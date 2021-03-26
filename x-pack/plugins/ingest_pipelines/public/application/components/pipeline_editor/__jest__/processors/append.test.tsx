@@ -6,7 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { setup, SetupResult } from './processor.helpers';
+import { setup, SetupResult, getProcessorValue } from './processor.helpers';
 
 // Default parameter values automatically added to the URI parts processor when saved
 const defaultAppendParameters = {
@@ -15,6 +15,8 @@ const defaultAppendParameters = {
   ignore_failure: undefined,
   description: undefined,
 };
+
+const APPEND_TYPE = 'append';
 
 describe('Processor: Append', () => {
   let onUpdate: jest.Mock;
@@ -58,7 +60,7 @@ describe('Processor: Append', () => {
     expect(form.getErrorsMessages()).toEqual(['A type is required.']);
 
     // Add type (the other fields are not visible until a type is selected)
-    await addProcessorType({ type: 'append', label: 'Append' });
+    await addProcessorType(APPEND_TYPE);
 
     // Click submit button with only the type defined
     await saveNewProcessor();
@@ -80,7 +82,7 @@ describe('Processor: Append', () => {
     // Open flyout to add new processor
     addProcessor();
     // Add type (the other fields are not visible until a type is selected)
-    await addProcessorType({ type: 'append', label: 'Append' });
+    await addProcessorType(APPEND_TYPE);
     // Add "field" value (required)
     form.setInputValue('fieldNameField.input', 'field_1');
 
@@ -90,8 +92,7 @@ describe('Processor: Append', () => {
     // Save the field
     await saveNewProcessor();
 
-    const [onUpdateResult] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];
-    const { processors } = onUpdateResult.getData();
+    const processors = getProcessorValue(onUpdate, APPEND_TYPE);
     expect(processors[0].append).toEqual({
       field: 'field_1',
       value: ['Some_Value'],
@@ -99,32 +100,32 @@ describe('Processor: Append', () => {
     });
   });
 
-  // test('allows optional parameters to be set', async () => {
-  //   const {
-  //     actions: { addProcessor, addProcessorType, saveNewProcessor },
-  //     form, find
-  //   } = testBed;
+  test('allows optional parameters to be set', async () => {
+    const {
+      actions: { addProcessor, addProcessorType, saveNewProcessor },
+      form,
+      find,
+    } = testBed;
 
-  //   // Open flyout to add new processor
-  //   addProcessor();
-  //   // Add type (the other fields are not visible until a type is selected)
-  //   await addProcessorType({ type: 'append', label: 'Append' });
-  //   // Add "field" value (required)
-  //   form.setInputValue('fieldNameField.input', 'field_1');
+    // Open flyout to add new processor
+    addProcessor();
+    // Add type (the other fields are not visible until a type is selected)
+    await addProcessorType(APPEND_TYPE);
+    // Add "field" value (required)
+    form.setInputValue('fieldNameField.input', 'field_1');
 
-  //   // Set optional parameteres
-  //   find('valueFieldAppend.input').simulate('change', [{ label: 'Some_Value' }]);
+    // Set optional parameteres
+    find('valueFieldAppend.input').simulate('change', [{ label: 'Some_Value' }]);
 
-  //   // Save the field with new changes
-  //   await saveNewProcessor();
+    // Save the field with new changes
+    await saveNewProcessor();
 
-  //   const [onUpdateResult] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];
-  //   const { processors } = onUpdateResult.getData();
-  //   expect(processors[0].append).toEqual({
-  //     description: undefined,
-  //     field: 'field_1',
-  //     ignore_failure: undefined,
-  //     target_field: 'target_field',
-  //   });
-  // });
+    const processors = getProcessorValue(onUpdate, APPEND_TYPE);
+    expect(processors[0].append).toEqual({
+      description: undefined,
+      field: 'field_1',
+      ignore_failure: undefined,
+      target_field: 'target_field',
+    });
+  });
 });
