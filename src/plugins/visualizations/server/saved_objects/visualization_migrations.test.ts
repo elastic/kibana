@@ -1672,7 +1672,12 @@ describe('migration visualization', () => {
         doc as Parameters<SavedObjectMigrationFn>[0],
         savedObjectMigrationContext
       );
-    const getTestDoc = (type = 'area', categoryAxes?: object[], valueAxes?: object[]) => ({
+    const getTestDoc = (
+      type = 'area',
+      categoryAxes?: object[],
+      valueAxes?: object[],
+      hasPalette = false
+    ) => ({
       attributes: {
         title: 'My Vis',
         description: 'This is my super cool vis.',
@@ -1691,6 +1696,12 @@ describe('migration visualization', () => {
                 labels: {},
               },
             ],
+            ...(hasPalette && {
+              palette: {
+                type: 'palette',
+                name: 'default',
+              },
+            }),
           },
         }),
       },
@@ -1703,11 +1714,18 @@ describe('migration visualization', () => {
       expect(isVislibVis).toEqual(true);
     });
 
-    it('should decorate existing docs with the kibana legacy palette - xy', () => {
+    it('should decorate existing docs without a predefined palette with the kibana legacy palette', () => {
       const migratedTestDoc = migrate(getTestDoc());
       const { palette } = JSON.parse(migratedTestDoc.attributes.visState).params;
 
       expect(palette.name).toEqual('kibana_palette');
+    });
+
+    it('should not overwrite the palette with the legacy one if the palette already exists in the saved object', () => {
+      const migratedTestDoc = migrate(getTestDoc('area', undefined, undefined, true));
+      const { palette } = JSON.parse(migratedTestDoc.attributes.visState).params;
+
+      expect(palette.name).toEqual('default');
     });
 
     describe('labels.filter', () => {

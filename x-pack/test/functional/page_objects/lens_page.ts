@@ -173,6 +173,45 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /**
+     * Drags field to workspace
+     *
+     * @param field  - the desired field for the dimension
+     * */
+    async clickField(field: string) {
+      await testSubjects.click(`lnsFieldListPanelField-${field}`);
+    },
+
+    async editField() {
+      await retry.try(async () => {
+        await testSubjects.click('lnsFieldListPanelEdit');
+        await testSubjects.missingOrFail('lnsFieldListPanelEdit');
+      });
+    },
+
+    async removeField() {
+      await retry.try(async () => {
+        await testSubjects.click('lnsFieldListPanelRemove');
+        await testSubjects.missingOrFail('lnsFieldListPanelRemove');
+      });
+    },
+
+    async searchField(name: string) {
+      await testSubjects.setValue('lnsIndexPatternFieldSearch', name);
+    },
+
+    async waitForField(field: string) {
+      await retry.try(async () => {
+        await testSubjects.existOrFail(`lnsFieldListPanelField-${field}`);
+      });
+    },
+
+    async waitForFieldMissing(field: string) {
+      await retry.try(async () => {
+        await testSubjects.missingOrFail(`lnsFieldListPanelField-${field}`);
+      });
+    },
+
+    /**
      * Copies field to chosen destination that is defined by distance of `steps`
      * (right arrow presses) from it
      *
@@ -350,6 +389,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       title: string,
       saveAsNew?: boolean,
       redirectToOrigin?: boolean,
+      saveToLibrary?: boolean,
       addToDashboard?: 'new' | 'existing' | null,
       dashboardId?: string
     ) {
@@ -361,6 +401,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         redirectToOrigin,
         addToDashboard: addToDashboard ? addToDashboard : null,
         dashboardId,
+        saveToLibrary,
       });
 
       await testSubjects.click('confirmSaveSavedObjectButton');
@@ -389,11 +430,16 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await colorPickerInput.type(color);
       await PageObjects.common.sleep(1000); // give time for debounced components to rerender
     },
-    async editMissingValues(option: string) {
+    async openVisualOptions() {
       await retry.try(async () => {
-        await testSubjects.click('lnsValuesButton');
-        await testSubjects.exists('lnsValuesButton');
+        await testSubjects.click('lnsVisualOptionsButton');
+        await testSubjects.exists('lnsVisualOptionsButton');
       });
+    },
+    async useCurvedLines() {
+      await testSubjects.click('lnsCurveStyleToggle');
+    },
+    async editMissingValues(option: string) {
       await testSubjects.click('lnsMissingValuesSelect');
       const optionSelector = await find.byCssSelector(`#${option}`);
       await optionSelector.click();
@@ -713,7 +759,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
       await this.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-        operation: 'avg',
+        operation: 'average',
         field: 'bytes',
       });
 
@@ -771,6 +817,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
         return firstCount === secondCount;
       });
+    },
+
+    async clickAddField() {
+      await testSubjects.click('lnsIndexPatternActions');
+      await testSubjects.existOrFail('indexPattern-add-field');
+      await testSubjects.click('indexPattern-add-field');
     },
   });
 }

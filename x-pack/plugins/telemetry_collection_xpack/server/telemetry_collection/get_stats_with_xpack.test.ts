@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { coreMock, elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
 import { getStatsWithXpack } from './get_stats_with_xpack';
 
@@ -81,8 +82,8 @@ function mockEsClient() {
       body: {
         cluster_uuid: 'test',
         cluster_name: 'test',
-        version: { number: '8.0.0' },
-      },
+        version: { number: '8.0.0' } as estypes.ElasticsearchVersionInfo,
+      } as estypes.RootNodeInfoResponse,
     }
   );
 
@@ -139,9 +140,9 @@ describe('Telemetry Collection: Get Aggregated Stats', () => {
     const esClient = mockEsClient();
     const usageCollection = mockUsageCollection({
       ...kibana,
-      monitoringTelemetry: [
-        { collectionSource: 'monitoring', timestamp: new Date().toISOString() },
-      ],
+      monitoringTelemetry: {
+        stats: [{ collectionSource: 'monitoring', timestamp: new Date().toISOString() }],
+      },
     });
     const context = getContext();
 

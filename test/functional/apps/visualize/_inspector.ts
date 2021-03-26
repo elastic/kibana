@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const inspector = getService('inspector');
   const filterBar = getService('filterBar');
+  const monacoEditor = getService('monacoEditor');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
@@ -42,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await inspector.openInspectorRequestsView();
         const requestTab = await inspector.getOpenRequestDetailRequestButton();
         await requestTab.click();
-        const requestJSON = JSON.parse(await inspector.getCodeEditorValue());
+        const requestJSON = JSON.parse(await monacoEditor.getCodeEditorValue());
 
         expect(requestJSON.aggs['2'].max).property('missing', 10);
       });

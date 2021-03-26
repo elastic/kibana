@@ -1876,6 +1876,12 @@
             "app_query_change": {
               "type": "long"
             },
+            "open_help_popover": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user opened one of the in-product help popovers."
+              }
+            },
             "indexpattern_field_info_click": {
               "type": "long"
             },
@@ -1949,31 +1955,126 @@
               "type": "long"
             },
             "indexpattern_dimension_operation_terms": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the top values function was selected"
+              }
             },
             "indexpattern_dimension_operation_date_histogram": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the date histogram function was selected"
+              }
             },
             "indexpattern_dimension_operation_avg": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the average function was selected"
+              }
             },
             "indexpattern_dimension_operation_min": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the min function was selected"
+              }
             },
             "indexpattern_dimension_operation_max": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the max function was selected"
+              }
             },
             "indexpattern_dimension_operation_sum": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the sum function was selected"
+              }
             },
             "indexpattern_dimension_operation_count": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the count function was selected"
+              }
             },
             "indexpattern_dimension_operation_cardinality": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the cardinality function was selected"
+              }
             },
             "indexpattern_dimension_operation_filters": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the filters function was selected"
+              }
+            },
+            "indexpattern_dimension_operation_range": {
+              "type": "long",
+              "_meta": { "description": "Number of times the range function was selected" }
+            },
+            "indexpattern_dimension_operation_median": {
+              "type": "long",
+              "_meta": { "description": "Number of times the median function was selected" }
+            },
+            "indexpattern_dimension_operation_percentile": {
+              "type": "long",
+              "_meta": { "description": "Number of times the percentile function was selected" }
+            },
+            "indexpattern_dimension_operation_last_value": {
+              "type": "long",
+              "_meta": { "description": "Number of times the last value function was selected" }
+            },
+            "indexpattern_dimension_operation_cumulative_sum": {
+              "type": "long",
+              "_meta": { "description": "Number of times the cumulative sum function was selected" }
+            },
+            "indexpattern_dimension_operation_counter_rate": {
+              "type": "long",
+              "_meta": { "description": "Number of times the counter rate function was selected" }
+            },
+            "indexpattern_dimension_operation_derivative": {
+              "type": "long",
+              "_meta": { "description": "Number of times the derivative function was selected" }
+            },
+            "indexpattern_dimension_operation_moving_average": {
+              "type": "long",
+              "_meta": { "description": "Number of times the moving average function was selected" }
+            },
+            "open_field_editor_edit": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user opened the editor flyout to edit a field from within Lens."
+              }
+            },
+            "open_field_editor_add": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user opened the editor flyout to add a field from within Lens."
+              }
+            },
+            "save_field_edit": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user edited a field from within Lens."
+              }
+            },
+            "save_field_add": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user added a field from within Lens."
+              }
+            },
+            "open_field_delete_modal": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user opened the field delete modal from within Lens."
+              }
+            },
+            "delete_field": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user deleted a field from within Lens."
+              }
             }
           }
         },
@@ -1982,6 +2083,12 @@
             "app_query_change": {
               "type": "long"
             },
+            "open_help_popover": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user opened one of the in-product help popovers."
+              }
+            },
             "indexpattern_field_info_click": {
               "type": "long"
             },
@@ -2055,31 +2162,126 @@
               "type": "long"
             },
             "indexpattern_dimension_operation_terms": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the top values function was selected"
+              }
             },
             "indexpattern_dimension_operation_date_histogram": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the date histogram function was selected"
+              }
             },
             "indexpattern_dimension_operation_avg": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the average function was selected"
+              }
             },
             "indexpattern_dimension_operation_min": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the min function was selected"
+              }
             },
             "indexpattern_dimension_operation_max": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the max function was selected"
+              }
             },
             "indexpattern_dimension_operation_sum": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the sum function was selected"
+              }
             },
             "indexpattern_dimension_operation_count": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the count function was selected"
+              }
             },
             "indexpattern_dimension_operation_cardinality": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the cardinality function was selected"
+              }
             },
             "indexpattern_dimension_operation_filters": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the filters function was selected"
+              }
+            },
+            "indexpattern_dimension_operation_range": {
+              "type": "long",
+              "_meta": { "description": "Number of times the range function was selected" }
+            },
+            "indexpattern_dimension_operation_median": {
+              "type": "long",
+              "_meta": { "description": "Number of times the median function was selected" }
+            },
+            "indexpattern_dimension_operation_percentile": {
+              "type": "long",
+              "_meta": { "description": "Number of times the percentile function was selected" }
+            },
+            "indexpattern_dimension_operation_last_value": {
+              "type": "long",
+              "_meta": { "description": "Number of times the last value function was selected" }
+            },
+            "indexpattern_dimension_operation_cumulative_sum": {
+              "type": "long",
+              "_meta": { "description": "Number of times the cumulative sum function was selected" }
+            },
+            "indexpattern_dimension_operation_counter_rate": {
+              "type": "long",
+              "_meta": { "description": "Number of times the counter rate function was selected" }
+            },
+            "indexpattern_dimension_operation_derivative": {
+              "type": "long",
+              "_meta": { "description": "Number of times the derivative function was selected" }
+            },
+            "indexpattern_dimension_operation_moving_average": {
+              "type": "long",
+              "_meta": { "description": "Number of times the moving average function was selected" }
+            },
+            "open_field_editor_edit": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user opened the editor flyout to edit a field from within Lens."
+              }
+            },
+            "open_field_editor_add": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user opened the editor flyout to add a field from within Lens."
+              }
+            },
+            "save_field_edit": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user edited a field from within Lens."
+              }
+            },
+            "save_field_add": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user added a field from within Lens."
+              }
+            },
+            "open_field_delete_modal": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user opened the field delete modal from within Lens."
+              }
+            },
+            "delete_field": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user deleted a field from within Lens."
+              }
             }
           }
         },
@@ -2331,6 +2533,17 @@
                   }
                 }
               }
+            }
+          }
+        }
+      }
+    },
+    "kibana_settings": {
+      "properties": {
+        "xpack": {
+          "properties": {
+            "default_admin_email": {
+              "type": "text"
             }
           }
         }
@@ -3637,128 +3850,248 @@
     "spaces": {
       "properties": {
         "usesFeatureControls": {
-          "type": "boolean"
+          "type": "boolean",
+          "_meta": {
+            "description": "Indicates if at least one feature is disabled in at least one space. This is a signal that space-level feature controls are in use. This does not account for role-based (security) feature controls."
+          }
         },
         "disabledFeatures": {
           "properties": {
             "DYNAMIC_KEY": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
             },
             "stackAlerts": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
             },
             "actions": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
             },
             "enterpriseSearch": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
             },
             "fleet": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
             },
             "savedObjectsTagging": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
             },
             "indexPatterns": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
             },
             "discover": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
             },
             "canvas": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
             },
             "maps": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
             },
             "siem": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
             },
             "monitoring": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
             },
             "graph": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
             },
             "uptime": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
             },
             "savedObjectsManagement": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
             },
             "timelion": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
             },
             "dev_tools": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
             },
             "advancedSettings": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
             },
             "infrastructure": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
             },
             "visualize": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
             },
             "logs": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
             },
             "dashboard": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
             },
             "ml": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
             },
             "apm": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The number of spaces which have this feature disabled."
+              }
             }
           }
         },
         "available": {
-          "type": "boolean"
+          "type": "boolean",
+          "_meta": {
+            "description": "Indicates if the spaces feature is available in this installation."
+          }
         },
         "enabled": {
-          "type": "boolean"
+          "type": "boolean",
+          "_meta": {
+            "description": "Indicates if the spaces feature is enabled in this installation."
+          }
         },
         "count": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "The number of spaces in this installation."
+          }
         },
         "apiCalls.copySavedObjects.total": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Copy Saved Objects\" API has been called."
+          }
         },
         "apiCalls.copySavedObjects.kibanaRequest.yes": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Copy Saved Objects\" API has been called via the Kibana client."
+          }
         },
         "apiCalls.copySavedObjects.kibanaRequest.no": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Copy Saved Objects\" API has been called via an API consumer (e.g. curl)."
+          }
         },
         "apiCalls.copySavedObjects.createNewCopiesEnabled.yes": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Copy Saved Objects\" API has been called with \"createNewCopies\" set to true."
+          }
         },
         "apiCalls.copySavedObjects.createNewCopiesEnabled.no": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Copy Saved Objects\" API has been called with \"createNewCopies\" set to false."
+          }
         },
         "apiCalls.copySavedObjects.overwriteEnabled.yes": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Copy Saved Objects\" API has been called with \"overwrite\" set to true."
+          }
         },
         "apiCalls.copySavedObjects.overwriteEnabled.no": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Copy Saved Objects\" API has been called with \"overwrite\" set to false."
+          }
         },
         "apiCalls.resolveCopySavedObjectsErrors.total": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Resolve Copy Saved Objects Errors\" API has been called."
+          }
         },
         "apiCalls.resolveCopySavedObjectsErrors.kibanaRequest.yes": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Resolve Copy Saved Objects Errors\" API has been called via the Kibana client."
+          }
         },
         "apiCalls.resolveCopySavedObjectsErrors.kibanaRequest.no": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Resolve Copy Saved Objects Errors\" API has been called via an API consumer (e.g. curl)."
+          }
         },
         "apiCalls.resolveCopySavedObjectsErrors.createNewCopiesEnabled.yes": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Resolve Copy Saved Objects Errors\" API has been called with \"createNewCopies\" set to true."
+          }
         },
         "apiCalls.resolveCopySavedObjectsErrors.createNewCopiesEnabled.no": {
-          "type": "long"
+          "type": "long",
+          "_meta": {
+            "description": "The number of times the \"Resolve Copy Saved Objects Errors\" API has been called with \"createNewCopies\" set to false."
+          }
         }
       }
     },
