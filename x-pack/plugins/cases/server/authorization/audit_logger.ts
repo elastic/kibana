@@ -30,7 +30,7 @@ export class AuthorizationAuditLogger {
     operation: OperationDetails;
   }): string {
     // class: determine what we're calling this (don't use class)
-    const classMsg = className === undefined ? 'of any class' : `of class "${className}"`;
+    const classMsg = className == null ? 'of any class' : `of class "${className}"`;
     /**
      * This will take the form:
      * `Unauthorized to create case of class "securitySolution"`
@@ -56,7 +56,7 @@ export class AuthorizationAuditLogger {
         type: operation.type,
         outcome: EventOutcome.SUCCESS,
       },
-      ...(username !== undefined && {
+      ...(username != null && {
         user: {
           name: username,
         },
@@ -87,7 +87,7 @@ export class AuthorizationAuditLogger {
         outcome: EventOutcome.FAILURE,
       },
       // add the user information if we have it
-      ...(username !== undefined && {
+      ...(username != null && {
         user: {
           name: username,
         },
