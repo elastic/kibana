@@ -1,4 +1,4 @@
-[[rules-enable-api]]
+[[enable-rule-api]]
 === Enable rule API
 ++++
 <titleabbrev>Enable rule</titleabbrev>
@@ -6,14 +6,14 @@
 
 Enable a rule.
 
-[[rules-enable-api-request]]
+[[enable-rule-api-request]]
 ==== Request
 
 `POST <kibana host>:<port>/api/alerting/rule/<id>/_enable`
 
 `POST <kibana host>:<port>/s/<space_id>/api/alerting/rule/<id>/_enable`
 
-[[rules-enable-api-path-params]]
+[[enable-rule-api-path-params]]
 ==== Path parameters
 
 `id`::
@@ -22,7 +22,7 @@ Enable a rule.
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
-[[rules-enable-api-response-codes]]
+[[enable-rule-api-response-codes]]
 ==== Response code
 
 `200`::

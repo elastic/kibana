@@ -1,4 +1,4 @@
-[[alerts-legacy-api-get]]
+[[alerts-api-get]]
 === Legacy get alert API
 ++++
 <titleabbrev>Legacy get alert</titleabbrev>
@@ -6,18 +6,18 @@
 
 deprecated::[7.13.0]
 
-Please use the <<rules-get-api>> instead.
+Use the <<get-rule-api>> instead.
 
 Retrieve an alert by ID.
 
-[[alerts-legacy-api-get-request]]
+[[alerts-api-get-request]]
 ==== Request
 
 `GET <kibana host>:<port>/api/alerts/alert/<id>`
 
 `GET <kibana host>:<port>/s/<space_id>/api/alerts/alert/<id>`
 
-[[alerts-legacy-api-get-params]]
+[[alerts-api-get-params]]
 ==== Path parameters
 
 `id`::
@@ -26,13 +26,13 @@ Retrieve an alert by ID.
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
-[[alerts-legacy-api-get-codes]]
+[[alerts-api-get-codes]]
 ==== Response code
 
 `200`::
     Indicates a successful call.
 
-[[alerts-legacy-api-get-example]]
+[[alerts-api-get-example]]
 ==== Example
 
 Retrieve the alert object with the ID `41893910-6bca-11eb-9e0d-85d233e3ee35`:

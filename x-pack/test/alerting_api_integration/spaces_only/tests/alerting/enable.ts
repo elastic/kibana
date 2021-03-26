@@ -80,5 +80,42 @@ export default function createEnableAlertTests({ getService }: FtrProviderContex
         message: `Saved object [alert/${createdAlert.id}] not found`,
       });
     });
+
+    describe('legacy', () => {
+      it('should handle enable alert request appropriately', async () => {
+        const { body: createdAlert } = await supertestWithoutAuth
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestAlertData({ enabled: false }))
+          .expect(200);
+        objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+
+        await supertestWithoutAuth
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${createdAlert.id}/_enable`)
+          .set('kbn-xsrf', 'foo')
+          .expect(204);
+
+        const { body: updatedAlert } = await supertestWithoutAuth
+          .get(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createdAlert.id}`)
+          .set('kbn-xsrf', 'foo')
+          .expect(200);
+        expect(typeof updatedAlert.scheduled_task_id).to.eql('string');
+        const { _source: taskRecord } = await getScheduledTask(updatedAlert.scheduled_task_id);
+        expect(taskRecord.type).to.eql('task');
+        expect(taskRecord.task.taskType).to.eql('alerting:test.noop');
+        expect(JSON.parse(taskRecord.task.params)).to.eql({
+          alertId: createdAlert.id,
+          spaceId: Spaces.space1.id,
+        });
+
+        // Ensure AAD isn't broken
+        await checkAAD({
+          supertest: supertestWithoutAuth,
+          spaceId: Spaces.space1.id,
+          type: 'alert',
+          id: createdAlert.id,
+        });
+      });
+    });
   });
 }

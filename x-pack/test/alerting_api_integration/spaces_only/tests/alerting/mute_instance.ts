@@ -50,5 +50,39 @@ export default function createMuteInstanceTests({ getService }: FtrProviderConte
         id: createdAlert.id,
       });
     });
+
+    describe('legacy', () => {
+      it('should handle mute alert instance request appropriately', async () => {
+        const { body: createdAlert } = await supertestWithoutAuth
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestAlertData({ enabled: false }))
+          .expect(200);
+        objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+
+        await supertestWithoutAuth
+          .post(
+            `${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${
+              createdAlert.id
+            }/alert_instance/1/_mute`
+          )
+          .set('kbn-xsrf', 'foo')
+          .expect(204);
+
+        const { body: updatedAlert } = await supertestWithoutAuth
+          .get(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createdAlert.id}`)
+          .set('kbn-xsrf', 'foo')
+          .expect(200);
+        expect(updatedAlert.muted_alert_ids).to.eql(['1']);
+
+        // Ensure AAD isn't broken
+        await checkAAD({
+          supertest: supertestWithoutAuth,
+          spaceId: Spaces.space1.id,
+          type: 'alert',
+          id: createdAlert.id,
+        });
+      });
+    });
   });
 }

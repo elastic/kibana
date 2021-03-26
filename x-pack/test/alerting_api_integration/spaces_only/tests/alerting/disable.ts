@@ -74,5 +74,36 @@ export default function createDisableAlertTests({ getService }: FtrProviderConte
         message: `Saved object [alert/${createdAlert.id}] not found`,
       });
     });
+
+    describe('legacy', () => {
+      it('should handle disable alert request appropriately', async () => {
+        const { body: createdAlert } = await supertestWithoutAuth
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestAlertData({ enabled: true }))
+          .expect(200);
+        objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+
+        await supertestWithoutAuth
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${createdAlert.id}/_disable`)
+          .set('kbn-xsrf', 'foo')
+          .expect(204);
+
+        try {
+          await getScheduledTask(createdAlert.scheduledTaskId);
+          throw new Error('Should have removed scheduled task');
+        } catch (e) {
+          expect(e.status).to.eql(404);
+        }
+
+        // Ensure AAD isn't broken
+        await checkAAD({
+          supertest: supertestWithoutAuth,
+          spaceId: Spaces.space1.id,
+          type: 'alert',
+          id: createdAlert.id,
+        });
+      });
+    });
   });
 }
