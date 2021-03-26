@@ -187,21 +187,6 @@ export const CONFIG_OAUTH_BUTTON = i18n.translate(
   }
 );
 
-export const CONFIGURED_SOURCES_LIST_UNCONNECTED_TOOLTIP = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSource.configuredSources.unConnectedTooltip',
-  {
-    defaultMessage: 'No connected sources',
-  }
-);
-
-export const CONFIGURED_SOURCES_LIST_ACCOUNT_ONLY_TOOLTIP = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.contentSource.configuredSources.accountOnlyTooltip',
-  {
-    defaultMessage:
-      'Private content source. Each user must add the content source from their own personal dashboard.',
-  }
-);
-
 export const CONFIGURED_SOURCES_CONNECT_BUTTON = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSource.configuredSources.connectButton',
   {
@@ -216,17 +201,31 @@ export const CONFIGURED_SOURCES_EMPTY_STATE = i18n.translate(
   }
 );
 
-export const CONFIGURED_SOURCES_TITLE = i18n.translate(
+export const CONFIGURED_ORG_SOURCES_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSource.configuredSources.title',
   {
-    defaultMessage: 'Configured content sources',
+    defaultMessage: 'Organization sources',
   }
 );
 
-export const CONFIGURED_SOURCES_EMPTY_BODY = i18n.translate(
+export const CONFIGURED_ORG_SOURCES_BODY = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.contentSource.configuredSources.body',
   {
-    defaultMessage: 'Configured and ready for connection.',
+    defaultMessage: 'These sources use one account to provide content for the search experience.',
+  }
+);
+
+export const CONFIGURED_PRIVATE_SOURCES_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.configuredSources.title',
+  {
+    defaultMessage: 'Private sources',
+  }
+);
+
+export const CONFIGURED_PRIVATE_SOURCES_BODY = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.contentSource.configuredSources.body',
+  {
+    defaultMessage: 'These sources allow your organization\'s users to use their own accounts and content in the search experience.',
   }
 );
 
