@@ -575,6 +575,11 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async setFieldFormat(format: string) {
       log.debug('set scripted field format = ' + format);
+      const formatRow = await testSubjects.find('formatRow');
+      const formatRowToggle = (
+        await formatRow.findAllByCssSelector('[data-test-subj="toggle"]')
+      )[0];
+      await formatRowToggle.click();
       await find.clickByCssSelector(
         'select[data-test-subj="editorSelectedFormatId"] > option[value="' + format + '"]'
       );
