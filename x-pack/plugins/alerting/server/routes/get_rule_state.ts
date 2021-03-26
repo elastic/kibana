@@ -9,7 +9,11 @@ import { IRouter } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { ILicenseState } from '../lib';
 import { RewriteResponseCase, verifyAccessAndContext } from './lib';
-import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH, AlertTaskState } from '../types';
+import {
+  AlertingRequestHandlerContext,
+  INTERNAL_BASE_ALERTING_API_PATH,
+  AlertTaskState,
+} from '../types';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -33,7 +37,7 @@ export const getRuleStateRoute = (
 ) => {
   router.get(
     {
-      path: `${BASE_ALERTING_API_PATH}/rule/{id}/state`,
+      path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}/state`,
       validate: {
         params: paramSchema,
       },

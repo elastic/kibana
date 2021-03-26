@@ -26,4 +26,5 @@ export interface AlertingFrameworkHealth {
 
 export const LEGACY_BASE_ALERT_API_PATH = '/api/alerts';
 export const BASE_ALERTING_API_PATH = '/api/alerting';
+export const INTERNAL_BASE_ALERTING_API_PATH = '/internal/alerting';
 export const ALERTS_FEATURE_ID = 'alerts';

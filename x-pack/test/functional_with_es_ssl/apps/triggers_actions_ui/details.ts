@@ -93,7 +93,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   async function getAlertInstanceSummary(alertId: string) {
     const { body: summary } = await supertest
-      .get(`/api/alerting/rule/${alertId}/_alert_summary`)
+      .get(`/internal/alerting/rule/${alertId}/_alert_summary`)
       .expect(200);
     return summary;
   }

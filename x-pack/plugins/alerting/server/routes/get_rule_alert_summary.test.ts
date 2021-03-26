@@ -48,7 +48,7 @@ describe('getRuleAlertSummaryRoute', () => {
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/alerting/rule/{id}/_alert_summary"`);
+    expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rule/{id}/_alert_summary"`);
 
     alertsClient.getAlertInstanceSummary.mockResolvedValueOnce(mockedAlertInstanceSummary);
 

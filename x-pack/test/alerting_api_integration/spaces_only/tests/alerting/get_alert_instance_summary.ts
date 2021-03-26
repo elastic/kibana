@@ -32,7 +32,7 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
 
     it(`handles non-existant alert`, async () => {
       await supertest
-        .get(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/1/_alert_summary`)
+        .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/1/_alert_summary`)
         .expect(404, {
           statusCode: 404,
           error: 'Not Found',
@@ -50,7 +50,7 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
 
       await waitForEvents(createdAlert.id, ['execute']);
       const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createdAlert.id}/_alert_summary`
+        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdAlert.id}/_alert_summary`
       );
 
       expect(response.status).to.eql(200);
@@ -83,7 +83,7 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
       objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 
       const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createdAlert.id}/_alert_summary`
+        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdAlert.id}/_alert_summary`
       );
 
       expect(response.status).to.eql(200);
@@ -118,7 +118,7 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
 
       await waitForEvents(createdAlert.id, ['execute']);
       const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${
+        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${
           createdAlert.id
         }/_alert_summary?date_start=${dateStart}`
       );
@@ -139,7 +139,7 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
       await waitForEvents(createdAlert.id, ['execute']);
       const dateStart = 'X0X0-08-08T08:08:08.008Z';
       const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${
+        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${
           createdAlert.id
         }/_alert_summary?date_start=${dateStart}`
       );
@@ -162,7 +162,7 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
       await alertUtils.muteInstance(createdAlert.id, '1');
       await waitForEvents(createdAlert.id, ['execute']);
       const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createdAlert.id}/_alert_summary`
+        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdAlert.id}/_alert_summary`
       );
 
       expect(response.status).to.eql(200);
@@ -185,7 +185,7 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
 
       await waitForEvents(createdAlert.id, ['execute']);
       const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createdAlert.id}/_alert_summary`
+        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdAlert.id}/_alert_summary`
       );
       const { error_messages: errorMessages } = response.body;
       expect(errorMessages.length).to.be.greaterThan(0);
@@ -219,7 +219,7 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
       await alertUtils.muteInstance(createdAlert.id, 'instanceD');
       await waitForEvents(createdAlert.id, ['new-instance', 'recovered-instance']);
       const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createdAlert.id}/_alert_summary`
+        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdAlert.id}/_alert_summary`
       );
 
       const actualInstances = response.body.alerts;

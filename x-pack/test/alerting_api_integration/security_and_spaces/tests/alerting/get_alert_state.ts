@@ -38,7 +38,7 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}/state`)
+            .get(`${getUrlPrefix(space.id)}/internal/alerting/rule/${createdAlert.id}/state`)
             .auth(user.username, user.password);
 
           switch (scenario.id) {
@@ -78,7 +78,7 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix(space.id)}/api/alerting/rule/${createdAlert.id}/state`)
+            .get(`${getUrlPrefix(space.id)}/internal/alerting/rule/${createdAlert.id}/state`)
             .auth(user.username, user.password);
 
           switch (scenario.id) {
@@ -128,7 +128,7 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix('other')}/api/alerting/rule/${createdAlert.id}/state`)
+            .get(`${getUrlPrefix('other')}/internal/alerting/rule/${createdAlert.id}/state`)
             .auth(user.username, user.password);
 
           expect(response.statusCode).to.eql(404);
@@ -153,7 +153,7 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
 
         it(`should handle getAlertState request appropriately when alert doesn't exist`, async () => {
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix(space.id)}/api/alerting/rule/1/state`)
+            .get(`${getUrlPrefix(space.id)}/internal/alerting/rule/1/state`)
             .auth(user.username, user.password);
 
           switch (scenario.id) {

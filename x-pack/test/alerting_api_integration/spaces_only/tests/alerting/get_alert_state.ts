@@ -29,7 +29,7 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
       objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 
       const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createdAlert.id}/state`
+        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdAlert.id}/state`
       );
 
       expect(response.status).to.eql(200);
@@ -58,7 +58,7 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
       // wait for alert to actually execute
       await retry.try(async () => {
         const response = await supertest.get(
-          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createdAlert.id}/state`
+          `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdAlert.id}/state`
         );
 
         expect(response.status).to.eql(200);
@@ -67,7 +67,7 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
       });
 
       const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createdAlert.id}/state`
+        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdAlert.id}/state`
       );
 
       expect(response.body.rule_type_state.runCount).to.greaterThan(0);
@@ -82,7 +82,7 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
 
     it(`should handle getAlertState request appropriately when alert doesn't exist`, async () => {
       await supertest
-        .get(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/1/state`)
+        .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/1/state`)
         .expect(404, {
           statusCode: 404,
           error: 'Not Found',
@@ -122,7 +122,7 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
         });
 
         const response = await supertest.get(
-          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createdAlert.id}/state`
+          `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdAlert.id}/state`
         );
 
         expect(response.body.rule_type_state.runCount).to.greaterThan(0);
