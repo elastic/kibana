@@ -10,7 +10,7 @@ The *Rules* tab provides a cross-app view of alerting. Different {kib} apps like
 * Drill-down to <<rule-details, rule details>>
 
 [role="screenshot"]
-image:management/alerting/images/rules-and-connectors-ui.png[Example rule listing in the Rules and Connectors UI]
+image:images/rules-and-connectors-ui.png[Example rule listing in the Rules and Connectors UI]
 
 For more information on alerting concepts and the types of rules and connectors available, see <<alerting-getting-started>>.
 
