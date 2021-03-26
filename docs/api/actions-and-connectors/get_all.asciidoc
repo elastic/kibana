@@ -1,7 +1,7 @@
 [[get-all-connectors-api]]
 === Get all connectors API
 ++++
-<titleabbrev>Get all connectors API</titleabbrev>
+<titleabbrev>Get all connectors</titleabbrev>
 ++++
 
 Retrieves all connectors.

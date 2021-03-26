@@ -1,7 +1,7 @@
 [[execute-connector-api]]
 === Execute connector API
 ++++
-<titleabbrev>Execute connector API</titleabbrev>
+<titleabbrev>Execute connector</titleabbrev>
 ++++
 
 Executes a connector by ID.

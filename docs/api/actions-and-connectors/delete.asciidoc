@@ -1,7 +1,7 @@
 [[delete-connector-api]]
 === Delete connector API
 ++++
-<titleabbrev>Delete connector API</titleabbrev>
+<titleabbrev>Delete connector</titleabbrev>
 ++++
 
 Deletes an connector by ID.

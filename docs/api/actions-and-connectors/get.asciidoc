@@ -1,7 +1,7 @@
 [[get-connector-api]]
 === Get connector API
 ++++
-<titleabbrev>Get connector API</titleabbrev>
+<titleabbrev>Get connector</titleabbrev>
 ++++
 
 Retrieves a connector by ID.

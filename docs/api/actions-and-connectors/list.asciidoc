@@ -1,7 +1,7 @@
 [[list-connector-types-api]]
 === List connector types API
 ++++
-<titleabbrev>List all connector types API</titleabbrev>
+<titleabbrev>List all connector types</titleabbrev>
 ++++
 
 Retrieves a list of all connector types.

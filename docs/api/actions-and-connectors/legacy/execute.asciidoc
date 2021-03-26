@@ -1,7 +1,7 @@
 [[actions-and-connectors-legacy-api-execute]]
 ==== Legacy Execute connector API
 ++++
-<titleabbrev>Legacy Execute connector API</titleabbrev>
+<titleabbrev>Legacy Execute connector</titleabbrev>
 ++++
 
 deprecated::[7.13.0]

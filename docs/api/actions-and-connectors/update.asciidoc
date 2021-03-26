@@ -1,7 +1,7 @@
 [[update-connector-api]]
 === Update connector API
 ++++
-<titleabbrev>Update connector API</titleabbrev>
+<titleabbrev>Update connector</titleabbrev>
 ++++
 
 Updates the attributes for an existing connector.
