@@ -10,7 +10,7 @@ import { useStore } from 'react-redux';
 import { Store } from 'redux';
 import { CommitFn, State } from '../../../types';
 import { TopNavMenu as Component } from './top_nav_menu.component';
-import { navigationService } from '../../services';
+import { navigationService, overlayService } from '../../services';
 
 interface Props {
   commit: CommitFn;
@@ -22,6 +22,8 @@ export const TopNavMenu: FC<Props> = ({ commit }) => {
   return (
     <Component
       NavigationUITopNavMenu={navigationService.getService().TopNavMenu}
+      openModal={overlayService.getService().openModal}
+      openFlyout={overlayService.getService().openFlyout}
       canvasStore={canvasStore as Store<State>}
       commit={commit}
     />

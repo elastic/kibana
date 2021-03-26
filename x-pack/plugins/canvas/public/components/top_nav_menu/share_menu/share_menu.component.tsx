@@ -8,6 +8,8 @@
 import React, { FunctionComponent, useState } from 'react';
 import PropTypes from 'prop-types';
 import { EuiContextMenu, EuiIcon } from '@elastic/eui';
+import { OverlayFlyoutStart } from 'kibana/public';
+import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 import { ComponentStrings } from '../../../../i18n/components';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
 import { ClosePopoverFn } from '../../popover';
@@ -36,6 +38,8 @@ export interface Props {
   getExportUrl: GetExportUrlFn;
   /** Handler for closing the menu */
   onClose: () => void;
+  /** Handles opening flyouts */
+  openFlyout: OverlayFlyoutStart['open'];
 }
 
 /**
@@ -46,6 +50,7 @@ export const ShareMenu: FunctionComponent<Props> = ({
   onExport,
   getExportUrl,
   onClose,
+  openFlyout,
 }) => {
   const [showFlyout, setShowFlyout] = useState(false);
 
@@ -101,12 +106,12 @@ export const ShareMenu: FunctionComponent<Props> = ({
     ],
   });
 
-  const flyout = showFlyout ? <ShareWebsiteFlyout onClose={closeFlyout} /> : null;
+  const flyout = <ShareWebsiteFlyout onClose={closeFlyout} />;
 
   return (
     <>
       <EuiContextMenu initialPanelId={0} panels={flattenPanelTree(getPanelTree(onClose))} />
-      {flyout}
+      {showFlyout ? openFlyout(toMountPoint(flyout)) : null}
     </>
   );
 };

@@ -38,11 +38,16 @@ export interface Props {
   assets: AssetType[];
   /** Function to invoke when the modal is closed */
   onClose: () => void;
+  /** Handler for adding an asset */
   onAddAsset: (file: File) => void;
+  /** The function to execute when the user clicks 'Create' */
+  onCreateAsset: (assetId: string) => void;
+  /** The function to execute when the user clicks 'Delete' */
+  onDeleteAsset: (asset: AssetType) => void;
 }
 
 export const AssetManager: FC<Props> = (props) => {
-  const { assets, onClose, onAddAsset } = props;
+  const { assets, onClose, onAddAsset, onCreateAsset, onDeleteAsset } = props;
   const [isLoading, setIsLoading] = useState(false);
 
   const assetsTotal = Math.round(
@@ -108,7 +113,13 @@ export const AssetManager: FC<Props> = (props) => {
         {assets.length ? (
           <EuiFlexGrid columns={4}>
             {assets.map((asset) => (
-              <Asset asset={asset} key={asset.id} />
+              <Asset
+                asset={asset}
+                onCreateAsset={onCreateAsset}
+                onDeleteAsset={onDeleteAsset}
+                onClose={onClose}
+                key={asset.id}
+              />
             ))}
           </EuiFlexGrid>
         ) : (

@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { OverlaysService } from '../overlay';
+import { OverlayService } from '../overlay';
 
 const noop = (..._args: any[]): any => {};
 
-export const overlayService: OverlaysService = {};
+export const overlayService: OverlayService = {
+  openModal: noop,
+  openFlyout: noop,
+};

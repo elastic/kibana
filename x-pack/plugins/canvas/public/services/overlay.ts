@@ -8,10 +8,13 @@
 import { OverlayStart } from 'src/core/public';
 import { CanvasServiceFactory } from '.';
 
-export type OverlayService = OverlayStart;
+export interface OverlayService {
+  openFlyout: OverlayStart['openFlyout'];
+  openModal: OverlayStart['openModal'];
+}
 
-export const overlayServiceFactory: CanvasServiceFactory<OverlayService> = (setup, start) => {
-  const { overlays } = start;
+export const overlayServiceFactory: CanvasServiceFactory<OverlayService> = (_setup, start) => {
+  const { openFlyout, openModal } = start.overlays;
 
-  return overlays;
+  return { openFlyout, openModal };
 };

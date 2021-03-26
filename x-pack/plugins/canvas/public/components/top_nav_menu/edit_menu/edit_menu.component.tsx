@@ -7,19 +7,29 @@
 
 import React, { FC, useState } from 'react';
 import PropTypes from 'prop-types';
-import { EuiContextMenu, EuiIcon } from '@elastic/eui';
+import { EuiContextMenu, EuiIcon, EuiFocusTrap, EuiOutsideClickDetector } from '@elastic/eui';
+import { OverlayModalStart } from 'kibana/public';
+import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
 import { ComponentStrings } from '../../../../i18n/components';
 import { ShortcutStrings } from '../../../../i18n/shortcuts';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
 import { CustomElementModal } from '../../custom_element_modal';
 import { CONTEXT_MENU_TOP_BORDER_CLASSNAME } from '../../../../common/lib/constants';
-import { PositionedElement } from '../../../../types';
+import { AssetType, PositionedElement } from '../../../../types';
 import { AssetManager } from '../../asset_manager';
 
 const { WorkpadHeaderEditMenu: strings } = ComponentStrings;
 const shortcutHelp = ShortcutStrings.getShortcutHelp();
 
 export interface Props {
+  /** The assets to display within the modal */
+  assets: AssetType[];
+  /** indicated whether the selected element is a group or not */
+  groupIsSelected: boolean;
+  /** Is there element clipboard data to paste? */
+  hasPasteData: boolean;
+  /** only more than one selected element can be grouped */
+  selectedNodes: PositionedElement[];
   /** cuts selected elements */
   cutNodes: () => void;
   /** copies selected elements to clipboard */
@@ -40,10 +50,6 @@ export interface Props {
   sendToBack: () => void;
   /** saves the selected elements as an custom-element saved object */
   createCustomElement: (name: string, description: string, image: string) => void;
-  /** indicated whether the selected element is a group or not */
-  groupIsSelected: boolean;
-  /** only more than one selected element can be grouped */
-  selectedNodes: PositionedElement[];
   /** groups selected elements */
   groupNodes: () => void;
   /** ungroups selected group */
@@ -70,11 +76,21 @@ export interface Props {
   redoHistory: () => void;
   /** Handler for closing the menu */
   onClose: () => void;
-  /** Is there element clipboard data to paste? */
-  hasPasteData: boolean;
+  /** Handles opening modals */
+  openModal: OverlayModalStart['open'];
+  /** Handler for adding an asset */
+  onAddAsset: (file: File) => void;
+  /** The function to execute when the user clicks 'Create' */
+  onCreateAsset: (assetId: string) => void;
+  /** The function to execute when the user clicks 'Delete' */
+  onDeleteAsset: (asset: AssetType) => void;
 }
 
 export const EditMenu: FC<Props> = ({
+  assets,
+  groupIsSelected,
+  hasPasteData,
+  selectedNodes,
   cutNodes,
   copyNodes,
   pasteNodes,
@@ -93,21 +109,19 @@ export const EditMenu: FC<Props> = ({
   distributeHorizontally,
   distributeVertically,
   createCustomElement,
-  selectedNodes,
-  groupIsSelected,
   groupNodes,
   ungroupNodes,
   undoHistory,
   redoHistory,
   onClose,
-  hasPasteData,
+  openModal,
+  onAddAsset,
+  onCreateAsset,
+  onDeleteAsset,
 }) => {
-  const [isAssetModalVisible, setAssetModalVisible] = useState(false);
   const [isSaveElementModalVisible, setSaveElementModal] = useState(false);
   const showSaveElementModal = () => setSaveElementModal(true);
   const hideSaveElementModal = () => setSaveElementModal(false);
-  const hideAssetModal = () => setAssetModalVisible(false);
-  const showAssetModal = () => setAssetModalVisible(true);
 
   const handleSave = (name: string, description: string, image: string) => {
     createCustomElement(name, description, image);
@@ -264,7 +278,7 @@ export const EditMenu: FC<Props> = ({
       className: CONTEXT_MENU_TOP_BORDER_CLASSNAME,
       'data-test-subj': 'canvasWorkpadEditMenu__manageAssetsButton',
       onClick: () => {
-        showAssetModal();
+        openAssetModal();
         onClose();
       },
     };
@@ -357,6 +371,33 @@ export const EditMenu: FC<Props> = ({
     };
   };
 
+  const openAssetModal = () => {
+    return new Promise((resolve) => {
+      const session = openModal(
+        toMountPoint(
+          <EuiFocusTrap
+            clickOutsideDisables={true}
+            initialFocus={'.canvasAssetManager__fileUploadWrapper'}
+          >
+            <EuiOutsideClickDetector onOutsideClick={() => {}}>
+              <AssetManager
+                assets={assets}
+                onAddAsset={onAddAsset}
+                onCreateAsset={onCreateAsset}
+                onDeleteAsset={onDeleteAsset}
+                onClose={() => session.close()}
+              />
+            </EuiOutsideClickDetector>
+          </EuiFocusTrap>
+        ),
+        {
+          'data-test-subj': 'canvasManageAssetModal',
+          maxWidth: 550,
+        }
+      );
+    });
+  };
+
   return (
     <div>
       <EuiContextMenu initialPanelId={0} panels={flattenPanelTree(getPanelTree())} />
@@ -367,7 +408,6 @@ export const EditMenu: FC<Props> = ({
           onCancel={hideSaveElementModal}
         />
       ) : null}
-      {isAssetModalVisible ? <AssetManager onClose={hideAssetModal} /> : null}
     </div>
   );
 };

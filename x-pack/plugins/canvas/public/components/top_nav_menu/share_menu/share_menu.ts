@@ -7,6 +7,7 @@
 
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
+import { OverlayFlyoutStart } from 'kibana/public';
 import { jobCompletionNotifications } from '../../../../../../plugins/reporting/public';
 import { getWorkpad, getPages } from '../../../state/selectors/workpad';
 import { getWindow } from '../../../lib/get_window';
@@ -38,6 +39,7 @@ const getAbsoluteUrl = (path: string) => {
 
 interface Props {
   onClose: () => void;
+  openFlyout: OverlayFlyoutStart['open'];
 }
 
 interface StateProps {
@@ -54,7 +56,7 @@ export const ShareMenu = compose<ComponentProps, Props>(
       workpad,
       pageCount,
       services,
-    }: StateProps & WithServicesProps): Omit<ComponentProps, 'onClose'> => ({
+    }: StateProps & WithServicesProps): Partial<ComponentProps> => ({
       getExportUrl: (type, layout) => {
         if (type === 'pdf') {
           const pdfUrl = getPdfUrl(

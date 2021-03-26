@@ -8,8 +8,13 @@
 import { connect } from 'react-redux';
 import { compose, withHandlers, withProps } from 'recompose';
 import { Dispatch } from 'redux';
-import { State, PositionedElement } from '../../../../types';
+import { set } from '@elastic/safer-lodash-set';
+import { fromExpression, toExpression } from '@kbn/interpreter/common';
+import { OverlayModalStart } from 'kibana/public';
+import { State, PositionedElement, AssetType, ExpressionAstExpression } from '../../../../types';
 import { getClipboardData } from '../../../lib/clipboard';
+// @ts-expect-error untyped local
+import { elementsRegistry } from '../../../lib/elements_registry';
 // @ts-expect-error untyped local
 import { flatten } from '../../../lib/aeroelastic/functional';
 // @ts-expect-error untyped local
@@ -17,7 +22,14 @@ import { globalStateUpdater } from '../../workpad_page/integration_utils';
 // @ts-expect-error untyped local
 import { crawlTree } from '../../workpad_page/integration_utils';
 // @ts-expect-error untyped local
-import { insertNodes, elementLayer, removeElements } from '../../../state/actions/elements';
+import { createAsset, removeAsset } from '../../../state/actions/assets';
+import {
+  addElement,
+  insertNodes,
+  elementLayer,
+  removeElements,
+  // @ts-expect-error untyped local
+} from '../../../state/actions/elements';
 // @ts-expect-error untyped local
 import { undoHistory, redoHistory } from '../../../state/actions/history';
 // @ts-expect-error untyped local
@@ -35,6 +47,8 @@ import {
   alignmentDistributionHandlerCreators,
 } from '../../../lib/element_handler_creators';
 import { EditMenu as Component, Props as ComponentProps } from './edit_menu.component';
+import { getAssets } from '../../../state/selectors/assets';
+import { getId } from '../../../lib/get_id';
 
 type LayoutState = any;
 
@@ -43,6 +57,7 @@ type CommitFn = (type: string, payload: any) => LayoutState;
 interface OwnProps {
   commit: CommitFn;
   onClose: () => void;
+  openModal: OverlayModalStart['open'];
 }
 
 const withGlobalState = (
@@ -83,6 +98,7 @@ const mapStateToProps = (state: State) => {
     });
 
   return {
+    assets: getAssets(state),
     pageId,
     selectedToplevelNodes,
     selectedNodes,
@@ -106,14 +122,49 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
   undoHistory: () => dispatch(undoHistory()),
   redoHistory: () => dispatch(redoHistory()),
   dispatch,
+  onAddAsset: (type: string, content: string) => {
+    // make the ID here and pass it into the action
+    const assetId = getId('asset');
+    dispatch(createAsset(type, content, assetId));
+
+    // then return the id, so the caller knows the id that will be created
+    return assetId;
+  },
+  onCreateAsset: (pageId: string) => (assetId: string) => {
+    const imageElement = elementsRegistry.get('image');
+    const elementAST = fromExpression(imageElement.expression);
+    const selector = ['chain', '0', 'arguments', 'dataurl'];
+    const subExp: ExpressionAstExpression[] = [
+      {
+        type: 'expression',
+        chain: [
+          {
+            type: 'function',
+            function: 'asset',
+            arguments: {
+              _: [assetId],
+            },
+          },
+        ],
+      },
+    ];
+    const newAST = set<ExpressionAstExpression>(elementAST, selector, subExp);
+    imageElement.expression = toExpression(newAST);
+    dispatch(addElement(pageId, imageElement));
+  },
+  onDeleteAsset: (asset: AssetType) => dispatch(removeAsset(asset.id)),
 });
 
 const mergeProps = (
-  { state, selectedToplevelNodes, ...restStateProps }: ReturnType<typeof mapStateToProps>,
-  { dispatch, ...restDispatchProps }: ReturnType<typeof mapDispatchToProps>,
+  { state, selectedToplevelNodes, assets, ...restStateProps }: ReturnType<typeof mapStateToProps>,
+  { dispatch, onCreateAsset, ...restDispatchProps }: ReturnType<typeof mapDispatchToProps>,
   { commit, ...restOwnProps }: OwnProps
 ) => {
   const updateGlobalState = globalStateUpdater(dispatch, state);
+
+  // pull values out of assets object
+  // have to cast to AssetType[] because TS doesn't know about filtering
+  const assetValues = Object.values(assets).filter((asset) => !!asset) as AssetType[];
 
   return {
     ...restDispatchProps,
@@ -122,6 +173,8 @@ const mergeProps = (
     commit: withGlobalState(commit, updateGlobalState),
     groupIsSelected:
       selectedToplevelNodes.length === 1 && selectedToplevelNodes[0].includes('group'),
+    assets: assetValues,
+    onCreateAsset: onCreateAsset(restStateProps.pageId),
   };
 };
 

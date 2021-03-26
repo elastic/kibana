@@ -11,6 +11,7 @@ import { expressionsService } from './expressions';
 import { navigationService } from './navigation';
 import { navLinkService } from './nav_link';
 import { notifyService } from './notify';
+import { overlayService } from './overlay';
 import { platformService } from './platform';
 
 export const stubs: CanvasServices = {

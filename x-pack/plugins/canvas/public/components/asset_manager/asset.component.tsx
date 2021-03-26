@@ -33,12 +33,14 @@ export interface Props {
   /** The asset to be rendered */
   asset: AssetType;
   /** The function to execute when the user clicks 'Create' */
-  onCreate: (assetId: string) => void;
+  onCreateAsset: (assetId: string) => void;
   /** The function to execute when the user clicks 'Delete' */
-  onDelete: (asset: AssetType) => void;
+  onDeleteAsset: (asset: AssetType) => void;
+  /** The handler to close the modal */
+  onClose: () => void;
 }
 
-export const Asset: FC<Props> = ({ asset, onCreate, onDelete }) => {
+export const Asset: FC<Props> = ({ asset, onCreateAsset, onDeleteAsset, onClose }) => {
   const { success } = useNotifyService();
   const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
 
@@ -52,7 +54,8 @@ export const Asset: FC<Props> = ({ asset, onCreate, onDelete }) => {
       confirmButtonText={strings.getConfirmModalButtonLabel()}
       onConfirm={() => {
         setIsConfirmModalVisible(false);
-        onDelete(asset);
+        onDeleteAsset(asset);
+        onClose();
       }}
       onCancel={() => setIsConfirmModalVisible(false)}
     />
@@ -64,7 +67,10 @@ export const Asset: FC<Props> = ({ asset, onCreate, onDelete }) => {
         <EuiButtonIcon
           iconType="vector"
           aria-label={strings.getCreateImageTooltip()}
-          onClick={() => onCreate(asset.id)}
+          onClick={() => {
+            onCreateAsset(asset.id);
+            onClose();
+          }}
         />
       </EuiToolTip>
     </EuiFlexItem>
