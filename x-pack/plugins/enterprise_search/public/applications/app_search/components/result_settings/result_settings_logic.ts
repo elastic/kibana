@@ -27,11 +27,9 @@ import {
   areFieldsAtDefaultSettings,
   areFieldsEmpty,
   clearAllFields,
-  clearAllServerFields,
   convertServerResultFieldsToResultFields,
   convertToServerFieldResultSetting,
   resetAllFields,
-  resetAllServerFields,
   splitResultFields,
 } from './utils';
 
@@ -44,12 +42,9 @@ interface ResultSettingsActions {
     schema: Schema,
     schemaConflicts?: SchemaConflicts
   ): {
-    serverResultFields: ServerFieldResultSettingObject;
     resultFields: FieldResultSettingObject;
     schema: Schema;
     schemaConflicts: SchemaConflicts;
-    nonTextResultFields: FieldResultSettingObject;
-    textResultFields: FieldResultSettingObject;
   };
   clearAllFields(): void;
   resetAllFields(): void;
@@ -98,14 +93,8 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     closeModals: () => true,
     initializeResultFields: (serverResultFields, schema, schemaConflicts) => {
       const resultFields = convertServerResultFieldsToResultFields(serverResultFields, schema);
-      Object.keys(schema).forEach((fieldName) => {
-        if (!serverResultFields.hasOwnProperty(fieldName)) {
-          serverResultFields[fieldName] = {};
-        }
-      });
 
       return {
-        serverResultFields,
         resultFields,
         schema,
         schemaConflicts,
@@ -162,22 +151,6 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
             : resultFields,
       },
     ],
-    serverResultFields: [
-      {},
-      {
-        initializeResultFields: (_, { serverResultFields }) => serverResultFields,
-        clearAllFields: (serverResultFields) => clearAllServerFields(serverResultFields),
-        resetAllFields: (serverResultFields) => resetAllServerFields(serverResultFields),
-        updateField: (serverResultFields, { fieldName, settings }) => {
-          return serverResultFields.hasOwnProperty(fieldName)
-            ? {
-                ...serverResultFields,
-                [fieldName]: convertToServerFieldResultSetting(settings),
-              }
-            : serverResultFields;
-        },
-      },
-    ],
     lastSavedResultFields: [
       {},
       {
@@ -210,6 +183,17 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
       (resultFields: FieldResultSettingObject, schema: Schema) => {
         const { nonTextResultFields } = splitResultFields(resultFields, schema);
         return nonTextResultFields;
+      },
+    ],
+    serverResultFields: [
+      () => [selectors.resultFields],
+      (resultFields: FieldResultSettingObject) => {
+        return Object.entries(resultFields).reduce((serverResultFields, [fieldName, settings]) => {
+          return {
+            ...serverResultFields,
+            [fieldName]: convertToServerFieldResultSetting(settings as FieldResultSetting),
+          };
+        }, {});
       },
     ],
     resultFieldsAtDefaultSettings: [

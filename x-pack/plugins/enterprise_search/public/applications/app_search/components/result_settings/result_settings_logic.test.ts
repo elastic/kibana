@@ -27,13 +27,13 @@ describe('ResultSettingsLogic', () => {
     saving: false,
     openModal: OpenModal.None,
     resultFields: {},
-    serverResultFields: {},
     lastSavedResultFields: {},
     schema: {},
     schemaConflicts: {},
   };
 
   const SELECTORS = {
+    serverResultFields: {},
     reducedServerResultFields: {},
     resultFieldsAtDefaultSettings: true,
     resultFieldsEmpty: true,
@@ -138,13 +138,6 @@ describe('ResultSettingsLogic', () => {
               snippetFallback: false,
             },
           },
-          // It stores the originally passed results as serverResultFields
-          serverResultFields: {
-            foo: { raw: { size: 5 } },
-            // Baz was not part of the original serverResultFields, it was injected based on the schema
-            baz: {},
-            bar: { raw: { size: 5 } },
-          },
           // The modal should be reset back to closed if it had been opened previously
           openModal: OpenModal.None,
           // Stores the provided schema details
@@ -210,10 +203,6 @@ describe('ResultSettingsLogic', () => {
             quuz: { raw: false, snippet: false, snippetFallback: false },
             corge: { raw: true, snippet: false, snippetFallback: true },
           },
-          serverResultFields: {
-            grault: { raw: { size: 5 } },
-            garply: { raw: true },
-          },
         });
 
         ResultSettingsLogic.actions.clearAllFields();
@@ -223,10 +212,6 @@ describe('ResultSettingsLogic', () => {
           resultFields: {
             quuz: {},
             corge: {},
-          },
-          serverResultFields: {
-            grault: {},
-            garply: {},
           },
         });
       });
@@ -239,10 +224,6 @@ describe('ResultSettingsLogic', () => {
             quuz: { raw: true, snippet: true, snippetFallback: true },
             corge: { raw: true, snippet: true, snippetFallback: true },
           },
-          serverResultFields: {
-            grault: { raw: { size: 5 } },
-            garply: { raw: true },
-          },
         });
 
         ResultSettingsLogic.actions.resetAllFields();
@@ -252,10 +233,6 @@ describe('ResultSettingsLogic', () => {
           resultFields: {
             quuz: { raw: true, snippet: false, snippetFallback: false },
             corge: { raw: true, snippet: false, snippetFallback: false },
-          },
-          serverResultFields: {
-            grault: { raw: {} },
-            garply: { raw: {} },
           },
         });
       });
@@ -280,10 +257,6 @@ describe('ResultSettingsLogic', () => {
           foo: { raw: true, snippet: true, snippetFallback: true },
           bar: { raw: true, snippet: true, snippetFallback: true },
         },
-        serverResultFields: {
-          foo: { raw: { size: 5 } },
-          bar: { raw: true },
-        },
       };
 
       it('should update settings for an individual field', () => {
@@ -301,11 +274,6 @@ describe('ResultSettingsLogic', () => {
           resultFields: {
             foo: { raw: true, snippet: false, snippetFallback: false },
             bar: { raw: true, snippet: true, snippetFallback: true },
-          },
-          serverResultFields: {
-            // Note that the specified settings for foo get converted to a "server" format here
-            foo: { raw: {} },
-            bar: { raw: true },
           },
         });
       });
@@ -470,11 +438,45 @@ describe('ResultSettingsLogic', () => {
       });
     });
 
-    describe('reducedServerResultFields', () => {
-      it('filters out fields that do not have any settings', () => {
+    describe('serverResultFields', () => {
+      it('returns resultFields formatted for the server', () => {
         mount({
-          serverResultFields: {
-            foo: { raw: { size: 5 } },
+          resultFields: {
+            foo: {
+              raw: true,
+              rawSize: 5,
+              snippet: true,
+              snippetFallback: true,
+              snippetSize: 3,
+            },
+            bar: {},
+            baz: {
+              raw: false,
+              snippet: false,
+              snippetFallback: false,
+            },
+          },
+        });
+
+        expect(ResultSettingsLogic.values.serverResultFields).toEqual({
+          foo: {
+            raw: { size: 5 },
+            snippet: { fallback: true, size: 3 },
+          },
+          bar: {},
+          baz: {},
+        });
+      });
+    });
+
+    describe('reducedServerResultFields', () => {
+      it('returns server formatted fields with empty settings filtered out', () => {
+        mount({
+          resultFields: {
+            foo: {
+              raw: true,
+              rawSize: 5,
+            },
             bar: {},
           },
         });
