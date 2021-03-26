@@ -1,1 +1,2 @@
 include::action-types.asciidoc[]
+include::connector-management.asciidoc[]

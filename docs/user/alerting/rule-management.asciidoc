@@ -50,9 +50,14 @@ After a rule is created, you can re-open the flyout and change a rule's properti
 The rule listing allows you to quickly mute/unmute, disable/enable, and delete individual rules by clicking the action button. 
 
 [role="screenshot"]
-image:management/alerting/images/individual-mute-disable.png[The actions button allows an individual rule to be muted, disabled, or deleted]
+image:images/individual-mute-disable.png[The actions button allows an individual rule to be muted, disabled, or deleted]
 
 These operations can also be performed in bulk by multi-selecting rules and clicking the *Manage rules* button:
 
 [role="screenshot"]
-image:management/alerting/images/bulk-mute-disable.png[The Manage rules button lets you mute/unmute, enable/disable, and delete in bulk]
+image:images/bulk-mute-disable.png[The Manage rules button lets you mute/unmute, enable/disable, and delete in bulk]
+
+[float]
+=== Required permissions
+
+Access to rules is granted based on your privileges to alerting-enabled features. See <<alerting-security, Alerting Security>> for more information.

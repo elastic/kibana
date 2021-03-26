@@ -1,4 +1,6 @@
 include::alerting-getting-started.asciidoc[]
 include::defining-rules.asciidoc[]
 include::rule-types.asciidoc[]
+include::rule-management.asciidoc[]
+include::rule-details.asciidoc[]
 include::alerting-troubleshooting.asciidoc[]

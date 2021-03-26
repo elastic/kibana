@@ -8,7 +8,7 @@ The *Rules and Connectors* UI lets you <<alert-management, see and control all t
 To manage rules and connectors, open the main menu, then click *Stack Management > Alerts and Insights > Rules and Connectors*.
 
 [role="screenshot"]
-image:management/alerting/images/rules-and-connectors-ui.png[Example rule listing in the Rules and Connectors UI]
+image:images/rules-and-connectors-ui.png[Example rule listing in the Rules and Connectors UI]
 
 [NOTE]
 ============================================================================

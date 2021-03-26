@@ -182,13 +182,7 @@ next major version of {es}, and then reindex, if needed.
 
 include::{kib-repo-dir}/management/advanced-options.asciidoc[]
 
-include::{kib-repo-dir}/management/alerting/rules-and-connectors-intro.asciidoc[]
-
-include::{kib-repo-dir}/management/alerting/rule-management.asciidoc[]
-
-include::{kib-repo-dir}/management/alerting/rule-details.asciidoc[]
-
-include::{kib-repo-dir}/management/alerting/connector-management.asciidoc[]
+include::{kib-repo-dir}/management/managing-rules-and-connectors.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-beats.asciidoc[]
 
