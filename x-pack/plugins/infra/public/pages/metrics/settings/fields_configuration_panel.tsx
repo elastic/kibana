@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
-import { InputFieldProps } from './input_fields';
+import { InputFieldProps } from '../../../components/source_configuration/input_fields';
 
 interface FieldsConfigurationPanelProps {
   containerFieldProps: InputFieldProps;

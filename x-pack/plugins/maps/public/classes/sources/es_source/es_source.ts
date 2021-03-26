@@ -195,6 +195,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       resp = await searchSource.fetch({
         abortSignal: abortController.signal,
         sessionId: searchSessionId,
+        legacyHitsTotal: false,
       });
       if (inspectorRequest) {
         const responseStats = search.getResponseInspectorStats(resp, searchSource);
@@ -247,6 +248,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       }
     }
     const searchService = getSearchService();
+
     const searchSource = await searchService.searchSource.create(initialSearchContext);
 
     searchSource.setField('index', indexPattern);
@@ -272,6 +274,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     registerCancelCallback: (callback: () => void) => void
   ): Promise<MapExtent | null> {
     const searchSource = await this.makeSearchSource(boundsFilters, 0);
+    searchSource.setField('trackTotalHits', false);
     searchSource.setField('aggs', {
       fitToBounds: {
         geo_bounds: {
@@ -284,7 +287,10 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     try {
       const abortController = new AbortController();
       registerCancelCallback(() => abortController.abort());
-      const esResp = await searchSource.fetch({ abortSignal: abortController.signal });
+      const esResp = await searchSource.fetch({
+        abortSignal: abortController.signal,
+        legacyHitsTotal: false,
+      });
 
       if (!esResp.aggregations) {
         return null;

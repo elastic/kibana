@@ -21322,7 +21322,6 @@
     "xpack.snapshotRestore.restoreForm.stepLogistics.dataStreamsAndIndicesToggleListLink": "データストリームとインデックスを選択",
     "xpack.snapshotRestore.restoreForm.stepLogistics.deselectAllIndicesLink": "すべて選択解除",
     "xpack.snapshotRestore.restoreForm.stepLogistics.docsButtonLabel": "スナップショットと復元ドキュメント",
-    "xpack.snapshotRestore.restoreForm.stepLogistics.includeGlobalStateDescription": "現在クラスターに存在しないテンプレートを復元し、テンプレートを同じ名前で上書きします。永続的な設定も復元します。",
     "xpack.snapshotRestore.restoreForm.stepLogistics.includeGlobalStateDisabledDescription": "このスナップショットでは使用できません。",
     "xpack.snapshotRestore.restoreForm.stepLogistics.includeGlobalStateLabel": "グローバル状態の復元",
     "xpack.snapshotRestore.restoreForm.stepLogistics.includeGlobalStateTitle": "グローバル状態の復元",
