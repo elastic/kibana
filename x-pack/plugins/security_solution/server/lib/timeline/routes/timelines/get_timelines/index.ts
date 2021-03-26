@@ -4,25 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import Boom from '@hapi/boom';
+
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
+import { identity } from 'fp-ts/lib/function';
 
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-
 import { TIMELINES_URL } from '../../../../../../common/constants';
 
 import { ConfigType } from '../../../../..';
 import { SetupPlugins } from '../../../../../plugin';
-import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 
 import { buildSiemResponse, transformError } from '../../../../detection_engine/routes/utils';
 
-import { buildFrameworkRequest } from '../../../utils/common';
-import { getTimelineQuerySchema } from '../../../schemas/timelines';
-import {
-  getTimelineTemplateOrNull,
-  getTimelineOrNull,
-  getAllTimeline,
-} from '../../../saved_object/timelines';
-import { getTimelinesBodySchema, TimelineStatus } from '../../../../../../common/types/timeline';
+import { buildFrameworkRequest, escapeHatch, throwErrors } from '../../../utils/common';
+import { getAllTimeline } from '../../../saved_object/timelines';
+import { getTimelinesQuerySchema } from '../../../schemas/timelines';
 
 export const getTimelinesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -33,8 +31,7 @@ export const getTimelinesRoute = (
     {
       path: TIMELINES_URL,
       validate: {
-        // query: buildRouteValidationWithExcess(getTimelinesBodySchema),
-        // body: buildRouteValidationWithExcess(getTimelinesBodySchema),
+        query: escapeHatch,
       },
       options: {
         tags: ['access:securitySolution'],
@@ -42,18 +39,30 @@ export const getTimelinesRoute = (
     },
     async (context, request, response) => {
       try {
-        console.log('request query', request.query);
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
-        const onlyUserFavorite = request.query?.onlyUserFavorite ?? false;
-        const pageInfo = request.query?.pageInfo ? JSON.parse(request?.query?.pageInfo) : null;
-        const search = request.query?.search ?? null;
-        const sort = request.query?.sort ? JSON.parse(request?.query?.sort) : null;
-        const status = request.query?.status ?? null;
-        const timelineType = request.query?.timelineType ?? null;
+        const queryParams = pipe(
+          getTimelinesQuerySchema.decode(request.query),
+          fold(throwErrors(Boom.badRequest), identity)
+        );
+        const onlyUserFavorite = queryParams?.onlyUserFavorite === 'true' ? true : false;
+        const pageSize = queryParams.pageSize ? parseInt(queryParams.pageSize, 10) : null;
+        const pageIndex = queryParams?.pageIndex ? parseInt(queryParams.pageIndex, 10) : null;
+        const search = queryParams?.search ?? null;
+        const sortField = queryParams?.sortField ?? null;
+        const sortOrder = queryParams?.sortOrder ?? null;
+        const status = queryParams?.status ?? null;
+        const timelineType = queryParams?.timelineType ?? null;
+        const sort =
+          sortField && sortOrder
+            ? {
+                sortField,
+                sortOrder,
+              }
+            : null;
         let res = null;
         let totalCount = null;
 
-        if (pageInfo == null) {
+        if (pageSize == null && pageIndex == null) {
           const allActiveTimelines = await getAllTimeline(
             frameworkRequest,
             false,
@@ -69,7 +78,10 @@ export const getTimelinesRoute = (
         res = await getAllTimeline(
           frameworkRequest,
           onlyUserFavorite,
-          pageInfo ?? { pageSize: totalCount ?? 0, pageIndex: 1 },
+          {
+            pageSize: pageSize ?? totalCount ?? 1,
+            pageIndex: pageIndex ?? 1,
+          },
           search,
           sort,
           status,

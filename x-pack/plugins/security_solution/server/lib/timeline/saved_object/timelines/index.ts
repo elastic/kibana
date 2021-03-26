@@ -18,6 +18,7 @@ import {
   ExportTimelineNotFoundError,
   TimelineStatusLiteralWithNull,
   AllTimelinesResponse,
+  ResponseTimelines,
 } from '../../../../../common/types/timeline';
 import {
   ResponseTimeline,

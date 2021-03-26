@@ -23,6 +23,9 @@ import {
   importTimelineResultSchema,
   ResponseFavoriteTimeline,
   GetTimelinesArgs,
+  AllTimelinesResponse,
+  SingleTimelineResponseType,
+  allTimelinesResponse,
 } from '../../../common/types/timeline';
 import { TimelineInput, TimelineType } from '../../graphql/types';
 import {
@@ -59,6 +62,18 @@ type RequestPersistTimeline = RequestPostTimeline & Partial<RequestPatchTimeline
 const decodeTimelineResponse = (respTimeline?: TimelineResponse) =>
   pipe(
     TimelineResponseType.decode(respTimeline),
+    fold(throwErrors(createToasterPlainError), identity)
+  );
+
+const decodeSingleTimelineResponse = (respTimeline?: TimelineResponse) =>
+  pipe(
+    SingleTimelineResponseType.decode(respTimeline),
+    fold(throwErrors(createToasterPlainError), identity)
+  );
+
+const decodeAllTimelinesResponse = (respTimeline: AllTimelinesResponse) =>
+  pipe(
+    allTimelinesResponse.decode(respTimeline),
     fold(throwErrors(createToasterPlainError), identity)
   );
 
@@ -254,31 +269,26 @@ export const getTimeline = async (id: string) => {
     },
   });
 
-  // return decodeTimelineResponse(response);
-  return response;
+  return decodeSingleTimelineResponse(response);
 };
 
 export const getAllTimelines = async (args: GetTimelinesArgs, abortSignal: AbortSignal) => {
-  const onlyUserFavorite = args?.onlyUserFavorite ?? '';
-  const pageInfo = args?.pageInfo ? JSON.stringify(args.pageInfo) : null;
-  const search = args?.search ?? '';
-  const sort = args?.sort ? JSON.stringify(args.sort) : null;
-  const status = args?.status ?? '';
-  const timelineType = args?.timelineType ?? null;
-
-  const response = await KibanaServices.get().http.fetch<ResponseTimelines>(TIMELINES_URL, {
+  const response = await KibanaServices.get().http.fetch<AllTimelinesResponse>(TIMELINES_URL, {
     method: 'GET',
     query: {
-      onlyUserFavorite,
-      pageInfo,
-      search,
-      sort,
-      status,
-      timelineType,
+      ...(args.onlyUserFavorite ? { onlyUserFavorite: args.onlyUserFavorite } : {}),
+      ...(args?.pageInfo?.pageSize ? { pageSize: args.pageInfo.pageSize } : {}),
+      ...(args?.pageInfo?.pageIndex ? { pageIndex: args.pageInfo.pageIndex } : {}),
+      ...(args.search ? { search: args.search } : {}),
+      ...(args?.sort?.sortField ? { sortField: args?.sort?.sortField } : {}),
+      ...(args?.sort?.sortOrder ? { sortOrder: args?.sort?.sortOrder } : {}),
+      ...(args.status ? { status: args.status } : {}),
+      ...(args.timelineType ? { timelineType: args.timelineType } : {}),
     },
+    signal: abortSignal,
   });
 
-  return response;
+  return decodeAllTimelinesResponse(response);
 };
 
 export const persistFavorite = async ({

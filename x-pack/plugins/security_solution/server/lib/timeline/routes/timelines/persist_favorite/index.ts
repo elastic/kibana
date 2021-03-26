@@ -58,7 +58,7 @@ export const persistFavoriteRoute = (
         return response.ok({
           body: {
             data: {
-              persistTimeline: timeline,
+              persistFavorite: timeline,
             },
           },
         });

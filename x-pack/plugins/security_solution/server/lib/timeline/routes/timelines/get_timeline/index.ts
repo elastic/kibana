@@ -17,12 +17,7 @@ import { buildSiemResponse, transformError } from '../../../../detection_engine/
 
 import { buildFrameworkRequest } from '../../../utils/common';
 import { getTimelineQuerySchema } from '../../../schemas/timelines';
-import {
-  getTimelineTemplateOrNull,
-  getTimelineOrNull,
-  getAllTimeline,
-} from '../../../saved_object/timelines';
-import { getTimelinesBodySchema, TimelineStatus } from '../../../../../../common/types/timeline';
+import { getTimelineTemplateOrNull, getTimelineOrNull } from '../../../saved_object/timelines';
 
 export const getTimelineRoute = (
   router: SecuritySolutionPluginRouter,
@@ -34,7 +29,6 @@ export const getTimelineRoute = (
       path: TIMELINE_URL,
       validate: {
         query: buildRouteValidationWithExcess(getTimelineQuerySchema),
-        // body: buildRouteValidationWithExcess(getTimelinesBodySchema),
       },
       options: {
         tags: ['access:securitySolution'],
@@ -42,7 +36,6 @@ export const getTimelineRoute = (
     },
     async (context, request, response) => {
       try {
-        console.log('request body', request.body);
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
         const query = request.query ?? {};
         const { template_timeline_id: templateTimelineId, id } = query;

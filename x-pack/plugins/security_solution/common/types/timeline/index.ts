@@ -346,6 +346,12 @@ export type TimelineSavedObject = runtimeTypes.TypeOf<
   typeof TimelineSavedToReturnObjectRuntimeType
 >;
 
+export const SingleTimelineResponseType = runtimeTypes.type({
+  data: runtimeTypes.type({
+    getOneTimeline: TimelineSavedToReturnObjectRuntimeType,
+  }),
+});
+
 /**
  * All Timeline Saved object type with metadata
  */
@@ -532,35 +538,33 @@ export interface ResponseFavoriteTimeline {
   favorite?: Maybe<FavoriteTimelineResult[]>;
 }
 
-export const getTimelinesBodySchema = runtimeTypes.partial({
-  onlyUserFavorite: unionWithNullType(runtimeTypes.boolean),
-  pageInfo: unionWithNullType(runtimeTypes.string),
-  search: unionWithNullType(runtimeTypes.string),
-  sort: unionWithNullType(runtimeTypes.string),
-  status: unionWithNullType(TimelineStatusLiteralRt),
-  timelineType: unionWithNullType(TimelineTypeLiteralRt),
-});
-
 export const getTimelinesArgs = runtimeTypes.partial({
   onlyUserFavorite: unionWithNullType(runtimeTypes.boolean),
   pageInfo: unionWithNullType(pageInfoTimeline),
   search: unionWithNullType(runtimeTypes.string),
-  sort: unionWithNullType(sortTimeline),
+  sort: sortTimeline,
   status: unionWithNullType(TimelineStatusLiteralRt),
   timelineType: unionWithNullType(TimelineTypeLiteralRt),
 });
 
-export type GetTimelinesArgs = runtimeTypes.TypeOf<typeof getTimelinesBodySchema>;
+export type GetTimelinesArgs = runtimeTypes.TypeOf<typeof getTimelinesArgs>;
 
-interface ResponseTimelines {
-  timeline: TimelineSavedObject[];
-  totalCount: number;
-}
+const responseTimelines = runtimeTypes.type({
+  timeline: runtimeTypes.array(TimelineSavedToReturnObjectRuntimeType),
+  totalCount: runtimeTypes.number,
+});
 
-export interface AllTimelinesResponse extends ResponseTimelines {
-  defaultTimelineCount: number;
-  templateTimelineCount: number;
-  elasticTemplateTimelineCount: number;
-  customTemplateTimelineCount: number;
-  favoriteCount: number;
-}
+export type ResponseTimelines = runtimeTypes.TypeOf<typeof responseTimelines>;
+
+export const allTimelinesResponse = runtimeTypes.intersection([
+  responseTimelines,
+  runtimeTypes.type({
+    defaultTimelineCount: runtimeTypes.number,
+    templateTimelineCount: runtimeTypes.number,
+    elasticTemplateTimelineCount: runtimeTypes.number,
+    customTemplateTimelineCount: runtimeTypes.number,
+    favoriteCount: runtimeTypes.number,
+  }),
+]);
+
+export type AllTimelinesResponse = runtimeTypes.TypeOf<typeof allTimelinesResponse>;
