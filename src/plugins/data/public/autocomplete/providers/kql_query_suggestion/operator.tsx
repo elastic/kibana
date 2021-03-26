@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -15,44 +16,44 @@ import { QuerySuggestionTypes } from '../../../../../../../src/plugins/data/publ
 
 const equalsText = (
   <FormattedMessage
-    id="xpack.data.kueryAutocomplete.equalOperatorDescription.equalsText"
+    id="data.kueryAutocomplete.equalOperatorDescription.equalsText"
     defaultMessage="equals"
-    description="Part of xpack.data.kueryAutocomplete.equalOperatorDescription. Full text: 'equals some value'"
+    description="Part of data.kueryAutocomplete.equalOperatorDescription. Full text: 'equals some value'"
   />
 );
 const lessThanOrEqualToText = (
   <FormattedMessage
-    id="xpack.data.kueryAutocomplete.lessThanOrEqualOperatorDescription.lessThanOrEqualToText"
+    id="data.kueryAutocomplete.lessThanOrEqualOperatorDescription.lessThanOrEqualToText"
     defaultMessage="less than or equal to"
-    description="Part of xpack.data.kueryAutocomplete.lessThanOrEqualOperatorDescription. Full text: 'is less than or equal to some value'"
+    description="Part of data.kueryAutocomplete.lessThanOrEqualOperatorDescription. Full text: 'is less than or equal to some value'"
   />
 );
 const greaterThanOrEqualToText = (
   <FormattedMessage
-    id="xpack.data.kueryAutocomplete.greaterThanOrEqualOperatorDescription.greaterThanOrEqualToText"
+    id="data.kueryAutocomplete.greaterThanOrEqualOperatorDescription.greaterThanOrEqualToText"
     defaultMessage="greater than or equal to"
-    description="Part of xpack.data.kueryAutocomplete.greaterThanOrEqualOperatorDescription. Full text: 'is greater than or equal to some value'"
+    description="Part of data.kueryAutocomplete.greaterThanOrEqualOperatorDescription. Full text: 'is greater than or equal to some value'"
   />
 );
 const lessThanText = (
   <FormattedMessage
-    id="xpack.data.kueryAutocomplete.lessThanOperatorDescription.lessThanText"
+    id="data.kueryAutocomplete.lessThanOperatorDescription.lessThanText"
     defaultMessage="less than"
-    description="Part of xpack.data.kueryAutocomplete.lessThanOperatorDescription. Full text: 'is less than some value'"
+    description="Part of data.kueryAutocomplete.lessThanOperatorDescription. Full text: 'is less than some value'"
   />
 );
 const greaterThanText = (
   <FormattedMessage
-    id="xpack.data.kueryAutocomplete.greaterThanOperatorDescription.greaterThanText"
+    id="data.kueryAutocomplete.greaterThanOperatorDescription.greaterThanText"
     defaultMessage="greater than"
-    description="Part of xpack.data.kueryAutocomplete.greaterThanOperatorDescription. Full text: 'is greater than some value'"
+    description="Part of data.kueryAutocomplete.greaterThanOperatorDescription. Full text: 'is greater than some value'"
   />
 );
 const existsText = (
   <FormattedMessage
-    id="xpack.data.kueryAutocomplete.existOperatorDescription.existsText"
+    id="data.kueryAutocomplete.existOperatorDescription.existsText"
     defaultMessage="exists"
-    description="Part of xpack.data.kueryAutocomplete.existOperatorDescription. Full text: 'exists in any form'"
+    description="Part of data.kueryAutocomplete.existOperatorDescription. Full text: 'exists in any form'"
   />
 );
 
@@ -60,11 +61,11 @@ const operators = {
   ':': {
     description: (
       <FormattedMessage
-        id="xpack.data.kueryAutocomplete.equalOperatorDescription"
+        id="data.kueryAutocomplete.equalOperatorDescription"
         defaultMessage="{equals} some value"
         values={{ equals: <span className="kbnSuggestionItem__callout">{equalsText}</span> }}
         description="Full text: 'equals some value'. See
-        'xpack.data.kueryAutocomplete.equalOperatorDescription.equalsText' for 'equals' part."
+        'data.kueryAutocomplete.equalOperatorDescription.equalsText' for 'equals' part."
       />
     ),
     fieldTypes: [
@@ -83,7 +84,7 @@ const operators = {
   '<=': {
     description: (
       <FormattedMessage
-        id="xpack.data.kueryAutocomplete.lessThanOrEqualOperatorDescription"
+        id="data.kueryAutocomplete.lessThanOrEqualOperatorDescription"
         defaultMessage="is {lessThanOrEqualTo} some value"
         values={{
           lessThanOrEqualTo: (
@@ -91,7 +92,7 @@ const operators = {
           ),
         }}
         description="Full text: 'is less than or equal to some value'. See
-        'xpack.data.kueryAutocomplete.lessThanOrEqualOperatorDescription.lessThanOrEqualToText' for 'less than or equal to' part."
+        'data.kueryAutocomplete.lessThanOrEqualOperatorDescription.lessThanOrEqualToText' for 'less than or equal to' part."
       />
     ),
     fieldTypes: ['number', 'number_range', 'date', 'date_range', 'ip', 'ip_range'],
@@ -99,7 +100,7 @@ const operators = {
   '>=': {
     description: (
       <FormattedMessage
-        id="xpack.data.kueryAutocomplete.greaterThanOrEqualOperatorDescription"
+        id="data.kueryAutocomplete.greaterThanOrEqualOperatorDescription"
         defaultMessage="is {greaterThanOrEqualTo} some value"
         values={{
           greaterThanOrEqualTo: (
@@ -107,7 +108,7 @@ const operators = {
           ),
         }}
         description="Full text: 'is greater than or equal to some value'. See
-        'xpack.data.kueryAutocomplete.greaterThanOrEqualOperatorDescription.greaterThanOrEqualToText' for 'greater than or equal to' part."
+        'data.kueryAutocomplete.greaterThanOrEqualOperatorDescription.greaterThanOrEqualToText' for 'greater than or equal to' part."
       />
     ),
     fieldTypes: ['number', 'number_range', 'date', 'date_range', 'ip', 'ip_range'],
@@ -115,11 +116,11 @@ const operators = {
   '<': {
     description: (
       <FormattedMessage
-        id="xpack.data.kueryAutocomplete.lessThanOperatorDescription"
+        id="data.kueryAutocomplete.lessThanOperatorDescription"
         defaultMessage="is {lessThan} some value"
         values={{ lessThan: <span className="kbnSuggestionItem__callout">{lessThanText}</span> }}
         description="Full text: 'is less than some value'. See
-        'xpack.data.kueryAutocomplete.lessThanOperatorDescription.lessThanText' for 'less than' part."
+        'data.kueryAutocomplete.lessThanOperatorDescription.lessThanText' for 'less than' part."
       />
     ),
     fieldTypes: ['number', 'number_range', 'date', 'date_range', 'ip', 'ip_range'],
@@ -127,13 +128,13 @@ const operators = {
   '>': {
     description: (
       <FormattedMessage
-        id="xpack.data.kueryAutocomplete.greaterThanOperatorDescription"
+        id="data.kueryAutocomplete.greaterThanOperatorDescription"
         defaultMessage="is {greaterThan} some value"
         values={{
           greaterThan: <span className="kbnSuggestionItem__callout">{greaterThanText}</span>,
         }}
         description="Full text: 'is greater than some value'. See
-        'xpack.data.kueryAutocomplete.greaterThanOperatorDescription.greaterThanText' for 'greater than' part."
+        'data.kueryAutocomplete.greaterThanOperatorDescription.greaterThanText' for 'greater than' part."
       />
     ),
     fieldTypes: ['number', 'number_range', 'date', 'date_range', 'ip', 'ip_range'],
@@ -141,11 +142,11 @@ const operators = {
   ': *': {
     description: (
       <FormattedMessage
-        id="xpack.data.kueryAutocomplete.existOperatorDescription"
+        id="data.kueryAutocomplete.existOperatorDescription"
         defaultMessage="{exists} in any form"
         values={{ exists: <span className="kbnSuggestionItem__callout">{existsText}</span> }}
         description="Full text: 'exists in any form'. See
-        'xpack.data.kueryAutocomplete.existOperatorDescription.existsText' for 'exists' part."
+        'data.kueryAutocomplete.existOperatorDescription.existsText' for 'exists' part."
       />
     ),
     fieldTypes: undefined,

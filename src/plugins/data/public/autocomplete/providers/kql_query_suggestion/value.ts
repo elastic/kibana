@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { flatten } from 'lodash';
+import { CoreSetup } from 'kibana/public';
 import { escapeQuotes } from './lib/escape_kuery';
 import { KqlQuerySuggestionProvider } from './types';
-import { getAutocompleteService } from '../../../services';
 import {
+  DataPublicPluginStart,
   IFieldType,
   IIndexPattern,
   QuerySuggestion,
@@ -26,7 +28,12 @@ const wrapAsSuggestions = (start: number, end: number, query: string, values: st
       end,
     }));
 
-export const setupGetValueSuggestions: KqlQuerySuggestionProvider = () => {
+export const setupGetValueSuggestions: KqlQuerySuggestionProvider = (
+  core: CoreSetup<object, DataPublicPluginStart>
+) => {
+  const autoCompleteServicePromise = core
+    .getStartServices()
+    .then(([_, __, dataStart]) => dataStart.autocomplete);
   return async (
     { indexPatterns, boolFilter, useTimeRange, signal },
     { start, end, prefix, suffix, fieldName, nestedPath }
@@ -41,7 +48,7 @@ export const setupGetValueSuggestions: KqlQuerySuggestionProvider = () => {
     });
 
     const query = `${prefix}${suffix}`.trim();
-    const { getValueSuggestions } = getAutocompleteService();
+    const { getValueSuggestions } = await autoCompleteServicePromise;
 
     const data = await Promise.all(
       indexPatternFieldEntries.map(([indexPattern, field]) =>
