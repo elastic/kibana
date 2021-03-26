@@ -54,10 +54,9 @@ export function extractReferences({
   if (updatedAttributes.visState) {
     const visState = JSON.parse(String(updatedAttributes.visState)) as SavedVisState;
 
-    extractControlsReferences(visState.params, updatedReferences);
-
-    if (visState.type === 'metrics') {
-      extractTimeSeriesReferences(visState.params, updatedReferences);
+    if (visState.type && visState.params) {
+      extractControlsReferences(visState.type, visState.params, updatedReferences);
+      extractTimeSeriesReferences(visState.type, visState.params, updatedReferences);
     }
 
     updatedAttributes.visState = JSON.stringify(visState);
@@ -87,11 +86,10 @@ export function injectReferences(savedObject: VisSavedObject, references: SavedO
     delete savedObject.savedSearchRefName;
   }
 
-  if (savedObject.visState?.params) {
-    injectControlsReferences(savedObject.visState.params, references);
+  const { type, params } = savedObject.visState ?? {};
 
-    if (savedObject.visState.type === 'metrics') {
-      injectTimeSeriesReferences(savedObject.visState.params, references);
-    }
+  if (type && params) {
+    injectControlsReferences(type, params, references);
+    injectTimeSeriesReferences(type, params, references);
   }
 }

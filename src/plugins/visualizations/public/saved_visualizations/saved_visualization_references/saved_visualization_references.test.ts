@@ -21,13 +21,13 @@ describe('extractReferences', () => {
     };
     const updatedDoc = extractReferences(doc);
     expect(updatedDoc).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "foo": true,
-  },
-  "references": Array [],
-}
-`);
+      Object {
+        "attributes": Object {
+          "foo": true,
+        },
+        "references": Array [],
+      }
+    `);
   });
 
   test('extracts references from savedSearchId', () => {
@@ -41,20 +41,20 @@ Object {
     };
     const updatedDoc = extractReferences(doc);
     expect(updatedDoc).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "foo": true,
-    "savedSearchRefName": "search_0",
-  },
-  "references": Array [
-    Object {
-      "id": "123",
-      "name": "search_0",
-      "type": "search",
-    },
-  ],
-}
-`);
+      Object {
+        "attributes": Object {
+          "foo": true,
+          "savedSearchRefName": "search_0",
+        },
+        "references": Array [
+          Object {
+            "id": "123",
+            "name": "search_0",
+            "type": "search",
+          },
+        ],
+      }
+    `);
   });
 
   test('extracts references from controls', () => {
@@ -63,6 +63,7 @@ Object {
       attributes: {
         foo: true,
         visState: JSON.stringify({
+          type: 'input_control_vis',
           params: {
             controls: [
               {
@@ -81,20 +82,20 @@ Object {
     const updatedDoc = extractReferences(doc);
 
     expect(updatedDoc).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "foo": true,
-    "visState": "{\\"params\\":{\\"controls\\":[{\\"bar\\":true,\\"indexPatternRefName\\":\\"control_0_index_pattern\\"},{\\"bar\\":false}]}}",
-  },
-  "references": Array [
-    Object {
-      "id": "pattern*",
-      "name": "control_0_index_pattern",
-      "type": "index-pattern",
-    },
-  ],
-}
-`);
+      Object {
+        "attributes": Object {
+          "foo": true,
+          "visState": "{\\"type\\":\\"input_control_vis\\",\\"params\\":{\\"controls\\":[{\\"bar\\":true,\\"indexPatternRefName\\":\\"control_0_index_pattern\\"},{\\"bar\\":false}]}}",
+        },
+        "references": Array [
+          Object {
+            "id": "pattern*",
+            "name": "control_0_index_pattern",
+            "type": "index-pattern",
+          },
+        ],
+      }
+    `);
   });
 });
 
@@ -106,11 +107,11 @@ describe('injectReferences', () => {
     } as VisSavedObject;
     injectReferences(context, []);
     expect(context).toMatchInlineSnapshot(`
-Object {
-  "id": "1",
-  "title": "test",
-}
-`);
+      Object {
+        "id": "1",
+        "title": "test",
+      }
+    `);
   });
 
   test('injects references into context', () => {
@@ -119,6 +120,7 @@ Object {
       title: 'test',
       savedSearchRefName: 'search_0',
       visState: ({
+        type: 'input_control_vis',
         params: {
           controls: [
             {
@@ -146,25 +148,26 @@ Object {
     ];
     injectReferences(context, references);
     expect(context).toMatchInlineSnapshot(`
-Object {
-  "id": "1",
-  "savedSearchId": "123",
-  "title": "test",
-  "visState": Object {
-    "params": Object {
-      "controls": Array [
-        Object {
-          "foo": true,
-          "indexPattern": "pattern*",
+      Object {
+        "id": "1",
+        "savedSearchId": "123",
+        "title": "test",
+        "visState": Object {
+          "params": Object {
+            "controls": Array [
+              Object {
+                "foo": true,
+                "indexPattern": "pattern*",
+              },
+              Object {
+                "foo": false,
+              },
+            ],
+          },
+          "type": "input_control_vis",
         },
-        Object {
-          "foo": false,
-        },
-      ],
-    },
-  },
-}
-`);
+      }
+    `);
   });
 
   test(`fails when it can't find the saved search reference in the array`, () => {
@@ -183,6 +186,7 @@ Object {
       id: '1',
       title: 'test',
       visState: ({
+        type: 'input_control_vis',
         params: {
           controls: [
             {

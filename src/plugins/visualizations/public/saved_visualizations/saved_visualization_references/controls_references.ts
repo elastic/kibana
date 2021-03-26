@@ -9,41 +9,46 @@
 import { SavedObjectReference } from '../../../../../core/types';
 import { VisParams } from '../../../common';
 
-export const extractControlsReferences = (
-  visParams: VisParams,
-  references: SavedObjectReference[] = []
-) => {
-  const controls = visParams?.controls ?? [];
+const isControlsVis = (visType: string) => visType === 'input_control_vis';
 
-  controls.forEach((control: Record<string, string>, i: number) => {
-    if (!control.indexPattern) {
-      return;
-    }
-    control.indexPatternRefName = `control_${i}_index_pattern`;
-    references.push({
-      name: control.indexPatternRefName,
-      type: 'index-pattern',
-      id: control.indexPattern,
+export const extractControlsReferences = (
+  visType: string,
+  visParams: VisParams,
+  references: SavedObjectReference[] = [],
+  prefix: string = 'control'
+) => {
+  if (isControlsVis(visType)) {
+    (visParams?.controls ?? []).forEach((control: Record<string, string>, i: number) => {
+      if (!control.indexPattern) {
+        return;
+      }
+      control.indexPatternRefName = `${prefix}_${i}_index_pattern`;
+      references.push({
+        name: control.indexPatternRefName,
+        type: 'index-pattern',
+        id: control.indexPattern,
+      });
+      delete control.indexPattern;
     });
-    delete control.indexPattern;
-  });
+  }
 };
 
 export const injectControlsReferences = (
+  visType: string,
   visParams: VisParams,
   references: SavedObjectReference[]
 ) => {
-  const controls = visParams.controls ?? [];
-
-  controls.forEach((control: Record<string, string>) => {
-    if (!control.indexPatternRefName) {
-      return;
-    }
-    const reference = references.find((ref) => ref.name === control.indexPatternRefName);
-    if (!reference) {
-      throw new Error(`Could not find index pattern reference "${control.indexPatternRefName}"`);
-    }
-    control.indexPattern = reference.id;
-    delete control.indexPatternRefName;
-  });
+  if (isControlsVis(visType)) {
+    (visParams.controls ?? []).forEach((control: Record<string, string>) => {
+      if (!control.indexPatternRefName) {
+        return;
+      }
+      const reference = references.find((ref) => ref.name === control.indexPatternRefName);
+      if (!reference) {
+        throw new Error(`Could not find index pattern reference "${control.indexPatternRefName}"`);
+      }
+      control.indexPattern = reference.id;
+      delete control.indexPatternRefName;
+    });
+  }
 };

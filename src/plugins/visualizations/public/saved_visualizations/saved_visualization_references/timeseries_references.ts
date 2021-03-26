@@ -18,6 +18,8 @@ const INDEX_PATTERN_REF_TYPE = 'index_pattern';
 /** @internal **/
 type Action = (object: Record<string, any>, key: string) => void;
 
+const isMetricsVis = (visType: string) => visType === 'metrics';
+
 const doForExtractedIndices = (action: Action, visParams: VisParams) => {
   action(visParams, 'index_pattern');
 
@@ -35,41 +37,47 @@ const doForExtractedIndices = (action: Action, visParams: VisParams) => {
 };
 
 export const extractTimeSeriesReferences = (
+  visType: string,
   visParams: VisParams,
-  references: SavedObjectReference[] = []
+  references: SavedObjectReference[] = [],
+  prefix: string = 'metrics'
 ) => {
   let i = 0;
+  if (isMetricsVis(visType)) {
+    doForExtractedIndices((object, key) => {
+      if (object[key] && object[key].id) {
+        const name = `${prefix}_${i++}_index_pattern`;
 
-  doForExtractedIndices((object, key) => {
-    if (object[key] && object[key].id) {
-      const name = `ref_${++i}_index_pattern`;
-
-      object[key + REF_NAME_POSTFIX] = name;
-      references.push({
-        name,
-        type: INDEX_PATTERN_REF_TYPE,
-        id: object[key].id,
-      });
-      delete object[key];
-    }
-  }, visParams);
+        object[key + REF_NAME_POSTFIX] = name;
+        references.push({
+          name,
+          type: INDEX_PATTERN_REF_TYPE,
+          id: object[key].id,
+        });
+        delete object[key];
+      }
+    }, visParams);
+  }
 };
 
 export const injectTimeSeriesReferences = (
+  visType: string,
   visParams: VisParams,
   references: SavedObjectReference[]
 ) => {
-  doForExtractedIndices((object, key) => {
-    const refKey = key + REF_NAME_POSTFIX;
+  if (isMetricsVis(visType)) {
+    doForExtractedIndices((object, key) => {
+      const refKey = key + REF_NAME_POSTFIX;
 
-    if (object[refKey]) {
-      const refValue = references.find((ref) => ref.name === object[refKey]);
+      if (object[refKey]) {
+        const refValue = references.find((ref) => ref.name === object[refKey]);
 
-      if (refValue) {
-        object[key] = { id: refValue.id };
+        if (refValue) {
+          object[key] = { id: refValue.id };
+        }
+
+        delete object[refKey];
       }
-
-      delete object[refKey];
-    }
-  }, visParams);
+    }, visParams);
+  }
 };
