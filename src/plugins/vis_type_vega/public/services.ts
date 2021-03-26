@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart, NotificationsStart, IUiSettingsClient } from 'src/core/public';
+import { CoreStart, NotificationsStart, IUiSettingsClient, DocLinksStart } from 'src/core/public';
 
 import { DataPublicPluginStart } from '../../data/public';
 import { createGetterSetter } from '../../kibana_utils/public';
@@ -35,3 +35,5 @@ export const [getInjectedVars, setInjectedVars] = createGetterSetter<{
 }>('InjectedVars');
 
 export const getEnableExternalUrls = () => getInjectedVars().enableExternalUrls;
+
+export const [getDocLinks, setDocLinks] = createGetterSetter<DocLinksStart>('docLinks');

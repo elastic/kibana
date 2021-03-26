@@ -108,7 +108,9 @@ export class DocLinksService {
           sum: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-sum-aggregation.html`,
           top_hits: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-top-hits-aggregation.html`,
         },
-        runtimeFields: `${ELASTICSEARCH_DOCS}runtime.html`,
+        runtimeFields: {
+          mapping: `${ELASTICSEARCH_DOCS}runtime-mapping-fields.html`,
+        },
         scriptedFields: {
           scriptFields: `${ELASTICSEARCH_DOCS}search-request-script-fields.html`,
           scriptAggs: `${ELASTICSEARCH_DOCS}search-aggregations.html`,
@@ -191,6 +193,7 @@ export class DocLinksService {
           lens: `${ELASTIC_WEBSITE_URL}what-is/kibana-lens`,
           lensPanels: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/lens.html`,
           maps: `${ELASTIC_WEBSITE_URL}maps`,
+          vega: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/vega.html`,
         },
         observability: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/index.html`,
@@ -380,7 +383,9 @@ export interface DocLinksStart {
       readonly sum: string;
       readonly top_hits: string;
     };
-    readonly runtimeFields: string;
+    readonly runtimeFields: {
+      readonly mapping: string;
+    };
     readonly scriptedFields: {
       readonly scriptFields: string;
       readonly scriptAggs: string;
