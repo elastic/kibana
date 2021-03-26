@@ -66,11 +66,11 @@ function getPutPreconfiguredPackagesMock() {
 }
 
 jest.mock('./epm/packages/install', () => ({
-  ensureInstalledPackage({ pkgName, version }: { pkgName: string; version: string }) {
+  ensureInstalledPackage({ pkgName, pkgVersion }: { pkgName: string; pkgVersion: string }) {
     const installedPackage = mockInstalledPackages.get(pkgName);
     if (installedPackage) return installedPackage;
 
-    const packageInstallation = { name: pkgName, version, title: pkgName };
+    const packageInstallation = { name: pkgName, version: pkgVersion, title: pkgName };
     mockInstalledPackages.set(pkgName, packageInstallation);
     return packageInstallation;
   },
