@@ -22,13 +22,13 @@ export const convertToLogger = (cliLog: Log): Logger => {
   };
 
   const adapter: Logger = {
-    trace: (message) => cliLog.good(message),
-    debug: (message) => cliLog.good(message),
-    info: (message) => cliLog.good(message),
-    warn: (msgOrError) => cliLog.warn(getErrorMessage(msgOrError)),
-    error: (msgOrError) => cliLog.bad(getErrorMessage(msgOrError)),
-    fatal: (msgOrError) => cliLog.bad(getErrorMessage(msgOrError)),
-    log: (record) => cliLog.good(record.message),
+    trace: (message) => cliLog.write(message),
+    debug: (message) => cliLog.write(message),
+    info: (message) => cliLog.write(message),
+    warn: (msgOrError) => cliLog.warn('warning', getErrorMessage(msgOrError)),
+    error: (msgOrError) => cliLog.bad('error', getErrorMessage(msgOrError)),
+    fatal: (msgOrError) => cliLog.bad('fatal', getErrorMessage(msgOrError)),
+    log: (record) => cliLog.write(record.message),
     get: () => adapter,
   };
   return adapter;
