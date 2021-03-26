@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 
-import type { estypes } from '@elastic/elasticsearch';
+import type { ApiResponse, estypes } from '@elastic/elasticsearch';
 import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 
 import * as st from 'supertest';
@@ -48,7 +48,7 @@ export const getSignalsWithES = async ({
   indices: string | string[];
   ids: string | string[];
 }): Promise<Map<string, Map<string, estypes.Hit<SignalHit>>>> => {
-  const signals = await es.search<SignalHit>({
+  const signals: ApiResponse<estypes.SearchResponse<SignalHit>> = await es.search({
     index: indices,
     body: {
       size: 10000,

@@ -11,7 +11,7 @@ import {
   isTooManyBucketsPreviewException,
   TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
 } from '../../../../../common/alerting/metrics';
-import { InfraSource } from '../../../../../common/http_api/source_api';
+import { InfraSource } from '../../../../../common/source_configuration/source_configuration';
 import { InfraDatabaseSearchResponse } from '../../../adapters/framework/adapter_types';
 import { createAfterKeyHandler } from '../../../../utils/create_afterkey_handler';
 import { getAllCompositeData } from '../../../../utils/get_all_composite_data';
