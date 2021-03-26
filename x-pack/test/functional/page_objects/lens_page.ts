@@ -756,7 +756,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
       await this.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-        operation: 'avg',
+        operation: 'average',
         field: 'bytes',
       });
 

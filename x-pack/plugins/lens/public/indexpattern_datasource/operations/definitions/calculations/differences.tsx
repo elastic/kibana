@@ -19,6 +19,8 @@ import { adjustTimeScaleOnOtherColumnChange } from '../../time_scale_utils';
 import { OperationDefinition } from '..';
 import { getFormatFromPreviousColumn } from '../helpers';
 
+const OPERATION_NAME = 'differences';
+
 const ofName = buildLabelFunction((name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.derivativeOf', {
     defaultMessage: 'Differences of {name}',
@@ -34,14 +36,14 @@ const ofName = buildLabelFunction((name?: string) => {
 
 export type DerivativeIndexPatternColumn = FormattedIndexPatternColumn &
   ReferenceBasedIndexPatternColumn & {
-    operationType: 'derivative';
+    operationType: typeof OPERATION_NAME;
   };
 
 export const derivativeOperation: OperationDefinition<
   DerivativeIndexPatternColumn,
   'fullReference'
 > = {
-  type: 'derivative',
+  type: OPERATION_NAME,
   priority: 1,
   displayName: i18n.translate('xpack.lens.indexPattern.derivative', {
     defaultMessage: 'Differences',
@@ -78,7 +80,7 @@ export const derivativeOperation: OperationDefinition<
         previousColumn?.timeScale
       ),
       dataType: 'number',
-      operationType: 'derivative',
+      operationType: OPERATION_NAME,
       isBucketed: false,
       scale: 'ratio',
       references: referenceIds,
