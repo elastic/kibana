@@ -7,7 +7,7 @@
 
 import { mapValues, pickBy } from 'lodash';
 import * as t from 'io-ts';
-import { RequiredKeys, OptionalKeys, PickByValueExact, OmitByValueExact } from 'utility-types';
+import { PickByValueExact } from 'utility-types';
 import { FieldMap } from '../types';
 
 const esFieldTypeMap = {
@@ -39,19 +39,12 @@ type RequiredKeysOf<T extends Record<string, { required?: boolean }>> = keyof Pi
   true
 >;
 
-type OptionalKeysOf<T extends Record<string, { required?: boolean }>> = keyof OmitByValueExact<
-  {
-    [key in keyof T]: T[key]['required'];
-  },
-  true
->;
-
 type IntersectionTypeOf<
   T extends Record<string, { required?: boolean; type: t.Any }>
 > = t.IntersectionC<
   [
     t.TypeC<Pick<{ [key in keyof T]: T[key]['type'] }, RequiredKeysOf<T>>>,
-    t.PartialC<Pick<{ [key in keyof T]: T[key]['type'] }, OptionalKeysOf<T>>>
+    t.PartialC<{ [key in keyof T]: T[key]['type'] }>
   ]
 >;
 

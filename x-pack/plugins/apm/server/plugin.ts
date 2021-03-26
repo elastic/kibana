@@ -151,22 +151,21 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
         'service.environment': {
           type: 'keyword',
         },
-        'processor.event': {
+        'transaction.type': {
           type: 'keyword',
         },
-        'transaction.type': {
+        'processor.event': {
           type: 'keyword',
         },
       },
     });
 
-    if (plugins.actions && plugins.alerting) {
-      registerApmAlerts({
-        registry: apmRuleRegistry,
-        ml: plugins.ml,
-        config$: mergedConfig$,
-      });
-    }
+    registerApmAlerts({
+      registry: apmRuleRegistry,
+      ml: plugins.ml,
+      config$: mergedConfig$,
+      logger: this.logger!.get('rule'),
+    });
 
     return {
       config$: mergedConfig$,

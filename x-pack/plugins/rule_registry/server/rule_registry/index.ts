@@ -156,7 +156,7 @@ export class RuleRegistry<TFieldMap extends FieldMap> {
       },
     });
 
-    return response.body as ESSearchResponse<unknown, TSearchRequest>;
+    return (response.body as unknown) as ESSearchResponse<unknown, TSearchRequest>;
   }
 
   registerType: RegisterRuleType<DefaultFieldMap> = (type) => {

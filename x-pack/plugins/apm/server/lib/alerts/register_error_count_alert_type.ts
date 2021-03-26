@@ -5,22 +5,11 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { isEmpty } from 'lodash';
-import { Observable } from 'rxjs';
+import { schema } from '@kbn/config-schema';
 import { take } from 'rxjs/operators';
-import { APMConfig } from '../..';
-import {
-  AlertingPlugin,
-  AlertInstanceContext,
-  AlertInstanceState,
-  AlertTypeState,
-} from '../../../../alerting/server';
-import {
-  AlertType,
-  ALERT_TYPES_CONFIG,
-  ThresholdMetActionGroupId,
-} from '../../../common/alert_types';
+import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
+import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
 import {
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
@@ -31,11 +20,7 @@ import { environmentQuery } from '../../../server/utils/queries';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
-
-interface RegisterAlertParams {
-  alerting: AlertingPlugin['setup'];
-  config$: Observable<APMConfig>;
-}
+import { RegisterRuleDependencies } from './register_apm_alerts';
 
 const paramsSchema = schema.object({
   windowSize: schema.number(),
@@ -48,16 +33,10 @@ const paramsSchema = schema.object({
 const alertTypeConfig = ALERT_TYPES_CONFIG[AlertType.ErrorCount];
 
 export function registerErrorCountAlertType({
-  alerting,
+  registry,
   config$,
-}: RegisterAlertParams) {
-  alerting.registerType<
-    TypeOf<typeof paramsSchema>,
-    AlertTypeState,
-    AlertInstanceState,
-    AlertInstanceContext,
-    ThresholdMetActionGroupId
-  >({
+}: RegisterRuleDependencies) {
+  registry.registerType({
     id: AlertType.ErrorCount,
     name: alertTypeConfig.name,
     actionGroups: alertTypeConfig.actionGroups,
@@ -83,13 +62,11 @@ export function registerErrorCountAlertType({
         config,
         savedObjectsClient: services.savedObjectsClient,
       });
-      const maxServiceEnvironments = config['xpack.apm.maxServiceEnvironments'];
 
       const searchParams = {
         index: indices['apm_oss.errorIndices'],
         size: 0,
         body: {
-          track_total_hits: true,
           query: {
             bool: {
               filter: [
@@ -109,16 +86,24 @@ export function registerErrorCountAlertType({
             },
           },
           aggs: {
-            services: {
-              terms: {
-                field: SERVICE_NAME,
-                size: 50,
+            error_counts: {
+              multi_terms: {
+                terms: [
+                  { field: SERVICE_NAME },
+                  { field: SERVICE_ENVIRONMENT, missing: '' },
+                ],
+                size: 10000,
               },
               aggs: {
-                environments: {
-                  terms: {
-                    field: SERVICE_ENVIRONMENT,
-                    size: maxServiceEnvironments,
+                latest: {
+                  top_metrics: {
+                    metrics: asMutableArray([
+                      { field: SERVICE_NAME },
+                      { field: SERVICE_ENVIRONMENT },
+                    ] as const),
+                    sort: {
+                      '@timestamp': 'desc' as const,
+                    },
                   },
                 },
               },
@@ -127,48 +112,48 @@ export function registerErrorCountAlertType({
         },
       };
 
-      const { body: response } = await alertingEsClient(services, searchParams);
-      const errorCount = response.hits.total.value;
+      const response = await alertingEsClient(
+        services.scopedClusterClient,
+        searchParams
+      );
 
-      if (errorCount > alertParams.threshold) {
-        function scheduleAction({
-          serviceName,
-          environment,
-        }: {
-          serviceName: string;
-          environment?: string;
-        }) {
-          const alertInstanceName = [
-            AlertType.ErrorCount,
-            serviceName,
-            environment,
-          ]
-            .filter((name) => name)
-            .join('_');
+      const errorCountResults =
+        response.aggregations?.error_counts.buckets.map((bucket) => {
+          const latest = bucket.latest.top[0].metrics;
 
-          const alertInstance = services.alertInstanceFactory(
-            alertInstanceName
-          );
-          alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId, {
-            serviceName,
-            environment,
+          return {
+            serviceName: latest['service.name'],
+            environment: latest['service.environment'],
+            errorCount: bucket.doc_count,
+          };
+        }) ?? [];
+
+      errorCountResults
+        .filter((result) => result.errorCount >= alertParams.threshold)
+        .forEach((result) => {
+          const { serviceName, environment, errorCount } = result;
+          services.check.warning({
+            name: [AlertType.ErrorCount, serviceName, environment]
+              .filter((name) => name)
+              .join('_'),
             threshold: alertParams.threshold,
-            triggerValue: errorCount,
-            interval: `${alertParams.windowSize}${alertParams.windowUnit}`,
+            value: errorCount,
+            context: {
+              serviceName,
+              environment: environment || ENVIRONMENT_NOT_DEFINED.text,
+              threshold: alertParams.threshold,
+              triggerValue: errorCount,
+              interval: `${alertParams.windowSize}${alertParams.windowUnit}`,
+            },
+            fields: {
+              'service.name': serviceName,
+              ...(environment ? { 'service.environment': environment } : {}),
+              'processor.event': 'error',
+            },
           });
-        }
-        response.aggregations?.services.buckets.forEach((serviceBucket) => {
-          const serviceName = serviceBucket.key as string;
-          if (isEmpty(serviceBucket.environments?.buckets)) {
-            scheduleAction({ serviceName });
-          } else {
-            serviceBucket.environments.buckets.forEach((envBucket) => {
-              const environment = envBucket.key as string;
-              scheduleAction({ serviceName, environment });
-            });
-          }
         });
-      }
+
+      return {};
     },
   });
 }

@@ -6,9 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { APMConfig } from '../..';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
 import {
   PROCESSOR_EVENT,
@@ -20,15 +18,10 @@ import {
 import { ProcessorEvent } from '../../../common/processor_event';
 import { getDurationFormatter } from '../../../common/utils/formatters';
 import { environmentQuery } from '../../../server/utils/queries';
-import { APMRuleRegistry } from '../../plugin';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
-
-interface RegisterAlertParams {
-  registry: APMRuleRegistry;
-  config$: Observable<APMConfig>;
-}
+import { RegisterRuleDependencies } from './register_apm_alerts';
 
 const paramsSchema = schema.object({
   serviceName: schema.string(),
@@ -49,7 +42,7 @@ const alertTypeConfig = ALERT_TYPES_CONFIG[AlertType.TransactionDuration];
 export function registerTransactionDurationAlertType({
   registry,
   config$,
-}: RegisterAlertParams) {
+}: RegisterRuleDependencies) {
   registry.registerType({
     id: AlertType.TransactionDuration,
     name: alertTypeConfig.name,
@@ -101,7 +94,7 @@ export function registerTransactionDurationAlertType({
             },
           },
           aggs: {
-            agg:
+            metric:
               alertParams.aggregationType === 'avg'
                 ? { avg: { field: TRANSACTION_DURATION } }
                 : {
@@ -112,12 +105,6 @@ export function registerTransactionDurationAlertType({
                       ],
                     },
                   },
-            environments: {
-              terms: {
-                field: SERVICE_ENVIRONMENT,
-                size: maxServiceEnvironments,
-              },
-            },
           },
         },
       };
@@ -131,10 +118,10 @@ export function registerTransactionDurationAlertType({
         return {};
       }
 
-      const { agg, environments } = response.aggregations;
+      const { metric } = response.aggregations;
 
       const transactionDuration =
-        'values' in agg ? Object.values(agg.values)[0] : agg?.value;
+        'values' in metric ? Object.values(metric.values)[0] : metric?.value;
 
       const threshold = alertParams.threshold * 1000;
 
@@ -144,26 +131,23 @@ export function registerTransactionDurationAlertType({
           transactionDuration
         ).formatted;
 
-        environments.buckets.map((bucket) => {
-          const environment = bucket.key;
-          services.check.warning({
-            name: `${AlertType.TransactionDuration}_${environment}`,
+        services.check.warning({
+          name: `${AlertType.TransactionDuration}_${environment}`,
+          threshold,
+          value: transactionDuration,
+          context: {
+            transactionType: alertParams.transactionType,
+            serviceName: alertParams.serviceName,
+            environment,
             threshold,
-            value: transactionDuration,
-            context: {
-              transactionType: alertParams.transactionType,
-              serviceName: alertParams.serviceName,
-              environment,
-              threshold,
-              triggerValue: transactionDurationFormatted,
-              interval: `${alertParams.windowSize}${alertParams.windowUnit}`,
-            },
-            fields: {
-              'service.name': alertParams.serviceName,
-              'service.environment': environment,
-              'transaction.type': alertParams.transactionType,
-            },
-          });
+            triggerValue: transactionDurationFormatted,
+            interval: `${alertParams.windowSize}${alertParams.windowUnit}`,
+          },
+          fields: {
+            'service.name': alertParams.serviceName,
+            'service.environment': environment,
+            'transaction.type': alertParams.transactionType,
+          },
         });
       }
 

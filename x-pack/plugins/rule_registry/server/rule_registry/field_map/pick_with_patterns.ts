@@ -6,7 +6,7 @@
  */
 
 import { ValuesType, SetIntersection, OmitByValueExact } from 'utility-types';
-import { pick, memoize } from 'lodash';
+import { pick } from 'lodash';
 import { ecsFieldMap } from '../../generated/ecs_field_map';
 
 type SplitByDot<

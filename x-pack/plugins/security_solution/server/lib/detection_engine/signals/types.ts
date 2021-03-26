@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { DslQuery, Filter } from 'src/plugins/data/common';
 import moment, { Moment } from 'moment';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
@@ -17,7 +18,7 @@ import {
   AlertExecutorOptions,
   AlertServices,
 } from '../../../../../alerting/server';
-import { BaseSearchResponse, SearchHit, SearchResponse, TermAggregationBucket } from '../../types';
+import { BaseSearchResponse, SearchHit, TermAggregationBucket } from '../../types';
 import {
   EqlSearchResponse,
   BaseHit,
@@ -150,11 +151,10 @@ export interface GetResponse {
   _source: SearchTypes;
 }
 
-export type EventSearchResponse = SearchResponse<EventSource>;
-export type SignalSearchResponse = SearchResponse<SignalSource>;
-export type SignalSourceHit = SignalSearchResponse['hits']['hits'][number];
+export type SignalSearchResponse = estypes.SearchResponse<SignalSource>;
+export type SignalSourceHit = estypes.Hit<SignalSource>;
 export type WrappedSignalHit = BaseHit<SignalHit>;
-export type BaseSignalHit = BaseHit<SignalSource>;
+export type BaseSignalHit = estypes.Hit<SignalSource>;
 
 export type EqlSignalSearchResponse = EqlSearchResponse<SignalSource>;
 

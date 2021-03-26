@@ -6,11 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { isEmpty } from 'lodash';
-import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { APMConfig } from '../..';
-import { AlertingPlugin } from '../../../../alerting/server';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
 import {
   EVENT_OUTCOME,
@@ -26,11 +22,7 @@ import { environmentQuery } from '../../../server/utils/queries';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
-
-interface RegisterAlertParams {
-  alerting: AlertingPlugin['setup'];
-  config$: Observable<APMConfig>;
-}
+import { RegisterRuleDependencies } from './register_apm_alerts';
 
 const paramsSchema = schema.object({
   windowSize: schema.number(),
@@ -44,10 +36,10 @@ const paramsSchema = schema.object({
 const alertTypeConfig = ALERT_TYPES_CONFIG[AlertType.TransactionErrorRate];
 
 export function registerTransactionErrorRateAlertType({
-  alerting,
+  registry,
   config$,
-}: RegisterAlertParams) {
-  alerting.registerType({
+}: RegisterRuleDependencies) {
+  registry.registerType({
     id: AlertType.TransactionErrorRate,
     name: alertTypeConfig.name,
     actionGroups: alertTypeConfig.actionGroups,
@@ -73,13 +65,11 @@ export function registerTransactionErrorRateAlertType({
         config,
         savedObjectsClient: services.savedObjectsClient,
       });
-      const maxServiceEnvironments = config['xpack.apm.maxServiceEnvironments'];
 
       const searchParams = {
         index: indices['apm_oss.transactionIndices'],
         size: 0,
         body: {
-          track_total_hits: true,
           query: {
             bool: {
               filter: [
@@ -91,6 +81,14 @@ export function registerTransactionErrorRateAlertType({
                   },
                 },
                 { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
+                {
+                  terms: {
+                    [EVENT_OUTCOME]: [
+                      EventOutcome.failure,
+                      EventOutcome.success,
+                    ],
+                  },
+                },
                 ...(alertParams.serviceName
                   ? [{ term: { [SERVICE_NAME]: alertParams.serviceName } }]
                   : []),
@@ -108,24 +106,19 @@ export function registerTransactionErrorRateAlertType({
             },
           },
           aggs: {
-            failed_transactions: {
-              filter: { term: { [EVENT_OUTCOME]: EventOutcome.failure } },
-            },
-            services: {
-              terms: {
-                field: SERVICE_NAME,
-                size: 50,
+            series: {
+              multi_terms: {
+                terms: [
+                  { field: SERVICE_NAME },
+                  { field: SERVICE_ENVIRONMENT },
+                  { field: TRANSACTION_TYPE },
+                ],
+                size: 10000,
               },
               aggs: {
-                transaction_types: {
-                  terms: { field: TRANSACTION_TYPE },
-                  aggs: {
-                    environments: {
-                      terms: {
-                        field: SERVICE_ENVIRONMENT,
-                        size: maxServiceEnvironments,
-                      },
-                    },
+                outcomes: {
+                  terms: {
+                    field: EVENT_OUTCOME,
                   },
                 },
               },
@@ -134,68 +127,67 @@ export function registerTransactionErrorRateAlertType({
         },
       };
 
-      const { body: response } = await alertingEsClient(services, searchParams);
+      const response = await alertingEsClient(
+        services.scopedClusterClient,
+        searchParams
+      );
+
       if (!response.aggregations) {
-        return;
+        return {};
       }
 
-      const failedTransactionCount =
-        response.aggregations.failed_transactions.doc_count;
-      const totalTransactionCount = response.hits.total.value;
-      const transactionErrorRate =
-        (failedTransactionCount / totalTransactionCount) * 100;
+      const results = response.aggregations.series.buckets
+        .map((bucket) => {
+          const [serviceName, environment, transactionType] = bucket.key;
 
-      if (transactionErrorRate > alertParams.threshold) {
-        function scheduleAction({
-          serviceName,
-          environment,
-          transactionType,
-        }: {
-          serviceName: string;
-          environment?: string;
-          transactionType?: string;
-        }) {
-          const alertInstanceName = [
+          const failed =
+            bucket.outcomes.buckets.find(
+              (outcomeBucket) => outcomeBucket.key === EventOutcome.failure
+            )?.doc_count ?? 0;
+          const succesful =
+            bucket.outcomes.buckets.find(
+              (outcomeBucket) => outcomeBucket.key === EventOutcome.success
+            )?.doc_count ?? 0;
+
+          return {
+            serviceName,
+            environment,
+            transactionType,
+            errorRate: (failed / failed + succesful) * 100,
+          };
+        })
+        .filter((result) => result.errorRate >= alertParams.threshold);
+
+      results.forEach((result) => {
+        const { serviceName, environment, transactionType, errorRate } = result;
+        services.check.warning({
+          name: [
             AlertType.TransactionErrorRate,
             serviceName,
             transactionType,
             environment,
           ]
             .filter((name) => name)
-            .join('_');
-
-          const alertInstance = services.alertInstanceFactory(
-            alertInstanceName
-          );
-          alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId, {
+            .join('_'),
+          threshold: alertParams.threshold,
+          value: errorRate,
+          context: {
             serviceName,
             transactionType,
             environment,
             threshold: alertParams.threshold,
-            triggerValue: asDecimalOrInteger(transactionErrorRate),
+            triggerValue: asDecimalOrInteger(errorRate),
             interval: `${alertParams.windowSize}${alertParams.windowUnit}`,
-          });
-        }
-
-        response.aggregations?.services.buckets.forEach((serviceBucket) => {
-          const serviceName = serviceBucket.key as string;
-          if (isEmpty(serviceBucket.transaction_types?.buckets)) {
-            scheduleAction({ serviceName });
-          } else {
-            serviceBucket.transaction_types.buckets.forEach((typeBucket) => {
-              const transactionType = typeBucket.key as string;
-              if (isEmpty(typeBucket.environments?.buckets)) {
-                scheduleAction({ serviceName, transactionType });
-              } else {
-                typeBucket.environments.buckets.forEach((envBucket) => {
-                  const environment = envBucket.key as string;
-                  scheduleAction({ serviceName, transactionType, environment });
-                });
-              }
-            });
-          }
+          },
+          fields: {
+            [SERVICE_NAME]: serviceName,
+            ...(environment ? { [SERVICE_ENVIRONMENT]: environment } : {}),
+            [TRANSACTION_TYPE]: transactionType,
+          },
         });
-      }
+      });
+
+      return {};
     },
   });
 }

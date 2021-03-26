@@ -73,8 +73,9 @@ export function modelSnapshotProvider(client: IScopedClusterClient, mlClient: Ml
     if (replay && model.snapshot_id === snapshotId && snapshot.model_snapshots.length) {
       // create calendar before starting restarting the datafeed
       if (calendarEvents !== undefined && calendarEvents.length) {
+        const calendarId = String(Date.now());
         const calendar: FormCalendar = {
-          calendarId: String(Date.now()),
+          calendarId,
           job_ids: [jobId],
           description: i18n.translate(
             'xpack.ml.models.jobService.revertModelSnapshot.autoCreatedCalendar.description',
@@ -83,16 +84,18 @@ export function modelSnapshotProvider(client: IScopedClusterClient, mlClient: Ml
             }
           ),
           events: calendarEvents.map((s) => ({
+            calendar_id: calendarId,
+            event_id: '',
             description: s.description,
-            start_time: s.start,
-            end_time: s.end,
+            start_time: `${s.start}`,
+            end_time: `${s.end}`,
           })),
         };
         const cm = new CalendarManager(mlClient);
         await cm.newCalendar(calendar);
       }
 
-      forceStartDatafeeds([datafeedId], snapshot.model_snapshots[0].latest_record_time_stamp, end);
+      forceStartDatafeeds([datafeedId], +snapshot.model_snapshots[0].latest_record_time_stamp, end);
     }
 
     return { success: true };

@@ -6,17 +6,17 @@
  */
 
 import {
-  InfraSavedSourceConfiguration,
-  SourceResponse,
-} from '../../../plugins/infra/common/http_api/source_api';
+  PartialMetricsSourceConfiguration,
+  MetricsSourceConfigurationResponse,
+} from '../../../plugins/infra/common/metrics_sources';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function InfraOpsSourceConfigurationProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const supertest = getService('supertest');
   const patchRequest = async (
-    body: InfraSavedSourceConfiguration
-  ): Promise<SourceResponse | undefined> => {
+    body: PartialMetricsSourceConfiguration
+  ): Promise<MetricsSourceConfigurationResponse | undefined> => {
     const response = await supertest
       .patch('/api/metrics/source/default')
       .set('kbn-xsrf', 'xxx')
@@ -26,7 +26,10 @@ export function InfraOpsSourceConfigurationProvider({ getService }: FtrProviderC
   };
 
   return {
-    async createConfiguration(sourceId: string, sourceProperties: InfraSavedSourceConfiguration) {
+    async createConfiguration(
+      sourceId: string,
+      sourceProperties: PartialMetricsSourceConfiguration
+    ) {
       log.debug(
         `Creating Infra UI source configuration "${sourceId}" with properties ${JSON.stringify(
           sourceProperties
