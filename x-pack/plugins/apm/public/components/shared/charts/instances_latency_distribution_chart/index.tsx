@@ -12,6 +12,8 @@ import {
   Position,
   ScaleType,
   Settings,
+  TooltipProps,
+  TooltipType,
 } from '@elastic/charts';
 import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -27,7 +29,7 @@ import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { ChartContainer } from '../chart_container';
 import { getResponseTimeTickFormatter } from '../transaction_charts/helper';
 
-interface InstancesLatencyDistributionChartProps {
+export interface InstancesLatencyDistributionChartProps {
   height: number;
   items?: APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/primary_statistics'>;
   status: FETCH_STATUS;
@@ -48,6 +50,19 @@ export function InstancesLatencyDistributionChart({
     },
   };
 
+  const tooltip: TooltipProps = {
+    type: TooltipType.Follow,
+    snap: false,
+    // TODO: Tooltips!
+    // headerFormatter: (args) => {
+    //   console.log('headerFormatter', args);
+    //   return <>hi</>;
+    // },
+    // customTooltip: (args) => {
+    //   console.log('customTooltip', args);
+    //   return <>hi</>;
+    // },
+  };
   const maxLatency = Math.max(...items.map((item) => item.latency ?? 0));
   const latencyFormatter = getDurationFormatter(maxLatency);
 
@@ -64,7 +79,7 @@ export function InstancesLatencyDistributionChart({
         <Chart id="instances-latency-distribution">
           <Settings
             legendPosition={Position.Bottom}
-            tooltip="none"
+            tooltip={tooltip}
             showLegend
             theme={chartTheme}
           />
