@@ -7550,8 +7550,6 @@
     "xpack.enterpriseSearch.appSearch.engine.analytics.totalDocuments": "合計ドキュメント数",
     "xpack.enterpriseSearch.appSearch.engine.analytics.totalQueries": "クエリ合計",
     "xpack.enterpriseSearch.appSearch.engine.analytics.totalQueriesNoResults": "結果がない上位のクエリ",
-    "xpack.enterpriseSearch.appSearch.engine.analytics.unavailable.description": "数分後に再試行してください。",
-    "xpack.enterpriseSearch.appSearch.engine.analytics.unavailable.title": "分析は現在使用できません",
     "xpack.enterpriseSearch.appSearch.engine.apiLogs.recent": "最近の API イベント",
     "xpack.enterpriseSearch.appSearch.engine.apiLogs.title": "API ログ",
     "xpack.enterpriseSearch.appSearch.engine.crawler.title": "Crawler",
