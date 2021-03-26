@@ -2515,7 +2515,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/server/plugin.ts",
-              "lineNumber": 94
+              "lineNumber": 95
             },
             "signature": [
               {
@@ -2535,7 +2535,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/server/plugin.ts",
-              "lineNumber": 95
+              "lineNumber": 96
             },
             "signature": [
               {
@@ -2556,7 +2556,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/server/plugin.ts",
-              "lineNumber": 96
+              "lineNumber": 97
             },
             "signature": [
               {
@@ -2577,7 +2577,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/server/plugin.ts",
-              "lineNumber": 97
+              "lineNumber": 98
             },
             "signature": [
               {
@@ -2597,7 +2597,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/server/plugin.ts",
-              "lineNumber": 98
+              "lineNumber": 99
             },
             "signature": [
               {
@@ -2618,7 +2618,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/server/plugin.ts",
-              "lineNumber": 99
+              "lineNumber": 100
             },
             "signature": [
               "Pick<",
@@ -2635,7 +2635,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/fleet/server/plugin.ts",
-          "lineNumber": 93
+          "lineNumber": 94
         },
         "initialIsOpen": false
       },
@@ -2735,7 +2735,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/fleet/server/plugin.ts",
-          "lineNumber": 137
+          "lineNumber": 140
         },
         "signature": [
           "[\"packagePolicyCreate\", (newPackagePolicy: ",
@@ -2837,7 +2837,7 @@
       "description": [],
       "source": {
         "path": "x-pack/plugins/fleet/server/plugin.ts",
-        "lineNumber": 122
+        "lineNumber": 125
       },
       "signature": [
         "void"
@@ -2862,7 +2862,7 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/fleet/server/plugin.ts",
-            "lineNumber": 161
+            "lineNumber": 164
           },
           "signature": [
             {
@@ -2882,7 +2882,7 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/fleet/server/plugin.ts",
-            "lineNumber": 162
+            "lineNumber": 165
           },
           "signature": [
             {
@@ -2902,7 +2902,7 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/fleet/server/plugin.ts",
-            "lineNumber": 163
+            "lineNumber": 166
           },
           "signature": [
             {
@@ -2924,7 +2924,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/fleet/server/plugin.ts",
-            "lineNumber": 167
+            "lineNumber": 170
           },
           "signature": [
             {
@@ -2944,7 +2944,7 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/fleet/server/plugin.ts",
-            "lineNumber": 168
+            "lineNumber": 171
           },
           "signature": [
             {
@@ -2966,7 +2966,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/fleet/server/plugin.ts",
-            "lineNumber": 173
+            "lineNumber": 176
           },
           "signature": [
             "(...args: ",
@@ -2990,7 +2990,7 @@
           ],
           "source": {
             "path": "x-pack/plugins/fleet/server/plugin.ts",
-            "lineNumber": 179
+            "lineNumber": 182
           },
           "signature": [
             "(packageName: string) => ",
@@ -3006,7 +3006,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/fleet/server/plugin.ts",
-        "lineNumber": 160
+        "lineNumber": 163
       },
       "lifecycle": "start",
       "initialIsOpen": true
@@ -3274,7 +3274,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/index.ts",
-          "lineNumber": 38
+          "lineNumber": 39
         },
         "signature": [
           "<T>(o: T) => [keyof T, T[keyof T]][]"
@@ -4486,59 +4486,44 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/rest_spec/epm.ts",
-              "lineNumber": 86
+              "lineNumber": 91
             }
           },
           {
             "tags": [],
-            "id": "def-common.BulkInstallPackageInfo.newVersion",
+            "id": "def-common.BulkInstallPackageInfo.version",
             "type": "string",
-            "label": "newVersion",
+            "label": "version",
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/rest_spec/epm.ts",
-              "lineNumber": 87
+              "lineNumber": 92
             }
           },
           {
             "tags": [],
-            "id": "def-common.BulkInstallPackageInfo.oldVersion",
-            "type": "CompoundType",
-            "label": "oldVersion",
+            "id": "def-common.BulkInstallPackageInfo.result",
+            "type": "Object",
+            "label": "result",
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/rest_spec/epm.ts",
-              "lineNumber": 89
-            },
-            "signature": [
-              "string | null"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.BulkInstallPackageInfo.assets",
-            "type": "Array",
-            "label": "assets",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/fleet/common/types/rest_spec/epm.ts",
-              "lineNumber": 90
+              "lineNumber": 93
             },
             "signature": [
               {
                 "pluginId": "fleet",
                 "scope": "common",
                 "docId": "kibFleetPluginApi",
-                "section": "def-common.AssetReference",
-                "text": "AssetReference"
-              },
-              "[]"
+                "section": "def-common.InstallResult",
+                "text": "InstallResult"
+              }
             ]
           }
         ],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/rest_spec/epm.ts",
-          "lineNumber": 85
+          "lineNumber": 90
         },
         "initialIsOpen": false
       },
@@ -4557,7 +4542,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/rest_spec/epm.ts",
-              "lineNumber": 98
+              "lineNumber": 101
             },
             "signature": [
               "{ packages: string[]; }"
@@ -4566,7 +4551,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/rest_spec/epm.ts",
-          "lineNumber": 97
+          "lineNumber": 100
         },
         "initialIsOpen": false
       },
@@ -4585,7 +4570,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/rest_spec/epm.ts",
-              "lineNumber": 94
+              "lineNumber": 97
             },
             "signature": [
               "(",
@@ -4610,7 +4595,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/rest_spec/epm.ts",
-          "lineNumber": 93
+          "lineNumber": 96
         },
         "initialIsOpen": false
       },
@@ -5235,7 +5220,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/rest_spec/epm.ts",
-              "lineNumber": 108
+              "lineNumber": 111
             },
             "signature": [
               "{ pkgkey: string; }"
@@ -5244,7 +5229,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/rest_spec/epm.ts",
-          "lineNumber": 107
+          "lineNumber": 110
         },
         "initialIsOpen": false
       },
@@ -5263,7 +5248,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/rest_spec/epm.ts",
-              "lineNumber": 114
+              "lineNumber": 117
             },
             "signature": [
               {
@@ -5279,7 +5264,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/rest_spec/epm.ts",
-          "lineNumber": 113
+          "lineNumber": 116
         },
         "initialIsOpen": false
       },
@@ -5507,7 +5492,7 @@
               "lineNumber": 15
             },
             "signature": [
-              "{ enabled: boolean; tlsCheckDisabled: boolean; pollingRequestTimeout: number; maxConcurrentConnections: number; kibana: { host?: string | string[] | undefined; ca_sha256?: string | undefined; }; elasticsearch: { host?: string | undefined; ca_sha256?: string | undefined; }; agentPolicyRolloutRateLimitIntervalMs: number; agentPolicyRolloutRateLimitRequestPerInterval: number; }"
+              "{ enabled: boolean; fleetServerEnabled: boolean; tlsCheckDisabled: boolean; pollingRequestTimeout: number; maxConcurrentConnections: number; kibana: { host?: string | string[] | undefined; ca_sha256?: string | undefined; }; elasticsearch: { host?: string | undefined; ca_sha256?: string | undefined; }; agentPolicyRolloutRateLimitIntervalMs: number; agentPolicyRolloutRateLimitRequestPerInterval: number; }"
             ]
           }
         ],
@@ -8610,6 +8595,55 @@
         "initialIsOpen": false
       },
       {
+        "id": "def-common.InstallResult",
+        "type": "Interface",
+        "label": "InstallResult",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-common.InstallResult.assets",
+            "type": "Array",
+            "label": "assets",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/fleet/common/types/rest_spec/epm.ts",
+              "lineNumber": 86
+            },
+            "signature": [
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.AssetReference",
+                "text": "AssetReference"
+              },
+              "[]"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-common.InstallResult.status",
+            "type": "CompoundType",
+            "label": "status",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/fleet/common/types/rest_spec/epm.ts",
+              "lineNumber": 87
+            },
+            "signature": [
+              "\"installed\" | \"already_installed\""
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/fleet/common/types/rest_spec/epm.ts",
+          "lineNumber": 85
+        },
+        "initialIsOpen": false
+      },
+      {
         "id": "def-common.InstallScriptRequest",
         "type": "Interface",
         "label": "InstallScriptRequest",
@@ -8824,13 +8858,13 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/fleet/common/types/rest_spec/epm.ts",
-              "lineNumber": 104
+              "lineNumber": 107
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/rest_spec/epm.ts",
-          "lineNumber": 103
+          "lineNumber": 106
         },
         "initialIsOpen": false
       },
@@ -13209,7 +13243,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/constants/epm.ts",
-          "lineNumber": 13
+          "lineNumber": 12
         },
         "signature": [
           "\"fleet_server\""
@@ -13243,21 +13277,6 @@
         },
         "signature": [
           "\"ingest_manager_settings\""
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-common.INDEX_PATTERN_SAVED_OBJECT_TYPE",
-        "type": "string",
-        "label": "INDEX_PATTERN_SAVED_OBJECT_TYPE",
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/fleet/common/constants/epm.ts",
-          "lineNumber": 10
-        },
-        "signature": [
-          "\"index-pattern\""
         ],
         "initialIsOpen": false
       },
@@ -13460,7 +13479,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/constants/epm.ts",
-          "lineNumber": 11
+          "lineNumber": 10
         },
         "signature": [
           "60000"
@@ -14087,7 +14106,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/fleet/common/types/index.ts",
-          "lineNumber": 43
+          "lineNumber": 44
         },
         "signature": [
           "T[keyof T]"
@@ -14443,7 +14462,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/constants/epm.ts",
-          "lineNumber": 24
+          "lineNumber": 23
         },
         "signature": [
           "{ readonly Input: \"input\"; }"
@@ -15151,7 +15170,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/constants/epm.ts",
-          "lineNumber": 28
+          "lineNumber": 27
         },
         "signature": [
           "{ readonly Logs: \"logs\"; readonly Metrics: \"metrics\"; }"
@@ -15481,7 +15500,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/constants/epm.ts",
-          "lineNumber": 22
+          "lineNumber": 21
         },
         "signature": [
           "{ readonly System: \"system\"; readonly Endpoint: \"endpoint\"; readonly ElasticAgent: \"elastic_agent\"; }"
@@ -16058,7 +16077,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/constants/epm.ts",
-          "lineNumber": 33
+          "lineNumber": 32
         },
         "signature": [
           "{ readonly Installed: \"installed\"; readonly NotInstalled: \"not_installed\"; }"
@@ -16416,7 +16435,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/fleet/common/constants/epm.ts",
-          "lineNumber": 15
+          "lineNumber": 14
         },
         "signature": [
           "{ readonly System: \"system\"; readonly Endpoint: \"endpoint\"; readonly ElasticAgent: \"elastic_agent\"; }"

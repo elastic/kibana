@@ -22,7 +22,7 @@ export const findPotentialMatches = async (
   const { body: queryResult } = await query(queryContext, searchAfter, size);
   const monitorIds: string[] = [];
 
-  (queryResult.aggregations?.monitors.buckets ?? []).forEach((b) => {
+  (queryResult.aggregations?.monitors.buckets ?? []).forEach((b: any) => {
     const monitorId = b.key.monitor_id;
     monitorIds.push(monitorId as string);
   });
@@ -40,7 +40,8 @@ const query = async (queryContext: QueryContext, searchAfter: any, size: number)
     body,
   };
 
-  return await queryContext.search(params);
+  const response = await queryContext.search(params);
+  return response;
 };
 
 const queryBody = async (queryContext: QueryContext, searchAfter: any, size: number) => {
@@ -77,7 +78,9 @@ const queryBody = async (queryContext: QueryContext, searchAfter: any, size: num
           size,
           sources: [
             {
-              monitor_id: { terms: { field: 'monitor.id', order: queryContext.cursorOrder() } },
+              monitor_id: {
+                terms: { field: 'monitor.id' as const, order: queryContext.cursorOrder() },
+              },
             },
           ],
         },
