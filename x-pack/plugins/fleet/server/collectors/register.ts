@@ -50,8 +50,8 @@ export function registerFleetUsageCollector(
       agents_enabled: { type: 'boolean' },
       agents: {
         total: { type: 'long' },
-        online: { type: 'long' },
-        error: { type: 'long' },
+        healthy: { type: 'long' },
+        unhealthy: { type: 'long' },
         offline: { type: 'long' },
         updating: { type: 'long' },
       },
