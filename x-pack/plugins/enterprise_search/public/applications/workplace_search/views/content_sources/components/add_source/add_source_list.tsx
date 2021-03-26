@@ -93,7 +93,20 @@ export const AddSourceList: React.FC = () => {
 
   return (
     <>
-      <ViewContentHeader title={PAGE_TITLE} />
+      <ViewContentHeader
+        title={PAGE_TITLE}
+        action={
+          <EuiFormRow>
+            <EuiFieldSearch
+              data-test-subj="FilterSourcesInput"
+              value={filterValue}
+              onChange={handleFilterChange}
+              fullWidth
+              placeholder={ADD_SOURCE_PLACEHOLDER}
+            />
+          </EuiFormRow>
+        }
+      />
       {showConfiguredSourcesList || isOrganization ? (
         <ContentSection>
           {showConfiguredSourcesList && (
@@ -103,18 +116,7 @@ export const AddSourceList: React.FC = () => {
             />
           )}
           {isOrganization && (
-            <>
-              <EuiFormRow>
-                <EuiFieldSearch
-                  data-test-subj="FilterSourcesInput"
-                  value={filterValue}
-                  onChange={handleFilterChange}
-                  fullWidth
-                  placeholder={ADD_SOURCE_PLACEHOLDER}
-                />
-              </EuiFormRow>
-              <AvailableSourcesList sources={visibleAvailableSources} />
-            </>
+            <AvailableSourcesList sources={visibleAvailableSources} />
           )}
         </ContentSection>
       ) : (
