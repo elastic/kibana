@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
@@ -22,7 +23,7 @@ const getDescription = (field: IFieldType) => {
   return (
     <p>
       <FormattedMessage
-        id="xpack.data.kueryAutocomplete.filterResultsDescription"
+        id="data.kueryAutocomplete.filterResultsDescription"
         defaultMessage="Filter results that contain {fieldName}"
         values={{ fieldName: <span className="kbnSuggestionItem__callout">{field.name}</span> }}
       />
