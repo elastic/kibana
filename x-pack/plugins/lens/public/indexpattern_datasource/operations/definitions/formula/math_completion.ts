@@ -162,12 +162,12 @@ function getArgumentSuggestions(
     return { list: [], type: SUGGESTION_TYPE.FIELD };
   }
 
-  // TODO: Expand to all valid fields for the function
   if (operation.input === 'field' && position === 0) {
     const available = memoizedGetAvailableOperationsByMetadata(
       indexPattern,
       operationDefinitionMap
     );
+    // TODO: This only allow numeric functions, will reject last_value(string) for example.
     const validOperation = available.find(
       ({ operationMetaData }) =>
         operationMetaData.dataType === 'number' && !operationMetaData.isBucketed

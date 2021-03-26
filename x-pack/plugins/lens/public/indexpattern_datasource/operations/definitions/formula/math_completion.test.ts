@@ -46,6 +46,15 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
     getPossibleOperationForField: (field: IndexPatternField) =>
       field.name === 'Records' ? numericOperation() : null,
   } as unknown) as GenericOperationDefinition,
+  last_value: ({
+    type: 'last_value',
+    input: 'field',
+    buildColumn: buildGenericColumn('last_value'),
+    getPossibleOperationForField: (field: IndexPatternField) => ({
+      dataType: field.type,
+      isBucketed: false,
+    }),
+  } as unknown) as GenericOperationDefinition,
   moving_average: ({
     type: 'moving_average',
     input: 'fullReference',
@@ -187,8 +196,8 @@ describe('math completion', () => {
         operationDefinitionMap,
         { word: '', startColumn: 1, endColumn: 1 }
       );
-      expect(results.list).toHaveLength(3 + Object.keys(tinymathFunctions).length);
-      ['sum', 'moving_average', 'cumulative_sum'].forEach((key) => {
+      expect(results.list).toHaveLength(4 + Object.keys(tinymathFunctions).length);
+      ['sum', 'moving_average', 'cumulative_sum', 'last_value'].forEach((key) => {
         expect(results.list).toEqual(expect.arrayContaining([{ label: key, type: 'operation' }]));
       });
       Object.keys(tinymathFunctions).forEach((key) => {
@@ -208,8 +217,8 @@ describe('math completion', () => {
         operationDefinitionMap,
         { word: '', startColumn: 15, endColumn: 15 }
       );
-      expect(results.list).toHaveLength(1);
-      ['sum'].forEach((key) => {
+      expect(results.list).toHaveLength(2);
+      ['sum', 'last_value'].forEach((key) => {
         expect(results.list).toEqual(expect.arrayContaining([{ label: key, type: 'operation' }]));
       });
     });
@@ -241,8 +250,8 @@ describe('math completion', () => {
         operationDefinitionMap,
         { word: '', startColumn: 16, endColumn: 16 }
       );
-      expect(results.list).toHaveLength(3 + Object.keys(tinymathFunctions).length);
-      ['sum', 'moving_average', 'cumulative_sum'].forEach((key) => {
+      expect(results.list).toHaveLength(4 + Object.keys(tinymathFunctions).length);
+      ['sum', 'moving_average', 'cumulative_sum', 'last_value'].forEach((key) => {
         expect(results.list).toEqual(expect.arrayContaining([{ label: key, type: 'math' }]));
       });
       Object.keys(tinymathFunctions).forEach((key) => {
@@ -262,8 +271,8 @@ describe('math completion', () => {
         operationDefinitionMap,
         { word: '', startColumn: 10, endColumn: 10 }
       );
-      expect(results.list).toHaveLength(3 + Object.keys(tinymathFunctions).length);
-      ['sum', 'moving_average', 'cumulative_sum'].forEach((key) => {
+      expect(results.list).toHaveLength(4 + Object.keys(tinymathFunctions).length);
+      ['sum', 'moving_average', 'cumulative_sum', 'last_value'].forEach((key) => {
         expect(results.list).toEqual(expect.arrayContaining([{ label: key, type: 'math' }]));
       });
       Object.keys(tinymathFunctions).forEach((key) => {
@@ -297,6 +306,21 @@ describe('math completion', () => {
         createMockedIndexPattern(),
         operationDefinitionMap,
         { word: '', startColumn: 4, endColumn: 4 }
+      );
+      expect(results.list).toEqual(['bytes', 'memory']);
+    });
+
+    it('should autocomplete only operations that provide numeric output', async () => {
+      const results = await suggest(
+        'last_value()',
+        11,
+        {
+          triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
+          triggerCharacter: '(',
+        },
+        createMockedIndexPattern(),
+        operationDefinitionMap,
+        { word: '', startColumn: 11, endColumn: 11 }
       );
       expect(results.list).toEqual(['bytes', 'memory']);
     });
