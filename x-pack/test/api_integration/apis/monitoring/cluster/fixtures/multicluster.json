@@ -105,11 +105,7 @@
   },
   "alerts": {
     "alertsMeta": {
-      "enabled": false
-    },
-    "clusterMeta": {
-      "enabled": false,
-      "message": "Cluster [clustertwo] license type [basic] does not support Cluster Alerts"
+      "enabled": true
     },
     "list": {}
   },

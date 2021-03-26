@@ -21,6 +21,7 @@ import { ManagementPluginReducer } from '../../management';
 import { State } from './types';
 import { AppAction } from './actions';
 import { KibanaIndexPatterns } from './sourcerer/model';
+import { ExperimentalFeatures } from '../../../common/experimental_features';
 
 export type SubPluginsInitReducer = HostsPluginReducer &
   NetworkPluginReducer &
@@ -36,14 +37,16 @@ export const createInitialState = (
     kibanaIndexPatterns,
     configIndexPatterns,
     signalIndexName,
+    enableExperimental,
   }: {
     kibanaIndexPatterns: KibanaIndexPatterns;
     configIndexPatterns: string[];
     signalIndexName: string | null;
+    enableExperimental: ExperimentalFeatures;
   }
 ): PreloadedState<State> => {
   const preloadedState: PreloadedState<State> = {
-    app: initialAppState,
+    app: { ...initialAppState, enableExperimental },
     dragAndDrop: initialDragAndDropState,
     ...pluginsInitState,
     inputs: createInitialInputsState(),
