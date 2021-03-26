@@ -85,6 +85,7 @@ export interface SourceDataItem {
   addPath: string;
   editPath: string;
   accountContextOnly: boolean;
+  privateSourcesEnabled: boolean;
 }
 
 export interface ContentSource {
