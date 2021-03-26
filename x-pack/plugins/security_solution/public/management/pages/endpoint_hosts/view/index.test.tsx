@@ -232,6 +232,7 @@ describe('when on the list page', () => {
       > = [];
       let firstPolicyID: string;
       let firstPolicyRev: number;
+
       beforeEach(() => {
         reactTestingLibrary.act(() => {
           const mockedEndpointData = mockEndpointResultList({ total: 5 });
@@ -368,13 +369,6 @@ describe('when on the list page', () => {
       });
 
       it('should display correct policy status', async () => {
-        const policyStatusToRGBColor: Array<[string, string]> = [
-          ['Success', 'background-color: rgb(109, 204, 177);'],
-          ['Warning', 'background-color: rgb(241, 216, 111);'],
-          ['Failure', 'background-color: rgb(255, 126, 98);'],
-          ['Unsupported', 'background-color: rgb(211, 218, 230);'],
-        ];
-        const policyStatusStyleMap = new Map<string, string>(policyStatusToRGBColor);
         const renderResult = render();
         await reactTestingLibrary.act(async () => {
           await middlewareSpy.waitForAction('serverReturnedEndpointList');
@@ -382,10 +376,21 @@ describe('when on the list page', () => {
         const policyStatuses = await renderResult.findAllByTestId('rowPolicyStatus');
 
         policyStatuses.forEach((status, index) => {
-          expect(status.textContent).toEqual(POLICY_STATUS_TO_TEXT[generatedPolicyStatuses[index]]);
-          expect(status.getAttribute('style')).toMatch(
-            policyStatusStyleMap.get(status.textContent)
+          const policyStatusToRGBColor: Array<[string, string]> = [
+            ['Success', 'background-color: rgb(109, 204, 177);'],
+            ['Warning', 'background-color: rgb(241, 216, 111);'],
+            ['Failure', 'background-color: rgb(255, 126, 98);'],
+            ['Unsupported', 'background-color: rgb(211, 218, 230);'],
+          ];
+          const policyStatusStyleMap: ReadonlyMap<string, string> = new Map<string, string>(
+            policyStatusToRGBColor
           );
+          const expectedStatusColor: string = policyStatusStyleMap.get(status.textContent!) ?? '';
+          expect(status.textContent).toEqual(POLICY_STATUS_TO_TEXT[generatedPolicyStatuses[index]]);
+          /* expect(status.getAttribute('style')).toMatch(
+            /background-color\: rgb\(109\, 204\, 177\)\;/
+            );*/
+          expect(status.getAttribute('style')).toMatch(expectedStatusColor);
         });
       });
 
