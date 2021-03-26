@@ -33,6 +33,7 @@ describe('buildBulkBody', () => {
   test('bulk body builds well-defined body', () => {
     const sampleParams = sampleRuleAlertParams();
     const doc = sampleDocNoSortId();
+    // @ts-expect-error @elastic/elasticsearch _source is optional
     delete doc._source.source;
     const fakeSignalSourceHit = buildBulkBody({
       doc,
@@ -143,6 +144,7 @@ describe('buildBulkBody', () => {
     const baseDoc = sampleDocNoSortId();
     const doc: SignalSourceHit = {
       ...baseDoc,
+      // @ts-expect-error @elastic/elasticsearch _source is optional
       _source: {
         ...baseDoc._source,
         threshold_result: {
@@ -155,6 +157,7 @@ describe('buildBulkBody', () => {
         },
       },
     };
+    // @ts-expect-error @elastic/elasticsearch _source is optional
     delete doc._source.source;
     const fakeSignalSourceHit = buildBulkBody({
       doc,
@@ -271,7 +274,9 @@ describe('buildBulkBody', () => {
   test('bulk body builds original_event if it exists on the event to begin with', () => {
     const sampleParams = sampleRuleAlertParams();
     const doc = sampleDocNoSortId();
+    // @ts-expect-error @elastic/elasticsearch _source is optional
     delete doc._source.source;
+    // @ts-expect-error @elastic/elasticsearch _source is optional
     doc._source.event = {
       action: 'socket_opened',
       module: 'system',
@@ -384,7 +389,9 @@ describe('buildBulkBody', () => {
   test('bulk body builds original_event if it exists on the event to begin with but no kind information', () => {
     const sampleParams = sampleRuleAlertParams();
     const doc = sampleDocNoSortId();
+    // @ts-expect-error @elastic/elasticsearch _source is optional
     delete doc._source.source;
+    // @ts-expect-error @elastic/elasticsearch _source is optional
     doc._source.event = {
       action: 'socket_opened',
       module: 'system',
@@ -495,7 +502,9 @@ describe('buildBulkBody', () => {
   test('bulk body builds original_event if it exists on the event to begin with with only kind information', () => {
     const sampleParams = sampleRuleAlertParams();
     const doc = sampleDocNoSortId();
+    // @ts-expect-error @elastic/elasticsearch _source is optional
     delete doc._source.source;
+    // @ts-expect-error @elastic/elasticsearch _source is optional
     doc._source.event = {
       kind: 'event',
     };
@@ -599,6 +608,7 @@ describe('buildBulkBody', () => {
   test('bulk body builds "original_signal" if it exists already as a numeric', () => {
     const sampleParams = sampleRuleAlertParams();
     const sampleDoc = sampleDocNoSortId();
+    // @ts-expect-error @elastic/elasticsearch _source is optional
     delete sampleDoc._source.source;
     const doc = ({
       ...sampleDoc,
@@ -702,6 +712,7 @@ describe('buildBulkBody', () => {
   test('bulk body builds "original_signal" if it exists already as an object', () => {
     const sampleParams = sampleRuleAlertParams();
     const sampleDoc = sampleDocNoSortId();
+    // @ts-expect-error @elastic/elasticsearch _source is optional
     delete sampleDoc._source.source;
     const doc = ({
       ...sampleDoc,
@@ -1053,6 +1064,7 @@ describe('buildSignalFromSequence', () => {
 describe('buildSignalFromEvent', () => {
   test('builds a basic signal from a single event', () => {
     const ancestor = sampleDocWithAncestors().hits.hits[0];
+    // @ts-expect-error @elastic/elasticsearch _source is optional
     delete ancestor._source.source;
     const ruleSO = sampleRuleSO();
     const signal = buildSignalFromEvent(ancestor, ruleSO, true);

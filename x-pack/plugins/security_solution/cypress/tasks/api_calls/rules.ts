@@ -45,9 +45,9 @@ export const createCustomIndicatorRule = (rule: ThreatIndicatorRule, ruleId = 'r
         {
           entries: [
             {
-              field: rule.indicatorMapping,
+              field: rule.indicatorMappingField,
               type: 'mapping',
-              value: rule.indicatorMapping,
+              value: rule.indicatorIndexField,
             },
           ],
         },
@@ -55,13 +55,13 @@ export const createCustomIndicatorRule = (rule: ThreatIndicatorRule, ruleId = 'r
       threat_query: '*:*',
       threat_language: 'kuery',
       threat_filters: [],
-      threat_index: ['mock*'],
+      threat_index: rule.indicatorIndexPattern,
       threat_indicator_path: '',
       from: 'now-17520h',
-      index: ['exceptions-*'],
+      index: rule.index,
       query: rule.customQuery || '*:*',
       language: 'kuery',
-      enabled: false,
+      enabled: true,
     },
     headers: { 'kbn-xsrf': 'cypress-creds' },
     failOnStatusCode: false,

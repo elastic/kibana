@@ -122,6 +122,7 @@ export class DocLinksService {
         },
         indexPatterns: {
           introduction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/index-patterns.html`,
+          fieldFormattersNumber: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/numeral.html`,
           fieldFormattersString: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/field-formatters-string.html`,
         },
         addData: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/connect-to-elasticsearch.html`,
@@ -186,10 +187,11 @@ export class DocLinksService {
         },
         visualize: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/dashboard.html`,
-          timelionDeprecation: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/create-panels-with-timelion.html`,
+          timelionDeprecation: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/timelion.html`,
           lens: `${ELASTIC_WEBSITE_URL}what-is/kibana-lens`,
-          lensPanels: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/dashboard.html#create-panels-with-lens`,
+          lensPanels: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/lens.html`,
           maps: `${ELASTIC_WEBSITE_URL}maps`,
+          vega: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/vega.html`,
         },
         observability: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/index.html`,
@@ -283,6 +285,7 @@ export class DocLinksService {
           registerSourceOnly: `${ELASTICSEARCH_DOCS}snapshots-register-repository.html#snapshots-source-only-repository`,
           registerUrl: `${ELASTICSEARCH_DOCS}snapshots-register-repository.html#snapshots-read-only-repository`,
           restoreSnapshot: `${ELASTICSEARCH_DOCS}snapshots-restore-snapshot.html`,
+          restoreSnapshotApi: `${ELASTICSEARCH_DOCS}restore-snapshot-api.html#restore-snapshot-api-request-body`,
         },
         ingest: {
           pipelines: `${ELASTICSEARCH_DOCS}ingest.html`,
@@ -391,6 +394,8 @@ export interface DocLinksStart {
     };
     readonly indexPatterns: {
       readonly introduction: string;
+      readonly fieldFormattersNumber: string;
+      readonly fieldFormattersString: string;
     };
     readonly addData: string;
     readonly kibana: string;

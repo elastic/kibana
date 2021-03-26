@@ -6,11 +6,17 @@
  */
 
 import { EuiFlexItem, EuiPanel } from '@elastic/eui';
-import React from 'react';
+import { orderBy } from 'lodash';
+import React, { useState } from 'react';
+import uuid from 'uuid';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
-import { useFetcher } from '../../../hooks/use_fetcher';
-import { ServiceOverviewInstancesTable } from './service_overview_instances_table';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { getTimeRangeComparison } from '../../shared/time_comparison/get_time_range_comparison';
+import {
+  ServiceOverviewInstancesTable,
+  TableOptions,
+} from './service_overview_instances_table';
 
 // We're hiding this chart until these issues are resolved in the 7.13 timeframe:
 //
@@ -24,17 +30,70 @@ interface ServiceOverviewInstancesChartAndTableProps {
   serviceName: string;
 }
 
+const INITIAL_STATE = {
+  items: [] as Array<{
+    serviceNodeName: string;
+    errorRate: number;
+    throughput: number;
+    latency: number;
+    cpuUsage: number;
+    memoryUsage: number;
+  }>,
+  requestId: undefined,
+  totalItems: 0,
+};
+
+const INITIAL_STATE_COMPARISON_STATISTICS = {
+  currentPeriod: {},
+  previousPeriod: {},
+};
+
+export type SortField =
+  | 'serviceNodeName'
+  | 'latency'
+  | 'throughput'
+  | 'errorRate'
+  | 'cpuUsage'
+  | 'memoryUsage';
+
+export type SortDirection = 'asc' | 'desc';
+export const PAGE_SIZE = 5;
+const DEFAULT_SORT = {
+  direction: 'desc' as const,
+  field: 'throughput' as const,
+};
+
 export function ServiceOverviewInstancesChartAndTable({
   chartHeight,
   serviceName,
 }: ServiceOverviewInstancesChartAndTableProps) {
   const { transactionType } = useApmServiceContext();
+  const [tableOptions, setTableOptions] = useState<TableOptions>({
+    pageIndex: 0,
+    sort: DEFAULT_SORT,
+  });
+
+  const { pageIndex, sort } = tableOptions;
+  const { direction, field } = sort;
 
   const {
-    urlParams: { environment, kuery, latencyAggregationType, start, end },
+    urlParams: {
+      environment,
+      kuery,
+      latencyAggregationType,
+      start,
+      end,
+      comparisonType,
+    },
   } = useUrlParams();
 
-  const { data = [], status } = useFetcher(
+  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
+    start,
+    end,
+    comparisonType,
+  });
+
+  const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
       if (!start || !end || !transactionType || !latencyAggregationType) {
         return;
@@ -42,7 +101,7 @@ export function ServiceOverviewInstancesChartAndTable({
 
       return callApmApi({
         endpoint:
-          'GET /api/apm/services/{serviceName}/service_overview_instances',
+          'GET /api/apm/services/{serviceName}/service_overview_instances/primary_statistics',
         params: {
           path: {
             serviceName,
@@ -54,11 +113,32 @@ export function ServiceOverviewInstancesChartAndTable({
             start,
             end,
             transactionType,
-            numBuckets: 20,
           },
         },
+      }).then((response) => {
+        const tableItems = orderBy(
+          // need top-level sortable fields for the managed table
+          response.map((item) => ({
+            ...item,
+            latency: item.latency ?? 0,
+            throughput: item.throughput ?? 0,
+            errorRate: item.errorRate ?? 0,
+            cpuUsage: item.cpuUsage ?? 0,
+            memoryUsage: item.memoryUsage ?? 0,
+          })),
+          field,
+          direction
+        ).slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE);
+
+        return {
+          requestId: uuid(),
+          items: tableItems,
+          totalItems: response.length,
+        };
       });
     },
+    // comparisonType is listed as dependency even thought it is not used. This is needed to trigger the comparison api when it is changed.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       environment,
       kuery,
@@ -67,7 +147,58 @@ export function ServiceOverviewInstancesChartAndTable({
       end,
       serviceName,
       transactionType,
+      pageIndex,
+      field,
+      direction,
+      comparisonType,
     ]
+  );
+
+  const { items, requestId, totalItems } = data;
+
+  const {
+    data: comparisonStatistics = INITIAL_STATE_COMPARISON_STATISTICS,
+    status: comparisonStatisticsStatus,
+  } = useFetcher(
+    (callApmApi) => {
+      if (
+        !start ||
+        !end ||
+        !transactionType ||
+        !latencyAggregationType ||
+        !totalItems
+      ) {
+        return;
+      }
+
+      return callApmApi({
+        endpoint:
+          'GET /api/apm/services/{serviceName}/service_overview_instances/comparison_statistics',
+        params: {
+          path: {
+            serviceName,
+          },
+          query: {
+            environment,
+            kuery,
+            latencyAggregationType,
+            start,
+            end,
+            numBuckets: 20,
+            transactionType,
+            serviceNodeIds: JSON.stringify(
+              items.map((item) => item.serviceNodeName)
+            ),
+            comparisonStart,
+            comparisonEnd,
+          },
+        },
+      });
+    },
+    // only fetches comparison statistics when requestId is invalidated by primary statistics api call
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [requestId],
+    { preservePreviousData: false }
   );
 
   return (
@@ -75,16 +206,34 @@ export function ServiceOverviewInstancesChartAndTable({
       {/* <EuiFlexItem grow={3}>
         <InstancesLatencyDistributionChart
           height={chartHeight}
-          items={data}
+          items={data.items}
           status={status}
         />
       </EuiFlexItem> */}
       <EuiFlexItem grow={7}>
         <EuiPanel>
           <ServiceOverviewInstancesTable
-            items={data}
+            items={items}
             serviceName={serviceName}
             status={status}
+            tableOptions={tableOptions}
+            totalItems={totalItems}
+            serviceInstanceComparisonStatistics={comparisonStatistics}
+            isLoading={
+              status === FETCH_STATUS.LOADING ||
+              comparisonStatisticsStatus === FETCH_STATUS.LOADING
+            }
+            onChangeTableOptions={(newTableOptions) => {
+              setTableOptions({
+                pageIndex: newTableOptions.page?.index ?? 0,
+                sort: newTableOptions.sort
+                  ? {
+                      field: newTableOptions.sort.field as SortField,
+                      direction: newTableOptions.sort.direction,
+                    }
+                  : DEFAULT_SORT,
+              });
+            }}
           />
         </EuiPanel>
       </EuiFlexItem>
