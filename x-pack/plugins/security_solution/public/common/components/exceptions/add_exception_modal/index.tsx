@@ -174,13 +174,6 @@ export const AddExceptionModal = memo(function AddExceptionModal({
 
   const [selectedOS, setSelectedOS] = useState([OSOptions[0]]);
 
-  const handleOSSelectionChange = useCallback(
-    (selectedOptions: string[]): void => {
-      setSelectedOS(selectedOptions);
-    },
-    [setSelectedOS]
-  );
-
   // const onChange = (selectedOptions) => {
   //   // We should only get back either 0 or 1 options.
   //   setSelected(selectedOptions);
@@ -276,6 +269,14 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     }
   }, [exceptionListType, ruleExceptionList, ruleName, alertData]);
 
+  const handleOSSelectionChange = useCallback(
+    (selectedOptions: string[]): void => {
+      setSelectedOS(selectedOptions);
+      setExceptionItemsToAdd(initialExceptionItems);
+    },
+    [setSelectedOS, setExceptionItemsToAdd, initialExceptionItems]
+  );
+
   useEffect((): void => {
     if (isSignalIndexPatternLoading === false && isSignalIndexLoading === false) {
       setShouldDisableBulkClose(
@@ -319,6 +320,18 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     [setShouldBulkCloseAlert]
   );
 
+  const hasAlertData = useMemo((): boolean => {
+    return alertData !== undefined;
+  }, [alertData]);
+
+  const osTypesFromAlert = useMemo((): OsTypeArray => {
+    return retrieveAlertOsTypes(alertData);
+  }, [alertData]);
+
+  const osTypesSelection = useMemo((): OsTypesArray => {
+    return hasAlertData ? osTypesFromAlert : [selectedOS[0].label];
+  }, [hasAlertData, osTypesFromAlert, selectedOS]);
+
   const enrichExceptionItems = useCallback((): Array<
     ExceptionListItemSchema | CreateExceptionListItemSchema
   > => {
@@ -328,11 +341,11 @@ export const AddExceptionModal = memo(function AddExceptionModal({
         ? enrichNewExceptionItemsWithComments(exceptionItemsToAdd, [{ comment }])
         : exceptionItemsToAdd;
     if (exceptionListType === 'endpoint') {
-      const osTypes = retrieveAlertOsTypes(alertData);
+      const osTypes = osTypesSelection;
       enriched = lowercaseHashValues(enrichExceptionItemsWithOS(enriched, osTypes));
     }
     return enriched;
-  }, [comment, exceptionItemsToAdd, exceptionListType, alertData]);
+  }, [comment, exceptionItemsToAdd, exceptionListType, osTypesSelection]);
 
   const onAddExceptionConfirm = useCallback((): void => {
     if (addOrUpdateExceptionItems != null) {
@@ -368,10 +381,6 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     }
     return false;
   }, [maybeRule]);
-
-  const osTypesFromAlert = useMemo((): OsTypeArray => {
-    return retrieveAlertOsTypes(alertData);
-  }, [alertData]);
 
   return (
     <Modal onClose={onCancel} data-test-subj="add-exception-modal">
@@ -425,20 +434,22 @@ export const AddExceptionModal = memo(function AddExceptionModal({
               )}
               <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
               <EuiSpacer />
-              <>
-                <EuiComboBox
-                  placeholder="Select an OS"
-                  singleSelection={{ asPlainText: true }}
-                  options={OSOptions}
-                  selectedOptions={selectedOS}
-                  onChange={handleOSSelectionChange}
-                  isClearable={false}
-                />
-              </>
+              {!hasAlertData && (
+                <>
+                  <EuiComboBox
+                    placeholder="Select an OS"
+                    singleSelection={{ asPlainText: true }}
+                    options={OSOptions}
+                    selectedOptions={selectedOS}
+                    onChange={handleOSSelectionChange}
+                    isClearable={false}
+                  />
+                </>
+              )}
               <ExceptionBuilderComponent
                 exceptionListItems={initialExceptionItems}
                 listType={exceptionListType}
-                osTypes={osTypesFromAlert}
+                osTypes={osTypesSelection}
                 listId={ruleExceptionList.list_id}
                 listNamespaceType={ruleExceptionList.namespace_type}
                 ruleName={ruleName}
