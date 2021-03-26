@@ -94,6 +94,7 @@ exports[`after fetch When given a title that matches multiple dashboards, filter
         />
       </div>
     }
+    noItemsShowEmptyList={false}
     rowHeader="title"
     searchFilters={Array []}
     tableCaption="Dashboards"
@@ -193,6 +194,7 @@ exports[`after fetch hideWriteControls 1`] = `
         />
       </div>
     }
+    noItemsShowEmptyList={false}
     rowHeader="title"
     searchFilters={Array []}
     tableCaption="Dashboards"
@@ -340,6 +342,7 @@ exports[`after fetch initialFilter 1`] = `
         />
       </div>
     }
+    noItemsShowEmptyList={false}
     rowHeader="title"
     searchFilters={Array []}
     tableCaption="Dashboards"
@@ -486,6 +489,7 @@ exports[`after fetch renders all table rows 1`] = `
         />
       </div>
     }
+    noItemsShowEmptyList={false}
     rowHeader="title"
     searchFilters={Array []}
     tableCaption="Dashboards"
@@ -632,6 +636,7 @@ exports[`after fetch renders call to action when no dashboards exist 1`] = `
         />
       </div>
     }
+    noItemsShowEmptyList={false}
     rowHeader="title"
     searchFilters={Array []}
     tableCaption="Dashboards"
@@ -778,6 +783,7 @@ exports[`after fetch renders warning when listingLimit is exceeded 1`] = `
         />
       </div>
     }
+    noItemsShowEmptyList={false}
     rowHeader="title"
     searchFilters={Array []}
     tableCaption="Dashboards"
