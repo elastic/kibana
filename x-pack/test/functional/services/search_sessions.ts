@@ -65,10 +65,19 @@ export function SearchSessionsProvider({ getService }: FtrProviderContext) {
       await testSubjects.click('searchSessionIndicatorViewSearchSessionsLink');
     }
 
-    public async save() {
+    public async save({ searchSessionName }: { searchSessionName?: string } = {}) {
       log.debug('save the search session');
       await this.ensurePopoverOpened();
       await testSubjects.click('searchSessionIndicatorSaveBtn');
+
+      if (searchSessionName) {
+        await testSubjects.click('searchSessionNameEdit');
+        await testSubjects.setValue('searchSessionNameInput', searchSessionName, {
+          clearWithKeyboard: true,
+        });
+        await testSubjects.click('searchSessionNameSave');
+      }
+
       await this.ensurePopoverClosed();
     }
 

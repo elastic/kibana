@@ -19,7 +19,7 @@ export function getVersion() {
   return esVersion;
 }
 
-export function getContentType(body: any) {
+export function getContentType(body: unknown) {
   if (!body) return;
   return 'application/json';
 }
@@ -27,7 +27,7 @@ export function getContentType(body: any) {
 export function send(
   method: string,
   path: string,
-  data: any,
+  data: string | object,
   { asSystemRequest }: SendOptions = {}
 ) {
   const wrappedDfd = $.Deferred();
@@ -47,10 +47,10 @@ export function send(
   };
 
   $.ajax(options).then(
-    (responseData: any, textStatus: string, jqXHR: any) => {
+    (responseData, textStatus: string, jqXHR: unknown) => {
       wrappedDfd.resolveWith({}, [responseData, textStatus, jqXHR]);
     },
-    ((jqXHR: any, textStatus: string, errorThrown: Error) => {
+    ((jqXHR: { status: number; responseText: string }, textStatus: string, errorThrown: Error) => {
       if (jqXHR.status === 0) {
         jqXHR.responseText =
           "\n\nFailed to connect to Console's backend.\nPlease check the Kibana server is up and running";
