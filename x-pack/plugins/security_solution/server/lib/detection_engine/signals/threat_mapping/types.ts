@@ -4,9 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { SearchResponse } from 'elasticsearch';
-
+import type { estypes } from '@elastic/elasticsearch';
 import { ListClient } from '../../../../../../lists/server';
 import {
   Type,
@@ -187,7 +185,7 @@ export interface ThreatListDoc {
  * This is an ECS document being returned, but the user could return or use non-ecs based
  * documents potentially.
  */
-export type ThreatListItem = SearchResponse<ThreatListDoc>['hits']['hits'][number];
+export type ThreatListItem = estypes.Hit<ThreatListDoc>;
 
 export interface ThreatIndicator {
   [key: string]: unknown;

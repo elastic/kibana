@@ -22,6 +22,7 @@ interface AppValues extends WorkplaceSearchInitialData {
 interface AppActions {
   initializeAppData(props: InitialAppData): InitialAppData;
   setContext(isOrganization: boolean): boolean;
+  setOrgName(name: string): string;
   setSourceRestriction(canCreatePersonalSources: boolean): boolean;
 }
 
@@ -36,6 +37,7 @@ export const AppLogic = kea<MakeLogicType<AppValues, AppActions>>({
       isFederatedAuth,
     }),
     setContext: (isOrganization) => isOrganization,
+    setOrgName: (name: string) => name,
     setSourceRestriction: (canCreatePersonalSources: boolean) => canCreatePersonalSources,
   },
   reducers: {
@@ -61,6 +63,10 @@ export const AppLogic = kea<MakeLogicType<AppValues, AppActions>>({
       emptyOrg,
       {
         initializeAppData: (_, { workplaceSearch }) => workplaceSearch?.organization || emptyOrg,
+        setOrgName: (state, name) => ({
+          ...state,
+          name,
+        }),
       },
     ],
     account: [
