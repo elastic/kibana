@@ -6,26 +6,30 @@
  */
 
 import { ExceptionListClient } from '../../../../../lists/server';
-import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common';
+import {
+  ENDPOINT_TRUSTED_APPS_LIST_ID,
+  ExceptionListItemSchema,
+} from '../../../../../lists/common';
 
 import {
   DeleteTrustedAppsRequestParams,
+  GetOneTrustedAppResponse,
   GetTrustedAppsListRequest,
   GetTrustedAppsSummaryResponse,
   GetTrustedListAppsResponse,
   PostTrustedAppCreateRequest,
   PostTrustedAppCreateResponse,
+  PutTrustedAppUpdateRequest,
+  PutTrustedAppUpdateResponse,
 } from '../../../../common/endpoint/types';
 
 import {
   exceptionListItemToTrustedApp,
   newTrustedAppToCreateExceptionListItemOptions,
   osFromExceptionItem,
+  updatedTrustedAppToUpdateExceptionListItemOptions,
 } from './mapping';
-
-export class MissingTrustedAppException {
-  constructor(public id: string) {}
-}
+import { TrustedAppNotFoundError, TrustedAppVersionConflictError } from './errors';
 
 export const deleteTrustedApp = async (
   exceptionsListClient: ExceptionListClient,
@@ -38,13 +42,32 @@ export const deleteTrustedApp = async (
   });
 
   if (!exceptionListItem) {
-    throw new MissingTrustedAppException(id);
+    throw new TrustedAppNotFoundError(id);
   }
+};
+
+export const getTrustedApp = async (
+  exceptionsListClient: ExceptionListClient,
+  id: string
+): Promise<GetOneTrustedAppResponse> => {
+  const trustedAppExceptionItem = await exceptionsListClient.getExceptionListItem({
+    itemId: '',
+    id,
+    namespaceType: 'agnostic',
+  });
+
+  if (!trustedAppExceptionItem) {
+    throw new TrustedAppNotFoundError(id);
+  }
+
+  return {
+    data: exceptionListItemToTrustedApp(trustedAppExceptionItem),
+  };
 };
 
 export const getTrustedAppsList = async (
   exceptionsListClient: ExceptionListClient,
-  { page, per_page: perPage }: GetTrustedAppsListRequest
+  { page, per_page: perPage, kuery }: GetTrustedAppsListRequest
 ): Promise<GetTrustedListAppsResponse> => {
   // Ensure list is created if it does not exist
   await exceptionsListClient.createTrustedAppsList();
@@ -53,7 +76,7 @@ export const getTrustedAppsList = async (
     listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
     page,
     perPage,
-    filter: undefined,
+    filter: kuery,
     namespaceType: 'agnostic',
     sortField: 'name',
     sortOrder: 'asc',
@@ -74,11 +97,56 @@ export const createTrustedApp = async (
   // Ensure list is created if it does not exist
   await exceptionsListClient.createTrustedAppsList();
 
+  // Validate update TA entry - error if not valid
+  // TODO: implement validations
+
   const createdTrustedAppExceptionItem = await exceptionsListClient.createExceptionListItem(
     newTrustedAppToCreateExceptionListItemOptions(newTrustedApp)
   );
 
   return { data: exceptionListItemToTrustedApp(createdTrustedAppExceptionItem) };
+};
+
+export const updateTrustedApp = async (
+  exceptionsListClient: ExceptionListClient,
+  id: string,
+  updatedTrustedApp: PutTrustedAppUpdateRequest
+): Promise<PutTrustedAppUpdateResponse> => {
+  const currentTrustedApp = await exceptionsListClient.getExceptionListItem({
+    itemId: '',
+    id,
+    namespaceType: 'agnostic',
+  });
+
+  if (!currentTrustedApp) {
+    throw new TrustedAppNotFoundError(id);
+  }
+
+  // Validate update TA entry - error if not valid
+  // TODO: implement validations
+
+  let updatedTrustedAppExceptionItem: ExceptionListItemSchema | null;
+
+  try {
+    updatedTrustedAppExceptionItem = await exceptionsListClient.updateExceptionListItem(
+      updatedTrustedAppToUpdateExceptionListItemOptions(currentTrustedApp, updatedTrustedApp)
+    );
+  } catch (e) {
+    if (e?.output?.statusCode === 409) {
+      throw new TrustedAppVersionConflictError(id, e);
+    }
+
+    throw e;
+  }
+
+  // If `null` is returned, then that means the TA does not exist (could happen in race conditions)
+  if (!updatedTrustedAppExceptionItem) {
+    throw new TrustedAppNotFoundError(id);
+  }
+
+  return {
+    data: exceptionListItemToTrustedApp(updatedTrustedAppExceptionItem),
+  };
 };
 
 export const getTrustedAppsSummary = async (

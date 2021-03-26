@@ -29,7 +29,7 @@ import { useUiSetting } from '../../../../../../../../../src/plugins/kibana_reac
 import { toMetricOpt } from '../../../../../../common/snapshot_metric_i18n';
 import { MetricsExplorerAggregation } from '../../../../../../common/http_api';
 import { colorTransformer, Color } from '../../../../../../common/color_palette';
-import { useSourceContext } from '../../../../../containers/source';
+import { useSourceContext } from '../../../../../containers/metrics_source';
 import { useTimeline } from '../../hooks/use_timeline';
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
 import { useWaffleTimeContext } from '../../hooks/use_waffle_time';
