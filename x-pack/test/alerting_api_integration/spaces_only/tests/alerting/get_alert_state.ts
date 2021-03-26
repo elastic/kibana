@@ -122,7 +122,7 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
         });
 
         const response = await supertest.get(
-          `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createdAlert.id}/state`
+          `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdAlert.id}/state`
         );
 
         expect(response.body.rule_type_state.runCount).to.greaterThan(0);
