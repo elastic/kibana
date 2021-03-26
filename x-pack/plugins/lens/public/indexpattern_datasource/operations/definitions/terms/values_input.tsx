@@ -7,10 +7,10 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiRange } from '@elastic/eui';
+import { EuiFieldNumber } from '@elastic/eui';
 import { useDebounceWithOptions } from '../helpers';
 
-export const ValuesRangeInput = ({
+export const ValuesInput = ({
   value,
   onChange,
 }: {
@@ -18,7 +18,7 @@ export const ValuesRangeInput = ({
   onChange: (value: number) => void;
 }) => {
   const MIN_NUMBER_OF_VALUES = 1;
-  const MAX_NUMBER_OF_VALUES = 100;
+  const MAX_NUMBER_OF_VALUES = 1000;
 
   const [inputValue, setInputValue] = useState(String(value));
 
@@ -36,13 +36,11 @@ export const ValuesRangeInput = ({
   );
 
   return (
-    <EuiRange
+    <EuiFieldNumber
       min={MIN_NUMBER_OF_VALUES}
       max={MAX_NUMBER_OF_VALUES}
       step={1}
       value={inputValue}
-      showInput
-      showLabels
       compressed
       onChange={({ currentTarget }) => setInputValue(currentTarget.value)}
       aria-label={i18n.translate('xpack.lens.indexPattern.terms.size', {
