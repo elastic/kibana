@@ -14,15 +14,12 @@ import {
   EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSuperSelect,
   EuiFormRow,
-  EuiText,
   htmlIdGenerator,
   EuiColorPicker,
   EuiColorPickerProps,
   EuiToolTip,
   EuiIcon,
-  EuiIconTip,
 } from '@elastic/eui';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 import {
@@ -31,29 +28,17 @@ import {
   VisualizationDimensionEditorProps,
   FormatFactory,
 } from '../types';
-import {
-  State,
-  SeriesType,
-  visualizationTypes,
-  YAxisMode,
-  AxesSettingsConfig,
-  ValidLayer,
-} from './types';
-import {
-  isHorizontalChart,
-  isHorizontalSeries,
-  getSeriesColor,
-  hasHistogramSeries,
-} from './state_helpers';
+import { State, SeriesType, visualizationTypes, YAxisMode, AxesSettingsConfig } from './types';
+import { isHorizontalChart, isHorizontalSeries, getSeriesColor } from './state_helpers';
 import { trackUiEvent } from '../lens_ui_telemetry';
-import { fittingFunctionDefinitions } from './fitting_functions';
-import { ToolbarPopover, LegendSettingsPopover } from '../shared_components';
+import { LegendSettingsPopover } from '../shared_components';
 import { AxisSettingsPopover } from './axis_settings_popover';
 import { TooltipWrapper } from './tooltip_wrapper';
 import { getAxesConfiguration } from './axes_configuration';
 import { PalettePicker } from '../shared_components';
 import { getAccessorColorConfig, getColorAssignments } from './color_assignment';
 import { getSortedAccessors } from './to_expression';
+import { VisualOptionsPopover } from './visual_options_popover/visual_options_popover';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
@@ -89,30 +74,6 @@ const legendOptions: Array<{ id: string; value: 'auto' | 'show' | 'hide'; label:
     label: i18n.translate('xpack.lens.xyChart.legendVisibility.hide', {
       defaultMessage: 'Hide',
     }),
-  },
-];
-
-const valueLabelsOptions: Array<{
-  id: string;
-  value: 'hide' | 'inside' | 'outside';
-  label: string;
-  'data-test-subj': string;
-}> = [
-  {
-    id: `value_labels_hide`,
-    value: 'hide',
-    label: i18n.translate('xpack.lens.xyChart.valueLabelsVisibility.auto', {
-      defaultMessage: 'Hide',
-    }),
-    'data-test-subj': 'lnsXY_valueLabels_hide',
-  },
-  {
-    id: `value_labels_inside`,
-    value: 'inside',
-    label: i18n.translate('xpack.lens.xyChart.valueLabelsVisibility.inside', {
-      defaultMessage: 'Show',
-    }),
-    'data-test-subj': 'lnsXY_valueLabels_inside',
   },
 ];
 
@@ -159,45 +120,8 @@ export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
   );
 }
 
-function getValueLabelDisableReason({
-  isAreaPercentage,
-  isHistogramSeries,
-}: {
-  isAreaPercentage: boolean;
-  isHistogramSeries: boolean;
-}): string {
-  if (isHistogramSeries) {
-    return i18n.translate('xpack.lens.xyChart.valuesHistogramDisabledHelpText', {
-      defaultMessage: 'This setting cannot be changed on histograms.',
-    });
-  }
-  if (isAreaPercentage) {
-    return i18n.translate('xpack.lens.xyChart.valuesPercentageDisabledHelpText', {
-      defaultMessage: 'This setting cannot be changed on percentage area charts.',
-    });
-  }
-  return i18n.translate('xpack.lens.xyChart.valuesStackedDisabledHelpText', {
-    defaultMessage: 'This setting cannot be changed on stacked or percentage bar charts',
-  });
-}
 export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProps<State>) {
   const { state, setState, frame } = props;
-
-  const hasNonBarSeries = state?.layers.some(({ seriesType }) =>
-    ['area_stacked', 'area', 'line'].includes(seriesType)
-  );
-
-  const hasBarNotStacked = state?.layers.some(({ seriesType }) =>
-    ['bar', 'bar_horizontal'].includes(seriesType)
-  );
-
-  const isAreaPercentage = state?.layers.some(
-    ({ seriesType }) => seriesType === 'area_percentage_stacked'
-  );
-
-  const isHistogramSeries = Boolean(
-    hasHistogramSeries(state?.layers as ValidLayer[], frame.datasourceLayers)
-  );
 
   const shouldRotate = state?.layers.length ? isHorizontalChart(state.layers) : false;
   const axisGroups = getAxesConfiguration(state?.layers, shouldRotate);
@@ -267,113 +191,15 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
       ? 'hide'
       : 'show';
 
-  const valueLabelsVisibilityMode = state?.valueLabels || 'hide';
-
-  const isValueLabelsEnabled = !hasNonBarSeries && hasBarNotStacked && !isHistogramSeries;
-  const isFittingEnabled = hasNonBarSeries;
-
-  const valueLabelsDisabledReason = getValueLabelDisableReason({
-    isAreaPercentage,
-    isHistogramSeries,
-  });
-
   return (
     <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween">
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="none" responsive={false}>
-          <TooltipWrapper
-            tooltipContent={valueLabelsDisabledReason}
-            condition={!isValueLabelsEnabled && !isFittingEnabled}
-          >
-            <ToolbarPopover
-              title={i18n.translate('xpack.lens.xyChart.valuesLabel', {
-                defaultMessage: 'Values',
-              })}
-              type="values"
-              groupPosition="left"
-              buttonDataTestSubj="lnsValuesButton"
-              isDisabled={!isValueLabelsEnabled && !isFittingEnabled}
-            >
-              {isValueLabelsEnabled ? (
-                <EuiFormRow
-                  display="columnCompressed"
-                  label={
-                    <span>
-                      {i18n.translate('xpack.lens.shared.chartValueLabelVisibilityLabel', {
-                        defaultMessage: 'Labels',
-                      })}
-                    </span>
-                  }
-                >
-                  <EuiButtonGroup
-                    isFullWidth
-                    legend={i18n.translate('xpack.lens.shared.chartValueLabelVisibilityLabel', {
-                      defaultMessage: 'Labels',
-                    })}
-                    data-test-subj="lnsValueLabelsDisplay"
-                    name="valueLabelsDisplay"
-                    buttonSize="compressed"
-                    options={valueLabelsOptions}
-                    idSelected={
-                      valueLabelsOptions.find(({ value }) => value === valueLabelsVisibilityMode)!
-                        .id
-                    }
-                    onChange={(modeId) => {
-                      const newMode = valueLabelsOptions.find(({ id }) => id === modeId)!.value;
-                      setState({ ...state, valueLabels: newMode });
-                    }}
-                  />
-                </EuiFormRow>
-              ) : null}
-              {isFittingEnabled ? (
-                <EuiFormRow
-                  display="columnCompressed"
-                  label={
-                    <>
-                      {i18n.translate('xpack.lens.xyChart.missingValuesLabel', {
-                        defaultMessage: 'Missing values',
-                      })}{' '}
-                      <EuiIconTip
-                        color="subdued"
-                        content={i18n.translate('xpack.lens.xyChart.missingValuesLabelHelpText', {
-                          defaultMessage: `By default, Lens hides the gaps in the data. To fill the gap, make a selection.`,
-                        })}
-                        iconProps={{
-                          className: 'eui-alignTop',
-                        }}
-                        position="top"
-                        size="s"
-                        type="questionInCircle"
-                      />
-                    </>
-                  }
-                >
-                  <EuiSuperSelect
-                    data-test-subj="lnsMissingValuesSelect"
-                    compressed
-                    options={fittingFunctionDefinitions.map(({ id, title, description }) => {
-                      return {
-                        value: id,
-                        dropdownDisplay: (
-                          <>
-                            <strong>{title}</strong>
-                            <EuiText size="xs" color="subdued">
-                              <p>{description}</p>
-                            </EuiText>
-                          </>
-                        ),
-                        inputDisplay: title,
-                      };
-                    })}
-                    valueOfSelected={state?.fittingFunction || 'None'}
-                    onChange={(value) => setState({ ...state, fittingFunction: value })}
-                    itemLayoutAlign="top"
-                    hasDividers
-                  />
-                </EuiFormRow>
-              ) : null}
-            </ToolbarPopover>
-          </TooltipWrapper>
+          <VisualOptionsPopover
+            state={state}
+            setState={setState}
+            datasourceLayers={frame.datasourceLayers}
+          />
           <LegendSettingsPopover
             legendOptions={legendOptions}
             mode={legendMode}
