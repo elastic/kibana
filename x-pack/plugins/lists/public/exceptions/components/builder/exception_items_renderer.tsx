@@ -61,13 +61,13 @@ const initialState: State = {
   exceptionsToDelete: [],
 };
 
-interface OnChangeProps {
+export interface OnChangeProps {
   errorExists: boolean;
   exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
   exceptionsToDelete: ExceptionListItemSchema[];
 }
 
-interface ExceptionBuilderProps {
+export interface ExceptionBuilderProps {
   allowLargeValueLists: boolean;
   autocompleteService: AutocompleteStart;
   exceptionListItems: ExceptionsBuilderExceptionItem[];
