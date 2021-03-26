@@ -34,19 +34,24 @@ import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 import { ThreatMapping } from '../../../../../common/detection_engine/schemas/types/threat_mapping';
 import { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request';
+import {
+  getMlRuleParams,
+  getQueryRuleParams,
+  getThreatRuleParams,
+} from '../../schemas/rule_schemas.mock';
 
 type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
 describe('utils', () => {
   describe('transformAlertToRule', () => {
     test('should work with a full data set', () => {
-      const fullRule = getResult();
+      const fullRule = getResult(getQueryRuleParams());
       const rule = transformAlertToRule(fullRule);
       expect(rule).toEqual(getOutputRuleAlertForRest());
     });
 
     test('should work with a partial data set missing data', () => {
-      const fullRule = getResult();
+      const fullRule = getResult(getQueryRuleParams());
       const { from, language, ...omitParams } = fullRule.params;
       fullRule.params = omitParams as RuleTypeParams;
       const rule = transformAlertToRule(fullRule);
@@ -59,7 +64,7 @@ describe('utils', () => {
     });
 
     test('should omit query if query is undefined', () => {
-      const fullRule = getResult();
+      const fullRule = getResult(getQueryRuleParams());
       fullRule.params.query = undefined;
       const rule = transformAlertToRule(fullRule);
       const { query, ...expectedWithoutQuery } = getOutputRuleAlertForRest();
@@ -67,7 +72,7 @@ describe('utils', () => {
     });
 
     test('should omit a mix of undefined, null, and missing fields', () => {
-      const fullRule = getResult();
+      const fullRule = getResult(getQueryRuleParams());
       fullRule.params.query = undefined;
       fullRule.params.language = undefined;
       const { from, ...omitParams } = fullRule.params;
@@ -85,7 +90,7 @@ describe('utils', () => {
     });
 
     test('should return enabled is equal to false', () => {
-      const fullRule = getResult();
+      const fullRule = getResult(getQueryRuleParams());
       fullRule.enabled = false;
       const ruleWithEnabledFalse = transformAlertToRule(fullRule);
       const expected = getOutputRuleAlertForRest();
@@ -94,7 +99,7 @@ describe('utils', () => {
     });
 
     test('should return immutable is equal to false', () => {
-      const fullRule = getResult();
+      const fullRule = getResult(getQueryRuleParams());
       fullRule.params.immutable = false;
       const ruleWithEnabledFalse = transformAlertToRule(fullRule);
       const expected = getOutputRuleAlertForRest();
@@ -102,7 +107,7 @@ describe('utils', () => {
     });
 
     test('should work with tags but filter out any internal tags', () => {
-      const fullRule = getResult();
+      const fullRule = getResult(getQueryRuleParams());
       fullRule.tags = ['tag 1', 'tag 2', `${INTERNAL_IDENTIFIER}_some_other_value`];
       const rule = transformAlertToRule(fullRule);
       const expected = getOutputRuleAlertForRest();
@@ -111,7 +116,7 @@ describe('utils', () => {
     });
 
     test('transforms ML Rule fields', () => {
-      const mlRule = getResult();
+      const mlRule = getResult(getMlRuleParams());
       mlRule.params.anomalyThreshold = 55;
       mlRule.params.machineLearningJobId = 'some_job_id';
       mlRule.params.type = 'machine_learning';
@@ -127,7 +132,7 @@ describe('utils', () => {
     });
 
     test('transforms threat_matching fields', () => {
-      const threatRule = getResult();
+      const threatRule = getResult(getThreatRuleParams());
       const threatFilters: PartialFilter[] = [
         {
           query: {
@@ -178,7 +183,10 @@ describe('utils', () => {
     // This has to stay here until we do data migration of saved objects and lists is removed from:
     // signal_params_schema.ts
     test('does not leak a lists structure in the transform which would cause validation issues', () => {
-      const result: RuleAlertType & { lists: [] } = { lists: [], ...getResult() };
+      const result: RuleAlertType & { lists: [] } = {
+        lists: [],
+        ...getResult(getQueryRuleParams()),
+      };
       const rule = transformAlertToRule(result);
       expect(rule).toEqual(
         expect.not.objectContaining({
@@ -192,7 +200,7 @@ describe('utils', () => {
     test('does not leak an exceptions_list structure in the transform which would cause validation issues', () => {
       const result: RuleAlertType & { exceptions_list: [] } = {
         exceptions_list: [],
-        ...getResult(),
+        ...getResult(getQueryRuleParams()),
       };
       const rule = transformAlertToRule(result);
       expect(rule).toEqual(
@@ -289,7 +297,7 @@ describe('utils', () => {
           page: 1,
           perPage: 0,
           total: 0,
-          data: [getResult()],
+          data: [getResult(getQueryRuleParams())],
         },
         []
       );
@@ -319,7 +327,7 @@ describe('utils', () => {
 
   describe('transform', () => {
     test('outputs 200 if the data is of type siem alert', () => {
-      const output = transform(getResult());
+      const output = transform(getResult(getQueryRuleParams()));
       const expected = getOutputRuleAlertForRest();
       expect(output).toEqual(expected);
     });
@@ -434,7 +442,7 @@ describe('utils', () => {
 
   describe('transformOrBulkError', () => {
     test('outputs 200 if the data is of type siem alert', () => {
-      const output = transformOrBulkError('rule-1', getResult(), {
+      const output = transformOrBulkError('rule-1', getResult(getQueryRuleParams()), {
         id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
         actions: [],
         ruleThrottle: 'no_actions',
@@ -466,15 +474,15 @@ describe('utils', () => {
     });
 
     test('given single alert will return the alert transformed', () => {
-      const result1 = getResult();
+      const result1 = getResult(getQueryRuleParams());
       const transformed = transformAlertsToRules([result1]);
       const expected = getOutputRuleAlertForRest();
       expect(transformed).toEqual([expected]);
     });
 
     test('given two alerts will return the two alerts transformed', () => {
-      const result1 = getResult();
-      const result2 = getResult();
+      const result1 = getResult(getQueryRuleParams());
+      const result2 = getResult(getQueryRuleParams());
       result2.id = 'some other id';
       result2.params.ruleId = 'some other id';
 
@@ -489,7 +497,7 @@ describe('utils', () => {
 
   describe('transformOrImportError', () => {
     test('returns 1 given success if the alert is an alert type and the existing success count is 0', () => {
-      const output = transformOrImportError('rule-1', getResult(), {
+      const output = transformOrImportError('rule-1', getResult(getQueryRuleParams()), {
         success: true,
         success_count: 0,
         errors: [],
@@ -503,7 +511,7 @@ describe('utils', () => {
     });
 
     test('returns 2 given successes if the alert is an alert type and the existing success count is 1', () => {
-      const output = transformOrImportError('rule-1', getResult(), {
+      const output = transformOrImportError('rule-1', getResult(getQueryRuleParams()), {
         success: true,
         success_count: 1,
         errors: [],

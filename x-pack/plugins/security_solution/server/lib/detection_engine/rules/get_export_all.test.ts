@@ -14,11 +14,12 @@ import { alertsClientMock } from '../../../../../alerting/server/mocks';
 import { getExportAll } from './get_export_all';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../common/detection_engine/schemas/types/threat.mock';
+import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 
 describe('getExportAll', () => {
   test('it exports everything from the alerts client', async () => {
     const alertsClient = alertsClientMock.create();
-    alertsClient.get.mockResolvedValue(getResult());
+    alertsClient.get.mockResolvedValue(getResult(getQueryRuleParams()));
     alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
     const exports = await getExportAll(alertsClient);

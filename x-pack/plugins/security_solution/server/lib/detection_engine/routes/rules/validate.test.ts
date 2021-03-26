@@ -17,6 +17,7 @@ import { getResult, getFindResultStatus } from '../__mocks__/request_responses';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 import { RuleTypeParams } from '../../types';
+import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 
 export const ruleOutput = (): RulesSchema => ({
   actions: [],
@@ -72,14 +73,14 @@ export const ruleOutput = (): RulesSchema => ({
 describe('validate', () => {
   describe('transformValidate', () => {
     test('it should do a validation correctly of a partial alert', () => {
-      const ruleAlert = getResult();
+      const ruleAlert = getResult(getQueryRuleParams());
       const [validated, errors] = transformValidate(ruleAlert);
       expect(validated).toEqual(ruleOutput());
       expect(errors).toEqual(null);
     });
 
     test('it should do an in-validation correctly of a partial alert', () => {
-      const ruleAlert = getResult();
+      const ruleAlert = getResult(getQueryRuleParams());
       // @ts-expect-error
       delete ruleAlert.name;
       const [validated, errors] = transformValidate(ruleAlert);
@@ -91,7 +92,7 @@ describe('validate', () => {
   describe('transformValidateFindAlerts', () => {
     test('it should do a validation correctly of a find alert', () => {
       const findResult: FindResult<RuleTypeParams> = {
-        data: [getResult()],
+        data: [getResult(getQueryRuleParams())],
         page: 1,
         perPage: 0,
         total: 0,
@@ -114,7 +115,7 @@ describe('validate', () => {
 
     test('it should do an in-validation correctly of a partial alert', () => {
       const findResult: FindResult<RuleTypeParams> = {
-        data: [getResult()],
+        data: [getResult(getQueryRuleParams())],
         page: 1,
         perPage: 0,
         total: 0,
@@ -129,13 +130,13 @@ describe('validate', () => {
 
   describe('transformValidateBulkError', () => {
     test('it should do a validation correctly of a rule id', () => {
-      const ruleAlert = getResult();
+      const ruleAlert = getResult(getQueryRuleParams());
       const validatedOrError = transformValidateBulkError('rule-1', ruleAlert);
       expect(validatedOrError).toEqual(ruleOutput());
     });
 
     test('it should do an in-validation correctly of a rule id', () => {
-      const ruleAlert = getResult();
+      const ruleAlert = getResult(getQueryRuleParams());
       // @ts-expect-error
       delete ruleAlert.name;
       const validatedOrError = transformValidateBulkError('rule-1', ruleAlert);
@@ -151,7 +152,7 @@ describe('validate', () => {
 
     test('it should do a validation correctly of a rule id with ruleStatus passed in', () => {
       const ruleStatus = getFindResultStatus();
-      const ruleAlert = getResult();
+      const ruleAlert = getResult(getQueryRuleParams());
       const validatedOrError = transformValidateBulkError('rule-1', ruleAlert, null, ruleStatus);
       const expected: RulesSchema = {
         ...ruleOutput(),
@@ -164,7 +165,7 @@ describe('validate', () => {
     });
 
     test('it should return error object if "alert" is not expected alert type', () => {
-      const ruleAlert = getResult();
+      const ruleAlert = getResult(getQueryRuleParams());
       // @ts-expect-error
       delete ruleAlert.alertTypeId;
       const validatedOrError = transformValidateBulkError('rule-1', ruleAlert);

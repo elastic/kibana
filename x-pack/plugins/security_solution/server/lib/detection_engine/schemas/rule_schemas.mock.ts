@@ -6,11 +6,13 @@
  */
 
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
+import { getThreatMappingMock } from '../signals/threat_mapping/build_threat_mapping_filter.mock';
 import {
   BaseRuleParams,
   EqlRuleParams,
   MachineLearningRuleParams,
   QueryRuleParams,
+  ThreatRuleParams,
   ThresholdRuleParams,
 } from './rule_schemas';
 
@@ -90,5 +92,25 @@ export const getQueryRuleParams = (): QueryRuleParams => {
     index: ['some-index'],
     filters: undefined,
     savedId: undefined,
+  };
+};
+
+export const getThreatRuleParams = (): ThreatRuleParams => {
+  return {
+    ...getBaseRuleParams(),
+    type: 'threat_match',
+    language: 'kuery',
+    query: '*:*',
+    index: ['some-index'],
+    filters: undefined,
+    savedId: undefined,
+    threatQuery: 'threat-query',
+    threatFilters: undefined,
+    threatIndex: ['some-threat-index'],
+    threatLanguage: 'kuery',
+    threatMapping: getThreatMappingMock(),
+    threatIndicatorPath: '',
+    concurrentSearches: undefined,
+    itemsPerSearch: undefined,
   };
 };

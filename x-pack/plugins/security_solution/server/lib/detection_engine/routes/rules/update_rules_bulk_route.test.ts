@@ -20,6 +20,7 @@ import { serverMock, requestContextMock, requestMock } from '../__mocks__';
 import { updateRulesBulkRoute } from './update_rules_bulk_route';
 import { BulkError } from '../utils';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
+import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
@@ -34,7 +35,7 @@ describe('update_rules_bulk', () => {
     ml = mlServicesMock.create();
 
     clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-    clients.alertsClient.update.mockResolvedValue(getResult());
+    clients.alertsClient.update.mockResolvedValue(getResult(getQueryRuleParams()));
     clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
 
     updateRulesBulkRoute(server.router, ml);

@@ -14,6 +14,7 @@ import {
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { findRulesRoute } from './find_rules_route';
+import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 
 jest.mock('../../signals/rule_status_service');
 describe('find_rules', () => {
@@ -25,7 +26,7 @@ describe('find_rules', () => {
     ({ clients, context } = requestContextMock.createTools());
 
     clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-    clients.alertsClient.get.mockResolvedValue(getResult());
+    clients.alertsClient.get.mockResolvedValue(getResult(getQueryRuleParams()));
     clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
 
     findRulesRoute(server.router);
