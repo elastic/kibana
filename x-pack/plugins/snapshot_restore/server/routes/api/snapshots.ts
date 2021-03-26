@@ -21,16 +21,16 @@ export function registerSnapshotsRoutes({
   router.get(
     { path: addBasePath('snapshots'), validate: false },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.snapshotRestore!.client;
+      const { client: clusterClient } = ctx.core.elasticsearch;
 
-      const managedRepository = await getManagedRepositoryName(callAsCurrentUser);
+      const managedRepository = await getManagedRepositoryName(clusterClient.asCurrentUser);
 
       let policies: string[] = [];
 
       // Attempt to retrieve policies
       // This could fail if user doesn't have access to read SLM policies
       try {
-        const policiesByName = await callAsCurrentUser('sr.policies');
+        const policiesByName = await clusterClient.asCurrentUser.slm.getLifecycle();
         policies = Object.keys(policiesByName);
       } catch (e) {
         // Silently swallow error as policy names aren't required in UI
@@ -44,7 +44,9 @@ export function registerSnapshotsRoutes({
       let repositoryNames: string[];
 
       try {
-        const repositoriesByName = await callAsCurrentUser('snapshot.getRepository', {
+        const {
+          body: repositoriesByName,
+        } = await clusterClient.asCurrentUser.snapshot.getRepository({
           repository: '_all',
         });
         repositoryNames = Object.keys(repositoriesByName);
@@ -72,23 +74,23 @@ export function registerSnapshotsRoutes({
         try {
           // If any of these repositories 504 they will cost the request significant time.
           const {
-            responses: fetchedResponses,
-          }: {
-            responses: Array<{
-              repository: 'string';
-              snapshots: SnapshotDetailsEs[];
-            }>;
-          } = await callAsCurrentUser('snapshot.get', {
+            body: { snapshots: fetchedResponses },
+          } = await clusterClient.asCurrentUser.snapshot.get({
             repository,
             snapshot: '_all',
             ignore_unavailable: true, // Allow request to succeed even if some snapshots are unavailable.
           });
 
           // Decorate each snapshot with the repository with which it's associated.
-          fetchedResponses.forEach(({ snapshots: fetchedSnapshots }) => {
-            fetchedSnapshots.forEach((snapshot) => {
-              snapshots.push(deserializeSnapshotDetails(repository, snapshot, managedRepository));
-            });
+          fetchedResponses.forEach((snapshot) => {
+            snapshots.push(
+              deserializeSnapshotDetails(
+                repository,
+                // TODO: Bring {@link SnapshotDetailsEs in line with {@link SnapshotInfo}
+                snapshot as SnapshotDetailsEs,
+                managedRepository
+              )
+            );
           });
 
           repositories.push(repository);
@@ -124,28 +126,20 @@ export function registerSnapshotsRoutes({
       validate: { params: getOneParamsSchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.snapshotRestore!.client;
+      const { client: clusterClient } = ctx.core.elasticsearch;
       const { repository, snapshot } = req.params as TypeOf<typeof getOneParamsSchema>;
-      const managedRepository = await getManagedRepositoryName(callAsCurrentUser);
+      const managedRepository = await getManagedRepositoryName(clusterClient.asCurrentUser);
 
       try {
         const {
-          responses: snapshotsResponse,
-        }: {
-          responses: Array<{
-            repository: string;
-            snapshots: SnapshotDetailsEs[];
-            error?: any;
-          }>;
-        } = await callAsCurrentUser('snapshot.get', {
+          body: { snapshots },
+        } = await clusterClient.asCurrentUser.snapshot.get({
           repository,
           snapshot: '_all',
           ignore_unavailable: true,
         });
 
-        const snapshotsList =
-          snapshotsResponse && snapshotsResponse[0] && snapshotsResponse[0].snapshots;
-        const selectedSnapshot = snapshotsList.find(
+        const selectedSnapshot = snapshots.find(
           ({ snapshot: snapshotName }) => snapshot === snapshotName
         ) as SnapshotDetailsEs;
 
@@ -154,11 +148,11 @@ export function registerSnapshotsRoutes({
           return res.notFound({ body: 'Snapshot not found' });
         }
 
-        const successfulSnapshots = snapshotsList
+        const successfulSnapshots = snapshots
           .filter(({ state }) => state === 'SUCCESS')
           .sort((a, b) => {
-            return +new Date(b.end_time) - +new Date(a.end_time);
-          });
+            return +new Date(b.end_time!) - +new Date(a.end_time!);
+          }) as SnapshotDetailsEs[];
 
         return res.ok({
           body: deserializeSnapshotDetails(
@@ -192,7 +186,7 @@ export function registerSnapshotsRoutes({
   router.post(
     { path: addBasePath('snapshots/bulk_delete'), validate: { body: deleteSchema } },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.snapshotRestore!.client;
+      const { client: clusterClient } = ctx.core.elasticsearch;
 
       const response: {
         itemsDeleted: Array<{ snapshot: string; repository: string }>;
@@ -210,7 +204,8 @@ export function registerSnapshotsRoutes({
         for (let i = 0; i < snapshots.length; i++) {
           const { snapshot, repository } = snapshots[i];
 
-          await callAsCurrentUser('snapshot.delete', { snapshot, repository })
+          await clusterClient.asCurrentUser.snapshot
+            .delete({ snapshot, repository })
             .then(() => response.itemsDeleted.push({ snapshot, repository }))
             .catch((e) =>
               response.errors.push({
