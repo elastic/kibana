@@ -6,7 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { setup, SetupResult } from './processor.helpers';
+import { setup, SetupResult, getProcessorValue } from './processor.helpers';
 
 // Default parameter values automatically added to the Bytes processor when saved
 const defaultBytesParameters = {
@@ -82,8 +82,7 @@ describe('Processor: Bytes', () => {
     // Save the field
     await saveNewProcessor();
 
-    const [onUpdateResult] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];
-    const { processors } = onUpdateResult.getData();
+    const processors =  getProcessorValue(onUpdate, BYTES_TYPE);
     expect(processors[0].bytes).toEqual({
       field: 'field_1',
       ...defaultBytesParameters,
@@ -109,8 +108,7 @@ describe('Processor: Bytes', () => {
     // Save the field with new changes
     await saveNewProcessor();
 
-    const [onUpdateResult] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];
-    const { processors } = onUpdateResult.getData();
+    const processors =  getProcessorValue(onUpdate, BYTES_TYPE);
     expect(processors[0].bytes).toEqual({
       description: undefined,
       field: 'field_1',

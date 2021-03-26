@@ -6,7 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { setup, SetupResult } from './processor.helpers';
+import { setup, SetupResult, getProcessorValue } from './processor.helpers';
 
 // Default parameter values automatically added to the URI parts processor when saved
 const defaultUriPartsParameters = {
@@ -79,8 +79,7 @@ describe('Processor: URI parts', () => {
     // Save the field
     await saveNewProcessor();
 
-    const [onUpdateResult] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];
-    const { processors } = onUpdateResult.getData();
+    const processors =  getProcessorValue(onUpdate, URI_PARTS_TYPE);
     expect(processors[0].uri_parts).toEqual({
       field: 'field_1',
       ...defaultUriPartsParameters,
@@ -108,8 +107,7 @@ describe('Processor: URI parts', () => {
     // Save the field with new changes
     await saveNewProcessor();
 
-    const [onUpdateResult] = onUpdate.mock.calls[onUpdate.mock.calls.length - 1];
-    const { processors } = onUpdateResult.getData();
+    const processors =  getProcessorValue(onUpdate, URI_PARTS_TYPE);
     expect(processors[0].uri_parts).toEqual({
       description: undefined,
       field: 'field_1',
