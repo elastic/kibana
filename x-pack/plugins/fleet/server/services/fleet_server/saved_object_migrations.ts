@@ -169,6 +169,7 @@ async function migrateAgentPolicies() {
         track_total_hits: true,
       });
 
+      // @ts-expect-error value is number | TotalHits
       if (res.body.hits.total.value === 0) {
         return agentPolicyService.createFleetPolicyChangeFleetServer(
           soClient,
