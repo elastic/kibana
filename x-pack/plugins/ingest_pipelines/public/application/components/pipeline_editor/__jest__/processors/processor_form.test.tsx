@@ -8,8 +8,6 @@
 import { act } from 'react-dom/test-utils';
 import { setup, SetupResult } from './processor.helpers';
 
-
-
 describe('Processor: Bytes', () => {
   let onUpdate: jest.Mock;
   let testBed: SetupResult;
@@ -50,6 +48,5 @@ describe('Processor: Bytes', () => {
 
     // Expect form error as a processor type is required
     expect(form.getErrorsMessages()).toEqual(['A type is required.']);
-
   });
 });
