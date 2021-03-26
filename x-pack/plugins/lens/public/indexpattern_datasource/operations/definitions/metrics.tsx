@@ -27,7 +27,7 @@ type MetricColumn<T> = FormattedIndexPatternColumn &
 const typeToFn: Record<string, string> = {
   min: 'aggMin',
   max: 'aggMax',
-  avg: 'aggAvg',
+  average: 'aggAvg',
   sum: 'aggSum',
   median: 'aggMedian',
 };
@@ -76,7 +76,6 @@ function buildMetricOperation<T extends MetricColumn<string>>({
     },
     isTransferable: (column, newIndexPattern) => {
       const newField = newIndexPattern.getFieldByName(column.sourceField);
-
       return Boolean(
         newField &&
           supportedTypes.includes(newField.type) &&
@@ -124,7 +123,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
 }
 
 export type SumIndexPatternColumn = MetricColumn<'sum'>;
-export type AvgIndexPatternColumn = MetricColumn<'avg'>;
+export type AvgIndexPatternColumn = MetricColumn<'average'>;
 export type MinIndexPatternColumn = MetricColumn<'min'>;
 export type MaxIndexPatternColumn = MetricColumn<'max'>;
 export type MedianIndexPatternColumn = MetricColumn<'median'>;
@@ -154,7 +153,7 @@ export const maxOperation = buildMetricOperation<MaxIndexPatternColumn>({
 });
 
 export const averageOperation = buildMetricOperation<AvgIndexPatternColumn>({
-  type: 'avg',
+  type: 'average',
   priority: 2,
   displayName: i18n.translate('xpack.lens.indexPattern.avg', {
     defaultMessage: 'Average',

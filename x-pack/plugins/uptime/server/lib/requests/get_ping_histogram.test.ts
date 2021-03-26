@@ -21,16 +21,16 @@ describe('getPingHistogram', () => {
           {
             key: 1,
             up: {
-              doc_count: 2,
+              value: 2,
             },
             down: {
-              doc_count: 1,
+              value: 1,
             },
           },
           {
             key: 2,
             up: {
-              doc_count: 2,
+              value: 2,
             },
             down: {
               bucket_count: 1,
@@ -53,10 +53,10 @@ describe('getPingHistogram', () => {
               {
                 key: 1,
                 up: {
-                  doc_count: 2,
+                  value: 2,
                 },
                 down: {
-                  doc_count: 1,
+                  value: 1,
                 },
               },
             ],
@@ -68,8 +68,8 @@ describe('getPingHistogram', () => {
 
     const result = await getPingHistogram({
       uptimeEsClient,
-      from: 'now-15m',
-      to: 'now',
+      dateStart: 'now-15m',
+      dateEnd: 'now',
     });
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
@@ -89,8 +89,8 @@ describe('getPingHistogram', () => {
 
     const result = await getPingHistogram({
       uptimeEsClient,
-      from: 'now-15m',
-      to: 'now',
+      dateStart: 'now-15m',
+      dateEnd: 'now',
       filters: '',
     });
 
@@ -111,28 +111,28 @@ describe('getPingHistogram', () => {
               {
                 key: 1,
                 up: {
-                  doc_count: 2,
+                  value: 2,
                 },
                 down: {
-                  doc_count: 1,
+                  value: 1,
                 },
               },
               {
                 key: 2,
                 up: {
-                  doc_count: 2,
+                  value: 2,
                 },
                 down: {
-                  doc_count: 2,
+                  value: 2,
                 },
               },
               {
                 key: 3,
                 up: {
-                  doc_count: 3,
+                  value: 3,
                 },
                 down: {
-                  doc_count: 1,
+                  value: 1,
                 },
               },
             ],
@@ -153,8 +153,8 @@ describe('getPingHistogram', () => {
 
     const result = await getPingHistogram({
       uptimeEsClient,
-      from: 'now-15m',
-      to: 'now',
+      dateStart: 'now-15m',
+      dateEnd: 'now',
       filters: JSON.stringify(searchFilter),
       monitorId: undefined,
     });
@@ -175,28 +175,28 @@ describe('getPingHistogram', () => {
               {
                 key: 1,
                 up: {
-                  doc_count: 2,
+                  value: 2,
                 },
                 down: {
-                  doc_count: 1,
+                  value: 1,
                 },
               },
               {
                 key: 2,
                 up: {
-                  doc_count: 1,
+                  value: 1,
                 },
                 down: {
-                  doc_count: 2,
+                  value: 2,
                 },
               },
               {
                 key: 3,
                 up: {
-                  doc_count: 3,
+                  value: 3,
                 },
                 down: {
-                  doc_count: 1,
+                  value: 1,
                 },
               },
             ],
@@ -209,8 +209,8 @@ describe('getPingHistogram', () => {
     const filters = `{"bool":{"must":[{"simple_query_string":{"query":"http"}}]}}`;
     const result = await getPingHistogram({
       uptimeEsClient,
-      from: 'now-15m',
-      to: 'now',
+      dateStart: 'now-15m',
+      dateEnd: 'now',
       filters,
     });
 
