@@ -53,6 +53,7 @@ export function registerFleetUsageCollector(
         online: { type: 'long' },
         error: { type: 'long' },
         offline: { type: 'long' },
+        updating: { type: 'long' },
       },
       packages: {
         type: 'array',

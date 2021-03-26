@@ -14,9 +14,10 @@ import { isFleetServerSetup } from '../services/fleet_server';
 
 export interface AgentUsage {
   total: number;
-  online: number;
-  error: number;
+  healthy: number;
+  unhealthy: number;
   offline: number;
+  updating: number;
 }
 
 export const getAgentUsage = async (
@@ -28,20 +29,25 @@ export const getAgentUsage = async (
   if (!soClient || !esClient || !(await isFleetServerSetup())) {
     return {
       total: 0,
-      online: 0,
-      error: 0,
+      healthy: 0,
+      unhealthy: 0,
       offline: 0,
+      updating: 0,
     };
   }
 
-  const { total, online, error, offline } = await AgentService.getAgentStatusForAgentPolicy(
-    soClient,
-    esClient
-  );
-  return {
+  const {
     total,
     online,
     error,
     offline,
+    updating,
+  } = await AgentService.getAgentStatusForAgentPolicy(soClient, esClient);
+  return {
+    total,
+    healthy: online,
+    unhealthy: error,
+    offline,
+    updating,
   };
 };
