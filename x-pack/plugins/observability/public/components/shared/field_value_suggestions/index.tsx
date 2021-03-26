@@ -25,6 +25,7 @@ export interface FieldValueSuggestionsProps {
   time?: { from: string; to: string };
   forceOpen?: boolean;
   button?: JSX.Element;
+  width?: number;
 }
 
 export function FieldValueSuggestions({
@@ -35,6 +36,7 @@ export function FieldValueSuggestions({
   filters,
   button,
   time,
+  width,
   forceOpen,
   anchorPosition,
   onChange: onSelectionChange,
@@ -63,6 +65,7 @@ export function FieldValueSuggestions({
       button={button}
       forceOpen={forceOpen}
       anchorPosition={anchorPosition}
+      width={width}
     />
   );
 }

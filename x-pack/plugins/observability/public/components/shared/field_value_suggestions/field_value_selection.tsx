@@ -27,6 +27,7 @@ export interface FieldValueSelectionProps {
   anchorPosition?: PopoverAnchorPosition;
   forceOpen?: boolean;
   button?: JSX.Element;
+  width?: number;
 }
 
 const formatOptions = (values?: string[], value?: string): EuiSelectableOption[] => {
@@ -43,6 +44,7 @@ export function FieldValueSelection({
   values,
   setQuery,
   button,
+  width,
   forceOpen,
   anchorPosition,
   onChange: onSelectionChange,
@@ -72,6 +74,7 @@ export function FieldValueSelection({
 
   const anchorButton = (
     <EuiButton
+      style={width ? { width } : {}}
       size="s"
       iconType="arrowDown"
       iconSide="right"

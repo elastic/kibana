@@ -8,6 +8,7 @@
 import { ConfigProps, DataSeries } from '../types';
 import { FieldLabels } from './constants';
 import { buildPhraseFilter } from './utils';
+import { OperationType } from '../../../../../../lens/public';
 
 export function getServiceThroughputLensConfig({
   seriesId,
@@ -22,7 +23,7 @@ export function getServiceThroughputLensConfig({
       sourceField: '@timestamp',
     },
     yAxisColumn: {
-      operationType: 'avg',
+      operationType: 'avg' as OperationType,
       sourceField: 'transaction.duration.us',
       label: 'Throughput',
     },

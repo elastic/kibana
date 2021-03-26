@@ -61,6 +61,7 @@ export function ReportDefinitionCol({ dataViewSeries }: { dataViewSeries: DataSe
                     onChange={(val?: string) => onChange(field, val)}
                     filters={(filters ?? []).map(({ query }) => query)}
                     time={series.time}
+                    width={200}
                   />
                 </EuiFlexItem>
                 {rtd?.[field] && (
