@@ -6,18 +6,14 @@
  */
 
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 import { addDecorator, storiesOf } from '@storybook/react';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import { EuiCheckbox, EuiSpacer, EuiSwitch, EuiText } from '@elastic/eui';
-
+import { EuiThemeProvider } from '../../../../../../../../../../src/plugins/kibana_react/common';
 import { OperatingSystem } from '../../../../../../../common/endpoint/types';
 
 import { ConfigForm } from '.';
 
-addDecorator((storyFn) => (
-  <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>
-));
+addDecorator((storyFn) => <EuiThemeProvider darkMode={false}>{storyFn()}</EuiThemeProvider>);
 
 storiesOf('PolicyDetails/ConfigForm', module)
   .add('One OS', () => {

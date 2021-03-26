@@ -6,11 +6,10 @@
  */
 
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 import { storiesOf, addDecorator } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
+import { EuiThemeProvider } from '../../../../../../../../../../src/plugins/kibana_react/common';
 import { KibanaContextProvider } from '../../../../../../../../../../src/plugins/kibana_react/public';
 import {
   ConditionEntryField,
@@ -24,9 +23,7 @@ import { TrustedAppCard } from '.';
 
 addDecorator((storyFn) => (
   <KibanaContextProvider services={{ uiSettings: { get: () => 'MMM D, YYYY @ HH:mm:ss.SSS' } }}>
-    <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-      {storyFn()}
-    </ThemeProvider>
+    <EuiThemeProvider darkMode={false}>{storyFn()}</EuiThemeProvider>
   </KibanaContextProvider>
 ));
 

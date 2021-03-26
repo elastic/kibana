@@ -14,12 +14,11 @@ import {
   EuiIcon,
   EuiText,
 } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
-import styled from 'styled-components';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import * as i18n from '../translations';
 
-export const Icon = styled(EuiIcon)`
-  margin-right: ${theme.euiSizeS};
+export const Icon = euiStyled(EuiIcon)`
+  margin-right: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
 Icon.displayName = 'Icon';

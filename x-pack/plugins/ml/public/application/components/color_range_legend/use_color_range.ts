@@ -7,9 +7,7 @@
 
 import d3 from 'd3';
 import { useMemo } from 'react';
-import euiThemeLight from '@elastic/eui/dist/eui_theme_light.json';
-import euiThemeDark from '@elastic/eui/dist/eui_theme_dark.json';
-
+import { euiDarkVars, euiLightVars } from '@kbn/ui-shared-deps/theme';
 import { i18n } from '@kbn/i18n';
 
 import { useUiSettings } from '../../contexts/kibana/use_ui_settings_context';
@@ -188,12 +186,10 @@ export const useColorRange = (
   return scaleTypes[colorRangeScale];
 };
 
-export type EuiThemeType = typeof euiThemeLight | typeof euiThemeDark;
-
 export function useCurrentEuiTheme() {
   const uiSettings = useUiSettings();
   return useMemo(
-    () => ({ euiTheme: uiSettings.get('theme:darkMode') ? euiThemeDark : euiThemeLight }),
+    () => ({ euiTheme: uiSettings.get('theme:darkMode') ? euiDarkVars : euiLightVars }),
     [uiSettings]
   );
 }

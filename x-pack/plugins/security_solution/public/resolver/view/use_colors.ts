@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import euiThemeAmsterdamDark from '@elastic/eui/dist/eui_theme_amsterdam_dark.json';
-import euiThemeAmsterdamLight from '@elastic/eui/dist/eui_theme_amsterdam_light.json';
-import { useMemo } from 'react';
+import { useContext, useMemo } from 'react';
+import { ThemeContext } from 'styled-components';
+import { EuiTheme } from '../../../../../../src/plugins/kibana_react/common';
 import { useUiSetting } from '../../../../../../src/plugins/kibana_react/public';
 
 type ResolverColorNames =
@@ -32,7 +32,8 @@ type ColorMap = Record<ResolverColorNames, string>;
  */
 export function useColors(): ColorMap {
   const isDarkMode = useUiSetting('theme:darkMode');
-  const theme = isDarkMode ? euiThemeAmsterdamDark : euiThemeAmsterdamLight;
+  const theme = useContext<EuiTheme>(ThemeContext).eui;
+
   return useMemo(() => {
     return {
       copyableFieldBackground: theme.euiColorLightShade,

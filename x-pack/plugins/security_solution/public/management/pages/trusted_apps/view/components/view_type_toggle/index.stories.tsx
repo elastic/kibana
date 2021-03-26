@@ -6,16 +6,12 @@
  */
 
 import React, { useState } from 'react';
-import { ThemeProvider } from 'styled-components';
 import { storiesOf, addDecorator } from '@storybook/react';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
-
+import { EuiThemeProvider } from '../../../../../../../../../../src/plugins/kibana_react/common';
 import { ViewType } from '../../../state';
 import { ViewTypeToggle } from '.';
 
-addDecorator((storyFn) => (
-  <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>
-));
+addDecorator((storyFn) => <EuiThemeProvider darkMode={false}>{storyFn()}</EuiThemeProvider>);
 
 const useRenderStory = (viewType: ViewType) => {
   const [selectedOption, setSelectedOption] = useState<ViewType>(viewType);

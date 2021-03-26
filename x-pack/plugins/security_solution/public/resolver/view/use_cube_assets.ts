@@ -8,11 +8,10 @@
 import { i18n } from '@kbn/i18n';
 
 import { ButtonColor } from '@elastic/eui';
-import euiThemeAmsterdamDark from '@elastic/eui/dist/eui_theme_amsterdam_dark.json';
-import euiThemeAmsterdamLight from '@elastic/eui/dist/eui_theme_amsterdam_light.json';
-import { useMemo } from 'react';
+import { useContext, useMemo } from 'react';
+import { ThemeContext } from 'styled-components';
+import { EuiTheme } from '../../../../../../src/plugins/kibana_react/common';
 import { ResolverProcessType, NodeDataStatus } from '../types';
-import { useUiSetting } from '../../../../../../src/plugins/kibana_react/public';
 import { useSymbolIDs } from './use_symbol_ids';
 import { useColors } from './use_colors';
 
@@ -24,9 +23,8 @@ export function useCubeAssets(
   isProcessTrigger: boolean
 ): NodeStyleConfig {
   const SymbolIds = useSymbolIDs();
-  const isDarkMode = useUiSetting('theme:darkMode');
-  const theme = isDarkMode ? euiThemeAmsterdamDark : euiThemeAmsterdamLight;
   const colorMap = useColors();
+  const theme = useContext<EuiTheme>(ThemeContext).eui;
 
   const nodeAssets: NodeStyleMap = useMemo(
     () => ({
