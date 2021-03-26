@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { isEqual } from 'lodash';
 import React, { useRef, useState } from 'react';
 import {
   EuiPopover,
@@ -17,7 +16,7 @@ import {
   EuiPopoverProps,
 } from '@elastic/eui';
 
-import { ExperimentSolution } from '../../../common';
+import { ExperimentSolution, ExperimentStatus, ExperimentID, Experiment } from '../../../common';
 import { pluginServices } from '../../services';
 import { ExperimentsStrings } from '../../i18n';
 import { ExperimentPanel } from './experiment_panel';
@@ -30,6 +29,20 @@ export interface Props extends Omit<EuiPopoverProps, 'children'> {
   solutions?: ExperimentSolution[];
 }
 
+const statusHasChanged = (
+  original: Record<ExperimentID, Experiment>,
+  current: Record<ExperimentID, Experiment>
+): boolean => {
+  for (const id of Object.keys(original) as ExperimentID[]) {
+    for (const key of Object.keys(original[id].status) as Array<keyof ExperimentStatus>) {
+      if (original[id].status[key] !== current[id].status[key]) {
+        return true;
+      }
+    }
+  }
+  return false;
+};
+
 export const ExperimentsPopover = (props: Props) => {
   const { solutions, ...rest } = props;
   const { experiments: experimentsService } = pluginServices.getHooks();
@@ -38,10 +51,13 @@ export const ExperimentsPopover = (props: Props) => {
   const [experiments, setExperiments] = useState(getExperiments());
   const initialStatus = useRef(getExperiments());
 
+  const isChanged = statusHasChanged(initialStatus.current, experiments);
+
   return (
     <EuiPopover {...{ ...rest }}>
       <EuiPopoverTitle>Available Experiments</EuiPopoverTitle>
       {Object.values(experiments).map((experiment) => {
+        // Filter out any panels that don't match the solutions filter, (if provided).
         if (solutions && !solutions.some((solution) => experiment.solutions.includes(solution))) {
           return null;
         }
@@ -58,7 +74,7 @@ export const ExperimentsPopover = (props: Props) => {
         );
       })}
       <EuiPopoverFooter className="experimentsPopover__footer">
-        {!isEqual(initialStatus.current, experiments) ? (
+        {isChanged ? (
           <EuiCallOut
             className="experimentsPopover__callout"
             size="s"

@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { mapValues } from 'lodash';
-import { ExperimentEnvironment } from '../../../common';
+import { ExperimentEnvironment, experimentIDs, Experiment } from '../../../common';
 import { PluginServiceFactory } from '../create';
 import { experiments, ExperimentID, getExperimentIDs } from '../../../common';
 import {
@@ -21,7 +20,11 @@ export type ExperimentsServiceFactory = PluginServiceFactory<PresentationExperim
 export const experimentsServiceFactory: ExperimentsServiceFactory = () => {
   const storage = window.sessionStorage;
 
-  const getExperiments = () => mapValues(experiments, (experiment) => getExperiment(experiment.id));
+  const getExperiments = () =>
+    experimentIDs.reduce((acc, id) => {
+      acc[id] = getExperiment(id);
+      return acc;
+    }, {} as { [id in ExperimentID]: Experiment });
 
   const getExperiment = (id: ExperimentID) => {
     const experiment = experiments[id];

@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { mapValues } from 'lodash';
 import {
   experiments,
+  experimentIDs,
   ExperimentID,
   ExperimentEnvironment,
   getExperimentIDs,
+  Experiment,
 } from '../../../common';
 import { PluginServiceFactory } from '../create';
 import {
@@ -24,20 +25,26 @@ export type ExperimentsServiceFactory = PluginServiceFactory<PresentationExperim
 
 export const experimentsServiceFactory: ExperimentsServiceFactory = () => {
   const reset = () =>
-    mapValues(experiments, (experiment) => {
+    experimentIDs.reduce((acc, id) => {
+      const experiment = getExperiment(id);
       const defaultValue = experiment.isActive;
 
-      return {
+      acc[id] = {
         defaultValue,
         session: null,
         browser: null,
         kibana: defaultValue,
       };
-    });
+      return acc;
+    }, {} as { [id in ExperimentID]: { defaultValue: boolean; session: boolean | null; browser: boolean | null; kibana: boolean } });
 
   let statuses = reset();
 
-  const getExperiments = () => mapValues(experiments, (experiment) => getExperiment(experiment.id));
+  const getExperiments = () =>
+    experimentIDs.reduce((acc, id) => {
+      acc[id] = getExperiment(id);
+      return acc;
+    }, {} as { [id in ExperimentID]: Experiment });
 
   const getExperiment = (id: ExperimentID) => {
     const experiment = experiments[id];

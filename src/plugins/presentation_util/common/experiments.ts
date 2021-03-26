@@ -28,6 +28,7 @@ export type ExperimentStatus = {
   isEnabled: boolean;
   isOverride: boolean;
 } & EnvironmentStatus;
+
 export interface ExperimentConfig {
   id: ExperimentID;
   name: string;

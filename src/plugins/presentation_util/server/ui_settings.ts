@@ -7,19 +7,25 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { mapValues } from 'lodash';
 import { UiSettingsParams } from '../../../../src/core/types';
-import { experiments, ExperimentID } from '../common';
+import { experiments, experimentIDs, ExperimentID, ExperimentConfig } from '../common';
 
-const experimentSettings: Record<ExperimentID, UiSettingsParams<boolean>> = mapValues(
-  experiments,
-  (experiment) => {
+const experimentSettings: Record<ExperimentID, UiSettingsParams<boolean>> = experimentIDs.reduce(
+  (acc, id) => {
+    const experiment = experiments[id];
     const { name, description, isActive: value } = experiment;
-    return {
+    acc[id] = {
       name,
       value,
       description,
       schema: schema.boolean(),
+    };
+    return acc;
+  },
+  {} as {
+    [id in ExperimentID]: Pick<ExperimentConfig, 'name' | 'description'> & {
+      value: boolean;
+      schema: ReturnType<typeof schema.boolean>;
     };
   }
 );

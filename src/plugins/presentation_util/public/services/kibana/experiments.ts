@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { mapValues } from 'lodash';
-
 import {
   environmentNames,
   ExperimentEnvironment,
@@ -16,7 +14,7 @@ import {
 } from '../../../common';
 import { PresentationUtilPluginStartDeps } from '../../types';
 import { KibanaPluginServiceFactory } from '../create';
-import { experiments, ExperimentID } from '../../../common';
+import { experiments, ExperimentID, Experiment } from '../../../common';
 import {
   PresentationExperimentsService,
   isEnabledByStorageValue,
@@ -35,7 +33,11 @@ export const experimentsServiceFactory: ExperimentsServiceFactory = ({ coreStart
   const localStorage = window.localStorage;
   const sessionStorage = window.sessionStorage;
 
-  const getExperiments = () => mapValues(experiments, (experiment) => getExperiment(experiment.id));
+  const getExperiments = () =>
+    experimentIDs.reduce((acc, id) => {
+      acc[id] = getExperiment(id);
+      return acc;
+    }, {} as { [id in ExperimentID]: Experiment });
 
   const getExperiment = (id: ExperimentID) => {
     const experiment = experiments[id];
