@@ -4,9 +4,7 @@
 <titleabbrev>Legacy Update connector</titleabbrev>
 ++++
 
-deprecated::[7.13.0]
-
-Use the <<update-connector-api>> instead.
+WARNING: Deprecated in 7.13.0. Use <<update-connector-api>> instead.
 
 Updates the attributes for an existing connector.
 

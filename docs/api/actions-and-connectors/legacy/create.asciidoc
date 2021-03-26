@@ -4,9 +4,7 @@
 <titleabbrev>Legacy Create connector</titleabbrev>
 ++++
 
-deprecated::[7.13.0]
-
-Use the <<create-connector-api>> instead.
+WARNING: Deprecated in 7.13.0. Use <<create-connector-api>> instead.
 
 Creates a connector.
 

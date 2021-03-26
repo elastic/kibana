@@ -4,9 +4,7 @@
 <titleabbrev>Legacy Get all connector</titleabbrev>
 ++++
 
-deprecated::[7.13.0]
-
-Use the <<get-all-connectors-api>> instead.
+WARNING: Deprecated in 7.13.0. Use <<get-all-connectors-api>> instead.
 
 Retrieves all connectors.
 

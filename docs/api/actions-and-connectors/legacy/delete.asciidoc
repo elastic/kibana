@@ -4,9 +4,7 @@
 <titleabbrev>Legacy Delete connector</titleabbrev>
 ++++
 
-deprecated::[7.13.0]
-
-Use the <<delete-connector-api>> instead.
+WARNING: Deprecated in 7.13.0. Use <<delete-connector-api>> instead.
 
 Deletes a connector by ID.
 

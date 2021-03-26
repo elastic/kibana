@@ -4,9 +4,7 @@
 <titleabbrev>Legacy Get connector</titleabbrev>
 ++++
 
-deprecated::[7.13.0]
-
-Use the <<get-connector-api>> instead.
+WARNING: Deprecated in 7.13.0. Use <<get-connector-api>> instead.
 
 Retrieves a connector by ID.
 
