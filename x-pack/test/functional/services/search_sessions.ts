@@ -72,7 +72,9 @@ export function SearchSessionsProvider({ getService }: FtrProviderContext) {
 
       if (searchSessionName) {
         await testSubjects.click('searchSessionNameEdit');
-        await testSubjects.setValue('searchSessionNameInput', searchSessionName);
+        await testSubjects.setValue('searchSessionNameInput', searchSessionName, {
+          clearWithKeyboard: true,
+        });
         await testSubjects.click('searchSessionNameSave');
       }
 
