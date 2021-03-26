@@ -23,6 +23,7 @@ const setup = (props?: Props) =>
 const docLinks: DocLinksStart = {
   ELASTIC_WEBSITE_URL: 'htts://jestTest.elastic.co',
   DOC_LINK_VERSION: 'jest',
+  ELASTICSEARCH_DOCS: 'mock-url',
   links: {
     runtimeFields: { mapping: 'https://jestTest.elastic.co/to-be-defined.html' },
     scriptedFields: {} as any,

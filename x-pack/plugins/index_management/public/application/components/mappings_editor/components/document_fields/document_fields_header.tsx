@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiText, EuiLink, EuiFlexGroup, EuiFlexItem, EuiFieldSearch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { documentationService } from '../../../../services/documentation';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   searchValue: string;
@@ -18,16 +18,22 @@ interface Props {
 }
 
 export const DocumentFieldsHeader = React.memo(({ searchValue, onSearchChange }: Props) => {
+  const { services } = useKibana();
+  const docLinks = services.docLinks!;
   return (
     <EuiFlexGroup justifyContent="spaceBetween">
       <EuiFlexItem>
         <EuiText size="s" color="subdued">
           <FormattedMessage
             id="xpack.idxMgmt.mappingsEditor.documentFieldsDescription"
-            defaultMessage="Define the fields for your indexed documents. {docsLink}"
+            defaultMessage="Define the fields for your indexed documents. {docUrl}"
             values={{
-              docsLink: (
-                <EuiLink href={documentationService.getMappingTypesLink()} target="_blank" external>
+              docUrl: (
+                <EuiLink
+                  href={docLinks.links.elasticsearch.mappingFieldDataTypes}
+                  target="_blank"
+                  external
+                >
                   {i18n.translate('xpack.idxMgmt.mappingsEditor.documentFieldsDocumentationLink', {
                     defaultMessage: 'Learn more.',
                   })}

@@ -10,45 +10,36 @@ import { DataType } from '../components/mappings_editor/types';
 import { TYPE_DEFINITION } from '../components/mappings_editor/constants';
 
 class DocumentationService {
-  private esDocsBase: string = '';
-  private kibanaDocsBase: string = '';
-
   public setup(docLinks: DocLinksStart): void {
-    const { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL } = docLinks;
-    const docsBase = `${ELASTIC_WEBSITE_URL}guide/en`;
-
-    this.esDocsBase = `${docsBase}/elasticsearch/reference/${DOC_LINK_VERSION}`;
-    this.kibanaDocsBase = `${docsBase}/kibana/${DOC_LINK_VERSION}`;
+    const { ELASTICSEARCH_DOCS, links } = docLinks;
   }
 
   public getEsDocsBase() {
-    return this.esDocsBase;
+    return `${this.ELASTICSEARCH_DOCS}`;
   }
 
   public getSettingsDocumentationLink() {
-    return `${this.esDocsBase}/index-modules.html#index-modules-settings`;
+    return this.links.elasticsearch.indexSettings;
   }
 
   public getMappingDocumentationLink() {
-    return `${this.esDocsBase}/mapping.html`;
+    return this.links.elasticsearch.mapping;
   }
 
   public getRoutingLink() {
-    return `${this.esDocsBase}/mapping-routing-field.html`;
+    return this.links.elasticsearch.mappingRouting;
   }
 
   public getDataStreamsDocumentationLink() {
-    return `${this.esDocsBase}/data-streams.html`;
+    return this.links.elasticsearch.dataStreams;
   }
 
   public getTemplatesDocumentationLink(isLegacy = false) {
-    return isLegacy
-      ? `${this.esDocsBase}/indices-templates-v1.html`
-      : `${this.esDocsBase}/indices-templates.html`;
+    return isLegacy ? this.links.apis.putIndexTemplateV1 : this.links.elasticsearch.indexTemplates;
   }
 
   public getIdxMgmtDocumentationLink() {
-    return `${this.kibanaDocsBase}/managing-indices.html`;
+    return this.links.management.indexManagement;
   }
 
   public getTypeDocLink = (type: DataType, docType = 'main'): string | undefined => {
@@ -63,157 +54,143 @@ class DocumentationService {
     }
     return `${this.esDocsBase}${typeDefinition.documentation[docType]}`;
   };
-
-  public getMappingTypesLink() {
-    return `${this.esDocsBase}/mapping-types.html`;
-  }
-
   public getDynamicMappingLink() {
-    return `${this.esDocsBase}/dynamic-field-mapping.html`;
+    return this.links.elasticsearch.mappingDynamicFields;
   }
-
   public getPercolatorQueryLink() {
-    return `${this.esDocsBase}/query-dsl-percolate-query.html`;
+    return this.links.query.percolate;
   }
 
   public getRankFeatureQueryLink() {
-    return `${this.esDocsBase}/rank-feature.html`;
+    return this.links.elasticsearch.mappingRankFeatureFields;
   }
 
   public getMetaFieldLink() {
-    return `${this.esDocsBase}/mapping-meta-field.html`;
+    return this.links.elasticsearch.mappingMetaFields;
   }
 
   public getDynamicTemplatesLink() {
-    return `${this.esDocsBase}/dynamic-templates.html`;
+    return this.links.elasticsearch.mappingDynamicTemplates;
   }
 
   public getMappingSourceFieldLink() {
-    return `${this.esDocsBase}/mapping-source-field.html`;
+    return this.links.elasticsearch.mappingSourceFields;
   }
 
   public getDisablingMappingSourceFieldLink() {
-    return `${this.esDocsBase}/mapping-source-field.html#disable-source-field`;
+    return this.links.elasticsearch.mappingSourceFieldsDisable;
   }
 
   public getNullValueLink() {
-    return `${this.esDocsBase}/null-value.html`;
+    return this.links.elasticsearch.mappingNullValue;
   }
 
   public getTermVectorLink() {
-    return `${this.esDocsBase}/term-vector.html`;
+    return this.links.elasticsearch.mappingTermVector;
   }
 
   public getStoreLink() {
-    return `${this.esDocsBase}/mapping-store.html`;
+    return this.links.elasticsearch.mappingStore;
   }
 
   public getSimilarityLink() {
-    return `${this.esDocsBase}/similarity.html`;
+    return this.links.elasticsearch.mappingSimilarity;
   }
 
   public getNormsLink() {
-    return `${this.esDocsBase}/norms.html`;
+    return this.links.elasticsearch.mappingNorms;
   }
 
   public getIndexLink() {
-    return `${this.esDocsBase}/mapping-index.html`;
+    return this.links.elasticsearch.mappingIndex;
   }
 
   public getIgnoreMalformedLink() {
-    return `${this.esDocsBase}/ignore-malformed.html`;
+    return this.links.elasticsearch.mappingIgnoreMalformed;
   }
 
   public getMetaLink() {
-    return `${this.esDocsBase}/mapping-field-meta.html`;
+    return this.links.elasticsearch.mappingMeta;
   }
 
   public getFormatLink() {
-    return `${this.esDocsBase}/mapping-date-format.html`;
+    return this.links.elasticsearch.mappingFormat;
   }
 
   public getEagerGlobalOrdinalsLink() {
-    return `${this.esDocsBase}/eager-global-ordinals.html`;
+    return this.links.elasticsearch.mappingEagerGlobalOrdinals;
   }
 
   public getDocValuesLink() {
-    return `${this.esDocsBase}/doc-values.html`;
+    return this.links.elasticsearch.mappingDocValues;
   }
 
   public getCopyToLink() {
-    return `${this.esDocsBase}/copy-to.html`;
+    return this.links.elasticsearch.mappingCopyTo;
   }
 
   public getCoerceLink() {
-    return `${this.esDocsBase}/coerce.html`;
-  }
-
-  public getBoostLink() {
-    return `${this.esDocsBase}/mapping-boost.html`;
+    return this.links.elasticsearch.mappingCoerce;
   }
 
   public getNormalizerLink() {
-    return `${this.esDocsBase}/normalizer.html`;
+    return this.links.elasticsearch.mappingNormalizer;
   }
 
   public getIgnoreAboveLink() {
-    return `${this.esDocsBase}/ignore-above.html`;
+    return this.links.elasticsearch.mappingIgnoreAbove;
   }
 
   public getFielddataLink() {
-    return `${this.esDocsBase}/fielddata.html`;
+    return this.links.elasticsearch.mappingFieldData;
   }
 
   public getFielddataFrequencyLink() {
-    return `${this.esDocsBase}/fielddata.html#field-data-filtering`;
+    return this.links.elasticsearch.mappingFieldDataFilter;
   }
 
   public getEnablingFielddataLink() {
-    return `${this.esDocsBase}/fielddata.html#before-enabling-fielddata`;
+    return this.links.elasticsearch.mappingFieldDataEnable;
   }
 
   public getIndexPhrasesLink() {
-    return `${this.esDocsBase}/index-phrases.html`;
+    return this.links.elasticsearch.mappingIndexPhrases;
   }
 
   public getIndexPrefixesLink() {
-    return `${this.esDocsBase}/index-prefixes.html`;
+    return this.links.elasticsearch.mappingIndexPrefixes;
   }
 
   public getPositionIncrementGapLink() {
-    return `${this.esDocsBase}/position-increment-gap.html`;
+    return this.links.elasticsearch.mappingPositionIncrementGap;
   }
 
   public getAnalyzerLink() {
-    return `${this.esDocsBase}/analyzer.html`;
+    return this.links.elasticsearch.mappingAnalyzer;
   }
 
   public getDateFormatLink() {
-    return `${this.esDocsBase}/mapping-date-format.html`;
+    return this.links.elasticsearch.mappingFormat;
   }
 
   public getIndexOptionsLink() {
-    return `${this.esDocsBase}/index-options.html`;
+    return this.links.elasticsearch.mappingIndexOptions;
   }
 
   public getAlternativeToMappingTypesLink() {
-    return `${this.esDocsBase}/removal-of-types.html#_alternatives_to_mapping_types`;
+    return this.links.elasticsearch.mappingTypesRemoval;
   }
 
   public getJoinMultiLevelsPerformanceLink() {
-    return `${this.esDocsBase}/parent-join.html#_parent_join_and_performance`;
+    return this.links.elasticsearch.mappingJoinFieldsPerformance;
   }
 
   public getDynamicLink() {
-    return `${this.esDocsBase}/dynamic.html`;
+    return this.links.elasticsearch.mappingDynamic;
   }
 
   public getEnabledLink() {
-    return `${this.esDocsBase}/enabled.html`;
-  }
-
-  public getRuntimeFields() {
-    return `${this.esDocsBase}/runtime.html`;
+    return this.links.elasticsearch.mappingEnabled;
   }
 
   public getWellKnownTextLink() {
