@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const searchSessions = getService('searchSessions');
   const queryBar = getService('queryBar');
 
-  describe('send to background', () => {
+  describe('save a search sessions', () => {
     before(async function () {
       const { body } = await es.info();
       if (!body.version.number.includes('SNAPSHOT')) {
@@ -83,7 +83,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
 
       // load URL to restore a saved session
-      // TODO: replace with clicking on "Re-run link"
       const url = await browser.getCurrentUrl();
       const savedSessionURL = `${url}&searchSessionId=${savedSessionId}`;
       await browser.get(savedSessionURL);

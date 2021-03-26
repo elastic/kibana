@@ -17,7 +17,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     ...xpackFunctionalConfig.getAll(),
 
     junit: {
-      reportName: 'X-Pack Background Search UI (Enabled WIP Feature)',
+      reportName: 'X-Pack Search Sessions Integration',
     },
 
     testFiles: [
@@ -29,10 +29,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
     kbnTestServer: {
       ...xpackFunctionalConfig.get('kbnTestServer'),
-      serverArgs: [
-        ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
-        '--xpack.data_enhanced.search.sessions.enabled=true', // enable WIP send to background UI
-      ],
+      serverArgs: [...xpackFunctionalConfig.get('kbnTestServer.serverArgs')],
     },
     services,
   };
