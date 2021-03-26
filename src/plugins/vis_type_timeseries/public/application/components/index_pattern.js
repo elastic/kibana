@@ -158,12 +158,14 @@ export const IndexPattern = ({
                 onChange={handleSelectChange(TIME_RANGE_MODE_KEY)}
                 singleSelection={{ asPlainText: true }}
                 isDisabled={disabled}
-                append={
-                  <LastValueModePopover
-                    isIndicatorDisplayed={!model.hide_last_value_indicator}
-                    toggleIndicatorDisplay={toggleIndicatorDisplay}
-                  />
-                }
+                {...(!isEntireTimeRangeActive(model, isTimeSeries) && {
+                  append: (
+                    <LastValueModePopover
+                      isIndicatorDisplayed={!model.hide_last_value_indicator}
+                      toggleIndicatorDisplay={toggleIndicatorDisplay}
+                    />
+                  ),
+                })}
               />
             </EuiFormRow>
             <EuiText size="xs" style={{ margin: 0 }}>
