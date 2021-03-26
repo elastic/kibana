@@ -7,8 +7,9 @@
 
 import { SavedObjectsType } from 'kibana/server';
 import { SEARCH_SESSION_TYPE } from '../../common';
+import { searchSessionSavedObjectMigrations } from './search_sessions_migrations';
 
-export const searchSessionMapping: SavedObjectsType = {
+export const searchSessionSavedObjectType: SavedObjectsType = {
   name: SEARCH_SESSION_TYPE,
   namespaceType: 'single',
   hidden: true,
@@ -67,4 +68,5 @@ export const searchSessionMapping: SavedObjectsType = {
       },
     },
   },
+  migrations: searchSessionSavedObjectMigrations,
 };
