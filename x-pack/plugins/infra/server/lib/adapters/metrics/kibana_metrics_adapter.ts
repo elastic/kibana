@@ -35,7 +35,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
     options: InfraMetricsRequestOptions,
     rawRequest: KibanaRequest
   ): Promise<NodeDetailsMetricData[]> {
-    const indexPattern = `${options.sourceConfiguration.metricAlias},${options.sourceConfiguration.logAlias}`;
+    const indexPattern = `${options.sourceConfiguration.metricAlias}`;
     const fields = findInventoryFields(options.nodeType, options.sourceConfiguration.fields);
     const nodeField = fields.id;
 
@@ -113,7 +113,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
       );
     }
 
-    const indexPattern = `${options.sourceConfiguration.metricAlias},${options.sourceConfiguration.logAlias}`;
+    const indexPattern = `${options.sourceConfiguration.metricAlias}`;
     const timerange = {
       min: options.timerange.from,
       max: options.timerange.to,
@@ -133,7 +133,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
     const calculatedInterval = await calculateMetricInterval(
       client,
       {
-        indexPattern: `${options.sourceConfiguration.logAlias},${options.sourceConfiguration.metricAlias}`,
+        indexPattern: `${options.sourceConfiguration.metricAlias}`,
         timestampField: options.sourceConfiguration.fields.timestamp,
         timerange: options.timerange,
       },

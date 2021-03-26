@@ -37,6 +37,7 @@ import { initGetSubCaseApi } from './cases/sub_case/get_sub_case';
 import { initPatchSubCasesApi } from './cases/sub_case/patch_sub_cases';
 import { initFindSubCasesApi } from './cases/sub_case/find_sub_cases';
 import { initDeleteSubCasesApi } from './cases/sub_case/delete_sub_cases';
+import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 
 /**
  * Default page number when interacting with the saved objects API.
@@ -56,12 +57,16 @@ export function initCaseApi(deps: RouteDeps) {
   initPostCaseApi(deps);
   initPushCaseApi(deps);
   initGetAllCaseUserActionsApi(deps);
-  initGetAllSubCaseUserActionsApi(deps);
-  // Sub cases
-  initGetSubCaseApi(deps);
-  initPatchSubCasesApi(deps);
-  initFindSubCasesApi(deps);
-  initDeleteSubCasesApi(deps);
+
+  if (ENABLE_CASE_CONNECTOR) {
+    // Sub cases
+    initGetAllSubCaseUserActionsApi(deps);
+    initGetSubCaseApi(deps);
+    initPatchSubCasesApi(deps);
+    initFindSubCasesApi(deps);
+    initDeleteSubCasesApi(deps);
+  }
+
   // Comments
   initDeleteCommentApi(deps);
   initDeleteAllCommentsApi(deps);
