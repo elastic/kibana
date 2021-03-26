@@ -16,9 +16,10 @@ import { RUNTIME_FIELD_OPTIONS } from '../constants';
 
 interface Props {
   isDisabled?: boolean;
+  onChange: (value: RuntimeType) => void;
 }
 
-export const TypeField = ({ isDisabled = false }: Props) => {
+export const TypeField = ({ isDisabled = false, onChange }: Props) => {
   return (
     <UseField<Array<EuiComboBoxOptionOption<RuntimeType>>> path="type">
       {({ label, value, setValue }) => {
@@ -44,6 +45,7 @@ export const TypeField = ({ isDisabled = false }: Props) => {
                     return;
                   }
                   setValue(newValue);
+                  onChange(newValue[0].value || 'keyword');
                 }}
                 isClearable={false}
                 isDisabled={isDisabled}

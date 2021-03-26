@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   EuiComboBoxOptionOption,
   EuiCode,
+  EuiFormErrorText,
 } from '@elastic/eui';
 import type { CoreStart } from 'src/core/public';
 
@@ -137,6 +138,11 @@ const geti18nTexts = (): {
   },
 });
 
+const changeWarning = i18n.translate('indexPatternFieldEditor.editor.form.changeWarning', {
+  defaultMessage:
+    'Warning: Change name or type may break searches or visualizations that rely on this field.',
+});
+
 const formDeserializer = (field: Field): FieldFormInternal => {
   let fieldType: Array<EuiComboBoxOptionOption<RuntimeType>>;
   if (!field.type) {
@@ -194,6 +200,12 @@ const FieldEditorComponent = ({
     }
   }, [onChange, isFormValid, isSubmitted, submit]);
 
+  // const [showWarning, setShowWarning] = useState(false);
+  // const [nameValue, setNameValue] = useState(field?.name || '');
+  // const [typeValue, setTypeValue] = useState(field?.type || 'keyword');
+  const [nameChanged, setNameChanged] = useState(false);
+  const [typeChanged, setTypeChanged] = useState(false);
+
   return (
     <Form form={form} className="indexPatternFieldEditor__form">
       <EuiFlexGroup>
@@ -212,15 +224,28 @@ const FieldEditorComponent = ({
                 }),
               },
             }}
+            onChange={(val) => {
+              if (field?.name) {
+                setNameChanged(field?.name !== val);
+              }
+            }}
           />
         </EuiFlexItem>
 
         {/* Type */}
         <EuiFlexItem>
-          <TypeField isDisabled={fieldTypeToProcess === 'concrete'} />
+          <TypeField
+            isDisabled={fieldTypeToProcess === 'concrete'}
+            onChange={(val) => {
+              if (field?.type) {
+                setTypeChanged(field?.type !== val);
+              }
+            }}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 
+      {(nameChanged || typeChanged) && <EuiFormErrorText>{changeWarning}</EuiFormErrorText>}
       <EuiSpacer size="xl" />
 
       {/* Set custom label */}
