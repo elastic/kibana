@@ -138,15 +138,17 @@ export function deleteTestSuiteFactory(
 
     expect(buckets).to.eql(expectedBuckets);
 
-    // There were eleven multi-namespace objects.
+    // There were 15 multi-namespace objects.
     // Since Space 2 was deleted, any multi-namespace objects that existed in that space
     // are updated to remove it, and of those, any that don't exist in any space are deleted.
     const { body: multiNamespaceResponse } = await es.search<Record<string, any>>({
       index: '.kibana',
+      size: 20,
       body: { query: { terms: { type: ['sharedtype'] } } },
     });
     const docs = multiNamespaceResponse.hits.hits;
-    expect(docs).length(10); // just ten results, since spaces_2_only got deleted
+    // Just 12 results, since spaces_2_only, conflict_1_space_2 and conflict_2_space_2 got deleted.
+    expect(docs).length(12);
     docs.forEach((doc) => () => {
       const containsSpace2 = doc?._source?.namespaces.includes('space_2');
       expect(containsSpace2).to.eql(false);
