@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 import { performance } from 'perf_hooks';
 import {
   AlertInstanceContext,
@@ -12,7 +12,7 @@ import {
   AlertServices,
 } from '../../../../../alerting/server';
 import { Logger } from '../../../../../../../src/core/server';
-import { SignalSearchResponse } from './types';
+import type { SignalSearchResponse, SignalSource } from './types';
 import { BuildRuleMessage } from './rule_messages';
 import { buildEventsSearchQuery } from './build_events_query';
 import { createErrorsFromShard, makeFloatString } from './utils';
@@ -22,7 +22,7 @@ import {
 } from '../../../../common/detection_engine/schemas/common/schemas';
 
 interface SingleSearchAfterParams {
-  aggregations?: unknown;
+  aggregations?: Record<string, estypes.AggregationContainer>;
   searchAfterSortId: string | undefined;
   index: string[];
   from: string;
@@ -31,7 +31,7 @@ interface SingleSearchAfterParams {
   logger: Logger;
   pageSize: number;
   sortOrder?: SortOrderOrUndefined;
-  filter: unknown;
+  filter?: estypes.QueryContainer;
   timestampOverride: TimestampOverrideOrUndefined;
   buildRuleMessage: BuildRuleMessage;
   excludeDocsWithTimestampOverride: boolean;
@@ -72,10 +72,9 @@ export const singleSearchAfter = async ({
     });
 
     const start = performance.now();
-    const nextSearchAfterResult: SignalSearchResponse = await services.callCluster(
-      'search',
-      searchAfterQuery
-    );
+    const {
+      body: nextSearchAfterResult,
+    } = await services.scopedClusterClient.asCurrentUser.search<SignalSource>(searchAfterQuery);
     const end = performance.now();
     const searchErrors = createErrorsFromShard({
       errors: nextSearchAfterResult._shards.failures ?? [],

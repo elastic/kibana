@@ -6,7 +6,7 @@
  */
 
 import { isBoom } from '@hapi/boom';
-import { KibanaRequest } from 'src/core/server';
+import type { KibanaRequest } from 'src/core/server';
 
 import {
   ENROLLMENT_API_KEYS_INDEX,
@@ -169,6 +169,7 @@ async function migrateAgentPolicies() {
         track_total_hits: true,
       });
 
+      // @ts-expect-error value is number | TotalHits
       if (res.body.hits.total.value === 0) {
         return agentPolicyService.createFleetPolicyChangeFleetServer(
           soClient,

@@ -141,8 +141,14 @@ export interface PostBulkAgentUpgradeRequest {
     version: string;
   };
 }
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PostBulkAgentUpgradeResponse {}
+
+export type PostBulkAgentUpgradeResponse = Record<
+  Agent['id'],
+  {
+    success: boolean;
+    error?: string;
+  }
+>;
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PostAgentUpgradeResponse {}
@@ -164,12 +170,13 @@ export interface PostBulkAgentReassignRequest {
   };
 }
 
-export interface PostBulkAgentReassignResponse {
-  [key: string]: {
+export type PostBulkAgentReassignResponse = Record<
+  Agent['id'],
+  {
     success: boolean;
-    error?: Error;
-  };
-}
+    error?: string;
+  }
+>;
 
 export interface GetOneAgentEventsRequest {
   params: {

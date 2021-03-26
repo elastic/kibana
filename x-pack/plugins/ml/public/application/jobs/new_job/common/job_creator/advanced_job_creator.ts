@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 
 import { JobCreator } from './job_creator';
@@ -28,7 +29,7 @@ export interface RichDetector {
   byField: SplitField;
   overField: SplitField;
   partitionField: SplitField;
-  excludeFrequent: string | null;
+  excludeFrequent: estypes.ExcludeFrequent | null;
   description: string | null;
   customRules: CustomRule[] | null;
 }
@@ -56,7 +57,7 @@ export class AdvancedJobCreator extends JobCreator {
     byField: SplitField,
     overField: SplitField,
     partitionField: SplitField,
-    excludeFrequent: string | null,
+    excludeFrequent: estypes.ExcludeFrequent | null,
     description: string | null
   ) {
     // addDetector doesn't support adding new custom rules.
@@ -83,7 +84,7 @@ export class AdvancedJobCreator extends JobCreator {
     byField: SplitField,
     overField: SplitField,
     partitionField: SplitField,
-    excludeFrequent: string | null,
+    excludeFrequent: estypes.ExcludeFrequent | null,
     description: string | null,
     index: number
   ) {
@@ -114,7 +115,7 @@ export class AdvancedJobCreator extends JobCreator {
     byField: SplitField,
     overField: SplitField,
     partitionField: SplitField,
-    excludeFrequent: string | null,
+    excludeFrequent: estypes.ExcludeFrequent | null,
     description: string | null,
     customRules: CustomRule[] | null
   ): { detector: Detector; richDetector: RichDetector } {
@@ -177,16 +178,15 @@ export class AdvancedJobCreator extends JobCreator {
   // load the start and end times for the selected index
   // and apply them to the job creator
   public async autoSetTimeRange() {
-    try {
-      const { start, end } = await ml.getTimeFieldRange({
-        index: this._indexPatternTitle,
-        timeFieldName: this.timeFieldName,
-        query: this.query,
-      });
-      this.setTimeRange(start.epoch, end.epoch);
-    } catch (error) {
-      throw Error(error);
-    }
+    const { start, end } = await ml.getTimeFieldRange({
+      index: this._indexPatternTitle,
+      timeFieldName: this.timeFieldName,
+      query: this.query,
+      runtimeMappings: this.datafeedConfig.runtime_mappings,
+      // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
+      indicesOptions: this.datafeedConfig.indices_options,
+    });
+    this.setTimeRange(start.epoch, end.epoch);
   }
 
   public cloneFromExistingJob(job: Job, datafeed: Datafeed) {

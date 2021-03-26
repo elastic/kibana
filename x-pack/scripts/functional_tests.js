@@ -40,6 +40,7 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/plugin_api_integration/config.ts'),
   require.resolve('../test/security_api_integration/saml.config.ts'),
   require.resolve('../test/security_api_integration/session_idle.config.ts'),
+  require.resolve('../test/security_api_integration/session_invalidate.config.ts'),
   require.resolve('../test/security_api_integration/session_lifespan.config.ts'),
   require.resolve('../test/security_api_integration/login_selector.config.ts'),
   require.resolve('../test/security_api_integration/audit.config.ts'),
@@ -73,9 +74,10 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/reporting_api_integration/reporting_without_security.config.ts'),
   require.resolve('../test/security_solution_endpoint_api_int/config.ts'),
   require.resolve('../test/fleet_api_integration/config.ts'),
-  require.resolve('../test/send_search_to_background_integration/config.ts'),
+  require.resolve('../test/search_sessions_integration/config.ts'),
   require.resolve('../test/saved_object_tagging/api_integration/security_and_spaces/config.ts'),
   require.resolve('../test/saved_object_tagging/api_integration/tagging_api/config.ts'),
+  require.resolve('../test/examples/config.ts'),
 ];
 
 require('../../src/setup_node_env');

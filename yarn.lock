@@ -1349,15 +1349,16 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@25.1.0":
-  version "25.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-25.1.0.tgz#8859e07c9822696b3f9b12ae46a18e3316f623fd"
-  integrity sha512-4IFmyhg3dG7VjP0C9DbMBBAxAtai/HPdG/4Z5UMdGYGoZiJwS+fo50irQtvD3H5Lm6OSS8Xk9hmCVPx8KmdiUg==
+"@elastic/charts@26.0.0":
+  version "26.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-26.0.0.tgz#42f06d3be0f40e0128e301b37bdfc509169c387b"
+  integrity sha512-5eBPSjdBb+pVDCcQOYA0dFBiYonHcw7ewxOUxgR8qMmay0xHc7gGUXZiDfIkyUDpJA+a9DS9juNNqKn/M4UbiQ==
   dependencies:
     "@popperjs/core" "^2.4.0"
     chroma-js "^2.1.0"
     classnames "^2.2.6"
     d3-array "^1.2.4"
+    d3-cloud "^1.2.5"
     d3-collection "^1.0.7"
     d3-color "^1.4.0"
     d3-interpolate "^1.4.0"
@@ -1378,16 +1379,16 @@
   version "0.0.0"
   uid ""
 
-"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@^8.0.0-canary.3":
-  version "8.0.0-canary.3"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-8.0.0-canary.3.tgz#b06b95b1370417ac700f30277814fbe7ad532760"
-  integrity sha512-D8kiFxip0IATzXS+5MAA3+4jnTPiJrpkW+FVNc9e3eq8iCIW/BIv9kPqEH55N/RlJxFwGTz5W4jmmFqBeamNFA==
+"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@^8.0.0-canary.4":
+  version "8.0.0-canary.4"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-8.0.0-canary.4.tgz#6f1a592974941baae347eb8c66a2006848349717"
+  integrity sha512-UexFloloyvGOhvMc1ePRHCy89sjQL6rPTTZkXAB/GcC8rCvA3mgSnIY2+Ylvctdv9o4l+M4Bkw8azICulyhwMg==
   dependencies:
-    debug "^4.1.1"
+    debug "^4.3.1"
     hpagent "^0.1.1"
-    ms "^2.1.1"
+    ms "^2.1.3"
     pump "^3.0.0"
-    secure-json-parse "^2.1.0"
+    secure-json-parse "^2.3.1"
 
 "@elastic/ems-client@7.12.0":
   version "7.12.0"
@@ -2015,16 +2016,6 @@
   integrity sha512-eYyLkuUiFZTer59h+SGy7hUm+qE9p+UemePTHLlIWppEd+wExn3Df5jO04bFQTm7nleF5V8CtuYQYb+VFpZ6Sg==
   dependencies:
     "@hapi/hoek" "9.x.x"
-
-"@hapi/vision@^6.0.1":
-  version "6.0.1"
-  resolved "https://registry.yarnpkg.com/@hapi/vision/-/vision-6.0.1.tgz#976c3575be56d3cb5b472ddcfe0b7403778706fd"
-  integrity sha512-xv4PwmhbXCLzDfojZ7l4+P/YynBhMInV8GtLPH4gB74prhwOl8lGcJxxK8V9rf1aMH/vonM5yVGd9FuoA9sT0A==
-  dependencies:
-    "@hapi/boom" "9.x.x"
-    "@hapi/bounce" "2.x.x"
-    "@hapi/hoek" "9.x.x"
-    "@hapi/validate" "1.x.x"
 
 "@hapi/wreck@17.x.x", "@hapi/wreck@^17.0.0", "@hapi/wreck@^17.1.0":
   version "17.1.0"
@@ -10823,7 +10814,7 @@ d3-array@>=2.5, d3-array@^2.3.0, d3-array@^2.7.1:
   resolved "https://registry.yarnpkg.com/d3-array/-/d3-array-2.8.0.tgz#f76e10ad47f1f4f75f33db5fc322eb9ffde5ef23"
   integrity sha512-6V272gsOeg7+9pTW1jSYOR1QE37g95I3my1hBmY+vOUNHRrk9yt4OTz/gK7PMkVAVDrYYq4mq3grTiZ8iJdNIw==
 
-d3-cloud@1.2.5:
+d3-cloud@1.2.5, d3-cloud@^1.2.5:
   version "1.2.5"
   resolved "https://registry.yarnpkg.com/d3-cloud/-/d3-cloud-1.2.5.tgz#3e91564f2d27fba47fcc7d812eb5081ea24c603d"
   integrity sha512-4s2hXZgvs0CoUIw31oBAGrHt9Kt/7P9Ik5HIVzISFiWkD0Ga2VLAuO/emO/z1tYIpE7KG2smB4PhMPfFMJpahw==
@@ -11187,7 +11178,7 @@ debug@3.X, debug@^3.0.0, debug@^3.0.1, debug@^3.1.0, debug@^3.1.1, debug@^3.2.5,
   dependencies:
     ms "^2.1.1"
 
-debug@4, debug@^4.0.0, debug@^4.0.1, debug@^4.1.0, debug@^4.1.1, debug@^4.2.0:
+debug@4, debug@^4.0.0, debug@^4.0.1, debug@^4.1.0, debug@^4.1.1, debug@^4.2.0, debug@^4.3.1:
   version "4.3.1"
   resolved "https://registry.yarnpkg.com/debug/-/debug-4.3.1.tgz#f0d229c505e0c6d8c49ac553d1b13dc183f6b2ee"
   integrity sha512-doEwdvm4PCeK4K3RQN2ZC2BYUBaxwLARCqZmMjtF8a51J2Rb0xpVloFRnCODwqjpwnAoao4pelN8l3RJdv3gRQ==
@@ -14213,7 +14204,7 @@ gaze@^1.0.0:
   dependencies:
     globule "^1.0.0"
 
-geckodriver@^1.21.2:
+geckodriver@^1.22.2:
   version "1.22.2"
   resolved "https://registry.yarnpkg.com/geckodriver/-/geckodriver-1.22.2.tgz#e0904bed50a1d2abaa24597d4ae43eb6662f9d72"
   integrity sha512-xcf1OLfHqNX4+wQhj4weu2gtiwtPnV8yEEKvLkC8GuFtUc5WjOGodV/2pHiYJjCSJRQfsmIgY5Xs1zaJf/OGFA==
@@ -14436,9 +14427,9 @@ glob-parent@^3.1.0:
     path-dirname "^1.0.0"
 
 glob-parent@^5.0.0, glob-parent@^5.1.0, glob-parent@^5.1.1, glob-parent@~5.1.0:
-  version "5.1.1"
-  resolved "https://registry.yarnpkg.com/glob-parent/-/glob-parent-5.1.1.tgz#b6c1ef417c4e5663ea498f1c45afac6916bbc229"
-  integrity sha512-FnI+VGOpnlGHWZxthPGR+QhR78fuiK0sNLkHQv+bL9fQi57lNNdquIbna/WrfROrolq8GK5Ek6BiMwqL/voRYQ==
+  version "5.1.2"
+  resolved "https://registry.yarnpkg.com/glob-parent/-/glob-parent-5.1.2.tgz#869832c58034fe68a4093c17dc15e8340d8401c4"
+  integrity sha512-AOIgSQCepiJYwP3ARnGx+5VnTu2HBYdzbGP45eLw1vr3zB3vZLeyed1sC9hnbcOc9/SrMyM5RPQrkGz4aS9Zow==
   dependencies:
     is-glob "^4.0.1"
 
@@ -18212,10 +18203,10 @@ kdbush@^3.0.0:
   resolved "https://registry.yarnpkg.com/kdbush/-/kdbush-3.0.0.tgz#f8484794d47004cc2d85ed3a79353dbe0abc2bf0"
   integrity sha512-hRkd6/XW4HTsA9vjVpY9tuXJYLSlelnkTmVFu4M9/7MIYQtFcHpbugAU7UbOfjOiVSVYl2fqgBuJ32JUmRo5Ew==
 
-kea@^2.2.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/kea/-/kea-2.2.0.tgz#1ba4a174a53880cca8002a67cf62b19b30d09702"
-  integrity sha512-IzgTC6SC89wTLfiBMPlduG4r4YanxONYK4werz8RMZxPvcYw4XEEK8xQJguwVYtLCEGm4x5YiLCubGqGfRcbEw==
+kea@^2.3.0:
+  version "2.3.3"
+  resolved "https://registry.yarnpkg.com/kea/-/kea-2.3.3.tgz#8fbd6d0c4ba5079c5abe46486bbc7dc1fd071a62"
+  integrity sha512-NZQHisfEvlg+e6BsHckW03IYaIBY+fuK4xiov7ShZ0GudUmNLhqgHSxUsykU/wdrCPEI6ANX1gyDIRTnUd3HyA==
 
 kew@~0.1.7:
   version "0.1.7"
@@ -20078,6 +20069,11 @@ ms@2.1.2:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.2.tgz#d09d1f357b443f493382a8eb3ccd183872ae6009"
   integrity sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==
+
+ms@^2.1.3:
+  version "2.1.3"
+  resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.3.tgz#574c8138ce1d2b5861f0b44579dbadd60c6615b2"
+  integrity sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==
 
 msgpackr-extract@^0.3.5, msgpackr-extract@^0.3.6:
   version "0.3.6"
@@ -22941,9 +22937,9 @@ react-datetime@^2.14.0:
     react-onclickoutside "^6.5.0"
 
 react-dev-utils@^11.0.3:
-  version "11.0.3"
-  resolved "https://registry.yarnpkg.com/react-dev-utils/-/react-dev-utils-11.0.3.tgz#b61ed499c7d74f447d4faddcc547e5e671e97c08"
-  integrity sha512-4lEA5gF4OHrcJLMUV1t+4XbNDiJbsAWCH5Z2uqlTqW6dD7Cf5nEASkeXrCI/Mz83sI2o527oBIFKVMXtRf1Vtg==
+  version "11.0.4"
+  resolved "https://registry.yarnpkg.com/react-dev-utils/-/react-dev-utils-11.0.4.tgz#a7ccb60257a1ca2e0efe7a83e38e6700d17aa37a"
+  integrity sha512-dx0LvIGHcOPtKbeiSUM4jqpBl3TcY7CDjZdfOIcKeznE7BWr9dg0iPG90G5yfVQ+p/rGNMXdbfStvzQZEVEi4A==
   dependencies:
     "@babel/code-frame" "7.10.4"
     address "1.1.2"
@@ -24963,10 +24959,10 @@ scss-tokenizer@^0.2.3:
     js-base64 "^2.1.8"
     source-map "^0.4.2"
 
-secure-json-parse@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/secure-json-parse/-/secure-json-parse-2.1.0.tgz#ae76f5624256b5c497af887090a5d9e156c9fb20"
-  integrity sha512-GckO+MS/wT4UogDyoI/H/S1L0MCcKS1XX/vp48wfmU7Nw4woBmb8mIpu4zPBQjKlRT88/bt9xdoV4111jPpNJA==
+secure-json-parse@^2.3.1:
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/secure-json-parse/-/secure-json-parse-2.3.1.tgz#908aa5e806e223ff8d179d37ad95c2433f5f147d"
+  integrity sha512-5uGhQLHSC9tVa7RGPkSwxbZVsJCZvIODOadAimCXkU1aCa1fWdszj2DktcutK8A7dD58PoRdxTYiy0jFl6qjnw==
 
 seed-random@~2.2.0:
   version "2.2.0"

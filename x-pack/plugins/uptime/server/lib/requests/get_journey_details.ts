@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryContainer } from '@elastic/elasticsearch/api/types';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
 import { SyntheticsJourneyApiResponse } from '../../../common/runtime_types';
 
@@ -27,13 +28,12 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
           },
           {
             term: {
-              'synthetics.type': 'journey/end',
+              'synthetics.type': 'journey/start',
             },
           },
-        ],
+        ] as QueryContainer[],
       },
     },
-    _source: ['@timestamp', 'monitor.id'],
     size: 1,
   };
 
@@ -53,10 +53,10 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
             },
             {
               term: {
-                'synthetics.type': 'journey/end',
+                'synthetics.type': 'journey/start',
               },
             },
-          ],
+          ] as QueryContainer[],
         },
       },
       _source: ['@timestamp', 'monitor.check_group'],
@@ -79,7 +79,7 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
           ],
         },
       },
-      sort: [{ '@timestamp': { order: 'desc' } }],
+      sort: [{ '@timestamp': { order: 'desc' as const } }],
     };
 
     const nextParams = {
@@ -98,7 +98,7 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
           ],
         },
       },
-      sort: [{ '@timestamp': { order: 'asc' } }],
+      sort: [{ '@timestamp': { order: 'asc' as const } }],
     };
 
     const { body: previousJourneyResult } = await uptimeEsClient.search({ body: previousParams });
@@ -109,6 +109,7 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
       nextJourneyResult?.hits?.hits.length > 0 ? nextJourneyResult?.hits?.hits[0] : null;
     return {
       timestamp: thisJourneySource['@timestamp'],
+      journey: thisJourneySource,
       previous: previousJourney
         ? {
             checkGroup: previousJourney._source.monitor.check_group,

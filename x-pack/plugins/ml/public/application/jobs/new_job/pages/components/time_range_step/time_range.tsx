@@ -47,7 +47,9 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
       const resp = await chartLoader.loadEventRateChart(
         jobCreator.start,
         jobCreator.end,
-        chartInterval.getInterval().asMilliseconds()
+        chartInterval.getInterval().asMilliseconds(),
+        // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
+        jobCreator.datafeedConfig.indices_options
       );
       setEventRateChartData(resp);
     } catch (error) {

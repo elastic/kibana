@@ -29,8 +29,8 @@ export const createGetPingHistogramRoute: UMRestApiRouteFactory = (libs: UMServe
 
     return await libs.requests.getPingHistogram({
       uptimeEsClient,
-      from: dateStart,
-      to: dateEnd,
+      dateStart,
+      dateEnd,
       monitorId,
       filters,
       bucketSize,

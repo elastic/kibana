@@ -4,9 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { SearchResponse } from 'elasticsearch';
-
+import type { estypes } from '@elastic/elasticsearch';
 import { ListClient } from '../../../../../../lists/server';
 import {
   Type,
@@ -29,7 +27,7 @@ import {
   AlertServices,
 } from '../../../../../../alerting/server';
 import { ExceptionListItemSchema } from '../../../../../../lists/common/schemas';
-import { ILegacyScopedClusterClient, Logger } from '../../../../../../../../src/core/server';
+import { ElasticsearchClient, Logger } from '../../../../../../../../src/core/server';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
@@ -148,7 +146,7 @@ export interface BooleanFilter {
 }
 
 export interface GetThreatListOptions {
-  callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
+  esClient: ElasticsearchClient;
   query: string;
   language: ThreatLanguageOrUndefined;
   index: string[];
@@ -164,7 +162,7 @@ export interface GetThreatListOptions {
 }
 
 export interface ThreatListCountOptions {
-  callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
+  esClient: ElasticsearchClient;
   query: string;
   language: ThreatLanguageOrUndefined;
   threatFilters: PartialFilter[];
@@ -187,7 +185,7 @@ export interface ThreatListDoc {
  * This is an ECS document being returned, but the user could return or use non-ecs based
  * documents potentially.
  */
-export type ThreatListItem = SearchResponse<ThreatListDoc>['hits']['hits'][number];
+export type ThreatListItem = estypes.Hit<ThreatListDoc>;
 
 export interface ThreatIndicator {
   [key: string]: unknown;

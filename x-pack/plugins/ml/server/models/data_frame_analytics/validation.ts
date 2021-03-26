@@ -6,20 +6,30 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { estypes } from '@elastic/elasticsearch';
 import { IScopedClusterClient } from 'kibana/server';
 import { getAnalysisType } from '../../../common/util/analytics_utils';
 import {
+  ALL_CATEGORIES,
+  FRACTION_EMPTY_LIMIT,
   INCLUDED_FIELDS_THRESHOLD,
   MINIMUM_NUM_FIELD_FOR_CHECK,
-  FRACTION_EMPTY_LIMIT,
+  NUM_CATEGORIES_THRESHOLD,
   TRAINING_DOCS_LOWER,
   TRAINING_DOCS_UPPER,
   VALIDATION_STATUS,
 } from '../../../common/constants/validation';
-import { getDependentVar } from '../../../common/util/analytics_utils';
+import {
+  getDependentVar,
+  isRegressionAnalysis,
+  isClassificationAnalysis,
+} from '../../../common/util/analytics_utils';
 import { extractErrorMessage } from '../../../common/util/errors';
 import { SearchResponse7 } from '../../../common';
-import { DataFrameAnalyticsConfig } from '../../../common/types/data_frame_analytics';
+import {
+  AnalysisConfig,
+  DataFrameAnalyticsConfig,
+} from '../../../common/types/data_frame_analytics';
 
 interface MissingAgg {
   [key: string]: {
@@ -69,6 +79,87 @@ const analysisFieldsWarningMessage = {
   heading: analysisFieldsHeading,
 };
 
+function getRegressionAndClassificationMessage(
+  analysisConfig: AnalysisConfig,
+  analysisType: string,
+  totalDocs: number,
+  depVarCardinality: number | undefined
+) {
+  const messages = [];
+  if (isRegressionAnalysis(analysisConfig) || isClassificationAnalysis(analysisConfig)) {
+    const trainingPercent = analysisConfig[analysisType].training_percent;
+    const featureImportance = analysisConfig[analysisType].num_top_feature_importance_values;
+    const topClasses: number | undefined = isClassificationAnalysis(analysisConfig)
+      ? analysisConfig[analysisType].num_top_classes
+      : undefined;
+
+    if (trainingPercent) {
+      const trainingDocs = totalDocs * (trainingPercent / 100);
+      const trainingPercentMessage = getTrainingPercentMessage(trainingDocs);
+      if (trainingPercentMessage) {
+        messages.push(trainingPercentMessage);
+      }
+    }
+
+    if (featureImportance && featureImportance > 0) {
+      messages.push({
+        id: 'feature_importance',
+        text: i18n.translate(
+          'xpack.ml.models.dfaValidation.messages.featureImportanceWarningMessage',
+          {
+            defaultMessage:
+              'Enabling feature importance can result in long running jobs when there are a large number of training documents.',
+          }
+        ),
+        status: VALIDATION_STATUS.WARNING,
+        heading: i18n.translate('xpack.ml.models.dfaValidation.messages.featureImportanceHeading', {
+          defaultMessage: 'Feature importance',
+        }),
+      });
+    }
+
+    if (topClasses !== undefined) {
+      if (
+        (topClasses === ALL_CATEGORIES &&
+          depVarCardinality &&
+          depVarCardinality > NUM_CATEGORIES_THRESHOLD) ||
+        topClasses > NUM_CATEGORIES_THRESHOLD
+      ) {
+        messages.push({
+          id: 'num_top_classes',
+          text: i18n.translate('xpack.ml.models.dfaValidation.messages.topClassesWarningMessage', {
+            defaultMessage:
+              'Probabilities will be reported for {numCategories, plural, one {# category} other {# categories}}. There could be a significant effect on the size of your destination index.',
+            values: {
+              numCategories: topClasses === ALL_CATEGORIES ? depVarCardinality : topClasses,
+            },
+          }),
+          status: VALIDATION_STATUS.WARNING,
+          heading: i18n.translate('xpack.ml.models.dfaValidation.messages.topClassesHeading', {
+            defaultMessage: 'Top classes',
+          }),
+        });
+      } else {
+        messages.push({
+          id: 'num_top_classes',
+          text: i18n.translate('xpack.ml.models.dfaValidation.messages.topClassesSuccessMessage', {
+            defaultMessage:
+              'Probabilities will be reported for {numCategories, plural, one {# category} other {# categories}}.',
+            values: {
+              numCategories: topClasses === ALL_CATEGORIES ? depVarCardinality : topClasses,
+            },
+          }),
+          status: VALIDATION_STATUS.SUCCESS,
+          heading: i18n.translate('xpack.ml.models.dfaValidation.messages.topClassesHeading', {
+            defaultMessage: 'Top classes',
+          }),
+        });
+      }
+    }
+  }
+  return messages;
+}
+
 function getTrainingPercentMessage(trainingDocs: number) {
   if (trainingDocs >= TRAINING_DOCS_UPPER) {
     return {
@@ -106,14 +197,17 @@ async function getValidationCheckMessages(
   asCurrentUser: IScopedClusterClient['asCurrentUser'],
   analyzedFields: string[],
   index: string | string[],
-  query: any = defaultQuery,
-  depVar: string,
-  trainingPercent?: number
+  analysisConfig: AnalysisConfig,
+  query: estypes.QueryContainer = defaultQuery
 ) {
+  const analysisType = getAnalysisType(analysisConfig);
+  const depVar = getDependentVar(analysisConfig);
   const messages = [];
   const emptyFields: string[] = [];
   const percentEmptyLimit = FRACTION_EMPTY_LIMIT * 100;
+
   let depVarValid = true;
+  let depVarCardinality: number | undefined;
   let analysisFieldsNumHigh = false;
   let analysisFieldsEmpty = false;
 
@@ -128,14 +222,11 @@ async function getValidationCheckMessages(
   }, {} as any);
 
   if (depVar !== '') {
-    const depVarAgg =
-      depVar !== ''
-        ? {
-            [`${depVar}_const`]: {
-              cardinality: { field: depVar },
-            },
-          }
-        : {};
+    const depVarAgg = {
+      [`${depVar}_const`]: {
+        cardinality: { field: depVar },
+      },
+    };
 
     aggs = { ...aggs, ...depVarAgg };
   }
@@ -151,21 +242,11 @@ async function getValidationCheckMessages(
       },
     });
 
+    // @ts-expect-error
     const totalDocs = body.hits.total.value;
 
-    if (trainingPercent) {
-      const trainingDocs = totalDocs * (trainingPercent / 100);
-      const trainingPercentMessage = getTrainingPercentMessage(trainingDocs);
-      if (trainingPercentMessage) {
-        messages.push(trainingPercentMessage);
-      }
-
-      if (analyzedFields.length && analyzedFields.length > INCLUDED_FIELDS_THRESHOLD) {
-        analysisFieldsNumHigh = true;
-      }
-    }
-
     if (body.aggregations) {
+      // @ts-expect-error
       Object.entries(body.aggregations).forEach(([aggName, { doc_count: docCount, value }]) => {
         const empty = docCount / totalDocs;
 
@@ -186,6 +267,7 @@ async function getValidationCheckMessages(
         }
 
         if (aggName === `${depVar}_const`) {
+          depVarCardinality = value;
           if (value === 1) {
             depVarValid = false;
             dependentVarWarningMessage.text = i18n.translate(
@@ -210,6 +292,18 @@ async function getValidationCheckMessages(
           }
         }
       });
+    }
+
+    const regressionAndClassificationMessages = getRegressionAndClassificationMessage(
+      analysisConfig,
+      analysisType,
+      totalDocs,
+      depVarCardinality
+    );
+    messages.push(...regressionAndClassificationMessages);
+
+    if (analyzedFields.length && analyzedFields.length > INCLUDED_FIELDS_THRESHOLD) {
+      analysisFieldsNumHigh = true;
     }
 
     if (emptyFields.length) {
@@ -278,18 +372,12 @@ export async function validateAnalyticsJob(
   client: IScopedClusterClient,
   job: DataFrameAnalyticsConfig
 ) {
-  const analysisType = getAnalysisType(job.analysis);
-  const analysis = job.analysis[analysisType];
-  const depVar = getDependentVar(job.analysis);
-
   const messages = await getValidationCheckMessages(
     client.asCurrentUser,
     job.analyzed_fields.includes,
     job.source.index,
-    job.source.query,
-    depVar,
-    // @ts-ignore
-    analysis.training_percent
+    job.analysis,
+    job.source.query
   );
   return messages;
 }

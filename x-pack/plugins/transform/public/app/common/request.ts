@@ -58,13 +58,19 @@ export function getPivotQuery(search: string | SavedSearchQuery): PivotQuery {
   return search;
 }
 
-export function isSimpleQuery(arg: any): arg is SimpleQuery {
-  return arg.query_string !== undefined;
+export function isSimpleQuery(arg: unknown): arg is SimpleQuery {
+  return isPopulatedObject(arg) && arg.hasOwnProperty('query_string');
 }
 
 export const matchAllQuery = { match_all: {} };
-export function isMatchAllQuery(query: any): boolean {
-  return query.match_all !== undefined && Object.keys(query.match_all).length === 0;
+export function isMatchAllQuery(query: unknown): boolean {
+  return (
+    isPopulatedObject(query) &&
+    query.hasOwnProperty('match_all') &&
+    typeof query.match_all === 'object' &&
+    query.match_all !== null &&
+    Object.keys(query.match_all).length === 0
+  );
 }
 
 export const defaultQuery: PivotQuery = { query_string: { query: '*' } };
@@ -78,11 +84,6 @@ export function getCombinedRuntimeMappings(
 ): StepDefineExposedState['runtimeMappings'] | undefined {
   let combinedRuntimeMappings = {};
 
-  // Use runtime field mappings defined inline from API
-  if (isPopulatedObject(runtimeMappings)) {
-    combinedRuntimeMappings = { ...combinedRuntimeMappings, ...runtimeMappings };
-  }
-
   // And runtime field mappings defined by index pattern
   if (isIndexPattern(indexPattern)) {
     const computedFields = indexPattern.getComputedFields();
@@ -94,7 +95,13 @@ export function getCombinedRuntimeMappings(
     }
   }
 
-  if (isPopulatedObject(combinedRuntimeMappings)) {
+  // Use runtime field mappings defined inline from API
+  // and override fields with same name from index pattern
+  if (isPopulatedObject(runtimeMappings)) {
+    combinedRuntimeMappings = { ...combinedRuntimeMappings, ...runtimeMappings };
+  }
+
+  if (isPopulatedObject<StepDefineExposedState['runtimeMappings']>(combinedRuntimeMappings)) {
     return combinedRuntimeMappings;
   }
   return undefined;

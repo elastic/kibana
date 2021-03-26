@@ -5,32 +5,38 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
 import { fetchClusterHealth } from './fetch_cluster_health';
 
 describe('fetchClusterHealth', () => {
   it('should return the cluster health', async () => {
     const status = 'green';
     const clusterUuid = 'sdfdsaj34434';
-    const callCluster = jest.fn(() => ({
-      hits: {
-        hits: [
-          {
-            _index: '.monitoring-es-7',
-            _source: {
-              cluster_state: {
-                status,
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+    esClient.search.mockReturnValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        hits: {
+          hits: [
+            {
+              _index: '.monitoring-es-7',
+              _source: {
+                cluster_state: {
+                  status,
+                },
+                cluster_uuid: clusterUuid,
               },
-              cluster_uuid: clusterUuid,
             },
-          },
-        ],
-      },
-    }));
+          ],
+        },
+      } as estypes.SearchResponse)
+    );
 
     const clusters = [{ clusterUuid, clusterName: 'foo' }];
     const index = '.monitoring-es-*';
 
-    const health = await fetchClusterHealth(callCluster, clusters, index);
+    const health = await fetchClusterHealth(esClient, clusters, index);
     expect(health).toEqual([
       {
         health: status,
