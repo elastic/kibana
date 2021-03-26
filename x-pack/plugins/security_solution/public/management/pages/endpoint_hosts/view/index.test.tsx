@@ -387,9 +387,6 @@ describe('when on the list page', () => {
           );
           const expectedStatusColor: string = policyStatusStyleMap.get(status.textContent!) ?? '';
           expect(status.textContent).toEqual(POLICY_STATUS_TO_TEXT[generatedPolicyStatuses[index]]);
-          /* expect(status.getAttribute('style')).toMatch(
-            /background-color\: rgb\(109\, 204\, 177\)\;/
-            );*/
           expect(status.getAttribute('style')).toMatch(expectedStatusColor);
         });
       });
