@@ -394,7 +394,7 @@
       }
     ]
   },
-  "id": "nginx-Logs-ml",
+  "id": "sample_ml_module",
   "migrationVersion": {
     "search": "7.9.3"
   },
