@@ -97,6 +97,7 @@ curl -X POST \
 include::{kib-repo-dir}/api/features.asciidoc[]
 include::{kib-repo-dir}/api/spaces-management.asciidoc[]
 include::{kib-repo-dir}/api/role-management.asciidoc[]
+include::{kib-repo-dir}/api/session-management.asciidoc[]
 include::{kib-repo-dir}/api/saved-objects.asciidoc[]
 include::{kib-repo-dir}/api/alerting.asciidoc[]
 include::{kib-repo-dir}/api/actions-and-connectors.asciidoc[]

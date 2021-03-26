@@ -2296,7 +2296,7 @@
             "children": [
               {
                 "type": "Object",
-                "label": "{ spaceId, user, config, callCluster }",
+                "label": "{ spaceId, user, config, esClient }",
                 "isRequired": true,
                 "signature": [
                   {
@@ -3696,6 +3696,188 @@
         "source": {
           "path": "x-pack/plugins/lists/server/types.ts",
           "lineNumber": 48
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-server.UpdateExceptionListItemOptions",
+        "type": "Interface",
+        "label": "UpdateExceptionListItemOptions",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-server.UpdateExceptionListItemOptions._version",
+            "type": "string",
+            "label": "_version",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 144
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.UpdateExceptionListItemOptions.comments",
+            "type": "Array",
+            "label": "comments",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 145
+            },
+            "signature": [
+              "({ comment: string; } & { id?: string | undefined; })[]"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.UpdateExceptionListItemOptions.entries",
+            "type": "Array",
+            "label": "entries",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 146
+            },
+            "signature": [
+              "({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"date\" | \"text\" | \"keyword\" | \"ip\" | \"long\" | \"double\" | \"date_nanos\" | \"geo_point\" | \"geo_shape\" | \"short\" | \"binary\" | \"date_range\" | \"ip_range\" | \"shape\" | \"integer\" | \"byte\" | \"float\" | \"double_range\" | \"float_range\" | \"half_float\" | \"integer_range\" | \"long_range\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; })[]"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.UpdateExceptionListItemOptions.id",
+            "type": "string",
+            "label": "id",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 147
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.UpdateExceptionListItemOptions.itemId",
+            "type": "string",
+            "label": "itemId",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 148
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.UpdateExceptionListItemOptions.namespaceType",
+            "type": "CompoundType",
+            "label": "namespaceType",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 149
+            },
+            "signature": [
+              "\"single\" | \"agnostic\""
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.UpdateExceptionListItemOptions.name",
+            "type": "string",
+            "label": "name",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 150
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.UpdateExceptionListItemOptions.osTypes",
+            "type": "Array",
+            "label": "osTypes",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 151
+            },
+            "signature": [
+              "(\"windows\" | \"linux\" | \"macos\")[]"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.UpdateExceptionListItemOptions.description",
+            "type": "string",
+            "label": "description",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 152
+            },
+            "signature": [
+              "string | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.UpdateExceptionListItemOptions.meta",
+            "type": "Uncategorized",
+            "label": "meta",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 153
+            },
+            "signature": [
+              "object | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.UpdateExceptionListItemOptions.tags",
+            "type": "Array",
+            "label": "tags",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 154
+            },
+            "signature": [
+              "string[] | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.UpdateExceptionListItemOptions.type",
+            "type": "string",
+            "label": "type",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+              "lineNumber": 155
+            },
+            "signature": [
+              "\"simple\" | undefined"
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client_types.ts",
+          "lineNumber": 143
         },
         "initialIsOpen": false
       }

@@ -247,6 +247,62 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
       };
       expect(actualInstances).to.eql(expectedInstances);
     });
+
+    describe('legacy', () => {
+      it('handles multi-instance status', async () => {
+        // pattern of when the alert should fire
+        const pattern = {
+          instanceA: [true, true, true, true],
+          instanceB: [true, true, false, false],
+          instanceC: [true, true, true, true],
+        };
+
+        const { body: createdAlert } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestAlertData({
+              rule_type_id: 'test.patternFiring',
+              params: { pattern },
+              schedule: { interval: '1s' },
+            })
+          )
+          .expect(200);
+        objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+
+        await alertUtils.muteInstance(createdAlert.id, 'instanceC');
+        await alertUtils.muteInstance(createdAlert.id, 'instanceD');
+        await waitForEvents(createdAlert.id, ['new-instance', 'recovered-instance']);
+        const response = await supertest.get(
+          `${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${createdAlert.id}/_instance_summary`
+        );
+
+        const actualInstances = response.body.instances;
+        const expectedInstances = {
+          instanceA: {
+            status: 'Active',
+            muted: false,
+            actionGroupId: 'default',
+            activeStartDate: actualInstances.instanceA.activeStartDate,
+          },
+          instanceB: {
+            status: 'OK',
+            muted: false,
+          },
+          instanceC: {
+            status: 'Active',
+            muted: true,
+            actionGroupId: 'default',
+            activeStartDate: actualInstances.instanceC.activeStartDate,
+          },
+          instanceD: {
+            status: 'OK',
+            muted: true,
+          },
+        };
+        expect(actualInstances).to.eql(expectedInstances);
+      });
+    });
   });
 
   async function waitForEvents(id: string, actions: string[]) {

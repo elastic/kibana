@@ -69,5 +69,37 @@ export default function createUpdateApiKeyTests({ getService }: FtrProviderConte
         message: `Saved object [alert/${createdAlert.id}] not found`,
       });
     });
+
+    describe('legacy', () => {
+      it('should handle update alert api key appropriately', async () => {
+        const { body: createdAlert } = await supertestWithoutAuth
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestAlertData())
+          .expect(200);
+        objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+
+        await supertestWithoutAuth
+          .post(
+            `${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${createdAlert.id}/_update_api_key`
+          )
+          .set('kbn-xsrf', 'foo')
+          .expect(204);
+
+        const { body: updatedAlert } = await supertestWithoutAuth
+          .get(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createdAlert.id}`)
+          .set('kbn-xsrf', 'foo')
+          .expect(200);
+        expect(updatedAlert.api_key_owner).to.eql(null);
+
+        // Ensure AAD isn't broken
+        await checkAAD({
+          supertest: supertestWithoutAuth,
+          spaceId: Spaces.space1.id,
+          type: 'alert',
+          id: createdAlert.id,
+        });
+      });
+    });
   });
 }

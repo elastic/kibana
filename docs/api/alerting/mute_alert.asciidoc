@@ -1,0 +1,42 @@
+[[mute-alert-api]]
+=== Mute alert API
+++++
+<titleabbrev>Mute alert</titleabbrev>
+++++
+
+Mute an alert.
+
+[[mute-alert-api-request]]
+==== Request
+
+`POST <kibana host>:<port>/api/alerting/rule/<rule_id>/alert/<alert_id>/_mute`
+
+`POST <kibana host>:<port>/s/<space_id>/api/alerting/rule/<rule_id>/alert/<alert_id>/_mute`
+
+[[mute-alert-api-path-params]]
+==== Path parameters
+
+`rule_id`::
+  (Required, string) The ID of the rule whose alert you want to mute.
+
+`alert_id`::
+  (Required, string) The ID of the alert that you want to mute.
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+[[mute-alert-api-response-codes]]
+==== Response code
+
+`200`::
+  Indicates a successful call.
+
+==== Example
+
+Mute alert with ID:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/alerting/rule/41893910-6bca-11eb-9e0d-85d233e3ee35/alert/dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2/_mute
+--------------------------------------------------
+// KIBANA

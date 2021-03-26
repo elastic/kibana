@@ -230,6 +230,7 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    * If set to optional, time scaling won't be enabled by default and can be removed.
    */
   timeScalingMode?: TimeScalingMode;
+  filterable?: boolean;
 
   getHelpMessage?: (props: HelpProps<C>) => React.ReactNode;
 }
@@ -436,3 +437,11 @@ export const operationDefinitionMap: Record<
   (definitionMap, definition) => ({ ...definitionMap, [definition.type]: definition }),
   {}
 );
+
+/**
+ * Cannot map the prev names, but can guarantee the new names are matching up using the type system
+ */
+export const renameOperationsMapping: Record<string, GenericOperationDefinition['type']> = {
+  avg: 'average',
+  cardinality: 'unique_count',
+};

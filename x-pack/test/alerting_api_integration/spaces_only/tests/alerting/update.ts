@@ -105,5 +105,65 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           message: `Saved object [alert/${createdAlert.id}] not found`,
         });
     });
+
+    describe('legacy', () => {
+      it('should handle update alert request appropriately', async () => {
+        const { body: createdAlert } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestAlertData())
+          .expect(200);
+        objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+
+        const updatedData = {
+          name: 'bcd',
+          tags: ['bar'],
+          params: {
+            foo: true,
+          },
+          schedule: { interval: '12s' },
+          actions: [],
+          throttle: '1m',
+          notifyWhen: 'onThrottleInterval',
+        };
+        const response = await supertest
+          .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${createdAlert.id}`)
+          .set('kbn-xsrf', 'foo')
+          .send(updatedData)
+          .expect(200);
+
+        expect(response.body).to.eql({
+          ...updatedData,
+          id: createdAlert.id,
+          tags: ['bar'],
+          alertTypeId: 'test.noop',
+          consumer: 'alertsFixture',
+          createdBy: null,
+          enabled: true,
+          updatedBy: null,
+          apiKeyOwner: null,
+          muteAll: false,
+          mutedInstanceIds: [],
+          notifyWhen: 'onThrottleInterval',
+          scheduledTaskId: createdAlert.scheduled_task_id,
+          createdAt: response.body.createdAt,
+          updatedAt: response.body.updatedAt,
+          executionStatus: response.body.executionStatus,
+        });
+        expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
+        expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);
+        expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(
+          Date.parse(response.body.createdAt)
+        );
+
+        // Ensure AAD isn't broken
+        await checkAAD({
+          supertest,
+          spaceId: Spaces.space1.id,
+          type: 'alert',
+          id: createdAlert.id,
+        });
+      });
+    });
   });
 }

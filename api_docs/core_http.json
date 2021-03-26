@@ -974,7 +974,7 @@
               "lineNumber": 197
             },
             "signature": [
-              "\"error\" | \"manual\" | \"follow\" | undefined"
+              "\"error\" | \"follow\" | \"manual\" | undefined"
             ]
           },
           {

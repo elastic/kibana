@@ -1,4 +1,4 @@
-[[alerts-legacy-api-health]]
+[[alerts-api-health]]
 === Legacy get Alerting framework health API
 ++++
 <titleabbrev>Legacy get Alerting framework health</titleabbrev>
@@ -6,30 +6,30 @@
 
 deprecated::[7.13.0]
 
-Please use the <<alerting-health-api>> instead.
+Use the <<get-alerting-framework-health-api>> instead.
 
 Retrieve the health status of the Alerting framework.
 
-[[alerts-legacy-api-health-request]]
+[[alerts-api-health-request]]
 ==== Request
 
 `GET <kibana host>:<port>/api/alerts/_health`
 
 `GET <kibana host>:<port>/s/<space_id>/api/alerts/_health`
 
-[[alerts-legacy-api-health-params]]
+[[alerts-api-health-params]]
 ==== Path parameters
 
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
-[[alerts-legacy-api-health-codes]]
+[[alerts-api-health-codes]]
 ==== Response code
 
 `200`::
     Indicates a successful call.
 
-[[alerts-legacy-api-health-example]]
+[[alerts-api-health-example]]
 ==== Example
 
 Retrieve the health status of the Alerting framework:
