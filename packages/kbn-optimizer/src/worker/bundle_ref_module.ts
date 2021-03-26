@@ -21,11 +21,6 @@ export class BundleRefModule extends Module {
     super('kbn/bundleRef', null);
   }
 
-  // eslint-disable-next-line @typescript-eslint/explicit-member-accessibility
-  get exportsArgument() {
-    return (this.buildInfo && this.buildInfo.exportsArgument) || 'exports';
-  }
-
   libIdent() {
     return this.ref.exportId;
   }
