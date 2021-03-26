@@ -139,6 +139,7 @@ type TestSubject =
   | 'addProcessorForm.submitButton'
   | 'processorTypeSelector.input'
   | 'fieldNameField.input'
+  | 'ignoreMissingSwitch.input'
   | 'targetField.input'
   | 'keepOriginalField.input'
   | 'removeIfSuccessfulField.input';

@@ -105,6 +105,8 @@ describe('Processor: Bytes', () => {
     // Set optional parameteres
     form.setInputValue('targetField.input', 'target_field');
 
+    form.toggleEuiSwitch('ignoreMissingSwitch.input');
+
     // Save the field with new changes
     await saveNewProcessor();
 
@@ -114,6 +116,9 @@ describe('Processor: Bytes', () => {
       field: 'field_1',
       ignore_failure: undefined,
       target_field: 'target_field',
+      ignore_missing: true,
+      tag: undefined,
+      if: undefined,
     });
   });
 });
