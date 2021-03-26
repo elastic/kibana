@@ -46,8 +46,17 @@ jest.mock('../use_add_exception');
 jest.mock('../../../containers/source');
 jest.mock('../use_fetch_or_create_rule_exception_list');
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
-jest.mock('../../../../shared_imports');
 jest.mock('../../../../detections/containers/detection_engine/rules/use_rule_async');
+jest.mock('../../../../shared_imports', () => {
+  const originalModule = jest.requireActual('../../../../shared_imports');
+
+  return {
+    ...originalModule,
+    ExceptionBuilder: {
+      ExceptionBuilderComponent: () => ({} as JSX.Element),
+    },
+  };
+});
 
 describe('When the edit exception modal is opened', () => {
   const ruleName = 'test rule';
