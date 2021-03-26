@@ -87,7 +87,7 @@ export interface TableListViewState {
 class TableListView extends React.Component<TableListViewProps, TableListViewState> {
   static defaultProps = {
     noItemsShowEmptyList: false,
-  }
+  };
 
   private pagination = {};
   private _isMounted = false;
