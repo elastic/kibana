@@ -17,7 +17,6 @@ export const CASE_CONFIGURE_SAVED_OBJECT = 'cases-configure';
 export const SAVED_OBJECT_TYPES = [
   CASE_SAVED_OBJECT,
   CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,
-  SUB_CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
   CASE_CONFIGURE_SAVED_OBJECT,
@@ -82,3 +81,7 @@ export const SECURITY_SOLUTION_OWNER = 'securitySolution';
  * This flag governs enabling the case as a connector feature. It is disabled by default as the feature is not complete.
  */
 export const ENABLE_CASE_CONNECTOR = false;
+
+if (ENABLE_CASE_CONNECTOR) {
+  SAVED_OBJECT_TYPES.push(SUB_CASE_SAVED_OBJECT);
+}
