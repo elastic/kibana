@@ -37,12 +37,12 @@ describe('ResultSettingsFieldNumber', () => {
     jest.clearAllMocks();
   });
 
-  it("is rendered with it's value set from [fieldSizeProperty] in fieldSettings", () => {
+  it('is rendered with its value set from [fieldSizeProperty] in fieldSettings', () => {
     const wrapper = shallow(<ResultSettingsFieldNumber {...props} />);
     expect(wrapper.find(EuiFieldNumber).prop('value')).toEqual(29);
   });
 
-  it('is has no value if [fieldSizeProperty] in fieldSettings has no value', () => {
+  it('has no value if [fieldSizeProperty] in fieldSettings has no value', () => {
     const wrapper = shallow(
       <ResultSettingsFieldNumber
         {...{

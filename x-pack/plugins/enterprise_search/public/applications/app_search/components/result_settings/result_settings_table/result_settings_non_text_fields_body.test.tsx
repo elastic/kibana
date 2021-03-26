@@ -68,7 +68,7 @@ describe('ResultSettingsNonTextFieldsBody', () => {
       return tableRow.find('[data-test-subj="ResultSettingRawCheckBox"]');
     };
 
-    it("is rendered with it's checked property set from state", () => {
+    it('is rendered with its checked property set from state', () => {
       const rawCheckbox = getRawCheckbox();
       expect(rawCheckbox.prop('checked')).toEqual(values.nonTextResultFields.bar.raw);
     });

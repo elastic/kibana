@@ -82,7 +82,7 @@ describe('ResultSettingsTextFieldsBody', () => {
       return tableRow.find('[data-test-subj="ResultSettingRawCheckBox"]');
     };
 
-    it("is rendered with it's checked property set from state", () => {
+    it('is rendered with its checked property set from state', () => {
       const rawCheckbox = getRawCheckbox();
       expect(rawCheckbox.prop('checked')).toEqual(values.textResultFields.bar.raw);
     });
@@ -101,7 +101,7 @@ describe('ResultSettingsTextFieldsBody', () => {
       return tableRow.find('[data-test-subj="ResultSettingSnippetTextBox"]');
     };
 
-    it("is rendered with it's checked property set from state", () => {
+    it('is rendered with its checked property set from state', () => {
       const snippetCheckbox = getSnippetCheckbox();
       expect(snippetCheckbox.prop('checked')).toEqual(values.textResultFields.foo.snippet);
     });
@@ -120,7 +120,7 @@ describe('ResultSettingsTextFieldsBody', () => {
       return tableRow.find('[data-test-subj="ResultSettingFallbackTextBox"]');
     };
 
-    it("is rendered with it's checked property set from state", () => {
+    it('is rendered with its checked property set from state', () => {
       const fallbackCheckbox = getFallbackCheckbox();
       expect(fallbackCheckbox.prop('checked')).toEqual(values.textResultFields.foo.snippetFallback);
     });

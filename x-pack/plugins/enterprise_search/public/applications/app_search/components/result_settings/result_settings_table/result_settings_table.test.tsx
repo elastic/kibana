@@ -42,7 +42,7 @@ describe('ResultSettingsTable', () => {
     expect(wrapper.find(ResultSettingsDisabledFieldsHeader).exists()).toBe(true);
   });
 
-  it('will hide sections that have no data avialble to show', () => {
+  it('will hide sections that have no data available to show', () => {
     setMockValues({
       textResultFields: {},
       nonTextResultFields: {},
