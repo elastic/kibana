@@ -727,7 +727,6 @@ export const createInitialState = ({
   };
 
   const reindexTargetMappings: IndexMapping = {
-    // @ts-expect-error we don't allow plugins to set `dynamic`
     dynamic: false,
     properties: {
       type: { type: 'keyword' },

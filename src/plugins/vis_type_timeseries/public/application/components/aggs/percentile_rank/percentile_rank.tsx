@@ -17,19 +17,16 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AggSelect } from '../agg_select';
-// @ts-ignore
 import { FieldSelect } from '../field_select';
 // @ts-ignore
 import { createChangeHandler } from '../../lib/create_change_handler';
-// @ts-ignore
 import { createSelectHandler } from '../../lib/create_select_handler';
-// @ts-ignore
 import { createNumberHandler } from '../../lib/create_number_handler';
 
 import { AggRow } from '../agg_row';
 import { PercentileRankValues } from './percentile_rank_values';
 
-import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
+import { KBN_FIELD_TYPES } from '../../../../../../data/public';
 import { MetricsItemsSchema, PanelSchema, SanitizedFieldType } from '../../../../../common/types';
 import { DragHandleProps } from '../../../../types';
 import { PercentileHdr } from '../percentile_hdr';

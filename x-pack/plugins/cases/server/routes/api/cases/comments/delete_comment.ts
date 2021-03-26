@@ -12,7 +12,7 @@ import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../../saved_obje
 import { buildCommentUserActionItem } from '../../../../services/user_actions/helpers';
 import { RouteDeps } from '../../types';
 import { wrapError } from '../../utils';
-import { CASE_COMMENT_DETAILS_URL } from '../../../../../common/constants';
+import { CASE_COMMENT_DETAILS_URL, ENABLE_CASE_CONNECTOR } from '../../../../../common/constants';
 
 export function initDeleteCommentApi({
   caseService,
@@ -37,6 +37,12 @@ export function initDeleteCommentApi({
     },
     async (context, request, response) => {
       try {
+        if (!ENABLE_CASE_CONNECTOR && request.query?.subCaseId !== undefined) {
+          throw Boom.badRequest(
+            'The `subCaseId` is not supported when the case connector feature is disabled'
+          );
+        }
+
         const client = context.core.savedObjects.client;
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const { username, full_name, email } = await caseService.getUser({ request });
