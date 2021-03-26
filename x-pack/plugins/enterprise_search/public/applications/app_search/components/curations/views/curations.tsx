@@ -11,9 +11,7 @@ import { useValues, useActions } from 'kea';
 
 import {
   EuiPageHeader,
-  EuiPageHeaderSection,
   EuiPageContent,
-  EuiTitle,
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiEmptyPrompt,
@@ -47,18 +45,14 @@ export const Curations: React.FC = () => {
 
   return (
     <>
-      <EuiPageHeader>
-        <EuiPageHeaderSection>
-          <EuiTitle size="l">
-            <h1>{CURATIONS_OVERVIEW_TITLE}</h1>
-          </EuiTitle>
-        </EuiPageHeaderSection>
-        <EuiPageHeaderSection>
+      <EuiPageHeader
+        pageTitle={CURATIONS_OVERVIEW_TITLE}
+        rightSideItems={[
           <EuiButtonTo to={generateEnginePath(ENGINE_CURATIONS_NEW_PATH)} fill>
             {CREATE_NEW_CURATION_TITLE}
-          </EuiButtonTo>
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
+          </EuiButtonTo>,
+        ]}
+      />
       <EuiPageContent>
         <FlashMessages />
         <CurationsTable />
