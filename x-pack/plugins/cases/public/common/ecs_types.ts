@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 export interface RuleEcs {
   id?: string[];
   rule_id?: string[];
@@ -40,4 +39,20 @@ export interface RuleEcs {
   version?: string[];
   note?: string[];
   building_block_type?: string[];
+}
+
+export interface SignalEcs {
+  rule?: RuleEcs;
+  original_time?: string[];
+  status?: string[];
+  group?: {
+    id?: string[];
+  };
+  threshold_result?: unknown;
+}
+
+export interface Ecs {
+  _id: string;
+  _index?: string;
+  signal?: SignalEcs;
 }

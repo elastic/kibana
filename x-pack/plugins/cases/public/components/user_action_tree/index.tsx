@@ -30,7 +30,6 @@ import {
   AlertCommentRequestRt,
   CommentType,
   ContextTypeUserRt,
-  Ecs,
 } from '../../../common';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { parseString } from '../../containers/utils';
@@ -50,6 +49,7 @@ import { UserActionTimestamp } from './user_action_timestamp';
 import { UserActionUsername } from './user_action_username';
 import { UserActionContentToolbar } from './user_action_content_toolbar';
 import { getManualAlertIdsWithNoRuleId } from '../case_view/helpers';
+import { Ecs } from '../../common/ecs_types';
 export interface UserActionTreeProps {
   getCaseDetailHrefWithCommentId: (commentId: string) => string;
   caseServices: CaseServices;

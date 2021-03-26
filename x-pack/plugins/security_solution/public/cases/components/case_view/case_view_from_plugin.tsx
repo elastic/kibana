@@ -30,9 +30,9 @@ import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { DetailsPanel } from '../../../timelines/components/side_panel';
 import { SEND_ALERT_TO_TIMELINE } from '../user_action_tree/translations';
-import { Ecs } from '../../../../../cases/common';
 import { InvestigateInTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
 import { buildAlertsQuery } from './helpers';
+import { Ecs } from '../../../../common/ecs';
 
 interface Props {
   caseId: string;

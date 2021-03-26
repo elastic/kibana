@@ -17,7 +17,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 
-import { CaseStatuses, CaseAttributes, CaseType, Ecs } from '../../../common';
+import { CaseStatuses, CaseAttributes, CaseType } from '../../../common';
 import { Case, CaseConnector } from '../../containers/types';
 import { HeaderPage } from '../header_page';
 import { EditableTitle } from '../header_page/editable_title';
@@ -40,6 +40,7 @@ import {
 } from '../configure_cases/utils';
 import { StatusActionButton } from '../status/button';
 import * as i18n from './translations';
+import { Ecs } from '../../common/ecs_types';
 
 // TODO: All below imports depend on Timeline or SecuritySolution in some form or another
 // import { SpyRoute } from '../../../common/utils/route/spy_routes';
