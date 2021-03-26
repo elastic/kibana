@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mapValues } from 'lodash';
+import { mapValues, uniqueId } from 'lodash';
 import React, {
   createContext,
   useCallback,
@@ -44,7 +44,6 @@ function useUiFilters(params: IUrlParams): UIFilters {
 const defaultRefresh = (_time: TimeRange) => {};
 
 const UrlParamsContext = createContext({
-  rangeId: 0,
   refreshTimeRange: defaultRefresh,
   uiFilters: {} as UIFilters,
   urlParams: {} as IUrlParams,
@@ -53,11 +52,9 @@ const UrlParamsContext = createContext({
 const UrlParamsProvider: React.ComponentClass<{}> = withRouter(
   ({ location, children }) => {
     const refUrlParams = useRef(resolveUrlParams(location, {}));
+    const [, forceUpdate] = useState('');
 
     const { start, end, rangeFrom, rangeTo } = refUrlParams.current;
-
-    // Counter to force an update in useFetcher when the refresh button is clicked.
-    const [rangeId, setRangeId] = useState(0);
 
     const urlParams = useMemo(
       () =>
@@ -72,25 +69,26 @@ const UrlParamsProvider: React.ComponentClass<{}> = withRouter(
 
     refUrlParams.current = urlParams;
 
-    const refreshTimeRange = useCallback((timeRange: TimeRange) => {
-      refUrlParams.current = {
-        ...refUrlParams.current,
-        ...getDateRange({ state: {}, ...timeRange }),
-      };
-
-      setRangeId((prevRangeId) => prevRangeId + 1);
-    }, []);
+    const refreshTimeRange = useCallback(
+      (timeRange: TimeRange) => {
+        refUrlParams.current = {
+          ...refUrlParams.current,
+          ...getDateRange({ state: {}, ...timeRange }),
+        };
+        forceUpdate(uniqueId());
+      },
+      [forceUpdate]
+    );
 
     const uiFilters = useUiFilters(urlParams);
 
     const contextValue = useMemo(() => {
       return {
-        rangeId,
         refreshTimeRange,
         urlParams,
         uiFilters,
       };
-    }, [rangeId, refreshTimeRange, uiFilters, urlParams]);
+    }, [refreshTimeRange, uiFilters, urlParams]);
 
     return (
       <UrlParamsContext.Provider children={children} value={contextValue} />
