@@ -102,6 +102,75 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
         },
       });
     });
+
+    describe('legacy', () => {
+      it('should aggregate alert status totals', async () => {
+        const NumOkAlerts = 4;
+        const NumActiveAlerts = 1;
+        const NumErrorAlerts = 2;
+
+        await Promise.all(
+          [...Array(NumOkAlerts)].map(async () => {
+            const okAlertId = await createTestAlert(
+              {
+                rule_type_id: 'test.noop',
+                schedule: { interval: '1s' },
+              },
+              'ok'
+            );
+            objectRemover.add(Spaces.space1.id, okAlertId, 'rule', 'alerting');
+          })
+        );
+
+        await Promise.all(
+          [...Array(NumActiveAlerts)].map(async () => {
+            const activeAlertId = await createTestAlert(
+              {
+                rule_type_id: 'test.patternFiring',
+                schedule: { interval: '1s' },
+                params: {
+                  pattern: { instance: new Array(100).fill(true) },
+                },
+              },
+              'active'
+            );
+            objectRemover.add(Spaces.space1.id, activeAlertId, 'rule', 'alerting');
+          })
+        );
+
+        await Promise.all(
+          [...Array(NumErrorAlerts)].map(async () => {
+            const activeAlertId = await createTestAlert(
+              {
+                rule_type_id: 'test.throw',
+                schedule: { interval: '1s' },
+              },
+              'error'
+            );
+            objectRemover.add(Spaces.space1.id, activeAlertId, 'rule', 'alerting');
+          })
+        );
+
+        // Adding delay to allow ES refresh cycle to run. Even when the waitForStatus
+        // calls are successful, the call to aggregate may return stale totals if called
+        // too early.
+        await delay(1000);
+        const reponse = await supertest.get(
+          `${getUrlPrefix(Spaces.space1.id)}/api/alerts/_aggregate`
+        );
+
+        expect(reponse.status).to.eql(200);
+        expect(reponse.body).to.eql({
+          alertExecutionStatus: {
+            ok: NumOkAlerts,
+            active: NumActiveAlerts,
+            error: NumErrorAlerts,
+            pending: 0,
+            unknown: 0,
+          },
+        });
+      });
+    });
   });
 
   const WaitForStatusIncrement = 500;
