@@ -20,66 +20,74 @@ interface TSVBTables {
   [key: string]: Datatable;
 }
 
+interface TSVBColumns {
+  id: number;
+  name: string;
+  isSplit: boolean;
+}
+
+export const addMetaToColumns = (
+  columns: TSVBColumns[],
+  indexPattern: IndexPattern,
+  metricsType: string
+): DatatableColumn[] => {
+  return columns.map((column) => {
+    const field = indexPattern.getFieldByName(column.name);
+    const type = (field?.spec.type as DatatableColumnType) || 'number';
+    const cleanedColumn = {
+      id: column.id.toString(),
+      name: column.name,
+      meta: {
+        type,
+        field: column.name,
+        index: indexPattern.title,
+        source: 'esaggs',
+        sourceParams: {
+          enabled: true,
+          indexPatternId: indexPattern?.id,
+          type: type === 'date' ? 'date_histogram' : column.isSplit ? 'terms' : metricsType,
+        },
+      },
+    };
+    return cleanedColumn;
+  });
+};
+
 export const convertSeriesToDataTable = (
   model: TimeseriesVisParams,
   series: PanelData[],
-  indexPattern: IndexPattern[]
+  indexPattern: IndexPattern
 ) => {
   const tables: TSVBTables = {};
-
-  for (let i = 0; i < model.series.length; i++) {
-    const modelSeries = model.series[i];
-    const seriesPerModel = series.filter((s) => s.seriesId === modelSeries.id);
+  for (let layerIdx = 0; layerIdx < model.series.length; layerIdx++) {
+    const layer = model.series[layerIdx];
+    const isGroupedByTerms = layer.split_mode === 'terms';
+    const seriesPerLayer = series.filter((s) => s.seriesId === layer.id);
     let id = X_ACCESSOR_INDEX;
-    const columns = [
-      { id, name: model.time_field ?? (model.default_timefield || ''), isSplit: false },
-    ];
-    const isSplitByTerms = seriesPerModel[0].isSplitByTerms;
-    if (seriesPerModel.length) {
+
+    const columns: TSVBColumns[] = [{ id, name: indexPattern.timeFieldName || '', isSplit: false }];
+    if (seriesPerLayer.length) {
       id++;
-      columns.push({ id, name: seriesPerModel[0].splitByLabel, isSplit: false });
-      if (isSplitByTerms) {
+      columns.push({ id, name: seriesPerLayer[0].splitByLabel, isSplit: false });
+      if (isGroupedByTerms) {
         id++;
-        columns.push({ id, name: modelSeries.terms_field || '', isSplit: true });
+        columns.push({ id, name: layer.terms_field || '', isSplit: true });
       }
     }
-    const columnsWithMeta: DatatableColumn[] = columns.map((column) => {
-      const field = indexPattern[0].getFieldByName(column.name);
-      const type = (field?.spec.type as DatatableColumnType) || 'number';
-      const cleanedColumn = {
-        id: column.id.toString(),
-        name: column.name,
-        meta: {
-          type,
-          field: column.name,
-          index: model.index_pattern ?? model.default_index_pattern,
-          source: 'esaggs',
-          sourceParams: {
-            enabled: true,
-            indexPatternId: indexPattern[0]?.id,
-            type:
-              type === 'date'
-                ? 'date_histogram'
-                : column.isSplit
-                ? 'terms'
-                : modelSeries.metrics[0].type,
-          },
-        },
-      };
-      return cleanedColumn;
-    });
+    const columnsWithMeta = addMetaToColumns(columns, indexPattern, layer.metrics[0].type);
+
     let rows: DatatableRow[] = [];
-    for (let j = 0; j < seriesPerModel.length; j++) {
-      const data = seriesPerModel[j].data.map((row) => {
-        const t: DatatableRow = [row[0], row[1]];
-        if (seriesPerModel[j].isSplitByTerms) {
-          t.push(seriesPerModel[j].label);
+    for (let j = 0; j < seriesPerLayer.length; j++) {
+      const data = seriesPerLayer[j].data.map((rowData) => {
+        const row: DatatableRow = [rowData[0], rowData[1]];
+        if (isGroupedByTerms) {
+          row.push(seriesPerLayer[j].label);
         }
-        return t;
+        return row;
       });
       rows = [...rows, ...data];
     }
-    tables[modelSeries.id] = {
+    tables[layer.id] = {
       type: 'datatable',
       rows,
       columns: columnsWithMeta,

@@ -44,10 +44,10 @@ function TimeseriesVisualization({
 }: TimeseriesVisualizationProps) {
   const onBrush = useCallback(
     async (gte: string, lte: string, series: PanelData[]) => {
-      const indexPattern = await getDataStart().indexPatterns.find(
-        model.index_pattern ?? model.default_index_pattern
-      );
-      const tables = convertSeriesToDataTable(model, series, indexPattern);
+      const indexPatternString = model.index_pattern || model.default_index_pattern || '';
+      const indexPatterns = await getDataStart().indexPatterns.find(indexPatternString);
+
+      const tables = convertSeriesToDataTable(model, series, indexPatterns[0]);
       const table = tables[model.series[0].id];
 
       const range: [number, number] = [parseInt(gte, 10), parseInt(lte, 10)];
@@ -56,7 +56,7 @@ function TimeseriesVisualization({
           table,
           column: 0,
           range,
-          timeFieldName: model.time_field ?? model.default_timefield,
+          timeFieldName: indexPatterns[0].timeFieldName,
         },
         name: 'brush',
       };
