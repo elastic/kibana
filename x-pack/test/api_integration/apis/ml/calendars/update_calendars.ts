@@ -42,6 +42,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     beforeEach(async () => {
       await ml.api.createCalendar(calendarId, originalCalendar);
+      // @ts-expect-error not full interface
       await ml.api.createCalendarEvents(calendarId, originalEvents);
     });
 
@@ -70,6 +71,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(updatedEvents).to.have.length(updateCalendarRequestBody.events.length);
       await ml.api.waitForEventsToExistInCalendar(
         updatedCalendar.calendar_id,
+        // @ts-expect-error not full interface
         updateCalendarRequestBody.events
       );
     });

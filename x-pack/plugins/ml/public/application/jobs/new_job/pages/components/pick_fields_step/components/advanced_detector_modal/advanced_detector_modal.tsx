@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import React, { FC, Fragment, useState, useContext, useEffect } from 'react';
 import {
   EuiComboBox,
@@ -170,6 +171,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
       byField,
       overField,
       partitionField,
+      // @ts-expect-error
       excludeFrequent: excludeFrequentOption.label !== '' ? excludeFrequentOption.label : null,
       description: descriptionOption !== '' ? descriptionOption : null,
       customRules: null,
@@ -343,7 +345,9 @@ function createFieldOption(field: Field | null): EuiComboBoxOptionOption {
   };
 }
 
-function createExcludeFrequentOption(excludeFrequent: string | null): EuiComboBoxOptionOption {
+function createExcludeFrequentOption(
+  excludeFrequent: estypes.ExcludeFrequent | null
+): EuiComboBoxOptionOption {
   if (excludeFrequent === null) {
     return emptyOption;
   }

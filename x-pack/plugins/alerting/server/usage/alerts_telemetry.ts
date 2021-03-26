@@ -246,50 +246,59 @@ export async function getTotalCountAggregations(
     },
   });
 
-  const totalAlertsCount = Object.keys(results.aggregations.byAlertTypeId.value.types).reduce(
+  const aggregations = results.aggregations as {
+    byAlertTypeId: { value: { types: Record<string, string> } };
+    throttleTime: { value: { min: number; max: number; totalCount: number; totalSum: number } };
+    intervalTime: { value: { min: number; max: number; totalCount: number; totalSum: number } };
+    connectorsAgg: {
+      connectors: {
+        value: { min: number; max: number; totalActionsCount: number; totalAlertsCount: number };
+      };
+    };
+  };
+
+  const totalAlertsCount = Object.keys(aggregations.byAlertTypeId.value.types).reduce(
     (total: number, key: string) =>
-      parseInt(results.aggregations.byAlertTypeId.value.types[key], 0) + total,
+      parseInt(aggregations.byAlertTypeId.value.types[key], 0) + total,
     0
   );
 
   return {
     count_total: totalAlertsCount,
-    count_by_type: Object.keys(results.aggregations.byAlertTypeId.value.types).reduce(
+    count_by_type: Object.keys(aggregations.byAlertTypeId.value.types).reduce(
       // ES DSL aggregations are returned as `any` by esClient.search
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (obj: any, key: string) => ({
         ...obj,
-        [replaceFirstAndLastDotSymbols(key)]: results.aggregations.byAlertTypeId.value.types[key],
+        [replaceFirstAndLastDotSymbols(key)]: aggregations.byAlertTypeId.value.types[key],
       }),
       {}
     ),
     throttle_time: {
-      min: `${results.aggregations.throttleTime.value.min}s`,
+      min: `${aggregations.throttleTime.value.min}s`,
       avg: `${
-        results.aggregations.throttleTime.value.totalCount > 0
-          ? results.aggregations.throttleTime.value.totalSum /
-            results.aggregations.throttleTime.value.totalCount
+        aggregations.throttleTime.value.totalCount > 0
+          ? aggregations.throttleTime.value.totalSum / aggregations.throttleTime.value.totalCount
           : 0
       }s`,
-      max: `${results.aggregations.throttleTime.value.max}s`,
+      max: `${aggregations.throttleTime.value.max}s`,
     },
     schedule_time: {
-      min: `${results.aggregations.intervalTime.value.min}s`,
+      min: `${aggregations.intervalTime.value.min}s`,
       avg: `${
-        results.aggregations.intervalTime.value.totalCount > 0
-          ? results.aggregations.intervalTime.value.totalSum /
-            results.aggregations.intervalTime.value.totalCount
+        aggregations.intervalTime.value.totalCount > 0
+          ? aggregations.intervalTime.value.totalSum / aggregations.intervalTime.value.totalCount
           : 0
       }s`,
-      max: `${results.aggregations.intervalTime.value.max}s`,
+      max: `${aggregations.intervalTime.value.max}s`,
     },
     connectors_per_alert: {
-      min: results.aggregations.connectorsAgg.connectors.value.min,
+      min: aggregations.connectorsAgg.connectors.value.min,
       avg:
         totalAlertsCount > 0
-          ? results.aggregations.connectorsAgg.connectors.value.totalActionsCount / totalAlertsCount
+          ? aggregations.connectorsAgg.connectors.value.totalActionsCount / totalAlertsCount
           : 0,
-      max: results.aggregations.connectorsAgg.connectors.value.max,
+      max: aggregations.connectorsAgg.connectors.value.max,
     },
   };
 }
@@ -308,20 +317,23 @@ export async function getTotalCountInUse(esClient: ElasticsearchClient, kibanaIn
       },
     },
   });
+
+  const aggregations = searchResult.aggregations as {
+    byAlertTypeId: { value: { types: Record<string, string> } };
+  };
+
   return {
-    countTotal: Object.keys(searchResult.aggregations.byAlertTypeId.value.types).reduce(
+    countTotal: Object.keys(aggregations.byAlertTypeId.value.types).reduce(
       (total: number, key: string) =>
-        parseInt(searchResult.aggregations.byAlertTypeId.value.types[key], 0) + total,
+        parseInt(aggregations.byAlertTypeId.value.types[key], 0) + total,
       0
     ),
-    countByType: Object.keys(searchResult.aggregations.byAlertTypeId.value.types).reduce(
+    countByType: Object.keys(aggregations.byAlertTypeId.value.types).reduce(
       // ES DSL aggregations are returned as `any` by esClient.search
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (obj: any, key: string) => ({
         ...obj,
-        [replaceFirstAndLastDotSymbols(key)]: searchResult.aggregations.byAlertTypeId.value.types[
-          key
-        ],
+        [replaceFirstAndLastDotSymbols(key)]: aggregations.byAlertTypeId.value.types[key],
       }),
       {}
     ),
