@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { SetViewControl } from './set_view_control';
 import { ToolsControl } from './tools_control';
+import { FeatureEditControl } from './feature_edit_control';
 import { FitToData } from './fit_to_data';
 
 export class ToolbarOverlay extends React.Component {
@@ -21,6 +22,23 @@ export class ToolbarOverlay extends React.Component {
     return (
       <EuiFlexItem>
         <ToolsControl
+          geoFields={geoFields}
+          getFilterActions={getFilterActions}
+          getActionContext={getActionContext}
+        />
+      </EuiFlexItem>
+    );
+  }
+
+  _renderFeatureEditControl() {
+    const { addFilters, geoFields, getFilterActions, getActionContext } = this.props;
+    if (!addFilters || !geoFields.length) {
+      return null;
+    }
+
+    return (
+      <EuiFlexItem>
+        <FeatureEditControl
           geoFields={geoFields}
           getFilterActions={getFilterActions}
           getActionContext={getActionContext}
@@ -47,6 +65,8 @@ export class ToolbarOverlay extends React.Component {
         </EuiFlexItem>
 
         {this._renderToolsControl()}
+
+        {this._renderFeatureEditControl()}
       </EuiFlexGroup>
     );
   }
