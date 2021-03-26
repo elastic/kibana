@@ -13,13 +13,13 @@ const invalidNumberValue = (value: number) => {
   return isNaN(value) || value === undefined || value === null;
 };
 
-const getTopHits = (threadType: string, order: string) => ({
+const getTopHits = (threadType: string, order: 'asc' | 'desc') => ({
   top_hits: {
     sort: [
       {
         timestamp: {
           order,
-          unmapped_type: 'long',
+          unmapped_type: 'long' as const,
         },
       },
     ],
@@ -81,10 +81,10 @@ export async function fetchThreadPoolRejectionStats(
               },
               aggs: {
                 most_recent: {
-                  ...getTopHits(threadType, 'desc'),
+                  ...getTopHits(threadType, 'desc' as const),
                 },
                 least_recent: {
-                  ...getTopHits(threadType, 'asc'),
+                  ...getTopHits(threadType, 'asc' as const),
                 },
               },
             },
@@ -96,6 +96,7 @@ export async function fetchThreadPoolRejectionStats(
 
   const { body: response } = await esClient.search(params);
   const stats: AlertThreadPoolRejectionsStats[] = [];
+  // @ts-expect-error @elastic/elasticsearch Aggregate does not specify buckets
   const { buckets: clusterBuckets = [] } = response.aggregations.clusters;
 
   if (!clusterBuckets.length) {

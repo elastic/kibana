@@ -13,7 +13,7 @@ import {
 } from '../../../../../../../../src/core/server';
 import {
   ESSearchRequest,
-  ESSearchResponse,
+  InferSearchResponseOf,
 } from '../../../../../../../../typings/elasticsearch';
 import { unwrapEsResponse } from '../../../../../../observability/server';
 import { ProcessorEvent } from '../../../../../common/processor_event';
@@ -54,7 +54,7 @@ type ESSearchRequestOf<TParams extends APMEventESSearchRequest> = Omit<
 
 type TypedSearchResponse<
   TParams extends APMEventESSearchRequest
-> = ESSearchResponse<
+> = InferSearchResponseOf<
   TypeOfProcessorEvent<ValuesType<TParams['apm']['events']>>,
   ESSearchRequestOf<TParams>
 >;
