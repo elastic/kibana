@@ -8716,7 +8716,6 @@
     "xpack.fleet.settings.elasticHostError": "無効なURL",
     "xpack.fleet.settings.elasticsearchUrlLabel": "Elasticsearch URL",
     "xpack.fleet.settings.flyoutTitle": "Fleet 設定",
-    "xpack.fleet.settings.globalOutputDescription": "データを送信する場所を指定します。これらの設定はすべてのElasticエージェントポリシーに適用されます。",
     "xpack.fleet.settings.globalOutputTitle": "グローバル出力",
     "xpack.fleet.settings.invalidYamlFormatErrorMessage": "無効なYAML形式：{reason}",
     "xpack.fleet.settings.kibanaUrlDifferentPathOrProtocolError": "各URLのプロトコルとパスは同じでなければなりません",
