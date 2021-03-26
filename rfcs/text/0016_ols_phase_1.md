@@ -120,7 +120,7 @@ This wrapper will be updated to ensure that access to private objects is only gr
 Step 1) The user is authorized to perform the operation on saved objects of the requested type, within the requested space. (Example: `update` a `user-settings` saved object in the `marketing` space)
 Step 2) The user is authorized to access this specific instance of the saved object, as described by that object's access control specification. For this first phase, the `accessControl.owner` is allowed to perform all operations. The only other users who are allowed to access this object are administrators (see [resolved question 2](#92-authorization-for-private-objects))
 
-Step 1 of this authorization check is the same check we perform today for all existing saved object types. Step 2 is a new authorization check, and **introduces additional overhead and complexity**. We explore the logic for this step in more detail later in this RFC.
+Step 1 of this authorization check is the same check we perform today for all existing saved object types. Step 2 is a new authorization check, and **introduces additional overhead and complexity**. We explore the logic for this step in more detail later in this RFC. Alternatives to this approach are discussed in [alternatives, section 5.2](#52-re-using-the-repositorys-pre-flight-checks).
 
 ![High-level authorization model for private objects](../images/ols_phase_1_auth.png)
 
@@ -238,7 +238,40 @@ This first phase also does not allow a public object to become private. Search s
 
 # 5. Alternatives
 
+## 5.1 Document level security
 OLS can be thought of as a Kibana-specific implementation of [Document level security](https://www.elastic.co/guide/en/elasticsearch/reference/current/document-level-security.html) ("DLS"). As such, we could consider enhancing the existing DLS feature to fit our needs (DLS doesn't prevent writes at the moment, only reads). This would involve considerable work from the Elasticsearch security team before we could consider this, and may not scale to subsequent phases of OLS.
+
+## 5.2 Re-using the repository's pre-flight checks
+The Saved Objects Repository uses pre-flight checks to ensure that operations against multi-namespace saved objects are adhering the user's current space. The currently proposed implementation has the security wrapper performing pre-flight checks for `private` objects.
+
+If we have `private` multi-namespace saved objects, then we will end up performing two pre-flight requests, which is excessive. We could explore re-using the repository's pre-flight checks instead of introducing new checks.
+
+The primary concern with this approach is audit logging. Currently, we audit create/update/delete events before they happen, so that we can record that the operation was attempted, even in the event of a network outage or other transient event.
+
+If we re-use the repository's pre-flight checks, then the repository will need a way to signal that audit logging should occur. We have a couple of options to explore in this regard:
+
+### 5.2.1 Move audit logging code into the repository
+Now that we no longer ship an OSS distribution, we could move the audit logging code directly into the repository. The implementation could still be provided by the security plugin, so we could still record information about the current user, and respect the current license.
+
+If we take this approach, then we will need a way to create a repository without audit logging. Certain features rely on the fact that the repository does not perform its own audit logging (such as Alerting, and the background repair jobs for ML).
+
+Core originally provided an [`audit_trail_service`](https://github.com/elastic/kibana/blob/v7.9.3/src/core/server/audit_trail/audit_trail_service.ts) for this type of functionality, with the thinking that OSS features could take advantage of this if needed. This was abandoned when we discovered that we had no such usages at the time, so we simplified the architecture. We could re-introduce this if desired, in order to support this initiative.
+
+Not all saved object audit events can be recorded by the repository. When users are not authorized at the type level (e.g., user can't `create` `dashboards`), then the wrapper will record this and not allow the operation to proceed. This shared-responsibility model will likely be even more confusing to reason about, so I'm not sure it's worth the small performance optimization we would get in return.
+
+### 5.2.2 Pluggable authorization
+This inverts the current model. Instead of security wrapping the saved objects client, security could instead provide an authorization module to the repository. The repository could decide when to perform authorization (including audit logging), passing along the results of any pre-flight operations as necessary.
+
+This arguably a lot of work, but worth consideration as we evolve both our persistence and authorization mechanisms to support our maturing solutions.
+
+Similar to alternative `5.2.1`, we would need a way to create a repository without authorization/auditing to support specific use cases.
+
+### 5.2.3 Repository callbacks
+
+A more rudimentary approach would be to provide callbacks via each saved object operation's `options` property. This callback would be provided by the security wrapper, and called by the repository when it was "safe" to perform the audit operation.
+
+This is a very simplistic approach, and probably not an architecture that we want to encourage or support long-term.
+
 
 # 6. Adoption strategy
 
