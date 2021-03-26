@@ -12,7 +12,7 @@ import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 
 import { EuiErrorBoundary, EuiFlexItem, EuiFlexGroup, EuiButtonEmpty } from '@elastic/eui';
 import { IIndexPattern } from 'src/plugins/data/common';
-import { InfraSourceConfiguration } from '../../../common/http_api/source_api';
+import { MetricsSourceConfigurationProperties } from '../../../common/metrics_sources';
 import { DocumentTitle } from '../../components/document_title';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { RoutedTabs } from '../../components/navigation/routed_tabs';
@@ -24,7 +24,7 @@ import {
 } from './metrics_explorer/hooks/use_metrics_explorer_options';
 import { WithMetricsExplorerOptionsUrlState } from '../../containers/metrics_explorer/with_metrics_explorer_options_url_state';
 import { WithSource } from '../../containers/with_source';
-import { Source } from '../../containers/source';
+import { Source } from '../../containers/metrics_source';
 import { MetricsExplorerPage } from './metrics_explorer';
 import { SnapshotPage } from './inventory_view';
 import { MetricsSettingsPage } from './settings';
@@ -188,8 +188,8 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
 };
 
 const PageContent = (props: {
-  configuration: InfraSourceConfiguration;
-  createDerivedIndexPattern: (type: 'logs' | 'metrics' | 'both') => IIndexPattern;
+  configuration: MetricsSourceConfigurationProperties;
+  createDerivedIndexPattern: (type: 'metrics') => IIndexPattern;
 }) => {
   const { createDerivedIndexPattern, configuration } = props;
   const { options } = useContext(MetricsExplorerOptionsContainer.Context);

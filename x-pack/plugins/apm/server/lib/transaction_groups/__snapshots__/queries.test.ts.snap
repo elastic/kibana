@@ -14,9 +14,11 @@ Array [
           "aggs": Object {
             "transaction_type": Object {
               "top_metrics": Object {
-                "metrics": Object {
-                  "field": "transaction.type",
-                },
+                "metrics": Array [
+                  Object {
+                    "field": "transaction.type",
+                  },
+                ],
                 "sort": Object {
                   "@timestamp": "desc",
                 },
@@ -210,9 +212,11 @@ Array [
           "aggs": Object {
             "transaction_type": Object {
               "top_metrics": Object {
-                "metrics": Object {
-                  "field": "transaction.type",
-                },
+                "metrics": Array [
+                  Object {
+                    "field": "transaction.type",
+                  },
+                ],
                 "sort": Object {
                   "@timestamp": "desc",
                 },
