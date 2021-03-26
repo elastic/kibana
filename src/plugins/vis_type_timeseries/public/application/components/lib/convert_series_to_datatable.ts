@@ -14,6 +14,7 @@ import {
 } from 'src/plugins/expressions/public';
 import { TimeseriesVisParams } from '../../../types';
 import { PanelData } from '../../../../common/types';
+import { getDataStart } from '../../../services';
 import { X_ACCESSOR_INDEX } from '../../visualizations/constants';
 
 interface TSVBTables {
@@ -53,14 +54,23 @@ export const addMetaToColumns = (
   });
 };
 
-export const convertSeriesToDataTable = (
+export const convertSeriesToDataTable = async (
   model: TimeseriesVisParams,
   series: PanelData[],
-  indexPattern: IndexPattern
+  initialIndexPattern: IndexPattern
 ) => {
   const tables: TSVBTables = {};
   for (let layerIdx = 0; layerIdx < model.series.length; layerIdx++) {
     const layer = model.series[layerIdx];
+    let indexPattern = initialIndexPattern;
+    // The user can overwrite the index pattern of a layer.
+    // In that case, the index pattern should be calculated again.
+    if (layer.override_index_pattern) {
+      const overwrittenIndexPatterns = await getDataStart().indexPatterns.find(
+        layer.series_index_pattern || ''
+      );
+      indexPattern = overwrittenIndexPatterns[0];
+    }
     const isGroupedByTerms = layer.split_mode === 'terms';
     const seriesPerLayer = series.filter((s) => s.seriesId === layer.id);
     let id = X_ACCESSOR_INDEX;
@@ -69,6 +79,7 @@ export const convertSeriesToDataTable = (
     if (seriesPerLayer.length) {
       id++;
       columns.push({ id, name: seriesPerLayer[0].splitByLabel, isSplit: false });
+      // Adds an extra column, if the layer is split by terms aggregation
       if (isGroupedByTerms) {
         id++;
         columns.push({ id, name: layer.terms_field || '', isSplit: true });
@@ -80,6 +91,7 @@ export const convertSeriesToDataTable = (
     for (let j = 0; j < seriesPerLayer.length; j++) {
       const data = seriesPerLayer[j].data.map((rowData) => {
         const row: DatatableRow = [rowData[0], rowData[1]];
+        // If the layer is split by terms aggregation, the data array should also contain the split value.
         if (isGroupedByTerms) {
           row.push(seriesPerLayer[j].label);
         }

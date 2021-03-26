@@ -10,6 +10,16 @@ import { PanelData } from '../../../../common/types';
 import { TimeseriesVisParams } from '../../../types';
 import { convertSeriesToDataTable, addMetaToColumns } from './convert_series_to_datatable';
 
+jest.mock('../../../services', () => {
+  return {
+    getDataStart: jest.fn(() => {
+      return {
+        indexPatterns: jest.fn(),
+      };
+    }),
+  };
+});
+
 describe('convert series to datatables', () => {
   let indexPattern: IndexPattern;
 
@@ -148,16 +158,16 @@ describe('convert series to datatables', () => {
         isSplitByTerms: true,
       },
     ] as unknown) as PanelData[];
-    test('creates one table for one layer series with the correct columns', () => {
-      const tables = convertSeriesToDataTable(model, series, indexPattern);
+    test('creates one table for one layer series with the correct columns', async () => {
+      const tables = await convertSeriesToDataTable(model, series, indexPattern);
       expect(Object.keys(tables).sort()).toEqual([model.series[0].id].sort());
 
       expect(tables.series1.columns.length).toEqual(3);
       expect(tables.series1.rows.length).toEqual(8);
     });
 
-    test('the table rows for a series with term aggregation should be a combination of the different terms', () => {
-      const tables = convertSeriesToDataTable(model, series, indexPattern);
+    test('the table rows for a series with term aggregation should be a combination of the different terms', async () => {
+      const tables = await convertSeriesToDataTable(model, series, indexPattern);
       expect(Object.keys(tables).sort()).toEqual([model.series[0].id].sort());
 
       expect(tables.series1.rows.length).toEqual(8);

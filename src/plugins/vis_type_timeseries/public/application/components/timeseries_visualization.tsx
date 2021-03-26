@@ -16,10 +16,11 @@ import { PaletteRegistry } from 'src/plugins/charts/public';
 // @ts-expect-error
 import { ErrorComponent } from './error';
 import { TimeseriesVisTypes } from './vis_types';
+import { TimeseriesVisData, PanelData } from '../../../common/types';
 import { TimeseriesVisParams } from '../../types';
 import { getDataStart } from '../../services';
-import { TimeseriesVisData, PanelData } from '../../../common/types';
 import { convertSeriesToDataTable } from './lib/convert_series_to_datatable';
+import { X_ACCESSOR_INDEX } from '../visualizations/constants';
 
 interface TimeseriesVisualizationProps {
   className?: string;
@@ -47,14 +48,14 @@ function TimeseriesVisualization({
       const indexPatternString = model.index_pattern || model.default_index_pattern || '';
       const indexPatterns = await getDataStart().indexPatterns.find(indexPatternString);
 
-      const tables = convertSeriesToDataTable(model, series, indexPatterns[0]);
+      const tables = await convertSeriesToDataTable(model, series, indexPatterns[0]);
       const table = tables[model.series[0].id];
 
       const range: [number, number] = [parseInt(gte, 10), parseInt(lte, 10)];
       const event = {
         data: {
           table,
-          column: 0,
+          column: X_ACCESSOR_INDEX,
           range,
           timeFieldName: indexPatterns[0].timeFieldName,
         },
