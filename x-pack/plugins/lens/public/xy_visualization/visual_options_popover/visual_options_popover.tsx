@@ -74,11 +74,10 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
     isHistogramSeries,
   });
 
+  const isDisabled = !isValueLabelsEnabled && !isFittingEnabled && !isCurveTypeEnabled;
+
   return (
-    <TooltipWrapper
-      tooltipContent={valueLabelsDisabledReason}
-      condition={!isValueLabelsEnabled && !isFittingEnabled}
-    >
+    <TooltipWrapper tooltipContent={valueLabelsDisabledReason} condition={isDisabled}>
       <ToolbarPopover
         title={i18n.translate('xpack.lens.shared.curveLabel', {
           defaultMessage: 'Visual options',
@@ -86,7 +85,7 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
         type="visualOptions"
         groupPosition="right"
         buttonDataTestSubj="lnsVisualOptionsButton"
-        isDisabled={!isValueLabelsEnabled && !isFittingEnabled && !isCurveTypeEnabled}
+        isDisabled={isDisabled}
       >
         <LineCurveOption
           isCurveTypeEnabled={isCurveTypeEnabled}
