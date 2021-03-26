@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-export type DescribeFn = (text: string, fn: () => void) => void;
+import { GenericFtrProviderContext } from '@kbn/test/types/ftr';
 
-export interface TestDefinitionAuthentication {
-  username?: string;
-  password?: string;
-}
+import { services } from './services';
+
+export type FtrProviderContext = GenericFtrProviderContext<typeof services, {}>;
