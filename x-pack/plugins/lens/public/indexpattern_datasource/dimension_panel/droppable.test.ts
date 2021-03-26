@@ -1035,7 +1035,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
                 },
               },
               col3: {
-                operationType: 'avg',
+                operationType: 'average',
                 sourceField: 'memory',
                 label: 'average of memory',
                 dataType: 'number',
