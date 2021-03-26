@@ -10,7 +10,6 @@ import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import { EuiColorPalettePicker, EuiColorPalettePickerPaletteProps } from '@elastic/eui';
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { NativeRenderer } from '../native_renderer';
 
 export function PalettePicker({
   palettes,
@@ -67,22 +66,6 @@ export function PalettePicker({
           valueOfSelected={activePalette?.name || 'default'}
           selectionDisplay={'palette'}
         />
-        {/* // TODO: remove it */}
-        {/* {activePalette && palettes.get(activePalette.name).renderEditor && (
-          <NativeRenderer
-            render={palettes.get(activePalette.name).renderEditor!}
-            nativeProps={{
-              state: activePalette.params,
-              setState: (updater) => {
-                setPalette({
-                  type: 'palette',
-                  name: activePalette.name,
-                  params: updater(activePalette.params),
-                });
-              },
-            }}
-          />
-        )} */}
       </>
     </EuiFormRow>
   );
