@@ -14,7 +14,7 @@ export const mockKibanaValues = {
   charts: chartPluginMock.createStartContract(),
   cloud: {
     isCloudEnabled: false,
-    cloudDeploymentUrl: 'https://cloud.elastic.co/deployments/some-id',
+    deployment_url: 'https://cloud.elastic.co/deployments/some-id',
   },
   history: mockHistory,
   navigateToUrl: jest.fn(),

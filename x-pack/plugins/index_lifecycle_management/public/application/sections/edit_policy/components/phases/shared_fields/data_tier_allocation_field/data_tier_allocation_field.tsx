@@ -60,7 +60,7 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({ phase, descr
 
   const hasNodeAttrs = Boolean(Object.keys(nodesByAttributes ?? {}).length);
   const isCloudEnabled = cloud?.isCloudEnabled ?? false;
-  const cloudDeploymentUrl = cloud?.cloudDeploymentUrl;
+  const cloudDeploymentUrl = cloud?.deploymentUrl;
 
   const renderNotice = () => {
     switch (allocationType) {

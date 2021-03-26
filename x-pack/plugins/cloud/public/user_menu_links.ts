@@ -8,30 +8,32 @@
 import { i18n } from '@kbn/i18n';
 import { UserMenuLink } from '../../security/public';
 import { CloudConfigType } from '.';
+import { getFullCloudUrl } from './utils';
 
 export const createUserMenuLinks = (config: CloudConfigType): UserMenuLink[] => {
-  const { resetPasswordUrl, accountUrl } = config;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const { profile_url, organization_url, base_url } = config;
   const userMenuLinks = [] as UserMenuLink[];
 
-  if (resetPasswordUrl) {
+  if (base_url && profile_url) {
     userMenuLinks.push({
       label: i18n.translate('xpack.cloud.userMenuLinks.profileLinkText', {
         defaultMessage: 'Profile',
       }),
       iconType: 'user',
-      href: resetPasswordUrl,
+      href: getFullCloudUrl(base_url, profile_url),
       order: 100,
       setAsProfile: true,
     });
   }
 
-  if (accountUrl) {
+  if (base_url && organization_url) {
     userMenuLinks.push({
       label: i18n.translate('xpack.cloud.userMenuLinks.accountLinkText', {
         defaultMessage: 'Account & Billing',
       }),
       iconType: 'gear',
-      href: accountUrl,
+      href: getFullCloudUrl(base_url, organization_url),
       order: 200,
     });
   }

@@ -2080,7 +2080,7 @@
     "home.tutorials.common.auditbeatStatusCheck.successText": "データを受信しました",
     "home.tutorials.common.auditbeatStatusCheck.text": "Auditbeat からデータを受け取ったことを確認してください。",
     "home.tutorials.common.auditbeatStatusCheck.title": "ステータス",
-    "home.tutorials.common.cloudInstructions.passwordAndResetLink": "{passwordTemplate}が「Elastic」ユーザーのパスワードです。\\{#config.cloud.resetPasswordUrl\\}\n      パスワードを忘れた場合[Elastic Cloudでリセット] (\\{config.cloud.resetPasswordUrl\\}) 。\n      \\{/config.cloud.resetPasswordUrl\\}",
+    "home.tutorials.common.cloudInstructions.passwordAndResetLink": "{passwordTemplate}が「Elastic」ユーザーのパスワードです。\\{#config.cloud.base_url\\}\\{#config.cloud.profile_url\\}\n      パスワードを忘れた場合[Elastic Cloudでリセット] (\\{#config.cloud.base_url\\}\\{config.cloud.profile_url\\}) 。\n      \\{#config.cloud.base_url\\}\\{/config.cloud.profile_url\\}",
     "home.tutorials.common.filebeat.cloudInstructions.gettingStarted.title": "はじめに",
     "home.tutorials.common.filebeat.premCloudInstructions.gettingStarted.title": "はじめに",
     "home.tutorials.common.filebeat.premInstructions.gettingStarted.title": "はじめに",

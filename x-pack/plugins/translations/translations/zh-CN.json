@@ -2091,7 +2091,7 @@
     "home.tutorials.common.auditbeatStatusCheck.successText": "已成功接收数据",
     "home.tutorials.common.auditbeatStatusCheck.text": "确认从 Auditbeat 收到数据",
     "home.tutorials.common.auditbeatStatusCheck.title": "状态",
-    "home.tutorials.common.cloudInstructions.passwordAndResetLink": "其中 {passwordTemplate} 是用户 `elastic` 的密码。\\{#config.cloud.resetPasswordUrl\\}\n      忘了密码？[在 Elastic Cloud 中重置](\\{config.cloud.resetPasswordUrl\\})。\n      \\{/config.cloud.resetPasswordUrl\\}",
+    "home.tutorials.common.cloudInstructions.passwordAndResetLink": "其中 {passwordTemplate} 是用户 `elastic` 的密码。\\{#config.cloud.base_url\\}\\{#config.cloud.profile_url\\}\n      忘了密码？[在 Elastic Cloud 中重置](\\{#config.cloud.base_url\\}\\{config.cloud.profile_url\\})。\n      \\{#config.cloud.base_url\\}\\{/config.cloud.profile_url\\}",
     "home.tutorials.common.filebeat.cloudInstructions.gettingStarted.title": "入门",
     "home.tutorials.common.filebeat.premCloudInstructions.gettingStarted.title": "入门",
     "home.tutorials.common.filebeat.premInstructions.gettingStarted.title": "入门",
