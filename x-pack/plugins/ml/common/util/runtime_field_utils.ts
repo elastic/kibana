@@ -5,14 +5,15 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { isPopulatedObject } from './object_utils';
 import {
   RUNTIME_FIELD_TYPES,
   RuntimeType,
 } from '../../../../../src/plugins/data/common/index_patterns';
-import type { RuntimeField, RuntimeMappings } from '../types/fields';
+import type { RuntimeMappings } from '../types/fields';
 
-export function isRuntimeField(arg: unknown): arg is RuntimeField {
+export function isRuntimeField(arg: unknown): arg is estypes.RuntimeField {
   return (
     isPopulatedObject(arg) &&
     ((Object.keys(arg).length === 1 && arg.hasOwnProperty('type')) ||

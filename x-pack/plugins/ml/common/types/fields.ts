@@ -28,7 +28,7 @@ export interface Field {
   aggregatable?: boolean;
   aggIds?: AggId[];
   aggs?: Aggregation[];
-  runtimeField?: RuntimeField;
+  runtimeField?: estypes.RuntimeField;
 }
 
 export interface Aggregation {
@@ -108,17 +108,4 @@ export interface AggCardinality {
 
 export type RollupFields = Record<FieldId, [Record<'agg', ES_AGGREGATION>]>;
 
-// Replace this with import once #88995 is merged
-const RUNTIME_FIELD_TYPES = ['keyword', 'long', 'double', 'date', 'ip', 'boolean'] as const;
-type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
-
-export interface RuntimeField {
-  type: RuntimeType;
-  script?:
-    | string
-    | {
-        source: string;
-      };
-}
-
-export type RuntimeMappings = estypes.RuntimeFields;
+export type RuntimeMappings = Record<string, estypes.RuntimeField>;
