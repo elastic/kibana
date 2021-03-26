@@ -118,14 +118,13 @@ export class Server {
     const { pluginTree, pluginPaths, uiPlugins } = await this.plugins.discover({
       environment: environmentSetup,
     });
-    const legacyConfigSetup = await this.legacy.setupLegacyConfig();
 
     // rely on dev server to validate config, don't validate in the parent process
     if (!this.env.isDevCliParent) {
       // Immediately terminate in case of invalid configuration
       // This needs to be done after plugin discovery
       await this.configService.validate();
-      await ensureValidConfiguration(this.configService, legacyConfigSetup);
+      await ensureValidConfiguration(this.configService);
     }
 
     const contextServiceSetup = this.context.setup({
@@ -259,15 +258,9 @@ export class Server {
       coreUsageData: coreUsageDataStart,
     };
 
-    const pluginsStart = await this.plugins.start(this.coreStart);
+    await this.plugins.start(this.coreStart);
 
-    await this.legacy.start({
-      core: {
-        ...this.coreStart,
-        plugins: pluginsStart,
-      },
-      plugins: mapToObject(pluginsStart.contracts),
-    });
+    await this.legacy.start();
 
     await this.http.start();
 

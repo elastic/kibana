@@ -12,8 +12,7 @@ import { statSync } from 'fs';
 import { resolve } from 'path';
 import url from 'url';
 
-import { getConfigPath } from '@kbn/utils';
-import { IS_KIBANA_DISTRIBUTABLE } from '../../legacy/utils';
+import { getConfigPath, IS_KIBANA_DISTRIBUTABLE } from '@kbn/utils';
 import { fromRoot } from '../../core/server/utils';
 import { bootstrap } from '../../core/server';
 import { readKeystore } from '../keystore/read_keystore';

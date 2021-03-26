@@ -20,8 +20,6 @@ const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
 const match = (regex: RegExp, errorMsg: string) => (str: string) =>
   regex.test(str) ? undefined : errorMsg;
 
-// before update to make sure it's in sync with validation rules in Legacy
-// https://github.com/elastic/kibana/blob/master/src/legacy/server/config/schema.js
 export const config = {
   path: 'server' as const,
   schema: schema.object(

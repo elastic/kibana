@@ -16,6 +16,5 @@ export type {
   LegacyVars,
   LegacyConfig,
   LegacyServiceSetupDeps,
-  LegacyServiceStartDeps,
   LegacyServiceSetupConfig,
 } from './types';
