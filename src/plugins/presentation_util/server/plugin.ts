@@ -9,7 +9,7 @@
 import { CoreSetup, Plugin } from 'kibana/server';
 import { getUISettings } from './ui_settings';
 
-export class PresentationUtilPluginSetup implements Plugin<object, object> {
+export class PresentationUtilPlugin implements Plugin<object, object> {
   public setup(core: CoreSetup) {
     core.uiSettings.register(getUISettings());
     return {};

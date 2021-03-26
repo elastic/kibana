@@ -8,7 +8,9 @@
 
 import { schema } from '@kbn/config-schema';
 import { UiSettingsParams } from '../../../../src/core/types';
-import { experiments, experimentIDs, ExperimentID, ExperimentConfig } from '../common';
+import { experiments, experimentIDs, ExperimentID } from '../common';
+
+export const SETTING_CATEGORY = 'Experiments';
 
 const experimentSettings: Record<ExperimentID, UiSettingsParams<boolean>> = experimentIDs.reduce(
   (acc, id) => {
@@ -17,16 +19,16 @@ const experimentSettings: Record<ExperimentID, UiSettingsParams<boolean>> = expe
     acc[id] = {
       name,
       value,
+      type: 'boolean',
       description,
       schema: schema.boolean(),
+      requiresPageReload: true,
+      category: [SETTING_CATEGORY],
     };
     return acc;
   },
   {} as {
-    [id in ExperimentID]: Pick<ExperimentConfig, 'name' | 'description'> & {
-      value: boolean;
-      schema: ReturnType<typeof schema.boolean>;
-    };
+    [id in ExperimentID]: UiSettingsParams<boolean>;
   }
 );
 

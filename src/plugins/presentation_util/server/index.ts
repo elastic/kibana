@@ -6,4 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { getUISettings } from './ui_settings';
+import { PresentationUtilPlugin } from './plugin';
+
+export const plugin = () => new PresentationUtilPlugin();

@@ -96,3 +96,7 @@ export const ExperimentsPopover = (props: Props) => {
     </EuiPopover>
   );
 };
+
+// required for dynamic import using React.lazy()
+// eslint-disable-next-line import/no-default-export
+export default ExperimentsPopover;
