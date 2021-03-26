@@ -6,5 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { registerApplicationUsageCollector } from './telemetry_application_usage_collector';
-export { rollDailyData as migrateTransactionalDocs } from './rollups';
+export const storeApplicationUsageMock = jest.fn();
+jest.doMock('./store_application_usage', () => ({
+  storeApplicationUsage: storeApplicationUsageMock,
+}));
