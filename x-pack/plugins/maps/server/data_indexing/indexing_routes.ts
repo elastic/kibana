@@ -16,7 +16,7 @@ import {
 } from '../../common/constants';
 import { createDocSource } from './create_doc_source';
 import { writeDataToIndex } from './index_data';
-import { DataPluginStart } from '../../../../../target/types/plugins/data/server/plugin';
+import { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
 
 export function initIndexingRoutes({
   router,
