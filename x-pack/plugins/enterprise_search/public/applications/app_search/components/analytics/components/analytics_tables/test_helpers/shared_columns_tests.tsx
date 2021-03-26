@@ -9,8 +9,8 @@ import {
   mockHttpValues,
   mockKibanaValues,
   mockFlashMessageHelpers,
-} from '../../../../../__mocks__';
-import '../../../../__mocks__/engine_logic.mock';
+} from '../../../../../../__mocks__';
+import '../../../../../__mocks__/engine_logic.mock';
 
 import { ReactWrapper } from 'enzyme';
 
