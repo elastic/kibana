@@ -22,14 +22,12 @@ export const Positionable: FC<Props> = ({ children, transformMatrix, width, heig
   const childNode = React.Children.only(children);
 
   const matrix = (transformMatrix.map((n, i) =>
-    i < 12 ? n : Math.round(n)
-  ) as any) as TransformMatrix3d;
+    i === 12 ? n - width / 2 : i === 13 ? n - height / 2 : n
+  ) as unknown) as TransformMatrix3d; // TS weakness: https://stackoverflow.com/questions/65335982/how-to-map-a-typescript-tuple-into-a-new-tuple-using-array-map
 
   const newStyle: CSSProperties = {
     width,
     height,
-    marginLeft: -width / 2,
-    marginTop: -height / 2,
     position: 'absolute',
     transform: matrixToCSS(matrix),
   };
