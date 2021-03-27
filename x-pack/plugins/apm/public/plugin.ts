@@ -9,7 +9,7 @@ import { ConfigSchema } from '.';
 import {
   FetchDataParams,
   HasDataParams,
-  ObservabilityPluginSetup,
+  ObservabilityPublicSetup,
 } from '../../observability/public';
 import {
   AppMountParameters,
@@ -52,7 +52,7 @@ export interface ApmPluginSetupDeps {
   home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
-  observability?: ObservabilityPluginSetup;
+  observability?: ObservabilityPublicSetup;
 }
 
 export interface ApmPluginStartDeps {

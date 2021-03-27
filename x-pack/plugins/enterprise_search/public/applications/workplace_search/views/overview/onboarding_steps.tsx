@@ -21,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { EuiButtonEmptyTo } from '../../../shared/react_router_helpers';
+import { EuiButtonTo } from '../../../shared/react_router_helpers';
 import { TelemetryLogic } from '../../../shared/telemetry';
 import { AppLogic } from '../../app_logic';
 import sharedSourcesIcon from '../../components/shared/assets/source_icons/share_circle.svg';
@@ -142,10 +142,10 @@ export const OrgNameOnboarding: React.FC = () => {
     });
 
   return (
-    <EuiPanel paddingSize="l">
+    <EuiPanel color="subdued" hasShadow={false} paddingSize="l">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
         <EuiFlexItem className="eui-hideFor--xs eui-hideFor--s" grow={false}>
-          <EuiIcon type="training" color="subdued" size="xl" />
+          <EuiIcon type="documentEdit" size="xl" />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiTitle size="xs">
@@ -158,16 +158,17 @@ export const OrgNameOnboarding: React.FC = () => {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmptyTo
+          <EuiButtonTo
             to={ORG_SETTINGS_PATH}
             onClick={onClick}
             data-test-subj="orgNameChangeButton"
+            size="s"
           >
             <FormattedMessage
               id="xpack.enterpriseSearch.workplaceSearch.orgNameOnboarding.buttonLabel"
               defaultMessage="Name your organization"
             />
-          </EuiButtonEmptyTo>
+          </EuiButtonTo>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
