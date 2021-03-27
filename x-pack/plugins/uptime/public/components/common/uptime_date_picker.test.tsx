@@ -10,9 +10,9 @@ import { UptimeDatePicker } from './uptime_date_picker';
 import {
   renderWithRouter,
   shallowWithRouter,
-  MountWithReduxProvider,
   mountWithRouterRedux,
-} from '../../lib';
+} from '../../lib/helper/enzyme_helpers';
+import { MountWithReduxProvider } from '../../lib';
 import { UptimeStartupPluginsContextProvider } from '../../contexts';
 import { startPlugins } from '../../lib/__mocks__/uptime_plugin_start_mock';
 import { ClientPluginsStart } from '../../apps/plugin';

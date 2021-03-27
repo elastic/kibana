@@ -12,7 +12,7 @@ import {
   mountWithRouterRedux,
   renderWithRouterRedux,
   shallowWithRouterRedux,
-} from '../../../../lib';
+} from '../../../../lib/helper/enzyme_helpers';
 import { EuiPopover, EuiText } from '@elastic/eui';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../common/constants';
 import { ReactRouterEuiLink } from '../../../common/react_router_helpers';

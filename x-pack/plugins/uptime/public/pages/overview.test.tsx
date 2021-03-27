@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { OverviewPageComponent } from './overview';
-import { shallowWithRouter } from '../lib';
+import { shallowWithRouter } from '../lib/helper/enzyme_helpers';
 
 describe('MonitorPage', () => {
   const indexPattern = {

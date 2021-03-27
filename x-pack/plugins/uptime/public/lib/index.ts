@@ -6,4 +6,3 @@
  */
 
 export { MountWithReduxProvider } from './helper';
-export * from './helper/enzyme_helpers';
