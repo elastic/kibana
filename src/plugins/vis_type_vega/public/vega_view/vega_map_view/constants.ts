@@ -7,7 +7,7 @@
  */
 
 import type { Style } from 'mapbox-gl';
-import { TMS_IN_YML_ID } from '../../../../maps_legacy/public';
+import { TMS_IN_YML_ID } from '../../../../maps_ems/public';
 
 export const vegaLayerId = 'vega';
 export const userConfiguredLayerId = TMS_IN_YML_ID;

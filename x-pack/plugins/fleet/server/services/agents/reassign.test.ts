@@ -47,7 +47,6 @@ describe('reassignAgent (singular)', () => {
     expect(esClient.update).toBeCalledTimes(1);
     const calledWith = esClient.update.mock.calls[0];
     expect(calledWith[0]?.id).toBe(agentInUnmanagedDoc._id);
-    // @ts-expect-error
     expect(calledWith[0]?.body?.doc).toHaveProperty('policy_id', unmanagedAgentPolicySO.id);
   });
 
@@ -91,7 +90,6 @@ describe('reassignAgents (plural)', () => {
     // calls ES update with correct values
     const calledWith = esClient.bulk.mock.calls[0][0];
     // only 1 are unmanaged and bulk write two line per update
-    // @ts-expect-error
     expect(calledWith.body.length).toBe(2);
     // @ts-expect-error
     expect(calledWith.body[0].update._id).toEqual(agentInUnmanagedDoc._id);
@@ -121,7 +119,7 @@ function createClientsMock() {
       case unmanagedAgentPolicySO2.id:
         return unmanagedAgentPolicySO2;
       default:
-        throw new Error('Not found');
+        throw new Error(`${id} not found`);
     }
   });
   soClientMock.bulkGet.mockImplementation(async (options) => {
@@ -147,11 +145,11 @@ function createClientsMock() {
       case agentInUnmanagedDoc._id:
         return { body: agentInUnmanagedDoc };
       default:
-        throw new Error('Not found');
+        throw new Error(`${id} not found`);
     }
   });
-  // @ts-expect-error
   esClientMock.bulk.mockResolvedValue({
+    // @ts-expect-error not full interface
     body: { items: [] },
   });
 

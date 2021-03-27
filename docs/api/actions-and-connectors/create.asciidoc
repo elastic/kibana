@@ -1,25 +1,25 @@
-[[actions-and-connectors-api-create]]
+[[create-connector-api]]
 === Create connector API
 ++++
-<titleabbrev>Create connector API</titleabbrev>
+<titleabbrev>Create connector</titleabbrev>
 ++++
 
 Creates a connector.
 
-[[actions-and-connectors-api-create-request]]
+[[create-connector-api-request]]
 ==== Request
 
 `POST <kibana host>:<port>/api/actions/connector`
 
 `POST <kibana host>:<port>/s/<space_id>/api/actions/connector`
 
-[[actions-and-connectors-api-create-path-params]]
+[[create-connector-api-path-params]]
 ==== Path parameters
 
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
-[[actions-and-connectors-api-create-request-body]]
+[[create-connector-api-request-body]]
 ==== Request body
 
 `name`::
@@ -36,15 +36,15 @@ Creates a connector.
   (Required, object) The secrets configuration for the connector. Secrets configuration properties vary
   depending on the connector type. For information about the secrets configuration properties, refer to <<action-types,Action and connector types>>.
 +
-WARNING: Remember these values. You must provide them each time you call the <<actions-and-connectors-api-update, update>> API.
+WARNING: Remember these values. You must provide them each time you call the <<update-connector-api, update>> API.
 
-[[actions-and-connectors-api-create-request-codes]]
+[[create-connector-api-request-codes]]
 ==== Response code
 
 `200`::
     Indicates a successful call.
 
-[[actions-and-connectors-api-create-example]]
+[[create-connector-api-example]]
 ==== Example
 
 [source,sh]

@@ -224,6 +224,10 @@ export interface Datasource<T = unknown, P = unknown> {
    * uniqueLabels of dimensions exposed for aria-labels of dragged dimensions
    */
   uniqueLabels: (state: T) => Record<string, string>;
+  /**
+   * Check the internal state integrity and returns a list of missing references
+   */
+  checkIntegrity: (state: T) => string[];
 }
 
 /**
@@ -570,7 +574,7 @@ export interface Visualization<T = unknown> {
   /** Track added layers in internal state */
   appendLayer?: (state: T, layerId: string, layerType?: string) => T;
   /* if set, allows adding of multiple types of layers */
-  getLayerTypes?: (state: T) => Array<{ name: string; dataBacked: boolean }>;
+  getLayerTypes?: (state: T) => Array<{ name: string }>;
 
   /**
    * For consistency across different visualizations, the dimension configuration UI is standardized

@@ -21,9 +21,10 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { PartialClock, CheckInEmptyCircle } from './custom_icons';
+import { CheckInEmptyCircle, PartialClock } from './custom_icons';
 import './search_session_indicator.scss';
 import { SearchSessionState } from '../../../../../../../src/plugins/data/public';
+import { SearchSessionName } from './components';
 
 export interface SearchSessionIndicatorProps {
   state: SearchSessionState;
@@ -38,6 +39,9 @@ export interface SearchSessionIndicatorProps {
   saveDisabledReasonText?: string;
 
   onOpened?: (openedState: SearchSessionState) => void;
+
+  searchSessionName?: string;
+  saveSearchSessionNameFn?: (newName: string) => Promise<unknown>;
 }
 
 type ActionButtonProps = SearchSessionIndicatorProps & { buttonProps: EuiButtonEmptyProps };
@@ -365,7 +369,16 @@ export const SearchSessionIndicator = React.forwardRef<
       }
     >
       <div data-test-subj="searchSessionIndicatorPopoverContainer">
-        <EuiText size="s">
+        {props.searchSessionName && props.saveSearchSessionNameFn ? (
+          <>
+            <SearchSessionName
+              name={props.searchSessionName}
+              editName={props.saveSearchSessionNameFn}
+            />
+            <EuiSpacer size={'xs'} />
+          </>
+        ) : null}
+        <EuiText size={'s'}>
           <p>{popover.title}</p>
         </EuiText>
         <EuiSpacer size={'xs'} />

@@ -8,7 +8,13 @@
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
 import { uniq } from 'lodash';
+import {
+  LatencyAggregationType,
+  latencyAggregationTypeRt,
+} from '../../common/latency_aggregation_types';
+import { ProfilingValueType } from '../../common/profiling';
 import { isoToEpochRt } from '../../common/runtime_types/iso_to_epoch_rt';
+import { jsonRt } from '../../common/runtime_types/json_rt';
 import { toNumberRt } from '../../common/runtime_types/to_number_rt';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
 import { setupRequest } from '../lib/helpers/setup_request';
@@ -16,31 +22,26 @@ import { getServiceAnnotations } from '../lib/services/annotations';
 import { getServices } from '../lib/services/get_services';
 import { getServiceAgentName } from '../lib/services/get_service_agent_name';
 import { getServiceDependencies } from '../lib/services/get_service_dependencies';
+import { getServiceErrorGroupPeriods } from '../lib/services/get_service_error_groups/get_service_error_group_comparison_statistics';
 import { getServiceErrorGroupPrimaryStatistics } from '../lib/services/get_service_error_groups/get_service_error_group_primary_statistics';
-import { getServiceErrorGroupComparisonStatistics } from '../lib/services/get_service_error_groups/get_service_error_group_comparison_statistics';
-import { getServiceInstances } from '../lib/services/get_service_instances';
+import { getServiceInstancesComparisonStatisticsPeriods } from '../lib/services/get_service_instances/comparison_statistics';
+import { getServiceInstancesPrimaryStatistics } from '../lib/services/get_service_instances/primary_statistics';
 import { getServiceMetadataDetails } from '../lib/services/get_service_metadata_details';
 import { getServiceMetadataIcons } from '../lib/services/get_service_metadata_icons';
 import { getServiceNodeMetadata } from '../lib/services/get_service_node_metadata';
 import { getServiceTransactionTypes } from '../lib/services/get_service_transaction_types';
 import { getThroughput } from '../lib/services/get_throughput';
-import { createRoute } from './create_route';
+import { getServiceProfilingStatistics } from '../lib/services/profiling/get_service_profiling_statistics';
+import { getServiceProfilingTimeline } from '../lib/services/profiling/get_service_profiling_timeline';
 import { offsetPreviousPeriodCoordinates } from '../utils/offset_previous_period_coordinate';
-import { jsonRt } from '../../common/runtime_types/json_rt';
+import { withApmSpan } from '../utils/with_apm_span';
+import { createRoute } from './create_route';
 import {
   comparisonRangeRt,
   environmentRt,
   kueryRt,
   rangeRt,
 } from './default_api_types';
-import { withApmSpan } from '../utils/with_apm_span';
-import { getServiceProfilingStatistics } from '../lib/services/profiling/get_service_profiling_statistics';
-import { getServiceProfilingTimeline } from '../lib/services/profiling/get_service_profiling_timeline';
-import { ProfilingValueType } from '../../common/profiling';
-import {
-  latencyAggregationTypeRt,
-  LatencyAggregationType,
-} from '../../common/latency_aggregation_types';
 
 export const servicesRoute = createRoute({
   endpoint: 'GET /api/apm/services',
@@ -329,6 +330,7 @@ export const serviceErrorGroupsComparisonStatisticsRoute = createRoute({
       environmentRt,
       kueryRt,
       rangeRt,
+      comparisonRangeRt,
       t.type({
         numBuckets: toNumberRt,
         transactionType: t.string,
@@ -342,10 +344,18 @@ export const serviceErrorGroupsComparisonStatisticsRoute = createRoute({
 
     const {
       path: { serviceName },
-      query: { environment, kuery, numBuckets, transactionType, groupIds },
+      query: {
+        environment,
+        kuery,
+        numBuckets,
+        transactionType,
+        groupIds,
+        comparisonStart,
+        comparisonEnd,
+      },
     } = context.params;
 
-    return getServiceErrorGroupComparisonStatistics({
+    return getServiceErrorGroupPeriods({
       environment,
       kuery,
       serviceName,
@@ -353,6 +363,8 @@ export const serviceErrorGroupsComparisonStatisticsRoute = createRoute({
       numBuckets,
       transactionType,
       groupIds,
+      comparisonStart,
+      comparisonEnd,
     });
   },
 });
@@ -422,8 +434,9 @@ export const serviceThroughputRoute = createRoute({
   },
 });
 
-export const serviceInstancesRoute = createRoute({
-  endpoint: 'GET /api/apm/services/{serviceName}/service_overview_instances',
+export const serviceInstancesPrimaryStatisticsRoute = createRoute({
+  endpoint:
+    'GET /api/apm/services/{serviceName}/service_overview_instances/primary_statistics',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -432,7 +445,6 @@ export const serviceInstancesRoute = createRoute({
       t.type({
         latencyAggregationType: latencyAggregationTypeRt,
         transactionType: t.string,
-        numBuckets: toNumberRt,
       }),
       environmentRt,
       kueryRt,
@@ -443,10 +455,61 @@ export const serviceInstancesRoute = createRoute({
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.path;
+    const { environment, kuery, transactionType } = context.params.query;
+    const latencyAggregationType = (context.params.query
+      .latencyAggregationType as unknown) as LatencyAggregationType;
+
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
+
+    const { start, end } = setup;
+
+    return getServiceInstancesPrimaryStatistics({
+      environment,
+      kuery,
+      latencyAggregationType,
+      serviceName,
+      setup,
+      transactionType,
+      searchAggregatedTransactions,
+      start,
+      end,
+    });
+  },
+});
+
+export const serviceInstancesComparisonStatisticsRoute = createRoute({
+  endpoint:
+    'GET /api/apm/services/{serviceName}/service_overview_instances/comparison_statistics',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      t.type({
+        latencyAggregationType: latencyAggregationTypeRt,
+        transactionType: t.string,
+        serviceNodeIds: jsonRt.pipe(t.array(t.string)),
+        numBuckets: toNumberRt,
+      }),
+      environmentRt,
+      kueryRt,
+      rangeRt,
+      comparisonRangeRt,
+    ]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName } = context.params.path;
     const {
       environment,
       kuery,
       transactionType,
+      comparisonStart,
+      comparisonEnd,
+      serviceNodeIds,
       numBuckets,
     } = context.params.query;
     const latencyAggregationType = (context.params.query
@@ -456,7 +519,7 @@ export const serviceInstancesRoute = createRoute({
       setup
     );
 
-    return getServiceInstances({
+    return getServiceInstancesComparisonStatisticsPeriods({
       environment,
       kuery,
       latencyAggregationType,
@@ -465,6 +528,9 @@ export const serviceInstancesRoute = createRoute({
       transactionType,
       searchAggregatedTransactions,
       numBuckets,
+      serviceNodeIds,
+      comparisonStart,
+      comparisonEnd,
     });
   },
 });

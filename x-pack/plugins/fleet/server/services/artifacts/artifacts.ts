@@ -8,18 +8,19 @@
 import { deflate } from 'zlib';
 import { promisify } from 'util';
 
-import { createHash, BinaryLike } from 'crypto';
+import type { BinaryLike } from 'crypto';
+import { createHash } from 'crypto';
 
 import uuid from 'uuid';
-import { ElasticsearchClient } from 'kibana/server';
+import type { ElasticsearchClient } from 'kibana/server';
 
-import { FLEET_SERVER_ARTIFACTS_INDEX, ListResult } from '../../../common';
-import { ESSearchHit, ESSearchResponse } from '../../../../../typings/elasticsearch';
+import type { ListResult } from '../../../common';
+import { FLEET_SERVER_ARTIFACTS_INDEX } from '../../../common';
 
 import { ArtifactsElasticsearchError } from '../../errors';
 
 import { isElasticsearchItemNotFoundError } from './utils';
-import {
+import type {
   Artifact,
   ArtifactElasticsearchProperties,
   ArtifactEncodedMetadata,
@@ -27,7 +28,7 @@ import {
   ListArtifactsProps,
   NewArtifact,
 } from './types';
-import { esSearchHitToArtifact } from './mappings';
+import { esSearchHitToArtifact, newArtifactToElasticsearchProperties } from './mappings';
 
 const deflateAsync = promisify(deflate);
 
@@ -36,11 +37,12 @@ export const getArtifact = async (
   id: string
 ): Promise<Artifact | undefined> => {
   try {
-    const esData = await esClient.get<ESSearchHit<ArtifactElasticsearchProperties>>({
+    const esData = await esClient.get<ArtifactElasticsearchProperties>({
       index: FLEET_SERVER_ARTIFACTS_INDEX,
       id,
     });
 
+    // @ts-expect-error @elastic/elasticsearch _source is optional
     return esSearchHitToArtifact(esData.body);
   } catch (e) {
     if (isElasticsearchItemNotFoundError(e)) {
@@ -56,10 +58,7 @@ export const createArtifact = async (
   artifact: NewArtifact
 ): Promise<Artifact> => {
   const id = uuid.v4();
-  const newArtifactData: ArtifactElasticsearchProperties = {
-    ...artifact,
-    created: new Date().toISOString(),
-  };
+  const newArtifactData = newArtifactToElasticsearchProperties(artifact);
 
   try {
     await esClient.create({
@@ -69,10 +68,7 @@ export const createArtifact = async (
       refresh: 'wait_for',
     });
 
-    return {
-      ...newArtifactData,
-      id,
-    };
+    return esSearchHitToArtifact({ _id: id, _source: newArtifactData });
   } catch (e) {
     throw new ArtifactsElasticsearchError(e);
   }
@@ -96,9 +92,7 @@ export const listArtifacts = async (
   const { perPage = 20, page = 1, kuery = '', sortField = 'created', sortOrder = 'asc' } = options;
 
   try {
-    const searchResult = await esClient.search<
-      ESSearchResponse<ArtifactElasticsearchProperties, {}>
-    >({
+    const searchResult = await esClient.search<ArtifactElasticsearchProperties>({
       index: FLEET_SERVER_ARTIFACTS_INDEX,
       sort: `${sortField}:${sortOrder}`,
       q: kuery,
@@ -107,9 +101,11 @@ export const listArtifacts = async (
     });
 
     return {
+      // @ts-expect-error @elastic/elasticsearch _source is optional
       items: searchResult.body.hits.hits.map((hit) => esSearchHitToArtifact(hit)),
       page,
       perPage,
+      // @ts-expect-error doesn't handle total as number
       total: searchResult.body.hits.total.value,
     };
   } catch (e) {

@@ -17,11 +17,11 @@ export enum StorageKeys {
 export class Storage {
   constructor(private readonly engine: IStorageEngine, private readonly prefix: string) {}
 
-  encode(val: any) {
+  encode(val: unknown) {
     return JSON.stringify(val);
   }
 
-  decode(val: any) {
+  decode(val: string | null) {
     if (typeof val === 'string') {
       return JSON.parse(val);
     }
@@ -37,7 +37,7 @@ export class Storage {
     }
   }
 
-  set(key: string, val: any) {
+  set(key: string, val: unknown) {
     this.engine.setItem(this.encodeKey(key), this.encode(val));
     return val;
   }

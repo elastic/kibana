@@ -15,6 +15,8 @@ import { extendedEnvSerializer } from './test_helpers';
 import { DevServer, Options } from './dev_server';
 import { TestLog } from './log';
 
+jest.useFakeTimers('modern');
+
 class MockProc extends EventEmitter {
   public readonly signalsSent: string[] = [];
 
@@ -91,6 +93,17 @@ const run = (server: DevServer) => {
   return subscription;
 };
 
+const collect = <T>(stream: Rx.Observable<T>) => {
+  const events: T[] = [];
+  const subscription = stream.subscribe({
+    next(item) {
+      events.push(item);
+    },
+  });
+  subscriptions.push(subscription);
+  return events;
+};
+
 afterEach(() => {
   if (currentProc) {
     currentProc.removeAllListeners();
@@ -107,6 +120,9 @@ describe('#run$', () => {
   it('starts the dev server with the right options', () => {
     run(new DevServer(defaultOptions)).unsubscribe();
 
+    // ensure that FORCE_COLOR is in the env for consistency in snapshot
+    process.env.FORCE_COLOR = process.env.FORCE_COLOR || 'true';
+
     expect(execa.node.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -122,7 +138,10 @@ describe('#run$', () => {
               "ELASTIC_APM_SERVICE_NAME": "kibana",
               "isDevCliChild": "true",
             },
-            "nodeOptions": Array [],
+            "nodeOptions": Array [
+              "--preserve-symlinks-main",
+              "--preserve-symlinks",
+            ],
             "stdio": "pipe",
           },
         ],
@@ -302,7 +321,106 @@ describe('#run$', () => {
     expect(currentProc.signalsSent).toEqual([]);
     sigint$.next();
     expect(currentProc.signalsSent).toEqual(['SIGINT']);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    jest.advanceTimersByTime(100);
     expect(currentProc.signalsSent).toEqual(['SIGINT', 'SIGKILL']);
+  });
+});
+
+describe('#getPhase$', () => {
+  it('emits "starting" when run$ is subscribed then emits "fatal exit" when server exits with code > 0, then starting once watcher fires and "listening" when the server is ready', () => {
+    const server = new DevServer(defaultOptions);
+    const events = collect(server.getPhase$());
+
+    expect(events).toEqual([]);
+    run(server);
+    expect(events).toEqual(['starting']);
+    events.length = 0;
+
+    isProc(currentProc);
+    currentProc.mockExit(2);
+    expect(events).toEqual(['fatal exit']);
+    events.length = 0;
+
+    restart$.next();
+    expect(events).toEqual(['starting']);
+    events.length = 0;
+
+    currentProc.mockListening();
+    expect(events).toEqual(['listening']);
+  });
+});
+
+describe('#getRestartTime$()', () => {
+  it('does not send event if server does not start listening before starting again', () => {
+    const server = new DevServer(defaultOptions);
+    const phases = collect(server.getPhase$());
+    const events = collect(server.getRestartTime$());
+    run(server);
+
+    isProc(currentProc);
+    restart$.next();
+    jest.advanceTimersByTime(1000);
+    restart$.next();
+    jest.advanceTimersByTime(1000);
+    restart$.next();
+    expect(phases).toMatchInlineSnapshot(`
+      Array [
+        "starting",
+        "starting",
+        "starting",
+        "starting",
+      ]
+    `);
+    expect(events).toEqual([]);
+  });
+
+  it('reports restart times', () => {
+    const server = new DevServer(defaultOptions);
+    const phases = collect(server.getPhase$());
+    const events = collect(server.getRestartTime$());
+
+    run(server);
+    isProc(currentProc);
+
+    restart$.next();
+    currentProc.mockExit(1);
+    restart$.next();
+    restart$.next();
+    restart$.next();
+    currentProc.mockExit(1);
+    restart$.next();
+    jest.advanceTimersByTime(1234);
+    currentProc.mockListening();
+    restart$.next();
+    restart$.next();
+    jest.advanceTimersByTime(5678);
+    currentProc.mockListening();
+
+    expect(phases).toMatchInlineSnapshot(`
+      Array [
+        "starting",
+        "starting",
+        "fatal exit",
+        "starting",
+        "starting",
+        "starting",
+        "fatal exit",
+        "starting",
+        "listening",
+        "starting",
+        "starting",
+        "listening",
+      ]
+    `);
+    expect(events).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "ms": 1234,
+        },
+        Object {
+          "ms": 5678,
+        },
+      ]
+    `);
   });
 });

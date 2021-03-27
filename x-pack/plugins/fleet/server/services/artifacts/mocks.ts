@@ -5,11 +5,15 @@
  * 2.0.
  */
 import { URL } from 'url';
-import { ApiResponse } from '@elastic/elasticsearch';
+
+import type { ApiResponse } from '@elastic/elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+
 import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
-import { ESSearchHit, ESSearchResponse } from '../../../../../typings/elasticsearch';
-import { Artifact, ArtifactElasticsearchProperties, ArtifactsClientInterface } from './types';
+import type { SearchHit, ESSearchResponse } from '../../../../../../typings/elasticsearch';
+
+import type { Artifact, ArtifactElasticsearchProperties, ArtifactsClientInterface } from './types';
+import { newArtifactToElasticsearchProperties } from './mappings';
 
 export const createArtifactsClientMock = (): jest.Mocked<ArtifactsClientInterface> => {
   return {
@@ -73,8 +77,12 @@ export const generateEsRequestErrorApiResponseMock = (
   );
 };
 
-export const generateArtifactEsGetSingleHitMock = (): ESSearchHit<ArtifactElasticsearchProperties> => {
-  const { id, ..._source } = generateArtifactMock();
+export const generateArtifactEsGetSingleHitMock = (): SearchHit<ArtifactElasticsearchProperties> => {
+  const { id, created, ...newArtifact } = generateArtifactMock();
+  const _source = {
+    ...newArtifactToElasticsearchProperties(newArtifact),
+    created,
+  };
 
   return {
     _index: '.fleet-artifacts_1',

@@ -26,6 +26,7 @@ import {
   BrushEndListener,
   LineAnnotation,
   AnnotationDomainTypes,
+  CurveType,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
@@ -180,6 +181,13 @@ export const xyChart: ExpressionFunctionDefinition<
       types: ['lens_xy_layer'] as any,
       help: 'Layers of visual series',
       multi: true,
+    },
+    curveType: {
+      types: ['string'],
+      options: ['LINEAR', 'CURVE_MONOTONE_X'],
+      help: i18n.translate('xpack.lens.xyChart.curveType.help', {
+        defaultMessage: 'Define how curve type is rendered for a line chart',
+      }),
     },
   },
   fn(data: LensMultiTable, args: XYArgs) {
@@ -776,10 +784,17 @@ export function XYChart({
 
           const index = `${layerIndex}-${accessorIndex}`;
 
+          const curveType = args.curveType ? CurveType[args.curveType] : undefined;
+
           switch (seriesType) {
             case 'line':
               return (
-                <LineSeries key={index} {...seriesProps} fit={getFitOptions(fittingFunction)} />
+                <LineSeries
+                  key={index}
+                  {...seriesProps}
+                  fit={getFitOptions(fittingFunction)}
+                  curve={curveType}
+                />
               );
             case 'bar':
             case 'bar_stacked':
@@ -807,11 +822,17 @@ export function XYChart({
                   key={index}
                   {...seriesProps}
                   fit={isPercentage ? 'zero' : getFitOptions(fittingFunction)}
+                  curve={curveType}
                 />
               );
             case 'area':
               return (
-                <AreaSeries key={index} {...seriesProps} fit={getFitOptions(fittingFunction)} />
+                <AreaSeries
+                  key={index}
+                  {...seriesProps}
+                  fit={getFitOptions(fittingFunction)}
+                  curve={curveType}
+                />
               );
             default:
               return assertNever(seriesType);

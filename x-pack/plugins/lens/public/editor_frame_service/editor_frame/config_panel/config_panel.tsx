@@ -137,10 +137,8 @@ export function LayerPanels(
         visualizationState &&
         (
           (activeVisualization.getLayerTypes &&
-            activeVisualization?.getLayerTypes(visualizationState)) || [
-            { name: 'default', dataBacked: true },
-          ]
-        ).map(({ name: layerType, dataBacked }) => (
+            activeVisualization?.getLayerTypes(visualizationState)) || [{ name: 'default' }]
+        ).map(({ name: layerType }) => (
           <EuiFlexItem grow={true} key={layerType}>
             <EuiToolTip
               className="eui-fullWidth"
@@ -174,7 +172,6 @@ export function LayerPanels(
                         activeDatasource: datasourceMap[activeDatasourceId],
                         state,
                         layerType: activeVisualization.getLayerTypes ? layerType : undefined,
-                        dataBacked,
                       }),
                   });
                   setNextFocusedLayerId(id);

@@ -1,5 +1,29 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Table render name 1`] = `
+<span>
+  customer
+</span>
+`;
+
+exports[`Table render name 2`] = `
+<span>
+  customer
+  <span>
+     
+    <EuiIconTip
+      content={
+        <span>
+          This field exists on the index pattern only.
+        </span>
+      }
+      title="Runtime field"
+      type="indexSettings"
+    />
+  </span>
+</span>
+`;
+
 exports[`Table should render conflicting type 1`] = `
 <span>
   conflict
@@ -141,6 +165,15 @@ exports[`Table should render normally 1`] = `
         "kbnType": "conflict",
         "name": "conflictingField",
         "type": "text, long",
+      },
+      Object {
+        "displayName": "customer",
+        "excluded": false,
+        "info": Array [],
+        "isMapped": false,
+        "kbnType": "text",
+        "name": "customer",
+        "type": "keyword",
       },
     ]
   }

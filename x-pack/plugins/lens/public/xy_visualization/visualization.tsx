@@ -113,7 +113,7 @@ export const getXyVisualization = ({
         newLayerState(
           usedSeriesTypes.length === 1 ? usedSeriesTypes[0] : state.preferredSeriesType,
           layerId,
-          layerType as 'data' | 'threshold' | 'threshold_const'
+          layerType as 'data' | 'threshold'
         ),
       ],
     };
@@ -321,11 +321,7 @@ export const getXyVisualization = ({
     };
   },
 
-  getLayerTypes: () => [
-    { name: 'data', dataBacked: true },
-    { name: 'threshold', dataBacked: true },
-    { name: 'threshold_const', dataBacked: false },
-  ],
+  getLayerTypes: () => [{ name: 'data' }, { name: 'threshold' }],
 
   getLayerContextMenuIcon({ state, layerId }) {
     const layer = state.layers.find((l) => l.layerId === layerId);
@@ -544,7 +540,7 @@ function getMessageIdsForDimension(dimension: string, layers: number[], isHorizo
 function newLayerState(
   seriesType: SeriesType,
   layerId: string,
-  layerType: 'data' | 'threshold' | 'threshold_const' = 'data'
+  layerType: 'data' | 'threshold' = 'data'
 ): XYLayerConfig {
   return {
     layerId,

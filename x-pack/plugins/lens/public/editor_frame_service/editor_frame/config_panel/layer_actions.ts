@@ -24,7 +24,6 @@ interface AppendLayerOptions {
   activeDatasource: Pick<Datasource, 'insertLayer' | 'id'>;
   activeVisualization: Pick<Visualization, 'appendLayer'>;
   layerType?: string;
-  dataBacked?: boolean;
 }
 
 export function removeLayer(opts: RemoveLayerOptions): EditorFrameState {
@@ -64,7 +63,6 @@ export function appendLayer({
   generateId,
   activeDatasource,
   layerType,
-  dataBacked,
 }: AppendLayerOptions): EditorFrameState {
   trackUiEvent('layer_added');
 
@@ -78,15 +76,13 @@ export function appendLayer({
     ...state,
     datasourceStates: {
       ...state.datasourceStates,
-      [activeDatasource.id]: dataBacked
-        ? {
-            ...state.datasourceStates[activeDatasource.id],
-            state: activeDatasource.insertLayer(
-              state.datasourceStates[activeDatasource.id].state,
-              layerId
-            ),
-          }
-        : state.datasourceStates[activeDatasource.id],
+      [activeDatasource.id]: {
+        ...state.datasourceStates[activeDatasource.id],
+        state: activeDatasource.insertLayer(
+          state.datasourceStates[activeDatasource.id].state,
+          layerId
+        ),
+      },
     },
     visualization: {
       ...state.visualization,

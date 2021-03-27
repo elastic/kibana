@@ -113,11 +113,11 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
         value: true,
         description: i18n.translate('xpack.rollupJobs.rollupIndexPatternsDescription', {
           defaultMessage: `Enable the creation of index patterns which capture rollup indices,
-              which in turn enable visualizations based on rollup data. Refresh
-              the page to apply the changes.`,
+              which in turn enable visualizations based on rollup data.`,
         }),
         category: ['rollups'],
         schema: schema.boolean(),
+        requiresPageReload: true,
       },
     });
 

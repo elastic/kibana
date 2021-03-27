@@ -304,7 +304,7 @@ export const layerConfig: ExpressionFunctionDefinition<
     },
     layerType: {
       types: ['string'],
-      options: ['data', 'threshold', 'threshold_const'],
+      options: ['data', 'threshold'],
     },
     thresholdAxis: {
       types: ['string'],
@@ -392,7 +392,7 @@ export interface XYLayerConfig {
   seriesType: SeriesType;
   splitAccessor?: string;
   palette?: PaletteOutput;
-  layerType?: 'data' | 'threshold' | 'threshold_const';
+  layerType?: 'data' | 'threshold';
 }
 
 export interface ValidLayer extends XYLayerConfig {
@@ -424,7 +424,10 @@ export interface XYArgs {
   };
   tickLabelsVisibilitySettings?: AxesSettingsConfig & { type: 'lens_xy_tickLabelsConfig' };
   gridlinesVisibilitySettings?: AxesSettingsConfig & { type: 'lens_xy_gridlinesConfig' };
+  curveType?: XYCurveType;
 }
+
+export type XYCurveType = 'LINEAR' | 'CURVE_MONOTONE_X';
 
 // Persisted parts of the state
 export interface XYState {
@@ -439,6 +442,7 @@ export interface XYState {
   axisTitlesVisibilitySettings?: AxesSettingsConfig;
   tickLabelsVisibilitySettings?: AxesSettingsConfig;
   gridlinesVisibilitySettings?: AxesSettingsConfig;
+  curveType?: XYCurveType;
 }
 
 export type State = XYState;

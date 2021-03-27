@@ -81,7 +81,6 @@
       "migrationVersion": {
         "config": "7.13.0"
       },
-      "namespace": "default",
       "references": [
       ],
       "type": "config",

@@ -43,7 +43,7 @@ import {
 } from '../errors';
 import { getFullAgentPolicyKibanaConfig } from '../../common/services/full_agent_policy_kibana_config';
 
-import { createAgentPolicyAction, listAgents } from './agents';
+import { createAgentPolicyAction, getAgentsByKuery } from './agents';
 import { packagePolicyService } from './package_policy';
 import { outputService } from './output';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
@@ -520,7 +520,7 @@ class AgentPolicyService {
       throw new Error('The default agent policy cannot be deleted');
     }
 
-    const { total } = await listAgents(esClient, {
+    const { total } = await getAgentsByKuery(esClient, {
       showInactive: false,
       perPage: 0,
       page: 1,
@@ -706,12 +706,20 @@ class AgentPolicyService {
       } catch (error) {
         throw new Error('Default settings is not setup');
       }
-      if (!settings.kibana_urls || !settings.kibana_urls.length)
-        throw new Error('kibana_urls is missing');
+      if (settings.fleet_server_hosts && settings.fleet_server_hosts.length) {
+        fullAgentPolicy.fleet = {
+          hosts: settings.fleet_server_hosts,
+        };
+      } // TODO remove as part of https://github.com/elastic/kibana/issues/94303
+      else {
+        if (!settings.kibana_urls || !settings.kibana_urls.length)
+          throw new Error('kibana_urls is missing');
 
-      fullAgentPolicy.fleet = {
-        kibana: getFullAgentPolicyKibanaConfig(settings.kibana_urls),
-      };
+        fullAgentPolicy.fleet = {
+          hosts: settings.kibana_urls,
+          kibana: getFullAgentPolicyKibanaConfig(settings.kibana_urls),
+        };
+      }
     }
     return fullAgentPolicy;
   }
