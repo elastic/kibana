@@ -69,7 +69,7 @@ Subject::       The subject line of the email.
 Message::       The message text of the email. Markdown format is supported.
 
 [[configuring-email]]
-=== Configuring email accounts for well-known services
+==== Configuring email accounts for well-known services
 
 The email connector can send email using many popular SMTP email services.
 
