@@ -1,6 +1,6 @@
 [role="xpack"]
 [[resilient-action-type]]
-=== IBM Resilient connector and action
+== IBM Resilient connector and action
 ++++
 <titleabbrev>IBM Resilient</titleabbrev>
 ++++
@@ -9,7 +9,7 @@ The IBM Resilient connector uses the https://developer.ibm.com/security/resilien
 
 [float]
 [[resilient-connector-configuration]]
-==== Connector configuration
+=== Connector configuration
 
 IBM Resilient connectors have the following configuration properties.
 
@@ -21,7 +21,7 @@ API key secret::  The authentication key secret for HTTP Basic authentication.
 
 [float]
 [[Preconfigured-resilient-configuration]]
-==== Preconfigured connector type
+=== Preconfigured connector type
 
 [source,text]
 --
@@ -48,7 +48,7 @@ Secrets defines sensitive information for the connector type.
 
 [float]
 [[resilient-action-configuration]]
-==== Action configuration
+=== Action configuration
 
 IBM Resilient actions have the following configuration properties.
 
@@ -59,6 +59,6 @@ Description:: The details about the incident.
 Additional comments:: Additional information for the client, such as how to troubleshoot the issue.
 
 [[configuring-resilient]]
-==== Configure IBM Resilient
+=== Configure IBM Resilient
 
 IBM Resilient offers https://www.ibm.com/security/intelligent-orchestration/resilient[Instances], which you can use to test incidents.

@@ -1,6 +1,6 @@
 [role="xpack"]
 [[server-log-action-type]]
-=== Server log connector and action
+== Server log connector and action
 ++++
 <titleabbrev>Server log</titleabbrev>
 ++++
@@ -9,7 +9,7 @@ This connector writes an entry to the {kib} server log.
 
 [float]
 [[server-log-connector-configuration]]
-==== Connector configuration
+=== Connector configuration
 
 Server log connectors have the following configuration properties.
 
@@ -28,7 +28,7 @@ Name::      The name of the connector. The name is used to identify a  connector
 
 [float]
 [[server-log-action-configuration]]
-==== Action configuration
+=== Action configuration
 
 Server log actions have the following properties.
 

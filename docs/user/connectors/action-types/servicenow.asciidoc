@@ -1,6 +1,6 @@
 [role="xpack"]
 [[servicenow-action-type]]
-=== ServiceNow connector and action
+== ServiceNow connector and action
 ++++
 <titleabbrev>ServiceNow</titleabbrev>
 ++++
@@ -9,7 +9,7 @@ The ServiceNow connector uses the https://developer.servicenow.com/app.do#!/rest
 
 [float]
 [[servicenow-connector-configuration]]
-==== Connector configuration
+=== Connector configuration
 
 ServiceNow connectors have the following configuration properties.
 
@@ -20,7 +20,7 @@ Password::  Password for HTTP Basic authentication.
 
 [float]
 [[Preconfigured-servicenow-configuration]]
-==== Preconfigured connector type
+=== Preconfigured connector type
 
 [source,text]
 --
@@ -45,7 +45,7 @@ Secrets defines sensitive information for the connector type.
 
 [float]
 [[servicenow-action-configuration]]
-==== Action configuration
+=== Action configuration
 
 ServiceNow actions have the following configuration properties.
 
@@ -57,6 +57,6 @@ Description::          The details about the incident.
 Additional comments::  Additional information for the client, such as how to troubleshoot the issue.
 
 [[configuring-servicenow]]
-==== Configure ServiceNow
+=== Configure ServiceNow
 
 ServiceNow offers free https://developer.servicenow.com/dev.do#!/guides/madrid/now-platform/pdi-guide/obtaining-a-pdi[Personal Developer Instances], which you can use to test incidents.

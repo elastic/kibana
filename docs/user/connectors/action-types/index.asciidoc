@@ -1,6 +1,6 @@
 [role="xpack"]
 [[index-action-type]]
-=== Index connector and action
+== Index connector and action
 ++++
 <titleabbrev>Index</titleabbrev>
 ++++
@@ -9,7 +9,7 @@ The index connector will index a document into {es}. See also the {ref}/indices-
 
 [float]
 [[index-connector-configuration]]
-==== Connector configuration
+=== Connector configuration
 
 Index connectors have the following configuration properties.
 
@@ -20,7 +20,7 @@ Execution time field::  This field will be automatically set to the time the ale
 
 [float]
 [[Preconfigured-index-configuration]]
-==== Preconfigured connector type
+=== Preconfigured connector type
 
 [source,text]
 --
@@ -41,7 +41,7 @@ Config defines information for the connector type.
 
 [float]
 [[index-action-configuration]]
-==== Action configuration
+=== Action configuration
 
 Index actions have the following properties.
 
@@ -49,7 +49,7 @@ Document::  The document to index in JSON format.
 
 [float]
 [[index-action-example]]
-==== Example
+=== Example
 
 Example of the index document for Index Threshold rule:
 

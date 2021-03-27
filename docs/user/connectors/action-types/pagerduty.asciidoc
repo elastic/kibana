@@ -1,6 +1,6 @@
 [role="xpack"]
 [[pagerduty-action-type]]
-=== PagerDuty connector and action
+== PagerDuty connector and action
 ++++
 <titleabbrev>PagerDuty</titleabbrev>
 ++++
@@ -9,7 +9,7 @@ The PagerDuty connector uses the https://v2.developer.pagerduty.com/docs/events-
 
 [float]
 [[pagerduty-connector-configuration]]
-==== Connector configuration
+=== Connector configuration
 
 PagerDuty connectors have the following configuration properties.
 
@@ -19,7 +19,7 @@ Integration Key::   A 32 character PagerDuty Integration Key for an integration 
 
 [float]
 [[Preconfigured-pagerduty-configuration]]
-==== Preconfigured connector type
+=== Preconfigured connector type
 
 [source,text]
 --
@@ -42,7 +42,7 @@ Secrets defines sensitive information for the connector type.
 
 [float]
 [[pagerduty-action-configuration]]
-==== Action configuration
+=== Action configuration
 
 PagerDuty actions have the following properties.
 
@@ -60,7 +60,7 @@ For more details on these properties, see https://v2.developer.pagerduty.com/v2/
 
 [float]
 [[pagerduty-benefits]]
-==== Configure PagerDuty
+=== Configure PagerDuty
 
 By integrating PagerDuty with rules, you can:
 
@@ -70,14 +70,14 @@ By integrating PagerDuty with rules, you can:
 
 [float]
 [[pagerduty-support]]
-===== Support
+==== Support
 If you need help with this integration, get in touch with the {kib} team by visiting
 https://support.elastic.co[support.elastic.co] or by using the *Ask Elastic* option in the {kib} Help menu.
 You can also select the {kib} category at https://discuss.elastic.co/[discuss.elastic.co].
 
 [float]
 [[pagerduty-integration-walkthrough]]
-===== Integration with PagerDuty walkthrough
+==== Integration with PagerDuty walkthrough
 
 [[pagerduty-in-pagerduty]]
 *In PagerDuty*

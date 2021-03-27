@@ -1,6 +1,6 @@
 [role="xpack"]
 [[webhook-action-type]]
-=== Webhook connector and action
+== Webhook connector and action
 ++++
 <titleabbrev>Webhook</titleabbrev>
 ++++
@@ -9,7 +9,7 @@ The Webhook connector uses https://github.com/axios/axios[axios] to send a POST 
 
 [float]
 [[webhook-connector-configuration]]
-==== Connector configuration
+=== Connector configuration
 
 Webhook connectors have the following configuration properties.
 
@@ -23,7 +23,7 @@ Password::  Password for HTTP basic authentication.
 
 [float]
 [[Preconfigured-webhook-configuration]]
-==== Preconfigured connector type
+=== Preconfigured connector type
 
 [source,text]
 --
@@ -54,7 +54,7 @@ Secrets defines sensitive information for the connector type.
 
 [float]
 [[webhook-action-configuration]]
-==== Action configuration
+=== Action configuration
 
 Webhook actions have the following properties.
 

@@ -1,6 +1,6 @@
 [role="xpack"]
 [[jira-action-type]]
-=== Jira connector and action
+== Jira connector and action
 ++++
 <titleabbrev>Jira</titleabbrev>
 ++++
@@ -9,7 +9,7 @@ The Jira connector uses the https://developer.atlassian.com/cloud/jira/platform/
 
 [float]
 [[jira-connector-configuration]]
-==== Connector configuration
+=== Connector configuration
 
 Jira connectors have the following configuration properties.
 
@@ -21,7 +21,7 @@ API token (or password)::  Jira API authentication token (or password) for HTTP 
 
 [float]
 [[Preconfigured-jira-configuration]]
-==== Preconfigured connector type
+=== Preconfigured connector type
 
 [source,text]
 --
@@ -48,7 +48,7 @@ Secrets defines sensitive information for the connector type.
 
 [float]
 [[jira-action-configuration]]
-==== Action configuration
+=== Action configuration
 
 Jira actions have the following configuration properties.
 
@@ -61,6 +61,6 @@ Parent:: The ID or key of the parent issue. Only for `Subtask` issue types.
 Additional comments:: Additional information for the client, such as how to troubleshoot the issue.
 
 [[configuring-jira]]
-==== Configure Jira
+=== Configure Jira
 
 Jira offers free https://www.atlassian.com/software/jira/free[Instances], which you can use to test incidents.
