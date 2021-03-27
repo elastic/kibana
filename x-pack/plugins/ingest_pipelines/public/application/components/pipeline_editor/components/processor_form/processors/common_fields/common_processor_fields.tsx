@@ -79,11 +79,17 @@ export const CommonProcessorFields: FunctionComponent = () => {
           },
         }}
         path="fields.if"
+        data-test-subj="ifConfigField"
       />
 
-      <UseField config={tagConfig} component={Field} path="fields.tag" />
+      <UseField config={tagConfig} component={Field} path="fields.tag" data-test-subj="tagField" />
 
-      <UseField config={ignoreFailureConfig} component={ToggleField} path="fields.ignore_failure" />
+      <UseField
+        config={ignoreFailureConfig}
+        component={ToggleField}
+        path="fields.ignore_failure"
+        data-test-subj="ignoreFailureSwitch"
+      />
     </section>
   );
 };

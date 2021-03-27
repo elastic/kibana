@@ -141,6 +141,7 @@ type TestSubject =
   | 'fieldNameField.input'
   | 'valueFieldAppend.input'
   | 'ignoreMissingSwitch.input'
+  | 'ignoreFailureSwitch.input'
   | 'targetField.input'
   | 'keepOriginalField.input'
   | 'removeIfSuccessfulField.input';

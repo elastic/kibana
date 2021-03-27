@@ -115,8 +115,9 @@ describe('Processor: Append', () => {
     form.setInputValue('fieldNameField.input', 'field_1');
 
     // Set optional parameteres
-    find('valueFieldAppend.input').simulate('change', [{ label: 'Some_Value' }]);
+    find('valueFieldAppend.input').simulate('change', [{ label: ['Some_Value'] }]);
 
+    form.toggleEuiSwitch('ignoreFailureSwitch.input');
     // Save the field with new changes
     await saveNewProcessor();
 
@@ -124,8 +125,10 @@ describe('Processor: Append', () => {
     expect(processors[0].append).toEqual({
       description: undefined,
       field: 'field_1',
-      ignore_failure: undefined,
-      target_field: 'target_field',
+      ignore_failure: true,
+      if: undefined,
+      tag: undefined,
+      value: [['Some_Value']],
     });
   });
 });
