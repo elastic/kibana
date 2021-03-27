@@ -12,6 +12,7 @@ import { EuiSpacer, EuiButtonEmpty, EuiText, EuiLink } from '@elastic/eui';
 
 import { useMappingsState, useDispatch } from '../../mappings_state_context';
 import {
+  documentationService,
   GlobalFlyout,
   RuntimeField,
   RuntimeFieldEditorFlyoutContent,
@@ -20,13 +21,11 @@ import {
 import { useConfig } from '../../config_context';
 import { EmptyPrompt } from './empty_prompt';
 import { RuntimeFieldsListItemContainer } from './runtimefields_list_item_container';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 
 const { useGlobalFlyout } = GlobalFlyout;
 
 export const RuntimeFieldsList = () => {
-  const docLinks = useKibana().services.docLinks!;
-  const runtimeFieldsDocsUri = docLinks.links.runtimeFields;
+  const runtimeFieldsDocsUri = documentationService.getRuntimeFields();
   const {
     runtimeFields,
     runtimeFieldsList: { status, fieldToEdit },

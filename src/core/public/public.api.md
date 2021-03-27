@@ -562,6 +562,7 @@ export interface DocLinksStart {
             readonly top_hits: string;
         };
         readonly runtimeFields: {
+            readonly overview: string;
             readonly mapping: string;
         };
         readonly scriptedFields: {
