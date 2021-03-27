@@ -37,7 +37,6 @@ interface State {
   lat: number | string;
   lon: number | string;
   zoom: number | string;
-  prevView: string;
 }
 
 export class SetViewControl extends Component<Props, State> {
@@ -46,27 +45,20 @@ export class SetViewControl extends Component<Props, State> {
     lat: 0,
     lon: 0,
     zoom: 0,
-    prevView: '',
   };
 
-  static getDerivedStateFromProps(nextProps: Props, prevState: State) {
-    const nextView = getViewString(nextProps.center.lat, nextProps.center.lon, nextProps.zoom);
-    if (nextView !== prevState.prevView) {
-      return {
-        lat: nextProps.center.lat,
-        lon: nextProps.center.lon,
-        zoom: nextProps.zoom,
-        prevView: nextView,
-      };
+  _togglePopover = () => {
+    if (this.state.isPopoverOpen) {
+      this._closePopover();
+      return;
     }
 
-    return null;
-  }
-
-  _togglePopover = () => {
-    this.setState((prevState) => ({
-      isPopoverOpen: !prevState.isPopoverOpen,
-    }));
+    this.setState({
+      lat: this.props.center.lat,
+      lon: this.props.center.lon,
+      zoom: this.props.zoom,
+      isPopoverOpen: true,
+    });
   };
 
   _closePopover = () => {
