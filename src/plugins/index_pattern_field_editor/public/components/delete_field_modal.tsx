@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiCallOut, EuiConfirmModal, EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
 const geti18nTexts = (fieldsToDelete?: string[]) => {
   let modalTitle = '';
+  let confirmButtonText = '';
   if (fieldsToDelete) {
     const isSingle = fieldsToDelete.length === 1;
 
@@ -19,27 +20,35 @@ const geti18nTexts = (fieldsToDelete?: string[]) => {
       ? i18n.translate(
           'indexPatternFieldEditor.deleteRuntimeField.confirmModal.deleteSingleTitle',
           {
-            defaultMessage: `Remove field '{name}'?`,
+            defaultMessage: `Remove field '{name}'`,
             values: { name: fieldsToDelete[0] },
           }
         )
       : i18n.translate(
           'indexPatternFieldEditor.deleteRuntimeField.confirmModal.deleteMultipleTitle',
           {
-            defaultMessage: `Remove {count} fields?`,
+            defaultMessage: `Remove {count} fields`,
             values: { count: fieldsToDelete.length },
+          }
+        );
+    confirmButtonText = isSingle
+      ? i18n.translate(
+          'indexPatternFieldEditor.deleteRuntimeField.confirmationModal.removeButtonLabel',
+          {
+            defaultMessage: `Remove field`,
+          }
+        )
+      : i18n.translate(
+          'indexPatternFieldEditor.deleteRuntimeField.confirmationModal.removeMultipleButtonLabel',
+          {
+            defaultMessage: `Remove fields`,
           }
         );
   }
 
   return {
     modalTitle,
-    confirmButtonText: i18n.translate(
-      'indexPatternFieldEditor.deleteRuntimeField.confirmationModal.removeButtonLabel',
-      {
-        defaultMessage: 'Remove',
-      }
-    ),
+    confirmButtonText,
     cancelButtonText: i18n.translate(
       'indexPatternFieldEditor.deleteRuntimeField.confirmationModal.cancelButtonLabel',
       {
@@ -50,6 +59,19 @@ const geti18nTexts = (fieldsToDelete?: string[]) => {
       'indexPatternFieldEditor.deleteRuntimeField.confirmModal.multipleDeletionDescription',
       {
         defaultMessage: 'You are about to remove these runtime fields:',
+      }
+    ),
+    typeConfirm: i18n.translate(
+      'indexPatternFieldEditor.deleteRuntimeField.confirmModal.typeConfirm',
+      {
+        defaultMessage: "Type 'REMOVE' to confirm",
+      }
+    ),
+    warningRemovingFields: i18n.translate(
+      'indexPatternFieldEditor.deleteRuntimeField.confirmModal.warningRemovingFields',
+      {
+        defaultMessage:
+          'Warning: Removing fields may break searches or visualizations that rely on this field.',
       }
     ),
   };
@@ -65,6 +87,7 @@ export function DeleteFieldModal({ fieldsToDelete, closeModal, confirmDelete }: 
   const i18nTexts = geti18nTexts(fieldsToDelete);
   const { modalTitle, confirmButtonText, cancelButtonText, warningMultipleFields } = i18nTexts;
   const isMultiple = Boolean(fieldsToDelete.length > 1);
+  const [confirmContent, setConfirmContent] = useState<string>();
   return (
     <EuiConfirmModal
       title={modalTitle}
@@ -74,17 +97,28 @@ export function DeleteFieldModal({ fieldsToDelete, closeModal, confirmDelete }: 
       cancelButtonText={cancelButtonText}
       buttonColor="danger"
       confirmButtonText={confirmButtonText}
+      confirmButtonDisabled={confirmContent?.toUpperCase() !== 'REMOVE'}
     >
-      {isMultiple && (
-        <>
-          <p>{warningMultipleFields}</p>
-          <ul>
-            {fieldsToDelete.map((fieldName) => (
-              <li key={fieldName}>{fieldName}</li>
-            ))}
-          </ul>
-        </>
-      )}
+      <EuiCallOut color="warning" title={i18nTexts.warningRemovingFields} iconType="alert" size="s">
+        {isMultiple && (
+          <>
+            <p>{warningMultipleFields}</p>
+            <ul>
+              {fieldsToDelete.map((fieldName) => (
+                <li key={fieldName}>{fieldName}</li>
+              ))}
+            </ul>
+          </>
+        )}
+      </EuiCallOut>
+      <EuiSpacer />
+      <EuiFormRow label={i18nTexts.typeConfirm}>
+        <EuiFieldText
+          value={confirmContent}
+          onChange={(e) => setConfirmContent(e.target.value)}
+          data-test-subj="deleteModalConfirmText"
+        />
+      </EuiFormRow>
     </EuiConfirmModal>
   );
 }

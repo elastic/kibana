@@ -12,6 +12,7 @@ import {
   ISavedObjectsRepository,
 } from 'kibana/server';
 import chalk from 'chalk';
+import { estypes } from '@elastic/elasticsearch';
 import { UMBackendFrameworkAdapter } from './adapters';
 import { UMLicenseCheck } from './domains';
 import { UptimeRequests } from './requests';
@@ -54,7 +55,9 @@ export function createUptimeESClient({
 
   return {
     baseESClient: esClient,
-    async search<TParams>(params: TParams): Promise<{ body: ESSearchResponse<unknown, TParams> }> {
+    async search<TParams extends estypes.SearchRequest>(
+      params: TParams
+    ): Promise<{ body: ESSearchResponse<unknown, TParams> }> {
       let res: any;
       let esError: any;
       const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(
@@ -148,4 +151,8 @@ export function debugESCall({
     console.log(formatObj(params));
   }
   console.log(`\n`);
+}
+
+export function createEsQuery<T extends estypes.SearchRequest>(params: T): T {
+  return params;
 }

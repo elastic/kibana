@@ -16,6 +16,9 @@ export const plugin = (context: PluginInitializerContext) => {
 };
 
 export const config: PluginConfigDescriptor<ConfigType> = {
+  exposeToBrowser: {
+    enableExperimental: true,
+  },
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [
     renameFromRoot('xpack.siem.enabled', 'xpack.securitySolution.enabled'),
