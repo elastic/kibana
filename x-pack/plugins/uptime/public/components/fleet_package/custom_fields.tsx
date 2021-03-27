@@ -54,7 +54,6 @@ export const CustomFields = memo<Props>(
 
     useDebounce(
       () => {
-        // urls and schedule is managed by us, name is managed by fleet
         onChange(fields);
       },
       250,
@@ -313,11 +312,11 @@ export const CustomFields = memo<Props>(
                   labelAppend={<OptionalLabel />}
                 >
                   <EuiFieldText
-                    value={fields[ConfigKeys.SERVICE_NAME]}
+                    value={fields[ConfigKeys.APM_SERVICE_NAME]}
                     onChange={(event) =>
                       handleInputChange({
                         value: event.target.value,
-                        configKey: ConfigKeys.SERVICE_NAME,
+                        configKey: ConfigKeys.APM_SERVICE_NAME,
                       })
                     }
                   />

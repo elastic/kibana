@@ -118,7 +118,11 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, valida
             defaultMessage="Request headers"
           />
         }
-        contentMode={fields[ConfigKeys.REQUEST_BODY_CHECK].type}
+        contentMode={
+          fields[ConfigKeys.REQUEST_BODY_CHECK].value
+            ? fields[ConfigKeys.REQUEST_BODY_CHECK].type
+            : undefined
+        } // only pass contentMode if the request body is truthy
         defaultValue={defaultValues[ConfigKeys.REQUEST_HEADERS_CHECK]}
         onChange={useCallback(
           (value) =>

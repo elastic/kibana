@@ -68,7 +68,7 @@ export enum ConfigKeys {
   REQUEST_METHOD_CHECK = 'check.request.method',
   REQUEST_SEND_CHECK = 'check.send',
   SCHEDULE = 'schedule',
-  SERVICE_NAME = 'service.name',
+  APM_SERVICE_NAME = 'service.name',
   TAGS = 'tags',
   TIMEOUT = 'timeout',
   URLS = 'urls',
@@ -82,7 +82,7 @@ export interface ISimpleFields {
   [ConfigKeys.PROXY_URL]: string;
   [ConfigKeys.PROXY_USE_LOCAL_RESOLVER]: boolean;
   [ConfigKeys.SCHEDULE]: { number: string; unit: ScheduleUnit };
-  [ConfigKeys.SERVICE_NAME]: string;
+  [ConfigKeys.APM_SERVICE_NAME]: string;
   [ConfigKeys.TIMEOUT]: number;
   [ConfigKeys.URLS]: string;
   [ConfigKeys.TAGS]: string[];

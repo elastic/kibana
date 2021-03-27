@@ -86,14 +86,14 @@ const defaultValues = {
     number: '5',
     unit: ScheduleUnit.SECONDS,
   },
-  [ConfigKeys.SERVICE_NAME]: '',
+  [ConfigKeys.APM_SERVICE_NAME]: '',
   [ConfigKeys.TAGS]: [],
   [ConfigKeys.TIMEOUT]: 1600,
   [ConfigKeys.URLS]: '',
   [ConfigKeys.WAIT]: 1,
 };
 
-const defaultConfig: Config = {
+export const defaultConfig: Config = {
   name: '',
   ...defaultValues,
 };

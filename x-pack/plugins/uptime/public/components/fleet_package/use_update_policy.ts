@@ -21,6 +21,7 @@ interface Props {
 }
 
 export const useUpdatePolicy = ({ defaultConfig, newPolicy, onChange, validate }: Props) => {
+  const [updatedPolicy, setUpdatedPolicy] = useState<NewPackagePolicy>(newPolicy);
   // Update the integration policy with our custom fields
   const [config, setConfig] = useState<Config>(defaultConfig);
   const currentConfig = useRef<Config>(defaultConfig);
@@ -32,14 +33,16 @@ export const useUpdatePolicy = ({ defaultConfig, newPolicy, onChange, validate }
     const configDidUpdate = configKeys.some((key) => config[key] !== currentConfig.current[key]);
     const isValid =
       !!newPolicy.name && !validationKeys.find((key) => validate[type][key]?.(config[key]));
-    const updatedPolicy = { ...newPolicy };
-    const currentInput = updatedPolicy.inputs.find((input) => input.type === `synthetics/${type}`);
+    const formattedPolicy = { ...newPolicy };
+    const currentInput = formattedPolicy.inputs.find(
+      (input) => input.type === `synthetics/${type}`
+    );
     const dataStream = currentInput?.streams[0];
 
     // prevent an infinite loop of updating the policy
     if (currentInput && dataStream && configDidUpdate) {
       // reset all data streams to enabled false
-      updatedPolicy.inputs.forEach((input) => (input.enabled = false));
+      formattedPolicy.inputs.forEach((input) => (input.enabled = false));
       // enable only the input type and data stream that matches the monitor type.
       currentInput.enabled = true;
       dataStream.enabled = true;
@@ -72,9 +75,10 @@ export const useUpdatePolicy = ({ defaultConfig, newPolicy, onChange, validate }
         }
       });
       currentConfig.current = config;
+      setUpdatedPolicy(formattedPolicy);
       onChange({
         isValid,
-        updatedPolicy,
+        updatedPolicy: formattedPolicy,
       });
     }
   }, [config, currentConfig, newPolicy, onChange, validate]);
@@ -87,5 +91,6 @@ export const useUpdatePolicy = ({ defaultConfig, newPolicy, onChange, validate }
   return {
     config,
     setConfig,
+    updatedPolicy,
   };
 };

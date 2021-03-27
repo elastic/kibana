@@ -8,58 +8,15 @@
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../lib/helper/rtl_helpers';
+import { defaultConfig } from './synthetics_policy_create_extension';
 import { CustomFields } from './custom_fields';
-import {
-  ConfigKeys,
-  Config,
-  DataStream,
-  HTTPMethod,
-  Mode,
-  ResponseBodyIndexPolicy,
-  ScheduleUnit,
-} from './types';
+import { ConfigKeys, DataStream, ScheduleUnit } from './types';
 import { validate as centralValidation } from './validation';
 
 // ensures that fields appropriately match to their label
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => `id-${Math.random()}`,
 }));
-
-const defaultCustomConfig = {
-  [ConfigKeys.HOSTS]: '',
-  [ConfigKeys.MAX_REDIRECTS]: 0,
-  [ConfigKeys.MONITOR_TYPE]: DataStream.HTTP,
-  [ConfigKeys.PROXY_URL]: '',
-  [ConfigKeys.PROXY_USE_LOCAL_RESOLVER]: false,
-  [ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]: [],
-  [ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE]: [],
-  [ConfigKeys.RESPONSE_BODY_INDEX]: ResponseBodyIndexPolicy.ON_ERROR,
-  [ConfigKeys.RESPONSE_HEADERS_CHECK]: {},
-  [ConfigKeys.RESPONSE_HEADERS_INDEX]: true,
-  [ConfigKeys.RESPONSE_RECEIVE_CHECK]: [],
-  [ConfigKeys.RESPONSE_STATUS_CHECK]: [], // may need to make sure that this field is not applied when length is 0
-  [ConfigKeys.REQUEST_BODY_CHECK]: {
-    value: '',
-    type: Mode.TEXT,
-  },
-  [ConfigKeys.REQUEST_HEADERS_CHECK]: {},
-  [ConfigKeys.REQUEST_METHOD_CHECK]: HTTPMethod.GET,
-  [ConfigKeys.REQUEST_SEND_CHECK]: '',
-  [ConfigKeys.SCHEDULE]: {
-    number: '5',
-    unit: ScheduleUnit.SECONDS,
-  },
-  [ConfigKeys.SERVICE_NAME]: '',
-  [ConfigKeys.TAGS]: [],
-  [ConfigKeys.TIMEOUT]: 1600,
-  [ConfigKeys.URLS]: '',
-  [ConfigKeys.WAIT]: 1,
-};
-
-const defaultConfig: Config = {
-  name: '',
-  ...defaultCustomConfig,
-};
 
 const defaultValidation = centralValidation[DataStream.HTTP];
 
@@ -103,7 +60,7 @@ describe('<CustomFields />', () => {
     expect(monitorIntervalUnit.value).toEqual(defaultConfig[ConfigKeys.SCHEDULE].unit);
     // expect(tags).toBeInTheDocument();
     expect(apmServiceName).toBeInTheDocument();
-    expect(apmServiceName.value).toEqual(defaultConfig[ConfigKeys.SERVICE_NAME]);
+    expect(apmServiceName.value).toEqual(defaultConfig[ConfigKeys.APM_SERVICE_NAME]);
     expect(maxRedirects).toBeInTheDocument();
     expect(maxRedirects.value).toEqual(`${defaultConfig[ConfigKeys.MAX_REDIRECTS]}`);
     expect(timeout).toBeInTheDocument();
