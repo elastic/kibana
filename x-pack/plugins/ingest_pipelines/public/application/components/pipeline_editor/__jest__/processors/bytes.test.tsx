@@ -8,17 +8,15 @@
 import { act } from 'react-dom/test-utils';
 import { setup, SetupResult, getProcessorValue } from './processor.helpers';
 
-// Default parameter values automatically added to the URI parts processor when saved
-const defaultUriPartsParameters = {
-  keep_original: undefined,
-  remove_if_successful: undefined,
+// Default parameter values automatically added to the Bytes processor when saved
+const defaultBytesParameters = {
   ignore_failure: undefined,
   description: undefined,
 };
 
-const URI_PARTS_TYPE = 'uri_parts';
+const BYTES_TYPE = 'bytes';
 
-describe('Processor: URI parts', () => {
+describe('Processor: Bytes', () => {
   let onUpdate: jest.Mock;
   let testBed: SetupResult;
 
@@ -53,9 +51,14 @@ describe('Processor: URI parts', () => {
 
     // Open flyout to add new processor
     addProcessor();
+    // Click submit button without entering any fields
+    await saveNewProcessor();
+
+    // Expect form error as a processor type is required
+    expect(form.getErrorsMessages()).toEqual(['A type is required.']);
 
     // Add type (the other fields are not visible until a type is selected)
-    await addProcessorType(URI_PARTS_TYPE);
+    await addProcessorType(BYTES_TYPE);
 
     // Click submit button with only the type defined
     await saveNewProcessor();
@@ -73,16 +76,16 @@ describe('Processor: URI parts', () => {
     // Open flyout to add new processor
     addProcessor();
     // Add type (the other fields are not visible until a type is selected)
-    await addProcessorType(URI_PARTS_TYPE);
+    await addProcessorType(BYTES_TYPE);
     // Add "field" value (required)
     form.setInputValue('fieldNameField.input', 'field_1');
     // Save the field
     await saveNewProcessor();
 
-    const processors = getProcessorValue(onUpdate, URI_PARTS_TYPE);
-    expect(processors[0].uri_parts).toEqual({
+    const processors = getProcessorValue(onUpdate, BYTES_TYPE);
+    expect(processors[0].bytes).toEqual({
       field: 'field_1',
-      ...defaultUriPartsParameters,
+      ...defaultBytesParameters,
     });
   });
 
@@ -95,26 +98,27 @@ describe('Processor: URI parts', () => {
     // Open flyout to add new processor
     addProcessor();
     // Add type (the other fields are not visible until a type is selected)
-    await addProcessorType(URI_PARTS_TYPE);
+    await addProcessorType(BYTES_TYPE);
     // Add "field" value (required)
     form.setInputValue('fieldNameField.input', 'field_1');
 
     // Set optional parameteres
     form.setInputValue('targetField.input', 'target_field');
-    form.toggleEuiSwitch('keepOriginalField.input');
-    form.toggleEuiSwitch('removeIfSuccessfulField.input');
+
+    form.toggleEuiSwitch('ignoreMissingSwitch.input');
 
     // Save the field with new changes
     await saveNewProcessor();
 
-    const processors = getProcessorValue(onUpdate, URI_PARTS_TYPE);
-    expect(processors[0].uri_parts).toEqual({
+    const processors = getProcessorValue(onUpdate, BYTES_TYPE);
+    expect(processors[0].bytes).toEqual({
       description: undefined,
       field: 'field_1',
       ignore_failure: undefined,
-      keep_original: false,
-      remove_if_successful: true,
       target_field: 'target_field',
+      ignore_missing: true,
+      tag: undefined,
+      if: undefined,
     });
   });
 });
