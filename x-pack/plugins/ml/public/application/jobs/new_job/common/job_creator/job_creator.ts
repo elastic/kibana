@@ -246,12 +246,20 @@ export class JobCreator {
   private _initModelPlotConfig() {
     // initialize configs to false if they are missing
     if (this._job_config.model_plot_config === undefined) {
-      this._job_config.model_plot_config = {};
+      this._job_config.model_plot_config = {
+        enabled: false,
+      };
     }
-    if (this._job_config.model_plot_config.enabled === undefined) {
+    if (
+      this._job_config.model_plot_config !== undefined &&
+      this._job_config.model_plot_config.enabled === undefined
+    ) {
       this._job_config.model_plot_config.enabled = false;
     }
-    if (this._job_config.model_plot_config.annotations_enabled === undefined) {
+    if (
+      this._job_config.model_plot_config !== undefined &&
+      this._job_config.model_plot_config.annotations_enabled === undefined
+    ) {
       this._job_config.model_plot_config.annotations_enabled = false;
     }
   }
@@ -636,6 +644,7 @@ export class JobCreator {
       this._job_config.custom_settings !== undefined &&
       this._job_config.custom_settings[setting] !== undefined
     ) {
+      // @ts-expect-error
       return this._job_config.custom_settings[setting];
     }
     return null;
@@ -710,6 +719,7 @@ export class JobCreator {
         this._datafeed_config.runtime_mappings = {};
       }
       Object.entries(runtimeFieldMap).forEach(([key, val]) => {
+        // @ts-expect-error
         this._datafeed_config.runtime_mappings![key] = val;
       });
     }
