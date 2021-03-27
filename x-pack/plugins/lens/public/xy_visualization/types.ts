@@ -305,10 +305,25 @@ export const layerConfig: ExpressionFunctionDefinition<
     layerType: {
       types: ['string'],
       options: ['data', 'threshold'],
+      help: '',
     },
     thresholdAxis: {
       types: ['string'],
       options: ['bottom', 'left', 'right'],
+      help: '',
+    },
+    lineStyle: {
+      types: ['string'],
+      options: ['dashed', 'dotted', 'solid'],
+      help: '',
+    },
+    lineWidth: {
+      types: ['number'],
+      help: '',
+    },
+    icon: {
+      types: ['string'],
+      help: '',
     },
     xScaleType: {
       options: ['ordinal', 'linear', 'time'],
@@ -388,6 +403,9 @@ export interface XYLayerConfig {
   accessors: string[];
   yConfig?: YConfig[];
   thresholdAxis?: 'left' | 'right' | 'bottom';
+  lineStyle?: 'solid' | 'dashed' | 'dotted';
+  lineWidth?: number;
+  icon?: string;
   constantThresholdValues?: number[];
   seriesType: SeriesType;
   splitAccessor?: string;
