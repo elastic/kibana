@@ -16,6 +16,7 @@ import { progress } from './progress';
 import { repeatImage } from './repeat_image';
 import { revealImage } from './reveal_image';
 import { shape } from './shape';
+import { flow } from './flow';
 import { table } from './table';
 import { text } from './text';
 
@@ -31,6 +32,7 @@ export const renderFunctions = [
   repeatImage,
   revealImage,
   shape,
+  flow,
   table,
   text,
 ];

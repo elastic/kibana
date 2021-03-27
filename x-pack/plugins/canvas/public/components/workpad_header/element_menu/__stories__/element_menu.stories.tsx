@@ -117,6 +117,17 @@ You can use standard Markdown in here, but you can also access your piped-in dat
     expression:
       'shape "square" fill="#4cbce4" border="rgba(255,255,255,0)" borderWidth=0 maintainAspect=false | render',
   },
+  flow: {
+    name: 'flow',
+    displayName: 'Flow',
+    type: 'flow',
+    help: 'A customizable flow element',
+    width: 200,
+    height: 200,
+    icon: 'node',
+    expression:
+      'flow "square" fill="#4cbce4" border="rgba(255,255,255,0)" borderWidth=0 maintainAspect=false | render',
+  },
   table: {
     name: 'table',
     displayName: 'Data table',

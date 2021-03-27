@@ -29,6 +29,8 @@ import { render } from './render';
 // @ts-expect-error untyped local
 import { shape } from './shape';
 // @ts-expect-error untyped local
+import { flow } from './flow';
+// @ts-expect-error untyped local
 import { table } from './table';
 // @ts-expect-error untyped local
 import { timefilterControl } from './timefilterControl';
@@ -47,6 +49,7 @@ export const viewSpecs = [
   revealImage,
   render,
   shape,
+  flow,
   table,
   timefilterControl,
 ];

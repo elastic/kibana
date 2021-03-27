@@ -51,6 +51,7 @@ export function render(): ExpressionFunctionDefinition<
           'repeatImage',
           'revealImage',
           'shape',
+          'flow',
           'table',
           'time_filter',
           'text',

@@ -26,6 +26,8 @@ import { progressWheel } from './progress_wheel';
 import { repeatImage } from './repeat_image';
 import { revealImage } from './reveal_image';
 import { shape } from './shape';
+import { flow } from './flow';
+import { flowTerminal } from './flowTerminal';
 import { table } from './table';
 import { timeFilter } from './time_filter';
 import { verticalBarChart } from './vert_bar_chart';
@@ -55,6 +57,8 @@ const elementSpecs = [
   repeatImage,
   revealImage,
   shape,
+  flow,
+  flowTerminal,
   table,
   timeFilter,
   verticalBarChart,

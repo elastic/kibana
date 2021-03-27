@@ -16,6 +16,7 @@ import { pie } from '../canvas_plugin_src/renderers/pie';
 import { plot } from '../canvas_plugin_src/renderers/plot';
 import { progress } from '../canvas_plugin_src/renderers/progress';
 import { shape } from '../canvas_plugin_src/renderers/shape';
+import { flow } from '../canvas_plugin_src/renderers/flow';
 import { table } from '../canvas_plugin_src/renderers/table';
 import { text } from '../canvas_plugin_src/renderers/text';
 
@@ -36,6 +37,7 @@ export const renderFunctions = [
   plot,
   progress,
   shape,
+  flow,
   table,
   text,
 ];

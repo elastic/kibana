@@ -159,6 +159,16 @@ export const RendererStrings = {
         defaultMessage: 'Render a basic shape',
       }),
   },
+  flow: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.renderer.flow.displayName', {
+        defaultMessage: 'Flow',
+      }),
+    getHelpDescription: () =>
+      i18n.translate('xpack.canvas.renderer.flow.helpDescription', {
+        defaultMessage: 'Render a flow element',
+      }),
+  },
   table: {
     getDisplayName: () =>
       i18n.translate('xpack.canvas.renderer.table.displayName', {

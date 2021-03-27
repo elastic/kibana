@@ -284,6 +284,16 @@ export const ArgumentStrings = {
         defaultMessage: 'Change the shape of the current element',
       }),
   },
+  Flow: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.arguments.flowTitle', {
+        defaultMessage: 'Flow',
+      }),
+    getHelp: () =>
+      i18n.translate('xpack.canvas.uis.arguments.FlowLabel', {
+        defaultMessage: 'Change the flow',
+      }),
+  },
   String: {
     getDisplayName: () =>
       i18n.translate('xpack.canvas.uis.arguments.stringTitle', {
@@ -1101,6 +1111,52 @@ export const ViewStrings = {
     getShapeDisplayName: () =>
       i18n.translate('xpack.canvas.uis.views.shape.args.shapeTitle', {
         defaultMessage: 'Select shape',
+      }),
+  },
+  Flow: {
+    getBorderDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.flow.args.borderTitle', {
+        defaultMessage: 'Border',
+      }),
+    getBorderHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.flow.args.borderLabel', {
+        defaultMessage: 'Accepts HEX, RGB or HTML color names',
+      }),
+    getBorderWidthDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.flow.args.borderWidthTitle', {
+        defaultMessage: 'Border width',
+      }),
+    getBorderWidthHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.flow.args.borderWidthLabel', {
+        defaultMessage: 'Border width',
+      }),
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.flowTitle', {
+        defaultMessage: 'Flow',
+      }),
+    getFillDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.flow.args.fillTitle', {
+        defaultMessage: 'Fill',
+      }),
+    getFillHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.flow.args.fillLabel', {
+        defaultMessage: 'Accepts HEX, RGB or HTML color names',
+      }),
+    getMaintainAspectDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.flow.args.maintainAspectTitle', {
+        defaultMessage: 'Aspect ratio settings',
+      }),
+    getMaintainAspectLabelName: () =>
+      i18n.translate('xpack.canvas.uis.views.flow.args.maintainAspectLabel', {
+        defaultMessage: 'Use a fixed ratio',
+      }),
+    getMaintainAspectHelp: () =>
+      i18n.translate('xpack.canvas.uis.views.flow.args.maintainAspectHelpLabel', {
+        defaultMessage: `Enable to maintain aspect ratio`,
+      }),
+    getShapeDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.views.flow.args.shapeTitle', {
+        defaultMessage: 'Shape',
       }),
   },
   Table: {

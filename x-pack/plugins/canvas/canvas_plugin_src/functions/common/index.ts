@@ -46,6 +46,7 @@ import { repeatImage } from './repeat_image';
 import { revealImage } from './revealImage';
 import { seriesStyle } from './seriesStyle';
 import { shape } from './shape';
+import { flow } from './flow';
 import { sort } from './sort';
 import { staticColumn } from './staticColumn';
 import { string } from './string';
@@ -99,6 +100,7 @@ export const functions = [
   rowCount,
   seriesStyle,
   shape,
+  flow,
   sort,
   staticColumn,
   string,

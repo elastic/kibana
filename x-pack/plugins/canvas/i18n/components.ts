@@ -1352,6 +1352,10 @@ export const ComponentStrings = {
       i18n.translate('xpack.canvas.workpadHeaderElementMenu.shapeMenuItemLabel', {
         defaultMessage: 'Shape',
       }),
+    getFlowMenuItemLabel: () =>
+      i18n.translate('xpack.canvas.workpadHeaderElementMenu.flowMenuItemLabel', {
+        defaultMessage: 'Flow',
+      }),
     getTextMenuItemLabel: () =>
       i18n.translate('xpack.canvas.workpadHeaderElementMenu.textMenuItemLabel', {
         defaultMessage: 'Text',

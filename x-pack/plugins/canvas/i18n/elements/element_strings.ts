@@ -182,6 +182,14 @@ export const getElementStrings = (): ElementStringDict => ({
       defaultMessage: 'A customizable shape',
     }),
   },
+  flowTerminal: {
+    displayName: i18n.translate('xpack.canvas.elements.flowTerminalDisplayName', {
+      defaultMessage: 'Flow terminal',
+    }),
+    help: i18n.translate('xpack.canvas.elements.flowTerminalHelpText', {
+      defaultMessage: 'A flow terminal',
+    }),
+  },
   table: {
     displayName: i18n.translate('xpack.canvas.elements.tableDisplayName', {
       defaultMessage: 'Data table',

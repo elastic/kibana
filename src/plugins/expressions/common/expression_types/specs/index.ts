@@ -18,6 +18,7 @@ import { pointseries } from './pointseries';
 import { range } from './range';
 import { render } from './render';
 import { shape } from './shape';
+import { flow } from './flow';
 import { string } from './string';
 import { style } from './style';
 import { AnyExpressionTypeDefinition } from '../types';
@@ -35,6 +36,7 @@ export const typeSpecs: AnyExpressionTypeDefinition[] = [
   range,
   render,
   shape,
+  flow,
   string,
   style,
 ];
@@ -51,5 +53,6 @@ export * from './pointseries';
 export * from './range';
 export * from './render';
 export * from './shape';
+export * from './flow';
 export * from './string';
 export * from './style';

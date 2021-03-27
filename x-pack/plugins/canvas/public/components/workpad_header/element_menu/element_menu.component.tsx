@@ -41,6 +41,7 @@ const elementTypeMeta: ElementTypeMeta = {
   other: { name: strings.getOtherMenuItemLabel(), icon: 'empty' },
   progress: { name: strings.getProgressMenuItemLabel(), icon: 'visGoal' },
   shape: { name: strings.getShapeMenuItemLabel(), icon: 'node' },
+  flow: { name: strings.getFlowMenuItemLabel(), icon: 'indexMapping' },
   text: { name: strings.getTextMenuItemLabel(), icon: 'visText' },
 };
 
@@ -105,6 +106,7 @@ export const ElementMenu: FunctionComponent<Props> = ({
     other: otherElements,
     progress: progressElements,
     shape: shapeElements,
+    flow: flowElements,
     text: textElements,
   } = categorizeElementsByType(Object.values(elements));
 
@@ -142,6 +144,7 @@ export const ElementMenu: FunctionComponent<Props> = ({
       items: [
         elementListToMenuItems(textElements),
         elementListToMenuItems(shapeElements),
+        elementListToMenuItems(flowElements),
         elementListToMenuItems(chartElements),
         elementListToMenuItems(imageElements),
         elementListToMenuItems(filterElements),
