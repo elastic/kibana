@@ -21,7 +21,7 @@ import { pluginServices } from '../../services';
 import { ExperimentsStrings } from '../../i18n';
 import { ExperimentPanel } from './experiment_panel';
 
-import './experiments_popover.scss';
+import './experiments_list.scss';
 
 const { Popover: strings } = ExperimentsStrings.Components;
 
@@ -43,7 +43,7 @@ const statusHasChanged = (
   return false;
 };
 
-export const ExperimentsPopover = (props: Props) => {
+export const ExperimentsList = (props: Props) => {
   const { solutions, ...rest } = props;
   const { experiments: experimentsService } = pluginServices.getHooks();
   const { getExperiments, setExperimentStatus, reset } = experimentsService.useService();

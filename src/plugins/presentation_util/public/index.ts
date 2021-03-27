@@ -12,11 +12,11 @@ import { pluginServices } from './services';
 export { PresentationUtilPluginSetup, PresentationUtilPluginStart } from './types';
 
 export {
+  DashboardPicker,
+  ExperimentsButton,
+  ExperimentsPopover,
   SavedObjectSaveModalDashboard,
-  SaveModalDashboardProps,
-} from './components/saved_object_save_modal_dashboard';
-
-export { DashboardPicker, ExperimentsButton, ExperimentsPopover } from './components';
+} from './components';
 
 export function plugin() {
   return new PresentationUtilPlugin();

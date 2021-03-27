@@ -113,4 +113,6 @@ export interface UsageStats {
   'csv:quoteValues': boolean;
   'dateFormat:dow': string;
   dateFormat: string;
+  'presentation:unifiedToolbar': boolean;
+  'canvas:timeToPresent': boolean;
 }

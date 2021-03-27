@@ -11,3 +11,6 @@ import React from 'react';
 export const ExperimentsButton = React.lazy(() => import('./experiments/experiments_button'));
 export const ExperimentsPopover = React.lazy(() => import('./experiments/experiments_popover'));
 export const DashboardPicker = React.lazy(() => import('./dashboard_picker'));
+export const SavedObjectSaveModalDashboard = React.lazy(
+  () => import('./saved_object_save_modal_dashboard')
+);
