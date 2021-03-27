@@ -298,3 +298,5 @@ export type RawValue = string | number | boolean | undefined | null;
 export type FieldFormatter = (value: RawValue) => string | number;
 
 export const INDEX_META_DATA_CREATED_BY = 'maps-drawing-data-ingest';
+
+export const MAX_DRAWING_SIZE_BYTES = 10485760; // 10MB
