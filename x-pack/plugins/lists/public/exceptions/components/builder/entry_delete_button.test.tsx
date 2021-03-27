@@ -8,8 +8,8 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
-import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { getEntryMatchMock } from '../../../../../../lists/common/schemas/types/entry_match.mock';
+import { getExceptionListItemSchemaMock } from '../../../../common/schemas/response/exception_list_item_schema.mock';
+import { getEntryMatchMock } from '../../../../common/schemas/types/entry_match.mock';
 
 import { BuilderEntryDeleteButtonComponent } from './entry_delete_button';
 
