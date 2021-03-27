@@ -200,9 +200,6 @@ const FieldEditorComponent = ({
     }
   }, [onChange, isFormValid, isSubmitted, submit]);
 
-  // const [showWarning, setShowWarning] = useState(false);
-  // const [nameValue, setNameValue] = useState(field?.name || '');
-  // const [typeValue, setTypeValue] = useState(field?.type || 'keyword');
   const [nameChanged, setNameChanged] = useState(false);
   const [typeChanged, setTypeChanged] = useState(false);
 
@@ -245,7 +242,9 @@ const FieldEditorComponent = ({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {(nameChanged || typeChanged) && <EuiFormErrorText>{changeWarning}</EuiFormErrorText>}
+      {(nameChanged || typeChanged) && (
+        <EuiFormErrorText data-test-subj="changeWarning">{changeWarning}</EuiFormErrorText>
+      )}
       <EuiSpacer size="xl" />
 
       {/* Set custom label */}
