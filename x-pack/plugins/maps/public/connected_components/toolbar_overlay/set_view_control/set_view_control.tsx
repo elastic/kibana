@@ -21,10 +21,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { MapCenter } from '../../../../common/descriptor_types';
 import { MapSettings } from '../../../reducers/map';
 
-function getViewString(lat: number, lon: number, zoom: number) {
-  return `${lat},${lon},${zoom}`;
-}
-
 export interface Props {
   settings: MapSettings;
   zoom: number;
