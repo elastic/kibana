@@ -56,7 +56,8 @@ Short description::    A short description for the incident, used for searching 
 Description::          The details about the incident.
 Additional comments::  Additional information for the client, such as how to troubleshoot the issue.
 
+[float]
 [[configuring-servicenow]]
-==== Configure ServiceNow
+=== Configure ServiceNow
 
 ServiceNow offers free https://developer.servicenow.com/dev.do#!/guides/madrid/now-platform/pdi-guide/obtaining-a-pdi[Personal Developer Instances], which you can use to test incidents.

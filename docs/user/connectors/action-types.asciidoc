@@ -5,7 +5,7 @@
 Connectors provide a central place to store connection information for services and integrations with third party systems. Actions are instantiations of a connector that are linked to rules and run as background tasks on the {kib} server when rule conditions are met. {kib} provides the following types of connectors:
 
 [cols="2"]
-|===
+|==
 
 a| <<email-action-type, Email>>
 
@@ -46,7 +46,7 @@ a| <<slack-action-type, Slack>>
 a| <<webhook-action-type, Webhook>>
 
 | Send a request to a web service.
-|===
+|==
 
 [NOTE]
 ==============================================
