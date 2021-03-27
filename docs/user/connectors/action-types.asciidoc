@@ -1,6 +1,6 @@
 [role="xpack"]
 [[action-types]]
-== Connectors
+= Connectors
 
 Connectors provide a central place to store connection information for services and integrations with third party systems. Actions are instantiations of a connector that are linked to rules and run as background tasks on the {kib} server when rule conditions are met. {kib} provides the following types of connectors:
 
@@ -57,7 +57,7 @@ see https://www.elastic.co/subscriptions[the subscription page].
 
 [float]
 [[create-connectors]]
-=== Preconfigured connectors
+== Preconfigured connectors
 
 For out-of-the-box and standardized connectors, you can <<preconfigured-connector-example, preconfigure connectors>>
 before {kib} starts.

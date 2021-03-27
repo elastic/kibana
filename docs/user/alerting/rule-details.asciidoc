@@ -1,6 +1,6 @@
 [role="xpack"]
 [[rule-details]]
-=== Rule details
+== Rule details
 
 
 The *Rule details* page tells you about the state of the rule and provides granular control over the actions it is taking. 
