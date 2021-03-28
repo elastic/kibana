@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { FIELD_TYPES } from '../../shared_imports';
 
 export const defaultValue = {
@@ -15,7 +16,7 @@ export const defaultValue = {
   policy_id: '1e2bb670-686c-11eb-84b4-81282a213fcf',
   output_id: '',
   package: {
-    name: 'osquery_elastic_managed',
+    name: OSQUERY_INTEGRATION_NAME,
     title: 'OSquery Elastic Managed',
     version: '0.1.2',
   },

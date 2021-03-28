@@ -22,11 +22,6 @@ export const buildActionResultsQuery = ({
         action_id: actionId,
       },
     },
-    {
-      exists: {
-        field: 'error.keyword',
-      },
-    },
   ];
 
   const dslQuery = {

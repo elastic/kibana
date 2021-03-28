@@ -9,6 +9,7 @@ import React from 'react';
 import { Switch, Redirect, Route } from 'react-router-dom';
 
 import { LiveQueries } from './live_query';
+import { ScheduledQueries } from './scheduled_queries';
 
 const OsqueryAppRoutesComponent = () => (
   <Switch>
@@ -21,6 +22,9 @@ const OsqueryAppRoutesComponent = () => (
           <Route path={`/queries`}>
             <Queries />
           </Route> */}
+    <Route path={`/scheduled_queries`}>
+      <ScheduledQueries />
+    </Route>
     <Route path="/live_query">
       <LiveQueries />
     </Route>

@@ -13,6 +13,7 @@ import { produce } from 'immer';
 import { EuiFlyout, EuiTitle, EuiFlyoutBody, EuiFlyoutHeader, EuiPortal } from '@elastic/eui';
 import React from 'react';
 
+import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { AddPackQueryForm } from '../../packs/common/add_pack_query';
 
 // @ts-expect-error update types
@@ -24,7 +25,7 @@ export const AddNewQueryFlyout = ({ data, handleChange, onClose }) => {
       draft.inputs[0].streams.push({
         data_stream: {
           type: 'logs',
-          dataset: 'osquery_elastic_managed.osquery',
+          dataset: `${OSQUERY_INTEGRATION_NAME}.osquery`,
         },
         vars: {
           query: {

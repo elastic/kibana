@@ -17,6 +17,7 @@ import { GetPackagesResponse, EPM_API_ROUTES } from '../../../fleet/common';
 import { Container, Nav, Wrapper } from './layouts';
 import { OsqueryAppRoutes } from '../routes';
 import { useKibana, useRouterNavigate } from '../common/lib/kibana';
+import { OSQUERY_INTEGRATION_NAME } from '../../common';
 
 export const OsqueryAppComponent = () => {
   const {
@@ -36,7 +37,7 @@ export const OsqueryAppComponent = () => {
       }),
     {
       select: ({ response }: GetPackagesResponse) => {
-        const osqueryIntegration = find(['name', 'osquery_elastic_managed'], response);
+        const osqueryIntegration = find(['name', OSQUERY_INTEGRATION_NAME], response);
 
         if (!osqueryIntegration) return null;
 
@@ -64,6 +65,15 @@ export const OsqueryAppComponent = () => {
                   <FormattedMessage
                     id="xpack.osquery.appNavigation.liveQueryLinkText"
                     defaultMessage="Live Query"
+                  />
+                </EuiTab>
+                <EuiTab
+                  isSelected={section === 'scheduled_queries'}
+                  {...useRouterNavigate('scheduled_queries')}
+                >
+                  <FormattedMessage
+                    id="xpack.osquery.appNavigation.scheduledQueriesLinkText"
+                    defaultMessage="Scheduled Queries"
                   />
                 </EuiTab>
               </EuiTabs>

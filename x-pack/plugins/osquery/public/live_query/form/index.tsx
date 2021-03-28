@@ -138,12 +138,12 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           defaultMessage: 'Check results',
         }),
         children: actionId ? (
-          <ResultTabs actionId={actionId} agentsCount={agents?.length} isLive={true} />
+          <ResultTabs actionId={actionId} agentIds={agents} isLive={true} />
         ) : null,
         status: resultsStatus,
       },
     ],
-    [actionId, agentSelected, agents?.length, queryStatus, resultsStatus, submit, submitQueryStatus]
+    [actionId, agentSelected, agents, queryStatus, resultsStatus, submit, submitQueryStatus]
   );
 
   return (

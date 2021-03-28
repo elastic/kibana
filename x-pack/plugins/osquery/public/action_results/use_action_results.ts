@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { flatten, reverse, uniqBy } from 'lodash/fp';
 import { useQuery } from 'react-query';
 
 import { createFilter } from '../common/helpers';
@@ -18,6 +19,7 @@ import {
   Direction,
 } from '../../common/search_strategy';
 import { ESTermQuery } from '../../common/typed_json';
+import { queryClient } from '../query_client';
 
 import { generateTablePaginationOptions, getInspectResponse, InspectResponse } from './helpers';
 
@@ -33,6 +35,7 @@ export interface ResultsArgs {
 interface UseActionResults {
   actionId: string;
   activePage: number;
+  agentIds?: string[];
   direction: Direction;
   limit: number;
   sortField: string;
@@ -44,6 +47,7 @@ interface UseActionResults {
 export const useActionResults = ({
   actionId,
   activePage,
+  agentIds,
   direction,
   limit,
   sortField,
@@ -53,8 +57,10 @@ export const useActionResults = ({
 }: UseActionResults) => {
   const { data } = useKibana().services;
 
+  console.error('aaa', agentIds);
+
   return useQuery(
-    ['actionResults', { actionId, activePage, direction, limit, sortField }],
+    ['actionResults', { actionId }],
     async () => {
       const responseData = await data.search
         .search<ResultsRequestOptions, ResultsStrategyResponse>(
@@ -81,8 +87,17 @@ export const useActionResults = ({
         // @ts-expect-error update types
         responseData.rawResponse?.aggregations?.aggs.responses_by_action_id?.responses.buckets;
 
+      const cachedData = queryClient.getQueryData(['actionResults', { actionId }]);
+
+      console.error('cachedData', cachedData);
+
+      const previousEdges = cachedData?.edges.length
+        ? cachedData?.edges
+        : agentIds?.map((agentId) => ({ fields: { agent_id: [agentId] } })) ?? [];
+
       return {
         ...responseData,
+        edges: reverse(uniqBy('fields.agent_id[0]', flatten([responseData.edges, previousEdges]))),
         aggregations: {
           totalResponded,
           // @ts-expect-error update types
@@ -94,17 +109,18 @@ export const useActionResults = ({
       };
     },
     {
-      placeholderData: {
+      initialData: {
         edges: [],
         aggregations: {
           totalResponded: 0,
           successful: 0,
+          pending: agentIds?.length ?? 0,
           failed: 0,
         },
       },
       refetchInterval: isLive ? 1000 : false,
       keepPreviousData: true,
-      enabled: !skip,
+      enabled: !skip && !!agentIds?.length,
     }
   );
 };

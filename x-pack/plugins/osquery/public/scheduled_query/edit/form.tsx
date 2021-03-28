@@ -114,7 +114,7 @@ const EditScheduledQueryFormComponent: React.FC<EditScheduledQueryFormProps> = (
                   get(item.path, form.getFormData()) ?? {
                     data_stream: {
                       type: 'logs',
-                      dataset: 'osquery_elastic_managed.osquery',
+                      dataset: `${OSQUERY_INTEGRATION_NAME}.osquery`,
                     },
                     vars: {
                       query: {

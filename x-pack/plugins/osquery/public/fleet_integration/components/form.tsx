@@ -14,6 +14,7 @@ import React, { useCallback, useMemo } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { useQuery } from 'react-query';
 
+import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import {
   // UseField,
   useForm,
@@ -114,9 +115,9 @@ const EditScheduledQueryFormComponent: React.FC<EditScheduledQueryFormProps> = (
           data: {
             data_stream: {
               type: 'logs',
-              dataset: 'osquery_elastic_managed.osquery',
+              dataset: `${OSQUERY_INTEGRATION_NAME}.osquery`,
             },
-            id: 'osquery-osquery_elastic_managed.osquery-7065c2dc-f835-4d13-9486-6eec515f39bd',
+            id: `osquery-${OSQUERY_INTEGRATION_NAME}.osquery-7065c2dc-f835-4d13-9486-6eec515f39bd`,
             vars: {
               query: {
                 type: 'text',
@@ -199,7 +200,7 @@ const EditScheduledQueryFormComponent: React.FC<EditScheduledQueryFormProps> = (
                           {
                             data_stream: {
                               type: 'logs',
-                              dataset: 'osquery_elastic_managed.osquery',
+                              dataset: `${OSQUERY_INTEGRATION_NAME}.osquery`,
                             },
                             vars: {
                               query: {

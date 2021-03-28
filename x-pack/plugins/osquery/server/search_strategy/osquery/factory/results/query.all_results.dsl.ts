@@ -39,6 +39,14 @@ export const buildResultsQuery = ({
     index: 'logs-osquery_managed.result*',
     ignoreUnavailable: true,
     body: {
+      aggs: {
+        count_by_agent_id: {
+          terms: {
+            field: 'agent.id',
+            size: 100,
+          },
+        },
+      },
       query: { bool: { filter } },
       from: activePage * querySize,
       size: querySize,

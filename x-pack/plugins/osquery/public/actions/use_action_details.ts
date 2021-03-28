@@ -25,17 +25,17 @@ export interface ActionDetailsArgs {
   isInspected: boolean;
 }
 
-interface UseActionDetails {
+interface UseScheduledQueries {
   actionId: string;
   filterQuery?: ESTermQuery | string;
   skip?: boolean;
 }
 
-export const useActionDetails = ({ actionId, filterQuery, skip = false }: UseActionDetails) => {
+export const useActionDetails = ({ actionId, filterQuery, skip = false }: UseScheduledQueries) => {
   const { data } = useKibana().services;
 
   return useQuery(
-    ['action', { actionId }],
+    ['scheduledQueries', {}],
     async () => {
       const responseData = await data.search
         .search<ActionDetailsRequestOptions, ActionDetailsStrategyResponse>(

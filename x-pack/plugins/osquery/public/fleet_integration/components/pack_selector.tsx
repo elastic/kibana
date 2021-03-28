@@ -15,6 +15,7 @@ import { EuiText, EuiSuperSelect } from '@elastic/eui';
 import React from 'react';
 import { useQuery } from 'react-query';
 
+import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { useKibana } from '../../common/lib/kibana';
 
 // @ts-expect-error update types
@@ -40,7 +41,7 @@ export const ScheduledQueryPackSelector = ({ data, handleChange }) => {
       draft.inputs[0].streams = newPack.queries.map((packQuery) => ({
         data_stream: {
           type: 'logs',
-          dataset: 'osquery_elastic_managed.osquery',
+          dataset: `${OSQUERY_INTEGRATION_NAME}.osquery`,
         },
         vars: {
           query: {

@@ -24,7 +24,7 @@ import {
   StartPlugins,
   AppPluginStartDependencies,
 } from './types';
-import { PLUGIN_NAME } from '../common';
+import { OSQUERY_INTEGRATION_NAME, PLUGIN_NAME } from '../common';
 import {
   LazyOsqueryManagedPolicyCreateImportExtension,
   LazyOsqueryManagedPolicyEditExtension,
@@ -38,7 +38,7 @@ export function toggleOsqueryPlugin(updater$: Subject<AppUpdater>, http: CoreSta
     const installed = response.find(
       // @ts-expect-error update types
       (integration) =>
-        integration?.name === 'osquery_elastic_managed' && integration?.status === 'installed'
+        integration?.name === OSQUERY_INTEGRATION_NAME && integration?.status === 'installed'
     );
     updater$.next(() => ({
       status: installed ? AppStatus.accessible : AppStatus.inaccessible,
@@ -114,7 +114,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       }
 
       registerExtension({
-        package: 'osquery_elastic_managed',
+        package: OSQUERY_INTEGRATION_NAME,
         view: 'package-policy-create',
         component: config.scheduledQueries
           ? LazyOsqueryManagedPolicyCreateImportExtension
@@ -122,7 +122,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       });
 
       registerExtension({
-        package: 'osquery_elastic_managed',
+        package: OSQUERY_INTEGRATION_NAME,
         view: 'package-policy-edit',
         component: config.scheduledQueries
           ? LazyOsqueryManagedPolicyEditExtension
@@ -130,7 +130,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       });
 
       registerExtension({
-        package: 'osquery_elastic_managed',
+        package: OSQUERY_INTEGRATION_NAME,
         view: 'package-detail-custom',
         component: LazyOsqueryManagedCustomButtonExtension,
       });

@@ -13,11 +13,11 @@ import { ActionResultsSummary } from '../../action_results/action_results_summar
 
 interface ResultTabsProps {
   actionId: string;
-  agentsCount?: number;
+  agentIds?: string[];
   isLive?: boolean;
 }
 
-const ResultTabsComponent: React.FC<ResultTabsProps> = ({ actionId, agentsCount, isLive }) => {
+const ResultTabsComponent: React.FC<ResultTabsProps> = ({ actionId, agentIds, isLive }) => {
   const tabs = useMemo(
     () => [
       {
@@ -26,7 +26,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({ actionId, agentsCount,
         content: (
           <>
             <EuiSpacer />
-            <ActionResultsSummary actionId={actionId} agentsCount={agentsCount} isLive={isLive} />
+            <ActionResultsSummary actionId={actionId} agentIds={agentIds} isLive={isLive} />
           </>
         ),
       },
@@ -41,7 +41,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({ actionId, agentsCount,
         ),
       },
     ],
-    [actionId, agentsCount, isLive]
+    [actionId, agentIds, isLive]
   );
 
   return (

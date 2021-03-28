@@ -8,6 +8,7 @@
 import { EuiButton, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 import deepmerge from 'deepmerge';
 import React, { useCallback } from 'react';
+import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 
 import { useForm, UseArray, UseField, getUseField, Field, Form } from '../../shared_imports';
 
@@ -56,7 +57,7 @@ const NewScheduledQueryFormComponent: React.FC<NewScheduledQueryFormProps> = ({ 
               defaultValue={{
                 data_stream: {
                   type: 'logs',
-                  dataset: 'osquery_elastic_managed.osquery',
+                  dataset: `${OSQUERY_INTEGRATION_NAME}.osquery`,
                 },
                 vars: {
                   query: {

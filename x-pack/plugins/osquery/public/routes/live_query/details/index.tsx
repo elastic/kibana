@@ -144,10 +144,7 @@ const LiveQueryDetailsPageComponent = () => {
         {data?.actionDetails._source?.data?.query}
       </EuiCodeBlock>
       <EuiSpacer />
-      <ResultTabs
-        actionId={actionId}
-        agentsCount={data?.actionDetails?.fields?.agents?.length ?? 0}
-      />
+      <ResultTabs actionId={actionId} agentIds={data?.actionDetails?.fields?.agents} />
     </WithHeaderLayout>
   );
 };

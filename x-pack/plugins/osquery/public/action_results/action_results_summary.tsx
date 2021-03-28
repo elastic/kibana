@@ -12,17 +12,18 @@ import {
   EuiTextColor,
   EuiSpacer,
   EuiDescriptionList,
-  EuiBasicTable,
+  EuiInMemoryTable,
   EuiCodeBlock,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { useActionResults } from './use_action_results';
+import { useAllResults } from '../results/use_all_results';
 import { Direction } from '../../common/search_strategy';
 
 interface ActionResultsSummaryProps {
   actionId: string;
-  agentsCount?: number;
+  agentIds?: string[];
   isLive?: boolean;
 }
 
@@ -34,7 +35,7 @@ const renderErrorMessage = (error: string) => (
 
 const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   actionId,
-  agentsCount,
+  agentIds,
   isLive,
 }) => {
   const [pageIndex, setPageIndex] = useState(0);
@@ -45,6 +46,16 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   } = useActionResults({
     actionId,
     activePage: pageIndex,
+    agentIds,
+    limit: pageSize,
+    direction: Direction.asc,
+    sortField: '@timestamp',
+    isLive,
+  });
+
+  const { data: logsResults } = useAllResults({
+    actionId,
+    activePage: pageIndex,
     limit: pageSize,
     direction: Direction.asc,
     sortField: '@timestamp',
@@ -52,18 +63,18 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   });
 
   const notRespondedCount = useMemo(() => {
-    if (!agentsCount || !aggregations.totalResponded) {
+    if (!agentIds || !aggregations.totalResponded) {
       return '-';
     }
 
-    return agentsCount - aggregations.totalResponded;
-  }, [aggregations.totalResponded, agentsCount]);
+    return agentIds.length - aggregations.totalResponded;
+  }, [aggregations.totalResponded, agentIds]);
 
   const listItems = useMemo(
     () => [
       {
         title: 'Agents queried',
-        description: agentsCount,
+        description: agentIds?.length,
       },
       {
         title: 'Successful',
@@ -82,15 +93,51 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
         ),
       },
     ],
-    [agentsCount, aggregations.failed, aggregations.successful, notRespondedCount]
+    [agentIds, aggregations.failed, aggregations.successful, notRespondedCount]
+  );
+
+  const renderRowsColumn = useCallback(
+    (_, item) => {
+      if (!logsResults) return '-';
+      const agentId = item.fields.agent_id[0];
+
+      console.error(
+        'agentId',
+        agentId,
+        logsResults?.rawResponse?.aggregations?.count_by_agent_id?.buckets
+      );
+
+      return (
+        logsResults?.rawResponse?.aggregations?.count_by_agent_id?.buckets?.find(
+          (bucket) => bucket.key === agentId
+        )?.doc_count ?? '-'
+      );
+    },
+    [logsResults]
   );
 
   const columns = useMemo(
     () => [
       {
+        field: 'fields.completed_at[0]',
+        name: 'Status',
+        sortable: true,
+        // eslint-disable-next-line react/display-name
+        render: (value, item) => {
+          console.error('item', item);
+          if (!value) return 'pending';
+          if (item.fields['error.keyword']) return 'error';
+          return <>{'success'}</>;
+        },
+      },
+      {
         field: 'fields.agent_id[0]',
         name: 'Agent ID',
-        truncateText: true,
+      },
+      {
+        field: 'fields.rows[0]',
+        name: '# rows',
+        render: renderRowsColumn,
       },
       {
         field: 'fields.error[0]',
@@ -98,7 +145,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
         render: renderErrorMessage,
       },
     ],
-    []
+    [renderRowsColumn]
   );
 
   const pagination = useMemo(
@@ -136,12 +183,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
       {edges.length ? (
         <>
           <EuiSpacer />
-          <EuiBasicTable
-            items={edges}
-            columns={columns}
-            pagination={pagination}
-            onChange={onTableChange}
-          />
+          <EuiInMemoryTable items={edges} columns={columns} pagination={pagination} />
         </>
       ) : null}
     </>
