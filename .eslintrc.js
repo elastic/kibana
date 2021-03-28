@@ -89,6 +89,72 @@ const SAFER_LODASH_SET_DEFINITELYTYPED_HEADER = `
  */
 `;
 
+/** Packages which should not be included within production code. */
+const DEV_PACKAGES = [
+  'kbn-babel-code-parser',
+  'kbn-dev-utils',
+  'kbn-docs-utils',
+  'kbn-es*',
+  'kbn-eslint*',
+  'kbn-optimizer',
+  'kbn-plugin-generator',
+  'kbn-plugin-helpers',
+  'kbn-pm',
+  'kbn-storybook',
+  'kbn-telemetry-tools',
+  'kbn-test',
+];
+
+/** Directories (at any depth) which include dev-only code. */
+const DEV_DIRECTORIES = [
+  '.storybook',
+  '__tests__',
+  '__test__',
+  '__jest__',
+  '__fixtures__',
+  '__mocks__',
+  '__stories__',
+  'e2e',
+  'fixtures',
+  'ftr_e2e',
+  'integration_tests',
+  'manual_tests',
+  'mock',
+  'storybook',
+  'scripts',
+  'test',
+  'test-d',
+  'test_utils',
+  'test_utilities',
+  'test_helpers',
+  'tests_client_integration',
+];
+
+/** File patterns for dev-only code. */
+const DEV_FILE_PATTERNS = [
+  '*.mock.{js,ts,tsx}',
+  '*.test.{js,ts,tsx}',
+  '*.test.helpers.{js,ts,tsx}',
+  '*.stories.{js,ts,tsx}',
+  '*.story.{js,ts,tsx}',
+  '*.stub.{js,ts,tsx}',
+  'mock.{js,ts,tsx}',
+  '_stubs.{js,ts,tsx}',
+  '{testHelpers,test_helper,test_utils}.{js,ts,tsx}',
+  '{postcss,webpack}.config.js',
+];
+
+/** Glob patterns which describe dev-only code. */
+const DEV_PATTERNS = [
+  ...DEV_PACKAGES.map((pkg) => `packages/${pkg}/**/*`),
+  ...DEV_DIRECTORIES.map((dir) => `{packages,src,x-pack}/**/${dir}/**/*`),
+  ...DEV_FILE_PATTERNS.map((file) => `{packages,src,x-pack}/**/${file}`),
+  'packages/kbn-interpreter/tasks/**/*',
+  'src/dev/**/*',
+  'x-pack/{dev-tools,tasks,scripts,test,build_chromium}/**/*',
+  'x-pack/plugins/*/server/scripts/**/*',
+];
+
 module.exports = {
   root: true,
 
@@ -491,43 +557,17 @@ module.exports = {
     },
 
     /**
-     * Files that ARE NOT allowed to use devDependencies
+     * Single package.json rules, it tells eslint to ignore the child package.json files
+     * and look for dependencies declarations in the single and root level package.json
      */
     {
-      files: ['x-pack/**/*.js', 'packages/kbn-interpreter/**/*.js'],
+      files: ['{src,x-pack,packages}/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'import/no-extraneous-dependencies': [
           'error',
           {
-            devDependencies: false,
-            peerDependencies: true,
-            packageDir: '.',
-          },
-        ],
-      },
-    },
-
-    /**
-     * Files that ARE allowed to use devDependencies
-     */
-    {
-      files: [
-        'packages/kbn-es/src/**/*.js',
-        'packages/kbn-interpreter/tasks/**/*.js',
-        'packages/kbn-interpreter/src/plugin/**/*.js',
-        'x-pack/{dev-tools,tasks,scripts,test,build_chromium}/**/*.js',
-        'x-pack/**/{__tests__,__test__,__jest__,__fixtures__,__mocks__,public}/**/*.js',
-        'x-pack/**/*.test.js',
-        'x-pack/test_utils/**/*',
-        'x-pack/gulpfile.js',
-        'x-pack/plugins/apm/public/utils/testHelpers.js',
-        'x-pack/plugins/canvas/shareable_runtime/postcss.config.js',
-      ],
-      rules: {
-        'import/no-extraneous-dependencies': [
-          'error',
-          {
-            devDependencies: true,
+            /* Files that ARE allowed to use devDependencies */
+            devDependencies: [...DEV_PATTERNS],
             peerDependencies: true,
             packageDir: '.',
           },
@@ -1416,22 +1456,6 @@ module.exports = {
           'error',
           {
             patterns: ['lodash/*', '!lodash/fp', 'rxjs/internal-compatibility'],
-          },
-        ],
-      },
-    },
-
-    /**
-     * Single package.json rules, it tells eslint to ignore the child package.json files
-     * and look for dependencies declarations in the single and root level package.json
-     */
-    {
-      files: ['**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'import/no-extraneous-dependencies': [
-          'error',
-          {
-            packageDir: '.',
           },
         ],
       },

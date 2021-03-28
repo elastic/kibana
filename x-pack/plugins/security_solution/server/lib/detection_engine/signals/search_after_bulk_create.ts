@@ -95,6 +95,7 @@ export const searchAfterAndBulkCreate = async ({
             to: tuple.to.toISOString(),
             services,
             logger,
+            // @ts-expect-error please, declare a type explicitly instead of unknown
             filter,
             pageSize: Math.ceil(Math.min(tuple.maxSignals, pageSize)),
             timestampOverride: ruleParams.timestampOverride,
@@ -104,6 +105,7 @@ export const searchAfterAndBulkCreate = async ({
           // call this function setSortIdOrExit()
           const lastSortId = searchResultB?.hits?.hits[searchResultB.hits.hits.length - 1]?.sort;
           if (lastSortId != null && lastSortId.length !== 0) {
+            // @ts-expect-error @elastic/elasticsearch SortResults contains null not assignable to backupSortId
             backupSortId = lastSortId[0];
             hasBackupSortId = true;
           } else {
@@ -135,6 +137,7 @@ export const searchAfterAndBulkCreate = async ({
             to: tuple.to.toISOString(),
             services,
             logger,
+            // @ts-expect-error please, declare a type explicitly instead of unknown
             filter,
             pageSize: Math.ceil(Math.min(tuple.maxSignals, pageSize)),
             timestampOverride: ruleParams.timestampOverride,
@@ -155,6 +158,7 @@ export const searchAfterAndBulkCreate = async ({
 
           const lastSortId = searchResult.hits.hits[searchResult.hits.hits.length - 1]?.sort;
           if (lastSortId != null && lastSortId.length !== 0) {
+            // @ts-expect-error @elastic/elasticsearch SortResults contains null not assignable to sortId
             sortId = lastSortId[0];
             hasSortId = true;
           } else {
