@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { isPopulatedObject } from '../../../common/utils/object_utils';
+
 import { RouteDependencies } from '../../types';
 
 import { addBasePath } from '../index';
 
 import { wrapError, wrapEsError } from './error_utils';
-import { isPopulatedObject } from '../../../common/shared_imports';
 
 const NODE_ROLES = 'roles';
 

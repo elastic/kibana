@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { Privileges } from '../../../../../common/types/privileges';
-import { isPopulatedObject } from '../../../../../common/shared_imports';
+import { isPopulatedObject } from '../../../../../common/utils/object_utils';
 
 export interface Capabilities {
   canGetTransform: boolean;

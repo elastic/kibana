@@ -8,7 +8,6 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 
 import { TRANSFORM_STATE } from '../constants';
-import { isRuntimeField } from '../shared_imports';
 
 export const transformIdsSchema = schema.arrayOf(
   schema.object({
@@ -56,15 +55,25 @@ export interface CommonResponseStatusSchema {
 }
 
 export const runtimeMappingsSchema = schema.maybe(
-  schema.object(
-    {},
-    {
-      unknowns: 'allow',
-      validate: (v: object) => {
-        if (Object.values(v).some((o) => !isRuntimeField(o))) {
-          return 'Invalid runtime field';
-        }
-      },
-    }
+  schema.recordOf(
+    schema.string(),
+    schema.object({
+      type: schema.oneOf([
+        schema.literal('keyword'),
+        schema.literal('long'),
+        schema.literal('double'),
+        schema.literal('date'),
+        schema.literal('ip'),
+        schema.literal('boolean'),
+      ]),
+      script: schema.maybe(
+        schema.oneOf([
+          schema.string(),
+          schema.object({
+            source: schema.string(),
+          }),
+        ])
+      ),
+    })
   )
 );

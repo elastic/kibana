@@ -18,7 +18,6 @@ import { SimpleQuery } from '../common';
 
 import { SearchItems } from './use_search_items';
 import { useIndexData } from './use_index_data';
-import { estypes } from '@elastic/elasticsearch';
 
 jest.mock('../../shared_imports');
 jest.mock('../app_dependencies');
@@ -26,6 +25,7 @@ jest.mock('./use_api');
 
 import { useAppDependencies } from '../__mocks__/app_dependencies';
 import { MlSharedContext } from '../__mocks__/shared_context';
+import { RuntimeField } from '../../../../../../src/plugins/data/common/index_patterns';
 
 const query: SimpleQuery = {
   query_string: {
@@ -40,7 +40,7 @@ const runtimeMappings = {
     script: {
       source: "emit(doc['bytes'].value * 2.0)",
     },
-  } as estypes.RuntimeField,
+  } as RuntimeField,
 };
 
 describe('Transform: useIndexData()', () => {

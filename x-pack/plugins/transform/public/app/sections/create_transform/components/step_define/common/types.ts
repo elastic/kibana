@@ -23,7 +23,8 @@ import {
   PivotConfigDefinition,
 } from '../../../../../../../common/types/transform';
 import { LatestFunctionConfig } from '../../../../../../../common/api_schemas/transforms';
-import { isPopulatedObject, RuntimeMappings } from '../../../../../../../common/shared_imports';
+
+import { isPopulatedObject } from '../../../../../../../common/utils/object_utils';
 
 export interface ErrorMessage {
   query: string;
@@ -35,6 +36,20 @@ export interface Field {
   type: KBN_FIELD_TYPES;
 }
 
+// Replace this with import once #88995 is merged
+const RUNTIME_FIELD_TYPES = ['keyword', 'long', 'double', 'date', 'ip', 'boolean'] as const;
+type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
+
+export interface RuntimeField {
+  type: RuntimeType;
+  script?:
+    | string
+    | {
+        source: string;
+      };
+}
+
+export type RuntimeMappings = Record<string, RuntimeField>;
 export interface StepDefineExposedState {
   transformFunction: TransformFunction;
   aggList: PivotAggsConfigDict;
@@ -55,6 +70,26 @@ export interface StepDefineExposedState {
   runtimeMappings?: RuntimeMappings;
   runtimeMappingsUpdated: boolean;
   isRuntimeMappingsEditorEnabled: boolean;
+}
+
+export function isRuntimeField(arg: unknown): arg is RuntimeField {
+  return (
+    isPopulatedObject(arg) &&
+    ((Object.keys(arg).length === 1 && arg.hasOwnProperty('type')) ||
+      (Object.keys(arg).length === 2 &&
+        arg.hasOwnProperty('type') &&
+        arg.hasOwnProperty('script') &&
+        (typeof arg.script === 'string' ||
+          (isPopulatedObject(arg.script) &&
+            Object.keys(arg.script).length === 1 &&
+            arg.script.hasOwnProperty('source') &&
+            typeof arg.script.source === 'string')))) &&
+    RUNTIME_FIELD_TYPES.includes(arg.type as RuntimeType)
+  );
+}
+
+export function isRuntimeMappings(arg: unknown): arg is RuntimeMappings {
+  return isPopulatedObject(arg) && Object.values(arg).every((d) => isRuntimeField(d));
 }
 
 export function isPivotPartialRequest(arg: unknown): arg is { pivot: PivotConfigDefinition } {

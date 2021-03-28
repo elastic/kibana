@@ -17,6 +17,7 @@ import type {
   PutTransformsPivotRequestSchema,
   PutTransformsRequestSchema,
 } from '../../../common/api_schemas/transforms';
+import { isPopulatedObject } from '../../../common/utils/object_utils';
 import { DateHistogramAgg, HistogramAgg, TermsAgg } from '../../../common/types/pivot_group_by';
 import { isIndexPattern } from '../../../common/types/index_pattern';
 
@@ -34,7 +35,6 @@ import {
   PivotAggsConfig,
   PivotGroupByConfig,
 } from './';
-import { isPopulatedObject } from '../../../common/shared_imports';
 
 export interface SimpleQuery {
   query_string: {

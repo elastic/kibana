@@ -7,7 +7,7 @@
 
 import { isRuntimeField, isRuntimeMappings } from './runtime_field_utils';
 
-describe('runtime_field_utiles', () => {
+describe('Transform: step_define type guards', () => {
   it('isRuntimeField()', () => {
     expect(isRuntimeField(1)).toBe(false);
     expect(isRuntimeField(null)).toBe(false);

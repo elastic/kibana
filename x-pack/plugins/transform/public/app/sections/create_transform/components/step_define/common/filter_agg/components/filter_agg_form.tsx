@@ -14,11 +14,9 @@ import { commonFilterAggs, filterAggsFieldSupport } from '../constants';
 import { IndexPattern } from '../../../../../../../../../../../../src/plugins/data/public';
 import { getFilterAggTypeConfig } from '../config';
 import type { FilterAggType, PivotAggsConfigFilter } from '../types';
+import type { RuntimeMappings } from '../../types';
 import { getKibanaFieldTypeFromEsType } from '../../get_pivot_dropdown_options';
-import {
-  isPopulatedObject,
-  RuntimeMappings,
-} from '../../../../../../../../../common/shared_imports';
+import { isPopulatedObject } from '../../../../../../../../../common/utils/object_utils';
 
 /**
  * Resolves supported filters for provided field.

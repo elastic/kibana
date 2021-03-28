@@ -7,9 +7,9 @@
 
 import { EuiComboBoxOptionOption } from '@elastic/eui/src/components/combo_box/types';
 import type { LatestFunctionConfig, PutTransformsRequestSchema } from '../api_schemas/transforms';
+import { isPopulatedObject } from '../utils/object_utils';
 import { PivotGroupByDict } from './pivot_group_by';
 import { PivotAggDict } from './pivot_aggs';
-import { isPopulatedObject } from '../shared_imports';
 
 export type IndexName = string;
 export type IndexPattern = string;
