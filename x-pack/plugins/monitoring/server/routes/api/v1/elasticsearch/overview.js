@@ -54,7 +54,7 @@ export function esOverviewRoute(server) {
         const [clusterStats, metrics, shardActivity, logs] = await Promise.all([
           getClusterStats(req, esIndexPattern, clusterUuid),
           getMetrics(req, esIndexPattern, metricSet),
-          getLastRecovery(req, esIndexPattern),
+          getLastRecovery(req, esIndexPattern, config.get('monitoring.ui.max_bucket_size')),
           getLogs(config, req, filebeatIndexPattern, { clusterUuid, start, end }),
         ]);
         const indicesUnassignedShardStats = await getIndicesUnassignedShardStats(

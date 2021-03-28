@@ -57,15 +57,28 @@ export function handleLegacyLastRecoveries(resp: ElasticsearchResponse, start: n
   return [];
 }
 
+// For MB, we index individual documents instead of a single document with a list of recovered shards
+// This means we need to query a bit differently to end up with the same result. We need to ensure
+// that our recovered shards are within the same time window to match the legacy query (of size: 1)
 export function handleMbLastRecoveries(resp: ElasticsearchResponse, start: number) {
-  const data = (resp.hits?.hits ?? [])
-    .map((hit) => hit._source.elasticsearch?.index?.recovery)
-    .filter(filterOldShardActivity(moment.utc(start).valueOf()));
-  data.sort((a, b) => (a && b ? (b.start_time_in_millis ?? 0) - (a.start_time_in_millis ?? 0) : 0));
-  return data;
+  const hits = resp.hits?.hits ?? [];
+  const groupedByTimestamp = hits.reduce((accum, hit) => {
+    accum[hit._source['@timestamp']] = accum[hit._source['@timestamp']] || [];
+    accum[hit._source['@timestamp']].push(hit);
+    return accum;
+  }, {});
+  const maxTimestamp = resp.aggregations?.max_timestamp?.value_as_string;
+  const mapped = groupedByTimestamp[maxTimestamp].map(
+    (hit) => hit._source.elasticsearch?.index?.recovery
+  );
+  const filtered = mapped.filter(filterOldShardActivity(moment.utc(start).valueOf()));
+  filtered.sort((a, b) =>
+    a && b ? (b.start_time_in_millis ?? 0) - (a.start_time_in_millis ?? 0) : 0
+  );
+  return filtered;
 }
 
-export async function getLastRecovery(req: LegacyRequest, esIndexPattern: string) {
+export async function getLastRecovery(req: LegacyRequest, esIndexPattern: string, size: number) {
   checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getLastRecovery');
 
   const start = req.payload.timeRange.min;
@@ -85,12 +98,19 @@ export async function getLastRecovery(req: LegacyRequest, esIndexPattern: string
   };
   const mbParams = {
     index: esIndexPattern,
-    size: 10000,
+    size,
     ignoreUnavailable: true,
     body: {
-      _source: ['elasticsearch.index.recovery'],
+      _source: ['elasticsearch.index.recovery', '@timestamp'],
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createQuery({ type: 'index_recovery', start, end, clusterUuid, metric }),
+      aggs: {
+        max_timestamp: {
+          max: {
+            field: '@timestamp',
+          },
+        },
+      },
     },
   };
 

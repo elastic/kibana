@@ -159,9 +159,10 @@ function transformCcr(legacyDoc: any) {
   };
 }
 
-const hashes: any = {};
+const usedLastRecoveryIds: string[] = [];
+// let debug = false;
 
-function applyCustomESRules(item: any, legacyDoc: any, mbDoc: any) {
+function applyCustomESRules(item: any, legacyDoc: any, mbDoc: any, legacyDocId: string) {
   const extraMbDocs = [];
 
   set(mbDoc, 'elasticsearch.node', {
@@ -224,30 +225,29 @@ function applyCustomESRules(item: any, legacyDoc: any, mbDoc: any) {
   if (legacyDoc.type === 'index_recovery') {
     const first = legacyDoc.index_recovery.shards.shift();
     set(mbDoc, 'elasticsearch.index.recovery', first);
-    for (const shard of legacyDoc.index_recovery.shards) {
-      const extraMbDoc = {
-        ...item,
-        value: {
-          ...item.value,
-          id: makeid(12),
-          index: `metricbeat-8.0.0`,
-          source: {
-            ...mbDoc,
-            elasticsearch: {
-              ...mbDoc.elasticsearch,
-              index: {
-                ...mbDoc.elasticsearch.index,
-                recovery: shard,
+    if (!usedLastRecoveryIds.includes(legacyDocId)) {
+      for (const shard of legacyDoc.index_recovery.shards) {
+        const extraMbDoc = {
+          ...item,
+          value: {
+            ...item.value,
+            id: makeid(12),
+            index: `metricbeat-8.0.0`,
+            source: {
+              ...mbDoc,
+              elasticsearch: {
+                ...mbDoc.elasticsearch,
+                index: {
+                  ...mbDoc.elasticsearch.index,
+                  recovery: shard,
+                },
               },
             },
           },
-        },
-      };
-      const hash = JSON.stringify(shard);
-      if (!hashes[hash]) {
-        hashes[hash] = true;
+        };
         extraMbDocs.push(extraMbDoc);
       }
+      usedLastRecoveryIds.push(legacyDocId);
     }
   }
 
@@ -345,6 +345,8 @@ export async function rebuildAllAction({
     const gzip = isGzip(childPath);
     const tempFile = childPath + (gzip ? '.rebuilding.gz' : '.rebuilding');
 
+    // debug = archiveName.includes('singlecluster-green-platinum');
+
     if (childName.includes('data.json') && !archiveName.includes('_mb')) {
       const existingDir = `${rootDir}/${archiveName}`;
       const mbDir = `${rootDir}/${archiveName}_mb`;
@@ -366,6 +368,7 @@ export async function rebuildAllAction({
               item.value.index.indexOf('-logstash') > -1)
           ) {
             const legacyDoc = item.value.source;
+            const legacyDocId = item.value.id;
             const mbDoc = {
               metricset: {
                 name: convertLegacyTypeToMetricsetName(legacyDoc.type),
@@ -390,7 +393,7 @@ export async function rebuildAllAction({
               mbDocs.push(item);
             } else {
               if (item.value.index.indexOf('-es') > -1) {
-                mbDocs.push(...applyCustomESRules(item, legacyDoc, mbDoc));
+                mbDocs.push(...applyCustomESRules(item, legacyDoc, mbDoc, legacyDocId));
               } else if (item.value.index.indexOf('-kibana') > -1) {
                 mbDocs.push(...applyCustomKibanaRules(item, legacyDoc, mbDoc));
               } else if (item.value.index.indexOf('-logstash') > -1) {
