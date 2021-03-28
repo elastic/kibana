@@ -9,14 +9,14 @@ import React, { Fragment, Component } from 'react';
 import { EuiFormRow, EuiPanel, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { GeoFieldSelect } from '../../../components/geo_field_select';
-import { GeoIndexPatternSelect } from '../../../components/geo_index_pattern_select';
-import { getGeoFields } from '../../../index_pattern_util';
-import { ESTopHitsSourceDescriptor } from '../../../../common/descriptor_types';
-import { IndexPattern, IFieldType } from '../../../../../src/plugins/data/common';
+import { GeoFieldSelect } from '../../../../components/geo_field_select';
+import { GeoIndexPatternSelect } from '../../../../components/geo_index_pattern_select';
+import { getGeoFields } from '../../../../index_pattern_util';
+import { ESSearchSourceDescriptor } from '../../../../../common/descriptor_types';
+import { IndexPattern, IFieldType } from '../../../../../../src/plugins/data/common';
 
 interface Props {
-  onSourceConfigChange: (sourceConfig: Partial<ESTopHitsSourceDescriptor>) => void;
+  onSourceConfigChange: (sourceConfig: Partial<ESSearchSourceDescriptor>) => void;
 }
 
 interface State {

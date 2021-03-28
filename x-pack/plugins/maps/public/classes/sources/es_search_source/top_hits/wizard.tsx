@@ -7,25 +7,21 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-// @ts-ignore
 import { CreateSourceEditor } from './create_source_editor';
-import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
-import { sourceTitle } from './es_top_hits_source';
-import { BlendedVectorLayer } from '../../layers/blended_vector_layer/blended_vector_layer';
-import { VectorLayer } from '../../layers/vector_layer';
-import { LAYER_WIZARD_CATEGORY, SCALING_TYPES } from '../../../../common/constants';
-import { TiledVectorLayer } from '../../layers/tiled_vector_layer/tiled_vector_layer';
-import { DocumentsLayerIcon } from '../../layers/icons/documents_layer_icon';
-import { ESTopHitsSourceDescriptor } from '../../../../common/descriptor_types';
+import { LayerWizard, RenderWizardArguments } from '../../../layers/layer_wizard_registry';
+import { VectorLayer } from '../../../layers/vector_layer';
+import { LAYER_WIZARD_CATEGORY, SCALING_TYPES } from '../../../../../common/constants';
+import { TopHitsLayerIcon } from '../../../layers/icons/top_hits_layer_icon';
+import { ESSearchSourceDescriptor } from '../../../../../common/descriptor_types';
 
 export const esTopHitsLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
-  description: i18n.translate('xpack.maps.source.esTopHitsDescription', {
+  description: i18n.translate('xpack.maps.source.topHitsDescription', {
     defaultMessage: 'Display the most relevant documents per entity',
   }),
-  icon: DocumentsLayerIcon,
+  icon: TopHitsLayerIcon,
   renderWizard: ({ previewLayers, mapColors }: RenderWizardArguments) => {
-    const onSourceConfigChange = (sourceConfig: Partial<ESTopHitsSourceDescriptor>) => {
+    const onSourceConfigChange = (sourceConfig: Partial<ESSearchSourceDescriptor>) => {
       if (!sourceConfig) {
         previewLayers([]);
         return;
@@ -37,5 +33,7 @@ export const esTopHitsLayerWizardConfig: LayerWizard = {
     };
     return <CreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
   },
-  title: sourceTitle,
+  title: i18n.translate('xpack.maps.source.topHitsTitle', {
+    defaultMessage: 'Top hits per entity',
+  }),
 };

@@ -7,8 +7,10 @@
 
 import { registerLayerWizard } from './layer_wizard_registry';
 import { uploadLayerWizardConfig } from './file_upload_wizard';
-import { esDocumentsLayerWizardConfig } from '../sources/es_search_source';
-import { esTopHitsLayerWizardConfig } from '../sources/es_top_hits_source';
+import {
+  esDocumentsLayerWizardConfig,
+  esTopHitsLayerWizardConfig,
+} from '../sources/es_search_source';
 import { clustersLayerWizardConfig, heatmapLayerWizardConfig } from '../sources/es_geo_grid_source';
 import { geoLineLayerWizardConfig } from '../sources/es_geo_line_source';
 // @ts-ignore

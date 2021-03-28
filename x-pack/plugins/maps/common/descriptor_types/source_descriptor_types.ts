@@ -100,9 +100,6 @@ export type ESSearchSourceDescriptor = AbstractESSourceDescriptor & {
   sortField: string;
   sortOrder: SortDirection;
   scalingType: SCALING_TYPES;
-};
-
-export type ESTopHitsSourceDescriptor = ESSearchSourceDescriptor & {
   topHitsSplitField: string;
   topHitsSize: number;
 };
