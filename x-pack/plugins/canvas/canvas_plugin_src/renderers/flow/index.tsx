@@ -8,9 +8,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+import { euiPaletteColorBlind } from '@elastic/eui';
 import { RendererStrings } from '../../../i18n';
 import { RendererFactory } from '../../../types';
 import { Output } from '../../functions/common/shape';
+
+const euiVisPalette = euiPaletteColorBlind();
+const goldenRatio = 1.618;
 
 const { flow: strings } = RendererStrings;
 
@@ -27,35 +31,34 @@ export const flow: RendererFactory<Output> = () => ({
       const height = domNode.offsetHeight;
 
       const ports = [
-        { place: 'left', index: 0, title: 'left 0', color: 'rgb(84, 179, 153)' },
-        { place: 'left', index: 1, title: 'left 1', color: 'rgb(84, 179, 153)' },
-        { place: 'left', index: 2, title: 'left 2', color: 'rgb(84, 179, 153)' },
-        { place: 'left', index: 3, title: 'left 3', color: 'rgb(84, 179, 153)' },
-        { place: 'left', index: 4, title: 'left 4', color: 'rgb(84, 179, 153)' },
-        { place: 'left', index: 5, title: 'left 5', color: 'rgb(84, 179, 153)' },
-        { place: 'left', index: 6, title: 'left 6', color: 'rgb(84, 179, 153)' },
-        { place: 'left', index: 7, title: 'left 7', color: 'rgb(84, 179, 153)' },
-        { place: 'left', index: 8, title: 'left 8', color: 'rgb(84, 179, 153)' },
-        { place: 'left', index: 9, title: 'left 9', color: 'rgb(84, 179, 153)' },
-        { place: 'right', index: 0, title: 'right 0', color: 'rgb(96, 146, 192)' },
-        { place: 'right', index: 1, title: 'right 1', color: 'rgb(96, 146, 192)' },
+        { place: 'left', index: 0, title: 'left 0', color: euiVisPalette[0] },
+        { place: 'left', index: 1, title: 'left 1', color: euiVisPalette[1] },
+        { place: 'left', index: 2, title: 'left 2', color: euiVisPalette[2] },
+        { place: 'left', index: 3, title: 'left 3', color: euiVisPalette[3] },
+        { place: 'left', index: 4, title: 'left 4', color: euiVisPalette[4] },
+        { place: 'left', index: 5, title: 'left 5', color: euiVisPalette[5] },
+        { place: 'left', index: 6, title: 'left 6', color: euiVisPalette[6] },
+        { place: 'left', index: 7, title: 'left 7', color: euiVisPalette[7] },
+        { place: 'left', index: 8, title: 'left 8', color: euiVisPalette[8] },
+        { place: 'left', index: 9, title: 'left 9', color: euiVisPalette[9] },
+        { place: 'right', index: 0, title: 'right 0', color: euiVisPalette[0] },
+        { place: 'right', index: 1, title: 'right 1', color: euiVisPalette[1] },
       ];
 
       const leftCount = ports.reduce((p, { place }) => (place === 'left' ? p + 1 : p), 0);
       const rightCount = ports.reduce((p, { place }) => (place === 'right' ? p + 1 : p), 0);
 
-      const tWidthDesired = 16;
-      const tHeightDesired = 16;
-      const paddingDesired = 4;
+      const tSizeDesired = 10;
+      const paddingDesired = tSizeDesired / goldenRatio;
 
-      const tVertPitchDesired = tHeightDesired + paddingDesired;
+      const tVertPitchDesired = tSizeDesired + paddingDesired;
 
       const tVertPitchLeft = Math.min(tVertPitchDesired, height / leftCount);
       const tVertPitchRight = Math.min(tVertPitchDesired, height / rightCount);
 
-      const tWidth = tWidthDesired;
-      const tHeightLeft = tHeightDesired * (tVertPitchLeft / tVertPitchDesired);
-      const tHeightRight = tHeightDesired * (tVertPitchRight / tVertPitchDesired);
+      const tWidth = tSizeDesired;
+      const tHeightLeft = tSizeDesired * (tVertPitchLeft / tVertPitchDesired);
+      const tHeightRight = tSizeDesired * (tVertPitchRight / tVertPitchDesired);
       const vertPaddingLeft = paddingDesired * (tVertPitchLeft / tVertPitchDesired);
       const vertPaddingRight = paddingDesired * (tVertPitchRight / tVertPitchDesired);
 
@@ -63,11 +66,14 @@ export const flow: RendererFactory<Output> = () => ({
       const remainingPlaceRight = Math.max(0, height - rightCount * tVertPitchRight);
 
       ReactDOM.render(
-        <svg
-          viewBox={`0 0 ${width} ${height}`}
-          style={{ strokeWidth: borderWidth, stroke: border }}
-        >
-          <rect x={0} y={0} width={width} height={height} style={{ fill }}>
+        <svg viewBox={`0 0 ${width} ${height}`} style={{}}>
+          <rect
+            x={0}
+            y={0}
+            width={width}
+            height={height}
+            style={{ fill, strokeWidth: borderWidth, stroke: border }}
+          >
             <title>Flow node</title>
           </rect>
           {ports.map(({ place, index, title, color }, i) => (
