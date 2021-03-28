@@ -8,38 +8,27 @@
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
+import { dataPluginMock } from 'src/plugins/data/public/mocks';
 
-import { useKibana } from '../../../../common/lib/kibana';
-import { fields } from '../../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
-import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
-import { getEntryMatchMock } from '../../../../../../lists/common/schemas/types/entry_match.mock';
-import { getEntryMatchAnyMock } from '../../../../../../lists/common/schemas/types/entry_match_any.mock';
+import { fields } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
+import { getExceptionListItemSchemaMock } from '../../../../common/schemas/response/exception_list_item_schema.mock';
+import { getEntryMatchMock } from '../../../../common/schemas/types/entry_match.mock';
+import { getEntryMatchAnyMock } from '../../../../common/schemas/types/entry_match_any.mock';
+import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { getMockTheme } from '../../../common/test_utils/kibana_react.mock';
 
-import { BuilderExceptionListItemComponent } from './exception_item';
-import { getMockTheme } from '../../../lib/kibana/kibana_react.mock';
+import { BuilderExceptionListItemComponent } from './exception_item_renderer';
 
 const mockTheme = getMockTheme({
   eui: {
     euiColorLightShade: '#ece',
   },
 });
-
-jest.mock('../../../../common/lib/kibana');
+const mockKibanaHttpService = coreMock.createStart().http;
+const { autocomplete: autocompleteStartMock } = dataPluginMock.createStartContract();
 
 describe('BuilderExceptionListItemComponent', () => {
   const getValueSuggestionsMock = jest.fn().mockResolvedValue(['value 1', 'value 2']);
-
-  beforeAll(() => {
-    (useKibana as jest.Mock).mockReturnValue({
-      services: {
-        data: {
-          autocomplete: {
-            getValueSuggestions: getValueSuggestionsMock,
-          },
-        },
-      },
-    });
-  });
 
   afterEach(() => {
     getValueSuggestionsMock.mockClear();
@@ -54,20 +43,22 @@ describe('BuilderExceptionListItemComponent', () => {
       const wrapper = mount(
         <ThemeProvider theme={mockTheme}>
           <BuilderExceptionListItemComponent
+            allowLargeValueLists={true}
+            andLogicIncluded={true}
+            autocompleteService={autocompleteStartMock}
             exceptionItem={exceptionItem}
-            exceptionId={'123'}
             exceptionItemIndex={0}
+            httpService={mockKibanaHttpService}
             indexPattern={{
+              fields,
               id: '1234',
               title: 'logstash-*',
-              fields,
             }}
-            andLogicIncluded={true}
             isOnlyItem={false}
             listType="detection"
-            setErrorsExist={jest.fn()}
-            onDeleteExceptionItem={jest.fn()}
             onChangeExceptionItem={jest.fn()}
+            onDeleteExceptionItem={jest.fn()}
+            setErrorsExist={jest.fn()}
           />
         </ThemeProvider>
       );
@@ -83,20 +74,22 @@ describe('BuilderExceptionListItemComponent', () => {
       const wrapper = mount(
         <ThemeProvider theme={mockTheme}>
           <BuilderExceptionListItemComponent
+            allowLargeValueLists={true}
+            andLogicIncluded={true}
+            autocompleteService={autocompleteStartMock}
             exceptionItem={exceptionItem}
-            exceptionId={'123'}
             exceptionItemIndex={1}
+            httpService={mockKibanaHttpService}
             indexPattern={{
+              fields,
               id: '1234',
               title: 'logstash-*',
-              fields,
             }}
-            andLogicIncluded={true}
             isOnlyItem={false}
             listType="detection"
-            setErrorsExist={jest.fn()}
-            onDeleteExceptionItem={jest.fn()}
             onChangeExceptionItem={jest.fn()}
+            onDeleteExceptionItem={jest.fn()}
+            setErrorsExist={jest.fn()}
           />
         </ThemeProvider>
       );
@@ -110,20 +103,22 @@ describe('BuilderExceptionListItemComponent', () => {
       const wrapper = mount(
         <ThemeProvider theme={mockTheme}>
           <BuilderExceptionListItemComponent
+            allowLargeValueLists={true}
+            andLogicIncluded={true}
+            autocompleteService={autocompleteStartMock}
             exceptionItem={exceptionItem}
-            exceptionId={'123'}
             exceptionItemIndex={1}
+            httpService={mockKibanaHttpService}
             indexPattern={{
+              fields,
               id: '1234',
               title: 'logstash-*',
-              fields,
             }}
-            andLogicIncluded={true}
             isOnlyItem={false}
             listType="detection"
-            setErrorsExist={jest.fn()}
-            onDeleteExceptionItem={jest.fn()}
             onChangeExceptionItem={jest.fn()}
+            onDeleteExceptionItem={jest.fn()}
+            setErrorsExist={jest.fn()}
           />
         </ThemeProvider>
       );
@@ -139,20 +134,22 @@ describe('BuilderExceptionListItemComponent', () => {
       const wrapper = mount(
         <ThemeProvider theme={mockTheme}>
           <BuilderExceptionListItemComponent
+            allowLargeValueLists={true}
+            andLogicIncluded={false}
+            autocompleteService={autocompleteStartMock}
             exceptionItem={exceptionItem}
-            exceptionId={'123'}
             exceptionItemIndex={1}
+            httpService={mockKibanaHttpService}
             indexPattern={{
+              fields,
               id: '1234',
               title: 'logstash-*',
-              fields,
             }}
-            andLogicIncluded={false}
             isOnlyItem={false}
             listType="detection"
-            setErrorsExist={jest.fn()}
-            onDeleteExceptionItem={jest.fn()}
             onChangeExceptionItem={jest.fn()}
+            onDeleteExceptionItem={jest.fn()}
+            setErrorsExist={jest.fn()}
           />
         </ThemeProvider>
       );
@@ -175,20 +172,22 @@ describe('BuilderExceptionListItemComponent', () => {
       };
       const wrapper = mount(
         <BuilderExceptionListItemComponent
+          allowLargeValueLists={true}
+          andLogicIncluded={false}
+          autocompleteService={autocompleteStartMock}
           exceptionItem={exceptionItem}
-          exceptionId={'123'}
           exceptionItemIndex={0}
+          httpService={mockKibanaHttpService}
           indexPattern={{
+            fields,
             id: '1234',
             title: 'logstash-*',
-            fields,
           }}
-          andLogicIncluded={false}
           isOnlyItem={true}
           listType="detection"
-          setErrorsExist={jest.fn()}
-          onDeleteExceptionItem={jest.fn()}
           onChangeExceptionItem={jest.fn()}
+          onDeleteExceptionItem={jest.fn()}
+          setErrorsExist={jest.fn()}
         />
       );
 
@@ -203,20 +202,22 @@ describe('BuilderExceptionListItemComponent', () => {
 
       const wrapper = mount(
         <BuilderExceptionListItemComponent
+          allowLargeValueLists={true}
+          andLogicIncluded={false}
+          autocompleteService={autocompleteStartMock}
           exceptionItem={exceptionItem}
-          exceptionId={'123'}
           exceptionItemIndex={0}
+          httpService={mockKibanaHttpService}
           indexPattern={{
+            fields,
             id: '1234',
             title: 'logstash-*',
-            fields,
           }}
-          andLogicIncluded={false}
           isOnlyItem={false}
           listType="detection"
-          setErrorsExist={jest.fn()}
-          onDeleteExceptionItem={jest.fn()}
           onChangeExceptionItem={jest.fn()}
+          onDeleteExceptionItem={jest.fn()}
+          setErrorsExist={jest.fn()}
         />
       );
 
@@ -230,22 +231,24 @@ describe('BuilderExceptionListItemComponent', () => {
       exceptionItem.entries = [getEntryMatchMock()];
       const wrapper = mount(
         <BuilderExceptionListItemComponent
+          allowLargeValueLists={true}
+          andLogicIncluded={false}
+          autocompleteService={autocompleteStartMock}
           exceptionItem={exceptionItem}
-          exceptionId={'123'}
           exceptionItemIndex={1}
+          httpService={mockKibanaHttpService}
           indexPattern={{
+            fields,
             id: '1234',
             title: 'logstash-*',
-            fields,
           }}
-          andLogicIncluded={false}
           // if exceptionItemIndex is not 0, wouldn't make sense for
           // this to be true, but done for testing purposes
           isOnlyItem={true}
           listType="detection"
-          setErrorsExist={jest.fn()}
-          onDeleteExceptionItem={jest.fn()}
           onChangeExceptionItem={jest.fn()}
+          onDeleteExceptionItem={jest.fn()}
+          setErrorsExist={jest.fn()}
         />
       );
 
@@ -259,20 +262,22 @@ describe('BuilderExceptionListItemComponent', () => {
       exceptionItem.entries = [getEntryMatchMock(), getEntryMatchMock()];
       const wrapper = mount(
         <BuilderExceptionListItemComponent
+          allowLargeValueLists={true}
+          andLogicIncluded={false}
+          autocompleteService={autocompleteStartMock}
           exceptionItem={exceptionItem}
-          exceptionId={'123'}
           exceptionItemIndex={0}
+          httpService={mockKibanaHttpService}
           indexPattern={{
+            fields,
             id: '1234',
             title: 'logstash-*',
-            fields,
           }}
-          andLogicIncluded={false}
           isOnlyItem={true}
           listType="detection"
-          setErrorsExist={jest.fn()}
-          onDeleteExceptionItem={jest.fn()}
           onChangeExceptionItem={jest.fn()}
+          onDeleteExceptionItem={jest.fn()}
+          setErrorsExist={jest.fn()}
         />
       );
 
@@ -288,20 +293,22 @@ describe('BuilderExceptionListItemComponent', () => {
       exceptionItem.entries = [getEntryMatchMock(), getEntryMatchAnyMock()];
       const wrapper = mount(
         <BuilderExceptionListItemComponent
+          allowLargeValueLists={true}
+          andLogicIncluded={false}
+          autocompleteService={autocompleteStartMock}
           exceptionItem={exceptionItem}
-          exceptionId={'123'}
           exceptionItemIndex={0}
+          httpService={mockKibanaHttpService}
           indexPattern={{
+            fields,
             id: '1234',
             title: 'logstash-*',
-            fields,
           }}
-          andLogicIncluded={false}
           isOnlyItem={true}
           listType="detection"
-          setErrorsExist={jest.fn()}
-          onDeleteExceptionItem={mockOnDeleteExceptionItem}
           onChangeExceptionItem={jest.fn()}
+          onDeleteExceptionItem={mockOnDeleteExceptionItem}
+          setErrorsExist={jest.fn()}
         />
       );
 
