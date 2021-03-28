@@ -18,7 +18,7 @@ import {
   IconType,
 } from '@elastic/eui';
 
-import { EuiButtonTo, EuiButtonEmptyTo } from '../../../shared/react_router_helpers';
+import { EuiButtonTo } from '../../../shared/react_router_helpers';
 import { TelemetryLogic } from '../../../shared/telemetry';
 
 interface OnboardingCardProps {
@@ -49,15 +49,15 @@ export const OnboardingCard: React.FC<OnboardingCardProps> = ({
     });
 
   const completeButton = actionPath ? (
-    <EuiButtonEmptyTo to={actionPath} data-test-subj={testSubj} onClick={onClick}>
+    <EuiButtonTo to={actionPath} data-test-subj={testSubj} onClick={onClick} fill>
       {actionTitle}
-    </EuiButtonEmptyTo>
+    </EuiButtonTo>
   ) : (
     <EuiButtonEmpty data-test-subj={testSubj}>{actionTitle}</EuiButtonEmpty>
   );
 
   const incompleteButton = actionPath ? (
-    <EuiButtonTo to={actionPath} data-test-subj={testSubj} onClick={onClick}>
+    <EuiButtonTo to={actionPath} data-test-subj={testSubj} onClick={onClick} fill>
       {actionTitle}
     </EuiButtonTo>
   ) : (
@@ -66,7 +66,7 @@ export const OnboardingCard: React.FC<OnboardingCardProps> = ({
 
   return (
     <EuiFlexItem>
-      <EuiPanel>
+      <EuiPanel color="subdued" hasShadow={false}>
         <EuiEmptyPrompt
           iconType={complete ? 'checkInCircleFilled' : (icon as IconType)}
           iconColor={complete ? 'secondary' : 'subdued'}

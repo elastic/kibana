@@ -37,7 +37,13 @@ describe('reducer', () => {
 
       expect(result).toStrictEqual({
         ...initialState,
-        location: { page_index: 5, page_size: 50, show: 'create', view_type: 'list' },
+        location: {
+          page_index: 5,
+          page_size: 50,
+          show: 'create',
+          view_type: 'list',
+          id: undefined,
+        },
         active: true,
       });
     });

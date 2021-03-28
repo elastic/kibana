@@ -17,6 +17,7 @@
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
     { "path": "../alerting/tsconfig.json" },
     { "path": "../licensing/tsconfig.json" },
+    { "path": "../lens/tsconfig.json" },
     { "path": "../translations/tsconfig.json" }
   ]
 }
