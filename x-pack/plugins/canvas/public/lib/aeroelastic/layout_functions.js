@@ -161,8 +161,7 @@ export const draggingShape = ({ draggedShape, shapes }, hoveredShape, down, mous
   const dragInProgress =
     down &&
     shapes.reduce((prev, next) => prev || (draggedShape && next.id === draggedShape.id), false);
-  const result = (dragInProgress && draggedShape) || (down && mouseDowned && hoveredShape);
-  return result;
+  return (dragInProgress && draggedShape) || (down && mouseDowned && hoveredShape);
 };
 
 // the currently dragged shape is considered in-focus; if no dragging is going on, then the hovered shape
@@ -391,8 +390,7 @@ const fromScreen = (currentTransform) => (transform) => {
   if (isTranslate) {
     const composite = compositeComponent(currentTransform);
     const inverse = invert(composite);
-    const result = translateComponent(multiply(inverse, transform));
-    return result;
+    return translateComponent(multiply(inverse, transform));
   } else {
     return transform;
   }
@@ -428,7 +426,7 @@ export const getAlignDistributeTransformIntents = (
     const { controlledAnchor, horizontal } = alignAction;
     const groupBoundingBox = shapeAABB(group, identityAABB());
     const groupAnchor = anchorAABB(groupBoundingBox, controlledAnchor, horizontal);
-    const results = children.map((c) => {
+    return children.map((c) => {
       const childBoundingBox = shapeAABB(c, identityAABB());
       const childAnchor = anchorAABB(childBoundingBox, controlledAnchor, horizontal);
       const delta = groupAnchor - childAnchor;
@@ -437,7 +435,6 @@ export const getAlignDistributeTransformIntents = (
         shapes: [c.id],
       };
     });
-    return results;
   } else if (distributeAction && children.length > 2) {
     const { horizontal } = distributeAction;
     const { a: A, b: B } = group;
@@ -464,12 +461,11 @@ export const getAlignDistributeTransformIntents = (
       (i, j) => childrenCenters[i] - childrenCenters[j]
     );
     const reduction = sortedChildrenIndex.reduce(
-      ({ cursor, deltas }, i) => {
+      ({ cursor: desiredLeft, deltas }, i) => {
         const size = childrenSizes[i];
         const originalLeft = childrenAnchors[i];
-        const desiredLeft = cursor;
         const delta = desiredLeft - originalLeft;
-        const nextLeft = cursor + size + gap;
+        const nextLeft = desiredLeft + size + gap;
         return {
           cursor: nextLeft,
           deltas: [...deltas, delta],
@@ -477,14 +473,13 @@ export const getAlignDistributeTransformIntents = (
       },
       { cursor: groupAnchor, deltas: [] }
     );
-    const results = reduction.deltas.map((delta, ii) => {
+    return reduction.deltas.map((delta, ii) => {
       const i = sortedChildrenIndex[ii];
       return {
         cumulativeTransforms: [translate(horizontal ? delta : 0, horizontal ? 0 : delta, 0)],
         shapes: [children[i].id],
       };
     });
-    return results;
   }
   return [];
 };
@@ -577,7 +572,7 @@ export const applyLocalTransforms = (shapes, transformIntents) => {
   return shapes.map(shapeApplyLocalTransforms(transformIntents));
 };
 
-// eslint-disable-next-line
+/*
 const getUpstreamTransforms = (shapes, shape) =>
   shape.parent
     ? getUpstreamTransforms(
@@ -585,6 +580,7 @@ const getUpstreamTransforms = (shapes, shape) =>
         shapes.find((s) => s.id === shape.parent)
       ).concat([shape.localTransformMatrix])
     : [shape.localTransformMatrix];
+*/
 
 const getUpstreams = (shapes, shape) =>
   shape.parent
@@ -605,34 +601,31 @@ const cascadeUnsnappedTransforms = (shapes, shape) => {
   const upstreamTransforms = upstreams.map((s) => {
     return s.localTransformMatrix;
   });
-  const cascadedTransforms = reduceTransforms(upstreamTransforms);
-  return cascadedTransforms;
+  return reduceTransforms(upstreamTransforms);
 };
 
-const cascadeTransforms = (shapes, shape) => {
-  const cascade = (s) =>
-    s.snapDeltaMatrix
-      ? multiply(s.localTransformMatrix, s.snapDeltaMatrix)
-      : s.localTransformMatrix;
+const cascade = (s) =>
+  s.snapDeltaMatrix ? multiply(s.localTransformMatrix, s.snapDeltaMatrix) : s.localTransformMatrix;
+
+const cascadeTransforms = (shape, shapes) => {
   if (!shape.parent) {
     return cascade(shape);
   } // boost for common case of toplevel shape
   const upstreams = getUpstreams(shapes, shape);
   const upstreamTransforms = upstreams.map(cascade);
-  const cascadedTransforms = reduceTransforms(upstreamTransforms);
-  return cascadedTransforms;
+  return reduceTransforms(upstreamTransforms);
 };
 
-const shapeCascadeProperties = (shapes) => (shape) => {
+const shapeCascadeProperties = (shape, _index, shapes) => {
   return {
     ...shape,
-    transformMatrix: cascadeTransforms(shapes, shape),
+    transformMatrix: cascadeTransforms(shape, shapes),
     width: 2 * snappedA(shape),
     height: 2 * snappedB(shape),
   };
 };
 
-export const cascadeProperties = (shapes) => shapes.map(shapeCascadeProperties(shapes));
+export const cascadeProperties = (shapes) => shapes.map(shapeCascadeProperties);
 
 const alignmentGuides = (config, shapes, guidedShapes, draggedShape) => {
   const result = {};
@@ -837,8 +830,7 @@ const resizePointAnnotations = (config, parent, a, b) => ([x, y, cursorAngle]) =
 const resizeEdgeAnnotations = (config, parent, a, b) => ([[x0, y0], [x1, y1]]) => {
   const x = a * mean(x0, x1);
   const y = b * mean(y0, y1);
-  const markerPlace = translate(x, y, config.atopZ - 10);
-  const transform = markerPlace; // no offset etc. at the moment
+  const markerPlace = translate(x, y, config.atopZ - 10); // no offset etc. at the moment
   const horizontal = y0 === y1;
   const length = horizontal ? a * Math.abs(x1 - x0) : b * Math.abs(y1 - y0);
   const sectionHalfLength = Math.max(0, length / 2 - config.resizeAnnotationConnectorOffset);
@@ -851,7 +843,7 @@ const resizeEdgeAnnotations = (config, parent, a, b) => ([[x0, y0], [x1, y1]]) =
     subtype: config.resizeConnectorName,
     interactive: true,
     parent: parent.id,
-    localTransformMatrix: transform,
+    localTransformMatrix: markerPlace,
     backgroundColor: config.devColor,
     a: horizontal ? sectionHalfLength : width,
     b: horizontal ? width : sectionHalfLength,
@@ -892,13 +884,12 @@ function resizeAnnotation(config, shapes, selectedShapes, shape) {
 
   if (foundShape.subtype === config.resizeHandleName) {
     // preserve any interactive annotation when handling
-    const result = foundShape.interactive
+    return foundShape.interactive
       ? resizeAnnotationsFunction(config, {
           shapes,
           selectedShapes: [shapes.find((s) => shape.parent === s.id)],
         })
       : [];
-    return result;
   }
   if (foundShape.type === 'annotation') {
     return resizeAnnotation(
@@ -926,12 +917,11 @@ function resizeAnnotation(config, shapes, selectedShapes, shape) {
   return [...resizePoints, ...connectors];
 }
 
-export function resizeAnnotationsFunction(config, { shapes, selectedShapes }) {
-  const shapesToAnnotate = selectedShapes;
+export function resizeAnnotationsFunction(config, { shapes, selectedShapes: shapesToAnnotate }) {
   return flatten(
     shapesToAnnotate
       .map((shape) => {
-        return resizeAnnotation(config, shapes, selectedShapes, shape);
+        return resizeAnnotation(config, shapes, shapesToAnnotate, shape);
       })
       .filter(identity)
   );
@@ -1063,7 +1053,8 @@ const axisAlignedBoundingBoxShape = (config, shapesToBox) => {
   const axisAlignedBoundingBox = shapesAABB(shapesToBox);
   const { a, b, localTransformMatrix, rigTransform } = projectAABB(axisAlignedBoundingBox);
   const id = getId(config.groupName, shapesToBox.map((s) => s.id).join('|'));
-  const aabbShape = {
+  // return aabbShape
+  return {
     id,
     type: config.groupName,
     subtype: config.adHocGroupName,
@@ -1073,7 +1064,6 @@ const axisAlignedBoundingBoxShape = (config, shapesToBox) => {
     rigTransform,
     parent: null,
   };
-  return aabbShape;
 };
 
 const resetChild = (s) => {
@@ -1088,8 +1078,7 @@ const childScaler = ({ a, b }, baseAB) => {
   const epsilon = 1e-6;
   const groupScaleX = Math.max(a / baseAB[0], epsilon);
   const groupScaleY = Math.max(b / baseAB[1], epsilon);
-  const groupScale = scale(groupScaleX, groupScaleY, 1);
-  return groupScale;
+  return scale(groupScaleX, groupScaleY, 1);
 };
 
 const resizeChild = (groupScale) => (s) => {
@@ -1583,12 +1572,10 @@ export const getGroupedSelectedPrimaryShapeIds = (selectedShapes) =>
 export const getGroupedSelectedShapeIds = (selectedShapes) =>
   selectedShapes.map((shape) => shape.id);
 
-export const getRotationAnnotations = (config, { shapes, selectedShapes }) => {
-  const shapesToAnnotate = selectedShapes;
-  return shapesToAnnotate
-    .map((shape, i) => rotationAnnotation(config, shapes, selectedShapes, shape, i))
+export const getRotationAnnotations = (config, { shapes, selectedShapes: shapesToAnnotate }) =>
+  shapesToAnnotate
+    .map((shape, i) => rotationAnnotation(config, shapes, shapesToAnnotate, shape, i))
     .filter(identity);
-};
 
 export const getDragBox = (dragging, draggedShape, { x0, y0, x1, y1 }) =>
   dragging &&
