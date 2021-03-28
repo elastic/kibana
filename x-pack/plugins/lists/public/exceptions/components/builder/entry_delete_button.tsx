@@ -9,7 +9,7 @@ import React, { useCallback } from 'react';
 import { EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { BuilderEntry } from '../types';
+import { BuilderEntry } from './types';
 
 const MyFirstRowContainer = styled(EuiFlexItem)`
   padding-top: 20px;
