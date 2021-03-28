@@ -56,7 +56,7 @@ export interface WorkloadAggregation {
         scheduleDensity: {
           range: {
             field: string;
-            ranges: [{ from: string; to: string }];
+            ranges: [{ from: number; to: number }];
           };
           aggs: {
             histogram: {
@@ -86,7 +86,6 @@ export interface WorkloadAggregation {
 
 // The type of a bucket in the scheduleDensity range aggregation
 type ScheduleDensityResult = AggregationResultOf<
-  // @ts-expect-error AggregationRange reqires from: number
   WorkloadAggregation['aggs']['idleTasks']['aggs']['scheduleDensity'],
   {}
 >['buckets'][0];
