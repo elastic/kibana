@@ -7,7 +7,7 @@
 import React, { FC, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { formatDate } from '@elastic/eui';
-import { DashboardItem, useDashboardTable } from './use_dashboards_table';
+import { useDashboardTable } from './use_dashboards_table';
 import { AddToDashboardControl } from './add_to_dashboard_controls';
 import { useAddToDashboardActions } from './use_add_to_dashboard_actions';
 import { AppStateSelectedCells, getSelectionTimeRange } from '../explorer_utils';
@@ -46,18 +46,17 @@ export const AddAnomalyChartsToDashboardControl: FC<AddToDashboardControlProps> 
 }) => {
   const [severity] = useTableSeverity();
 
-  const getPanelsData = useCallback(
-    async (selectedItems: DashboardItem[]) => {
-      const { earliestMs, latestMs } = getSelectionTimeRange(selectedCells, interval, bounds);
-      const timeRange: TimeRange = {
-        from: formatDate(earliestMs, 'MMM D, YYYY @ HH:mm:ss.SSS'),
-        to: formatDate(latestMs, 'MMM D, YYYY @ HH:mm:ss.SSS'),
-        mode: 'absolute',
-      };
+  const getPanelsData = useCallback(async () => {
+    const { earliestMs, latestMs } = getSelectionTimeRange(selectedCells, interval, bounds);
+    const timeRange: TimeRange = {
+      from: formatDate(earliestMs, 'MMM D, YYYY @ HH:mm:ss.SSS'),
+      to: formatDate(latestMs, 'MMM D, YYYY @ HH:mm:ss.SSS'),
+      mode: 'absolute',
+    };
 
-      const config = getDefaultEmbeddablePanelConfig(jobIds);
-
-      return selectedItems.map((item) => ({
+    const config = getDefaultEmbeddablePanelConfig(jobIds);
+    return [
+      {
         ...config,
         embeddableConfig: {
           jobIds,
@@ -65,10 +64,9 @@ export const AddAnomalyChartsToDashboardControl: FC<AddToDashboardControlProps> 
           severityThreshold: severity.val,
           timeRange,
         },
-      }));
-    },
-    [selectedCells, interval, bounds]
-  );
+      },
+    ];
+  }, [selectedCells, interval, bounds]);
 
   const { selectedItems, selection, dashboardItems, isLoading, search } = useDashboardTable();
   const { addToDashboardAndEditCallback, addToDashboardCallback } = useAddToDashboardActions({
@@ -83,7 +81,7 @@ export const AddAnomalyChartsToDashboardControl: FC<AddToDashboardControlProps> 
     />
   );
 
-  const disabled = selectedItems.length !== 1;
+  const disabled = selectedItems.length < 1 && !Array.isArray(jobIds === undefined);
   return (
     <AddToDashboardControl
       onClose={onClose}
