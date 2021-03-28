@@ -72,6 +72,7 @@ import { getToastNotifications } from '../util/dependency_cache';
 import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '../../../common/constants/settings';
 import { withKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { ML_APP_URL_GENERATOR } from '../../../common/constants/ml_url_generator';
+import { AnomalyContextMenu } from './anomaly_context_menu';
 
 const ExplorerPage = ({
   children,
@@ -431,14 +432,27 @@ export class ExplorerUI extends React.Component {
             )}
             {loading === false && (
               <EuiPanel>
-                <EuiTitle className="panel-title">
-                  <h2>
-                    <FormattedMessage
-                      id="xpack.ml.explorer.anomaliesTitle"
-                      defaultMessage="Anomalies"
+                <EuiFlexGroup direction="row" gutterSize="m" responsive={false} alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle className="panel-title">
+                      <h2>
+                        <FormattedMessage
+                          id="xpack.ml.explorer.anomaliesTitle"
+                          defaultMessage="Anomalies"
+                        />
+                      </h2>
+                    </EuiTitle>
+                  </EuiFlexItem>
+
+                  <EuiFlexItem grow={false} style={{ marginLeft: 'auto', alignSelf: 'baseline' }}>
+                    <AnomalyContextMenu
+                      selectedJobs={selectedJobs}
+                      selectedCells={selectedCells}
+                      bounds={bounds}
+                      interval={this.props.explorerState.swimlaneBucketInterval.asSeconds()}
                     />
-                  </h2>
-                </EuiTitle>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
 
                 <EuiFlexGroup
                   direction="row"
