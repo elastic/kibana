@@ -131,7 +131,7 @@ describe('index pattern usage collection', () => {
         perIndexPattern: {
           scriptedFieldCount: { min: 3, max: 3, avg: 3 },
           runtimeFieldCount: countSummaryDefault,
-          scriptedFieldLineCount: { min: 3, max: 3, avg: 3 },
+          scriptedFieldLineCount: { min: 1, max: 3, avg: 2 },
           runtimeFieldLineCount: countSummaryDefault,
         },
       });
