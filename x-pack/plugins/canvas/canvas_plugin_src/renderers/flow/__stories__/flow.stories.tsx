@@ -7,19 +7,19 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { shape } from '../';
+import { flow } from '../';
 import { Render } from '../../__stories__/render';
-import { Shape } from '../../../functions/common/shape';
+import { Shape } from '../../../functions/common/flow';
 
-storiesOf('renderers/shape', module).add('default', () => {
+storiesOf('renderers/flow', module).add('default', () => {
   const config = {
-    type: 'shape' as 'shape',
+    type: 'flow' as 'flow',
     border: '#FFEEDD',
     borderWidth: 8,
-    shape: Shape.BOOKMARK,
+    shape: Shape.SQUARE,
     fill: '#112233',
     maintainAspect: true,
   };
 
-  return <Render renderer={shape} config={config} />;
+  return <Render renderer={flow} config={config} />;
 });

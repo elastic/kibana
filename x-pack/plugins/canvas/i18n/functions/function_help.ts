@@ -66,6 +66,7 @@ import { help as savedSearch } from './dict/saved_search';
 import { help as savedVisualization } from './dict/saved_visualization';
 import { help as seriesStyle } from './dict/series_style';
 import { help as shape } from './dict/shape';
+import { help as flow } from './dict/flow';
 import { help as sort } from './dict/sort';
 import { help as staticColumn } from './dict/static_column';
 import { help as string } from './dict/string';
@@ -80,12 +81,12 @@ import { help as to } from './dict/to';
 import { help as urlparam } from './dict/urlparam';
 
 /**
- * This type defines an entry in the `FunctionHelpMap`.  It uses 
- * an `ExpressionFunction` to infer its `Arguments` in order to strongly-type that 
+ * This type defines an entry in the `FunctionHelpMap`.  It uses
+ * an `ExpressionFunction` to infer its `Arguments` in order to strongly-type that
  * entry.
- * 
+ *
  * For example:
- * 
+ *
 ```
    interface Arguments {
      bar: string;
@@ -227,6 +228,7 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   savedVisualization,
   seriesStyle,
   shape,
+  flow,
   sort,
   staticColumn,
   string,

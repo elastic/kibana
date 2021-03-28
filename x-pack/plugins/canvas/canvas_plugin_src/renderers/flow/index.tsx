@@ -11,7 +11,7 @@ import ReactDOM from 'react-dom';
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { RendererStrings } from '../../../i18n';
 import { RendererFactory } from '../../../types';
-import { Output } from '../../functions/common/shape';
+import { Output } from '../../functions/common/flow';
 
 const euiVisPalette = euiPaletteColorBlind();
 const goldenRatio = 1.618;

@@ -11,6 +11,14 @@ import { getFunctionHelp } from '../../../i18n';
 export enum Shape {
   ARROW = 'arrow',
   ARROW_MULTI = 'arrowMulti',
+  LINE_ELBOW_UP = 'lineElbowUp',
+  LINE_ELBOW_DOWN = 'lineElbowDown',
+  LINE_STRAIGHT_UP = 'lineStraightUp',
+  LINE_STRAIGHT_DOWN = 'lineStraightDown',
+  LINE_SMOOTH_UP = 'lineSmoothUp',
+  LINE_SMOOTH_DOWN = 'lineSmoothDown',
+  LINE_HORIZONTAL = 'lineHorizontal',
+  LINE_VERTICAL = 'lineVertical',
   BOOKMARK = 'bookmark',
   CIRCLE = 'circle',
   CROSS = 'cross',
@@ -40,7 +48,7 @@ export interface Output extends Arguments {
 }
 
 export function flow(): ExpressionFunctionDefinition<'flow', null, Arguments, Output> {
-  const { help, args: argHelp } = getFunctionHelp().shape;
+  const { help, args: argHelp } = getFunctionHelp().flow;
 
   return {
     name: 'flow',
