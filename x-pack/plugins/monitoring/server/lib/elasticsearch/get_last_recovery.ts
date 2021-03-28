@@ -13,7 +13,11 @@ import { checkParam } from '../error_missing_required';
 import { createQuery } from '../create_query';
 // @ts-ignore
 import { ElasticsearchMetric } from '../metrics';
-import { ElasticsearchResponse, ElasticsearchIndexRecoveryShard } from '../../../common/types/es';
+import {
+  ElasticsearchResponse,
+  ElasticsearchIndexRecoveryShard,
+  ElasticsearchResponseHit,
+} from '../../../common/types/es';
 import { LegacyRequest } from '../../types';
 
 /**
@@ -62,11 +66,15 @@ export function handleLegacyLastRecoveries(resp: ElasticsearchResponse, start: n
 // that our recovered shards are within the same time window to match the legacy query (of size: 1)
 export function handleMbLastRecoveries(resp: ElasticsearchResponse, start: number) {
   const hits = resp.hits?.hits ?? [];
-  const groupedByTimestamp = hits.reduce((accum, hit) => {
-    accum[hit._source['@timestamp']] = accum[hit._source['@timestamp']] || [];
-    accum[hit._source['@timestamp']].push(hit);
-    return accum;
-  }, {});
+  const groupedByTimestamp = hits.reduce(
+    (accum: { [timestamp: string]: ElasticsearchResponseHit[] }, hit) => {
+      const timestamp = hit._source['@timestamp'] ?? '';
+      accum[timestamp] = accum[timestamp] || [];
+      accum[timestamp].push(hit);
+      return accum;
+    },
+    {}
+  );
   const maxTimestamp = resp.aggregations?.max_timestamp?.value_as_string;
   const mapped = groupedByTimestamp[maxTimestamp].map(
     (hit) => hit._source.elasticsearch?.index?.recovery
