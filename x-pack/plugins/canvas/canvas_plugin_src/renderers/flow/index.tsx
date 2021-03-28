@@ -76,26 +76,31 @@ export const flow: RendererFactory<Output> = () => ({
           >
             <title>Flow node</title>
           </rect>
-          {ports.map(({ place, index, title, color }, i) => (
-            <rect
-              key={i}
-              x={place === 'left' ? 0 : width - tWidth}
-              y={
-                place === 'left'
-                  ? vertPaddingLeft / 2 +
-                    index * (tHeightLeft + vertPaddingLeft) +
-                    remainingPlaceLeft / 2
-                  : vertPaddingRight / 2 +
-                    index * (tHeightRight + vertPaddingRight) +
-                    remainingPlaceRight / 2
-              }
-              width={tWidth}
-              height={place === 'left' ? tHeightLeft : tHeightRight}
-              style={{ fill: color }}
-            >
-              <title>{title}</title>
-            </rect>
-          ))}
+          {ports.map(({ place, index, title, color }, i) => {
+            const x0 = place === 'left' ? 0 : width - tWidth;
+            const y0 =
+              place === 'left'
+                ? vertPaddingLeft / 2 +
+                  index * (tHeightLeft + vertPaddingLeft) +
+                  remainingPlaceLeft / 2
+                : vertPaddingRight / 2 +
+                  index * (tHeightRight + vertPaddingRight) +
+                  remainingPlaceRight / 2;
+            const portWidth = tWidth;
+            const portHeight = place === 'left' ? tHeightLeft : tHeightRight;
+            return (
+              <rect
+                key={i}
+                x={x0}
+                y={y0}
+                width={portWidth}
+                height={portHeight}
+                style={{ fill: color }}
+              >
+                <title>{title}</title>
+              </rect>
+            );
+          })}
         </svg>,
         domNode
       );
