@@ -118,7 +118,7 @@ export const renderApp = (
 ) => {
   const { element } = appMountParameters;
 
-  createCallApmApi(core.http);
+  createCallApmApi(core);
 
   // Automatically creates static index pattern and stores as saved object
   createStaticIndexPattern().catch((e) => {

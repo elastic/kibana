@@ -398,6 +398,7 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
 
     const response = await mlClient.anomalySearch(
       {
+        // @ts-expect-error
         body: requestBody,
       },
       jobIds
@@ -425,7 +426,8 @@ export function alertingServiceProvider(mlClient: MlClient, esClient: Elasticsea
           .filter((v) => v.doc_count > 0 && v[resultsLabel.aggGroupLabel].doc_count > 0)
           // Map response
           .map(formatter)
-      : [formatter(result as AggResultsResponse)]
+      : // @ts-expect-error
+        [formatter(result as AggResultsResponse)]
     ).filter(isDefined);
   };
 
