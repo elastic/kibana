@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { estypes } from '@elastic/elasticsearch';
+
 import { PIVOT_SUPPORTED_AGGS } from '../../../common/types/pivot_aggs';
 
 import { PivotGroupByConfig } from '../common';
@@ -29,6 +29,7 @@ import {
   PivotQuery,
 } from './request';
 import { LatestFunctionConfigUI } from '../../../common/types/transform';
+import { RuntimeField } from '../../../../../../src/plugins/data/common/index_patterns';
 
 const simpleQuery: PivotQuery = { query_string: { query: 'airline:AAL' } };
 
@@ -272,7 +273,7 @@ describe('Transform: Common', () => {
         script: {
           source: "emit(doc['bytes'].value * 2.0)",
         },
-      } as estypes.RuntimeField,
+      } as RuntimeField,
     };
 
     const pivotState: StepDefineExposedState = {

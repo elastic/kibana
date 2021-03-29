@@ -13,7 +13,7 @@ import { EuiCodeEditor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { StepDefineFormHook } from '../step_define';
-import { isRuntimeMappings } from '../../../../../../common/shared_imports';
+import { isRuntimeMappings } from '../step_define/common/types';
 
 export const AdvancedRuntimeMappingsEditor: FC<StepDefineFormHook['runtimeMappingsEditor']> = memo(
   ({
