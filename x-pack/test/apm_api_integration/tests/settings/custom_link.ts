@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { CustomLink } from '../../../../plugins/apm/common/custom_link/custom_link_types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
-import { createApmApiSupertest } from '../../common/apm_api_supertest';
+import { ApmApiError, createApmApiSupertest } from '../../common/apm_api_supertest';
 
 export default function customLinksTests({ getService }: FtrProviderContext) {
   const supertestRead = createApmApiSupertest(getService('supertest'));
@@ -29,15 +29,11 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
         ],
       } as CustomLink;
 
-      try {
-        await createCustomLink(customLink);
-        expect(true).to.be(false);
-      } catch (e) {
-        expect(e.res.status).to.be(403);
-        expectSnapshot(e.res.body.message).toMatchInline(
-          `"To create custom links, you must be subscribed to an Elastic Gold license or above. With it, you'll have the ability to create custom links to improve your workflow when analyzing your services."`
-        );
-      }
+      const err = await expectToReject<ApmApiError>(() => createCustomLink(customLink));
+      expect(err.res.status).to.be(403);
+      expectSnapshot(err.res.body.message).toMatchInline(
+        `"To create custom links, you must be subscribed to an Elastic Gold license or above. With it, you'll have the ability to create custom links to improve your workflow when analyzing your services."`
+      );
     });
   });
 
@@ -183,4 +179,13 @@ export default function customLinksTests({ getService }: FtrProviderContext) {
       params: { path: { id } },
     });
   }
+}
+
+async function expectToReject<T extends Error>(fn: () => Promise<any>): Promise<T> {
+  try {
+    await fn();
+  } catch (e) {
+    return e;
+  }
+  throw new Error(`Expected fn to throw`);
 }
