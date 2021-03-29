@@ -7,7 +7,7 @@
 
 import { Plugin, CoreSetup, AppMountParameters } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { TimelinePluginSetup, TimelinePluginStart } from '../../../../../plugins/timeline/public';
+import { TimelinePluginSetup } from '../../../../../plugins/timeline/public';
 import { renderApp } from './applications/timeline_test';
 
 export type TimelineTestPluginSetup = void;
@@ -23,7 +23,7 @@ export class TimelineTestPlugin
   implements
     Plugin<
       TimelineTestPluginSetup,
-      TimelineTestPluginStart,
+      void,
       TimelineTestPluginSetupDependencies,
       TimelineTestPluginStartDependencies
     > {

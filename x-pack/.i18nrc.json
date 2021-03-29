@@ -53,6 +53,7 @@
     "xpack.spaces": "plugins/spaces",
     "xpack.savedObjectsTagging": ["plugins/saved_objects_tagging"],
     "xpack.taskManager": "legacy/plugins/task_manager",
+    "xpack.timeline": "plugins/timeline",
     "xpack.transform": "plugins/transform",
     "xpack.triggersActionsUI": "plugins/triggers_actions_ui",
     "xpack.upgradeAssistant": "plugins/upgrade_assistant",

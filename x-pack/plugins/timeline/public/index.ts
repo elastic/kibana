@@ -8,4 +8,4 @@ import { TimelinePlugin } from './plugin';
 export function plugin(initializerContext: PluginInitializerContext) {
   return new TimelinePlugin(initializerContext);
 }
-export { TimelinePluginSetup, TimelinePluginStart } from './types';
+export { TimelinePluginSetup } from './types';
