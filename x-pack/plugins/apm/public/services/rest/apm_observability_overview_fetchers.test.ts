@@ -8,7 +8,7 @@
 import moment from 'moment';
 import {
   fetchObservabilityOverviewPageData,
-  hasData,
+  getHasData,
 } from './apm_observability_overview_fetchers';
 import * as createCallApmApi from './createCallApmApi';
 
@@ -31,12 +31,12 @@ describe('Observability dashboard data', () => {
   describe('hasData', () => {
     it('returns false when no data is available', async () => {
       callApmApiMock.mockImplementation(() => Promise.resolve(false));
-      const response = await hasData();
+      const response = await getHasData();
       expect(response).toBeFalsy();
     });
     it('returns true when data is available', async () => {
-      callApmApiMock.mockImplementation(() => Promise.resolve(true));
-      const response = await hasData();
+      callApmApiMock.mockResolvedValue({ hasData: true });
+      const response = await getHasData();
       expect(response).toBeTruthy();
     });
   });
