@@ -94,6 +94,7 @@ export const heatmapVisTypeDefinition: VisTypeDefinition<HeatmapVisParams> = {
           'cardinality',
           'std_dev',
           'top_hits',
+          '!filtered_metric',
         ],
         defaults: [{ schema: 'metric', type: 'count' }],
       },

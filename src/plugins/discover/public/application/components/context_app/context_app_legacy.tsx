@@ -87,6 +87,7 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
       minimumVisibleRows,
       useNewFieldsApi,
     } = renderProps;
+    // @ts-expect-error doesn't implement full DocTableLegacyProps interface
     return {
       columns,
       indexPattern,

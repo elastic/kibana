@@ -173,7 +173,7 @@ const initialState: IndexPatternPrivateState = {
           label: 'My Op',
           dataType: 'number',
           isBucketed: false,
-          operationType: 'avg',
+          operationType: 'average',
           sourceField: 'memory',
         },
       },
@@ -200,7 +200,7 @@ const initialState: IndexPatternPrivateState = {
           label: 'My Op',
           dataType: 'number',
           isBucketed: false,
-          operationType: 'avg',
+          operationType: 'average',
           sourceField: 'bytes',
         },
       },
@@ -827,7 +827,7 @@ describe('IndexPattern Data Panel', () => {
         });
 
         // wait for indx pattern to be loaded
-        await new Promise((r) => setTimeout(r, 0));
+        await act(async () => await new Promise((r) => setTimeout(r, 0)));
 
         expect(props.indexPatternFieldEditor.openEditor).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -860,10 +860,11 @@ describe('IndexPattern Data Panel', () => {
             .prop('children') as ReactElement).props.items[0].props.onClick();
         });
         // wait for indx pattern to be loaded
-        await new Promise((r) => setTimeout(r, 0));
+        await act(async () => await new Promise((r) => setTimeout(r, 0)));
+
         await (props.indexPatternFieldEditor.openEditor as jest.Mock).mock.calls[0][0].onSave();
         // wait for indx pattern to be loaded
-        await new Promise((r) => setTimeout(r, 0));
+        await act(async () => await new Promise((r) => setTimeout(r, 0)));
         expect(props.onUpdateIndexPattern).toHaveBeenCalledWith(
           expect.objectContaining({
             fields: [

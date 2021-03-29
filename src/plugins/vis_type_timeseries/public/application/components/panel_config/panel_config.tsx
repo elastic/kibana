@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { TimeseriesVisData } from '../../../../common/types';
 import { FormValidationContext } from '../../contexts/form_validation_context';
 import { VisDataContext } from '../../contexts/vis_data_context';
+import { PanelModelContext } from '../../contexts/panel_model_context';
 import { PanelConfigProps } from './types';
 import { TimeseriesPanelConfig as timeseries } from './timeseries';
 import { MetricPanelConfig as metric } from './metric';
@@ -61,11 +62,13 @@ export function PanelConfig(props: PanelConfigProps) {
   if (Component) {
     return (
       <FormValidationContext.Provider value={updateControlValidity}>
-        <VisDataContext.Provider value={visData}>
-          <div data-test-subj={`tvbPanelConfig__${model.type}`}>
-            <Component {...props} />
-          </div>
-        </VisDataContext.Provider>
+        <PanelModelContext.Provider value={model}>
+          <VisDataContext.Provider value={visData}>
+            <div data-test-subj={`tvbPanelConfig__${model.type}`}>
+              <Component {...props} />
+            </div>
+          </VisDataContext.Provider>
+        </PanelModelContext.Provider>
       </FormValidationContext.Provider>
     );
   }

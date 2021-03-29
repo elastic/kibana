@@ -33,7 +33,6 @@ import { ColorRules } from '../color_rules';
 import { ColorPicker } from '../color_picker';
 import { YesNo } from '../yes_no';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
-// @ts-ignore this is typed in https://github.com/elastic/kibana/pull/92812, remove ignore after merging
 import { QueryBarWrapper } from '../query_bar_wrapper';
 import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
 import { TimeseriesVisParams } from '../../../types';
@@ -120,6 +119,7 @@ export class TopNPanelConfig extends Component<
               fields={this.props.fields}
               model={this.props.model}
               onChange={this.props.onChange}
+              allowIndexSwitchingMode={true}
             />
 
             <EuiHorizontalRule />
@@ -138,13 +138,13 @@ export class TopNPanelConfig extends Component<
                 >
                   <QueryBarWrapper
                     query={{
-                      language: model.filter.language || getDefaultQueryLanguage(),
-                      query: model.filter.query || '',
+                      language: model.filter?.language || getDefaultQueryLanguage(),
+                      query: model.filter?.query || '',
                     }}
-                    onChange={(filter: PanelConfigProps['model']['filter']) =>
-                      this.props.onChange({ filter })
-                    }
-                    indexPatterns={[model.index_pattern || model.default_index_pattern]}
+                    onChange={(filter: PanelConfigProps['model']['filter']) => {
+                      this.props.onChange({ filter });
+                    }}
+                    indexPatterns={[model.index_pattern || model.default_index_pattern || '']}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -225,6 +225,7 @@ export class TopNPanelConfig extends Component<
           <EuiTab
             isSelected={selectedTab === PANEL_CONFIG_TABS.DATA}
             onClick={() => this.switchTab(PANEL_CONFIG_TABS.DATA)}
+            data-test-subj="topNEditorDataBtn"
           >
             <FormattedMessage
               id="visTypeTimeseries.topN.dataTab.dataButtonLabel"
@@ -234,6 +235,7 @@ export class TopNPanelConfig extends Component<
           <EuiTab
             isSelected={selectedTab === PANEL_CONFIG_TABS.OPTIONS}
             onClick={() => this.switchTab(PANEL_CONFIG_TABS.OPTIONS)}
+            data-test-subj="topNEditorPanelOptionsBtn"
           >
             <FormattedMessage
               id="visTypeTimeseries.topN.optionsTab.panelOptionsButtonLabel"
