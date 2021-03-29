@@ -1,14 +1,11 @@
 [role="xpack"]
-[[rule-types]]
-== Rules
+[[stack-rules]]
+== Stack Rules
 
 Kibana provides two types of rules:
 
 * Stack rules, which are built into {kib}
-* Domain-specific rules, which are registered by {kib} apps.
-
-[float]
-==== Standard stack rules
+* <<domain-specific-rules, Domain-specific rules>>, which are registered by {kib} apps.
 
 {kib} provides two stack rules: 
 
@@ -17,17 +14,6 @@ Kibana provides two types of rules:
 
 Users require the `all` privilege to access the *Stack Rules* feature and create and edit rules.
 See <<kibana-feature-privileges, feature privileges>> for more information.
-
-[float]
-==== Domain-specific rules
-
-For domain-specific rules, refer to the documentation for that app.
-{kib} supports these rules:
-
-* {observability-guide}/create-alerts.html[Observability rules]
-* {security-guide}/prebuilt-rules.html[Security rules]
-* <<geo-alerting, Maps rules>>
-* {ml-docs}/ml-configuring-alerts.html[{ml-cap} rules] beta:[]
 
 [NOTE]
 ==============================================
@@ -39,4 +25,3 @@ see {subscriptions}[the subscription page].
 
 include::stack-rules/index-threshold.asciidoc[]
 include::stack-rules/es-query.asciidoc[]
-include::map-rules/geo-rule-types.asciidoc[]

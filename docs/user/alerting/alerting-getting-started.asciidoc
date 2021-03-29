@@ -47,7 +47,7 @@ to control the details of the conditions to detect.
 
 For example, an <<rule-type-index-threshold, index threshold rule type>> lets you specify the index to query, an aggregation field, and a time window, but the details of the underlying {es} query are hidden.
 
-See <<rule-types>> for the types of rules provided by {kib} and how they express their conditions.
+See <<stack-rules>> and <<domain-specific-rules>> for the types of rules provided by {kib} and how they express their conditions.
 
 [float]
 [[alerting-concepts-scheduling]]
