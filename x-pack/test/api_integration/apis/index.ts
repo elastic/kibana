@@ -36,5 +36,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./upgrade_assistant'));
     loadTestFile(require.resolve('./searchprofiler'));
     loadTestFile(require.resolve('./painless_lab'));
+    loadTestFile(require.resolve('./file_upload'));
   });
 }
