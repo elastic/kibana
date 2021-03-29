@@ -106,7 +106,7 @@ export async function getLatencyDistribution({
     type Agg = NonNullable<typeof response.aggregations>;
 
     if (!response.aggregations) {
-      return;
+      return {};
     }
 
     function formatDistribution(distribution: Agg['distribution']) {

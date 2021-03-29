@@ -23,13 +23,13 @@ import {
 } from '../../../../../common/utils/formatters';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+import { PrimaryStatsServiceInstanceItem } from '../../../app/service_overview/service_overview_instances_chart_and_table';
 import { ChartContainer } from '../chart_container';
 import { getResponseTimeTickFormatter } from '../transaction_charts/helper';
 
 interface InstancesLatencyDistributionChartProps {
   height: number;
-  items?: APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/primary_statistics'>;
+  items?: PrimaryStatsServiceInstanceItem[];
   status: FETCH_STATUS;
 }
 
