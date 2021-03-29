@@ -116,6 +116,7 @@ export function monitoringMlListingProvider() {
           if (job.ml) {
             return {
               ...job.ml.job,
+              node: job.node,
               job_id: job.ml.job.id,
             };
           }

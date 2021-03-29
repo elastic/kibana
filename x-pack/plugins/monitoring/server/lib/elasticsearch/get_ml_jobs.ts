@@ -21,7 +21,18 @@ import { LegacyRequest } from '../../types';
  */
 export function handleResponse(response: ElasticsearchResponse) {
   const hits = response.hits?.hits;
-  return hits?.map((hit) => hit._source.job_stats ?? hit._source.elasticsearch) ?? [];
+  return (
+    hits?.map((hit) => {
+      const job = hit._source.job_stats ?? hit._source.elasticsearch;
+      return {
+        ...job,
+        node: {
+          ...job?.node,
+          name: job?.node?.name ?? job?.node?.id,
+        },
+      };
+    }) ?? []
+  );
 }
 
 export function getMlJobs(req: LegacyRequest, esIndexPattern: string) {

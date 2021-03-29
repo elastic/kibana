@@ -43,7 +43,7 @@ async function getCcrStat(req: LegacyRequest, esIndexPattern: string, filters: u
       'hits.hits.inner_hits.oldest.hits.hits._source.ccr_stats.operations_written',
       'hits.hits.inner_hits.oldest.hits.hits._source.elasticsearch.ccr.follower.operations_written',
       'hits.hits.inner_hits.oldest.hits.hits._source.ccr_stats.failed_read_requests',
-      'hits.hits.inner_hits.oldest.hits.hits._source.elasticsearch.ccr.follower.failed_read_requests',
+      'hits.hits.inner_hits.oldest.hits.hits._source.elasticsearch.ccr.requests.failed.read.count',
     ],
     body: {
       sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
