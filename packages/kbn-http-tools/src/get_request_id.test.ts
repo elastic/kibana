@@ -28,8 +28,8 @@ describe('getRequestId', () => {
       const request = {
         headers: {
           'x-opaque-id': 'id from header',
-          raw: { req: { socket: { remoteAddress: '1.1.1.1' } } },
         },
+        raw: { req: { socket: { remoteAddress: '1.1.1.1' } } },
       } as any;
       expect(getRequestId(request, { allowFromAnyIp: true, ipAllowlist: [] })).toEqual(
         'id from header'

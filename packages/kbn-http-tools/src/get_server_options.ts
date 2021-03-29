@@ -7,7 +7,6 @@
  */
 
 import { RouteOptionsCors, ServerOptions } from '@hapi/hapi';
-import { ensureNoUnsafeProperties } from '@kbn/std';
 import { ServerOptions as TLSOptions } from 'https';
 import { defaultValidationErrorHandler } from './default_validation_error_handler';
 import { IHttpConfig } from './types';
@@ -25,10 +24,6 @@ export function getServerOptions(config: IHttpConfig, { configureTLS = true } = 
         headers: corsAllowedHeaders,
       }
     : false;
-  // Note that all connection options configured here should be exactly the same
-  // as in the legacy platform server (see `src/legacy/server/http/index`). Any change
-  // SHOULD BE applied in both places. The only exception is TLS-specific options,
-  // that are configured only here.
   const options: ServerOptions = {
     host: config.host,
     port: config.port,
@@ -46,11 +41,6 @@ export function getServerOptions(config: IHttpConfig, { configureTLS = true } = 
         options: {
           abortEarly: false,
         },
-        // TODO: This payload validation can be removed once the legacy platform is completely removed.
-        // This is a default payload validation which applies to all LP routes which do not specify their own
-        // `validate.payload` handler, in order to reduce the likelyhood of prototype pollution vulnerabilities.
-        // (All NP routes are already required to specify their own validation in order to access the payload)
-        payload: (value) => Promise.resolve(ensureNoUnsafeProperties(value)),
       },
     },
     state: {

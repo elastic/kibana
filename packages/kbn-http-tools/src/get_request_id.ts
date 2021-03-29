@@ -11,12 +11,12 @@ import uuid from 'uuid';
 
 export function getRequestId(
   request: Request,
-  options: { allowFromAnyIp: boolean; ipAllowlist: string[] }
+  { allowFromAnyIp, ipAllowlist }: { allowFromAnyIp: boolean; ipAllowlist: string[] }
 ): string {
-  return options.allowFromAnyIp ||
+  const remoteAddress = request.raw.req.socket?.remoteAddress;
+  return allowFromAnyIp ||
     // socket may be undefined in integration tests that connect via the http listener directly
-    (request.raw.req.socket?.remoteAddress &&
-      options.ipAllowlist.includes(request.raw.req.socket.remoteAddress))
+    (remoteAddress && ipAllowlist.includes(remoteAddress))
     ? request.headers['x-opaque-id'] ?? uuid.v4()
     : uuid.v4();
 }
