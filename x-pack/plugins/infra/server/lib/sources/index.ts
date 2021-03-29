@@ -8,4 +8,4 @@
 export * from './defaults';
 export { infraSourceConfigurationSavedObjectType } from './saved_object_type';
 export * from './sources';
-export * from '../../../common/http_api/source_api';
+export * from '../../../common/source_configuration/source_configuration';

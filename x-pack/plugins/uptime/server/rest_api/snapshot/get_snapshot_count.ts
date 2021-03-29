@@ -19,7 +19,7 @@ export const createGetSnapshotCount: UMRestApiRouteFactory = (libs: UMServerLibs
       dateRangeEnd: schema.string(),
       filters: schema.maybe(schema.string()),
       query: schema.maybe(schema.string()),
-      _debug: schema.maybe(schema.boolean()),
+      _inspect: schema.maybe(schema.boolean()),
     }),
   },
   handler: async ({ uptimeEsClient, request }): Promise<any> => {

@@ -7,7 +7,7 @@
  */
 
 import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
-import { ApplicationUsageTelemetryReport } from './telemetry_application_usage_collector';
+import { ApplicationUsageTelemetryReport } from './types';
 
 const commonSchema: MakeSchemaFrom<ApplicationUsageTelemetryReport[string]> = {
   appId: { type: 'keyword', _meta: { description: 'The application being tracked' } },
