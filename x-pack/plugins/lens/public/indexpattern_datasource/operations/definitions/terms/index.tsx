@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFormRow,
@@ -13,9 +13,7 @@ import {
   EuiSwitch,
   EuiSwitchEvent,
   EuiSpacer,
-  EuiPopover,
-  EuiButtonEmpty,
-  EuiText,
+  EuiAccordion,
   EuiIconTip,
 } from '@elastic/eui';
 import { AggFunctionsMapping } from '../../../../../../../../src/plugins/data/public';
@@ -24,7 +22,7 @@ import { updateColumnParam, isReferenced } from '../../layer_helpers';
 import { DataType } from '../../../../types';
 import { OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
-import { ValuesRangeInput } from './values_range_input';
+import { ValuesInput } from './values_input';
 import { getEsAggsSuffix, getInvalidFieldMessage } from '../helpers';
 import type { IndexPatternLayer } from '../../../types';
 
@@ -193,8 +191,6 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
   paramEditor: function ParamEditor({ layer, updateLayer, currentColumn, columnId, indexPattern }) {
     const hasRestrictions = indexPattern.hasRestrictions;
 
-    const [popoverOpen, setPopoverOpen] = useState(false);
-
     const SEPARATOR = '$$$';
     function toValue(orderBy: TermsIndexPatternColumn['params']['orderBy']) {
       if (orderBy.type === 'alphabetical') {
@@ -237,7 +233,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
           display="columnCompressed"
           fullWidth
         >
-          <ValuesRangeInput
+          <ValuesInput
             value={currentColumn.params.size}
             onChange={(value) => {
               updateLayer(
@@ -251,71 +247,6 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
             }}
           />
         </EuiFormRow>
-        {!hasRestrictions && (
-          <EuiText textAlign="right">
-            <EuiPopover
-              ownFocus
-              button={
-                <EuiButtonEmpty
-                  size="xs"
-                  iconType="arrowDown"
-                  iconSide="right"
-                  onClick={() => {
-                    setPopoverOpen(!popoverOpen);
-                  }}
-                >
-                  {i18n.translate('xpack.lens.indexPattern.terms.advancedSettings', {
-                    defaultMessage: 'Advanced',
-                  })}
-                </EuiButtonEmpty>
-              }
-              isOpen={popoverOpen}
-              closePopover={() => {
-                setPopoverOpen(false);
-              }}
-            >
-              <EuiSwitch
-                label={i18n.translate('xpack.lens.indexPattern.terms.otherBucketDescription', {
-                  defaultMessage: 'Group other values as "Other"',
-                })}
-                compressed
-                data-test-subj="indexPattern-terms-other-bucket"
-                checked={Boolean(currentColumn.params.otherBucket)}
-                onChange={(e: EuiSwitchEvent) =>
-                  updateLayer(
-                    updateColumnParam({
-                      layer,
-                      columnId,
-                      paramName: 'otherBucket',
-                      value: e.target.checked,
-                    })
-                  )
-                }
-              />
-              <EuiSpacer size="m" />
-              <EuiSwitch
-                label={i18n.translate('xpack.lens.indexPattern.terms.missingBucketDescription', {
-                  defaultMessage: 'Include documents without this field',
-                })}
-                compressed
-                disabled={!currentColumn.params.otherBucket}
-                data-test-subj="indexPattern-terms-missing-bucket"
-                checked={Boolean(currentColumn.params.missingBucket)}
-                onChange={(e: EuiSwitchEvent) =>
-                  updateLayer(
-                    updateColumnParam({
-                      layer,
-                      columnId,
-                      paramName: 'missingBucket',
-                      value: e.target.checked,
-                    })
-                  )
-                }
-              />
-            </EuiPopover>
-            <EuiSpacer size="s" />
-          </EuiText>
-        )}
         <EuiFormRow
           label={
             <>
@@ -415,6 +346,57 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
             })}
           />
         </EuiFormRow>
+        {!hasRestrictions && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiAccordion
+              id="lnsTermsAdvanced"
+              buttonContent={i18n.translate('xpack.lens.indexPattern.terms.advancedSettings', {
+                defaultMessage: 'Advanced',
+              })}
+            >
+              <EuiSpacer size="m" />
+              <EuiSwitch
+                label={i18n.translate('xpack.lens.indexPattern.terms.otherBucketDescription', {
+                  defaultMessage: 'Group other values as "Other"',
+                })}
+                compressed
+                data-test-subj="indexPattern-terms-other-bucket"
+                checked={Boolean(currentColumn.params.otherBucket)}
+                onChange={(e: EuiSwitchEvent) =>
+                  updateLayer(
+                    updateColumnParam({
+                      layer,
+                      columnId,
+                      paramName: 'otherBucket',
+                      value: e.target.checked,
+                    })
+                  )
+                }
+              />
+              <EuiSpacer size="m" />
+              <EuiSwitch
+                label={i18n.translate('xpack.lens.indexPattern.terms.missingBucketDescription', {
+                  defaultMessage: 'Include documents without this field',
+                })}
+                compressed
+                disabled={!currentColumn.params.otherBucket}
+                data-test-subj="indexPattern-terms-missing-bucket"
+                checked={Boolean(currentColumn.params.missingBucket)}
+                onChange={(e: EuiSwitchEvent) =>
+                  updateLayer(
+                    updateColumnParam({
+                      layer,
+                      columnId,
+                      paramName: 'missingBucket',
+                      value: e.target.checked,
+                    })
+                  )
+                }
+              />
+            </EuiAccordion>
+          </>
+        )}
       </>
     );
   },

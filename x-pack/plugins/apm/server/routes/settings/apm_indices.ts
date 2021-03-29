@@ -18,7 +18,8 @@ export const apmIndexSettingsRoute = createRoute({
   endpoint: 'GET /api/apm/settings/apm-index-settings',
   options: { tags: ['access:apm'] },
   handler: async ({ context }) => {
-    return await getApmIndexSettings({ context });
+    const apmIndexSettings = await getApmIndexSettings({ context });
+    return { apmIndexSettings };
   },
 });
 
