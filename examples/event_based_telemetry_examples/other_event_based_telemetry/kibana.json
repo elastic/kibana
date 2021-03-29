@@ -1,0 +1,10 @@
+{
+  "id": "otherEventBasedTelemetry",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "configPath": ["examples", "other_event_based_telemetry"],
+  "server": true,
+  "ui": false,
+  "requiredPlugins": [],
+  "optionalPlugins": ["telemetry"]
+}

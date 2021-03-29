@@ -8,33 +8,38 @@
 
 import { URL } from 'url';
 import { AsyncSubject, Observable } from 'rxjs';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import {
+import { map, take } from 'rxjs/operators';
+import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import type {
   TelemetryCollectionManagerPluginSetup,
   TelemetryCollectionManagerPluginStart,
 } from 'src/plugins/telemetry_collection_manager/server';
-import { take } from 'rxjs/operators';
-import {
+import type {
   CoreSetup,
+  LoggingServiceSetup,
   PluginInitializerContext,
   ISavedObjectsRepository,
   CoreStart,
-  SavedObjectsClient,
   Plugin,
+  PluginScopedAPI,
+  UnwrapScopedApi,
   Logger,
   UiSettingsServiceStart,
-} from '../../../core/server';
+  LoggerContextConfigInput,
+} from 'src/core/server';
+import { SavedObjectsClient } from '../../../core/server';
 import { registerRoutes } from './routes';
 import { registerCollection } from './telemetry_collection';
 import {
   registerTelemetryUsageCollector,
   registerTelemetryPluginUsageCollector,
 } from './collectors';
-import { TelemetryConfigType } from './config';
+import type { TelemetryConfigType } from './config';
 import { FetcherTask } from './fetcher';
 import { handleOldSettings } from './handle_old_settings';
 import { getTelemetrySavedObject } from './telemetry_repository';
 import { getTelemetryOptIn } from '../common/telemetry_config';
+import { EventBasedTelemetryService } from './event_based_telemetry';
 
 interface TelemetryPluginsDepsSetup {
   usageCollection: UsageCollectionSetup;
@@ -45,31 +50,43 @@ interface TelemetryPluginsDepsStart {
   telemetryCollectionManager: TelemetryCollectionManagerPluginStart;
 }
 
-export interface TelemetryPluginSetup {
+export type TelemetryPluginSetup = UnwrapScopedApi<TelemetryPluginScopedSetup>;
+
+export interface TelemetryPluginScopedSetup {
   /**
    * Resolves into the telemetry Url used to send telemetry.
    * The url is wrapped with node's [URL constructor](https://nodejs.org/api/url.html).
    */
   getTelemetryUrl: () => Promise<URL>;
+  events: {
+    registerChannel: PluginScopedAPI<EventBasedTelemetryService['registerChannel']>;
+  };
 }
 
-export interface TelemetryPluginStart {
+export type TelemetryPluginStart = UnwrapScopedApi<TelemetryPluginScopedStart>;
+
+export interface TelemetryPluginScopedStart {
   /**
    * Resolves `true` if the user has opted into send Elastic usage data.
    * Resolves `false` if the user explicitly opted out of sending usage data to Elastic
    * or did not choose to opt-in or out -yet- after a minor or major upgrade (only when previously opted-out).
    */
   getIsOptedIn: () => Promise<boolean>;
+  events: {
+    sendToChannel: PluginScopedAPI<EventBasedTelemetryService['sendToChannel']>;
+  };
 }
 
 type SavedObjectsRegisterType = CoreSetup['savedObjects']['registerType'];
 
-export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPluginStart> {
+export class TelemetryPlugin
+  implements Plugin<TelemetryPluginScopedSetup, TelemetryPluginScopedStart> {
   private readonly logger: Logger;
   private readonly currentKibanaVersion: string;
   private readonly config$: Observable<TelemetryConfigType>;
   private readonly isDev: boolean;
   private readonly fetcherTask: FetcherTask;
+  private readonly eventBasedTelemetryService: EventBasedTelemetryService;
   /**
    * @private Used to mark the completion of the old UI Settings migration
    */
@@ -85,12 +102,21 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       ...initializerContext,
       logger: this.logger,
     });
+    const syncConfig = initializerContext.config.get();
+    this.eventBasedTelemetryService = new EventBasedTelemetryService(this.logger.get('events'), {
+      isDev: this.isDev,
+      kibanaVersion: this.currentKibanaVersion,
+      getIsOptedIn: () => this.getIsOptedIn(),
+      telemetryUrl: new URL(syncConfig.url),
+      ...syncConfig.events,
+    });
   }
 
   public setup(
-    { http, savedObjects }: CoreSetup,
+    { http, plugins, savedObjects, logging }: CoreSetup,
     { usageCollection, telemetryCollectionManager }: TelemetryPluginsDepsSetup
-  ): TelemetryPluginSetup {
+  ): TelemetryPluginScopedSetup {
+    this.setupLoggerContextConfig(logging);
     const currentKibanaVersion = this.currentKibanaVersion;
     const config$ = this.config$;
     const isDev = this.isDev;
@@ -114,37 +140,79 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
         const config = await config$.pipe(take(1)).toPromise();
         return new URL(config.url);
       },
+      events: {
+        registerChannel: plugins.createScopedApi((pluginName, channelDetails) =>
+          this.eventBasedTelemetryService.registerChannel(pluginName, channelDetails)
+        ),
+      },
     };
   }
 
   public start(core: CoreStart, { telemetryCollectionManager }: TelemetryPluginsDepsStart) {
-    const { savedObjects, uiSettings } = core;
+    const { elasticsearch, savedObjects, uiSettings } = core;
     const savedObjectsInternalRepository = savedObjects.createInternalRepository();
     this.savedObjectsClient = savedObjectsInternalRepository;
 
     // Not catching nor awaiting these promises because they should never reject
     this.handleOldUiSettings(uiSettings);
     this.startFetcherWhenOldSettingsAreHandled(core, telemetryCollectionManager);
+    this.eventBasedTelemetryService.start(elasticsearch.client.asInternalUser);
 
     return {
-      getIsOptedIn: async () => {
-        await this.oldUiSettingsHandled$.pipe(take(1)).toPromise(); // Wait for the old settings to be handled
-        const internalRepository = new SavedObjectsClient(savedObjectsInternalRepository);
-        const telemetrySavedObject = await getTelemetrySavedObject(internalRepository);
-        const config = await this.config$.pipe(take(1)).toPromise();
-        const allowChangingOptInStatus = config.allowChangingOptInStatus;
-        const configTelemetryOptIn = typeof config.optIn === 'undefined' ? null : config.optIn;
-        const currentKibanaVersion = this.currentKibanaVersion;
-        const isOptedIn = getTelemetryOptIn({
-          currentKibanaVersion,
-          telemetrySavedObject,
-          allowChangingOptInStatus,
-          configTelemetryOptIn,
-        });
-
-        return isOptedIn === true;
+      getIsOptedIn: () => this.getIsOptedIn(),
+      events: {
+        sendToChannel: core.plugins.createScopedApi((pluginName, channelName, events) =>
+          this.eventBasedTelemetryService.sendToChannel(pluginName, channelName, events)
+        ),
       },
     };
+  }
+
+  public stop() {
+    this.eventBasedTelemetryService.stop();
+  }
+
+  /**
+   * By default, it silences the telemetry logs in production,
+   * although it allows users to set their own appenders and loggers
+   * @param logging {@link LoggingServiceSetup}
+   * @private
+   */
+  private setupLoggerContextConfig(logging: LoggingServiceSetup): void {
+    const loggerConfig$ = this.config$.pipe(
+      map(({ logging: { appenders, loggers } }) => {
+        const loggingConfig: LoggerContextConfigInput = {
+          appenders,
+          loggers: [
+            { name: '', level: this.isDev ? 'all' : 'off', appenders: ['default'] },
+            ...loggers,
+          ],
+        };
+        return loggingConfig;
+      })
+    );
+
+    logging.configure(loggerConfig$);
+  }
+
+  private async getIsOptedIn(): Promise<boolean> {
+    await this.oldUiSettingsHandled$.pipe(take(1)).toPromise(); // Wait for the old settings to be handled
+    // If oldSettings are handled, the savedObjectsRepository must exist.
+    const savedObjectsInternalRepository = this.savedObjectsClient!;
+    const internalRepository = new SavedObjectsClient(savedObjectsInternalRepository);
+    const telemetrySavedObject = await getTelemetrySavedObject(internalRepository);
+    const config = await this.config$.pipe(take(1)).toPromise();
+    const allowChangingOptInStatus = config.allowChangingOptInStatus;
+    const configTelemetryOptIn = config.optIn ?? null;
+    const currentKibanaVersion = this.currentKibanaVersion;
+    const isOptedIn = getTelemetryOptIn({
+      currentKibanaVersion,
+      telemetrySavedObject,
+      allowChangingOptInStatus,
+      configTelemetryOptIn,
+    });
+
+    return isOptedIn === true;
   }
 
   private async handleOldUiSettings(uiSettings: UiSettingsServiceStart) {

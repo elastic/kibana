@@ -21,6 +21,9 @@ function createSetupContract(): Setup {
   const telemetryUrl = new URL('https://telemetry-staging.elastic.co/xpack/MOCK_URL/send');
   const setupContract: Setup = {
     getTelemetryUrl: jest.fn().mockResolvedValue(telemetryUrl),
+    events: {
+      registerChannel: jest.fn(),
+    },
   };
 
   return setupContract;
@@ -29,6 +32,9 @@ function createSetupContract(): Setup {
 function createStartContract(): Start {
   const startContract: Start = {
     getIsOptedIn: jest.fn(),
+    events: {
+      sendToChannel: jest.fn(),
+    },
   };
 
   return startContract;

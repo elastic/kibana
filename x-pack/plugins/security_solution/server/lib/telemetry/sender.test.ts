@@ -133,9 +133,11 @@ describe('TelemetryEventsSender', () => {
       sender['sendEvents'] = jest.fn();
       sender['telemetryStart'] = {
         getIsOptedIn: jest.fn(async () => true),
+        events: { sendToChannel: jest.fn() },
       };
       sender['telemetrySetup'] = {
         getTelemetryUrl: jest.fn(async () => new URL('https://telemetry.elastic.co')),
+        events: { registerChannel: jest.fn() },
       };
       sender['fetchClusterInfo'] = jest.fn(async () => {
         return {
@@ -162,6 +164,7 @@ describe('TelemetryEventsSender', () => {
       sender['sendEvents'] = jest.fn();
       const telemetryStart = {
         getIsOptedIn: jest.fn(async () => false),
+        events: { sendToChannel: jest.fn() },
       };
       sender['telemetryStart'] = telemetryStart;
 

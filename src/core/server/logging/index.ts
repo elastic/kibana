@@ -24,8 +24,8 @@ export type {
   LoggerContextConfigInput,
   LoggerConfigType,
   loggerContextConfigSchema,
-  loggerSchema,
 } from './logging_config';
+export { loggerSchema } from './logging_config';
 export { LoggingSystem } from './logging_system';
 export type { ILoggingSystem } from './logging_system';
 export { LoggingService } from './logging_service';

@@ -119,7 +119,6 @@ export class PluginsSystem {
         // missing optional dependency.
         if (contracts.has(dependencyName)) {
           const contract = contracts.get(dependencyName);
-          depContracts[dependencyName] = contract;
           if (isRecord(contract)) {
             depContracts[dependencyName] = injectPluginName(pluginName, contract);
           } else {
@@ -181,6 +180,12 @@ export class PluginsSystem {
         // missing optional dependency.
         if (contracts.has(dependencyName)) {
           depContracts[dependencyName] = contracts.get(dependencyName);
+          const contract = contracts.get(dependencyName);
+          if (isRecord(contract)) {
+            depContracts[dependencyName] = injectPluginName(pluginName, contract);
+          } else {
+            depContracts[dependencyName] = contract;
+          }
         }
 
         return depContracts;

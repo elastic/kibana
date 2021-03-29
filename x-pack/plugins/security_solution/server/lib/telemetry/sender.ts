@@ -71,6 +71,11 @@ export class TelemetryEventsSender {
   public setup(telemetrySetup?: TelemetryPluginSetup, taskManager?: TaskManagerSetupContract) {
     this.telemetrySetup = telemetrySetup;
 
+    this.telemetrySetup?.events.registerChannel({
+      name: 'diagnostics-analytics',
+      schema: {}, // TODO: Fill up schema based on allowlistEventFields
+    });
+
     if (taskManager) {
       this.diagTask = new TelemetryDiagTask(this.logger, taskManager, this);
     }
@@ -147,6 +152,8 @@ export class TelemetryEventsSender {
       // we're full already
       return;
     }
+
+    this.telemetryStart?.events.sendToChannel('alerts-endpoint', this.processEvents(events));
 
     if (events.length > this.maxQueueSize - qlength) {
       this.queue.push(...this.processEvents(events.slice(0, this.maxQueueSize - qlength)));

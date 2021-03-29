@@ -60,7 +60,7 @@ import {
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { MetricsServiceSetup, MetricsServiceStart } from './metrics';
 import { StatusServiceSetup } from './status';
-import { AppenderConfigType, appendersSchema, LoggingServiceSetup } from './logging';
+import { AppenderConfigType, appendersSchema, loggerSchema, LoggingServiceSetup } from './logging';
 import { CoreUsageDataStart } from './core_usage_data';
 import { I18nServiceSetup } from './i18n';
 import { DeprecationsServiceSetup } from './deprecations';
@@ -561,5 +561,6 @@ export const config = {
   },
   logging: {
     appenders: appendersSchema as Type<AppenderConfigType>,
+    loggers: loggerSchema,
   },
 };
