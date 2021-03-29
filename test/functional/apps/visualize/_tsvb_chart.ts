@@ -136,8 +136,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Sometimes popovers take some time to appear in Firefox (#71979)
         await retry.tryForTime(20000, async () => {
           await PageObjects.visualBuilder.setIndexPatternValue('with-timefield', useKibanaIndexes);
-          await PageObjects.visualBuilder.waitForIndexPatternTimeFieldOptionsLoaded();
-          await PageObjects.visualBuilder.selectIndexPatternTimeField('timestamp');
         });
         const newValue = await PageObjects.visualBuilder.getMetricValue();
         expect(newValue).to.eql('1');
