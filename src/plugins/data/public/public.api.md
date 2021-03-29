@@ -1262,10 +1262,11 @@ export interface IKibanaSearchRequest<Params = any> {
     params?: Params;
 }
 
+// Warning: (ae-forgotten-export) The symbol "BatchResultBase" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "IKibanaSearchResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export interface IKibanaSearchResponse<RawResponse = any> {
+export interface IKibanaSearchResponse<RawResponse = any> extends BatchResultBase {
     id?: string;
     isPartial?: boolean;
     isRunning?: boolean;
