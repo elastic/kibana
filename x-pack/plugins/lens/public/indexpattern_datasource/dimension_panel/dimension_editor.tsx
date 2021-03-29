@@ -594,6 +594,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 indexPattern: currentIndexPattern,
                 columnId,
                 op: 'formula',
+                visualizationGroups: dimensionGroups,
               });
               setStateWrapper(newLayer);
               trackUiEvent(`indexpattern_dimension_operation_formula`);

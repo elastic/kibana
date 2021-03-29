@@ -56,6 +56,7 @@ import {
   getPossibleFunctions,
   getSignatureHelp,
   getHover,
+  offsetToRowColumn,
 } from './math_completion';
 import { LANGUAGE_ID } from './math_tokenization';
 
@@ -122,30 +123,33 @@ export const formulaOperation: OperationDefinition<
         ? currentColumn.label
         : params?.formula
       : '';
-    return [
-      {
-        type: 'function',
-        function: 'mapColumn',
-        arguments: {
-          id: [columnId],
-          name: [label || ''],
-          exp: [
-            {
-              type: 'expression',
-              chain: [
+
+    return currentColumn.references.length
+      ? [
+          {
+            type: 'function',
+            function: 'mapColumn',
+            arguments: {
+              id: [columnId],
+              name: [label || ''],
+              exp: [
                 {
-                  type: 'function',
-                  function: 'math',
-                  arguments: {
-                    expression: [`${currentColumn.references[0]}`],
-                  },
+                  type: 'expression',
+                  chain: [
+                    {
+                      type: 'function',
+                      function: 'math',
+                      arguments: {
+                        expression: [`${currentColumn.references[0]}`],
+                      },
+                    },
+                  ],
                 },
               ],
             },
-          ],
-        },
-      },
-    ];
+          },
+        ]
+      : [];
   },
   buildColumn({ previousColumn, layer }, _, operationDefinitionMap) {
     let previousFormula = '';
@@ -275,15 +279,18 @@ function FormulaEditor({
           editorModel.current,
           'LENS',
           errors.flatMap((innerError) =>
-            innerError.locations.map((location) => ({
-              message: innerError.message,
-              startColumn: location.min + 1,
-              endColumn: location.max + 1,
-              // Fake, assumes single line
-              startLineNumber: 1,
-              endLineNumber: 1,
-              severity: monaco.MarkerSeverity.Error,
-            }))
+            innerError.locations.map((location) => {
+              const startPosition = offsetToRowColumn(text, location.min);
+              const endPosition = offsetToRowColumn(text, location.max);
+              return {
+                message: innerError.message,
+                startColumn: startPosition.column + 1,
+                startLineNumber: startPosition.lineNumber,
+                endColumn: endPosition.column + 1,
+                endLineNumber: endPosition.lineNumber,
+                severity: monaco.MarkerSeverity.Error,
+              };
+            })
           )
         );
       } else {
@@ -428,8 +435,7 @@ function FormulaEditor({
       wordWrap: 'on',
       // Disable suggestions that appear when we don't provide a default suggestion
       wordBasedSuggestions: false,
-      wrappingIndent: 'indent',
-      dimension: { width: 300, height: 280 },
+      dimension: { width: 290, height: 280 },
       fixedOverflowWidgets: true,
     },
   };

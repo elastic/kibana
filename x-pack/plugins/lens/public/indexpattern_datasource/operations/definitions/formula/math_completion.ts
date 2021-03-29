@@ -11,7 +11,7 @@ import { monaco } from '@kbn/monaco';
 import { parse, TinymathLocation, TinymathAST, TinymathFunction } from '@kbn/tinymath';
 import { IndexPattern } from '../../../types';
 import { memoizedGetAvailableOperationsByMetadata } from '../../operations';
-import { tinymathFunctions } from './util';
+import { tinymathFunctions, groupArgsByType } from './util';
 import type { GenericOperationDefinition } from '..';
 
 export enum SUGGESTION_TYPE {
@@ -61,6 +61,32 @@ function getInfoAtPosition(
   };
 }
 
+export function offsetToRowColumn(expression: string, offset: number): monaco.Position {
+  const lines = expression.split(/\n/);
+  let remainingChars = offset;
+  let lineNumber = 1;
+  for (const line of lines) {
+    if (line.length >= remainingChars) {
+      return new monaco.Position(lineNumber, remainingChars);
+    }
+    remainingChars -= line.length + 1;
+    lineNumber++;
+  }
+
+  throw new Error('Algorithm failure');
+}
+
+export function monacoPositionToOffset(expression: string, position: monaco.Position): number {
+  const lines = expression.split(/\n/);
+  return lines
+    .slice(0, position.lineNumber - 1)
+    .reduce(
+      (prev, current, index) =>
+        prev + index === position.lineNumber - 1 ? position.column - 1 : current.length,
+      0
+    );
+}
+
 export async function suggest(
   expression: string,
   position: number,
@@ -79,8 +105,8 @@ export async function suggest(
       // TODO
     } else if (tokenInfo?.parent) {
       return getArgumentSuggestions(
-        tokenInfo.parent.name,
-        tokenInfo.parent.args.length - 1,
+        tokenInfo.parent,
+        tokenInfo.parent.args.findIndex((a) => a === tokenInfo.ast),
         indexPattern,
         operationDefinitionMap
       );
@@ -96,7 +122,7 @@ export async function suggest(
 
 export function getPossibleFunctions(
   indexPattern: IndexPattern,
-  operationDefinitionMap: Record<string, GenericOperationDefinition>
+  operationDefinitionMap?: Record<string, GenericOperationDefinition>
 ) {
   const available = memoizedGetAvailableOperationsByMetadata(indexPattern, operationDefinitionMap);
   const possibleOperationNames: string[] = [];
@@ -127,11 +153,12 @@ function getFunctionSuggestions(
 }
 
 function getArgumentSuggestions(
-  name: string,
+  ast: TinymathFunction,
   position: number,
   indexPattern: IndexPattern,
   operationDefinitionMap: Record<string, GenericOperationDefinition>
 ) {
+  const { name } = ast;
   const operation = operationDefinitionMap[name];
   if (!operation && !tinymathFunctions[name]) {
     return { list: [], type: SUGGESTION_TYPE.FIELD };
@@ -153,7 +180,15 @@ function getArgumentSuggestions(
 
   if (position > 0) {
     if ('operationParams' in operation) {
-      const suggestedParam = operation.operationParams!.map((p) => p.name);
+      // Exclude any previously used named args
+      const { namedArguments } = groupArgsByType(ast.args);
+      const suggestedParam = operation
+        .operationParams!.filter(
+          (param) =>
+            // Keep the param if it's the first use
+            !namedArguments.find((arg) => arg.name === param.name)
+        )
+        .map((p) => p.name);
       return {
         list: suggestedParam,
         type: SUGGESTION_TYPE.NAMED_ARGUMENT,
@@ -172,7 +207,7 @@ function getArgumentSuggestions(
       ({ operationMetaData }) =>
         operationMetaData.dataType === 'number' && !operationMetaData.isBucketed
     );
-    if (validOperation) {
+    if (validOperation && operation.type !== 'count') {
       const fields = validOperation.operations
         .filter((op) => op.operationType === operation.type)
         .map((op) => ('field' in op ? op.field : undefined))
@@ -225,6 +260,7 @@ export function getSuggestion(
   let insertTextRules: monaco.languages.CompletionItem['insertTextRules'];
   let detail: string = '';
   let command: monaco.languages.CompletionItem['command'];
+  let sortText: string = '';
 
   switch (type) {
     case SUGGESTION_TYPE.FIELD:
@@ -239,19 +275,19 @@ export function getSuggestion(
         title: 'Trigger Suggestion Dialog',
         id: 'editor.action.triggerSuggest',
       };
-      kind = monaco.languages.CompletionItemKind.Function;
       insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
       if (typeof suggestion !== 'string') {
         const tinymathFunction = tinymathFunctions[suggestion.label];
+        insertText = `${label}($0)`;
         if (tinymathFunction) {
-          insertText = `${label}($0)`;
           label = `${label}(${tinymathFunction.positionalArguments
             .map(({ name }) => name)
             .join(', ')})`;
           detail = 'TinyMath';
+          kind = monaco.languages.CompletionItemKind.Method;
         } else {
           const def = operationDefinitionMap[suggestion.label];
-          insertText = `${label}($0)`;
+          kind = monaco.languages.CompletionItemKind.Constant;
           if ('operationParams' in def) {
             label = `${label}(expression, ${def
               .operationParams!.map((p) => `${p.name}=${p.type}`)
@@ -262,6 +298,8 @@ export function getSuggestion(
             label = `${label}(expression)`;
           }
           detail = 'Elasticsearch';
+          // Always put ES functions first
+          sortText = `0${label}`;
         }
       }
       break;
@@ -270,10 +308,9 @@ export function getSuggestion(
         title: 'Trigger Suggestion Dialog',
         id: 'editor.action.triggerSuggest',
       };
-      kind = monaco.languages.CompletionItemKind.Field;
+      kind = monaco.languages.CompletionItemKind.Keyword;
       label = `${label}=`;
       detail = '';
-
       break;
   }
 
@@ -285,6 +322,7 @@ export function getSuggestion(
     insertTextRules,
     command,
     range,
+    sortText,
   };
 }
 

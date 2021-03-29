@@ -238,6 +238,21 @@ describe('math completion', () => {
       expect(results.list).toEqual(['window']);
     });
 
+    it('should not list named arguments when they are already in use', async () => {
+      const results = await suggest(
+        'moving_average(count(), window=5, )',
+        34,
+        {
+          triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
+          triggerCharacter: ',',
+        },
+        createMockedIndexPattern(),
+        operationDefinitionMap,
+        { word: '', startColumn: 34, endColumn: 34 }
+      );
+      expect(results.list).toEqual([]);
+    });
+
     it('should list all valid positional arguments for a tinymath function used by name', async () => {
       const results = await suggest(
         'divide(count(), )',
