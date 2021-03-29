@@ -5,32 +5,20 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useContext } from 'react';
-import { DragDrop, DragDropIdentifier, DragContext } from '../../../drag_drop';
-
+import React, { useMemo, useCallback, useContext, ReactElement } from 'react';
+import { DragDrop, DragDropIdentifier, DragContext } from '../../../../drag_drop';
 import {
   Datasource,
   VisualizationDimensionGroupConfig,
   isDraggedOperation,
   DropType,
-} from '../../../types';
-import { LayerDatasourceDropProps } from './types';
-
-const getAdditionalClassesOnEnter = (dropType?: string) => {
-  if (
-    dropType === 'field_replace' ||
-    dropType === 'replace_compatible' ||
-    dropType === 'replace_incompatible'
-  ) {
-    return 'lnsDragDrop-isReplacing';
-  }
-};
-
-const getAdditionalClassesOnDroppable = (dropType?: string) => {
-  if (dropType === 'move_incompatible' || dropType === 'replace_incompatible') {
-    return 'lnsDragDrop-notCompatible';
-  }
-};
+} from '../../../../types';
+import { LayerDatasourceDropProps } from '../types';
+import {
+  getCustomDropTarget,
+  getAdditionalClassesOnDroppable,
+  getAdditionalClassesOnEnter,
+} from './drop_targets_utils';
 
 export function DraggableDimensionButton({
   layerId,
@@ -58,7 +46,7 @@ export function DraggableDimensionButton({
   group: VisualizationDimensionGroupConfig;
   groups: VisualizationDimensionGroupConfig[];
   label: string;
-  children: React.ReactElement;
+  children: ReactElement;
   layerDatasource: Datasource<unknown, unknown>;
   layerDatasourceDropProps: LayerDatasourceDropProps;
   accessorIndex: number;
@@ -76,8 +64,18 @@ export function DraggableDimensionButton({
     dimensionGroups: groups,
   });
 
-  const dropType = dropProps?.dropType;
+  const dropTypes = dropProps?.dropTypes;
   const nextLabel = dropProps?.nextLabel;
+  const canDuplicate = !!(
+    dropTypes &&
+    (dropTypes.includes('replace_duplicate_incompatible') ||
+      dropTypes.includes('replace_duplicate_compatible'))
+  );
+
+  const canSwap = !!(
+    dropTypes &&
+    (dropTypes.includes('swap_incompatible') || dropTypes.includes('swap_compatible'))
+  );
 
   const value = useMemo(
     () => ({
@@ -85,15 +83,28 @@ export function DraggableDimensionButton({
       groupId: group.groupId,
       layerId,
       id: columnId,
-      dropType,
+      filterOperations: group.filterOperations,
       humanData: {
+        canSwap,
+        canDuplicate,
         label,
         groupLabel: group.groupLabel,
         position: accessorIndex + 1,
         nextLabel: nextLabel || '',
       },
     }),
-    [columnId, group.groupId, accessorIndex, layerId, dropType, label, group.groupLabel, nextLabel]
+    [
+      columnId,
+      group.groupId,
+      accessorIndex,
+      layerId,
+      label,
+      group.groupLabel,
+      nextLabel,
+      group.filterOperations,
+      canDuplicate,
+      canSwap,
+    ]
   );
 
   // todo: simplify by id and use drop targets?
@@ -110,7 +121,7 @@ export function DraggableDimensionButton({
     columnId,
   ]);
 
-  const handleOnDrop = React.useCallback(
+  const handleOnDrop = useCallback(
     (droppedItem, selectedDropType) => onDrop(droppedItem, value, selectedDropType),
     [value, onDrop]
   );
@@ -122,12 +133,13 @@ export function DraggableDimensionButton({
       data-test-subj={group.dataTestSubj}
     >
       <DragDrop
+        getCustomDropTarget={getCustomDropTarget}
         getAdditionalClassesOnEnter={getAdditionalClassesOnEnter}
         getAdditionalClassesOnDroppable={getAdditionalClassesOnDroppable}
         order={[2, layerIndex, groupIndex, accessorIndex]}
         draggable
         dragType={isDraggedOperation(dragging) ? 'move' : 'copy'}
-        dropType={dropType}
+        dropTypes={dropTypes}
         reorderableGroup={reorderableGroup.length > 1 ? reorderableGroup : undefined}
         value={value}
         onDrop={handleOnDrop}
