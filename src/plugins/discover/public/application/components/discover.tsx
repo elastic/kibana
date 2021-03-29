@@ -207,9 +207,7 @@ export function Discover({
   );
 
   const onEditRuntimeField = () => {
-    if (refreshAppState) {
-      refreshAppState();
-    }
+    opts.refetch$.next();
     // needed to trigger refresh of table cells
     setShouldRerender(!shouldRerender);
   };

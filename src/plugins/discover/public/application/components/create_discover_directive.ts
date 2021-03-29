@@ -28,6 +28,5 @@ export function createDiscoverDirective(reactDirective: any) {
     ['updateQuery', { watchDepth: 'reference' }],
     ['updateSavedQueryId', { watchDepth: 'reference' }],
     ['unmappedFieldsConfig', { watchDepth: 'value' }],
-    ['refreshAppState', { watchDepth: 'reference' }],
   ]);
 }
