@@ -12,6 +12,7 @@ import uuid from 'uuid';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { InstancesLatencyDistributionChart } from '../../shared/charts/instances_latency_distribution_chart';
 import { getTimeRangeComparison } from '../../shared/time_comparison/get_time_range_comparison';
 import {
@@ -24,20 +25,24 @@ interface ServiceOverviewInstancesChartAndTableProps {
   serviceName: string;
 }
 
-const INITIAL_STATE = {
-  items: [] as Array<{
-    serviceNodeName: string;
-    errorRate: number;
-    throughput: number;
-    latency: number;
-    cpuUsage: number;
-    memoryUsage: number;
-  }>,
-  requestId: undefined,
-  totalItems: 0,
+export interface PrimaryStatsServiceInstanceItem {
+  serviceNodeName: string;
+  errorRate: number;
+  throughput: number;
+  latency: number;
+  cpuUsage: number;
+  memoryUsage: number;
+}
+
+const INITIAL_STATE_PRIMARY_STATS = {
+  primaryStatsItems: [] as PrimaryStatsServiceInstanceItem[],
+  primaryStatsRequestId: undefined,
+  primaryStatsItemCount: 0,
 };
 
-const INITIAL_STATE_COMPARISON_STATISTICS = {
+type ApiResponseComparisonStats = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/comparison_statistics'>;
+
+const INITIAL_STATE_COMPARISON_STATISTICS: ApiResponseComparisonStats = {
   currentPeriod: {},
   previousPeriod: {},
 };
@@ -87,7 +92,10 @@ export function ServiceOverviewInstancesChartAndTable({
     comparisonType,
   });
 
-  const { data = INITIAL_STATE, status } = useFetcher(
+  const {
+    data: primaryStatsData = INITIAL_STATE_PRIMARY_STATS,
+    status: primaryStatsStatus,
+  } = useFetcher(
     (callApmApi) => {
       if (!start || !end || !transactionType || !latencyAggregationType) {
         return;
@@ -110,9 +118,9 @@ export function ServiceOverviewInstancesChartAndTable({
           },
         },
       }).then((response) => {
-        const tableItems = orderBy(
+        const primaryStatsItems = orderBy(
           // need top-level sortable fields for the managed table
-          response.map((item) => ({
+          response.serviceInstances.map((item) => ({
             ...item,
             latency: item.latency ?? 0,
             throughput: item.throughput ?? 0,
@@ -125,9 +133,9 @@ export function ServiceOverviewInstancesChartAndTable({
         ).slice(pageIndex * PAGE_SIZE, (pageIndex + 1) * PAGE_SIZE);
 
         return {
-          requestId: uuid(),
-          items: tableItems,
-          totalItems: response.length,
+          primaryStatsRequestId: uuid(),
+          primaryStatsItems,
+          primaryStatsItemCount: response.serviceInstances.length,
         };
       });
     },
@@ -148,10 +156,14 @@ export function ServiceOverviewInstancesChartAndTable({
     ]
   );
 
-  const { items, requestId, totalItems } = data;
+  const {
+    primaryStatsItems,
+    primaryStatsRequestId,
+    primaryStatsItemCount,
+  } = primaryStatsData;
 
   const {
-    data: comparisonStatistics = INITIAL_STATE_COMPARISON_STATISTICS,
+    data: comparisonStatsData = INITIAL_STATE_COMPARISON_STATISTICS,
     status: comparisonStatisticsStatus,
   } = useFetcher(
     (callApmApi) => {
@@ -160,7 +172,7 @@ export function ServiceOverviewInstancesChartAndTable({
         !end ||
         !transactionType ||
         !latencyAggregationType ||
-        !totalItems
+        !primaryStatsItemCount
       ) {
         return;
       }
@@ -181,7 +193,7 @@ export function ServiceOverviewInstancesChartAndTable({
             numBuckets: 20,
             transactionType,
             serviceNodeIds: JSON.stringify(
-              items.map((item) => item.serviceNodeName)
+              primaryStatsItems.map((item) => item.serviceNodeName)
             ),
             comparisonStart,
             comparisonEnd,
@@ -191,7 +203,7 @@ export function ServiceOverviewInstancesChartAndTable({
     },
     // only fetches comparison statistics when requestId is invalidated by primary statistics api call
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [requestId],
+    [primaryStatsRequestId],
     { preservePreviousData: false }
   );
 
@@ -207,14 +219,14 @@ export function ServiceOverviewInstancesChartAndTable({
       <EuiFlexItem grow={7}>
         <EuiPanel>
           <ServiceOverviewInstancesTable
-            items={items}
+            primaryStatsItems={primaryStatsItems}
+            primaryStatsStatus={primaryStatsStatus}
+            primaryStatsItemCount={primaryStatsItemCount}
+            comparisonStatsData={comparisonStatsData}
             serviceName={serviceName}
-            status={status}
             tableOptions={tableOptions}
-            totalItems={totalItems}
-            serviceInstanceComparisonStatistics={comparisonStatistics}
             isLoading={
-              status === FETCH_STATUS.LOADING ||
+              primaryStatsStatus === FETCH_STATUS.LOADING ||
               comparisonStatisticsStatus === FETCH_STATUS.LOADING
             }
             onChangeTableOptions={(newTableOptions) => {

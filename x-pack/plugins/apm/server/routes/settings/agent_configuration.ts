@@ -31,7 +31,8 @@ export const agentConfigurationRoute = createRoute({
   options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
-    return await listConfigurations({ setup });
+    const configurations = await listConfigurations({ setup });
+    return { configurations };
   },
 });
 
@@ -204,10 +205,12 @@ export const listAgentConfigurationServicesRoute = createRoute({
     const searchAggregatedTransactions = await getSearchAggregatedTransactions(
       setup
     );
-    return await getServiceNames({
+    const serviceNames = await getServiceNames({
       setup,
       searchAggregatedTransactions,
     });
+
+    return { serviceNames };
   },
 });
 
@@ -225,11 +228,13 @@ export const listAgentConfigurationEnvironmentsRoute = createRoute({
       setup
     );
 
-    return await getEnvironments({
+    const environments = await getEnvironments({
       serviceName,
       setup,
       searchAggregatedTransactions,
     });
+
+    return { environments };
   },
 });
 
