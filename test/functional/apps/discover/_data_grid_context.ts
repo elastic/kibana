@@ -110,7 +110,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await alert?.accept();
       expect(await browser.getCurrentUrl()).to.contain('#/context');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await docTable.getBodyRows()).to.have.length(6);
+      expect(await docTable.getRowsText()).to.have.length(6);
     });
   });
 }

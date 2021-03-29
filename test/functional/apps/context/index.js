@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
     });
 
     after(function unloadMakelogs() {
-      //return esArchiver.unload('logstash_functional');
+      return esArchiver.unload('logstash_functional');
     });
 
     loadTestFile(require.resolve('./_context_navigation'));
