@@ -7,8 +7,6 @@
 
 import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../__mocks__';
 
-import { resetContext } from 'kea';
-
 import { nextTick } from '@kbn/test/jest';
 
 import { IndexingStatusLogic } from './indexing_status_logic';
@@ -26,7 +24,6 @@ describe('IndexingStatusLogic', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    resetContext({});
     mount({}, { percentageComplete: 100, numDocumentsWithErrors: 0 });
   });
 
