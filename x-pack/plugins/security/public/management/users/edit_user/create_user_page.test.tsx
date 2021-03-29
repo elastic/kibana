@@ -53,7 +53,8 @@ describe('CreateUserPage', () => {
     });
   });
 
-  it('validates form', async () => {
+  // flaky https://github.com/elastic/kibana/issues/95345
+  it.skip('validates form', async () => {
     const coreStart = coreMock.createStart();
     const history = createMemoryHistory({ initialEntries: ['/create'] });
     const authc = securityMock.createSetup().authc;

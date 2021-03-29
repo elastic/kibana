@@ -55,4 +55,4 @@ export const ENGINE_CURATIONS_NEW_PATH = `${ENGINE_CURATIONS_PATH}/new`;
 export const ENGINE_CURATION_PATH = `${ENGINE_CURATIONS_PATH}/:curationId`;
 
 export const ENGINE_SEARCH_UI_PATH = `${ENGINE_PATH}/reference_application/new`;
-export const ENGINE_API_LOGS_PATH = `${ENGINE_PATH}/api-logs`;
+export const ENGINE_API_LOGS_PATH = `${ENGINE_PATH}/api_logs`;
