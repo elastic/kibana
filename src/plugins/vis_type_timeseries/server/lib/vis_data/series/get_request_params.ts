@@ -6,43 +6,46 @@
  * Side Public License, v 1.
  */
 
-import { PanelSchema, SeriesItemsSchema } from '../../../../common/types';
 import { buildRequestBody } from './build_request_body';
-import { getIndexPatternObject } from '../../../lib/search_strategies/lib/get_index_pattern';
-import { VisTypeTimeseriesRequestServices, VisTypeTimeseriesVisDataRequest } from '../../../types';
-import { DefaultSearchCapabilities } from '../../search_strategies';
+
+import type { FetchedIndexPattern, PanelSchema, SeriesItemsSchema } from '../../../../common/types';
+import type {
+  VisTypeTimeseriesRequestServices,
+  VisTypeTimeseriesVisDataRequest,
+} from '../../../types';
+import type { DefaultSearchCapabilities } from '../../search_strategies';
 
 export async function getSeriesRequestParams(
   req: VisTypeTimeseriesVisDataRequest,
   panel: PanelSchema,
+  panelIndex: FetchedIndexPattern,
   series: SeriesItemsSchema,
   capabilities: DefaultSearchCapabilities,
   {
     esQueryConfig,
     esShardTimeout,
     uiSettings,
-    indexPatternsService,
+    cachedIndexPatternFetcher,
   }: VisTypeTimeseriesRequestServices
 ) {
-  const indexPattern =
-    (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
+  let seriesIndex = panelIndex;
 
-  const { indexPatternObject, indexPatternString } = await getIndexPatternObject(indexPattern, {
-    indexPatternsService,
-  });
+  if (series.override_index_pattern) {
+    seriesIndex = await cachedIndexPatternFetcher(series.series_index_pattern ?? '');
+  }
 
   const request = await buildRequestBody(
     req,
     panel,
     series,
     esQueryConfig,
-    indexPatternObject,
+    seriesIndex.indexPattern,
     capabilities,
     uiSettings
   );
 
   return {
-    index: indexPatternString,
+    index: seriesIndex.indexPatternString,
     body: {
       ...request,
       timeout: esShardTimeout > 0 ? `${esShardTimeout}ms` : undefined,
