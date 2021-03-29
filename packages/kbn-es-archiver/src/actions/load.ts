@@ -11,7 +11,7 @@ import { createReadStream } from 'fs';
 import { Readable } from 'stream';
 import { ToolingLog } from '@kbn/dev-utils';
 import { KbnClient } from '@kbn/test';
-import { Client } from '@elastic/elasticsearch';
+import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { createPromiseFromStreams, concatStreamProviders } from '@kbn/utils';
 import { ES_CLIENT_HEADERS } from '../client_headers';
 
@@ -48,7 +48,7 @@ export async function loadAction({
   name: string;
   skipExisting: boolean;
   useCreate: boolean;
-  client: Client;
+  client: KibanaClient;
   dataDir: string;
   log: ToolingLog;
   kbnClient: KbnClient;
@@ -103,7 +103,7 @@ export async function loadAction({
 
   // If we affected the Kibana index, we need to ensure it's migrated...
   if (Object.keys(result).some((k) => k.startsWith('.kibana'))) {
-    await migrateKibanaIndex({ client, kbnClient });
+    await migrateKibanaIndex({ kbnClient });
     log.debug('[%s] Migrated Kibana index after loading Kibana data', name);
 
     if (kibanaPluginIds.includes('spaces')) {

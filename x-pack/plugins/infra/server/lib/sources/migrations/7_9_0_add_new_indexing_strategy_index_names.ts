@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectMigrationFn } from 'src/core/server';
-import { InfraSourceConfiguration } from '../../../../common/http_api/source_api';
+import { InfraSourceConfiguration } from '../../../../common/source_configuration/source_configuration';
 
 export const addNewIndexingStrategyIndexNames: SavedObjectMigrationFn<
   InfraSourceConfiguration,

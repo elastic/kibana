@@ -376,7 +376,6 @@ export const ExceptionBuilderComponent = ({
               <BuilderExceptionListItemComponent
                 key={getExceptionListItemId(exceptionListItem, index)}
                 exceptionItem={exceptionListItem}
-                exceptionId={getExceptionListItemId(exceptionListItem, index)}
                 indexPattern={indexPatterns}
                 listType={listType}
                 exceptionItemIndex={index}

@@ -50,13 +50,12 @@ const createTestCases = (overwrite: boolean) => {
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
-  const es = getService('legacyEs');
 
   const {
     addTests,
     createTestDefinitions,
     expectSavedObjectForbidden,
-  } = bulkCreateTestSuiteFactory(es, esArchiver, supertest);
+  } = bulkCreateTestSuiteFactory(esArchiver, supertest);
   const createTests = (overwrite: boolean, user: TestUser) => {
     const { normalTypes, hiddenType, allTypes } = createTestCases(overwrite);
     // use singleRequest to reduce execution time and/or test combined cases

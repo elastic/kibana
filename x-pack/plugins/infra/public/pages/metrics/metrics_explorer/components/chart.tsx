@@ -18,7 +18,7 @@ import {
 } from '@elastic/charts';
 import { first, last } from 'lodash';
 import moment from 'moment';
-import { InfraSourceConfiguration } from '../../../../../common/http_api/source_api';
+import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
 import {
   MetricsExplorerOptions,
@@ -46,7 +46,7 @@ interface Props {
   options: MetricsExplorerOptions;
   chartOptions: MetricsExplorerChartOptions;
   series: MetricsExplorerSeries;
-  source: InfraSourceConfiguration | undefined;
+  source: MetricsSourceConfigurationProperties | undefined;
   timeRange: MetricsExplorerTimeOptions;
   onTimeChange: (start: string, end: string) => void;
 }

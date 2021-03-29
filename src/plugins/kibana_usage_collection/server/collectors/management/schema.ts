@@ -200,10 +200,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'discover:aggs:terms:size': {
-    type: 'long',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'context:tieBreakerFields': {
     type: 'array',
     items: {
@@ -417,6 +413,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'observability:enableAlertingExperience': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:enableInspectEsQueries': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
