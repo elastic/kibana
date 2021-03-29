@@ -189,6 +189,8 @@ export default function ({ getService }: FtrProviderContext) {
             x: sampleCell.x + cellSize,
             y: sampleCell.y + cellSize,
           });
+          await ml.swimLane.waitForSwimLanesToload();
+
           // TODO extend cell data with X and Y values, and cell width
           await ml.swimLane.assertSelection(overallSwimLaneTestSubj, {
             x: [1454846400000, 1454860800000],
@@ -215,6 +217,8 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('clears the selection');
           await ml.anomalyExplorer.clearSwimLaneSelection();
+          await ml.swimLane.waitForSwimLanesToload();
+
           await ml.navigation.assertCurrentURLNotContain(
             'selectedLanes%3A!(Overall)%2CselectedTimes%3A!(1454846400%2C1454860800)%2CselectedType%3Aoverall%2CshowTopFieldValues%3A!t%2CviewByFieldName%3Aairline%2CviewByFromPage%3A1%2CviewByPerPage%3A10'
           );
@@ -255,6 +259,7 @@ export default function ({ getService }: FtrProviderContext) {
             x: sampleCell.x + cellSize,
             y: sampleCell.y + cellSize,
           });
+          await ml.swimLane.waitForSwimLanesToload();
 
           await ml.testExecution.logTestStep('check page content');
           await ml.swimLane.assertSelection(viewBySwimLaneTestSubj, {
@@ -274,6 +279,8 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('clears the selection');
           await ml.anomalyExplorer.clearSwimLaneSelection();
+          await ml.swimLane.waitForSwimLanesToload();
+
           await ml.anomaliesTable.assertTableRowsCount(25);
           await ml.anomalyExplorer.assertInfluencerFieldListLength('airline', 10);
           await ml.anomalyExplorer.assertAnomalyExplorerChartsCount(0);
@@ -299,6 +306,7 @@ export default function ({ getService }: FtrProviderContext) {
             x2: sampleCell2!.x + cellSize,
             y2: sampleCell2!.y + cellSize,
           });
+          await ml.swimLane.waitForSwimLanesToload();
 
           await ml.swimLane.assertSelection(viewBySwimLaneTestSubj, {
             x: [1454817600000, 1454846400000],
@@ -311,6 +319,8 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('clears the selection');
           await ml.anomalyExplorer.clearSwimLaneSelection();
+          await ml.swimLane.waitForSwimLanesToload();
+
           await ml.anomaliesTable.assertTableRowsCount(25);
           await ml.anomalyExplorer.assertInfluencerFieldListLength('airline', 10);
           await ml.anomalyExplorer.assertAnomalyExplorerChartsCount(0);

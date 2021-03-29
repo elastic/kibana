@@ -208,5 +208,15 @@ export function SwimLaneProvider({ getService }: FtrProviderContext) {
       await testSubjects.click(`mlSwimLanePageSizePanel > ${rowsCount} rows`);
       await this.assertPageSize(testSubj, rowsCount);
     },
+
+    async waitForSwimLanesToload() {
+      // when updating the swim lanes, the old lanes might still be displayed
+      // for some time, before the loading indicator is displayed
+
+      // wait for loading indicator to be displayed
+      await testSubjects.existOrFail('mlSwimLaneLoadingIndicator', { timeout: 10 * 1000 });
+      // wait for loading indicator to disappear
+      await testSubjects.missingOrFail('mlSwimLaneLoadingIndicator', { timeout: 10 * 1000 });
+    },
   };
 }
