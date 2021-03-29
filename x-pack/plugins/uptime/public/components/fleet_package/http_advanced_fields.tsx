@@ -7,16 +7,16 @@
 
 import React, { useCallback, useState, memo } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
+import ReactMarkdown from 'react-markdown';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiAccordion,
   EuiFormRow,
   EuiSelect,
   EuiDescribedFormGroup,
-  EuiLink,
   EuiCheckbox,
   EuiSpacer,
-  EuiIconTip,
 } from '@elastic/eui';
 
 import { ConfigKeys, HTTPMethod, IHTTPAdvancedFields, Validation } from './types';
@@ -73,20 +73,7 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, valida
         description={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.requestConfiguration.description"
-            defaultMessage="Configure your Heartbeat monitor with the following options. Find information about each option in the {link}."
-            values={{
-              link: (
-                <EuiLink
-                  href="https://www.elastic.co/guide/en/beats/heartbeat/current/monitor-options.html"
-                  target="_blank"
-                >
-                  <FormattedMessage
-                    id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.requestConfiguration.heartbeatDocs"
-                    defaultMessage="Heartbeat docs"
-                  />
-                </EuiLink>
-              ),
-            }}
+            defaultMessage="Configure an optional request to send to the remote host including method, body, and headers."
           />
         }
       >
@@ -94,8 +81,14 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, valida
         <EuiFormRow
           label={
             <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.requestConfiguration.requestMethod"
+              id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.requestConfiguration.requestMethod.label"
               defaultMessage="Request method"
+            />
+          }
+          helpText={
+            <FormattedMessage
+              id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.requestMethod.helpText"
+              defaultMessage="The HTTP method to use."
             />
           }
         >
@@ -111,36 +104,62 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, valida
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
-      <HeaderField
+      <EuiFormRow
+        fullWidth
         label={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.requestConfiguration.requestHeaders"
             defaultMessage="Request headers"
           />
         }
-        contentMode={
-          fields[ConfigKeys.REQUEST_BODY_CHECK].value
-            ? fields[ConfigKeys.REQUEST_BODY_CHECK].type
-            : undefined
-        } // only pass contentMode if the request body is truthy
-        defaultValue={defaultValues[ConfigKeys.REQUEST_HEADERS_CHECK]}
-        onChange={useCallback(
-          (value) =>
-            handleInputChange({
-              value,
-              configKey: ConfigKeys.REQUEST_HEADERS_CHECK,
-            }),
-          [handleInputChange]
-        )}
         isInvalid={
           !!validate[ConfigKeys.REQUEST_HEADERS_CHECK]?.(fields[ConfigKeys.REQUEST_HEADERS_CHECK])
         }
-      />
+        error={
+          !!validate[ConfigKeys.REQUEST_HEADERS_CHECK]?.(fields[ConfigKeys.REQUEST_HEADERS_CHECK])
+            ? [
+                <FormattedMessage
+                  id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.requestHeadersField.error"
+                  defaultMessage="Header key must be a valid HTTP token."
+                />,
+              ]
+            : undefined
+        }
+        helpText={
+          <FormattedMessage
+            id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.requestHeadersField.helpText"
+            defaultMessage="A dictionary of additional HTTP headers to send. By default heartbeat will set the User-Agent header to identify itself."
+          />
+        }
+      >
+        <HeaderField
+          contentMode={
+            fields[ConfigKeys.REQUEST_BODY_CHECK].value
+              ? fields[ConfigKeys.REQUEST_BODY_CHECK].type
+              : undefined
+          } // only pass contentMode if the request body is truthy
+          defaultValue={defaultValues[ConfigKeys.REQUEST_HEADERS_CHECK]}
+          onChange={useCallback(
+            (value) =>
+              handleInputChange({
+                value,
+                configKey: ConfigKeys.REQUEST_HEADERS_CHECK,
+              }),
+            [handleInputChange]
+          )}
+        />
+      </EuiFormRow>
       <EuiFormRow
         label={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.requestConfiguration.requestBody"
             defaultMessage="Request body"
+          />
+        }
+        helpText={
+          <FormattedMessage
+            id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.requestBody.helpText"
+            defaultMessage="Optional request body content."
           />
         }
         fullWidth
@@ -171,33 +190,46 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, valida
         description={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseConfiguration.description"
-            defaultMessage="Configure your Heartbeat monitor with the following options. Find information about each option in the {link}."
-            values={{
-              link: (
-                <EuiLink
-                  href="https://www.elastic.co/guide/en/beats/heartbeat/current/monitor-options.html"
-                  target="_blank"
-                >
-                  <FormattedMessage
-                    id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseConfiguration.heartbeatDocs"
-                    defaultMessage="Heartbeat docs"
-                  />
-                </EuiLink>
-              ),
-            }}
+            defaultMessage="Control the indexing of the HTTP response contents."
           />
         }
       >
         <EuiSpacer size="s" />
-        <ResponseBodyIndexField
-          defaultValue={defaultValues[ConfigKeys.RESPONSE_BODY_INDEX]}
-          onChange={useCallback(
-            (policy) =>
-              handleInputChange({ value: policy, configKey: ConfigKeys.RESPONSE_BODY_INDEX }),
-            [handleInputChange]
-          )}
-        />
-        <EuiFormRow>
+        <EuiFormRow
+          helpText={
+            <ReactMarkdown
+              source={i18n.translate(
+                'xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.indexResponseBody.helpText',
+                {
+                  defaultMessage:
+                    'Controls the indexing of the HTTP response body contents to the `http.response.body.contents` field.',
+                }
+              )}
+            />
+          }
+        >
+          <ResponseBodyIndexField
+            defaultValue={defaultValues[ConfigKeys.RESPONSE_BODY_INDEX]}
+            onChange={useCallback(
+              (policy) =>
+                handleInputChange({ value: policy, configKey: ConfigKeys.RESPONSE_BODY_INDEX }),
+              [handleInputChange]
+            )}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          helpText={
+            <ReactMarkdown
+              source={i18n.translate(
+                'xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.indexResponseHeaders.helpText',
+                {
+                  defaultMessage:
+                    'Controls the indexing of the HTTP response headers `http.response.body.headers` field.',
+                }
+              )}
+            />
+          }
+        >
           <EuiCheckbox
             id={'uptimeFleetIndexResponseHeaders'}
             checked={fields[ConfigKeys.RESPONSE_HEADERS_INDEX]}
@@ -228,20 +260,7 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, valida
         description={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseChecks.description"
-            defaultMessage="Configure your Heartbeat monitor with the following options. Find information about each option in the {link}."
-            values={{
-              link: (
-                <EuiLink
-                  href="https://www.elastic.co/guide/en/beats/heartbeat/current/monitor-options.html"
-                  target="_blank"
-                >
-                  <FormattedMessage
-                    id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseChecks.heartbeatDocs"
-                    defaultMessage="Heartbeat docs"
-                  />
-                </EuiLink>
-              ),
-            }}
+            defaultMessage="Configure the expected HTTP response."
           />
         }
       >
@@ -253,6 +272,17 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, valida
             />
           }
           labelAppend={<OptionalLabel />}
+          helpText={
+            <ReactMarkdown
+              source={i18n.translate(
+                'xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseStatusCheck.helpText',
+                {
+                  defaultMessage:
+                    'A list of expected status codes. 4xx and 5xx codes are considered down by default. Other codes are considered `up`.',
+                }
+              )}
+            />
+          }
         >
           <ComboBox
             selectedOptions={fields[ConfigKeys.RESPONSE_STATUS_CHECK]}
@@ -267,11 +297,22 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, valida
         <EuiFormRow
           label={
             <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseChecks.responseBodyContains"
+              id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseCheckPositive.label"
               defaultMessage="Check response body contains"
             />
           }
           labelAppend={<OptionalLabel />}
+          helpText={
+            <ReactMarkdown
+              source={i18n.translate(
+                'xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseBodyCheckPositive.helpText',
+                {
+                  defaultMessage:
+                    'A list of regular expressions to match the body output. Only a single expression needs to match.',
+                }
+              )}
+            />
+          }
         >
           <ComboBox
             selectedOptions={fields[ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE]}
@@ -287,19 +328,23 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, valida
         </EuiFormRow>
         <EuiFormRow
           label={
-            <>
-              <FormattedMessage
-                id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseChecks.responseBodyDoesNotContain"
-                defaultMessage="Check response body does not contain"
-              />{' '}
-              <EuiIconTip
-                content="Source maps allow browser dev tools to map minified code to the original source code"
-                position="right"
-              />
-            </>
+            <FormattedMessage
+              id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseCheckNegative.label"
+              defaultMessage="Check response body does not contain"
+            />
           }
           labelAppend={<OptionalLabel />}
-          helpText="Sample help text"
+          helpText={
+            <ReactMarkdown
+              source={i18n.translate(
+                'xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseBodyCheckNegative.helpText',
+                {
+                  defaultMessage:
+                    'A list of regular expressions to match the the body output negatively. Return match failed if single expression matches.',
+                }
+              )}
+            />
+          }
         >
           <ComboBox
             selectedOptions={fields[ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]}
@@ -314,38 +359,51 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, valida
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
-      <HeaderField
+      <EuiFormRow
+        fullWidth
         label={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseChecks.checkResponseHeadersContain"
             defaultMessage="Check response headers contain"
           />
         }
-        defaultValue={defaultValues[ConfigKeys.RESPONSE_HEADERS_CHECK]}
-        onChange={useCallback(
-          (value) =>
-            handleInputChange({
-              value,
-              configKey: ConfigKeys.RESPONSE_HEADERS_CHECK,
-            }),
-          [handleInputChange]
-        )}
         isInvalid={
           !!validate[ConfigKeys.RESPONSE_HEADERS_CHECK]?.(fields[ConfigKeys.RESPONSE_HEADERS_CHECK])
         }
-      />
+        error={
+          !!validate[ConfigKeys.RESPONSE_HEADERS_CHECK]?.(fields[ConfigKeys.RESPONSE_HEADERS_CHECK])
+            ? [
+                <FormattedMessage
+                  id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseHeadersField.error"
+                  defaultMessage="Header key must be a valid HTTP token."
+                />,
+              ]
+            : undefined
+        }
+        helpText={
+          <FormattedMessage
+            id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseHeadersField.helpText"
+            defaultMessage="The required response headers."
+          />
+        }
+      >
+        <HeaderField
+          defaultValue={defaultValues[ConfigKeys.RESPONSE_HEADERS_CHECK]}
+          onChange={useCallback(
+            (value) =>
+              handleInputChange({
+                value,
+                configKey: ConfigKeys.RESPONSE_HEADERS_CHECK,
+              }),
+            [handleInputChange]
+          )}
+        />
+      </EuiFormRow>
     </EuiAccordion>
   );
 });
 
-const requestMethodOptions = [
-  { value: HTTPMethod.GET, text: 'GET' },
-  { value: HTTPMethod.POST, text: 'POST' },
-  { value: HTTPMethod.PUT, text: 'PUT' },
-  { value: HTTPMethod.DELETE, text: 'DELETE' },
-  { value: HTTPMethod.HEAD, text: 'HEAD' },
-  { value: HTTPMethod.CONNECT, text: 'CONNECT' },
-  { value: HTTPMethod.OPTIONS, text: 'OPTIONS' },
-  { value: HTTPMethod.TRACE, text: 'TRACE' },
-  { value: HTTPMethod.PATCH, text: 'PATCH' },
-];
+const requestMethodOptions = Object.values(HTTPMethod).map((method) => ({
+  value: method,
+  text: method,
+}));

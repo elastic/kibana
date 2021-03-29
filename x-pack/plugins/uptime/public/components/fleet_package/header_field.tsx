@@ -6,8 +6,6 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFormRow } from '@elastic/eui';
 import { ContentType, Mode } from './types';
 
 import { KeyValuePairsField, Pair } from './key_value_field';
@@ -15,18 +13,16 @@ import { KeyValuePairsField, Pair } from './key_value_field';
 interface Props {
   contentMode?: Mode;
   defaultValue: Record<string, string>;
-  label: string | React.ReactElement;
-  isInvalid: boolean;
   onChange: (value: Record<string, string>) => void;
 }
 
-export const HeaderField = ({ contentMode, defaultValue, label, isInvalid, onChange }: Props) => {
+export const HeaderField = ({ contentMode, defaultValue, onChange }: Props) => {
   const defaultValueKeys = Object.keys(defaultValue).filter((key) => key !== 'Content-Type'); // Content-Type is a secret header we hide from the user
   const formattedDefaultValues: Pair[] = [
     ...defaultValueKeys.map<Pair>((key) => {
       return [key || '', defaultValue[key] || '', true]; // key, value, checked
     }),
-    ['', '', false],
+    ['', '', false], // ensure there is one extra empty field
   ];
   const [headers, setHeaders] = useState<Pair[]>(
     defaultValueKeys.length ? formattedDefaultValues : [['', '', false]]
@@ -51,25 +47,7 @@ export const HeaderField = ({ contentMode, defaultValue, label, isInvalid, onCha
     }
   }, [contentMode, headers, onChange]);
 
-  return (
-    <EuiFormRow
-      fullWidth
-      label={label}
-      isInvalid={isInvalid}
-      error={
-        isInvalid
-          ? [
-              <FormattedMessage
-                id="xpack.uptime.createPackagePolicy.stepConfigure.headersField.error"
-                defaultMessage="Header key must be a valid HTTP token"
-              />,
-            ]
-          : undefined
-      }
-    >
-      <KeyValuePairsField defaultPairs={headers} onChange={setHeaders} />
-    </EuiFormRow>
-  );
+  return <KeyValuePairsField defaultPairs={headers} onChange={setHeaders} />;
 };
 
 export const contentTypes: Record<Mode, ContentType> = {
