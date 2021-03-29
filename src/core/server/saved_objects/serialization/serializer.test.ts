@@ -288,7 +288,7 @@ describe('#rawToSavedObject', () => {
           },
         } as any,
       })
-    ).toThrow(`Raw document 'hello:universe' is not a valid saved object`);
+    ).toThrow(`Raw document 'hello:universe' is missing _source.type field`);
   });
 
   test('it is complimentary with savedObjectToRaw', () => {
@@ -329,7 +329,7 @@ describe('#rawToSavedObject', () => {
           type: 'hello',
         },
       })
-    ).toThrow(`Raw document 'universe' is not a valid saved object`);
+    ).toThrow(`Raw document 'universe' does not start with expected prefix 'hello:'`);
   });
 
   describe('namespace-agnostic type with a namespace', () => {
@@ -343,7 +343,7 @@ describe('#rawToSavedObject', () => {
     test(`fails for documents which have a namespace prefix in their _id`, () => {
       const _id = `${raw._source.namespace}:${raw._id}`;
       expect(() => namespaceAgnosticSerializer.rawToSavedObject({ ...raw, _id })).toThrow(
-        `Raw document 'baz:foo:bar' is not a valid saved object`
+        `Raw document 'baz:foo:bar' does not start with expected prefix 'foo:'`
       );
     });
 
@@ -372,7 +372,7 @@ describe('#rawToSavedObject', () => {
     test(`fails for documents which have any extra prefix in their _id`, () => {
       const _id = `random:${raw._id}`;
       expect(() => singleNamespaceSerializer.rawToSavedObject({ ...raw, _id })).toThrow(
-        `Raw document 'random:foo:bar' is not a valid saved object`
+        `Raw document 'random:foo:bar' does not start with expected prefix 'foo:'`
       );
     });
 
@@ -396,14 +396,14 @@ describe('#rawToSavedObject', () => {
     test(`fails for documents which do not have a namespace prefix in their _id`, () => {
       const _id = sampleTemplate._id;
       expect(() => singleNamespaceSerializer.rawToSavedObject({ ...raw, _id })).toThrow(
-        `Raw document 'foo:bar' is not a valid saved object`
+        `Raw document 'foo:bar' does not start with expected prefix 'baz:foo:'`
       );
     });
 
     test(`fails for documents which have any extra prefix in their _id`, () => {
       const _id = `random:${raw._id}`;
       expect(() => singleNamespaceSerializer.rawToSavedObject({ ...raw, _id })).toThrow(
-        `Raw document 'random:baz:foo:bar' is not a valid saved object`
+        `Raw document 'random:baz:foo:bar' does not start with expected prefix 'baz:foo:'`
       );
     });
 
@@ -432,14 +432,14 @@ describe('#rawToSavedObject', () => {
     test(`fails for documents which have a namespace prefix in their _id`, () => {
       const _id = `${raw._source.namespace}:${raw._id}`;
       expect(() => multiNamespaceSerializer.rawToSavedObject({ ...raw, _id })).toThrow(
-        `Raw document 'baz:foo:bar' is not a valid saved object`
+        `Raw document 'baz:foo:bar' does not start with expected prefix 'foo:'`
       );
     });
 
     test(`fails for documents which have any extra prefix in their _id`, () => {
       const _id = `random:${raw._id}`;
       expect(() => multiNamespaceSerializer.rawToSavedObject({ ...raw, _id })).toThrow(
-        `Raw document 'random:foo:bar' is not a valid saved object`
+        `Raw document 'random:foo:bar' does not start with expected prefix 'foo:'`
       );
     });
 
