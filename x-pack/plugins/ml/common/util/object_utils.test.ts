@@ -27,6 +27,6 @@ describe('object_utils', () => {
         'attribute1',
         'otherAttribute',
       ])
-    ).toBe(true);
+    ).toBe(false);
   });
 });
