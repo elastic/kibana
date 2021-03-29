@@ -11097,7 +11097,6 @@
     "xpack.infra.sourceConfiguration.hostNameFieldDescription": "ホストの識別に使用されるフィールドです",
     "xpack.infra.sourceConfiguration.hostNameFieldLabel": "ホスト名",
     "xpack.infra.sourceConfiguration.indicesSectionTitle": "インデックス",
-    "xpack.infra.sourceConfiguration.logColumnListEmptyErrorMessage": "ログ列リストは未入力のままにできません。",
     "xpack.infra.sourceConfiguration.logColumnsSectionTitle": "ログ列",
     "xpack.infra.sourceConfiguration.logIndicesDescription": "ログデータを含む一致するインデックスのインデックスパターンです",
     "xpack.infra.sourceConfiguration.logIndicesLabel": "ログインデックス",
