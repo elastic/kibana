@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import {
-  EuiBasicTable,
+  EuiInMemoryTable,
   EuiBasicTableColumn,
   EuiButtonEmpty,
   EuiSpacer,
@@ -23,7 +23,6 @@ import {
   txtSelectableMessage,
   txtCloneButtonLabel,
   txtSingleItemCloneActionLabel,
-  txtSourceColumnTitle,
   txtActionColumnTitle,
   txtTriggerColumnTitle,
 } from './i18n';
@@ -107,7 +106,7 @@ export const DrilldownTemplateTable: React.FC<DrilldownTemplateTableProps> = ({
 
   return (
     <>
-      <EuiBasicTable
+      <EuiInMemoryTable
         itemId="id"
         items={items}
         columns={columns}
@@ -118,7 +117,6 @@ export const DrilldownTemplateTable: React.FC<DrilldownTemplateTableProps> = ({
             direction: 'asc',
             field: 'name',
           },
-          enableAllColumns: true,
         }}
         selection={{
           onSelectionChange: (selection) => {
