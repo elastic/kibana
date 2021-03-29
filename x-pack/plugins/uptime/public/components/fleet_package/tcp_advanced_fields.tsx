@@ -60,20 +60,7 @@ export const TCPAdvancedFields = memo<Props>(({ defaultValues, onChange }) => {
         description={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.tcpAdvacnedSettings.requestConfiguration.description"
-            defaultMessage="Configure your Heartbeat monitor with the following options. Find information about each option in the {link}."
-            values={{
-              link: (
-                <EuiLink
-                  href="https://www.elastic.co/guide/en/beats/heartbeat/current/monitor-options.html"
-                  target="_blank"
-                >
-                  <FormattedMessage
-                    id="xpack.uptime.createPackagePolicy.stepConfigure.heartbeatDocs"
-                    defaultMessage="Heartbeat docs"
-                  />
-                </EuiLink>
-              ),
-            }}
+            defaultMessage="Configure the payload sent to the remote host."
           />
         }
       >
@@ -81,11 +68,17 @@ export const TCPAdvancedFields = memo<Props>(({ defaultValues, onChange }) => {
         <EuiFormRow
           label={
             <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.tcpAdvacnedSettings.requestConfiguration.requestPayload"
+              id="xpack.uptime.createPackagePolicy.stepConfigure.tcpAdvacnedSettings.requestConfiguration.requestPayload.label"
               defaultMessage="Request payload"
             />
           }
           labelAppend={<OptionalLabel />}
+          helpText={
+            <FormattedMessage
+              id="xpack.uptime.createPackagePolicy.stepConfigure.tcpAdvacnedSettings.requestConfiguration.requestPayload.helpText"
+              defaultMessage="An optional payload string to send to the remote host."
+            />
+          }
         >
           <EuiFieldText
             value={fields[ConfigKeys.REQUEST_SEND_CHECK]}
@@ -112,31 +105,24 @@ export const TCPAdvancedFields = memo<Props>(({ defaultValues, onChange }) => {
         description={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.tcpAdvancedOptions.responseConfiguration.description"
-            defaultMessage="Configure your Heartbeat monitor with the following options. Find information about each option in the {link}."
-            values={{
-              link: (
-                <EuiLink
-                  href="https://www.elastic.co/guide/en/beats/heartbeat/current/monitor-options.html"
-                  target="_blank"
-                >
-                  <FormattedMessage
-                    id="xpack.uptime.createPackagePolicy.stepConfigure.tcp.heartbeatDocs"
-                    defaultMessage="Heartbeat docs"
-                  />
-                </EuiLink>
-              ),
-            }}
+            defaultMessage="Configure the expected response from the remote host."
           />
         }
       >
         <EuiFormRow
           label={
             <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.tcpAdvacnedSettings.requestConfiguration.requestPayload"
+              id="xpack.uptime.createPackagePolicy.stepConfigure.tcpAdvacnedSettings.responseConfiguration.responseContains.label"
               defaultMessage="Check response contains"
             />
           }
           labelAppend={<OptionalLabel />}
+          helpText={
+            <FormattedMessage
+              id="xpack.uptime.createPackagePolicy.stepConfigure.tcpAdvacnedSettings.responseConfiguration.responseContains.helpText"
+              defaultMessage="The expected remote host response."
+            />
+          }
         >
           <ComboBox
             selectedOptions={fields[ConfigKeys.RESPONSE_RECEIVE_CHECK]}
