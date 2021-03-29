@@ -133,4 +133,8 @@ describe('discover sidebar', function () {
     findTestSubject(comp, 'fieldToggle-bytes').simulate('click');
     expect(props.onAddField).toHaveBeenCalledWith('bytes');
   });
+  it('should allow deselecting fields', function () {
+    findTestSubject(comp, 'fieldToggle-extension').simulate('click');
+    expect(props.onRemoveField).toHaveBeenCalledWith('extension');
+  });
 });
