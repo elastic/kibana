@@ -574,7 +574,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     async setFieldFormat(format: string) {
-      await testSubjects.setEuiSwitch('formatRow>toggle');
+      await testSubjects.setEuiSwitch('formatRow>toggle', 'check');
       await find.clickByCssSelector(
         'select[data-test-subj="editorSelectedFormatId"] > option[value="' + format + '"]'
       );
