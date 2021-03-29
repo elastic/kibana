@@ -19,7 +19,7 @@ describe('BannersPlugin', () => {
 
   beforeEach(() => {
     bannerConfig = {
-      placement: 'header',
+      placement: 'top',
       textContent: 'foo',
       backgroundColor: '#000000',
       textColor: '#FFFFFF',

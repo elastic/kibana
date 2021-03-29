@@ -45,7 +45,7 @@ describe('registerSettings', () => {
 
   it('uses the configuration values as defaults', () => {
     const config = createConfig({
-      placement: 'header',
+      placement: 'top',
       backgroundColor: '#FF00CC',
       textColor: '#AAFFEE',
       textContent: 'Some text',

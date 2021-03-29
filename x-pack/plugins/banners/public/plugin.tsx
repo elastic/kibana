@@ -21,7 +21,7 @@ export class BannersPlugin implements Plugin<{}, {}, {}, {}> {
   start({ chrome, uiSettings, http }: CoreStart) {
     getBannerInfo(http).then(
       ({ allowed, banner }) => {
-        if (allowed && banner.placement === 'header') {
+        if (allowed && banner.placement === 'top') {
           chrome.setHeaderBanner({
             content: toMountPoint(<Banner bannerConfig={banner} />),
           });

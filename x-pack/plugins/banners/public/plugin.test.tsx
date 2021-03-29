@@ -51,11 +51,11 @@ describe('BannersPlugin', () => {
   });
 
   describe('when banner is allowed', () => {
-    it('registers the header banner if `banner.placement` is `header`', async () => {
+    it('registers the header banner if `banner.placement` is `top`', async () => {
       getBannerInfoMock.mockResolvedValue({
         allowed: true,
         banner: createBannerConfig({
-          placement: 'header',
+          placement: 'top',
         }),
       });
 
@@ -82,11 +82,11 @@ describe('BannersPlugin', () => {
   });
 
   describe('when banner is not allowed', () => {
-    it('does not register the header banner if `banner.placement` is `header`', async () => {
+    it('does not register the header banner if `banner.placement` is `top`', async () => {
       getBannerInfoMock.mockResolvedValue({
         allowed: false,
         banner: createBannerConfig({
-          placement: 'header',
+          placement: 'top',
         }),
       });
 

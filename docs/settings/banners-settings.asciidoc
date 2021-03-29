@@ -16,7 +16,7 @@ You can configure the `xpack.banners` settings in your `kibana.yml` file.
 |===
 
 | `xpack.banners.placement`
-| Set to `header` to enable the header banner. Defaults to `disabled`.
+| Set to `top` to enable the top banner. Defaults to `disabled`.
 
 | `xpack.banners.textContent`
 | The text to display inside the banner, either plain text or Markdown.
