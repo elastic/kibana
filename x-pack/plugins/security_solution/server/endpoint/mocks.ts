@@ -108,6 +108,7 @@ export const createMockPackageService = (): jest.Mocked<PackageService> => {
  */
 export const createMockFleetStartContract = (indexPattern: string): FleetStartContract => {
   return {
+    fleetSetupCompleted: jest.fn().mockResolvedValue(undefined),
     esIndexPatternService: {
       getESIndexPattern: jest.fn().mockResolvedValue(indexPattern),
     },

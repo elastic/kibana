@@ -17,7 +17,7 @@ export {
 export { isESClientError } from './utils';
 
 export class IngestManagerError extends Error {
-  constructor(message?: string) {
+  constructor(message?: string, public readonly meta?: unknown) {
     super(message);
     this.name = this.constructor.name; // for stack traces
   }
@@ -45,6 +45,8 @@ export class ConcurrentInstallOperationError extends IngestManagerError {}
 export class AgentReassignmentError extends IngestManagerError {}
 export class AgentUnenrollmentError extends IngestManagerError {}
 export class AgentPolicyDeletionError extends IngestManagerError {}
+
+export class FleetSetupError extends IngestManagerError {}
 
 export class ArtifactsClientError extends IngestManagerError {}
 export class ArtifactsClientAccessDeniedError extends IngestManagerError {
