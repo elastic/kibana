@@ -54,7 +54,7 @@ export const getSinglePercentileMetricAgg = () => {
     ],
     getValue(agg, bucket) {
       let valueKey = String(agg.params.percentile);
-      if (agg.params.percentile % 1 === 0) {
+      if (Number.isInteger(agg.params.percentile)) {
         valueKey += '.0';
       }
       return bucket[agg.id].values[valueKey];
