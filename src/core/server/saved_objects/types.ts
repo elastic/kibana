@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { SavedObjectsClient } from './service/saved_objects_client';
 import { SavedObjectsTypeMappingDefinition } from './mappings';
 import { SavedObjectMigrationMap } from './migrations';
@@ -79,7 +80,7 @@ export interface SavedObjectsFindOptions {
   page?: number;
   perPage?: number;
   sortField?: string;
-  sortOrder?: string;
+  sortOrder?: estypes.SortOrder;
   /**
    * An array of fields to include in the results
    * @example
@@ -93,7 +94,7 @@ export interface SavedObjectsFindOptions {
   /**
    * Use the sort values from the previous page to retrieve the next page of results.
    */
-  searchAfter?: unknown[];
+  searchAfter?: estypes.Id[];
   /**
    * The fields to perform the parsed query against. Unlike the `searchFields` argument, these are expected to be root fields and will not
    * be modified. If used in conjunction with `searchFields`, both are concatenated together.

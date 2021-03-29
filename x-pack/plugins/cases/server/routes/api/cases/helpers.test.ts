@@ -11,7 +11,7 @@ import {
   ConnectorTypes,
   ESCaseConnector,
   ESCasesConfigureAttributes,
-} from '../../../../common';
+} from '../../../../common/api';
 import { mockCaseConfigure } from '../__fixtures__';
 import {
   transformCaseConnectorToEsConnector,

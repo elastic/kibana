@@ -65,14 +65,19 @@ import {
 import { SecurityAppStore } from './common/store/store';
 import { getCaseConnectorUI } from './cases/components/connectors';
 import { licenseService } from './common/hooks/use_license';
+import { SecuritySolutionUiConfigType } from './common/types';
+
 import { getLazyEndpointPolicyEditExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_edit_extension';
 import { LazyEndpointPolicyCreateExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_extension';
 import { getLazyEndpointPackageCustomExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_package_custom_extension';
+import { parseExperimentalConfigValue } from '../common/experimental_features';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private kibanaVersion: string;
+  private config: SecuritySolutionUiConfigType;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.config = this.initializerContext.config.get<SecuritySolutionUiConfigType>();
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
   private detectionsUpdater$ = new Subject<AppUpdater>();
@@ -520,6 +525,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             kibanaIndexPatterns,
             configIndexPatterns: configIndexPatterns.indicesExist,
             signalIndexName: signal.name,
+            enableExperimental: parseExperimentalConfigValue(this.config.enableExperimental || []),
           }
         ),
         {

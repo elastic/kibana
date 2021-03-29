@@ -6675,10 +6675,10 @@
                     "description": "Maximum size of the payload in bytes of saved objects that can be imported."
                   }
                 },
-                "maxImportExportSizeBytes": {
+                "maxImportExportSize": {
                   "type": "long",
                   "_meta": {
-                    "description": "Maximum size in bytes of saved object that can be imported or exported."
+                    "description": "Maximum count of saved objects that can be imported or exported."
                   }
                 }
               }
@@ -8026,6 +8026,18 @@
           "_meta": {
             "description": "Non-default value of setting."
           }
+        },
+        "observability:enableAlertingExperience": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "observability:enableInspectEsQueries": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
         }
       }
     },
@@ -9317,6 +9329,16 @@
             "enabled": {
               "type": "long"
             }
+          }
+        }
+      }
+    },
+    "vis_type_timeseries": {
+      "properties": {
+        "timeseries_use_last_value_mode_total": {
+          "type": "long",
+          "_meta": {
+            "description": "Number of TSVB visualizations using \"last value\" as a time range"
           }
         }
       }
