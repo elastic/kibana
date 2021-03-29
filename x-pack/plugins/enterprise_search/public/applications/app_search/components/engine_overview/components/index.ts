@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export { UnavailablePrompt } from './unavailable_prompt';
 export { TotalStats } from './total_stats';
 export { TotalCharts } from './total_charts';
 export { RecentApiLogs } from './recent_api_logs';

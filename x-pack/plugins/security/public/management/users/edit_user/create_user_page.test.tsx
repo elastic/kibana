@@ -20,6 +20,8 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
 }));
 
 describe('CreateUserPage', () => {
+  jest.setTimeout(15_000);
+
   it('creates user when submitting form and redirects back', async () => {
     const coreStart = coreMock.createStart();
     const history = createMemoryHistory({ initialEntries: ['/create'] });
@@ -53,8 +55,7 @@ describe('CreateUserPage', () => {
     });
   });
 
-  // flaky https://github.com/elastic/kibana/issues/95345
-  it.skip('validates form', async () => {
+  it('validates form', async () => {
     const coreStart = coreMock.createStart();
     const history = createMemoryHistory({ initialEntries: ['/create'] });
     const authc = securityMock.createSetup().authc;

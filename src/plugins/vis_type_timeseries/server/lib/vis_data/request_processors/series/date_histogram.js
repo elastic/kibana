@@ -19,7 +19,7 @@ export function dateHistogram(
   panel,
   series,
   esQueryConfig,
-  indexPatternObject,
+  indexPattern,
   capabilities,
   uiSettings
 ) {
@@ -27,11 +27,7 @@ export function dateHistogram(
     const maxBarsUiSettings = await uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS);
     const barTargetUiSettings = await uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
 
-    const { timeField, interval, maxBars } = getIntervalAndTimefield(
-      panel,
-      series,
-      indexPatternObject
-    );
+    const { timeField, interval, maxBars } = getIntervalAndTimefield(panel, series, indexPattern);
     const { bucketSize, intervalString } = getBucketSize(
       req,
       interval,
@@ -68,7 +64,7 @@ export function dateHistogram(
     overwrite(doc, `aggs.${series.id}.meta`, {
       timeField,
       intervalString,
-      index: indexPatternObject?.title,
+      index: indexPattern?.title,
       bucketSize,
       seriesId: series.id,
     });

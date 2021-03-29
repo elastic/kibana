@@ -3,6 +3,45 @@
   "client": {
     "classes": [
       {
+        "id": "def-public.CrazyClass",
+        "type": "Class",
+        "tags": [],
+        "label": "CrazyClass",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "pluginA",
+            "scope": "public",
+            "docId": "kibPluginAPluginApi",
+            "section": "def-public.CrazyClass",
+            "text": "CrazyClass"
+          },
+          "<P> extends ",
+          {
+            "pluginId": "pluginA",
+            "scope": "public",
+            "docId": "kibPluginAPluginApi",
+            "section": "def-public.ExampleClass",
+            "text": "ExampleClass"
+          },
+          "<",
+          {
+            "pluginId": "pluginA",
+            "scope": "public",
+            "docId": "kibPluginAPluginApi",
+            "section": "def-public.WithGen",
+            "text": "WithGen"
+          },
+          "<P>>"
+        ],
+        "children": [],
+        "source": {
+          "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts",
+          "lineNumber": 65
+        },
+        "initialIsOpen": false
+      },
+      {
         "id": "def-public.ExampleClass",
         "type": "Class",
         "tags": [],
@@ -35,8 +74,7 @@
             "description": [],
             "source": {
               "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts",
-              "lineNumber": 44,
-              "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts#L44"
+              "lineNumber": 44
             },
             "signature": [
               "React.ComponentClass<{}, any> | React.FunctionComponent<{}> | undefined"
@@ -61,8 +99,7 @@
                 "description": [],
                 "source": {
                   "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts",
-                  "lineNumber": 46,
-                  "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts#L46"
+                  "lineNumber": 46
                 }
               }
             ],
@@ -70,8 +107,7 @@
             "returnComment": [],
             "source": {
               "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts",
-              "lineNumber": 46,
-              "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts#L46"
+              "lineNumber": 46
             }
           },
           {
@@ -94,8 +130,7 @@
                 "description": [],
                 "source": {
                   "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts",
-                  "lineNumber": 54,
-                  "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts#L54"
+                  "lineNumber": 54
                 }
               }
             ],
@@ -123,8 +158,7 @@
             "label": "arrowFn",
             "source": {
               "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts",
-              "lineNumber": 54,
-              "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts#L54"
+              "lineNumber": 54
             },
             "tags": [],
             "returnComment": []
@@ -166,8 +200,7 @@
                 ],
                 "source": {
                   "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts",
-                  "lineNumber": 60,
-                  "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts#L60"
+                  "lineNumber": 60
                 }
               }
             ],
@@ -175,60 +208,270 @@
             "returnComment": [],
             "source": {
               "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts",
-              "lineNumber": 60,
-              "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts#L60"
+              "lineNumber": 60
             }
           }
         ],
         "source": {
           "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts",
-          "lineNumber": 38,
-          "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts#L38"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.CrazyClass",
-        "type": "Class",
-        "tags": [],
-        "label": "CrazyClass",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "pluginA",
-            "scope": "public",
-            "docId": "kibPluginAPluginApi",
-            "section": "def-public.CrazyClass",
-            "text": "CrazyClass"
-          },
-          "<P> extends ",
-          {
-            "pluginId": "pluginA",
-            "scope": "public",
-            "docId": "kibPluginAPluginApi",
-            "section": "def-public.ExampleClass",
-            "text": "ExampleClass"
-          },
-          "<",
-          {
-            "pluginId": "pluginA",
-            "scope": "public",
-            "docId": "kibPluginAPluginApi",
-            "section": "def-public.WithGen",
-            "text": "WithGen"
-          },
-          "<P>>"
-        ],
-        "children": [],
-        "source": {
-          "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts",
-          "lineNumber": 65,
-          "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts#L65"
+          "lineNumber": 38
         },
         "initialIsOpen": false
       }
     ],
     "functions": [
+      {
+        "id": "def-public.arrowFn",
+        "type": "Function",
+        "children": [
+          {
+            "type": "string",
+            "label": "a",
+            "isRequired": true,
+            "signature": [
+              "string"
+            ],
+            "description": [],
+            "source": {
+              "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
+              "lineNumber": 42
+            }
+          },
+          {
+            "type": "number",
+            "label": "b",
+            "isRequired": false,
+            "signature": [
+              "number | undefined"
+            ],
+            "description": [],
+            "source": {
+              "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
+              "lineNumber": 43
+            }
+          },
+          {
+            "type": "Array",
+            "label": "c",
+            "isRequired": true,
+            "signature": [
+              {
+                "pluginId": "pluginA",
+                "scope": "public",
+                "docId": "kibPluginAPluginApi",
+                "section": "def-public.TypeWithGeneric",
+                "text": "TypeWithGeneric"
+              },
+              "<string>"
+            ],
+            "description": [],
+            "source": {
+              "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
+              "lineNumber": 44
+            }
+          },
+          {
+            "type": "CompoundType",
+            "label": "d",
+            "isRequired": true,
+            "signature": [
+              {
+                "pluginId": "pluginA",
+                "scope": "public",
+                "docId": "kibPluginAPluginApi",
+                "section": "def-public.ImAType",
+                "text": "ImAType"
+              }
+            ],
+            "description": [],
+            "source": {
+              "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
+              "lineNumber": 45
+            }
+          },
+          {
+            "type": "string",
+            "label": "e",
+            "isRequired": false,
+            "signature": [
+              "string | undefined"
+            ],
+            "description": [],
+            "source": {
+              "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
+              "lineNumber": 46
+            }
+          }
+        ],
+        "signature": [
+          "(a: string, b: number | undefined, c: ",
+          {
+            "pluginId": "pluginA",
+            "scope": "public",
+            "docId": "kibPluginAPluginApi",
+            "section": "def-public.TypeWithGeneric",
+            "text": "TypeWithGeneric"
+          },
+          "<string>, d: ",
+          {
+            "pluginId": "pluginA",
+            "scope": "public",
+            "docId": "kibPluginAPluginApi",
+            "section": "def-public.ImAType",
+            "text": "ImAType"
+          },
+          ", e?: string | undefined) => ",
+          {
+            "pluginId": "pluginA",
+            "scope": "public",
+            "docId": "kibPluginAPluginApi",
+            "section": "def-public.TypeWithGeneric",
+            "text": "TypeWithGeneric"
+          },
+          "<string>"
+        ],
+        "description": [
+          "\nThis is an arrow function.\n"
+        ],
+        "label": "arrowFn",
+        "source": {
+          "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
+          "lineNumber": 41
+        },
+        "tags": [],
+        "returnComment": [
+          "something!"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.crazyFunction",
+        "type": "Function",
+        "children": [
+          {
+            "id": "def-public.crazyFunction.obj",
+            "type": "Object",
+            "label": "obj",
+            "tags": [],
+            "description": [],
+            "children": [
+              {
+                "tags": [],
+                "id": "def-public.crazyFunction.obj.hi",
+                "type": "string",
+                "label": "hi",
+                "description": [],
+                "source": {
+                  "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
+                  "lineNumber": 67
+                }
+              }
+            ],
+            "source": {
+              "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
+              "lineNumber": 67
+            }
+          },
+          {
+            "id": "def-public.crazyFunction.{-fn }",
+            "type": "Object",
+            "label": "{ fn }",
+            "tags": [],
+            "description": [],
+            "children": [
+              {
+                "tags": [],
+                "id": "def-public.crazyFunction.{-fn }.fn",
+                "type": "Function",
+                "label": "fn",
+                "description": [],
+                "source": {
+                  "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
+                  "lineNumber": 68
+                },
+                "signature": [
+                  "(foo: { param: string; }) => number"
+                ]
+              }
+            ],
+            "source": {
+              "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
+              "lineNumber": 68
+            }
+          },
+          {
+            "id": "def-public.crazyFunction.{-str }",
+            "type": "Object",
+            "label": "{ str }",
+            "tags": [],
+            "description": [],
+            "children": [
+              {
+                "tags": [],
+                "id": "def-public.crazyFunction.{-str }.str",
+                "type": "string",
+                "label": "str",
+                "description": [],
+                "source": {
+                  "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
+                  "lineNumber": 69
+                }
+              }
+            ],
+            "source": {
+              "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
+              "lineNumber": 69
+            }
+          }
+        ],
+        "signature": [
+          "(obj: { hi: string; }, { fn }: { fn: (foo: { param: string; }) => number; }, { str }: { str: string; }) => () => () => number"
+        ],
+        "description": [
+          "\nWho would write such a complicated function?? Ewwww.\n\nAccording to https://jsdoc.app/tags-param.html#parameters-with-properties,\nthis is how destructured arguements should be commented.\n"
+        ],
+        "label": "crazyFunction",
+        "source": {
+          "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
+          "lineNumber": 66
+        },
+        "tags": [],
+        "returnComment": [
+          "I have no idea."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.fnWithNonExportedRef",
+        "type": "Function",
+        "children": [
+          {
+            "type": "Object",
+            "label": "a",
+            "isRequired": true,
+            "signature": [
+              "ImNotExported"
+            ],
+            "description": [],
+            "source": {
+              "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
+              "lineNumber": 76
+            }
+          }
+        ],
+        "signature": [
+          "(a: ImNotExported) => string"
+        ],
+        "description": [],
+        "label": "fnWithNonExportedRef",
+        "source": {
+          "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
+          "lineNumber": 76
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
       {
         "id": "def-public.notAnArrowFn",
         "type": "Function",
@@ -276,8 +519,7 @@
             ],
             "source": {
               "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
-              "lineNumber": 22,
-              "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts#L22"
+              "lineNumber": 22
             }
           },
           {
@@ -292,8 +534,7 @@
             ],
             "source": {
               "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
-              "lineNumber": 23,
-              "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts#L23"
+              "lineNumber": 23
             }
           },
           {
@@ -315,8 +556,7 @@
             ],
             "source": {
               "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
-              "lineNumber": 24,
-              "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts#L24"
+              "lineNumber": 24
             }
           },
           {
@@ -337,8 +577,7 @@
             ],
             "source": {
               "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
-              "lineNumber": 25,
-              "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts#L25"
+              "lineNumber": 25
             }
           },
           {
@@ -353,8 +592,7 @@
             ],
             "source": {
               "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
-              "lineNumber": 26,
-              "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts#L26"
+              "lineNumber": 26
             }
           }
         ],
@@ -364,367 +602,12 @@
         ],
         "source": {
           "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
-          "lineNumber": 21,
-          "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts#L21"
+          "lineNumber": 21
         },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.arrowFn",
-        "type": "Function",
-        "children": [
-          {
-            "type": "string",
-            "label": "a",
-            "isRequired": true,
-            "signature": [
-              "string"
-            ],
-            "description": [],
-            "source": {
-              "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
-              "lineNumber": 42,
-              "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts#L42"
-            }
-          },
-          {
-            "type": "number",
-            "label": "b",
-            "isRequired": false,
-            "signature": [
-              "number | undefined"
-            ],
-            "description": [],
-            "source": {
-              "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
-              "lineNumber": 43,
-              "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts#L43"
-            }
-          },
-          {
-            "type": "Array",
-            "label": "c",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "pluginA",
-                "scope": "public",
-                "docId": "kibPluginAPluginApi",
-                "section": "def-public.TypeWithGeneric",
-                "text": "TypeWithGeneric"
-              },
-              "<string>"
-            ],
-            "description": [],
-            "source": {
-              "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
-              "lineNumber": 44,
-              "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts#L44"
-            }
-          },
-          {
-            "type": "CompoundType",
-            "label": "d",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "pluginA",
-                "scope": "public",
-                "docId": "kibPluginAPluginApi",
-                "section": "def-public.ImAType",
-                "text": "ImAType"
-              }
-            ],
-            "description": [],
-            "source": {
-              "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
-              "lineNumber": 45,
-              "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts#L45"
-            }
-          },
-          {
-            "type": "string",
-            "label": "e",
-            "isRequired": false,
-            "signature": [
-              "string | undefined"
-            ],
-            "description": [],
-            "source": {
-              "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
-              "lineNumber": 46,
-              "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts#L46"
-            }
-          }
-        ],
-        "signature": [
-          "(a: string, b: number | undefined, c: ",
-          {
-            "pluginId": "pluginA",
-            "scope": "public",
-            "docId": "kibPluginAPluginApi",
-            "section": "def-public.TypeWithGeneric",
-            "text": "TypeWithGeneric"
-          },
-          "<string>, d: ",
-          {
-            "pluginId": "pluginA",
-            "scope": "public",
-            "docId": "kibPluginAPluginApi",
-            "section": "def-public.ImAType",
-            "text": "ImAType"
-          },
-          ", e?: string | undefined) => ",
-          {
-            "pluginId": "pluginA",
-            "scope": "public",
-            "docId": "kibPluginAPluginApi",
-            "section": "def-public.TypeWithGeneric",
-            "text": "TypeWithGeneric"
-          },
-          "<string>"
-        ],
-        "description": [
-          "\nThis is an arrow function.\n"
-        ],
-        "label": "arrowFn",
-        "source": {
-          "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
-          "lineNumber": 41,
-          "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts#L41"
-        },
-        "tags": [],
-        "returnComment": [
-          "something!"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.crazyFunction",
-        "type": "Function",
-        "children": [
-          {
-            "id": "def-public.crazyFunction.obj",
-            "type": "Object",
-            "label": "obj",
-            "tags": [],
-            "description": [],
-            "children": [
-              {
-                "tags": [],
-                "id": "def-public.crazyFunction.obj.hi",
-                "type": "string",
-                "label": "hi",
-                "description": [],
-                "source": {
-                  "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
-                  "lineNumber": 67,
-                  "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts#L67"
-                }
-              }
-            ],
-            "source": {
-              "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
-              "lineNumber": 67,
-              "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts#L67"
-            }
-          },
-          {
-            "id": "def-public.crazyFunction.{-fn }",
-            "type": "Object",
-            "label": "{ fn }",
-            "tags": [],
-            "description": [],
-            "children": [
-              {
-                "tags": [],
-                "id": "def-public.crazyFunction.{-fn }.fn",
-                "type": "Function",
-                "label": "fn",
-                "description": [],
-                "source": {
-                  "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
-                  "lineNumber": 68,
-                  "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts#L68"
-                },
-                "signature": [
-                  "(foo: { param: string; }) => number"
-                ]
-              }
-            ],
-            "source": {
-              "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
-              "lineNumber": 68,
-              "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts#L68"
-            }
-          },
-          {
-            "id": "def-public.crazyFunction.{-str }",
-            "type": "Object",
-            "label": "{ str }",
-            "tags": [],
-            "description": [],
-            "children": [
-              {
-                "tags": [],
-                "id": "def-public.crazyFunction.{-str }.str",
-                "type": "string",
-                "label": "str",
-                "description": [],
-                "source": {
-                  "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
-                  "lineNumber": 69,
-                  "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts#L69"
-                }
-              }
-            ],
-            "source": {
-              "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
-              "lineNumber": 69,
-              "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts#L69"
-            }
-          }
-        ],
-        "signature": [
-          "(obj: { hi: string; }, { fn }: { fn: (foo: { param: string; }) => number; }, { str }: { str: string; }) => () => () => number"
-        ],
-        "description": [
-          "\nWho would write such a complicated function?? Ewwww.\n\nAccording to https://jsdoc.app/tags-param.html#parameters-with-properties,\nthis is how destructured arguements should be commented.\n"
-        ],
-        "label": "crazyFunction",
-        "source": {
-          "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
-          "lineNumber": 66,
-          "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts#L66"
-        },
-        "tags": [],
-        "returnComment": [
-          "I have no idea."
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.fnWithNonExportedRef",
-        "type": "Function",
-        "children": [
-          {
-            "type": "Object",
-            "label": "a",
-            "isRequired": true,
-            "signature": [
-              "ImNotExported"
-            ],
-            "description": [],
-            "source": {
-              "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
-              "lineNumber": 76,
-              "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts#L76"
-            }
-          }
-        ],
-        "signature": [
-          "(a: ImNotExported) => string"
-        ],
-        "description": [],
-        "label": "fnWithNonExportedRef",
-        "source": {
-          "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
-          "lineNumber": 76,
-          "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts#L76"
-        },
-        "tags": [],
-        "returnComment": [],
         "initialIsOpen": false
       }
     ],
     "interfaces": [
-      {
-        "id": "def-public.SearchSpec",
-        "type": "Interface",
-        "label": "SearchSpec",
-        "description": [
-          "\nThe SearchSpec interface contains settings for creating a new SearchService, like\nusername and password."
-        ],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.SearchSpec.username",
-            "type": "string",
-            "label": "username",
-            "description": [
-              "\nStores the username. Duh,"
-            ],
-            "source": {
-              "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/plugin.ts",
-              "lineNumber": 26,
-              "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/plugin.ts#L26"
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-public.SearchSpec.password",
-            "type": "string",
-            "label": "password",
-            "description": [
-              "\nStores the password. I hope it's encrypted!"
-            ],
-            "source": {
-              "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/plugin.ts",
-              "lineNumber": 30,
-              "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/plugin.ts#L30"
-            }
-          }
-        ],
-        "source": {
-          "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/plugin.ts",
-          "lineNumber": 22,
-          "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/plugin.ts#L22"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.WithGen",
-        "type": "Interface",
-        "label": "WithGen",
-        "signature": [
-          {
-            "pluginId": "pluginA",
-            "scope": "public",
-            "docId": "kibPluginAPluginApi",
-            "section": "def-public.WithGen",
-            "text": "WithGen"
-          },
-          "<T>"
-        ],
-        "description": [
-          "\nAn interface with a generic."
-        ],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-public.WithGen.t",
-            "type": "Uncategorized",
-            "label": "t",
-            "description": [],
-            "source": {
-              "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts",
-              "lineNumber": 31,
-              "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts#L31"
-            },
-            "signature": [
-              "T"
-            ]
-          }
-        ],
-        "source": {
-          "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts",
-          "lineNumber": 30,
-          "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts#L30"
-        },
-        "initialIsOpen": false
-      },
       {
         "id": "def-public.AnotherInterface",
         "type": "Interface",
@@ -750,8 +633,7 @@
             "description": [],
             "source": {
               "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts",
-              "lineNumber": 35,
-              "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts#L35"
+              "lineNumber": 35
             },
             "signature": [
               "T"
@@ -760,8 +642,7 @@
         ],
         "source": {
           "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts",
-          "lineNumber": 34,
-          "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts#L34"
+          "lineNumber": 34
         },
         "initialIsOpen": false
       },
@@ -802,8 +683,7 @@
             ],
             "source": {
               "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts",
-              "lineNumber": 75,
-              "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts#L75"
+              "lineNumber": 75
             },
             "signature": [
               "() => Promise<string>"
@@ -819,8 +699,7 @@
             ],
             "source": {
               "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts",
-              "lineNumber": 81,
-              "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts#L81"
+              "lineNumber": 81
             },
             "signature": [
               "<T>(t: T) => void"
@@ -841,15 +720,47 @@
             "returnComment": [],
             "source": {
               "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts",
-              "lineNumber": 86,
-              "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts#L86"
+              "lineNumber": 86
             }
           }
         ],
         "source": {
           "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts",
-          "lineNumber": 71,
-          "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts#L71"
+          "lineNumber": 71
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.ImAnObject",
+        "type": "Interface",
+        "label": "ImAnObject",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.ImAnObject.foo",
+            "type": "Function",
+            "label": "foo",
+            "description": [],
+            "source": {
+              "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/types.ts",
+              "lineNumber": 44
+            },
+            "signature": [
+              {
+                "pluginId": "pluginA",
+                "scope": "public",
+                "docId": "kibPluginAPluginApi",
+                "section": "def-public.FnWithGeneric",
+                "text": "FnWithGeneric"
+              }
+            ]
+          }
+        ],
+        "source": {
+          "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/types.ts",
+          "lineNumber": 43
         },
         "initialIsOpen": false
       },
@@ -870,8 +781,7 @@
             "description": [],
             "source": {
               "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts",
-              "lineNumber": 93,
-              "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts#L93"
+              "lineNumber": 93
             },
             "signature": [
               "React.ComponentType<{}>"
@@ -880,44 +790,89 @@
         ],
         "source": {
           "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts",
-          "lineNumber": 92,
-          "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts#L92"
+          "lineNumber": 92
         },
         "initialIsOpen": false
       },
       {
-        "id": "def-public.ImAnObject",
+        "id": "def-public.SearchSpec",
         "type": "Interface",
-        "label": "ImAnObject",
-        "description": [],
+        "label": "SearchSpec",
+        "description": [
+          "\nThe SearchSpec interface contains settings for creating a new SearchService, like\nusername and password."
+        ],
         "tags": [],
         "children": [
           {
             "tags": [],
-            "id": "def-public.ImAnObject.foo",
-            "type": "Function",
-            "label": "foo",
+            "id": "def-public.SearchSpec.username",
+            "type": "string",
+            "label": "username",
+            "description": [
+              "\nStores the username. Duh,"
+            ],
+            "source": {
+              "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/plugin.ts",
+              "lineNumber": 26
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.SearchSpec.password",
+            "type": "string",
+            "label": "password",
+            "description": [
+              "\nStores the password. I hope it's encrypted!"
+            ],
+            "source": {
+              "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/plugin.ts",
+              "lineNumber": 30
+            }
+          }
+        ],
+        "source": {
+          "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/plugin.ts",
+          "lineNumber": 22
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.WithGen",
+        "type": "Interface",
+        "label": "WithGen",
+        "signature": [
+          {
+            "pluginId": "pluginA",
+            "scope": "public",
+            "docId": "kibPluginAPluginApi",
+            "section": "def-public.WithGen",
+            "text": "WithGen"
+          },
+          "<T>"
+        ],
+        "description": [
+          "\nAn interface with a generic."
+        ],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.WithGen.t",
+            "type": "Uncategorized",
+            "label": "t",
             "description": [],
             "source": {
-              "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/types.ts",
-              "lineNumber": 44,
-              "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/types.ts#L44"
+              "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts",
+              "lineNumber": 31
             },
             "signature": [
-              {
-                "pluginId": "pluginA",
-                "scope": "public",
-                "docId": "kibPluginAPluginApi",
-                "section": "def-public.FnWithGeneric",
-                "text": "FnWithGeneric"
-              }
+              "T"
             ]
           }
         ],
         "source": {
-          "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/types.ts",
-          "lineNumber": 43,
-          "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/types.ts#L43"
+          "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts",
+          "lineNumber": 30
         },
         "initialIsOpen": false
       }
@@ -933,13 +888,127 @@
         ],
         "source": {
           "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/types.ts",
-          "lineNumber": 31,
-          "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/types.ts#L31"
+          "lineNumber": 31
         },
         "initialIsOpen": false
       }
     ],
     "misc": [
+      {
+        "tags": [],
+        "id": "def-public.aNum",
+        "type": "number",
+        "label": "aNum",
+        "description": [
+          "\nIt's a number. A special number."
+        ],
+        "source": {
+          "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/const_vars.ts",
+          "lineNumber": 78
+        },
+        "signature": [
+          "10"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-public.aNumArray",
+        "type": "Array",
+        "label": "aNumArray",
+        "description": [
+          "\nThis is an array of numbers. The type is implied."
+        ],
+        "source": {
+          "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/const_vars.ts",
+          "lineNumber": 68
+        },
+        "signature": [
+          "number[]"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-public.aStr",
+        "type": "string",
+        "label": "aStr",
+        "description": [
+          "\nA string that says hi to you!"
+        ],
+        "source": {
+          "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/const_vars.ts",
+          "lineNumber": 73
+        },
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-public.aStrArray",
+        "type": "Array",
+        "label": "aStrArray",
+        "description": [
+          "\nThis is an array of strings. The type is explicit."
+        ],
+        "source": {
+          "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/const_vars.ts",
+          "lineNumber": 63
+        },
+        "signature": [
+          "string[]"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-public.aUnionProperty",
+        "type": "CompoundType",
+        "label": "aUnionProperty",
+        "description": [
+          "\nThis is a complicated union type"
+        ],
+        "source": {
+          "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/const_vars.ts",
+          "lineNumber": 58
+        },
+        "signature": [
+          "string | number | (() => string) | ",
+          {
+            "pluginId": "pluginA",
+            "scope": "public",
+            "docId": "kibPluginAPluginApi",
+            "section": "def-public.CrazyClass",
+            "text": "CrazyClass"
+          },
+          "<any>"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.FnWithGeneric",
+        "type": "Type",
+        "label": "FnWithGeneric",
+        "tags": [],
+        "description": [
+          "\nThis is a type that defines a function.\n"
+        ],
+        "source": {
+          "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/types.ts",
+          "lineNumber": 26
+        },
+        "signature": [
+          "(t: T) => ",
+          {
+            "pluginId": "pluginA",
+            "scope": "public",
+            "docId": "kibPluginAPluginApi",
+            "section": "def-public.TypeWithGeneric",
+            "text": "TypeWithGeneric"
+          },
+          "<T>"
+        ],
+        "initialIsOpen": false
+      },
       {
         "tags": [],
         "id": "def-public.imAnAny",
@@ -948,8 +1017,7 @@
         "description": [],
         "source": {
           "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/index.ts",
-          "lineNumber": 19,
-          "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/index.ts#L19"
+          "lineNumber": 19
         },
         "signature": [
           "any"
@@ -964,11 +1032,104 @@
         "description": [],
         "source": {
           "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/index.ts",
-          "lineNumber": 20,
-          "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/index.ts#L20"
+          "lineNumber": 20
         },
         "signature": [
           "unknown"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.ImAType",
+        "type": "Type",
+        "label": "ImAType",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/types.ts",
+          "lineNumber": 19
+        },
+        "signature": [
+          "string | number | ",
+          {
+            "pluginId": "pluginA",
+            "scope": "public",
+            "docId": "kibPluginAFooPluginApi",
+            "section": "def-public.FooType",
+            "text": "FooType"
+          },
+          " | ",
+          {
+            "pluginId": "pluginA",
+            "scope": "public",
+            "docId": "kibPluginAPluginApi",
+            "section": "def-public.TypeWithGeneric",
+            "text": "TypeWithGeneric"
+          },
+          "<string> | ",
+          {
+            "pluginId": "pluginA",
+            "scope": "common",
+            "docId": "kibPluginAPluginApi",
+            "section": "def-common.ImACommonType",
+            "text": "ImACommonType"
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.IRefANotExportedType",
+        "type": "Type",
+        "label": "IRefANotExportedType",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/types.ts",
+          "lineNumber": 42
+        },
+        "signature": [
+          {
+            "pluginId": "pluginA",
+            "scope": "public",
+            "docId": "kibPluginAFooPluginApi",
+            "section": "def-public.ImNotExportedFromIndex",
+            "text": "ImNotExportedFromIndex"
+          },
+          " | { zed: \"hi\"; }"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-public.literalString",
+        "type": "string",
+        "label": "literalString",
+        "description": [
+          "\nI'm a type of string, but more specifically, a literal string type."
+        ],
+        "source": {
+          "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/const_vars.ts",
+          "lineNumber": 83
+        },
+        "signature": [
+          "\"HI\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.MultipleDeclarationsType",
+        "type": "Type",
+        "label": "MultipleDeclarationsType",
+        "tags": [],
+        "description": [
+          "\nCalling node.getSymbol().getDeclarations() will return > 1 declaration."
+        ],
+        "source": {
+          "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/types.ts",
+          "lineNumber": 40
+        },
+        "signature": [
+          "(typeof DayOfWeek)[]"
         ],
         "initialIsOpen": false
       },
@@ -980,8 +1141,7 @@
         "description": [],
         "source": {
           "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts",
-          "lineNumber": 78,
-          "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/fns.ts#L78"
+          "lineNumber": 78
         },
         "signature": [
           "(a: string, b: number | undefined, c: ",
@@ -1013,119 +1173,6 @@
         "initialIsOpen": false
       },
       {
-        "tags": [],
-        "id": "def-public.aUnionProperty",
-        "type": "CompoundType",
-        "label": "aUnionProperty",
-        "description": [
-          "\nThis is a complicated union type"
-        ],
-        "source": {
-          "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/const_vars.ts",
-          "lineNumber": 58,
-          "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/const_vars.ts#L58"
-        },
-        "signature": [
-          "string | number | (() => string) | ",
-          {
-            "pluginId": "pluginA",
-            "scope": "public",
-            "docId": "kibPluginAPluginApi",
-            "section": "def-public.CrazyClass",
-            "text": "CrazyClass"
-          },
-          "<any>"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-public.aStrArray",
-        "type": "Array",
-        "label": "aStrArray",
-        "description": [
-          "\nThis is an array of strings. The type is explicit."
-        ],
-        "source": {
-          "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/const_vars.ts",
-          "lineNumber": 63,
-          "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/const_vars.ts#L63"
-        },
-        "signature": [
-          "string[]"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-public.aNumArray",
-        "type": "Array",
-        "label": "aNumArray",
-        "description": [
-          "\nThis is an array of numbers. The type is implied."
-        ],
-        "source": {
-          "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/const_vars.ts",
-          "lineNumber": 68,
-          "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/const_vars.ts#L68"
-        },
-        "signature": [
-          "number[]"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-public.aStr",
-        "type": "string",
-        "label": "aStr",
-        "description": [
-          "\nA string that says hi to you!"
-        ],
-        "source": {
-          "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/const_vars.ts",
-          "lineNumber": 73,
-          "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/const_vars.ts#L73"
-        },
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-public.aNum",
-        "type": "number",
-        "label": "aNum",
-        "description": [
-          "\nIt's a number. A special number."
-        ],
-        "source": {
-          "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/const_vars.ts",
-          "lineNumber": 78,
-          "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/const_vars.ts#L78"
-        },
-        "signature": [
-          "10"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-public.literalString",
-        "type": "string",
-        "label": "literalString",
-        "description": [
-          "\nI'm a type of string, but more specifically, a literal string type."
-        ],
-        "source": {
-          "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/const_vars.ts",
-          "lineNumber": 83,
-          "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/const_vars.ts#L83"
-        },
-        "signature": [
-          "\"HI\""
-        ],
-        "initialIsOpen": false
-      },
-      {
         "id": "def-public.StringOrUndefinedType",
         "type": "Type",
         "label": "StringOrUndefinedType",
@@ -1135,8 +1182,7 @@
         ],
         "source": {
           "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/types.ts",
-          "lineNumber": 15,
-          "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/types.ts#L15"
+          "lineNumber": 15
         },
         "signature": [
           "undefined | string"
@@ -1151,117 +1197,10 @@
         "description": [],
         "source": {
           "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/types.ts",
-          "lineNumber": 17,
-          "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/types.ts#L17"
+          "lineNumber": 17
         },
         "signature": [
           "T[]"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.ImAType",
-        "type": "Type",
-        "label": "ImAType",
-        "tags": [],
-        "description": [],
-        "source": {
-          "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/types.ts",
-          "lineNumber": 19,
-          "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/types.ts#L19"
-        },
-        "signature": [
-          "string | number | ",
-          {
-            "pluginId": "pluginA",
-            "scope": "public",
-            "docId": "kibPluginAFooPluginApi",
-            "section": "def-public.FooType",
-            "text": "FooType"
-          },
-          " | ",
-          {
-            "pluginId": "pluginA",
-            "scope": "public",
-            "docId": "kibPluginAPluginApi",
-            "section": "def-public.TypeWithGeneric",
-            "text": "TypeWithGeneric"
-          },
-          "<string> | ",
-          {
-            "pluginId": "pluginA",
-            "scope": "common",
-            "docId": "kibPluginAPluginApi",
-            "section": "def-common.ImACommonType",
-            "text": "ImACommonType"
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.FnWithGeneric",
-        "type": "Type",
-        "label": "FnWithGeneric",
-        "tags": [],
-        "description": [
-          "\nThis is a type that defines a function.\n"
-        ],
-        "source": {
-          "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/types.ts",
-          "lineNumber": 26,
-          "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/types.ts#L26"
-        },
-        "signature": [
-          "(t: T) => ",
-          {
-            "pluginId": "pluginA",
-            "scope": "public",
-            "docId": "kibPluginAPluginApi",
-            "section": "def-public.TypeWithGeneric",
-            "text": "TypeWithGeneric"
-          },
-          "<T>"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.MultipleDeclarationsType",
-        "type": "Type",
-        "label": "MultipleDeclarationsType",
-        "tags": [],
-        "description": [
-          "\nCalling node.getSymbol().getDeclarations() will return > 1 declaration."
-        ],
-        "source": {
-          "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/types.ts",
-          "lineNumber": 40,
-          "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/types.ts#L40"
-        },
-        "signature": [
-          "(typeof DayOfWeek)[]"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.IRefANotExportedType",
-        "type": "Type",
-        "label": "IRefANotExportedType",
-        "tags": [],
-        "description": [],
-        "source": {
-          "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/types.ts",
-          "lineNumber": 42,
-          "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/types.ts#L42"
-        },
-        "signature": [
-          {
-            "pluginId": "pluginA",
-            "scope": "public",
-            "docId": "kibPluginAFooPluginApi",
-            "section": "def-public.ImNotExportedFromIndex",
-            "text": "ImNotExportedFromIndex"
-          },
-          " | { zed: \"hi\"; }"
         ],
         "initialIsOpen": false
       }
@@ -1282,8 +1221,7 @@
             ],
             "source": {
               "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/const_vars.ts",
-              "lineNumber": 21,
-              "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/const_vars.ts#L21"
+              "lineNumber": 21
             },
             "signature": [
               "typeof ",
@@ -1306,8 +1244,7 @@
             ],
             "source": {
               "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/const_vars.ts",
-              "lineNumber": 26,
-              "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/const_vars.ts#L26"
+              "lineNumber": 26
             },
             "signature": [
               "typeof ",
@@ -1340,8 +1277,7 @@
                 "description": [],
                 "source": {
                   "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/const_vars.ts",
-                  "lineNumber": 31,
-                  "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/const_vars.ts#L31"
+                  "lineNumber": 31
                 }
               }
             ],
@@ -1369,8 +1305,7 @@
             "label": "aPropertyInlineFn",
             "source": {
               "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/const_vars.ts",
-              "lineNumber": 31,
-              "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/const_vars.ts#L31"
+              "lineNumber": 31
             },
             "tags": [],
             "returnComment": []
@@ -1385,8 +1320,7 @@
             ],
             "source": {
               "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/const_vars.ts",
-              "lineNumber": 38,
-              "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/const_vars.ts#L38"
+              "lineNumber": 38
             }
           },
           {
@@ -1402,8 +1336,7 @@
                 "description": [],
                 "source": {
                   "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/const_vars.ts",
-                  "lineNumber": 44,
-                  "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/const_vars.ts#L44"
+                  "lineNumber": 44
                 }
               }
             ],
@@ -1413,8 +1346,7 @@
             "label": "nestedObj",
             "source": {
               "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/const_vars.ts",
-              "lineNumber": 43,
-              "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/const_vars.ts#L43"
+              "lineNumber": 43
             }
           }
         ],
@@ -1424,8 +1356,7 @@
         "label": "aPretendNamespaceObj",
         "source": {
           "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/const_vars.ts",
-          "lineNumber": 17,
-          "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/const_vars.ts#L17"
+          "lineNumber": 17
         },
         "initialIsOpen": false
       }
@@ -1451,8 +1382,7 @@
           ],
           "source": {
             "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/plugin.ts",
-            "lineNumber": 101,
-            "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/plugin.ts#L101"
+            "lineNumber": 101
           },
           "signature": [
             "(searchSpec: ",
@@ -1476,8 +1406,7 @@
           ],
           "source": {
             "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/plugin.ts",
-            "lineNumber": 109,
-            "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/plugin.ts#L109"
+            "lineNumber": 109
           },
           "signature": [
             "(searchSpec: { username: string; password: string; }) => string"
@@ -1495,8 +1424,7 @@
           ],
           "source": {
             "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/plugin.ts",
-            "lineNumber": 122,
-            "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/plugin.ts#L122"
+            "lineNumber": 122
           },
           "signature": [
             "(thingOne: number, thingTwo: string, thingThree: { nestedVar: number; }) => void"
@@ -1512,8 +1440,7 @@
           ],
           "source": {
             "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/plugin.ts",
-            "lineNumber": 133,
-            "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/plugin.ts#L133"
+            "lineNumber": 133
           },
           "signature": [
             "(obj: { fn: (foo: { param: string; }) => number; }) => () => { retFoo: () => string; }"
@@ -1529,15 +1456,13 @@
           ],
           "source": {
             "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/plugin.ts",
-            "lineNumber": 140,
-            "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/plugin.ts#L140"
+            "lineNumber": 140
           }
         }
       ],
       "source": {
         "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/plugin.ts",
-        "lineNumber": 89,
-        "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/plugin.ts#L89"
+        "lineNumber": 89
       },
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -1559,8 +1484,7 @@
           "description": [],
           "source": {
             "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/plugin.ts",
-            "lineNumber": 68,
-            "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/plugin.ts#L68"
+            "lineNumber": 68
           },
           "signature": [
             "() => ",
@@ -1576,8 +1500,7 @@
       ],
       "source": {
         "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/plugin.ts",
-        "lineNumber": 64,
-        "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/plugin.ts#L64"
+        "lineNumber": 64
       },
       "lifecycle": "start",
       "initialIsOpen": true
@@ -1610,15 +1533,13 @@
             "description": [],
             "source": {
               "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/common/index.ts",
-              "lineNumber": 12,
-              "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/common/index.ts#L12"
+              "lineNumber": 12
             }
           }
         ],
         "source": {
           "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/common/index.ts",
-          "lineNumber": 11,
-          "link": "https://github.com/elastic/kibana/tree/masterpackages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/common/index.ts#L11"
+          "lineNumber": 11
         },
         "initialIsOpen": false
       }

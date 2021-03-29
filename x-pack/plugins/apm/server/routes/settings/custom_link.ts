@@ -52,7 +52,8 @@ export const listCustomLinksRoute = createRoute({
     const { query } = context.params;
     // picks only the items listed in FILTER_OPTIONS
     const filters = pick(query, FILTER_OPTIONS);
-    return await listCustomLinks({ setup, filters });
+    const customLinks = await listCustomLinks({ setup, filters });
+    return { customLinks };
   },
 });
 
