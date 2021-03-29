@@ -157,8 +157,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('collapsedItemActions');
 
       const disableSwitchAfterReEnable = await testSubjects.find('disableSwitch');
-      const isChecked = await disableSwitchAfterReEnable.getAttribute('aria-checked');
-      expect(isChecked).to.eql('false');
+      await retry.try(async () => {
+        const isChecked = await disableSwitchAfterReEnable.getAttribute('aria-checked');
+        expect(isChecked).to.eql('false');
+      });
     });
 
     it('should mute single alert', async () => {
@@ -199,8 +201,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('collapsedItemActions');
 
       const muteSwitchAfterUnmute = await testSubjects.find('muteSwitch');
-      const isChecked = await muteSwitchAfterUnmute.getAttribute('aria-checked');
-      expect(isChecked).to.eql('false');
+
+      await retry.try(async () => {
+        const isChecked = await muteSwitchAfterUnmute.getAttribute('aria-checked');
+        expect(isChecked).to.eql('false');
+      });
     });
 
     it('should delete single alert', async () => {
