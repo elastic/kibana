@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiFilterButton, hexToRgb } from '@elastic/eui';
 import { useIndexPatternContext } from '../../hooks/use_default_index_pattern';
 import { useUrlStorage } from '../../hooks/use_url_strorage';
@@ -74,6 +74,16 @@ export function FilterValueButton({
 
   const forceOpenNested = isNestedOpen?.value === value && isNestedOpen.negate === negate;
 
+  const filters = useMemo(() => {
+    return [
+      {
+        term: {
+          [field]: value,
+        },
+      },
+    ];
+  }, [field, value]);
+
   return nestedField && forceOpenNested ? (
     <FieldValueSuggestions
       button={button}
@@ -81,13 +91,7 @@ export function FilterValueButton({
       indexPattern={indexPattern}
       sourceField={nestedField}
       onChange={onNestedChange}
-      filters={[
-        {
-          term: {
-            [field]: value,
-          },
-        },
-      ]}
+      filters={filters}
       forceOpen={forceOpenNested}
       anchorPosition="rightCenter"
       time={series.time}

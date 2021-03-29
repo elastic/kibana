@@ -8,17 +8,13 @@
 import { useUrlStorage } from './use_url_strorage';
 import { UrlFilter } from '../types';
 
-interface Props {
-  seriesId: string;
-}
-
-interface UpdateFilter {
+export interface UpdateFilter {
   field: string;
   value: string;
   negate?: boolean;
 }
 
-export const useSeriesFilters = ({ seriesId }: Props) => {
+export const useSeriesFilters = ({ seriesId }: { seriesId: string }) => {
   const { series, setSeries } = useUrlStorage(seriesId);
 
   const filters = series.filters ?? [];

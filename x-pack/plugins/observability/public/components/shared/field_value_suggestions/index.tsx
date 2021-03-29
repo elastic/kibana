@@ -10,14 +10,14 @@ import React, { useState } from 'react';
 import { useDebounce } from 'react-use';
 import { PopoverAnchorPosition } from '@elastic/eui/src/components/popover/popover';
 import { useValuesList } from '../../../hooks/use_values_list';
-import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
+import { IndexPattern } from '../../../../../../../src/plugins/data/common';
 import { FieldValueSelection } from './field_value_selection';
 import { ESFilter } from '../../../../../../../typings/elasticsearch';
 
 export interface FieldValueSuggestionsProps {
   value?: string;
   label: string;
-  indexPattern: IIndexPattern;
+  indexPattern: IndexPattern;
   sourceField: string;
   onChange: (val?: string) => void;
   filters: ESFilter[];

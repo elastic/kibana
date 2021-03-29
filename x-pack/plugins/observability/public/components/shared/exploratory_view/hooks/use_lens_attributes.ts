@@ -11,12 +11,12 @@ import { LensAttributes } from '../configurations/lens_attributes';
 import { useUrlStorage } from './use_url_strorage';
 import { getDefaultConfigs } from '../configurations/default_configs';
 
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
+import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { DataSeries, SeriesUrl, UrlFilter } from '../types';
 
 interface Props {
   seriesId: string;
-  indexPattern?: IIndexPattern | null;
+  indexPattern?: IndexPattern | null;
 }
 
 export const getFiltersFromDefs = (

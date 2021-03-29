@@ -49,7 +49,7 @@ describe('Series Builder ReportDefinitionCol', function () {
   it('should be able to remove selected definition', function () {
     render(<ReportDefinitionCol dataViewSeries={dataViewSeries} />);
 
-    const removeBtn = screen.getByRole('button', { name: /elastic-co/i });
+    const removeBtn = screen.getByText(/elastic-co/i);
 
     fireEvent.click(removeBtn);
 

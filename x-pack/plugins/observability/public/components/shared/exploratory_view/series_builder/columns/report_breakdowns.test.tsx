@@ -12,7 +12,7 @@ import { getDefaultConfigs } from '../../configurations/default_configs';
 import { mockIndexPattern, mockUrlStorage } from '../../rtl_helpers';
 import { NEW_SERIES_KEY } from '../../hooks/use_url_strorage';
 import { ReportBreakdowns } from './report_breakdowns';
-import { USER_AGENT_NAME, USER_AGENT_OS } from '../../configurations/data/elasticsearch_fieldnames';
+import { USER_AGENT_OS } from '../../configurations/data/elasticsearch_fieldnames';
 
 describe('Series Builder ReportBreakdowns', function () {
   const dataViewSeries = getDefaultConfigs({

@@ -23,10 +23,12 @@ describe('ExploratoryViewHeader', function () {
 
   it('should be able to click open in lens', function () {
     mockUrlStorage({
-      'uptime-pings-histogram': {
-        reportType: 'upp',
-        breakdown: 'monitor.status',
-        time: { from: 'now-15m', to: 'now' },
+      data: {
+        'uptime-pings-histogram': {
+          reportType: 'upp',
+          breakdown: 'monitor.status',
+          time: { from: 'now-15m', to: 'now' },
+        },
       },
     });
 

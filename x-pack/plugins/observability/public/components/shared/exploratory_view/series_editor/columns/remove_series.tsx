@@ -20,5 +20,13 @@ export function RemoveSeries({ series }: Props) {
   const onClick = () => {
     removeSeries(series.id);
   };
-  return <EuiButtonIcon iconType="cross" color="primary" onClick={onClick} size="m" />;
+  return (
+    <EuiButtonIcon
+      aria-label={'Click to remove series'}
+      iconType="cross"
+      color="primary"
+      onClick={onClick}
+      size="m"
+    />
+  );
 }

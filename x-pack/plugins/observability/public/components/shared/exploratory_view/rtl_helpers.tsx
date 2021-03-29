@@ -33,9 +33,12 @@ import * as useUrlHook from './hooks/use_url_strorage';
 import * as useSeriesFilterHook from './hooks/use_series_filters';
 import * as useHasDataHook from '../../../hooks/use_has_data';
 import * as useValuesListHook from '../../../hooks/use_values_list';
-import { getStubIndexPattern } from '../../../../../../../src/plugins/data/public/index_patterns/index_pattern.stub';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { getStubIndexPattern } from '../../../../../../../src/plugins/data/public/index_patterns/index_pattern.stub';
 import indexPatternData from './configurations/data/index_pattern.json';
+
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { setIndexPatterns } from '../../../../../../../src/plugins/data/public/services';
 import { IndexPatternsContract } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
 import { UrlFilter } from './types';
@@ -56,8 +59,7 @@ interface MockKibanaProviderProps<ExtraCore extends Partial<CoreStart>>
   history: History;
 }
 
-interface MockRouterProps<ExtraCore extends Partial<CoreStart>>
-  extends MockKibanaProviderProps<ExtraCore> {}
+type MockRouterProps<ExtraCore extends Partial<CoreStart>> = MockKibanaProviderProps<ExtraCore>;
 
 type Url =
   | string
@@ -219,7 +221,7 @@ const getHistoryFromUrl = (url: Url) => {
 
 export const mockFetcher = (data: any) => {
   return jest.spyOn(fetcherHook, 'useFetcher').mockReturnValue({
-    data: data,
+    data,
     status: fetcherHook.FETCH_STATUS.SUCCESS,
     refetch: jest.fn(),
   });
@@ -242,7 +244,7 @@ export const mockUseValuesList = (values?: string[]) => {
 };
 
 export const mockUrlStorage = ({ data, filters }: { data?: AllSeries; filters?: UrlFilter[] }) => {
-  let mockDataSeries = data || {
+  const mockDataSeries = data || {
     'performance-distribution': {
       reportType: 'pld',
       breakdown: 'user_agent.name',

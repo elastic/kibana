@@ -96,6 +96,7 @@ export function XYChartTypes({
           </EuiButton>
         ) : (
           <EuiButtonIcon
+            aria-label={vizTypes.find(({ id }) => id === value)?.label}
             iconType={vizTypes.find(({ id }) => id === value)?.icon!}
             onClick={() => {
               setIsOpen((prevState) => !prevState);

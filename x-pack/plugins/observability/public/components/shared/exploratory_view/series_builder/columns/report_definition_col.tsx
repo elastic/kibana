@@ -72,8 +72,8 @@ export function ReportDefinitionCol({ dataViewSeries }: { dataViewSeries: DataSe
                       color="hollow"
                       onClick={() => onRemove(field)}
                       iconOnClick={() => onRemove(field)}
-                      iconOnClickAriaLabel={''}
-                      onClickAriaLabel={''}
+                      iconOnClickAriaLabel={'Click to remove'}
+                      onClickAriaLabel={'Click to remove'}
                     >
                       {rtd?.[field]}
                     </EuiBadge>

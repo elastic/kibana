@@ -13,7 +13,7 @@ import { ReportTypes } from '../series_builder';
 
 describe('ReportTypesCol', function () {
   it('should render properly', function () {
-    render(<ReportTypesCol reportTypes={ReportTypes['rum']} />);
+    render(<ReportTypesCol reportTypes={ReportTypes.rum} />);
     screen.getByText('Performance distribution');
     screen.getByText('KPI over time');
   });
@@ -25,7 +25,7 @@ describe('ReportTypesCol', function () {
 
   it('should set series on change', function () {
     const { setSeries } = mockUrlStorage({});
-    render(<ReportTypesCol reportTypes={ReportTypes['synthetics']} />);
+    render(<ReportTypesCol reportTypes={ReportTypes.synthetics} />);
 
     fireEvent.click(screen.getByText(/monitor duration/i));
 
@@ -50,7 +50,7 @@ describe('ReportTypesCol', function () {
       },
     });
 
-    render(<ReportTypesCol reportTypes={ReportTypes['synthetics']} />);
+    render(<ReportTypesCol reportTypes={ReportTypes.synthetics} />);
 
     const button = screen.getByRole('button', {
       name: /pings histogram/i,

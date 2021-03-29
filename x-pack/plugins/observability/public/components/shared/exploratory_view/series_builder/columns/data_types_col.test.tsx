@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, screen } from '@testing-library/react';
+import { act, fireEvent, screen } from '@testing-library/react';
 import { mockUrlStorage, render } from '../../rtl_helpers';
 import { dataTypes, DataTypesCol } from './data_types_col';
 import { NEW_SERIES_KEY } from '../../hooks/use_url_strorage';
@@ -23,15 +23,17 @@ describe('DataTypesCol', function () {
   it('should set series on change', function () {
     const { setSeries } = mockUrlStorage({});
 
-    const { getByText } = render(<DataTypesCol />);
+    render(<DataTypesCol />);
 
-    fireEvent.click(getByText(/user experience\(rum\)/i));
+    act(() => {
+      fireEvent.click(screen.getByText(/user experience\(rum\)/i));
+    });
 
     expect(setSeries).toHaveBeenCalledTimes(1);
     expect(setSeries).toHaveBeenCalledWith('newSeriesKey', { dataType: 'rum' });
   });
 
-  it('should set series on change', function () {
+  it('should set series on change on already selected', function () {
     const { setSeries } = mockUrlStorage({
       data: {
         [NEW_SERIES_KEY]: {
@@ -50,7 +52,10 @@ describe('DataTypesCol', function () {
     });
 
     expect(button.classList).toContain('euiButton--fill');
-    fireEvent.click(button);
+
+    act(() => {
+      fireEvent.click(button);
+    });
 
     // undefined on click selected
     expect(setSeries).toHaveBeenCalledWith('newSeriesKey', { dataType: undefined });

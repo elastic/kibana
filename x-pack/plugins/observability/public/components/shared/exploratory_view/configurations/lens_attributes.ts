@@ -23,7 +23,10 @@ import {
 } from '../../../../../../../../src/plugins/data/common';
 import { FieldLabels } from './constants';
 import { DataSeries, UrlFilter } from '../types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { XYCurveType } from '../../../../../../lens/public/xy_visualization/types';
+
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { DataType } from '../../../../../../lens/public/types';
 
 function getLayerReferenceName(layerId: string) {
