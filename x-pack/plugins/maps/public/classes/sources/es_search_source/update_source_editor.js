@@ -15,7 +15,6 @@ import { getIndexPatternService } from '../../../kibana_services';
 import { i18n } from '@kbn/i18n';
 import {
   getGeoTileAggNotSupportedReason,
-  getTermsFields,
   getSourceFields,
   supportsGeoTileAgg,
 } from '../../../index_pattern_util';
@@ -38,7 +37,6 @@ export class UpdateSourceEditor extends Component {
 
   state = {
     sourceFields: null,
-    termFields: null,
     sortFields: null,
     supportsClustering: false,
     mvtDisabledReason: null,
@@ -100,7 +98,6 @@ export class UpdateSourceEditor extends Component {
       clusteringDisabledReason: getGeoTileAggNotSupportedReason(geoField),
       mvtDisabledReason: null,
       sourceFields: sourceFields,
-      termFields: getTermsFields(indexPattern.fields), //todo change term fields to use fields
       sortFields: indexPattern.fields.filter(
         (field) => field.sortable && !indexPatterns.isNestedField(field)
       ), //todo change sort fields to use fields
@@ -210,7 +207,6 @@ export class UpdateSourceEditor extends Component {
           scalingType={this.props.scalingType}
           supportsClustering={this.state.supportsClustering}
           clusteringDisabledReason={this.state.clusteringDisabledReason}
-          termFields={this.state.termFields}
         />
       </EuiPanel>
     );

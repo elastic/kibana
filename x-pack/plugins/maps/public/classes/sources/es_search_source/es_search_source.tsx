@@ -60,6 +60,7 @@ import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { DataRequest } from '../../util/data_request';
 import { SortDirection, SortDirectionNumeric } from '../../../../../../../src/plugins/data/common';
 import { isValidStringConfig } from '../../util/valid_string_config';
+import { TopHitsUpdateSourceEditor } from './top_hits';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.esSearchTitle', {
   defaultMessage: 'Documents',
@@ -166,6 +167,22 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   }
 
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null {
+    if (this._isTopHits()) {
+      return (
+        <TopHitsUpdateSourceEditor
+          source={this}
+          indexPatternId={this.getIndexPatternId()}
+          onChange={sourceEditorArgs.onChange}
+          tooltipFields={this._tooltipFields}
+          sortField={this._descriptor.sortField}
+          sortOrder={this._descriptor.sortOrder}
+          filterByMapBounds={this.isFilterByMapBounds()}
+          topHitsSplitField={this._descriptor.topHitsSplitField}
+          topHitsSize={this._descriptor.topHitsSize}
+        />
+      );
+    }
+
     const getGeoField = () => {
       return this._getGeoField();
     };
@@ -656,6 +673,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
 
   getSyncMeta(): VectorSourceSyncMeta | null {
     return {
+      filterByMapBounds: this._descriptor.filterByMapBounds,
       sortField: this._descriptor.sortField,
       sortOrder: this._descriptor.sortOrder,
       scalingType: this._descriptor.scalingType,
