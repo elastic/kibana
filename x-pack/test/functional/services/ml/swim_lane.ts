@@ -209,7 +209,7 @@ export function SwimLaneProvider({ getService }: FtrProviderContext) {
       await this.assertPageSize(testSubj, rowsCount);
     },
 
-    async waitForSwimLanesToload() {
+    async waitForSwimLanesToLoad() {
       // when updating the swim lanes, the old lanes might still be displayed
       // for some time, before the loading indicator is displayed
 
