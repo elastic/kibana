@@ -69,7 +69,7 @@ const createRequest = ({ type, id, initialNamespaces }: CreateTestCase) => ({
   initialNamespaces,
 });
 
-export function createTestSuiteFactory(es: any, esArchiver: any, supertest: SuperTest<any>) {
+export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
   const expectSavedObjectForbidden = expectResponses.forbiddenTypes('create');
   const expectResponseBody = (
     testCase: CreateTestCase,
