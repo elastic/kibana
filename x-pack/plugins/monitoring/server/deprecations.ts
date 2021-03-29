@@ -45,9 +45,7 @@ export const deprecations = ({
     ),
     renameFromRoot('xpack.monitoring', 'monitoring'),
     (config, fromPath, logger) => {
-      const clusterAlertsEnabled = get(config, 'cluster_alerts.enabled');
-      const emailNotificationsEnabled =
-        clusterAlertsEnabled && get(config, 'cluster_alerts.email_notifications.enabled');
+      const emailNotificationsEnabled = get(config, 'cluster_alerts.email_notifications.enabled');
       if (emailNotificationsEnabled && !get(config, CLUSTER_ALERTS_ADDRESS_CONFIG_KEY)) {
         logger(
           `Config key [${fromPath}.${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}] will be required for email notifications to work in 7.0."`

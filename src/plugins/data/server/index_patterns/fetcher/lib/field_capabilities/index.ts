@@ -7,5 +7,4 @@
  */
 
 export { getFieldCapabilities } from './field_capabilities';
-export { FieldCapsResponse } from './field_caps_response';
 export { shouldReadFieldFromDocValues } from './should_read_field_from_doc_values';

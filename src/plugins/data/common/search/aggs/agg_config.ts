@@ -240,7 +240,9 @@ export class AggConfig {
     const output = this.write(aggConfigs) as any;
 
     const configDsl = {} as any;
-    configDsl[this.type.dslName || this.type.name] = output.params;
+    if (!this.type.hasNoDslParams) {
+      configDsl[this.type.dslName || this.type.name] = output.params;
+    }
 
     // if the config requires subAggs, write them to the dsl as well
     if (this.subAggs.length) {
