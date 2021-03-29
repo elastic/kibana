@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { PRECONFIGURATION_API_ROUTES } from '../../../../plugins/fleet/common/constants';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
@@ -32,7 +33,7 @@ export default function (providerContext: FtrProviderContext) {
     // Basic health check for the API; functionality is covered by the unit tests
     it('should succeed with an empty payload', async () => {
       const { body } = await supertest
-        .put('/api/fleet/preconfiguration')
+        .put(PRECONFIGURATION_API_ROUTES.PUT_PRECONFIG)
         .set('kbn-xsrf', 'xxxx')
         .send({})
         .expect(200);

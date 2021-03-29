@@ -269,6 +269,7 @@ export class FleetPlugin
       registerSettingsRoutes(routerSuperuserOnly);
       registerDataStreamRoutes(routerSuperuserOnly);
       registerEPMRoutes(routerSuperuserOnly);
+      registerPreconfigurationRoutes(routerSuperuserOnly);
 
       // Conditional config routes
       if (config.agents.enabled) {
@@ -289,7 +290,6 @@ export class FleetPlugin
             router: routerSuperuserOnly,
             basePath: core.http.basePath,
           });
-          registerPreconfigurationRoutes(routerSuperuserOnly);
           // Do not enforce superuser role for Elastic Agent routes
           registerElasticAgentRoutes(router, config);
         }

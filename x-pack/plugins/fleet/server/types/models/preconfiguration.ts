@@ -7,6 +7,8 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import semverValid from 'semver/functions/valid';
+import { AgentPolicyBaseSchema } from './agent_policy';
+import { NamespaceSchema } from './package_policy';
 
 const varsSchema = schema.maybe(
   schema.arrayOf(
@@ -35,13 +37,9 @@ export const PreconfiguredPackagesSchema = schema.arrayOf(
 
 export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
   schema.object({
-    name: schema.string(),
+    ...AgentPolicyBaseSchema,
+    namespace: schema.maybe(NamespaceSchema),
     id: schema.oneOf([schema.string(), schema.number()]),
-    namespace: schema.maybe(schema.string()),
-    description: schema.maybe(schema.string()),
-    monitoring_enabled: schema.maybe(
-      schema.arrayOf(schema.oneOf([schema.literal('logs'), schema.literal('metrics')]))
-    ),
     package_policies: schema.arrayOf(
       schema.object({
         name: schema.string(),
@@ -49,7 +47,7 @@ export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
           name: schema.string(),
         }),
         description: schema.maybe(schema.string()),
-        namespace: schema.maybe(schema.string()),
+        namespace: schema.maybe(NamespaceSchema),
         inputs: schema.maybe(
           schema.arrayOf(
             schema.object({
