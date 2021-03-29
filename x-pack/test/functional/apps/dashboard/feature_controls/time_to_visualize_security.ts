@@ -77,7 +77,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.security.forceLogout();
     });
 
-    describe('lens by value works without library save permissions', () => {
+    describe.only('lens by value works without library save permissions', () => {
       before(async () => {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.preserveCrossAppState();
@@ -120,11 +120,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await PageObjects.lens.configureDimension({
           dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-          operation: 'avg',
+          operation: 'average',
           field: 'bytes',
         });
 
         await PageObjects.lens.switchToVisualization('lnsMetric');
+
         await PageObjects.lens.waitForVisualization();
         await PageObjects.lens.assertMetric('Average of bytes', '5,727.322');
 
