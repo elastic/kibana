@@ -354,6 +354,10 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     [swimlaneData?.fieldName]
   );
 
+  console.log(swimLanePoints, '___swimLanePoints___');
+
+  console.log(swimlaneData.interval * 1000, '___swimlaneData.interval * 1000___');
+
   // A resize observer is required to compute the bucket span based on the chart width to fetch the data accordingly
   return (
     <EuiResizeObserver onResize={resizeHandler}>

@@ -18,6 +18,7 @@ export * from './datatable_visualization/datatable_visualization';
 export * from './metric_visualization/metric_visualization';
 export * from './pie_visualization/pie_visualization';
 export * from './xy_visualization/xy_visualization';
+export * from './heatmap_visualization/heatmap_visualization';
 
 export * from './indexpattern_datasource/indexpattern';
 
