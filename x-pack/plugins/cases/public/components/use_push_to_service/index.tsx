@@ -27,7 +27,7 @@ export interface UsePushToService {
   connector: CaseConnector;
   caseServices: CaseServices;
   connectors: ActionConnector[];
-  onConfigureCasesNavClick: () => void;
+  onConfigureCasesNavClick: (ev: React.MouseEvent) => void;
   updateCase: (newCase: Case) => void;
   userCanCrud: boolean;
   isValidConnector: boolean;
