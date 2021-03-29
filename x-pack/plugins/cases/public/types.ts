@@ -15,6 +15,7 @@ import {
 import { AllCasesProps } from './components/all_cases';
 import { CreateCaseProps } from './components/create';
 import { ConfigureCasesProps } from './components/configure_cases';
+import { CaseViewProps } from './components/case_view';
 
 export interface SetupPlugins {
   security: SecurityPluginSetup;
@@ -38,6 +39,7 @@ export type StartServices = CoreStart &
 
 export interface CasesUiStart {
   getAllCases: (props: AllCasesProps) => ReactElement<AllCasesProps>;
+  getCaseView: (props: CaseViewProps) => ReactElement<CaseViewProps>;
   getCreateCase: (props: CreateCaseProps) => ReactElement<CreateCaseProps>;
   getConfigureCases: (props: ConfigureCasesProps) => ReactElement<ConfigureCasesProps>;
 }

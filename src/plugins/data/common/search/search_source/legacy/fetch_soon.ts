@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { UI_SETTINGS } from '../../../constants';
 import { FetchHandlers, SearchRequest } from '../fetch';
 import { ISearchOptions } from '../../index';
@@ -57,9 +57,11 @@ async function delayedFetch(
   options: ISearchOptions,
   fetchHandlers: FetchHandlers,
   ms: number
-): Promise<SearchResponse<any>> {
+): Promise<estypes.SearchResponse<any>> {
   if (ms === 0) {
-    return callClient([request], [options], fetchHandlers)[0];
+    return callClient([request], [options], fetchHandlers)[0] as Promise<
+      estypes.SearchResponse<any>
+    >;
   }
 
   const i = requestsToFetch.length;

@@ -7,7 +7,7 @@
 
 import { KibanaServices } from '../../common/lib/kibana';
 
-import { CommentType, CaseStatuses } from '../../../../cases/common/api';
+import { ConnectorTypes, CommentType, CaseStatuses } from '../../../../cases/common/api';
 import { CASES_URL } from '../../../../cases/common';
 
 import {

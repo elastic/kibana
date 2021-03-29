@@ -32,17 +32,17 @@ async function getIndexTemplate(
     ignore: [404],
   };
 
-  const response = await client.indices.getIndexTemplate<{
-    index_templates: TemplateFromEs[];
-  }>(
+  const response = await client.indices.getIndexTemplate(
     {
       name: templateName,
     },
     options
   );
 
-  const { index_templates: templates } = response.body;
-  return templates?.find((template) => template.name === templateName)?.index_template;
+  const { index_templates: templates } = response.body as {
+    index_templates: TemplateFromEs[];
+  };
+  return templates.find((template) => template.name === templateName)?.index_template;
 }
 
 async function updateIndexTemplate(

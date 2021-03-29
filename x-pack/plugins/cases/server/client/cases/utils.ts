@@ -9,17 +9,17 @@ import { i18n } from '@kbn/i18n';
 import { flow } from 'lodash';
 import {
   ActionConnector,
-  CaseResponse,
   CaseFullExternalService,
+  CaseResponse,
   CaseUserActionsResponse,
+  CommentAttributes,
+  CommentRequestAlertType,
+  CommentRequestUserType,
   CommentResponse,
   CommentResponseAlertsType,
   CommentType,
   ConnectorMappingsAttributes,
   ConnectorTypes,
-  CommentAttributes,
-  CommentRequestUserType,
-  CommentRequestAlertType,
 } from '../../../common';
 import { ActionsClient } from '../../../../actions/server';
 import { externalServiceFormatters, FormatterConnectorTypes } from '../../connectors';
@@ -27,8 +27,8 @@ import { CasesClientGetAlertsResponse } from '../../client/alerts/types';
 import {
   BasicParams,
   EntityInformation,
-  ExternalServiceParams,
   ExternalServiceComment,
+  ExternalServiceParams,
   Incident,
   MapIncident,
   PipedField,
