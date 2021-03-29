@@ -10,6 +10,7 @@ import { EuiButton, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { Case, SubCase } from '../../../../../../cases/common';
 import { APP_ID } from '../../../../../common/constants';
 import { timelineSelectors } from '../../../../timelines/store/timeline';
 import { useAllCasesModal } from '../../../../cases/components/use_all_cases_modal';
@@ -20,7 +21,6 @@ import { TimelineStatus, TimelineId, TimelineType } from '../../../../../common/
 import { getCreateCaseUrl, getCaseDetailsUrl } from '../../../../common/components/link_to';
 import { SecurityPageName } from '../../../../app/types';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
-import { Case, SubCase } from '../../../../cases/containers/types';
 import * as i18n from '../../timeline/properties/translations';
 
 interface Props {

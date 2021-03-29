@@ -22,7 +22,7 @@ import styled, { css } from 'styled-components';
 import classnames from 'classnames';
 
 import * as i18n from './translations';
-import { CaseStatuses, CaseType } from '../../../common';
+import { CaseStatuses, CaseType, CommentRequestAlertType, CommentType } from '../../../common';
 import { getCasesColumns } from './columns';
 import { Case, DeleteCase, FilterOptions, SortFieldCase, SubCase } from '../../containers/types';
 import { useGetCases, UpdateCase } from '../../containers/use_get_cases';
@@ -44,6 +44,7 @@ import { getActions } from './actions';
 import { CasesTableFilters } from './table_filters';
 import { useUpdateCases } from '../../containers/use_bulk_update_case';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
+import { usePostComment } from '../../containers/use_post_comment';
 import { getActionLicenseError } from '../use_push_to_service/helpers';
 import { CaseCallOut } from '../callout';
 import { ConfigureCaseButton } from '../configure_cases/button';
@@ -112,6 +113,7 @@ const BasicTable = styled(EuiBasicTable)`
 BasicTable.displayName = 'BasicTable';
 
 export interface AllCasesProps {
+  alertData?: Omit<CommentRequestAlertType, 'type'>;
   configureCasesHref: string;
   createCaseHref: string;
   disabledStatuses?: CaseStatuses[];
@@ -122,10 +124,12 @@ export interface AllCasesProps {
   onCreateCaseNavClick?: (ev: React.MouseEvent) => void;
   onRowClick?: (theCase?: Case | SubCase) => void;
   userCanCrud: boolean;
+  updateCase?: (newCase: Case) => void;
 }
 
 export const AllCases = React.memo<AllCasesProps>(
   ({
+    alertData,
     configureCasesHref,
     createCaseHref,
     disabledStatuses,
@@ -136,6 +140,7 @@ export const AllCases = React.memo<AllCasesProps>(
     onCreateCaseNavClick,
     onRowClick,
     userCanCrud,
+    updateCase,
   }) => {
     const { actionLicense } = useGetActionLicense();
     const {
@@ -175,6 +180,10 @@ export const AllCases = React.memo<AllCasesProps>(
       isUpdated,
       updateBulkStatus,
     } = useUpdateCases();
+
+    // Post Comment to Case
+    const { postComment, isLoading: isCommentsUpdating } = usePostComment();
+
     const [deleteThisCase, setDeleteThisCase] = useState<DeleteCase>({
       title: '',
       id: '',
@@ -369,12 +378,12 @@ export const AllCases = React.memo<AllCasesProps>(
           onCaseDetailsNavClick,
         }),
       [
-        userCanCrud,
         actions,
         filterOptions.status,
-        isModal,
         getCaseDetailsHref,
+        isModal,
         onCaseDetailsNavClick,
+        userCanCrud,
       ]
     );
 
@@ -420,7 +429,17 @@ export const AllCases = React.memo<AllCasesProps>(
 
     const tableRowProps = useCallback(
       (theCase: Case) => {
-        const onTableRowClick = memoize(() => {
+        const onTableRowClick = memoize(async () => {
+          if (alertData != null) {
+            await postComment({
+              caseId: theCase.id,
+              data: {
+                type: CommentType.alert,
+                ...alertData,
+              },
+              updateCase,
+            });
+          }
           if (onRowClick) {
             onRowClick(theCase);
           }
@@ -432,7 +451,7 @@ export const AllCases = React.memo<AllCasesProps>(
           ...(isModal && theCase.type !== CaseType.collection ? { onClick: onTableRowClick } : {}),
         };
       },
-      [isModal, onRowClick]
+      [isModal, alertData, onRowClick, postComment, updateCase]
     );
 
     const enableBuckActions = userCanCrud && !isModal;
@@ -501,7 +520,7 @@ export const AllCases = React.memo<AllCasesProps>(
             </EuiFlexGroup>
           </CaseHeaderPage>
         )}
-        {(isCasesLoading || isDeleting || isUpdating) && !isDataEmpty && (
+        {(isCasesLoading || isDeleting || isUpdating || isCommentsUpdating) && !isDataEmpty && (
           <ProgressLoader size="xs" color="accent" className="essentialAnimation" />
         )}
         <TableWrap data-test-subj="table-wrap" loading={!isModal ? isCasesLoading : undefined}>
@@ -563,6 +582,7 @@ export const AllCases = React.memo<AllCasesProps>(
                 itemId="id"
                 items={data.cases}
                 itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+                loading={isCommentsUpdating}
                 noItemsMessage={
                   <EuiEmptyPrompt
                     title={<h3>{i18n.NO_CASES}</h3>}

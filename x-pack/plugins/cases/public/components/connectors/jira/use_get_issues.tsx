@@ -8,7 +8,7 @@
 import { isEmpty, debounce } from 'lodash/fp';
 import { useState, useEffect, useRef } from 'react';
 import { HttpSetup, ToastsApi } from 'kibana/public';
-import { ActionConnector } from '../../../containers/types';
+import { ActionConnector } from '../../../../common';
 import { getIssues } from './api';
 import { Issues } from './types';
 import * as i18n from './translations';

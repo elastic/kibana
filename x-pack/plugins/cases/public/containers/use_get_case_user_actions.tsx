@@ -10,10 +10,15 @@ import { useCallback, useEffect, useState, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 
 import { errorToToaster, useStateToaster } from '../components/toasters';
-import { CaseFullExternalService } from '../../common/api/cases';
+import {
+  CaseFullExternalService,
+  CaseConnector,
+  CaseExternalService,
+  CaseUserActions,
+  ElasticUser,
+} from '../../common';
 import { getCaseUserActions, getSubCaseUserActions } from './api';
 import * as i18n from './translations';
-import { CaseConnector, CaseExternalService, CaseUserActions, ElasticUser } from './types';
 import { convertToCamelCase, parseString } from './utils';
 
 export interface CaseService extends CaseExternalService {

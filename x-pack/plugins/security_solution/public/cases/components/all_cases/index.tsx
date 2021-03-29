@@ -8,8 +8,7 @@
 import React, { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 
-import { CaseStatuses } from '../../../../../cases/common';
-import { Case, SubCase } from '../../containers/types';
+import { Case, CaseStatuses, CommentRequestAlertType, SubCase } from '../../../../../cases/common';
 import {
   getCaseDetailsUrl,
   getConfigureCasesUrl,
@@ -20,20 +19,22 @@ import { SecurityPageName } from '../../../app/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { APP_ID } from '../../../../common/constants';
 
-interface AllCasesNavProps {
+export interface AllCasesNavProps {
   detailName: string;
   search?: string;
   subCaseId?: string;
 }
 
 interface AllCasesProps {
+  alertData?: Omit<CommentRequestAlertType, 'type'>;
   disabledStatuses?: CaseStatuses[];
   isModal?: boolean;
   onRowClick?: (theCase?: Case | SubCase) => void;
+  updateCase?: (newCase: Case) => void;
   userCanCrud: boolean;
 }
 export const AllCases = React.memo<AllCasesProps>(
-  ({ disabledStatuses, isModal = false, onRowClick, userCanCrud }) => {
+  ({ alertData, disabledStatuses, isModal = false, onRowClick, updateCase, userCanCrud }) => {
     const {
       cases: casesUi,
       application: { navigateToApp },
@@ -64,6 +65,7 @@ export const AllCases = React.memo<AllCasesProps>(
     );
 
     return casesUi.getAllCases({
+      alertData,
       configureCasesHref: formatUrl(getConfigureCasesUrl()),
       createCaseHref: formatUrl(getCreateCaseUrl()),
       disabledStatuses,
@@ -79,6 +81,7 @@ export const AllCases = React.memo<AllCasesProps>(
       onConfigureCasesNavClick: goToCaseConfigure,
       onCreateCaseNavClick: goToCreateCase,
       onRowClick,
+      updateCase,
       userCanCrud,
     });
   }

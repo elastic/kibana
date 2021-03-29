@@ -6,10 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
-export const VIEW_ALL_CASES = i18n.translate(
-  'xpack.securitySolution.recentCases.viewAllCasesLink',
+export const SEND_ALERT_TO_TIMELINE = i18n.translate(
+  'xpack.securitySolution.cases.caseView.sendAlertToTimelineTooltip',
   {
-    defaultMessage: 'View all cases',
+    defaultMessage: 'Investigate in timeline',
   }
 );

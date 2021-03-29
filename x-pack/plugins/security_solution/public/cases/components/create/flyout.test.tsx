@@ -5,56 +5,12 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-import React, { ReactNode } from 'react';
+import React from 'react';
 import { mount } from 'enzyme';
 
 import '../../../common/mock/match_media';
 import { CreateCaseFlyout } from './flyout';
 import { TestProviders } from '../../../common/mock';
-
-jest.mock('../create/form_context', () => {
-  return {
-    FormContext: ({
-      children,
-      onSuccess,
-    }: {
-      children: ReactNode;
-      onSuccess: ({ id }: { id: string }) => Promise<void>;
-    }) => {
-      return (
-        <>
-          <button
-            type="button"
-            data-test-subj="form-context-on-success"
-            onClick={async () => {
-              await onSuccess({ id: 'case-id' });
-            }}
-          >
-            {'submit'}
-          </button>
-          {children}
-        </>
-      );
-    },
-  };
-});
-
-jest.mock('../create/form', () => {
-  return {
-    CreateCaseForm: () => {
-      return <>{'form'}</>;
-    },
-  };
-});
-
-jest.mock('../create/submit_button', () => {
-  return {
-    SubmitCaseButton: () => {
-      return <>{'Submit'}</>;
-    },
-  };
-});
 
 const onCloseFlyout = jest.fn();
 const onSuccess = jest.fn();

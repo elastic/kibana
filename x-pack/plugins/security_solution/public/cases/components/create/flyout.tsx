@@ -9,18 +9,18 @@ import React, { memo } from 'react';
 import styled from 'styled-components';
 import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
 
-import { Case } from '../../containers/types';
 import * as i18n from '../../translations';
 import { useKibana } from '../../../common/lib/kibana';
+import { Case } from '../../../../../cases/common';
 
 export interface CreateCaseModalProps {
+  afterCaseCreated?: (theCase: Case) => Promise<void>;
   onCloseFlyout: () => void;
   onSuccess: (theCase: Case) => Promise<void>;
-  afterCaseCreated?: (theCase: Case) => Promise<void>;
 }
 
 const StyledFlyout = styled(EuiFlyout)`
-  ${({ theme }) => `w
+  ${({ theme }) => `
     z-index: ${theme.eui.euiZModal};
   `}
 `;
@@ -32,9 +32,9 @@ const FormWrapper = styled.div`
 `;
 
 const CreateCaseFlyoutComponent: React.FC<CreateCaseModalProps> = ({
-  onSuccess,
   afterCaseCreated,
   onCloseFlyout,
+  onSuccess,
 }) => {
   const { cases } = useKibana().services;
   return (
@@ -46,7 +46,6 @@ const CreateCaseFlyoutComponent: React.FC<CreateCaseModalProps> = ({
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <FormWrapper>
-          {/* TODO: STEPH TEST THIS*/}
           {cases.getCreateCase({
             afterCaseCreated,
             onCancel: onCloseFlyout,

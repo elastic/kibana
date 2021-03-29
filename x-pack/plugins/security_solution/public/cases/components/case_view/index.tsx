@@ -10,7 +10,7 @@ import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { SearchResponse } from 'elasticsearch';
 import { isEmpty } from 'lodash';
-import { Case } from '../../containers/types';
+
 import {
   getCaseDetailsUrl,
   getCaseDetailsUrlWithCommentId,
@@ -19,20 +19,20 @@ import {
   getRuleDetailsUrl,
   useFormatUrl,
 } from '../../../common/components/link_to';
+import { Ecs } from '../../../../common/ecs';
+import { Case } from '../../../../../cases/common';
 import { TimelineNonEcsData } from '../../../../common/search_strategy';
 import { TimelineId } from '../../../../common/types/timeline';
 import { SecurityPageName } from '../../../app/types';
 import { KibanaServices, useKibana } from '../../../common/lib/kibana';
 import { APP_ID, DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../common/constants';
-import { formatAlertToEcsSignal, useFetchAlertData } from '../user_action_tree/helpers';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { DetailsPanel } from '../../../timelines/components/side_panel';
-import { SEND_ALERT_TO_TIMELINE } from '../user_action_tree/translations';
 import { InvestigateInTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
-import { buildAlertsQuery } from './helpers';
-import { Ecs } from '../../../../common/ecs';
+import { buildAlertsQuery, formatAlertToEcsSignal, useFetchAlertData } from './helpers';
+import { SEND_ALERT_TO_TIMELINE } from './translations';
 
 interface Props {
   caseId: string;

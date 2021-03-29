@@ -7,7 +7,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { HttpSetup, ToastsApi } from 'kibana/public';
-import { ActionConnector } from '../../../containers/types';
+import { ActionConnector } from '../../../../common';
 import { getChoices } from './api';
 import { Choice } from './types';
 import * as i18n from './translations';

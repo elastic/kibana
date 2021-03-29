@@ -6,13 +6,14 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { CaseStatuses } from '../../../../../cases/common';
-import { Case, SubCase } from '../../containers/types';
+import { Case, CaseStatuses, CommentRequestAlertType, SubCase } from '../../../../../cases/common';
 import { AllCasesModal } from './all_cases_modal';
 
 export interface UseAllCasesModalProps {
-  onRowClick: (theCase?: Case | SubCase) => void;
+  alertData?: Omit<CommentRequestAlertType, 'type'>;
   disabledStatuses?: CaseStatuses[];
+  onRowClick: (theCase?: Case | SubCase) => void;
+  updateCase?: (newCase: Case) => void;
 }
 
 export interface UseAllCasesModalReturnedValues {
@@ -23,8 +24,10 @@ export interface UseAllCasesModalReturnedValues {
 }
 
 export const useAllCasesModal = ({
-  onRowClick,
+  alertData,
   disabledStatuses,
+  onRowClick,
+  updateCase,
 }: UseAllCasesModalProps): UseAllCasesModalReturnedValues => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const closeModal = useCallback(() => setIsModalOpen(false), []);
@@ -41,10 +44,12 @@ export const useAllCasesModal = ({
     () => ({
       modal: (
         <AllCasesModal
+          alertData={alertData}
+          disabledStatuses={disabledStatuses}
           isModalOpen={isModalOpen}
           onCloseCaseModal={closeModal}
           onRowClick={onClick}
-          disabledStatuses={disabledStatuses}
+          updateCase={updateCase}
         />
       ),
       isModalOpen,
@@ -52,7 +57,16 @@ export const useAllCasesModal = ({
       openModal,
       onRowClick,
     }),
-    [isModalOpen, closeModal, onClick, disabledStatuses, openModal, onRowClick]
+    [
+      alertData,
+      closeModal,
+      disabledStatuses,
+      isModalOpen,
+      onClick,
+      onRowClick,
+      openModal,
+      updateCase,
+    ]
   );
 
   return state;

@@ -9,7 +9,7 @@ import { useReducer, useCallback, useRef, useEffect } from 'react';
 
 import { errorToToaster, useStateToaster } from '../components/toasters';
 import { patchCase, patchSubCase } from './api';
-import { UpdateKey, UpdateByKey, CaseStatuses } from './types';
+import { UpdateKey, UpdateByKey, CaseStatuses } from '../../common';
 import * as i18n from './translations';
 import { createUpdateSuccessToaster } from './utils';
 

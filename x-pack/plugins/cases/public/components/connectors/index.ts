@@ -17,7 +17,7 @@ import {
   ResilientFieldsType,
 } from '../../../common';
 
-export { getActionType as getCaseConnectorUI } from './case';
+export { getActionType as getCaseConnectorUi } from './case';
 
 export * from './config';
 export * from './types';

@@ -131,15 +131,15 @@ export interface UseGetCases extends UseGetCasesState {
 }
 
 export const useGetCases = (
-  initialQueryParams?: QueryParams,
-  initialFilterOptions?: FilterOptions
+  initialQueryParams: Partial<QueryParams> = {},
+  initialFilterOptions: Partial<FilterOptions> = {}
 ): UseGetCases => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     data: initialData,
-    filterOptions: initialFilterOptions ?? DEFAULT_FILTER_OPTIONS,
+    filterOptions: { ...DEFAULT_FILTER_OPTIONS, ...initialFilterOptions },
     isError: false,
     loading: [],
-    queryParams: initialQueryParams ?? DEFAULT_QUERY_PARAMS,
+    queryParams: { ...DEFAULT_QUERY_PARAMS, ...initialQueryParams },
     selectedCases: [],
   });
   const [, dispatchToaster] = useStateToaster();
@@ -160,39 +160,41 @@ export const useGetCases = (
     dispatch({ type: 'UPDATE_FILTER_OPTIONS', payload: newFilters });
   }, []);
 
-  const fetchCases = useCallback(async (filterOptions: FilterOptions, queryParams: QueryParams) => {
-    try {
-      didCancelFetchCases.current = false;
-      abortCtrlFetchCases.current.abort();
-      abortCtrlFetchCases.current = new AbortController();
-      dispatch({ type: 'FETCH_INIT', payload: 'cases' });
+  const fetchCases = useCallback(
+    async (filterOptions: FilterOptions, queryParams: QueryParams) => {
+      try {
+        didCancelFetchCases.current = false;
+        abortCtrlFetchCases.current.abort();
+        abortCtrlFetchCases.current = new AbortController();
+        dispatch({ type: 'FETCH_INIT', payload: 'cases' });
 
-      const response = await getCases({
-        filterOptions,
-        queryParams,
-        signal: abortCtrlFetchCases.current.signal,
-      });
-
-      if (!didCancelFetchCases.current) {
-        dispatch({
-          type: 'FETCH_CASES_SUCCESS',
-          payload: response,
+        const response = await getCases({
+          filterOptions,
+          queryParams,
+          signal: abortCtrlFetchCases.current.signal,
         });
-      }
-    } catch (error) {
-      if (!didCancelFetchCases.current) {
-        if (error.name !== 'AbortError') {
-          errorToToaster({
-            title: i18n.ERROR_TITLE,
-            error: error.body && error.body.message ? new Error(error.body.message) : error,
-            dispatchToaster,
+
+        if (!didCancelFetchCases.current) {
+          dispatch({
+            type: 'FETCH_CASES_SUCCESS',
+            payload: response,
           });
         }
-        dispatch({ type: 'FETCH_FAILURE', payload: 'cases' });
+      } catch (error) {
+        if (!didCancelFetchCases.current) {
+          if (error.name !== 'AbortError') {
+            errorToToaster({
+              title: i18n.ERROR_TITLE,
+              error: error.body && error.body.message ? new Error(error.body.message) : error,
+              dispatchToaster,
+            });
+          }
+          dispatch({ type: 'FETCH_FAILURE', payload: 'cases' });
+        }
       }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    },
+    [dispatchToaster]
+  );
 
   const dispatchUpdateCaseProperty = useCallback(
     async ({ updateKey, updateValue, caseId, refetchCasesStatus, version }: UpdateCase) => {

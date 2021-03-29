@@ -8,9 +8,8 @@
 import React, { memo } from 'react';
 import { EuiModal, EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
 
-import { Case } from '../../containers/types';
 import * as i18n from '../../translations';
-import { CaseType } from '../../../../../cases/common';
+import { Case, CaseType } from '../../../../../cases/common';
 import { useKibana } from '../../../common/lib/kibana';
 
 export interface CreateCaseModalProps {
@@ -38,9 +37,9 @@ const CreateModalComponent: React.FC<CreateCaseModalProps> = ({
         {/* TODO: STEPH TEST THIS*/}
         {cases.getCreateCase({
           caseType,
+          hideConnectorServiceNowSir,
           onCancel: onCloseCaseModal,
           onSuccess,
-          hideConnectorServiceNowSir,
           withSteps: false,
         })}
       </EuiModalBody>

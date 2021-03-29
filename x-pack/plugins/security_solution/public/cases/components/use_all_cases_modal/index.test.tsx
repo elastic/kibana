@@ -43,6 +43,14 @@ jest.mock('../../../common/hooks/use_selector');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const onRowClick = jest.fn();
+const closeModal = jest.fn();
+const openModal = jest.fn();
+const defaultArgs = {
+  onRowClick,
+  closeModal,
+  openModal,
+  isModalOpen: true,
+};
 
 describe('useAllCasesModal', () => {
   let navigateToApp: jest.Mock;
@@ -55,7 +63,7 @@ describe('useAllCasesModal', () => {
 
   it('init', async () => {
     const { result } = renderHook<UseAllCasesModalProps, UseAllCasesModalReturnedValues>(
-      () => useAllCasesModal({ onRowClick }),
+      () => useAllCasesModal(defaultArgs),
       {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       }
@@ -66,7 +74,7 @@ describe('useAllCasesModal', () => {
 
   it('opens the modal', async () => {
     const { result } = renderHook<UseAllCasesModalProps, UseAllCasesModalReturnedValues>(
-      () => useAllCasesModal({ onRowClick }),
+      () => useAllCasesModal(defaultArgs),
       {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       }
@@ -81,7 +89,7 @@ describe('useAllCasesModal', () => {
 
   it('closes the modal', async () => {
     const { result } = renderHook<UseAllCasesModalProps, UseAllCasesModalReturnedValues>(
-      () => useAllCasesModal({ onRowClick }),
+      () => useAllCasesModal(defaultArgs),
       {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       }
@@ -97,7 +105,7 @@ describe('useAllCasesModal', () => {
 
   it('returns a memoized value', async () => {
     const { result, rerender } = renderHook<UseAllCasesModalProps, UseAllCasesModalReturnedValues>(
-      () => useAllCasesModal({ onRowClick }),
+      () => useAllCasesModal(defaultArgs),
       {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       }
@@ -112,7 +120,7 @@ describe('useAllCasesModal', () => {
 
   it('closes the modal when clicking a row', async () => {
     const { result } = renderHook<UseAllCasesModalProps, UseAllCasesModalReturnedValues>(
-      () => useAllCasesModal({ onRowClick }),
+      () => useAllCasesModal(defaultArgs),
       {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       }

@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
-export const VIEW_ALL_CASES = i18n.translate(
-  'xpack.securitySolution.recentCases.viewAllCasesLink',
-  {
-    defaultMessage: 'View all cases',
-  }
-);
+export * from '../../public/containers/types';
