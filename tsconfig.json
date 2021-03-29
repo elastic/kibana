@@ -123,6 +123,7 @@
     { "path": "./x-pack/plugins/stack_alerts/tsconfig.json" },
     { "path": "./x-pack/plugins/task_manager/tsconfig.json" },
     { "path": "./x-pack/plugins/telemetry_collection_xpack/tsconfig.json" },
+    { "path": "./x-pack/plugins/timeline/tsconfig.json" },
     { "path": "./x-pack/plugins/transform/tsconfig.json" },
     { "path": "./x-pack/plugins/translations/tsconfig.json" },
     { "path": "./x-pack/plugins/triggers_actions_ui/tsconfig.json" },
