@@ -32,7 +32,7 @@ function findColorSegment(
 
   // what about values in range
   const index = colors.findIndex((c, i) => comparison(value, minValue + (1 + i) * step) <= 0);
-  return colors[index - 1] || colors[0];
+  return colors[index] || colors[0];
 }
 
 function findColorsByStops(
@@ -42,7 +42,7 @@ function findColorsByStops(
   stops: number[]
 ) {
   const index = stops.findIndex((s) => comparison(value, s) <= 0);
-  return colors[index - 1] || colors[0];
+  return colors[index] || colors[0];
 }
 
 function getNormalizedValueByRange(
@@ -77,8 +77,12 @@ function workoutColorForCell(
 
   const maxValue = rangeMax ?? minMax.max;
   const minValue = rangeMin ?? minMax.min;
-  const normalizedMaxValue = stops.length && range !== 'percent' ? maxValue / 100 : maxValue;
-  const normalizedMinValue = stops.length && range !== 'percent' ? minValue / 100 : minValue;
+  // Stops are always within the 0-100 range
+  const normalizedMaxValue =
+    stops.length && range !== 'percent' ? (100 * maxValue) / (minMax.max || 1) : maxValue;
+  const normalizedMinValue =
+    stops.length && range !== 'percent' ? minValue / (minMax.min || 1) : minValue;
+
   // in case of shorter rangers, extends the steps on the sides to cover the whole set
   if (comparisonFn(normalizedValue, normalizedMaxValue) > 0) {
     return colors[colors.length - 1];
