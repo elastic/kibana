@@ -12,8 +12,7 @@ import { sendAlertToTimelineAction, determineToAndFrom } from './actions';
 import {
   mockEcsDataWithAlert,
   defaultTimelineProps,
-  mockTimelineApolloResult,
-  mockTimelineDetailsApollo,
+  mockTimelineResult,
   mockTimelineDetails,
 } from '../../../common/mock/';
 import { CreateTimeline, UpdateTimelineLoading } from './types';
@@ -26,7 +25,11 @@ import {
 } from '../../../../common/types/timeline';
 import { ISearchStart } from '../../../../../../../src/plugins/data/public';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
-import * as api from '../../../timelines/containers/api';
+import { getTimelineTemplate } from '../../../timelines/containers/api';
+
+jest.mock('../../../timelines/containers/api', () => ({
+  getTimelineTemplate: jest.fn(),
+}));
 
 describe('alert actions', () => {
   const anchor = '2020-03-01T17:59:46.349Z';
@@ -57,12 +60,7 @@ describe('alert actions', () => {
       searchSource: {} as ISearchStart['searchSource'],
     };
 
-    jest.spyOn(api, 'getTimeline').mockImplementation((id) => {
-      if (id != null) {
-        return Promise.resolve(mockTimelineApolloResult);
-      }
-      return Promise.resolve(mockTimelineDetailsApollo);
-    });
+    (getTimelineTemplate as jest.Mock).mockResolvedValue(mockTimelineResult);
 
     clock = sinon.useFakeTimers(unix);
   });
@@ -229,8 +227,8 @@ describe('alert actions', () => {
       });
 
       test('it invokes createTimeline with kqlQuery.filterQuery.kuery.kind as "kuery" if not specified in returned timeline template', async () => {
-        const mockTimelineApolloResultModified = {
-          ...mockTimelineApolloResult,
+        const mockTimelineResultModified = {
+          ...mockTimelineResult,
           kqlQuery: {
             filterQuery: {
               kuery: {
@@ -239,7 +237,7 @@ describe('alert actions', () => {
             },
           },
         };
-        jest.spyOn(api, 'getTimeline').mockResolvedValue(mockTimelineApolloResultModified);
+        (getTimelineTemplate as jest.Mock).mockResolvedValue(mockTimelineResultModified);
 
         await sendAlertToTimelineAction({
           createTimeline,
@@ -255,7 +253,7 @@ describe('alert actions', () => {
       });
 
       test('it invokes createTimeline with default timeline if apolloClient throws', async () => {
-        jest.spyOn(api, 'getTimeline').mockImplementation(() => {
+        (getTimelineTemplate as jest.Mock).mockImplementation(() => {
           throw new Error('Test error');
         });
 

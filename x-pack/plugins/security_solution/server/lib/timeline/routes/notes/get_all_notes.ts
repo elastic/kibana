@@ -70,7 +70,7 @@ export const getAllNotesRoute = (
           }
         }
 
-        return response.ok({ body: res });
+        return response.ok({ body: res ?? [] });
       } catch (err) {
         const error = transformError(err);
         const siemResponse = buildSiemResponse(response);

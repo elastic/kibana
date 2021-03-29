@@ -23,10 +23,11 @@ import {
   importTimelineResultSchema,
   ResponseFavoriteTimeline,
   AllTimelinesResponse,
-  SingleTimelineResponseType,
+  SingleTimelineResponse,
   allTimelinesResponse,
   responseFavoriteTimeline,
   GetTimelinesArgs,
+  SingleTimelineResponseType,
 } from '../../../common/types/timeline';
 import { TimelineInput, TimelineType } from '../../graphql/types';
 import {
@@ -66,7 +67,7 @@ const decodeTimelineResponse = (respTimeline?: TimelineResponse) =>
     fold(throwErrors(createToasterPlainError), identity)
   );
 
-const decodeSingleTimelineResponse = (respTimeline?: TimelineResponse) =>
+const decodeSingleTimelineResponse = (respTimeline?: SingleTimelineResponse) =>
   pipe(
     SingleTimelineResponseType.decode(respTimeline),
     fold(throwErrors(createToasterPlainError), identity)
@@ -270,7 +271,7 @@ export const installPrepackedTimelines = async (): Promise<ImportTimelineResultS
 };
 
 export const getTimeline = async (id: string) => {
-  const response = await KibanaServices.get().http.get<TimelineResponse>(TIMELINE_URL, {
+  const response = await KibanaServices.get().http.get<SingleTimelineResponse>(TIMELINE_URL, {
     query: {
       id,
     },
@@ -280,7 +281,7 @@ export const getTimeline = async (id: string) => {
 };
 
 export const getTimelineTemplate = async (templateTimelineId: string) => {
-  const response = await KibanaServices.get().http.get<TimelineResponse>(TIMELINE_URL, {
+  const response = await KibanaServices.get().http.get<SingleTimelineResponse>(TIMELINE_URL, {
     query: {
       template_timeline_id: templateTimelineId,
     },

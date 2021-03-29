@@ -26,3 +26,5 @@ export const getTimelinesQuerySchema = rt.partial({
   status: unionWithNullType(TimelineStatusLiteralRt),
   timelineType: unionWithNullType(TimelineTypeLiteralRt),
 });
+
+export type GetTimelinesArgs = rt.TypeOf<typeof getTimelinesQuerySchema>;

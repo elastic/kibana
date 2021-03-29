@@ -352,6 +352,8 @@ export const SingleTimelineResponseType = runtimeTypes.type({
   }),
 });
 
+export type SingleTimelineResponse = runtimeTypes.TypeOf<typeof SingleTimelineResponseType>;
+
 /**
  * All Timeline Saved object type with metadata
  */

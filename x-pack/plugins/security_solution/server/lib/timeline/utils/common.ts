@@ -63,6 +63,8 @@ export const formatErrors = (errors: rt.Errors): string[] => {
   return [...new Set(err)];
 };
 
+type ErrorFactory = (message: string) => Error;
+
 export const throwErrors = (createError: ErrorFactory) => (errors: rt.Errors) => {
   throw createError(formatErrors(errors).join('\n'));
 };

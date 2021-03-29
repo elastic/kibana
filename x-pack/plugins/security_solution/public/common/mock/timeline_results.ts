@@ -2169,7 +2169,7 @@ export const mockTimelineModel: TimelineModel = {
   version: '1',
 };
 
-export const mockTimelineResult: TimelineResult = {
+export const mockGetOneTimelineResult: TimelineResult = {
   savedObjectId: 'ef579e40-jibber-jabber',
   columns: timelineDefaults.columns.filter((column) => column.id !== 'event.action'),
   dateRange: { start: '2020-03-18T13:46:38.929Z', end: '2020-03-18T13:52:38.929Z' },
@@ -2196,9 +2196,9 @@ export const mockTimelineResult: TimelineResult = {
   version: '1',
 };
 
-export const mockTimelineApolloResult = {
+export const mockTimelineResult = {
   data: {
-    getOneTimeline: mockTimelineResult,
+    getOneTimeline: mockGetOneTimelineResult,
   },
   loading: false,
   networkStatus: 7,

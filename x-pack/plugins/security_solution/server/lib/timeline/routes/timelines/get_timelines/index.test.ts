@@ -12,24 +12,18 @@ import {
   requestContextMock,
   createMockConfig,
 } from '../../../../detection_engine/routes/__mocks__';
-import {
-  getTimelineOrNull,
-  getTimelineTemplateOrNull,
-  getAllTimeline,
-} from '../../../saved_object/timelines';
+import { getAllTimeline } from '../../../saved_object/timelines';
 
 import { mockGetCurrentUser } from '../../../__mocks__/import_timelines';
 import { getTimelineRequest } from '../../../__mocks__/request_responses';
 
-import { getTimelineRoute } from '.';
+import { getTimelinesRoute } from '.';
 
 jest.mock('../../../saved_object/timelines', () => ({
   getAllTimeline: jest.fn(),
-  getTimelineOrNull: jest.fn(),
-  getTimelineTemplateOrNull: jest.fn(),
 }));
 
-describe('get timeline', () => {
+describe('get all timelines', () => {
   let server: ReturnType<typeof serverMock.create>;
   let securitySetup: SecurityPluginSetup;
   let { context } = requestContextMock.createTools();
@@ -48,29 +42,17 @@ describe('get timeline', () => {
       authz: {},
     } as unknown) as SecurityPluginSetup;
 
-    getTimelineRoute(server.router, createMockConfig(), securitySetup);
+    getTimelinesRoute(server.router, createMockConfig(), securitySetup);
   });
 
-  test('should call getTimelineTemplateOrNull if templateTimelineId is given', async () => {
-    const templateTimelineId = '123';
-    await server.inject(getTimelineRequest({ template_timeline_id: templateTimelineId }), context);
-
-    expect((getTimelineTemplateOrNull as jest.Mock).mock.calls[0][1]).toEqual(templateTimelineId);
-  });
-
-  test('should call getTimelineOrNull if id is given', async () => {
-    const id = '456';
-
-    await server.inject(getTimelineRequest({ id }), context);
-
-    expect((getTimelineOrNull as jest.Mock).mock.calls[0][1]).toEqual(id);
-  });
-
-  test('should call getAllTimeline if nither templateTimelineId nor id is given', async () => {
-    (getAllTimeline as jest.Mock).mockResolvedValue({ totalCount: 3 });
-
+  test('should get the total count', async () => {
     await server.inject(getTimelineRequest(), context);
+    expect((getAllTimeline as jest.Mock).mock.calls[0][2]).toEqual({ pageSize: 1, pageIndex: 1 });
+  });
 
-    expect(getAllTimeline as jest.Mock).toHaveBeenCalledTimes(2);
+  test('should get all timelines with total count', async () => {
+    (getAllTimeline as jest.Mock).mockResolvedValue({ totalCount: 100 });
+    await server.inject(getTimelineRequest(), context);
+    expect((getAllTimeline as jest.Mock).mock.calls[1][2]).toEqual({ pageSize: 100, pageIndex: 1 });
   });
 });

@@ -12,7 +12,7 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { Provider } from 'react-redux';
 
 import { useInitSourcerer } from '.';
-import { mockPatterns, mockSource } from './mocks';
+import { mockPatterns } from './mocks';
 // import { SourcererScopeName } from '../../store/sourcerer/model';
 import { RouteSpyState } from '../../utils/route/types';
 import { SecurityPageName } from '../../../../common/constants';
@@ -28,7 +28,6 @@ import {
   SUB_PLUGINS_REDUCER,
 } from '../../mock';
 import { SourcererScopeName } from '../../store/sourcerer/model';
-const mockSourceDefaults = mockSource;
 
 const mockRouteSpy: RouteSpyState = {
   pageName: SecurityPageName.overview,
@@ -79,11 +78,6 @@ jest.mock('../../lib/kibana', () => ({
     },
   }),
   useUiSetting$: jest.fn().mockImplementation(() => [mockPatterns]),
-}));
-jest.mock('../../utils/apollo_context', () => ({
-  useApolloClient: jest.fn().mockReturnValue({
-    query: jest.fn().mockImplementation(() => Promise.resolve(mockSourceDefaults)),
-  }),
 }));
 
 describe('Sourcerer Hooks', () => {

@@ -16,9 +16,7 @@ import { useTimelineStatus } from '../use_timeline_status';
 import { OpenTimelineModal } from '.';
 
 jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../common/utils/apollo_context', () => ({
-  useApolloClient: () => ({}),
-}));
+
 jest.mock('../../../containers/all', () => {
   const originalModule = jest.requireActual('../../../containers/all');
   return {
