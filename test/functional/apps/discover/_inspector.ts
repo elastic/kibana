@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('inspect', () => {
     before(async () => {
-      await kibanaServer.savedObjects.clean({ types: ['search'] });
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await kibanaServer.importExport.load('discover');
       await esArchiver.loadIfNeeded('logstash_functional');
       // delete .kibana index and update configDoc

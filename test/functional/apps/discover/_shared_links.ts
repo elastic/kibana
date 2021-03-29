@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       log.debug('load kibana index with default index pattern');
-      await kibanaServer.savedObjects.clean({ types: ['search'] });
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await kibanaServer.importExport.load('discover');
       await esArchiver.loadIfNeeded('logstash_functional');
 

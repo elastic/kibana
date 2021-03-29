@@ -23,7 +23,7 @@ export default function ({
     const testSubjects = getService('testSubjects');
 
     before(async function () {
-      await kibanaServer.savedObjects.clean({ types: ['search'] });
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await kibanaServer.importExport.load('discover');
       await esArchiver.loadIfNeeded('logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);

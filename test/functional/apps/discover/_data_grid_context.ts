@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   // FLAKY: https://github.com/elastic/kibana/issues/94545
   describe.skip('discover data grid context tests', () => {
     before(async () => {
-      await kibanaServer.savedObjects.clean({ types: ['search'] });
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await kibanaServer.importExport.load('discover');
       await esArchiver.loadIfNeeded('logstash_functional');
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
