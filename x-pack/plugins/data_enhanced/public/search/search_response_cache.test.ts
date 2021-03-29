@@ -54,8 +54,8 @@ describe('', () => {
           return of({
             ...responses[i],
             meta: {
-              size: JSON.stringify(responses[i]).length
-            }
+              size: JSON.stringify(responses[i]).length,
+            },
           });
         }
       })
@@ -221,7 +221,7 @@ describe('', () => {
     test('caches a response and re-emits it', async () => {
       const s$ = getSearchObservable$();
       cache.set('123', s$);
-      const {meta, ...finalRes} = await cache.get('123')!.toPromise();
+      const { meta, ...finalRes } = await cache.get('123')!.toPromise();
       expect(finalRes).toStrictEqual(r[r.length - 1]);
     });
 
@@ -240,7 +240,7 @@ describe('', () => {
       await s$!.toPromise();
 
       // get final response from cached$
-      const {meta, ...finalRes} = await cached$!.toPromise();
+      const { meta, ...finalRes } = await cached$!.toPromise();
       expect(finalRes).toStrictEqual(r[r.length - 1]);
       expect(next).toHaveBeenCalledTimes(4);
     });
@@ -265,7 +265,7 @@ describe('', () => {
       // wait for original search to complete
       await s$!.toPromise();
 
-      const {meta, ...finalRes} = await cached$!.toPromise();
+      const { meta, ...finalRes } = await cached$!.toPromise();
 
       expect(finalRes).toStrictEqual(r[r.length - 1]);
       expect(next).toHaveBeenCalledTimes(2);
@@ -285,7 +285,7 @@ describe('', () => {
         next,
       });
 
-      const {meta, ...finalRes} = await cached$!.toPromise();
+      const { meta, ...finalRes } = await cached$!.toPromise();
 
       expect(finalRes).toStrictEqual(r[r.length - 1]);
       expect(next).toHaveBeenCalledTimes(1);
@@ -304,7 +304,7 @@ describe('', () => {
         next,
       });
 
-      const {meta, ...finalRes} = await cached$!.toPromise();
+      const { meta, ...finalRes } = await cached$!.toPromise();
 
       expect(finalRes).toStrictEqual(r[r.length - 1]);
       expect(next).toHaveBeenCalledTimes(1);
