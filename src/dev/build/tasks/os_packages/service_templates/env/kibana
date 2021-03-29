@@ -1,5 +1,8 @@
 user="kibana"
 group="kibana"
+chroot="/"
+chdir="/"
+nice=""
 
 KBN_PATH_CONF="/etc/kibana"
 RESTART_ON_UPGRADE="false"
