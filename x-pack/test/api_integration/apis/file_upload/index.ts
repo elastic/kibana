@@ -7,9 +7,7 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, loadTestFile }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
-
+export default function ({ loadTestFile }: FtrProviderContext) {
   describe('File upload', function () {
     loadTestFile(require.resolve('./has_import_permission'));
   });
