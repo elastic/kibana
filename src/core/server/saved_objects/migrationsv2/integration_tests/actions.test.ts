@@ -631,9 +631,9 @@ describe('migration actions', () => {
       const res = (await reindex(
         client,
         'existing_index_with_docs',
-        'existing_index_with_write_block',
+        'reindex_target',
         Option.none,
-        true
+        false
       )()) as Either.Right<ReindexResponse>;
 
       const task = waitForReindexTask(client, res.right.taskId, '0s');
