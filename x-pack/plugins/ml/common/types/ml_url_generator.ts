@@ -15,6 +15,7 @@ import { ML_PAGES } from '../constants/ml_url_generator';
 import type { DataFrameAnalysisConfigType } from './data_frame_analytics';
 import type { SearchQueryLanguage } from '../constants/search';
 import type { ListingPageUrlState } from './common';
+import type { InfluencersFilterQuery } from './es_client';
 
 type OptionalPageState = object | undefined;
 
@@ -113,9 +114,9 @@ export interface ExplorerAppState {
     viewByFromPage?: number;
   };
   mlExplorerFilter: {
-    influencersFilterQuery?: unknown;
+    influencersFilterQuery?: InfluencersFilterQuery;
     filterActive?: boolean;
-    filteredFields?: string[];
+    filteredFields?: Array<string | number>;
     queryString?: string;
   };
   query?: any;
