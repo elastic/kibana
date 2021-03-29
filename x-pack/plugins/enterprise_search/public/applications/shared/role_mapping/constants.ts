@@ -101,13 +101,6 @@ export const FILTER_ROLE_MAPPINGS_PLACEHOLDER = i18n.translate(
   }
 );
 
-export const MANAGE_ROLE_MAPPING_BUTTON = i18n.translate(
-  'xpack.enterpriseSearch.roleMapping.manageRoleMappingButtonLabel',
-  {
-    defaultMessage: 'Manage',
-  }
-);
-
 export const ROLE_MAPPINGS_TITLE = i18n.translate(
   'xpack.enterpriseSearch.roleMapping.roleMappingsTitle',
   {
