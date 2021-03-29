@@ -9,11 +9,16 @@ import React, { Fragment, Component } from 'react';
 import { EuiFormRow, EuiPanel, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { SCALING_TYPES } from '../../../../../common/constants';
 import { GeoFieldSelect } from '../../../../components/geo_field_select';
 import { GeoIndexPatternSelect } from '../../../../components/geo_index_pattern_select';
 import { getGeoFields, getTermsFields } from '../../../../index_pattern_util';
 import { ESSearchSourceDescriptor } from '../../../../../common/descriptor_types';
-import { IndexPattern, IFieldType } from '../../../../../../src/plugins/data/common';
+import {
+  IndexPattern,
+  IFieldType,
+  SortDirection,
+} from '../../../../../../../../src/plugins/data/common';
 import { TopHitsForm } from './top_hits_form';
 
 interface Props {
@@ -75,11 +80,23 @@ export class CreateSourceEditor extends Component<Props, State> {
   _previewLayer = () => {
     const { indexPattern, geoFieldName, topHitsSplitField, topHitsSize } = this.state;
 
+    const tooltipProperties: string[] = [];
+    if (topHitsSplitField) {
+      tooltipProperties.push(topHitsSplitField);
+    }
+    if (indexPattern.timeFieldName) {
+      tooltipProperties.push(indexPattern.timeFieldName);
+    }
+
     const sourceConfig =
       indexPattern && geoFieldName && topHitsSplitField
         ? {
             indexPatternId: indexPattern.id,
             geoField: geoFieldName,
+            scalingType: SCALING_TYPES.TOP_HITS,
+            sortField: indexPattern.timeFieldName ? indexPattern.timeFieldName : '',
+            sortOrder: SortDirection.desc,
+            tooltipProperties,
             topHitsSplitField,
             topHitsSize,
           }

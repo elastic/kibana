@@ -13,6 +13,7 @@ import { VectorLayer } from '../../../layers/vector_layer';
 import { LAYER_WIZARD_CATEGORY, SCALING_TYPES } from '../../../../../common/constants';
 import { TopHitsLayerIcon } from '../../../layers/icons/top_hits_layer_icon';
 import { ESSearchSourceDescriptor } from '../../../../../common/descriptor_types';
+import { ESSearchSource } from '../es_search_source';
 
 export const esTopHitsLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
@@ -27,9 +28,9 @@ export const esTopHitsLayerWizardConfig: LayerWizard = {
         return;
       }
 
-      // const sourceDescriptor = ESSearchSource.createDescriptor(sourceConfig);
-      // VectorLayer.createDescriptor({ sourceDescriptor }, mapColors);
-      previewLayers([]);
+      const sourceDescriptor = ESSearchSource.createDescriptor(sourceConfig);
+      const layerDescriptor = VectorLayer.createDescriptor({ sourceDescriptor }, mapColors);
+      previewLayers([layerDescriptor]);
     };
     return <CreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
   },
