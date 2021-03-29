@@ -5,16 +5,22 @@
  * 2.0.
  */
 
-import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../__mocks__';
+import { mockFlashMessageHelpers, mockHttpValues } from '../../__mocks__';
 
 import { nextTick } from '@kbn/test/jest';
 
 import { IndexingStatusLogic } from './indexing_status_logic';
 
 describe('IndexingStatusLogic', () => {
-  const { mount, unmount } = new LogicMounter(IndexingStatusLogic);
   const { http } = mockHttpValues;
   const { flashAPIErrors } = mockFlashMessageHelpers;
+  const mount = () => {
+    IndexingStatusLogic({ percentageComplete: 100, numDocumentsWithErrors: 0 });
+    const unmount = IndexingStatusLogic.mount();
+    return unmount;
+  };
+
+  let unmount: Function;
 
   const mockStatusResponse = {
     percentageComplete: 50,
@@ -24,7 +30,7 @@ describe('IndexingStatusLogic', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mount();
+    unmount = mount();
   });
 
   it('has expected default values', () => {
