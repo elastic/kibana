@@ -14,8 +14,9 @@ import type {
   EsQueryConfig,
   IndexPatternsService,
 } from '../../data/server';
-import { VisPayload } from '../common/types';
-import { SearchStrategyRegistry } from './lib/search_strategies';
+import type { VisPayload } from '../common/types';
+import type { SearchStrategyRegistry } from './lib/search_strategies';
+import type { CachedIndexPatternFetcher } from './lib/search_strategies/lib/cached_index_pattern_fetcher';
 
 export type ConfigObservable = Observable<SharedGlobalConfig>;
 
@@ -33,4 +34,5 @@ export interface VisTypeTimeseriesRequestServices {
   uiSettings: IUiSettingsClient;
   indexPatternsService: IndexPatternsService;
   searchStrategyRegistry: SearchStrategyRegistry;
+  cachedIndexPatternFetcher: CachedIndexPatternFetcher;
 }

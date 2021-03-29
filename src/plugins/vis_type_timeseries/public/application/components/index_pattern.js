@@ -24,6 +24,7 @@ import {
 import { FieldSelect } from './aggs/field_select';
 import { createSelectHandler } from './lib/create_select_handler';
 import { createTextHandler } from './lib/create_text_handler';
+import { IndexPatternSelect } from './lib/index_pattern_select';
 import { YesNo } from './yes_no';
 import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 import { FormValidationContext } from '../contexts/form_validation_context';
@@ -64,7 +65,8 @@ export const IndexPattern = ({
   onChange,
   disabled,
   model: _model,
-  allowLevelofDetail,
+  allowLevelOfDetail,
+  allowIndexSwitchingMode,
 }) => {
   const config = getUISettings();
   const timeFieldName = `${prefix}time_field`;
@@ -166,26 +168,13 @@ export const IndexPattern = ({
       )}
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiFormRow
-            id={htmlId('indexPattern')}
-            label={i18n.translate('visTypeTimeseries.indexPatternLabel', {
-              defaultMessage: 'Index pattern',
-            })}
-            helpText={
-              isDefaultIndexPatternUsed &&
-              i18n.translate('visTypeTimeseries.indexPattern.searchByDefaultIndex', {
-                defaultMessage: 'Default index pattern is used. To query all indexes use *',
-              })
-            }
-          >
-            <EuiFieldText
-              data-test-subj="metricsIndexPatternInput"
-              disabled={disabled}
-              placeholder={model.default_index_pattern}
-              onChange={handleTextChange(indexPatternName)}
-              value={model[indexPatternName]}
-            />
-          </EuiFormRow>
+          <IndexPatternSelect
+            value={model[indexPatternName]}
+            indexPatternName={indexPatternName}
+            onChange={onChange}
+            disabled={disabled}
+            allowIndexSwitchingMode={allowIndexSwitchingMode}
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow
@@ -246,7 +235,7 @@ export const IndexPattern = ({
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {allowLevelofDetail && (
+      {allowLevelOfDetail && (
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFormRow
@@ -333,5 +322,6 @@ IndexPattern.propTypes = {
   prefix: PropTypes.string,
   disabled: PropTypes.bool,
   className: PropTypes.string,
-  allowLevelofDetail: PropTypes.bool,
+  allowLevelOfDetail: PropTypes.bool,
+  allowIndexSwitchingMode: PropTypes.bool,
 };

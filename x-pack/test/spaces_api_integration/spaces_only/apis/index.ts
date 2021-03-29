@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { TestInvoker } from '../../common/lib/types';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function spacesOnlyTestSuite({ loadTestFile }: TestInvoker) {
+export default function spacesOnlyTestSuite({ loadTestFile }: FtrProviderContext) {
   describe('spaces api without security', function () {
     this.tags('ciGroup5');
 

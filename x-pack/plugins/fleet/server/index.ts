@@ -65,6 +65,11 @@ export const config: PluginConfigDescriptor = {
         host: schema.maybe(schema.string()),
         ca_sha256: schema.maybe(schema.string()),
       }),
+      fleet_server: schema.maybe(
+        schema.object({
+          hosts: schema.maybe(schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }))),
+        })
+      ),
       agentPolicyRolloutRateLimitIntervalMs: schema.number({
         defaultValue: AGENT_POLICY_ROLLOUT_RATE_LIMIT_INTERVAL_MS,
       }),
