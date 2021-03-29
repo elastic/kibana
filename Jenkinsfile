@@ -3,44 +3,69 @@
 library 'kibana-pipeline-library'
 kibanaLibrary.load()
 
-kibanaPipeline(timeoutMinutes: 155, checkPrChanges: true, setCommitStatus: true) {
-  slackNotifications.onFailure(disabled: !params.NOTIFY_ON_FAILURE) {
-    githubPr.withDefaultPrComments {
-      ciStats.trackBuild {
-        catchError {
-          retryable.enable()
-          parallel([
-            'kibana-intake-agent': workers.intake('kibana-intake', './test/scripts/jenkins_unit.sh'),
-            'x-pack-intake-agent': workers.intake('x-pack-intake', './test/scripts/jenkins_xpack.sh'),
-            'kibana-oss-agent': workers.functional('kibana-oss-tests', { kibanaPipeline.buildOss() }, [
-              'oss-ciGroup1': kibanaPipeline.ossCiGroupProcess(1),
-              'oss-ciGroup2': kibanaPipeline.ossCiGroupProcess(2),
-              'oss-ciGroup3': kibanaPipeline.ossCiGroupProcess(3),
-              'oss-ciGroup4': kibanaPipeline.ossCiGroupProcess(4),
-              'oss-ciGroup5': kibanaPipeline.ossCiGroupProcess(5),
-              'oss-ciGroup6': kibanaPipeline.ossCiGroupProcess(6),
-              'oss-ciGroup7': kibanaPipeline.ossCiGroupProcess(7),
-              'oss-ciGroup8': kibanaPipeline.ossCiGroupProcess(8),
-              'oss-ciGroup9': kibanaPipeline.ossCiGroupProcess(9),
-              'oss-ciGroup10': kibanaPipeline.ossCiGroupProcess(10),
-              'oss-ciGroup11': kibanaPipeline.ossCiGroupProcess(11),
-              'oss-ciGroup12': kibanaPipeline.ossCiGroupProcess(12),
-            ]),
-            'kibana-xpack-agent': workers.functional('kibana-xpack-tests', { kibanaPipeline.buildXpack() }, [
-              'xpack-ciGroup1': kibanaPipeline.xpackCiGroupProcess(1),
-              'xpack-ciGroup2': kibanaPipeline.xpackCiGroupProcess(2),
-              'xpack-ciGroup3': kibanaPipeline.xpackCiGroupProcess(3),
-              'xpack-ciGroup4': kibanaPipeline.xpackCiGroupProcess(4),
-              'xpack-ciGroup5': kibanaPipeline.xpackCiGroupProcess(5),
-              'xpack-ciGroup6': kibanaPipeline.xpackCiGroupProcess(6),
-            ]),
-          ])
+def ES_BRANCH = '6.8'
+
+def PROMOTE_WITHOUT_VERIFY = false
+
+timeout(time: 120, unit: 'MINUTES') {
+  timestamps {
+    ansiColor('xterm') {
+      slackNotifications.onFailure {
+        node('docker && tests-l') {
+          catchError {
+            def VERSION
+            def SNAPSHOT_ID
+            def DESTINATION
+
+            def scmVars = checkoutEs(ES_BRANCH)
+            def GIT_COMMIT = scmVars.GIT_COMMIT
+            def GIT_COMMIT_SHORT = sh(script: "git rev-parse --short ${GIT_COMMIT}", returnStdout: true).trim()
+
+            buildArchives('to-archive')
+          }
         }
       }
     }
   }
+}
 
-  if (params.NOTIFY_ON_FAILURE) {
-    kibanaPipeline.sendMail()
+def checkoutEs(branch) {
+  retryWithDelay(8, 15) {
+    return checkout([
+      $class: 'GitSCM',
+      branches: [[name: branch]],
+      doGenerateSubmoduleConfigurations: false,
+      extensions: [],
+      submoduleCfg: [],
+      userRemoteConfigs: [[
+        credentialsId: 'f6c7695a-671e-4f4f-a331-acdce44ff9ba',
+        url: 'git@github.com:elastic/elasticsearch',
+      ]],
+    ])
+  }
+}
+
+def buildArchives(destination) {
+  def props = readProperties file: '.ci/java-versions.properties'
+  withEnv([
+    // Select the correct JDK for this branch
+    "PATH=/var/lib/jenkins/.java/${props.ES_BUILD_JAVA}/bin:${env.PATH}",
+    "JAVA_HOME=/var/lib/jenkins/.java/${props.ES_BUILD_JAVA}",
+
+    "HOME=/var/lib/jenkins", // A Vagrant error is thrown if HOME is missing
+
+    // These Jenkins env vars trigger some automation in the elasticsearch repo that we don't want
+    "BUILD_NUMBER=",
+    "JENKINS_URL=",
+    "BUILD_URL=",
+    "JOB_NAME=",
+    "NODE_NAME=",
+  ]) {
+    sh """
+      ./gradlew -Dbuild.docker=true assemble --parallel
+      mkdir -p ${destination}
+      find distribution/archives -type f \\( -name 'elasticsearch-*.tar.gz' -o -name 'elasticsearch-*.zip' \\) -not -path *no-jdk* -exec cp {} ${destination} \\;
+      docker images "docker.elastic.co/elasticsearch/elasticsearch" --format "{{.Tag}}" | xargs -n1 bash -c 'docker save docker.elastic.co/elasticsearch/elasticsearch:\${0} | gzip > ${destination}/elasticsearch-\${0}-docker-image.tar.gz'
+    """
   }
 }
