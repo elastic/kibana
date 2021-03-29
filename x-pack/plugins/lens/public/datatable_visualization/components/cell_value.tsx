@@ -77,11 +77,13 @@ function workoutColorForCell(
 
   const maxValue = rangeMax ?? minMax.max;
   const minValue = rangeMin ?? minMax.min;
+  const normalizedMaxValue = stops.length && range !== 'percent' ? maxValue / 100 : maxValue;
+  const normalizedMinValue = stops.length && range !== 'percent' ? minValue / 100 : minValue;
   // in case of shorter rangers, extends the steps on the sides to cover the whole set
-  if (comparisonFn(normalizedValue, maxValue) > 0) {
+  if (comparisonFn(normalizedValue, normalizedMaxValue) > 0) {
     return colors[colors.length - 1];
   }
-  if (comparisonFn(normalizedValue, minValue) < 0) {
+  if (comparisonFn(normalizedValue, normalizedMinValue) < 0) {
     return colors[0];
   }
 
