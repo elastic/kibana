@@ -26,6 +26,7 @@ import {
   AllTimelinesResponse,
   SingleTimelineResponseType,
   allTimelinesResponse,
+  responseFavoriteTimeline,
 } from '../../../common/types/timeline';
 import { TimelineInput, TimelineType } from '../../graphql/types';
 import {
@@ -86,6 +87,12 @@ const decodeTimelineErrorResponse = (respTimeline?: TimelineErrorResponse) =>
 const decodePrepackedTimelineResponse = (respTimeline?: ImportTimelineResultSchema) =>
   pipe(
     importTimelineResultSchema.decode(respTimeline),
+    fold(throwErrors(createToasterPlainError), identity)
+  );
+
+const decodeResponseFavoriteTimeline = (respTimeline?: ResponseFavoriteTimeline) =>
+  pipe(
+    responseFavoriteTimeline.decode(respTimeline),
     fold(throwErrors(createToasterPlainError), identity)
   );
 
@@ -315,7 +322,7 @@ export const persistFavorite = async ({
     }
   );
 
-  return response;
+  return decodeResponseFavoriteTimeline(response);
 };
 
 export const deleteTimelinesByIds = async (savedObjectIds: string[]) => {

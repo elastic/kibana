@@ -17,7 +17,7 @@ import {
 import { FlowTarget } from '../../search_strategy/security_solution/network';
 import { PositiveInteger } from '../../detection_engine/schemas/types';
 import { errorSchema } from '../../detection_engine/schemas/response/error_schema';
-import { Direction, Maybe } from '../../search_strategy';
+import { Direction } from '../../search_strategy';
 
 /*
  *  ColumnHeader Types
@@ -509,34 +509,29 @@ export const direction = runtimeTypes.union([
 
 export const sortTimeline = runtimeTypes.type({
   sortField: sortFieldTimeline,
-
   sortOrder: direction,
 });
 
-export interface FavoriteTimelineResult {
-  fullName?: Maybe<string>;
+const favoriteTimelineResult = runtimeTypes.partial({
+  fullName: unionWithNullType(runtimeTypes.string),
+  userName: unionWithNullType(runtimeTypes.string),
+  favoriteDate: unionWithNullType(runtimeTypes.number),
+});
 
-  userName?: Maybe<string>;
+export type FavoriteTimelineResult = runtimeTypes.TypeOf<typeof favoriteTimelineResult>;
 
-  favoriteDate?: Maybe<number>;
-}
-export interface ResponseFavoriteTimeline {
-  code?: Maybe<number>;
+export const responseFavoriteTimeline = runtimeTypes.partial({
+  savedObjectId: runtimeTypes.string,
+  version: runtimeTypes.string,
+  code: unionWithNullType(runtimeTypes.number),
+  message: unionWithNullType(runtimeTypes.string),
+  templateTimelineId: unionWithNullType(runtimeTypes.string),
+  templateTimelineVersion: unionWithNullType(runtimeTypes.number),
+  timelineType: unionWithNullType(TimelineTypeLiteralRt),
+  favorite: unionWithNullType(runtimeTypes.array(favoriteTimelineResult)),
+});
 
-  message?: Maybe<string>;
-
-  savedObjectId: string;
-
-  templateTimelineId?: Maybe<string>;
-
-  templateTimelineVersion?: Maybe<number>;
-
-  timelineType?: Maybe<TimelineType>;
-
-  version: string;
-
-  favorite?: Maybe<FavoriteTimelineResult[]>;
-}
+export type ResponseFavoriteTimeline = runtimeTypes.TypeOf<typeof responseFavoriteTimeline>;
 
 export const getTimelinesArgs = runtimeTypes.partial({
   onlyUserFavorite: unionWithNullType(runtimeTypes.boolean),
