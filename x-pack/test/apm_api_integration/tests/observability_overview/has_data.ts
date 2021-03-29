@@ -6,20 +6,24 @@
  */
 
 import expect from '@kbn/expect';
+import { createApmApiSupertest } from '../../common/apm_api_supertest';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { registry } from '../../common/registry';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const apmApiSupertest = createApmApiSupertest(supertest);
 
   registry.when(
     'Observability overview when data is not loaded',
     { config: 'basic', archives: [] },
     () => {
       it('returns false when there is no data', async () => {
-        const response = await supertest.get('/api/apm/observability_overview/has_data');
+        const response = await apmApiSupertest({
+          endpoint: 'GET /api/apm/observability_overview/has_data',
+        });
         expect(response.status).to.be(200);
-        expect(response.body).to.eql(false);
+        expect(response.body.hasData).to.eql(false);
       });
     }
   );
@@ -29,9 +33,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'basic', archives: ['observability_overview'] },
     () => {
       it('returns false when there is only onboarding data', async () => {
-        const response = await supertest.get('/api/apm/observability_overview/has_data');
+        const response = await apmApiSupertest({
+          endpoint: 'GET /api/apm/observability_overview/has_data',
+        });
         expect(response.status).to.be(200);
-        expect(response.body).to.eql(false);
+        expect(response.body.hasData).to.eql(false);
       });
     }
   );
@@ -41,9 +47,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'basic', archives: ['apm_8.0.0'] },
     () => {
       it('returns true when there is at least one document on transaction, error or metrics indices', async () => {
-        const response = await supertest.get('/api/apm/observability_overview/has_data');
+        const response = await apmApiSupertest({
+          endpoint: 'GET /api/apm/observability_overview/has_data',
+        });
         expect(response.status).to.be(200);
-        expect(response.body).to.eql(true);
+        expect(response.body.hasData).to.eql(true);
       });
     }
   );
