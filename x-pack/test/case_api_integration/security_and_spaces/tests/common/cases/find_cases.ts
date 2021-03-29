@@ -8,13 +8,18 @@
 import expect from '@kbn/expect';
 import supertestAsPromised from 'supertest-as-promised';
 import type { ApiResponse, estypes } from '@elastic/elasticsearch';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
   CASES_URL,
   SUB_CASES_PATCH_DEL_URL,
 } from '../../../../../../plugins/cases/common/constants';
-import { postCaseReq, postCommentUserReq, findCasesResp } from '../../../../common/lib/mock';
+import {
+  postCaseReq,
+  postCommentUserReq,
+  findCasesResp,
+  getPostCaseRequest,
+} from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
   createSubCase,
@@ -22,12 +27,21 @@ import {
   CreateSubCaseResp,
   createCaseAction,
   deleteCaseAction,
+  getSpaceUrlPrefix,
 } from '../../../../common/lib/utils';
 import {
   CasesFindResponse,
   CaseStatuses,
   CaseType,
 } from '../../../../../../plugins/cases/common/api';
+import {
+  obsOnly,
+  secOnly,
+  obsOnlyRead,
+  secOnlyRead,
+  noKibanaPrivileges,
+  superUser,
+} from '../../../../common/lib/authentication/users';
 
 interface CaseAttributes {
   cases: {
@@ -39,6 +53,8 @@ interface CaseAttributes {
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+
   describe('find_cases', () => {
     describe('basic tests', () => {
       afterEach(async () => {
@@ -668,6 +684,80 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body.count_open_cases).to.eql(10);
         expect(body.count_closed_cases).to.eql(0);
         expect(body.count_in_progress_cases).to.eql(0);
+      });
+    });
+
+    describe('rbac', () => {
+      it('should return the correct cases', async () => {
+        // Create case owned by the security solution user
+        await supertestWithoutAuth
+          .post(`${getSpaceUrlPrefix('space1')}${CASES_URL}`)
+          .auth(secOnly.username, secOnly.password)
+          .set('kbn-xsrf', 'true')
+          .send(getPostCaseRequest())
+          .expect(200);
+
+        // Create case owned by the observability user
+        await supertestWithoutAuth
+          .post(`${getSpaceUrlPrefix('space1')}${CASES_URL}`)
+          .auth(obsOnly.username, obsOnly.password)
+          .set('kbn-xsrf', 'true')
+          .send(getPostCaseRequest({ scope: 'observabilityFixture' }))
+          .expect(200);
+
+        // Get all cases as security solution user
+        const { body: secBody } = await supertestWithoutAuth
+          .get(`${getSpaceUrlPrefix('space1')}${CASES_URL}/_find?sortOrder=asc`)
+          .auth(secOnlyRead.username, secOnlyRead.password)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200);
+
+        // Get all cases as observability user
+        const { body: obsBody } = await supertestWithoutAuth
+          .get(`${getSpaceUrlPrefix('space1')}${CASES_URL}/_find?sortOrder=asc`)
+          .auth(obsOnlyRead.username, obsOnlyRead.password)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200);
+
+        const secRes = secBody as CasesFindResponse;
+        const obsRes = obsBody as CasesFindResponse;
+
+        expect(secRes.total).to.eql(1);
+        expect(obsRes.total).to.eql(1);
+
+        secRes.cases.forEach((theCase) => expect(theCase.scope).to.eql('securitySolutionFixture'));
+        obsRes.cases.forEach((theCase) => expect(theCase.scope).to.eql('observabilityFixture'));
+      });
+
+      it(`User ${
+        noKibanaPrivileges.username
+      } with role(s) ${noKibanaPrivileges.roles.join()} - should NOT create a case`, async () => {
+        await supertestWithoutAuth
+          .post(`${getSpaceUrlPrefix('space1')}${CASES_URL}`)
+          .auth(noKibanaPrivileges.username, noKibanaPrivileges.password)
+          .set('kbn-xsrf', 'true')
+          .send(getPostCaseRequest())
+          .expect(403);
+      });
+
+      it('should NOT read a case from a space with no permissions', async () => {
+        // Create a case owned by the super user on space2 for securitySolutionFixture
+        await supertestWithoutAuth
+          .post(`${getSpaceUrlPrefix('space2')}${CASES_URL}`)
+          .auth(superUser.username, superUser.password)
+          .set('kbn-xsrf', 'true')
+          .send(getPostCaseRequest())
+          .expect(200);
+
+        // secOnly user has permission only on space1
+        await supertestWithoutAuth
+          .get(`${getSpaceUrlPrefix('space2')}${CASES_URL}/_find?sortOrder=asc`)
+          .auth(secOnly.username, secOnly.password)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(403);
       });
     });
   });

@@ -9,7 +9,11 @@ import expect from '@kbn/expect';
 
 import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 import {
-  postCaseReq,
+  ConnectorTypes,
+  ConnectorJiraTypeFields,
+} from '../../../../../../plugins/cases/common/api';
+import {
+  getPostCaseRequest,
   postCaseResp,
   removeServerGeneratedPropertiesFromCase,
 } from '../../../../common/lib/mock';
@@ -39,7 +43,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
+        .send(getPostCaseRequest())
         .expect(200);
 
       const data = removeServerGeneratedPropertiesFromCase(postedCase);
@@ -50,12 +54,13 @@ export default ({ getService }: FtrProviderContext): void => {
       await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
-        .send({ ...postCaseReq, badKey: true })
+        // @ts-expect-error
+        .send({ ...getPostCaseRequest({ badKey: true }) })
         .expect(400);
     });
 
     it('unhappy path - 400s when connector is not supplied', async () => {
-      const { connector, ...caseWithoutConnector } = postCaseReq;
+      const { connector, ...caseWithoutConnector } = getPostCaseRequest();
 
       await supertest
         .post(CASES_URL)
@@ -69,8 +74,10 @@ export default ({ getService }: FtrProviderContext): void => {
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
         .send({
-          ...postCaseReq,
-          connector: { id: 'wrong', name: 'wrong', type: '.not-exists', fields: null },
+          ...getPostCaseRequest({
+            // @ts-expect-error
+            connector: { id: 'wrong', name: 'wrong', type: '.not-exists', fields: null },
+          }),
         })
         .expect(400);
     });
@@ -80,13 +87,15 @@ export default ({ getService }: FtrProviderContext): void => {
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
         .send({
-          ...postCaseReq,
-          connector: {
-            id: 'wrong',
-            name: 'wrong',
-            type: '.jira',
-            fields: { unsupported: 'value' },
-          },
+          ...getPostCaseRequest({
+            // @ts-expect-error
+            connector: {
+              id: 'wrong',
+              name: 'wrong',
+              type: ConnectorTypes.jira,
+              fields: { unsupported: 'value' },
+            } as ConnectorJiraTypeFields,
+          }),
         })
         .expect(400);
     });
@@ -97,7 +106,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .post(`${getSpaceUrlPrefix('space1')}${CASES_URL}`)
           .auth(secOnly.username, secOnly.password)
           .set('kbn-xsrf', 'true')
-          .send(postCaseReq)
+          .send(getPostCaseRequest())
           .expect(200);
 
         expect(theCase.scope).to.eql('securitySolutionFixture');
@@ -108,7 +117,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .post(`${getSpaceUrlPrefix('space1')}${CASES_URL}`)
           .auth(secOnly.username, secOnly.password)
           .set('kbn-xsrf', 'true')
-          .send({ ...postCaseReq, scope: 'observabilityFixture' })
+          .send({ ...getPostCaseRequest({ scope: 'observabilityFixture' }) })
           .expect(403);
       });
 
@@ -120,7 +129,7 @@ export default ({ getService }: FtrProviderContext): void => {
             .post(`${getSpaceUrlPrefix('space1')}${CASES_URL}`)
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'true')
-            .send(postCaseReq)
+            .send(getPostCaseRequest())
             .expect(403);
         });
       }
@@ -130,7 +139,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .post(`${getSpaceUrlPrefix('space2')}${CASES_URL}`)
           .auth(secOnly.username, secOnly.password)
           .set('kbn-xsrf', 'true')
-          .send(postCaseReq)
+          .send(getPostCaseRequest())
           .expect(403);
       });
     });
