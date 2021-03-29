@@ -19,6 +19,7 @@ import type {
 import { getSeriesData } from './vis_data/get_series_data';
 import { getTableData } from './vis_data/get_table_data';
 import { getEsQueryConfig } from './vis_data/helpers/get_es_query_uisettings';
+import { getCachedIndexPatternFetcher } from './search_strategies/lib/cached_index_pattern_fetcher';
 
 export async function getVisData(
   requestContext: VisTypeTimeseriesRequestHandlerContext,
@@ -29,12 +30,14 @@ export async function getVisData(
   const esShardTimeout = await framework.getEsShardTimeout();
   const indexPatternsService = await framework.getIndexPatternsService(requestContext);
   const esQueryConfig = await getEsQueryConfig(uiSettings);
+
   const services: VisTypeTimeseriesRequestServices = {
     esQueryConfig,
     esShardTimeout,
     indexPatternsService,
     uiSettings,
     searchStrategyRegistry: framework.searchStrategyRegistry,
+    cachedIndexPatternFetcher: getCachedIndexPatternFetcher(indexPatternsService),
   };
 
   const promises = request.body.panels.map((panel) => {
