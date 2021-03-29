@@ -53,11 +53,6 @@ describe('Processor: Append', () => {
 
     // Open flyout to add new processor
     addProcessor();
-    // Click submit button without entering any fields
-    await saveNewProcessor();
-
-    // Expect form error as a processor type is required
-    expect(form.getErrorsMessages()).toEqual(['A type is required.']);
 
     // Add type (the other fields are not visible until a type is selected)
     await addProcessorType(APPEND_TYPE);
@@ -88,7 +83,6 @@ describe('Processor: Append', () => {
 
     find('valueFieldAppend.input').simulate('change', [{ label: 'Some_Value' }]);
 
-    // form.setInputValue('valueField.comboBoxSearchInput', 'Some_Value');
     // Save the field
     await saveNewProcessor();
 
@@ -115,7 +109,7 @@ describe('Processor: Append', () => {
     form.setInputValue('fieldNameField.input', 'field_1');
 
     // Set optional parameteres
-    find('valueFieldAppend.input').simulate('change', [{ label: ['Some_Value'] }]);
+    find('valueFieldAppend.input').simulate('change', [{ label: 'Some_Value' }]);
 
     form.toggleEuiSwitch('ignoreFailureSwitch.input');
     // Save the field with new changes
@@ -128,7 +122,7 @@ describe('Processor: Append', () => {
       ignore_failure: true,
       if: undefined,
       tag: undefined,
-      value: [['Some_Value']],
+      value: ['Some_Value'],
     });
   });
 });
