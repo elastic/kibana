@@ -437,3 +437,11 @@ export const operationDefinitionMap: Record<
   (definitionMap, definition) => ({ ...definitionMap, [definition.type]: definition }),
   {}
 );
+
+/**
+ * Cannot map the prev names, but can guarantee the new names are matching up using the type system
+ */
+export const renameOperationsMapping: Record<string, GenericOperationDefinition['type']> = {
+  avg: 'average',
+  cardinality: 'unique_count',
+};

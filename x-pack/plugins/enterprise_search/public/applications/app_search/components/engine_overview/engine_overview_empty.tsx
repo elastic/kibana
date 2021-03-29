@@ -7,13 +7,7 @@
 
 import React from 'react';
 
-import {
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiPageContentBody,
-  EuiTitle,
-  EuiButton,
-} from '@elastic/eui';
+import { EuiPageHeader, EuiPageContentBody, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { FlashMessages } from '../../../shared/flash_messages';
@@ -23,25 +17,20 @@ import { DocumentCreationButtons, DocumentCreationFlyout } from '../document_cre
 export const EmptyEngineOverview: React.FC = () => {
   return (
     <>
-      <EuiPageHeader>
-        <EuiPageHeaderSection>
-          <EuiTitle size="l">
-            <h1>
-              {i18n.translate('xpack.enterpriseSearch.appSearch.engine.overview.empty.heading', {
-                defaultMessage: 'Engine setup',
-              })}
-            </h1>
-          </EuiTitle>
-        </EuiPageHeaderSection>
-        <EuiPageHeaderSection>
+      <EuiPageHeader
+        pageTitle={i18n.translate(
+          'xpack.enterpriseSearch.appSearch.engine.overview.empty.heading',
+          { defaultMessage: 'Engine setup' }
+        )}
+        rightSideItems={[
           <EuiButton href={`${DOCS_PREFIX}/index.html`} target="_blank">
             {i18n.translate(
               'xpack.enterpriseSearch.appSearch.engine.overview.empty.headingAction',
               { defaultMessage: 'View documentation' }
             )}
-          </EuiButton>
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
+          </EuiButton>,
+        ]}
+      />
       <FlashMessages />
       <EuiPageContentBody>
         <DocumentCreationButtons />

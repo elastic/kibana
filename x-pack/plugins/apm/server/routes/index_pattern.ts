@@ -21,10 +21,13 @@ export const staticIndexPatternRoute = createRoute((core) => ({
       getInternalSavedObjectsClient(core),
     ]);
 
-    await createStaticIndexPattern(setup, context, savedObjectsClient);
+    const didCreateIndexPattern = await createStaticIndexPattern(
+      setup,
+      context,
+      savedObjectsClient
+    );
 
-    // send empty response regardless of outcome
-    return undefined;
+    return { created: didCreateIndexPattern };
   },
 }));
 
@@ -41,6 +44,8 @@ export const apmIndexPatternTitleRoute = createRoute({
   endpoint: 'GET /api/apm/index_pattern/title',
   options: { tags: ['access:apm'] },
   handler: async ({ context }) => {
-    return getApmIndexPatternTitle(context);
+    return {
+      indexPatternTitle: getApmIndexPatternTitle(context),
+    };
   },
 });
