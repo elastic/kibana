@@ -102,12 +102,12 @@ export default function ({ getService }: FtrProviderContext) {
         body: {
           hits: { hits },
         },
-      } = await es.search({ index: '.kibana', q: 'type:ui-metric' });
+      } = await es.search<any>({ index: '.kibana', q: 'type:ui-metric' });
 
       const countTypeEvent = hits.find(
         (hit: { _id: string }) => hit._id === `ui-metric:myApp:${uniqueEventName}`
       );
-      expect(countTypeEvent._source['ui-metric'].count).to.eql(3);
+      expect(countTypeEvent?._source['ui-metric'].count).to.eql(3);
     });
   });
 }

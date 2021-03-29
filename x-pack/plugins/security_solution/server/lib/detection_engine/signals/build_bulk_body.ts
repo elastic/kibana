@@ -163,7 +163,8 @@ export const buildSignalFromEvent = (
   applyOverrides: boolean
 ): SignalHit => {
   const rule = applyOverrides
-    ? buildRuleWithOverrides(ruleSO, event._source)
+    ? // @ts-expect-error @elastic/elasticsearch _source is optional
+      buildRuleWithOverrides(ruleSO, event._source)
     : buildRuleWithoutOverrides(ruleSO);
   const signal: Signal = {
     ...buildSignal([event], rule),

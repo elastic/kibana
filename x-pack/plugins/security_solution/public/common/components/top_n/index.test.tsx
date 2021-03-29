@@ -168,7 +168,6 @@ const store = createStore(
 let testProps = {
   browserFields: mockBrowserFields,
   field,
-  indexNames: [],
   indexPattern: mockIndexPattern,
   timelineId: TimelineId.hostsPageExternalAlerts,
   toggleTopN: jest.fn(),

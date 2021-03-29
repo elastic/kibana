@@ -12,6 +12,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { Job, Datafeed } from '../../../../plugins/ml/common/types/anomaly_detection_jobs';
 import { DataFrameAnalyticsConfig } from '../../../../plugins/ml/public/application/data_frame_analytics/common';
 
+// @ts-expect-error not full interface
 const FQ_SM_JOB_CONFIG: Job = {
   job_id: ``,
   description: 'mean(responsetime) on farequote dataset with 15m bucket span',
@@ -31,6 +32,7 @@ const FQ_SM_JOB_CONFIG: Job = {
   model_plot_config: { enabled: true },
 };
 
+// @ts-expect-error not full interface
 const FQ_MM_JOB_CONFIG: Job = {
   job_id: `fq_multi_1_ae`,
   description:
@@ -50,6 +52,7 @@ const FQ_MM_JOB_CONFIG: Job = {
   model_plot_config: { enabled: true },
 };
 
+// @ts-expect-error not full interface
 const FQ_DATAFEED_CONFIG: Datafeed = {
   datafeed_id: '',
   indices: ['ft_farequote'],

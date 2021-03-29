@@ -27,6 +27,7 @@ export async function getSettings(soClient: SavedObjectsClientContract): Promise
   return {
     id: settingsSo.id,
     ...settingsSo.attributes,
+    fleet_server_hosts: settingsSo.attributes.fleet_server_hosts || [],
   };
 }
 
@@ -81,9 +82,10 @@ export function createDefaultSettings(): BaseSettings {
     pathname: basePath.serverBasePath,
   });
 
+  const fleetServerHosts = appContextService.getConfig()?.agents?.fleet_server?.hosts ?? [];
+
   return {
-    agent_auto_upgrade: true,
-    package_auto_upgrade: true,
     kibana_urls: [cloudUrl || flagsUrl || defaultUrl].flat(),
+    fleet_server_hosts: fleetServerHosts,
   };
 }

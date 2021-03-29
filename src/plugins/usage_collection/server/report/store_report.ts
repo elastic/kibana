@@ -10,6 +10,7 @@ import { ISavedObjectsRepository } from 'src/core/server';
 import moment from 'moment';
 import { chain, sumBy } from 'lodash';
 import { ReportSchemaType } from './schema';
+import { storeApplicationUsage } from './store_application_usage';
 
 export async function storeReport(
   internalRepository: ISavedObjectsRepository,
@@ -17,11 +18,11 @@ export async function storeReport(
 ) {
   const uiCounters = report.uiCounter ? Object.entries(report.uiCounter) : [];
   const userAgents = report.userAgent ? Object.entries(report.userAgent) : [];
-  const appUsage = report.application_usage ? Object.values(report.application_usage) : [];
+  const appUsages = report.application_usage ? Object.values(report.application_usage) : [];
 
   const momentTimestamp = moment();
-  const timestamp = momentTimestamp.toDate();
   const date = momentTimestamp.format('DDMMYYYY');
+  const timestamp = momentTimestamp.toDate();
 
   return Promise.allSettled([
     // User Agent
@@ -64,21 +65,6 @@ export async function storeReport(
       ];
     }),
     // Application Usage
-    ...[
-      (async () => {
-        if (!appUsage.length) return [];
-        const { saved_objects: savedObjects } = await internalRepository.bulkCreate(
-          appUsage.map((metric) => ({
-            type: 'application_usage_transactional',
-            attributes: {
-              ...metric,
-              timestamp,
-            },
-          }))
-        );
-
-        return savedObjects;
-      })(),
-    ],
+    storeApplicationUsage(internalRepository, appUsages, timestamp),
   ]);
 }
