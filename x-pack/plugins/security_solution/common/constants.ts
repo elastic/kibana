@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ENABLE_CASE_CONNECTOR } from '../../cases/common/constants';
+import { ENABLE_CASE_CONNECTOR } from '../../cases/common';
 
 export const APP_ID = 'securitySolution';
 export const SERVER_APP_ID = 'siem';
