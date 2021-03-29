@@ -7,7 +7,7 @@
  */
 
 import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
-import { IHttpConfig, SslConfig, sslSchema } from '@kbn/http-tools';
+import { IHttpConfig, SslConfig, sslSchema } from '@kbn/server-http-tools';
 import { hostname } from 'os';
 import url from 'url';
 

@@ -16,7 +16,7 @@
     "@kbn/config": "link:../kbn-config",
     "@kbn/config-schema": "link:../kbn-config-schema",
     "@kbn/logging": "link:../kbn-logging",
-    "@kbn/http-tools": "link:../kbn-http-tools",
+    "@kbn/http-tools": "link:../kbn-server-http-tools",
     "@kbn/optimizer": "link:../kbn-optimizer",
     "@kbn/std": "link:../kbn-std",
     "@kbn/utils": "link:../kbn-utils"

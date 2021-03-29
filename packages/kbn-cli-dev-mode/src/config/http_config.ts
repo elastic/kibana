@@ -7,7 +7,7 @@
  */
 
 import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
-import { ICorsConfig, IHttpConfig, ISslConfig, SslConfig, sslSchema } from '@kbn/http-tools';
+import { ICorsConfig, IHttpConfig, ISslConfig, SslConfig, sslSchema } from '@kbn/server-http-tools';
 
 export const httpConfigSchema = schema.object(
   {

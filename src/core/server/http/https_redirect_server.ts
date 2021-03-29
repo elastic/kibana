@@ -8,7 +8,7 @@
 
 import { Request, ResponseToolkit, Server } from '@hapi/hapi';
 import { format as formatUrl } from 'url';
-import { createServer, getListenerOptions, getServerOptions } from '@kbn/http-tools';
+import { createServer, getListenerOptions, getServerOptions } from '@kbn/server-http-tools';
 
 import { Logger } from '../logging';
 import { HttpConfig } from './http_config';

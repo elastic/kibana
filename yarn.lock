@@ -2662,7 +2662,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/http-tools@link:packages/kbn-http-tools":
+"@kbn/http-tools@link:packages/kbn-server-http-tools":
   version "0.0.0"
   uid ""
 
@@ -2699,6 +2699,10 @@
   uid ""
 
 "@kbn/pm@link:packages/kbn-pm":
+  version "0.0.0"
+  uid ""
+
+"@kbn/server-http-tools@link:packages/kbn-server-http-tools":
   version "0.0.0"
   uid ""
 

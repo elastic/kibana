@@ -15,7 +15,7 @@ import { sampleSize } from 'lodash';
 import * as Rx from 'rxjs';
 import { take } from 'rxjs/operators';
 import { ByteSizeValue } from '@kbn/config-schema';
-import { createServer, getListenerOptions, getServerOptions } from '@kbn/http-tools';
+import { createServer, getListenerOptions, getServerOptions } from '@kbn/server-http-tools';
 
 import { DevConfig, HttpConfig } from './config';
 import { Log } from './log';

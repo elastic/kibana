@@ -10,7 +10,7 @@ import { Server, Request } from '@hapi/hapi';
 import HapiStaticFiles from '@hapi/inert';
 import url from 'url';
 import uuid from 'uuid';
-import { createServer, getListenerOptions, getServerOptions, getRequestId } from '@kbn/http-tools';
+import { createServer, getListenerOptions, getServerOptions, getRequestId } from '@kbn/server-http-tools';
 
 import { Logger, LoggerFactory } from '../logging';
 import { HttpConfig } from './http_config';
