@@ -1837,7 +1837,7 @@
         },
         "agents": {
           "properties": {
-            "total": {
+            "total_enrolled": {
               "type": "long"
             },
             "healthy": {
@@ -1849,7 +1849,7 @@
             "offline": {
               "type": "long"
             },
-            "updating": {
+            "total_all_statuses": {
               "type": "long"
             }
           }
