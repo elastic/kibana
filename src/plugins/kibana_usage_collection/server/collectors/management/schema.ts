@@ -412,4 +412,8 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:enableInspectEsQueries': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
 };

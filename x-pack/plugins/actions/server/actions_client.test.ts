@@ -745,6 +745,7 @@ describe('getAll()', () => {
       };
       unsecuredSavedObjectsClient.find.mockResolvedValueOnce(expectedResult);
       scopedClusterClient.asInternalUser.search.mockResolvedValueOnce(
+        // @ts-expect-error not full search response
         elasticsearchClientMock.createSuccessTransportRequestPromise({
           aggregations: {
             '1': { doc_count: 6 },
@@ -818,6 +819,7 @@ describe('getAll()', () => {
         ],
       });
       scopedClusterClient.asInternalUser.search.mockResolvedValueOnce(
+        // @ts-expect-error not full search response
         elasticsearchClientMock.createSuccessTransportRequestPromise({
           aggregations: {
             '1': { doc_count: 6 },
@@ -878,6 +880,7 @@ describe('getAll()', () => {
     };
     unsecuredSavedObjectsClient.find.mockResolvedValueOnce(expectedResult);
     scopedClusterClient.asInternalUser.search.mockResolvedValueOnce(
+      // @ts-expect-error not full search response
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         aggregations: {
           '1': { doc_count: 6 },
@@ -950,6 +953,7 @@ describe('getBulk()', () => {
         ],
       });
       scopedClusterClient.asInternalUser.search.mockResolvedValueOnce(
+        // @ts-expect-error not full search response
         elasticsearchClientMock.createSuccessTransportRequestPromise({
           aggregations: {
             '1': { doc_count: 6 },
@@ -1020,6 +1024,7 @@ describe('getBulk()', () => {
         ],
       });
       scopedClusterClient.asInternalUser.search.mockResolvedValueOnce(
+        // @ts-expect-error not full search response
         elasticsearchClientMock.createSuccessTransportRequestPromise({
           aggregations: {
             '1': { doc_count: 6 },
@@ -1077,6 +1082,7 @@ describe('getBulk()', () => {
       ],
     });
     scopedClusterClient.asInternalUser.search.mockResolvedValueOnce(
+      // @ts-expect-error not full search response
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         aggregations: {
           '1': { doc_count: 6 },

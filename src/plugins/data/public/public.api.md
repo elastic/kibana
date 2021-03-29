@@ -23,11 +23,12 @@ import * as CSS from 'csstype';
 import { Datatable as Datatable_2 } from 'src/plugins/expressions';
 import { Datatable as Datatable_3 } from 'src/plugins/expressions/common';
 import { DatatableColumn as DatatableColumn_2 } from 'src/plugins/expressions';
-import { DatatableColumnType } from 'src/plugins/expressions/common';
+import { DatatableColumnType as DatatableColumnType_2 } from 'src/plugins/expressions/common';
 import { DetailedPeerCertificate } from 'tls';
 import { Ensure } from '@kbn/utility-types';
 import { EnvironmentMode } from '@kbn/config';
 import { ErrorToastOptions } from 'src/core/public/notifications';
+import { estypes } from '@elastic/elasticsearch';
 import { EuiBreadcrumb } from '@elastic/eui';
 import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiComboBoxProps } from '@elastic/eui';
@@ -84,16 +85,14 @@ import { RequestAdapter } from 'src/plugins/inspector/common';
 import { RequestStatistics as RequestStatistics_2 } from 'src/plugins/inspector/common';
 import { Required } from '@kbn/utility-types';
 import * as Rx from 'rxjs';
-import { SavedObject } from 'kibana/server';
-import { SavedObject as SavedObject_2 } from 'src/core/server';
+import { SavedObject } from 'src/core/server';
+import { SavedObject as SavedObject_2 } from 'kibana/server';
 import { SavedObjectReference } from 'src/core/types';
 import { SavedObjectsClientContract } from 'src/core/public';
 import { SavedObjectsFindOptions } from 'kibana/public';
 import { SavedObjectsFindResponse } from 'kibana/server';
 import { SavedObjectsUpdateResponse } from 'kibana/server';
 import { SchemaTypeError } from '@kbn/config-schema';
-import { Search } from '@elastic/elasticsearch/api/requestParams';
-import { SearchResponse } from 'elasticsearch';
 import { SerializedFieldFormat as SerializedFieldFormat_2 } from 'src/plugins/expressions/common';
 import { StartServicesAccessor } from 'kibana/public';
 import { ToastInputFields } from 'src/core/public/notifications';
@@ -189,7 +188,7 @@ export class AggConfig {
     // @deprecated (undocumented)
     toJSON(): AggConfigSerialized;
     // Warning: (ae-forgotten-export) The symbol "SerializableState" needs to be exported by the entry point index.d.ts
-    toSerializedFieldFormat(): {} | Ensure<SerializedFieldFormat_2<SerializableState>, SerializableState>;
+    toSerializedFieldFormat(): {} | Ensure<SerializedFieldFormat_2<SerializableState_2>, SerializableState_2>;
     // (undocumented)
     get type(): IAggType;
     set type(type: IAggType);
@@ -273,9 +272,9 @@ export type AggConfigSerialized = Ensure<{
     type: string;
     enabled?: boolean;
     id?: string;
-    params?: {} | SerializableState;
+    params?: {} | SerializableState_2;
     schema?: string;
-}, SerializableState>;
+}, SerializableState_2>;
 
 // Warning: (ae-missing-release-tag) "AggFunctionsMapping" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1128,7 +1127,7 @@ export interface IEsSearchRequest extends IKibanaSearchRequest<ISearchRequestPar
 // Warning: (ae-missing-release-tag) "IEsSearchResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type IEsSearchResponse<Source = any> = IKibanaSearchResponse<SearchResponse<Source>>;
+export type IEsSearchResponse<Source = any> = IKibanaSearchResponse<estypes.SearchResponse<Source>>;
 
 // Warning: (ae-missing-release-tag) "IFieldFormat" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1605,7 +1604,7 @@ export class IndexPatternsService {
     // Warning: (ae-forgotten-export) The symbol "IndexPatternSavedObjectAttrs" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
-    getCache: () => Promise<SavedObject_2<IndexPatternSavedObjectAttrs>[] | null | undefined>;
+    getCache: () => Promise<SavedObject<IndexPatternSavedObjectAttrs>[] | null | undefined>;
     getDefault: () => Promise<IndexPattern | null>;
     getFieldsForIndexPattern: (indexPattern: IndexPattern | IndexPatternSpec, options?: GetFieldsOptions | undefined) => Promise<any>;
     // Warning: (ae-forgotten-export) The symbol "GetFieldsOptions" needs to be exported by the entry point index.d.ts
@@ -1617,7 +1616,7 @@ export class IndexPatternsService {
     }>>;
     getTitles: (refresh?: boolean) => Promise<string[]>;
     refreshFields: (indexPattern: IndexPattern) => Promise<void>;
-    savedObjectToSpec: (savedObject: SavedObject_2<IndexPatternAttributes>) => IndexPatternSpec;
+    savedObjectToSpec: (savedObject: SavedObject<IndexPatternAttributes>) => IndexPatternSpec;
     setDefault: (id: string, force?: boolean) => Promise<void>;
     updateSavedObject(indexPattern: IndexPattern, saveAttempts?: number, ignoreErrors?: boolean): Promise<void | Error>;
 }
@@ -2415,9 +2414,9 @@ export class SearchSource {
     createChild(options?: {}): SearchSource;
     createCopy(): SearchSource;
     destroy(): void;
-    fetch$(options?: ISearchOptions): import("rxjs").Observable<import("elasticsearch").SearchResponse<any>>;
+    fetch$(options?: ISearchOptions): import("rxjs").Observable<import("@elastic/elasticsearch/api/types").SearchResponse<any>>;
     // @deprecated
-    fetch(options?: ISearchOptions): Promise<import("elasticsearch").SearchResponse<any>>;
+    fetch(options?: ISearchOptions): Promise<import("@elastic/elasticsearch/api/types").SearchResponse<any>>;
     getField<K extends keyof SearchSourceFields>(field: K, recurse?: boolean): SearchSourceFields[K];
     getFields(): SearchSourceFields;
     getId(): string;
