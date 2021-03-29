@@ -1,0 +1,14 @@
+{
+  "modules": ["host_summaries"],
+  "indices": [
+    "auditbeat-*",
+    "endgame-*",
+    "filebeat-*",
+    "logs-*",
+    "packetbeat-*",
+    "winlogbeat-*",
+    "-logs-diagnotic*",
+    "-*elastic-cloud-logs-*"
+  ],
+  "auto_start": true
+}

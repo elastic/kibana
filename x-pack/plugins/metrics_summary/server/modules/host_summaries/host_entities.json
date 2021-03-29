@@ -1,0 +1,38 @@
+{
+  "id": "host_entities",
+  "description": "Unique host names",
+  "pivot": {
+    "group_by": {
+      "host.name": {
+        "terms": {
+          "field": "host.name"
+        }
+      },
+      "host.os.name": {
+        "terms": {
+          "field": "host.os.name",
+          "missing_bucket": true
+        }
+      },
+      "host.os.version": {
+        "terms": {
+          "field": "host.os.version",
+          "missing_bucket": true
+        }
+      },
+      "@timestamp": {
+        "date_histogram": {
+          "field": "@timestamp",
+          "calendar_interval": "1h"
+        }
+      }
+    },
+    "aggregations": {
+      "metrics.host.name.value_count": {
+        "value_count": {
+          "field": "host.name"
+        }
+      }
+    }
+  }
+}

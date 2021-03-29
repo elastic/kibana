@@ -1,0 +1,10 @@
+{
+  "modules": [
+    "host_metrics",
+    "host_summaries",
+    "network_metrics",
+    "network_summaries",
+    "user_summaries",
+    "user_metrics"
+  ]
+}

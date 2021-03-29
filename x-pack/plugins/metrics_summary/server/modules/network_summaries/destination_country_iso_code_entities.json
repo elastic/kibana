@@ -1,0 +1,51 @@
+{
+  "id": "destination_country_iso_code_entities",
+  "description": "Unique destination country iso code",
+  "pivot": {
+    "group_by": {
+      "destination.geo.country_iso_code": {
+        "terms": {
+          "field": "destination.geo.country_iso_code"
+        }
+      },
+      "@timestamp": {
+        "date_histogram": {
+          "field": "@timestamp",
+          "calendar_interval": "1h"
+        }
+      }
+    },
+    "aggregations": {
+      "metrics.destination.geo.country_iso_code.value_count": {
+        "value_count": {
+          "field": "destination.geo.country_iso_code"
+        }
+      },
+      "metrics.source.bytes.sum": {
+        "sum": {
+          "field": "source.bytes"
+        }
+      },
+      "metrics.destination.bytes.sum": {
+        "sum": {
+          "field": "destination.bytes"
+        }
+      },
+      "metrics.network.community_id.cardinality": {
+        "cardinality": {
+          "field": "network.community_id"
+        }
+      },
+      "metrics.source.ip.cardinality": {
+        "cardinality": {
+          "field": "source.ip"
+        }
+      },
+      "metrics.destination.ip.cardinality": {
+        "cardinality": {
+          "field": "destination.ip"
+        }
+      }
+    }
+  }
+}

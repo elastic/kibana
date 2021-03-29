@@ -1,0 +1,46 @@
+{
+  "id": "destination_ip_entities",
+  "description": "Unique destination ip",
+  "pivot": {
+    "group_by": {
+      "destination.ip": {
+        "terms": {
+          "field": "destination.ip"
+        }
+      },
+      "@timestamp": {
+        "date_histogram": {
+          "field": "@timestamp",
+          "calendar_interval": "1h"
+        }
+      }
+    },
+    "aggregations": {
+      "metrics.destination.ip.value_count": {
+        "value_count": {
+          "field": "destination.ip"
+        }
+      },
+      "metrics.source.bytes.sum": {
+        "sum": {
+          "field": "source.bytes"
+        }
+      },
+      "metrics.destination.bytes.sum": {
+        "sum": {
+          "field": "destination.bytes"
+        }
+      },
+      "metrics.network.community_id.cardinality": {
+        "cardinality": {
+          "field": "network.community_id"
+        }
+      },
+      "metrics.source.ip.cardinality": {
+        "cardinality": {
+          "field": "source.ip"
+        }
+      }
+    }
+  }
+}

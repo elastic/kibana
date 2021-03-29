@@ -1,0 +1,23 @@
+{
+  "modules": [
+    "host_metrics",
+    "host_summaries",
+    "network_metrics",
+    "network_summaries",
+    "user_summaries",
+    "user_metrics"
+  ],
+  "indices": ["auditbeat-*"],
+  "auto_start": true,
+  "settings": {
+    "max_page_search_size": 5000
+  },
+  "query": {
+    "range": {
+      "@timestamp": {
+        "gte": "now-1d/d",
+        "format": "strict_date_optional_time"
+      }
+    }
+  }
+}

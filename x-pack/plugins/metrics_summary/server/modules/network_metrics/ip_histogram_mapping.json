@@ -1,0 +1,59 @@
+{
+  "mappings": {
+    "_meta": {
+      "index": "ip_histogram"
+    },
+    "dynamic": "strict",
+    "properties": {
+      "@timestamp": {
+        "type": "date"
+      },
+      "metrics": {
+        "properties": {
+          "source": {
+            "properties": {
+              "ip": {
+                "properties": {
+                  "value_count": {
+                    "type": "long"
+                  },
+                  "cardinality": {
+                    "type": "long"
+                  }
+                }
+              },
+              "bytes": {
+                "properties": {
+                  "sum": {
+                    "type": "long"
+                  }
+                }
+              }
+            }
+          },
+          "destination": {
+            "properties": {
+              "ip": {
+                "properties": {
+                  "value_count": {
+                    "type": "long"
+                  },
+                  "cardinality": {
+                    "type": "long"
+                  }
+                }
+              },
+              "bytes": {
+                "properties": {
+                  "sum": {
+                    "type": "long"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

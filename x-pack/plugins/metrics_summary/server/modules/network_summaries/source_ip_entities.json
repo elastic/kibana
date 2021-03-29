@@ -1,0 +1,46 @@
+{
+  "id": "source_ip_entities",
+  "description": "Unique source ip",
+  "pivot": {
+    "group_by": {
+      "source.ip": {
+        "terms": {
+          "field": "source.ip"
+        }
+      },
+      "@timestamp": {
+        "date_histogram": {
+          "field": "@timestamp",
+          "calendar_interval": "1h"
+        }
+      }
+    },
+    "aggregations": {
+      "metrics.source.ip.value_count": {
+        "value_count": {
+          "field": "source.ip"
+        }
+      },
+      "metrics.source.bytes.sum": {
+        "sum": {
+          "field": "source.bytes"
+        }
+      },
+      "metrics.destination.bytes.sum": {
+        "sum": {
+          "field": "destination.bytes"
+        }
+      },
+      "metrics.network.community_id.cardinality": {
+        "cardinality": {
+          "field": "network.community_id"
+        }
+      },
+      "metrics.destination.ip.cardinality": {
+        "cardinality": {
+          "field": "destination.ip"
+        }
+      }
+    }
+  }
+}

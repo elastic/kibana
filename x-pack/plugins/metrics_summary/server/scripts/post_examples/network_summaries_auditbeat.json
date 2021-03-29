@@ -1,0 +1,4 @@
+{
+  "modules": ["network_summaries"],
+  "indices": ["auditbeat-*"]
+}

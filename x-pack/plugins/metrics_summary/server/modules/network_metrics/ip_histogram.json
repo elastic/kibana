@@ -1,0 +1,26 @@
+{
+  "id": "ip_histogram",
+  "description": "ip histogram",
+  "pivot": {
+    "group_by": {
+      "@timestamp": {
+        "date_histogram": {
+          "field": "@timestamp",
+          "calendar_interval": "1h"
+        }
+      }
+    },
+    "aggregations": {
+      "metrics.source.ip.cardinality": {
+        "cardinality": {
+          "field": "source.ip"
+        }
+      },
+      "metrics.destination.ip.cardinality": {
+        "cardinality": {
+          "field": "destination.ip"
+        }
+      }
+    }
+  }
+}

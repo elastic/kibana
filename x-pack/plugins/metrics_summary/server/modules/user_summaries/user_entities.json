@@ -1,0 +1,51 @@
+{
+  "id": "user_entities",
+  "description": "Unique user names",
+  "pivot": {
+    "group_by": {
+      "user.name": {
+        "terms": {
+          "field": "user.name"
+        }
+      },
+      "@timestamp": {
+        "date_histogram": {
+          "field": "@timestamp",
+          "calendar_interval": "1h"
+        }
+      }
+    },
+    "aggregations": {
+      "metrics.event.authentication": {
+        "filter": {
+          "term": {
+            "event.category": "authentication"
+          }
+        },
+        "aggs": {
+          "success.value_count": {
+            "filter": {
+              "term": {
+                "event.outcome": "success"
+              }
+            }
+          },
+          "failure.value_count": {
+            "filter": {
+              "term": {
+                "event.outcome": "failure"
+              }
+            }
+          },
+          "unknown.value_count": {
+            "filter": {
+              "term": {
+                "event.outcome": "unknown"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -19,6 +19,7 @@
     "x-pack/plugins/cases/**/*",
     "x-pack/plugins/lists/**/*",
     "x-pack/plugins/security_solution/**/*",
+    "x-pack/plugins/metrics_summary/**/*",
   ],
   "exclude": [
     "x-pack/plugins/security_solution/cypress/**/*"

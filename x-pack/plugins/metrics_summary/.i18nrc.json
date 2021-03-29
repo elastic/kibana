@@ -1,0 +1,7 @@
+{
+  "prefix": "metricsSummary",
+  "paths": {
+    "metricsSummary": "."
+  },
+  "translations": ["translations/ja-JP.json"]
+}
