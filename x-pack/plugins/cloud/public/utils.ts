@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-export function getFullCloudUrl(baseUrl: string, dirPath: string) {
+export function getFullCloudUrl(baseUrl: string | undefined, dirPath: string | undefined) {
   let fullCloudUrl = '';
 
-  if (baseUrl && dirPath) {
+  if (typeof baseUrl !== 'undefined' && typeof dirPath !== 'undefined') {
     fullCloudUrl = baseUrl.concat(dirPath);
-  } else {
-    throw new Error(`Both a baseUrl and dirPath must be passed to the getFullCloudUrl function.`);
   }
+
   return fullCloudUrl;
 }
