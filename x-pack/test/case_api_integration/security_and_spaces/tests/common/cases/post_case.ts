@@ -108,7 +108,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .post(`${getSpaceUrlPrefix('space1')}${CASES_URL}`)
           .auth(secOnly.username, secOnly.password)
           .set('kbn-xsrf', 'true')
-          .send({ ...postCaseReq, scope: 'observability' })
+          .send({ ...postCaseReq, scope: 'observabilityFixture' })
           .expect(403);
       });
 

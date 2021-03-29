@@ -25,16 +25,16 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
   public setup(core: CoreSetup<FixtureStartDeps>, deps: FixtureSetupDeps) {
     const { features } = deps;
     features.registerKibanaFeature({
-      id: 'securitySolutionFixture',
-      name: 'SecuritySolutionFixture',
+      id: 'observabilityFixture',
+      name: 'ObservabilityFixture',
       app: ['kibana'],
       category: { id: 'cases-fixtures', label: 'Cases Fixtures' },
-      cases: ['securitySolutionFixture'],
+      cases: ['observabilityFixture'],
       privileges: {
         all: {
           app: ['kibana'],
           cases: {
-            all: ['securitySolutionFixture'],
+            all: ['observabilityFixture'],
           },
           savedObject: {
             all: ['alert', ...casesSavedObjectTypes],
@@ -45,7 +45,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
         read: {
           app: ['kibana'],
           cases: {
-            read: ['securitySolutionFixture'],
+            read: ['observabilityFixture'],
           },
           savedObject: {
             all: [],

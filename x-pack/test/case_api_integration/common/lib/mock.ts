@@ -44,7 +44,7 @@ export const postCaseReq: CasePostRequest = {
   settings: {
     syncAlerts: true,
   },
-  scope: 'securitySolution',
+  scope: 'securitySolutionFixture',
 };
 
 /**

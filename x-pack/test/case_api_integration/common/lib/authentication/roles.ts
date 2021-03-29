@@ -101,10 +101,7 @@ export const observabilityOnlyAll: Role = {
     kibana: [
       {
         feature: {
-          logs: ['all'],
-          infrastructure: ['all'],
-          apm: ['all'],
-          uptime: ['all'],
+          observabilityFixture: ['all'],
         },
         spaces: ['space1'],
       },
@@ -126,10 +123,7 @@ export const observabilityOnlyRead: Role = {
     kibana: [
       {
         feature: {
-          logs: ['read'],
-          infrastructure: ['read'],
-          apm: ['read'],
-          uptime: ['read'],
+          observabilityFixture: ['read'],
         },
         spaces: ['space1'],
       },
