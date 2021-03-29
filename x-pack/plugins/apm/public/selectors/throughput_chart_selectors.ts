@@ -8,14 +8,14 @@
 import { difference, zipObject } from 'lodash';
 import { EuiTheme } from '../../../../../src/plugins/kibana_react/common';
 import { asTransactionRate } from '../../common/utils/formatters';
-import { TimeSeries } from '../../typings/timeseries';
+import { Coordinate, TimeSeries } from '../../typings/timeseries';
 import { APIReturnType } from '../services/rest/createCallApmApi';
 import { httpStatusCodeToColor } from '../utils/httpStatusCodeToColor';
 
 export type ThroughputChartsResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/charts/throughput'>;
 
 export interface ThroughputChart {
-  throughputTimeseries: TimeSeries[];
+  throughputTimeseries: Array<TimeSeries<Coordinate>>;
 }
 
 export function getThroughputChartSelector({
