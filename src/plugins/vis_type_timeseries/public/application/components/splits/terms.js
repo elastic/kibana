@@ -25,7 +25,7 @@ import {
   EuiFieldText,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-import { FIELD_TYPES } from '../../../../common/field_types';
+import { KBN_FIELD_TYPES } from '../../../../../data/public';
 import { STACKED_OPTIONS } from '../../visualizations/constants';
 
 const DEFAULTS = { terms_direction: 'desc', terms_size: 10, terms_order_by: '_count' };
@@ -133,7 +133,7 @@ export const SplitByTermsUI = ({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {selectedFieldType === FIELD_TYPES.STRING && (
+      {selectedFieldType === KBN_FIELD_TYPES.STRING && (
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFormRow

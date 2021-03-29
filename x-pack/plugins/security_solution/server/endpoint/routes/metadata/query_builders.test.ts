@@ -10,6 +10,7 @@ import { kibanaRequestToMetadataListESQuery, getESQueryHostMetadataByID } from '
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { metadataCurrentIndexPattern } from '../../../../common/endpoint/constants';
+import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
 import { metadataQueryStrategyV2 } from './support/query_strategies';
 
 describe('query builder', () => {
@@ -22,6 +23,7 @@ describe('query builder', () => {
           logFactory: loggingSystemMock.create(),
           service: new EndpointAppContextService(),
           config: () => Promise.resolve(createMockConfig()),
+          experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
         },
         metadataQueryStrategyV2()
       );
@@ -36,6 +38,7 @@ describe('query builder', () => {
           logFactory: loggingSystemMock.create(),
           service: new EndpointAppContextService(),
           config: () => Promise.resolve(createMockConfig()),
+          experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
         },
         metadataQueryStrategyV2()
       );
@@ -63,6 +66,7 @@ describe('query builder', () => {
           logFactory: loggingSystemMock.create(),
           service: new EndpointAppContextService(),
           config: () => Promise.resolve(createMockConfig()),
+          experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
         },
         metadataQueryStrategyV2()
       );
@@ -80,6 +84,7 @@ describe('query builder', () => {
           logFactory: loggingSystemMock.create(),
           service: new EndpointAppContextService(),
           config: () => Promise.resolve(createMockConfig()),
+          experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
         },
         metadataQueryStrategyV2(),
         {
@@ -111,6 +116,7 @@ describe('query builder', () => {
           logFactory: loggingSystemMock.create(),
           service: new EndpointAppContextService(),
           config: () => Promise.resolve(createMockConfig()),
+          experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
         },
         metadataQueryStrategyV2()
       );
@@ -149,6 +155,9 @@ describe('query builder', () => {
             logFactory: loggingSystemMock.create(),
             service: new EndpointAppContextService(),
             config: () => Promise.resolve(createMockConfig()),
+            experimentalFeatures: parseExperimentalConfigValue(
+              createMockConfig().enableExperimental
+            ),
           },
           metadataQueryStrategyV2(),
           {
