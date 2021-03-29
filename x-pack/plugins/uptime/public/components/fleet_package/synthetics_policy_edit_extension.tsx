@@ -24,10 +24,7 @@ export const SyntheticsPolicyEditExtension = memo<PackagePolicyEditExtensionComp
         const currentInput = currentPolicy.inputs.find((input) => input.enabled === true);
         const vars = currentInput?.streams[0]?.vars;
 
-        const configKeys = Object.values(ConfigKeys) as ConfigKeys[];
-        // if (vars) {
-        //   configKeys = Object.keys(vars) as ConfigKeys[];
-        // }
+        const configKeys: ConfigKeys[] = Object.values(ConfigKeys);
         const formattedDefaultConfig = configKeys.reduce(
           (acc: Record<string, unknown>, key: ConfigKeys) => {
             const value = vars?.[key]?.value;
