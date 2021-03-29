@@ -191,10 +191,8 @@ function discoverController($route, $scope) {
 
   const {
     appStateContainer,
-    startSync: startStateSync,
     stopSync: stopStateSync,
     setAppState,
-    replaceUrlAppState,
     kbnUrlStateStorage,
     getPreviousAppState,
   } = stateContainer;
@@ -256,15 +254,9 @@ function discoverController($route, $scope) {
         $scope.state = { ...newState };
 
         // detect changes that should trigger fetching of new data
-        const changes = ['interval', 'sort'].filter(
+        const changes = ['sort'].filter(
           (prop) => !_.isEqual(newStatePartial[prop], oldStatePartial[prop])
         );
-
-        if (oldStatePartial.hideChart && !newStatePartial.hideChart) {
-          // in case the histogram is hidden, no data is requested
-          // so when changing this state data needs to be fetched
-          changes.push(true);
-        }
 
         if (changes.length) {
           refetch$.next();
@@ -320,7 +312,7 @@ function discoverController($route, $scope) {
     requests: new RequestAdapter(),
   });
 
-  const shouldSearchOnPageLoad = () => {
+  $scope.opts.shouldSearchOnPageLoad = () => {
     // A saved search is created on every page load, so we check the ID to see if we're loading a
     // previously saved search or if it is just transient
     return (
@@ -332,7 +324,7 @@ function discoverController($route, $scope) {
   };
 
   $scope.fetchStatus = fetchStatuses.UNINITIALIZED;
-  $scope.resultState = shouldSearchOnPageLoad() ? 'loading' : 'uninitialized';
+  $scope.resultState = $scope.opts.shouldSearchOnPageLoad() ? 'loading' : 'uninitialized';
 
   let abortController;
   $scope.$on('$destroy', () => {
@@ -494,12 +486,4 @@ function discoverController($route, $scope) {
     )
   );
   $scope.opts.fetch$ = fetch$;
-
-  // Propagate current app state to url, then start syncing and fetching
-  replaceUrlAppState().then(() => {
-    startStateSync();
-    if (shouldSearchOnPageLoad()) {
-      refetch$.next();
-    }
-  });
 }

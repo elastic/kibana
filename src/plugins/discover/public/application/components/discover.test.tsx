@@ -71,6 +71,7 @@ function getProps(indexPattern: IndexPattern): DiscoverProps {
     opts: {
       config: mockUiSettings,
       data: dataPluginMock.createStartContract(),
+      fetch$: {} as Subject<undefined>,
       filterManager: createFilterManagerMock(),
       getFieldCounts: jest.fn(),
       indexPatternList: (indexPattern as unknown) as Array<SavedObject<IndexPatternAttributes>>,
@@ -81,6 +82,7 @@ function getProps(indexPattern: IndexPattern): DiscoverProps {
       savedSearch: savedSearchMock,
       searchSessionManager: {} as DiscoverSearchSessionManager,
       setHeaderActionMenu: jest.fn(),
+      shouldSearchOnPageLoad: jest.fn(),
       timefield: indexPattern.timeFieldName || '',
       setAppState: jest.fn(),
       services,

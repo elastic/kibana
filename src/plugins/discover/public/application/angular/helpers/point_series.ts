@@ -26,20 +26,23 @@ export interface Table {
   rows: Row[];
 }
 
+export interface HistogramParamsBounds {
+  min: Moment;
+  max: Moment;
+}
+
 interface HistogramParams {
   date: true;
   interval: Duration;
   intervalESValue: number;
   intervalESUnit: Unit;
   format: string;
-  bounds: {
-    min: Moment;
-    max: Moment;
-  };
+  bounds: HistogramParamsBounds;
 }
 export interface Dimension {
   accessor: 0 | 1;
   format: SerializedFieldFormat<{ pattern: string }>;
+  label: string;
 }
 
 export interface Dimensions {

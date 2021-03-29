@@ -7,10 +7,14 @@
  */
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
-import { IAggConfigs, TimeRangeBounds } from '../../../../../data/common';
+import { IAggConfigs } from '../../../../../data/common';
 import { DataPublicPluginStart, search } from '../../../../../data/public';
+import { Dimensions, HistogramParamsBounds } from '../../angular/helpers/point_series';
 
-export function getDimensions(aggs: IAggConfigs, data: DataPublicPluginStart) {
+export function getDimensions(
+  aggs: IAggConfigs,
+  data: DataPublicPluginStart
+): Dimensions | undefined {
   const [metric, agg] = aggs.aggs;
   const { from, to } = data.query.timefilter.timefilter.getTime();
   agg.params.timeRange = {
@@ -18,15 +22,15 @@ export function getDimensions(aggs: IAggConfigs, data: DataPublicPluginStart) {
     to: dateMath.parse(to, { roundUp: true }),
   };
   const bounds = agg.params.timeRange
-    ? data.query.timefilter.timefilter.calculateBounds(agg.params.timeRange)
+    ? (data.query.timefilter.timefilter.calculateBounds(
+        agg.params.timeRange
+      ) as HistogramParamsBounds)
     : null;
   const buckets = search.aggs.isDateHistogramBucketAggConfig(agg) ? agg.buckets : undefined;
 
-  if (!buckets) {
+  if (!buckets || !bounds) {
     return;
   }
-
-  buckets.setBounds(bounds as TimeRangeBounds);
 
   const { esUnit, esValue } = buckets.getInterval();
   return {
@@ -40,7 +44,7 @@ export function getDimensions(aggs: IAggConfigs, data: DataPublicPluginStart) {
         intervalESValue: esValue,
         intervalESUnit: esUnit,
         format: buckets.getScaledDateFormat(),
-        bounds: buckets.getBounds(),
+        bounds,
       },
     },
     y: {

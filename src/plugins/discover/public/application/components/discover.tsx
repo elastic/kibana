@@ -89,10 +89,8 @@ export function Discover({
   const { chartData, timefilterUpdateHandler, bucketInterval } = useChartData({
     data,
     fetch$: opts.fetch$,
-    indexPattern,
-    interval: state.interval,
+    interval: state.interval!,
     savedSearch,
-    searchSource,
     hideChart: hideChart || !indexPattern.timeFieldName,
   });
 
@@ -108,14 +106,6 @@ export function Discover({
     },
     [opts]
   );
-
-  useEffect(() => {
-    const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
-    chrome.docTitle.change(`Discover${pageTitleSuffix}`);
-
-    setBreadcrumbsTitle(savedSearch, chrome);
-    addHelpMenuToAppChrome(chrome, docLinks);
-  }, [savedSearch, chrome, docLinks]);
 
   const { onAddColumn, onRemoveColumn, onMoveColumn, onSetColumns } = useMemo(
     () =>
@@ -170,7 +160,9 @@ export function Discover({
     },
     [setAppState]
   );
-
+  /**
+   * Legacy function, remove once legacy grid is removed
+   */
   const onBackToTop = useCallback(() => {
     if (scrollableDesktop && scrollableDesktop.current) {
       scrollableDesktop.current.focus();
@@ -202,6 +194,22 @@ export function Discover({
     }
     return useNewFieldsApi ? state.columns.filter((col) => col !== '_source') : state.columns;
   }, [state, useNewFieldsApi]);
+
+  useEffect(() => {
+    const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
+    chrome.docTitle.change(`Discover${pageTitleSuffix}`);
+
+    setBreadcrumbsTitle(savedSearch, chrome);
+    addHelpMenuToAppChrome(chrome, docLinks);
+    // Propagate current app state to url, then start syncing and fetching
+    opts.stateContainer.replaceUrlAppState({}).then(() => {
+      opts.stateContainer.startSync();
+      if (opts.shouldSearchOnPageLoad()) {
+        opts.refetch$.next();
+      }
+    });
+  }, [savedSearch, chrome, docLinks, opts]);
+
   return (
     <I18nProvider>
       <EuiPage className="dscPage" data-fetch-counter={fetchCounter}>
@@ -330,7 +338,7 @@ export function Discover({
                         )}
                       </EuiFlexGroup>
                     </EuiFlexItem>
-                    {chartData && (
+                    {!hideChart && chartData && (
                       <EuiFlexItem grow={false}>
                         <section
                           aria-label={i18n.translate(

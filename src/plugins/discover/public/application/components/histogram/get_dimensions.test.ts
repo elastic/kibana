@@ -19,6 +19,11 @@ test('getDimensions', () => {
   const searchSource = ({
     setField,
     removeField: jest.fn(),
+    getField: (name: string) => {
+      if (name === 'index') {
+        return indexPattern;
+      }
+    },
   } as unknown) as SearchSource;
 
   const dataMock = dataPluginMock.createStartContract();
@@ -29,35 +34,38 @@ test('getDimensions', () => {
     return calculateBounds(timeRange);
   };
 
-  const aggsConfig = applyAggsToSearchSource(true, searchSource, 'auto', indexPattern, dataMock);
+  const aggsConfig = applyAggsToSearchSource(searchSource, 'auto', dataMock);
   const actual = getDimensions(aggsConfig!, dataMock);
   expect(actual).toMatchInlineSnapshot(`
-      Object {
-        "x": Object {
-          "accessor": 0,
-          "format": Object {
-            "id": "date",
-            "params": Object {
-              "pattern": "HH:mm:ss.SSS",
-            },
-          },
-          "label": "timestamp per 0 milliseconds",
+    Object {
+      "x": Object {
+        "accessor": 0,
+        "format": Object {
+          "id": "date",
           "params": Object {
-            "bounds": undefined,
-            "date": true,
-            "format": "HH:mm:ss.SSS",
-            "interval": "P365D",
-            "intervalESUnit": "d",
-            "intervalESValue": 365,
+            "pattern": "HH:mm:ss.SSS",
           },
         },
-        "y": Object {
-          "accessor": 1,
-          "format": Object {
-            "id": "number",
+        "label": "timestamp per 0 milliseconds",
+        "params": Object {
+          "bounds": Object {
+            "max": "2021-03-29T07:04:00.695Z",
+            "min": "1991-03-29T08:04:00.694Z",
           },
-          "label": "Count",
+          "date": true,
+          "format": "HH:mm:ss.SSS",
+          "interval": "P0D",
+          "intervalESUnit": "ms",
+          "intervalESValue": 0,
         },
-      }
-    `);
+      },
+      "y": Object {
+        "accessor": 1,
+        "format": Object {
+          "id": "number",
+        },
+        "label": "Count",
+      },
+    }
+  `);
 });

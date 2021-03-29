@@ -6,64 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { getServices } from '../../kibana_services';
 import { buildPointSeriesData } from './helpers';
+import { Dimensions } from './helpers/point_series';
 
-function tableResponseHandler(table: any, dimensions: any) {
+function tableResponseHandler(table: any) {
   const converted = { tables: [], direction: '' };
-  const split = dimensions.splitColumn || dimensions.splitRow;
 
-  if (split) {
-    converted.direction = dimensions.splitRow ? 'row' : 'column';
-    const splitColumnIndex = split[0].accessor;
-    const splitColumnFormatter = getServices().data.fieldFormats.deserialize(split[0].format);
-    const splitColumn = table.columns[splitColumnIndex];
-    const splitMap = {};
-    let splitIndex = 0;
-
-    table.rows.forEach((row: any, rowIndex: any) => {
-      const splitValue = row[splitColumn.id];
-
-      if (!splitMap.hasOwnProperty(splitValue)) {
-        // @ts-ignore
-        splitMap[splitValue] = splitIndex++;
-        const tableGroup = {
-          $parent: converted,
-          title: `${splitColumnFormatter.convert(splitValue)}: ${splitColumn.name}`,
-          name: splitColumn.name,
-          key: splitValue,
-          column: splitColumnIndex,
-          row: rowIndex,
-          table,
-          tables: [],
-        };
-
-        tableGroup.tables.push({
-          // @ts-ignore
-          $parent: tableGroup,
-          // @ts-ignore
-          columns: table.columns,
-          // @ts-ignore
-          rows: [],
-        });
-
-        // @ts-ignore
-        converted.tables.push(tableGroup);
-      }
-
-      // @ts-ignore
-      const tableIndex = splitMap[splitValue];
-      // @ts-ignore
-      converted.tables[tableIndex].tables[0].rows.push(row);
-    });
-  } else {
-    converted.tables.push({
-      // @ts-ignore
-      columns: table.columns,
-      // @ts-ignore
-      rows: table.rows,
-    });
-  }
+  converted.tables.push({
+    // @ts-ignore
+    columns: table.columns,
+    // @ts-ignore
+    rows: table.rows,
+  });
 
   return converted;
 }
@@ -102,8 +56,8 @@ function convertTableGroup(tableGroup: any, convertTable: any) {
   return out;
 }
 
-export const discoverResponseHandler = (response: any, dimensions: any) => {
-  const tableGroup = tableResponseHandler(response, dimensions);
+export const discoverResponseHandler = (response: any, dimensions: Dimensions) => {
+  const tableGroup = tableResponseHandler(response);
 
   let converted = convertTableGroup(tableGroup, (table: any) => {
     return buildPointSeriesData(table, dimensions);

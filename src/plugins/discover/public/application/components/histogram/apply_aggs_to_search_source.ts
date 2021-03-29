@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { IndexPattern, SearchSource } from '../../../../../data/common';
+import { SearchSource } from '../../../../../data/common';
 import { DataPublicPluginStart } from '../../../../../data/public';
 
 /**
@@ -13,19 +13,11 @@ import { DataPublicPluginStart } from '../../../../../data/public';
  * for Discover's histogram vis
  */
 export function applyAggsToSearchSource(
-  enabled: boolean,
   searchSource: SearchSource,
   histogramInterval: string,
-  indexPattern: IndexPattern,
   data: DataPublicPluginStart
 ) {
-  if (!enabled) {
-    if (searchSource.getField('aggs')) {
-      // clean up fields in case it was set before
-      searchSource.removeField('aggs');
-    }
-    return;
-  }
+  const indexPattern = searchSource.getField('index')!;
   const visStateAggs = [
     {
       type: 'count',

@@ -118,6 +118,10 @@ export interface DiscoverProps {
      */
     searchSessionManager: DiscoverSearchSessionManager;
     /**
+     * Determines whether data should be fetched when the app is loaded
+     */
+    shouldSearchOnPageLoad: () => boolean;
+    /**
      * The number of documents that can be displayed in the table/grid
      */
     sampleSize: number;

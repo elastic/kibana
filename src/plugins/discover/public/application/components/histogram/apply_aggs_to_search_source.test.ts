@@ -11,17 +11,22 @@ import { dataPluginMock } from '../../../../../data/public/mocks';
 import { applyAggsToSearchSource } from './apply_aggs_to_search_source';
 
 describe('applyAggsToSearchSource', () => {
-  test('enabled = true', () => {
+  test('is working', () => {
     const indexPattern = indexPatternWithTimefieldMock;
     const setField = jest.fn();
     const searchSource = ({
       setField,
+      getField: (name: string) => {
+        if (name === 'index') {
+          return indexPattern;
+        }
+      },
       removeField: jest.fn(),
     } as unknown) as SearchSource;
 
     const dataMock = dataPluginMock.createStartContract();
 
-    const aggsConfig = applyAggsToSearchSource(true, searchSource, 'auto', indexPattern, dataMock);
+    const aggsConfig = applyAggsToSearchSource(searchSource, 'auto', dataMock);
 
     expect(aggsConfig!.aggs).toMatchInlineSnapshot(`
     Array [
@@ -63,26 +68,5 @@ describe('applyAggsToSearchSource', () => {
       },
     }
   `);
-  });
-
-  test('enabled = false', () => {
-    const indexPattern = indexPatternWithTimefieldMock;
-    const setField = jest.fn();
-    const getField = jest.fn(() => {
-      return true;
-    });
-    const removeField = jest.fn();
-    const searchSource = ({
-      getField,
-      setField,
-      removeField,
-    } as unknown) as SearchSource;
-
-    const dataMock = dataPluginMock.createStartContract();
-
-    const aggsConfig = applyAggsToSearchSource(false, searchSource, 'auto', indexPattern, dataMock);
-    expect(aggsConfig).toBeFalsy();
-    expect(getField).toHaveBeenCalledWith('aggs');
-    expect(removeField).toHaveBeenCalledWith('aggs');
   });
 });
