@@ -17,6 +17,7 @@ import {
   SearchSessionState,
 } from '../../../../../src/plugins/data/public';
 import { ENHANCED_ES_SEARCH_STRATEGY, IAsyncSearchOptions, pollSearch } from '../../common';
+import { SearchAbortController } from './search_abort_controller';
 
 export class EnhancedSearchInterceptor extends SearchInterceptor {
   private uiSettingsSub: Subscription;
@@ -47,31 +48,30 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
   }
 
   public search({ id, ...request }: IKibanaSearchRequest, options: IAsyncSearchOptions = {}) {
-    const { combinedSignal, timeoutSignal, cleanup, abort } = this.setupAbortSignal({
-      abortSignal: options.abortSignal,
-      timeout: this.searchTimeout,
-    });
-    const strategy = options?.strategy ?? ENHANCED_ES_SEARCH_STRATEGY;
-    const searchOptions = { ...options, strategy, abortSignal: combinedSignal };
+    const searchOptions = {
+      strategy: ENHANCED_ES_SEARCH_STRATEGY,
+      ...options,
+    };
+    const { sessionId, strategy, abortSignal } = searchOptions;
     const search = () => this.runSearch({ id, ...request }, searchOptions);
 
+    const searchAbortController = new SearchAbortController(abortSignal, this.searchTimeout);
     this.pendingCount$.next(this.pendingCount$.getValue() + 1);
-
-    const untrackSearch =
-      this.deps.session.isCurrentSession(options.sessionId) &&
-      this.deps.session.trackSearch({ abort });
+    const untrackSearch = this.deps.session.isCurrentSession(options.sessionId)
+      ? this.deps.session.trackSearch({ abort: () => searchAbortController.abort() })
+      : undefined;
 
     // track if this search's session will be send to background
     // if yes, then we don't need to cancel this search when it is aborted
     let isSavedToBackground = false;
     const savedToBackgroundSub =
-      this.deps.session.isCurrentSession(options.sessionId) &&
+      this.deps.session.isCurrentSession(sessionId) &&
       this.deps.session.state$
         .pipe(
           skip(1), // ignore any state, we are only interested in transition x -> BackgroundLoading
           filter(
             (state) =>
-              this.deps.session.isCurrentSession(options.sessionId) &&
+              this.deps.session.isCurrentSession(sessionId) &&
               state === SearchSessionState.BackgroundLoading
           ),
           take(1)
@@ -84,18 +84,22 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
       if (id && !isSavedToBackground) this.deps.http.delete(`/internal/search/${strategy}/${id}`);
     });
 
-    return pollSearch(search, cancel, { ...options, abortSignal: combinedSignal }).pipe(
+    return pollSearch(search, cancel, {
+      ...options,
+      abortSignal: searchAbortController.getSignal(),
+    }).pipe(
       tap((response) => (id = response.id)),
       catchError((e: Error) => {
         cancel();
-        return throwError(this.handleSearchError(e, timeoutSignal, options));
+        return throwError(this.handleSearchError(e, options, searchAbortController.isTimeout()));
       }),
       finalize(() => {
         this.pendingCount$.next(this.pendingCount$.getValue() - 1);
-        cleanup();
-        if (untrackSearch && this.deps.session.isCurrentSession(options.sessionId)) {
+        if (this.deps.session.isCurrentSession(options.sessionId)) {
           // untrack if this search still belongs to current session
-          untrackSearch();
+          untrackSearch?.();
+        } else {
+          searchAbortController.cleanup();
         }
         if (savedToBackgroundSub) {
           savedToBackgroundSub.unsubscribe();
