@@ -6,10 +6,7 @@
  * Side Public License, v 1.
  */
 
-export enum FIELD_TYPES {
-  BOOLEAN = 'boolean',
-  DATE = 'date',
-  GEO = 'geo_point',
-  NUMBER = 'number',
-  STRING = 'string',
-}
+import React from 'react';
+import { PanelSchema } from '../../../common/types';
+
+export const PanelModelContext = React.createContext<PanelSchema | null>(null);

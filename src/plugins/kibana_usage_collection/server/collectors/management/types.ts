@@ -32,6 +32,7 @@ export interface UsageStats {
   'apm:enableSignificantTerms': boolean;
   'apm:enableServiceOverview': boolean;
   'observability:enableAlertingExperience': boolean;
+  'observability:enableInspectEsQueries': boolean;
   'visualize:enableLabs': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:colorMapping': string;
