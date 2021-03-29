@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryContainer } from '@elastic/elasticsearch/api/types';
 import { Setup, SetupTimeRange } from '../../server/lib/helpers/setup_request';
 import {
   SERVICE_NAME,
@@ -51,7 +52,7 @@ export function getMetricsProjection({
     ...rangeQuery(start, end),
     ...environmentQuery(environment),
     ...kqlQuery(kuery),
-  ];
+  ] as QueryContainer[];
 
   return {
     apm: {

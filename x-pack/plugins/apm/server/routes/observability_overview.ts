@@ -9,7 +9,7 @@ import * as t from 'io-ts';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceCount } from '../lib/observability_overview/get_service_count';
 import { getTransactionCoordinates } from '../lib/observability_overview/get_transaction_coordinates';
-import { hasData } from '../lib/observability_overview/has_data';
+import { getHasData } from '../lib/observability_overview/has_data';
 import { createRoute } from './create_route';
 import { rangeRt } from './default_api_types';
 import { getSearchAggregatedTransactions } from '../lib/helpers/aggregated_transactions';
@@ -20,7 +20,8 @@ export const observabilityOverviewHasDataRoute = createRoute({
   options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
-    return await hasData({ setup });
+    const res = await getHasData({ setup });
+    return { hasData: res };
   },
 });
 
