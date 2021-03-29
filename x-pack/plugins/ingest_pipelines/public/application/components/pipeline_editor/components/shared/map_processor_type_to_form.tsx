@@ -428,7 +428,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
         'Uses a pre-trained data frame analytics model to infer against incoming data.',
     }),
     getDefaultDescription: ({ field, target_field: targetField = field }) =>
-      i18n.translate('xpack.ingestPipelines.processors.defaultDescription.rename', {
+      i18n.translate('xpack.ingestPipelines.processors.defaultDescription.inference', {
         defaultMessage: 'Renames the "{field}" to "{target_field}"',
         values: {
           field,
