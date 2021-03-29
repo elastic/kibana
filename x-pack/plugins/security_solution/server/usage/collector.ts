@@ -138,9 +138,11 @@ export const registerCollector: RegisterCollector = ({
       const savedObjectsClient = (internalSavedObjectsClient as unknown) as SavedObjectsClientContract;
       const [detections, detectionMetrics, endpoints] = await Promise.allSettled([
         fetchDetectionsUsage(kibanaIndex, esClient, ml, savedObjectsClient),
-        fetchDetectionsMetrics(ml, savedObjectsClient),
+        fetchDetectionsMetrics(kibanaIndex, esClient, ml, savedObjectsClient),
         getEndpointTelemetryFromFleet(savedObjectsClient, endpointAppContext, esClient),
       ]);
+
+      // console.log(JSON.stringify(detectionMetrics));
 
       return {
         detections: detections.status === 'fulfilled' ? detections.value : defaultDetectionsUsage,

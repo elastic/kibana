@@ -12,7 +12,7 @@ import {
 } from '../../../../../../src/core/server';
 import { MlPluginSetup } from '../../../../ml/server';
 import { SIGNALS_ID, INTERNAL_IMMUTABLE_KEY } from '../../../common/constants';
-import { DetectionRulesUsage, MlJobsUsage, MlJobMetric } from './index';
+import { DetectionRulesUsage, MlJobsUsage, MlJobMetric, DetectionRuleMetric } from './index';
 import { isJobStarted } from '../../../common/machine_learning/helpers';
 import { isSecurityJob } from '../../../common/machine_learning/is_security_job';
 
@@ -38,7 +38,17 @@ interface RuleSearchParams {
   size: number;
 }
 interface RuleSearchResult {
-  alert: { enabled: boolean; tags: string[] };
+  alert: {
+    enabled: boolean;
+    tags: string[];
+    createdAt: string;
+    updatedAt: string;
+    params: DetectionRuleParms;
+  };
+}
+
+interface DetectionRuleParms {
+  ruleId: string;
 }
 
 const isElasticRule = (tags: string[]) => tags.includes(`${INTERNAL_IMMUTABLE_KEY}:true`);
@@ -297,6 +307,43 @@ export const getMlJobMetrics = async (
     } catch (e) {
       // ignore failure, usage will be zeroed
     }
+  }
+
+  return [];
+};
+
+export const getDetectionRuleMetrics = async (
+  index: string,
+  esClient: ElasticsearchClient,
+  savedObjectClient: SavedObjectsClientContract
+): Promise<DetectionRuleMetric[]> => {
+  const ruleSearchOptions: RuleSearchParams = {
+    body: { query: { bool: { filter: { term: { 'alert.alertTypeId': SIGNALS_ID } } } } },
+    filterPath: [],
+    ignoreUnavailable: true,
+    index,
+    size: 1000,
+  };
+
+  try {
+    const { body: ruleResults } = await esClient.search<RuleSearchResult>(ruleSearchOptions);
+
+    if (ruleResults.hits?.hits?.length > 0) {
+      const elasticRules = ruleResults.hits.hits.filter((hit) =>
+        isElasticRule(hit._source?.alert.tags || [])
+      );
+
+      return elasticRules.map((hit) => {
+        return {
+          rule_id: hit._source?.alert.params.ruleId,
+          enabled: hit._source?.alert.enabled,
+          created_on: hit._source?.alert.createdAt,
+          updated_on: hit._source?.alert.updatedAt,
+        } as DetectionRuleMetric;
+      });
+    }
+  } catch (e) {
+    // ignore failure, usage will be zeroed
   }
 
   return [];
