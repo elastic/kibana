@@ -7,20 +7,14 @@
 
 import React from 'react';
 
-import { useValues } from 'kea';
-
 import { EuiFlexGroup, EuiFlexItem, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { FlashMessages } from '../../../shared/flash_messages';
 
-import { UnavailablePrompt, TotalStats, TotalCharts, RecentApiLogs } from './components';
-
-import { EngineOverviewLogic } from './';
+import { TotalStats, TotalCharts, RecentApiLogs } from './components';
 
 export const EngineOverviewMetrics: React.FC = () => {
-  const { apiLogsUnavailable } = useValues(EngineOverviewLogic);
-
   return (
     <>
       <EuiPageHeader
@@ -29,22 +23,17 @@ export const EngineOverviewMetrics: React.FC = () => {
         })}
       />
       <FlashMessages />
-      {apiLogsUnavailable ? (
-        <UnavailablePrompt />
-      ) : (
-        <>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={1}>
-              <TotalStats />
-            </EuiFlexItem>
-            <EuiFlexItem grow={3}>
-              <TotalCharts />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="xl" />
-          <RecentApiLogs />
-        </>
-      )}
+
+      <EuiFlexGroup>
+        <EuiFlexItem grow={1}>
+          <TotalStats />
+        </EuiFlexItem>
+        <EuiFlexItem grow={3}>
+          <TotalCharts />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="xl" />
+      <RecentApiLogs />
     </>
   );
 };
