@@ -120,7 +120,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -393,7 +393,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -666,7 +666,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -939,7 +939,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -1212,7 +1212,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -1485,7 +1485,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -1758,7 +1758,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -2031,7 +2031,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -2304,7 +2304,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -2577,7 +2577,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -2899,7 +2899,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
             >
               <button
                 aria-label="Previous page"
-                class="euiButtonIcon euiButtonIcon--text"
+                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
                 data-test-subj="pagination-button-previous"
                 disabled=""
                 type="button"
@@ -3044,7 +3044,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
               </ul>
               <button
                 aria-label="Next page, 2"
-                class="euiButtonIcon euiButtonIcon--text"
+                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
                 data-test-subj="pagination-button-next"
                 type="button"
               >
@@ -3139,7 +3139,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -3412,7 +3412,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -3685,7 +3685,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -3958,7 +3958,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -4231,7 +4231,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -4504,7 +4504,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -4777,7 +4777,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -5050,7 +5050,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -5323,7 +5323,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -5596,7 +5596,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -5918,7 +5918,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
             >
               <button
                 aria-label="Previous page"
-                class="euiButtonIcon euiButtonIcon--text"
+                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
                 data-test-subj="pagination-button-previous"
                 disabled=""
                 type="button"
@@ -6063,7 +6063,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
               </ul>
               <button
                 aria-label="Next page, 2"
-                class="euiButtonIcon euiButtonIcon--text"
+                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
                 data-test-subj="pagination-button-next"
                 type="button"
               >
@@ -6116,7 +6116,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -6389,7 +6389,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -6662,7 +6662,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -6935,7 +6935,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -7208,7 +7208,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -7481,7 +7481,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -7754,7 +7754,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -8027,7 +8027,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -8300,7 +8300,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -8573,7 +8573,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
           >
             <div
               class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -8895,7 +8895,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
             >
               <button
                 aria-label="Previous page, 2"
-                class="euiButtonIcon euiButtonIcon--text"
+                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
                 data-test-subj="pagination-button-previous"
                 type="button"
               >
@@ -8993,7 +8993,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
               </ul>
               <button
                 aria-label="Next page, 4"
-                class="euiButtonIcon euiButtonIcon--text"
+                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
                 data-test-subj="pagination-button-next"
                 type="button"
               >
