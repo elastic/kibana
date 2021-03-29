@@ -225,6 +225,7 @@ export class TopNPanelConfig extends Component<
           <EuiTab
             isSelected={selectedTab === PANEL_CONFIG_TABS.DATA}
             onClick={() => this.switchTab(PANEL_CONFIG_TABS.DATA)}
+            data-test-subj="topNEditorDataBtn"
           >
             <FormattedMessage
               id="visTypeTimeseries.topN.dataTab.dataButtonLabel"
@@ -234,6 +235,7 @@ export class TopNPanelConfig extends Component<
           <EuiTab
             isSelected={selectedTab === PANEL_CONFIG_TABS.OPTIONS}
             onClick={() => this.switchTab(PANEL_CONFIG_TABS.OPTIONS)}
+            data-test-subj="topNEditorPanelOptionsBtn"
           >
             <FormattedMessage
               id="visTypeTimeseries.topN.optionsTab.panelOptionsButtonLabel"
