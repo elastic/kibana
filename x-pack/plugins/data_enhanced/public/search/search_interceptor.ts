@@ -102,8 +102,10 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
       switchMap((requestHash) => {
         const cached = requestHash ? this.responseCache.get(requestHash) : undefined;
         if (cached) {
-          return cached;
+          if (abortSignal) cached.searchAbortController.addAbortSignal(abortSignal);
+          return cached.response$;
         }
+
         const searchAbortController = new SearchAbortController(abortSignal, this.searchTimeout);
         this.pendingCount$.next(this.pendingCount$.getValue() + 1);
         const untrackSearch = this.deps.session.isCurrentSession(options.sessionId)
@@ -137,7 +139,10 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
 
         if (requestHash) {
           // Cache and return from cache
-          return this.responseCache.set(requestHash, search$);
+          return this.responseCache.set(requestHash, {
+            response$: search$,
+            searchAbortController,
+          });
         }
 
         return search$;

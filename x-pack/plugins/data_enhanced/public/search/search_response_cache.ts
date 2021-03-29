@@ -7,9 +7,16 @@
 
 import { Observable, ReplaySubject, Subscription } from 'rxjs';
 import { IKibanaSearchResponse, isErrorResponse } from '../../../../../src/plugins/data/public';
+import { SearchAbortController } from './search_abort_controller';
 
 interface ResponseCacheItem {
-  response: ReplaySubject<IKibanaSearchResponse<any>>;
+  response$: Observable<IKibanaSearchResponse<any>>;
+  searchAbortController: SearchAbortController;
+}
+
+interface ResponseCacheItemInternal {
+  response$: Observable<IKibanaSearchResponse<any>>;
+  searchAbortController: SearchAbortController;
   size: number;
   subs: Subscription;
 }
@@ -17,7 +24,7 @@ interface ResponseCacheItem {
 export const CACHE_MAX_SIZE_MB = 10;
 
 export class SearchResponseCache {
-  private responseCache: Map<string, ResponseCacheItem>;
+  private responseCache: Map<string, ResponseCacheItemInternal>;
   private cacheSize = 0;
 
   constructor(private maxItems: number, private maxCacheSizeMB: number) {
@@ -39,7 +46,7 @@ export class SearchResponseCache {
     }
   }
 
-  private setItem(key: string, item: ResponseCacheItem) {
+  private setItem(key: string, item: ResponseCacheItemInternal) {
     // The deletion of the key will move it to the end of the Map's entries.
     this.deleteItem(key, false);
     this.cacheSize += item.size;
@@ -71,27 +78,30 @@ export class SearchResponseCache {
    * @returns A ReplaySubject that mimics the behavior of the original observable
    * @throws error if key already exists
    */
-  public set(key: string, response$: Observable<IKibanaSearchResponse<any>>) {
+  public set(key: string, item: ResponseCacheItem) {
     if (this.responseCache.has(key)) {
       throw new Error('duplicate key');
     }
 
+    const { response$, searchAbortController } = item;
+
     const responseReplay$ = new ReplaySubject<IKibanaSearchResponse<any>>(1);
-    const item = {
-      response: responseReplay$,
+    const cacheItem: ResponseCacheItemInternal = {
+      response$: responseReplay$,
+      searchAbortController,
       subs: new Subscription(),
       size: 0,
     };
 
-    this.setItem(key, item);
+    this.setItem(key, cacheItem);
 
-    item.subs.add(
+    cacheItem.subs.add(
       response$.subscribe({
         next: (r) => {
           const newSize = r.meta?.size || JSON.stringify(r).length;
           if (this.byteToMb(newSize) < this.maxCacheSizeMB && !isErrorResponse(r)) {
             this.setItem(key, {
-              ...item,
+              ...cacheItem,
               size: newSize,
             });
             this.shrink();
@@ -115,12 +125,15 @@ export class SearchResponseCache {
     return responseReplay$;
   }
 
-  public get(key: string) {
+  public get(key: string): ResponseCacheItem | undefined {
     const item = this.responseCache.get(key);
     if (item) {
       // touch the item, and move it to the end of the map's entries
       this.setItem(key, item);
-      return item?.response;
+      return {
+        response$: item.response$,
+        searchAbortController: item.searchAbortController,
+      };
     }
   }
 }
