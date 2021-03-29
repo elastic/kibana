@@ -13,7 +13,7 @@ import {
   createBatchedFunction,
   BatchResponseItem,
   ErrorLike,
-  ResultBase,
+  BatchResultBase,
 } from '../../common';
 import { fetchStreaming, split } from '../streaming';
 import { normalizeError } from '../../common';
@@ -23,7 +23,7 @@ export interface BatchedFunctionProtocolError extends ErrorLike {
   code: string;
 }
 
-export interface StreamingBatchedFunctionParams<Payload, Result extends ResultBase> {
+export interface StreamingBatchedFunctionParams<Payload, Result extends BatchResultBase> {
   /**
    * URL endpoint that will receive a batch of requests. This endpoint is expected
    * to receive batch as a serialized JSON array. It should stream responses back
@@ -57,7 +57,7 @@ export interface StreamingBatchedFunctionParams<Payload, Result extends ResultBa
  * server using `params.fetchStreaming` in a POST request. Responses are streamed back
  * and each batch item is resolved once corresponding response is received.
  */
-export const createStreamingBatchedFunction = <Payload, Result extends ResultBase>(
+export const createStreamingBatchedFunction = <Payload, Result extends BatchResultBase>(
   params: StreamingBatchedFunctionParams<Payload, Result>
 ): BatchedFunc<Payload, Result> => {
   const {

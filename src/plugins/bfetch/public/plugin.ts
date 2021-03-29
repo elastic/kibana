@@ -8,7 +8,7 @@
 
 import { CoreStart, PluginInitializerContext, CoreSetup, Plugin } from 'src/core/public';
 import { fetchStreaming as fetchStreamingStatic, FetchStreamingParams } from './streaming';
-import { removeLeadingSlash, ResultBase } from '../common';
+import { removeLeadingSlash, BatchResultBase } from '../common';
 import {
   createStreamingBatchedFunction,
   StreamingBatchedFunctionParams,
@@ -23,7 +23,7 @@ export interface BfetchPublicStartDependencies {}
 
 export interface BfetchPublicContract {
   fetchStreaming: (params: FetchStreamingParams) => ReturnType<typeof fetchStreamingStatic>;
-  batchedFunction: <Payload, Result extends ResultBase>(
+  batchedFunction: <Payload, Result extends BatchResultBase>(
     params: StreamingBatchedFunctionParams<Payload, Result>
   ) => BatchedFunc<Payload, Result>;
 }

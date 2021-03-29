@@ -8,6 +8,7 @@
 
 import { Plugin, CoreSetup, AppNavLinkStatus } from '../../../src/core/public';
 import { BfetchPublicSetup, BfetchPublicStart } from '../../../src/plugins/bfetch/public';
+import { BatchResultBase } from '../../../src/plugins/bfetch/common';
 import { mount } from './mount';
 import { DeveloperExamplesSetup } from '../../developer_examples/public';
 
@@ -24,12 +25,16 @@ export interface BfetchExplorerStartPlugins {
   bfetch: BfetchPublicStart;
 }
 
+interface ExampleResponse extends BatchResultBase {
+  num: number;
+}
+
 export class BfetchExplorerPlugin implements Plugin {
   public setup(
     core: CoreSetup<BfetchExplorerStartPlugins, void>,
     { bfetch, developerExamples }: BfetchExplorerSetupPlugins
   ) {
-    const double = bfetch.batchedFunction<{ num: number }, { num: number }>({
+    const double = bfetch.batchedFunction<{ num: number }, ExampleResponse>({
       url: '/bfetch_explorer/double',
     });
 
