@@ -45,6 +45,7 @@ export const CloudUrlHelp: FunctionComponent = () => {
               defaultMessage="Open {deploymentsLink}"
               values={{
                 deploymentsLink: (
+                  // TODO Cloud deployments link
                   <EuiLink external={true} href="test.com">
                     <FormattedMessage
                       id="xpack.remoteClusters.remoteClusterForm.cloudUrlHelpModal.deploymentsLink"
