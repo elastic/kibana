@@ -14,7 +14,12 @@ describe('utils', () => {
     });
     it('should parse simple query with term', () => {
       expect(parseQueryFilterToKQL('simpleQuery')).toBe(
-        'exception-list-agnostic.attributes.name:"simpleQuery" OR exception-list-agnostic.attributes.description:"simpleQuery" OR exception-list-agnostic.attributes.entries.value:"simpleQuery" OR exception-list-agnostic.attributes.entries.entries.value:"simpleQuery"'
+        'exception-list-agnostic.attributes.name:*simpleQuery* OR exception-list-agnostic.attributes.description:*simpleQuery* OR exception-list-agnostic.attributes.entries.value:*simpleQuery* OR exception-list-agnostic.attributes.entries.entries.value:*simpleQuery*'
+      );
+    });
+    it('should parse complex query with term', () => {
+      expect(parseQueryFilterToKQL('complex query')).toBe(
+        'exception-list-agnostic.attributes.name:*complex* *query* OR exception-list-agnostic.attributes.description:*complex* *query* OR exception-list-agnostic.attributes.entries.value:*complex* *query* OR exception-list-agnostic.attributes.entries.entries.value:*complex* *query*'
       );
     });
   });
