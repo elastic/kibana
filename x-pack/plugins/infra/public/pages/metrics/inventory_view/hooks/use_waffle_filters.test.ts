@@ -17,7 +17,7 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 
-jest.mock('../../../../containers/source', () => ({
+jest.mock('../../../../containers/metrics_source', () => ({
   useSourceContext: () => ({
     createDerivedIndexPattern: () => 'jestbeat-*',
   }),
