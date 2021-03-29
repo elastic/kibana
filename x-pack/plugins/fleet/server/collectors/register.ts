@@ -49,11 +49,11 @@ export function registerFleetUsageCollector(
     schema: {
       agents_enabled: { type: 'boolean' },
       agents: {
-        total: { type: 'long' },
+        total_enrolled: { type: 'long' },
         healthy: { type: 'long' },
         unhealthy: { type: 'long' },
         offline: { type: 'long' },
-        updating: { type: 'long' },
+        total_all_statuses: { type: 'long' },
       },
       packages: {
         type: 'array',
