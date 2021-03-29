@@ -21,11 +21,17 @@ interface LastValueModeIndicatorProps {
   modelInterval: string;
 }
 
+const lastValueLabel = i18n.translate('visTypeTimeseries.lastValueModeIndicator.lastValue', {
+  defaultMessage: 'Last value',
+});
+
 export const LastValueModeIndicator = ({
   seriesData,
   panelInterval,
   modelInterval,
 }: LastValueModeIndicatorProps) => {
+  if (!seriesData?.length) return <EuiBadge>{lastValueLabel}</EuiBadge>;
+
   const dateFormat = getUISettings().get('dateFormat');
   const scaledDataFormat = getUISettings().get('dateFormat:scaled');
 
@@ -35,7 +41,7 @@ export const LastValueModeIndicator = ({
   };
 
   const formatter = createIntervalBasedFormatter(panelInterval, scaledDataFormat, dateFormat);
-  const lastBucketDate = formatter(seriesData![seriesData!.length - 1][0]);
+  const lastBucketDate = formatter(seriesData[seriesData.length - 1][0]);
   const formattedPanelInterval =
     (isAutoInterval(modelInterval) || isGteInterval(modelInterval)) && getFormattedPanelInterval();
 
@@ -73,10 +79,7 @@ export const LastValueModeIndicator = ({
           }
         )}
       >
-        <FormattedMessage
-          id="visTypeTimeseries.lastValueModeIndicator.lastValue"
-          defaultMessage="Last value"
-        />
+        {lastValueLabel}
       </EuiBadge>
     </EuiToolTip>
   );

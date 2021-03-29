@@ -43,14 +43,13 @@ export const LastValueModePopover = ({
       <div className="tvbLastValueModePopoverBody">
         <EuiPopoverTitle>
           {i18n.translate('visTypeTimeseries.lastValueModePopover.title', {
-            defaultMessage: 'Toggle "Last value" indicator display mode',
+            defaultMessage: 'Last value options',
           })}
         </EuiPopoverTitle>
         <EuiSwitch
           checked={isIndicatorDisplayed}
           label={i18n.translate('visTypeTimeseries.lastValueModePopover.switch', {
-            defaultMessage:
-              'Show the indicator when data is fetched using "Last value" data timerange mode',
+            defaultMessage: 'Show label when using Last value mode',
           })}
           onChange={toggleIndicatorDisplay}
         />
