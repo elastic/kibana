@@ -1537,7 +1537,8 @@ describe('IndexPatternDimensionEditorPanel', () => {
                   col4: {
                     isBucketed: false,
                     label: 'Unique count of src',
-                    operationType: 'cardinality',
+                    filter: undefined,
+                    operationType: 'unique_count',
                     sourceField: 'src',
                     dataType: 'number',
                     params: undefined,
