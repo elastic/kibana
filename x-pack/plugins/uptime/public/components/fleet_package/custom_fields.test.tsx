@@ -155,6 +155,20 @@ describe('<CustomFields />', () => {
     expect(queryByLabelText('Proxy URL')).not.toBeInTheDocument();
   });
 
+  it('shows resolve hostnames locally field when proxy url is filled for tcp monitors', () => {
+    const { getByLabelText, queryByLabelText } = render(<WrappedComponent typeEditable />);
+    const monitorType = getByLabelText('Monitor Type') as HTMLInputElement;
+    fireEvent.change(monitorType, { target: { value: DataStream.TCP } });
+
+    expect(queryByLabelText('Resolve hostnames locally')).not.toBeInTheDocument();
+
+    const proxyUrl = getByLabelText('Proxy URL') as HTMLInputElement;
+
+    fireEvent.change(proxyUrl, { target: { value: 'sampleProxyUrl' } });
+
+    expect(getByLabelText('Resolve hostnames locally')).toBeInTheDocument();
+  });
+
   it('handles validation', () => {
     const { getByText, getByLabelText, queryByText } = render(<WrappedComponent />);
 
