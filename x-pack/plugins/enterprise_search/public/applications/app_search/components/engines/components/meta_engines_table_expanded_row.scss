@@ -1,0 +1,22 @@
+
+.meta-engines__source-engines-table {
+  margin: -8px -8px 7px -8px;
+
+  thead {
+    display: none;
+  }
+
+  @include euiBreakpoint('l', 'xl') {
+    .euiTableRowCell {
+      border-top: none;
+    }
+
+    .euiTitle {
+      display: none;
+    }
+  }
+
+  .euiTableHeaderMobile {
+    display: none
+  }
+}
