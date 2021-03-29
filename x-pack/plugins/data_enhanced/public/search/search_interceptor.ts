@@ -120,6 +120,17 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
           catchError((e: Error) => {
             cancel();
             return throwError(this.handleSearchError(e, timeoutSignal, options));
+          }),
+          finalize(() => {
+            this.pendingCount$.next(this.pendingCount$.getValue() - 1);
+            cleanup();
+            if (untrackSearch && this.deps.session.isCurrentSession(sessionId)) {
+              // untrack if this search still belongs to current session
+              untrackSearch();
+            }
+            if (savedToBackgroundSub) {
+              savedToBackgroundSub.unsubscribe();
+            }
           })
         );
 
@@ -129,17 +140,6 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
         }
 
         return search$;
-      }),
-      finalize(() => {
-        this.pendingCount$.next(this.pendingCount$.getValue() - 1);
-        cleanup();
-        if (untrackSearch && this.deps.session.isCurrentSession(sessionId)) {
-          // untrack if this search still belongs to current session
-          untrackSearch();
-        }
-        if (savedToBackgroundSub) {
-          savedToBackgroundSub.unsubscribe();
-        }
       })
     );
   }

@@ -101,14 +101,17 @@ export class SearchResponseCache {
             // Evict and ignore.
             this.deleteItem(key);
           }
+
+          responseReplay$.next(r);
         },
-        error: () => {
+        error: (e) => {
           // Evict item on error
           this.deleteItem(key);
+          responseReplay$.error(e);
         },
+        complete: () => responseReplay$.complete(),
       })
     );
-    item.subs.add(response$.subscribe(responseReplay$));
     this.shrink();
     return responseReplay$;
   }
