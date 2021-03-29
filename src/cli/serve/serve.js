@@ -242,6 +242,14 @@ export default function (program) {
       cache: !!opts.cache,
       dist: !!opts.dist,
     };
+
+    // In development mode, the main process uses the @kbn/dev-cli-mode
+    // bootstrap script instead of core's. The DevCliMode instance
+    // is in charge of starting up the optimizer, and spawning another
+    // `/script/kibana` process with the `isDevCliChild` varenv set to true.
+    // This variable is then used to identify that we're the 'real'
+    // Kibana server process, and will be using core's bootstrap script
+    // to effectively start Kibana.
     const bootstrapScript = getBootstrapScript(cliArgs.dev);
 
     await bootstrapScript({
