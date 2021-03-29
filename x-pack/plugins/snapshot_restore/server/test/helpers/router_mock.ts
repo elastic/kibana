@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ApiResponse } from '@elastic/elasticsearch';
 import type { IRouter } from 'src/core/server';
 import { get } from 'lodash';
 
