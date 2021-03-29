@@ -192,8 +192,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await retry.try(async () => {
         await testSubjects.click('lnsFieldListPanelRemove');
         await testSubjects.missingOrFail('lnsFieldListPanelRemove');
-        await testSubjects.click('confirmModalConfirmButton');
-        await testSubjects.missingOrFail('confirmModalConfirmButton');
       });
     },
 
@@ -432,11 +430,16 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await colorPickerInput.type(color);
       await PageObjects.common.sleep(1000); // give time for debounced components to rerender
     },
-    async editMissingValues(option: string) {
+    async openVisualOptions() {
       await retry.try(async () => {
-        await testSubjects.click('lnsValuesButton');
-        await testSubjects.exists('lnsValuesButton');
+        await testSubjects.click('lnsVisualOptionsButton');
+        await testSubjects.exists('lnsVisualOptionsButton');
       });
+    },
+    async useCurvedLines() {
+      await testSubjects.click('lnsCurveStyleToggle');
+    },
+    async editMissingValues(option: string) {
       await testSubjects.click('lnsMissingValuesSelect');
       const optionSelector = await find.byCssSelector(`#${option}`);
       await optionSelector.click();
@@ -756,7 +759,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
       await this.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-        operation: 'avg',
+        operation: 'average',
         field: 'bytes',
       });
 
