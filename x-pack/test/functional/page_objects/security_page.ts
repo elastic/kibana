@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// @ts-ignore
 import { adminTestUser } from '@kbn/test';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { AuthenticatedUser, Role } from '../../../plugins/security/common/model';

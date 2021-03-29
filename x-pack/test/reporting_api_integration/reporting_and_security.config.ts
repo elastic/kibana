@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// @ts-ignore
 import { esTestConfig, kbnTestConfig, kibanaServerTestUser } from '@kbn/test';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { format as formatUrl } from 'url';

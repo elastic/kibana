@@ -10,6 +10,7 @@ import url from 'url';
 import { delay } from 'bluebird';
 import expect from '@kbn/expect';
 import request, { Cookie } from 'request';
+// @ts-ignore
 import { adminTestUser } from '@kbn/test';
 import {
   getLogoutRequest,

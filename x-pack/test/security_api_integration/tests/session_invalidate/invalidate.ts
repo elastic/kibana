@@ -7,6 +7,7 @@
 
 import request, { Cookie } from 'request';
 import expect from '@kbn/expect';
+// @ts-ignore
 import { adminTestUser } from '@kbn/test';
 import type { AuthenticationProvider } from '../../../../plugins/security/common/model';
 import { getSAMLRequestId, getSAMLResponse } from '../../fixtures/saml/saml_tools';

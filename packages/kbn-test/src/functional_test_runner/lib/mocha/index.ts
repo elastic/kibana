@@ -7,5 +7,7 @@
  */
 
 // @ts-ignore will be replaced shortly
+// @internal
 export { setupMocha } from './setup_mocha';
+// @internal
 export { runTests } from './run_tests';

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+// @internal
 import {
   runTestsCli,
   processRunTestsCliOptions,
@@ -14,27 +15,34 @@ import {
   // @ts-ignore not typed yet
 } from './functional_tests/cli';
 
+// @internal
 export { runTestsCli, processRunTestsCliOptions, startServersCli, processStartServersCliOptions };
 
 // @ts-ignore not typed yet
+// @internal
 export { runTests, startServers } from './functional_tests/tasks';
 
 // @ts-ignore not typed yet
+// @internal
 export { KIBANA_ROOT } from './functional_tests/lib/paths';
 
 // @ts-ignore not typed yet
+// @internal
 export { esTestConfig, createLegacyEsTestCluster } from './legacy_es';
 
 // @ts-ignore not typed yet
+// @internal
 export { kbnTestConfig, kibanaServerTestUser, kibanaTestUser, adminTestUser } from './kbn';
 
 // @ts-ignore not typed yet
+// @internal
 export { setupUsers, DEFAULT_SUPERUSER_PASS } from './functional_tests/lib/auth';
 
 export { readConfigFile } from './functional_test_runner/lib/config/read_config_file';
 
 export { runFtrCli } from './functional_test_runner/cli';
 
+// @internal
 export { setupJUnitReportGeneration, escapeCdata } from './mocha';
 
 export { runFailedTestsReporterCli } from './failed_tests_reporter';

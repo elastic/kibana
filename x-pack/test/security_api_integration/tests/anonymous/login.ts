@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import request, { Cookie } from 'request';
+// @ts-ignore
 import { adminTestUser } from '@kbn/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
 

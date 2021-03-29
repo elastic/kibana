@@ -9,12 +9,19 @@
 import { Client } from 'elasticsearch';
 import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
 import {
+  // @ts-expect-error
   createLegacyEsTestCluster,
+  // @ts-expect-error
   DEFAULT_SUPERUSER_PASS,
+  // @ts-expect-error
   esTestConfig,
+  // @ts-expect-error
   kbnTestConfig,
+  // @ts-expect-error
   kibanaServerTestUser,
+  // @ts-expect-error
   kibanaTestUser,
+  // @ts-expect-error
   setupUsers,
 } from '@kbn/test';
 import { defaultsDeep, get } from 'lodash';

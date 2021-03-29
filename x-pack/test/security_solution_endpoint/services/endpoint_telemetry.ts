@@ -7,6 +7,7 @@
 
 import fs from 'fs';
 import Path from 'path';
+// @ts-ignore
 import { KIBANA_ROOT } from '@kbn/test';
 import { FtrProviderContext } from '../ftr_provider_context';
 
