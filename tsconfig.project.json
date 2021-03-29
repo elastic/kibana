@@ -11,6 +11,7 @@
     "**/*.test.ts",
     "**/*.test.tsx",
     "**/integration_tests/*",
+    "**/test/**/*",
     "**/test/*",
     "**/tests/*",
     "**/tests_client_integration/*",
