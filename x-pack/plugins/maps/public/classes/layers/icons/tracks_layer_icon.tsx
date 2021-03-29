@@ -13,9 +13,9 @@ export const TracksLayerIcon: FunctionComponent = () => (
       className="mapLayersWizardIcon__highlight"
       d="M12.733 12.136h32.283v.545H12.935L4.452 19.98l-.356-.413 8.637-7.43z"
     />
-    <circle cx="24.939" cy="12.409" r="3.273" className="mapLayersWizardIcon__highlight" />
+    <circle cx="24.939" cy="12.409" r="2.182" className="mapLayersWizardIcon__highlight" />
     <circle cx="35.849" cy="12.409" r="2.182" className="mapLayersWizardIcon__highlight" />
-    <circle cx="45.561" cy="12.409" r="2.182" className="mapLayersWizardIcon__highlight" />
+    <circle cx="45.561" cy="12.409" r="3.273" className="mapLayersWizardIcon__highlight" />
     <circle cx="5.197" cy="18.954" r="2.182" className="mapLayersWizardIcon__highlight" />
     <circle cx="13.485" cy="12.409" r="2.182" className="mapLayersWizardIcon__highlight" />
   </svg>

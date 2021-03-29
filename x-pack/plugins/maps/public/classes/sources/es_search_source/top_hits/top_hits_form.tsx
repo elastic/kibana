@@ -18,6 +18,7 @@ import { IFieldType } from '../../../../../../../../src/plugins/data/public';
 
 interface Props {
   indexPatternId: string;
+  isColumnCompressed?: boolean;
   onChange: (args: OnSourceChangeArgs) => void;
   termFields: IFieldType[];
   topHitsSplitField: string | null;
@@ -76,7 +77,7 @@ export class TopHitsForm extends Component<Props, State> {
           label={i18n.translate('xpack.maps.source.esSearch.topHitsSizeLabel', {
             defaultMessage: 'Documents per entity',
           })}
-          display="columnCompressed"
+          display={this.props.isColumnCompressed ? 'columnCompressed' : 'row'}
         >
           <ValidatedRange
             min={1}
@@ -100,7 +101,7 @@ export class TopHitsForm extends Component<Props, State> {
           label={i18n.translate('xpack.maps.source.esSearch.topHitsSplitFieldLabel', {
             defaultMessage: 'Entity',
           })}
-          display="columnCompressed"
+          display={this.props.isColumnCompressed ? 'columnCompressed' : 'row'}
         >
           <SingleFieldSelect
             placeholder={i18n.translate(

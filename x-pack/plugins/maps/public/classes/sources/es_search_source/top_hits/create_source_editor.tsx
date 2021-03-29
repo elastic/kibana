@@ -105,6 +105,7 @@ export class CreateSourceEditor extends Component<Props, State> {
     return (
       <TopHitsForm
         indexPatternId={this.state.indexPattern.id}
+        isColumnCompressed={false}
         onChange={this._onTopHitsPropChange}
         termFields={this.state.termFields}
         topHitsSplitField={this.state.topHitsSplitField}
