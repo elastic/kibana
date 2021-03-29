@@ -9,7 +9,7 @@ export const Timeline = (props: TimelineProps) => {
     <I18nProvider>
       <div data-test-subj="timeline-wrapper">
         <FormattedMessage
-          id="timeline.helloWorldText"
+          id="xpack.timeline.placeholder"
           defaultMessage="Plugin: {name} Timeline: {timelineId}"
           values={{ name: PLUGIN_NAME, timelineId: props.timelineId }}
         />
