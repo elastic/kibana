@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { cloneDeep } from 'lodash';
 import {
   KibanaRequest,
   Logger,
@@ -25,7 +26,6 @@ import { AuthenticatedUser, SecurityPluginSetup } from '../../../security/server
 import {
   ESCaseAttributes,
   CommentAttributes,
-  SavedObjectFindOptions,
   User,
   CommentPatchAttributes,
   SubCaseAttributes,
@@ -82,20 +82,20 @@ interface GetSubCasesArgs extends ClientArgs {
 interface FindCommentsArgs {
   client: SavedObjectsClientContract;
   id: string | string[];
-  options?: SavedObjectFindOptions;
+  options?: SavedObjectFindOptionsKueryNode;
 }
 
 interface FindCaseCommentsArgs {
   client: SavedObjectsClientContract;
   id: string | string[];
-  options?: SavedObjectFindOptions;
+  options?: SavedObjectFindOptionsKueryNode;
   includeSubCaseComments?: boolean;
 }
 
 interface FindSubCaseCommentsArgs {
   client: SavedObjectsClientContract;
   id: string | string[];
-  options?: SavedObjectFindOptions;
+  options?: SavedObjectFindOptionsKueryNode;
 }
 
 interface FindCasesArgs extends ClientArgs {
@@ -186,7 +186,7 @@ interface FindCommentsByAssociationArgs {
   client: SavedObjectsClientContract;
   id: string | string[];
   associationType: AssociationType;
-  options?: SavedObjectFindOptions;
+  options?: SavedObjectFindOptionsKueryNode;
 }
 
 interface Collection {
@@ -419,7 +419,7 @@ export class CaseService implements CaseServiceSetup {
     if (ENABLE_CASE_CONNECTOR && subCaseOptions) {
       subCasesTotal = await this.findSubCaseStatusStats({
         client,
-        options: subCaseOptions,
+        options: cloneDeep(subCaseOptions),
         ids: caseIds,
       });
     }
@@ -493,7 +493,13 @@ export class CaseService implements CaseServiceSetup {
       associationType,
       id: ids,
       options: {
-        filter: `(${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.alert} OR ${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.generatedAlert})`,
+        filter: nodeBuilder.or([
+          nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`, CommentType.alert),
+          nodeBuilder.is(
+            `${CASE_COMMENT_SAVED_OBJECT}.attributes.type`,
+            CommentType.generatedAlert
+          ),
+        ]),
       },
     });
 
@@ -768,7 +774,7 @@ export class CaseService implements CaseServiceSetup {
       this.log.debug(`Attempting to find cases`);
       return await client.find({
         sortField: defaultSortField,
-        ...options,
+        ...cloneDeep(options),
         type: CASE_SAVED_OBJECT,
       });
     } catch (error) {
@@ -788,7 +794,7 @@ export class CaseService implements CaseServiceSetup {
       if (options?.page !== undefined || options?.perPage !== undefined) {
         return client.find({
           sortField: defaultSortField,
-          ...options,
+          ...cloneDeep(options),
           type: SUB_CASE_SAVED_OBJECT,
         });
       }
@@ -798,14 +804,14 @@ export class CaseService implements CaseServiceSetup {
         page: 1,
         perPage: 1,
         sortField: defaultSortField,
-        ...options,
+        ...cloneDeep(options),
         type: SUB_CASE_SAVED_OBJECT,
       });
       return client.find({
         page: 1,
         perPage: stats.total,
         sortField: defaultSortField,
-        ...options,
+        ...cloneDeep(options),
         type: SUB_CASE_SAVED_OBJECT,
       });
     } catch (error) {
@@ -875,7 +881,7 @@ export class CaseService implements CaseServiceSetup {
         return client.find({
           type: CASE_COMMENT_SAVED_OBJECT,
           sortField: defaultSortField,
-          ...options,
+          ...cloneDeep(options),
         });
       }
       // get the total number of comments that are in ES then we'll grab them all in one go
@@ -886,7 +892,7 @@ export class CaseService implements CaseServiceSetup {
         perPage: 1,
         sortField: defaultSortField,
         // spread the options after so the caller can override the default behavior if they want
-        ...options,
+        ...cloneDeep(options),
       });
 
       return client.find({
@@ -894,7 +900,7 @@ export class CaseService implements CaseServiceSetup {
         page: 1,
         perPage: stats.total,
         sortField: defaultSortField,
-        ...options,
+        ...cloneDeep(options),
       });
     } catch (error) {
       this.log.error(`Error on GET all comments for ${JSON.stringify(id)}: ${error}`);
@@ -929,13 +935,15 @@ export class CaseService implements CaseServiceSetup {
       let filter: KueryNode | undefined;
       if (!includeSubCaseComments) {
         // if other filters were passed in then combine them to filter out sub case comments
-        filter = nodeBuilder.and([
-          options?.filter,
-          nodeBuilder.is(
-            `${CASE_COMMENT_SAVED_OBJECT}.attributes.associationType`,
-            AssociationType.case
-          ),
-        ]);
+        const associationFilter = nodeBuilder.is(
+          `${CASE_COMMENT_SAVED_OBJECT}.attributes.associationType`,
+          AssociationType.case
+        );
+
+        filter =
+          options?.filter != null
+            ? nodeBuilder.and([options?.filter, associationFilter])
+            : associationFilter;
       }
 
       this.log.debug(`Attempting to GET all comments for case caseID ${JSON.stringify(id)}`);
