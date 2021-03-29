@@ -11,19 +11,20 @@ import { schema } from '@kbn/config-schema';
 import * as t from 'io-ts';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isLeft } from 'fp-ts/lib/Either';
-import { KibanaResponseFactory, RouteRegistrar } from 'src/core/server';
+import { KibanaRequest, RouteRegistrar } from 'src/core/server';
 import { RequestAbortedError } from '@elastic/elasticsearch/lib/errors';
 import agent from 'elastic-apm-node';
+import { parseMethod } from '../../../common/apm_api/parse_endpoint';
 import { merge } from '../../../common/runtime_types/merge';
 import { strictKeysRt } from '../../../common/runtime_types/strict_keys_rt';
 import { APMConfig } from '../..';
-import { ServerAPI } from '../typings';
+import { InspectResponse, RouteParamsRT, ServerAPI } from '../typings';
 import { jsonRt } from '../../../common/runtime_types/json_rt';
 import type { ApmPluginRequestHandlerContext } from '../typings';
 
-const debugRt = t.exact(
+const inspectRt = t.exact(
   t.partial({
-    query: t.exact(t.partial({ _debug: jsonRt.pipe(t.boolean) })),
+    query: t.exact(t.partial({ _inspect: jsonRt.pipe(t.boolean) })),
   })
 );
 
@@ -31,6 +32,11 @@ type RouteOrRouteFactoryFn = Parameters<ServerAPI<{}>['add']>[0];
 
 const isNotEmpty = (val: any) =>
   val !== undefined && val !== null && !(isPlainObject(val) && isEmpty(val));
+
+export const inspectableEsQueriesMap = new WeakMap<
+  KibanaRequest,
+  InspectResponse
+>();
 
 export function createApi() {
   const routes: RouteOrRouteFactoryFn[] = [];
@@ -58,24 +64,10 @@ export function createApi() {
         const { params, endpoint, options, handler } = route;
 
         const [method, path] = endpoint.split(' ');
-
-        const typedRouterMethod = method.trim().toLowerCase() as
-          | 'get'
-          | 'post'
-          | 'put'
-          | 'delete';
-
-        if (!['get', 'post', 'put', 'delete'].includes(typedRouterMethod)) {
-          throw new Error(
-            "Couldn't register route, as endpoint was not prefixed with a valid HTTP method"
-          );
-        }
+        const typedRouterMethod = parseMethod(method);
 
         // For all runtime types with props, we create an exact
         // version that will strip all keys that are unvalidated.
-
-        const paramsRt = params ? merge([params, debugRt]) : debugRt;
-
         const anyObject = schema.object({}, { unknowns: 'allow' });
 
         (router[typedRouterMethod] as RouteRegistrar<
@@ -102,56 +94,52 @@ export function createApi() {
               });
             }
 
+            // init debug queries
+            inspectableEsQueriesMap.set(request, []);
+
             try {
-              const paramMap = pickBy(
-                {
-                  path: request.params,
-                  body: request.body,
-                  query: {
-                    _debug: 'false',
-                    ...request.query,
-                  },
-                },
-                isNotEmpty
-              );
-
-              const result = strictKeysRt(paramsRt).decode(paramMap);
-
-              if (isLeft(result)) {
-                throw Boom.badRequest(PathReporter.report(result)[0]);
-              }
+              const validParams = validateParams(request, params);
               const data = await handler({
                 request,
                 context: {
                   ...context,
                   plugins,
-                  // Only return values for parameters that have runtime types,
-                  // but always include query as _debug is always set even if
-                  // it's not defined in the route.
-                  params: mergeLodash(
-                    { query: { _debug: false } },
-                    pickBy(result.right, isNotEmpty)
-                  ),
+                  params: validParams,
                   config,
                   logger,
                 },
               });
 
-              return response.ok({ body: data as any });
+              const body = { ...data };
+              if (validParams.query._inspect) {
+                body._inspect = inspectableEsQueriesMap.get(request);
+              }
+
+              // cleanup
+              inspectableEsQueriesMap.delete(request);
+
+              return response.ok({ body });
             } catch (error) {
+              const opts = {
+                statusCode: 500,
+                body: {
+                  message: error.message,
+                  attributes: {
+                    _inspect: inspectableEsQueriesMap.get(request),
+                  },
+                },
+              };
+
               if (Boom.isBoom(error)) {
-                return convertBoomToKibanaResponse(error, response);
+                opts.statusCode = error.output.statusCode;
               }
 
               if (error instanceof RequestAbortedError) {
-                return response.custom({
-                  statusCode: 499,
-                  body: {
-                    message: 'Client closed request',
-                  },
-                });
+                opts.statusCode = 499;
+                opts.body.message = 'Client closed request';
               }
-              throw error;
+
+              return response.custom(opts);
             }
           }
         );
@@ -162,22 +150,35 @@ export function createApi() {
   return api;
 }
 
-function convertBoomToKibanaResponse(
-  error: Boom.Boom,
-  response: KibanaResponseFactory
+function validateParams(
+  request: KibanaRequest,
+  params: RouteParamsRT | undefined
 ) {
-  const opts = { body: { message: error.message } };
-  switch (error.output.statusCode) {
-    case 404:
-      return response.notFound(opts);
+  const paramsRt = params ? merge([params, inspectRt]) : inspectRt;
+  const paramMap = pickBy(
+    {
+      path: request.params,
+      body: request.body,
+      query: {
+        _inspect: 'false',
+        // @ts-ignore
+        ...request.query,
+      },
+    },
+    isNotEmpty
+  );
 
-    case 400:
-      return response.badRequest(opts);
+  const result = strictKeysRt(paramsRt).decode(paramMap);
 
-    case 403:
-      return response.forbidden(opts);
-
-    default:
-      throw error;
+  if (isLeft(result)) {
+    throw Boom.badRequest(PathReporter.report(result)[0]);
   }
+
+  // Only return values for parameters that have runtime types,
+  // but always include query as _inspect is always set even if
+  // it's not defined in the route.
+  return mergeLodash(
+    { query: { _inspect: false } },
+    pickBy(result.right, isNotEmpty)
+  );
 }
