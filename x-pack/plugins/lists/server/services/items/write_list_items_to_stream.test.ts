@@ -305,7 +305,9 @@ describe('write_list_items_to_stream', () => {
 
     test('it will throw an exception with a status code if the hit_source is not a data type we expect', () => {
       const options = getWriteResponseHitsToStreamOptionsMock();
+      // @ts-expect-error _source is optional
       options.response.hits.hits[0]._source.ip = undefined;
+      // @ts-expect-error _source is optional
       options.response.hits.hits[0]._source.keyword = undefined;
       const expected = `Encountered an error where hit._source was an unexpected type: ${JSON.stringify(
         options.response.hits.hits[0]._source

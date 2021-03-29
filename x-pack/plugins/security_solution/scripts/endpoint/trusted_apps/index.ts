@@ -98,10 +98,13 @@ const generateTrustedAppEntry: (options?: GenerateTrustedAppEntryOptions) => obj
   os = randomOperatingSystem(),
   name = randomName(),
 } = {}): NewTrustedApp => {
-  return {
+  const newTrustedApp: NewTrustedApp = {
     description: `Generator says we trust ${name}`,
     name,
     os,
+    effectScope: {
+      type: 'global',
+    },
     entries: [
       {
         // @ts-ignore
@@ -119,6 +122,8 @@ const generateTrustedAppEntry: (options?: GenerateTrustedAppEntryOptions) => obj
       },
     ],
   };
+
+  return newTrustedApp;
 };
 
 const randomN = (max: number): number => Math.floor(Math.random() * max);

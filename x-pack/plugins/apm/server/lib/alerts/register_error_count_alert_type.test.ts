@@ -54,9 +54,19 @@ describe('Error count alert', () => {
     services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         hits: {
+          hits: [],
           total: {
+            relation: 'eq',
             value: 0,
           },
+        },
+        took: 0,
+        timed_out: false,
+        _shards: {
+          failed: 0,
+          skipped: 0,
+          successful: 1,
+          total: 1,
         },
       })
     );
@@ -89,7 +99,9 @@ describe('Error count alert', () => {
     services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         hits: {
+          hits: [],
           total: {
+            relation: 'eq',
             value: 2,
           },
         },
@@ -110,6 +122,14 @@ describe('Error count alert', () => {
               },
             ],
           },
+        },
+        took: 0,
+        timed_out: false,
+        _shards: {
+          failed: 0,
+          skipped: 0,
+          successful: 1,
+          total: 1,
         },
       })
     );
@@ -177,7 +197,9 @@ describe('Error count alert', () => {
     services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         hits: {
+          hits: [],
           total: {
+            relation: 'eq',
             value: 2,
           },
         },
@@ -192,6 +214,14 @@ describe('Error count alert', () => {
               },
             ],
           },
+        },
+        took: 0,
+        timed_out: false,
+        _shards: {
+          failed: 0,
+          skipped: 0,
+          successful: 1,
+          total: 1,
         },
       })
     );

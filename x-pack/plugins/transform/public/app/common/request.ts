@@ -84,11 +84,6 @@ export function getCombinedRuntimeMappings(
 ): StepDefineExposedState['runtimeMappings'] | undefined {
   let combinedRuntimeMappings = {};
 
-  // Use runtime field mappings defined inline from API
-  if (isPopulatedObject(runtimeMappings)) {
-    combinedRuntimeMappings = { ...combinedRuntimeMappings, ...runtimeMappings };
-  }
-
   // And runtime field mappings defined by index pattern
   if (isIndexPattern(indexPattern)) {
     const computedFields = indexPattern.getComputedFields();
@@ -98,6 +93,12 @@ export function getCombinedRuntimeMappings(
         combinedRuntimeMappings = { ...combinedRuntimeMappings, ...ipRuntimeMappings };
       }
     }
+  }
+
+  // Use runtime field mappings defined inline from API
+  // and override fields with same name from index pattern
+  if (isPopulatedObject(runtimeMappings)) {
+    combinedRuntimeMappings = { ...combinedRuntimeMappings, ...runtimeMappings };
   }
 
   if (isPopulatedObject<StepDefineExposedState['runtimeMappings']>(combinedRuntimeMappings)) {

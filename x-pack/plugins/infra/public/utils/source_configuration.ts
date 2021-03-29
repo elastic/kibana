@@ -6,14 +6,14 @@
  */
 
 import {
-  InfraSavedSourceConfigurationColumn,
-  InfraSavedSourceConfigurationFields,
+  InfraSourceConfigurationColumn,
+  InfraSourceConfigurationFieldColumn,
   InfraSourceConfigurationMessageColumn,
   InfraSourceConfigurationTimestampColumn,
-} from '../../common/http_api/source_api';
+} from '../../common/source_configuration/source_configuration';
 
-export type LogColumnConfiguration = InfraSavedSourceConfigurationColumn;
-export type FieldLogColumnConfiguration = InfraSavedSourceConfigurationFields;
+export type LogColumnConfiguration = InfraSourceConfigurationColumn;
+export type FieldLogColumnConfiguration = InfraSourceConfigurationFieldColumn;
 export type MessageLogColumnConfiguration = InfraSourceConfigurationMessageColumn;
 export type TimestampLogColumnConfiguration = InfraSourceConfigurationTimestampColumn;
 

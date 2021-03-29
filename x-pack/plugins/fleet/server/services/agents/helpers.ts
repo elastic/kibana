@@ -5,23 +5,26 @@
  * 2.0.
  */
 
-import type { GetResponse, SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 
+import type { SearchHit } from '../../../../../../typings/elasticsearch';
 import type { Agent, AgentSOAttributes, FleetServerAgent } from '../../types';
 
 type FleetServerAgentESResponse =
-  | GetResponse<FleetServerAgent>
-  | SearchResponse<FleetServerAgent>['hits']['hits'][0];
+  | estypes.MultiGetHit<FleetServerAgent>
+  | estypes.SearchResponse<FleetServerAgent>['hits']['hits'][0]
+  | SearchHit<FleetServerAgent>;
 
 export function searchHitToAgent(hit: FleetServerAgentESResponse): Agent {
+  // @ts-expect-error @elastic/elasticsearch MultiGetHit._source is optional
   return {
     id: hit._id,
     ...hit._source,
-    policy_revision: hit._source.policy_revision_idx,
+    policy_revision: hit._source?.policy_revision_idx,
     current_error_events: [],
     access_api_key: undefined,
     status: undefined,
-    packages: hit._source.packages ?? [],
+    packages: hit._source?.packages ?? [],
   };
 }
 

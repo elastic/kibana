@@ -195,6 +195,7 @@ interface TestCase {
 
 function testIt({ fieldValue, scoreDefault, scoreMapping, expected }: TestCase) {
   const result = buildRiskScoreFromMapping({
+    // @ts-expect-error @elastic/elasticsearch _source is optional
     eventSource: sampleDocRiskScore(fieldValue)._source,
     riskScore: scoreDefault,
     riskScoreMapping: scoreMapping,
