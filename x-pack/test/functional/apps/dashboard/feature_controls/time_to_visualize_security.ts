@@ -77,7 +77,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.security.forceLogout();
     });
 
-    describe.only('lens by value works without library save permissions', () => {
+    describe('lens by value works without library save permissions', () => {
       before(async () => {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.preserveCrossAppState();
