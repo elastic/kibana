@@ -6,20 +6,20 @@
  */
 
 import { CoreSetup } from 'src/core/server';
-import { Route, RouteParamsRT } from './typings';
+import { HandlerReturn, Route, RouteParamsRT } from './typings';
 
 export function createRoute<
   TEndpoint extends string,
-  TRouteParamsRT extends RouteParamsRT | undefined = undefined,
-  TReturn = unknown
+  TReturn extends HandlerReturn,
+  TRouteParamsRT extends RouteParamsRT | undefined = undefined
 >(
   route: Route<TEndpoint, TRouteParamsRT, TReturn>
 ): Route<TEndpoint, TRouteParamsRT, TReturn>;
 
 export function createRoute<
   TEndpoint extends string,
-  TRouteParamsRT extends RouteParamsRT | undefined = undefined,
-  TReturn = unknown
+  TReturn extends HandlerReturn,
+  TRouteParamsRT extends RouteParamsRT | undefined = undefined
 >(
   route: (core: CoreSetup) => Route<TEndpoint, TRouteParamsRT, TReturn>
 ): (core: CoreSetup) => Route<TEndpoint, TRouteParamsRT, TReturn>;
