@@ -296,6 +296,21 @@ interface WaitForTaskResponse {
 }
 
 /**
+ * After waiting for the specificed timeout, the task has not yet completed.
+ *
+ * When querying the tasks API we use `wait_for_completion=true` to block the
+ * request until the task completes. If after the `timeout`, the task still has
+ * not completed we return this error. This does not mean that the task itelf
+ * has reached a timeout, Elasticsearch will continue to run the task.
+ */
+export interface WaitForTaskCompletionTimeoutError {
+  /** After waiting for the specificed timeout, the task has not yet completed. */
+  readonly type: 'wait_for_task_completion_timeout';
+  readonly message: string;
+  readonly error?: Error;
+}
+
+/**
  * Blocks for up to 60s or until a task completes.
  *
  * TODO: delete completed tasks
@@ -304,7 +319,10 @@ const waitForTask = (
   client: ElasticsearchClient,
   taskId: string,
   timeout: string
-): TaskEither.TaskEither<RetryableEsClientError, WaitForTaskResponse> => () => {
+): TaskEither.TaskEither<
+  RetryableEsClientError | WaitForTaskCompletionTimeoutError,
+  WaitForTaskResponse
+> => () => {
   return client.tasks
     .get({
       task_id: taskId,
@@ -328,7 +346,7 @@ const waitForTask = (
         e.body?.error?.type === 'receive_timeout_transport_exception'
       ) {
         return Either.left({
-          type: 'retryable_es_client_error' as const,
+          type: 'wait_for_task_completion_timeout' as const,
           message: `[${e.body.error.type}] ${e.body.error.reason}`,
           error: e,
         });
@@ -438,7 +456,7 @@ export const reindex = (
 };
 
 interface WaitForReindexTaskFailure {
-  cause: { type: string; reason: string };
+  readonly cause: { type: string; reason: string };
 }
 
 export const waitForReindexTask = flow(
@@ -450,7 +468,8 @@ export const waitForReindexTask = flow(
       | { type: 'index_not_found_exception'; index: string }
       | { type: 'target_index_had_write_block' }
       | { type: 'incompatible_mapping_exception' }
-      | RetryableEsClientError,
+      | RetryableEsClientError
+      | WaitForTaskCompletionTimeoutError,
       'reindex_succeeded'
     > => {
       const failureIsAWriteBlock = ({ cause: { type, reason } }: WaitForReindexTaskFailure) =>
@@ -521,7 +540,12 @@ export const verifyReindex = (
 export const waitForPickupUpdatedMappingsTask = flow(
   waitForTask,
   TaskEither.chain(
-    (res): TaskEither.TaskEither<RetryableEsClientError, 'pickup_updated_mappings_succeeded'> => {
+    (
+      res
+    ): TaskEither.TaskEither<
+      RetryableEsClientError | WaitForTaskCompletionTimeoutError,
+      'pickup_updated_mappings_succeeded'
+    > => {
       // We don't catch or type failures/errors because they should never
       // occur in our migration algorithm and we don't have any business logic
       // for dealing with it. If something happens we'll just crash and try

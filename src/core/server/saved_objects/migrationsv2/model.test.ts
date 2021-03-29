@@ -162,13 +162,13 @@ describe('migrations v2 model', () => {
 
     test('terminates to FATAL after 10 retries', () => {
       const newState = model(
-        { ...state, ...{ retryCount: 10, retryDelay: 64000 } },
+        { ...state, ...{ retryCount: 15, retryDelay: 64000 } },
         Either.left(retryableError)
       ) as FatalState;
 
       expect(newState.controlState).toEqual('FATAL');
       expect(newState.reason).toMatchInlineSnapshot(
-        `"Unable to complete the INIT step after 10 attempts, terminating."`
+        `"Unable to complete the INIT step after 15 attempts, terminating."`
       );
     });
   });
@@ -707,6 +707,16 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
+      test('LEGACY_REINDEX_WAIT_FOR_TASK -> LEGACY_REINDEX_WAIT_FOR_TASK if action fails with wait_for_task_completion_timeout', () => {
+        const res: ResponseType<'LEGACY_REINDEX_WAIT_FOR_TASK'> = Either.left({
+          message: '[timeout_exception] Timeout waiting for ...',
+          type: 'wait_for_task_completion_timeout',
+        });
+        const newState = model(legacyReindexWaitForTaskState, res);
+        expect(newState.controlState).toEqual('LEGACY_REINDEX_WAIT_FOR_TASK');
+        expect(newState.retryCount).toEqual(1);
+        expect(newState.retryDelay).toEqual(2000);
+      });
     });
     describe('LEGACY_DELETE', () => {
       const legacyDeleteState: LegacyDeleteState = {
@@ -845,6 +855,16 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('SET_TEMP_WRITE_BLOCK');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
+      });
+      test('REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK -> REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK when response is left wait_for_task_completion_timeout', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK'> = Either.left({
+          message: '[timeout_exception] Timeout waiting for ...',
+          type: 'wait_for_task_completion_timeout',
+        });
+        const newState = model(state, res);
+        expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK');
+        expect(newState.retryCount).toEqual(1);
+        expect(newState.retryDelay).toEqual(2000);
       });
     });
     describe('SET_TEMP_WRITE_BLOCK', () => {
@@ -1024,6 +1044,19 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('DONE');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
+      });
+      test('UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK when response is left wait_for_task_completion_timeout', () => {
+        const res: ResponseType<'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK'> = Either.left({
+          message: '[timeout_exception] Timeout waiting for ...',
+          type: 'wait_for_task_completion_timeout',
+        });
+        const newState = model(
+          updateTargetMappingsWaitForTaskState,
+          res
+        ) as UpdateTargetMappingsWaitForTaskState;
+        expect(newState.controlState).toEqual('UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK');
+        expect(newState.retryCount).toEqual(1);
+        expect(newState.retryDelay).toEqual(2000);
       });
     });
     describe('CREATE_NEW_TARGET', () => {

@@ -18,25 +18,22 @@ import { SavedObjectsMigrationVersion } from '../types';
 import { disableUnknownTypeMappingFields } from '../migrations/core/migration_context';
 
 /**
- * How many times to retry a failing step.
+ * How many times to retry a step that fails with retryable_es_client_error
+ * such as a statusCode: 503 or a snapshot_in_progress_exception.
  *
- * Waiting for a task to complete will cause a failing step every time the
- * wait_for_task action times out e.g. the following sequence has 3 retry
- * attempts:
- * LEGACY_REINDEX_WAIT_FOR_TASK (60s timeout) ->
- * LEGACY_REINDEX_WAIT_FOR_TASK (2s delay, 60s timeout) ->
- * LEGACY_REINDEX_WAIT_FOR_TASK (4s delay, 60s timeout) ->
- * LEGACY_REINDEX_WAIT_FOR_TASK (success) -> ...
+ * We don't want to immediately crash Kibana and cause a reboot for these
+ * intermittent. However, if we're still receiving e.g. a 503 after 10 minutes
+ * this is probably not just a temporary problem so we stop trying and exit
+ * with a fatal error.
  *
- * This places an upper limit to how long we will wait for a task to complete.
- * The duration of a step is the time it takes for the action to complete plus
- * the exponential retry delay:
- * max_task_runtime = 2+4+8+16+32+64*(MAX_RETRY_ATTEMPTS-5) + ACTION_DURATION*MAX_RETRY_ATTEMPTS
+ * Because of the exponential backoff the total time we will retry such errors
+ * is:
+ * max_retry_time = 2+4+8+16+32+64*(DEFAULT_RETRY_ATTEMPTS-5) + ACTION_DURATION*DEFAULT_RETRY_ATTEMPTS
  *
- * For MAX_RETRY_ATTEMPTS=10, ACTION_DURATION=60
- * max_task_runtime = 16.46 minutes
+ * For DEFAULT_RETRY_ATTEMPTS=15, ACTION_DURATION=0
+ * max_task_runtime = 11.7 minutes
  */
-const MAX_RETRY_ATTEMPTS = 10;
+const DEFAULT_RETRY_ATTEMPTS = 15;
 
 /**
  * A helper function/type for ensuring that all control state's are handled.
@@ -115,12 +112,16 @@ function getAliases(indices: FetchIndexResponse) {
   }, {} as Record<string, string>);
 }
 
-const delayRetryState = <S extends State>(state: S, left: RetryableEsClientError): S => {
-  if (state.retryCount === MAX_RETRY_ATTEMPTS) {
+const delayRetryState = <S extends State>(
+  state: S,
+  errorMessage: string,
+  maxRetryAttempts: number
+): S => {
+  if (state.retryCount >= maxRetryAttempts) {
     return {
       ...state,
       controlState: 'FATAL',
-      reason: `Unable to complete the ${state.controlState} step after ${MAX_RETRY_ATTEMPTS} attempts, terminating.`,
+      reason: `Unable to complete the ${state.controlState} step after ${maxRetryAttempts} attempts, terminating.`,
     };
   } else {
     const retryCount = state.retryCount + 1;
@@ -134,9 +135,7 @@ const delayRetryState = <S extends State>(state: S, left: RetryableEsClientError
         ...state.logs,
         {
           level: 'error',
-          message: `Action failed with '${
-            left.message
-          }'. Retrying attempt ${retryCount} out of ${MAX_RETRY_ATTEMPTS} in ${
+          message: `Action failed with '${errorMessage}'. Retrying attempt ${retryCount} in ${
             retryDelay / 1000
           } seconds.`,
         },
@@ -177,7 +176,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   // by the control state specific code below.
   if (Either.isLeft<unknown, unknown>(resW) && resW.left.type === 'retryable_es_client_error') {
     // Retry the same step after an exponentially increasing delay.
-    return delayRetryState(stateP, resW.left);
+    return delayRetryState(stateP, resW.left.message, DEFAULT_RETRY_ATTEMPTS);
   } else {
     // If the action didn't fail with a retryable_es_client_error, reset the
     // retry counter and retryDelay state
@@ -390,6 +389,12 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // step. However, by not skipping ahead we limit branches in the
         // control state progression and simplify the implementation.
         return { ...stateP, controlState: 'LEGACY_DELETE' };
+      } else if (left.type === 'wait_for_task_completion_timeout') {
+        // After waiting for the specificed timeout, the task has not yet
+        // completed. Retry this step to see if the task has completed after an
+        // exponential delay. We will basically keep polling forever until the
+        // Elasticeasrch task succeeds or fails.
+        return delayRetryState(stateP, left.message, Number.MAX_SAFE_INTEGER);
       } else {
         // We don't handle the following errors as the algorithm will never
         // run into these during the LEGACY_REINDEX_WAIT_FOR_TASK step:
@@ -493,6 +498,12 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           ...stateP,
           controlState: 'SET_TEMP_WRITE_BLOCK',
         };
+      } else if (left.type === 'wait_for_task_completion_timeout') {
+        // After waiting for the specificed timeout, the task has not yet
+        // completed. Retry this step to see if the task has completed after an
+        // exponential delay. We will basically keep polling forever until the
+        // Elasticeasrch task succeeds or fails.
+        return delayRetryState(stateP, left.message, Number.MAX_SAFE_INTEGER);
       } else {
         // Don't handle incompatible_mapping_exception as we will never add a write
         // block to the temp index or change the mappings.
@@ -611,7 +622,17 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         };
       }
     } else {
-      throwBadResponse(stateP, res);
+      const left = res.left;
+      if (left.type === 'wait_for_task_completion_timeout') {
+        // After waiting for the specificed timeout, the task has not yet
+        // completed. Retry this step to see if the task has completed after an
+        // exponential delay. We will basically keep polling forever until the
+        // Elasticeasrch task succeeds or fails.
+        return delayRetryState(stateP, left.message, Number.MAX_SAFE_INTEGER);
+      } else {
+        // @ts-expect-error TS doesn't correctly narrow left to never
+        throwBadResponse(stateP, left);
+      }
     }
   } else if (stateP.controlState === 'CREATE_NEW_TARGET') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
