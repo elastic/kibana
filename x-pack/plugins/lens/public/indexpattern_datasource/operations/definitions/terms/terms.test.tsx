@@ -8,12 +8,12 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { shallow, mount } from 'enzyme';
-import { EuiRange, EuiSelect, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
+import { EuiFieldNumber, EuiSelect, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import type { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
 import { createMockedIndexPattern } from '../../../mocks';
-import { ValuesRangeInput } from './values_range_input';
+import { ValuesInput } from './values_input';
 import type { TermsIndexPatternColumn } from '.';
 import { termsOperation } from '../index';
 import { IndexPattern, IndexPatternLayer } from '../../../types';
@@ -888,7 +888,7 @@ describe('terms', () => {
         />
       );
 
-      expect(instance.find(EuiRange).prop('value')).toEqual('3');
+      expect(instance.find(EuiFieldNumber).prop('value')).toEqual('3');
     });
 
     it('should update state with the size value', () => {
@@ -904,7 +904,7 @@ describe('terms', () => {
       );
 
       act(() => {
-        instance.find(ValuesRangeInput).prop('onChange')!(7);
+        instance.find(ValuesInput).prop('onChange')!(7);
       });
 
       expect(updateLayerSpy).toHaveBeenCalledWith({
