@@ -13,8 +13,6 @@ import { useActions, useValues } from 'kea';
 import {
   EuiButton,
   EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiTitle,
   EuiPageContentBody,
   EuiPageContent,
   EuiBasicTable,
@@ -22,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { DELETE_BUTTON_LABEL } from '../../../shared/constants';
 import { FlashMessages } from '../../../shared/flash_messages';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { Loading } from '../../../shared/loading';
@@ -79,25 +78,19 @@ export const DocumentDetail: React.FC<Props> = ({ engineBreadcrumb }) => {
   return (
     <>
       <SetPageChrome trail={[...engineBreadcrumb, DOCUMENTS_TITLE, documentTitle]} />
-      <EuiPageHeader>
-        <EuiPageHeaderSection>
-          <EuiTitle size="l">
-            <h1>{DOCUMENT_DETAIL_TITLE(documentTitle)}</h1>
-          </EuiTitle>
-        </EuiPageHeaderSection>
-        <EuiPageHeaderSection>
+      <EuiPageHeader
+        pageTitle={DOCUMENT_DETAIL_TITLE(documentTitle)}
+        rightSideItems={[
           <EuiButton
             color="danger"
             iconType="trash"
             onClick={() => deleteDocument(documentId)}
             data-test-subj="DeleteDocumentButton"
           >
-            {i18n.translate('xpack.enterpriseSearch.appSearch.documentDetail.deleteButton', {
-              defaultMessage: 'Delete',
-            })}
-          </EuiButton>
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
+            {DELETE_BUTTON_LABEL}
+          </EuiButton>,
+        ]}
+      />
       <EuiPageContent>
         <EuiPageContentBody>
           <FlashMessages />

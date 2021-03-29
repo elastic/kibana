@@ -51,7 +51,8 @@ export const AdvancedRuntimeMappingsSettings: FC<StepDefineFormHook> = (props) =
   } = props.pivotConfig;
 
   const applyChanges = () => {
-    const nextConfig = JSON.parse(advancedRuntimeMappingsConfig);
+    const nextConfig =
+      advancedRuntimeMappingsConfig === '' ? {} : JSON.parse(advancedRuntimeMappingsConfig);
     const previousConfig = runtimeMappings;
 
     applyRuntimeMappingsEditorChanges();
