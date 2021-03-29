@@ -42,6 +42,7 @@ import { EnginesLogic } from './engines_logic';
 import { EnginesTable } from './engines_table';
 
 import './engines_overview.scss';
+import { MetaEnginesTable } from './meta_engines_table';
 
 export const EnginesOverview: React.FC = () => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
@@ -145,7 +146,7 @@ export const EnginesOverview: React.FC = () => {
               </EuiPageContentHeaderSection>
             </EuiPageContentHeader>
             <EuiPageContentBody data-test-subj="appSearchMetaEngines">
-              <EnginesTable
+              <MetaEnginesTable
                 items={metaEngines}
                 loading={metaEnginesLoading}
                 pagination={{
