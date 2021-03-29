@@ -6378,12 +6378,6 @@
             "description": "The name of the cloud provider"
           }
         },
-        "id": {
-          "type": "keyword",
-          "_meta": {
-            "description": "The ID of the VM"
-          }
-        },
         "vm_type": {
           "type": "keyword",
           "_meta": {
@@ -6400,12 +6394,6 @@
           "type": "keyword",
           "_meta": {
             "description": "The availability zone within the region"
-          }
-        },
-        "metadata": {
-          "type": "text",
-          "_meta": {
-            "description": "Stringified object containing other metadata from the cloud provider"
           }
         }
       }

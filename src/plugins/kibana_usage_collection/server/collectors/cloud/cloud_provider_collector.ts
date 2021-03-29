@@ -11,11 +11,9 @@ import { CloudDetector } from './detector';
 
 interface Usage {
   name: string;
-  id?: string;
   vm_type?: string;
   region?: string;
   zone?: string;
-  metadata?: string;
 }
 
 export function registerCloudProviderUsageCollector(usageCollection: UsageCollectionSetup) {
@@ -33,8 +31,10 @@ export function registerCloudProviderUsageCollector(usageCollection: UsageCollec
       }
 
       return {
-        ...details,
-        metadata: details.metadata ? JSON.stringify(details.metadata) : undefined,
+        name: details.name,
+        vm_type: details.vm_type,
+        region: details.region,
+        zone: details.zone,
       };
     },
     schema: {
@@ -42,12 +42,6 @@ export function registerCloudProviderUsageCollector(usageCollection: UsageCollec
         type: 'keyword',
         _meta: {
           description: 'The name of the cloud provider',
-        },
-      },
-      id: {
-        type: 'keyword',
-        _meta: {
-          description: 'The ID of the VM',
         },
       },
       vm_type: {
@@ -66,12 +60,6 @@ export function registerCloudProviderUsageCollector(usageCollection: UsageCollec
         type: 'keyword',
         _meta: {
           description: 'The availability zone within the region',
-        },
-      },
-      metadata: {
-        type: 'text',
-        _meta: {
-          description: 'Stringified object containing other metadata from the cloud provider',
         },
       },
     },

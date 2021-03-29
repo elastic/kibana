@@ -56,7 +56,6 @@ describe('registerCloudProviderUsageCollector', () => {
     test('returns cloud details when defined', async () => {
       const mockDetails = {
         name: 'aws',
-        id: 'abc123',
         vm_type: 't2.micro',
         region: 'us-west-2',
         zone: 'us-west-2a',
@@ -65,24 +64,6 @@ describe('registerCloudProviderUsageCollector', () => {
       cloudDetailsMock.mockReturnValueOnce(mockDetails);
 
       await expect(collector.fetch(mockedFetchContext)).resolves.toEqual(mockDetails);
-    });
-
-    test('stringifies metadata if it is present', async () => {
-      const mockDetails = {
-        name: 'aws',
-        id: 'abc123',
-        vm_type: 't2.micro',
-        region: 'us-west-2',
-        zone: 'us-west-2a',
-        metadata: { hello: 'world' },
-      };
-
-      cloudDetailsMock.mockReturnValueOnce(mockDetails);
-
-      await expect(collector.fetch(mockedFetchContext)).resolves.toEqual({
-        ...mockDetails,
-        metadata: JSON.stringify(mockDetails.metadata),
-      });
     });
 
     test('should not fail if invoked when not ready', async () => {
