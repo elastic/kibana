@@ -35,9 +35,8 @@ export const essqlSearchStrategyProvider = (
       const { count, query, filter, timezone, params } = request;
 
       const searchUntilEnd = async () => {
-        let response = await esClient.asCurrentUser.transport.request({
-          path: '/_sql?format=json',
-          method: 'POST',
+        let response = await esClient.asCurrentUser.sql.query<QueryResponse>({
+          format: 'json',
           body: {
             query,
             params,
@@ -51,7 +50,8 @@ export const essqlSearchStrategyProvider = (
             },
           },
         });
-        let body = response.body as QueryResponse;
+
+        let body = response.body;
 
         const columns = body.columns.map(({ name, type }) => {
           return {
@@ -66,9 +66,8 @@ export const essqlSearchStrategyProvider = (
         // If we still have rows to retrieve, continue requesting data
         // using the cursor until we have everything
         while (rows.length < count && body.cursor !== undefined) {
-          response = await esClient.asCurrentUser.transport.request({
-            path: '/_sql?format=json',
-            method: 'POST',
+          response = await esClient.asCurrentUser.sql.query({
+            format: 'json',
             body: {
               cursor: body.cursor,
             },
@@ -81,9 +80,7 @@ export const essqlSearchStrategyProvider = (
 
         // If we used a cursor, clean it up
         if (body.cursor !== undefined) {
-          await esClient.asCurrentUser.transport.request({
-            path: '/_sql/close',
-            method: 'POST',
+          await esClient.asCurrentUser.sql.clearCursor({
             body: {
               cursor: body.cursor,
             },

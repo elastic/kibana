@@ -10,6 +10,7 @@ import {
   ExpressionValueFilter,
 } from 'src/plugins/expressions/common';
 import { searchService } from '../../../public/services';
+import { ESSQL_SEARCH_STRATEGY } from '../../../common/lib/constants';
 import { EssqlSearchStrategyRequest, EssqlSearchStrategyResponse } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
@@ -70,7 +71,9 @@ export function essql(): ExpressionFunctionDefinition<
       };
 
       return search
-        .search<EssqlSearchStrategyRequest, EssqlSearchStrategyResponse>(req, { strategy: 'essql' })
+        .search<EssqlSearchStrategyRequest, EssqlSearchStrategyResponse>(req, {
+          strategy: ESSQL_SEARCH_STRATEGY,
+        })
         .toPromise()
         .then((resp: EssqlSearchStrategyResponse) => {
           return {

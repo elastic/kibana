@@ -7,7 +7,6 @@
 
 import { IKibanaSearchRequest } from 'src/plugins/data/common';
 import { ExpressionValueFilter } from '.';
-
 export interface EssqlSearchStrategyRequest extends IKibanaSearchRequest {
   count: number;
   query: string;
