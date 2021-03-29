@@ -35,6 +35,7 @@ export default ({ getService }: FtrProviderContext) => {
       beforeEach(async () => {
         for (const testCalendar of testCalendars) {
           await ml.api.createCalendar(testCalendar.calendar_id, testCalendar);
+          // @ts-expect-error not full interface
           await ml.api.createCalendarEvents(testCalendar.calendar_id, testEvents);
         }
       });
@@ -54,6 +55,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(body).to.have.length(testCalendars.length);
         expect(body[0].events).to.have.length(testEvents.length);
+        // @ts-expect-error not full interface
         ml.api.assertAllEventsExistInCalendar(testEvents, body[0]);
       });
 
@@ -66,6 +68,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(body).to.have.length(testCalendars.length);
         expect(body[0].events).to.have.length(testEvents.length);
+        // @ts-expect-error not full interface
         ml.api.assertAllEventsExistInCalendar(testEvents, body[0]);
       });
 
@@ -89,6 +92,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       beforeEach(async () => {
         await ml.api.createCalendar(calendarId, testCalendar);
+        // @ts-expect-error not full interface
         await ml.api.createCalendarEvents(calendarId, testEvents);
       });
 
@@ -106,6 +110,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body.job_ids).to.eql(testCalendar.job_ids);
         expect(body.description).to.eql(testCalendar.description);
         expect(body.events).to.have.length(testEvents.length);
+        // @ts-expect-error not full interface
         ml.api.assertAllEventsExistInCalendar(testEvents, body);
       });
 
@@ -119,6 +124,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body.job_ids).to.eql(testCalendar.job_ids);
         expect(body.description).to.eql(testCalendar.description);
         expect(body.events).to.have.length(testEvents.length);
+        // @ts-expect-error not full interface
         ml.api.assertAllEventsExistInCalendar(testEvents, body);
       });
 
