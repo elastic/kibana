@@ -377,16 +377,6 @@ export const getSelectedLayerJoinDescriptors = createSelector(getSelectedLayer, 
   });
 });
 
-// Get list of unique index patterns used by all layers
-export const getUniqueIndexPatternIds = createSelector(getLayerList, (layerList) => {
-  const indexPatternIds: string[] = [];
-  layerList.forEach((layer) => {
-    indexPatternIds.push(...layer.getIndexPatternIds());
-  });
-  return _.uniq(indexPatternIds).sort();
-});
-
-// Get list of unique index patterns, excluding index patterns from layers that disable applyGlobalQuery
 export const getQueryableUniqueIndexPatternIds = createSelector(
   getLayerList,
   getWaitingForMapReadyLayerListRaw,
@@ -396,11 +386,15 @@ export const getQueryableUniqueIndexPatternIds = createSelector(
     if (waitingForMapReadyLayerList.length) {
       waitingForMapReadyLayerList.forEach((layerDescriptor) => {
         const layer = createLayerInstance(layerDescriptor);
-        indexPatternIds.push(...layer.getQueryableIndexPatternIds());
+        if (layer.isVisible()) {
+          indexPatternIds.push(...layer.getQueryableIndexPatternIds());
+        }
       });
     } else {
       layerList.forEach((layer) => {
-        indexPatternIds.push(...layer.getQueryableIndexPatternIds());
+        if (layer.isVisible()) {
+          indexPatternIds.push(...layer.getQueryableIndexPatternIds());
+        }
       });
     }
     return _.uniq(indexPatternIds);
