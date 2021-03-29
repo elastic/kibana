@@ -53,6 +53,9 @@ function mockFetchImplementation(responses: any[]) {
   fetchMock.mockImplementation((r) => {
     if (!r.request.id) i = 0;
     const { time = 0, value = {}, isError = false } = responses[i++];
+    value.meta = {
+      size: 10,
+    };
     return new Promise((resolve, reject) =>
       setTimeout(() => {
         return (isError ? reject : resolve)(value);
@@ -592,6 +595,31 @@ describe('EnhancedSearchInterceptor', () => {
       },
     ];
 
+    const partialCompleteResponse = [
+      {
+        time: 10,
+        value: {
+          isPartial: true,
+          isRunning: true,
+          id: 1,
+          rawResponse: {
+            took: 1,
+          },
+        },
+      },
+      {
+        time: 20,
+        value: {
+          isPartial: false,
+          isRunning: false,
+          id: 1,
+          rawResponse: {
+            took: 1,
+          },
+        },
+      },
+    ];
+
     beforeEach(() => {
       sessionService.isCurrentSession.mockImplementation((_sessionId) => _sessionId === sessionId);
       sessionService.getSessionId.mockImplementation(() => sessionId);
@@ -786,32 +814,8 @@ describe('EnhancedSearchInterceptor', () => {
       expect(complete2).toBeCalledTimes(1);
     });
 
-    test.skip('aborting a running search shouldnt effect cache', async () => {
-      const responses = [
-        {
-          time: 10,
-          value: {
-            isPartial: true,
-            isRunning: true,
-            id: 1,
-            rawResponse: {
-              took: 1,
-            },
-          },
-        },
-        {
-          time: 20,
-          value: {
-            isPartial: false,
-            isRunning: false,
-            id: 1,
-            rawResponse: {
-              took: 1,
-            },
-          },
-        },
-      ];
-      mockFetchImplementation(responses);
+    test.skip('aborting a running first search shouldnt effect cache', async () => {
+      mockFetchImplementation(partialCompleteResponse);
 
       const abortController = new AbortController();
 
@@ -838,13 +842,43 @@ describe('EnhancedSearchInterceptor', () => {
 
       expect(error).toBeCalledTimes(1);
       expect(next2).toBeCalledTimes(1);
-      // expect(error2).toBeCalledTimes(1);
 
       await timeTravel(10);
       expect(next2).toBeCalledTimes(2);
+    });
 
-      //
-      // expect(fetchMock).toBeCalledTimes(2);
+    test.skip('aborting a running second search shouldnt effect cache', async () => {
+      mockFetchImplementation(partialCompleteResponse);
+
+      const abortController = new AbortController();
+
+      // Search once
+      searchInterceptor.search(basicReq, { sessionId }).subscribe({ next, error, complete });
+
+      // Get partial result
+      await timeTravel(10);
+      expect(fetchMock).toBeCalledTimes(1);
+      expect(next).toBeCalledTimes(1);
+      expect(error).not.toBeCalled();
+
+      // Search the same thing again, this will return the result from cache
+      const error2 = jest.fn();
+      const next2 = jest.fn();
+      const resp2$ = searchInterceptor.search(basicReq, {
+        sessionId,
+        abortSignal: abortController.signal,
+      });
+      resp2$.subscribe({ next: next2, error: error2, complete });
+
+      // Abort the original request
+      abortController.abort();
+      await timeTravel(10);
+
+      expect(error).toBeCalledTimes(1);
+      expect(next2).toBeCalledTimes(1);
+
+      await timeTravel(10);
+      expect(next2).toBeCalledTimes(2);
     });
 
     test('aborting a completed search shouldnt effect cache', async () => {

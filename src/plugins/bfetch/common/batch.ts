@@ -10,11 +10,17 @@ export interface ErrorLike {
   message: string;
 }
 
+export interface ResultBase {
+  meta?: {
+    size: number;
+  };
+}
+
 export interface BatchRequestData<Item> {
   batch: Item[];
 }
 
-export interface BatchResponseItem<Result extends object, Error extends ErrorLike = ErrorLike> {
+export interface BatchResponseItem<Result extends ResultBase, Error extends ErrorLike = ErrorLike> {
   id: number;
   result?: Result;
   error?: Error;

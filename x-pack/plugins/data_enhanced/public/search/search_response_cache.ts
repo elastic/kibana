@@ -88,9 +88,11 @@ export class SearchResponseCache {
     item.subs.add(
       response$.subscribe({
         next: (r) => {
-          const newSize = JSON.stringify(r).length;
-
-          if (this.byteToMb(newSize) < this.maxCacheSizeMB && !isErrorResponse(r)) {
+          const newSize = r.meta?.size || JSON.stringify(r).length;
+          if (
+            this.byteToMb(newSize) < this.maxCacheSizeMB &&
+            !isErrorResponse(r)
+          ) {
             this.setItem(key, {
               ...item,
               size: newSize,

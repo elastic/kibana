@@ -51,7 +51,12 @@ describe('', () => {
         if (responses[i].rawResponse.throw === true) {
           return throwError('nooo');
         } else {
-          return of(responses[i]);
+          return of({
+            ...responses[i],
+            meta: {
+              size: JSON.stringify(responses[i]).length
+            }
+          });
         }
       })
     );
@@ -216,7 +221,8 @@ describe('', () => {
     test('caches a response and re-emits it', async () => {
       const s$ = getSearchObservable$();
       cache.set('123', s$);
-      expect(await cache.get('123')!.toPromise()).toBe(r[r.length - 1]);
+      const {meta, ...finalRes} = await cache.get('123')!.toPromise();
+      expect(finalRes).toStrictEqual(r[r.length - 1]);
     });
 
     test('cached$ should emit same as original search$', async () => {
@@ -234,8 +240,8 @@ describe('', () => {
       await s$!.toPromise();
 
       // get final response from cached$
-      const finalRes = await cached$!.toPromise();
-      expect(finalRes).toBe(r[r.length - 1]);
+      const {meta, ...finalRes} = await cached$!.toPromise();
+      expect(finalRes).toStrictEqual(r[r.length - 1]);
       expect(next).toHaveBeenCalledTimes(4);
     });
 
@@ -259,9 +265,9 @@ describe('', () => {
       // wait for original search to complete
       await s$!.toPromise();
 
-      const finalRes = await cached$!.toPromise();
+      const {meta, ...finalRes} = await cached$!.toPromise();
 
-      expect(finalRes).toBe(r[r.length - 1]);
+      expect(finalRes).toStrictEqual(r[r.length - 1]);
       expect(next).toHaveBeenCalledTimes(2);
     });
 
@@ -279,9 +285,9 @@ describe('', () => {
         next,
       });
 
-      const finalRes = await cached$!.toPromise();
+      const {meta, ...finalRes} = await cached$!.toPromise();
 
-      expect(finalRes).toBe(r[r.length - 1]);
+      expect(finalRes).toStrictEqual(r[r.length - 1]);
       expect(next).toHaveBeenCalledTimes(1);
     });
 
@@ -298,9 +304,9 @@ describe('', () => {
         next,
       });
 
-      const finalRes = await cached$!.toPromise();
+      const {meta, ...finalRes} = await cached$!.toPromise();
 
-      expect(finalRes).toBe(r[r.length - 1]);
+      expect(finalRes).toStrictEqual(r[r.length - 1]);
       expect(next).toHaveBeenCalledTimes(1);
     });
   });
