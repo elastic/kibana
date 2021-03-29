@@ -82,6 +82,16 @@ describe('palette', () => {
         const result = fn(null);
         expect(result.params!.colors).toEqual(defaultCustomColors);
       });
+
+      it('keeps the stops order pristine when set', () => {
+        const stops = [1, 2, 3];
+        const result = fn(null, {
+          color: ['red', 'green', 'blue'],
+          stop: [1, 2, 3],
+          reverse: true,
+        });
+        expect(result.params!.stops).toEqual(stops);
+      });
     });
   });
 });
