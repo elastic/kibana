@@ -6,12 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext } from 'react';
-import { CoreStartContext } from '../contexts/query_input_bar_context';
-import { QueryStringInput } from '../../../../../plugins/data/public';
+export { extractControlsReferences, injectControlsReferences } from './controls_references';
+export { extractTimeSeriesReferences, injectTimeSeriesReferences } from './timeseries_references';
 
-export function QueryBarWrapper(props) {
-  const coreStartContext = useContext(CoreStartContext);
-
-  return <QueryStringInput {...props} {...coreStartContext} />;
-}
+export { extractReferences, injectReferences } from './saved_visualization_references';
