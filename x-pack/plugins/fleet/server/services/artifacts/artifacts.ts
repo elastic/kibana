@@ -11,7 +11,6 @@ import { promisify } from 'util';
 import type { BinaryLike } from 'crypto';
 import { createHash } from 'crypto';
 
-import uuid from 'uuid';
 import type { ElasticsearchClient } from 'kibana/server';
 
 import type { ListResult } from '../../../common';
@@ -19,7 +18,7 @@ import { FLEET_SERVER_ARTIFACTS_INDEX } from '../../../common';
 
 import { ArtifactsElasticsearchError } from '../../errors';
 
-import { isElasticsearchItemNotFoundError } from './utils';
+import { isElasticsearchItemNotFoundError, isElasticsearchVersionConflictError } from './utils';
 import type {
   Artifact,
   ArtifactElasticsearchProperties,
@@ -57,7 +56,7 @@ export const createArtifact = async (
   esClient: ElasticsearchClient,
   artifact: NewArtifact
 ): Promise<Artifact> => {
-  const id = uuid.v4();
+  const id = `${artifact.packageName}:${artifact.identifier}-${artifact.decodedSha256}`;
   const newArtifactData = newArtifactToElasticsearchProperties(artifact);
 
   try {
@@ -67,11 +66,14 @@ export const createArtifact = async (
       body: newArtifactData,
       refresh: 'wait_for',
     });
-
-    return esSearchHitToArtifact({ _id: id, _source: newArtifactData });
   } catch (e) {
-    throw new ArtifactsElasticsearchError(e);
+    // we ignore 409 errors from the create (document already exists)
+    if (!isElasticsearchVersionConflictError(e)) {
+      throw new ArtifactsElasticsearchError(e);
+    }
   }
+
+  return esSearchHitToArtifact({ _id: id, _source: newArtifactData });
 };
 
 export const deleteArtifact = async (esClient: ElasticsearchClient, id: string): Promise<void> => {
