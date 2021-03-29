@@ -6,24 +6,19 @@
  */
 
 import expect from '@kbn/expect';
-import url from 'url';
 import { pick, sortBy } from 'lodash';
-import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_number';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
+import { isFiniteNumber } from '../../../../plugins/apm/common/utils/is_finite_number';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives from '../../common/fixtures/es_archiver/archives_metadata';
 import { registry } from '../../common/registry';
+import { createApmApiSupertest } from '../../common/apm_api_supertest';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const apmApiSupertest = createApmApiSupertest(getService('supertest'));
 
   const archiveName = 'apm_8.0.0';
   const { start, end } = archives[archiveName];
-
-  interface Response {
-    status: number;
-    body: APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/primary_statistics'>;
-  }
 
   registry.when(
     'Service overview instances primary statistics when data is not loaded',
@@ -31,20 +26,21 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     () => {
       describe('when data is not loaded', () => {
         it('handles the empty state', async () => {
-          const response: Response = await supertest.get(
-            url.format({
-              pathname: `/api/apm/services/opbeans-java/service_overview_instances/primary_statistics`,
+          const response = await apmApiSupertest({
+            endpoint: `GET /api/apm/services/{serviceName}/service_overview_instances/primary_statistics`,
+            params: {
+              path: { serviceName: 'opbeans-java' },
               query: {
                 latencyAggregationType: 'avg',
                 start,
                 end,
                 transactionType: 'request',
               },
-            })
-          );
+            },
+          });
 
           expect(response.status).to.be(200);
-          expect(response.body).to.eql([]);
+          expect(response.body.serviceInstances).to.eql([]);
         });
       });
     }
@@ -55,28 +51,31 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     { config: 'basic', archives: [archiveName] },
     () => {
       describe('fetching java data', () => {
-        let response: Response;
+        let response: {
+          body: APIReturnType<`GET /api/apm/services/{serviceName}/service_overview_instances/primary_statistics`>;
+        };
 
         beforeEach(async () => {
-          response = await supertest.get(
-            url.format({
-              pathname: `/api/apm/services/opbeans-java/service_overview_instances/primary_statistics`,
+          response = await apmApiSupertest({
+            endpoint: `GET /api/apm/services/{serviceName}/service_overview_instances/primary_statistics`,
+            params: {
+              path: { serviceName: 'opbeans-java' },
               query: {
                 latencyAggregationType: 'avg',
                 start,
                 end,
                 transactionType: 'request',
               },
-            })
-          );
+            },
+          });
         });
 
         it('returns a service node item', () => {
-          expect(response.body.length).to.be.greaterThan(0);
+          expect(response.body.serviceInstances.length).to.be.greaterThan(0);
         });
 
         it('returns statistics for each service node', () => {
-          const item = response.body[0];
+          const item = response.body.serviceInstances[0];
 
           expect(isFiniteNumber(item.cpuUsage)).to.be(true);
           expect(isFiniteNumber(item.memoryUsage)).to.be(true);
@@ -86,7 +85,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('returns the right data', () => {
-          const items = sortBy(response.body, 'serviceNodeName');
+          const items = sortBy(response.body.serviceInstances, 'serviceNodeName');
 
           const serviceNodeNames = items.map((item) => item.serviceNodeName);
 
@@ -121,24 +120,27 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       describe('fetching non-java data', () => {
-        let response: Response;
+        let response: {
+          body: APIReturnType<`GET /api/apm/services/{serviceName}/service_overview_instances/primary_statistics`>;
+        };
 
         beforeEach(async () => {
-          response = await supertest.get(
-            url.format({
-              pathname: `/api/apm/services/opbeans-ruby/service_overview_instances/primary_statistics`,
+          response = await apmApiSupertest({
+            endpoint: `GET /api/apm/services/{serviceName}/service_overview_instances/primary_statistics`,
+            params: {
+              path: { serviceName: 'opbeans-ruby' },
               query: {
                 latencyAggregationType: 'avg',
                 start,
                 end,
                 transactionType: 'request',
               },
-            })
-          );
+            },
+          });
         });
 
         it('returns statistics for each service node', () => {
-          const item = response.body[0];
+          const item = response.body.serviceInstances[0];
 
           expect(isFiniteNumber(item.cpuUsage)).to.be(true);
           expect(isFiniteNumber(item.memoryUsage)).to.be(true);
@@ -148,7 +150,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('returns the right data', () => {
-          const items = sortBy(response.body, 'serviceNodeName');
+          const items = sortBy(response.body.serviceInstances, 'serviceNodeName');
 
           const serviceNodeNames = items.map((item) => item.serviceNodeName);
 

@@ -55,7 +55,6 @@ describe('BuilderExceptionListItemComponent', () => {
         <ThemeProvider theme={mockTheme}>
           <BuilderExceptionListItemComponent
             exceptionItem={exceptionItem}
-            exceptionId={'123'}
             exceptionItemIndex={0}
             indexPattern={{
               id: '1234',
@@ -84,7 +83,6 @@ describe('BuilderExceptionListItemComponent', () => {
         <ThemeProvider theme={mockTheme}>
           <BuilderExceptionListItemComponent
             exceptionItem={exceptionItem}
-            exceptionId={'123'}
             exceptionItemIndex={1}
             indexPattern={{
               id: '1234',
@@ -111,7 +109,6 @@ describe('BuilderExceptionListItemComponent', () => {
         <ThemeProvider theme={mockTheme}>
           <BuilderExceptionListItemComponent
             exceptionItem={exceptionItem}
-            exceptionId={'123'}
             exceptionItemIndex={1}
             indexPattern={{
               id: '1234',
@@ -140,7 +137,6 @@ describe('BuilderExceptionListItemComponent', () => {
         <ThemeProvider theme={mockTheme}>
           <BuilderExceptionListItemComponent
             exceptionItem={exceptionItem}
-            exceptionId={'123'}
             exceptionItemIndex={1}
             indexPattern={{
               id: '1234',
@@ -176,7 +172,6 @@ describe('BuilderExceptionListItemComponent', () => {
       const wrapper = mount(
         <BuilderExceptionListItemComponent
           exceptionItem={exceptionItem}
-          exceptionId={'123'}
           exceptionItemIndex={0}
           indexPattern={{
             id: '1234',
@@ -204,7 +199,6 @@ describe('BuilderExceptionListItemComponent', () => {
       const wrapper = mount(
         <BuilderExceptionListItemComponent
           exceptionItem={exceptionItem}
-          exceptionId={'123'}
           exceptionItemIndex={0}
           indexPattern={{
             id: '1234',
@@ -231,7 +225,6 @@ describe('BuilderExceptionListItemComponent', () => {
       const wrapper = mount(
         <BuilderExceptionListItemComponent
           exceptionItem={exceptionItem}
-          exceptionId={'123'}
           exceptionItemIndex={1}
           indexPattern={{
             id: '1234',
@@ -260,7 +253,6 @@ describe('BuilderExceptionListItemComponent', () => {
       const wrapper = mount(
         <BuilderExceptionListItemComponent
           exceptionItem={exceptionItem}
-          exceptionId={'123'}
           exceptionItemIndex={0}
           indexPattern={{
             id: '1234',
@@ -289,7 +281,6 @@ describe('BuilderExceptionListItemComponent', () => {
       const wrapper = mount(
         <BuilderExceptionListItemComponent
           exceptionItem={exceptionItem}
-          exceptionId={'123'}
           exceptionItemIndex={0}
           indexPattern={{
             id: '1234',
