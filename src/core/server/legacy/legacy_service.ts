@@ -113,7 +113,7 @@ export class LegacyService implements CoreService {
   public async start() {
     const { setupDeps } = this;
 
-    if (!setupDeps || !this.legacyRawConfig) {
+    if (!setupDeps) {
       throw new Error('Legacy service is not setup yet.');
     }
 
