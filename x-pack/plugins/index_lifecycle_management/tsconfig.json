@@ -8,7 +8,6 @@
     "declarationMap": true
   },
   "include": [
-    "__jest__/**/*",
     "common/**/*",
     "public/**/*",
     "server/**/*",
