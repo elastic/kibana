@@ -70,8 +70,14 @@ export async function suggestEMSTermJoinConfig(
     matches.push(...suggestByName(sampleValuesConfig.sampleValuesColumnName));
   }
 
-  if (sampleValuesConfig.sampleValues) {
-    matches.push(...suggestByBalue(sampleValuesConfig.sampleValues));
+  if (sampleValuesConfig.sampleValues && sampleValuesConfig.sampleValues.length) {
+    matches.push(...suggestByValues(sampleValuesConfig.sampleValues));
+
+    if (sampleValuesConfig.emsLayerIds && sampleValuesConfig.emsLayerIds.length) {
+      matches.push(
+        ...(await suggestByLayerId(sampleValuesConfig.emsLayerIds, sampleValuesConfig.sampleValues))
+      );
+    }
   }
 
   const uniqMatches: UniqueMatch[] = matches.reduce((accum: UniqueMatch[], match) => {
@@ -108,7 +114,7 @@ function suggestByName(columnName: string): IEMSTermJoinConfig[] {
   });
 }
 
-function suggestByBalue(values: Array<string | number>): IEMSTermJoinConfig[] {
+function suggestByValues(values: Array<string | number>): IEMSTermJoinConfig[] {
   const matches = wellKnownColumnFormats.filter((wellknown) => {
     for (let i = 0; i < values.length; i++) {
       const value = values[i].toString();
@@ -122,4 +128,70 @@ function suggestByBalue(values: Array<string | number>): IEMSTermJoinConfig[] {
   return matches.map((m) => {
     return m.emsConfig;
   });
+}
+
+function existsInEMS(emsJson: any, emsFieldId: string, sampleValue: string): boolean {
+  for (let i = 0; i < emsJson.features.length; i++) {
+    const emsFieldValue = emsJson.features.properties[emsFieldId].toString();
+    if (emsFieldValue.toString() === sampleValue) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function matchesEmsField(emsJson: any, emsFieldId: string, sampleValues: Array<string | number>) {
+  for (let j = 0; j < sampleValues.length; j++) {
+    const sampleValue = sampleValues[j].toString();
+    if (!existsInEMS(json, emsFieldId, sampleValue)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+async function getMatchesForEMSLayer(
+  emsLayerId: string,
+  sampleValues: Array<string | number>
+): Promise<IEMSTermJoinConfig[]> {
+  const fileLayers: FileLayer[] = await getEmsFileLayers();
+  const fileLayer: FileLayer | undefined = fileLayers.find((fl) => fl.hasId(emsLayerId));
+
+  if (!fileLayer) {
+    return [];
+  }
+
+  const emsFields = fileLayer.getFields();
+  const url = await fileLayer.getDefaultFormatUrl();
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error('Request failed');
+  }
+  try {
+    const emsJson = await response.json();
+    const matches: IEMSTermJoinConfig[] = [];
+    for (let f = 0; f < emsFields.length; f++) {
+      if (matchesEmsField(emsJson, emsFields[f].id, sampleValues)) {
+        matches.push({
+          layerId: emsLayerId,
+          field: emsFields[f].id,
+        });
+      }
+    }
+    return matches;
+  } catch (e) {
+    return [];
+  }
+}
+
+async function suggestByLayerId(
+  emsLayerIds: string[],
+  values: Array<string | number>
+): Promise<IEMSTermJoinConfig[]> {
+  const matches = [];
+  for (const emsLayerId of emsLayerIds) {
+    const layerIdMathes = await getMatchesForEMSLayer(emsLayerId, values);
+    matches.push(...layerIdMathes);
+  }
+  return matches;
 }
