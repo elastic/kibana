@@ -11,7 +11,7 @@ import angular from 'angular';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import UseUnmount from 'react-use/lib/useUnmount';
-import { EuiButton, EuiContextMenu } from '@elastic/eui';
+import { EuiContextMenu } from '@elastic/eui';
 import { VisualizeInput } from '../../../../visualizations/public';
 import {
   AddFromLibraryButton,
@@ -111,10 +111,6 @@ export function DashboardTopNav({
 
   const [state, setState] = useState<DashboardTopNavState>({ chromeIsVisible: false });
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
-  const [isEditorMenuOpen, setEditorMenuOpen] = useState(false);
-
-  const toggleEditorMenu = () => setEditorMenuOpen(!isEditorMenuOpen);
-  const closeEditorMenu = () => setEditorMenuOpen(false);
 
   const factories = embeddable
     ? Array.from(embeddable.getEmbeddableFactories()).filter(
