@@ -11,6 +11,14 @@ export const SUMMARY = i18n.translate('xpack.securitySolution.alertDetails.summa
   defaultMessage: 'Summary',
 });
 
+export const THREAT_SUMMARY = i18n.translate('xpack.securitySolution.alertDetails.threatSummary', {
+  defaultMessage: 'Threat Summary',
+});
+
+export const THREAT_INFO = i18n.translate('xpack.securitySolution.alertDetails.threatInfo', {
+  defaultMessage: 'Threat Info',
+});
+
 export const INVESTIGATION_GUIDE = i18n.translate(
   'xpack.securitySolution.alertDetails.summary.investigationGuide',
   {

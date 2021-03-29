@@ -36,6 +36,7 @@ import {
 import { DESTINATION_IP_FIELD_NAME, SOURCE_IP_FIELD_NAME } from '../../../network/components/ip';
 import { LineClamp } from '../line_clamp';
 import { useRuleAsync } from '../../../detections/containers/detection_engine/rules/use_rule_async';
+import { getDataFromSourceHits } from '../../../../common/utils/field_formatters';
 
 interface SummaryRow {
   title: string;
@@ -44,11 +45,20 @@ interface SummaryRow {
     eventId: string;
     fieldName: string;
     value: string;
-    fieldType: string;
-    linkValue: string | undefined;
+    fieldType?: string;
+    linkValue?: string;
   };
 }
 type Summary = SummaryRow[];
+
+export interface SummaryViewProps {
+  browserFields?: BrowserFields;
+  data: TimelineEventsDetailsItem[];
+  eventId: string;
+  isDisplayingThreatInfo?: boolean;
+  isDisplayingThreatSummary?: boolean;
+  timelineId: string;
+}
 
 const fields = [
   { id: 'signal.status' },
@@ -112,83 +122,124 @@ const getDescription = ({
 const getSummary = ({
   data,
   browserFields,
-  timelineId,
+  timelineId: contextId,
   eventId,
+  isDisplayingThreatSummary,
+  isDisplayingThreatInfo,
 }: {
   data: TimelineEventsDetailsItem[];
-  browserFields: BrowserFields;
+  browserFields?: BrowserFields;
   timelineId: string;
   eventId: string;
+  isDisplayingThreatSummary: boolean;
+  isDisplayingThreatInfo: boolean;
 }) => {
-  return data != null
-    ? fields.reduce<Summary>((acc, item) => {
-        const field = data.find((d) => d.field === item.id);
-        if (!field) {
-          return acc;
-        }
-        const linkValueField =
-          item.linkField != null && data.find((d) => d.field === item.linkField);
-        const linkValue = getOr(null, 'originalValue.0', linkValueField);
-        const value = getOr(null, 'originalValue.0', field);
-        const category = field.category;
-        const fieldType = get(`${category}.fields.${field.field}.type`, browserFields) as string;
-        const description = {
-          contextId: timelineId,
-          eventId,
-          fieldName: item.id,
-          value,
-          fieldType: item.fieldType ?? fieldType,
-          linkValue: linkValue ?? undefined,
-        };
-
-        if (item.id === 'signal.threshold_result.terms') {
-          try {
-            const terms = getOr(null, 'originalValue', field);
-            const parsedValue = terms.map((term: string) => JSON.parse(term));
-            const thresholdTerms = (parsedValue ?? []).map(
-              (entry: { field: string; value: string }) => {
-                return {
-                  title: `${entry.field} [threshold]`,
-                  description: {
-                    ...description,
-                    value: entry.value,
-                  },
-                };
-              }
-            );
-            return [...acc, ...thresholdTerms];
-          } catch (err) {
-            return acc;
-          }
-        }
-
-        if (item.id === 'signal.threshold_result.cardinality') {
-          try {
-            const parsedValue = JSON.parse(value);
-            return [
-              ...acc,
-              {
-                title: ALERTS_HEADERS_THRESHOLD_CARDINALITY,
-                description: {
-                  ...description,
-                  value: `count(${parsedValue.field}) == ${parsedValue.value}`,
-                },
-              },
-            ];
-          } catch (err) {
-            return acc;
-          }
-        }
-
+  if (!data) return [];
+  if (isDisplayingThreatSummary || isDisplayingThreatInfo) {
+    return data.reduce<Summary>((acc, { category, field, originalValue }) => {
+      if (isDisplayingThreatInfo && field === 'threat.indicator' && originalValue) {
+        const threatData = Array.isArray(originalValue)
+          ? originalValue.length === 1
+            ? JSON.parse(originalValue[0])
+            : originalValue.map((threatDataItem) => JSON.parse(threatDataItem))
+          : JSON.parse(originalValue);
+        return getDataFromSourceHits(threatData).map((threatInfoItem) => ({
+          title: threatInfoItem.field,
+          description: {
+            contextId,
+            eventId,
+            fieldName: threatInfoItem.field,
+            value: threatInfoItem.originalValue[0],
+          },
+        }));
+      } else if (
+        isDisplayingThreatSummary &&
+        field.startsWith('threat.indicator.') &&
+        originalValue
+      ) {
         return [
           ...acc,
           {
-            title: item.label ?? item.id,
-            description,
+            title: field.substring('threat.indicator.'.length),
+            description: {
+              value: originalValue,
+              contextId,
+              eventId,
+              fieldName: field,
+            },
           },
         ];
-      }, [])
-    : [];
+      }
+      return acc;
+    }, []);
+  } else {
+    return fields.reduce<Summary>((acc, item) => {
+      const field = data.find((d) => d.field === item.id);
+      if (!field) {
+        return acc;
+      }
+      const linkValueField = item.linkField != null && data.find((d) => d.field === item.linkField);
+      const linkValue = getOr(null, 'originalValue.0', linkValueField);
+      const value = getOr(null, 'originalValue.0', field);
+      const category = field.category;
+      const fieldType = get(`${category}.fields.${field.field}.type`, browserFields) as string;
+      const description = {
+        contextId,
+        eventId,
+        fieldName: item.id,
+        value,
+        fieldType: item.fieldType ?? fieldType,
+        linkValue: linkValue ?? undefined,
+      };
+
+      if (item.id === 'signal.threshold_result.terms') {
+        try {
+          const terms = getOr(null, 'originalValue', field);
+          const parsedValue = terms.map((term: string) => JSON.parse(term));
+          const thresholdTerms = (parsedValue ?? []).map(
+            (entry: { field: string; value: string }) => {
+              return {
+                title: `${entry.field} [threshold]`,
+                description: {
+                  ...description,
+                  value: entry.value,
+                },
+              };
+            }
+          );
+          return [...acc, ...thresholdTerms];
+        } catch (err) {
+          return acc;
+        }
+      }
+
+      if (item.id === 'signal.threshold_result.cardinality') {
+        try {
+          const parsedValue = JSON.parse(value);
+          return [
+            ...acc,
+            {
+              title: ALERTS_HEADERS_THRESHOLD_CARDINALITY,
+              description: {
+                ...description,
+                value: `count(${parsedValue.field}) == ${parsedValue.value}`,
+              },
+            },
+          ];
+        } catch (err) {
+          return acc;
+        }
+      }
+
+      return [
+        ...acc,
+        {
+          title: item.label ?? item.id,
+          description,
+        },
+      ];
+    }, []);
+  }
 };
 
 const summaryColumns: Array<EuiBasicTableColumn<SummaryRow>> = [
@@ -207,12 +258,14 @@ const summaryColumns: Array<EuiBasicTableColumn<SummaryRow>> = [
   },
 ];
 
-export const SummaryViewComponent: React.FC<{
-  browserFields: BrowserFields;
-  data: TimelineEventsDetailsItem[];
-  eventId: string;
-  timelineId: string;
-}> = ({ data, eventId, timelineId, browserFields }) => {
+export const SummaryViewComponent: React.FC<SummaryViewProps> = ({
+  browserFields,
+  data,
+  eventId,
+  isDisplayingThreatInfo = false,
+  isDisplayingThreatSummary = false,
+  timelineId,
+}) => {
   const ruleId = useMemo(() => {
     const item = data.find((d) => d.field === 'signal.rule.id');
     return Array.isArray(item?.originalValue)
@@ -220,17 +273,31 @@ export const SummaryViewComponent: React.FC<{
       : item?.originalValue ?? null;
   }, [data]);
   const { rule: maybeRule } = useRuleAsync(ruleId);
-  const summaryList = useMemo(() => getSummary({ browserFields, data, eventId, timelineId }), [
-    browserFields,
-    data,
-    eventId,
-    timelineId,
-  ]);
+  const summaryList = useMemo(
+    () =>
+      getSummary({
+        browserFields,
+        data,
+        eventId,
+        isDisplayingThreatInfo,
+        isDisplayingThreatSummary,
+        timelineId,
+      }),
+    [browserFields, data, eventId, timelineId, isDisplayingThreatSummary, isDisplayingThreatInfo]
+  );
+  const isTableEmpty = isDisplayingThreatSummary && summaryList.length === 0;
+  if (isTableEmpty) return null;
 
   return (
     <>
       <StyledEuiInMemoryTable
-        data-test-subj="summary-view"
+        data-test-subj={`${
+          isDisplayingThreatInfo
+            ? 'threat-info'
+            : isDisplayingThreatSummary
+            ? 'threat-summary'
+            : 'summary'
+        }-view`}
         items={summaryList}
         columns={summaryColumns}
         compressed

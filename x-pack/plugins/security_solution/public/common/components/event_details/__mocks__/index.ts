@@ -655,4 +655,16 @@ export const mockAlertDetailsData = [
     values: ['7.10.0'],
     originalValue: ['7.10.0'],
   },
+  {
+    category: 'threat',
+    field: 'threat.indicator',
+    values: [`{"verybad":true}`],
+    originalValue: [`{"verybad":true}`],
+  },
+  {
+    category: 'threat',
+    field: 'threat.indicator.matched',
+    values: [`{"verybad":true}`],
+    originalValue: [`{"verybad":true}`],
+  },
 ];

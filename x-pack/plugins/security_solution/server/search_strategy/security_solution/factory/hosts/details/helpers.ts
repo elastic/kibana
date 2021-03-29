@@ -9,7 +9,7 @@ import { set } from '@elastic/safer-lodash-set/fp';
 import { get, has, head } from 'lodash/fp';
 import { hostFieldsMap } from '../../../../../../common/ecs/ecs_fields';
 import { HostItem } from '../../../../../../common/search_strategy/security_solution/hosts';
-import { toObjectArrayOfStrings } from '../../../../helpers/to_array';
+import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array';
 
 import { HostAggEsItem, HostBuckets, HostValue } from '../../../../../lib/hosts/types';
 

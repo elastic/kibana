@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EventHit, EventSource } from '../../../../../../common/search_strategy';
-import { getDataFromFieldsHits, getDataFromSourceHits, getDataSafety } from './helpers';
-import { eventDetailsFormattedFields, eventHit } from '../mocks';
+import { EventHit, EventSource } from '../search_strategy';
+import { getDataFromFieldsHits, getDataFromSourceHits, getDataSafety } from './field_formatters';
+import { eventDetailsFormattedFields, eventHit } from './mock_event_details';
 
 describe('Events Details Helpers', () => {
   const fields: EventHit['fields'] = eventHit.fields;

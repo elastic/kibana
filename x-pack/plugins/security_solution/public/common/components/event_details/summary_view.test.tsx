@@ -61,6 +61,28 @@ describe('SummaryViewComponent', () => {
     });
   });
 
+  test('render threat info', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <SummaryViewComponent {...props} isDisplayingThreatInfo />
+      </TestProviders>
+    );
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="threat-info-view"]').exists()).toEqual(true);
+    });
+  });
+
+  test('render threat summary', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <SummaryViewComponent {...props} isDisplayingThreatSummary />
+      </TestProviders>
+    );
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="threat-summary-view"]').exists()).toEqual(true);
+    });
+  });
+
   test("render no investigation guide if it doesn't exist", async () => {
     (useRuleAsync as jest.Mock).mockReturnValue({
       rule: {

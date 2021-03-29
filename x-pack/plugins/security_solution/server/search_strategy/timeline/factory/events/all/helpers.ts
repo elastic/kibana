@@ -11,8 +11,11 @@ import {
   TimelineEdges,
   TimelineNonEcsData,
 } from '../../../../../../common/search_strategy';
-import { toStringArray } from '../../../../helpers/to_array';
-import { getDataSafety, getDataFromFieldsHits } from '../details/helpers';
+import { toStringArray } from '../../../../../../common/utils/to_array';
+import {
+  getDataFromFieldsHits,
+  getDataSafety,
+} from '../../../../../../common/utils/field_formatters';
 
 const getTimestamp = (hit: EventHit): string => {
   if (hit.fields && hit.fields['@timestamp']) {

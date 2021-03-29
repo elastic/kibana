@@ -13,7 +13,7 @@ import '../../mock/match_media';
 import '../../mock/react_beautiful_dnd';
 import { mockDetailItemData, mockDetailItemDataId, TestProviders } from '../../mock';
 
-import { EventDetails, EventsViewType } from './event_details';
+import { EventDetails, EventsViewType, EventView, ThreatView } from './event_details';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { useMountAppended } from '../../utils/use_mount_appended';
 import { mockAlertDetailsData } from './__mocks__';
@@ -28,10 +28,12 @@ describe('EventDetails', () => {
     data: mockDetailItemData,
     id: mockDetailItemDataId,
     isAlert: false,
-    onViewSelected: jest.fn(),
+    onEventViewSelected: jest.fn(),
+    onThreatViewSelected: jest.fn(),
     timelineTabType: TimelineTabs.query,
     timelineId: 'test',
-    view: EventsViewType.summaryView,
+    eventView: EventsViewType.summaryView as EventView,
+    threatView: EventsViewType.threatSummaryView as ThreatView,
   };
 
   const alertsProps = {
@@ -95,6 +97,29 @@ describe('EventDetails', () => {
           .first()
           .text()
       ).toEqual('Summary');
+    });
+  });
+
+  describe('threat tabs', () => {
+    ['Threat Summary', 'Threat Info'].forEach((tab) => {
+      test(`it renders the ${tab} tab`, () => {
+        expect(
+          alertsWrapper
+            .find('[data-test-subj="threatDetails"]')
+            .find('[role="tablist"]')
+            .containsMatchingElement(<span>{tab}</span>)
+        ).toBeTruthy();
+      });
+    });
+
+    test('the Summary tab is selected by default', () => {
+      expect(
+        alertsWrapper
+          .find('[data-test-subj="threatDetails"]')
+          .find('.euiTab-isSelected')
+          .first()
+          .text()
+      ).toEqual('Threat Summary');
     });
   });
 });

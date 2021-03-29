@@ -11,7 +11,7 @@ import { hostFieldsMap } from '../../../../../../common/ecs/ecs_fields';
 import { HostsEdges } from '../../../../../../common/search_strategy/security_solution/hosts';
 
 import { HostAggEsItem, HostBuckets, HostValue } from '../../../../../lib/hosts/types';
-import { toObjectArrayOfStrings } from '../../../../helpers/to_array';
+import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array';
 
 export const HOSTS_FIELDS: readonly string[] = [
   '_id',

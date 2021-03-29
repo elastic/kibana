@@ -8,7 +8,7 @@
 import { EventHit } from '../../../../../../common/search_strategy';
 import { TIMELINE_EVENTS_FIELDS } from './constants';
 import { formatTimelineData } from './helpers';
-import { eventHit } from '../mocks';
+import { eventHit } from '../../../../../../common/utils/mock_event_details';
 
 describe('#formatTimelineData', () => {
   it('happy path', async () => {
