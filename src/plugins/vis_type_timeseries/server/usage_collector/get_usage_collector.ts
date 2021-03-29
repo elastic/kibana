@@ -6,13 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { SearchResponse } from 'elasticsearch';
 import { ElasticsearchClient } from 'src/core/server';
 import { SavedObjectsClientContract, ISavedObjectsRepository } from 'kibana/server';
 import { TIME_RANGE_DATA_MODES } from '../../common/timerange_data_modes';
 import { findByValueEmbeddables } from '../../../dashboard/server';
-
-type ESResponse = SearchResponse<{ visualization: { visState: string }; updated_at: string }>;
 
 export interface TimeseriesUsage {
   timeseries_use_last_value_mode_total: number;
@@ -46,7 +43,10 @@ export const getStats = async (
     },
   };
 
-  const { body: esResponse } = await esClient.search<ESResponse>(searchParams);
+  const { body: esResponse } = await esClient.search<{
+    visualization: { visState: string };
+    updated_at: string;
+  }>(searchParams);
 
   function telemetryUseLastValueMode(visState: VisState) {
     if (
@@ -61,15 +61,18 @@ export const getStats = async (
 
   if (esResponse?.hits?.hits?.length) {
     for (const hit of esResponse.hits.hits) {
-      const { visualization } = hit._source;
-      let visState: VisState = {};
-      try {
-        visState = JSON.parse(visualization?.visState ?? '{}');
-      } catch (e) {
-        // invalid visState
-      }
+      if (hit._source && 'visualization' in hit._source) {
+        const { visualization } = hit._source!;
 
-      telemetryUseLastValueMode(visState);
+        let visState: VisState = {};
+        try {
+          visState = JSON.parse(visualization?.visState ?? '{}');
+        } catch (e) {
+          // invalid visState
+        }
+
+        telemetryUseLastValueMode(visState);
+      }
     }
   }
 
