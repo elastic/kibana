@@ -92,23 +92,22 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
   }
 
   try {
-    if (Array.isArray(agents)) {
-      await AgentService.sendUpgradeAgentsActions(soClient, esClient, {
-        agentIds: agents,
-        sourceUri,
-        version,
-        force,
-      });
-    } else {
-      await AgentService.sendUpgradeAgentsActions(soClient, esClient, {
-        kuery: agents,
-        sourceUri,
-        version,
-        force,
-      });
-    }
+    const agentOptions = Array.isArray(agents) ? { agentIds: agents } : { kuery: agents };
+    const upgradeOptions = {
+      ...agentOptions,
+      sourceUri,
+      version,
+      force,
+    };
+    const results = await AgentService.sendUpgradeAgentsActions(soClient, esClient, upgradeOptions);
+    const body = results.items.reduce<PostBulkAgentUpgradeResponse>((acc, so) => {
+      acc[so.id] = {
+        success: !so.error,
+        error: so.error?.message,
+      };
+      return acc;
+    }, {});
 
-    const body: PostBulkAgentUpgradeResponse = {};
     return response.ok({ body });
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });

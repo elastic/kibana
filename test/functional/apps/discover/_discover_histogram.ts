@@ -22,7 +22,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
 
-  describe('discover histogram', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/94532
+  describe.skip('discover histogram', function describeIndexTests() {
     before(async () => {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('long_window_logstash');

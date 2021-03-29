@@ -26,7 +26,6 @@ import {
 import { parseInterval } from '../../../common/util/parse_interval';
 import { ml } from '../services/ml_api_service';
 import { mlJobService } from '../services/job_service';
-import { mlResultsService } from '../services/results_service';
 import { getTimeBucketsFromCache } from '../util/time_buckets';
 import { getTimefilter, getUiSettings } from '../util/dependency_cache';
 
@@ -65,6 +64,7 @@ export function getDefaultSwimlaneData() {
 }
 
 export async function loadFilteredTopInfluencers(
+  mlResultsService,
   jobIds,
   earliestMs,
   latestMs,
@@ -125,6 +125,7 @@ export async function loadFilteredTopInfluencers(
   });
 
   return await loadTopInfluencers(
+    mlResultsService,
     jobIds,
     earliestMs,
     latestMs,
@@ -539,12 +540,17 @@ export async function loadAnomaliesTableData(
 // and avoid race conditions ending up with the wrong charts.
 let requestCount = 0;
 export async function loadDataForCharts(
+  mlResultsService,
   jobIds,
   earliestMs,
   latestMs,
   influencers = [],
   selectedCells,
-  influencersFilterQuery
+  influencersFilterQuery,
+  // choose whether or not to keep track of the request that could be out of date
+  // in Anomaly Explorer this is being used to ignore any request that are out of date
+  // but in embeddables, we might have multiple requests coming from multiple different panels
+  takeLatestOnly = true
 ) {
   return new Promise((resolve) => {
     // Just skip doing the request when this function
@@ -573,7 +579,7 @@ export async function loadDataForCharts(
       )
       .then((resp) => {
         // Ignore this response if it's returned by an out of date promise
-        if (newRequestCount < requestCount) {
+        if (takeLatestOnly && newRequestCount < requestCount) {
           resolve([]);
         }
 
@@ -590,6 +596,7 @@ export async function loadDataForCharts(
 }
 
 export async function loadTopInfluencers(
+  mlResultsService,
   selectedJobIds,
   earliestMs,
   latestMs,
