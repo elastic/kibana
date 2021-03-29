@@ -94,7 +94,7 @@
   "dependencies": {
     "@elastic/apm-rum": "^5.6.1",
     "@elastic/apm-rum-react": "^1.2.5",
-    "@elastic/charts": "25.3.0",
+    "@elastic/charts": "26.0.0",
     "@elastic/datemath": "link:packages/elastic-datemath",
     "@elastic/elasticsearch": "npm:@elastic/elasticsearch-canary@7.13.0-canary.1",
     "@elastic/ems-client": "7.12.0",
