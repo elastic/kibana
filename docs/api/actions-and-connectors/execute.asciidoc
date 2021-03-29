@@ -1,19 +1,19 @@
-[[actions-and-connectors-api-execute]]
+[[execute-connector-api]]
 === Execute connector API
 ++++
-<titleabbrev>Execute connector API</titleabbrev>
+<titleabbrev>Execute connector</titleabbrev>
 ++++
 
 Executes a connector by ID.
 
-[[actions-and-connectors-api-execute-request]]
+[[execute-connector-api-request]]
 ==== Request
 
 `POST <kibana host>:<port>/api/actions/connector/<id>/_execute`
 
 `POST <kibana host>:<port>/s/<space_id>/api/actions/connector/<id>/_execute`
 
-[[actions-and-connectors-api-execute-params]]
+[[execute-connector-api-params]]
 ==== Path parameters
 
 `id`::
@@ -22,20 +22,20 @@ Executes a connector by ID.
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
-[[actions-and-connectors-api-execute-request-body]]
+[[execute-connector-api-request-body]]
 ==== Request body
 
 `params`::
   (Required, object) The parameters of the connector. Parameter properties vary depending on
   the connector type. For information about the parameter properties, refer to <<action-types,Action and connector types>>.
 
-[[actions-and-connectors-api-execute-codes]]
+[[execute-connector-api-codes]]
 ==== Response code
 
 `200`::
     Indicates a successful call.
 
-[[actions-and-connectors-api-execute-example]]
+[[execute-connector-api-example]]
 ==== Example
 
 [source,sh]

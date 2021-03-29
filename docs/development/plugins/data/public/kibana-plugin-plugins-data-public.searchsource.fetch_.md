@@ -9,7 +9,7 @@ Fetch this source from Elasticsearch, returning an observable over the response(
 <b>Signature:</b>
 
 ```typescript
-fetch$(options?: ISearchOptions): import("rxjs").Observable<import("elasticsearch").SearchResponse<any>>;
+fetch$(options?: ISearchOptions): import("rxjs").Observable<import("@elastic/elasticsearch/api/types").SearchResponse<any>>;
 ```
 
 ## Parameters
@@ -20,5 +20,5 @@ fetch$(options?: ISearchOptions): import("rxjs").Observable<import("elasticsearc
 
 <b>Returns:</b>
 
-`import("rxjs").Observable<import("elasticsearch").SearchResponse<any>>`
+`import("rxjs").Observable<import("@elastic/elasticsearch/api/types").SearchResponse<any>>`
 
