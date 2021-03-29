@@ -14,10 +14,11 @@ import {
   isTooManyBucketsPreviewException,
 } from '../../../../common/alerting/metrics';
 import { ElasticsearchClient } from '../../../../../../../src/core/server';
-import { InfraSource } from '../../../../common/http_api/source_api';
+import { InfraSource } from '../../../../common/source_configuration/source_configuration';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
 import { InventoryItemType } from '../../../../common/inventory_models/types';
 import { evaluateCondition } from './evaluate_condition';
+import { LogQueryFields } from '../../../services/log_queries/get_log_query_fields';
 
 interface InventoryMetricThresholdParams {
   criteria: InventoryMetricConditions[];
@@ -30,6 +31,7 @@ interface PreviewInventoryMetricThresholdAlertParams {
   esClient: ElasticsearchClient;
   params: InventoryMetricThresholdParams;
   source: InfraSource;
+  logQueryFields: LogQueryFields;
   lookback: Unit;
   alertInterval: string;
   alertThrottle: string;
@@ -43,6 +45,7 @@ export const previewInventoryMetricThresholdAlert: (
   esClient,
   params,
   source,
+  logQueryFields,
   lookback,
   alertInterval,
   alertThrottle,
@@ -68,7 +71,7 @@ export const previewInventoryMetricThresholdAlert: (
   try {
     const results = await Promise.all(
       criteria.map((c) =>
-        evaluateCondition(c, nodeType, source, esClient, filterQuery, lookbackSize)
+        evaluateCondition(c, nodeType, source, logQueryFields, esClient, filterQuery, lookbackSize)
       )
     );
 

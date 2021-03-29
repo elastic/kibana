@@ -53,11 +53,13 @@
 /src/plugins/navigation/ @elastic/kibana-app-services
 /src/plugins/share/ @elastic/kibana-app-services
 /src/plugins/ui_actions/ @elastic/kibana-app-services
+/src/plugins/index_pattern_field_editor @elastic/kibana-app-services
 /x-pack/examples/ui_actions_enhanced_examples/ @elastic/kibana-app-services
 /x-pack/plugins/data_enhanced/ @elastic/kibana-app-services
 /x-pack/plugins/embeddable_enhanced/ @elastic/kibana-app-services
 /x-pack/plugins/ui_actions_enhanced/ @elastic/kibana-app-services
 /x-pack/plugins/runtime_fields @elastic/kibana-app-services
+/x-pack/test/search_sessions_integration/ @elastic/kibana-app-services
 #CC# /src/plugins/bfetch/ @elastic/kibana-app-services
 #CC# /src/plugins/index_pattern_management/ @elastic/kibana-app-services
 #CC# /src/plugins/inspector/ @elastic/kibana-app-services
