@@ -93,6 +93,9 @@ export function createApmEventClient({
         ignore_unavailable: true,
       };
 
+      // only "search" operation is currently supported
+      const requestType = 'search';
+
       return callAsyncWithDebug({
         cb: () => {
           const searchPromise = cancelEsRequestOnAbort(
@@ -103,10 +106,14 @@ export function createApmEventClient({
           return unwrapEsResponse(searchPromise);
         },
         getDebugMessage: () => ({
-          body: getDebugBody(searchParams, 'search'),
+          body: getDebugBody(searchParams, requestType),
           title: getDebugTitle(request),
         }),
+        isCalledWithInternalUser: false,
         debug,
+        request,
+        requestType,
+        requestParams: searchParams,
       });
     },
   };

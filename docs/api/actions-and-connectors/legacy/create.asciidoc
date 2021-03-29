@@ -1,12 +1,10 @@
 [[actions-and-connectors-legacy-api-create]]
 ==== Legacy Create connector API
 ++++
-<titleabbrev>Legacy Create connector API</titleabbrev>
+<titleabbrev>Legacy Create connector</titleabbrev>
 ++++
 
-deprecated::[7.13.0]
-
-Please use the <<actions-and-connectors-api-create>> instead.
+WARNING: Deprecated in 7.13.0. Use <<create-connector-api>> instead.
 
 Creates a connector.
 
