@@ -153,11 +153,9 @@ export class HttpService
   }
 
   /**
-   * Indicates if http server has configured to start listening on a configured port.
-   * We shouldn't start http service in two cases:
-   * 1. If `server.autoListen` is explicitly set to `false`.
-   * 2. When the process is run as dev cluster master in which case cluster manager
-   * will fork a dedicated process where http service will be set up instead.
+   * Indicates if http server is configured to start listening on a configured port.
+   * (if `server.autoListen` is not explicitly set to `false`.)
+   *
    * @internal
    * */
   private shouldListen(config: HttpConfig) {

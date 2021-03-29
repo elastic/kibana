@@ -6,15 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { LoggerFactory, Logger } from '@kbn/logging';
+import { Logger } from '@kbn/logging';
 import { Log } from './log';
-
-export const convertToLoggerFactory = (cliLog: Log): LoggerFactory => {
-  const adapted = convertToLogger(cliLog);
-  return {
-    get: () => adapted,
-  };
-};
 
 export const convertToLogger = (cliLog: Log): Logger => {
   const getErrorMessage = (msgOrError: string | Error): string => {

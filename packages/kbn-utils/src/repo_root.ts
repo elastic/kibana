@@ -57,3 +57,5 @@ const { kibanaDir, kibanaPkgJson } = findKibanaPackageJson();
 
 export const REPO_ROOT = kibanaDir;
 export const UPSTREAM_BRANCH = kibanaPkgJson.branch;
+
+export const fromRoot = (...paths: string[]) => Path.resolve(REPO_ROOT, ...paths);

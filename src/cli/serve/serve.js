@@ -12,11 +12,9 @@ import { statSync } from 'fs';
 import { resolve } from 'path';
 import url from 'url';
 
-import { getConfigPath, REPO_ROOT } from '@kbn/utils';
+import { getConfigPath, fromRoot } from '@kbn/utils';
 import { IS_KIBANA_DISTRIBUTABLE } from '../../legacy/utils';
 import { readKeystore } from '../keystore/read_keystore';
-
-const fromRoot = (p) => resolve(REPO_ROOT, p);
 
 function canRequire(path) {
   try {

@@ -115,8 +115,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     const config = await this.config$.pipe(first()).toPromise();
 
     let contracts = new Map<PluginName, unknown>();
-    const initialize = config.initialize;
-    if (initialize) {
+    if (config.initialize) {
       contracts = await this.pluginsSystem.setupPlugins(deps);
       this.registerPluginStaticDirs(deps);
     } else {
@@ -124,7 +123,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     }
 
     return {
-      initialized: initialize,
+      initialized: config.initialize,
       contracts,
     };
   }
