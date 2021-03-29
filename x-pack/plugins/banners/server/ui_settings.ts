@@ -30,7 +30,8 @@ export const registerSettings = (uiSettings: UiSettingsServiceSetup, config: Ban
         defaultMessage: 'Banner placement',
       }),
       description: i18n.translate('xpack.banners.settings.placement.description', {
-        defaultMessage: 'Set the placement of the banner. {subscriptionLink}',
+        defaultMessage:
+          'Display a top banner for this space, above the Elastic header. {subscriptionLink}',
         values: {
           subscriptionLink,
         },
@@ -39,10 +40,17 @@ export const registerSettings = (uiSettings: UiSettingsServiceSetup, config: Ban
       order: 1,
       type: 'select',
       value: config.placement,
-      options: ['disabled', 'header'],
-      optionLabels: {},
+      options: ['disabled', 'top'],
+      optionLabels: {
+        disabled: i18n.translate('xpack.banners.settings.placement.disabled', {
+          defaultMessage: 'Disabled',
+        }),
+        top: i18n.translate('xpack.banners.settings.placement.top', {
+          defaultMessage: 'Top',
+        }),
+      },
       requiresPageReload: true,
-      schema: schema.oneOf([schema.literal('disabled'), schema.literal('header')]),
+      schema: schema.oneOf([schema.literal('disabled'), schema.literal('top')]),
     },
     'banners:textContent': {
       name: i18n.translate('xpack.banners.settings.textContent.title', {

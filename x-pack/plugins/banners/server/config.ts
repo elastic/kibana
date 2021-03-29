@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { get } from 'lodash';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor } from 'kibana/server';
 import { isHexColor } from './utils';
 
 const configSchema = schema.object({
-  placement: schema.oneOf([schema.literal('disabled'), schema.literal('header')], {
+  placement: schema.oneOf([schema.literal('disabled'), schema.literal('top')], {
     defaultValue: 'disabled',
   }),
   textContent: schema.string({ defaultValue: '' }),
@@ -38,4 +39,15 @@ export type BannersConfigType = TypeOf<typeof configSchema>;
 export const config: PluginConfigDescriptor<BannersConfigType> = {
   schema: configSchema,
   exposeToBrowser: {},
+  deprecations: () => [
+    (rootConfig, fromPath, logger) => {
+      const pluginConfig = get(rootConfig, fromPath);
+      if (pluginConfig?.placement === 'header') {
+        logger('The `header` value for xpack.banners.placement has been replaced by `top`');
+        pluginConfig.placement = 'top';
+      }
+
+      return rootConfig;
+    },
+  ],
 };
