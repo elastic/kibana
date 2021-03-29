@@ -23,7 +23,7 @@ import * as CSS from 'csstype';
 import { Datatable as Datatable_2 } from 'src/plugins/expressions';
 import { Datatable as Datatable_3 } from 'src/plugins/expressions/common';
 import { DatatableColumn as DatatableColumn_2 } from 'src/plugins/expressions';
-import { DatatableColumnType } from 'src/plugins/expressions/common';
+import { DatatableColumnType as DatatableColumnType_2 } from 'src/plugins/expressions/common';
 import { DetailedPeerCertificate } from 'tls';
 import { Ensure } from '@kbn/utility-types';
 import { EnvironmentMode } from '@kbn/config';
@@ -85,8 +85,8 @@ import { RequestAdapter } from 'src/plugins/inspector/common';
 import { RequestStatistics as RequestStatistics_2 } from 'src/plugins/inspector/common';
 import { Required } from '@kbn/utility-types';
 import * as Rx from 'rxjs';
-import { SavedObject } from 'kibana/server';
-import { SavedObject as SavedObject_2 } from 'src/core/server';
+import { SavedObject } from 'src/core/server';
+import { SavedObject as SavedObject_2 } from 'kibana/server';
 import { SavedObjectReference } from 'src/core/types';
 import { SavedObjectsClientContract } from 'src/core/public';
 import { SavedObjectsFindOptions } from 'kibana/public';
@@ -188,7 +188,7 @@ export class AggConfig {
     // @deprecated (undocumented)
     toJSON(): AggConfigSerialized;
     // Warning: (ae-forgotten-export) The symbol "SerializableState" needs to be exported by the entry point index.d.ts
-    toSerializedFieldFormat(): {} | Ensure<SerializedFieldFormat_2<SerializableState>, SerializableState>;
+    toSerializedFieldFormat(): {} | Ensure<SerializedFieldFormat_2<SerializableState_2>, SerializableState_2>;
     // (undocumented)
     get type(): IAggType;
     set type(type: IAggType);
@@ -272,9 +272,9 @@ export type AggConfigSerialized = Ensure<{
     type: string;
     enabled?: boolean;
     id?: string;
-    params?: {} | SerializableState;
+    params?: {} | SerializableState_2;
     schema?: string;
-}, SerializableState>;
+}, SerializableState_2>;
 
 // Warning: (ae-missing-release-tag) "AggFunctionsMapping" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1604,7 +1604,7 @@ export class IndexPatternsService {
     // Warning: (ae-forgotten-export) The symbol "IndexPatternSavedObjectAttrs" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
-    getCache: () => Promise<SavedObject_2<IndexPatternSavedObjectAttrs>[] | null | undefined>;
+    getCache: () => Promise<SavedObject<IndexPatternSavedObjectAttrs>[] | null | undefined>;
     getDefault: () => Promise<IndexPattern | null>;
     getFieldsForIndexPattern: (indexPattern: IndexPattern | IndexPatternSpec, options?: GetFieldsOptions | undefined) => Promise<any>;
     // Warning: (ae-forgotten-export) The symbol "GetFieldsOptions" needs to be exported by the entry point index.d.ts
@@ -1616,7 +1616,7 @@ export class IndexPatternsService {
     }>>;
     getTitles: (refresh?: boolean) => Promise<string[]>;
     refreshFields: (indexPattern: IndexPattern) => Promise<void>;
-    savedObjectToSpec: (savedObject: SavedObject_2<IndexPatternAttributes>) => IndexPatternSpec;
+    savedObjectToSpec: (savedObject: SavedObject<IndexPatternAttributes>) => IndexPatternSpec;
     setDefault: (id: string, force?: boolean) => Promise<void>;
     updateSavedObject(indexPattern: IndexPattern, saveAttempts?: number, ignoreErrors?: boolean): Promise<void | Error>;
 }
@@ -2704,7 +2704,7 @@ export const UI_SETTINGS: {
 // src/plugins/data/public/index.ts:427:1 - (ae-forgotten-export) The symbol "propFilter" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:430:1 - (ae-forgotten-export) The symbol "toAbsoluteDates" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/query/state_sync/connect_to_query_state.ts:34:5 - (ae-forgotten-export) The symbol "FilterStateStore" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/search/session/session_service.ts:55:5 - (ae-forgotten-export) The symbol "UrlGeneratorStateMapping" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/search/session/session_service.ts:56:5 - (ae-forgotten-export) The symbol "UrlGeneratorStateMapping" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 
