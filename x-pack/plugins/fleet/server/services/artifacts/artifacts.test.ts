@@ -85,7 +85,7 @@ describe('When using the artifacts services', () => {
 
       expect(esClientMock.create).toHaveBeenCalledWith({
         index: FLEET_SERVER_ARTIFACTS_INDEX,
-        id: expect.any(String),
+        id: `${artifact.packageName}:${artifact.identifier}-${artifact.decodedSha256}`,
         body: {
           ...newArtifactToElasticsearchProperties(newArtifact),
           created: expect.any(String),
