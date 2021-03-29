@@ -57,7 +57,7 @@ export const securitySolutionOnlyAll: Role = {
     kibana: [
       {
         feature: {
-          siem: ['all'],
+          securitySolutionFixture: ['all'],
         },
         spaces: ['space1'],
       },
@@ -79,7 +79,7 @@ export const securitySolutionOnlyRead: Role = {
     kibana: [
       {
         feature: {
-          siem: ['read'],
+          securitySolutionFixture: ['read'],
         },
         spaces: ['space1'],
       },

@@ -100,7 +100,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .send(postCaseReq)
           .expect(200);
 
-        expect(theCase.scope).to.eql('securitySolution');
+        expect(theCase.scope).to.eql('securitySolutionFixture');
       });
 
       it('User: security solution only - should NOT create a case of different scope', async () => {
