@@ -23,7 +23,7 @@ export const uploadLayerWizardConfig: LayerWizard = {
   getIsDisabled: async () => {
     const hasImportPermission = await getFileUpload().hasImportPermission({
       checkCreateIndexPattern: true,
-      hasPipeline: false,
+      checkHasManagePipeline: false,
     });
     return !hasImportPermission;
   },

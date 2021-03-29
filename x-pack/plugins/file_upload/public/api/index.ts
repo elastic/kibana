@@ -35,7 +35,7 @@ export async function importerFactory(
 
 interface HasImportPermissionParams {
   checkCreateIndexPattern: boolean;
-  hasPipeline: boolean;
+  checkHasManagePipeline: boolean;
   indexName?: string;
 }
 

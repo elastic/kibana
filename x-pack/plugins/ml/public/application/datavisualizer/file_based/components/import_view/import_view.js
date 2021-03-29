@@ -126,7 +126,7 @@ export class ImportView extends Component {
           if (
             (await getFileUpload().hasImportPermission({
               checkCreateIndexPattern: createIndexPattern,
-              hasPipeline: true,
+              checkHasManagePipeline: true,
               indexName: index,
             })) === false
           ) {

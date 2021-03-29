@@ -50,14 +50,14 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
         query: schema.object({
           indexName: schema.maybe(schema.string()),
           checkCreateIndexPattern: schema.boolean(),
-          hasPipeline: schema.boolean(),
+          checkHasManagePipeline: schema.boolean(),
         }),
       },
     },
     async (context, request, response) => {
       try {
         const [, pluginsStart] = await coreSetup.getStartServices();
-        const { indexName, checkCreateIndexPattern, hasPipeline } = request.query;
+        const { indexName, checkCreateIndexPattern, checkHasManagePipeline } = request.query;
 
         const authorizationService = pluginsStart.security?.authz;
         const requiresAuthz = authorizationService?.mode.useRbacForRequest(request) ?? false;
@@ -68,7 +68,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
 
         const checkPrivilegesPayload: CheckPrivilegesPayload = {
           elasticsearch: {
-            cluster: hasPipeline ? ['manage_pipeline'] : [],
+            cluster: checkHasManagePipeline ? ['manage_pipeline'] : [],
             index: indexName ? { [indexName]: ['create', 'create_index'] } : {},
           },
         };

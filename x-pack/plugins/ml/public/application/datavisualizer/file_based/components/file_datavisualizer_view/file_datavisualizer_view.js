@@ -63,7 +63,7 @@ export class FileDataVisualizerView extends Component {
     // cluster privileges, the user will still need index privileges to create and ingest
     const hasPermissionToImport = await getFileUpload().hasImportPermission({
       checkCreateIndexPattern: false,
-      hasPipeline: true,
+      checkHasManagePipeline: true,
     });
     this.setState({ hasPermissionToImport });
   }
