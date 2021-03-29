@@ -396,6 +396,7 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
 
     // expect HTTP fields not to be in the DOM
     expect(queryByLabelText('URL')).not.toBeInTheDocument();
+    expect(queryByLabelText('Max redirects')).not.toBeInTheDocument();
 
     // ensure at least one tcp advanced option is present
     const advancedOptionsButton = getByText('Advanced options');
@@ -496,24 +497,20 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
 
     const host = getByLabelText('Host') as HTMLInputElement;
     const monitorIntervalNumber = getByLabelText('Number') as HTMLInputElement;
-    const maxRedirects = getByLabelText('Max redirects') as HTMLInputElement;
     const timeout = getByLabelText('Timeout in milliseconds') as HTMLInputElement;
 
     // create errors
     fireEvent.change(host, { target: { value: '' } });
     fireEvent.change(monitorIntervalNumber, { target: { value: '-1' } });
-    fireEvent.change(maxRedirects, { target: { value: '-1' } });
     fireEvent.change(timeout, { target: { value: '-1' } });
 
     await waitFor(() => {
       const hostError = getByText('Host is required');
       const monitorIntervalError = getByText('Monitor interval is required');
-      const maxRedirectsError = getByText('Max redirects must be 0 or greater');
       const timeoutError = getByText('Timeout must be 0 or greater');
 
       expect(hostError).toBeInTheDocument();
       expect(monitorIntervalError).toBeInTheDocument();
-      expect(maxRedirectsError).toBeInTheDocument();
       expect(timeoutError).toBeInTheDocument();
       expect(onChange).toBeCalledWith(
         expect.objectContaining({
@@ -525,7 +522,6 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
     // resolve errors
     fireEvent.change(host, { target: { value: 'smtp.gmail.com:587' } });
     fireEvent.change(monitorIntervalNumber, { target: { value: '1' } });
-    fireEvent.change(maxRedirects, { target: { value: '1' } });
     fireEvent.change(timeout, { target: { value: '1' } });
 
     await waitFor(() => {
@@ -549,27 +545,23 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
 
     const host = getByLabelText('Host') as HTMLInputElement;
     const monitorIntervalNumber = getByLabelText('Number') as HTMLInputElement;
-    const maxRedirects = getByLabelText('Max redirects') as HTMLInputElement;
     const timeout = getByLabelText('Timeout in milliseconds') as HTMLInputElement;
     const wait = getByLabelText('Wait in seconds') as HTMLInputElement;
 
     // create errors
     fireEvent.change(host, { target: { value: '' } });
     fireEvent.change(monitorIntervalNumber, { target: { value: '-1' } });
-    fireEvent.change(maxRedirects, { target: { value: '-1' } });
     fireEvent.change(timeout, { target: { value: '-1' } });
     fireEvent.change(wait, { target: { value: '-1' } });
 
     await waitFor(() => {
       const hostError = getByText('Host is required');
       const monitorIntervalError = getByText('Monitor interval is required');
-      const maxRedirectsError = getByText('Max redirects must be 0 or greater');
       const timeoutError = getByText('Timeout must be 0 or greater');
       const waitError = getByText('Wait must be 0 or greater');
 
       expect(hostError).toBeInTheDocument();
       expect(monitorIntervalError).toBeInTheDocument();
-      expect(maxRedirectsError).toBeInTheDocument();
       expect(timeoutError).toBeInTheDocument();
       expect(waitError).toBeInTheDocument();
       expect(onChange).toBeCalledWith(
@@ -582,14 +574,12 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
     // resolve errors
     fireEvent.change(host, { target: { value: '1.1.1.1' } });
     fireEvent.change(monitorIntervalNumber, { target: { value: '1' } });
-    fireEvent.change(maxRedirects, { target: { value: '1' } });
     fireEvent.change(timeout, { target: { value: '1' } });
     fireEvent.change(wait, { target: { value: '1' } });
 
     await waitFor(() => {
       expect(queryByText('Host is required')).not.toBeInTheDocument();
       expect(queryByText('Monitor interval is required')).not.toBeInTheDocument();
-      expect(queryByText('Max redirects must be 0 or greater')).not.toBeInTheDocument();
       expect(queryByText('Timeout must be 0 or greater')).not.toBeInTheDocument();
       expect(queryByText('Wait must be 0 or greater')).not.toBeInTheDocument();
       expect(onChange).toBeCalledWith(

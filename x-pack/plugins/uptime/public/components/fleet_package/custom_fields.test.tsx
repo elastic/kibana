@@ -44,11 +44,9 @@ describe('<CustomFields />', () => {
     const proxyUrl = getByLabelText('Proxy URL') as HTMLInputElement;
     const monitorIntervalNumber = getByLabelText('Number') as HTMLInputElement;
     const monitorIntervalUnit = getByLabelText('Unit') as HTMLInputElement;
-    // const tags = getByLabelText('Tags') as HTMLInputElement;
     const apmServiceName = getByLabelText('APM service name') as HTMLInputElement;
     const maxRedirects = getByLabelText('Max redirects') as HTMLInputElement;
     const timeout = getByLabelText('Timeout in milliseconds') as HTMLInputElement;
-    // const wait = getByLabelText('Wait in seconds') as HTMLInputElement;
     expect(monitorType).not.toBeInTheDocument();
     expect(url).toBeInTheDocument();
     expect(url.value).toEqual(defaultConfig[ConfigKeys.URLS]);
@@ -84,7 +82,6 @@ describe('<CustomFields />', () => {
     const proxyUrl = getByLabelText('Proxy URL') as HTMLInputElement;
     const monitorIntervalNumber = getByLabelText('Number') as HTMLInputElement;
     const monitorIntervalUnit = getByLabelText('Unit') as HTMLInputElement;
-    // const tags = getByLabelText('Tags') as HTMLInputElement;
     const apmServiceName = getByLabelText('APM service name') as HTMLInputElement;
     const maxRedirects = getByLabelText('Max redirects') as HTMLInputElement;
     const timeout = getByLabelText('Timeout in milliseconds') as HTMLInputElement;
@@ -138,6 +135,7 @@ describe('<CustomFields />', () => {
 
     // expect HTTP fields not to be in the DOM
     expect(queryByLabelText('URL')).not.toBeInTheDocument();
+    expect(queryByLabelText('Max redirects')).not.toBeInTheDocument();
 
     // ensure at least one tcp advanced option is present
     const advancedOptionsButton = getByText('Advanced options');

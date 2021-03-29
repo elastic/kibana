@@ -119,14 +119,10 @@ export const CustomFields = memo<Props>(
                       !!validate[ConfigKeys.MONITOR_TYPE]?.(fields[ConfigKeys.MONITOR_TYPE])
                     }
                     error={
-                      validate[ConfigKeys.MONITOR_TYPE]?.(fields[ConfigKeys.MONITOR_TYPE])
-                        ? [
-                            <FormattedMessage
-                              id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType.error"
-                              defaultMessage="Monitor type is required"
-                            />,
-                          ]
-                        : undefined
+                      <FormattedMessage
+                        id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorType.error"
+                        defaultMessage="Monitor type is required"
+                      />
                     }
                   >
                     <EuiSelect
@@ -151,14 +147,10 @@ export const CustomFields = memo<Props>(
                     }
                     isInvalid={!!validate[ConfigKeys.URLS]?.(fields[ConfigKeys.URLS])}
                     error={
-                      validate[ConfigKeys.URLS]?.(fields[ConfigKeys.URLS])
-                        ? [
-                            <FormattedMessage
-                              id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.URL.error"
-                              defaultMessage="URL is required"
-                            />,
-                          ]
-                        : undefined
+                      <FormattedMessage
+                        id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.URL.error"
+                        defaultMessage="URL is required"
+                      />
                     }
                   >
                     <EuiFieldText
@@ -179,14 +171,10 @@ export const CustomFields = memo<Props>(
                     }
                     isInvalid={!!validate[ConfigKeys.HOSTS]?.(fields[ConfigKeys.HOSTS])}
                     error={
-                      validate[ConfigKeys.HOSTS]?.(fields[ConfigKeys.HOSTS])
-                        ? [
-                            <FormattedMessage
-                              id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.hosts.error"
-                              defaultMessage="Host is required"
-                            />,
-                          ]
-                        : undefined
+                      <FormattedMessage
+                        id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.hosts.error"
+                        defaultMessage="Host is required"
+                      />
                     }
                   >
                     <EuiFieldText
@@ -251,14 +239,10 @@ export const CustomFields = memo<Props>(
                   }
                   isInvalid={!!validate[ConfigKeys.SCHEDULE]?.(fields[ConfigKeys.SCHEDULE])}
                   error={
-                    validate[ConfigKeys.SCHEDULE]?.(fields[ConfigKeys.SCHEDULE])
-                      ? [
-                          <FormattedMessage
-                            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval.error"
-                            defaultMessage="Monitor interval is required"
-                          />,
-                        ]
-                      : undefined
+                    <FormattedMessage
+                      id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.monitorInterval.error"
+                      defaultMessage="Monitor interval is required"
+                    />
                   }
                 >
                   <ScheduleField
@@ -282,14 +266,10 @@ export const CustomFields = memo<Props>(
                     }
                     isInvalid={!!validate[ConfigKeys.WAIT]?.(fields[ConfigKeys.WAIT])}
                     error={
-                      validate[ConfigKeys.WAIT]?.(fields[ConfigKeys.WAIT])
-                        ? [
-                            <FormattedMessage
-                              id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.wait.error"
-                              defaultMessage="Wait must be 0 or greater"
-                            />,
-                          ]
-                        : undefined
+                      <FormattedMessage
+                        id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.wait.error"
+                        defaultMessage="Wait must be 0 or greater"
+                      />
                     }
                     labelAppend={<OptionalLabel />}
                   >
@@ -321,39 +301,43 @@ export const CustomFields = memo<Props>(
                     }
                   />
                 </EuiFormRow>
-                <EuiFormRow
-                  label={
-                    <FormattedMessage
-                      id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.maxRedirects"
-                      defaultMessage="Max redirects"
-                    />
-                  }
-                  isInvalid={
-                    !!validate[ConfigKeys.MAX_REDIRECTS]?.(fields[ConfigKeys.MAX_REDIRECTS])
-                  }
-                  error={
-                    validate[ConfigKeys.MAX_REDIRECTS]?.(fields[ConfigKeys.MAX_REDIRECTS])
-                      ? [
-                          <FormattedMessage
-                            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.maxRedirects.error"
-                            defaultMessage="Max redirects must be 0 or greater"
-                          />,
-                        ]
-                      : undefined
-                  }
-                  labelAppend={<OptionalLabel />}
-                >
-                  <EuiFieldNumber
-                    min={0}
-                    value={fields[ConfigKeys.MAX_REDIRECTS]}
-                    onChange={(event) =>
-                      handleInputChange({
-                        value: event.target.value,
-                        configKey: ConfigKeys.MAX_REDIRECTS,
-                      })
+                {isHTTP && (
+                  <EuiFormRow
+                    label={
+                      <FormattedMessage
+                        id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.maxRedirects"
+                        defaultMessage="Max redirects"
+                      />
                     }
-                  />
-                </EuiFormRow>
+                    isInvalid={
+                      !!validate[ConfigKeys.MAX_REDIRECTS]?.(fields[ConfigKeys.MAX_REDIRECTS])
+                    }
+                    error={
+                      <FormattedMessage
+                        id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.maxRedirects.error"
+                        defaultMessage="Max redirects must be 0 or greater"
+                      />
+                    }
+                    labelAppend={<OptionalLabel />}
+                    helpText={
+                      <FormattedMessage
+                        id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.maxRedirects.helpText"
+                        defaultMessage="The total number of redirections Heartbeat will follow."
+                      />
+                    }
+                  >
+                    <EuiFieldNumber
+                      min={0}
+                      value={fields[ConfigKeys.MAX_REDIRECTS]}
+                      onChange={(event) =>
+                        handleInputChange({
+                          value: event.target.value,
+                          configKey: ConfigKeys.MAX_REDIRECTS,
+                        })
+                      }
+                    />
+                  </EuiFormRow>
+                )}
                 <EuiFormRow
                   label={
                     <FormattedMessage
@@ -363,14 +347,10 @@ export const CustomFields = memo<Props>(
                   }
                   isInvalid={fields[ConfigKeys.TIMEOUT] < 0}
                   error={
-                    fields[ConfigKeys.TIMEOUT] < 0
-                      ? [
-                          <FormattedMessage
-                            id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.error"
-                            defaultMessage="Timeout must be 0 or greater"
-                          />,
-                        ]
-                      : undefined
+                    <FormattedMessage
+                      id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.error"
+                      defaultMessage="Timeout must be 0 or greater"
+                    />
                   }
                   labelAppend={<OptionalLabel />}
                 >

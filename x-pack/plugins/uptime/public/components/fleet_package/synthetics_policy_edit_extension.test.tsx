@@ -450,24 +450,20 @@ describe('<SyntheticsPolicyEditExtension />', () => {
 
     const host = getByLabelText('Host') as HTMLInputElement;
     const monitorIntervalNumber = getByLabelText('Number') as HTMLInputElement;
-    const maxRedirects = getByLabelText('Max redirects') as HTMLInputElement;
     const timeout = getByLabelText('Timeout in milliseconds') as HTMLInputElement;
 
     // create errors
     fireEvent.change(host, { target: { value: '' } });
     fireEvent.change(monitorIntervalNumber, { target: { value: '-1' } });
-    fireEvent.change(maxRedirects, { target: { value: '-1' } });
     fireEvent.change(timeout, { target: { value: '-1' } });
 
     await waitFor(() => {
       const hostError = getByText('Host is required');
       const monitorIntervalError = getByText('Monitor interval is required');
-      const maxRedirectsError = getByText('Max redirects must be 0 or greater');
       const timeoutError = getByText('Timeout must be 0 or greater');
 
       expect(hostError).toBeInTheDocument();
       expect(monitorIntervalError).toBeInTheDocument();
-      expect(maxRedirectsError).toBeInTheDocument();
       expect(timeoutError).toBeInTheDocument();
       expect(onChange).toBeCalledWith(
         expect.objectContaining({
@@ -479,13 +475,11 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     // resolve errors
     fireEvent.change(host, { target: { value: 'smtp.gmail.com:587' } });
     fireEvent.change(monitorIntervalNumber, { target: { value: '1' } });
-    fireEvent.change(maxRedirects, { target: { value: '1' } });
     fireEvent.change(timeout, { target: { value: '1' } });
 
     await waitFor(() => {
       expect(queryByText('Host is required')).not.toBeInTheDocument();
       expect(queryByText('Monitor interval is required')).not.toBeInTheDocument();
-      expect(queryByText('Max redirects must be 0 or greater')).not.toBeInTheDocument();
       expect(queryByText('Timeout must be 0 or greater')).not.toBeInTheDocument();
       expect(onChange).toBeCalledWith(
         expect.objectContaining({
@@ -519,27 +513,23 @@ describe('<SyntheticsPolicyEditExtension />', () => {
 
     const host = getByLabelText('Host') as HTMLInputElement;
     const monitorIntervalNumber = getByLabelText('Number') as HTMLInputElement;
-    const maxRedirects = getByLabelText('Max redirects') as HTMLInputElement;
     const timeout = getByLabelText('Timeout in milliseconds') as HTMLInputElement;
     const wait = getByLabelText('Wait in seconds') as HTMLInputElement;
 
     // create errors
     fireEvent.change(host, { target: { value: '' } });
     fireEvent.change(monitorIntervalNumber, { target: { value: '-1' } });
-    fireEvent.change(maxRedirects, { target: { value: '-1' } });
     fireEvent.change(timeout, { target: { value: '-1' } });
     fireEvent.change(wait, { target: { value: '-1' } });
 
     await waitFor(() => {
       const hostError = getByText('Host is required');
       const monitorIntervalError = getByText('Monitor interval is required');
-      const maxRedirectsError = getByText('Max redirects must be 0 or greater');
       const timeoutError = getByText('Timeout must be 0 or greater');
       const waitError = getByText('Wait must be 0 or greater');
 
       expect(hostError).toBeInTheDocument();
       expect(monitorIntervalError).toBeInTheDocument();
-      expect(maxRedirectsError).toBeInTheDocument();
       expect(timeoutError).toBeInTheDocument();
       expect(waitError).toBeInTheDocument();
       expect(onChange).toBeCalledWith(
@@ -552,14 +542,12 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     // resolve errors
     fireEvent.change(host, { target: { value: '1.1.1.1' } });
     fireEvent.change(monitorIntervalNumber, { target: { value: '1' } });
-    fireEvent.change(maxRedirects, { target: { value: '1' } });
     fireEvent.change(timeout, { target: { value: '1' } });
     fireEvent.change(wait, { target: { value: '1' } });
 
     await waitFor(() => {
       expect(queryByText('Host is required')).not.toBeInTheDocument();
       expect(queryByText('Monitor interval is required')).not.toBeInTheDocument();
-      expect(queryByText('Max redirects must be 0 or greater')).not.toBeInTheDocument();
       expect(queryByText('Timeout must be 0 or greater')).not.toBeInTheDocument();
       expect(queryByText('Wait must be 0 or greater')).not.toBeInTheDocument();
       expect(onChange).toBeCalledWith(
@@ -679,7 +667,6 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     const monitorIntervalNumber = getByLabelText('Number') as HTMLInputElement;
     const monitorIntervalUnit = getByLabelText('Unit') as HTMLInputElement;
     const apmServiceName = getByLabelText('APM service name') as HTMLInputElement;
-    const maxRedirects = getByLabelText('Max redirects') as HTMLInputElement;
     const timeout = getByLabelText('Timeout in milliseconds') as HTMLInputElement;
     expect(url).toBeInTheDocument();
     expect(url.value).toEqual(defaultConfig[ConfigKeys.URLS]);
@@ -691,8 +678,6 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     expect(monitorIntervalUnit.value).toEqual(defaultConfig[ConfigKeys.SCHEDULE].unit);
     expect(apmServiceName).toBeInTheDocument();
     expect(apmServiceName.value).toEqual(defaultConfig[ConfigKeys.APM_SERVICE_NAME]);
-    expect(maxRedirects).toBeInTheDocument();
-    expect(maxRedirects.value).toEqual(`${defaultConfig[ConfigKeys.MAX_REDIRECTS]}`);
     expect(timeout).toBeInTheDocument();
     expect(timeout.value).toEqual(`${defaultConfig[ConfigKeys.TIMEOUT]}`);
 
@@ -754,7 +739,6 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     const monitorIntervalNumber = getByLabelText('Number') as HTMLInputElement;
     const monitorIntervalUnit = getByLabelText('Unit') as HTMLInputElement;
     const apmServiceName = getByLabelText('APM service name') as HTMLInputElement;
-    const maxRedirects = getByLabelText('Max redirects') as HTMLInputElement;
     const timeout = getByLabelText('Timeout in milliseconds') as HTMLInputElement;
     const wait = getByLabelText('Wait in seconds') as HTMLInputElement;
     expect(url).toBeInTheDocument();
@@ -765,8 +749,6 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     expect(monitorIntervalUnit.value).toEqual(defaultConfig[ConfigKeys.SCHEDULE].unit);
     expect(apmServiceName).toBeInTheDocument();
     expect(apmServiceName.value).toEqual(defaultConfig[ConfigKeys.APM_SERVICE_NAME]);
-    expect(maxRedirects).toBeInTheDocument();
-    expect(maxRedirects.value).toEqual(`${defaultConfig[ConfigKeys.MAX_REDIRECTS]}`);
     expect(timeout).toBeInTheDocument();
     expect(timeout.value).toEqual(`${defaultConfig[ConfigKeys.TIMEOUT]}`);
     expect(wait).toBeInTheDocument();
