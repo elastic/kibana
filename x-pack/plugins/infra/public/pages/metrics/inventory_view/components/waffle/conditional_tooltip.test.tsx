@@ -17,7 +17,7 @@ import {
   InfraFormatterType,
 } from '../../../../../lib/lib';
 
-jest.mock('../../../../../containers/source', () => ({
+jest.mock('../../../../../containers/metrics_source', () => ({
   useSourceContext: () => ({ sourceId: 'default' }),
 }));
 

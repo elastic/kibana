@@ -50,6 +50,7 @@ async function getSpacesUsage(
 
   let resp: SpacesAggregationResponse | undefined;
   try {
+    // @ts-expect-error `SearchResponse['hits']['total']` incorrectly expects `number` type instead of `{ value: number }`.
     ({ body: resp } = await esClient.search({
       index: kibanaIndex,
       body: {
