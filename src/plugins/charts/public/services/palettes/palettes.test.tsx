@@ -523,5 +523,38 @@ describe('palettes', () => {
       );
       expect(color).toEqual('#00ff00');
     });
+
+    it('should return a gradient helper function', () => {
+      const helperFn = palette.getGradientColorHelper!(
+        { min: 0, max: 100 },
+        {
+          colors: ['#00ff00', '#000000'],
+          stops: [],
+        }
+      );
+      expect(helperFn).not.toBeUndefined();
+      // check initial and final stops match
+      expect(helperFn(0)).toEqual('#00ff00');
+      expect(helperFn(1000)).toEqual('#000000');
+      // check that moving a tiny bit off the color changes as gradient
+      expect(helperFn(1)).not.toEqual('#00ff00');
+      expect(helperFn(99)).not.toEqual('#000000');
+    });
+
+    it('should return a gradient helper function that supports custom stops', () => {
+      const helperFn = palette.getGradientColorHelper!(
+        { min: 0, max: 100 },
+        {
+          colors: ['#00ff00', '#aa0000', '#000000'],
+          stops: [0, 25, 100],
+        }
+      );
+      expect(helperFn).not.toBeUndefined();
+
+      expect(helperFn(25)).toEqual('#aa0000');
+      // make sure there are small changes on the gradient
+      expect(helperFn(26)).not.toEqual('#aa0000');
+      expect(helperFn(24)).not.toEqual('#aa0000');
+    });
   });
 });
