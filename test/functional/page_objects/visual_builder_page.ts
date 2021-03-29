@@ -431,6 +431,11 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
+    public async clickDataTab(tabName: string) {
+      await testSubjects.click(`${tabName}EditorDataBtn`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
     public async switchIndexPatternSelectionMode(useKibanaIndices: boolean) {
       await testSubjects.click('switchIndexPatternSelectionModePopover');
       await testSubjects.setEuiSwitch(
@@ -637,6 +642,16 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
         '.tvbAggRow--split [data-test-subj="comboBoxInput"]'
       );
       return await comboBox.isOptionSelected(groupBy, value);
+    }
+
+    public async setMetricsDataTimerangeMode(value: string) {
+      const dataTimeRangeMode = await testSubjects.find('dataTimeRangeMode');
+      return await comboBox.setElement(dataTimeRangeMode, value);
+    }
+
+    public async checkSelectedDataTimerangeMode(value: string) {
+      const dataTimeRangeMode = await testSubjects.find('dataTimeRangeMode');
+      return await comboBox.isOptionSelected(dataTimeRangeMode, value);
     }
   }
 
