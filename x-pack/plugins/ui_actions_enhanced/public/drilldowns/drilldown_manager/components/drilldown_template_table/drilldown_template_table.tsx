@@ -17,6 +17,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiSearchBarProps,
 } from '@elastic/eui';
 import {
   txtNameColumnTitle,
@@ -104,6 +105,13 @@ export const DrilldownTemplateTable: React.FC<DrilldownTemplateTableProps> = ({
     },
   ];
 
+  const search: EuiSearchBarProps = {
+    box: {
+      incremental: true,
+    },
+    defaultQuery: '',
+  };
+
   return (
     <>
       <EuiInMemoryTable
@@ -112,6 +120,7 @@ export const DrilldownTemplateTable: React.FC<DrilldownTemplateTableProps> = ({
         columns={columns}
         isSelectable={!!onClone}
         responsive={false}
+        search={search}
         sorting={{
           sort: {
             direction: 'asc',
