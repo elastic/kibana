@@ -249,111 +249,6 @@ describe('useBarChartsHooks', () => {
     },
   };
 
-  const defaultHttpStream = {
-    streams: [
-      {
-        enabled: true,
-        data_stream: {
-          type: 'synthetics',
-          dataset: 'http',
-        },
-        vars: {
-          type: {
-            value: 'http',
-            type: 'text',
-          },
-          name: {
-            value: defaultConfig[ConfigKeys.NAME],
-            type: 'text',
-          },
-          schedule: {
-            value: '"@every 5s"',
-            type: 'text',
-          },
-          urls: {
-            value: '',
-            type: 'text',
-          },
-          'service.name': {
-            value: '',
-            type: 'text',
-          },
-          timeout: {
-            value: 1600,
-            type: 'integer',
-          },
-          max_redirects: {
-            value: 0,
-            type: 'integer',
-          },
-          proxy_url: {
-            value: '',
-            type: 'text',
-          },
-          tags: {
-            value: '[]',
-            type: 'yaml',
-          },
-          'response.include_headers': {
-            value: true,
-            type: 'bool',
-          },
-          'response.include_body': {
-            value: 'on_error',
-            type: 'text',
-          },
-          'check.request.method': {
-            value: 'GET',
-            type: 'text',
-          },
-          'check.request.headers': {
-            value: '{"Content-Type":"text/plain"}',
-            type: 'yaml',
-          },
-          'check.request.body': {
-            value: '""',
-            type: 'yaml',
-          },
-          'check.response.status': {
-            value: '[]',
-            type: 'yaml',
-          },
-          'check.response.headers': {
-            value: '{}',
-            type: 'yaml',
-          },
-          'check.response.body.positive': {
-            value: '[]',
-            type: 'yaml',
-          },
-          'check.response.body.negative': {
-            value: '[]',
-            type: 'yaml',
-          },
-          'ssl.certificate_authorities': {
-            value: '',
-            type: 'yaml',
-          },
-          'ssl.certificate': {
-            value: '',
-            type: 'yaml',
-          },
-          'ssl.key': {
-            value: '',
-            type: 'yaml',
-          },
-          'ssl.key_passphrase': {
-            type: 'text',
-          },
-          'ssl.verification_mode': {
-            value: 'full',
-            type: 'text',
-          },
-        },
-      },
-    ],
-  };
-
   it('handles http data stream', () => {
     const onChange = jest.fn();
     const { result } = renderHook((props) => useUpdatePolicy(props), {
@@ -468,7 +363,7 @@ describe('useBarChartsHooks', () => {
     ).toEqual(tcpConfig[ConfigKeys.PROXY_URL]);
     expect(
       result.current.updatedPolicy.inputs[0]?.streams[0]?.vars?.[ConfigKeys.APM_SERVICE_NAME].value
-    ).toEqual(defaultConfig[ConfigKeys.APM_SERVICE_NAME]);
+    ).toEqual(tcpConfig[ConfigKeys.APM_SERVICE_NAME]);
     expect(
       result.current.updatedPolicy.inputs[1]?.streams[0]?.vars?.[ConfigKeys.TIMEOUT].value
     ).toEqual(tcpConfig[ConfigKeys.TIMEOUT]);
