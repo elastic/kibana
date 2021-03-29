@@ -48,7 +48,7 @@ To enable dragging an item, use `DragDrop` with both a `draggable` and a `value`
 
 ## Dropping
 
-To enable dropping, use `DragDrop` with both a `droppable` attribute and an `onDrop` handler attribute. Droppable should only be set to true if there is an item being dragged, and if a drop of the dragged item is supported.
+To enable dropping, use `DragDrop` with both a `dropTypes` attribute that should be an array with at least one value and an `onDrop` handler attribute. `dropType` should only be truthy if is an item being dragged, and if a drop of the dragged item is supported.
 
 ```js
 const { dragging } = useContext(DragContext);
@@ -56,7 +56,7 @@ const { dragging } = useContext(DragContext);
 return (
   <DragDrop
     className="axis"
-    dropType={getDropProps(dragging)}
+    dropTypes=['truthyValue']
     onDrop={(item) => onChange([...items, item])}
   >
     {items.map((x) => (
@@ -85,8 +85,7 @@ The children `DragDrop` components must have props defined as in the example:
       <DragDrop
         key={f.id}
         draggable
-        droppable
-        dragType="move"
+        dragTypes={["move"]}
         dropType="reorder"
         reorderableGroup={fields} // consists all reorderable elements in the group, eg. [{id:'3'}, {id:'5'}, {id:'1'}]
         value={{
