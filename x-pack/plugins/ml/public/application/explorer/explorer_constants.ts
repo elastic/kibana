@@ -22,6 +22,7 @@ export const EXPLORER_ACTION = {
   CLEAR_JOBS: 'clearJobs',
   JOB_SELECTION_CHANGE: 'jobSelectionChange',
   SET_CHARTS: 'setCharts',
+  SET_CHARTS_DATA_LOADING: 'setChartsDataLoading',
   SET_EXPLORER_DATA: 'setExplorerData',
   SET_FILTER_DATA: 'setFilterData',
   SET_INFLUENCER_FILTER_SETTINGS: 'setInfluencerFilterSettings',
@@ -50,7 +51,9 @@ export const CHART_TYPE = {
   POPULATION_DISTRIBUTION: 'population_distribution',
   SINGLE_METRIC: 'single_metric',
   GEO_MAP: 'geo_map',
-};
+} as const;
+
+export type ChartType = typeof CHART_TYPE[keyof typeof CHART_TYPE];
 
 export const MAX_CATEGORY_EXAMPLES = 10;
 

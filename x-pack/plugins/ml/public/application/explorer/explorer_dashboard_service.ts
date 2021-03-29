@@ -137,6 +137,9 @@ export const explorerService = {
   setFilterData: (payload: Partial<Exclude<ExplorerAppState['mlExplorerFilter'], undefined>>) => {
     explorerAction$.next(setFilterDataActionCreator(payload));
   },
+  setChartsDataLoading: () => {
+    explorerAction$.next({ type: EXPLORER_ACTION.SET_CHARTS_DATA_LOADING });
+  },
   setSwimlaneContainerWidth: (payload: number) => {
     explorerAction$.next({
       type: EXPLORER_ACTION.SET_SWIMLANE_CONTAINER_WIDTH,
@@ -156,3 +159,5 @@ export const explorerService = {
     explorerAction$.next({ type: EXPLORER_ACTION.SET_VIEW_BY_PER_PAGE, payload });
   },
 };
+
+export type ExplorerService = typeof explorerService;

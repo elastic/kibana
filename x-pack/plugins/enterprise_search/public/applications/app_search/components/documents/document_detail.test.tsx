@@ -14,7 +14,7 @@ import { useParams } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
 
-import { EuiPageContent, EuiBasicTable } from '@elastic/eui';
+import { EuiPageHeader, EuiPageContent, EuiBasicTable } from '@elastic/eui';
 
 import { Loading } from '../../../shared/loading';
 import { ResultFieldValue } from '../result';
@@ -102,7 +102,8 @@ describe('DocumentDetail', () => {
 
   it('will delete the document when the delete button is pressed', () => {
     const wrapper = shallow(<DocumentDetail engineBreadcrumb={['test']} />);
-    const button = wrapper.find('[data-test-subj="DeleteDocumentButton"]');
+    const header = wrapper.find(EuiPageHeader).dive().children().dive();
+    const button = header.find('[data-test-subj="DeleteDocumentButton"]');
 
     button.simulate('click');
 

@@ -24,16 +24,18 @@ import {
 } from '../../explorer_utils';
 import { AnnotationsTable } from '../../../../../common/types/annotations';
 import { SWIM_LANE_DEFAULT_PAGE_SIZE } from '../../explorer_constants';
+import { InfluencersFilterQuery } from '../../../../../common/types/es_client';
 
 export interface ExplorerState {
   annotations: AnnotationsTable;
+  anomalyChartsDataLoading: boolean;
   chartsData: ExplorerChartsData;
   fieldFormatsLoading: boolean;
   filterActive: boolean;
   filteredFields: any[];
   filterPlaceHolder: any;
   indexPattern: { title: string; fields: any[] };
-  influencersFilterQuery: any;
+  influencersFilterQuery: InfluencersFilterQuery;
   influencers: Dictionary<any>;
   isAndOperator: boolean;
   loading: boolean;
@@ -68,6 +70,7 @@ export function getExplorerDefaultState(): ExplorerState {
       annotationsData: [],
       aggregations: {},
     },
+    anomalyChartsDataLoading: true,
     chartsData: getDefaultChartsData(),
     fieldFormatsLoading: false,
     filterActive: false,
