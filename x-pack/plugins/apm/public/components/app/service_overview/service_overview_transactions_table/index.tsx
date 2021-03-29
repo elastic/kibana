@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 import React, { useState } from 'react';
 import uuid from 'uuid';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
@@ -28,8 +29,9 @@ interface Props {
   serviceName: string;
 }
 
+type ApiResponse = APIReturnType<'GET /api/apm/services/{serviceName}/transactions/groups/primary_statistics'>;
 const INITIAL_STATE = {
-  transactionGroups: [],
+  transactionGroups: [] as ApiResponse['transactionGroups'],
   isAggregationAccurate: true,
   requestId: '',
   transactionGroupsTotalItems: 0,

@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import React, { useState } from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { DiscoverGrid, DiscoverGridProps } from './discover_grid/discover_grid';
@@ -38,6 +37,7 @@ export function createDiscoverGridDirective(reactDirective: any) {
   return reactDirective(DiscoverGridEmbeddable, [
     ['columns', { watchDepth: 'collection' }],
     ['indexPattern', { watchDepth: 'reference' }],
+    ['isLoading', { watchDepth: 'reference' }],
     ['onAddColumn', { watchDepth: 'reference', wrapApply: false }],
     ['onFilter', { watchDepth: 'reference', wrapApply: false }],
     ['onRemoveColumn', { watchDepth: 'reference', wrapApply: false }],

@@ -204,7 +204,10 @@ describe('EnginesLogic', () => {
       it('should call loadEngines if engine.type === default', () => {
         jest.spyOn(EnginesLogic.actions, 'loadEngines');
 
-        EnginesLogic.actions.onDeleteEngineSuccess({ ...MOCK_ENGINE, type: EngineTypes.default });
+        EnginesLogic.actions.onDeleteEngineSuccess({
+          ...MOCK_ENGINE,
+          type: 'default' as EngineTypes.default,
+        });
 
         expect(EnginesLogic.actions.loadEngines).toHaveBeenCalled();
       });
@@ -212,7 +215,10 @@ describe('EnginesLogic', () => {
       it('should call loadMetaEngines if engine.type === meta', () => {
         jest.spyOn(EnginesLogic.actions, 'loadMetaEngines');
 
-        EnginesLogic.actions.onDeleteEngineSuccess({ ...MOCK_ENGINE, type: EngineTypes.meta });
+        EnginesLogic.actions.onDeleteEngineSuccess({
+          ...MOCK_ENGINE,
+          type: 'meta' as EngineTypes.meta,
+        });
 
         expect(EnginesLogic.actions.loadMetaEngines).toHaveBeenCalled();
       });

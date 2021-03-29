@@ -25,8 +25,10 @@ import { useFetcher } from '../../../../hooks/use_fetcher';
 import { createAgentConfigurationHref } from '../../../shared/Links/apm/agentConfigurationLinks';
 import { AgentConfigurationList } from './List';
 
+const INITIAL_DATA = { configurations: [] };
+
 export function AgentConfigurations() {
-  const { refetch, data = [], status } = useFetcher(
+  const { refetch, data = INITIAL_DATA, status } = useFetcher(
     (callApmApi) =>
       callApmApi({ endpoint: 'GET /api/apm/settings/agent-configuration' }),
     [],
@@ -36,7 +38,7 @@ export function AgentConfigurations() {
   useTrackPageview({ app: 'apm', path: 'agent_configuration' });
   useTrackPageview({ app: 'apm', path: 'agent_configuration', delay: 15000 });
 
-  const hasConfigurations = !isEmpty(data);
+  const hasConfigurations = !isEmpty(data.configurations);
 
   return (
     <>
@@ -72,7 +74,11 @@ export function AgentConfigurations() {
 
         <EuiSpacer size="m" />
 
-        <AgentConfigurationList status={status} data={data} refetch={refetch} />
+        <AgentConfigurationList
+          status={status}
+          configurations={data.configurations}
+          refetch={refetch}
+        />
       </EuiPanel>
     </>
   );

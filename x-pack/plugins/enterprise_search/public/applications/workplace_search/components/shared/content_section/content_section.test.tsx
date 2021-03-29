@@ -25,7 +25,7 @@ describe('ContentSection', () => {
     const wrapper = shallow(<ContentSection {...props} className="test" />);
 
     expect(wrapper.prop('data-test-subj')).toEqual('contentSection');
-    expect(wrapper.prop('className')).toEqual('test content-section');
+    expect(wrapper.prop('className')).toEqual('test');
     expect(wrapper.find('.children')).toHaveLength(1);
   });
 
@@ -47,7 +47,6 @@ describe('ContentSection', () => {
       />
     );
 
-    expect(wrapper.find(EuiSpacer).first().prop('size')).toEqual('s');
     expect(wrapper.find(EuiSpacer)).toHaveLength(1);
     expect(wrapper.find('.header')).toHaveLength(1);
   });

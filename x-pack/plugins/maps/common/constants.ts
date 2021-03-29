@@ -40,6 +40,7 @@ export const MAP_PATH = 'map';
 export const GIS_API_PATH = `api/${APP_ID}`;
 export const INDEX_SETTINGS_API_PATH = `${GIS_API_PATH}/indexSettings`;
 export const FONTS_API_PATH = `${GIS_API_PATH}/fonts`;
+export const INDEX_SOURCE_API_PATH = `${GIS_API_PATH}/docSource`;
 export const API_ROOT_PATH = `/${GIS_API_PATH}`;
 
 export const MVT_GETTILE_API_PATH = 'mvt/getTile';
@@ -295,3 +296,7 @@ export const DEFAULT_PERCENTILES = [50, 75, 90, 95, 99];
 export type RawValue = string | number | boolean | undefined | null;
 
 export type FieldFormatter = (value: RawValue) => string | number;
+
+export const INDEX_META_DATA_CREATED_BY = 'maps-drawing-data-ingest';
+
+export const MAX_DRAWING_SIZE_BYTES = 10485760; // 10MB

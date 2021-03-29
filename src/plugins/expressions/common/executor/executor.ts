@@ -215,17 +215,25 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
   }
 
   public inject(ast: ExpressionAstExpression, references: SavedObjectReference[]) {
+    let linkId = 0;
     return this.walkAst(cloneDeep(ast), (fn, link) => {
-      link.arguments = fn.inject(link.arguments, references);
+      link.arguments = fn.inject(
+        link.arguments,
+        references
+          .filter((r) => r.name.includes(`l${linkId}_`))
+          .map((r) => ({ ...r, name: r.name.replace(`l${linkId}_`, '') }))
+      );
+      linkId++;
     });
   }
 
   public extract(ast: ExpressionAstExpression) {
+    let linkId = 0;
     const allReferences: SavedObjectReference[] = [];
     const newAst = this.walkAst(cloneDeep(ast), (fn, link) => {
       const { state, references } = fn.extract(link.arguments);
       link.arguments = state;
-      allReferences.push(...references);
+      allReferences.push(...references.map((r) => ({ ...r, name: `l${linkId++}_${r.name}` })));
     });
     return { state: newAst, references: allReferences };
   }
