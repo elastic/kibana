@@ -30,10 +30,12 @@ export const environmentsRoute = createRoute({
       setup
     );
 
-    return getEnvironments({
+    const environments = await getEnvironments({
       setup,
       serviceName,
       searchAggregatedTransactions,
     });
+
+    return { environments };
   },
 });
