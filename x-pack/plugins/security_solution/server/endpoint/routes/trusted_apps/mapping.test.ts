@@ -13,6 +13,7 @@ import {
   NewTrustedApp,
   OperatingSystem,
   TrustedApp,
+  UpdateTrustedApp,
 } from '../../../../common/endpoint/types';
 
 import {
@@ -21,6 +22,7 @@ import {
   createEntryNested,
   exceptionListItemToTrustedApp,
   newTrustedAppToCreateExceptionListItemOptions,
+  updatedTrustedAppToUpdateExceptionListItemOptions,
 } from './mapping';
 
 const createExceptionListItemOptions = (
@@ -43,7 +45,7 @@ const createExceptionListItemOptions = (
 const exceptionListItemSchema = (
   item: Partial<ExceptionListItemSchema>
 ): ExceptionListItemSchema => ({
-  _version: '123',
+  _version: 'abc123',
   id: '',
   comments: [],
   created_at: '',
@@ -75,6 +77,7 @@ describe('mapping', () => {
         {
           name: 'linux trusted app',
           description: 'Linux Trusted App',
+          effectScope: { type: 'global' },
           os: OperatingSystem.LINUX,
           entries: [createConditionEntry(ConditionEntryField.PATH, '/bin/malware')],
         },
@@ -92,6 +95,7 @@ describe('mapping', () => {
         {
           name: 'macos trusted app',
           description: 'MacOS Trusted App',
+          effectScope: { type: 'global' },
           os: OperatingSystem.MAC,
           entries: [createConditionEntry(ConditionEntryField.PATH, '/bin/malware')],
         },
@@ -109,6 +113,7 @@ describe('mapping', () => {
         {
           name: 'windows trusted app',
           description: 'Windows Trusted App',
+          effectScope: { type: 'global' },
           os: OperatingSystem.WINDOWS,
           entries: [createConditionEntry(ConditionEntryField.PATH, 'C:\\Program Files\\Malware')],
         },
@@ -126,6 +131,7 @@ describe('mapping', () => {
         {
           name: 'Signed trusted app',
           description: 'Signed Trusted App',
+          effectScope: { type: 'global' },
           os: OperatingSystem.WINDOWS,
           entries: [createConditionEntry(ConditionEntryField.SIGNER, 'Microsoft Windows')],
         },
@@ -148,6 +154,7 @@ describe('mapping', () => {
         {
           name: 'MD5 trusted app',
           description: 'MD5 Trusted App',
+          effectScope: { type: 'global' },
           os: OperatingSystem.LINUX,
           entries: [
             createConditionEntry(ConditionEntryField.HASH, '1234234659af249ddf3e40864e9fb241'),
@@ -167,6 +174,7 @@ describe('mapping', () => {
         {
           name: 'SHA1 trusted app',
           description: 'SHA1 Trusted App',
+          effectScope: { type: 'global' },
           os: OperatingSystem.LINUX,
           entries: [
             createConditionEntry(
@@ -191,6 +199,7 @@ describe('mapping', () => {
         {
           name: 'SHA256 trusted app',
           description: 'SHA256 Trusted App',
+          effectScope: { type: 'global' },
           os: OperatingSystem.LINUX,
           entries: [
             createConditionEntry(
@@ -218,6 +227,7 @@ describe('mapping', () => {
         {
           name: 'MD5 trusted app',
           description: 'MD5 Trusted App',
+          effectScope: { type: 'global' },
           os: OperatingSystem.LINUX,
           entries: [
             createConditionEntry(ConditionEntryField.HASH, '1234234659Af249ddf3e40864E9FB241'),
@@ -251,10 +261,14 @@ describe('mapping', () => {
         }),
         {
           id: '123',
+          version: 'abc123',
           name: 'linux trusted app',
           description: 'Linux Trusted App',
+          effectScope: { type: 'global' },
           created_at: '11/11/2011T11:11:11.111',
           created_by: 'admin',
+          updated_at: '11/11/2011T11:11:11.111',
+          updated_by: 'admin',
           os: OperatingSystem.LINUX,
           entries: [createConditionEntry(ConditionEntryField.PATH, '/bin/malware')],
         }
@@ -274,10 +288,14 @@ describe('mapping', () => {
         }),
         {
           id: '123',
+          version: 'abc123',
           name: 'macos trusted app',
           description: 'MacOS Trusted App',
+          effectScope: { type: 'global' },
           created_at: '11/11/2011T11:11:11.111',
           created_by: 'admin',
+          updated_at: '11/11/2011T11:11:11.111',
+          updated_by: 'admin',
           os: OperatingSystem.MAC,
           entries: [createConditionEntry(ConditionEntryField.PATH, '/bin/malware')],
         }
@@ -297,10 +315,14 @@ describe('mapping', () => {
         }),
         {
           id: '123',
-          created_at: '11/11/2011T11:11:11.111',
-          created_by: 'admin',
+          version: 'abc123',
           name: 'windows trusted app',
           description: 'Windows Trusted App',
+          effectScope: { type: 'global' },
+          created_at: '11/11/2011T11:11:11.111',
+          created_by: 'admin',
+          updated_at: '11/11/2011T11:11:11.111',
+          updated_by: 'admin',
           os: OperatingSystem.WINDOWS,
           entries: [createConditionEntry(ConditionEntryField.PATH, 'C:\\Program Files\\Malware')],
         }
@@ -325,10 +347,14 @@ describe('mapping', () => {
         }),
         {
           id: '123',
+          version: 'abc123',
           name: 'signed trusted app',
           description: 'Signed trusted app',
+          effectScope: { type: 'global' },
           created_at: '11/11/2011T11:11:11.111',
           created_by: 'admin',
+          updated_at: '11/11/2011T11:11:11.111',
+          updated_by: 'admin',
           os: OperatingSystem.WINDOWS,
           entries: [createConditionEntry(ConditionEntryField.SIGNER, 'Microsoft Windows')],
         }
@@ -348,10 +374,14 @@ describe('mapping', () => {
         }),
         {
           id: '123',
+          version: 'abc123',
           name: 'MD5 trusted app',
           description: 'MD5 Trusted App',
+          effectScope: { type: 'global' },
           created_at: '11/11/2011T11:11:11.111',
           created_by: 'admin',
+          updated_at: '11/11/2011T11:11:11.111',
+          updated_by: 'admin',
           os: OperatingSystem.LINUX,
           entries: [
             createConditionEntry(ConditionEntryField.HASH, '1234234659af249ddf3e40864e9fb241'),
@@ -375,10 +405,14 @@ describe('mapping', () => {
         }),
         {
           id: '123',
+          version: 'abc123',
           name: 'SHA1 trusted app',
           description: 'SHA1 Trusted App',
+          effectScope: { type: 'global' },
           created_at: '11/11/2011T11:11:11.111',
           created_by: 'admin',
+          updated_at: '11/11/2011T11:11:11.111',
+          updated_by: 'admin',
           os: OperatingSystem.LINUX,
           entries: [
             createConditionEntry(
@@ -408,10 +442,14 @@ describe('mapping', () => {
         }),
         {
           id: '123',
+          version: 'abc123',
           name: 'SHA256 trusted app',
           description: 'SHA256 Trusted App',
+          effectScope: { type: 'global' },
           created_at: '11/11/2011T11:11:11.111',
           created_by: 'admin',
+          updated_at: '11/11/2011T11:11:11.111',
+          updated_by: 'admin',
           os: OperatingSystem.LINUX,
           entries: [
             createConditionEntry(
@@ -421,6 +459,45 @@ describe('mapping', () => {
           ],
         }
       );
+    });
+  });
+
+  describe('updatedTrustedAppToUpdateExceptionListItemOptions', () => {
+    it('should map to UpdateExceptionListItemOptions', () => {
+      const updatedTrustedApp: UpdateTrustedApp = {
+        name: 'Linux trusted app',
+        description: 'Linux Trusted App',
+        effectScope: { type: 'global' },
+        os: OperatingSystem.LINUX,
+        entries: [createConditionEntry(ConditionEntryField.PATH, '/bin/malware')],
+        version: 'abc',
+      };
+
+      expect(
+        updatedTrustedAppToUpdateExceptionListItemOptions(
+          exceptionListItemSchema({ id: 'original-id-here', item_id: 'original-item-id-here' }),
+          updatedTrustedApp
+        )
+      ).toEqual({
+        _version: 'abc',
+        comments: [],
+        description: 'Linux Trusted App',
+        entries: [
+          {
+            field: 'process.executable.caseless',
+            operator: 'included',
+            type: 'match',
+            value: '/bin/malware',
+          },
+        ],
+        id: 'original-id-here',
+        itemId: 'original-item-id-here',
+        name: 'Linux trusted app',
+        namespaceType: 'agnostic',
+        osTypes: ['linux'],
+        tags: ['policy:all'],
+        type: 'simple',
+      });
     });
   });
 });

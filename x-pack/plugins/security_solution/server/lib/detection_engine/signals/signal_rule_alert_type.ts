@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 /* eslint-disable complexity */
 
-import { Logger, KibanaRequest } from 'src/core/server';
+import { Logger, SavedObject } from 'src/core/server';
 import isEmpty from 'lodash/isEmpty';
 import { chain, tryCatch } from 'fp-ts/lib/TaskEither';
 import { flow } from 'fp-ts/lib/function';
 
-import { ApiResponse } from '@elastic/elasticsearch';
-import { performance } from 'perf_hooks';
+import * as t from 'io-ts';
+import { pickBy } from 'lodash/fp';
+import { validateNonExact } from '../../../../common/validate';
 import { toError, toPromise } from '../../../../common/fp_utils';
 
 import {
@@ -21,49 +21,28 @@ import {
   DEFAULT_SEARCH_AFTER_PAGE_SIZE,
   SERVER_APP_ID,
 } from '../../../../common/constants';
-import { isJobStarted, isMlRule } from '../../../../common/machine_learning/helpers';
+import { isMlRule } from '../../../../common/machine_learning/helpers';
 import {
   isThresholdRule,
   isEqlRule,
   isThreatMatchRule,
-  hasLargeValueItem,
-  normalizeThresholdField,
+  isQueryRule,
 } from '../../../../common/detection_engine/utils';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { SetupPlugins } from '../../../plugin';
 import { getInputIndex } from './get_input_output_index';
-import { searchAfterAndBulkCreate } from './search_after_bulk_create';
-import { getFilter } from './get_filter';
-import {
-  SignalRuleAlertTypeDefinition,
-  RuleAlertAttributes,
-  EqlSignalSearchResponse,
-  WrappedSignalHit,
-} from './types';
+import { SignalRuleAlertTypeDefinition, RuleAlertAttributes } from './types';
 import {
   getListsClient,
   getExceptions,
-  wrapSignal,
-  createErrorsFromShard,
   createSearchAfterReturnType,
-  mergeReturns,
-  createSearchAfterReturnTypeFromResponse,
   checkPrivileges,
   hasTimestampFields,
   hasReadIndexPrivileges,
   getRuleRangeTuples,
-  makeFloatString,
 } from './utils';
 import { signalParamsSchema } from './signal_params_schema';
 import { siemRuleActionGroups } from './siem_rule_action_groups';
-import { findMlSignals } from './find_ml_signals';
-import {
-  bulkCreateThresholdSignals,
-  getThresholdBucketFilters,
-  getThresholdSignalHistory,
-  findThresholdSignals,
-} from './threshold';
-import { bulkCreateMlSignals } from './bulk_create_ml_signals';
 import {
   scheduleNotificationActions,
   NotificationRuleTypeParams,
@@ -73,15 +52,19 @@ import { buildRuleMessageFactory } from './rule_messages';
 import { ruleStatusSavedObjectsClientFactory } from './rule_status_saved_objects_client';
 import { getNotificationResultsLink } from '../notifications/utils';
 import { TelemetryEventsSender } from '../../telemetry/sender';
-import { buildEqlSearchRequest } from '../../../../common/detection_engine/get_query_filter';
-import { bulkInsertSignals, filterDuplicateSignals } from './single_bulk_create';
-import { buildSignalFromEvent, buildSignalGroupFromSequence } from './build_bulk_body';
-import { createThreatSignals } from './threat_mapping/create_threat_signals';
-import { getIndexVersion } from '../routes/index/get_index_version';
-import { MIN_EQL_RULE_INDEX_VERSION } from '../routes/index/get_signals_template';
-import { filterEventsAgainstList } from './filters/filter_events_against_list';
-import { isOutdated } from '../migrations/helpers';
 import { RuleTypeParams } from '../types';
+import { eqlExecutor } from './executors/eql';
+import { queryExecutor } from './executors/query';
+import { threatMatchExecutor } from './executors/threat_match';
+import { thresholdExecutor } from './executors/threshold';
+import { mlExecutor } from './executors/ml';
+import {
+  eqlRuleParams,
+  machineLearningRuleParams,
+  queryRuleParams,
+  threatRuleParams,
+  thresholdRuleParams,
+} from '../schemas/rule_schemas';
 
 export const signalRulesAlertType = ({
   logger,
@@ -124,34 +107,7 @@ export const signalRulesAlertType = ({
       spaceId,
       updatedBy: updatedByUser,
     }) {
-      const {
-        anomalyThreshold,
-        from,
-        ruleId,
-        index,
-        eventCategoryOverride,
-        filters,
-        language,
-        maxSignals,
-        meta,
-        machineLearningJobId,
-        outputIndex,
-        savedId,
-        query,
-        to,
-        threshold,
-        threatFilters,
-        threatQuery,
-        threatIndex,
-        threatIndicatorPath,
-        threatMapping,
-        threatLanguage,
-        timestampOverride,
-        type,
-        exceptionsList,
-        concurrentSearches,
-        itemsPerSearch,
-      } = params;
+      const { ruleId, index, maxSignals, meta, outputIndex, timestampOverride, type } = params;
 
       const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
       let hasError: boolean = false;
@@ -168,15 +124,8 @@ export const signalRulesAlertType = ({
       const {
         actions,
         name,
-        tags,
-        createdAt,
-        createdBy,
-        updatedBy,
-        enabled,
         schedule: { interval },
-        throttle,
       } = savedObject.attributes;
-      const updatedAt = savedObject.updated_at ?? '';
       const refresh = actions.length ? 'wait_for' : false;
       const buildRuleMessage = buildRuleMessageFactory({
         id: alertId,
@@ -240,8 +189,8 @@ export const signalRulesAlertType = ({
       const { tuples, remainingGap } = getRuleRangeTuples({
         logger,
         previousStartedAt,
-        from,
-        to,
+        from: params.from,
+        to: params.to,
         interval,
         maxSignals,
         buildRuleMessage,
@@ -266,392 +215,80 @@ export const signalRulesAlertType = ({
         });
         const exceptionItems = await getExceptions({
           client: exceptionsClient,
-          lists: exceptionsList ?? [],
+          lists: params.exceptionsList ?? [],
         });
-
         if (isMlRule(type)) {
-          if (ml == null) {
-            throw new Error('ML plugin unavailable during rule execution');
-          }
-          if (machineLearningJobId == null || anomalyThreshold == null) {
-            throw new Error(
-              [
-                'Machine learning rule is missing job id and/or anomaly threshold:',
-                `job id: "${machineLearningJobId}"`,
-                `anomaly threshold: "${anomalyThreshold}"`,
-              ].join(' ')
-            );
-          }
-
-          // Using fake KibanaRequest as it is needed to satisfy the ML Services API, but can be empty as it is
-          // currently unused by the jobsSummary function.
-          const fakeRequest = {} as KibanaRequest;
-          const summaryJobs = await ml
-            .jobServiceProvider(fakeRequest, services.savedObjectsClient)
-            .jobsSummary([machineLearningJobId]);
-          const jobSummary = summaryJobs.find((job) => job.id === machineLearningJobId);
-
-          if (jobSummary == null || !isJobStarted(jobSummary.jobState, jobSummary.datafeedState)) {
-            const errorMessage = buildRuleMessage(
-              'Machine learning job is not started:',
-              `job id: "${machineLearningJobId}"`,
-              `job status: "${jobSummary?.jobState}"`,
-              `datafeed status: "${jobSummary?.datafeedState}"`
-            );
-            logger.warn(errorMessage);
-            hasError = true;
-            await ruleStatusService.error(errorMessage);
-          }
-
-          const anomalyResults = await findMlSignals({
+          const mlRuleSO = asTypeSpecificSO(savedObject, machineLearningRuleParams);
+          result = await mlExecutor({
+            rule: mlRuleSO,
             ml,
-            // Using fake KibanaRequest as it is needed to satisfy the ML Services API, but can be empty as it is
-            // currently unused by the mlAnomalySearch function.
-            request: ({} as unknown) as KibanaRequest,
-            savedObjectsClient: services.savedObjectsClient,
-            jobId: machineLearningJobId,
-            anomalyThreshold,
-            from,
-            to,
-            exceptionItems: exceptionItems ?? [],
-          });
-
-          const filteredAnomalyResults = await filterEventsAgainstList({
             listClient,
-            exceptionsList: exceptionItems ?? [],
-            logger,
-            eventSearchResult: anomalyResults,
-            buildRuleMessage,
-          });
-
-          const anomalyCount = filteredAnomalyResults.hits.hits.length;
-          if (anomalyCount) {
-            logger.info(buildRuleMessage(`Found ${anomalyCount} signals from ML anomalies.`));
-          }
-
-          const {
-            success,
-            errors,
-            bulkCreateDuration,
-            createdItemsCount,
-            createdItems,
-          } = await bulkCreateMlSignals({
-            actions,
-            throttle,
-            someResult: filteredAnomalyResults,
-            ruleParams: params,
+            exceptionItems,
+            ruleStatusService,
             services,
             logger,
-            id: alertId,
-            signalsIndex: outputIndex,
-            name,
-            createdBy,
-            createdAt,
-            updatedBy,
-            updatedAt,
-            interval,
-            enabled,
             refresh,
-            tags,
             buildRuleMessage,
           });
-          // The legacy ES client does not define failures when it can be present on the structure, hence why I have the & { failures: [] }
-          const shardFailures =
-            (filteredAnomalyResults._shards as typeof filteredAnomalyResults._shards & {
-              failures: [];
-            }).failures ?? [];
-          const searchErrors = createErrorsFromShard({
-            errors: shardFailures,
+        } else if (isThresholdRule(type)) {
+          const thresholdRuleSO = asTypeSpecificSO(savedObject, thresholdRuleParams);
+          result = await thresholdExecutor({
+            rule: thresholdRuleSO,
+            tuples,
+            exceptionItems,
+            ruleStatusService,
+            services,
+            version,
+            logger,
+            refresh,
+            buildRuleMessage,
+            startedAt,
           });
-          result = mergeReturns([
-            result,
-            createSearchAfterReturnType({
-              success: success && filteredAnomalyResults._shards.failed === 0,
-              errors: [...errors, ...searchErrors],
-              createdSignalsCount: createdItemsCount,
-              createdSignals: createdItems,
-              bulkCreateTimes: bulkCreateDuration ? [bulkCreateDuration] : [],
-            }),
-          ]);
-        } else if (isThresholdRule(type) && threshold) {
-          if (hasLargeValueItem(exceptionItems ?? [])) {
-            await ruleStatusService.partialFailure(
-              'Exceptions that use "is in list" or "is not in list" operators are not applied to Threshold rules'
-            );
-            wroteWarningStatus = true;
-          }
-          const inputIndex = await getInputIndex(services, version, index);
-
-          for (const tuple of tuples) {
-            const {
-              thresholdSignalHistory,
-              searchErrors: previousSearchErrors,
-            } = await getThresholdSignalHistory({
-              indexPattern: [outputIndex],
-              from: tuple.from.toISOString(),
-              to: tuple.to.toISOString(),
-              services,
-              logger,
-              ruleId,
-              bucketByFields: normalizeThresholdField(threshold.field),
-              timestampOverride,
-              buildRuleMessage,
-            });
-
-            const bucketFilters = await getThresholdBucketFilters({
-              thresholdSignalHistory,
-              timestampOverride,
-            });
-
-            const esFilter = await getFilter({
-              type,
-              filters: filters ? filters.concat(bucketFilters) : bucketFilters,
-              language,
-              query,
-              savedId,
-              services,
-              index: inputIndex,
-              lists: exceptionItems ?? [],
-            });
-
-            const {
-              searchResult: thresholdResults,
-              searchErrors,
-              searchDuration: thresholdSearchDuration,
-            } = await findThresholdSignals({
-              inputIndexPattern: inputIndex,
-              from: tuple.from.toISOString(),
-              to: tuple.to.toISOString(),
-              services,
-              logger,
-              filter: esFilter,
-              threshold,
-              timestampOverride,
-              buildRuleMessage,
-            });
-
-            const {
-              success,
-              bulkCreateDuration,
-              createdItemsCount,
-              createdItems,
-              errors,
-            } = await bulkCreateThresholdSignals({
-              actions,
-              throttle,
-              someResult: thresholdResults,
-              ruleParams: params,
-              filter: esFilter,
-              services,
-              logger,
-              id: alertId,
-              inputIndexPattern: inputIndex,
-              signalsIndex: outputIndex,
-              timestampOverride,
-              startedAt,
-              from: tuple.from.toDate(),
-              name,
-              createdBy,
-              createdAt,
-              updatedBy,
-              updatedAt,
-              interval,
-              enabled,
-              refresh,
-              tags,
-              thresholdSignalHistory,
-              buildRuleMessage,
-            });
-
-            result = mergeReturns([
-              result,
-              createSearchAfterReturnTypeFromResponse({
-                searchResult: thresholdResults,
-                timestampOverride,
-              }),
-              createSearchAfterReturnType({
-                success,
-                errors: [...errors, ...previousSearchErrors, ...searchErrors],
-                createdSignalsCount: createdItemsCount,
-                createdSignals: createdItems,
-                bulkCreateTimes: bulkCreateDuration ? [bulkCreateDuration] : [],
-                searchAfterTimes: [thresholdSearchDuration],
-              }),
-            ]);
-          }
         } else if (isThreatMatchRule(type)) {
-          if (
-            threatQuery == null ||
-            threatIndex == null ||
-            threatMapping == null ||
-            query == null
-          ) {
-            throw new Error(
-              [
-                'Indicator match is missing threatQuery and/or threatIndex and/or threatMapping:',
-                `threatQuery: "${threatQuery}"`,
-                `threatIndex: "${threatIndex}"`,
-                `threatMapping: "${threatMapping}"`,
-              ].join(' ')
-            );
-          }
-          const inputIndex = await getInputIndex(services, version, index);
-          result = await createThreatSignals({
+          const threatRuleSO = asTypeSpecificSO(savedObject, threatRuleParams);
+          result = await threatMatchExecutor({
+            rule: threatRuleSO,
             tuples,
-            threatMapping,
-            query,
-            inputIndex,
-            type,
-            filters: filters ?? [],
-            language,
-            name,
-            savedId,
-            services,
-            exceptionItems: exceptionItems ?? [],
             listClient,
-            logger,
-            eventsTelemetry,
-            alertId,
-            outputIndex,
-            params,
+            exceptionItems,
+            services,
+            version,
             searchAfterSize,
-            actions,
-            createdBy,
-            createdAt,
-            updatedBy,
-            interval,
-            updatedAt,
-            enabled,
+            logger,
             refresh,
-            tags,
-            throttle,
-            threatFilters: threatFilters ?? [],
-            threatQuery,
-            threatLanguage,
+            eventsTelemetry,
             buildRuleMessage,
-            threatIndex,
-            threatIndicatorPath,
-            concurrentSearches: concurrentSearches ?? 1,
-            itemsPerSearch: itemsPerSearch ?? 9000,
           });
-        } else if (type === 'query' || type === 'saved_query') {
-          const inputIndex = await getInputIndex(services, version, index);
-          const esFilter = await getFilter({
-            type,
-            filters,
-            language,
-            query,
-            savedId,
-            services,
-            index: inputIndex,
-            lists: exceptionItems ?? [],
-          });
-
-          result = await searchAfterAndBulkCreate({
+        } else if (isQueryRule(type)) {
+          const queryRuleSO = asTypeSpecificSO(savedObject, queryRuleParams);
+          result = await queryExecutor({
+            rule: queryRuleSO,
             tuples,
             listClient,
-            exceptionsList: exceptionItems ?? [],
-            ruleParams: params,
+            exceptionItems,
             services,
+            version,
+            searchAfterSize,
             logger,
-            eventsTelemetry,
-            id: alertId,
-            inputIndexPattern: inputIndex,
-            signalsIndex: outputIndex,
-            filter: esFilter,
-            actions,
-            name,
-            createdBy,
-            createdAt,
-            updatedBy,
-            updatedAt,
-            interval,
-            enabled,
-            pageSize: searchAfterSize,
             refresh,
-            tags,
-            throttle,
+            eventsTelemetry,
             buildRuleMessage,
           });
         } else if (isEqlRule(type)) {
-          if (query === undefined) {
-            throw new Error('EQL query rule must have a query defined');
-          }
-          if (hasLargeValueItem(exceptionItems ?? [])) {
-            await ruleStatusService.partialFailure(
-              'Exceptions that use "is in list" or "is not in list" operators are not applied to EQL rules'
-            );
-            wroteWarningStatus = true;
-          }
-          try {
-            const signalIndexVersion = await getIndexVersion(
-              services.scopedClusterClient.asCurrentUser,
-              outputIndex
-            );
-            if (isOutdated({ current: signalIndexVersion, target: MIN_EQL_RULE_INDEX_VERSION })) {
-              throw new Error(
-                `EQL based rules require an update to version ${MIN_EQL_RULE_INDEX_VERSION} of the detection alerts index mapping`
-              );
-            }
-          } catch (err) {
-            if (err.statusCode === 403) {
-              throw new Error(
-                `EQL based rules require the user that created it to have the view_index_metadata, read, and write permissions for index: ${outputIndex}`
-              );
-            } else {
-              throw err;
-            }
-          }
-          const inputIndex = await getInputIndex(services, version, index);
-          const request = buildEqlSearchRequest(
-            query,
-            inputIndex,
-            from,
-            to,
+          const eqlRuleSO = asTypeSpecificSO(savedObject, eqlRuleParams);
+          result = await eqlExecutor({
+            rule: eqlRuleSO,
+            exceptionItems,
+            ruleStatusService,
+            services,
+            version,
             searchAfterSize,
-            timestampOverride,
-            exceptionItems ?? [],
-            eventCategoryOverride
-          );
-          const eqlSignalSearchStart = performance.now();
-          const {
-            body: response,
-          } = (await services.scopedClusterClient.asCurrentUser.transport.request(
-            request
-          )) as ApiResponse<EqlSignalSearchResponse>;
-          const eqlSignalSearchEnd = performance.now();
-          const eqlSearchDuration = makeFloatString(eqlSignalSearchEnd - eqlSignalSearchStart);
-          result.searchAfterTimes = [eqlSearchDuration];
-          let newSignals: WrappedSignalHit[] | undefined;
-          if (response.hits.sequences !== undefined) {
-            newSignals = response.hits.sequences.reduce(
-              (acc: WrappedSignalHit[], sequence) =>
-                acc.concat(buildSignalGroupFromSequence(sequence, savedObject, outputIndex)),
-              []
-            );
-          } else if (response.hits.events !== undefined) {
-            newSignals = filterDuplicateSignals(
-              savedObject.id,
-              response.hits.events.map((event) =>
-                wrapSignal(buildSignalFromEvent(event, savedObject, true), outputIndex)
-              )
-            );
-          } else {
-            throw new Error(
-              'eql query response should have either `sequences` or `events` but had neither'
-            );
-          }
-          if (newSignals.length > 0) {
-            const insertResult = await bulkInsertSignals(newSignals, logger, services, refresh);
-            result.bulkCreateTimes.push(insertResult.bulkCreateDuration);
-            result.createdSignalsCount += insertResult.createdItemsCount;
-            result.createdSignals = insertResult.createdItems;
-          }
-          result.success = true;
+            logger,
+            refresh,
+          });
         } else {
           throw new Error(`unknown rule type ${type}`);
         }
-
         if (result.success) {
           if (actions.length) {
             const notificationRuleParams: NotificationRuleTypeParams = {
@@ -740,6 +377,34 @@ export const signalRulesAlertType = ({
           lastLookBackDate: result.lastLookBackDate?.toISOString(),
         });
       }
+    },
+  };
+};
+
+/**
+ * This function takes a generic rule SavedObject and a type-specific schema for the rule params
+ * and validates the SavedObject params against the schema. If they validate, it returns a SavedObject
+ * where the params have been replaced with the validated params. This eliminates the need for logic that
+ * checks if the required type specific fields actually exist on the SO and prevents rule executors from
+ * accessing fields that only exist on other rule types.
+ *
+ * @param ruleSO SavedObject typed as an object with all fields from all different rule types
+ * @param schema io-ts schema for the specific rule type the SavedObject claims to be
+ */
+export const asTypeSpecificSO = <T extends t.Mixed>(
+  ruleSO: SavedObject<RuleAlertAttributes>,
+  schema: T
+) => {
+  const nonNullParams = pickBy((value: unknown) => value !== null, ruleSO.attributes.params);
+  const [validated, errors] = validateNonExact(nonNullParams, schema);
+  if (validated == null || errors != null) {
+    throw new Error(`Rule attempted to execute with invalid params: ${errors}`);
+  }
+  return {
+    ...ruleSO,
+    attributes: {
+      ...ruleSO.attributes,
+      params: validated,
     },
   };
 };

@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import { omit, isEqual, map, uniq, pick, truncate, trim } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { estypes } from '@elastic/elasticsearch';
 import {
   Logger,
   SavedObjectsClientContract,
@@ -100,7 +101,7 @@ export interface FindOptions extends IndexType {
   defaultSearchOperator?: 'AND' | 'OR';
   searchFields?: string[];
   sortField?: string;
-  sortOrder?: string;
+  sortOrder?: estypes.SortOrder;
   hasReference?: {
     type: string;
     id: string;

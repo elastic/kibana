@@ -6,7 +6,7 @@
  */
 import { ElasticsearchClient } from 'kibana/server';
 import { AlertLicense, AlertCluster } from '../../../common/types/alerts';
-import { ElasticsearchResponse } from '../../../common/types/es';
+import { ElasticsearchSource } from '../../../common/types/es';
 
 export async function fetchLicenses(
   esClient: ElasticsearchClient,
@@ -25,8 +25,8 @@ export async function fetchLicenses(
       sort: [
         {
           timestamp: {
-            order: 'desc',
-            unmapped_type: 'long',
+            order: 'desc' as const,
+            unmapped_type: 'long' as const,
           },
         },
       ],
@@ -59,15 +59,15 @@ export async function fetchLicenses(
     },
   };
 
-  const { body: response } = await esClient.search<ElasticsearchResponse>(params);
+  const { body: response } = await esClient.search<ElasticsearchSource>(params);
   return (
     response?.hits?.hits.map((hit) => {
-      const rawLicense = hit._source.license ?? {};
+      const rawLicense = hit._source!.license ?? {};
       const license: AlertLicense = {
         status: rawLicense.status ?? '',
         type: rawLicense.type ?? '',
         expiryDateMS: rawLicense.expiry_date_in_millis ?? 0,
-        clusterUuid: hit._source.cluster_uuid,
+        clusterUuid: hit._source!.cluster_uuid,
         ccs: hit._index,
       };
       return license;

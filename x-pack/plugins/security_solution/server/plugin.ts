@@ -167,6 +167,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       logFactory: this.context.logger,
       service: this.endpointAppContextService,
       config: (): Promise<ConfigType> => Promise.resolve(config),
+      experimentalFeatures: parseExperimentalConfigValue(config.enableExperimental),
     };
 
     initUsageCollectors({
@@ -202,7 +203,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     registerLimitedConcurrencyRoutes(core);
     registerResolverRoutes(router);
     registerPolicyRoutes(router, endpointContext);
-    registerTrustedAppsRoutes(router);
+    registerTrustedAppsRoutes(router, endpointContext);
     registerDownloadArtifactRoute(router, endpointContext, this.artifactsCache);
 
     plugins.features.registerKibanaFeature({

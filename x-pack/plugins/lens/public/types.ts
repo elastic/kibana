@@ -17,7 +17,7 @@ import {
   Datatable,
   SerializedFieldFormat,
 } from '../../../../src/plugins/expressions/public';
-import { DragContextState, DragDropIdentifier } from './drag_drop';
+import { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import { Document } from './persistence';
 import { DateRange } from '../common';
 import { Query, Filter, SavedQuery, IFieldFormat } from '../../../../src/plugins/data/public';
@@ -142,11 +142,16 @@ export type DropType =
   | 'field_add'
   | 'field_replace'
   | 'reorder'
-  | 'duplicate_in_group'
   | 'move_compatible'
   | 'replace_compatible'
   | 'move_incompatible'
-  | 'replace_incompatible';
+  | 'replace_incompatible'
+  | 'replace_duplicate_compatible'
+  | 'duplicate_compatible'
+  | 'swap_compatible'
+  | 'replace_duplicate_incompatible'
+  | 'duplicate_incompatible'
+  | 'swap_incompatible';
 
 export interface DatasourceSuggestion<T = unknown> {
   state: T;
@@ -194,7 +199,7 @@ export interface Datasource<T = unknown, P = unknown> {
       groupId: string;
       dragging: DragContextState['dragging'];
     }
-  ) => { dropType: DropType; nextLabel?: string } | undefined;
+  ) => { dropTypes: DropType[]; nextLabel?: string } | undefined;
   onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => false | true | { deleted: string };
   updateStateOnCloseDimension?: (props: {
     layerId: string;
@@ -295,10 +300,11 @@ export interface DatasourceLayerPanelProps<T> {
   activeData?: Record<string, Datatable>;
 }
 
-export interface DraggedOperation {
+export interface DraggedOperation extends DraggingIdentifier {
   layerId: string;
   groupId: string;
   columnId: string;
+  filterOperations: (operation: OperationMetadata) => boolean;
 }
 
 export function isDraggedOperation(

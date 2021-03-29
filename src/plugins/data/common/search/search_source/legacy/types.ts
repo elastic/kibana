@@ -7,8 +7,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { ApiResponse } from '@elastic/elasticsearch';
-import { SearchResponse } from 'elasticsearch';
+import type { estypes, ApiResponse } from '@elastic/elasticsearch';
 import { FetchHandlers, SearchRequest } from '../fetch';
 
 interface MsearchHeaders {
@@ -28,7 +27,7 @@ export interface MsearchRequestBody {
 
 // @internal
 export interface MsearchResponse {
-  body: ApiResponse<{ responses: Array<SearchResponse<any>> }>;
+  body: ApiResponse<{ responses: Array<estypes.SearchResponse<any>> }>;
 }
 
 // @internal
@@ -51,6 +50,6 @@ export interface SearchStrategyProvider {
 }
 
 export interface SearchStrategyResponse<T = any> {
-  searching: Promise<Array<SearchResponse<T>>>;
+  searching: Promise<Array<estypes.SearchResponse<T>>>;
   abort: () => void;
 }
