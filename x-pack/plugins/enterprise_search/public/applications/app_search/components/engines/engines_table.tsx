@@ -14,6 +14,7 @@ import {
   EuiBasicTableColumn,
   CriteriaWithPagination,
   EuiTableActionsColumnType,
+  EuiTableFieldDataColumnType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedNumber } from '@kbn/i18n/react';
@@ -28,6 +29,65 @@ import { ENGINE_PATH } from '../../routes';
 import { generateEncodedPath } from '../../utils/encode_path_params';
 import { FormattedDateTime } from '../../utils/formatted_date_time';
 import { EngineDetails } from '../engine/types';
+
+export const NAME_COLUMN: EuiTableFieldDataColumnType<EngineDetails> = {
+  field: 'name',
+  name: i18n.translate('xpack.enterpriseSearch.appSearch.enginesOverview.table.column.name', {
+    defaultMessage: 'Name',
+  }),
+  width: '30%',
+  truncateText: true,
+  mobileOptions: {
+    header: true,
+    // Note: the below props are valid props per https://elastic.github.io/eui/#/tabular-content/tables (Responsive tables), but EUI's types have a bug reporting it as an error
+    // @ts-ignore
+    enlarge: true,
+    fullWidth: true,
+    truncateText: false,
+  },
+};
+
+export const CREATED_AT_COLUMN: EuiTableFieldDataColumnType<EngineDetails> = {
+  field: 'created_at',
+  name: i18n.translate('xpack.enterpriseSearch.appSearch.enginesOverview.table.column.createdAt', {
+    defaultMessage: 'Created At',
+  }),
+  dataType: 'string',
+  render: (dateString: string) => <FormattedDateTime date={new Date(dateString)} hideTime />,
+};
+
+export const LANGUAGE_COLUMN: EuiTableFieldDataColumnType<EngineDetails> = {
+  field: 'language',
+  name: i18n.translate('xpack.enterpriseSearch.appSearch.enginesOverview.table.column.language', {
+    defaultMessage: 'Language',
+  }),
+  dataType: 'string',
+  render: (language: string, engine: EngineDetails) =>
+    engine.isMeta ? '' : language || UNIVERSAL_LANGUAGE,
+};
+
+export const DOCUMENT_COUNT_COLUMN: EuiTableFieldDataColumnType<EngineDetails> = {
+  field: 'document_count',
+  name: i18n.translate(
+    'xpack.enterpriseSearch.appSearch.enginesOverview.table.column.documentCount',
+    {
+      defaultMessage: 'Document Count',
+    }
+  ),
+  dataType: 'number',
+  render: (number: number) => <FormattedNumber value={number} />,
+  truncateText: true,
+};
+
+export const FIELD_COUNT_COLUMN: EuiTableFieldDataColumnType<EngineDetails> = {
+  field: 'field_count',
+  name: i18n.translate('xpack.enterpriseSearch.appSearch.enginesOverview.table.column.fieldCount', {
+    defaultMessage: 'Field Count',
+  }),
+  dataType: 'number',
+  render: (number: number) => <FormattedNumber value={number} />,
+  truncateText: true,
+};
 
 interface EnginesTableProps {
   items: EngineDetails[];
@@ -57,8 +117,6 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
     myRole: { canManageEngines },
   } = useValues(AppLogic);
 
-  const generateEncodedEnginePath = (engineName: string) =>
-    generateEncodedPath(ENGINE_PATH, { engineName });
   const sendEngineTableLinkClickTelemetry = () =>
     sendAppSearchTelemetry({
       action: 'clicked',
@@ -67,80 +125,24 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
 
   const columns: Array<EuiBasicTableColumn<EngineDetails>> = [
     {
-      field: 'name',
-      name: i18n.translate('xpack.enterpriseSearch.appSearch.enginesOverview.table.column.name', {
-        defaultMessage: 'Name',
-      }),
+      ...NAME_COLUMN,
       render: (name: string) => (
         <EuiLinkTo
           data-test-subj="EngineNameLink"
-          to={generateEncodedEnginePath(name)}
+          to={generateEncodedPath(ENGINE_PATH, { engineName: name })}
           onClick={sendEngineTableLinkClickTelemetry}
         >
           {name}
         </EuiLinkTo>
       ),
-      width: '30%',
-      truncateText: true,
-      mobileOptions: {
-        header: true,
-        // Note: the below props are valid props per https://elastic.github.io/eui/#/tabular-content/tables (Responsive tables), but EUI's types have a bug reporting it as an error
-        // @ts-ignore
-        enlarge: true,
-        fullWidth: true,
-        truncateText: false,
-      },
     },
-    {
-      field: 'created_at',
-      name: i18n.translate(
-        'xpack.enterpriseSearch.appSearch.enginesOverview.table.column.createdAt',
-        {
-          defaultMessage: 'Created At',
-        }
-      ),
-      dataType: 'string',
-      render: (dateString: string) => <FormattedDateTime date={new Date(dateString)} hideTime />,
-    },
-    {
-      field: 'language',
-      name: i18n.translate(
-        'xpack.enterpriseSearch.appSearch.enginesOverview.table.column.language',
-        {
-          defaultMessage: 'Language',
-        }
-      ),
-      dataType: 'string',
-      render: (language: string, engine: EngineDetails) =>
-        engine.isMeta ? '' : language || UNIVERSAL_LANGUAGE,
-    },
-    {
-      field: 'document_count',
-      name: i18n.translate(
-        'xpack.enterpriseSearch.appSearch.enginesOverview.table.column.documentCount',
-        {
-          defaultMessage: 'Document Count',
-        }
-      ),
-      dataType: 'number',
-      render: (number: number) => <FormattedNumber value={number} />,
-      truncateText: true,
-    },
-    {
-      field: 'field_count',
-      name: i18n.translate(
-        'xpack.enterpriseSearch.appSearch.enginesOverview.table.column.fieldCount',
-        {
-          defaultMessage: 'Field Count',
-        }
-      ),
-      dataType: 'number',
-      render: (number: number) => <FormattedNumber value={number} />,
-      truncateText: true,
-    },
+    CREATED_AT_COLUMN,
+    LANGUAGE_COLUMN,
+    DOCUMENT_COUNT_COLUMN,
+    FIELD_COUNT_COLUMN,
   ];
 
-  const actionsColumn: EuiTableActionsColumnType<EngineDetails> = {
+  const ENGINE_ACTIONS_COLUMN: EuiTableActionsColumnType<EngineDetails> = {
     name: i18n.translate('xpack.enterpriseSearch.appSearch.enginesOverview.table.column.actions', {
       defaultMessage: 'Actions',
     }),
@@ -157,7 +159,7 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
         icon: 'eye',
         onClick: (engineDetails) => {
           sendEngineTableLinkClickTelemetry();
-          navigateToUrl(generateEncodedEnginePath(engineDetails.name));
+          navigateToUrl(generateEncodedPath(ENGINE_PATH, { engineName: engineDetails.name }));
         },
       },
       {
@@ -194,7 +196,7 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
   };
 
   if (canManageEngines) {
-    columns.push(actionsColumn);
+    columns.push(ENGINE_ACTIONS_COLUMN);
   }
 
   return (
