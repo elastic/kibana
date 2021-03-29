@@ -38,7 +38,7 @@ const optionsMap = {
   [criticalLabel]: ANOMALY_THRESHOLD.CRITICAL,
 };
 
-interface TableSeverity {
+export interface TableSeverity {
   val: number;
   display: string;
   color: string;
@@ -67,7 +67,7 @@ export const SEVERITY_OPTIONS: TableSeverity[] = [
   },
 ];
 
-function optionValueToThreshold(value: number) {
+export function optionValueToThreshold(value: number) {
   // Get corresponding threshold object with required display and val properties from the specified value.
   let threshold = SEVERITY_OPTIONS.find((opt) => opt.val === value);
 
@@ -121,17 +121,26 @@ interface Props {
 export const SelectSeverity: FC<Props> = ({ classNames } = { classNames: '' }) => {
   const [severity, setSeverity] = useTableSeverity();
 
-  const onChange = (valueDisplay: string) => {
-    setSeverity(optionValueToThreshold(optionsMap[valueDisplay]));
+  return <SelectSeverityUI severity={severity} onChange={setSeverity} />;
+};
+
+export const SelectSeverityUI: FC<{
+  classNames?: string;
+  severity: TableSeverity;
+  onChange: (s: TableSeverity) => void;
+}> = ({ classNames = '', severity, onChange }) => {
+  const handleOnChange = (valueDisplay: string) => {
+    onChange(optionValueToThreshold(optionsMap[valueDisplay]));
   };
 
   return (
     <EuiSuperSelect
+      data-test-subj={'mlAnomalySeverityThresholdControls'}
       className={classNames}
       hasDividers
       options={getSeverityOptions()}
       valueOfSelected={severity.display}
-      onChange={onChange}
+      onChange={handleOnChange}
     />
   );
 };
