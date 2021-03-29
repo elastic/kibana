@@ -19,6 +19,7 @@ export type {
   ObservabilityPublicPluginsSetup,
   ObservabilityPublicPluginsStart,
 };
+export { enableInspectEsQueries } from '../common/ui_settings_keys';
 
 export const plugin: PluginInitializer<
   ObservabilityPublicSetup,
