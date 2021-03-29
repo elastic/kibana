@@ -4,7 +4,72 @@
 As with any configuration in the {kib} platform, logging configuration is validated against the predefined schema and if there are
 any issues with it, {kib} will fail to start with the detailed error message.
 
-Here is a configuration example that can be used to configure _loggers_, _appenders_ and _layouts_:
+Here are some examples for the most common logging use cases:
+
+[[log-to-file-example]]
+=== Log to a file
+
+Log the default log format to a file instead of to stdout (the default).
+
+[source,yaml]
+----
+logging:
+  appenders:
+    file:
+      type: file
+      fileName: /var/log/kibana.log
+      layout:
+        type: pattern
+  root:
+    appenders: [default, file]
+----
+
+[[log-in-json-ECS-example]]
+=== Log in ECS json format
+
+Log the default log format to json layout instead of pattern (the default).
+
+[source,yaml]
+----
+logging:
+  appenders:
+    json-layout:
+      type: console
+      layout:
+        type: json
+  root:
+    appenders: [default, json-layout]
+----
+
+[[log-with-meta-to-stdout]]
+=== Log with meta to stdout (meta is not included by default).
+
+[source,yaml]
+----
+logging:
+  appenders:
+    console-meta:
+      type: console
+      layout:
+        type: pattern
+        pattern: "[%date] [%level] [%logger] [%meta] %message"
+  root:
+    appenders: [default, console-meta]
+----
+
+[[change-overall-log-level]]
+=== Change overall log level.
+
+[source,yaml]
+----
+logging:
+  root:
+    level: debug
+----
+
+[[customize-specific-log-records]]
+=== Customize specific log records
+Here is a more detailed configuration example that can be used to configure _loggers_, _appenders_ and _layouts_:
 
 [source,yaml]
 ----
@@ -18,8 +83,6 @@ logging:
     file:
       type: file
       fileName: /var/log/kibana.log
-      layout:
-        type: pattern
     custom:
       type: console
       layout:
@@ -28,9 +91,11 @@ logging:
     json-file-appender:
       type: file
       fileName: /var/log/kibana-json.log
+      layout:
+        type: json
 
   root:
-    appenders: [console, file]
+    appenders: [default, console, file]
     level: error
 
   loggers:
@@ -44,11 +109,11 @@ logging:
     - name: optimize
       appenders: [console]
     - name: telemetry
-      level: all
       appenders: [json-file-appender]
+      level: all
     - name: metrics.ops
-      level: debug
       appenders: [console]
+      level: debug
 ----
 
 Here is what we get with the config above:
