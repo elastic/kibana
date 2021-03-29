@@ -274,6 +274,7 @@ To reload the logging settings, send a SIGHUP signal to {kib}.
 
 |[[logging-root]] `logging.root:`
 | The `root` logger has a dedicated configuration node since this context name is special and is pre-configured for logging by default. 
+// TODO: add link to the advanced logging documentation.
 
 |[[logging-root-appenders]] `logging.root.appenders:`
 | A list of logging appenders to forward the root level logger instance to.  By default `root` is configured with the `default` appender that must be included in the list. This is the configuration that all custom loggers will use unless they're re-configured explicitly. Additional appenders, if configured, can be included in the list.
@@ -295,6 +296,7 @@ To reload the logging settings, send a SIGHUP signal to {kib}.
 
 | `logging.appenders:`
 | Define how and where log messages are displayed (eg. *stdout* or console) and stored (eg. file on the disk).
+// TODO: add link to the advanced logging documentation.
 
 | `logging.appenders.console:`
 | Appender to use for logging records to *stdout*. By default, uses the `[%date][%level][%logger] %message` **pattern** layout. To use a **json**, set the <<log-in-json-ECS-example,layout type to `json`>>.
@@ -305,9 +307,9 @@ To reload the logging settings, send a SIGHUP signal to {kib}.
 | `logging.appenders.rolling-file:`
 | Similar to Log4j's `RollingFileAppender`, this appender will log into a file and rotate if following a rolling strategy when the configured policy triggers. There are currently two policies supported: `size-limit` and `time-interval`. 
 
-The size limit policy will perform a rollover when the log file reaches a maximum `size` (*Default 100mb*). 
+The size limit policy will perform a rollover when the log file reaches a maximum `size`. *Default 100mb*
 
-The time interval policy will rotate the log file every given interval of time (*Default 24h*).
+The time interval policy will rotate the log file every given interval of time. *Default 24h*
 
 | [[regionmap-ES-map]] `map.includeElasticMapsService:` {ess-icon}
  | Set to `false` to disable connections to Elastic Maps Service.
