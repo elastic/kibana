@@ -286,6 +286,12 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
                 <EuiFormRow
                   error={form.errors.expiration}
                   isInvalid={form.touched.expiration && !!form.errors.expiration}
+                  label={i18n.translate(
+                    'xpack.security.accountManagement.createApiKey.customExpirationInputLabel',
+                    {
+                      defaultMessage: 'Lifetime (days)',
+                    }
+                  )}
                 >
                   <EuiFieldNumber
                     append={i18n.translate(
@@ -323,13 +329,16 @@ export function validate(values: ApiKeyFormValues) {
     });
   }
 
-  if (values.customExpiration && !values.expiration) {
-    errors.expiration = i18n.translate(
-      'xpack.security.management.apiKeys.createApiKey.expirationRequired',
-      {
-        defaultMessage: 'Enter a duration or disable this option.',
-      }
-    );
+  if (values.customExpiration) {
+    const parsedExpiration = parseFloat(values.expiration);
+    if (isNaN(parsedExpiration) || parsedExpiration <= 0) {
+      errors.expiration = i18n.translate(
+        'xpack.security.management.apiKeys.createApiKey.expirationRequired',
+        {
+          defaultMessage: 'Enter a valid duration or disable this option.',
+        }
+      );
+    }
   }
 
   if (values.customPrivileges) {

@@ -26,6 +26,8 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => `id-${Math.random()}`,
 }));
 
+jest.setTimeout(15000);
+
 const coreStart = coreMock.createStart();
 
 const apiClientMock = apiKeysAPIClientMock.create();
@@ -173,6 +175,51 @@ describe('APIKeysGridPage', () => {
     await waitFor(() => {
       expect(coreStart.http.post).toHaveBeenLastCalledWith('/internal/security/api_key', {
         body: JSON.stringify({ name: 'Test' }),
+      });
+      expect(history.location.pathname).toBe('/');
+    });
+
+    await findByDisplayValue(btoa('1D:AP1_K3Y'));
+  });
+
+  it('creates API key with optional expiration, redirects back and displays base64', async () => {
+    const history = createMemoryHistory({ initialEntries: ['/create'] });
+    coreStart.http.get.mockResolvedValue([{ name: 'superuser' }]);
+    coreStart.http.post.mockResolvedValue({ id: '1D', api_key: 'AP1_K3Y' });
+
+    const { findByRole, findByDisplayValue } = render(
+      <Providers services={coreStart} authc={authc} history={history}>
+        <APIKeysGridPage
+          apiKeysAPIClient={apiClientMock}
+          notifications={coreStart.notifications}
+          history={history}
+        />
+      </Providers>
+    );
+    expect(coreStart.http.get).toHaveBeenCalledWith('/api/security/role');
+
+    const dialog = await findByRole('dialog');
+
+    fireEvent.change(await within(dialog).findByLabelText('Name'), {
+      target: { value: 'Test' },
+    });
+
+    fireEvent.click(await within(dialog).findByLabelText('Expire after time'));
+
+    fireEvent.click(await findByRole('button', { name: 'Create API key' }));
+
+    const alert = await findByRole('alert');
+    within(alert).getByText(/Enter a valid duration or disable this option\./i);
+
+    fireEvent.change(await within(dialog).findByLabelText('Lifetime (days)'), {
+      target: { value: '12' },
+    });
+
+    fireEvent.click(await findByRole('button', { name: 'Create API key' }));
+
+    await waitFor(() => {
+      expect(coreStart.http.post).toHaveBeenLastCalledWith('/internal/security/api_key', {
+        body: JSON.stringify({ name: 'Test', expiration: '12d' }),
       });
       expect(history.location.pathname).toBe('/');
     });

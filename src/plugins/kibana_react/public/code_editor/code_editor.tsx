@@ -91,6 +91,9 @@ export interface Props {
    */
   useDarkTheme?: boolean;
 
+  /**
+   * Should the editor use a transparent background
+   */
   transparentBackground?: boolean;
 }
 
