@@ -9,7 +9,7 @@
 import { BehaviorSubject } from 'rxjs';
 import { ISessionsClient } from './sessions_client';
 import { ISessionService } from './session_service';
-import { SearchSessionState } from './search_session_state';
+import { SearchSessionState, SessionMeta } from './search_session_state';
 
 export function getSessionsClientMock(): jest.Mocked<ISessionsClient> {
   return {
@@ -31,7 +31,9 @@ export function getSessionServiceMock(): jest.Mocked<ISessionService> {
     getSessionId: jest.fn(),
     getSession$: jest.fn(() => new BehaviorSubject(undefined).asObservable()),
     state$: new BehaviorSubject<SearchSessionState>(SearchSessionState.None).asObservable(),
-    searchSessionName$: new BehaviorSubject<string | undefined>(undefined).asObservable(),
+    sessionMeta$: new BehaviorSubject<SessionMeta>({
+      state: SearchSessionState.None,
+    }).asObservable(),
     renameCurrentSession: jest.fn(),
     trackSearch: jest.fn((searchDescriptor) => () => {}),
     destroy: jest.fn(),

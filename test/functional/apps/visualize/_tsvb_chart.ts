@@ -43,6 +43,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickMetric();
         await PageObjects.visualBuilder.checkMetricTabIsPresent();
+        await PageObjects.visualBuilder.clickPanelOptions('metric');
+        await PageObjects.visualBuilder.setMetricsDataTimerangeMode('Last value');
+        await PageObjects.visualBuilder.clickDataTab('metric');
       });
 
       it('should not have inspector enabled', async () => {
@@ -81,12 +84,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualBuilder.checkGaugeTabIsPresent();
       });
 
+      it('should "Entire time range" selected as timerange mode for new visualization', async () => {
+        await PageObjects.visualBuilder.clickPanelOptions('gauge');
+        await PageObjects.visualBuilder.checkSelectedDataTimerangeMode('Entire time range');
+        await PageObjects.visualBuilder.clickDataTab('gauge');
+      });
+
       it('should verify gauge label and count display', async () => {
         await PageObjects.visChart.waitForVisualizationRenderingStabilized();
         const labelString = await PageObjects.visualBuilder.getGaugeLabel();
         expect(labelString).to.be('Count');
         const gaugeCount = await PageObjects.visualBuilder.getGaugeCount();
-        expect(gaugeCount).to.be('156');
+        expect(gaugeCount).to.be('13,830');
       });
     });
 
@@ -95,6 +104,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickTopN();
         await PageObjects.visualBuilder.checkTopNTabIsPresent();
+        await PageObjects.visualBuilder.clickPanelOptions('topN');
+        await PageObjects.visualBuilder.setMetricsDataTimerangeMode('Last value');
+        await PageObjects.visualBuilder.clickDataTab('topN');
       });
 
       it('should verify topN label and count display', async () => {
@@ -115,6 +127,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualBuilder.resetPage();
         await PageObjects.visualBuilder.clickMetric();
         await PageObjects.visualBuilder.checkMetricTabIsPresent();
+        await PageObjects.visualBuilder.clickPanelOptions('metric');
+        await PageObjects.visualBuilder.setMetricsDataTimerangeMode('Last value');
+        await PageObjects.visualBuilder.clickDataTab('metric');
         await PageObjects.timePicker.setAbsoluteRange(
           'Sep 22, 2019 @ 00:00:00.000',
           'Sep 23, 2019 @ 00:00:00.000'

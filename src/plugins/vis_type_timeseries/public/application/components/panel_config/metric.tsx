@@ -165,6 +165,7 @@ export class MetricPanelConfig extends Component<
           <EuiTab
             isSelected={selectedTab === PANEL_CONFIG_TABS.DATA}
             onClick={() => this.switchTab(PANEL_CONFIG_TABS.DATA)}
+            data-test-subj="metricEditorDataBtn"
           >
             <FormattedMessage
               id="visTypeTimeseries.metric.dataTab.dataButtonLabel"
