@@ -2662,10 +2662,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/http-tools@link:packages/kbn-server-http-tools":
-  version "0.0.0"
-  uid ""
-
 "@kbn/i18n@link:packages/kbn-i18n":
   version "0.0.0"
   uid ""
