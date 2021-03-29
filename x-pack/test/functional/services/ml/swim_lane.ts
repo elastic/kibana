@@ -213,10 +213,11 @@ export function SwimLaneProvider({ getService }: FtrProviderContext) {
       // when updating the swim lanes, the old lanes might still be displayed
       // for some time, before the loading indicator is displayed
 
-      // wait for loading indicator to be displayed
-      await testSubjects.existOrFail('mlSwimLaneLoadingIndicator', { timeout: 10 * 1000 });
-      // wait for loading indicator to disappear
-      await testSubjects.missingOrFail('mlSwimLaneLoadingIndicator', { timeout: 10 * 1000 });
+      // wait for loading indicator to be displayed, but don't fail in case it's already gone
+      if (await testSubjects.exists('mlSwimLaneLoadingIndicator', { timeout: 10 * 1000 })) {
+        // only wait for loading indicator to disappear if it was actually displayed
+        await testSubjects.missingOrFail('mlSwimLaneLoadingIndicator', { timeout: 10 * 1000 });
+      }
     },
   };
 }
