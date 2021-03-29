@@ -23,7 +23,7 @@ const filtersTitle = i18n.translate('data.search.aggs.buckets.filtersTitle', {
     'The name of an aggregation, that allows to specify multiple individual filters to group data by.',
 });
 
-interface FilterValue {
+export interface FilterValue {
   input: Query;
   label: string;
   id: string;

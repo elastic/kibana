@@ -180,6 +180,11 @@ export class AggConfig {
     return moment.duration(Number(amount), unit);
   }
 
+  getTimeShiftedFilter(timeShift: moment.Duration, value: any) {
+    // TODO better handling for implementation vs no implementation
+    return this.type.getTimeShiftedFilter!(this, timeShift, value);
+  }
+
   write(aggs?: IAggConfigs) {
     return writeParams<AggConfig>(this.type.params, this, aggs);
   }

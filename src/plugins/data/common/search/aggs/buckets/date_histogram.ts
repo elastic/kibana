@@ -133,6 +133,22 @@ export const getDateHistogramBucketAgg = ({
         },
       };
     },
+    getTimeShiftedFilter: (agg, timeShift, val) => {
+      const bucketStart = moment(val).subtract(timeShift);
+      updateTimeBuckets(agg, calculateBounds);
+
+      const { useNormalizedEsInterval } = agg.params;
+      const interval = agg.buckets.getInterval(useNormalizedEsInterval);
+      const bucketEnd = bucketStart.clone().add(interval);
+      return {
+        range: {
+          [agg.fieldName()]: {
+            gte: bucketStart.toISOString(),
+            lte: bucketEnd.toISOString(),
+          },
+        },
+      };
+    },
     params: [
       {
         name: 'field',

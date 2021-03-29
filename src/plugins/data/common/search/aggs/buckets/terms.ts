@@ -140,6 +140,10 @@ export const getTermsBucketAgg = () =>
       }
       return resp;
     },
+    getTimeShiftedFilter: (agg, _timeShift, val) => {
+      // TODO this doesn't work for other/missing buckets
+      return agg.createFilter(val).query;
+    },
     params: [
       {
         name: 'field',

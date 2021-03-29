@@ -53,6 +53,7 @@ export interface AggTypeConfig<
   getValue?: (agg: TAggConfig, bucket: any) => any;
   getKey?: (bucket: any, key: any, agg: TAggConfig) => any;
   getValueBucketPath?: (agg: TAggConfig) => string;
+  getTimeShiftedFilter?: (agg: TAggConfig, timeShift: moment.Duration, value: any) => any;
 }
 
 // TODO need to make a more explicit interface for this
@@ -210,6 +211,8 @@ export class AggType<
 
   getValue: (agg: TAggConfig, bucket: any) => any;
 
+  getTimeShiftedFilter: (agg: TAggConfig, timeShift: moment.Duration, value: any) => any;
+
   getKey?: (bucket: any, key: any, agg: TAggConfig) => any;
 
   paramByName = (name: string) => {
@@ -283,6 +286,11 @@ export class AggType<
     this.getResponseAggs = config.getResponseAggs || (() => {});
     this.decorateAggConfig = config.decorateAggConfig || (() => ({}));
     this.postFlightRequest = config.postFlightRequest || identity;
+    this.getTimeShiftedFilter =
+      config.getTimeShiftedFilter ||
+      (() => {
+        throw new Error('not implemented');
+      });
 
     this.getSerializedFormat =
       config.getSerializedFormat ||

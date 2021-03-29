@@ -50,6 +50,13 @@ export function buildEsQuery(
     config.allowLeadingWildcards,
     config.dateFormatTZ
   );
+  // TODO there is probably a more elegant way than this.
+  // We need to pass raw queries to the filters agg somehow
+  const rawQuery = buildQueryFromFilters(
+    queriesByLanguage.rawQuery ? (queriesByLanguage.rawQuery.map((q) => q.query) as Filter[]) : [],
+    indexPattern,
+    config.ignoreFilterIfFieldNotInIndex
+  );
   const luceneQuery = buildQueryFromLucene(
     queriesByLanguage.lucene,
     config.queryStringOptions,
@@ -63,10 +70,25 @@ export function buildEsQuery(
 
   return {
     bool: {
-      must: [...kueryQuery.must, ...luceneQuery.must, ...filterQuery.must],
-      filter: [...kueryQuery.filter, ...luceneQuery.filter, ...filterQuery.filter],
-      should: [...kueryQuery.should, ...luceneQuery.should, ...filterQuery.should],
-      must_not: [...kueryQuery.must_not, ...luceneQuery.must_not, ...filterQuery.must_not],
+      must: [...kueryQuery.must, ...luceneQuery.must, ...filterQuery.must, ...rawQuery.must],
+      filter: [
+        ...kueryQuery.filter,
+        ...luceneQuery.filter,
+        ...filterQuery.filter,
+        ...rawQuery.filter,
+      ],
+      should: [
+        ...kueryQuery.should,
+        ...luceneQuery.should,
+        ...filterQuery.should,
+        ...rawQuery.should,
+      ],
+      must_not: [
+        ...kueryQuery.must_not,
+        ...luceneQuery.must_not,
+        ...filterQuery.must_not,
+        ...rawQuery.must_not,
+      ],
     },
   };
 }
