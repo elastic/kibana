@@ -33,10 +33,8 @@ export default function ({ getService }: FtrProviderContext) {
     after(() => esArchiver.unload('auditbeat/uncommon_processes'));
 
     it('should return an edge of length 1 when given a pagination of length 1', async () => {
-      let response: null | UncommonProcessesResponse = null;
-
       await retry.try(async () => {
-        response = await supertest
+        const response = await supertest
           .post('/internal/search/securitySolutionSearchStrategy/')
           .set('kbn-xsrf', 'true')
           .send({
@@ -58,16 +56,14 @@ export default function ({ getService }: FtrProviderContext) {
             inspect: false,
           })
           .expect(200);
+        expect(response!.body.edges.length).to.be(1);
       });
-      expect(response!.body.edges.length).to.be(1);
     });
 
     describe('when given a pagination of length 2', () => {
-      let response: null | UncommonProcessesResponse = null;
-
-      before(async () => {
+      it('should return an edge of length 2 ', async () => {
         await retry.try(async () => {
-          response = await supertest
+          const response = await supertest
             .post('/internal/search/securitySolutionSearchStrategy/')
             .set('kbn-xsrf', 'true')
             .send({
@@ -88,40 +84,43 @@ export default function ({ getService }: FtrProviderContext) {
               docValueFields: [],
               inspect: false,
               wait_for_completion_timeout: '10s',
-            });
+            })
+            .expect(200);
+          expect(response!.body.edges.length).to.be(2);
         });
-      });
-      it('should return an edge of length 2 ', () => {
-        expect(response!.body.edges.length).to.be(2);
       });
     });
 
     describe('when given a pagination of length 1', () => {
       let response: null | UncommonProcessesResponse = null;
       before(async () => {
-        response = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/')
-          .set('kbn-xsrf', 'true')
-          .send({
-            factoryQueryType: HostsQueries.uncommonProcesses,
-            sourceId: 'default',
-            timerange: {
-              interval: '12h',
-              to: TO,
-              from: FROM,
-            },
-            pagination: {
-              activePage: 0,
-              cursorStart: 0,
-              fakePossibleCount: 3,
-              querySize: 1,
-            },
-            defaultIndex: ['auditbeat-uncommon-processes'],
-            docValueFields: [],
-            inspect: false,
-            wait_for_completion_timeout: '10s',
-          });
+        await retry.try(async () => {
+          response = await supertest
+            .post('/internal/search/securitySolutionSearchStrategy/')
+            .set('kbn-xsrf', 'true')
+            .send({
+              factoryQueryType: HostsQueries.uncommonProcesses,
+              sourceId: 'default',
+              timerange: {
+                interval: '12h',
+                to: TO,
+                from: FROM,
+              },
+              pagination: {
+                activePage: 0,
+                cursorStart: 0,
+                fakePossibleCount: 3,
+                querySize: 1,
+              },
+              defaultIndex: ['auditbeat-uncommon-processes'],
+              docValueFields: [],
+              inspect: false,
+              wait_for_completion_timeout: '10s',
+            })
+            .expect(200);
+        });
       });
+
       it('should return an edge of length 1 ', () => {
         expect(response!.body.edges.length).to.be(1);
       });
