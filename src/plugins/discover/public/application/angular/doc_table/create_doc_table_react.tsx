@@ -32,7 +32,6 @@ export interface DocTableLegacyProps {
   sampleSize: number;
   sort?: string[][];
   useNewFieldsApi?: boolean;
-  shouldRerender?: boolean;
 }
 export interface AngularDirective {
   template: string;
@@ -84,7 +83,6 @@ function getRenderFn(domNode: Element, props: any) {
                 on-remove-column="renderProps.onRemoveColumn"
                 render-complete
                 use-new-fields-api="renderProps.useNewFieldsApi"
-                should-rerender="renderProps.shouldRerender"
                 sorting="renderProps.sort"></doc_table>`,
   };
 

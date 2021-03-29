@@ -68,6 +68,7 @@ export function Discover({
   searchSource,
   state,
   unmappedFieldsConfig,
+  refreshAppState,
 }: DiscoverProps) {
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
   const scrollableDesktop = useRef<HTMLDivElement>(null);
@@ -126,8 +127,6 @@ export function Discover({
       }),
     [capabilities, config, indexPattern, indexPatterns, setAppState, state, useNewFieldsApi]
   );
-
-  const [shouldRerender, setShouldRerender] = useState<boolean>(false);
 
   const onOpenInspector = useCallback(() => {
     // prevent overlapping
@@ -205,10 +204,10 @@ export function Discover({
     [opts, state]
   );
 
-  const onEditRuntimeField = async () => {
-    await fetch();
-    // needed to trigger refresh of table cells
-    setShouldRerender(!shouldRerender);
+  const onEditRuntimeField = () => {
+    if (refreshAppState) {
+      refreshAppState();
+    }
   };
 
   const columns = useMemo(() => {
@@ -405,7 +404,6 @@ export function Discover({
                             onSort={onSort}
                             sampleSize={opts.sampleSize}
                             useNewFieldsApi={useNewFieldsApi}
-                            shouldRerender={shouldRerender}
                           />
                         )}
                         {!isLegacy && rows && rows.length && (
