@@ -70,7 +70,7 @@ function DebugQueryCallout() {
                 <EuiLink href={advancedSettingsUrl}>
                   {i18n.translate(
                     'xpack.apm.searchBar.inspectEsQueriesEnabled.callout.description.advancedSettings',
-                    { defaultMessage: 'Advanced Setting' }
+                    { defaultMessage: 'Advanced Settings' }
                   )}
                 </EuiLink>
               ),
