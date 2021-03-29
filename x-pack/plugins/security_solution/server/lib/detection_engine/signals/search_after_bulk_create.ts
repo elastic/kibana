@@ -6,6 +6,7 @@
  */
 
 import { identity } from 'lodash';
+import { SortResults } from '@elastic/elasticsearch/api/types';
 import { singleSearchAfter } from './single_search_after';
 import { singleBulkCreate } from './single_bulk_create';
 import { filterEventsAgainstList } from './filters/filter_events_against_list';
@@ -52,7 +53,7 @@ export const searchAfterAndBulkCreate = async ({
   let toReturn = createSearchAfterReturnType();
 
   // sortId tells us where to start our next consecutive search_after query
-  let sortIds: number[] | undefined;
+  let sortIds: SortResults;
   let hasSortId = true; // default to true so we execute the search on initial run
   // let backupSortId: string | undefined;
   // let hasBackupSortId = ruleParams.timestampOverride ? true : false;
@@ -77,6 +78,7 @@ export const searchAfterAndBulkCreate = async ({
     while (signalsCreatedCount < tuple.maxSignals) {
       try {
         let mergedSearchResults = createSearchResultReturnType();
+        // @ts-expect-error is used before being assigned
         logger.debug(buildRuleMessage(`sortIds: ${JSON.stringify(sortIds)}`));
 
         // if there is a timestampOverride param we always want to do a secondary search against @timestamp
@@ -130,12 +132,14 @@ export const searchAfterAndBulkCreate = async ({
         if (hasSortId) {
           const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
             buildRuleMessage,
+            // @ts-expect-error is used before being assigned
             searchAfterSortId: sortIds,
             index: inputIndexPattern,
             from: tuple.from.toISOString(),
             to: tuple.to.toISOString(),
             services,
             logger,
+            // @ts-expect-error please, declare a type explicitly instead of unknown
             filter,
             pageSize: Math.ceil(Math.min(tuple.maxSignals, pageSize)),
             timestampOverride: ruleParams.timestampOverride,

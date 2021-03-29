@@ -56,6 +56,7 @@ BuildEventsSearchQuery) => {
               '@timestamp': {
                 lte: to,
                 gte: from,
+                // @ts-expect-error
                 format: 'strict_date_optional_time',
               },
             },
@@ -92,6 +93,7 @@ BuildEventsSearchQuery) => {
   //     },
   //   });
   // }
+
   // @ts-expect-error undefined in not assignable to QueryContainer
   // but tests contain undefined, so I suppose it's desired behaviour
   const filterWithTime: estypes.QueryContainer[] = [filter, { bool: { filter: rangeFilter } }];

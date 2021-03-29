@@ -12,7 +12,7 @@ import {
   AlertServices,
 } from '../../../../../alerting/server';
 import { Logger } from '../../../../../../../src/core/server';
-import type { SignalSearchResponse, SignalSource } from './types';
+// import type { SignalSearchResponse, SignalSource } from './types';
 import { BuildRuleMessage } from './rule_messages';
 import { buildEventsSearchQuery } from './build_events_query';
 import { createErrorsFromShard, makeFloatString } from './utils';
@@ -20,6 +20,7 @@ import {
   SortOrderOrUndefined,
   TimestampOverrideOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
+import { SignalSearchResponse, SignalSource } from './types';
 
 interface SingleSearchAfterParams {
   aggregations?: Record<string, estypes.AggregationContainer>;
@@ -74,6 +75,7 @@ SingleSearchAfterParams): Promise<{
     const start = performance.now();
     const {
       body: nextSearchAfterResult,
+      // @ts-expect-error
     } = await services.scopedClusterClient.asCurrentUser.search<SignalSource>(searchAfterQuery);
     const end = performance.now();
     const searchErrors = createErrorsFromShard({
@@ -92,7 +94,7 @@ SingleSearchAfterParams): Promise<{
     ) {
       logger.error(buildRuleMessage(`[-] failure reason: ${exc.message}`));
 
-      const searchRes: SignalSearchResponse = {
+      const searchRes = {
         took: 0,
         timed_out: false,
         _shards: {

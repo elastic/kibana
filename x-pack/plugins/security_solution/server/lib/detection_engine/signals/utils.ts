@@ -13,6 +13,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import { isEmpty, partition } from 'lodash';
 import { ApiResponse, Context } from '@elastic/elasticsearch/lib/Transport';
 
+import { SortResults } from '@elastic/elasticsearch/api/types';
 import {
   TimestampOverrideOrUndefined,
   Privilege,
@@ -826,6 +827,6 @@ export const getThresholdTermsHash = (
     .digest('hex');
 };
 
-export const hasSafeSortIds = (sortIds: number[] | undefined) => {
-  return sortIds?.every((sortId) => sortId < Number.MAX_SAFE_INTEGER);
+export const hasSafeSortIds = (sortIds: SortResults) => {
+  return sortIds?.every((sortId) => sortId != null && sortId < Number.MAX_SAFE_INTEGER);
 };
