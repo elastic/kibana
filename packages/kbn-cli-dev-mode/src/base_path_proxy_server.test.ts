@@ -9,7 +9,12 @@
 import { Server } from '@hapi/hapi';
 import { EMPTY } from 'rxjs';
 import supertest from 'supertest';
-import { getServerOptions, getListenerOptions, createServer, IHttpConfig } from '@kbn/server-http-tools';
+import {
+  getServerOptions,
+  getListenerOptions,
+  createServer,
+  IHttpConfig,
+} from '@kbn/server-http-tools';
 import { ByteSizeValue } from '@kbn/config-schema';
 
 import { BasePathProxyServer, BasePathProxyServerOptions } from './base_path_proxy_server';

@@ -19,10 +19,10 @@
     "@kbn/http-tools": "link:../kbn-server-http-tools",
     "@kbn/optimizer": "link:../kbn-optimizer",
     "@kbn/std": "link:../kbn-std",
+    "@kbn/dev-utils": "link:../kbn-dev-utils",
     "@kbn/utils": "link:../kbn-utils"
   },
   "devDependencies": {
-    "@kbn/dev-utils": "link:../kbn-dev-utils",
     "@kbn/utility-types": "link:../kbn-utility-types"
   }
 }
