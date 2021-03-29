@@ -47,6 +47,7 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
   onOutputChange,
 }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
+
   const [fromPage, setFromPage] = useState<number>(1);
 
   const [{}, { uiActions }] = services;
