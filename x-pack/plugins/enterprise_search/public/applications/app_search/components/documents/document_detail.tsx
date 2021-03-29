@@ -13,8 +13,6 @@ import { useActions, useValues } from 'kea';
 import {
   EuiButton,
   EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiTitle,
   EuiPageContentBody,
   EuiPageContent,
   EuiBasicTable,
@@ -79,13 +77,9 @@ export const DocumentDetail: React.FC<Props> = ({ engineBreadcrumb }) => {
   return (
     <>
       <SetPageChrome trail={[...engineBreadcrumb, DOCUMENTS_TITLE, documentTitle]} />
-      <EuiPageHeader>
-        <EuiPageHeaderSection>
-          <EuiTitle size="l">
-            <h1>{DOCUMENT_DETAIL_TITLE(documentTitle)}</h1>
-          </EuiTitle>
-        </EuiPageHeaderSection>
-        <EuiPageHeaderSection>
+      <EuiPageHeader
+        pageTitle={DOCUMENT_DETAIL_TITLE(documentTitle)}
+        rightSideItems={[
           <EuiButton
             color="danger"
             iconType="trash"
@@ -95,9 +89,9 @@ export const DocumentDetail: React.FC<Props> = ({ engineBreadcrumb }) => {
             {i18n.translate('xpack.enterpriseSearch.appSearch.documentDetail.deleteButton', {
               defaultMessage: 'Delete',
             })}
-          </EuiButton>
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
+          </EuiButton>,
+        ]}
+      />
       <EuiPageContent>
         <EuiPageContentBody>
           <FlashMessages />

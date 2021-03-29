@@ -43,7 +43,7 @@ import {
 import { PaginationControls } from './pagination';
 import { AnomalySummary } from './annomaly_summary';
 import { AnomalySeverityIndicator } from '../../../../../../../components/logging/log_analysis_results/anomaly_severity_indicator';
-import { useSourceContext } from '../../../../../../../containers/source';
+import { useSourceContext } from '../../../../../../../containers/metrics_source';
 import { createResultsUrl } from '../flyout_home';
 import { useWaffleViewState, WaffleViewState } from '../../../../hooks/use_waffle_view_state';
 type JobType = 'k8s' | 'hosts';
