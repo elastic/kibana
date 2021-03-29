@@ -76,7 +76,7 @@ export function handleMbLastRecoveries(resp: ElasticsearchResponse, start: numbe
     {}
   );
   const maxTimestamp = resp.aggregations?.max_timestamp?.value_as_string;
-  const mapped = groupedByTimestamp[maxTimestamp].map(
+  const mapped = (groupedByTimestamp[maxTimestamp] ?? []).map(
     (hit) => hit._source.elasticsearch?.index?.recovery
   );
   const filtered = mapped.filter(filterOldShardActivity(moment.utc(start).valueOf()));
