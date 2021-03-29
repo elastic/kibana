@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { mockFlashMessageHelpers, mockHttpValues } from '../../__mocks__';
+import { LogicMounter, mockFlashMessageHelpers, mockHttpValues } from '../../__mocks__';
+
+import { resetContext } from 'kea';
 
 import { nextTick } from '@kbn/test/jest';
 
@@ -14,13 +16,7 @@ import { IndexingStatusLogic } from './indexing_status_logic';
 describe('IndexingStatusLogic', () => {
   const { http } = mockHttpValues;
   const { flashAPIErrors } = mockFlashMessageHelpers;
-  const mount = () => {
-    IndexingStatusLogic({ percentageComplete: 100, numDocumentsWithErrors: 0 });
-    const unmount = IndexingStatusLogic.mount();
-    return unmount;
-  };
-
-  let unmount: Function;
+  const { mount, unmount } = new LogicMounter(IndexingStatusLogic);
 
   const mockStatusResponse = {
     percentageComplete: 50,
@@ -30,7 +26,8 @@ describe('IndexingStatusLogic', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    unmount = mount();
+    resetContext({});
+    mount({}, { percentageComplete: 100, numDocumentsWithErrors: 0 });
   });
 
   it('has expected default values', () => {
@@ -57,6 +54,7 @@ describe('IndexingStatusLogic', () => {
     jest.useFakeTimers();
     const statusPath = '/api/workplace_search/path/123';
     const onComplete = jest.fn();
+    const clearIntervalSpy = jest.spyOn(global, 'clearInterval');
     const TIMEOUT = 3000;
 
     it('calls API and sets values', async () => {
@@ -90,13 +88,13 @@ describe('IndexingStatusLogic', () => {
 
       await nextTick();
 
-      expect(clearInterval).toHaveBeenCalled();
+      expect(clearIntervalSpy).toHaveBeenCalled();
       expect(onComplete).toHaveBeenCalledWith(mockStatusResponse.numDocumentsWithErrors);
     });
 
     it('handles unmounting', async () => {
       unmount();
-      expect(clearInterval).toHaveBeenCalled();
+      expect(clearIntervalSpy).toHaveBeenCalled();
     });
   });
 });

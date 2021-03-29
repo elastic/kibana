@@ -32,6 +32,7 @@ interface IndexingStatusValues {
 let pollingInterval: number;
 
 export const IndexingStatusLogic = kea<MakeLogicType<IndexingStatusValues, IndexingStatusActions>>({
+  path: ['enterprise_search', 'indexing_status_logic'],
   actions: {
     fetchIndexingStatus: ({ statusPath, onComplete }) => ({ statusPath, onComplete }),
     setIndexingStatus: ({ numDocumentsWithErrors, percentageComplete }) => ({
