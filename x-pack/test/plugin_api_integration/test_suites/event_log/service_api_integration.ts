@@ -164,10 +164,6 @@ export default function ({ getService }: FtrProviderContext) {
             action_subgroup: 'alert action subgroup',
             status: 'overall alert status, after alert execution',
           },
-          detection_engine: {
-            rule_status: 'warning',
-            rule_status_severity: 65,
-          },
         },
       };
 

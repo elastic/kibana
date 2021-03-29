@@ -109,12 +109,6 @@ export const EventSchema = schema.maybe(
             status: ecsString(),
           })
         ),
-        detection_engine: schema.maybe(
-          schema.object({
-            rule_status: ecsString(),
-            rule_status_severity: ecsNumber(),
-          })
-        ),
         saved_objects: schema.maybe(
           schema.arrayOf(
             schema.object({

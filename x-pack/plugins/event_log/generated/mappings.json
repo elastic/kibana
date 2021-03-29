@@ -257,17 +257,6 @@
                         }
                     }
                 },
-                "detection_engine": {
-                    "properties": {
-                        "rule_status": {
-                            "type": "keyword",
-                            "ignore_above": 1024
-                        },
-                        "rule_status_severity": {
-                            "type": "integer"
-                        }
-                    }
-                },
                 "saved_objects": {
                     "type": "nested",
                     "properties": {

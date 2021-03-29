@@ -38,18 +38,6 @@ exports.EcsCustomPropertyMappings = {
           },
         },
       },
-      // fields specific to Detection Engine of Elastic Security app (x-pack/plugins/security_solution)
-      detection_engine: {
-        properties: {
-          rule_status: {
-            type: 'keyword',
-            ignore_above: 1024,
-          },
-          rule_status_severity: {
-            type: 'integer',
-          },
-        },
-      },
       // array of saved object references, for "linking" via search
       saved_objects: {
         type: 'nested',

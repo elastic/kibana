@@ -124,10 +124,6 @@ Below is a document in the expected structure, with descriptions of the fields:
       action_subgroup: "alert action subgroup, for relevant documents",
       status: "overall alert status, after alert execution",
     },
-    detection_engine: {
-      rule_status: "detection rule execution status, e.g. warning",
-      rule_status_severity: 42,
-    },
     saved_objects: [
       {
         rel: "'primary' | undefined; see below",
