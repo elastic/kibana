@@ -11,7 +11,7 @@ import { first } from 'lodash';
 import { getCustomMetricLabel } from '../../../../../../common/formatters/get_custom_metric_label';
 import { SnapshotCustomMetricInput } from '../../../../../../common/http_api';
 import { withTheme, EuiTheme } from '../../../../../../../../../src/plugins/kibana_react/common';
-import { useSourceContext } from '../../../../../containers/source';
+import { useSourceContext } from '../../../../../containers/metrics_source';
 import { findInventoryModel } from '../../../../../../common/inventory_models';
 import {
   InventoryItemType,

@@ -10,7 +10,6 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export function FieldEditorProvider({ getService }: FtrProviderContext) {
   const browser = getService('browser');
-  const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
   class FieldEditor {
@@ -33,10 +32,17 @@ export function FieldEditorProvider({ getService }: FtrProviderContext) {
       await browser.pressKeys(script);
     }
     public async save() {
-      await retry.try(async () => {
-        await testSubjects.click('fieldSaveButton');
-        await testSubjects.missingOrFail('fieldSaveButton', { timeout: 2000 });
-      });
+      await testSubjects.click('fieldSaveButton');
+    }
+
+    public async confirmSave() {
+      await testSubjects.setValue('saveModalConfirmText', 'change');
+      await testSubjects.click('confirmModalConfirmButton');
+    }
+
+    public async confirmDelete() {
+      await testSubjects.setValue('deleteModalConfirmText', 'remove');
+      await testSubjects.click('confirmModalConfirmButton');
     }
   }
 
