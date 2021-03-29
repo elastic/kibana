@@ -72,7 +72,7 @@ const { TopNavMenu } = navigationStartMock.ui;
 
 function createMockFrame(): jest.Mocked<EditorFrameInstance> {
   return {
-    mount: jest.fn((el, props) => {}),
+    mount: jest.fn(async (el, props) => {}),
     unmount: jest.fn(() => {}),
   };
 }
