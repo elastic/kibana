@@ -18,6 +18,10 @@ import {
   EuiSpacer,
   EuiNotificationBadge,
   EuiPageSideBar,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiPopover,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { isEqual, sortBy } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -67,7 +71,8 @@ export function DiscoverSidebar({
   onEditRuntimeField,
 }: DiscoverSidebarProps) {
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
-  const { indexPatternFieldEditor } = services;
+  const [isAddIndexPatternFieldPopoverOpen, setIsAddIndexPatternFieldPopoverOpen] = useState(false);
+  const { indexPatternFieldEditor, core } = services;
   const indexPatternFieldEditPermission = indexPatternFieldEditor?.userPermissions.editIndexPattern();
   const canEditIndexPatternField = !!indexPatternFieldEditPermission && useNewFieldsApi;
   useEffect(() => {
@@ -188,6 +193,8 @@ export function DiscoverSidebar({
     });
   };
 
+  const addField = () => {};
+
   const filterChanged = isEqual(fieldFilter, getDefaultFieldFilter());
 
   if (useFlyout) {
@@ -226,14 +233,78 @@ export function DiscoverSidebar({
         responsive={false}
       >
         <EuiFlexItem grow={false}>
-          <DiscoverIndexPattern
-            config={config}
-            selectedIndexPattern={selectedIndexPattern}
-            indexPatternList={sortBy(indexPatternList, (o) => o.attributes.title)}
-            indexPatterns={indexPatterns}
-            state={state}
-            setAppState={setAppState}
-          />
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <DiscoverIndexPattern
+                config={config}
+                selectedIndexPattern={selectedIndexPattern}
+                indexPatternList={sortBy(indexPatternList, (o) => o.attributes.title)}
+                indexPatterns={indexPatterns}
+                state={state}
+                setAppState={setAppState}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiPopover
+                panelPaddingSize="s"
+                isOpen={isAddIndexPatternFieldPopoverOpen}
+                closePopover={() => {
+                  setIsAddIndexPatternFieldPopoverOpen(false);
+                }}
+                ownFocus
+                data-test-subj="discover-addRuntimeField-popover"
+                button={
+                  <EuiButtonIcon
+                    color="text"
+                    iconType="boxesHorizontal"
+                    data-test-subj="discoverIndexPatternActions"
+                    aria-label={i18n.translate(
+                      'discover.fieldChooser.indexPatterns.actionsPopoverLabel',
+                      {
+                        defaultMessage: 'Index pattern settings',
+                      }
+                    )}
+                    onClick={() => {
+                      setIsAddIndexPatternFieldPopoverOpen(!isAddIndexPatternFieldPopoverOpen);
+                    }}
+                  />
+                }
+              >
+                <EuiContextMenuPanel
+                  size="s"
+                  items={[
+                    <EuiContextMenuItem
+                      key="add"
+                      icon="indexOpen"
+                      data-test-subj="indexPattern-add-field"
+                      onClick={() => {
+                        setIsAddIndexPatternFieldPopoverOpen(false);
+                        addField();
+                      }}
+                    >
+                      {i18n.translate('discover.fieldChooser.indexPatterns.addFieldButton', {
+                        defaultMessage: 'Add field to index pattern',
+                      })}
+                    </EuiContextMenuItem>,
+                    <EuiContextMenuItem
+                      key="manage"
+                      icon="indexSettings"
+                      onClick={() => {
+                        setIsAddIndexPatternFieldPopoverOpen(false);
+                        core.application.navigateToApp('management', {
+                          path: `/kibana/indexPatterns/patterns/${selectedIndexPattern.id}`,
+                        });
+                      }}
+                    >
+                      {i18n.translate('xpack.lens.indexPatterns.manageFieldButton', {
+                        defaultMessage: 'Manage index pattern fields',
+                      })}
+                    </EuiContextMenuItem>,
+                  ]}
+                />
+              </EuiPopover>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <form>
