@@ -21,8 +21,6 @@
   ],
   "exclude": [
     "types/ftr_globals/**/*",
-    "**/integration_tests/**/*",
-    "**/__fixtures__/**/*",
-    "**/**/*.test.ts"
+    "**/__fixtures__/**/*"
   ]
 }

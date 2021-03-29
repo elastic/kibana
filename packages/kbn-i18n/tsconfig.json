@@ -20,8 +20,6 @@
     "types/intl_relativeformat.d.ts"
   ],
   "exclude": [
-    "**/__fixtures__/**/*",
-    "**/**/*.test.tsx",
-    "**/**/*.test.ts"
+    "**/__fixtures__/**/*"
   ]
 }

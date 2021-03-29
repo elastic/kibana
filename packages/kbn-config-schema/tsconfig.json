@@ -15,10 +15,7 @@
     ]
   },
   "include": [
-    "./types/joi.d.ts",
-    "./src/**/*.ts"
-  ],
-  "exclude": [
-    "**/**/*.test.ts"
+    "types/joi.d.ts",
+    "src/**/*.ts"
   ]
 }

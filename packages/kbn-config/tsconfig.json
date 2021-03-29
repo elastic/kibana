@@ -14,14 +14,9 @@
     ]
   },
   "include": [
-    "./src/**/*.ts"
+    "src/**/*.ts"
   ],
   "exclude": [
-    "**/__fixtures__/**/*",
-    "**/__mocks__/**/*",
-    "**/**/*.mock.ts",
-    "**/**/*.mocks.ts",
-    "**/**/*.test.ts",
-    "**/**/*.test.mocks.ts"
+    "**/__fixtures__/**/*"
   ]
 }

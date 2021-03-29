@@ -13,8 +13,6 @@
     "src/**/*"
   ],
   "exclude": [
-    "**/__fixtures__/**/*",
-    "**/integration_tests/**/*",
-    "**/**/*.test.ts"
+    "**/__fixtures__/**/*"
   ]
 }
