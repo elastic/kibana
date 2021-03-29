@@ -9,10 +9,7 @@ import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { FilterExpanded } from './filter_expanded';
 import { mockUrlStorage, mockUseValuesList, render } from '../../rtl_helpers';
-import {
-  USER_AGENT_NAME,
-  USER_AGENT_VERSION,
-} from '../../configurations/data/elasticsearch_fieldnames';
+import { USER_AGENT_NAME } from '../../configurations/data/elasticsearch_fieldnames';
 
 describe('FilterExpanded', function () {
   it('should render properly', async function () {
@@ -71,5 +68,26 @@ describe('FilterExpanded', function () {
         sourceField: USER_AGENT_NAME,
       })
     );
+  });
+  it('should filter display values', async function () {
+    mockUrlStorage({ filters: [{ field: USER_AGENT_NAME, values: ['Chrome'] }] });
+
+    mockUseValuesList(['Chrome', 'Firefox']);
+
+    render(
+      <FilterExpanded
+        seriesId={'series-id'}
+        label={'Browser Family'}
+        field={USER_AGENT_NAME}
+        goBack={jest.fn()}
+      />
+    );
+
+    expect(screen.queryByText('Firefox')).toBeTruthy();
+
+    fireEvent.input(screen.getByRole('searchbox'), { target: { value: 'ch' } });
+
+    expect(screen.queryByText('Firefox')).toBeFalsy();
+    expect(screen.getByText('Chrome')).toBeTruthy();
   });
 });

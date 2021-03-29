@@ -53,7 +53,7 @@ export interface XYChartTypesProps {
   excludeChartTypes?: string[];
 }
 
-function XYChartTypes({
+export function XYChartTypes({
   onChange,
   value,
   label,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useUiSetting } from '../../../../../src/plugins/kibana_react/public/ui_settings';
+import { useUiSetting } from '../../../../../src/plugins/kibana_react/public';
 import { UI_SETTINGS } from '../../../../../src/plugins/data/common';
 import { TimePickerQuickRange } from '../components/shared/exploratory_view/series_date_picker';
 

@@ -46,6 +46,10 @@ export function FilterExpanded({ seriesId, field, label, goBack, nestedField }: 
 
   const currFilter: UrlFilter | undefined = filters.find(({ field: fd }) => field === fd);
 
+  const displayValues = (values || []).filter((opt) =>
+    opt.toLowerCase().includes(value.toLowerCase())
+  );
+
   return (
     <>
       <EuiButtonEmpty iconType="arrowLeft" color="text" onClick={() => goBack()}>
@@ -64,35 +68,33 @@ export function FilterExpanded({ seriesId, field, label, goBack, nestedField }: 
           <EuiLoadingSpinner />
         </div>
       )}
-      {(values || [])
-        .filter((opt) => opt.toLowerCase().includes(value.toLowerCase()))
-        .map((opt) => (
-          <Fragment key={opt}>
-            <EuiFilterGroup fullWidth={true} color="primary">
-              <FilterValueButton
-                field={field}
-                value={opt}
-                allValues={currFilter?.notValues}
-                negate={true}
-                nestedField={nestedField}
-                seriesId={seriesId}
-                isNestedOpen={isOpen}
-                setIsNestedOpen={setIsOpen}
-              />
-              <FilterValueButton
-                field={field}
-                value={opt}
-                allValues={currFilter?.values}
-                nestedField={nestedField}
-                seriesId={seriesId}
-                negate={false}
-                isNestedOpen={isOpen}
-                setIsNestedOpen={setIsOpen}
-              />
-            </EuiFilterGroup>
-            <EuiSpacer size="s" />
-          </Fragment>
-        ))}
+      {displayValues.map((opt) => (
+        <Fragment key={opt}>
+          <EuiFilterGroup fullWidth={true} color="primary">
+            <FilterValueButton
+              field={field}
+              value={opt}
+              allSelectedValues={currFilter?.notValues}
+              negate={true}
+              nestedField={nestedField}
+              seriesId={seriesId}
+              isNestedOpen={isOpen}
+              setIsNestedOpen={setIsOpen}
+            />
+            <FilterValueButton
+              field={field}
+              value={opt}
+              allSelectedValues={currFilter?.values}
+              nestedField={nestedField}
+              seriesId={seriesId}
+              negate={false}
+              isNestedOpen={isOpen}
+              setIsNestedOpen={setIsOpen}
+            />
+          </EuiFilterGroup>
+          <EuiSpacer size="s" />
+        </Fragment>
+      ))}
     </>
   );
 }
