@@ -7,8 +7,14 @@
 
 import { SavedObjectsClient, Logger } from 'kibana/server';
 import { EndpointArtifactClientInterface } from '../../services';
-import { InternalArtifactCreateSchema } from '../../schemas';
+import { InternalArtifactCompleteSchema } from '../../schemas';
 import { ArtifactConstants } from './common';
+
+class ArtifactMigrationError extends Error {
+  constructor(message: string, public readonly meta?: unknown) {
+    super(message);
+  }
+}
 
 /**
  * With v7.13, artifact storage was moved from a security_solution saved object to a fleet index
@@ -34,7 +40,7 @@ export const migrateArtifactsToFleet = async (
       const {
         saved_objects: artifactList,
         total,
-      } = await soClient.find<InternalArtifactCreateSchema>({
+      } = await soClient.find<InternalArtifactCompleteSchema>({
         type: ArtifactConstants.SAVED_OBJECT_TYPE,
         page: 1,
         perPage: 10,
@@ -72,6 +78,8 @@ export const migrateArtifactsToFleet = async (
       }
     }
   } catch (e) {
-    logger.error(new Error('Artifact SO migration to fleet failed'), e);
+    const error = new ArtifactMigrationError('Artifact SO migration to fleet failed', e);
+    logger.error(error);
+    throw error;
   }
 };
