@@ -6,13 +6,14 @@
  */
 
 import { License } from '../../services';
-import { wrapEsError } from '../../lib';
-import { isEsError } from '../../shared_imports';
+import { handleEsError } from '../../shared_imports';
+import { wrapEsError, isEsError } from '../../lib';
+import type { RouteDependencies } from '../../types';
 
 const license = new License();
 license.getStatus = jest.fn().mockReturnValue({ isValid: true });
 
-export const routeDependencies = {
+export const routeDependencies: Omit<RouteDependencies, 'router'> = {
   license,
   config: {
     isSecurityEnabled: jest.fn().mockReturnValue(true),
@@ -22,5 +23,6 @@ export const routeDependencies = {
   lib: {
     isEsError,
     wrapEsError,
+    handleEsError,
   },
 };

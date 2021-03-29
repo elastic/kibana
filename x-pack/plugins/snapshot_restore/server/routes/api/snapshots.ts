@@ -31,7 +31,7 @@ export function registerSnapshotsRoutes({
       // Attempt to retrieve policies
       // This could fail if user doesn't have access to read SLM policies
       try {
-        const policiesByName = await clusterClient.asCurrentUser.slm.getLifecycle();
+        const { body: policiesByName } = await clusterClient.asCurrentUser.slm.getLifecycle();
         policies = Object.keys(policiesByName);
       } catch (e) {
         // Silently swallow error as policy names aren't required in UI
@@ -148,6 +148,9 @@ export function registerSnapshotsRoutes({
 
         const snapshotsList =
           snapshotsResponse && snapshotsResponse[0] && snapshotsResponse[0].snapshots;
+        if (!snapshotsList || snapshotsList.length === 0) {
+          return res.notFound({ body: 'Snapshot not found' });
+        }
         const selectedSnapshot = snapshotsList.find(
           ({ snapshot: snapshotName }) => snapshot === snapshotName
         ) as SnapshotDetailsEs;

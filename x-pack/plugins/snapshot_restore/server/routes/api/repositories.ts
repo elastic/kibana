@@ -312,7 +312,7 @@ export function registerRepositoriesRoutes({
           verify: false,
         });
 
-        return res.ok({ body: response });
+        return res.ok({ body: response.body });
       } catch (e) {
         if (isEsError(e)) {
           return handleEsError({ error: e, response: res });

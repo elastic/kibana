@@ -44,12 +44,23 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
     isManagedPolicy: false,
   };
 
-  const router = new RouterMock('snapshotRestore.client');
+  const router = new RouterMock();
+
+  /**
+   * ES APIs used by these endpoints
+   */
+  const getClusterSettingsFn = router.getMockApiFn('cluster.getSettings');
+  const putClusterSettingsFn = router.getMockApiFn('cluster.putSettings');
+  const getLifecycleFn = router.getMockApiFn('slm.getLifecycle');
+  const putLifecycleFn = router.getMockApiFn('slm.putLifecycle');
+  const executeLifecycleFn = router.getMockApiFn('slm.executeLifecycle');
+  const deleteLifecycleFn = router.getMockApiFn('slm.deleteLifecycle');
+  const resolveIndicesFn = router.getMockApiFn('indices.resolveIndex');
 
   beforeAll(() => {
     registerPolicyRoutes({
-      router: router as any,
       ...routeDependencies,
+      router,
     });
   });
 
@@ -64,7 +75,8 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
         fooPolicy: mockEsPolicy,
         barPolicy: mockEsPolicy,
       };
-      router.callAsCurrentUserResponses = [[], mockEsResponse];
+      getClusterSettingsFn.mockResolvedValue({ body: {} });
+      getLifecycleFn.mockResolvedValue({ body: mockEsResponse });
       const expectedResponse = {
         policies: [
           {
@@ -84,7 +96,8 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
 
     it('should return empty array if no repositories returned from ES', async () => {
       const mockEsResponse = {};
-      router.callAsCurrentUserResponses = [[], mockEsResponse];
+      getClusterSettingsFn.mockResolvedValue({ body: {} });
+      getLifecycleFn.mockResolvedValue({ body: mockEsResponse });
       const expectedResponse = { policies: [] };
       await expect(router.runRequest(mockRequest)).resolves.toEqual({
         body: expectedResponse,
@@ -92,11 +105,8 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
     });
 
     it('should throw if ES error', async () => {
-      router.callAsCurrentUserResponses = [
-        jest.fn().mockRejectedValueOnce(new Error()), // Get managed policyNames will silently fail
-        jest.fn().mockRejectedValueOnce(new Error()), // Call to 'sr.policies'
-      ];
-
+      getClusterSettingsFn.mockRejectedValue(new Error()); // Get managed policyNames should silently fail
+      getLifecycleFn.mockRejectedValue(new Error());
       await expect(router.runRequest(mockRequest)).rejects.toThrowError();
     });
   });
@@ -116,7 +126,8 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
         [name]: mockEsPolicy,
       };
 
-      router.callAsCurrentUserResponses = [mockEsResponse, {}];
+      getLifecycleFn.mockResolvedValue({ body: mockEsResponse });
+      getClusterSettingsFn.mockResolvedValue({ body: {} });
 
       const expectedResponse = {
         policy: {
@@ -130,14 +141,20 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
     });
 
     it('should return 404 error if not returned from ES', async () => {
-      router.callAsCurrentUserResponses = [{}, {}];
+      getLifecycleFn.mockRejectedValue({
+        name: 'ResponseError',
+        body: {},
+        statusCode: 404,
+      });
+      getClusterSettingsFn.mockResolvedValue({});
 
       const response = await router.runRequest(mockRequest);
-      expect(response.status).toBe(404);
+      expect(response.statusCode).toBe(404);
     });
 
     it('should throw if ES error', async () => {
-      router.callAsCurrentUserResponses = [jest.fn().mockRejectedValueOnce(new Error())];
+      getLifecycleFn.mockRejectedValueOnce(new Error('something unexpected'));
+      getClusterSettingsFn.mockResolvedValueOnce({ body: {} });
 
       await expect(router.runRequest(mockRequest)).rejects.toThrowError();
     });
@@ -158,7 +175,7 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
       const mockEsResponse = {
         snapshot_name: 'foo-policy-snapshot',
       };
-      router.callAsCurrentUserResponses = [mockEsResponse];
+      executeLifecycleFn.mockResolvedValue({ body: mockEsResponse });
 
       const expectedResponse = {
         snapshotName: 'foo-policy-snapshot',
@@ -170,7 +187,7 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
     });
 
     it('should throw if ES error', async () => {
-      router.callAsCurrentUserResponses = [jest.fn().mockRejectedValueOnce(new Error())];
+      executeLifecycleFn.mockRejectedValue(new Error());
 
       await expect(router.runRequest(mockRequest)).rejects.toThrowError();
     });
@@ -189,7 +206,7 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
 
     it('should return successful ES responses', async () => {
       const mockEsResponse = { acknowledged: true };
-      router.callAsCurrentUserResponses = [mockEsResponse, mockEsResponse];
+      deleteLifecycleFn.mockResolvedValue({ body: mockEsResponse });
 
       const expectedResponse = { itemsDeleted: names, errors: [] };
       await expect(router.runRequest(mockRequest)).resolves.toEqual({
@@ -202,10 +219,7 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
       mockEsError.response = '{}';
       mockEsError.statusCode = 500;
 
-      router.callAsCurrentUserResponses = [
-        jest.fn().mockRejectedValueOnce(mockEsError),
-        jest.fn().mockRejectedValueOnce(mockEsError),
-      ];
+      deleteLifecycleFn.mockRejectedValue(mockEsError);
 
       const expectedResponse = {
         itemsDeleted: [],
@@ -228,10 +242,8 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
       mockEsError.statusCode = 500;
       const mockEsResponse = { acknowledged: true };
 
-      router.callAsCurrentUserResponses = [
-        jest.fn().mockRejectedValueOnce(mockEsError),
-        mockEsResponse,
-      ];
+      deleteLifecycleFn.mockRejectedValueOnce(mockEsError);
+      deleteLifecycleFn.mockResolvedValueOnce({ body: mockEsResponse });
 
       const expectedResponse = {
         itemsDeleted: [names[1]],
@@ -264,7 +276,9 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
 
     it('should return successful ES response', async () => {
       const mockEsResponse = { acknowledged: true };
-      router.callAsCurrentUserResponses = [{}, mockEsResponse];
+
+      getLifecycleFn.mockResolvedValue({ body: {} });
+      putLifecycleFn.mockResolvedValue({ body: mockEsResponse });
 
       const expectedResponse = { ...mockEsResponse };
       await expect(router.runRequest(mockRequest)).resolves.toEqual({
@@ -274,14 +288,15 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
 
     it('should return error if policy with the same name already exists', async () => {
       const mockEsResponse = { [name]: {} };
-      router.callAsCurrentUserResponses = [mockEsResponse];
+      getLifecycleFn.mockResolvedValue({ body: mockEsResponse });
 
       const response = await router.runRequest(mockRequest);
       expect(response.status).toBe(409);
     });
 
     it('should throw if ES error', async () => {
-      router.callAsCurrentUserResponses = [{}, jest.fn().mockRejectedValueOnce(new Error())];
+      getLifecycleFn.mockResolvedValue({ body: {} });
+      putLifecycleFn.mockRejectedValue(new Error());
 
       await expect(router.runRequest(mockRequest)).rejects.toThrowError();
     });
@@ -302,14 +317,15 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
 
     it('should return successful ES response', async () => {
       const mockEsResponse = { acknowledged: true };
-      router.callAsCurrentUserResponses = [{ [name]: {} }, mockEsResponse];
+      getLifecycleFn.mockResolvedValue({ body: { [name]: {} } });
+      putLifecycleFn.mockResolvedValue({ body: mockEsResponse });
 
       const expectedResponse = { ...mockEsResponse };
       await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
     });
 
     it('should throw if ES error', async () => {
-      router.callAsCurrentUserResponses = [jest.fn().mockRejectedValueOnce(new Error())];
+      getLifecycleFn.mockRejectedValue(new Error());
 
       await expect(router.runRequest(mockRequest)).rejects.toThrowError();
     });
@@ -343,7 +359,8 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
           },
         ],
       };
-      router.callAsCurrentUserResponses = [mockEsResponse];
+
+      resolveIndicesFn.mockResolvedValue({ body: mockEsResponse });
 
       const expectedResponse = {
         indices: ['fooIndex'],
@@ -358,14 +375,14 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
         aliases: [],
         data_streams: [],
       };
-      router.callAsCurrentUserResponses = [mockEsResponse];
+      resolveIndicesFn.mockResolvedValue({ body: mockEsResponse });
 
       const expectedResponse = { indices: [], dataStreams: [] };
       await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
     });
 
     it('should throw if ES error', async () => {
-      router.callAsCurrentUserResponses = [jest.fn().mockRejectedValueOnce(new Error())];
+      resolveIndicesFn.mockRejectedValueOnce(new Error());
 
       await expect(router.runRequest(mockRequest)).rejects.toThrowError();
     });
@@ -383,14 +400,14 @@ describe('[Snapshot and Restore API Routes] Policy', () => {
 
     it('should return successful ES response', async () => {
       const mockEsResponse = { acknowledged: true };
-      router.callAsCurrentUserResponses = [mockEsResponse];
+      putClusterSettingsFn.mockResolvedValue({ body: mockEsResponse });
 
       const expectedResponse = { ...mockEsResponse };
       await expect(router.runRequest(mockRequest)).resolves.toEqual({ body: expectedResponse });
     });
 
     it('should throw if ES error', async () => {
-      router.callAsCurrentUserResponses = [jest.fn().mockRejectedValueOnce(new Error())];
+      putClusterSettingsFn.mockRejectedValue(new Error());
 
       await expect(router.runRequest(mockRequest)).rejects.toThrowError();
     });

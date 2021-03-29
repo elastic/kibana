@@ -29,12 +29,21 @@ const defaultSnapshot = {
 };
 
 describe('[Snapshot and Restore API Routes] Snapshots', () => {
-  const router = new RouterMock('snapshotRestore.client');
+  const router = new RouterMock();
+
+  /**
+   * ES APIs used by these endpoints
+   */
+  const getClusterSettingsFn = router.getMockApiFn('cluster.getSettings');
+  const getLifecycleFn = router.getMockApiFn('slm.getLifecycle');
+  const getRepoFn = router.getMockApiFn('snapshot.getRepository');
+  const getSnapshotFn = router.getMockApiFn('snapshot.get');
+  const deleteSnapshotFn = router.getMockApiFn('snapshot.delete');
 
   beforeAll(() => {
     registerSnapshotsRoutes({
-      router: router as any,
       ...routeDependencies,
+      router,
     });
   });
 
@@ -60,31 +69,29 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
         barRepository: {},
       };
 
-      const mockGetSnapshotsFooResponse = Promise.resolve({
+      const mockGetSnapshotsFooResponse = {
         responses: [
           {
             repository: 'fooRepository',
             snapshots: [{ snapshot: 'snapshot1' }],
           },
         ],
-      });
+      };
 
-      const mockGetSnapshotsBarResponse = Promise.resolve({
+      const mockGetSnapshotsBarResponse = {
         responses: [
           {
             repository: 'barRepository',
             snapshots: [{ snapshot: 'snapshot2' }],
           },
         ],
-      });
+      };
 
-      router.callAsCurrentUserResponses = [
-        mockSnapshotGetManagedRepositoryEsResponse,
-        mockSnapshotGetPolicyEsResponse,
-        mockSnapshotGetRepositoryEsResponse,
-        mockGetSnapshotsFooResponse,
-        mockGetSnapshotsBarResponse,
-      ];
+      getClusterSettingsFn.mockResolvedValue({ body: mockSnapshotGetManagedRepositoryEsResponse });
+      getLifecycleFn.mockResolvedValue({ body: mockSnapshotGetPolicyEsResponse });
+      getRepoFn.mockResolvedValue({ body: mockSnapshotGetRepositoryEsResponse });
+      getSnapshotFn.mockResolvedValueOnce({ body: mockGetSnapshotsFooResponse });
+      getSnapshotFn.mockResolvedValueOnce({ body: mockGetSnapshotsBarResponse });
 
       const expectedResponse = {
         errors: {},
@@ -120,11 +127,9 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
       const mockSnapshotGetPolicyEsResponse = {};
       const mockSnapshotGetRepositoryEsResponse = {};
 
-      router.callAsCurrentUserResponses = [
-        mockSnapshotGetManagedRepositoryEsResponse,
-        mockSnapshotGetPolicyEsResponse,
-        mockSnapshotGetRepositoryEsResponse,
-      ];
+      getClusterSettingsFn.mockResolvedValue({ body: mockSnapshotGetManagedRepositoryEsResponse });
+      getLifecycleFn.mockResolvedValue({ body: mockSnapshotGetPolicyEsResponse });
+      getRepoFn.mockResolvedValue({ body: mockSnapshotGetRepositoryEsResponse });
 
       const expectedResponse = {
         errors: [],
@@ -138,11 +143,9 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
     });
 
     test('throws if ES error', async () => {
-      router.callAsCurrentUserResponses = [
-        jest.fn().mockRejectedValueOnce(new Error('Error getting managed repository')),
-        jest.fn().mockRejectedValueOnce(new Error('Error getting policies')),
-        jest.fn().mockRejectedValueOnce(new Error('Error getting repository')),
-      ];
+      getClusterSettingsFn.mockRejectedValueOnce(new Error());
+      getLifecycleFn.mockRejectedValueOnce(new Error());
+      getRepoFn.mockRejectedValueOnce(new Error());
 
       await expect(router.runRequest(mockRequest)).rejects.toThrowError();
     });
@@ -177,10 +180,8 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
         ],
       };
 
-      router.callAsCurrentUserResponses = [
-        mockSnapshotGetManagedRepositoryEsResponse,
-        mockSnapshotGetEsResponse,
-      ];
+      getClusterSettingsFn.mockResolvedValue({ body: mockSnapshotGetManagedRepositoryEsResponse });
+      getSnapshotFn.mockResolvedValueOnce({ body: mockSnapshotGetEsResponse });
 
       const expectedResponse = {
         ...defaultSnapshot,
@@ -215,12 +216,13 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
         ],
       };
 
-      router.callAsCurrentUserResponses = [
-        mockSnapshotGetManagedRepositoryEsResponse,
-        mockSnapshotGetEsResponse,
-      ];
+      getClusterSettingsFn.mockResolvedValue({ body: mockSnapshotGetManagedRepositoryEsResponse });
+      getSnapshotFn.mockResolvedValueOnce({ body: mockSnapshotGetEsResponse });
 
-      await expect(router.runRequest(mockRequest)).rejects.toThrowError();
+      await expect(router.runRequest(mockRequest)).resolves.toEqual({
+        body: 'Snapshot not found',
+        status: 404,
+      });
     });
   });
 
@@ -243,7 +245,8 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
     it('should return successful ES responses', async () => {
       const mockEsResponse = { acknowledged: true };
 
-      router.callAsCurrentUserResponses = [mockEsResponse, mockEsResponse];
+      deleteSnapshotFn.mockResolvedValueOnce({ body: mockEsResponse });
+      deleteSnapshotFn.mockResolvedValueOnce({ body: mockEsResponse });
 
       const expectedResponse = {
         itemsDeleted: [
@@ -261,10 +264,8 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
       mockEsError.response = '{}';
       mockEsError.statusCode = 500;
 
-      router.callAsCurrentUserResponses = [
-        jest.fn().mockRejectedValueOnce(mockEsError),
-        jest.fn().mockRejectedValueOnce(mockEsError),
-      ];
+      deleteSnapshotFn.mockRejectedValueOnce(mockEsError);
+      deleteSnapshotFn.mockRejectedValueOnce(mockEsError);
 
       const expectedResponse = {
         itemsDeleted: [],
@@ -289,10 +290,8 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
       mockEsError.statusCode = 500;
       const mockEsResponse = { acknowledged: true };
 
-      router.callAsCurrentUserResponses = [
-        jest.fn().mockRejectedValueOnce(mockEsError),
-        mockEsResponse,
-      ];
+      deleteSnapshotFn.mockRejectedValueOnce(mockEsError);
+      deleteSnapshotFn.mockResolvedValueOnce({ body: mockEsResponse });
 
       const expectedResponse = {
         itemsDeleted: [{ snapshot: 'snapshot-2', repository: 'barRepository' }],
