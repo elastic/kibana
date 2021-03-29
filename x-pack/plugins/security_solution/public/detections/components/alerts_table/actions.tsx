@@ -21,7 +21,7 @@ import {
   UpdateAlertStatusActionProps,
 } from './types';
 import { Ecs } from '../../../../common/ecs';
-import { GetOneTimeline, TimelineResult } from '../../../graphql/types';
+import { TimelineResult } from '../../../graphql/types';
 import {
   TimelineNonEcsData,
   TimelineEventsDetailsItem,
@@ -29,7 +29,6 @@ import {
   TimelineEventsDetailsStrategyResponse,
   TimelineEventsQueries,
 } from '../../../../common/search_strategy/timeline';
-import { oneTimelineQuery } from '../../../timelines/containers/one/index.gql_query';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import {
   omitTypenameInTimeline,
@@ -47,6 +46,7 @@ import {
   QueryOperator,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { esFilters } from '../../../../../../../src/plugins/data/public';
+import { getTimelineTemplate } from '../../../timelines/containers/api';
 
 export const getUpdateAlertsQuery = (eventIds: Readonly<string[]>) => {
   return {
@@ -362,7 +362,6 @@ export const buildEqlDataProviderOrFilter = (
 };
 
 export const sendAlertToTimelineAction = async ({
-  apolloClient,
   createTimeline,
   ecsData: ecs,
   nonEcsData,
@@ -381,18 +380,11 @@ export const sendAlertToTimelineAction = async ({
   const { to, from } = determineToAndFrom({ ecs });
 
   // For now we do not want to populate the template timeline if we have alertIds
-  if (!isEmpty(timelineId) && apolloClient != null && isEmpty(alertIds)) {
+  if (!isEmpty(timelineId) && isEmpty(alertIds)) {
     try {
       updateTimelineIsLoading({ id: TimelineId.active, isLoading: true });
       const [responseTimeline, eventDataResp] = await Promise.all([
-        apolloClient.query<GetOneTimeline.Query, GetOneTimeline.Variables>({
-          query: oneTimelineQuery,
-          fetchPolicy: 'no-cache',
-          variables: {
-            id: timelineId,
-            timelineType: TimelineType.template,
-          },
-        }),
+        getTimelineTemplate(timelineId),
         searchStrategyClient
           .search<TimelineEventsDetailsRequestOptions, TimelineEventsDetailsStrategyResponse>(
             {

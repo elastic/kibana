@@ -14,7 +14,6 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 import '../../../common/mock/match_media';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import {
-  apolloClientObservable,
   mockGlobalState,
   mockIndexPattern,
   TestProviders,
@@ -35,22 +34,10 @@ describe('NetworkTopCountries Table Component', () => {
   const mount = useMountAppended();
 
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    apolloClientObservable,
-    kibanaObservable,
-    storage
-  );
+  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
   beforeEach(() => {
-    store = createStore(
-      state,
-      SUB_PLUGINS_REDUCER,
-      apolloClientObservable,
-      kibanaObservable,
-      storage
-    );
+    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   });
 
   describe('rendering', () => {

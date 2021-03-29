@@ -56,7 +56,6 @@ export interface TimelineEpicDependencies<State> {
   timelineTimeRangeSelector: (state: State) => inputsModel.TimeRange;
   selectAllTimelineQuery: () => (state: State, id: string) => inputsModel.GlobalQuery;
   selectNotesByIdSelector: (state: State) => NotesById;
-  apolloClient$: Observable<AppApolloClient>;
   kibana$: Observable<CoreStart>;
   storage: Storage;
 }

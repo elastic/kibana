@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { ApolloClient } from 'apollo-client';
-import { NormalizedCacheObject } from 'apollo-cache-inmemory';
 import { get } from 'lodash/fp';
 import { Action } from 'redux';
 import { Epic } from 'redux-observable';
@@ -34,7 +32,6 @@ import { persistNote } from '../../containers/notes/api';
 export const timelineNoteActionsType = [addNote.type, addNoteToEvent.type];
 
 export const epicPersistNote = (
-  apolloClient: ApolloClient<NormalizedCacheObject>,
   action: ActionTimeline,
   timeline: TimelineById,
   notes: NotesById,
@@ -45,23 +42,6 @@ export const epicPersistNote = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Observable<any> =>
   from(
-    // apolloClient.mutate<
-    //   PersistTimelineNoteMutation.Mutation,
-    //   PersistTimelineNoteMutation.Variables
-    // >({
-    //   mutation: persistTimelineNoteMutation,
-    //   fetchPolicy: 'no-cache',
-    //   variables: {
-    //     noteId: null,
-    //     version: null,
-    //     note: {
-    //       eventId: action.payload.eventId,
-    //       note: getNote(action.payload.noteId, notes),
-    //       timelineId: myEpicTimelineId.getTimelineId(),
-    //     },
-    //   },
-    //   refetchQueries,
-    // })
     persistNote({
       noteId: null,
       version: null,

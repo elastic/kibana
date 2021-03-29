@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { NormalizedCacheObject } from 'apollo-cache-inmemory';
-import { ApolloClient } from 'apollo-client';
 import { get } from 'lodash/fp';
 import { Action } from 'redux';
 import { Epic } from 'redux-observable';
@@ -32,7 +30,6 @@ import { persistFavorite } from '../../containers/api';
 export const timelineFavoriteActionsType = [updateIsFavorite.type];
 
 export const epicPersistTimelineFavorite = (
-  apolloClient: ApolloClient<NormalizedCacheObject>,
   action: ActionTimeline,
   timeline: TimelineById,
   action$: Observable<Action>,

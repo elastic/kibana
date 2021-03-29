@@ -8,11 +8,10 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { DeleteTimelineMutation, SortFieldTimeline, Direction } from '../../../graphql/types';
+import { SortFieldTimeline, Direction } from '../../../graphql/types';
 import { sourcererSelectors } from '../../../common/store';
 import { useShallowEqualSelector, useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { TimelineId } from '../../../../common/types/timeline';
-import { useApolloClient } from '../../../common/utils/apollo_context';
 import { TimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import {
@@ -20,7 +19,6 @@ import {
   updateIsLoading as dispatchUpdateIsLoading,
 } from '../../../timelines/store/timeline/actions';
 
-import { deleteTimelineMutation } from '../../containers/delete/persist.gql_query';
 import { useGetAllTimeline } from '../../containers/all';
 
 import { defaultHeaders } from '../timeline/body/column_headers/default_headers';
@@ -85,7 +83,6 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     setImportDataModalToggle,
     title,
   }) => {
-    const apolloClient = useApolloClient();
     const dispatch = useDispatch();
     /** Required by EuiTable for expandable rows: a map of `TimelineResult.savedObjectId` to rendered notes */
     const [itemIdToExpandedNotesRowMap, setItemIdToExpandedNotesRowMap] = useState<
@@ -215,16 +212,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
           );
         }
 
-        // await apolloClient!.mutate<
-        //   DeleteTimelineMutation.Mutation,
-        //   DeleteTimelineMutation.Variables
-        // >({
-        //   mutation: deleteTimelineMutation,
-        //   fetchPolicy: 'no-cache',
-        //   variables: { id: timelineIds },
-        // });
-
-        await deleteTimelinesByIds({ savedObjectIds: timelineIds });
+        await deleteTimelinesByIds(timelineIds);
         refetch();
       },
       [dispatch, existingIndexNames, refetch, timelineSavedObjectId]
@@ -294,7 +282,6 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         }
 
         queryTimelineById({
-          apolloClient,
           duplicate,
           onOpenTimeline,
           timelineId,
@@ -304,7 +291,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         });
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      [apolloClient, updateIsLoading, updateTimeline]
+      [updateIsLoading, updateTimeline]
     );
 
     useEffect(() => {

@@ -9,7 +9,7 @@ import gql from 'graphql-tag';
 
 export const oneTimelineQuery = gql`
   query GetOneTimeline($id: ID!, $timelineType: TimelineType) {
-    getOneTimeline(id: $id, timelineType: $timelineType) {
+    getOneTimeline() {
       savedObjectId
       columns {
         aggregatable

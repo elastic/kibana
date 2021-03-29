@@ -22,7 +22,6 @@ import {
   initialState as userInfoState,
 } from '../../../detections/components/user_info';
 import {
-  apolloClientObservable,
   createSecuritySolutionStorageMock,
   kibanaObservable,
   mockGlobalState,
@@ -112,24 +111,12 @@ describe('Sourcerer Hooks', () => {
     },
   };
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    apolloClientObservable,
-    kibanaObservable,
-    storage
-  );
+  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
   beforeEach(() => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
-    store = createStore(
-      state,
-      SUB_PLUGINS_REDUCER,
-      apolloClientObservable,
-      kibanaObservable,
-      storage
-    );
+    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     mockUseUserInfo.mockImplementation(() => userInfoState);
   });
   it('initializes loading default and timeline index patterns', async () => {

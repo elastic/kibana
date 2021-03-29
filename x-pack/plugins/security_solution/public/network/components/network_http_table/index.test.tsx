@@ -13,7 +13,6 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import '../../../common/mock/match_media';
 import {
-  apolloClientObservable,
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
@@ -34,23 +33,11 @@ describe('NetworkHttp Table Component', () => {
   const state: State = mockGlobalState;
 
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    apolloClientObservable,
-    kibanaObservable,
-    storage
-  );
+  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   const mount = useMountAppended();
 
   beforeEach(() => {
-    store = createStore(
-      state,
-      SUB_PLUGINS_REDUCER,
-      apolloClientObservable,
-      kibanaObservable,
-      storage
-    );
+    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   });
 
   describe('rendering', () => {

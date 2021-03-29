@@ -14,7 +14,6 @@ import '../../../common/mock/match_media';
 import {
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
-  apolloClientObservable,
   TestProviders,
   defaultHeaders,
   createSecuritySolutionStorageMock,
@@ -50,13 +49,7 @@ const addTimelineInStorageMock = addTimelineInStorage as jest.Mock;
 describe('epicLocalStorage', () => {
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    apolloClientObservable,
-    kibanaObservable,
-    storage
-  );
+  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
   let props = {} as QueryTabContentComponentProps;
   const sort: Sort[] = [
@@ -70,13 +63,7 @@ describe('epicLocalStorage', () => {
   const endDate = '2018-03-24T03:33:52.253Z';
 
   beforeEach(() => {
-    store = createStore(
-      state,
-      SUB_PLUGINS_REDUCER,
-      apolloClientObservable,
-      kibanaObservable,
-      storage
-    );
+    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     props = {
       columns: defaultHeaders,
       dataProviders: mockDataProviders,

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { NormalizedCacheObject } from 'apollo-cache-inmemory';
-import { ApolloClient } from 'apollo-client';
 import { get, omit } from 'lodash/fp';
 import { Action } from 'redux';
 import { Epic } from 'redux-observable';
@@ -33,7 +31,6 @@ import { persistPinnedEvent } from '../../containers/pinned_event/api';
 export const timelinePinnedEventActionsType = [pinEvent.type, unPinEvent.type];
 
 export const epicPersistPinnedEvent = (
-  apolloClient: ApolloClient<NormalizedCacheObject>,
   action: ActionTimeline,
   timeline: TimelineById,
   action$: Observable<Action>,

@@ -537,7 +537,7 @@ export const getTimelinesArgs = runtimeTypes.partial({
   onlyUserFavorite: unionWithNullType(runtimeTypes.boolean),
   pageInfo: unionWithNullType(pageInfoTimeline),
   search: unionWithNullType(runtimeTypes.string),
-  sort: sortTimeline,
+  sort: unionWithNullType(sortTimeline),
   status: unionWithNullType(TimelineStatusLiteralRt),
   timelineType: unionWithNullType(TimelineTypeLiteralRt),
 });

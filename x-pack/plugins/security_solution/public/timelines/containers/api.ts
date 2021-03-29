@@ -22,11 +22,11 @@ import {
   ImportTimelineResultSchema,
   importTimelineResultSchema,
   ResponseFavoriteTimeline,
-  GetTimelinesArgs,
   AllTimelinesResponse,
   SingleTimelineResponseType,
   allTimelinesResponse,
   responseFavoriteTimeline,
+  GetTimelinesArgs,
 } from '../../../common/types/timeline';
 import { TimelineInput, TimelineType } from '../../graphql/types';
 import {
@@ -35,8 +35,8 @@ import {
   TIMELINE_IMPORT_URL,
   TIMELINE_EXPORT_URL,
   TIMELINE_PREPACKAGED_URL,
-  TIMELINE_FAVORITE_URL,
   TIMELINES_URL,
+  TIMELINE_FAVORITE_URL,
 } from '../../../common/constants';
 
 import { KibanaServices } from '../../common/lib/kibana';
@@ -273,6 +273,16 @@ export const getTimeline = async (id: string) => {
   const response = await KibanaServices.get().http.get<TimelineResponse>(TIMELINE_URL, {
     query: {
       id,
+    },
+  });
+
+  return decodeSingleTimelineResponse(response);
+};
+
+export const getTimelineTemplate = async (templateTimelineId: string) => {
+  const response = await KibanaServices.get().http.get<TimelineResponse>(TIMELINE_URL, {
+    query: {
+      template_timeline_id: templateTimelineId,
     },
   });
 

@@ -10,7 +10,6 @@ import React from 'react';
 
 import '../../../../common/mock/match_media';
 import {
-  apolloClientObservable,
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
@@ -39,13 +38,7 @@ describe('Expandable Host Component', () => {
   };
 
   const { storage } = createSecuritySolutionStorageMock();
-  const store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    apolloClientObservable,
-    kibanaObservable,
-    storage
-  );
+  const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
   const mockProps = {
     contextID: 'text-context',

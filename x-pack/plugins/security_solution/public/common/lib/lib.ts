@@ -8,10 +8,6 @@
 import { NormalizedCacheObject } from 'apollo-cache-inmemory';
 import ApolloClient from 'apollo-client';
 
-export interface AppFrontendLibs {
-  apolloClient: AppApolloClient;
-}
-
 export type AppTimezoneProvider = () => string;
 
 export type AppApolloClient = ApolloClient<NormalizedCacheObject>;

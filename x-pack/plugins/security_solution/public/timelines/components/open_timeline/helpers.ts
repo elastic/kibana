@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import ApolloClient from 'apollo-client';
 import { set } from '@elastic/safer-lodash-set/fp';
 import { getOr, isEmpty } from 'lodash/fp';
 import { Action } from 'typescript-fsa';
@@ -309,7 +308,6 @@ export const formatTimelineResultToModel = (
 
 export interface QueryTimelineById<TCache> {
   activeTimelineTab?: TimelineTabs;
-  apolloClient: ApolloClient<TCache> | ApolloClient<{}> | undefined;
   duplicate?: boolean;
   graphEventId?: string;
   timelineId: string;
@@ -328,7 +326,6 @@ export interface QueryTimelineById<TCache> {
 
 export const queryTimelineById = <TCache>({
   activeTimelineTab = TimelineTabs.query,
-  apolloClient,
   duplicate = false,
   graphEventId = '',
   timelineId,

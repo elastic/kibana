@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import ApolloClient from 'apollo-client';
 import { EuiHorizontalRule, EuiText } from '@elastic/eui';
 import React, { useCallback, useMemo, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
@@ -32,13 +31,12 @@ import { useFormatUrl } from '../../../common/components/link_to';
 import { LinkAnchor } from '../../../common/components/links';
 
 interface Props {
-  apolloClient: ApolloClient<{}>;
   filterBy: FilterMode;
 }
 
 const PAGE_SIZE = 3;
 
-const StatefulRecentTimelinesComponent: React.FC<Props> = ({ apolloClient, filterBy }) => {
+const StatefulRecentTimelinesComponent: React.FC<Props> = ({ filterBy }) => {
   const dispatch = useDispatch();
   const updateIsLoading = useCallback((payload) => dispatch(dispatchUpdateIsLoading(payload)), [
     dispatch,
@@ -50,14 +48,13 @@ const StatefulRecentTimelinesComponent: React.FC<Props> = ({ apolloClient, filte
   const onOpenTimeline: OnOpenTimeline = useCallback(
     ({ duplicate, timelineId }) => {
       queryTimelineById({
-        apolloClient,
         duplicate,
         timelineId,
         updateIsLoading,
         updateTimeline,
       });
     },
-    [apolloClient, updateIsLoading, updateTimeline]
+    [updateIsLoading, updateTimeline]
   );
 
   const goToTimelines = useCallback(

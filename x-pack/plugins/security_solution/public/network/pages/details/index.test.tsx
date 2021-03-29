@@ -13,7 +13,6 @@ import '../../../common/mock/match_media';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { FlowTarget } from '../../../graphql/types';
 import {
-  apolloClientObservable,
   mockGlobalState,
   TestProviders,
   SUB_PLUGINS_REDUCER,
@@ -109,22 +108,10 @@ describe('Network Details', () => {
 
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(
-    state,
-    SUB_PLUGINS_REDUCER,
-    apolloClientObservable,
-    kibanaObservable,
-    storage
-  );
+  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
   beforeEach(() => {
-    store = createStore(
-      state,
-      SUB_PLUGINS_REDUCER,
-      apolloClientObservable,
-      kibanaObservable,
-      storage
-    );
+    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   });
 
   test('it renders', () => {

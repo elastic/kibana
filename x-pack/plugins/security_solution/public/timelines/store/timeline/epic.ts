@@ -133,7 +133,6 @@ export const createTimelineEpic = <State>(): Epic<
     selectNotesByIdSelector,
     timelineByIdSelector,
     timelineTimeRangeSelector,
-    apolloClient$,
     kibana$,
   }
 ) => {
@@ -195,8 +194,8 @@ export const createTimelineEpic = <State>(): Epic<
     ),
     dispatcherTimelinePersistQueue.pipe(
       delay(500),
-      withLatestFrom(timeline$, apolloClient$, notes$, timelineTimeRange$),
-      concatMap(([objAction, timeline, apolloClient, notes, timelineTimeRange]) => {
+      withLatestFrom(timeline$, notes$, timelineTimeRange$),
+      concatMap(([objAction, timeline, notes, timelineTimeRange]) => {
         const action: ActionTimeline = get('action', objAction);
         const timelineId = myEpicTimelineId.getTimelineId();
         const version = myEpicTimelineId.getTimelineVersion();
@@ -205,7 +204,6 @@ export const createTimelineEpic = <State>(): Epic<
 
         if (timelineNoteActionsType.includes(action.type)) {
           return epicPersistNote(
-            apolloClient,
             action,
             timeline,
             notes,
@@ -215,17 +213,9 @@ export const createTimelineEpic = <State>(): Epic<
             allTimelineQuery$
           );
         } else if (timelinePinnedEventActionsType.includes(action.type)) {
-          return epicPersistPinnedEvent(
-            apolloClient,
-            action,
-            timeline,
-            action$,
-            timeline$,
-            allTimelineQuery$
-          );
+          return epicPersistPinnedEvent(action, timeline, action$, timeline$, allTimelineQuery$);
         } else if (timelineFavoriteActionsType.includes(action.type)) {
           return epicPersistTimelineFavorite(
-            apolloClient,
             action,
             timeline,
             action$,
