@@ -20,6 +20,7 @@ import { ConfigSchema } from '../../../config';
 import {
   createSessionStateContainer,
   SearchSessionState,
+  SessionMeta,
   SessionStateContainer,
 } from './search_session_state';
 import { ISessionsClient } from './sessions_client';
@@ -78,7 +79,7 @@ export class SessionService {
   public readonly state$: Observable<SearchSessionState>;
   private readonly state: SessionStateContainer<TrackSearchDescriptor>;
 
-  public readonly searchSessionName$: Observable<string | undefined>;
+  public readonly sessionMeta$: Observable<SessionMeta>;
   private searchSessionInfoProvider?: SearchSessionInfoProvider;
   private searchSessionIndicatorUiConfig?: Partial<SearchSessionIndicatorUiConfig>;
   private subscription = new Subscription();
@@ -97,20 +98,24 @@ export class SessionService {
     const {
       stateContainer,
       sessionState$,
-      sessionStartTime$,
-      searchSessionName$,
+      sessionMeta$,
     } = createSessionStateContainer<TrackSearchDescriptor>({
       freeze: freezeState,
     });
     this.state$ = sessionState$;
     this.state = stateContainer;
-    this.searchSessionName$ = searchSessionName$;
+    this.sessionMeta$ = sessionMeta$;
 
     this.subscription.add(
-      sessionStartTime$.subscribe((startTime) => {
-        if (startTime) this.nowProvider.set(startTime);
-        else this.nowProvider.reset();
-      })
+      sessionMeta$
+        .pipe(
+          map((meta) => meta.startTime),
+          distinctUntilChanged()
+        )
+        .subscribe((startTime) => {
+          if (startTime) this.nowProvider.set(startTime);
+          else this.nowProvider.reset();
+        })
     );
 
     getStartServices().then(([coreStart]) => {

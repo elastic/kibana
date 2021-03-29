@@ -12,7 +12,6 @@ exports[`UptimeDatePicker component renders properly with mock data 1`] = `
     >
       <div
         class="euiPopover euiPopover--anchorDownLeft"
-        id="QuickSelectPopover"
       >
         <div
           class="euiPopover__anchor euiQuickSelectPopover__anchor"

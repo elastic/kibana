@@ -431,10 +431,39 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    public async setIndexPatternValue(value: string) {
-      const el = await testSubjects.find('metricsIndexPatternInput');
-      await el.clearValue();
-      await el.type(value, { charByChar: true });
+    public async clickDataTab(tabName: string) {
+      await testSubjects.click(`${tabName}EditorDataBtn`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    public async switchIndexPatternSelectionMode(useKibanaIndices: boolean) {
+      await testSubjects.click('switchIndexPatternSelectionModePopover');
+      await testSubjects.setEuiSwitch(
+        'switchIndexPatternSelectionMode',
+        useKibanaIndices ? 'check' : 'uncheck'
+      );
+    }
+
+    public async setIndexPatternValue(value: string, useKibanaIndices?: boolean) {
+      const metricsIndexPatternInput = 'metricsIndexPatternInput';
+
+      if (useKibanaIndices !== undefined) {
+        await this.switchIndexPatternSelectionMode(useKibanaIndices);
+      }
+
+      if (useKibanaIndices === false) {
+        const el = await testSubjects.find(metricsIndexPatternInput);
+        await el.clearValue();
+        if (value) {
+          await el.type(value, { charByChar: true });
+        }
+      } else {
+        await comboBox.clearInputField(metricsIndexPatternInput);
+        if (value) {
+          await comboBox.setCustom(metricsIndexPatternInput, value);
+        }
+      }
+
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
@@ -613,6 +642,16 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
         '.tvbAggRow--split [data-test-subj="comboBoxInput"]'
       );
       return await comboBox.isOptionSelected(groupBy, value);
+    }
+
+    public async setMetricsDataTimerangeMode(value: string) {
+      const dataTimeRangeMode = await testSubjects.find('dataTimeRangeMode');
+      return await comboBox.setElement(dataTimeRangeMode, value);
+    }
+
+    public async checkSelectedDataTimerangeMode(value: string) {
+      const dataTimeRangeMode = await testSubjects.find('dataTimeRangeMode');
+      return await comboBox.isOptionSelected(dataTimeRangeMode, value);
     }
   }
 
