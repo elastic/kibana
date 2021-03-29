@@ -41,19 +41,6 @@ __<<logging-appenders,Appenders>>__ define where log messages are displayed (eg.
 
 __<<logging-layouts,Layouts>>__ define how log messages are formatted and what type of information they include.
 
-[[logger-hierarchy]]
-=== Logger hierarchy
-
-Every logger has a unique name that follows a hierarchical naming rule. The logger is considered to be an
-ancestor of another logger if its name followed by a `.` is a prefix of the descendant logger. For example, a logger
-named `a.b` is an ancestor of logger `a.b.c`. All top-level loggers are descendants of a special `root` logger at the top of the logger hierarchy. The `root` logger always exists and
-fully configured.
-
-You can configure _<<log-level, log level>>_ and _appenders_ for a specific logger. If a logger only has a _log level_ configured, then the _appenders_ configuration applied to the logger is inherited from the ancestor logger.
-
-NOTE: In the current implementation we __don't support__ so called _appender additivity_ when log messages are forwarded to _every_ distinct appender within
-ancestor chain including `root`. That means that log messages are only forwarded to appenders that are configured for a particular logger. If a logger doesn't have any appenders configured, the configuration of that particular logger will be inherited from its closest ancestor. 
-
 [[log-level]]
 === Log level
 
@@ -66,7 +53,6 @@ the log record is ignored.
 
 The _all_ and _off_ levels can be used only in configuration and are just handy shortcuts that allow you to log every
 log record or disable logging entirely or for a specific logger. These levels are also configurable as <<logging-cli-migration,cli arguments>>.
-
 
 [[logging-layouts]]
 === Layouts
@@ -414,6 +400,19 @@ logging:
       appenders: [censor] # pass these logs to our rewrite appender
       level: debug
 ----
+
+[[logger-hierarchy]]
+=== Logger hierarchy
+
+Every logger has a unique name that follows a hierarchical naming rule. The logger is considered to be an
+ancestor of another logger if its name followed by a `.` is a prefix of the descendant logger. For example, a logger
+named `a.b` is an ancestor of logger `a.b.c`. All top-level loggers are descendants of a special `root` logger at the top of the logger hierarchy. The `root` logger always exists and
+fully configured.
+
+You can configure _<<log-level, log level>>_ and _appenders_ for a specific logger. If a logger only has a _log level_ configured, then the _appenders_ configuration applied to the logger is inherited from the ancestor logger.
+
+NOTE: In the current implementation we __don't support__ so called _appender additivity_ when log messages are forwarded to _every_ distinct appender within
+ancestor chain including `root`. That means that log messages are only forwarded to appenders that are configured for a particular logger. If a logger doesn't have any appenders configured, the configuration of that particular logger will be inherited from its closest ancestor. 
 
 [[dedicated-loggers]]
 ==== Dedicated loggers
