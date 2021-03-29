@@ -139,8 +139,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
 
       expect(await PageObjects.lens.getLayerCount()).to.eql(2);
-      await testSubjects.click('lnsLayerRemove');
-      await testSubjects.click('lnsLayerRemove');
+      await PageObjects.lens.removeLayer();
+      await PageObjects.lens.removeLayer();
       await testSubjects.existOrFail('empty-workspace');
     });
 
