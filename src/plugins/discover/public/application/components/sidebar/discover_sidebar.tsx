@@ -8,7 +8,7 @@
 
 import './discover_sidebar.scss';
 import { throttle } from 'lodash';
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiAccordion,
@@ -36,7 +36,7 @@ import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
 /**
  * Default number of available fields displayed and added on scroll
  */
-const PAGINATION_SIZE = 50;
+const FIELDS_PER_PAGE = 50;
 
 export interface DiscoverSidebarProps extends DiscoverSidebarResponsiveProps {
   /**
@@ -73,7 +73,9 @@ export function DiscoverSidebar({
 }: DiscoverSidebarProps) {
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
   const [scrollContainer, setScrollContainer] = useState<Element | undefined>(undefined);
-  const [pageSize, setPageSize] = useState(PAGINATION_SIZE);
+  const [fieldsToRender, setFieldsToRender] = useState(FIELDS_PER_PAGE);
+  const [fieldsPerPage, setFieldsPerPage] = useState(FIELDS_PER_PAGE);
+  const availableFieldsContainer = useRef<HTMLUListElement | null>(null);
 
   useEffect(() => {
     const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts);
@@ -84,9 +86,9 @@ export function DiscoverSidebar({
     (field: string, value: string | boolean | undefined) => {
       const newState = setFieldFilterProp(fieldFilter, field, value);
       setFieldFilter(newState);
-      setPageSize(PAGINATION_SIZE);
+      setFieldsToRender(fieldsPerPage);
     },
-    [fieldFilter, setFieldFilter]
+    [fieldFilter, setFieldFilter, setFieldsToRender, fieldsPerPage]
   );
 
   const getDetailsByField = useCallback(
@@ -125,22 +127,37 @@ export function DiscoverSidebar({
   );
 
   const paginate = useCallback(() => {
-    setPageSize(
-      Math.max(PAGINATION_SIZE, Math.min(pageSize + PAGINATION_SIZE * 0.5, unpopularFields.length))
-    );
-  }, [setPageSize, pageSize, unpopularFields]);
+    const newFieldsToRender = fieldsToRender + Math.round(fieldsPerPage * 0.5);
+    setFieldsToRender(Math.max(fieldsPerPage, Math.min(newFieldsToRender, unpopularFields.length)));
+  }, [setFieldsToRender, fieldsToRender, unpopularFields, fieldsPerPage]);
 
   useEffect(() => {
-    if (scrollContainer && unpopularFields) {
+    if (scrollContainer && unpopularFields.length && availableFieldsContainer.current) {
       const { clientHeight, scrollHeight } = scrollContainer;
+      const isScrollable = scrollHeight > clientHeight; // there is no scrolling currently
+      const allFieldsRendered = fieldsToRender >= unpopularFields.length;
 
-      if (clientHeight === scrollHeight && pageSize < unpopularFields.length) {
-        // in case of there is so much height available that there's no scrolling at initial rendering
-        // pagination starts after the first bulk of rendering
-        setTimeout(() => paginate(), 100);
+      if (!isScrollable && !allFieldsRendered) {
+        // Not all available fields were rendered with the given fieldsPerPage number
+        // and no scrolling is available due to the a high zoom out factor of the browser
+        // In this case the fieldsPerPage needs to be adapted
+        const fieldsRenderedHeight = availableFieldsContainer.current.clientHeight;
+        const avgHeightPerItem = Math.round(fieldsRenderedHeight / fieldsToRender);
+        const newFieldsPerPage = Math.round(clientHeight / avgHeightPerItem) + 10;
+        if (newFieldsPerPage >= FIELDS_PER_PAGE && newFieldsPerPage !== fieldsPerPage) {
+          setFieldsPerPage(newFieldsPerPage);
+          setFieldsToRender(newFieldsPerPage);
+        }
       }
     }
-  }, [scrollContainer, paginate, unpopularFields, pageSize]);
+  }, [
+    fieldsPerPage,
+    scrollContainer,
+    unpopularFields,
+    fieldsToRender,
+    setFieldsPerPage,
+    setFieldsToRender,
+  ]);
 
   const lazyScroll = useCallback(() => {
     if (scrollContainer) {
@@ -187,9 +204,9 @@ export function DiscoverSidebar({
 
   const getPaginated = useCallback(
     (list) => {
-      return list.slice(0, pageSize);
+      return list.slice(0, fieldsToRender);
     },
-    [pageSize]
+    [fieldsToRender]
   );
 
   const filterChanged = useMemo(() => isEqual(fieldFilter, getDefaultFieldFilter()), [fieldFilter]);
@@ -265,7 +282,7 @@ export function DiscoverSidebar({
             className="eui-yScroll"
           >
             {fields.length > 0 && (
-              <>
+              <div>
                 {selectedFields &&
                 selectedFields.length > 0 &&
                 selectedFields[0].displayName !== '_source' ? (
@@ -377,6 +394,7 @@ export function DiscoverSidebar({
                     className="dscFieldList dscFieldList--unpopular"
                     aria-labelledby="available_fields"
                     data-test-subj={`fieldList-unpopular`}
+                    ref={availableFieldsContainer}
                   >
                     {getPaginated(unpopularFields).map((field: IndexPatternField) => {
                       return (
@@ -397,7 +415,7 @@ export function DiscoverSidebar({
                     })}
                   </ul>
                 </EuiAccordion>
-              </>
+              </div>
             )}
           </div>
         </EuiFlexItem>
