@@ -72,16 +72,18 @@ export const transformRequestToMetricsAPIRequest = async (
     id: META_KEY,
     aggregations: {
       [META_KEY]: {
-        top_hits: {
-          size: 1,
-          _source: [inventoryFields.name],
-          sort: [{ [sourceOverrides?.timestamp ?? source.configuration.fields.timestamp]: 'desc' }],
+        top_metrics: {
+          metrics: [{ field: inventoryFields.name }],
+          sort: {
+            [source.configuration.fields.timestamp]: 'desc',
+          },
         },
       },
     },
   };
+
   if (inventoryFields.ip) {
-    metaAggregation.aggregations[META_KEY].top_hits._source.push(inventoryFields.ip);
+    metaAggregation.aggregations[META_KEY].top_metrics.metrics.push({ field: inventoryFields.ip });
   }
   metricsApiRequest.metrics.push(metaAggregation);
 

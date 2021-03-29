@@ -286,6 +286,12 @@ export const ESTopHitsAggRT = rt.type({
   top_hits: rt.object,
 });
 
+export const ESTopMetricsAggRT = rt.type({
+  top_metrics: rt.type({
+    metrics: rt.union([rt.array(rt.type({ field: rt.string })), rt.type({ field: rt.string })]),
+  }),
+});
+
 export interface SnapshotTermsWithAggregation {
   terms: { field: string };
   aggregations: MetricsUIAggregation;
@@ -310,6 +316,7 @@ export const ESAggregationRT = rt.union([
   ESTermsWithAggregationRT,
   ESCaridnalityAggRT,
   ESTopHitsAggRT,
+  ESTopMetricsAggRT,
 ]);
 
 export const MetricsUIAggregationRT = rt.record(rt.string, ESAggregationRT);
