@@ -18,7 +18,6 @@ import { i18n } from '@kbn/i18n';
 
 import { CoreSetup } from 'src/core/public';
 
-import type { estypes } from '@elastic/elasticsearch';
 import {
   IndexPattern,
   IFieldType,
@@ -50,6 +49,7 @@ import { getNestedProperty } from '../../util/object_utils';
 import { mlFieldFormatService } from '../../services/field_format_service';
 
 import { DataGridItem, IndexPagination, RenderCellValue } from './types';
+import type { RuntimeField } from '../../../../../../../src/plugins/data/common/index_patterns';
 import { RuntimeMappings } from '../../../../common/types/fields';
 import { isPopulatedObject } from '../../../../common/util/object_utils';
 
@@ -178,7 +178,7 @@ export const getDataGridSchemasFromFieldTypes = (fieldTypes: FieldTypes, results
 export const NON_AGGREGATABLE = 'non-aggregatable';
 
 export const getDataGridSchemaFromESFieldType = (
-  fieldType: ES_FIELD_TYPES | undefined | estypes.RuntimeField['type']
+  fieldType: ES_FIELD_TYPES | undefined | RuntimeField['type']
 ): string | undefined => {
   // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
   // To fall back to the default string schema it needs to be undefined.

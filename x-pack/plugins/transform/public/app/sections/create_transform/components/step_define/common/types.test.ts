@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isRuntimeField, isRuntimeMappings } from './runtime_field_utils';
+import { isRuntimeField, isRuntimeMappings } from './types';
 
 describe('Transform: step_define type guards', () => {
   it('isRuntimeField()', () => {
