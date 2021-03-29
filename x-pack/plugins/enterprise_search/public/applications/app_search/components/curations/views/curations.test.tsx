@@ -17,7 +17,7 @@ import React from 'react';
 
 import { shallow, ReactWrapper } from 'enzyme';
 
-import { EuiBasicTable, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiPageHeader, EuiBasicTable, EuiEmptyPrompt } from '@elastic/eui';
 
 import { Loading } from '../../../../shared/loading';
 
@@ -64,7 +64,7 @@ describe('Curations', () => {
   it('renders', () => {
     const wrapper = shallow(<Curations />);
 
-    expect(wrapper.find('h1').text()).toEqual('Curated results');
+    expect(wrapper.find(EuiPageHeader).prop('pageTitle')).toEqual('Curated results');
     expect(wrapper.find(CurationsTable)).toHaveLength(1);
   });
 

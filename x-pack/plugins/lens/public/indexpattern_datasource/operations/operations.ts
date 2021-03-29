@@ -12,12 +12,19 @@ import {
   operationDefinitions,
   GenericOperationDefinition,
   OperationType,
+  renameOperationsMapping,
 } from './definitions';
 import { IndexPattern, IndexPatternField } from '../types';
 import { documentField } from '../document_field';
 
 export { operationDefinitionMap } from './definitions';
-
+/**
+ * Map aggregation names from Elasticsearch to Lens names.
+ * Used when loading indexpatterns to map metadata (i.e. restrictions)
+ */
+export function translateToOperationName(agg: string): OperationType {
+  return agg in renameOperationsMapping ? renameOperationsMapping[agg] : (agg as OperationType);
+}
 /**
  * Returns all available operation types as a list at runtime.
  * This will be an array of each member of the union type `OperationType`
