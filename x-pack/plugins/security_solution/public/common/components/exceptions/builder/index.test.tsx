@@ -17,36 +17,25 @@ import {
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { getEntryMatchAnyMock } from '../../../../../../lists/common/schemas/types/entry_match_any.mock';
 
-import { useKibana } from '../../../../common/lib/kibana';
 import { getEmptyValue } from '../../empty_value';
 
 import { ExceptionBuilderComponent } from './';
 import { getMockTheme } from '../../../lib/kibana/kibana_react.mock';
+import { coreMock } from 'src/core/public/mocks';
+import { dataPluginMock } from 'src/plugins/data/public/mocks';
 
 const mockTheme = getMockTheme({
   eui: {
     euiColorLightShade: '#ece',
   },
 });
-
-jest.mock('../../../../common/lib/kibana');
+const mockKibanaHttpService = coreMock.createStart().http;
+const { autocomplete: autocompleteStartMock } = dataPluginMock.createStartContract();
 
 describe('ExceptionBuilderComponent', () => {
   let wrapper: ReactWrapper;
 
   const getValueSuggestionsMock = jest.fn().mockResolvedValue(['value 1', 'value 2']);
-
-  beforeEach(() => {
-    (useKibana as jest.Mock).mockReturnValue({
-      services: {
-        data: {
-          autocomplete: {
-            getValueSuggestions: getValueSuggestionsMock,
-          },
-        },
-      },
-    });
-  });
 
   afterEach(() => {
     getValueSuggestionsMock.mockClear();
@@ -58,6 +47,8 @@ describe('ExceptionBuilderComponent', () => {
     wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <ExceptionBuilderComponent
+          httpService={mockKibanaHttpService}
+          autocompleteService={autocompleteStartMock}
           exceptionListItems={[]}
           listType="detection"
           listId="list_id"
@@ -94,6 +85,8 @@ describe('ExceptionBuilderComponent', () => {
     wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <ExceptionBuilderComponent
+          httpService={mockKibanaHttpService}
+          autocompleteService={autocompleteStartMock}
           exceptionListItems={[
             {
               ...getExceptionListItemSchemaMock(),
@@ -136,6 +129,8 @@ describe('ExceptionBuilderComponent', () => {
     wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <ExceptionBuilderComponent
+          httpService={mockKibanaHttpService}
+          autocompleteService={autocompleteStartMock}
           exceptionListItems={[]}
           listType="detection"
           listId="list_id"
@@ -169,6 +164,8 @@ describe('ExceptionBuilderComponent', () => {
     wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <ExceptionBuilderComponent
+          httpService={mockKibanaHttpService}
+          autocompleteService={autocompleteStartMock}
           exceptionListItems={[]}
           listType="detection"
           listId="list_id"
@@ -223,6 +220,8 @@ describe('ExceptionBuilderComponent', () => {
     wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <ExceptionBuilderComponent
+          httpService={mockKibanaHttpService}
+          autocompleteService={autocompleteStartMock}
           exceptionListItems={[]}
           listType="detection"
           listId="list_id"
@@ -281,6 +280,8 @@ describe('ExceptionBuilderComponent', () => {
     wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <ExceptionBuilderComponent
+          httpService={mockKibanaHttpService}
+          autocompleteService={autocompleteStartMock}
           exceptionListItems={[
             {
               ...getExceptionListItemSchemaMock(),
@@ -333,6 +334,8 @@ describe('ExceptionBuilderComponent', () => {
     wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <ExceptionBuilderComponent
+          httpService={mockKibanaHttpService}
+          autocompleteService={autocompleteStartMock}
           exceptionListItems={[]}
           listType="detection"
           listId="list_id"
@@ -366,6 +369,8 @@ describe('ExceptionBuilderComponent', () => {
     wrapper = mount(
       <ThemeProvider theme={mockTheme}>
         <ExceptionBuilderComponent
+          httpService={mockKibanaHttpService}
+          autocompleteService={autocompleteStartMock}
           exceptionListItems={[]}
           listType="detection"
           listId="list_id"
@@ -402,6 +407,8 @@ describe('ExceptionBuilderComponent', () => {
       wrapper = mount(
         <ThemeProvider theme={mockTheme}>
           <ExceptionBuilderComponent
+            httpService={mockKibanaHttpService}
+            autocompleteService={autocompleteStartMock}
             exceptionListItems={[]}
             listType="detection"
             listId="list_id"

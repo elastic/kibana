@@ -1,12 +1,10 @@
 [[actions-and-connectors-legacy-api-get-all]]
 ==== Legacy Get all connector API
 ++++
-<titleabbrev>Legacy Get all connector API</titleabbrev>
+<titleabbrev>Legacy Get all connector</titleabbrev>
 ++++
 
-deprecated::[7.13.0]
-
-Please use the <<actions-and-connectors-api-get-all>> instead.
+WARNING: Deprecated in 7.13.0. Use <<get-all-connectors-api>> instead.
 
 Retrieves all connectors.
 
