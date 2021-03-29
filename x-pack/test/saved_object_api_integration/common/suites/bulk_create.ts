@@ -69,7 +69,7 @@ const createRequest = ({ type, id, initialNamespaces }: BulkCreateTestCase) => (
   ...(initialNamespaces && { initialNamespaces }),
 });
 
-export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: SuperTest<any>) {
+export function bulkCreateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
   const expectSavedObjectForbidden = expectResponses.forbiddenTypes('bulk_create');
   const expectResponseBody = (
     testCases: BulkCreateTestCase | BulkCreateTestCase[],
