@@ -185,13 +185,12 @@ export class SearchInterceptor {
   ): Observable<IKibanaSearchResponse> {
     // Defer the following logic until `subscribe` is actually called
     return defer(() => {
-      const { abortSignal } = options;
-      if (abortSignal?.aborted) {
+      if (options.abortSignal?.aborted) {
         return throwError(new AbortError());
       }
 
       this.pendingCount$.next(this.pendingCount$.getValue() + 1);
-      return from(this.runSearch(request, { ...options, abortSignal })).pipe(
+      return from(this.runSearch(request, options)).pipe(
         catchError((e: Error | AbortError) => {
           return throwError(this.handleSearchError(e, options));
         }),
