@@ -18,7 +18,7 @@ import {
 import { PluginContext } from '../context/plugin_context';
 import { usePluginContext } from '../hooks/use_plugin_context';
 import { useRouteParams } from '../hooks/use_route_params';
-import { ObservabilityPluginSetupDeps } from '../plugin';
+import { ObservabilityPublicPluginsStart } from '../plugin';
 import { HasDataContextProvider } from '../context/has_data_context';
 import { Breadcrumbs, routes } from '../routes';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
@@ -68,7 +68,7 @@ function App() {
 
 export const renderApp = (
   core: CoreStart,
-  plugins: ObservabilityPluginSetupDeps,
+  plugins: ObservabilityPublicPluginsStart,
   appMountParameters: AppMountParameters
 ) => {
   const { element, history } = appMountParameters;

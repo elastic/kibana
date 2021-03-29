@@ -12,7 +12,8 @@ import { IRouter, SharedGlobalConfig } from 'kibana/server';
 
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { IFieldType, Filter } from '../index';
+import type { estypes } from '@elastic/elasticsearch';
+import type { IFieldType } from '../index';
 import { findIndexPatternById, getFieldByName } from '../index_patterns';
 import { getRequestAbortedSignal } from '../lib';
 
@@ -73,7 +74,7 @@ async function getBody(
   { timeout, terminate_after }: Record<string, any>,
   field: IFieldType | string,
   query: string,
-  filters: Filter[] = []
+  filters: estypes.QueryContainer[] = []
 ) {
   const isFieldObject = (f: any): f is IFieldType => Boolean(f && f.name);
 
@@ -82,7 +83,7 @@ async function getBody(
     q.replace(/[.?+*|{}[\]()"\\#@&<>~]/g, (match) => `\\${match}`);
 
   // Helps ensure that the regex is not evaluated eagerly against the terms dictionary
-  const executionHint = 'map';
+  const executionHint = 'map' as const;
 
   // We don't care about the accuracy of the counts, just the content of the terms, so this reduces
   // the amount of information that needs to be transmitted to the coordinating node

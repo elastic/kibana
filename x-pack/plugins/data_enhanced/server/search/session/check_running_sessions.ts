@@ -6,21 +6,21 @@
  */
 
 import {
-  Logger,
   ElasticsearchClient,
-  SavedObjectsFindResult,
+  Logger,
   SavedObjectsClientContract,
+  SavedObjectsFindResult,
 } from 'kibana/server';
 import moment from 'moment';
 import { EMPTY, from } from 'rxjs';
 import { expand, mergeMap } from 'rxjs/operators';
 import { nodeBuilder } from '../../../../../../src/plugins/data/common';
 import {
-  SearchSessionStatus,
-  SearchSessionSavedObjectAttributes,
-  SearchSessionRequestInfo,
-  SEARCH_SESSION_TYPE,
   ENHANCED_ES_SEARCH_STRATEGY,
+  SEARCH_SESSION_TYPE,
+  SearchSessionRequestInfo,
+  SearchSessionSavedObjectAttributes,
+  SearchSessionStatus,
 } from '../../../common';
 import { getSearchStatus } from './get_search_status';
 import { getSessionStatus } from './get_session_status';
@@ -93,8 +93,14 @@ async function updateSessionStatus(
   // And only then derive the session's status
   const sessionStatus = getSessionStatus(session.attributes);
   if (sessionStatus !== session.attributes.status) {
+    const now = new Date().toISOString();
     session.attributes.status = sessionStatus;
-    session.attributes.touched = new Date().toISOString();
+    session.attributes.touched = now;
+    if (sessionStatus === SearchSessionStatus.COMPLETE) {
+      session.attributes.completed = now;
+    } else if (session.attributes.completed) {
+      session.attributes.completed = null;
+    }
     sessionUpdated = true;
   }
 
