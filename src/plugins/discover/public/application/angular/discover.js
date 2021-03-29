@@ -465,7 +465,7 @@ function discoverController($route, $scope) {
   }
 
   $scope.refreshAppState = async () => {
-    $scope.state = { ...appStateContainer.getState() };
+    await refetch$.next();
   };
 
   function logInspectorRequest({ searchSessionId = null } = { searchSessionId: null }) {
