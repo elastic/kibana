@@ -54,8 +54,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await testSubjects.click('rulesTab');
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/95590
-  describe.skip('alerts list', function () {
+  describe('alerts list', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('rulesTab');
