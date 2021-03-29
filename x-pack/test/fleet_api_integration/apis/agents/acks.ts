@@ -35,6 +35,7 @@ export default function (providerContext: FtrProviderContext) {
         index: '.fleet-agents',
         id: 'agent1',
       });
+      // @ts-expect-error has unknown type
       agentDoc.access_api_key_id = apiKey.id;
       await esClient.update({
         index: '.fleet-agents',
@@ -239,11 +240,11 @@ export default function (providerContext: FtrProviderContext) {
         })
         .expect(200);
 
-      const res = await esClient.get({
+      const res = await esClient.get<{ upgraded_at: unknown }>({
         index: '.fleet-agents',
         id: 'agent1',
       });
-      expect(res.body._source.upgraded_at).to.be.ok();
+      expect(res.body._source?.upgraded_at).to.be.ok();
     });
   });
 }

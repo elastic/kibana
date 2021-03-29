@@ -41,9 +41,15 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
         snapshotRequest.sourceId
       );
 
+      const logQueryFields = await libs.getLogQueryFields(
+        snapshotRequest.sourceId,
+        requestContext.core.savedObjects.client
+      );
+
       UsageCollector.countNode(snapshotRequest.nodeType);
       const client = createSearchClient(requestContext, framework);
-      const snapshotResponse = await getNodes(client, snapshotRequest, source);
+
+      const snapshotResponse = await getNodes(client, snapshotRequest, source, logQueryFields);
 
       return response.ok({
         body: SnapshotNodeResponseRT.encode(snapshotResponse),

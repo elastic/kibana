@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { Job, Datafeed } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
 
+// @ts-expect-error not full interface
 const JOB_CONFIG: Job = {
   job_id: `fq_multi_1_ae`,
   description:
@@ -28,8 +29,9 @@ const JOB_CONFIG: Job = {
   model_plot_config: { enabled: true },
 };
 
+// @ts-expect-error not full interface
 const DATAFEED_CONFIG: Datafeed = {
-  datafeed_id: 'datafeed-fq_multi_1_se',
+  datafeed_id: 'datafeed-fq_multi_1_ae',
   indices: ['ft_farequote'],
   job_id: 'fq_multi_1_ae',
   query: { bool: { must: [{ match_all: {} }] } },
