@@ -1,6 +1,6 @@
-- Start Date: TODO
-- RFC PR: (leave this empty)
-- Kibana Issue: (leave this empty)
+- Start Date: 2021-03-29
+- RFC PR: [#95070](https://github.com/elastic/kibana/pull/95070)
+- Kibana Issue: [#94630](https://github.com/elastic/kibana/issues/94630)
 
 ---
 
@@ -111,8 +111,6 @@ This table provides an overview of the conclusions made throughout the rest of t
 | Core functionality is first-party    | No      | Yes       | Mostly         | Yes      | Mostly   |
 | First-class support for test results | Buggy   | No        | No             | Yes      | Yes      |
 | GitHub Integration                   | Yes     | Limited   | Yes            | Yes      | Yes      |
-
-TODO link the conclusions to each section?
 
 # Motivation
 
