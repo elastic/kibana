@@ -61,3 +61,25 @@ Example.args = {
     },
   ],
 } as InstancesLatencyDistributionChartProps;
+
+export function SingleInstance({
+  items,
+}: InstancesLatencyDistributionChartProps) {
+  return (
+    <InstancesLatencyDistributionChart
+      height={300}
+      items={items}
+      status={FETCH_STATUS.SUCCESS}
+    />
+  );
+}
+SingleInstance.args = {
+  items: [
+    {
+      serviceNodeName:
+        '2f3221afa3f00d3bc07069d69efd5bd4c1607be6155a204551c8fe2e2b5dd750',
+      latency: 1130156.5424836602,
+      throughput: 9.71285705065604,
+    },
+  ],
+} as InstancesLatencyDistributionChartProps;

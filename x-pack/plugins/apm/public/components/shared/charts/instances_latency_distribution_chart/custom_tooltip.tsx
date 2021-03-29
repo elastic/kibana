@@ -13,7 +13,7 @@ import {
   TimeFormatter,
 } from '../../../../../common/utils/formatters';
 import { useTheme } from '../../../../hooks/use_theme';
-import { Item } from './';
+import { PrimaryStatsServiceInstanceItem } from '../../../app/service_overview/service_overview_instances_chart_and_table';
 
 const latencyLabel = i18n.translate(
   'xpack.apm.instancesLatencyDistributionChartTooltipLatencyLabel',
@@ -38,7 +38,7 @@ function SingleInstanceCustomTooltip({
 }: TooltipInfo & { latencyFormatter: TimeFormatter }) {
   const value = values[0];
   const { color } = value;
-  const datum = (value.datum as unknown) as Item;
+  const datum = (value.datum as unknown) as PrimaryStatsServiceInstanceItem;
   const { latency, serviceNodeName, throughput } = datum;
 
   return (
@@ -107,7 +107,7 @@ function MultipleInstanceCustomTooltip({
       </div>
       {values.map((value) => {
         const { color } = value;
-        const datum = (value.datum as unknown) as Item;
+        const datum = (value.datum as unknown) as PrimaryStatsServiceInstanceItem;
         const { latency, serviceNodeName, throughput } = datum;
         return (
           <div className="echTooltip__list">

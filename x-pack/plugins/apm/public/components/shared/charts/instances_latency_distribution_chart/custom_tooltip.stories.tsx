@@ -7,15 +7,15 @@
 
 import { TooltipInfo } from '@elastic/charts';
 import React, { ComponentType } from 'react';
-import { Item } from '.';
 import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
+import { PrimaryStatsServiceInstanceItem } from '../../../app/service_overview/service_overview_instances_chart_and_table';
 import { CustomTooltip } from './custom_tooltip';
 
 function getLatencyFormatter(props: TooltipInfo) {
   const maxLatency = Math.max(
     ...props.values.map((value) => {
-      const datum = (value.datum as unknown) as Item;
+      const datum = (value.datum as unknown) as PrimaryStatsServiceInstanceItem;
       return datum.latency ?? 0;
     })
   );

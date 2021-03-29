@@ -13,6 +13,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { ValuesType } from 'utility-types';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
@@ -20,12 +21,15 @@ import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
 import {
   PAGE_SIZE,
-  PrimaryStatsServiceInstanceItem,
   SortDirection,
   SortField,
 } from '../service_overview_instances_chart_and_table';
 import { ServiceOverviewTableContainer } from '../service_overview_table_container';
 import { getColumns } from './get_columns';
+
+type ServiceInstanceItem = ValuesType<
+  APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/primary_statistics'>
+>;
 
 type ServiceInstanceComparisonStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/comparison_statistics'>;
 
@@ -38,26 +42,26 @@ export interface TableOptions {
 }
 
 interface Props {
-  primaryStatsItems: PrimaryStatsServiceInstanceItem[];
+  items?: ServiceInstanceItem[];
   serviceName: string;
-  primaryStatsStatus: FETCH_STATUS;
-  primaryStatsItemCount: number;
+  status: FETCH_STATUS;
+  totalItems: number;
   tableOptions: TableOptions;
   onChangeTableOptions: (newTableOptions: {
     page?: { index: number };
     sort?: { field: string; direction: SortDirection };
   }) => void;
-  comparisonStatsData?: ServiceInstanceComparisonStatistics;
+  serviceInstanceComparisonStatistics?: ServiceInstanceComparisonStatistics;
   isLoading: boolean;
 }
 export function ServiceOverviewInstancesTable({
-  primaryStatsItems = [],
-  primaryStatsItemCount,
+  items = [],
+  totalItems,
   serviceName,
-  primaryStatsStatus: status,
+  status,
   tableOptions,
   onChangeTableOptions,
-  comparisonStatsData: comparisonStatsData,
+  serviceInstanceComparisonStatistics,
   isLoading,
 }: Props) {
   const { agentName } = useApmServiceContext();
@@ -72,14 +76,14 @@ export function ServiceOverviewInstancesTable({
     agentName,
     serviceName,
     latencyAggregationType,
-    comparisonStatsData,
+    serviceInstanceComparisonStatistics,
     comparisonEnabled,
   });
 
   const pagination = {
     pageIndex,
     pageSize: PAGE_SIZE,
-    totalItemCount: primaryStatsItemCount,
+    totalItemCount: totalItems,
     hidePerPageOptions: true,
   };
 
@@ -97,11 +101,11 @@ export function ServiceOverviewInstancesTable({
       <EuiFlexItem>
         <TableFetchWrapper status={status}>
           <ServiceOverviewTableContainer
-            isEmptyAndLoading={primaryStatsItemCount === 0 && isLoading}
+            isEmptyAndLoading={totalItems === 0 && isLoading}
           >
             <EuiBasicTable
               loading={isLoading}
-              items={primaryStatsItems}
+              items={items}
               columns={columns}
               pagination={pagination}
               sorting={{ sort: { field, direction } }}

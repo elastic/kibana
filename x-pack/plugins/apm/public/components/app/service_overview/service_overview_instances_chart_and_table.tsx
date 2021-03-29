@@ -212,8 +212,8 @@ export function ServiceOverviewInstancesChartAndTable({
       <EuiFlexItem grow={3}>
         <InstancesLatencyDistributionChart
           height={chartHeight}
-          items={data.items}
-          status={status}
+          items={primaryStatsItems}
+          status={primaryStatsStatus}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={7}>
