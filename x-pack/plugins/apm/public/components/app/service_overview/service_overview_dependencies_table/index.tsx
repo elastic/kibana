@@ -199,7 +199,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
     },
   ];
 
-  const { data = [], status } = useFetcher(
+  const { data, status } = useFetcher(
     (callApmApi) => {
       if (!start || !end || !comparisonStart || !comparisonEnd) {
         return;
@@ -224,8 +224,10 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
     [start, end, serviceName, environment, comparisonStart, comparisonEnd]
   );
 
+  const serviceDependencies = data?.serviceDependencies ?? [];
+
   // need top-level sortable fields for the managed table
-  const items = data.map((item) => ({
+  const items = serviceDependencies.map((item) => ({
     ...item,
     errorRateValue: item.currentPeriod.errorRate.value,
     latencyValue: item.currentPeriod.latency.value,
