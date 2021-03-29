@@ -28,7 +28,7 @@ test('getDimensions', () => {
 
   const dataMock = dataPluginMock.createStartContract();
   dataMock.query.timefilter.timefilter.getTime = () => {
-    return { from: 'now-30y', to: 'now' };
+    return { from: '1991-03-29T08:04:00.694Z', to: '2021-03-29T07:04:00.695Z' };
   };
   dataMock.query.timefilter.timefilter.calculateBounds = (timeRange) => {
     return calculateBounds(timeRange);
