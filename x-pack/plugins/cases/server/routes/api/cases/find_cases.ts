@@ -66,11 +66,13 @@ export function initFindCasesApi({ caseService, router, logger }: RouteDeps) {
         return response.ok({
           body: CasesFindResponseRt.encode(
             transformCases({
-              ...cases,
+              casesMap: cases.casesMap,
+              page: cases.page,
+              perPage: cases.perPage,
+              total: cases.total,
               countOpenCases: openCases,
               countInProgressCases: inProgressCases,
               countClosedCases: closedCases,
-              total: cases.casesMap.size,
             })
           ),
         });

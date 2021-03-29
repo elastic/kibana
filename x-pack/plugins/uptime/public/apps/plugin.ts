@@ -27,8 +27,8 @@ import {
   DataPublicPluginStart,
 } from '../../../../../src/plugins/data/public';
 import { alertTypeInitializers } from '../lib/alert_types';
-import { FetchDataParams, ObservabilityPluginSetup } from '../../../observability/public';
 import { FleetStart } from '../../../fleet/public';
+import { FetchDataParams, ObservabilityPublicSetup } from '../../../observability/public';
 import { PLUGIN } from '../../common/constants/plugin';
 import {
   LazySyntheticsPolicyCreateExtension,
@@ -38,7 +38,7 @@ import {
 export interface ClientPluginsSetup {
   data: DataPublicPluginSetup;
   home?: HomePublicPluginSetup;
-  observability: ObservabilityPluginSetup;
+  observability: ObservabilityPublicSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 }
 

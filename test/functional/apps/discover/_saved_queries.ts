@@ -26,8 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
   const testSubjects = getService('testSubjects');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/89477
-  describe.skip('saved queries saved objects', function describeIndexTests() {
+  describe('saved queries saved objects', function describeIndexTests() {
     before(async function () {
       log.debug('load kibana index with default index pattern');
       await esArchiver.load('discover');
@@ -120,6 +119,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('does not allow saving a query with a non-unique name', async () => {
+        // this check allows this test to run stand alone, also should fix occacional flakiness
+        const savedQueryExists = await savedQueryManagementComponent.savedQueryExist('OkResponse');
+        if (!savedQueryExists) {
+          await savedQueryManagementComponent.saveNewQuery(
+            'OkResponse',
+            '200 responses for .jpg over 24 hours',
+            true,
+            true
+          );
+          await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
+        }
         await savedQueryManagementComponent.saveNewQueryWithNameError('OkResponse');
       });
 
