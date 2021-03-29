@@ -202,12 +202,32 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
 
     dataStart.indexPatterns.getDefault().then(async (index) => {
       const defaultIndexTitle = index?.title ?? '';
+      const defaultIndexId = index?.id ?? '';
+      const defaultTimefieldName = index?.timeFieldName ?? '';
       const indexPatterns = extractIndexPatternValues(this.props.vis.params, defaultIndexTitle);
       const visFields = await fetchFields(indexPatterns);
 
-      this.setState((state) => ({
+      let model = this.state.model;
+      if (!model.index_pattern) {
+        model = {
+          ...model,
+          index_pattern: this.props.vis.params.use_kibana_indexes
+            ? {
+                id: defaultIndexId,
+              }
+            : defaultIndexTitle,
+        };
+      }
+      if (!model.time_field) {
+        model = {
+          ...model,
+          time_field: defaultTimefieldName,
+        };
+      }
+
+      this.setState({
         model: {
-          ...state.model,
+          ...model,
           /** @legacy
            *  please use IndexPatterns service instead
            * **/
@@ -215,10 +235,10 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
           /** @legacy
            *  please use IndexPatterns service instead
            * **/
-          default_timefield: index?.timeFieldName ?? '',
+          default_timefield: defaultTimefieldName,
         },
         visFields,
-      }));
+      });
     });
 
     this.props.eventEmitter.on('updateEditor', this.updateModel);

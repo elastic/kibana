@@ -112,10 +112,6 @@ export function FieldSelect({
     }
   });
 
-  if (value && !selectedOptions.length) {
-    onChange([]);
-  }
-
   return (
     <EuiComboBox
       data-test-subj={dataTestSubj}

@@ -52,8 +52,6 @@ export const metricsVisDefinition = {
           stacked: 'none',
         },
       ],
-      time_field: '',
-      index_pattern: '',
       use_kibana_indexes: true,
       interval: '',
       axis_position: 'left',
