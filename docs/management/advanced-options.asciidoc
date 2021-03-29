@@ -210,6 +210,27 @@ Turns off all unnecessary animations in the {kib} UI. Refresh the page to apply
 the changes.
 
 [float]
+[[kibana-banners-settings]]
+==== Banners
+
+[horizontal]
+[[banners-placement]]`banners:placement`::
+Set to `Top` to display a banner above the Elastic header. Defaults to the value of 
+the `xpack.banners.placement` configuration property.
+
+[[banners-textcontent]]`banners:textContent`::
+The text to display inside the banner for this space, either plain text or Markdown.
+Defaults to the value of the `xpack.banners.textContent` configuration property.
+
+[[banners-textcolor]]`banners:textColor`::
+The color for the banner text for this space. Defaults to the value of
+the `xpack.banners.textColor` configuration property.
+
+[[banners-backgroundcolor]]`banners:backgroundColor`::
+The color of the banner background for this space. Defaults to the value of
+the `xpack.banners.backgroundColor` configuration property.
+
+[float]
 [[kibana-dashboard-settings]]
 ==== Dashboard
 
