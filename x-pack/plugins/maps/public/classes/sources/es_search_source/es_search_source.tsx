@@ -91,7 +91,7 @@ function getDocValueAndSourceFields(
           lang: field.lang || '',
         },
       };
-    } else if (field.readFromDocValues || field.runtimeField) {
+    } else if (field.readFromDocValues) {
       const docValueField =
         field.type === 'date'
           ? {
