@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { SearchResponse, ShardsResponse } from 'elasticsearch';
+import type { SearchResponse, ShardsResponse } from 'elasticsearch';
+import { buildEsQuery } from '../../../../../src/plugins/data/common/es_query/es_query';
+import type { DslQuery } from '../../../../../src/plugins/data/common/es_query/kuery';
+import type { JsonObject } from '../../../../../src/plugins/kibana_utils/common';
 
 export const HITS_TOTAL_RELATION = {
   EQ: 'eq',
@@ -30,3 +33,5 @@ export interface SearchResponse7<T = any> {
   hits: SearchResponse7Hits<T>;
   aggregations?: any;
 }
+
+export type InfluencersFilterQuery = ReturnType<typeof buildEsQuery> | DslQuery | JsonObject;
