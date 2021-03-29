@@ -8,7 +8,6 @@
 import { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ValuesType } from 'utility-types';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { isJavaAgentName } from '../../../../../common/agent_name';
 import { UNIDENTIFIED_SERVICE_NODES_LABEL } from '../../../../../common/i18n';
@@ -25,10 +24,7 @@ import { MetricOverviewLink } from '../../../shared/Links/apm/MetricOverviewLink
 import { ServiceNodeMetricOverviewLink } from '../../../shared/Links/apm/ServiceNodeMetricOverviewLink';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { getLatencyColumnLabel } from '../get_latency_column_label';
-
-type ServiceInstancePrimaryStatisticItem = ValuesType<
-  APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/primary_statistics'>
->;
+import { PrimaryStatsServiceInstanceItem } from '../service_overview_instances_chart_and_table';
 
 type ServiceInstanceComparisonStatistics = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/comparison_statistics'>;
 
@@ -36,15 +32,15 @@ export function getColumns({
   serviceName,
   agentName,
   latencyAggregationType,
-  serviceInstanceComparisonStatistics,
+  comparisonStatsData,
   comparisonEnabled,
 }: {
   serviceName: string;
   agentName?: string;
   latencyAggregationType?: LatencyAggregationType;
-  serviceInstanceComparisonStatistics?: ServiceInstanceComparisonStatistics;
+  comparisonStatsData?: ServiceInstanceComparisonStatistics;
   comparisonEnabled?: boolean;
-}): Array<EuiBasicTableColumn<ServiceInstancePrimaryStatisticItem>> {
+}): Array<EuiBasicTableColumn<PrimaryStatsServiceInstanceItem>> {
   return [
     {
       field: 'serviceNodeName',
@@ -91,11 +87,9 @@ export function getColumns({
       width: px(unit * 10),
       render: (_, { serviceNodeName, latency }) => {
         const currentPeriodTimestamp =
-          serviceInstanceComparisonStatistics?.currentPeriod?.[serviceNodeName]
-            ?.latency;
+          comparisonStatsData?.currentPeriod?.[serviceNodeName]?.latency;
         const previousPeriodTimestamp =
-          serviceInstanceComparisonStatistics?.previousPeriod?.[serviceNodeName]
-            ?.latency;
+          comparisonStatsData?.previousPeriod?.[serviceNodeName]?.latency;
         return (
           <SparkPlot
             color="euiColorVis1"
@@ -118,11 +112,9 @@ export function getColumns({
       width: px(unit * 10),
       render: (_, { serviceNodeName, throughput }) => {
         const currentPeriodTimestamp =
-          serviceInstanceComparisonStatistics?.currentPeriod?.[serviceNodeName]
-            ?.throughput;
+          comparisonStatsData?.currentPeriod?.[serviceNodeName]?.throughput;
         const previousPeriodTimestamp =
-          serviceInstanceComparisonStatistics?.previousPeriod?.[serviceNodeName]
-            ?.throughput;
+          comparisonStatsData?.previousPeriod?.[serviceNodeName]?.throughput;
         return (
           <SparkPlot
             compact
@@ -146,11 +138,9 @@ export function getColumns({
       width: px(unit * 8),
       render: (_, { serviceNodeName, errorRate }) => {
         const currentPeriodTimestamp =
-          serviceInstanceComparisonStatistics?.currentPeriod?.[serviceNodeName]
-            ?.errorRate;
+          comparisonStatsData?.currentPeriod?.[serviceNodeName]?.errorRate;
         const previousPeriodTimestamp =
-          serviceInstanceComparisonStatistics?.previousPeriod?.[serviceNodeName]
-            ?.errorRate;
+          comparisonStatsData?.previousPeriod?.[serviceNodeName]?.errorRate;
         return (
           <SparkPlot
             compact
@@ -174,11 +164,9 @@ export function getColumns({
       width: px(unit * 8),
       render: (_, { serviceNodeName, cpuUsage }) => {
         const currentPeriodTimestamp =
-          serviceInstanceComparisonStatistics?.currentPeriod?.[serviceNodeName]
-            ?.cpuUsage;
+          comparisonStatsData?.currentPeriod?.[serviceNodeName]?.cpuUsage;
         const previousPeriodTimestamp =
-          serviceInstanceComparisonStatistics?.previousPeriod?.[serviceNodeName]
-            ?.cpuUsage;
+          comparisonStatsData?.previousPeriod?.[serviceNodeName]?.cpuUsage;
         return (
           <SparkPlot
             compact
@@ -202,11 +190,9 @@ export function getColumns({
       width: px(unit * 9),
       render: (_, { serviceNodeName, memoryUsage }) => {
         const currentPeriodTimestamp =
-          serviceInstanceComparisonStatistics?.currentPeriod?.[serviceNodeName]
-            ?.memoryUsage;
+          comparisonStatsData?.currentPeriod?.[serviceNodeName]?.memoryUsage;
         const previousPeriodTimestamp =
-          serviceInstanceComparisonStatistics?.previousPeriod?.[serviceNodeName]
-            ?.memoryUsage;
+          comparisonStatsData?.previousPeriod?.[serviceNodeName]?.memoryUsage;
         return (
           <SparkPlot
             compact
