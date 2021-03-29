@@ -149,7 +149,7 @@ class DocumentationService {
   }
 
   public getBoostLink() {
-    return `${this.esDocsBase}/mapping-boost.html`;
+    return `${this.esDocsBase}/mapping-params.html`;
   }
 
   public getNormalizerLink() {
