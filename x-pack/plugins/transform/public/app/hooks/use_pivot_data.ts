@@ -18,7 +18,11 @@ import type { PreviewMappingsProperties } from '../../../common/api_schemas/tran
 import { isPostTransformsPreviewResponseSchema } from '../../../common/api_schemas/type_guards';
 import { getNestedProperty } from '../../../common/utils/object_utils';
 
-import { RenderCellValue, UseIndexDataReturnType, HITS_TOTAL_RELATION } from '../../shared_imports';
+import {
+  RenderCellValue,
+  UseIndexDataReturnType,
+  ES_CLIENT_TOTAL_HITS_RELATION,
+} from '../../shared_imports';
 import { getErrorMessage } from '../../../common/utils/errors';
 
 import { useAppDependencies } from '../app_dependencies';
@@ -128,7 +132,7 @@ export const usePivotData = (
     if (!validationStatus.isValid) {
       setTableItems([]);
       setRowCount(0);
-      setRowCountRelation(HITS_TOTAL_RELATION.EQ);
+      setRowCountRelation(ES_CLIENT_TOTAL_HITS_RELATION.EQ);
       setNoDataMessage(validationStatus.errorMessage!);
       return;
     }
@@ -149,7 +153,7 @@ export const usePivotData = (
       setErrorMessage(getErrorMessage(resp));
       setTableItems([]);
       setRowCount(0);
-      setRowCountRelation(HITS_TOTAL_RELATION.EQ);
+      setRowCountRelation(ES_CLIENT_TOTAL_HITS_RELATION.EQ);
       setPreviewMappingsProperties({});
       setStatus(INDEX_STATUS.ERROR);
       return;
@@ -157,7 +161,7 @@ export const usePivotData = (
 
     setTableItems(resp.preview);
     setRowCount(resp.preview.length);
-    setRowCountRelation(HITS_TOTAL_RELATION.EQ);
+    setRowCountRelation(ES_CLIENT_TOTAL_HITS_RELATION.EQ);
     setPreviewMappingsProperties(resp.generated_dest_index.mappings.properties);
     setStatus(INDEX_STATUS.LOADED);
 

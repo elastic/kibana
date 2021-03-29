@@ -166,11 +166,7 @@ export type PivotAggsConfigWithUiSupport =
 
 export function isPivotAggsConfigWithUiSupport(arg: unknown): arg is PivotAggsConfigWithUiSupport {
   return (
-    isPopulatedObject(arg) &&
-    arg.hasOwnProperty('agg') &&
-    arg.hasOwnProperty('aggName') &&
-    arg.hasOwnProperty('dropDownName') &&
-    arg.hasOwnProperty('field') &&
+    isPopulatedObject(arg, ['agg', 'aggName', 'dropDownName', 'field']) &&
     isPivotSupportedAggs(arg.agg)
   );
 }
@@ -181,15 +177,12 @@ export function isPivotAggsConfigWithUiSupport(arg: unknown): arg is PivotAggsCo
 type PivotAggsConfigWithExtendedForm = PivotAggsConfigFilter;
 
 export function isPivotAggsWithExtendedForm(arg: unknown): arg is PivotAggsConfigWithExtendedForm {
-  return isPopulatedObject(arg) && arg.hasOwnProperty('AggFormComponent');
+  return isPopulatedObject(arg, ['AggFormComponent']);
 }
 
 export function isPivotAggsConfigPercentiles(arg: unknown): arg is PivotAggsConfigPercentiles {
   return (
-    isPopulatedObject(arg) &&
-    arg.hasOwnProperty('agg') &&
-    arg.hasOwnProperty('field') &&
-    arg.hasOwnProperty('percents') &&
+    isPopulatedObject(arg, ['agg', 'field', 'percents']) &&
     arg.agg === PIVOT_SUPPORTED_AGGS.PERCENTILES
   );
 }

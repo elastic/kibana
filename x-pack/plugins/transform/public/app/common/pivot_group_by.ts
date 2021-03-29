@@ -84,30 +84,21 @@ export type PivotGroupByConfigDict = Dictionary<PivotGroupByConfig>;
 
 export function isGroupByDateHistogram(arg: unknown): arg is GroupByDateHistogram {
   return (
-    isPopulatedObject(arg) &&
-    arg.hasOwnProperty('agg') &&
-    arg.hasOwnProperty('field') &&
-    arg.hasOwnProperty('calendar_interval') &&
+    isPopulatedObject(arg, ['agg', 'field', 'calendar_interval']) &&
     arg.agg === PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM
   );
 }
 
 export function isGroupByHistogram(arg: unknown): arg is GroupByHistogram {
   return (
-    isPopulatedObject(arg) &&
-    arg.hasOwnProperty('agg') &&
-    arg.hasOwnProperty('field') &&
-    arg.hasOwnProperty('interval') &&
+    isPopulatedObject(arg, ['agg', 'field', 'interval']) &&
     arg.agg === PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM
   );
 }
 
 export function isGroupByTerms(arg: unknown): arg is GroupByTerms {
   return (
-    isPopulatedObject(arg) &&
-    arg.hasOwnProperty('agg') &&
-    arg.hasOwnProperty('field') &&
-    arg.agg === PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS
+    isPopulatedObject(arg, ['agg', 'field']) && arg.agg === PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS
   );
 }
 
@@ -124,5 +115,5 @@ export function getEsAggFromGroupByConfig(groupByConfig: GroupByConfigBase): Gen
 }
 
 export function isPivotAggConfigWithUiSupport(arg: unknown): arg is PivotAggsConfigWithUiSupport {
-  return isPopulatedObject(arg) && arg.hasOwnProperty('agg') && arg.hasOwnProperty('field');
+  return isPopulatedObject(arg, ['agg', 'field']);
 }

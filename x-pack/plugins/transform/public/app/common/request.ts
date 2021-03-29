@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DefaultOperator } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { HttpFetchError } from '../../../../../../src/core/public';
 import type { IndexPattern } from '../../../../../../src/plugins/data/public';
@@ -39,7 +39,7 @@ import {
 export interface SimpleQuery {
   query_string: {
     query: string;
-    default_operator?: DefaultOperator;
+    default_operator?: estypes.DefaultOperator;
   };
 }
 
@@ -59,14 +59,13 @@ export function getPivotQuery(search: string | SavedSearchQuery): PivotQuery {
 }
 
 export function isSimpleQuery(arg: unknown): arg is SimpleQuery {
-  return isPopulatedObject(arg) && arg.hasOwnProperty('query_string');
+  return isPopulatedObject(arg, ['query_string']);
 }
 
 export const matchAllQuery = { match_all: {} };
 export function isMatchAllQuery(query: unknown): boolean {
   return (
-    isPopulatedObject(query) &&
-    query.hasOwnProperty('match_all') &&
+    isPopulatedObject(query, ['match_all']) &&
     typeof query.match_all === 'object' &&
     query.match_all !== null &&
     Object.keys(query.match_all).length === 0

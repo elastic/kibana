@@ -61,7 +61,5 @@ function isTransformState(arg: unknown): arg is TransformState {
 }
 
 export function isTransformStats(arg: unknown): arg is TransformStats {
-  return (
-    isPopulatedObject(arg) && {}.hasOwnProperty.call(arg, 'state') && isTransformState(arg.state)
-  );
+  return isPopulatedObject(arg, ['state']) && isTransformState(arg.state);
 }

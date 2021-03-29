@@ -86,7 +86,10 @@ function findFieldsInJob(job: Job, datafeed: Datafeed) {
 function findFieldsInAgg(obj: Record<string, object>) {
   const fields: string[] = [];
   Object.entries(obj).forEach(([key, val]) => {
-    if (isPopulatedObject(val)) {
+    if (
+      isPopulatedObject<Record<string, object>>(val) &&
+      Object.keys(val).every((d) => typeof d === 'object')
+    ) {
       fields.push(...findFieldsInAgg(val));
     } else if (typeof val === 'string' && key === 'field') {
       fields.push(val);

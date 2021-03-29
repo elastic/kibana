@@ -52,6 +52,15 @@ export const setNestedProperty = (obj: Record<string, any>, accessor: string, va
   return obj;
 };
 
-export const isPopulatedObject = <T = Record<string, unknown>>(arg: unknown): arg is T => {
-  return typeof arg === 'object' && arg !== null && Object.keys(arg).length > 0;
+export const isPopulatedObject = <T = Record<string, unknown>>(
+  arg: unknown,
+  requiredAttributes: string[] = []
+): arg is T => {
+  return (
+    typeof arg === 'object' &&
+    arg !== null &&
+    Object.keys(arg).length > 0 &&
+    (requiredAttributes.length === 0 ||
+      requiredAttributes.every((d) => ({}.hasOwnProperty.call(arg, d))))
+  );
 };

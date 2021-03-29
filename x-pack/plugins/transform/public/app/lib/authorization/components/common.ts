@@ -22,10 +22,8 @@ export type Privilege = [string, string];
 
 function isPrivileges(arg: unknown): arg is Privileges {
   return (
-    isPopulatedObject(arg) &&
-    arg.hasOwnProperty('hasAllPrivileges') &&
+    isPopulatedObject(arg, ['hasAllPrivileges', 'missingPrivileges']) &&
     typeof arg.hasAllPrivileges === 'boolean' &&
-    arg.hasOwnProperty('missingPrivileges') &&
     typeof arg.missingPrivileges === 'object' &&
     arg.missingPrivileges !== null
   );

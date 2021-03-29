@@ -12,12 +12,11 @@ import { isPopulatedObject } from '../utils/object_utils';
 // Custom minimal type guard for IndexPattern to check against the attributes used in transforms code.
 export function isIndexPattern(arg: any): arg is IndexPattern {
   return (
-    isPopulatedObject(arg) &&
+    isPopulatedObject(arg, ['title', 'fields']) &&
+    // `getComputedFields` is inherited, so not possible to check with `hasOwnProperty`
     'getComputedFields' in arg &&
     typeof arg.getComputedFields === 'function' &&
-    {}.hasOwnProperty.call(arg, 'title') &&
     typeof arg.title === 'string' &&
-    {}.hasOwnProperty.call(arg, 'fields') &&
     Array.isArray(arg.fields)
   );
 }

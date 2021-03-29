@@ -75,5 +75,19 @@ describe('object_utils', () => {
     expect(isPopulatedObject(null)).toBe(false);
     expect(isPopulatedObject({})).toBe(false);
     expect(isPopulatedObject({ attribute: 'value' })).toBe(true);
+    expect(isPopulatedObject({ attribute: 'value' }, ['otherAttribute'])).toBe(false);
+    expect(isPopulatedObject({ attribute: 'value' }, ['attribute'])).toBe(true);
+    expect(
+      isPopulatedObject({ attribute1: 'value1', attribute2: 'value2' }, [
+        'attribute1',
+        'attribute2',
+      ])
+    ).toBe(true);
+    expect(
+      isPopulatedObject({ attribute1: 'value1', attribute2: 'value2' }, [
+        'attribute1',
+        'otherAttribute',
+      ])
+    ).toBe(true);
   });
 });

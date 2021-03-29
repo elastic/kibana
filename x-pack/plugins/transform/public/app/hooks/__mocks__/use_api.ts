@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
+
 import { HttpFetchError } from 'kibana/public';
 
 import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
@@ -37,7 +39,6 @@ import type {
   PostTransformsUpdateResponseSchema,
 } from '../../../../common/api_schemas/update_transforms';
 
-import type { SearchResponse7 } from '../../../../common/shared_imports';
 import { EsIndex } from '../../../../common/types/es_index';
 
 import type { SavedSearchQuery } from '../use_search_items';
@@ -134,7 +135,7 @@ const apiFactory = () => ({
   ): Promise<GetTransformsAuditMessagesResponseSchema | HttpFetchError> {
     return Promise.resolve([]);
   },
-  async esSearch(payload: any): Promise<SearchResponse7 | HttpFetchError> {
+  async esSearch(payload: any): Promise<estypes.SearchResponse | HttpFetchError> {
     return Promise.resolve({
       hits: {
         hits: [],

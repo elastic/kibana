@@ -24,10 +24,7 @@ export const isNodes = (arg: unknown): arg is Nodes => {
   return (
     isPopulatedObject(arg) &&
     Object.values(arg).every(
-      (node) =>
-        isPopulatedObject(node) &&
-        {}.hasOwnProperty.call(node, NODE_ROLES) &&
-        Array.isArray(node.roles)
+      (node) => isPopulatedObject(node, [NODE_ROLES]) && Array.isArray(node.roles)
     )
   );
 };

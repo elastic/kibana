@@ -25,7 +25,6 @@ import {
   isClassificationAnalysis,
 } from '../../../common/util/analytics_utils';
 import { extractErrorMessage } from '../../../common/util/errors';
-import { SearchResponse7 } from '../../../common';
 import {
   AnalysisConfig,
   DataFrameAnalyticsConfig,
@@ -42,7 +41,7 @@ interface CardinalityAgg {
   };
 }
 
-type ValidationSearchResult = Omit<SearchResponse7, 'aggregations'> & {
+type ValidationSearchResult = Omit<estypes.SearchResponse, 'aggregations'> & {
   aggregations: MissingAgg | CardinalityAgg;
 };
 

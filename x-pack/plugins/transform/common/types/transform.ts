@@ -46,11 +46,11 @@ export type TransformLatestConfig = Omit<TransformBaseConfig, 'pivot'> & {
 export type TransformConfigUnion = TransformPivotConfig | TransformLatestConfig;
 
 export function isPivotTransform(transform: unknown): transform is TransformPivotConfig {
-  return isPopulatedObject(transform) && transform.hasOwnProperty('pivot');
+  return isPopulatedObject(transform, ['pivot']);
 }
 
 export function isLatestTransform(transform: unknown): transform is TransformLatestConfig {
-  return isPopulatedObject(transform) && transform.hasOwnProperty('latest');
+  return isPopulatedObject(transform, ['latest']);
 }
 
 export interface LatestFunctionConfigUI {

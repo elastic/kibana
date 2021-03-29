@@ -81,8 +81,8 @@ export interface SwimLaneDrilldownContext extends EditSwimlanePanelContext {
 
 export function isSwimLaneEmbeddable(arg: unknown): arg is SwimLaneDrilldownContext {
   return (
-    isPopulatedObject(arg) &&
-    arg.hasOwnProperty('embeddable') &&
+    isPopulatedObject(arg, ['embeddable']) &&
+    isPopulatedObject(arg.embeddable, ['type']) &&
     arg.embeddable.type === ANOMALY_SWIMLANE_EMBEDDABLE_TYPE
   );
 }
@@ -130,8 +130,8 @@ export function isAnomalyExplorerEmbeddable(
   arg: unknown
 ): arg is AnomalyChartsFieldSelectionContext {
   return (
-    isPopulatedObject(arg) &&
-    arg.hasOwnProperty('embeddable') &&
+    isPopulatedObject(arg, ['embeddable']) &&
+    isPopulatedObject(arg.embeddable, ['type']) &&
     arg.embeddable.type === ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE
   );
 }
