@@ -67,7 +67,7 @@ image::images/pre-configured-connectors-view-screen.png[Pre-configured connector
 
 [float]
 [[preconfigured-connector-alert-history]]
-==== Alert History Preconfigured Connector
+==== Alert history preconfigured connector
 
 {kib} offers a preconfigured <<index-action-type, Index>> connector to facilitate indexing active alert data into {es}.
 
@@ -82,9 +82,9 @@ When creating a new rule, add an <<index-action-type, Index action>> and select 
 [role="screenshot"]
 image::images/pre-configured-alert-history-connector.png[Select pre-configured alert history connectors]
 
-With this connector, documents are indexed using a pre-configured schema that captures all of the rule and alert information that is available as <<defining-alerts-actions-variables, action variables>>. By default, these documents will be indexed into the `alert-history-default` index, but you may specify a different index if desired. Note that all index names must start with `alert-history-` in order to take advantage of the pre-configured Alert History index template.
+Documents are indexed using a preconfigured schema that captures the <<defining-alerts-actions-variables, action variables>> available for the rule. By default, these documents are indexed into the `alert-history-default` index, but you can specify a different index. Index names must start with `alert-history-` to take advantage of the preconfigured Alert History index template.
 
 [IMPORTANT]
 ==============================================
-Make sure you have `all` or `write` privileges to the `alert-history-*` indices in order to ensure your documents will be written. Refer to <<xpack-kibana-role-management>> for more information.
+To write documents to the preconfigured index, you must have `all` or `write` privileges to the `alert-history-*` indices. Refer to <<xpack-kibana-role-management>> for more information.
 ==============================================
