@@ -28,9 +28,9 @@ function getDefaultEmbeddablePanelConfig(jobIds: JobId[]) {
 
 export interface AddToDashboardControlProps {
   jobIds: string[];
-  selectedCells: AppStateSelectedCells;
-  bounds: TimeRangeBounds;
-  interval: number;
+  selectedCells?: AppStateSelectedCells;
+  bounds?: TimeRangeBounds;
+  interval?: number;
   onClose: (callback?: () => Promise<any>) => void;
 }
 
@@ -47,12 +47,15 @@ export const AddAnomalyChartsToDashboardControl: FC<AddToDashboardControlProps> 
   const [severity] = useTableSeverity();
 
   const getPanelsData = useCallback(async () => {
-    const { earliestMs, latestMs } = getSelectionTimeRange(selectedCells, interval, bounds);
-    const timeRange: TimeRange = {
-      from: formatDate(earliestMs, 'MMM D, YYYY @ HH:mm:ss.SSS'),
-      to: formatDate(latestMs, 'MMM D, YYYY @ HH:mm:ss.SSS'),
-      mode: 'absolute',
-    };
+    let timeRange: TimeRange | undefined;
+    if (selectedCells !== undefined && interval !== undefined && bounds !== undefined) {
+      const { earliestMs, latestMs } = getSelectionTimeRange(selectedCells, interval, bounds);
+      timeRange = {
+        from: formatDate(earliestMs, 'MMM D, YYYY @ HH:mm:ss.SSS'),
+        to: formatDate(latestMs, 'MMM D, YYYY @ HH:mm:ss.SSS'),
+        mode: 'absolute',
+      };
+    }
 
     const config = getDefaultEmbeddablePanelConfig(jobIds);
     return [
@@ -62,7 +65,7 @@ export const AddAnomalyChartsToDashboardControl: FC<AddToDashboardControlProps> 
           jobIds,
           maxSeriesToPlot: DEFAULT_MAX_SERIES_TO_PLOT,
           severityThreshold: severity.val,
-          timeRange,
+          ...(timeRange ?? {}),
         },
       },
     ];

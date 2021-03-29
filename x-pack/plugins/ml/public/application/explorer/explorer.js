@@ -449,7 +449,12 @@ export class ExplorerUI extends React.Component {
                       selectedJobs={selectedJobs}
                       selectedCells={selectedCells}
                       bounds={bounds}
-                      interval={this.props.explorerState.swimlaneBucketInterval.asSeconds()}
+                      interval={
+                        this.props.explorerState.swimlaneBucketInterval
+                          ? this.props.explorerState.swimlaneBucketInterval.asSeconds()
+                          : undefined
+                      }
+                      chartsCount={chartsData.seriesToPlot.length}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>

@@ -22,15 +22,17 @@ import { AddAnomalyChartsToDashboardControl } from './dashboard_controls/add_ano
 
 interface AnomalyContextMenuProps {
   selectedJobs: ExplorerJob[];
-  selectedCells: AppStateSelectedCells;
-  bounds: TimeRangeBounds;
-  interval: number;
+  selectedCells?: AppStateSelectedCells;
+  bounds?: TimeRangeBounds;
+  interval?: number;
+  chartsCount: number;
 }
 export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
   selectedJobs,
   selectedCells,
   bounds,
   interval,
+  chartsCount,
 }) => {
   const {
     services: {
@@ -77,6 +79,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
                 iconType="boxesHorizontal"
                 onClick={setIsMenuOpen.bind(null, !isMenuOpen)}
                 data-test-subj="mlExplorerAnomalyPanelMenu"
+                disabled={chartsCount < 1}
               />
             }
             isOpen={isMenuOpen}
