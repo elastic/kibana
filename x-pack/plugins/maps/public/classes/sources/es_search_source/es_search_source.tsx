@@ -180,8 +180,6 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
         sortOrder={this._descriptor.sortOrder}
         scalingType={this._descriptor.scalingType}
         filterByMapBounds={this.isFilterByMapBounds()}
-        topHitsSplitField={this._descriptor.topHitsSplitField}
-        topHitsSize={this._descriptor.topHitsSize}
       />
     );
   }

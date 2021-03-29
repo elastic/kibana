@@ -11,9 +11,10 @@ import { EuiFormRow, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { GeoFieldSelect } from '../../../../components/geo_field_select';
 import { GeoIndexPatternSelect } from '../../../../components/geo_index_pattern_select';
-import { getGeoFields } from '../../../../index_pattern_util';
+import { getGeoFields, getTermsFields } from '../../../../index_pattern_util';
 import { ESSearchSourceDescriptor } from '../../../../../common/descriptor_types';
 import { IndexPattern, IFieldType } from '../../../../../../src/plugins/data/common';
+import { TopHitsForm } from './top_hits_form';
 
 interface Props {
   onSourceConfigChange: (sourceConfig: Partial<ESSearchSourceDescriptor>) => void;
@@ -23,6 +24,7 @@ interface State {
   indexPattern: IndexPattern | null;
   geoFields: IFieldType[];
   geoFieldName: string | null;
+  termFields: IFieldType[];
   topHitsSplitField: string | null;
   topHitsSize: number;
 }
@@ -32,6 +34,7 @@ export class CreateSourceEditor extends Component<Props, State> {
     indexPattern: null,
     geoFields: [],
     geoFieldName: null,
+    termFields: [],
     topHitsSplitField: null,
     topHitsSize: 1,
   };
@@ -44,6 +47,8 @@ export class CreateSourceEditor extends Component<Props, State> {
         indexPattern,
         geoFields,
         geoFieldName: null,
+        termFields: getTermsFields(indexPattern.fields),
+        topHitsSplitField: null,
       },
       () => {
         if (geoFields.length) {
@@ -55,6 +60,16 @@ export class CreateSourceEditor extends Component<Props, State> {
 
   _onGeoFieldSelect = (geoFieldName: string) => {
     this.setState({ geoFieldName }, this._previewLayer);
+  };
+
+  _onTopHitsPropChange = ({ propName, value }) => {
+    // @ts-expect-error
+    this.setState(
+      {
+        [propName]: value,
+      },
+      this._previewLayer
+    );
   };
 
   _previewLayer = () => {
@@ -87,32 +102,15 @@ export class CreateSourceEditor extends Component<Props, State> {
       return null;
     }
 
-    return null;
-    /* return (
-      <Fragment>
-        <EuiSpacer size="m" />
-        <ScalingForm
-          filterByMapBounds={this.state.filterByMapBounds}
-          indexPatternId={this.state.indexPattern ? this.state.indexPattern.id : ''}
-          onChange={this._onScalingPropChange}
-          scalingType={this.state.scalingType}
-          supportsClustering={doesGeoFieldSupportGeoTileAgg(
-            this.state.indexPattern,
-            this.state.geoFieldName
-          )}
-          clusteringDisabledReason={
-            this.state.indexPattern
-              ? getGeoTileAggNotSupportedReason(
-                  this.state.indexPattern.fields.getByName(this.state.geoFieldName)
-                )
-              : null
-          }
-          termFields={getTermsFields(this.state.indexPattern.fields)}
-          topHitsSplitField={this.state.topHitsSplitField}
-          topHitsSize={this.state.topHitsSize}
-        />
-      </Fragment>
-    );*/
+    return (
+      <TopHitsForm
+        indexPatternId={this.state.indexPattern.id}
+        onChange={this._onTopHitsPropChange}
+        termFields={this.state.termFields}
+        topHitsSplitField={this.state.topHitsSplitField}
+        topHitsSize={this.state.topHitsSize}
+      />
+    );
   }
 
   render() {

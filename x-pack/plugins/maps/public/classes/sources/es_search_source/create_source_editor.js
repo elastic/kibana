@@ -17,7 +17,6 @@ import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 import { ScalingForm } from './scaling_form';
 import {
   getGeoFields,
-  getTermsFields,
   getGeoTileAggNotSupportedReason,
   supportsGeoTileAgg,
 } from '../../../index_pattern_util';
@@ -34,8 +33,6 @@ const RESET_INDEX_PATTERN_STATE = {
   geoFieldName: undefined,
   filterByMapBounds: DEFAULT_FILTER_BY_MAP_BOUNDS,
   scalingType: SCALING_TYPES.CLUSTERS, // turn on clusting by default
-  topHitsSplitField: undefined,
-  topHitsSize: 1,
 };
 
 export class CreateSourceEditor extends Component {
@@ -97,14 +94,7 @@ export class CreateSourceEditor extends Component {
   };
 
   _previewLayer = () => {
-    const {
-      indexPattern,
-      geoFieldName,
-      filterByMapBounds,
-      scalingType,
-      topHitsSplitField,
-      topHitsSize,
-    } = this.state;
+    const { indexPattern, geoFieldName, filterByMapBounds, scalingType } = this.state;
 
     const sourceConfig =
       indexPattern && geoFieldName
@@ -113,8 +103,6 @@ export class CreateSourceEditor extends Component {
             geoField: geoFieldName,
             filterByMapBounds,
             scalingType,
-            topHitsSplitField,
-            topHitsSize,
           }
         : null;
     this.props.onSourceConfigChange(sourceConfig);
@@ -167,9 +155,6 @@ export class CreateSourceEditor extends Component {
                 )
               : null
           }
-          termFields={getTermsFields(this.state.indexPattern.fields)}
-          topHitsSplitField={this.state.topHitsSplitField}
-          topHitsSize={this.state.topHitsSize}
         />
       </Fragment>
     );

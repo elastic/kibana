@@ -33,8 +33,6 @@ export class UpdateSourceEditor extends Component {
     sortField: PropTypes.string,
     sortOrder: PropTypes.string.isRequired,
     scalingType: PropTypes.string.isRequired,
-    topHitsSplitField: PropTypes.string,
-    topHitsSize: PropTypes.number.isRequired,
     source: PropTypes.object,
   };
 
@@ -213,8 +211,6 @@ export class UpdateSourceEditor extends Component {
           supportsClustering={this.state.supportsClustering}
           clusteringDisabledReason={this.state.clusteringDisabledReason}
           termFields={this.state.termFields}
-          topHitsSplitField={this.props.topHitsSplitField}
-          topHitsSize={this.props.topHitsSize}
         />
       </EuiPanel>
     );
