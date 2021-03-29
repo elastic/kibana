@@ -14,8 +14,6 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiEmptyPrompt } from '@elastic/eui';
 
-import { SampleEngineCreationCta } from '../../sample_engine_creation_cta/sample_engine_creation_cta';
-
 import { EmptyState } from './';
 
 describe('EmptyState', () => {
@@ -25,6 +23,10 @@ describe('EmptyState', () => {
     beforeAll(() => {
       setMockValues({ myRole: { canManageEngines: true } });
       wrapper = shallow(<EmptyState />);
+    });
+
+    afterAll(() => {
+      jest.clearAllMocks();
     });
 
     it('renders a prompt to create an engine', () => {
@@ -52,18 +54,19 @@ describe('EmptyState', () => {
   });
 
   describe('when the user cannot manage/create engines', () => {
+    let wrapper: ShallowWrapper;
+
     beforeAll(() => {
       setMockValues({ myRole: { canManageEngines: false } });
+      wrapper = shallow(<EmptyState />);
+    });
+
+    afterAll(() => {
+      jest.clearAllMocks();
     });
 
     it('renders a prompt to contact the App Search admin', () => {
-      const wrapper = shallow(<EmptyState />);
-
       expect(wrapper.find('[data-test-subj="NonAdminEmptyEnginesPrompt"]')).toHaveLength(1);
-    });
-
-    it('contains a CTA to create a sample engine', () => {
-      expect(prompt.find(SampleEngineCreationCta)).toHaveLength(1);
     });
   });
 });
