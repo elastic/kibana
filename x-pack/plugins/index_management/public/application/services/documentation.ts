@@ -46,6 +46,7 @@ class DocumentationService {
   private mappingParameters: string = '';
   private mappingPositionIncrementGap: string = '';
   private mappingRankFeatureFields: string = '';
+  private mappingRouting: string = '';
   private mappingSimilarity: string = '';
   private mappingSourceFields: string = '';
   private mappingSourceFieldsDisable: string = '';

@@ -145,6 +145,7 @@ readonly links: {
             painlessExecuteAPIContexts: string;
             putComponentTemplateMetadata: string;
             putSnapshotLifecyclePolicy: string;
+            putIndexTemplateV1: string;
             putWatch: string;
             updateTransform: string;
         }>;

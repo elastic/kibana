@@ -617,6 +617,7 @@ export interface DocLinksStart {
             painlessExecuteAPIContexts: string;
             putComponentTemplateMetadata: string;
             putSnapshotLifecyclePolicy: string;
+            putIndexTemplateV1: string;
             putWatch: string;
             updateTransform: string;
         }>;
