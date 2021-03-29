@@ -170,10 +170,11 @@ export const removeWriteBlock = (
  */
 const waitForIndexStatusYellow = (
   client: ElasticsearchClient,
-  index: string
+  index: string,
+  timeout: string
 ): TaskEither.TaskEither<RetryableEsClientError, {}> => () => {
   return client.cluster
-    .health({ index, wait_for_status: 'yellow', timeout: '30s' })
+    .health({ index, wait_for_status: 'yellow', timeout })
     .then(() => {
       return Either.right({});
     })
@@ -189,13 +190,15 @@ export type CloneIndexResponse = AcknowledgeResponse;
  * This method adds some additional logic to the ES clone index API:
  *  - it is idempotent, if it gets called multiple times subsequent calls will
  *    wait for the first clone operation to complete (up to 60s)
- *  - the first call will wait up to 90s for the cluster state and all shards
+ *  - the first call will wait up to 120s for the cluster state and all shards
  *    to be updated.
  */
 export const cloneIndex = (
   client: ElasticsearchClient,
   source: string,
-  target: string
+  target: string,
+  /** only used for testing */
+  timeout = DEFAULT_TIMEOUT
 ): TaskEither.TaskEither<
   RetryableEsClientError | { type: 'index_not_found_exception'; index: string },
   CloneIndexResponse
@@ -227,7 +230,7 @@ export const cloneIndex = (
               },
             },
           },
-          timeout: DEFAULT_TIMEOUT,
+          timeout,
         },
         { maxRetries: 0 /** handle retry ourselves for now */ }
       )
@@ -277,7 +280,7 @@ export const cloneIndex = (
       } else {
         // Otherwise, wait until the target index has a 'green' status.
         return pipe(
-          waitForIndexStatusYellow(client, target),
+          waitForIndexStatusYellow(client, target, timeout),
           TaskEither.map((value) => {
             /** When the index status is 'green' we know that all shards were started */
             return { acknowledged: true, shardsAcknowledged: true };

@@ -292,6 +292,45 @@ describe('migration actions', () => {
         }
       `);
     });
+    it('resolves left with a retryable_es_client_error if clone target already exists but takes longer than the specified timeout before turning yellow', async () => {
+      // Create a red index
+      await client.indices
+        .create({
+          index: 'clone_red_index',
+          timeout: '5s',
+          body: {
+            mappings: { properties: {} },
+            settings: {
+              // Allocate 1 replica so that this index stays yellow
+              number_of_replicas: '1',
+              // Disable all shard allocation so that the index status is red
+              'index.routing.allocation.enable': 'none',
+            },
+          },
+        })
+        .catch((e) => {});
+
+      // Call clone even though the index already exists
+      const cloneIndexPromise = cloneIndex(
+        client,
+        'existing_index_with_write_block',
+        'clone_red_index',
+        '0s'
+      )();
+
+      await cloneIndexPromise.then((res) => {
+        expect(res).toMatchInlineSnapshot(`
+          Object {
+            "_tag": "Left",
+            "left": Object {
+              "error": [ResponseError: Response Error],
+              "message": "Response Error",
+              "type": "retryable_es_client_error",
+            },
+          }
+        `);
+      });
+    });
   });
 
   // Reindex doesn't return any errors on it's own, so we have to test
