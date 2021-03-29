@@ -62,6 +62,7 @@ see https://www.elastic.co/subscriptions[the subscription page].
 For out-of-the-box and standardized connectors, you can <<preconfigured-connector-example, preconfigure connectors>>
 before {kib} starts.
 
+include::connector-management.asciidoc[]
 include::action-types/email.asciidoc[]
 include::action-types/resilient.asciidoc[]
 include::action-types/index.asciidoc[]
