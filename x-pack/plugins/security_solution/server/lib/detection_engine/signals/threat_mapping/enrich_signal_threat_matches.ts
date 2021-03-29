@@ -57,9 +57,11 @@ export const buildMatchedIndicator = ({
     }
     const atomic = get(matchedThreat?._source, query.value) as unknown;
     const type = get(indicator, 'type') as unknown;
+    const event = get(matchedThreat?._source, 'event') as unknown;
 
     return {
       ...indicator,
+      event,
       matched: { atomic, field: query.field, id: query.id, index: query.index, type },
     };
   });

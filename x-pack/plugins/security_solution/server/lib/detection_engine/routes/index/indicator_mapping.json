@@ -1,0 +1,95 @@
+{
+  "event": {
+    "properties": {
+      "action": {
+        "ignore_above": 1024,
+        "type": "keyword"
+      },
+      "category": {
+        "ignore_above": 1024,
+        "type": "keyword"
+      },
+      "code": {
+        "ignore_above": 1024,
+        "type": "keyword"
+      },
+      "created": {
+        "type": "date"
+      },
+      "dataset": {
+        "ignore_above": 1024,
+        "type": "keyword"
+      },
+      "duration": {
+        "type": "long"
+      },
+      "end": {
+        "type": "date"
+      },
+      "hash": {
+        "ignore_above": 1024,
+        "type": "keyword"
+      },
+      "id": {
+        "ignore_above": 1024,
+        "type": "keyword"
+      },
+      "ingested": {
+        "type": "date"
+      },
+      "kind": {
+        "ignore_above": 1024,
+        "type": "keyword"
+      },
+      "module": {
+        "ignore_above": 1024,
+        "type": "keyword"
+      },
+      "original": {
+        "doc_values": false,
+        "ignore_above": 1024,
+        "index": false,
+        "type": "keyword"
+      },
+      "outcome": {
+        "ignore_above": 1024,
+        "type": "keyword"
+      },
+      "provider": {
+        "ignore_above": 1024,
+        "type": "keyword"
+      },
+      "reference": {
+        "ignore_above": 1024,
+        "type": "keyword"
+      },
+      "risk_score": {
+        "type": "float"
+      },
+      "risk_score_norm": {
+        "type": "float"
+      },
+      "sequence": {
+        "type": "long"
+      },
+      "severity": {
+        "type": "long"
+      },
+      "start": {
+        "type": "date"
+      },
+      "timezone": {
+        "ignore_above": 1024,
+        "type": "keyword"
+      },
+      "type": {
+        "ignore_above": 1024,
+        "type": "keyword"
+      },
+      "url": {
+        "ignore_above": 1024,
+        "type": "keyword"
+      }
+    }
+  }
+}
