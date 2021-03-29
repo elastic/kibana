@@ -7,9 +7,8 @@
 
 import { DocLinksStart } from 'src/core/public';
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export const getDocumentation = ({ ELASTICSEARCH_DOCS, links }: DocLinksStart) => {
-  const esDocsBase = `${ELASTICSEARCH_DOCS}`;
+export const getDocumentation = ({ links }: DocLinksStart) => {
+  const esDocsBase = links.elasticsearch.docsBase;
   return {
     esDocsBase,
     componentTemplates: links.apis.putComponentTemplate,

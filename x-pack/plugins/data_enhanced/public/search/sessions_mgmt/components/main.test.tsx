@@ -59,7 +59,6 @@ describe('Background Search Session Management Main', () => {
     const docLinks: DocLinksStart = {
       ELASTIC_WEBSITE_URL: `boo/`,
       DOC_LINK_VERSION: `#foo`,
-      ELASTICSEARCH_DOCS: `mock-url`,
       links: {
         elasticsearch: { asyncSearch: `mock-url` } as any,
       } as any,

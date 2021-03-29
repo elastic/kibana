@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCode } from '@elastic/eui';
 
-import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { documentationService } from '../../../../../services/documentation';
 import { EditFieldFormRow } from '../fields/edit_field';
 
 export const EnabledParameter = () => {

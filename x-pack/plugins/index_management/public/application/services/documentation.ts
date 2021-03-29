@@ -43,6 +43,7 @@ class DocumentationService {
   private mappingNormalizer: string = '';
   private mappingNorms: string = '';
   private mappingNullValue: string = '';
+  private mappingParameters: string = '';
   private mappingPositionIncrementGap: string = '';
   private mappingRankFeatureFields: string = '';
   private mappingSimilarity: string = '';
@@ -54,9 +55,9 @@ class DocumentationService {
   private percolate: string = '';
   private runtimeFields: string = '';
   public setup(docLinks: DocLinksStart): void {
-    const { ELASTICSEARCH_DOCS, links } = docLinks;
+    const { links } = docLinks;
     this.dataStreams = `${links.elasticsearch.dataStreams}`;
-    this.esDocsBase = `${ELASTICSEARCH_DOCS}`;
+    this.esDocsBase = `${links.elasticsearch.docsBase}`;
     this.indexManagement = `${links.management.indexManagement}`;
     this.indexSettings = `${links.elasticsearch.indexSettings}`;
     this.indexTemplates = `${links.elasticsearch.indexTemplates}`;
@@ -88,6 +89,7 @@ class DocumentationService {
     this.mappingNormalizer = `${links.elasticsearch.mappingNormalizer}`;
     this.mappingNorms = `${links.elasticsearch.mappingNorms}`;
     this.mappingNullValue = `${links.elasticsearch.mappingNullValue}`;
+    this.mappingParameters = `${links.elasticsearch.mappingParameters}`;
     this.mappingPositionIncrementGap = `${links.elasticsearch.mappingPositionIncrementGap}`;
     this.mappingRankFeatureFields = `${links.elasticsearch.mappingRankFeatureFields}`;
     this.mappingRouting = `${links.elasticsearch.mappingRouting}`;
@@ -221,6 +223,10 @@ class DocumentationService {
 
   public getCoerceLink() {
     return this.mappingCoerce;
+  }
+
+  public getBoostLink() {
+    return this.mappingParameters;
   }
 
   public getNormalizerLink() {

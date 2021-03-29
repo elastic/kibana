@@ -26,7 +26,6 @@ export class DocLinksService {
     return deepFreeze({
       DOC_LINK_VERSION,
       ELASTIC_WEBSITE_URL,
-      ELASTICSEARCH_DOCS,
       links: {
         dashboard: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/dashboard.html`,
@@ -132,6 +131,7 @@ export class DocLinksService {
         addData: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/connect-to-elasticsearch.html`,
         kibana: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/index.html`,
         elasticsearch: {
+          docsBase: `${ELASTICSEARCH_DOCS}`,
           asyncSearch: `${ELASTICSEARCH_DOCS}async-search-intro.html`,
           dataStreams: `${ELASTICSEARCH_DOCS}data-streams.html`,
           indexModules: `${ELASTICSEARCH_DOCS}index-modules.html`,
@@ -164,6 +164,7 @@ export class DocLinksService {
           mappingNormalizer: `${ELASTICSEARCH_DOCS}normalizer.html`,
           mappingNorms: `${ELASTICSEARCH_DOCS}norms.html`,
           mappingNullValue: `${ELASTICSEARCH_DOCS}null-value.html`,
+          mappingParameters: `${ELASTICSEARCH_DOCS}mapping-params.html`,
           mappingPositionIncrementGap: `${ELASTICSEARCH_DOCS}position-increment-gap.html`,
           mappingRankFeatureFields: `${ELASTICSEARCH_DOCS}rank-feature.html`,
           mappingRouting: `${ELASTICSEARCH_DOCS}mapping-routing-field.html`,
@@ -347,7 +348,6 @@ export class DocLinksService {
 export interface DocLinksStart {
   readonly DOC_LINK_VERSION: string;
   readonly ELASTIC_WEBSITE_URL: string;
-  readonly ELASTICSEARCH_DOCS: string;
   readonly links: {
     readonly dashboard: {
       readonly guide: string;

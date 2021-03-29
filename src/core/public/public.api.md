@@ -479,8 +479,6 @@ export interface DocLinksStart {
     // (undocumented)
     readonly ELASTIC_WEBSITE_URL: string;
     // (undocumented)
-    readonly ELASTICSEARCH_DOCS: string;
-    // (undocumented)
     readonly links: {
         readonly dashboard: {
             readonly guide: string;
