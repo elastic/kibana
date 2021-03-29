@@ -54,17 +54,10 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
     delete rawConfig.xpack;
   }
 
+  // only used to set cliArgs.envName
+  delete extraCliOptions.env;
+
   if (opts.dev) {
-    set('env', 'development');
-
-    if (!has('elasticsearch.username')) {
-      set('elasticsearch.username', 'kibana_system');
-    }
-
-    if (!has('elasticsearch.password')) {
-      set('elasticsearch.password', 'changeme');
-    }
-
     if (opts.ssl) {
       // @kbn/dev-utils is part of devDependencies
       // eslint-disable-next-line import/no-extraneous-dependencies
@@ -78,6 +71,7 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
           throw new Error(`Can't use --ssl when "${path}" configuration is already defined.`);
         }
       }
+
       ensureNotDefined('server.ssl.certificate');
       ensureNotDefined('server.ssl.key');
       ensureNotDefined('server.ssl.keystore.path');
