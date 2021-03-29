@@ -19,7 +19,9 @@ import {
   EuiSpacer,
   EuiNotificationBadge,
   EuiPageSideBar,
+  useResizeObserver,
 } from '@elastic/eui';
+
 import { isEqual, sortBy } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DiscoverField } from './discover_field';
@@ -72,7 +74,7 @@ export function DiscoverSidebar({
   unmappedFieldsConfig,
 }: DiscoverSidebarProps) {
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
-  const [scrollContainer, setScrollContainer] = useState<Element | undefined>(undefined);
+  const [scrollContainer, setScrollContainer] = useState<Element | null>(null);
   const [fieldsToRender, setFieldsToRender] = useState(FIELDS_PER_PAGE);
   const [fieldsPerPage, setFieldsPerPage] = useState(FIELDS_PER_PAGE);
   const availableFieldsContainer = useRef<HTMLUListElement | null>(null);
@@ -81,6 +83,8 @@ export function DiscoverSidebar({
     const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts);
     setFields(newFields);
   }, [selectedIndexPattern, fieldCounts, hits]);
+
+  const scrollDimensions = useResizeObserver(scrollContainer);
 
   const onChangeFieldSearch = useCallback(
     (field: string, value: string | boolean | undefined) => {
@@ -157,6 +161,7 @@ export function DiscoverSidebar({
     fieldsToRender,
     setFieldsPerPage,
     setFieldsToRender,
+    scrollDimensions,
   ]);
 
   const lazyScroll = useCallback(() => {
