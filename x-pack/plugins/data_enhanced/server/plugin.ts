@@ -15,7 +15,7 @@ import {
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { ENHANCED_ES_SEARCH_STRATEGY, EQL_SEARCH_STRATEGY } from '../common';
 import { registerSessionRoutes } from './routes';
-import { searchSessionMapping } from './saved_objects';
+import { searchSessionSavedObjectType } from './saved_objects';
 import {
   SearchSessionService,
   enhancedEsSearchStrategyProvider,
@@ -54,7 +54,7 @@ export class EnhancedDataServerPlugin
     const usage = deps.usageCollection ? usageProvider(core) : undefined;
 
     core.uiSettings.register(getUiSettings());
-    core.savedObjects.registerType(searchSessionMapping);
+    core.savedObjects.registerType(searchSessionSavedObjectType);
 
     deps.data.search.registerSearchStrategy(
       ENHANCED_ES_SEARCH_STRATEGY,

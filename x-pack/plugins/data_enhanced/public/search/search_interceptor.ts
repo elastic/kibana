@@ -19,10 +19,10 @@ import {
 import { ENHANCED_ES_SEARCH_STRATEGY, IAsyncSearchOptions, pollSearch } from '../../common';
 import { SearchResponseCache } from './search_response_cache';
 import { createRequestHash } from './utils';
+import { SearchAbortController } from './search_abort_controller';
 
 const MAX_CACHE_ITEMS = 50;
 const MAX_CACHE_SIZE_MB = 10;
-
 export class EnhancedSearchInterceptor extends SearchInterceptor {
   private uiSettingsSub: Subscription;
   private searchTimeout: number;
@@ -68,19 +68,12 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
   }
 
   public search({ id, ...request }: IKibanaSearchRequest, options: IAsyncSearchOptions = {}) {
-    const { abortSignal, sessionId } = options;
-    const { combinedSignal, timeoutSignal, cleanup, abort } = this.setupAbortSignal({
-      abortSignal,
-      timeout: this.searchTimeout,
-    });
-    const strategy = options?.strategy ?? ENHANCED_ES_SEARCH_STRATEGY;
-    const searchOptions = { ...options, strategy, abortSignal: combinedSignal };
+    const searchOptions = {
+      strategy: ENHANCED_ES_SEARCH_STRATEGY,
+      ...options,
+    };
+    const { sessionId, strategy, abortSignal } = searchOptions;
     const search = () => this.runSearch({ id, ...request }, searchOptions);
-
-    this.pendingCount$.next(this.pendingCount$.getValue() + 1);
-
-    const untrackSearch =
-      this.deps.session.isCurrentSession(sessionId) && this.deps.session.trackSearch({ abort });
 
     // track if this search's session will be send to background
     // if yes, then we don't need to cancel this search when it is aborted
@@ -111,22 +104,30 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
         if (cached) {
           return cached;
         }
+        const searchAbortController = new SearchAbortController(abortSignal, this.searchTimeout);
+        this.pendingCount$.next(this.pendingCount$.getValue() + 1);
+        const untrackSearch = this.deps.session.isCurrentSession(options.sessionId)
+          ? this.deps.session.trackSearch({ abort: () => searchAbortController.abort() })
+          : undefined;
 
         const search$ = pollSearch(search, cancel, {
           ...options,
-          abortSignal: combinedSignal,
+          abortSignal: searchAbortController.getSignal(),
         }).pipe(
           tap((response) => (id = response.id)),
           catchError((e: Error) => {
             cancel();
-            return throwError(this.handleSearchError(e, timeoutSignal, options));
+            return throwError(
+              this.handleSearchError(e, options, searchAbortController.isTimeout())
+            );
           }),
           finalize(() => {
             this.pendingCount$.next(this.pendingCount$.getValue() - 1);
-            cleanup();
-            if (untrackSearch && this.deps.session.isCurrentSession(sessionId)) {
+            if (this.deps.session.isCurrentSession(options.sessionId)) {
               // untrack if this search still belongs to current session
-              untrackSearch();
+              untrackSearch?.();
+            } else {
+              searchAbortController.cleanup();
             }
             if (savedToBackgroundSub) {
               savedToBackgroundSub.unsubscribe();

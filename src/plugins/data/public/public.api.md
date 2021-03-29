@@ -2323,8 +2323,6 @@ export interface SearchError {
 // @public (undocumented)
 export class SearchInterceptor {
     constructor(deps: SearchInterceptorDeps);
-    // @internal
-    protected abortController: AbortController;
     // @internal (undocumented)
     protected application: CoreStart['application'];
     // (undocumented)
@@ -2337,22 +2335,12 @@ export class SearchInterceptor {
     // Warning: (ae-forgotten-export) The symbol "AbortError" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
-    protected handleSearchError(e: KibanaServerError | AbortError, timeoutSignal: AbortSignal, options?: ISearchOptions): Error;
+    protected handleSearchError(e: KibanaServerError | AbortError, options?: ISearchOptions, isTimeout?: boolean): Error;
     // @internal
     protected pendingCount$: BehaviorSubject<number>;
     // @internal (undocumented)
     protected runSearch(request: IKibanaSearchRequest, options?: ISearchOptions): Promise<IKibanaSearchResponse>;
     search(request: IKibanaSearchRequest, options?: ISearchOptions): Observable<IKibanaSearchResponse>;
-    // @internal (undocumented)
-    protected setupAbortSignal({ abortSignal, timeout, }: {
-        abortSignal?: AbortSignal;
-        timeout?: number;
-    }): {
-        timeoutSignal: AbortSignal;
-        combinedSignal: AbortSignal;
-        cleanup: () => void;
-        abort: () => void;
-    };
     // (undocumented)
     showError(e: Error): void;
     }
@@ -2707,7 +2695,7 @@ export const UI_SETTINGS: {
 // src/plugins/data/public/index.ts:427:1 - (ae-forgotten-export) The symbol "propFilter" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:430:1 - (ae-forgotten-export) The symbol "toAbsoluteDates" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/query/state_sync/connect_to_query_state.ts:34:5 - (ae-forgotten-export) The symbol "FilterStateStore" needs to be exported by the entry point index.d.ts
-// src/plugins/data/public/search/session/session_service.ts:55:5 - (ae-forgotten-export) The symbol "UrlGeneratorStateMapping" needs to be exported by the entry point index.d.ts
+// src/plugins/data/public/search/session/session_service.ts:56:5 - (ae-forgotten-export) The symbol "UrlGeneratorStateMapping" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 
