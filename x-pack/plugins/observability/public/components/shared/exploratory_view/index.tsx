@@ -52,11 +52,13 @@ export function ExploratoryViewPage() {
       headerColor={theme.eui.euiColorEmptyShade}
       bodyColor={theme.eui.euiPageBackgroundColor}
     >
-      <IndexPatternContextProvider indexPattern={indexPattern!}>
-        <UrlStorageContextProvider storage={kbnUrlStateStorage}>
-          <ExploratoryView />
-        </UrlStorageContextProvider>
-      </IndexPatternContextProvider>
+      {indexPattern ? (
+        <IndexPatternContextProvider indexPattern={indexPattern!}>
+          <UrlStorageContextProvider storage={kbnUrlStateStorage}>
+            <ExploratoryView />
+          </UrlStorageContextProvider>
+        </IndexPatternContextProvider>
+      ) : null}
     </WithHeaderLayout>
   );
 }

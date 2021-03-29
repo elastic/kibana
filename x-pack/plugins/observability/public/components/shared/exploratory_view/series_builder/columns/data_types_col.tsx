@@ -11,7 +11,7 @@ import { AppDataType } from '../../types';
 import { useIndexPatternContext } from '../../hooks/use_default_index_pattern';
 import { NEW_SERIES_KEY, useUrlStorage } from '../../hooks/use_url_strorage';
 
-const dataTypes: Array<{ id: AppDataType; label: string }> = [
+export const dataTypes: Array<{ id: AppDataType; label: string }> = [
   { id: 'synthetics', label: 'Synthetic Monitoring' },
   { id: 'rum', label: 'User Experience(RUM)' },
   { id: 'logs', label: 'Logs' },

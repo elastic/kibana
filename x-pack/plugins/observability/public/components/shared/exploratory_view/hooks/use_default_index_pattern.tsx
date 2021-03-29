@@ -6,21 +6,21 @@
  */
 
 import React, { createContext, useContext, Context, useState, useEffect } from 'react';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
+import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { AppDataType } from '../types';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../../../../plugin';
 import { ObservabilityIndexPatterns } from '../../../../utils/observability_index_patterns';
 
 export interface IIndexPatternContext {
-  indexPattern: IIndexPattern;
+  indexPattern: IndexPattern;
   loadIndexPattern: (dataType: AppDataType) => void;
 }
 
 export const IndexPatternContext = createContext<Partial<IIndexPatternContext>>({});
 
 interface ProviderProps {
-  indexPattern: IIndexPattern;
+  indexPattern?: IndexPattern;
   children: JSX.Element;
 }
 

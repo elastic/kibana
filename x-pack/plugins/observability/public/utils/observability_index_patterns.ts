@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataPublicPluginStart, IIndexPattern } from '../../../../../src/plugins/data/public';
+import { DataPublicPluginStart, IndexPattern } from '../../../../../src/plugins/data/public';
 
 export type DataType = 'synthetics' | 'apm' | 'logs' | 'metrics' | 'rum';
 
@@ -47,15 +47,16 @@ export class ObservabilityIndexPatterns {
       fields,
       title: pattern,
       id: indexPatternList[app],
+      timeFieldName: '@timestamp',
     });
   }
 
-  async getIndexPattern(app: DataType): Promise<IIndexPattern | undefined> {
+  async getIndexPattern(app: DataType): Promise<IndexPattern | undefined> {
     if (!this.data) {
       throw new Error('data is not defined');
     }
     try {
-      return await this.data?.indexPatterns.get(indexPatternList[app || 'apm']);
+      return await this.data?.indexPatterns.get(indexPatternList[app]);
     } catch (e) {
       return await this.createIndexPattern(app || 'apm');
     }

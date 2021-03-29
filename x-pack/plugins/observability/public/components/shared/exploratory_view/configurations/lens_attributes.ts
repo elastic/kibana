@@ -19,17 +19,19 @@ import {
 import {
   buildPhraseFilter,
   buildPhrasesFilter,
-  IIndexPattern,
+  IndexPattern,
 } from '../../../../../../../../src/plugins/data/common';
 import { FieldLabels } from './constants';
 import { DataSeries, UrlFilter } from '../types';
+import { XYCurveType } from '../../../../../../lens/public/xy_visualization/types';
+import { DataType } from '../../../../../../lens/public/types';
 
 function getLayerReferenceName(layerId: string) {
   return `indexpattern-datasource-layer-${layerId}`;
 }
 
 export class LensAttributes {
-  indexPattern: IIndexPattern;
+  indexPattern: IndexPattern;
   layers: Record<string, PersistedIndexPatternLayer>;
   visualization: XYState;
   filters: UrlFilter[];
@@ -38,7 +40,7 @@ export class LensAttributes {
   reportDefinitions: Record<string, string>;
 
   constructor(
-    indexPattern: IIndexPattern,
+    indexPattern: IndexPattern,
     reportViewConfig: DataSeries,
     seriesType?: SeriesType,
     filters?: UrlFilter[],
@@ -55,15 +57,17 @@ export class LensAttributes {
     }
     this.seriesType = seriesType ?? reportViewConfig.defaultSeriesType;
     this.reportViewConfig = reportViewConfig;
-    this.addLayer();
+    this.layers.layer1 = this.getLayer();
     this.visualization = this.getXyState();
   }
 
   addBreakdown(sourceField: string) {
+    const fieldMeta = this.indexPattern.getFieldByName(sourceField);
+
     this.layers.layer1.columns['break-down-column'] = {
       sourceField,
-      label: `Top values of user_agent.name${FieldLabels[sourceField]}`,
-      dataType: 'string',
+      label: `Top values of ${FieldLabels[sourceField]}`,
+      dataType: fieldMeta?.type as DataType,
       operationType: 'terms',
       scale: 'ordinal',
       isBucketed: true,
@@ -121,7 +125,9 @@ export class LensAttributes {
     | LastValueIndexPatternColumn
     | DateHistogramIndexPatternColumn
     | RangeIndexPatternColumn {
-    const { type: fieldType, name: fieldName } = this.getFieldType()!;
+    const { xAxisColumn } = this.reportViewConfig;
+
+    const { type: fieldType, name: fieldName } = this.getFieldMeta(xAxisColumn.sourceField)!;
 
     if (fieldType === 'date') {
       return this.getDateHistogramColumn(fieldName);
@@ -134,10 +140,8 @@ export class LensAttributes {
     return this.getDateHistogramColumn(fieldName);
   }
 
-  getFieldType() {
-    const { xAxisColumn } = this.reportViewConfig;
-
-    let xAxisField = xAxisColumn.sourceField;
+  getFieldMeta(sourceField?: string) {
+    let xAxisField = sourceField;
 
     if (xAxisField) {
       const rdf = this.reportViewConfig.reportDefinitions ?? [];
@@ -147,12 +151,14 @@ export class LensAttributes {
       if (customField) {
         if (this.reportDefinitions[xAxisField]) {
           xAxisField = this.reportDefinitions[xAxisField];
+        } else if (customField.defaultValue) {
+          xAxisField = customField.defaultValue;
         } else if (customField.options?.[0].field) {
           xAxisField = customField.options?.[0].field;
         }
       }
 
-      return this.indexPattern.fields.find((field) => field.name === xAxisField);
+      return this.indexPattern.getFieldByName(xAxisField);
     }
   }
 
@@ -168,8 +174,8 @@ export class LensAttributes {
     } as CountIndexPatternColumn;
   }
 
-  addLayer() {
-    this.layers.layer1 = {
+  getLayer() {
+    return {
       columnOrder: ['x-axis-column', 'y-axis-column'],
       columns: {
         'x-axis-column': this.getXAxis(),
@@ -185,7 +191,7 @@ export class LensAttributes {
       valueLabels: 'hide',
       fittingFunction: 'Linear',
       // fittingFunction: 'None',
-
+      curveType: 'CURVE_MONOTONE_X' as XYCurveType,
       axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
       gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },

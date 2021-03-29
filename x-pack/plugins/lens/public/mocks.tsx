@@ -5,16 +5,20 @@
  * 2.0.
  */
 
+import React from 'react';
 import { LensPublicStart } from '.';
+import { visualizationTypes } from './xy_visualization/types';
 
 export type Start = jest.Mocked<LensPublicStart>;
 
 const createStartContract = (): Start => {
   const startContract: Start = {
-    EmbeddableComponent: jest.fn(() => null),
+    EmbeddableComponent: jest.fn(() => {
+      return <span>Lens Embeddable Component</span>;
+    }),
     canUseEditor: jest.fn(() => true),
     navigateToPrefilledEditor: jest.fn(),
-    getXyVisTypes: jest.fn(),
+    getXyVisTypes: jest.fn().mockReturnValue(new Promise(() => visualizationTypes)),
   };
   return startContract;
 };

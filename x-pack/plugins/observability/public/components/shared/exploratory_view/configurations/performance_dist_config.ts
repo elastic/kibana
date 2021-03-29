@@ -15,6 +15,7 @@ export const LCP_FIELD = 'transaction.marks.agent.largestContentfulPaint';
 export const TBT_FIELD = 'transaction.experience.tbt';
 export const FID_FIELD = 'transaction.experience.fid';
 export const CLS_FIELD = 'transaction.experience.cls';
+export const SERVICE_NAME = 'service.name';
 
 export function getPerformanceDistLensConfig({ seriesId, indexPattern }: ConfigProps): DataSeries {
   return {

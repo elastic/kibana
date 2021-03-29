@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { ReportViewTypeId, SeriesUrl } from '../../types';
 import { NEW_SERIES_KEY, useUrlStorage } from '../../hooks/use_url_strorage';
+import { i18n } from '@kbn/i18n';
 
 interface Props {
   reportTypes: Array<{ id: ReportViewTypeId; label: string }>;
@@ -50,6 +51,11 @@ export function ReportTypesCol({ reportTypes }: Props) {
       ))}
     </EuiFlexGroup>
   ) : (
-    <EuiText color="subdued"> Select a data type to start building a series. </EuiText>
+    <EuiText color="subdued">{SELECTED_DATA_TYPE_FOR_REPORT}</EuiText>
   );
 }
+
+export const SELECTED_DATA_TYPE_FOR_REPORT = i18n.translate(
+  'xpack.observability.expView.reportType.noDataType',
+  { defaultMessage: 'Select a data type to start building a series.' }
+);

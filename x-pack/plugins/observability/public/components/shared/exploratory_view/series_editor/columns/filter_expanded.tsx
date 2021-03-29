@@ -76,8 +76,8 @@ export function FilterExpanded({ seriesId, field, label, goBack, nestedField }: 
                 negate={true}
                 nestedField={nestedField}
                 seriesId={seriesId}
-                isOpen={isOpen}
-                setIsOpen={setIsOpen}
+                isNestedOpen={isOpen}
+                setIsNestedOpen={setIsOpen}
               />
               <FilterValueButton
                 field={field}
@@ -86,8 +86,8 @@ export function FilterExpanded({ seriesId, field, label, goBack, nestedField }: 
                 nestedField={nestedField}
                 seriesId={seriesId}
                 negate={false}
-                isOpen={isOpen}
-                setIsOpen={setIsOpen}
+                isNestedOpen={isOpen}
+                setIsNestedOpen={setIsOpen}
               />
             </EuiFilterGroup>
             <EuiSpacer size="s" />

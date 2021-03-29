@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { injectI18n } from '@kbn/i18n/react';
-import { esFilters, Filter } from '../../../../../../../../src/plugins/data/public';
+import { esFilters, Filter, IndexPattern } from '../../../../../../../../src/plugins/data/public';
 import { useIndexPatternContext } from '../hooks/use_default_index_pattern';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { useSeriesFilters } from '../hooks/use_series_filters';
@@ -20,6 +20,32 @@ interface Props {
   negate: boolean;
   definitionFilter?: boolean;
   removeFilter: (field: string, value: string, notVal: boolean) => void;
+}
+export function buildFilterLabel({
+  field,
+  value,
+  label,
+  indexPattern,
+  negate,
+}: {
+  label: string;
+  value: string;
+  negate: boolean;
+  field: string;
+  indexPattern: IndexPattern;
+}) {
+  const indexField = indexPattern.getFieldByName(field)!;
+
+  const filter = esFilters.buildPhraseFilter(indexField, value, indexPattern);
+
+  filter.meta.value = value;
+  filter.meta.key = label;
+  filter.meta.alias = null;
+  filter.meta.negate = negate;
+  filter.meta.disabled = false;
+  filter.meta.type = 'phrase';
+
+  return filter;
 }
 export function FilterLabel({
   label,
@@ -34,16 +60,7 @@ export function FilterLabel({
 
   const { indexPattern } = useIndexPatternContext();
 
-  const indexField = indexPattern.fields.find((fd) => fd.name === field)!;
-
-  const filter = esFilters.buildPhraseFilter(indexField, value, indexPattern);
-
-  filter.meta.value = value;
-  filter.meta.key = label;
-  filter.meta.alias = null;
-  filter.meta.negate = negate;
-  filter.meta.disabled = false;
-  filter.meta.type = 'phrase';
+  const filter = buildFilterLabel({ field, value, label, indexPattern, negate });
 
   const { invertFilter } = useSeriesFilters({ seriesId });
 
@@ -51,7 +68,7 @@ export function FilterLabel({
     services: { uiSettings },
   } = useKibana();
 
-  return (
+  return indexPattern ? (
     <FilterItem
       indexPatterns={[indexPattern]}
       id="browser"
@@ -69,5 +86,5 @@ export function FilterLabel({
       uiSettings={uiSettings!}
       hiddenPanelOptions={['pinFilter', 'editFilter', 'disableFilter']}
     />
-  );
+  ) : null;
 }

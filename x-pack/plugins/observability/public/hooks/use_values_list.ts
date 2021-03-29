@@ -53,7 +53,9 @@ export const useValuesList = ({
           ]
         : filters,
     });
-  }, [sourceField, query, time, data.autocomplete, indexPattern, filters]);
+  }, []);
+  // FIXME
+  // }, [sourceField, query, time, data.autocomplete, indexPattern]);
 
   return { values: values as string[], loading };
 };

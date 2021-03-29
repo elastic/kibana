@@ -8,8 +8,8 @@
 import { EuiSuperDatePicker } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import { useHasData } from '../../../../hooks/use_has_data';
-import { UI_SETTINGS, useKibanaUISettings } from '../../../../hooks/use_kibana_ui_settings';
 import { useUrlStorage } from '../hooks/use_url_strorage';
+import { useQuickTimeRanges } from '../../../../hooks/use_quick_time_ranges';
 
 export interface TimePickerTime {
   from: string;
@@ -27,15 +27,7 @@ interface Props {
 export function SeriesDatePicker({ seriesId }: Props) {
   const { onRefreshTimeRange } = useHasData();
 
-  const timePickerQuickRanges = useKibanaUISettings<TimePickerQuickRange[]>(
-    UI_SETTINGS.TIMEPICKER_QUICK_RANGES
-  );
-
-  const commonlyUsedRanges = timePickerQuickRanges.map(({ from, to, display }) => ({
-    start: from,
-    end: to,
-    label: display,
-  }));
+  const commonlyUsedRanges = useQuickTimeRanges();
 
   const { series, setSeries } = useUrlStorage(seriesId);
 

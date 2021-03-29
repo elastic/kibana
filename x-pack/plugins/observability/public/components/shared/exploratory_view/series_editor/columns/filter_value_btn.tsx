@@ -16,26 +16,26 @@ import FieldValueSuggestions from '../../../field_value_suggestions';
 interface Props {
   value: string;
   field: string;
-  allValues?: string[];
+  allSelectedValues?: string[];
   negate: boolean;
   nestedField?: string;
   seriesId: string;
-  isOpen: {
+  isNestedOpen: {
     value: string;
     negate: boolean;
   };
-  setIsOpen: (val: { value: string; negate: boolean }) => void;
+  setIsNestedOpen: (val: { value: string; negate: boolean }) => void;
 }
 
 export function FilterValueButton({
-  isOpen,
-  setIsOpen,
+  isNestedOpen,
+  setIsNestedOpen,
   value,
   field,
-  allValues,
   negate,
   seriesId,
   nestedField,
+  allSelectedValues,
 }: Props) {
   const { series } = useUrlStorage(seriesId);
 
@@ -43,7 +43,7 @@ export function FilterValueButton({
 
   const { setFilter, removeFilter } = useSeriesFilters({ seriesId });
 
-  const hasActiveFilters = (allValues ?? []).includes(value);
+  const hasActiveFilters = (allSelectedValues ?? []).includes(value);
 
   const button = (
     <FilterButton
@@ -56,9 +56,9 @@ export function FilterValueButton({
           setFilter({ field, value, negate });
         }
         if (!hasActiveFilters) {
-          setIsOpen({ value, negate });
+          setIsNestedOpen({ value, negate });
         } else {
-          setIsOpen({ value: '', negate });
+          setIsNestedOpen({ value: '', negate });
         }
       }}
       className=""
@@ -69,10 +69,12 @@ export function FilterValueButton({
 
   const onNestedChange = (val?: string) => {
     setFilter({ field: nestedField!, value: val! });
-    setIsOpen({ value: '', negate });
+    setIsNestedOpen({ value: '', negate });
   };
 
-  return nestedField ? (
+  const forceOpenNested = isNestedOpen?.value === value && isNestedOpen.negate === negate;
+
+  return nestedField && forceOpenNested ? (
     <FieldValueSuggestions
       button={button}
       label={'Version'}
@@ -86,7 +88,7 @@ export function FilterValueButton({
           },
         },
       ]}
-      forceOpen={isOpen?.value === value && isOpen.negate === negate}
+      forceOpen={forceOpenNested}
       anchorPosition="rightCenter"
       time={series.time}
     />
