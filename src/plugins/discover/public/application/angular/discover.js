@@ -393,7 +393,7 @@ function discoverController($route, $scope) {
   $scope.state.index = $scope.indexPattern.id;
   $scope.state.sort = getSortArray($scope.state.sort, $scope.indexPattern);
 
-  $scope.opts.fetch = $scope.fetch = function () {
+  $scope.opts.fetch = $scope.fetch = async function () {
     $scope.fetchCounter++;
     $scope.fetchError = undefined;
     if (!validateTimeRange(timefilter.getTime(), toastNotifications)) {
@@ -493,11 +493,16 @@ function discoverController($route, $scope) {
     showUnmappedFields,
   };
 
+  let autoRefreshDoneCb;
   const fetch$ = merge(
     refetch$,
     filterManager.getFetches$(),
     timefilter.getFetch$(),
-    timefilter.getAutoRefreshFetch$(),
+    timefilter.getAutoRefreshFetch$().pipe(
+      tap((done) => {
+        autoRefreshDoneCb = done;
+      })
+    ),
     data.query.queryString.getUpdates$(),
     searchSessionManager.newSearchSessionIdFromURL$
   ).pipe(debounceTime(100));
@@ -507,7 +512,16 @@ function discoverController($route, $scope) {
       $scope,
       fetch$,
       {
-        next: $scope.fetch,
+        next: async () => {
+          try {
+            await $scope.fetch();
+          } finally {
+            // notify auto refresh service that
+            // the last fetch is completed so it starts the next auto refresh loop
+            autoRefreshDoneCb?.();
+            autoRefreshDoneCb = undefined;
+          }
+        },
       },
       (error) => addFatalError(core.fatalErrors, error)
     )
