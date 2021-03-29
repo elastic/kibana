@@ -40,7 +40,7 @@ import {
 } from '../actions';
 import { appContextService } from '../../app_context';
 import { updateAgent } from '../crud';
-import type { FullAgentPolicyPermission } from '../../../../common';
+import type { FullAgentPolicy, FullAgentPolicyOutputPermissions } from '../../../../common';
 
 import { toPromiseAbortable, AbortError, createRateLimiter } from './rxjs_utils';
 
@@ -115,7 +115,7 @@ async function getOrCreateAgentDefaultOutputAPIKey(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   agent: Agent,
-  permissions: { [role: string]: { indices: FullAgentPolicyPermission[] } }
+  permissions: FullAgentPolicyOutputPermissions
 ): Promise<string> {
   const defaultAPIKey = await getAgentDefaultOutputAPIKey(soClient, esClient, agent);
   if (defaultAPIKey) {
@@ -174,21 +174,18 @@ export async function createAgentActionFromPolicyAction(
     }
   );
 
-  const permissions: { [role: string]: { indices: FullAgentPolicyPermission[] } } =
-    'policy' in newAgentAction.data
-      ? newAgentAction.data.policy.output_permissions.default
-      : newAgentAction.data.config.output_permissions.default; // agent <= 7.9
+  // agent <= 7.9 uses `data.config` instead of `data.policy`
+  const policyProp = 'policy' in newAgentAction.data ? 'policy' : 'config';
+
+  // TODO: The null assertion `!` is strictly correct for the current use case
+  // where the only output is `elasticsearch`, but this might change in the future.
+  const permissions = (newAgentAction.data[policyProp] as FullAgentPolicy).output_permissions!
+    .default;
 
   // Mutate the policy to set the api token for this agent
   const apiKey = await getOrCreateAgentDefaultOutputAPIKey(soClient, esClient, agent, permissions);
 
-  if (newAgentAction.data.policy) {
-    newAgentAction.data.policy.outputs.default.api_key = apiKey;
-  }
-  // BWC for agent <= 7.9
-  else if (newAgentAction.data.config) {
-    newAgentAction.data.config.outputs.default.api_key = apiKey;
-  }
+  newAgentAction.data[policyProp].outputs.default.api_key = apiKey;
 
   return [newAgentAction];
 }

@@ -8,7 +8,7 @@
 import type { KibanaRequest } from 'src/core/server';
 import type { SavedObjectsClientContract } from 'src/core/server';
 
-import type { FullAgentPolicyPermission } from '../../../common';
+import type { FullAgentPolicyOutputPermissions } from '../../../common';
 
 import { createAPIKey } from './security';
 
@@ -19,22 +19,10 @@ export async function generateOutputApiKey(
   soClient: SavedObjectsClientContract,
   outputId: string,
   agentId: string,
-  permissions: { [role: string]: { indices: FullAgentPolicyPermission[] } }
+  permissions: FullAgentPolicyOutputPermissions
 ): Promise<{ key: string; id: string }> {
   const name = `${agentId}:${outputId}`;
-
-  const APIKeyRequest = Object.entries(permissions).reduce<
-    Record<string, { cluster: string[]; indices: FullAgentPolicyPermission[] }>
-  >((request, [role, indices]) => {
-    request[role] = {
-      cluster: ['monitor'],
-      ...indices,
-    };
-
-    return request;
-  }, {});
-
-  const key = await createAPIKey(soClient, name, APIKeyRequest);
+  const key = await createAPIKey(soClient, name, permissions);
 
   if (!key) {
     throw new Error('Unable to create an output api key');

@@ -59,9 +59,14 @@ export interface FullAgentPolicyInput {
   [key: string]: any;
 }
 
-export interface FullAgentPolicyPermission {
-  names: string[];
-  privileges: string[];
+export interface FullAgentPolicyOutputPermissions {
+  [role: string]: {
+    cluster: string[];
+    indices: Array<{
+      names: string[];
+      privileges: string[];
+    }>;
+  };
 }
 
 export interface FullAgentPolicy {
@@ -72,11 +77,7 @@ export interface FullAgentPolicy {
     };
   };
   output_permissions?: {
-    [output: string]: {
-      [role: string]: {
-        indices: FullAgentPolicyPermission[];
-      };
-    };
+    [output: string]: FullAgentPolicyOutputPermissions;
   };
   fleet?: {
     kibana: FullAgentPolicyKibanaConfig;
