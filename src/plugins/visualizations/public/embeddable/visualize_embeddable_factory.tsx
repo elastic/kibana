@@ -12,6 +12,8 @@ import { first } from 'rxjs/operators';
 import { EmbeddableStateWithType } from 'src/plugins/embeddable/common';
 import { SavedObjectAttributes } from '../../../../core/public';
 import { extractSearchSourceReferences } from '../../../data/public';
+import { SavedObjectReference } from '../../../../core/public';
+
 import {
   EmbeddableFactoryDefinition,
   EmbeddableOutput,
@@ -38,6 +40,12 @@ import {
 } from '../services';
 import { showNewVisModal } from '../wizard';
 import { convertToSerializedVis } from '../saved_visualizations/_saved_vis';
+import {
+  extractControlsReferences,
+  extractTimeSeriesReferences,
+  injectTimeSeriesReferences,
+  injectControlsReferences,
+} from '../saved_visualizations/saved_visualization_references';
 import { createVisEmbeddableFromObject } from './create_vis_embeddable_from_object';
 import { StartServicesGetter } from '../../../kibana_utils/public';
 import { VisualizationsStartDeps } from '../plugin';
@@ -239,6 +247,19 @@ export class VisualizeEmbeddableFactory
     );
   }
 
+  public inject(_state: EmbeddableStateWithType, references: SavedObjectReference[]) {
+    const state = (_state as unknown) as VisualizeInput;
+
+    const { type, params } = state.savedVis ?? {};
+
+    if (type && params) {
+      injectControlsReferences(type, params, references);
+      injectTimeSeriesReferences(type, params, references);
+    }
+
+    return _state;
+  }
+
   public extract(_state: EmbeddableStateWithType) {
     const state = (_state as unknown) as VisualizeInput;
     const references = [];
@@ -259,19 +280,11 @@ export class VisualizeEmbeddableFactory
       });
     }
 
-    if (state.savedVis?.params.controls) {
-      const controls = state.savedVis.params.controls;
-      controls.forEach((control: Record<string, string>, i: number) => {
-        if (!control.indexPattern) {
-          return;
-        }
-        control.indexPatternRefName = `control_${i}_index_pattern`;
-        references.push({
-          name: control.indexPatternRefName,
-          type: 'index-pattern',
-          id: control.indexPattern,
-        });
-      });
+    const { type, params } = state.savedVis ?? {};
+
+    if (type && params) {
+      extractControlsReferences(type, params, references, `control_${state.id}`);
+      extractTimeSeriesReferences(type, params, references, `metrics_${state.id}`);
     }
 
     return { state: _state, references };
