@@ -22,7 +22,7 @@ export function isFleetServerSetup() {
   return _isFleetServerSetup;
 }
 
-export function awaitIfFleetServerSetupPending() {
+export async function awaitIfFleetServerSetupPending() {
   if (!_isPending) {
     return;
   }

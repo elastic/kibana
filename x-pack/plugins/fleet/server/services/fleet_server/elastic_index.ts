@@ -12,6 +12,8 @@ import type { FLEET_SERVER_INDICES } from '../../../common';
 import { FLEET_SERVER_INDICES_VERSION } from '../../../common';
 import { appContextService } from '../app_context';
 
+import { FleetSetupError } from '../../errors';
+
 import ESFleetAgentIndex from './elasticsearch/fleet_agents.json';
 import ESFleetPoliciesIndex from './elasticsearch/fleet_policies.json';
 import ESFleetPoliciesLeaderIndex from './elasticsearch/fleet_policies_leader.json';
@@ -47,22 +49,26 @@ export async function createAliasIfDoNotExists(
   alias: string,
   index: string
 ) {
-  const { body: exists } = await esClient.indices.existsAlias({
-    name: alias,
-  });
+  try {
+    const { body: exists } = await esClient.indices.existsAlias({
+      name: alias,
+    });
 
-  if (exists === true) {
-    return;
+    if (exists === true) {
+      return;
+    }
+    await esClient.indices.updateAliases({
+      body: {
+        actions: [
+          {
+            add: { index, alias },
+          },
+        ],
+      },
+    });
+  } catch (e) {
+    throw new FleetSetupError(`Create of alias [${alias}] for index [${index}] failed`, e);
   }
-  await esClient.indices.updateAliases({
-    body: {
-      actions: [
-        {
-          add: { index, alias },
-        },
-      ],
-    },
-  });
 }
 
 async function createOrUpdateIndex(
@@ -83,19 +89,23 @@ async function createOrUpdateIndex(
 }
 
 async function updateIndex(esClient: ElasticsearchClient, indexName: string, indexData: any) {
-  const res = await esClient.indices.getMapping({
-    index: indexName,
-  });
-
-  const migrationHash = hash(indexData);
-  if (res.body[indexName].mappings?._meta?.migrationHash !== migrationHash) {
-    await esClient.indices.putMapping({
+  try {
+    const res = await esClient.indices.getMapping({
       index: indexName,
-      body: Object.assign({
-        ...indexData.mappings,
-        _meta: { ...(indexData.mappings._meta || {}), migrationHash },
-      }),
     });
+
+    const migrationHash = hash(indexData);
+    if (res.body[indexName].mappings?._meta?.migrationHash !== migrationHash) {
+      await esClient.indices.putMapping({
+        index: indexName,
+        body: Object.assign({
+          ...indexData.mappings,
+          _meta: { ...(indexData.mappings._meta || {}), migrationHash },
+        }),
+      });
+    }
+  } catch (e) {
+    throw new FleetSetupError(`update of index [${indexName}] failed`, e);
   }
 }
 
@@ -115,7 +125,7 @@ async function createIndex(esClient: ElasticsearchClient, indexName: string, ind
   } catch (err) {
     // Swallow already exists errors as concurent Kibana can try to create that indice
     if (err?.body?.error?.type !== 'resource_already_exists_exception') {
-      throw err;
+      throw new FleetSetupError(`create of index [${indexName}] Failed`, err);
     }
   }
 }
