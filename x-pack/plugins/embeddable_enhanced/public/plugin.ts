@@ -119,7 +119,6 @@ export class EmbeddableEnhancedPlugin
     const dynamicActions = new DynamicActionManager({
       isCompatible: async (context: unknown) => {
         if (!this.isEmbeddableContext(context)) return false;
-        if (context.embeddable.getInput().viewMode !== ViewMode.VIEW) return false;
         return context.embeddable.runtimeId === embeddable.runtimeId;
       },
       storage,
