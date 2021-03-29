@@ -79,6 +79,7 @@ export function InstancesLatencyDistributionChart({
             tooltip={tooltip}
             showLegend
             theme={chartTheme}
+            xDomain={{ min: 0, max: 16 }}
           />
           <BubbleSeries
             color={theme.eui.euiColorVis1}
