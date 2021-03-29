@@ -8,6 +8,7 @@
 import { SavedObjectsClientContract } from 'src/core/server';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { ManifestClient } from './manifest_client';
+import { EndpointArtifactClientInterface } from './artifact_client';
 
 export const getManifestClientMock = (
   savedObjectsClient?: SavedObjectsClientContract
@@ -16,4 +17,12 @@ export const getManifestClientMock = (
     return new ManifestClient(savedObjectsClient, 'v1');
   }
   return new ManifestClient(savedObjectsClientMock.create(), 'v1');
+};
+
+export const createEndpointArtifactClientMock = (): jest.Mocked<EndpointArtifactClientInterface> => {
+  return {
+    createArtifact: jest.fn(),
+    getArtifact: jest.fn(),
+    deleteArtifact: jest.fn(),
+  };
 };
