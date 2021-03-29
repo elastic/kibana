@@ -110,7 +110,7 @@ export const AddSwimlaneToDashboardControl: FC<AddToDashboardControlProps> = ({
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.ml.explorer.addToDashboard.selectSwimlanesLabel"
+            id="xpack.ml.explorer.addToDashboard.swimlanes.selectSwimlanesLabel"
             defaultMessage="Select swim lane view:"
           />
         }
@@ -134,7 +134,7 @@ export const AddSwimlaneToDashboardControl: FC<AddToDashboardControlProps> = ({
 
   const title = (
     <FormattedMessage
-      id="xpack.ml.explorer.dashboardsTitle"
+      id="xpack.ml.explorer.addToDashboard.swimlanes.dashboardsTitle"
       defaultMessage="Add swim lanes to dashboards"
     />
   );

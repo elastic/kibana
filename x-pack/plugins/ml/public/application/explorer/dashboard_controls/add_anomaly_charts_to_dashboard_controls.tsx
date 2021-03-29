@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { FC, useCallback } from 'react';
+import React, { FC, useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { formatDate } from '@elastic/eui';
+import { EuiFieldNumber, EuiFormRow, formatDate } from '@elastic/eui';
 import { useDashboardTable } from './use_dashboards_table';
 import { AddToDashboardControl } from './add_to_dashboard_controls';
 import { useAddToDashboardActions } from './use_add_to_dashboard_actions';
@@ -18,6 +18,7 @@ import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../../../embeddables';
 import { getDefaultExplorerChartsPanelTitle } from '../../../embeddables/anomaly_charts/anomaly_charts_embeddable';
 import { TimeRangeBounds } from '../../util/time_buckets';
 import { useTableSeverity } from '../../components/controls/select_severity';
+import { MAX_ANOMALY_CHARTS_ALLOWED } from '../../../embeddables/anomaly_charts/anomaly_charts_initializer';
 
 function getDefaultEmbeddablePanelConfig(jobIds: JobId[]) {
   return {
@@ -45,6 +46,7 @@ export const AddAnomalyChartsToDashboardControl: FC<AddToDashboardControlProps> 
   interval,
 }) => {
   const [severity] = useTableSeverity();
+  const [maxSeriesToPlot, setMaxSeriesToPlot] = useState(DEFAULT_MAX_SERIES_TO_PLOT);
 
   const getPanelsData = useCallback(async () => {
     let timeRange: TimeRange | undefined;
@@ -63,13 +65,13 @@ export const AddAnomalyChartsToDashboardControl: FC<AddToDashboardControlProps> 
         ...config,
         embeddableConfig: {
           jobIds,
-          maxSeriesToPlot: DEFAULT_MAX_SERIES_TO_PLOT,
+          maxSeriesToPlot: maxSeriesToPlot ?? DEFAULT_MAX_SERIES_TO_PLOT,
           severityThreshold: severity.val,
           ...(timeRange ?? {}),
         },
       },
     ];
-  }, [selectedCells, interval, bounds]);
+  }, [selectedCells, interval, bounds, jobIds, maxSeriesToPlot, severity]);
 
   const { selectedItems, selection, dashboardItems, isLoading, search } = useDashboardTable();
   const { addToDashboardAndEditCallback, addToDashboardCallback } = useAddToDashboardActions({
@@ -79,12 +81,34 @@ export const AddAnomalyChartsToDashboardControl: FC<AddToDashboardControlProps> 
   });
   const title = (
     <FormattedMessage
-      id="xpack.ml.explorer.anomalies.dashboardsTitle"
+      id="xpack.ml.explorer.addToDashboard.anomalyCharts.dashboardsTitle"
       defaultMessage="Add anomaly charts to dashboards"
     />
   );
 
   const disabled = selectedItems.length < 1 && !Array.isArray(jobIds === undefined);
+
+  const extraControls = (
+    <EuiFormRow
+      label={
+        <FormattedMessage
+          id="xpack.ml.explorer.addToDashboard.anomalyCharts.maxSeriesToPlotLabel"
+          defaultMessage="Maximum number of series to plot"
+        />
+      }
+    >
+      <EuiFieldNumber
+        data-test-subj="mlAnomalyChartsInitializerMaxSeries"
+        id="selectMaxSeriesToPlot"
+        name="selectMaxSeriesToPlot"
+        value={maxSeriesToPlot}
+        onChange={(e) => setMaxSeriesToPlot(parseInt(e.target.value, 10))}
+        min={0}
+        max={MAX_ANOMALY_CHARTS_ALLOWED}
+      />
+    </EuiFormRow>
+  );
+
   return (
     <AddToDashboardControl
       onClose={onClose}
@@ -97,6 +121,8 @@ export const AddAnomalyChartsToDashboardControl: FC<AddToDashboardControlProps> 
       addToDashboardCallback={addToDashboardCallback}
       disabled={disabled}
       title={title}
-    />
+    >
+      {extraControls}
+    </AddToDashboardControl>
   );
 };
