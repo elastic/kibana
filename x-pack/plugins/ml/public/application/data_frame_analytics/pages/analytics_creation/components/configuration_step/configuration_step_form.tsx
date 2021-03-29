@@ -8,7 +8,6 @@
 import React, { FC, Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
-  EuiCallOut,
   EuiComboBox,
   EuiComboBoxOptionOption,
   EuiFormRow,
@@ -20,7 +19,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { debounce, cloneDeep } from 'lodash';
 
-import { FormattedMessage } from '@kbn/i18n/react';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 import { useMlContext } from '../../../../../contexts/ml';
 
@@ -54,13 +52,12 @@ import { useSavedSearch, SavedSearchQuery } from './use_saved_search';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/search';
 import { ExplorationQueryBarProps } from '../../../analytics_exploration/components/exploration_query_bar/exploration_query_bar';
 import { Query } from '../../../../../../../../../../src/plugins/data/common/query';
-import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 
 import { ScatterplotMatrix } from '../../../../../components/scatterplot_matrix';
 import { RuntimeMappings } from '../runtime_mappings';
+import { ConfigurationStepProps } from './configuration_step';
 
 const runtimeMappingKey = 'runtime_mapping';
-const maxRuntimeFieldsDisplayCount = 5;
 const requiredFieldsErrorText = i18n.translate(
   'xpack.ml.dataframe.analytics.createWizard.requiredFieldsErrorMessage',
   {
@@ -93,8 +90,9 @@ function getRuntimeDepVarOptions(jobType: AnalyticsJobType, runtimeMappings: Run
   return runtimeOptions;
 }
 
-export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
+export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
   actions,
+  isClone,
   state,
   setCurrentStep,
 }) => {
@@ -118,7 +116,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
   >();
 
   const { setEstimatedModelMemoryLimit, setFormState } = actions;
-  const { cloneJob, estimatedModelMemoryLimit, form, isJobCreated, requestMessages } = state;
+  const { estimatedModelMemoryLimit, form, isJobCreated, requestMessages } = state;
   const firstUpdate = useRef<boolean>(true);
   const {
     dependentVariable,
@@ -188,7 +186,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     try {
       if (currentIndexPattern !== undefined) {
         const depVarOptions = [];
-        let depVarUpdate = dependentVariable;
+        let depVarUpdate = formState.dependentVariable;
         // Get fields and filter for supported types for job type
         const { fields } = newJobCapsService;
 
@@ -206,11 +204,15 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
         }
 
         if (
-          cloneJob !== undefined &&
-          typeof runtimeMappings === 'object' &&
-          Object.keys(runtimeMappings).includes(form.dependentVariable)
+          isClone &&
+          typeof formState.runtimeMappings === 'object' &&
+          Object.keys(formState.runtimeMappings).includes(form.dependentVariable)
         ) {
           resetDependentVariable = false;
+          depVarOptions.push({
+            label: form.dependentVariable,
+            key: `runtime_mapping_${form.dependentVariable}`,
+          });
         }
 
         if (resetDependentVariable) {
@@ -404,15 +406,6 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     };
   }, [jobType, dependentVariable, trainingPercent, JSON.stringify(includes), jobConfigQueryString]);
 
-  const unsupportedRuntimeFields = useMemo(
-    () =>
-      currentIndexPattern.fields
-        .getAll()
-        .filter((f) => f.runtimeField)
-        .map((f) => `'${f.displayName}'`),
-    [currentIndexPattern.fields]
-  );
-
   const scatterplotMatrixProps = useMemo(
     () => ({
       color: isJobTypeWithDepVar ? dependentVariable : undefined,
@@ -557,11 +550,14 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
               singleSelection={true}
               options={dependentVariableOptions}
               selectedOptions={dependentVariable ? [{ label: dependentVariable }] : []}
-              onChange={(selectedOptions) =>
+              onChange={(selectedOptions) => {
+                // dependentVariable always needs to be in includes fields
+                const unique = new Set([...includes, selectedOptions[0].label]);
                 setFormState({
                   dependentVariable: selectedOptions[0].label || '',
-                })
-              }
+                  includes: Array.from(unique),
+                });
+              }}
               isClearable={false}
               isInvalid={dependentVariable === ''}
               data-test-subj={`mlAnalyticsCreateJobWizardDependentVariableSelect${
@@ -581,35 +577,6 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
       >
         <Fragment />
       </EuiFormRow>
-      {Array.isArray(unsupportedRuntimeFields) && unsupportedRuntimeFields.length > 0 && (
-        <>
-          <EuiCallOut size="s" color="warning">
-            <FormattedMessage
-              id="xpack.ml.dataframe.analytics.create.unsupportedRuntimeFieldsCallout"
-              defaultMessage="The runtime {runtimeFieldsCount, plural, one {field} other {fields}} {unsupportedRuntimeFields} {extraCountMsg} are not supported for analysis."
-              values={{
-                runtimeFieldsCount: unsupportedRuntimeFields.length,
-                extraCountMsg:
-                  unsupportedRuntimeFields.length - maxRuntimeFieldsDisplayCount > 0 ? (
-                    <FormattedMessage
-                      id="xpack.ml.dataframe.analytics.create.extraUnsupportedRuntimeFieldsMsg"
-                      defaultMessage="and {count} more"
-                      values={{
-                        count: unsupportedRuntimeFields.length - maxRuntimeFieldsDisplayCount,
-                      }}
-                    />
-                  ) : (
-                    ''
-                  ),
-                unsupportedRuntimeFields: unsupportedRuntimeFields
-                  .slice(0, maxRuntimeFieldsDisplayCount)
-                  .join(', '),
-              }}
-            />
-          </EuiCallOut>
-          <EuiSpacer />
-        </>
-      )}
 
       <AnalysisFieldsTable
         dependentVariable={dependentVariable}

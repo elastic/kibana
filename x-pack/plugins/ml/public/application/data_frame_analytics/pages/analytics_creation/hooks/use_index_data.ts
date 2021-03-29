@@ -9,7 +9,6 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { estypes } from '@elastic/elasticsearch';
 import { EuiDataGridColumn } from '@elastic/eui';
-
 import { CoreSetup } from 'src/core/public';
 
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
@@ -27,7 +26,7 @@ import {
   EsSorting,
   UseIndexDataReturnType,
   getProcessedFields,
-  getRuntimeFieldsMapping,
+  getCombinedRuntimeMappings,
 } from '../../../../components/data_grid';
 import { extractErrorMessage } from '../../../../../../common/util/errors';
 import { INDEX_STATUS } from '../../../common/analytics';
@@ -61,7 +60,12 @@ export const useIndexData = (
     ...indexPatternFields.map((id) => {
       const field = indexPattern.fields.getByName(id);
       const schema = getDataGridSchemaFromKibanaFieldType(field);
-      return { id, schema, isExpandable: schema !== 'boolean', isRuntimeFieldColumn: false };
+      return {
+        id,
+        schema,
+        isExpandable: schema !== 'boolean',
+        isRuntimeFieldColumn: field?.runtimeField !== undefined,
+      };
     }),
   ]);
 
@@ -88,6 +92,8 @@ export const useIndexData = (
     setErrorMessage('');
     setStatus(INDEX_STATUS.LOADING);
 
+    const combinedRuntimeMappings = getCombinedRuntimeMappings(indexPattern, runtimeMappings);
+
     const sort: EsSorting = sortingColumns.reduce((s, column) => {
       s[column.id] = { order: column.direction };
       return s;
@@ -101,7 +107,9 @@ export const useIndexData = (
         fields: ['*'],
         _source: false,
         ...(Object.keys(sort).length > 0 ? { sort } : {}),
-        ...getRuntimeFieldsMapping(indexPatternFields, indexPattern, runtimeMappings),
+        ...(combinedRuntimeMappings && Object.keys(combinedRuntimeMappings).length > 0
+          ? { runtime_mappings: combinedRuntimeMappings }
+          : {}),
       },
     };
 
@@ -112,13 +120,21 @@ export const useIndexData = (
       if (runtimeMappings !== undefined) {
         // remove old runtime field from columns
         const updatedColumns = columns.filter((col) => col.isRuntimeFieldColumn === false);
-        setColumns([...updatedColumns, ...getRuntimeFieldColumns(runtimeMappings)]);
+        setColumns([
+          ...updatedColumns,
+          ...(combinedRuntimeMappings ? getRuntimeFieldColumns(combinedRuntimeMappings) : []),
+        ]);
       } else {
         setColumns([
           ...indexPatternFields.map((id) => {
             const field = indexPattern.fields.getByName(id);
             const schema = getDataGridSchemaFromKibanaFieldType(field);
-            return { id, schema, isExpandable: schema !== 'boolean', isRuntimeFieldColumn: false };
+            return {
+              id,
+              schema,
+              isExpandable: schema !== 'boolean',
+              isRuntimeFieldColumn: field?.runtimeField !== undefined,
+            };
           }),
         ]);
       }

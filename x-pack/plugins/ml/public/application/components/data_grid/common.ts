@@ -122,6 +122,34 @@ export const getRuntimeFieldsMapping = (
     : {};
 };
 
+export function getCombinedRuntimeMappings(
+  indexPattern: IndexPattern | undefined,
+  runtimeMappings?: RuntimeMappings
+): RuntimeMappings | undefined {
+  let combinedRuntimeMappings = {};
+
+  // And runtime field mappings defined by index pattern
+  if (indexPattern) {
+    const computedFields = indexPattern?.getComputedFields();
+    if (computedFields?.runtimeFields !== undefined) {
+      const ipRuntimeMappings = computedFields.runtimeFields;
+      if (isPopulatedObject(ipRuntimeMappings)) {
+        combinedRuntimeMappings = { ...combinedRuntimeMappings, ...ipRuntimeMappings };
+      }
+    }
+  }
+
+  // Use runtime field mappings defined inline from API
+  // and override fields with same name from index pattern
+  if (isPopulatedObject(runtimeMappings)) {
+    combinedRuntimeMappings = { ...combinedRuntimeMappings, ...runtimeMappings };
+  }
+
+  if (isPopulatedObject<RuntimeMappings>(combinedRuntimeMappings)) {
+    return combinedRuntimeMappings;
+  }
+}
+
 export interface FieldTypes {
   [key: string]: ES_FIELD_TYPES;
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
+import React, { FC, useState, useEffect } from 'react';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -21,8 +21,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { XJsonMode } from '@kbn/ace';
 import { RuntimeField } from '../../../../../../../../../../src/plugins/data/common/index_patterns';
+import { useMlContext } from '../../../../../contexts/ml';
 import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { XJson } from '../../../../../../../../../../src/plugins/es_ui_shared/public';
+import { getCombinedRuntimeMappings } from '../../../../../components/data_grid/common';
 import { RuntimeMappingsEditor } from './runtime_mappings_editor';
 
 const advancedEditorsSidebarWidth = '220px';
@@ -58,6 +60,7 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
   const [advancedEditorRuntimeMappings, setAdvancedEditorRuntimeMappings] = useState<string>();
 
   const { setFormState } = actions;
+  const { cloneJob } = state;
   const { jobType, previousRuntimeMapping, runtimeMappings } = state.form;
 
   const {
@@ -65,6 +68,9 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
     setXJson: setAdvancedRuntimeMappingsConfig,
     xJson: advancedRuntimeMappingsConfig,
   } = useXJsonMode('');
+
+  const mlContext = useMlContext();
+  const { currentIndexPattern } = mlContext;
 
   const applyChanges = () => {
     const removeRuntimeMappings = advancedRuntimeMappingsConfig === '';
@@ -100,6 +106,25 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
     setIsRuntimeMappingsEditorEnabled(!isRuntimeMappingsEditorEnabled);
     setIsRuntimeMappingsEditorApplyButtonEnabled(false);
   };
+
+  useEffect(
+    function getInitialRuntimeMappings() {
+      const clonedRuntimeMappings = cloneJob?.source.runtime_mappings;
+      const combinedRuntimeMappings = getCombinedRuntimeMappings(
+        currentIndexPattern,
+        clonedRuntimeMappings
+      );
+
+      if (combinedRuntimeMappings) {
+        setAdvancedRuntimeMappingsConfig(JSON.stringify(combinedRuntimeMappings, null, 2));
+        setFormState({
+          runtimeMappings: combinedRuntimeMappings,
+          runtimeMappingsUpdated: true,
+        });
+      }
+    },
+    [cloneJob?.id]
+  );
 
   return (
     <>

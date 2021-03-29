@@ -11,6 +11,7 @@ export {
   getDataGridSchemaFromKibanaFieldType,
   getFieldsFromKibanaIndexPattern,
   getRuntimeFieldsMapping,
+  getCombinedRuntimeMappings,
   multiColumnSortFactory,
   showDataGridColumnChartErrorMessageToast,
   useRenderCellValue,
