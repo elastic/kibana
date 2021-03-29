@@ -34,8 +34,8 @@ import { FindFileStructureResponse } from '../../../../../../../file_upload/comm
 interface Props {
   mappingsString: string;
   pipelineString: string;
-  onMappingsStringChange(): void;
-  onPipelineStringChange(): void;
+  onMappingsStringChange(mappings: string): void;
+  onPipelineStringChange(pipeline: string): void;
   combinedFields: CombinedField[];
   onCombinedFieldsChange(combinedFields: CombinedField[]): void;
   results: FindFileStructureResponse;
@@ -72,11 +72,9 @@ export class CombinedFieldsForm extends Component<Props, State> {
     const pipeline = this.parsePipeline();
 
     this.props.onMappingsStringChange(
-      // @ts-expect-error
       JSON.stringify(addCombinedFieldsToMappings(mappings, [combinedField]), null, 2)
     );
     this.props.onPipelineStringChange(
-      // @ts-expect-error
       JSON.stringify(addCombinedFieldsToPipeline(pipeline, [combinedField]), null, 2)
     );
     this.props.onCombinedFieldsChange([...this.props.combinedFields, combinedField]);
@@ -99,11 +97,9 @@ export class CombinedFieldsForm extends Component<Props, State> {
     const removedCombinedFields = updatedCombinedFields.splice(index, 1);
 
     this.props.onMappingsStringChange(
-      // @ts-expect-error
       JSON.stringify(removeCombinedFieldsFromMappings(mappings, removedCombinedFields), null, 2)
     );
     this.props.onPipelineStringChange(
-      // @ts-expect-error
       JSON.stringify(removeCombinedFieldsFromPipeline(pipeline, removedCombinedFields), null, 2)
     );
     this.props.onCombinedFieldsChange(updatedCombinedFields);

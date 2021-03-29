@@ -242,11 +242,11 @@ async function getValidationCheckMessages(
       },
     });
 
-    // @ts-expect-error
+    // @ts-expect-error incorrect search response type
     const totalDocs = body.hits.total.value;
 
     if (body.aggregations) {
-      // @ts-expect-error
+      // @ts-expect-error incorrect search response type
       Object.entries(body.aggregations).forEach(([aggName, { doc_count: docCount, value }]) => {
         const empty = docCount / totalDocs;
 

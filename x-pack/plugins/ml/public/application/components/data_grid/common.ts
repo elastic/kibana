@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment-timezone';
+import { estypes } from '@elastic/elasticsearch';
 import { useEffect, useMemo } from 'react';
 
 import {
@@ -49,7 +50,6 @@ import { getNestedProperty } from '../../util/object_utils';
 import { mlFieldFormatService } from '../../services/field_format_service';
 
 import { DataGridItem, IndexPagination, RenderCellValue } from './types';
-import type { RuntimeField } from '../../../../../../../src/plugins/data/common/index_patterns';
 import { RuntimeMappings } from '../../../../common/types/fields';
 import { isPopulatedObject } from '../../../../common/util/object_utils';
 
@@ -110,7 +110,7 @@ export const getRuntimeFieldsMapping = (
   if (isPopulatedObject(ipRuntimeMappings)) {
     indexPatternFields.forEach((ipField) => {
       if (ipRuntimeMappings.hasOwnProperty(ipField)) {
-        // @ts-expect-error
+        // @ts-expect-error data plugin doesn't use estypes runtime fields
         combinedRuntimeMappings[ipField] = ipRuntimeMappings[ipField];
       }
     });
@@ -178,7 +178,7 @@ export const getDataGridSchemasFromFieldTypes = (fieldTypes: FieldTypes, results
 export const NON_AGGREGATABLE = 'non-aggregatable';
 
 export const getDataGridSchemaFromESFieldType = (
-  fieldType: ES_FIELD_TYPES | undefined | RuntimeField['type']
+  fieldType: ES_FIELD_TYPES | undefined | estypes.RuntimeField['type']
 ): string | undefined => {
   // Built-in values are ['boolean', 'currency', 'datetime', 'numeric', 'json']
   // To fall back to the default string schema it needs to be undefined.

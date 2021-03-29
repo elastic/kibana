@@ -183,7 +183,6 @@ export class AdvancedJobCreator extends JobCreator {
       timeFieldName: this.timeFieldName,
       query: this.query,
       runtimeMappings: this.datafeedConfig.runtime_mappings,
-      // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
       indicesOptions: this.datafeedConfig.indices_options,
     });
     this.setTimeRange(start.epoch, end.epoch);

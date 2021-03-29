@@ -35,8 +35,8 @@ interface Props {
   mappingsString: string;
   pipelineString: string;
   onIndexSettingsStringChange(): void;
-  onMappingsStringChange(): void;
-  onPipelineStringChange(): void;
+  onMappingsStringChange(mappings: string): void;
+  onPipelineStringChange(pipeline: string): void;
   indexNameError: string;
   indexPatternNameError: string;
   combinedFields: CombinedField[];
@@ -175,7 +175,7 @@ export const AdvancedSettings: FC<Props> = ({
 interface JsonEditorProps {
   initialized: boolean;
   data: string;
-  onChange(): void;
+  onChange(value: string): void;
 }
 
 const IndexSettings: FC<JsonEditorProps> = ({ initialized, data, onChange }) => {
