@@ -9,7 +9,6 @@ import { act, fireEvent, render } from '@testing-library/react';
 import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { CustomLinkMenuSection } from '.';
-import { CustomLink as CustomLinkType } from '../../../../../common/custom_link/custom_link_types';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import * as useFetcher from '../../../../hooks/use_fetcher';
@@ -40,7 +39,7 @@ const transaction = ({
 describe('Custom links', () => {
   it('shows empty message when no custom link is available', () => {
     jest.spyOn(useFetcher, 'useFetcher').mockReturnValue({
-      data: [],
+      data: { customLinks: [] },
       status: useFetcher.FETCH_STATUS.SUCCESS,
       refetch: jest.fn(),
     });
@@ -58,7 +57,7 @@ describe('Custom links', () => {
 
   it('shows loading while custom links are fetched', () => {
     jest.spyOn(useFetcher, 'useFetcher').mockReturnValue({
-      data: [],
+      data: { customLinks: [] },
       status: useFetcher.FETCH_STATUS.LOADING,
       refetch: jest.fn(),
     });
@@ -71,12 +70,14 @@ describe('Custom links', () => {
   });
 
   it('shows first 3 custom links available', () => {
-    const customLinks = [
-      { id: '1', label: 'foo', url: 'foo' },
-      { id: '2', label: 'bar', url: 'bar' },
-      { id: '3', label: 'baz', url: 'baz' },
-      { id: '4', label: 'qux', url: 'qux' },
-    ] as CustomLinkType[];
+    const customLinks = {
+      customLinks: [
+        { id: '1', label: 'foo', url: 'foo' },
+        { id: '2', label: 'bar', url: 'bar' },
+        { id: '3', label: 'baz', url: 'baz' },
+        { id: '4', label: 'qux', url: 'qux' },
+      ],
+    };
 
     jest.spyOn(useFetcher, 'useFetcher').mockReturnValue({
       data: customLinks,
@@ -93,15 +94,17 @@ describe('Custom links', () => {
   });
 
   it('clicks "show all" and "show fewer"', () => {
-    const customLinks = [
-      { id: '1', label: 'foo', url: 'foo' },
-      { id: '2', label: 'bar', url: 'bar' },
-      { id: '3', label: 'baz', url: 'baz' },
-      { id: '4', label: 'qux', url: 'qux' },
-    ] as CustomLinkType[];
+    const data = {
+      customLinks: [
+        { id: '1', label: 'foo', url: 'foo' },
+        { id: '2', label: 'bar', url: 'bar' },
+        { id: '3', label: 'baz', url: 'baz' },
+        { id: '4', label: 'qux', url: 'qux' },
+      ],
+    };
 
     jest.spyOn(useFetcher, 'useFetcher').mockReturnValue({
-      data: customLinks,
+      data,
       status: useFetcher.FETCH_STATUS.SUCCESS,
       refetch: jest.fn(),
     });
@@ -125,7 +128,7 @@ describe('Custom links', () => {
   describe('create custom link buttons', () => {
     it('shows create button below empty message', () => {
       jest.spyOn(useFetcher, 'useFetcher').mockReturnValue({
-        data: [],
+        data: { customLinks: [] },
         status: useFetcher.FETCH_STATUS.SUCCESS,
         refetch: jest.fn(),
       });
@@ -140,15 +143,17 @@ describe('Custom links', () => {
     });
 
     it('shows create button besides the title', () => {
-      const customLinks = [
-        { id: '1', label: 'foo', url: 'foo' },
-        { id: '2', label: 'bar', url: 'bar' },
-        { id: '3', label: 'baz', url: 'baz' },
-        { id: '4', label: 'qux', url: 'qux' },
-      ] as CustomLinkType[];
+      const data = {
+        customLinks: [
+          { id: '1', label: 'foo', url: 'foo' },
+          { id: '2', label: 'bar', url: 'bar' },
+          { id: '3', label: 'baz', url: 'baz' },
+          { id: '4', label: 'qux', url: 'qux' },
+        ],
+      };
 
       jest.spyOn(useFetcher, 'useFetcher').mockReturnValue({
-        data: customLinks,
+        data,
         status: useFetcher.FETCH_STATUS.SUCCESS,
         refetch: jest.fn(),
       });

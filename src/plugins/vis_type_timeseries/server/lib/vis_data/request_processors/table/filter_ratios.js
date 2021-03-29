@@ -13,7 +13,7 @@ import { calculateAggRoot } from './calculate_agg_root';
 
 const filter = (metric) => metric.type === 'filter_ratio';
 
-export function ratios(req, panel, esQueryConfig, indexPatternObject) {
+export function ratios(req, panel, esQueryConfig, indexPattern) {
   return (next) => (doc) => {
     panel.series.forEach((column) => {
       const aggRoot = calculateAggRoot(doc, column);
@@ -22,12 +22,12 @@ export function ratios(req, panel, esQueryConfig, indexPatternObject) {
           overwrite(
             doc,
             `${aggRoot}.timeseries.aggs.${metric.id}-numerator.filter`,
-            esQuery.buildEsQuery(indexPatternObject, metric.numerator, [], esQueryConfig)
+            esQuery.buildEsQuery(indexPattern, metric.numerator, [], esQueryConfig)
           );
           overwrite(
             doc,
             `${aggRoot}.timeseries.aggs.${metric.id}-denominator.filter`,
-            esQuery.buildEsQuery(indexPatternObject, metric.denominator, [], esQueryConfig)
+            esQuery.buildEsQuery(indexPattern, metric.denominator, [], esQueryConfig)
           );
 
           let numeratorPath = `${metric.id}-numerator>_count`;
