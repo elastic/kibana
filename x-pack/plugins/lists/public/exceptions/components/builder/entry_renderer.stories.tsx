@@ -15,10 +15,11 @@ import { HttpStart } from 'kibana/public';
 import { OperatorEnum, OperatorTypeEnum } from '../../../../common';
 import { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
 import { fields } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
+import { getMockTheme } from '../../../common/test_utils/kibana_react.mock';
 
 import { BuilderEntryItem, EntryItemProps } from './entry_renderer';
 
-const mockTheme = (): { darkMode: boolean; eui: unknown } => ({
+const mockTheme = getMockTheme({
   darkMode: false,
   eui: euiLightVars,
 });
