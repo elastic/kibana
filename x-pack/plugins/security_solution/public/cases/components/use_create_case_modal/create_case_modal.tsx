@@ -6,30 +6,20 @@
  */
 
 import React, { memo } from 'react';
-import styled from 'styled-components';
 import { EuiModal, EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
 
-import { FormContext } from '../create/form_context';
-import { CreateCaseForm } from '../create/form';
-import { SubmitCaseButton } from '../create/submit_button';
 import { Case } from '../../containers/types';
 import * as i18n from '../../translations';
 import { CaseType } from '../../../../../cases/common';
+import { useKibana } from '../../../common/lib/kibana';
 
 export interface CreateCaseModalProps {
+  caseType?: CaseType;
+  hideConnectorServiceNowSir?: boolean;
   isModalOpen: boolean;
   onCloseCaseModal: () => void;
   onSuccess: (theCase: Case) => Promise<void>;
-  caseType?: CaseType;
-  hideConnectorServiceNowSir?: boolean;
 }
-
-const Container = styled.div`
-  ${({ theme }) => `
-    margin-top: ${theme.eui.euiSize};
-    text-align: right;
-  `}
-`;
 
 const CreateModalComponent: React.FC<CreateCaseModalProps> = ({
   isModalOpen,
@@ -38,25 +28,21 @@ const CreateModalComponent: React.FC<CreateCaseModalProps> = ({
   caseType = CaseType.individual,
   hideConnectorServiceNowSir = false,
 }) => {
+  const { cases } = useKibana().services;
   return isModalOpen ? (
     <EuiModal onClose={onCloseCaseModal} data-test-subj="all-cases-modal">
       <EuiModalHeader>
         <EuiModalHeaderTitle>{i18n.CREATE_TITLE}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <FormContext
-          hideConnectorServiceNowSir={hideConnectorServiceNowSir}
-          caseType={caseType}
-          onSuccess={onSuccess}
-        >
-          <CreateCaseForm
-            withSteps={false}
-            hideConnectorServiceNowSir={hideConnectorServiceNowSir}
-          />
-          <Container>
-            <SubmitCaseButton />
-          </Container>
-        </FormContext>
+        {/* TODO: STEPH TEST THIS*/}
+        {cases.getCreateCase({
+          caseType,
+          onCancel: onCloseCaseModal,
+          onSuccess,
+          hideConnectorServiceNowSir,
+          withSteps: false,
+        })}
       </EuiModalBody>
     </EuiModal>
   ) : null;

@@ -8,7 +8,6 @@
 import React from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 
-import { USE_RAC_CASES_UI } from '../../../common/constants';
 import { SecurityPageName } from '../../app/types';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { WrapperPage } from '../../common/components/wrapper_page';
@@ -17,7 +16,6 @@ import { useGetUserSavedObjectPermissions } from '../../common/lib/kibana';
 import { getCaseUrl } from '../../common/components/link_to';
 import { navTabs } from '../../app/home/home_navigations';
 import { CaseView } from '../components/case_view';
-import { CaseViewFromPlugin } from '../components/case_view/case_view_from_plugin';
 import { savedObjectReadOnlyErrorMessage, CaseCallOut } from '../components/callout';
 
 export const CaseDetailsPage = React.memo(() => {
@@ -43,19 +41,11 @@ export const CaseDetailsPage = React.memo(() => {
             messages={[{ ...savedObjectReadOnlyErrorMessage }]}
           />
         )}
-        {USE_RAC_CASES_UI ? (
-          <CaseViewFromPlugin
-            caseId={caseId}
-            subCaseId={subCaseId}
-            userCanCrud={userPermissions?.crud ?? false}
-          />
-        ) : (
-          <CaseView
-            caseId={caseId}
-            subCaseId={subCaseId}
-            userCanCrud={userPermissions?.crud ?? false}
-          />
-        )}
+        <CaseView
+          caseId={caseId}
+          subCaseId={subCaseId}
+          userCanCrud={userPermissions?.crud ?? false}
+        />
       </WrapperPage>
       <SpyRoute pageName={SecurityPageName.case} />
     </>

@@ -17,11 +17,11 @@ import * as i18n from '../../common/translations';
 import { CaseType } from '../../../common';
 
 export interface CreateCaseModalProps {
+  caseType?: CaseType;
+  hideConnectorServiceNowSir?: boolean;
   isModalOpen: boolean;
   onCloseCaseModal: () => void;
   onSuccess: (theCase: Case) => Promise<void>;
-  caseType?: CaseType;
-  hideConnectorServiceNowSir?: boolean;
 }
 
 const Container = styled.div`
@@ -32,11 +32,11 @@ const Container = styled.div`
 `;
 
 const CreateModalComponent: React.FC<CreateCaseModalProps> = ({
+  caseType = CaseType.individual,
+  hideConnectorServiceNowSir,
   isModalOpen,
   onCloseCaseModal,
   onSuccess,
-  caseType = CaseType.individual,
-  hideConnectorServiceNowSir = false,
 }) => {
   return isModalOpen ? (
     <EuiModal onClose={onCloseCaseModal} data-test-subj="all-cases-modal">
@@ -45,13 +45,13 @@ const CreateModalComponent: React.FC<CreateCaseModalProps> = ({
       </EuiModalHeader>
       <EuiModalBody>
         <FormContext
-          hideConnectorServiceNowSir={hideConnectorServiceNowSir}
           caseType={caseType}
+          hideConnectorServiceNowSir={hideConnectorServiceNowSir}
           onSuccess={onSuccess}
         >
           <CreateCaseForm
-            withSteps={false}
             hideConnectorServiceNowSir={hideConnectorServiceNowSir}
+            withSteps={false}
           />
           <Container>
             <SubmitCaseButton />
