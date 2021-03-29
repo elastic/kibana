@@ -47,5 +47,8 @@ export default function ({ loadTestFile }) {
 
     // Settings
     loadTestFile(require.resolve('./settings/index'));
+
+    // Preconfiguration
+    loadTestFile(require.resolve('./preconfiguration/index'));
   });
 }
