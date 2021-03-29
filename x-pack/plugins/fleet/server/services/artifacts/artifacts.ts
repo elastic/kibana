@@ -18,7 +18,9 @@ import { FLEET_SERVER_ARTIFACTS_INDEX } from '../../../common';
 
 import { ArtifactsElasticsearchError } from '../../errors';
 
-import { isElasticsearchItemNotFoundError, isElasticsearchVersionConflictError } from './utils';
+import { isElasticsearchVersionConflictError } from '../../errors/utils';
+
+import { isElasticsearchItemNotFoundError } from './utils';
 import type {
   Artifact,
   ArtifactElasticsearchProperties,

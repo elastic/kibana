@@ -10,3 +10,7 @@ import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 export function isESClientError(error: unknown): error is ResponseError {
   return error instanceof ResponseError;
 }
+
+export const isElasticsearchVersionConflictError = (error: Error): boolean => {
+  return isESClientError(error) && error.meta.statusCode === 409;
+};

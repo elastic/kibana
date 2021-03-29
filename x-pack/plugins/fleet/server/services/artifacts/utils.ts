@@ -10,7 +10,3 @@ import { isESClientError } from '../../errors';
 export const isElasticsearchItemNotFoundError = (error: Error): boolean => {
   return isESClientError(error) && error.meta.statusCode === 404 && error.meta.body.found === false;
 };
-
-export const isElasticsearchVersionConflictError = (error: Error): boolean => {
-  return isESClientError(error) && error.meta.statusCode === 409;
-};
