@@ -227,6 +227,7 @@ async function installPackageFromRegistry({
           ...installedPkg.attributes.installed_kibana,
         ],
         status: 'already_installed',
+        installType,
       };
     }
   }
@@ -258,7 +259,7 @@ async function installPackageFromRegistry({
       installType,
       installSource: 'registry',
     }).then((assets) => {
-      return { assets, status: 'installed' };
+      return { assets, status: 'installed', installType };
     });
   } catch (e) {
     await handleInstallPackageFailure({
@@ -269,7 +270,11 @@ async function installPackageFromRegistry({
       installedPkg,
       esClient,
     });
-    throw e;
+    // throw e;
+    return {
+      error: e,
+      installType,
+    };
   }
 }
 
@@ -324,7 +329,7 @@ async function installPackageByUpload({
     installType,
     installSource,
   }).then((assets) => {
-    return { assets, status: 'installed' };
+    return { assets, status: 'installed', installType };
   });
 }
 

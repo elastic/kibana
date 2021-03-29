@@ -226,20 +226,21 @@ export const installPackageFromRegistryHandler: RequestHandler<
   const savedObjectsClient = context.core.savedObjects.client;
   const esClient = context.core.elasticsearch.client.asCurrentUser;
   const { pkgkey } = request.params;
-  try {
-    const res = await installPackage({
-      installSource: 'registry',
-      savedObjectsClient,
-      pkgkey,
-      esClient,
-      force: request.body?.force,
-    });
+
+  const res = await installPackage({
+    installSource: 'registry',
+    savedObjectsClient,
+    pkgkey,
+    esClient,
+    force: request.body?.force,
+  });
+  if (!res.error) {
     const body: InstallPackageResponse = {
-      response: res.assets,
+      response: res.assets || [],
     };
     return response.ok({ body });
-  } catch (e) {
-    return await defaultIngestErrorHandler({ error: e, response });
+  } else {
+    return await defaultIngestErrorHandler({ error: res.error, response });
   }
 };
 
@@ -301,7 +302,7 @@ export const installPackageByUploadHandler: RequestHandler<
       contentType,
     });
     const body: InstallPackageResponse = {
-      response: res.assets,
+      response: res.assets || [],
     };
     return response.ok({ body });
   } catch (error) {
