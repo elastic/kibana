@@ -7,6 +7,7 @@
 
 import { NewTrustedApp, TrustedApp } from '../../../../../common/endpoint/types/trusted_apps';
 import { AsyncResourceState } from '.';
+import { GetPolicyListResponse } from '../../policy/types';
 
 export interface Pagination {
   pageIndex: number;
@@ -29,7 +30,9 @@ export interface TrustedAppsListPageLocation {
   page_index: number;
   page_size: number;
   view_type: ViewType;
-  show?: 'create';
+  show?: 'create' | 'edit';
+  /** Used for editing. The ID of the selected trusted app */
+  id?: string;
 }
 
 export interface TrustedAppsListPageState {
@@ -51,9 +54,13 @@ export interface TrustedAppsListPageState {
       entry: NewTrustedApp;
       isValid: boolean;
     };
+    /** The trusted app to be edited (when in edit mode)  */
+    editItem?: AsyncResourceState<TrustedApp>;
     confirmed: boolean;
     submissionResourceState: AsyncResourceState<TrustedApp>;
   };
+  /** A list of all available polices for use in associating TA to policies */
+  policies: AsyncResourceState<GetPolicyListResponse>;
   location: TrustedAppsListPageLocation;
   active: boolean;
 }

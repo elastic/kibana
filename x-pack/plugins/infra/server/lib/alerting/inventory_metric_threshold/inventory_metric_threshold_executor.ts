@@ -68,12 +68,18 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
     sourceId || 'default'
   );
 
+  const logQueryFields = await libs.getLogQueryFields(
+    sourceId || 'default',
+    services.savedObjectsClient
+  );
+
   const results = await Promise.all(
     criteria.map((c) =>
       evaluateCondition(
         c,
         nodeType,
         source,
+        logQueryFields,
         services.scopedClusterClient.asCurrentUser,
         filterQuery
       )

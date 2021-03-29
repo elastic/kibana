@@ -68,6 +68,7 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
 
     if (opts.ssl) {
       // @kbn/dev-utils is part of devDependencies
+      // eslint-disable-next-line import/no-extraneous-dependencies
       const { CA_CERT_PATH, KBN_KEY_PATH, KBN_CERT_PATH } = require('@kbn/dev-utils');
       const customElasticsearchHosts = opts.elasticsearch
         ? opts.elasticsearch.split(',')

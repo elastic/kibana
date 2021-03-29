@@ -706,12 +706,20 @@ class AgentPolicyService {
       } catch (error) {
         throw new Error('Default settings is not setup');
       }
-      if (!settings.kibana_urls || !settings.kibana_urls.length)
-        throw new Error('kibana_urls is missing');
+      if (settings.fleet_server_hosts && settings.fleet_server_hosts.length) {
+        fullAgentPolicy.fleet = {
+          hosts: settings.fleet_server_hosts,
+        };
+      } // TODO remove as part of https://github.com/elastic/kibana/issues/94303
+      else {
+        if (!settings.kibana_urls || !settings.kibana_urls.length)
+          throw new Error('kibana_urls is missing');
 
-      fullAgentPolicy.fleet = {
-        kibana: getFullAgentPolicyKibanaConfig(settings.kibana_urls),
-      };
+        fullAgentPolicy.fleet = {
+          hosts: settings.kibana_urls,
+          kibana: getFullAgentPolicyKibanaConfig(settings.kibana_urls),
+        };
+      }
     }
     return fullAgentPolicy;
   }

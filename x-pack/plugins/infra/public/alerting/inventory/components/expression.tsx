@@ -43,7 +43,7 @@ import {
   AlertTypeParamsExpressionProps,
 } from '../../../../../triggers_actions_ui/public';
 import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
-import { useSourceViaHttp } from '../../../containers/source/use_source_via_http';
+import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
 import { sqsMetricTypes } from '../../../../common/inventory_models/aws_sqs/toolbar_items';
 import { ec2MetricTypes } from '../../../../common/inventory_models/aws_ec2/toolbar_items';
 import { s3MetricTypes } from '../../../../common/inventory_models/aws_s3/toolbar_items';
@@ -124,14 +124,13 @@ export const Expressions: React.FC<Props> = (props) => {
   } = props;
   const { source, createDerivedIndexPattern } = useSourceViaHttp({
     sourceId: 'default',
-    type: 'metrics',
     fetch: http.fetch,
     toastWarning: notifications.toasts.addWarning,
   });
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<Unit>('m');
 
-  const derivedIndexPattern = useMemo(() => createDerivedIndexPattern('metrics'), [
+  const derivedIndexPattern = useMemo(() => createDerivedIndexPattern(), [
     createDerivedIndexPattern,
   ]);
 
