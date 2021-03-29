@@ -1288,6 +1288,30 @@ test('should return a stream in the body', async () => {
   });
 });
 
+test('closes sockets on timeout', async () => {
+  const { registerRouter, server: innerServer } = await server.setup({
+    ...config,
+    socketTimeout: 1000,
+  });
+  const router = new Router('', logger, enhanceWithContext);
+
+  router.get({ path: '/a', validate: false }, async (context, req, res) => {
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    return res.ok({});
+  });
+  router.get({ path: '/b', validate: false }, (context, req, res) => res.ok({}));
+
+  registerRouter(router);
+
+  registerRouter(router);
+
+  await server.start();
+
+  expect(supertest(innerServer.listener).get('/a')).rejects.toThrow('socket hang up');
+
+  await supertest(innerServer.listener).get('/b').expect(200);
+});
+
 describe('setup contract', () => {
   describe('#createSessionStorage', () => {
     test('creates session storage factory', async () => {

@@ -9,13 +9,11 @@
 import { Stream } from 'stream';
 import Boom from '@hapi/boom';
 import supertest from 'supertest';
-import { ByteSizeValue, schema } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
 import { contextServiceMock } from '../../context/context_service.mock';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { createHttpServer } from '../test_utils';
-import { HttpServer } from '../http_server';
-import { Router } from '../router';
 import { HttpService } from '../http_service';
 
 let server: HttpService;
@@ -1836,51 +1834,5 @@ describe('ETag', () => {
       .get('/route')
       .set('If-None-Match', '"etag-1"')
       .expect(304, '');
-  });
-});
-
-describe('Timeouts', () => {
-  let httpServer: HttpServer;
-  let router: Router;
-
-  beforeEach(() => {
-    httpServer = new HttpServer(logger, 'foo');
-    const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
-    router = new Router('', logger.get(), enhanceWithContext);
-  });
-
-  afterEach(async () => {
-    await httpServer.stop();
-  });
-
-  test('closes sockets on timeout', async () => {
-    router.get({ path: '/a', validate: false }, async (context, req, res) => {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      return res.ok({});
-    });
-    router.get({ path: '/b', validate: false }, (context, req, res) => res.ok({}));
-
-    const { registerRouter, server: innerServer } = await httpServer.setup({
-      socketTimeout: 1000,
-      host: '127.0.0.1',
-      maxPayload: new ByteSizeValue(1024),
-      ssl: {},
-      cors: {
-        enabled: false,
-      },
-      compression: { enabled: true },
-      requestId: {
-        allowFromAnyIp: true,
-        ipAllowlist: [],
-      },
-    } as any);
-
-    registerRouter(router);
-
-    await httpServer.start();
-
-    expect(supertest(innerServer.listener).get('/a')).rejects.toThrow('socket hang up');
-
-    await supertest(innerServer.listener).get('/b').expect(200);
   });
 });
