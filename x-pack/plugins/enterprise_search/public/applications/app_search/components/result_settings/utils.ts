@@ -59,14 +59,8 @@ const convertToFieldResultSetting = (serverFieldResultSetting: ServerFieldResult
 
 export const clearAllFields = (fields: FieldResultSettingObject) => updateAllFields(fields, {});
 
-export const clearAllServerFields = (fields: ServerFieldResultSettingObject) =>
-  updateAllFields(fields, {});
-
 export const resetAllFields = (fields: FieldResultSettingObject) =>
   updateAllFields(fields, DEFAULT_FIELD_SETTINGS);
-
-export const resetAllServerFields = (fields: ServerFieldResultSettingObject) =>
-  updateAllFields(fields, { raw: {} });
 
 export const convertServerResultFieldsToResultFields = (
   serverResultFields: ServerFieldResultSettingObject,

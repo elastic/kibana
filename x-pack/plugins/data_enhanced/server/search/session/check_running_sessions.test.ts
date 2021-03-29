@@ -521,6 +521,7 @@ describe('getSearchStatus', () => {
       const updatedAttributes = updateInput[0].attributes as SearchSessionSavedObjectAttributes;
       expect(updatedAttributes.status).toBe(SearchSessionStatus.COMPLETE);
       expect(updatedAttributes.touched).not.toBe('123');
+      expect(updatedAttributes.completed).not.toBeUndefined();
       expect(updatedAttributes.idMapping['search-hash'].status).toBe(SearchStatus.COMPLETE);
       expect(updatedAttributes.idMapping['search-hash'].error).toBeUndefined();
 
