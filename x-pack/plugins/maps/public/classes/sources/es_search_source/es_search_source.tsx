@@ -60,16 +60,11 @@ import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { DataRequest } from '../../util/data_request';
 import { SortDirection, SortDirectionNumeric } from '../../../../../../../src/plugins/data/common';
 import { isValidStringConfig } from '../../util/valid_string_config';
-import { getDocValueAndSourceFields } from './get_docvalue_source_fields';
+import { getDocValueAndSourceFields, ScriptField } from './get_docvalue_source_fields';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.esSearchTitle', {
   defaultMessage: 'Documents',
 });
-
-export interface ScriptField {
-  source: string;
-  lang: string;
-}
 
 export class ESSearchSource extends AbstractESSource implements ITiledSingleLayerVectorSource {
   readonly _descriptor: ESSearchSourceDescriptor;

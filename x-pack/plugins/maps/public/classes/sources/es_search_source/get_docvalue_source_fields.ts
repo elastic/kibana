@@ -7,7 +7,11 @@
 
 import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
 import { getField } from '../../../../common/elasticsearch_util';
-import { ScriptField } from './es_search_source';
+
+export interface ScriptField {
+  source: string;
+  lang: string;
+}
 
 export function getDocValueAndSourceFields(
   indexPattern: IndexPattern,
@@ -23,7 +27,6 @@ export function getDocValueAndSourceFields(
   const scriptFields: Record<string, { script: ScriptField }> = {};
   fieldNames.forEach((fieldName) => {
     const field = getField(indexPattern, fieldName);
-    // console.log('fn', fieldName, field);
     if (field.scripted) {
       scriptFields[field.name] = {
         script: {

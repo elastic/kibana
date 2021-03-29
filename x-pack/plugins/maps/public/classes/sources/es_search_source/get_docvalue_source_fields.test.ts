@@ -7,17 +7,9 @@
 
 import { getDocValueAndSourceFields } from './get_docvalue_source_fields';
 import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
+import { IFieldType } from '../../../../../../../src/plugins/data/common/index_patterns/fields';
 
-function createMockIndexPattern(
-  fields: Array<{
-    name: string;
-    runtimeField?: object;
-    scripted?: boolean;
-    script?: string;
-    lang?: string;
-    readFromDocValues?: boolean;
-  }>
-): IndexPattern {
+function createMockIndexPattern(fields: IFieldType[]): IndexPattern {
   const indexPattern = {
     get fields() {
       return {
@@ -37,6 +29,7 @@ describe('getDocValueAndSourceFields', () => {
       createMockIndexPattern([
         {
           name: 'foobar',
+          // @ts-expect-error runtimeField not added yet to IFieldType. API tbd
           runtimeField: {},
         },
       ]),
