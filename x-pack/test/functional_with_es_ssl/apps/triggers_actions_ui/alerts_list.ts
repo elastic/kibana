@@ -177,8 +177,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('collapsedItemActions');
 
       const muteSwitchAfterMute = await testSubjects.find('muteSwitch');
-      const isChecked = await muteSwitchAfterMute.getAttribute('aria-checked');
-      expect(isChecked).to.eql('true');
+      await retry.try(async () => {
+        const isChecked = await muteSwitchAfterMute.getAttribute('aria-checked');
+        expect(isChecked).to.eql('true');
+      });
     });
 
     it('should unmute single alert', async () => {
