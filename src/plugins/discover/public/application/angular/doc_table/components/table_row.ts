@@ -91,13 +91,12 @@ export function createTableRowDirective($compile: ng.ICompileService) {
         $compile($detailsTr)($detailsScope);
       };
 
-      $scope.$watchMulti(['indexPattern.timeFieldName', 'row.highlight', '[]columns'], () => {
-        createSummaryRow($scope.row);
-      });
-
-      $scope.$watch('shouldRerender', () => {
-        createSummaryRow($scope.row);
-      });
+      $scope.$watchMulti(
+        ['indexPattern.timeFieldName', 'row.highlight', '[]columns', 'shouldRerender'],
+        () => {
+          createSummaryRow($scope.row);
+        }
+      );
 
       $scope.inlineFilter = function inlineFilter($event: any, type: string) {
         const column = $($event.currentTarget).data().column;

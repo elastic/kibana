@@ -69,11 +69,6 @@ export interface AppState {
    * id of the used saved query
    */
   savedQuery?: string;
-
-  /**
-   * just a boolean flag to trigger state refresh
-   */
-  needsRefresh?: boolean;
 }
 
 interface GetStateParams {

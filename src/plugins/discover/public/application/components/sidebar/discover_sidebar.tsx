@@ -169,7 +169,7 @@ export function DiscoverSidebar({
     if (!canEditIndexPatternField) {
       return;
     }
-    indexPatternFieldEditor.openEditor({
+    closeFieldEditor.current = indexPatternFieldEditor.openEditor({
       ctx: {
         indexPattern: selectedIndexPattern,
       },

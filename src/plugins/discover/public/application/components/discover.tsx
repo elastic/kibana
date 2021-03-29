@@ -68,7 +68,6 @@ export function Discover({
   searchSource,
   state,
   unmappedFieldsConfig,
-  refreshAppState,
 }: DiscoverProps) {
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
   const scrollableDesktop = useRef<HTMLDivElement>(null);
@@ -206,8 +205,8 @@ export function Discover({
     [opts, state]
   );
 
-  const onEditRuntimeField = () => {
-    opts.refetch$.next();
+  const onEditRuntimeField = async () => {
+    await fetch();
     // needed to trigger refresh of table cells
     setShouldRerender(!shouldRerender);
   };
