@@ -78,9 +78,8 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  const es = getService('legacyEs');
 
-  const { addTests, createTestDefinitions } = bulkCreateTestSuiteFactory(es, esArchiver, supertest);
+  const { addTests, createTestDefinitions } = bulkCreateTestSuiteFactory(esArchiver, supertest);
   const createTests = (overwrite: boolean, spaceId: string) => {
     const testCases = createTestCases(overwrite, spaceId);
     return createTestDefinitions(testCases, false, overwrite, {

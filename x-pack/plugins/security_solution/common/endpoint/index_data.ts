@@ -7,6 +7,7 @@
 
 import { Client } from '@elastic/elasticsearch';
 import seedrandom from 'seedrandom';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { KbnClient } from '@kbn/test';
 import { AxiosResponse } from 'axios';
 import { EndpointDocGenerator, TreeOptions, Event } from './generate_data';
