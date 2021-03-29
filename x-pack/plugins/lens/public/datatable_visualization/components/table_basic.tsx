@@ -208,13 +208,11 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
 
   const isNumericMap: Record<string, boolean> = useMemo(() => {
     const numericMap: Record<string, boolean> = {};
-    columnConfig.columns.forEach((column) => {
-      numericMap[column.columnId] =
-        firstLocalTable.columns.find((dataColumn) => dataColumn.id === column.columnId)?.meta
-          .type === 'number';
-    });
+    for (const column of firstLocalTable.columns) {
+      numericMap[column.id] = column.meta.type === 'number';
+    }
     return numericMap;
-  }, [firstLocalTable, columnConfig]);
+  }, [firstLocalTable]);
 
   const alignments: Record<string, 'left' | 'right' | 'center'> = useMemo(() => {
     const alignmentMap: Record<string, 'left' | 'right' | 'center'> = {};
@@ -252,7 +250,11 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   const gradientHelpers: Record<string, (value: number) => string> = useMemo(() => {
     const fnsMap: Record<string, (value: number) => string> = {};
     columnConfig.columns
-      .filter(({ columnId, colorMode }) => minMaxByColumnId[columnId] && colorMode !== 'none')
+      .filter(
+        ({ columnId, colorMode }) =>
+          // avoid to compute it for columns without the attribute
+          minMaxByColumnId[columnId] && colorMode != null && colorMode !== 'none'
+      )
       .forEach(({ columnId, palette }) => {
         const minValue = palette?.params?.rangeMin ?? minMaxByColumnId[columnId].min;
         const maxValue = palette?.params?.rangeMax ?? minMaxByColumnId[columnId].max;
