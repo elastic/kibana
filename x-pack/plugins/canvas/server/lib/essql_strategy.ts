@@ -15,17 +15,6 @@ import { EssqlSearchStrategyRequest, EssqlSearchStrategyResponse } from '../../t
 import { buildBoolArray } from '../../common/lib/request/build_bool_array';
 import { sanitizeName } from '../../common/lib/request/sanitize_name';
 import { normalizeType } from '../../common/lib/request/normalize_type';
-interface CursorResponse {
-  cursor?: string;
-  rows: string[][];
-}
-
-type QueryResponse = CursorResponse & {
-  columns: Array<{
-    name: string;
-    type: string;
-  }>;
-};
 
 export const essqlSearchStrategyProvider = (
   data: PluginStart
@@ -35,10 +24,11 @@ export const essqlSearchStrategyProvider = (
       const { count, query, filter, timezone, params } = request;
 
       const searchUntilEnd = async () => {
-        let response = await esClient.asCurrentUser.sql.query<QueryResponse>({
+        let response = await esClient.asCurrentUser.sql.query({
           format: 'json',
           body: {
             query,
+            // @ts-expect-error `params` missing from `QuerySqlRequest` type
             params,
             time_zone: timezone,
             fetch_size: count,
@@ -53,7 +43,7 @@ export const essqlSearchStrategyProvider = (
 
         let body = response.body;
 
-        const columns = body.columns.map(({ name, type }) => {
+        const columns = body.columns!.map(({ name, type }) => {
           return {
             id: sanitizeName(name),
             name: sanitizeName(name),
@@ -73,7 +63,7 @@ export const essqlSearchStrategyProvider = (
             },
           });
 
-          body = response.body as QueryResponse;
+          body = response.body;
 
           rows = [...rows, ...body.rows.map((row) => zipObject(columnNames, row))];
         }
