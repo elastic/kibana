@@ -57,7 +57,8 @@ We highly recommend testing your {kib} upgrade in a development cluster to disco
 For example, given the following error message:
 > Unable to migrate the corrupt saved object document with _id: 'marketing_space:dashboard:e3c5fc71-ac71-4805-bcab-2bcc9cc93275'. To allow migrations to proceed, please delete this document from the [.kibana_7.12.0_001] index.
 
-The following steps must be followed to allow the upgrade migration to succeed:
+The following steps must be followed to allow the upgrade migration to succeed.
+Please be aware the Dashboard having ID `e3c5fc71-ac71-4805-bcab-2bcc9cc93275` belonging to the space `marketing_space` will no more be available:
 1. Delete the corrupt document with `DELETE .kibana_7.12.0_001/_doc/marketing_space:dashboard:e3c5fc71-ac71-4805-bcab-2bcc9cc93275`
 2. Restart {kib}
 
