@@ -212,7 +212,7 @@ Object {
           class="euiSpacer euiSpacer--l"
         />
         <div
-          class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow c4"
+          class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow c4"
         >
           <div
             data-eui="EuiFocusTrap"
@@ -225,7 +225,7 @@ Object {
             >
               <button
                 aria-label="Close this dialog"
-                class="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
+                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiFlyout__closeButton"
                 data-test-subj="euiFlyoutCloseButton"
                 type="button"
               >
@@ -586,7 +586,7 @@ Object {
                                           >
                                             <button
                                               aria-label="Remove Entry"
-                                              class="euiButtonIcon euiButtonIcon--danger"
+                                              class="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall"
                                               data-test-subj="addTrustedAppFlyout-createForm-conditionsBuilder-group1-entry0-remove"
                                               disabled=""
                                               id="mockId"
@@ -997,7 +997,7 @@ Object {
                       class="euiFlexItem euiFlexItem--flexGrowZero"
                     >
                       <div
-                        class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
+                        class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
                       >
                         <div
                           class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -1365,7 +1365,7 @@ Object {
                         >
                           <button
                             aria-label="Previous page"
-                            class="euiButtonIcon euiButtonIcon--text"
+                            class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
                             data-test-subj="pagination-button-previous"
                             disabled=""
                             type="button"
@@ -1484,7 +1484,7 @@ Object {
                           </ul>
                           <button
                             aria-label="Next page, 2"
-                            class="euiButtonIcon euiButtonIcon--text"
+                            class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
                             data-test-subj="pagination-button-next"
                             type="button"
                           >
@@ -1512,13 +1512,13 @@ Object {
       data-test-subj="trustedAppsListPage"
     >
       <header
-        class="sc-pZNLs imoSYB siemHeaderPage"
+        class="sc-pjGtN iqOyKV siemHeaderPage"
       >
         <div
           class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
         >
           <div
-            class="euiFlexItem sc-oTOtL cKcAUE"
+            class="euiFlexItem sc-psbuI gHZSXZ"
           >
             <h1
               class="euiTitle euiTitle--large"
@@ -1538,7 +1538,7 @@ Object {
             </div>
           </div>
           <div
-            class="euiFlexItem euiFlexItem--flexGrowZero sc-oTOtL cKcAUE"
+            class="euiFlexItem euiFlexItem--flexGrowZero sc-psbuI gHZSXZ"
             data-test-subj="header-page-supplements"
           >
             <button
@@ -1599,7 +1599,7 @@ Object {
         class="euiSpacer euiSpacer--l"
       />
       <div
-        class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow sc-oUqyN jIrDlk"
+        class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow sc-oUqyN jIrDlk"
       >
         <div
           data-eui="EuiFocusTrap"
@@ -1612,7 +1612,7 @@ Object {
           >
             <button
               aria-label="Close this dialog"
-              class="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
+              class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiFlyout__closeButton"
               data-test-subj="euiFlyoutCloseButton"
               type="button"
             >
@@ -1784,7 +1784,7 @@ Object {
                         >
                           <div>
                             <div
-                              class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--directionRow euiFlexGroup--responsive sc-pcLzI gaXJWX"
+                              class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--directionRow euiFlexGroup--responsive sc-ptBBy hxgCsO"
                               data-test-subj="addTrustedAppFlyout-createForm-conditionsBuilder-group1"
                             >
                               <div
@@ -1973,7 +1973,7 @@ Object {
                                         >
                                           <button
                                             aria-label="Remove Entry"
-                                            class="euiButtonIcon euiButtonIcon--danger"
+                                            class="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall"
                                             data-test-subj="addTrustedAppFlyout-createForm-conditionsBuilder-group1-entry0-remove"
                                             disabled=""
                                             id="mockId"
@@ -2060,7 +2060,7 @@ Object {
                         class="euiFormRow__fieldWrapper"
                       >
                         <div
-                          class="sc-plgA-D bsISVJ"
+                          class="sc-qPzgd jNOPOu"
                         >
                           <div
                             class="euiFormRow euiFormRow--fullWidth"
@@ -2384,24 +2384,24 @@ Object {
                     class="euiFlexItem euiFlexItem--flexGrowZero"
                   >
                     <div
-                      class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
+                      class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
                     >
                       <div
                         class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                       >
                         <div
-                          class="euiFlexItem euiFlexItem--flexGrow2 sc-qPzgd aiUzK"
+                          class="euiFlexItem euiFlexItem--flexGrow2 sc-pAkMi kGVKuo"
                         >
                           <dl
                             class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                           >
                             <dt
-                              class="euiDescriptionList__title sc-pAkMi hqItBe"
+                              class="euiDescriptionList__title sc-pQfSI jJIOeJ"
                             >
                               Name
                             </dt>
                             <dd
-                              class="euiDescriptionList__description sc-pIgJL cnELLG eui-textBreakWord"
+                              class="euiDescriptionList__description sc-pYbQl KYizM eui-textBreakWord"
                             >
                               <span
                                 class="euiToolTipAnchor"
@@ -2412,12 +2412,12 @@ Object {
                               </span>
                             </dd>
                             <dt
-                              class="euiDescriptionList__title sc-pAkMi hqItBe"
+                              class="euiDescriptionList__title sc-pQfSI jJIOeJ"
                             >
                               OS
                             </dt>
                             <dd
-                              class="euiDescriptionList__description sc-pIgJL cnELLG eui-textBreakWord"
+                              class="euiDescriptionList__description sc-pYbQl KYizM eui-textBreakWord"
                             >
                               <span
                                 class="euiToolTipAnchor"
@@ -2428,12 +2428,12 @@ Object {
                               </span>
                             </dd>
                             <dt
-                              class="euiDescriptionList__title sc-pAkMi hqItBe"
+                              class="euiDescriptionList__title sc-pQfSI jJIOeJ"
                             >
                               Date Created
                             </dt>
                             <dd
-                              class="euiDescriptionList__description sc-pIgJL cnELLG eui-textBreakWord"
+                              class="euiDescriptionList__description sc-pYbQl KYizM eui-textBreakWord"
                             >
                               <span
                                 class="euiToolTipAnchor eui-textTruncate"
@@ -2442,12 +2442,12 @@ Object {
                               </span>
                             </dd>
                             <dt
-                              class="euiDescriptionList__title sc-pAkMi hqItBe"
+                              class="euiDescriptionList__title sc-pQfSI jJIOeJ"
                             >
                               Created By
                             </dt>
                             <dd
-                              class="euiDescriptionList__description sc-pIgJL cnELLG eui-textBreakWord"
+                              class="euiDescriptionList__description sc-pYbQl KYizM eui-textBreakWord"
                             >
                               <span
                                 class="euiToolTipAnchor"
@@ -2458,12 +2458,12 @@ Object {
                               </span>
                             </dd>
                             <dt
-                              class="euiDescriptionList__title sc-pAkMi hqItBe"
+                              class="euiDescriptionList__title sc-pQfSI jJIOeJ"
                             >
                               Description
                             </dt>
                             <dd
-                              class="euiDescriptionList__description sc-pIgJL cnELLG eui-textBreakWord"
+                              class="euiDescriptionList__description sc-pYbQl KYizM eui-textBreakWord"
                             >
                               <span
                                 class="euiToolTipAnchor"
@@ -2476,7 +2476,7 @@ Object {
                           </dl>
                         </div>
                         <div
-                          class="euiFlexItem euiFlexItem--flexGrow5 sc-qXUgY fyGsco"
+                          class="euiFlexItem euiFlexItem--flexGrow5 sc-pIgJL dxkHYu"
                         >
                           <div
                             class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
@@ -2752,7 +2752,7 @@ Object {
                       >
                         <button
                           aria-label="Previous page"
-                          class="euiButtonIcon euiButtonIcon--text"
+                          class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
                           data-test-subj="pagination-button-previous"
                           disabled=""
                           type="button"
@@ -2871,7 +2871,7 @@ Object {
                         </ul>
                         <button
                           aria-label="Next page, 2"
-                          class="euiButtonIcon euiButtonIcon--text"
+                          class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
                           data-test-subj="pagination-button-next"
                           type="button"
                         >
@@ -3152,7 +3152,7 @@ Object {
           class="euiSpacer euiSpacer--l"
         />
         <div
-          class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow c4"
+          class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow c4"
         >
           <div
             data-eui="EuiFocusTrap"
@@ -3165,7 +3165,7 @@ Object {
             >
               <button
                 aria-label="Close this dialog"
-                class="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
+                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiFlyout__closeButton"
                 data-test-subj="euiFlyoutCloseButton"
                 type="button"
               >
@@ -3526,7 +3526,7 @@ Object {
                                           >
                                             <button
                                               aria-label="Remove Entry"
-                                              class="euiButtonIcon euiButtonIcon--danger"
+                                              class="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall"
                                               data-test-subj="addTrustedAppFlyout-createForm-conditionsBuilder-group1-entry0-remove"
                                               disabled=""
                                               id="mockId"
@@ -3780,7 +3780,7 @@ Object {
                       class="euiFlexItem euiFlexItem--flexGrowZero"
                     >
                       <div
-                        class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
+                        class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
                       >
                         <div
                           class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -4148,7 +4148,7 @@ Object {
                         >
                           <button
                             aria-label="Previous page"
-                            class="euiButtonIcon euiButtonIcon--text"
+                            class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
                             data-test-subj="pagination-button-previous"
                             disabled=""
                             type="button"
@@ -4267,7 +4267,7 @@ Object {
                           </ul>
                           <button
                             aria-label="Next page, 2"
-                            class="euiButtonIcon euiButtonIcon--text"
+                            class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
                             data-test-subj="pagination-button-next"
                             type="button"
                           >
@@ -4295,13 +4295,13 @@ Object {
       data-test-subj="trustedAppsListPage"
     >
       <header
-        class="sc-pZNLs imoSYB siemHeaderPage"
+        class="sc-pjGtN iqOyKV siemHeaderPage"
       >
         <div
           class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
         >
           <div
-            class="euiFlexItem sc-oTOtL cKcAUE"
+            class="euiFlexItem sc-psbuI gHZSXZ"
           >
             <h1
               class="euiTitle euiTitle--large"
@@ -4321,7 +4321,7 @@ Object {
             </div>
           </div>
           <div
-            class="euiFlexItem euiFlexItem--flexGrowZero sc-oTOtL cKcAUE"
+            class="euiFlexItem euiFlexItem--flexGrowZero sc-psbuI gHZSXZ"
             data-test-subj="header-page-supplements"
           >
             <button
@@ -4382,7 +4382,7 @@ Object {
         class="euiSpacer euiSpacer--l"
       />
       <div
-        class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow sc-oUqyN jIrDlk"
+        class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow sc-oUqyN jIrDlk"
       >
         <div
           data-eui="EuiFocusTrap"
@@ -4395,7 +4395,7 @@ Object {
           >
             <button
               aria-label="Close this dialog"
-              class="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
+              class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiFlyout__closeButton"
               data-test-subj="euiFlyoutCloseButton"
               type="button"
             >
@@ -4567,7 +4567,7 @@ Object {
                         >
                           <div>
                             <div
-                              class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--directionRow euiFlexGroup--responsive sc-pcLzI gaXJWX"
+                              class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--directionRow euiFlexGroup--responsive sc-ptBBy hxgCsO"
                               data-test-subj="addTrustedAppFlyout-createForm-conditionsBuilder-group1"
                             >
                               <div
@@ -4756,7 +4756,7 @@ Object {
                                         >
                                           <button
                                             aria-label="Remove Entry"
-                                            class="euiButtonIcon euiButtonIcon--danger"
+                                            class="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall"
                                             data-test-subj="addTrustedAppFlyout-createForm-conditionsBuilder-group1-entry0-remove"
                                             disabled=""
                                             id="mockId"
@@ -5010,24 +5010,24 @@ Object {
                     class="euiFlexItem euiFlexItem--flexGrowZero"
                   >
                     <div
-                      class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow"
+                      class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
                     >
                       <div
                         class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                       >
                         <div
-                          class="euiFlexItem euiFlexItem--flexGrow2 sc-qPzgd aiUzK"
+                          class="euiFlexItem euiFlexItem--flexGrow2 sc-pAkMi kGVKuo"
                         >
                           <dl
                             class="euiDescriptionList euiDescriptionList--column euiDescriptionList--compressed"
                           >
                             <dt
-                              class="euiDescriptionList__title sc-pAkMi hqItBe"
+                              class="euiDescriptionList__title sc-pQfSI jJIOeJ"
                             >
                               Name
                             </dt>
                             <dd
-                              class="euiDescriptionList__description sc-pIgJL cnELLG eui-textBreakWord"
+                              class="euiDescriptionList__description sc-pYbQl KYizM eui-textBreakWord"
                             >
                               <span
                                 class="euiToolTipAnchor"
@@ -5038,12 +5038,12 @@ Object {
                               </span>
                             </dd>
                             <dt
-                              class="euiDescriptionList__title sc-pAkMi hqItBe"
+                              class="euiDescriptionList__title sc-pQfSI jJIOeJ"
                             >
                               OS
                             </dt>
                             <dd
-                              class="euiDescriptionList__description sc-pIgJL cnELLG eui-textBreakWord"
+                              class="euiDescriptionList__description sc-pYbQl KYizM eui-textBreakWord"
                             >
                               <span
                                 class="euiToolTipAnchor"
@@ -5054,12 +5054,12 @@ Object {
                               </span>
                             </dd>
                             <dt
-                              class="euiDescriptionList__title sc-pAkMi hqItBe"
+                              class="euiDescriptionList__title sc-pQfSI jJIOeJ"
                             >
                               Date Created
                             </dt>
                             <dd
-                              class="euiDescriptionList__description sc-pIgJL cnELLG eui-textBreakWord"
+                              class="euiDescriptionList__description sc-pYbQl KYizM eui-textBreakWord"
                             >
                               <span
                                 class="euiToolTipAnchor eui-textTruncate"
@@ -5068,12 +5068,12 @@ Object {
                               </span>
                             </dd>
                             <dt
-                              class="euiDescriptionList__title sc-pAkMi hqItBe"
+                              class="euiDescriptionList__title sc-pQfSI jJIOeJ"
                             >
                               Created By
                             </dt>
                             <dd
-                              class="euiDescriptionList__description sc-pIgJL cnELLG eui-textBreakWord"
+                              class="euiDescriptionList__description sc-pYbQl KYizM eui-textBreakWord"
                             >
                               <span
                                 class="euiToolTipAnchor"
@@ -5084,12 +5084,12 @@ Object {
                               </span>
                             </dd>
                             <dt
-                              class="euiDescriptionList__title sc-pAkMi hqItBe"
+                              class="euiDescriptionList__title sc-pQfSI jJIOeJ"
                             >
                               Description
                             </dt>
                             <dd
-                              class="euiDescriptionList__description sc-pIgJL cnELLG eui-textBreakWord"
+                              class="euiDescriptionList__description sc-pYbQl KYizM eui-textBreakWord"
                             >
                               <span
                                 class="euiToolTipAnchor"
@@ -5102,7 +5102,7 @@ Object {
                           </dl>
                         </div>
                         <div
-                          class="euiFlexItem euiFlexItem--flexGrow5 sc-qXUgY fyGsco"
+                          class="euiFlexItem euiFlexItem--flexGrow5 sc-pIgJL dxkHYu"
                         >
                           <div
                             class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
@@ -5378,7 +5378,7 @@ Object {
                       >
                         <button
                           aria-label="Previous page"
-                          class="euiButtonIcon euiButtonIcon--text"
+                          class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
                           data-test-subj="pagination-button-previous"
                           disabled=""
                           type="button"
@@ -5497,7 +5497,7 @@ Object {
                         </ul>
                         <button
                           aria-label="Next page, 2"
-                          class="euiButtonIcon euiButtonIcon--text"
+                          class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
                           data-test-subj="pagination-button-next"
                           type="button"
                         >
