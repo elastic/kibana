@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { HttpSetup } from 'kibana/public';
+import { CoreSetup, CoreStart } from 'kibana/public';
+import { parseEndpoint } from '../../../common/apm_api/parse_endpoint';
 import { FetchOptions } from '../../../common/fetch_options';
 import { callApi } from './callApi';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { APMAPI } from '../../../server/routes/create_apm_api';
+import type { APMAPI } from '../../../server/routes/create_apm_api';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Client } from '../../../server/routes/typings';
+import type { Client } from '../../../server/routes/typings';
 
 export type APMClient = Client<APMAPI['_S']>;
 export type AutoAbortedAPMClient = Client<APMAPI['_S'], { abortable: false }>;
@@ -24,8 +25,8 @@ export type APMClientOptions = Omit<
   signal: AbortSignal | null;
   params?: {
     body?: any;
-    query?: any;
-    path?: any;
+    query?: Record<string, any>;
+    path?: Record<string, any>;
   };
 };
 
@@ -35,23 +36,17 @@ export let callApmApi: APMClient = () => {
   );
 };
 
-export function createCallApmApi(http: HttpSetup) {
+export function createCallApmApi(core: CoreStart | CoreSetup) {
   callApmApi = ((options: APMClientOptions) => {
-    const { endpoint, params = {}, ...opts } = options;
+    const { endpoint, params, ...opts } = options;
+    const { method, pathname } = parseEndpoint(endpoint, params?.path);
 
-    const path = (params.path || {}) as Record<string, any>;
-    const [method, pathname] = endpoint.split(' ');
-
-    const formattedPathname = Object.keys(path).reduce((acc, paramName) => {
-      return acc.replace(`{${paramName}}`, path[paramName]);
-    }, pathname);
-
-    return callApi(http, {
+    return callApi(core, {
       ...opts,
       method,
-      pathname: formattedPathname,
-      body: params.body,
-      query: params.query,
+      pathname,
+      body: params?.body,
+      query: params?.query,
     });
   }) as APMClient;
 }

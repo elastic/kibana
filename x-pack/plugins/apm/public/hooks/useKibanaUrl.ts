@@ -8,13 +8,10 @@
 import url from 'url';
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
 
-export function useKibanaUrl(
-  /** The path to the plugin */ path: string,
-  /** The hash path */ hash?: string
-) {
+export function useKibanaUrl(path: string, urlObject?: url.UrlObject) {
   const { core } = useApmPluginContext();
   return url.format({
+    ...urlObject,
     pathname: core.http.basePath.prepend(path),
-    hash,
   });
 }

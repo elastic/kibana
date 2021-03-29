@@ -184,6 +184,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
     } = await asCurrentUser.search({
       index,
       body,
+      // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
       ...(datafeedConfig?.indices_options ?? {}),
     });
 
@@ -192,6 +193,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
     }
 
     const aggResult = fieldsToAgg.reduce((obj, field) => {
+      // @ts-expect-error fix search aggregation response
       obj[field] = (aggregations[field] || { value: 0 }).value;
       return obj;
     }, {} as { [field: string]: number });
@@ -247,10 +249,14 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
     });
 
     if (aggregations && aggregations.earliest && aggregations.latest) {
+      // @ts-expect-error fix search aggregation response
       obj.start.epoch = aggregations.earliest.value;
+      // @ts-expect-error fix search aggregation response
       obj.start.string = aggregations.earliest.value_as_string;
 
+      // @ts-expect-error fix search aggregation response
       obj.end.epoch = aggregations.latest.value;
+      // @ts-expect-error fix search aggregation response
       obj.end.string = aggregations.latest.value_as_string;
     }
     return obj;
@@ -400,6 +406,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
     } = await asCurrentUser.search({
       index,
       body,
+      // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
       ...(datafeedConfig?.indices_options ?? {}),
     });
 
@@ -408,6 +415,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
     }
 
     const aggResult = fieldsToAgg.reduce((obj, field) => {
+      // @ts-expect-error fix search aggregation response
       obj[field] = (aggregations[getMaxBucketAggKey(field)] || { value: 0 }).value ?? 0;
       return obj;
     }, {} as { [field: string]: number });
