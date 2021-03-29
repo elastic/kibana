@@ -41,6 +41,7 @@ import {
   AggParamsBucketMax,
   AggParamsBucketMin,
   AggParamsBucketSum,
+  AggParamsFilteredMetric,
   AggParamsCardinality,
   AggParamsCumulativeSum,
   AggParamsDateHistogram,
@@ -84,6 +85,7 @@ import {
   getCalculateAutoTimeExpression,
   METRIC_TYPES,
   AggConfig,
+  aggFilteredMetric,
 } from './';
 
 export { IAggConfig, AggConfigSerialized } from './agg_config';
@@ -188,6 +190,7 @@ export interface AggParamsMapping {
   [METRIC_TYPES.MAX_BUCKET]: AggParamsBucketMax;
   [METRIC_TYPES.MIN_BUCKET]: AggParamsBucketMin;
   [METRIC_TYPES.SUM_BUCKET]: AggParamsBucketSum;
+  [METRIC_TYPES.FILTERED_METRIC]: AggParamsFilteredMetric;
   [METRIC_TYPES.CUMULATIVE_SUM]: AggParamsCumulativeSum;
   [METRIC_TYPES.DERIVATIVE]: AggParamsDerivative;
   [METRIC_TYPES.MOVING_FN]: AggParamsMovingAvg;
@@ -217,6 +220,7 @@ export interface AggFunctionsMapping {
   aggBucketMax: ReturnType<typeof aggBucketMax>;
   aggBucketMin: ReturnType<typeof aggBucketMin>;
   aggBucketSum: ReturnType<typeof aggBucketSum>;
+  aggFilteredMetric: ReturnType<typeof aggFilteredMetric>;
   aggCardinality: ReturnType<typeof aggCardinality>;
   aggCount: ReturnType<typeof aggCount>;
   aggCumulativeSum: ReturnType<typeof aggCumulativeSum>;

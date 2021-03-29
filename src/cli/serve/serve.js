@@ -51,7 +51,6 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   const get = _.partial(_.get, rawConfig);
   const has = _.partial(_.has, rawConfig);
   const merge = _.partial(_.merge, rawConfig);
-
   if (opts.oss) {
     delete rawConfig.xpack;
   }
@@ -69,6 +68,7 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
 
     if (opts.ssl) {
       // @kbn/dev-utils is part of devDependencies
+      // eslint-disable-next-line import/no-extraneous-dependencies
       const { CA_CERT_PATH, KBN_KEY_PATH, KBN_CERT_PATH } = require('@kbn/dev-utils');
       const customElasticsearchHosts = opts.elasticsearch
         ? opts.elasticsearch.split(',')
@@ -112,10 +112,18 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   if (opts.elasticsearch) set('elasticsearch.hosts', opts.elasticsearch.split(','));
   if (opts.port) set('server.port', opts.port);
   if (opts.host) set('server.host', opts.host);
-  if (opts.quiet) set('logging.quiet', true);
-  if (opts.silent) set('logging.silent', true);
-  if (opts.verbose) set('logging.verbose', true);
-  if (opts.logFile) set('logging.dest', opts.logFile);
+  if (opts.silent) {
+    set('logging.silent', true);
+    set('logging.root.level', 'off');
+  }
+  if (opts.verbose) {
+    if (has('logging.root.appenders')) {
+      set('logging.root.level', 'all');
+    } else {
+      // Only set logging.verbose to true for legacy logging when KP logging isn't configured.
+      set('logging.verbose', true);
+    }
+  }
 
   set('plugins.scanDirs', _.compact([].concat(get('plugins.scanDirs'), opts.pluginDir)));
   set('plugins.paths', _.compact([].concat(get('plugins.paths'), opts.pluginPath)));
@@ -140,11 +148,14 @@ export default function (program) {
       [getConfigPath()]
     )
     .option('-p, --port <port>', 'The port to bind to', parseInt)
-    .option('-q, --quiet', 'Prevent all logging except errors')
+    .option('-q, --quiet', 'Deprecated, set logging level in your configuration')
     .option('-Q, --silent', 'Prevent all logging')
     .option('--verbose', 'Turns on verbose logging')
     .option('-H, --host <host>', 'The host to bind to')
-    .option('-l, --log-file <path>', 'The file to log to')
+    .option(
+      '-l, --log-file <path>',
+      'Deprecated, set logging file destination in your configuration'
+    )
     .option(
       '--plugin-dir <path>',
       'A path to scan for plugins, this can be specified multiple ' +
@@ -204,6 +215,7 @@ export default function (program) {
       cliArgs: {
         dev: !!opts.dev,
         envName: unknownOptions.env ? unknownOptions.env.name : undefined,
+        // no longer supported
         quiet: !!opts.quiet,
         silent: !!opts.silent,
         watch: !!opts.watch,

@@ -267,7 +267,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
       {splom === undefined || vegaSpec === undefined ? (
         <VegaChartLoading />
       ) : (
-        <div data-test-subj="mlScatterplotMatrix">
+        <div data-test-subj={`mlScatterplotMatrix ${isLoading ? 'loading' : 'loaded'}`}>
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiFormRow

@@ -34,7 +34,7 @@ export const getThresholdBucketFilters = async ({
 
       bucket.terms.forEach((term) => {
         if (term.field != null) {
-          (filter.bool.filter as ESFilter[]).push({
+          (filter.bool!.filter as ESFilter[]).push({
             term: {
               [term.field]: `${term.value}`,
             },

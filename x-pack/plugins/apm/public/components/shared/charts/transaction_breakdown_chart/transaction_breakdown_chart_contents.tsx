@@ -28,7 +28,7 @@ import {
   asAbsoluteDateTime,
   asPercent,
 } from '../../../../../common/utils/formatters';
-import { TimeSeries } from '../../../../../typings/timeseries';
+import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
@@ -42,7 +42,7 @@ interface Props {
   fetchStatus: FETCH_STATUS;
   height?: number;
   showAnnotations: boolean;
-  timeseries?: TimeSeries[];
+  timeseries?: Array<TimeSeries<Coordinate>>;
 }
 
 export function TransactionBreakdownChartContents({

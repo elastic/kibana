@@ -39,7 +39,7 @@ import {
   getAgentPolicyActionByIds,
 } from '../actions';
 import { appContextService } from '../../app_context';
-import { getAgent, updateAgent } from '../crud';
+import { updateAgent } from '../crud';
 
 import { toPromiseAbortable, AbortError, createRateLimiter } from './rxjs_utils';
 
@@ -260,25 +260,6 @@ export function agentCheckinStateNewActionsFactory() {
         const newActions = data.filter((action) => action.agent_id === agent.id);
         if (newActions.length === 0) {
           return EMPTY;
-        }
-
-        const hasConfigReassign = newActions.some(
-          (action) => action.type === 'INTERNAL_POLICY_REASSIGN'
-        );
-        if (hasConfigReassign) {
-          return from(getAgent(esClient, agent.id)).pipe(
-            concatMap((refreshedAgent) => {
-              if (!refreshedAgent.policy_id) {
-                throw new Error('Agent does not have a policy assigned');
-              }
-              const newAgentPolicy$ = getOrCreateAgentPolicyObservable(refreshedAgent.policy_id);
-              return newAgentPolicy$;
-            }),
-            rateLimiter(),
-            concatMap((policyAction) =>
-              createAgentActionFromPolicyAction(soClient, esClient, agent, policyAction)
-            )
-          );
         }
 
         return of(newActions);

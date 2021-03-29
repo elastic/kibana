@@ -246,8 +246,7 @@ export const EngineNav: React.FC = () => {
       )}
       {canViewEngineApiLogs && (
         <SideNavLink
-          isExternal
-          to={getAppSearchUrl(generateEnginePath(ENGINE_API_LOGS_PATH))}
+          to={generateEnginePath(ENGINE_API_LOGS_PATH)}
           data-test-subj="EngineAPILogsLink"
         >
           {API_LOGS_TITLE}

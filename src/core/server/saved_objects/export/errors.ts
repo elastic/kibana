@@ -27,7 +27,9 @@ export class SavedObjectsExportError extends Error {
   static exportSizeExceeded(limit: number) {
     return new SavedObjectsExportError(
       'export-size-exceeded',
-      `Can't export more than ${limit} objects`
+      `Can't export more than ${limit} objects. ` +
+        'If your server has enough memory, this limit can be increased ' +
+        'by adjusting the "savedObjects.maxImportExportSize" setting.'
     );
   }
 

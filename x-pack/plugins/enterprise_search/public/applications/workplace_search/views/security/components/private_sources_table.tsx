@@ -94,16 +94,12 @@ export const PrivateSourcesTable: React.FC<PrivateSourcesTableProps> = ({
   const panelDisabled = !isEnabled || !hasPlatinumLicense;
   const sectionDisabled = !sectionEnabled;
 
-  const panelClass = classNames('euiPanel--outline euiPanel--noShadow', {
-    'euiPanel--disabled': panelDisabled,
-  });
-
   const tableClass = classNames({ 'euiTable--disabled': sectionDisabled });
 
   const emptyState = (
     <>
       <EuiSpacer />
-      <EuiPanel className="euiPanel--inset euiPanel--outline" hasShadow={false} color="subdued">
+      <EuiPanel hasShadow={false} color="subdued">
         <EuiText textAlign="center" color="subdued" size="s">
           <strong>
             {isRemote ? REMOTE_SOURCES_EMPTY_TABLE_TITLE : STANDARD_SOURCES_EMPTY_TABLE_TITLE}
@@ -175,7 +171,12 @@ export const PrivateSourcesTable: React.FC<PrivateSourcesTableProps> = ({
   );
 
   return (
-    <EuiPanel hasShadow={false} className={panelClass}>
+    <EuiPanel
+      hasShadow={false}
+      className={classNames({
+        'euiPanel--disabled': panelDisabled,
+      })}
+    >
       {sectionHeading}
       {hasSources && sourcesTable}
     </EuiPanel>

@@ -86,6 +86,8 @@ export function QueryLanguageSwitcher({
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
       repositionOnScroll
+      ownFocus={true}
+      initialFocus={'[role="switch"]'}
     >
       <EuiPopoverTitle>
         <FormattedMessage

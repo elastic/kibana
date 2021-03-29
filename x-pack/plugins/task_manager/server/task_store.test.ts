@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 import _ from 'lodash';
 import { first } from 'rxjs/operators';
 
@@ -24,7 +24,6 @@ import {
   SavedObjectsErrorHelpers,
 } from 'src/core/server';
 import { TaskTypeDictionary } from './task_type_dictionary';
-import { RequestEvent } from '@elastic/elasticsearch/lib/Transport';
 import { mockLogger } from './test_utils';
 
 const savedObjectsClient = savedObjectsRepositoryMock.create();
@@ -206,8 +205,8 @@ describe('TaskStore', () => {
       });
     });
 
-    async function testFetch(opts?: SearchOpts, hits: unknown[] = []) {
-      esClient.search.mockResolvedValue(asApiResponse({ hits: { hits } }));
+    async function testFetch(opts?: SearchOpts, hits: Array<estypes.Hit<unknown>> = []) {
+      esClient.search.mockResolvedValue(asApiResponse({ hits: { hits, total: hits.length } }));
 
       const result = await store.fetch(opts);
 
@@ -564,9 +563,17 @@ describe('TaskStore', () => {
   });
 });
 
-const asApiResponse = <T>(body: T): RequestEvent<T> =>
-  ({
-    body,
-  } as RequestEvent<T>);
+const asApiResponse = (body: Pick<estypes.SearchResponse, 'hits'>) =>
+  elasticsearchServiceMock.createSuccessTransportRequestPromise({
+    hits: body.hits,
+    took: 0,
+    timed_out: false,
+    _shards: {
+      failed: 0,
+      successful: body.hits.hits.length,
+      total: 0,
+      skipped: 0,
+    },
+  });
 
 const randomId = () => `id-${_.random(1, 20)}`;

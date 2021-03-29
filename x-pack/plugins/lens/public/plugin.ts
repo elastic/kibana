@@ -21,6 +21,7 @@ import { ChartsPluginSetup, ChartsPluginStart } from '../../../../src/plugins/ch
 import { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
 import { EmbeddableStateTransfer } from '../../../../src/plugins/embeddable/public';
 import { EditorFrameService } from './editor_frame_service';
+import { IndexPatternFieldEditorStart } from '../../../../src/plugins/index_pattern_field_editor/public';
 import {
   IndexPatternDatasource,
   IndexPatternDatasourceSetupPlugins,
@@ -41,7 +42,7 @@ import {
   VISUALIZE_FIELD_TRIGGER,
 } from '../../../../src/plugins/ui_actions/public';
 import { APP_ID, getEditPath, NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common';
-import { EditorFrameStart } from './types';
+import type { EditorFrameStart, VisualizationType } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
 import { getSearchProvider } from './search_provider';
@@ -74,6 +75,7 @@ export interface LensPluginStartDependencies {
   charts: ChartsPluginStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   presentationUtil: PresentationUtilPluginStart;
+  indexPatternFieldEditor: IndexPatternFieldEditorStart;
 }
 
 export interface LensPublicStart {
@@ -99,6 +101,11 @@ export interface LensPublicStart {
    * Method which returns true if the user has permission to use Lens as defined by application capabilities.
    */
   canUseEditor: () => boolean;
+
+  /**
+   * Method which returns xy VisualizationTypes array keeping this async as to not impact page load bundle
+   */
+  getXyVisTypes: () => Promise<VisualizationType[]>;
 }
 
 export class LensPlugin {
@@ -181,6 +188,13 @@ export class LensPlugin {
       return ContextProvider;
     };
 
+    const ensureDefaultIndexPattern = async () => {
+      const [, deps] = await core.getStartServices();
+      // make sure a default index pattern exists
+      // if not, the page will be redirected to management and visualize won't be rendered
+      await deps.data.indexPatterns.ensureDefaultIndexPattern();
+    };
+
     core.application.register({
       id: APP_ID,
       title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
@@ -188,6 +202,7 @@ export class LensPlugin {
       mount: async (params: AppMountParameters) => {
         const { mountApp, stopReportManager } = await import('./async_services');
         this.stopReportManager = stopReportManager;
+        await ensureDefaultIndexPattern();
         return mountApp(core, params, {
           createEditorFrame: this.createEditorFrame!,
           attributeService: this.attributeService!,
@@ -246,6 +261,10 @@ export class LensPlugin {
       },
       canUseEditor: () => {
         return Boolean(core.application.capabilities.visualize?.show);
+      },
+      getXyVisTypes: async () => {
+        const { visualizationTypes } = await import('./xy_visualization/types');
+        return visualizationTypes;
       },
     };
   }

@@ -17,12 +17,10 @@ interface Props {
 
 export const useBreakdowns = ({ percentileRange, field, value }: Props) => {
   const { urlParams, uiFilters } = useUrlParams();
-
   const { start, end, searchTerm } = urlParams;
-
   const { min: minP, max: maxP } = percentileRange ?? {};
 
-  return useFetcher(
+  const { data, status } = useFetcher(
     (callApmApi) => {
       if (start && end && field && value) {
         return callApmApi({
@@ -47,4 +45,6 @@ export const useBreakdowns = ({ percentileRange, field, value }: Props) => {
     },
     [end, start, uiFilters, field, value, minP, maxP, searchTerm]
   );
+
+  return { breakdowns: data?.pageLoadDistBreakdown ?? [], status };
 };

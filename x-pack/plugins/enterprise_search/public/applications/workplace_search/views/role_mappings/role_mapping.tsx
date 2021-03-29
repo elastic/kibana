@@ -163,7 +163,7 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
                 <h3>{GROUP_ASSIGNMENT_TITLE}</h3>
               </EuiTitle>
               <EuiSpacer />
-              <div className="engines-list">
+              <div>
                 <EuiFormRow
                   isInvalid={!hasGroupAssignment}
                   error={[GROUP_ASSIGNMENT_INVALID_ERROR]}

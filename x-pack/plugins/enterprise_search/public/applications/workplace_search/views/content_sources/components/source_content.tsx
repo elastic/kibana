@@ -106,7 +106,7 @@ export const SourceContent: React.FC = () => {
   const isCustomSource = serviceType === CUSTOM_SERVICE_TYPE;
 
   const emptyState = (
-    <EuiPanel className="euiPanel--inset">
+    <EuiPanel>
       <EuiEmptyPrompt
         title={<h2>{emptyMessage}</h2>}
         iconType="documents"
