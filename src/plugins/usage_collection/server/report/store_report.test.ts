@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { storeApplicationUsageMock } from './store_report.test.mocks';
+
 import { savedObjectsRepositoryMock } from '../../../../core/server/mocks';
 import { storeReport } from './store_report';
 import { ReportSchemaType } from './schema';
@@ -16,8 +18,17 @@ describe('store_report', () => {
   const momentTimestamp = moment();
   const date = momentTimestamp.format('DDMMYYYY');
 
+  let repository: ReturnType<typeof savedObjectsRepositoryMock.create>;
+
+  beforeEach(() => {
+    repository = savedObjectsRepositoryMock.create();
+  });
+
+  afterEach(() => {
+    storeApplicationUsageMock.mockReset();
+  });
+
   test('stores report for all types of data', async () => {
-    const savedObjectClient = savedObjectsRepositoryMock.create();
     const report: ReportSchemaType = {
       reportVersion: 3,
       userAgent: {
@@ -53,9 +64,9 @@ describe('store_report', () => {
         },
       },
     };
-    await storeReport(savedObjectClient, report);
+    await storeReport(repository, report);
 
-    expect(savedObjectClient.create).toHaveBeenCalledWith(
+    expect(repository.create).toHaveBeenCalledWith(
       'ui-metric',
       { count: 1 },
       {
@@ -63,51 +74,45 @@ describe('store_report', () => {
         overwrite: true,
       }
     );
-    expect(savedObjectClient.incrementCounter).toHaveBeenNthCalledWith(
+    expect(repository.incrementCounter).toHaveBeenNthCalledWith(
       1,
       'ui-metric',
       'test-app-name:test-event-name',
       [{ fieldName: 'count', incrementBy: 3 }]
     );
-    expect(savedObjectClient.incrementCounter).toHaveBeenNthCalledWith(
+    expect(repository.incrementCounter).toHaveBeenNthCalledWith(
       2,
       'ui-counter',
       `test-app-name:${date}:${METRIC_TYPE.LOADED}:test-event-name`,
       [{ fieldName: 'count', incrementBy: 1 }]
     );
-    expect(savedObjectClient.incrementCounter).toHaveBeenNthCalledWith(
+    expect(repository.incrementCounter).toHaveBeenNthCalledWith(
       3,
       'ui-counter',
       `test-app-name:${date}:${METRIC_TYPE.CLICK}:test-event-name`,
       [{ fieldName: 'count', incrementBy: 2 }]
     );
-    expect(savedObjectClient.bulkCreate).toHaveBeenNthCalledWith(1, [
-      {
-        type: 'application_usage_transactional',
-        attributes: {
-          numberOfClicks: 3,
-          minutesOnScreen: 10,
-          appId: 'appId',
-          viewId: 'appId_view',
-          timestamp: expect.any(Date),
-        },
-      },
-    ]);
+
+    expect(storeApplicationUsageMock).toHaveBeenCalledTimes(1);
+    expect(storeApplicationUsageMock).toHaveBeenCalledWith(
+      repository,
+      Object.values(report.application_usage as Record<string, any>),
+      expect.any(Date)
+    );
   });
 
   test('it should not fail if nothing to store', async () => {
-    const savedObjectClient = savedObjectsRepositoryMock.create();
     const report: ReportSchemaType = {
       reportVersion: 3,
       userAgent: void 0,
       uiCounter: void 0,
       application_usage: void 0,
     };
-    await storeReport(savedObjectClient, report);
+    await storeReport(repository, report);
 
-    expect(savedObjectClient.bulkCreate).not.toHaveBeenCalled();
-    expect(savedObjectClient.incrementCounter).not.toHaveBeenCalled();
-    expect(savedObjectClient.create).not.toHaveBeenCalled();
-    expect(savedObjectClient.create).not.toHaveBeenCalled();
+    expect(repository.bulkCreate).not.toHaveBeenCalled();
+    expect(repository.incrementCounter).not.toHaveBeenCalled();
+    expect(repository.create).not.toHaveBeenCalled();
+    expect(repository.create).not.toHaveBeenCalled();
   });
 });

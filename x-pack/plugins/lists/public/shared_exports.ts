@@ -38,3 +38,7 @@ export {
   UseExceptionListItemsSuccess,
   UseExceptionListsSuccess,
 } from './exceptions/types';
+export { BuilderEntryItem } from './exceptions/components/builder/entry_renderer';
+export { BuilderAndBadgeComponent } from './exceptions/components/builder/and_badge';
+export { BuilderEntryDeleteButtonComponent } from './exceptions/components/builder/entry_delete_button';
+export { BuilderExceptionListItemComponent } from './exceptions/components/builder/exception_item_renderer';

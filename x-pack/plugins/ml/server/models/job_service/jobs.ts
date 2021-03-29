@@ -143,7 +143,10 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
       throw Boom.notFound(`Cannot find datafeed for job ${jobId}`);
     }
 
-    const { body } = await mlClient.stopDatafeed({ datafeed_id: datafeedId, force: true });
+    const { body } = await mlClient.stopDatafeed({
+      datafeed_id: datafeedId,
+      body: { force: true },
+    });
     if (body.stopped !== true) {
       return { success: false };
     }
@@ -316,6 +319,7 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
             (ds) => ds.datafeed_id === datafeed.datafeed_id
           );
           if (datafeedStats) {
+            // @ts-expect-error
             datafeeds[datafeed.job_id] = { ...datafeed, ...datafeedStats };
           }
         }
@@ -384,6 +388,7 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
         if (jobStatsResults && jobStatsResults.jobs) {
           const jobStats = jobStatsResults.jobs.find((js) => js.job_id === tempJob.job_id);
           if (jobStats !== undefined) {
+            // @ts-expect-error
             tempJob = { ...tempJob, ...jobStats };
             if (jobStats.node) {
               tempJob.node = jobStats.node;
@@ -417,13 +422,20 @@ export function jobsProvider(client: IScopedClusterClient, mlClient: MlClient) {
     const detailed = true;
     const jobIds: string[] = [];
     try {
-      const { body } = await asInternalUser.tasks.list({ actions, detailed });
-      Object.keys(body.nodes).forEach((nodeId) => {
-        const tasks = body.nodes[nodeId].tasks;
-        Object.keys(tasks).forEach((taskId) => {
-          jobIds.push(tasks[taskId].description.replace(/^delete-job-/, ''));
-        });
+      const { body } = await asInternalUser.tasks.list({
+        // @ts-expect-error @elastic-elasticsearch expects it to be a string
+        actions,
+        detailed,
       });
+
+      if (body.nodes) {
+        Object.keys(body.nodes).forEach((nodeId) => {
+          const tasks = body.nodes![nodeId].tasks;
+          Object.keys(tasks).forEach((taskId) => {
+            jobIds.push(tasks[taskId].description!.replace(/^delete-job-/, ''));
+          });
+        });
+      }
     } catch (e) {
       // if the user doesn't have permission to load the task list,
       // use the jobs list to get the ids of deleting jobs

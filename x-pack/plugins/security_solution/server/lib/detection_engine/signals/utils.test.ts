@@ -1108,6 +1108,7 @@ describe('utils', () => {
         lastLookBackDate: null,
         searchAfterTimes: [],
         success: true,
+        warning: false,
       };
       expect(newSearchResult).toEqual(expected);
     });
@@ -1126,6 +1127,7 @@ describe('utils', () => {
         lastLookBackDate: new Date('2020-04-20T21:27:45.000Z'),
         searchAfterTimes: [],
         success: true,
+        warning: false,
       };
       expect(newSearchResult).toEqual(expected);
     });
@@ -1133,6 +1135,7 @@ describe('utils', () => {
     test('result with error will create success: false within the result set', () => {
       const searchResult = sampleDocSearchResultsNoSortIdNoHits();
       searchResult._shards.failed = 1;
+      // @ts-expect-error not full interface
       searchResult._shards.failures = [{ reason: { reason: 'Not a sort failure' } }];
       const { success } = createSearchAfterReturnTypeFromResponse({
         searchResult,
@@ -1144,6 +1147,7 @@ describe('utils', () => {
     test('result with error will create success: false within the result set if failed is 2 or more', () => {
       const searchResult = sampleDocSearchResultsNoSortIdNoHits();
       searchResult._shards.failed = 2;
+      // @ts-expect-error not full interface
       searchResult._shards.failures = [{ reason: { reason: 'Not a sort failure' } }];
       const { success } = createSearchAfterReturnTypeFromResponse({
         searchResult,
@@ -1156,7 +1160,9 @@ describe('utils', () => {
       const searchResult = sampleDocSearchResultsNoSortIdNoHits();
       searchResult._shards.failed = 2;
       searchResult._shards.failures = [
+        // @ts-expect-error not full interface
         { reason: { reason: 'Not a sort failure' } },
+        // @ts-expect-error not full interface
         { reason: { reason: 'No mapping found for [@timestamp] in order to sort on' } },
       ];
       const { success } = createSearchAfterReturnTypeFromResponse({
@@ -1180,7 +1186,9 @@ describe('utils', () => {
       const searchResult = sampleDocSearchResultsNoSortIdNoHits();
       searchResult._shards.failed = 2;
       searchResult._shards.failures = [
+        // @ts-expect-error not full interface
         { reason: { reason: 'No mapping found for [event.ingested] in order to sort on' } },
+        // @ts-expect-error not full interface
         { reason: { reason: 'No mapping found for [@timestamp] in order to sort on' } },
       ];
       const { success } = createSearchAfterReturnTypeFromResponse({
@@ -1192,6 +1200,7 @@ describe('utils', () => {
 
     test('It will not set an invalid date time stamp from a non-existent @timestamp when the index is not 100% ECS compliant', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
+      // @ts-expect-error @elastic/elasticsearch _source is optional
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = undefined;
       if (searchResult.hits.hits[0].fields != null) {
         (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = undefined;
@@ -1205,6 +1214,7 @@ describe('utils', () => {
 
     test('It will not set an invalid date time stamp from a null @timestamp when the index is not 100% ECS compliant', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
+      // @ts-expect-error @elastic/elasticsearch _source is optional
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = null;
       if (searchResult.hits.hits[0].fields != null) {
         (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = null;
@@ -1218,6 +1228,7 @@ describe('utils', () => {
 
     test('It will not set an invalid date time stamp from an invalid @timestamp string', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
+      // @ts-expect-error @elastic/elasticsearch _source is optional
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = 'invalid';
       if (searchResult.hits.hits[0].fields != null) {
         (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = ['invalid'];
@@ -1233,6 +1244,7 @@ describe('utils', () => {
   describe('lastValidDate', () => {
     test('It returns undefined if the search result contains a null timestamp', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
+      // @ts-expect-error @elastic/elasticsearch _source is optional
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = null;
       if (searchResult.hits.hits[0].fields != null) {
         (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = null;
@@ -1243,6 +1255,7 @@ describe('utils', () => {
 
     test('It returns undefined if the search result contains a undefined timestamp', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
+      // @ts-expect-error @elastic/elasticsearch _source is optional
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = undefined;
       if (searchResult.hits.hits[0].fields != null) {
         (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = undefined;
@@ -1253,6 +1266,7 @@ describe('utils', () => {
 
     test('It returns undefined if the search result contains an invalid string value', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
+      // @ts-expect-error @elastic/elasticsearch _source is optional
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = 'invalid value';
       if (searchResult.hits.hits[0].fields != null) {
         (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = ['invalid value'];
@@ -1286,7 +1300,7 @@ describe('utils', () => {
     test('It returns timestampOverride date time if set', () => {
       const override = '2020-10-07T19:20:28.049Z';
       const searchResult = sampleDocSearchResultsNoSortId();
-      searchResult.hits.hits[0]._source.different_timestamp = new Date(override).toISOString();
+      searchResult.hits.hits[0]._source!.different_timestamp = new Date(override).toISOString();
       const date = lastValidDate({ searchResult, timestampOverride: 'different_timestamp' });
       expect(date?.toISOString()).toEqual(override);
     });
@@ -1319,6 +1333,7 @@ describe('utils', () => {
         lastLookBackDate: null,
         searchAfterTimes: [],
         success: true,
+        warning: false,
       };
       expect(searchAfterReturnType).toEqual(expected);
     });
@@ -1332,6 +1347,7 @@ describe('utils', () => {
         lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
         searchAfterTimes: ['123'],
         success: false,
+        warning: true,
       });
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: ['123'],
@@ -1341,6 +1357,7 @@ describe('utils', () => {
         lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
         searchAfterTimes: ['123'],
         success: false,
+        warning: true,
       };
       expect(searchAfterReturnType).toEqual(expected);
     });
@@ -1359,6 +1376,7 @@ describe('utils', () => {
         lastLookBackDate: null,
         searchAfterTimes: [],
         success: true,
+        warning: false,
       };
       expect(searchAfterReturnType).toEqual(expected);
     });
@@ -1375,6 +1393,7 @@ describe('utils', () => {
         lastLookBackDate: null,
         searchAfterTimes: [],
         success: true,
+        warning: false,
       };
       expect(merged).toEqual(expected);
     });
@@ -1448,6 +1467,7 @@ describe('utils', () => {
         lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'), // takes the next lastLookBackDate
         searchAfterTimes: ['123', '567'], // concatenates the searchAfterTimes together
         success: true, // Defaults to success true is all of it was successful
+        warning: false,
       };
       expect(merged).toEqual(expected);
     });

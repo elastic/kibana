@@ -463,6 +463,21 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     async getWelcomeText() {
       return await testSubjects.getVisibleText('global-banner-item');
     }
+
+    /**
+     * Clicks on an element, and validates that the desired effect has taken place
+     * by confirming the existence of a validator
+     */
+    async clickAndValidate(
+      clickTarget: string,
+      validator: string,
+      isValidatorCssString: boolean = false,
+      topOffset?: number
+    ) {
+      await testSubjects.click(clickTarget, undefined, topOffset);
+      const validate = isValidatorCssString ? find.byCssSelector : testSubjects.exists;
+      await validate(validator);
+    }
   }
 
   return new CommonPage();
