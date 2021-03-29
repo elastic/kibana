@@ -12,6 +12,7 @@ import {
   Position,
   ScaleType,
   Settings,
+  TooltipInfo,
   TooltipProps,
   TooltipType,
 } from '@elastic/charts';
@@ -28,10 +29,13 @@ import { useTheme } from '../../../../hooks/use_theme';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import { ChartContainer } from '../chart_container';
 import { getResponseTimeTickFormatter } from '../transaction_charts/helper';
+import { CustomTooltip } from './custom_tooltip';
+
+export type Item = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/primary_statistics'>[0];
 
 export interface InstancesLatencyDistributionChartProps {
   height: number;
-  items?: APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/primary_statistics'>;
+  items?: Item[];
   status: FETCH_STATUS;
 }
 
@@ -50,21 +54,16 @@ export function InstancesLatencyDistributionChart({
     },
   };
 
+  const maxLatency = Math.max(...items.map((item) => item.latency ?? 0));
+  const latencyFormatter = getDurationFormatter(maxLatency);
+
   const tooltip: TooltipProps = {
     type: TooltipType.Follow,
     snap: false,
-    // TODO: Tooltips!
-    // headerFormatter: (args) => {
-    //   console.log('headerFormatter', args);
-    //   return <>hi</>;
-    // },
-    // customTooltip: (args) => {
-    //   console.log('customTooltip', args);
-    //   return <>hi</>;
-    // },
+    customTooltip: (props: TooltipInfo) => (
+      <CustomTooltip {...props} latencyFormatter={latencyFormatter} />
+    ),
   };
-  const maxLatency = Math.max(...items.map((item) => item.latency ?? 0));
-  const latencyFormatter = getDurationFormatter(maxLatency);
 
   return (
     <EuiPanel>
