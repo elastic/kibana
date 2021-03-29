@@ -13,10 +13,11 @@ import { Type } from '../../../../../common/detection_engine/schemas/common/sche
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { getFormattedBuilderEntries, getUpdatedEntriesOnDelete } from './helpers';
 import { FormattedBuilderEntry, ExceptionsBuilderExceptionItem, BuilderEntry } from '../types';
-import { ExceptionListType } from '../../../../../public/lists_plugin_deps';
-import { BuilderEntryItem } from './entry_item';
+import { BuilderEntryItem, ExceptionListType } from '../../../../shared_imports';
 import { BuilderEntryDeleteButtonComponent } from './entry_delete_button';
 import { BuilderAndBadgeComponent } from './and_badge';
+import { isEqlRule, isThresholdRule } from '../../../../../common/detection_engine/utils';
+import { useKibana } from '../../../lib/kibana';
 
 const MyBeautifulLine = styled(EuiFlexItem)`
   &:after {
@@ -35,7 +36,6 @@ const MyOverflowContainer = styled(EuiFlexItem)`
 
 interface BuilderExceptionListItemProps {
   exceptionItem: ExceptionsBuilderExceptionItem;
-  exceptionId: string;
   exceptionItemIndex: number;
   indexPattern: IIndexPattern;
   andLogicIncluded: boolean;
@@ -51,7 +51,6 @@ interface BuilderExceptionListItemProps {
 export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionListItemProps>(
   ({
     exceptionItem,
-    exceptionId,
     exceptionItemIndex,
     indexPattern,
     isOnlyItem,
@@ -63,6 +62,7 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
     onlyShowListOperators = false,
     ruleType,
   }) => {
+    const { http, data } = useKibana().services;
     const handleEntryChange = useCallback(
       (entry: BuilderEntry, entryIndex: number): void => {
         const updatedEntries: BuilderEntry[] = [
@@ -119,6 +119,9 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
                       {item.nested === 'child' && <MyBeautifulLine grow={false} />}
                       <MyOverflowContainer grow={1}>
                         <BuilderEntryItem
+                          allowLargeValueLists={!isEqlRule(ruleType) && !isThresholdRule(ruleType)}
+                          httpService={http}
+                          autocompleteService={data.autocomplete}
                           entry={item}
                           indexPattern={indexPattern}
                           listType={listType}
@@ -128,7 +131,6 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
                           onChange={handleEntryChange}
                           setErrorsExist={setErrorsExist}
                           onlyShowListOperators={onlyShowListOperators}
-                          ruleType={ruleType}
                         />
                       </MyOverflowContainer>
                       <BuilderEntryDeleteButtonComponent

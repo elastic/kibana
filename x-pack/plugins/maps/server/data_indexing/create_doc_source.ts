@@ -11,8 +11,8 @@ import {
   CreateDocSourceResp,
   IndexSourceMappings,
   BodySettings,
-} from '../common';
-import { IndexPatternsService } from '../../../../src/plugins/data/common';
+} from '../../common';
+import { IndexPatternsCommonService } from '../../../../../src/plugins/data/server';
 
 const DEFAULT_SETTINGS = { number_of_shards: 1 };
 const DEFAULT_MAPPINGS = {
@@ -25,16 +25,11 @@ export async function createDocSource(
   index: string,
   mappings: IndexSourceMappings,
   { asCurrentUser }: IScopedClusterClient,
-  indexPatternsService: IndexPatternsService
+  indexPatternsService: IndexPatternsCommonService
 ): Promise<CreateDocSourceResp> {
   try {
     await createIndex(index, mappings, asCurrentUser);
-    await indexPatternsService.createAndSave(
-      {
-        title: index,
-      },
-      true
-    );
+    await indexPatternsService.createAndSave({ title: index }, true);
 
     return {
       success: true,

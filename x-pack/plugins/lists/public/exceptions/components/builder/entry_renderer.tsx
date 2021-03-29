@@ -6,58 +6,65 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { isEqlRule, isThresholdRule } from '../../../../../common/detection_engine/utils';
-import { Type } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { IFieldType, IIndexPattern } from '../../../../../../../../src/plugins/data/common';
-import { FieldComponent } from '../../autocomplete/field';
-import { OperatorComponent } from '../../autocomplete/operator';
-import { OperatorOption } from '../../autocomplete/types';
-import { AutocompleteFieldMatchComponent } from '../../autocomplete/field_value_match';
-import { AutocompleteFieldMatchAnyComponent } from '../../autocomplete/field_value_match_any';
-import { AutocompleteFieldExistsComponent } from '../../autocomplete/field_value_exists';
-import { FormattedBuilderEntry, BuilderEntry } from '../types';
-import { AutocompleteFieldListsComponent } from '../../autocomplete/field_value_lists';
-import { ListSchema, OperatorTypeEnum, ExceptionListType } from '../../../../lists_plugin_deps';
-import { getEmptyValue } from '../../empty_value';
-import * as i18n from './translations';
+import { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
+import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/common';
+import { HttpStart } from '../../../../../../../src/core/public';
+import { FieldComponent } from '../autocomplete/field';
+import { OperatorComponent } from '../autocomplete/operator';
+import { OperatorOption } from '../autocomplete/types';
+import { EXCEPTION_OPERATORS_ONLY_LISTS } from '../autocomplete/operators';
+import { AutocompleteFieldExistsComponent } from '../autocomplete/field_value_exists';
+import { AutocompleteFieldMatchComponent } from '../autocomplete/field_value_match';
+import { AutocompleteFieldMatchAnyComponent } from '../autocomplete/field_value_match_any';
+import { AutocompleteFieldListsComponent } from '../autocomplete/field_value_lists';
+import { ExceptionListType, ListSchema, OperatorTypeEnum } from '../../../../common';
+import { getEmptyValue } from '../../../common/empty_value';
+
 import {
+  getEntryOnFieldChange,
+  getEntryOnListChange,
+  getEntryOnMatchAnyChange,
+  getEntryOnMatchChange,
+  getEntryOnOperatorChange,
   getFilteredIndexPatterns,
   getOperatorOptions,
-  getEntryOnFieldChange,
-  getEntryOnOperatorChange,
-  getEntryOnMatchChange,
-  getEntryOnMatchAnyChange,
-  getEntryOnListChange,
 } from './helpers';
-import { EXCEPTION_OPERATORS_ONLY_LISTS } from '../../autocomplete/operators';
+import { BuilderEntry, FormattedBuilderEntry } from './types';
+import * as i18n from './translations';
 
 const MyValuesInput = styled(EuiFlexItem)`
   overflow: hidden;
 `;
 
-interface EntryItemProps {
+export interface EntryItemProps {
+  allowLargeValueLists?: boolean;
+  autocompleteService: AutocompleteStart;
   entry: FormattedBuilderEntry;
+  httpService: HttpStart;
   indexPattern: IIndexPattern;
-  showLabel: boolean;
   listType: ExceptionListType;
+  listTypeSpecificFilter?: (pattern: IIndexPattern, type: ExceptionListType) => IIndexPattern;
   onChange: (arg: BuilderEntry, i: number) => void;
-  setErrorsExist: (arg: boolean) => void;
   onlyShowListOperators?: boolean;
-  ruleType?: Type;
+  setErrorsExist: (arg: boolean) => void;
+  showLabel: boolean;
 }
 
 export const BuilderEntryItem: React.FC<EntryItemProps> = ({
+  allowLargeValueLists = false,
+  autocompleteService,
   entry,
+  httpService,
   indexPattern,
   listType,
-  showLabel,
+  listTypeSpecificFilter,
   onChange,
-  setErrorsExist,
   onlyShowListOperators = false,
-  ruleType,
+  setErrorsExist,
+  showLabel,
 }): JSX.Element => {
   const handleError = useCallback(
     (err: boolean): void => {
@@ -112,7 +119,12 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
 
   const renderFieldInput = useCallback(
     (isFirst: boolean): JSX.Element => {
-      const filteredIndexPatterns = getFilteredIndexPatterns(indexPattern, entry, listType);
+      const filteredIndexPatterns = getFilteredIndexPatterns(
+        indexPattern,
+        entry,
+        listType,
+        listTypeSpecificFilter
+      );
       const comboBox = (
         <FieldComponent
           placeholder={
@@ -145,7 +157,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
         );
       }
     },
-    [handleFieldChange, indexPattern, entry, listType]
+    [indexPattern, entry, listType, listTypeSpecificFilter, handleFieldChange]
   );
 
   const renderOperatorInput = (isFirst: boolean): JSX.Element => {
@@ -155,7 +167,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           entry,
           listType,
           entry.field != null && entry.field.type === 'boolean',
-          isFirst && !isEqlRule(ruleType) && !isThresholdRule(ruleType)
+          isFirst && !allowLargeValueLists
         );
     const comboBox = (
       <OperatorComponent
@@ -194,6 +206,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
         const value = typeof entry.value === 'string' ? entry.value : undefined;
         return (
           <AutocompleteFieldMatchComponent
+            autocompleteService={autocompleteService}
             rowLabel={isFirst ? i18n.VALUE : undefined}
             placeholder={i18n.EXCEPTION_FIELD_VALUE_PLACEHOLDER}
             selectedField={entry.correspondingKeywordField ?? entry.field}
@@ -214,6 +227,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
         const values: string[] = Array.isArray(entry.value) ? entry.value : [];
         return (
           <AutocompleteFieldMatchAnyComponent
+            autocompleteService={autocompleteService}
             rowLabel={isFirst ? i18n.VALUE : undefined}
             placeholder={i18n.EXCEPTION_FIELD_VALUE_PLACEHOLDER}
             selectedField={
@@ -238,6 +252,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
         const id = typeof entry.value === 'string' ? entry.value : undefined;
         return (
           <AutocompleteFieldListsComponent
+            httpService={httpService}
             rowLabel={isFirst ? i18n.VALUE : undefined}
             selectedField={entry.field}
             placeholder={i18n.EXCEPTION_FIELD_LISTS_PLACEHOLDER}
@@ -248,7 +263,6 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
             }
             isClearable={false}
             onChange={handleFieldListValueChange}
-            isRequired
             data-test-subj="exceptionBuilderEntryFieldList"
           />
         );
