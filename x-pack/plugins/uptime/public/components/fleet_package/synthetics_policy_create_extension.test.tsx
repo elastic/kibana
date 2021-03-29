@@ -269,7 +269,7 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
     const monitorIntervalUnit = getByLabelText('Unit') as HTMLInputElement;
     const apmServiceName = getByLabelText('APM service name') as HTMLInputElement;
     const maxRedirects = getByLabelText('Max redirects') as HTMLInputElement;
-    const timeout = getByLabelText('Timeout in milliseconds') as HTMLInputElement;
+    const timeout = getByLabelText('Timeout in seconds') as HTMLInputElement;
     expect(monitorType).toBeInTheDocument();
     expect(monitorType.value).toEqual(defaultConfig[ConfigKeys.MONITOR_TYPE]);
     expect(url).toBeInTheDocument();
@@ -307,7 +307,7 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
     const monitorIntervalUnit = getByLabelText('Unit') as HTMLInputElement;
     const apmServiceName = getByLabelText('APM service name') as HTMLInputElement;
     const maxRedirects = getByLabelText('Max redirects') as HTMLInputElement;
-    const timeout = getByLabelText('Timeout in milliseconds') as HTMLInputElement;
+    const timeout = getByLabelText('Timeout in seconds') as HTMLInputElement;
 
     fireEvent.change(url, { target: { value: 'http://elastic.co' } });
     fireEvent.change(proxyUrl, { target: { value: 'http://proxy.co' } });
@@ -443,7 +443,7 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
     const url = getByLabelText('URL') as HTMLInputElement;
     const monitorIntervalNumber = getByLabelText('Number') as HTMLInputElement;
     const maxRedirects = getByLabelText('Max redirects') as HTMLInputElement;
-    const timeout = getByLabelText('Timeout in milliseconds') as HTMLInputElement;
+    const timeout = getByLabelText('Timeout in seconds') as HTMLInputElement;
 
     // create errors
     fireEvent.change(monitorIntervalNumber, { target: { value: '-1' } });
@@ -497,7 +497,7 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
 
     const host = getByLabelText('Host') as HTMLInputElement;
     const monitorIntervalNumber = getByLabelText('Number') as HTMLInputElement;
-    const timeout = getByLabelText('Timeout in milliseconds') as HTMLInputElement;
+    const timeout = getByLabelText('Timeout in seconds') as HTMLInputElement;
 
     // create errors
     fireEvent.change(host, { target: { value: '' } });
@@ -545,7 +545,7 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
 
     const host = getByLabelText('Host') as HTMLInputElement;
     const monitorIntervalNumber = getByLabelText('Number') as HTMLInputElement;
-    const timeout = getByLabelText('Timeout in milliseconds') as HTMLInputElement;
+    const timeout = getByLabelText('Timeout in seconds') as HTMLInputElement;
     const wait = getByLabelText('Wait in seconds') as HTMLInputElement;
 
     // create errors

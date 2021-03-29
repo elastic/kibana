@@ -88,7 +88,7 @@ const defaultValues = {
   },
   [ConfigKeys.APM_SERVICE_NAME]: '',
   [ConfigKeys.TAGS]: [],
-  [ConfigKeys.TIMEOUT]: 1600,
+  [ConfigKeys.TIMEOUT]: 16,
   [ConfigKeys.URLS]: '',
   [ConfigKeys.WAIT]: 1,
 };

@@ -62,6 +62,7 @@ export const useUpdatePolicy = ({ defaultConfig, newPolicy, onChange, validate }
             case ConfigKeys.TAGS:
               configItem.value = JSON.stringify(config[key]); // convert to yaml string
               break;
+            case ConfigKeys.TIMEOUT:
             case ConfigKeys.WAIT:
               configItem.value = config[key] ? `${config[key]}s` : null; // convert to cron
               break;

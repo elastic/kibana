@@ -53,8 +53,8 @@ describe('useBarChartsHooks', () => {
                 type: 'text',
               },
               timeout: {
-                value: 1600,
-                type: 'integer',
+                value: '16s',
+                type: 'text',
               },
               max_redirects: {
                 value: 0,
@@ -285,7 +285,7 @@ describe('useBarChartsHooks', () => {
     ).toEqual(defaultConfig[ConfigKeys.APM_SERVICE_NAME]);
     expect(
       result.current.updatedPolicy.inputs[0]?.streams[0]?.vars?.[ConfigKeys.TIMEOUT].value
-    ).toEqual(defaultConfig[ConfigKeys.TIMEOUT]);
+    ).toEqual(`${defaultConfig[ConfigKeys.TIMEOUT]}s`);
     expect(
       result.current.updatedPolicy.inputs[0]?.streams[0]?.vars?.[
         ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE
@@ -366,7 +366,7 @@ describe('useBarChartsHooks', () => {
     ).toEqual(tcpConfig[ConfigKeys.APM_SERVICE_NAME]);
     expect(
       result.current.updatedPolicy.inputs[1]?.streams[0]?.vars?.[ConfigKeys.TIMEOUT].value
-    ).toEqual(tcpConfig[ConfigKeys.TIMEOUT]);
+    ).toEqual(`${tcpConfig[ConfigKeys.TIMEOUT]}s`);
     expect(
       result.current.updatedPolicy.inputs[1]?.streams[0]?.vars?.[
         ConfigKeys.PROXY_USE_LOCAL_RESOLVER
@@ -424,7 +424,7 @@ describe('useBarChartsHooks', () => {
     ).toEqual(defaultConfig[ConfigKeys.APM_SERVICE_NAME]);
     expect(
       result.current.updatedPolicy.inputs[2]?.streams[0]?.vars?.[ConfigKeys.TIMEOUT].value
-    ).toEqual(icmpConfig[ConfigKeys.TIMEOUT]);
+    ).toEqual(`${icmpConfig[ConfigKeys.TIMEOUT]}s`);
     expect(
       result.current.updatedPolicy.inputs[2]?.streams[0]?.vars?.[ConfigKeys.WAIT].value
     ).toEqual(`${icmpConfig[ConfigKeys.WAIT]}s`);

@@ -47,6 +47,7 @@ export const SyntheticsPolicyEditExtension = memo<PackagePolicyEditExtensionComp
                   acc[key] = fallbackConfig[key];
                 }
                 break;
+              case ConfigKeys.TIMEOUT:
               case ConfigKeys.WAIT:
                 acc[key] = value ? value.slice(0, value.length - 1) : fallbackConfig[key]; // remove unit
                 break;

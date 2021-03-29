@@ -58,8 +58,8 @@ const defaultNewPolicy: NewPackagePolicy = {
               type: 'text',
             },
             timeout: {
-              value: 1600,
-              type: 'integer',
+              value: '16s',
+              type: 'text',
             },
             max_redirects: {
               value: 0,
@@ -280,7 +280,7 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     const monitorIntervalUnit = getByLabelText('Unit') as HTMLInputElement;
     const apmServiceName = getByLabelText('APM service name') as HTMLInputElement;
     const maxRedirects = getByLabelText('Max redirects') as HTMLInputElement;
-    const timeout = getByLabelText('Timeout in milliseconds') as HTMLInputElement;
+    const timeout = getByLabelText('Timeout in seconds') as HTMLInputElement;
     expect(url).toBeInTheDocument();
     expect(url.value).toEqual(defaultConfig[ConfigKeys.URLS]);
     expect(proxyUrl).toBeInTheDocument();
@@ -322,7 +322,7 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     const monitorIntervalUnit = getByLabelText('Unit') as HTMLInputElement;
     const apmServiceName = getByLabelText('APM service name') as HTMLInputElement;
     const maxRedirects = getByLabelText('Max redirects') as HTMLInputElement;
-    const timeout = getByLabelText('Timeout in milliseconds') as HTMLInputElement;
+    const timeout = getByLabelText('Timeout in seconds') as HTMLInputElement;
 
     fireEvent.change(url, { target: { value: 'http://elastic.co' } });
     fireEvent.change(proxyUrl, { target: { value: 'http://proxy.co' } });
@@ -382,7 +382,7 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     const url = getByLabelText('URL') as HTMLInputElement;
     const monitorIntervalNumber = getByLabelText('Number') as HTMLInputElement;
     const maxRedirects = getByLabelText('Max redirects') as HTMLInputElement;
-    const timeout = getByLabelText('Timeout in milliseconds') as HTMLInputElement;
+    const timeout = getByLabelText('Timeout in seconds') as HTMLInputElement;
 
     // create errors
     fireEvent.change(url, { target: { value: '' } });
@@ -450,7 +450,7 @@ describe('<SyntheticsPolicyEditExtension />', () => {
 
     const host = getByLabelText('Host') as HTMLInputElement;
     const monitorIntervalNumber = getByLabelText('Number') as HTMLInputElement;
-    const timeout = getByLabelText('Timeout in milliseconds') as HTMLInputElement;
+    const timeout = getByLabelText('Timeout in seconds') as HTMLInputElement;
 
     // create errors
     fireEvent.change(host, { target: { value: '' } });
@@ -513,7 +513,7 @@ describe('<SyntheticsPolicyEditExtension />', () => {
 
     const host = getByLabelText('Host') as HTMLInputElement;
     const monitorIntervalNumber = getByLabelText('Number') as HTMLInputElement;
-    const timeout = getByLabelText('Timeout in milliseconds') as HTMLInputElement;
+    const timeout = getByLabelText('Timeout in seconds') as HTMLInputElement;
     const wait = getByLabelText('Wait in seconds') as HTMLInputElement;
 
     // create errors
@@ -593,7 +593,7 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     const monitorIntervalUnit = getByLabelText('Unit') as HTMLInputElement;
     const apmServiceName = getByLabelText('APM service name') as HTMLInputElement;
     const maxRedirects = getByLabelText('Max redirects') as HTMLInputElement;
-    const timeout = getByLabelText('Timeout in milliseconds') as HTMLInputElement;
+    const timeout = getByLabelText('Timeout in seconds') as HTMLInputElement;
     expect(url).toBeInTheDocument();
     expect(url.value).toEqual(defaultConfig[ConfigKeys.URLS]);
     expect(proxyUrl).toBeInTheDocument();
@@ -667,7 +667,7 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     const monitorIntervalNumber = getByLabelText('Number') as HTMLInputElement;
     const monitorIntervalUnit = getByLabelText('Unit') as HTMLInputElement;
     const apmServiceName = getByLabelText('APM service name') as HTMLInputElement;
-    const timeout = getByLabelText('Timeout in milliseconds') as HTMLInputElement;
+    const timeout = getByLabelText('Timeout in seconds') as HTMLInputElement;
     expect(url).toBeInTheDocument();
     expect(url.value).toEqual(defaultConfig[ConfigKeys.URLS]);
     expect(proxyUrl).toBeInTheDocument();
@@ -739,7 +739,7 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     const monitorIntervalNumber = getByLabelText('Number') as HTMLInputElement;
     const monitorIntervalUnit = getByLabelText('Unit') as HTMLInputElement;
     const apmServiceName = getByLabelText('APM service name') as HTMLInputElement;
-    const timeout = getByLabelText('Timeout in milliseconds') as HTMLInputElement;
+    const timeout = getByLabelText('Timeout in seconds') as HTMLInputElement;
     const wait = getByLabelText('Wait in seconds') as HTMLInputElement;
     expect(url).toBeInTheDocument();
     expect(url.value).toEqual(defaultConfig[ConfigKeys.URLS]);

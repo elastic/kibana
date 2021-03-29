@@ -46,7 +46,7 @@ describe('<CustomFields />', () => {
     const monitorIntervalUnit = getByLabelText('Unit') as HTMLInputElement;
     const apmServiceName = getByLabelText('APM service name') as HTMLInputElement;
     const maxRedirects = getByLabelText('Max redirects') as HTMLInputElement;
-    const timeout = getByLabelText('Timeout in milliseconds') as HTMLInputElement;
+    const timeout = getByLabelText('Timeout in seconds') as HTMLInputElement;
     expect(monitorType).not.toBeInTheDocument();
     expect(url).toBeInTheDocument();
     expect(url.value).toEqual(defaultConfig[ConfigKeys.URLS]);
@@ -84,7 +84,7 @@ describe('<CustomFields />', () => {
     const monitorIntervalUnit = getByLabelText('Unit') as HTMLInputElement;
     const apmServiceName = getByLabelText('APM service name') as HTMLInputElement;
     const maxRedirects = getByLabelText('Max redirects') as HTMLInputElement;
-    const timeout = getByLabelText('Timeout in milliseconds') as HTMLInputElement;
+    const timeout = getByLabelText('Timeout in seconds') as HTMLInputElement;
 
     fireEvent.change(url, { target: { value: 'http://elastic.co' } });
     fireEvent.change(proxyUrl, { target: { value: 'http://proxy.co' } });
@@ -173,7 +173,7 @@ describe('<CustomFields />', () => {
     const url = getByLabelText('URL') as HTMLInputElement;
     const monitorIntervalNumber = getByLabelText('Number') as HTMLInputElement;
     const maxRedirects = getByLabelText('Max redirects') as HTMLInputElement;
-    const timeout = getByLabelText('Timeout in milliseconds') as HTMLInputElement;
+    const timeout = getByLabelText('Timeout in seconds') as HTMLInputElement;
 
     // create errors
     fireEvent.change(monitorIntervalNumber, { target: { value: '-1' } });

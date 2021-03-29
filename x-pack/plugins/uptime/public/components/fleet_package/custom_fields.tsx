@@ -341,8 +341,8 @@ export const CustomFields = memo<Props>(
                 <EuiFormRow
                   label={
                     <FormattedMessage
-                      id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout"
-                      defaultMessage="Timeout in milliseconds"
+                      id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.label"
+                      defaultMessage="Timeout in seconds"
                     />
                   }
                   isInvalid={fields[ConfigKeys.TIMEOUT] < 0}
@@ -353,6 +353,12 @@ export const CustomFields = memo<Props>(
                     />
                   }
                   labelAppend={<OptionalLabel />}
+                  helpText={
+                    <FormattedMessage
+                      id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.timeout.helpText"
+                      defaultMessage="The total time allowed for testing the connection and exchanging data."
+                    />
+                  }
                 >
                   <EuiFieldNumber
                     min={0}
@@ -368,11 +374,17 @@ export const CustomFields = memo<Props>(
                 <EuiFormRow
                   label={
                     <FormattedMessage
-                      id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.tags"
+                      id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.tags.label"
                       defaultMessage="Tags"
                     />
                   }
                   labelAppend={<OptionalLabel />}
+                  helpText={
+                    <FormattedMessage
+                      id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.tags.helpText"
+                      defaultMessage="A list of tags that will be sent with the monitor event. Displayed in Uptime and enables searching by tag."
+                    />
+                  }
                 >
                   <ComboBox
                     selectedOptions={fields[ConfigKeys.TAGS]}
