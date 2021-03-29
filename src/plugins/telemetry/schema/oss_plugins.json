@@ -8033,6 +8033,12 @@
             "description": "Non-default value of setting."
           }
         },
+        "observability:enableInspectEsQueries": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "presentation:unifiedToolbar": {
           "type": "boolean",
           "_meta": {
@@ -9335,6 +9341,16 @@
             "enabled": {
               "type": "long"
             }
+          }
+        }
+      }
+    },
+    "vis_type_timeseries": {
+      "properties": {
+        "timeseries_use_last_value_mode_total": {
+          "type": "long",
+          "_meta": {
+            "description": "Number of TSVB visualizations using \"last value\" as a time range"
           }
         }
       }

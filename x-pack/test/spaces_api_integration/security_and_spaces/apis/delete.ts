@@ -24,7 +24,8 @@ export default function deleteSpaceTestSuite({ getService }: FtrProviderContext)
     expectReservedSpaceResult,
   } = deleteTestSuiteFactory(es, esArchiver, supertestWithoutAuth);
 
-  describe('delete', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/92358
+  describe.skip('delete', () => {
     [
       {
         spaceId: SPACES.DEFAULT.spaceId,

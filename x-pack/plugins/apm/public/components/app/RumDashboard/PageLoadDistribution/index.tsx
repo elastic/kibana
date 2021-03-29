@@ -95,13 +95,13 @@ export function PageLoadDistribution() {
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <PageLoadDistChart
-        data={data}
+        data={data?.pageLoadDistribution}
         onPercentileChange={onPercentileChange}
         loading={status !== 'success'}
         breakdown={breakdown}
         percentileRange={{
-          max: percentileRange.max || data?.maxDuration,
-          min: percentileRange.min || data?.minDuration,
+          max: percentileRange.max || data?.pageLoadDistribution?.maxDuration,
+          min: percentileRange.min || data?.pageLoadDistribution?.minDuration,
         }}
       />
     </div>

@@ -303,6 +303,80 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    it('should complete session when searches complete', async () => {
+      const sessionId = `my-session-${Math.random()}`;
+
+      // run search
+      const searchRes = await supertest
+        .post(`/internal/search/ese`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          sessionId,
+          params: {
+            body: {
+              query: {
+                term: {
+                  agent: '1',
+                },
+              },
+            },
+            wait_for_completion_timeout: '1ms',
+          },
+        })
+        .expect(200);
+
+      const { id } = searchRes.body;
+
+      // persist session
+      await supertest
+        .post(`/internal/session`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          sessionId,
+          name: 'My Session',
+          appId: 'discover',
+          expires: '123',
+          urlGeneratorId: 'discover',
+        })
+        .expect(200);
+
+      await retry.waitForWithTimeout('searches persisted into session', 5000, async () => {
+        const resp = await supertest
+          .get(`/internal/session/${sessionId}`)
+          .set('kbn-xsrf', 'foo')
+          .expect(200);
+
+        const { touched, created, persisted, idMapping } = resp.body.attributes;
+        expect(persisted).to.be(true);
+        expect(touched).not.to.be(undefined);
+        expect(created).not.to.be(undefined);
+
+        const idMappings = Object.values(idMapping).map((value: any) => value.id);
+        expect(idMappings).to.contain(id);
+        return true;
+      });
+
+      // session refresh interval is 10 seconds, wait to give a chance for status to update
+      await new Promise((resolve) => setTimeout(resolve, 10000));
+
+      await retry.waitForWithTimeout(
+        'searches eventually complete and session gets into the complete state',
+        5000,
+        async () => {
+          const resp = await supertest
+            .get(`/internal/session/${sessionId}`)
+            .set('kbn-xsrf', 'foo')
+            .expect(200);
+
+          const { status, completed } = resp.body.attributes;
+
+          expect(status).to.be(SearchSessionStatus.COMPLETE);
+          expect(completed).not.to.be(undefined);
+          return true;
+        }
+      );
+    });
+
     it('touched time updates when you poll on an search', async () => {
       const sessionId = `my-session-${Math.random()}`;
 
