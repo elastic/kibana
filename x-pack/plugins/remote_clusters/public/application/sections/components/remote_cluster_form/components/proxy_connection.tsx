@@ -8,23 +8,15 @@
 import React, { FunctionComponent } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiAccordion,
-  EuiFieldNumber,
-  EuiFieldText,
-  EuiFormRow,
-  EuiImage,
-  EuiLink,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFieldNumber, EuiFieldText, EuiFormRow, EuiLink } from '@elastic/eui';
 import { useAppContext } from '../../../../app_context';
 import { proxySettingsUrl } from '../../../../services/documentation';
 import { Props } from './connection_mode';
+import { CloudUrlHelp } from './cloud_url_help';
 
 export const ProxyConnection: FunctionComponent<Props> = (props) => {
   const { fields, fieldsErrors, areErrorsVisible, onFieldsChange } = props;
-  const { isCloudEnabled, basePath } = useAppContext();
+  const { isCloudEnabled } = useAppContext();
   const { proxyAddress, serverName, proxySocketConnections, cloudUrl, cloudUrlEnabled } = fields;
   const {
     proxyAddress: proxyAddressError,
@@ -33,7 +25,7 @@ export const ProxyConnection: FunctionComponent<Props> = (props) => {
   } = fieldsErrors;
 
   return (
-    <div data-test-subj="proxyConnectionDiv">
+    <>
       {cloudUrlEnabled ? (
         <>
           <EuiFormRow
@@ -44,43 +36,15 @@ export const ProxyConnection: FunctionComponent<Props> = (props) => {
                 defaultMessage="Elasticsearch endpoint URL"
               />
             }
+            labelAppend={<CloudUrlHelp />}
             isInvalid={Boolean(areErrorsVisible && cloudUrlError)}
             error={cloudUrlError}
             fullWidth
             helpText={
-              <>
-                <EuiSpacer size="s" />
-                <EuiAccordion
-                  id="cloudScreenshot"
-                  buttonContent={
-                    <EuiText size="xs">
-                      <FormattedMessage
-                        id="xpack.remoteClusters.remoteClusterForm.fieldCloudUrlHelpText"
-                        defaultMessage="How to find your Elasticsearch endpoint URL?"
-                      />
-                    </EuiText>
-                  }
-                >
-                  <EuiSpacer size="s" />
-                  <EuiText size="xs">
-                    <FormattedMessage
-                      id="xpack.remoteClusters.remoteClusterForm.cloudScreenshotDescription"
-                      defaultMessage="Copy the endpoint URL from the Cloud deployment overview page under Applications."
-                    />
-                  </EuiText>
-                  <EuiSpacer size="s" />
-                  <EuiImage
-                    url={basePath.prepend('/plugins/remoteClusters/assets/cloud_screenshot.png')}
-                    alt={i18n.translate(
-                      'xpack.remoteClusters.remoteClusterForm.cloudScreenshotAlt',
-                      {
-                        defaultMessage:
-                          'A screenshot of Cloud deployment page section with a highlighted endpoint URL.',
-                      }
-                    )}
-                  />
-                </EuiAccordion>
-              </>
+              <FormattedMessage
+                id="xpack.remoteClusters.remoteClusterForm.fieldCloudUrlHelpText"
+                defaultMessage="Elasticsearch endpoint URL of the remote deployment copied from the Cloud deployment page."
+              />
             }
           >
             <EuiFieldText
@@ -193,6 +157,6 @@ export const ProxyConnection: FunctionComponent<Props> = (props) => {
           fullWidth
         />
       </EuiFormRow>
-    </div>
+    </>
   );
 };

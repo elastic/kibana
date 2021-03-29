@@ -41,9 +41,13 @@ export interface RemoteClustersActions {
     setValue: (seed: string) => void;
     getValue: () => string;
   };
-  setProxyAddress: (proxyAddress: string) => void;
+  proxyAddressInput: {
+    setValue: (proxyAddress: string) => void;
+    exists: () => boolean;
+  };
   serverNameInput: {
-    label: () => string;
+    getLabel: () => string;
+    exists: () => boolean;
   };
   saveButton: {
     click: () => void;
@@ -134,8 +138,15 @@ export const createRemoteClustersActions = (testBed: TestBed): RemoteClustersAct
     };
   };
 
-  const setProxyAddress = (proxyAddress: string) =>
-    form.setInputValue('remoteClusterFormProxyAddressInput', proxyAddress);
+  const createProxyAddressActions = () => {
+    const proxyAddressSelector = 'remoteClusterFormProxyAddressInput';
+    return {
+      proxyAddressInput: {
+        setValue: (proxyAddress: string) => form.setInputValue(proxyAddressSelector, proxyAddress),
+        exists: () => exists(proxyAddressSelector),
+      },
+    };
+  };
 
   const createSaveButtonActions = () => {
     const click = () => {
@@ -149,8 +160,14 @@ export const createRemoteClustersActions = (testBed: TestBed): RemoteClustersAct
     return { saveButton: { click, isDisabled } };
   };
 
-  const serverNameInput = {
-    label: () => find('remoteClusterFormServerNameFormRow').find('label').text(),
+  const createServerNameActions = () => {
+    const serverNameSelector = 'remoteClusterFormServerNameFormRow';
+    return {
+      serverNameInput: {
+        getLabel: () => find('remoteClusterFormServerNameFormRow').find('label').text(),
+        exists: () => exists(serverNameSelector),
+      },
+    };
   };
 
   const globalErrorExists = () => exists('remoteClusterFormGlobalError');
@@ -173,8 +190,8 @@ export const createRemoteClustersActions = (testBed: TestBed): RemoteClustersAct
     ...createCloudUrlSwitchActions(),
     ...createSeedsInputActions(),
     ...createCloudUrlInputActions(),
-    setProxyAddress,
-    serverNameInput,
+    ...createProxyAddressActions(),
+    ...createServerNameActions(),
     ...createSaveButtonActions(),
     getErrorMessages: form.getErrorsMessages,
     globalErrorExists,
