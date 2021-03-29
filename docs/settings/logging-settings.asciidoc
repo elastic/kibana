@@ -1,13 +1,21 @@
-[[logging-service-configuration-example]]
-== Logging Service Configuration Example
+[[logging-settings]]
+=== Logging settings in {kib}
+++++
+<titleabbrev>Logging settings</titleabbrev>
+++++
 
-As with any configuration in the {kib} platform, logging configuration is validated against the predefined schema and if there are
+Compatibility with the legacy logging system is assured until the end of the `v7` version.
+All log messages handled by `root` context (default) are forwarded to the legacy logging service.
+The logging configuration is validated against the predefined schema and if there are
 any issues with it, {kib} will fail to start with the detailed error message.
 
-Here are some examples for the most common logging use cases:
+NOTE: When you switch to the new logging configuration, you will start seeing duplicate log entries in both formats. 
+These will be removed when the `default` appender is no longer required.
+
+Here are some configuration examples for the most common logging use cases:
 
 [[log-to-file-example]]
-=== Log to a file
+==== Log to a file
 
 Log the default log format to a file instead of to stdout (the default).
 
@@ -25,9 +33,10 @@ logging:
 ----
 
 [[log-in-json-ECS-example]]
-=== Log in ECS json format
+==== Log in json format
 
 Log the default log format to json layout instead of pattern (the default).
+With `json` layout log messages will be formatted as JSON strings in https://www.elastic.co/guide/en/ecs/current/ecs-reference.html[ECS format] that includes a timestamp, log level, logger, message text and any other metadata that may be associated with the log message itself
 
 [source,yaml]
 ----
@@ -42,7 +51,9 @@ logging:
 ----
 
 [[log-with-meta-to-stdout]]
-=== Log with meta to stdout (meta is not included by default).
+==== Log with meta to stdout
+
+Include `%meta` in your pattern layout:
 
 [source,yaml]
 ----
@@ -57,8 +68,28 @@ logging:
     appenders: [default, console-meta]
 ----
 
+[[log-elasticsearch-queries]]
+==== Log {es} queries
+
+[source,yaml]
+--
+logging:
+  appenders:
+    console_appender:
+      type: console
+      layout:
+        type: pattern
+        highlight: true
+  root:
+    appenders: [default, console_appender]
+    level: warn
+  loggers:
+    - name: elasticsearch.query
+      level: debug
+--
+
 [[change-overall-log-level]]
-=== Change overall log level.
+==== Change overall log level.
 
 [source,yaml]
 ----
@@ -68,8 +99,8 @@ logging:
 ----
 
 [[customize-specific-log-records]]
-=== Customize specific log records
-Here is a more detailed configuration example that can be used to configure _loggers_, _appenders_ and _layouts_:
+==== Customize specific log records
+Here is a detailed configuration example that can be used to configure _loggers_, _appenders_ and _layouts_:
 
 [source,yaml]
 ----
@@ -136,3 +167,7 @@ Here is what we get with the config above:
 
 | metrics.ops | console | debug
 |===
+
+NOTE: If you modify `root.appenders`, make sure to include `default`.
+
+// For more details about logging configuration, refer to the logging system documentation (update to include a link).

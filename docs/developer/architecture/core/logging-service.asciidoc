@@ -59,7 +59,7 @@ log record or disable logging entirely or for a specific logger. These levels ar
 
 Every appender should know exactly how to format log messages before they are written to the console or file on the disk.
 This behavior is controlled by the layouts and configured through `appender.layout` configuration property for every
-custom appender (see examples in <<logging-service-configuration-example,Configuration>>). Currently we don't define any default layout for the
+custom appender. Currently we don't define any default layout for the
 custom appenders, so one should always make the choice explicitly.
 
 There are two types of layout supported at the moment: <<pattern-layout,`pattern`>> and <<json-layout,`json`>>.
@@ -369,7 +369,7 @@ logging:
             value: "[REDACTED]"
 ----
 
-===== Complete Example
+===== Complete Example For Rewrite Appender
 
 [source,yaml]
 ----
