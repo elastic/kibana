@@ -26,12 +26,9 @@ export interface IIndexingStatusProps extends IIndexingStatus {
   setGlobalIndexingStatus?(activeReindexJob: IIndexingStatus): void;
 }
 
-export const IndexingStatus: React.FC<IIndexingStatusProps> = ({
-  viewLinkPath,
-  statusPath,
-  onComplete,
-}) => {
-  const { percentageComplete, numDocumentsWithErrors } = useValues(IndexingStatusLogic);
+export const IndexingStatus: React.FC<IIndexingStatusProps> = (props) => {
+  const { viewLinkPath, statusPath, onComplete } = props;
+  const { percentageComplete, numDocumentsWithErrors } = useValues(IndexingStatusLogic(props));
   const { fetchIndexingStatus } = useActions(IndexingStatusLogic);
 
   useEffect(() => {
