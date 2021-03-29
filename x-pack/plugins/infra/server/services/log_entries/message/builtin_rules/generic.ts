@@ -47,6 +47,37 @@ export const getGenericRules = (genericMessageFields: string[]) => [
 const createGenericRulesForField = (fieldName: string) => [
   {
     when: {
+      exists: ['event.dataset', 'log.level', fieldName, 'error.stack_trace.text'],
+    },
+    format: [
+      {
+        constant: '[',
+      },
+      {
+        field: 'event.dataset',
+      },
+      {
+        constant: '][',
+      },
+      {
+        field: 'log.level',
+      },
+      {
+        constant: '] ',
+      },
+      {
+        field: fieldName,
+      },
+      {
+        constant: '\n',
+      },
+      {
+        field: 'error.stack_trace.text',
+      },
+    ],
+  },
+  {
+    when: {
       exists: ['event.dataset', 'log.level', fieldName],
     },
     format: [
@@ -72,6 +103,31 @@ const createGenericRulesForField = (fieldName: string) => [
   },
   {
     when: {
+      exists: ['log.level', fieldName, 'error.stack_trace.text'],
+    },
+    format: [
+      {
+        constant: '[',
+      },
+      {
+        field: 'log.level',
+      },
+      {
+        constant: '] ',
+      },
+      {
+        field: fieldName,
+      },
+      {
+        constant: '\n',
+      },
+      {
+        field: 'error.stack_trace.text',
+      },
+    ],
+  },
+  {
+    when: {
       exists: ['log.level', fieldName],
     },
     format: [
@@ -86,6 +142,22 @@ const createGenericRulesForField = (fieldName: string) => [
       },
       {
         field: fieldName,
+      },
+    ],
+  },
+  {
+    when: {
+      exists: [fieldName, 'error.stack_trace.text'],
+    },
+    format: [
+      {
+        field: fieldName,
+      },
+      {
+        constant: '\n',
+      },
+      {
+        field: 'error.stack_trace.text',
       },
     ],
   },
