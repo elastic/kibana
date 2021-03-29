@@ -7,22 +7,27 @@
 
 import uuid from 'uuid';
 
-import { OsType } from '../../../../../lists/common/schemas/common';
+import { OsType } from '../../../../../lists/common/schemas';
 import {
   EntriesArray,
   EntryMatch,
   EntryNested,
   ExceptionListItemSchema,
   NestedEntriesArray,
-} from '../../../../../lists/common/shared_exports';
-import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common';
-import { CreateExceptionListItemOptions } from '../../../../../lists/server';
+} from '../../../../../lists/common';
+import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../lists/common/constants';
+import {
+  CreateExceptionListItemOptions,
+  UpdateExceptionListItemOptions,
+} from '../../../../../lists/server';
 import {
   ConditionEntry,
   ConditionEntryField,
+  EffectScope,
   NewTrustedApp,
   OperatingSystem,
   TrustedApp,
+  UpdateTrustedApp,
 } from '../../../../common/endpoint/types';
 
 type ConditionEntriesMap = { [K in ConditionEntryField]?: ConditionEntry<K> };
@@ -40,6 +45,8 @@ const OPERATING_SYSTEM_TO_OS_TYPE: Mapping<OperatingSystem, OsType> = {
   [OperatingSystem.WINDOWS]: 'windows',
 };
 
+const POLICY_REFERENCE_PREFIX = 'policy:';
+
 const filterUndefined = <T>(list: Array<T | undefined>): T[] => {
   return list.filter((item: T | undefined): item is T => item !== undefined);
 };
@@ -49,6 +56,21 @@ export const createConditionEntry = <T extends ConditionEntryField>(
   value: string
 ): ConditionEntry<T> => {
   return { field, value, type: 'match', operator: 'included' };
+};
+
+export const tagsToEffectScope = (tags: string[]): EffectScope => {
+  const policyReferenceTags = tags.filter((tag) => tag.startsWith(POLICY_REFERENCE_PREFIX));
+
+  if (policyReferenceTags.some((tag) => tag === `${POLICY_REFERENCE_PREFIX}all`)) {
+    return {
+      type: 'global',
+    };
+  } else {
+    return {
+      type: 'policy',
+      policies: policyReferenceTags.map((tag) => tag.substr(POLICY_REFERENCE_PREFIX.length)),
+    };
+  }
 };
 
 export const entriesToConditionEntriesMap = (entries: EntriesArray): ConditionEntriesMap => {
@@ -96,10 +118,14 @@ export const exceptionListItemToTrustedApp = (
 
     return {
       id: exceptionListItem.id,
+      version: exceptionListItem._version || '',
       name: exceptionListItem.name,
       description: exceptionListItem.description,
+      effectScope: tagsToEffectScope(exceptionListItem.tags),
       created_at: exceptionListItem.created_at,
       created_by: exceptionListItem.created_by,
+      updated_at: exceptionListItem.updated_at,
+      updated_by: exceptionListItem.updated_by,
       ...(os === OperatingSystem.LINUX || os === OperatingSystem.MAC
         ? {
             os,
@@ -147,6 +173,14 @@ export const createEntryNested = (field: string, entries: NestedEntriesArray): E
   return { field, entries, type: 'nested' };
 };
 
+export const effectScopeToTags = (effectScope: EffectScope) => {
+  if (effectScope.type === 'policy') {
+    return effectScope.policies.map((policy) => `${POLICY_REFERENCE_PREFIX}${policy}`);
+  } else {
+    return [`${POLICY_REFERENCE_PREFIX}all`];
+  }
+};
+
 export const conditionEntriesToEntries = (conditionEntries: ConditionEntry[]): EntriesArray => {
   return conditionEntries.map((conditionEntry) => {
     if (conditionEntry.field === ConditionEntryField.HASH) {
@@ -173,6 +207,7 @@ export const newTrustedAppToCreateExceptionListItemOptions = ({
   entries,
   name,
   description = '',
+  effectScope,
 }: NewTrustedApp): CreateExceptionListItemOptions => {
   return {
     comments: [],
@@ -184,7 +219,42 @@ export const newTrustedAppToCreateExceptionListItemOptions = ({
     name,
     namespaceType: 'agnostic',
     osTypes: [OPERATING_SYSTEM_TO_OS_TYPE[os]],
-    tags: ['policy:all'],
+    tags: effectScopeToTags(effectScope),
     type: 'simple',
+  };
+};
+
+/**
+ * Map UpdateTrustedApp to UpdateExceptionListItemOptions
+ *
+ * @param {ExceptionListItemSchema} currentTrustedAppExceptionItem
+ * @param {UpdateTrustedApp} updatedTrustedApp
+ */
+export const updatedTrustedAppToUpdateExceptionListItemOptions = (
+  {
+    id,
+    item_id: itemId,
+    namespace_type: namespaceType,
+    type,
+    comments,
+    meta,
+  }: ExceptionListItemSchema,
+  { os, entries, name, description = '', effectScope, version }: UpdateTrustedApp
+): UpdateExceptionListItemOptions => {
+  return {
+    _version: version,
+    name,
+    description,
+    entries: conditionEntriesToEntries(entries),
+    osTypes: [OPERATING_SYSTEM_TO_OS_TYPE[os]],
+    tags: effectScopeToTags(effectScope),
+
+    // Copied from current trusted app exception item
+    id,
+    comments,
+    itemId,
+    meta,
+    namespaceType,
+    type,
   };
 };

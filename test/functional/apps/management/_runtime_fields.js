@@ -15,6 +15,7 @@ export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['settings']);
+  const testSubjects = getService('testSubjects');
 
   describe('runtime fields', function () {
     this.tags(['skipFirefox']);
@@ -46,6 +47,20 @@ export default function ({ getService, getPageObjects }) {
         await retry.try(async function () {
           expect(parseInt(await PageObjects.settings.getFieldsTabCount())).to.be(startingCount + 1);
         });
+      });
+
+      it('should modify runtime field', async function () {
+        await PageObjects.settings.filterField(fieldName);
+        await testSubjects.click('editFieldFormat');
+        await PageObjects.settings.setFieldType('Long');
+        await PageObjects.settings.changeFieldScript('emit(6);');
+        await PageObjects.settings.clickSaveField();
+        await PageObjects.settings.confirmSave();
+      });
+
+      it('should delete runtime field', async function () {
+        await testSubjects.click('deleteField');
+        await PageObjects.settings.confirmDelete();
       });
     });
   });

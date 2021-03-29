@@ -36,7 +36,7 @@ export const errorsRoute = createRoute({
     const { serviceName } = params.path;
     const { environment, kuery, sortField, sortDirection } = params.query;
 
-    return getErrorGroups({
+    const errorGroups = await getErrorGroups({
       environment,
       kuery,
       serviceName,
@@ -44,6 +44,8 @@ export const errorsRoute = createRoute({
       sortDirection,
       setup,
     });
+
+    return { errorGroups };
   },
 });
 
