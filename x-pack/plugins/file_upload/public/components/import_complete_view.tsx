@@ -7,6 +7,7 @@
 
 import React, { Component, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonIcon,
   EuiCallOut,
@@ -17,7 +18,6 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { CodeEditor, KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { getHttp, getUiSettings } from '../kibana_services';
 import { ImportResults } from '../importer';
@@ -91,13 +91,32 @@ export class ImportCompleteView extends Component<Props, {}> {
 
   _getStatusMsg() {
     if (!this.props.importResults || !this.props.importResults.success) {
-      return i18n.translate('xpack.fileUpload.uploadFailureMsg', {
-        defaultMessage: 'File upload failed.',
-      });
+      const errorMsg = this.props.importResults.error
+        ? i18n.translate('xpack.fileUpload.uploadFailureMsgErrorBlock', {
+            defaultMessage: 'Error: {reason}',
+            values: { reason: this.props.importResults.error.error.reason },
+          })
+        : '';
+      return (
+        <EuiCallOut
+          title={i18n.translate('xpack.fileUpload.uploadFailureTitle', {
+            defaultMessage: 'File upload failed',
+          })}
+          color="danger"
+          iconType="alert"
+        >
+          <p>
+            {i18n.translate('xpack.fileUpload.uploadFailureMsg', {
+              defaultMessage: 'Unable to upload file. {errorMsg}',
+              values: { errorMsg },
+            })}
+          </p>
+        </EuiCallOut>
+      );
     }
 
     const successMsg = i18n.translate('xpack.fileUpload.uploadSuccessMsg', {
-      defaultMessage: 'File upload complete: indexed {numFeatures} features.',
+      defaultMessage: 'Indexed {numFeatures} features.',
       values: {
         numFeatures: this.props.importResults.docCount,
       },
@@ -112,15 +131,45 @@ export class ImportCompleteView extends Component<Props, {}> {
         })
       : '';
 
-    return `${successMsg} ${failedFeaturesMsg}`;
+    return (
+      <EuiCallOut
+        title={i18n.translate('xpack.fileUpload.uploadSuccessTitle', {
+          defaultMessage: 'File upload complete',
+        })}
+      >
+        <p>{`${successMsg} ${failedFeaturesMsg}`}</p>
+      </EuiCallOut>
+    );
+  }
+
+  _renderIndexManagementCallout() {
+    return this.props.importResults && this.props.importResults.success ? (
+      <EuiText>
+        <p>
+          <FormattedMessage
+            id="xpack.fileUpload.jsonImport.indexModsMsg"
+            defaultMessage="Further index modifications can be made using "
+          />
+          <a
+            data-test-subj="indexManagementNewIndexLink"
+            target="_blank"
+            href={getHttp().basePath.prepend('/app/management/kibana/indexPatterns')}
+          >
+            <FormattedMessage
+              id="xpack.fileUpload.jsonImport.indexMgmtLink"
+              defaultMessage="Index Management"
+            />
+          </a>
+        </p>
+      </EuiText>
+    ) : null;
   }
 
   render() {
     return (
       <KibanaContextProvider services={services}>
-        <EuiText>
-          <p>{this._getStatusMsg()}</p>
-        </EuiText>
+        {this._getStatusMsg()}
+
         {this._renderCodeEditor(
           this.props.importResults,
           i18n.translate('xpack.fileUpload.jsonImport.indexingResponse', {
@@ -135,24 +184,7 @@ export class ImportCompleteView extends Component<Props, {}> {
           }),
           'indexPatternRespCopyButton'
         )}
-        <EuiCallOut>
-          <div>
-            <FormattedMessage
-              id="xpack.fileUpload.jsonImport.indexModsMsg"
-              defaultMessage="Further index modifications can be made using "
-            />
-            <a
-              data-test-subj="indexManagementNewIndexLink"
-              target="_blank"
-              href={getHttp().basePath.prepend('/app/management/kibana/indexPatterns')}
-            >
-              <FormattedMessage
-                id="xpack.fileUpload.jsonImport.indexMgmtLink"
-                defaultMessage="Index Management"
-              />
-            </a>
-          </div>
-        </EuiCallOut>
+        {this._renderIndexManagementCallout()}
       </KibanaContextProvider>
     );
   }

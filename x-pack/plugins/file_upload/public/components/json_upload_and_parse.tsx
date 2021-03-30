@@ -75,6 +75,10 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
     }
 
     //
+    // check permissions
+    //
+
+    //
     // create index
     //
     const settings = ({
@@ -111,6 +115,7 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
     if (initializeImportResp.index === undefined || initializeImportResp.id === undefined) {
       this.setState({
         phase: PHASE.COMPLETE,
+        importResults: initializeImportResp,
       });
       this.props.onIndexingError();
       return;

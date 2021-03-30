@@ -7,6 +7,30 @@ Geospatial data comes in many formats.
 Choose an import tool based on the format of your geospatial data.
 
 [discrete]
+[[import-geospatial-privileges]]
+=== Security privileges
+
+The {stack-security-features} provide roles and privileges that control which users can upload files.
+You can manage your roles, privileges, and
+spaces in the **{stack-manage-app}** app in {kib}. For more information, see
+{ref}/security-privileges.html[Security privileges],
+<<kibana-privileges, {kib} privileges]>>, and <<xpack-kibana-role-management, {kib} role management>>.
+
+To upload GeoJson files in {kib} with *Maps*, you must have:
+* [ ] `all` {kib}
+privilege for the `Maps` feature
+* [ ] `all` {kib}
+privilege for the `Index Pattern Management` feature
+* [ ] `create`, `create_index`, and `read` index privileges for destination indices.
+Its recommended that users also have `view_index_metadata` index privilege for destination indices.
+
+To upload CSV files in {kib} with the *{file-data-viz}*, in addition to upload GeoJson privileges, to you must have:
+* [ ] `manage_pipeline` cluster privilege
+* [ ] `read` {kib} privilege for the `Machine Learning` feature
+* [ ] `machine_learning_admin` or `machine_learning_user` role
+
+
+[discrete]
 === Upload CSV with latitude and longitude columns
 
 *File Data Visualizer* indexes CSV files with latitude and longitude columns as a geo_point.
