@@ -14,6 +14,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { ResultSettings } from './result_settings';
+import { ResultSettingsTable } from './result_settings_table';
 
 describe('RelevanceTuning', () => {
   const actions = {
@@ -26,7 +27,7 @@ describe('RelevanceTuning', () => {
 
   it('renders', () => {
     const wrapper = shallow(<ResultSettings engineBreadcrumb={['test']} />);
-    expect(wrapper.isEmptyRender()).toBe(false);
+    expect(wrapper.find(ResultSettingsTable).exists()).toBe(true);
   });
 
   it('initializes result settings data when mounted', () => {
