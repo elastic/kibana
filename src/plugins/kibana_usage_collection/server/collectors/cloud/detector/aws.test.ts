@@ -13,13 +13,13 @@ import { AWS, AWSCloudService, AWSResponse } from './aws';
 type Callback = (err: unknown, res: unknown) => void;
 
 describe('AWS', () => {
-  const expectedFilename = '/sys/hypervisor/uuid';
+  const expectedFilenames = ['/sys/hypervisor/uuid', '/sys/devices/virtual/dmi/id/product_uuid'];
   const expectedEncoding = 'utf8';
   // mixed case to ensure we check for ec2 after lowercasing
   const ec2Uuid = 'eC2abcdef-ghijk\n';
   const ec2FileSystem = {
     readFile: (filename: string, encoding: string, callback: Callback) => {
-      expect(filename).toEqual(expectedFilename);
+      expect(expectedFilenames).toContain(filename);
       expect(encoding).toEqual(expectedEncoding);
 
       callback(null, ec2Uuid);
@@ -177,29 +177,64 @@ describe('AWS', () => {
   });
 
   describe('_tryToDetectUuid', () => {
-    it('checks the file system for UUID if not Windows', async () => {
-      const awsCheckedFileSystem = new AWSCloudService({
-        _fs: ec2FileSystem,
-        _isWindows: false,
+    describe('checks the file system for UUID if not Windows', () => {
+      it('checks /sys/hypervisor/uuid', async () => {
+        const awsCheckedFileSystem = new AWSCloudService({
+          _fs: {
+            readFile: (filename: string, encoding: string, callback: Callback) => {
+              expect(expectedFilenames).toContain(filename);
+              expect(encoding).toEqual(expectedEncoding);
+
+              callback(null, ec2Uuid);
+            },
+          } as typeof fs,
+          _isWindows: false,
+        });
+
+        const response = await awsCheckedFileSystem._tryToDetectUuid();
+
+        expect(response.isConfirmed()).toEqual(true);
+        expect(response.toJSON()).toEqual({
+          name: AWS.getName(),
+          id: ec2Uuid.trim().toLowerCase(),
+          region: undefined,
+          zone: undefined,
+          vm_type: undefined,
+          metadata: undefined,
+        });
       });
 
-      const response = await awsCheckedFileSystem._tryToDetectUuid();
+      it('checks /sys/devices/virtual/dmi/id/product_uuid', async () => {
+        const awsCheckedFileSystem = new AWSCloudService({
+          _fs: {
+            readFile: (filename: string, encoding: string, callback: Callback) => {
+              expect(expectedFilenames).toContain(filename);
+              expect(encoding).toEqual(expectedEncoding);
 
-      expect(response.isConfirmed()).toEqual(true);
-      expect(response.toJSON()).toEqual({
-        name: AWS.getName(),
-        id: ec2Uuid.trim().toLowerCase(),
-        region: undefined,
-        zone: undefined,
-        vm_type: undefined,
-        metadata: undefined,
+              callback(null, ec2Uuid);
+            },
+          } as typeof fs,
+          _isWindows: false,
+        });
+
+        const response = await awsCheckedFileSystem._tryToDetectUuid();
+
+        expect(response.isConfirmed()).toEqual(true);
+        expect(response.toJSON()).toEqual({
+          name: AWS.getName(),
+          id: ec2Uuid.trim().toLowerCase(),
+          region: undefined,
+          zone: undefined,
+          vm_type: undefined,
+          metadata: undefined,
+        });
       });
     });
 
     it('ignores UUID if it does not start with ec2', async () => {
       const notEC2FileSystem = {
         readFile: (filename: string, encoding: string, callback: Callback) => {
-          expect(filename).toEqual(expectedFilename);
+          expect(expectedFilenames).toContain(filename);
           expect(encoding).toEqual(expectedEncoding);
 
           callback(null, 'notEC2');
@@ -240,7 +275,7 @@ describe('AWS', () => {
 
       expect(async () => {
         await awsFailedFileSystem._tryToDetectUuid();
-      }).rejects.toThrowError(fileDNE);
+      }).rejects.toThrow(fileDNE);
     });
   });
 });

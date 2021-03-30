@@ -127,13 +127,20 @@ export class AWSCloudService extends CloudService {
   _tryToDetectUuid() {
     // Windows does not have an easy way to check
     if (!this._isWindows) {
-      return promisify(this._fs.readFile)('/sys/hypervisor/uuid', 'utf8').then((uuid) => {
-        if (isString(uuid)) {
-          // Some AWS APIs return it lowercase (like the file did in testing), while others return it uppercase
-          uuid = uuid.trim().toLowerCase();
+      const pathsToCheck = ['/sys/hypervisor/uuid', '/sys/devices/virtual/dmi/id/product_uuid'];
+      const promises = pathsToCheck.map((path) => promisify(this._fs.readFile)(path, 'utf8'));
 
-          if (uuid.startsWith('ec2')) {
-            return new CloudServiceResponse(this._name, true, { id: uuid });
+      return Promise.all(promises).then((uuids) => {
+        for (let uuid of uuids) {
+          if (isString(uuid)) {
+            // Some AWS APIs return it lowercase (like the file did in testing), while others return it uppercase
+            uuid = uuid.trim().toLowerCase();
+
+            // There is a small chance of a false positive here in the unlikely event that a uuid which doesn't
+            // belong to ec2 happens to be generated with `ec2` as the first three characters.
+            if (uuid.startsWith('ec2')) {
+              return new CloudServiceResponse(this._name, true, { id: uuid });
+            }
           }
         }
 
