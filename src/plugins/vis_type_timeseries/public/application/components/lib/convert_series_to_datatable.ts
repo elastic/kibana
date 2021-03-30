@@ -14,6 +14,7 @@ import {
 } from 'src/plugins/expressions/public';
 import { TimeseriesVisParams } from '../../../types';
 import { PanelData } from '../../../../common/types';
+import { fetchIndexPattern } from '../../../../common/index_patterns_utils';
 import { getDataStart } from '../../../services';
 import { X_ACCESSOR_INDEX } from '../../visualizations/constants';
 
@@ -62,20 +63,23 @@ export const convertSeriesToDataTable = async (
   const tables: TSVBTables = {};
   for (let layerIdx = 0; layerIdx < model.series.length; layerIdx++) {
     const layer = model.series[layerIdx];
-    let indexPattern = initialIndexPattern;
+    let usedIndexPattern = initialIndexPattern;
     // The user can overwrite the index pattern of a layer.
-    // In that case, the index pattern should be calculated again.
+    // In that case, the index pattern should be fetched again.
     if (layer.override_index_pattern) {
-      const overwrittenIndexPatterns = await getDataStart().indexPatterns.find(
-        layer.series_index_pattern || ''
-      );
-      indexPattern = overwrittenIndexPatterns[0];
+      const { indexPatterns } = getDataStart();
+      const { indexPattern } = await fetchIndexPattern(layer.series_index_pattern, indexPatterns);
+      if (indexPattern) {
+        usedIndexPattern = indexPattern;
+      }
     }
     const isGroupedByTerms = layer.split_mode === 'terms';
     const seriesPerLayer = series.filter((s) => s.seriesId === layer.id);
     let id = X_ACCESSOR_INDEX;
 
-    const columns: TSVBColumns[] = [{ id, name: indexPattern.timeFieldName || '', isSplit: false }];
+    const columns: TSVBColumns[] = [
+      { id, name: usedIndexPattern.timeFieldName || '', isSplit: false },
+    ];
     if (seriesPerLayer.length) {
       id++;
       columns.push({ id, name: seriesPerLayer[0].splitByLabel, isSplit: false });
@@ -85,7 +89,7 @@ export const convertSeriesToDataTable = async (
         columns.push({ id, name: layer.terms_field || '', isSplit: true });
       }
     }
-    const columnsWithMeta = addMetaToColumns(columns, indexPattern, layer.metrics[0].type);
+    const columnsWithMeta = addMetaToColumns(columns, usedIndexPattern, layer.metrics[0].type);
 
     let rows: DatatableRow[] = [];
     for (let j = 0; j < seriesPerLayer.length; j++) {

@@ -17,6 +17,7 @@ import { PaletteRegistry } from 'src/plugins/charts/public';
 import { ErrorComponent } from './error';
 import { TimeseriesVisTypes } from './vis_types';
 import { TimeseriesVisData, PanelData } from '../../../common/types';
+import { fetchIndexPattern } from '../../../common/index_patterns_utils';
 import { TimeseriesVisParams } from '../../types';
 import { getDataStart } from '../../services';
 import { convertSeriesToDataTable } from './lib/convert_series_to_datatable';
@@ -45,11 +46,14 @@ function TimeseriesVisualization({
 }: TimeseriesVisualizationProps) {
   const onBrush = useCallback(
     async (gte: string, lte: string, series: PanelData[]) => {
-      const indexPatternString = model.index_pattern || model.default_index_pattern || '';
-      const indexPatterns = await getDataStart().indexPatterns.find(indexPatternString);
+      const indexPatternValue = model.index_pattern || '';
+      const { indexPatterns } = getDataStart();
+      const { indexPattern } = await fetchIndexPattern(indexPatternValue, indexPatterns);
 
-      const tables = await convertSeriesToDataTable(model, series, indexPatterns[0]);
-      const table = tables[model.series[0].id];
+      const tables = indexPattern
+        ? await convertSeriesToDataTable(model, series, indexPattern)
+        : null;
+      const table = tables?.[model.series[0].id];
 
       const range: [number, number] = [parseInt(gte, 10), parseInt(lte, 10)];
       const event = {
@@ -57,7 +61,7 @@ function TimeseriesVisualization({
           table,
           column: X_ACCESSOR_INDEX,
           range,
-          timeFieldName: indexPatterns[0].timeFieldName,
+          timeFieldName: indexPattern?.timeFieldName,
         },
         name: 'brush',
       };

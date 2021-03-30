@@ -44,7 +44,7 @@ export const TimeseriesVisTypes: Record<string, React.ComponentType<TimeseriesVi
 
 export interface TimeseriesVisProps {
   model: TimeseriesVisParams;
-  onBrush: (gte: string, lte: string, series: PanelData[]) => void;
+  onBrush: (gte: string, lte: string, series: PanelData[]) => Promise<void>;
   onUiState: (
     field: string,
     value: {
