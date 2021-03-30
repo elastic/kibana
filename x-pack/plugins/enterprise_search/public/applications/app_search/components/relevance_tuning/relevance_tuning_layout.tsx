@@ -13,8 +13,10 @@ import { EuiPageHeader, EuiSpacer, EuiButton } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
+import { SAVE_BUTTON_LABEL } from '../../../shared/constants';
 import { FlashMessages } from '../../../shared/flash_messages';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+import { RESTORE_DEFAULTS_BUTTON_LABEL } from '../../constants';
 
 import { RELEVANCE_TUNING_TITLE } from './constants';
 import { RelevanceTuningCallouts } from './relevance_tuning_callouts';
@@ -47,24 +49,14 @@ export const RelevanceTuningLayout: React.FC<Props> = ({ engineBreadcrumb, child
                 fill
                 onClick={updateSearchSettings}
               >
-                {i18n.translate(
-                  'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.saveButtonLabel',
-                  {
-                    defaultMessage: 'Save',
-                  }
-                )}
+                {SAVE_BUTTON_LABEL}
               </EuiButton>,
               <EuiButton
                 data-test-subj="ResetRelevanceTuning"
                 color="danger"
                 onClick={resetSearchSettings}
               >
-                {i18n.translate(
-                  'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.resetButtonLabel',
-                  {
-                    defaultMessage: 'Restore defaults',
-                  }
-                )}
+                {RESTORE_DEFAULTS_BUTTON_LABEL}
               </EuiButton>,
             ]
           : []

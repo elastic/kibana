@@ -9,21 +9,16 @@ import React, { useMemo, useState, useEffect, useContext } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { generateId } from '../../../id_generator';
-import { DragDrop, DragDropIdentifier, DragContext } from '../../../drag_drop';
+import { generateId } from '../../../../id_generator';
+import { DragDrop, DragDropIdentifier, DragContext } from '../../../../drag_drop';
 
-import { Datasource, VisualizationDimensionGroupConfig, DropType } from '../../../types';
-import { LayerDatasourceDropProps } from './types';
+import { Datasource, VisualizationDimensionGroupConfig, DropType } from '../../../../types';
+import { LayerDatasourceDropProps } from '../types';
+import { getCustomDropTarget, getAdditionalClassesOnDroppable } from './drop_targets_utils';
 
 const label = i18n.translate('xpack.lens.indexPattern.emptyDimensionButton', {
   defaultMessage: 'Empty dimension',
 });
-
-const getAdditionalClassesOnDroppable = (dropType?: string) => {
-  if (dropType === 'move_incompatible' || dropType === 'replace_incompatible') {
-    return 'lnsDragDrop-notCompatible';
-  }
-};
 
 export function EmptyDimensionButton({
   group,
@@ -69,8 +64,13 @@ export function EmptyDimensionButton({
     dimensionGroups: groups,
   });
 
-  const dropType = dropProps?.dropType;
+  const dropTypes = dropProps?.dropTypes;
   const nextLabel = dropProps?.nextLabel;
+
+  const canDuplicate = !!(
+    dropTypes &&
+    (dropTypes.includes('duplicate_compatible') || dropTypes.includes('duplicate_incompatible'))
+  );
 
   const value = useMemo(
     () => ({
@@ -78,15 +78,15 @@ export function EmptyDimensionButton({
       groupId: group.groupId,
       layerId,
       id: newColumnId,
-      dropType,
       humanData: {
         label,
         groupLabel: group.groupLabel,
         position: itemIndex + 1,
         nextLabel: nextLabel || '',
+        canDuplicate,
       },
     }),
-    [dropType, newColumnId, group.groupId, layerId, group.groupLabel, itemIndex, nextLabel]
+    [newColumnId, group.groupId, layerId, group.groupLabel, itemIndex, nextLabel, canDuplicate]
   );
 
   const handleOnDrop = React.useCallback(
@@ -101,7 +101,8 @@ export function EmptyDimensionButton({
         value={value}
         order={[2, layerIndex, groupIndex, itemIndex]}
         onDrop={handleOnDrop}
-        dropType={dropType}
+        dropTypes={dropTypes}
+        getCustomDropTarget={getCustomDropTarget}
       >
         <div className="lnsLayerPanel__dimension lnsLayerPanel__dimension--empty">
           <EuiButtonEmpty
