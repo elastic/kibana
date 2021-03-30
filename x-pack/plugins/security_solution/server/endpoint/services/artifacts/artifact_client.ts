@@ -14,7 +14,7 @@ import { Artifact, ArtifactsClientInterface } from '../../../../../fleet/server'
 const inflateAsync = promisify(_inflate);
 
 export interface EndpointArtifactClientInterface {
-  getArtifact(id: string): Promise<SavedObject<InternalArtifactCompleteSchema> | undefined>;
+  getArtifact(id: string): Promise<InternalArtifactCompleteSchema | undefined>;
 
   createArtifact(
     artifact: InternalArtifactCompleteSchema
@@ -53,10 +53,7 @@ export class EndpointArtifactClient implements EndpointArtifactClientInterface {
       return;
     }
 
-    // FIXME:PT change method signature so that it returns back only the `InternalArtifactCompleteSchema`
-    return ({
-      attributes: artifacts.items[0],
-    } as unknown) as SavedObject<InternalArtifactCompleteSchema>;
+    return artifacts.items[0];
   }
 
   async createArtifact(
@@ -80,7 +77,7 @@ export class EndpointArtifactClient implements EndpointArtifactClientInterface {
   async deleteArtifact(id: string) {
     // Ignoring the `id` not being in the type until we can refactor the types in endpoint.
     // @ts-ignore
-    const artifactId = (await this.getArtifact(id)).attributes?.id;
+    const artifactId = (await this.getArtifact(id))?.id!;
     return this.fleetArtifacts.deleteArtifact(artifactId);
   }
 }

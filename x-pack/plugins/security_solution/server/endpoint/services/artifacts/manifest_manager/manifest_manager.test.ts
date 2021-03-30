@@ -175,10 +175,7 @@ describe('ManifestManager', () => {
 
       (manifestManagerContext.artifactClient as jest.Mocked<EndpointArtifactClientInterface>).getArtifact.mockImplementation(
         async (id) => {
-          return {
-            attributes: ARTIFACTS_BY_ID[id],
-            version: '2.1.1',
-          } as SavedObject<InternalArtifactCompleteSchema>;
+          return ARTIFACTS_BY_ID[id];
         }
       );
 

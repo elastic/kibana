@@ -296,7 +296,7 @@ export class ManifestManager {
           throw new Error(`artifact id [${entry.artifactId}] not found!`);
         }
 
-        manifest.addEntry(artifact.attributes, entry.policyId);
+        manifest.addEntry(artifact, entry.policyId);
       }
 
       return manifest;
