@@ -21,6 +21,7 @@ import { debounce, cloneDeep } from 'lodash';
 
 import { newJobCapsService } from '../../../../../services/new_job_capabilities_service';
 import { useMlContext } from '../../../../../contexts/ml';
+import { getCombinedRuntimeMappings } from '../../../../../components/data_grid/common';
 
 import {
   ANALYSIS_CONFIG_TYPE,
@@ -179,7 +180,10 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
     unsupportedFieldsError !== undefined ||
     fetchingExplainData;
 
-  const loadDepVarOptions = async (formState: State['form']) => {
+  const loadDepVarOptions = async (
+    formState: State['form'],
+    runtimeOptions: EuiComboBoxOptionOption[] = []
+  ) => {
     setLoadingDepVarOptions(true);
     setMaxDistinctValuesError(undefined);
 
@@ -218,7 +222,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
         if (resetDependentVariable) {
           depVarUpdate = '';
         }
-        setDependentVariableOptions(depVarOptions);
+        setDependentVariableOptions([...runtimeOptions, ...depVarOptions]);
         setLoadingDepVarOptions(false);
         setDependentVariableFetchFail(false);
         setFormState({ dependentVariable: depVarUpdate });
@@ -318,7 +322,14 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
 
   useEffect(() => {
     if (isJobTypeWithDepVar) {
-      loadDepVarOptions(form);
+      const indexPatternRuntimeFields = getCombinedRuntimeMappings(currentIndexPattern);
+      let runtimeOptions;
+
+      if (indexPatternRuntimeFields) {
+        runtimeOptions = getRuntimeDepVarOptions(jobType, indexPatternRuntimeFields);
+      }
+
+      loadDepVarOptions(form, runtimeOptions);
     }
   }, [jobType]);
 
@@ -415,6 +426,8 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
       index: currentIndexPattern.title,
       legendType: getScatterplotMatrixLegendType(jobType),
       searchQuery: jobConfigQuery,
+      runtimeMappings,
+      indexPattern: currentIndexPattern,
     }),
     [
       currentIndexPattern.title,

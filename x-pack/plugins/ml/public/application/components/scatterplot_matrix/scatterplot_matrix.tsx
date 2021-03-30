@@ -24,9 +24,12 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { IndexPattern } from '../../../../../../../src/plugins/data/public';
 import { extractErrorMessage } from '../../../../common';
 import { stringHash } from '../../../../common/util/string_utils';
+import { RuntimeMappings } from '../../../../common/types/fields';
 import type { ResultsSearchQuery } from '../../data_frame_analytics/common/analytics';
+import { getCombinedRuntimeMappings } from '../../components/data_grid';
 
 import { useMlApiContext } from '../../contexts/kibana';
 
@@ -84,6 +87,8 @@ export interface ScatterplotMatrixProps {
   color?: string;
   legendType?: LegendType;
   searchQuery?: ResultsSearchQuery;
+  runtimeMappings?: RuntimeMappings;
+  indexPattern?: IndexPattern;
 }
 
 export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
@@ -93,6 +98,8 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
   color,
   legendType,
   searchQuery,
+  runtimeMappings,
+  indexPattern,
 }) => {
   const { esSearch } = useMlApiContext();
 
@@ -185,6 +192,9 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
             }
           : searchQuery;
 
+        const combinedRuntimeMappings =
+          indexPattern && getCombinedRuntimeMappings(indexPattern, runtimeMappings);
+
         const resp: estypes.SearchResponse = await esSearch({
           index,
           body: {
@@ -193,6 +203,9 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
             query,
             from: 0,
             size: fetchSize,
+            ...(combinedRuntimeMappings && Object.keys(combinedRuntimeMappings).length > 0
+              ? { runtime_mappings: combinedRuntimeMappings }
+              : {}),
           },
         });
 
