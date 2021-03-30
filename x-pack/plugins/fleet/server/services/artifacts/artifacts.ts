@@ -29,7 +29,11 @@ import type {
   ListArtifactsProps,
   NewArtifact,
 } from './types';
-import { esSearchHitToArtifact, newArtifactToElasticsearchProperties } from './mappings';
+import {
+  esSearchHitToArtifact,
+  newArtifactToElasticsearchProperties,
+  uniqueIdFromArtifact,
+} from './mappings';
 
 const deflateAsync = promisify(deflate);
 
@@ -58,7 +62,7 @@ export const createArtifact = async (
   esClient: ElasticsearchClient,
   artifact: NewArtifact
 ): Promise<Artifact> => {
-  const id = `${artifact.packageName}:${artifact.identifier}-${artifact.decodedSha256}`;
+  const id = uniqueIdFromArtifact(artifact);
   const newArtifactData = newArtifactToElasticsearchProperties(artifact);
 
   try {
