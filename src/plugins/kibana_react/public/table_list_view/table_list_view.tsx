@@ -11,14 +11,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { debounce, keyBy, sortBy, uniq } from 'lodash';
 import {
-  EuiTitle,
   EuiInMemoryTable,
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
   EuiLink,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiButton,
   EuiSpacer,
   EuiConfirmModal,
@@ -30,6 +24,7 @@ import {
 
 import { HttpFetchError, ToastsStart } from 'kibana/public';
 import { toMountPoint } from '../util';
+import { KibanaPageLayout } from '../page_layout';
 
 interface Item {
   id?: string;
@@ -472,85 +467,69 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
     );
   }
 
-  renderListingOrEmptyState() {
-    if (!this.state.fetchError && this.hasNoItems()) {
-      return this.renderNoItemsMessage();
-    }
-
-    return this.renderListing();
-  }
-
-  renderListing() {
-    let createButton;
+  renderCreateButton() {
     if (this.props.createItem) {
-      createButton = (
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            onClick={this.props.createItem}
-            data-test-subj="newItemButton"
-            iconType="plusInCircle"
-            fill
-          >
-            <FormattedMessage
-              id="kibana-react.tableListView.listing.createNewItemButtonLabel"
-              defaultMessage="Create {entityName}"
-              values={{ entityName: this.props.entityName }}
-            />
-          </EuiButton>
-        </EuiFlexItem>
+      return (
+        <EuiButton
+          onClick={this.props.createItem}
+          data-test-subj="newItemButton"
+          iconType="plusInCircleFilled"
+          fill
+        >
+          <FormattedMessage
+            id="kibana-react.tableListView.listing.createNewItemButtonLabel"
+            defaultMessage="Create {entityName}"
+            values={{ entityName: this.props.entityName }}
+          />
+        </EuiButton>
       );
     }
-    return (
-      <div>
-        {this.state.showDeleteModal && this.renderConfirmDeleteModal()}
-
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd" data-test-subj="top-nav">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="l">
-              <h1 id={this.props.headingId}>{this.props.tableListTitle}</h1>
-            </EuiTitle>
-          </EuiFlexItem>
-
-          {createButton}
-        </EuiFlexGroup>
-
-        <EuiSpacer size="m" />
-        {this.props.children}
-
-        {this.renderListingLimitWarning()}
-        {this.renderFetchError()}
-
-        {this.renderTable()}
-      </div>
-    );
   }
 
-  renderPageContent() {
+  renderListingOrEmptyState() {
     if (!this.state.hasInitialFetchReturned) {
-      return;
+      return <></>;
+    }
+
+    if (!this.state.fetchError && this.hasNoItems()) {
+      return (
+        <KibanaPageLayout
+          data-test-subj={this.props.entityName + 'LandingPage'}
+          pageBodyProps={{
+            'aria-labelledby': this.state.hasInitialFetchReturned
+              ? this.props.headingId
+              : undefined,
+          }}
+          template="centeredBody"
+        >
+          {this.renderNoItemsMessage()}
+        </KibanaPageLayout>
+      );
     }
 
     return (
-      <EuiPageContent horizontalPosition="center">
-        {this.renderListingOrEmptyState()}
-      </EuiPageContent>
+      <KibanaPageLayout
+        data-test-subj={this.props.entityName + 'LandingPage'}
+        pageHeader={{
+          pageTitle: <span id={this.props.headingId}>{this.props.tableListTitle}</span>,
+          rightSideItems: [this.renderCreateButton()],
+          'data-test-subj': 'top-nav',
+        }}
+        pageBodyProps={{
+          'aria-labelledby': this.state.hasInitialFetchReturned ? this.props.headingId : undefined,
+        }}
+      >
+        {this.state.showDeleteModal && this.renderConfirmDeleteModal()}
+        {this.props.children}
+        {this.renderListingLimitWarning()}
+        {this.renderFetchError()}
+        {this.renderTable()}
+      </KibanaPageLayout>
     );
   }
 
   render() {
-    return (
-      <EuiPage
-        data-test-subj={this.props.entityName + 'LandingPage'}
-        className="itemListing__page"
-        restrictWidth
-      >
-        <EuiPageBody
-          aria-labelledby={this.state.hasInitialFetchReturned ? this.props.headingId : undefined}
-        >
-          {this.renderPageContent()}
-        </EuiPageBody>
-      </EuiPage>
-    );
+    return this.renderListingOrEmptyState();
   }
 }
 
