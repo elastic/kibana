@@ -8,7 +8,7 @@
 import Url from 'url';
 import Path from 'path';
 import type { FtrConfigProviderContext } from '@kbn/test/types/ftr';
-// @ts-ignore
+// @ts-expect-error
 import { kbnTestConfig } from '@kbn/test';
 import { pageObjects } from '../functional/page_objects';
 

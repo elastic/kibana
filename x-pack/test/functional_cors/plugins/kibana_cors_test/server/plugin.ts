@@ -6,7 +6,7 @@
  */
 
 import Hapi from '@hapi/hapi';
-// @ts-ignore
+// @ts-expect-error
 import { kbnTestConfig } from '@kbn/test';
 import { take } from 'rxjs/operators';
 import Url from 'url';

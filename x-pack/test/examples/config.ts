@@ -8,7 +8,7 @@
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { resolve } from 'path';
 import fs from 'fs';
-// @ts-ignore
+// @ts-expect-error
 import { KIBANA_ROOT } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {

@@ -11,7 +11,7 @@ import { delay } from 'bluebird';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-// @ts-ignore
+// @ts-expect-error
 import { adminTestUser } from '@kbn/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
 

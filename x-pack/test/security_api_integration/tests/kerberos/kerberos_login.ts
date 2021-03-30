@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import request, { Cookie } from 'request';
 import { delay } from 'bluebird';
-// @ts-ignore
+// @ts-expect-error
 import { adminTestUser } from '@kbn/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
