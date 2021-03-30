@@ -15,12 +15,10 @@ export class SearchAbortController {
   private inputAbortSignals: AbortSignal[] = new Array();
   private abortController: AbortController = new AbortController();
   private timeoutSub?: Subscription;
-  private boundAbortHandler: (this: AbortSignal, ev: Event) => void;
   private destroyed = false;
   private reason?: AbortReason;
 
   constructor(abortSignal?: AbortSignal, timeout?: number) {
-    this.boundAbortHandler = this.abortHandler.bind(this);
     if (abortSignal) {
       this.addAbortSignal(abortSignal);
     }
@@ -35,19 +33,19 @@ export class SearchAbortController {
     }
   }
 
-  private abortHandler() {
+  private abortHandler = () => {
     const allAborted = this.inputAbortSignals.every((signal) => signal.aborted);
     if (allAborted) {
       this.abortController.abort();
       this.cleanup();
     }
-  }
+  };
 
   public cleanup() {
     this.destroyed = true;
     this.timeoutSub?.unsubscribe();
     this.inputAbortSignals.forEach((abortSignal) => {
-      abortSignal.removeEventListener('abort', this.boundAbortHandler);
+      abortSignal.removeEventListener('abort', this.abortHandler);
     });
   }
 
@@ -62,7 +60,7 @@ export class SearchAbortController {
       this.abortHandler();
     } else {
       // abort our internal controller if the input signal aborts
-      inputSignal.addEventListener('abort', this.boundAbortHandler);
+      inputSignal.addEventListener('abort', this.abortHandler);
     }
   }
 
