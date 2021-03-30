@@ -30,6 +30,7 @@ export const ResultSettingsTextFieldsHeader: React.FC = () => {
               }
             )}
           >
+            {/* TODO This should likely be an EuiButtonIcon to allow screen readers & keyboard users to interact w/ this tooltip */}
             <EuiIcon type="questionInCircle" />
           </EuiToolTip>
         </EuiTableHeaderCell>
@@ -50,6 +51,7 @@ export const ResultSettingsTextFieldsHeader: React.FC = () => {
               }
             )}
           >
+            {/* TODO This should likely be an EuiButtonIcon to allow screen readers & keyboard users to interact w/ this tooltip */}
             <EuiIcon type="questionInCircle" />
           </EuiToolTip>
         </EuiTableHeaderCell>
@@ -61,6 +63,9 @@ export const ResultSettingsTextFieldsHeader: React.FC = () => {
             { defaultMessage: 'Text fields' }
           )}
         </EuiTableHeaderCell>
+        {/* TODO Right now the stacked "Raw" ths leads screen readers to reading out Raw - Raw - Raw 3x in a row once you get down to the non-text fields. We should consider either:
+          Channging this "Raw" column to something like "Enabled"
+          Or losing the RAW vs HIGHLIGHTING top-level headings */}
         <EuiTableHeaderCell align="center">
           {i18n.translate(
             'xpack.enterpriseSearch.appSearch.engine.resultSettings.table.column.rawTitle',

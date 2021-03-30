@@ -24,6 +24,8 @@ import './result_settings_table.scss';
 export const ResultSettingsTable: React.FC = () => {
   const { schemaConflicts, textResultFields, nonTextResultFields } = useValues(ResultSettingsLogic);
 
+  // TODO This table currently has mutiple theads, which is invalid html. We could change these subheaders to be EuiTableRow instead of EuiTableHeader
+  // to alleviate the issue.
   return (
     <EuiTable className="resultSettingsTable" responsive={false}>
       {!!Object.keys(textResultFields).length && (
