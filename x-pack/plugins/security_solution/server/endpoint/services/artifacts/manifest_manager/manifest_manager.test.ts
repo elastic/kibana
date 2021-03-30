@@ -6,7 +6,6 @@
  */
 
 import { inflateSync } from 'zlib';
-import { SavedObject } from 'src/core/server';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { ENDPOINT_LIST_ID, ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../../lists/common';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
@@ -506,7 +505,7 @@ describe('ManifestManager', () => {
           if (getArtifactId(artifact) === ARTIFACT_ID_EXCEPTIONS_WINDOWS) {
             throw error;
           } else {
-            return { attributes: artifact } as SavedObject<InternalArtifactCompleteSchema>;
+            return artifact;
           }
         }
       );

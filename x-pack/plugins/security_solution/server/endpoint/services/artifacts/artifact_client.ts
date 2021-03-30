@@ -7,7 +7,6 @@
 
 import { inflate as _inflate } from 'zlib';
 import { promisify } from 'util';
-import { SavedObject } from 'src/core/server';
 import { InternalArtifactCompleteSchema } from '../../schemas/artifacts';
 import { Artifact, ArtifactsClientInterface } from '../../../../../fleet/server';
 
@@ -16,9 +15,7 @@ const inflateAsync = promisify(_inflate);
 export interface EndpointArtifactClientInterface {
   getArtifact(id: string): Promise<InternalArtifactCompleteSchema | undefined>;
 
-  createArtifact(
-    artifact: InternalArtifactCompleteSchema
-  ): Promise<SavedObject<InternalArtifactCompleteSchema>>;
+  createArtifact(artifact: InternalArtifactCompleteSchema): Promise<InternalArtifactCompleteSchema>;
 
   deleteArtifact(id: string): Promise<void>;
 }
@@ -58,7 +55,7 @@ export class EndpointArtifactClient implements EndpointArtifactClientInterface {
 
   async createArtifact(
     artifact: InternalArtifactCompleteSchema
-  ): Promise<SavedObject<InternalArtifactCompleteSchema>> {
+  ): Promise<InternalArtifactCompleteSchema> {
     // FIXME:PT refactor to make this more efficient by passing through the uncompressed artifact content
     // Artifact `.body` is compressed/encoded. We need it decoded and as a string
     const artifactContent = await inflateAsync(Buffer.from(artifact.body, 'base64'));
@@ -69,9 +66,7 @@ export class EndpointArtifactClient implements EndpointArtifactClientInterface {
       type: this.parseArtifactId(artifact.identifier).type,
     });
 
-    return ({
-      attributes: createdArtifact,
-    } as unknown) as SavedObject<InternalArtifactCompleteSchema>;
+    return createdArtifact;
   }
 
   async deleteArtifact(id: string) {
