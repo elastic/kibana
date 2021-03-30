@@ -690,6 +690,8 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('rbac', () => {
+      // TODO: create util function for case creation. Example: createCaseAsUser(supertestWithoutAuth, user, space, scope)
+      // TODO: create validateCaseResponse(cases, scopes, numberOfExpectedCases)
       it('should return the correct cases', async () => {
         // Create case owned by the security solution user
         await supertestWithoutAuth
@@ -764,6 +766,39 @@ export default ({ getService }: FtrProviderContext): void => {
             .expect(403);
         });
       }
+
+      it('should return the correct cases when trying to exploit RBAC through the search field', async () => {
+        // super user creates a case with scope securitySolutionFixture
+        await supertestWithoutAuth
+          .post(`${getSpaceUrlPrefix('space1')}${CASES_URL}`)
+          .auth(superUser.username, superUser.password)
+          .set('kbn-xsrf', 'true')
+          .send(getPostCaseRequest())
+          .expect(200);
+
+        // super user creates a case with scope observabilityFixture
+        await supertestWithoutAuth
+          .post(`${getSpaceUrlPrefix('space1')}${CASES_URL}`)
+          .auth(superUser.username, superUser.password)
+          .set('kbn-xsrf', 'true')
+          .send(getPostCaseRequest({ scope: 'observabilityFixture' }))
+          .expect(200);
+
+        const { body } = await supertestWithoutAuth
+          .get(
+            `${getSpaceUrlPrefix(
+              'space1'
+            )}${CASES_URL}/_find?sortOrder=asc&search=securitySolutionFixture+observabilityFixture&searchFields[0]=scope`
+          )
+          .auth(secOnly.username, secOnly.password)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200);
+
+        const res = body as CasesFindResponse;
+        expect(res.total).to.eql(1);
+        res.cases.forEach((theCase) => expect(theCase.scope).to.be('securitySolutionFixture'));
+      });
     });
   });
 };
