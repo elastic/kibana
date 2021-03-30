@@ -810,7 +810,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/alerts_client/alerts_client.ts",
-              "lineNumber": 132
+              "lineNumber": 133
             }
           },
           {
@@ -821,7 +821,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/alerts_client/alerts_client.ts",
-              "lineNumber": 133
+              "lineNumber": 134
             }
           },
           {
@@ -832,7 +832,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/alerts_client/alerts_client.ts",
-              "lineNumber": 134
+              "lineNumber": 135
             }
           },
           {
@@ -843,7 +843,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/alerts_client/alerts_client.ts",
-              "lineNumber": 135
+              "lineNumber": 136
             },
             "signature": [
               "Pick<",
@@ -860,7 +860,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/alerting/server/alerts_client/alerts_client.ts",
-          "lineNumber": 131
+          "lineNumber": 132
         },
         "initialIsOpen": false
       },
@@ -905,7 +905,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/alerting/server/plugin.ts",
-                  "lineNumber": 111
+                  "lineNumber": 93
                 }
               }
             ],
@@ -913,13 +913,13 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/plugin.ts",
-              "lineNumber": 103
+              "lineNumber": 85
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/alerting/server/plugin.ts",
-          "lineNumber": 102
+          "lineNumber": 84
         },
         "initialIsOpen": false
       },
@@ -938,7 +938,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/plugin.ts",
-              "lineNumber": 123
+              "lineNumber": 105
             },
             "signature": [
               "() => Set<",
@@ -994,7 +994,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/alerting/server/plugin.ts",
-                  "lineNumber": 124
+                  "lineNumber": 106
                 }
               }
             ],
@@ -1002,7 +1002,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/plugin.ts",
-              "lineNumber": 124
+              "lineNumber": 106
             }
           },
           {
@@ -1013,7 +1013,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/alerting/server/plugin.ts",
-              "lineNumber": 125
+              "lineNumber": 107
             },
             "signature": [
               "() => Promise<",
@@ -1030,7 +1030,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/alerting/server/plugin.ts",
-          "lineNumber": 122
+          "lineNumber": 104
         },
         "initialIsOpen": false
       }
@@ -1118,7 +1118,7 @@
           },
           "<Params>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"muteAll\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\">>; delete: ({ id }: { id: string; }) => Promise<{}>; create: <Params extends Record<string, unknown> = never>({ data, options, }: ",
           "CreateOptions",
-          "<Params>) => Promise<",
+          "<Params>) => Promise<Pick<",
           {
             "pluginId": "alerting",
             "scope": "common",
@@ -1126,7 +1126,7 @@
             "section": "def-common.Alert",
             "text": "Alert"
           },
-          "<Params>>; find: <Params>({ options: { fields, ...options }, }?: { options?: ",
+          "<Params>, \"enabled\" | \"id\" | \"name\" | \"params\" | \"actions\" | \"muteAll\" | \"tags\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\">>; find: <Params>({ options: { fields, ...options }, }?: { options?: ",
           "FindOptions",
           " | undefined; }) => Promise<",
           {
@@ -2922,7 +2922,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerting/common/index.ts",
-          "lineNumber": 28
+          "lineNumber": 30
         },
         "signature": [
           "\"alerts\""
@@ -3006,16 +3006,16 @@
       },
       {
         "tags": [],
-        "id": "def-common.BASE_ALERT_API_PATH",
+        "id": "def-common.BASE_ALERTING_API_PATH",
         "type": "string",
-        "label": "BASE_ALERT_API_PATH",
+        "label": "BASE_ALERTING_API_PATH",
         "description": [],
         "source": {
           "path": "x-pack/plugins/alerting/common/index.ts",
-          "lineNumber": 27
+          "lineNumber": 28
         },
         "signature": [
-          "\"/api/alerts\""
+          "\"/api/alerting\""
         ],
         "initialIsOpen": false
       },
@@ -3031,6 +3031,36 @@
         },
         "signature": [
           "\"default\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.INTERNAL_BASE_ALERTING_API_PATH",
+        "type": "string",
+        "label": "INTERNAL_BASE_ALERTING_API_PATH",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/alerting/common/index.ts",
+          "lineNumber": 29
+        },
+        "signature": [
+          "\"/internal/alerting\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.LEGACY_BASE_ALERT_API_PATH",
+        "type": "string",
+        "label": "LEGACY_BASE_ALERT_API_PATH",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/alerting/common/index.ts",
+          "lineNumber": 27
+        },
+        "signature": [
+          "\"/api/alerts\""
         ],
         "initialIsOpen": false
       },

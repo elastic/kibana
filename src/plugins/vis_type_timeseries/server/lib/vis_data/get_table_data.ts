@@ -16,8 +16,8 @@ import { buildRequestBody } from './table/build_request_body';
 import { handleErrorResponse } from './handle_error_response';
 // @ts-expect-error
 import { processBucket } from './table/process_bucket';
-import { getIndexPatternObject } from '../search_strategies/lib/get_index_pattern';
-import { createFieldsFetcher } from './helpers/fields_fetcher';
+
+import { createFieldsFetcher } from '../search_strategies/lib/fields_fetcher';
 import { extractFieldLabel } from '../../../common/calculate_label';
 import type {
   VisTypeTimeseriesRequestHandlerContext,
@@ -32,12 +32,12 @@ export async function getTableData(
   panel: PanelSchema,
   services: VisTypeTimeseriesRequestServices
 ) {
-  const panelIndexPattern = panel.index_pattern;
+  const panelIndex = await services.cachedIndexPatternFetcher(panel.index_pattern);
 
   const strategy = await services.searchStrategyRegistry.getViableStrategy(
     requestContext,
     req,
-    panelIndexPattern
+    panelIndex
   );
 
   if (!strategy) {
@@ -49,15 +49,17 @@ export async function getTableData(
   }
 
   const { searchStrategy, capabilities } = strategy;
-  const { indexPatternObject } = await getIndexPatternObject(panelIndexPattern, {
+
+  const extractFields = createFieldsFetcher(req, {
     indexPatternsService: services.indexPatternsService,
+    cachedIndexPatternFetcher: services.cachedIndexPatternFetcher,
+    searchStrategy,
+    capabilities,
   });
 
-  const extractFields = createFieldsFetcher(req, { requestContext, searchStrategy, capabilities });
-
   const calculatePivotLabel = async () => {
-    if (panel.pivot_id && indexPatternObject?.title) {
-      const fields = await extractFields(indexPatternObject.title);
+    if (panel.pivot_id && panelIndex.indexPattern?.title) {
+      const fields = await extractFields(panelIndex.indexPattern.title);
 
       return extractFieldLabel(fields, panel.pivot_id);
     }
@@ -75,7 +77,7 @@ export async function getTableData(
       req,
       panel,
       services.esQueryConfig,
-      indexPatternObject,
+      panelIndex.indexPattern,
       capabilities,
       services.uiSettings
     );
@@ -83,7 +85,7 @@ export async function getTableData(
     const [resp] = await searchStrategy.search(requestContext, req, [
       {
         body,
-        index: panelIndexPattern,
+        index: panelIndex.indexPatternString,
       },
     ]);
 
