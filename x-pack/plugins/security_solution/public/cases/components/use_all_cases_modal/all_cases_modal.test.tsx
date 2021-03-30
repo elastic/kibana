@@ -94,9 +94,12 @@ describe('AllCasesModal', () => {
 
     const props = wrapper.find('AllCases').props();
     expect(props).toEqual({
+      alertData: defaultProps.alertData,
       userCanCrud: false,
       onRowClick,
       isModal: true,
+      disabledStatuses: undefined,
+      updateCase: undefined,
     });
   });
 

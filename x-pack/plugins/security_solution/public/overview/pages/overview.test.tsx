@@ -19,6 +19,8 @@ import { Overview } from './index';
 import { useIngestEnabledCheck } from '../../common/hooks/endpoint/ingest_enabled';
 import { useSourcererScope } from '../../common/containers/sourcerer';
 import { useFetchIndex } from '../../common/containers/source';
+import { mockLocation, routeData } from '../../cases/components/__mock__/router';
+import { useKibana } from '../../common/lib/kibana';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/containers/source');
@@ -57,7 +59,36 @@ const mockUseIngestEnabledCheck = useIngestEnabledCheck as jest.Mock;
 const mockUseFetchIndex = useFetchIndex as jest.Mock;
 const mockUseMessagesStorage: jest.Mock = useMessagesStorage as jest.Mock<UseMessagesStorage>;
 describe('Overview', () => {
+  const mockRecentCases = jest.fn();
   beforeEach(() => {
+    jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        application: {
+          getUrlForApp: jest.fn(),
+        },
+        cases: {
+          getRecentCases: mockRecentCases,
+        },
+        data: {
+          search: {
+            search: jest.fn().mockImplementation(() => ({
+              subscribe: jest.fn().mockImplementation(() => ({
+                error: jest.fn(),
+                next: jest.fn(),
+                unsubscribe: jest.fn(),
+              })),
+            })),
+          },
+        },
+        docLinks: { links: { siem: { gettingStarted: 'url-getting-started' } } },
+        http: { basePath: { get: jest.fn() } },
+        notifications: { toasts: { addWarning: jest.fn(), addError: jest.fn() } },
+        uiSettings: {
+          get: jest.fn(),
+        },
+      },
+    });
     mockUseFetchIndex.mockReturnValue([
       false,
       {

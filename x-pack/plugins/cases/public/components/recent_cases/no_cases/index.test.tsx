@@ -8,23 +8,10 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { useKibana } from '../../../common/lib/kibana';
-import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock';
 import { NoCases } from '.';
 
-jest.mock('../../../../common/lib/kibana');
-
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-
 describe('RecentCases', () => {
-  let navigateToApp: jest.Mock;
-
-  beforeEach(() => {
-    navigateToApp = jest.fn();
-    useKibanaMock().services.application.navigateToApp = navigateToApp;
-  });
-
   it('if no cases, you should be able to create a case by clicking on the link "start a new case"', () => {
     const createCaseHref = '/create';
     const wrapper = mount(

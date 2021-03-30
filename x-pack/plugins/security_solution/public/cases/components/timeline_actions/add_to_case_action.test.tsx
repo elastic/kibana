@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
 import React from 'react';
 import { mount } from 'enzyme';
 import { EuiGlobalToastList } from '@elastic/eui';
@@ -14,8 +13,9 @@ import { useKibana, useGetUserSavedObjectPermissions } from '../../../common/lib
 import { useStateToaster } from '../../../common/components/toasters';
 import { TestProviders } from '../../../common/mock';
 import { AddToCaseAction } from './add_to_case_action';
-import { Case } from '../../../../../cases/common';
 import { useAllCasesModal } from '../use_all_cases_modal';
+import { basicCase } from '../../../../../cases/public/containers/mock';
+import { Case } from '../../../../../cases/public/containers/types';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -28,28 +28,6 @@ jest.mock('../../../common/components/toasters', () => {
 });
 
 jest.mock('../use_all_cases_modal');
-
-jest.mock('../all_cases', () => {
-  return {
-    AllCases: ({ onRowClick }: { onRowClick: (theCase: Partial<Case>) => void }) => {
-      return (
-        <button
-          type="button"
-          data-test-subj="all-cases-modal-button"
-          onClick={() =>
-            onRowClick({
-              id: 'selected-case',
-              title: 'the selected case',
-              settings: { syncAlerts: true },
-            })
-          }
-        >
-          {'case-row'}
-        </button>
-      );
-    },
-  };
-});
 
 describe('AddToCaseAction', () => {
   const props = {
@@ -64,10 +42,14 @@ describe('AddToCaseAction', () => {
   const mockNavigateToApp = jest.fn();
   const mockCreateCase = jest.fn();
   const mockUseCasesModal = useAllCasesModal as jest.Mock;
+  const mockAllCasesModal = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
-    // mockUseCasesModal.mockReturnValue()
+    mockUseCasesModal.mockReturnValue({
+      modal: <></>,
+      openModal: mockAllCasesModal,
+    });
     (useStateToaster as jest.Mock).mockReturnValue([jest.fn(), mockDispatchToaster]);
     (useKibana as jest.Mock).mockReturnValue({
       services: {
@@ -83,7 +65,7 @@ describe('AddToCaseAction', () => {
     });
   });
 
-  it('it renders', async () => {
+  it('it renders', () => {
     const wrapper = mount(
       <TestProviders>
         <AddToCaseAction {...props} />
@@ -93,7 +75,7 @@ describe('AddToCaseAction', () => {
     expect(wrapper.find(`[data-test-subj="attach-alert-to-case-button"]`).exists()).toBeTruthy();
   });
 
-  it('it opens the context menu', async () => {
+  it('it opens the context menu', () => {
     const wrapper = mount(
       <TestProviders>
         <AddToCaseAction {...props} />
@@ -105,7 +87,7 @@ describe('AddToCaseAction', () => {
     expect(wrapper.find(`[data-test-subj="add-existing-case-menu-item"]`).exists()).toBeTruthy();
   });
 
-  it('it opens the create case modal', async () => {
+  it('it opens the create case modal', () => {
     const wrapper = mount(
       <TestProviders>
         <AddToCaseAction {...props} />
@@ -117,7 +99,7 @@ describe('AddToCaseAction', () => {
     expect(mockCreateCase).toHaveBeenCalled();
   });
 
-  it('it opens the all cases modal', async () => {
+  it('it opens the all cases modal', () => {
     const wrapper = mount(
       <TestProviders>
         <AddToCaseAction {...props} />
@@ -127,10 +109,14 @@ describe('AddToCaseAction', () => {
     wrapper.find(`[data-test-subj="attach-alert-to-case-button"]`).first().simulate('click');
     wrapper.find(`[data-test-subj="add-existing-case-menu-item"]`).first().simulate('click');
 
-    expect(wrapper.find(`[data-test-subj="all-cases-modal-button"]`).exists()).toBeTruthy();
+    expect(mockUseCasesModal.mock.calls[0][0].alertData).toEqual({
+      alertId: 'test-id',
+      index: 'test-index',
+      rule: { id: 'rule-id', name: 'rule-name' },
+    });
   });
 
-  it('it set rule information as null when missing', async () => {
+  it('it set rule information as null when missing', () => {
     const wrapper = mount(
       <TestProviders>
         <AddToCaseAction
@@ -146,10 +132,24 @@ describe('AddToCaseAction', () => {
 
     wrapper.find(`[data-test-subj="attach-alert-to-case-button"]`).first().simulate('click');
     wrapper.find(`[data-test-subj="add-new-case-item"]`).first().simulate('click');
-    console.log('MOCKMOCK', mockCreateCase.mock.calls);
+    expect(mockUseCasesModal.mock.calls[0][0].alertData).toEqual({
+      alertId: 'test-id',
+      index: 'test-index',
+      rule: { id: 'rule-id', name: null },
+    });
   });
 
-  it('navigates to case view when attach to a new case', async () => {
+  it('onSuccess triggers toaster that links to case view', () => {
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        application: { navigateToApp: mockNavigateToApp },
+        cases: {
+          getCreateCase: ({ onSuccess }: { onSuccess: (theCase: Case) => Promise<void> }) => {
+            onSuccess(basicCase);
+          },
+        },
+      },
+    });
     const wrapper = mount(
       <TestProviders>
         <AddToCaseAction {...props} />
@@ -158,33 +158,6 @@ describe('AddToCaseAction', () => {
 
     wrapper.find(`[data-test-subj="attach-alert-to-case-button"]`).first().simulate('click');
     wrapper.find(`[data-test-subj="add-new-case-item"]`).first().simulate('click');
-    wrapper.find(`[data-test-subj="form-context-on-success"]`).first().simulate('click');
-
-    expect(mockDispatchToaster).toHaveBeenCalled();
-    const toast = mockDispatchToaster.mock.calls[0][0].toast;
-
-    const toastWrapper = mount(
-      <EuiGlobalToastList toasts={[toast]} toastLifeTimeMs={6000} dismissToast={() => {}} />
-    );
-
-    toastWrapper
-      .find('[data-test-subj="toaster-content-case-view-link"]')
-      .first()
-      .simulate('click');
-
-    expect(mockNavigateToApp).toHaveBeenCalledWith('securitySolution:case', { path: '/new-case' });
-  });
-
-  it('navigates to case view when attach to an existing case', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <AddToCaseAction {...props} />
-      </TestProviders>
-    );
-
-    wrapper.find(`[data-test-subj="attach-alert-to-case-button"]`).first().simulate('click');
-    wrapper.find(`[data-test-subj="add-existing-case-menu-item"]`).first().simulate('click');
-    wrapper.find(`[data-test-subj="all-cases-modal-button"]`).first().simulate('click');
 
     expect(mockDispatchToaster).toHaveBeenCalled();
     const toast = mockDispatchToaster.mock.calls[0][0].toast;
@@ -199,11 +172,11 @@ describe('AddToCaseAction', () => {
       .simulate('click');
 
     expect(mockNavigateToApp).toHaveBeenCalledWith('securitySolution:case', {
-      path: '/selected-case',
+      path: '/basic-case-id',
     });
   });
 
-  it('disabled when event type is not supported', async () => {
+  it('disabled when event type is not supported', () => {
     const wrapper = mount(
       <TestProviders>
         <AddToCaseAction
@@ -221,7 +194,7 @@ describe('AddToCaseAction', () => {
     ).toBeTruthy();
   });
 
-  it('disabled when user does not have crud permissions', async () => {
+  it('disabled when user does not have crud permissions', () => {
     (useGetUserSavedObjectPermissions as jest.Mock).mockReturnValue({
       crud: false,
       read: true,
