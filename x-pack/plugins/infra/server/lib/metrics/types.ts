@@ -35,35 +35,11 @@ export const TopMetricsTypeRT = rt.type({
   ),
 });
 
-export const TopHitsTypeRT = rt.type({
-  hits: rt.type({
-    total: rt.type({
-      value: rt.number,
-      relation: rt.string,
-    }),
-    hits: rt.array(
-      rt.intersection([
-        rt.type({
-          _index: rt.string,
-          _id: rt.string,
-          _score: NumberOrNullRT,
-          _source: rt.object,
-        }),
-        rt.partial({
-          sort: rt.array(rt.union([rt.string, rt.number])),
-          max_score: NumberOrNullRT,
-        }),
-      ])
-    ),
-  }),
-});
-
 export const MetricValueTypeRT = rt.union([
   BasicMetricValueRT,
   NormalizedMetricValueRT,
   PercentilesTypeRT,
   PercentilesKeyedTypeRT,
-  TopHitsTypeRT,
   TopMetricsTypeRT,
 ]);
 export type MetricValueType = rt.TypeOf<typeof MetricValueTypeRT>;
