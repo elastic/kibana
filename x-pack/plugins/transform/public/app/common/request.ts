@@ -22,7 +22,7 @@ import { DateHistogramAgg, HistogramAgg, TermsAgg } from '../../../common/types/
 import type { SavedSearchQuery } from '../hooks/use_search_items';
 import type { StepDefineExposedState } from '../sections/create_transform/components/step_define';
 import type { StepDetailsExposedState } from '../sections/create_transform/components/step_details';
-import { isPopulatedObject } from './utils/object_utils';
+import { isPopulatedObject } from '../../../common/utils/object_utils';
 
 import {
   getEsAggFromAggConfig,
