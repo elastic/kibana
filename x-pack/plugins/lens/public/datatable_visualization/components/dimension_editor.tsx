@@ -15,7 +15,6 @@ import {
   EuiColorPaletteDisplay,
   EuiFlexItem,
   EuiFlexGroup,
-  EuiPopover,
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { PaletteRegistry } from 'src/plugins/charts/public';
@@ -23,6 +22,7 @@ import { VisualizationDimensionEditorProps } from '../../types';
 import { DatatableVisualizationState } from '../visualization';
 import { getOriginalId } from '../transpose_helpers';
 import { CustomizablePalette, applyPaletteParams, defaultParams } from './gradient_picker';
+import { PalettePanelContainer } from './palette_panel_container';
 
 const idPrefix = htmlIdGenerator()();
 
@@ -49,7 +49,7 @@ export function TableDimensionEditor(
 ) {
   const { state, setState, frame, accessor } = props;
   const column = state.columns.find(({ columnId }) => accessor === columnId);
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isPaletteOpen, setIsPaletteOpen] = useState(false);
 
   if (!column) return null;
   if (column.isTransposed) return null;
@@ -233,23 +233,20 @@ export function TableDimensionEditor(
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiPopover
-                    panelStyle={{ minWidth: 380 }}
-                    button={
-                      <EuiButtonEmpty
-                        iconType="controlsHorizontal"
-                        onClick={() => {
-                          setIsPopoverOpen(!isPopoverOpen);
-                        }}
-                        size="xs"
-                      >
-                        {i18n.translate('xpack.lens.paletteTableGradient.customize', {
-                          defaultMessage: 'Settings',
-                        })}
-                      </EuiButtonEmpty>
-                    }
-                    isOpen={isPopoverOpen}
-                    closePopover={() => setIsPopoverOpen(false)}
+                  <EuiButtonEmpty
+                    iconType="controlsHorizontal"
+                    onClick={() => {
+                      setIsPaletteOpen(!isPaletteOpen);
+                    }}
+                    size="xs"
+                  >
+                    {i18n.translate('xpack.lens.paletteTableGradient.customize', {
+                      defaultMessage: 'Settings',
+                    })}
+                  </EuiButtonEmpty>
+                  <PalettePanelContainer
+                    isOpen={isPaletteOpen}
+                    handleClose={() => setIsPaletteOpen(!isPaletteOpen)}
                   >
                     <CustomizablePalette
                       palettes={props.paletteService}
@@ -261,7 +258,7 @@ export function TableDimensionEditor(
                         });
                       }}
                     />
-                  </EuiPopover>
+                  </PalettePanelContainer>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFormRow>
