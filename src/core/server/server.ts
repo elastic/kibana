@@ -125,14 +125,7 @@ export class Server {
     await ensureValidConfiguration(this.configService);
 
     const contextServiceSetup = this.context.setup({
-      // We inject a fake "legacy plugin" with dependencies on every plugin so that legacy plugins:
-      // 1) Can access context from any KP plugin
-      // 2) Can register context providers that will only be available to other legacy plugins and will not leak into
-      //    New Platform plugins.
-      pluginDependencies: new Map([
-        ...pluginTree.asOpaqueIds,
-        [this.legacy.legacyId, [...pluginTree.asOpaqueIds.keys()]],
-      ]),
+      pluginDependencies: new Map([...pluginTree.asOpaqueIds]),
     });
 
     const httpSetup = await this.http.setup({

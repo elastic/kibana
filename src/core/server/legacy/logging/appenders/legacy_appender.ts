@@ -9,7 +9,8 @@
 import { schema } from '@kbn/config-schema';
 import { LegacyLoggingServer } from '@kbn/legacy-logging';
 import { DisposableAppender, LogRecord } from '@kbn/logging';
-import { LegacyVars } from '../../types';
+
+type LegacyVars = Record<string, any>;
 
 export interface LegacyAppenderConfig {
   type: 'legacy-appender';
