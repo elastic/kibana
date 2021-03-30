@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 
 import { ResultSettingsLogic } from '..';
 
-export const ResultSettingsDisabledFieldsBody: React.FC = () => {
+export const DisabledFieldsBody: React.FC = () => {
   const { schemaConflicts } = useValues(ResultSettingsLogic);
   return (
     <EuiTableBody>

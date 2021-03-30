@@ -12,12 +12,12 @@ import { EuiTable } from '@elastic/eui';
 
 import { ResultSettingsLogic } from '..';
 
-import { ResultSettingsDisabledFieldsBody } from './result_settings_disabled_fields_body';
-import { ResultSettingsDisabledFieldsHeader } from './result_settings_disabled_fields_header';
-import { ResultSettingsNonTextFieldsBody } from './result_settings_non_text_fields_body';
-import { ResultSettingsNonTextFieldsHeader } from './result_settings_non_text_fields_header';
-import { ResultSettingsTextFieldsBody } from './result_settings_text_fields_body';
-import { ResultSettingsTextFieldsHeader } from './result_settings_text_fields_header';
+import { DisabledFieldsBody } from './disabled_fields_body';
+import { DisabledFieldsHeader } from './disabled_fields_header';
+import { NonTextFieldsBody } from './non_text_fields_body';
+import { NonTextFieldsHeader } from './non_text_fields_header';
+import { TextFieldsBody } from './text_fields_body';
+import { TextFieldsHeader } from './text_fields_header';
 
 import './result_settings_table.scss';
 
@@ -30,20 +30,20 @@ export const ResultSettingsTable: React.FC = () => {
     <EuiTable className="resultSettingsTable" responsive={false}>
       {!!Object.keys(textResultFields).length && (
         <>
-          <ResultSettingsTextFieldsHeader />
-          <ResultSettingsTextFieldsBody />
+          <TextFieldsHeader />
+          <TextFieldsBody />
         </>
       )}
       {!!Object.keys(nonTextResultFields).length && (
         <>
-          <ResultSettingsNonTextFieldsHeader />
-          <ResultSettingsNonTextFieldsBody />
+          <NonTextFieldsHeader />
+          <NonTextFieldsBody />
         </>
       )}
       {!!Object.keys(schemaConflicts).length && (
         <>
-          <ResultSettingsDisabledFieldsHeader />
-          <ResultSettingsDisabledFieldsBody />
+          <DisabledFieldsHeader />
+          <DisabledFieldsBody />
         </>
       )}
     </EuiTable>

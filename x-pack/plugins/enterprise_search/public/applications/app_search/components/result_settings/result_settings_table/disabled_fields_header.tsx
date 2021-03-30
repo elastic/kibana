@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiTableHeader, EuiTableHeaderCell } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export const ResultSettingsDisabledFieldsHeader: React.FC = () => {
+export const DisabledFieldsHeader: React.FC = () => {
   return (
     <EuiTableHeader className="resultSettingsTable__disabledHeader">
       <EuiTableHeaderCell align="left" colSpan={5}>

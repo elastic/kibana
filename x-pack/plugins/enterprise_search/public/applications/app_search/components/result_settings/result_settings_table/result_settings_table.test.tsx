@@ -11,10 +11,10 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { ResultSettingsDisabledFieldsHeader } from './result_settings_disabled_fields_header';
-import { ResultSettingsNonTextFieldsBody } from './result_settings_non_text_fields_body';
+import { DisabledFieldsHeader } from './disabled_fields_header';
+import { NonTextFieldsBody } from './non_text_fields_body';
 import { ResultSettingsTable } from './result_settings_table';
-import { ResultSettingsTextFieldsBody } from './result_settings_text_fields_body';
+import { TextFieldsBody } from './text_fields_body';
 
 describe('ResultSettingsTable', () => {
   beforeEach(() => {
@@ -37,9 +37,9 @@ describe('ResultSettingsTable', () => {
 
   it('renders', () => {
     const wrapper = shallow(<ResultSettingsTable />);
-    expect(wrapper.find(ResultSettingsTextFieldsBody).exists()).toBe(true);
-    expect(wrapper.find(ResultSettingsNonTextFieldsBody).exists()).toBe(true);
-    expect(wrapper.find(ResultSettingsDisabledFieldsHeader).exists()).toBe(true);
+    expect(wrapper.find(TextFieldsBody).exists()).toBe(true);
+    expect(wrapper.find(NonTextFieldsBody).exists()).toBe(true);
+    expect(wrapper.find(DisabledFieldsHeader).exists()).toBe(true);
   });
 
   it('will hide sections that have no data available to show', () => {
@@ -50,8 +50,8 @@ describe('ResultSettingsTable', () => {
     });
 
     const wrapper = shallow(<ResultSettingsTable />);
-    expect(wrapper.find(ResultSettingsTextFieldsBody).exists()).toBe(false);
-    expect(wrapper.find(ResultSettingsNonTextFieldsBody).exists()).toBe(false);
-    expect(wrapper.find(ResultSettingsDisabledFieldsHeader).exists()).toBe(false);
+    expect(wrapper.find(TextFieldsBody).exists()).toBe(false);
+    expect(wrapper.find(NonTextFieldsBody).exists()).toBe(false);
+    expect(wrapper.find(DisabledFieldsHeader).exists()).toBe(false);
   });
 });

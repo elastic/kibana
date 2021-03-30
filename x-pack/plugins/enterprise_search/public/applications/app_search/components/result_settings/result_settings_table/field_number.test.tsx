@@ -13,9 +13,9 @@ import { EuiFieldNumber } from '@elastic/eui';
 
 import { FieldResultSetting } from '../types';
 
-import { ResultSettingsFieldNumber } from './result_settings_field_number';
+import { FieldNumber } from './field_number';
 
-describe('ResultSettingsFieldNumber', () => {
+describe('FieldNumber', () => {
   const fieldSettings = {
     raw: true,
     rawSize: 29,
@@ -38,13 +38,13 @@ describe('ResultSettingsFieldNumber', () => {
   });
 
   it('is rendered with its value set from [fieldSizeProperty] in fieldSettings', () => {
-    const wrapper = shallow(<ResultSettingsFieldNumber {...props} />);
+    const wrapper = shallow(<FieldNumber {...props} />);
     expect(wrapper.find(EuiFieldNumber).prop('value')).toEqual(29);
   });
 
   it('has no value if [fieldSizeProperty] in fieldSettings has no value', () => {
     const wrapper = shallow(
-      <ResultSettingsFieldNumber
+      <FieldNumber
         {...{
           ...props,
           fieldSettings: {
@@ -59,7 +59,7 @@ describe('ResultSettingsFieldNumber', () => {
 
   it('is disabled if the [fieldEnabledProperty] in fieldSettings is false', () => {
     const wrapper = shallow(
-      <ResultSettingsFieldNumber
+      <FieldNumber
         {...{
           ...props,
           fieldSettings: {
@@ -73,37 +73,37 @@ describe('ResultSettingsFieldNumber', () => {
   });
 
   it('will call updateAction when the value is changed', () => {
-    const wrapper = shallow(<ResultSettingsFieldNumber {...props} />);
+    const wrapper = shallow(<FieldNumber {...props} />);
     wrapper.simulate('change', { target: { value: '21' } });
     expect(props.updateAction).toHaveBeenCalledWith('foo', 21);
   });
 
   it('will call clearAction when the value is changed', () => {
-    const wrapper = shallow(<ResultSettingsFieldNumber {...props} />);
+    const wrapper = shallow(<FieldNumber {...props} />);
     wrapper.simulate('change', { target: { value: '' } });
     expect(props.clearAction).toHaveBeenCalledWith('foo');
   });
 
   it('will call updateAction on blur', () => {
-    const wrapper = shallow(<ResultSettingsFieldNumber {...props} />);
+    const wrapper = shallow(<FieldNumber {...props} />);
     wrapper.simulate('blur', { target: { value: '21' } });
     expect(props.updateAction).toHaveBeenCalledWith('foo', 21);
   });
 
   it('will call updateAction on blur using the minimum possible value if the current value is something other than a number', () => {
-    const wrapper = shallow(<ResultSettingsFieldNumber {...props} />);
+    const wrapper = shallow(<FieldNumber {...props} />);
     wrapper.simulate('blur', { target: { value: '' } });
     expect(props.updateAction).toHaveBeenCalledWith('foo', 20);
   });
 
   it('will call updateAction on blur using the minimum possible value if the value is something lower than the minimum', () => {
-    const wrapper = shallow(<ResultSettingsFieldNumber {...props} />);
+    const wrapper = shallow(<FieldNumber {...props} />);
     wrapper.simulate('blur', { target: { value: 5 } });
     expect(props.updateAction).toHaveBeenCalledWith('foo', 20);
   });
 
   it('will call updateAction on blur using the maximum possible value if the value is something above than the maximum', () => {
-    const wrapper = shallow(<ResultSettingsFieldNumber {...props} />);
+    const wrapper = shallow(<FieldNumber {...props} />);
     wrapper.simulate('blur', { target: { value: 2000 } });
     expect(props.updateAction).toHaveBeenCalledWith('foo', 1000);
   });

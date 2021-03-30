@@ -20,9 +20,9 @@ import {
 import { ResultSettingsLogic } from '../result_settings_logic';
 import { FieldResultSetting } from '../types';
 
-import { ResultSettingsFieldNumber } from './result_settings_field_number';
+import { FieldNumber } from './field_number';
 
-export const ResultSettingsTextFieldsBody: React.FC = () => {
+export const TextFieldsBody: React.FC = () => {
   const { textResultFields } = useValues(ResultSettingsLogic);
   const {
     toggleRawForField,
@@ -58,7 +58,7 @@ export const ResultSettingsTextFieldsBody: React.FC = () => {
             />
           </EuiTableRowCellCheckbox>
           <EuiTableRowCell align="center">
-            <ResultSettingsFieldNumber
+            <FieldNumber
               fieldName={fieldName}
               fieldEnabledProperty="raw"
               fieldSizeProperty="rawSize"
@@ -89,7 +89,7 @@ export const ResultSettingsTextFieldsBody: React.FC = () => {
             />
           </EuiTableRowCellCheckbox>
           <EuiTableRowCell align="center">
-            <ResultSettingsFieldNumber
+            <FieldNumber
               fieldName={fieldName}
               fieldEnabledProperty="snippet"
               fieldSizeProperty="snippetSize"

@@ -13,9 +13,9 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiTableRow } from '@elastic/eui';
 
-import { ResultSettingsTextFieldsBody } from './result_settings_text_fields_body';
+import { TextFieldsBody } from './text_fields_body';
 
-describe('ResultSettingsTextFieldsBody', () => {
+describe('TextFieldsBody', () => {
   const values = {
     textResultFields: {
       foo: {
@@ -60,7 +60,7 @@ describe('ResultSettingsTextFieldsBody', () => {
   const getFooTableRow = (wrapper: ShallowWrapper) => getTableRows(wrapper).at(1);
 
   it('renders a table row for each field, sorted by field name', () => {
-    const wrapper = shallow(<ResultSettingsTextFieldsBody />);
+    const wrapper = shallow(<TextFieldsBody />);
     const tableRows = getTableRows(wrapper);
 
     expect(tableRows.length).toBe(3);
@@ -77,7 +77,7 @@ describe('ResultSettingsTextFieldsBody', () => {
 
   describe('the "raw" checkbox within each table row', () => {
     const getRawCheckbox = () => {
-      const wrapper = shallow(<ResultSettingsTextFieldsBody />);
+      const wrapper = shallow(<TextFieldsBody />);
       const tableRow = getBarTableRow(wrapper);
       return tableRow.find('[data-test-subj="ResultSettingRawCheckBox"]');
     };
@@ -96,7 +96,7 @@ describe('ResultSettingsTextFieldsBody', () => {
 
   describe('the "snippet" checkbox within each table row', () => {
     const getSnippetCheckbox = () => {
-      const wrapper = shallow(<ResultSettingsTextFieldsBody />);
+      const wrapper = shallow(<TextFieldsBody />);
       const tableRow = getFooTableRow(wrapper);
       return tableRow.find('[data-test-subj="ResultSettingSnippetTextBox"]');
     };
@@ -115,7 +115,7 @@ describe('ResultSettingsTextFieldsBody', () => {
 
   describe('the "fallback" checkbox within each table row', () => {
     const getFallbackCheckbox = () => {
-      const wrapper = shallow(<ResultSettingsTextFieldsBody />);
+      const wrapper = shallow(<TextFieldsBody />);
       const tableRow = getFooTableRow(wrapper);
       return tableRow.find('[data-test-subj="ResultSettingFallbackTextBox"]');
     };
@@ -126,7 +126,7 @@ describe('ResultSettingsTextFieldsBody', () => {
     });
 
     it('is disabled if snippets are disabled for this field', () => {
-      const wrapper = shallow(<ResultSettingsTextFieldsBody />);
+      const wrapper = shallow(<TextFieldsBody />);
       const tableRow = getBarTableRow(wrapper);
       const fallbackCheckbox = tableRow.find('[data-test-subj="ResultSettingFallbackTextBox"]');
       expect(fallbackCheckbox.prop('disabled')).toEqual(true);

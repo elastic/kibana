@@ -13,9 +13,9 @@ import { shallow } from 'enzyme';
 
 import { EuiTableRow } from '@elastic/eui';
 
-import { ResultSettingsDisabledFieldsBody } from './result_settings_disabled_fields_body';
+import { DisabledFieldsBody } from './disabled_fields_body';
 
-describe('ResultSettingsDisabledFieldsBody', () => {
+describe('DisabledFieldsBody', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setMockValues({
@@ -33,7 +33,7 @@ describe('ResultSettingsDisabledFieldsBody', () => {
   });
 
   it('renders a table row for each field', () => {
-    const wrapper = shallow(<ResultSettingsDisabledFieldsBody />);
+    const wrapper = shallow(<DisabledFieldsBody />);
     const tableRows = wrapper.find(EuiTableRow);
 
     expect(tableRows.length).toBe(2);

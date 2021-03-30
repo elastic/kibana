@@ -9,11 +9,11 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { ResultSettingsTextFieldsHeader } from './result_settings_text_fields_header';
+import { TextFieldsHeader } from './text_fields_header';
 
-describe('ResultSettingsTextFieldsHeader', () => {
+describe('TextFieldsHeader', () => {
   it('renders', () => {
-    const wrapper = shallow(<ResultSettingsTextFieldsHeader />);
+    const wrapper = shallow(<TextFieldsHeader />);
     expect(wrapper.isEmptyRender()).toBe(false);
   });
 });

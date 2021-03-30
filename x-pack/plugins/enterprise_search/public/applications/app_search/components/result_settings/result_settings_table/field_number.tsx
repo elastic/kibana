@@ -61,7 +61,7 @@ interface Props {
   clearAction: (fieldName: string) => void;
 }
 
-export const ResultSettingsFieldNumber: React.FC<Props> = ({
+export const FieldNumber: React.FC<Props> = ({
   fieldSettings,
   fieldName,
   fieldEnabledProperty,

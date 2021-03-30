@@ -11,7 +11,7 @@ import { EuiTableHeader, EuiTableHeaderCell, EuiToolTip, EuiIcon } from '@elasti
 
 import { i18n } from '@kbn/i18n';
 
-export const ResultSettingsTextFieldsHeader: React.FC = () => {
+export const TextFieldsHeader: React.FC = () => {
   return (
     <>
       <EuiTableHeader className="resultSettingsTable__columnLabels">

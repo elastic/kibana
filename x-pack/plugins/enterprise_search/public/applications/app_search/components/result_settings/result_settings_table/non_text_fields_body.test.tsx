@@ -13,9 +13,9 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiTableRow } from '@elastic/eui';
 
-import { ResultSettingsNonTextFieldsBody } from './result_settings_non_text_fields_body';
+import { NonTextFieldsBody } from './non_text_fields_body';
 
-describe('ResultSettingsNonTextFieldsBody', () => {
+describe('NonTextFieldsBody', () => {
   const values = {
     nonTextResultFields: {
       foo: {
@@ -46,7 +46,7 @@ describe('ResultSettingsNonTextFieldsBody', () => {
   const getBarTableRow = (wrapper: ShallowWrapper) => getTableRows(wrapper).at(0);
 
   it('renders a table row for each field, sorted by field name', () => {
-    const wrapper = shallow(<ResultSettingsNonTextFieldsBody />);
+    const wrapper = shallow(<NonTextFieldsBody />);
     const tableRows = getTableRows(wrapper);
 
     expect(tableRows.length).toBe(3);
@@ -63,7 +63,7 @@ describe('ResultSettingsNonTextFieldsBody', () => {
 
   describe('the "raw" checkbox within each table row', () => {
     const getRawCheckbox = () => {
-      const wrapper = shallow(<ResultSettingsNonTextFieldsBody />);
+      const wrapper = shallow(<NonTextFieldsBody />);
       const tableRow = getBarTableRow(wrapper);
       return tableRow.find('[data-test-subj="ResultSettingRawCheckBox"]');
     };

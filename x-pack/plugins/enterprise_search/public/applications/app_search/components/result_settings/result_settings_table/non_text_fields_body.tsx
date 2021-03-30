@@ -20,7 +20,7 @@ import {
 import { ResultSettingsLogic } from '..';
 import { FieldResultSetting } from '../types';
 
-export const ResultSettingsNonTextFieldsBody: React.FC = () => {
+export const NonTextFieldsBody: React.FC = () => {
   const { nonTextResultFields } = useValues(ResultSettingsLogic);
   const { toggleRawForField } = useActions(ResultSettingsLogic);
 
