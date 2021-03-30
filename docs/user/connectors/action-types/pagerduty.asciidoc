@@ -41,6 +41,20 @@ Secrets defines sensitive information for the connector type.
 `routingKey`:: A string that corresponds to *Integration Key*.
 
 [float]
+[[define-pagerduty-ui]]
+=== Define connector in Stack Management
+
+Define PagerDuty connector properties.
+
+[role="screenshot"]
+image::user/connectors/images/pagerduty-connector.png[PagerDuty connector]
+
+Test PagerDuty action parameters.
+
+[role="screenshot"]
+image::user/connectors/images/pagerduty-params-test.png[PagerDuty params test]
+
+[float]
 [[pagerduty-action-configuration]]
 === Action configuration
 

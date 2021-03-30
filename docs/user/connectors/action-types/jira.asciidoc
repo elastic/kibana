@@ -47,6 +47,20 @@ Secrets defines sensitive information for the connector type.
 `apiToken`:: A string that corresponds to *API Token*. Should be stored in the <<creating-keystore, {kib} keystore>>.
 
 [float]
+[[define-jira-ui]]
+=== Define connector in Stack Management
+
+Define Jira connector properties.
+
+[role="screenshot"]
+image::user/connectors/images/jira-connector.png[Jira connector]
+
+Test Jira action parameters.
+
+[role="screenshot"]
+image::user/connectors/images/jira-params-test.png[Jira params test]
+
+[float]
 [[jira-action-configuration]]
 === Action configuration
 

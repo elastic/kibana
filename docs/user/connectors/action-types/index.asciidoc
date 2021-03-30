@@ -40,6 +40,20 @@ Config defines information for the connector type.
 `executionTimeField`:: A string that corresponds to *Execution time field*.
 
 [float]
+[[define-index-ui]]
+=== Define connector in Stack Management
+
+Define Index connector properties.
+
+[role="screenshot"]
+image::user/connectors/images/index-connector.png[Index connector]
+
+Test Index action parameters.
+
+[role="screenshot"]
+image::user/connectors/images/index-params-test.png[Index params test]
+
+[float]
 [[index-action-configuration]]
 === Action configuration
 

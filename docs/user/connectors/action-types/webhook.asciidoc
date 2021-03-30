@@ -53,6 +53,20 @@ Secrets defines sensitive information for the connector type.
 `password`:: A string that corresponds to *Password*. Should be stored in the <<creating-keystore, {kib} keystore>>. Required if `hasAuth` is set to `true`.
 
 [float]
+[[define-webhook-ui]]
+=== Define connector in Stack Management
+
+Define Webhook connector properties.
+
+[role="screenshot"]
+image::user/connectors/images/webhook-connector.png[Webhook connector]
+
+Test Webhook action parameters.
+
+[role="screenshot"]
+image::user/connectors/images/webhook-params-test.png[Webhook params test]
+
+[float]
 [[webhook-action-configuration]]
 === Action configuration
 

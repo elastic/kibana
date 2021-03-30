@@ -34,6 +34,20 @@ Secrets defines sensitive information for the connector type.
 `webhookUrl`:: A string that corresponds to *Webhook URL*.
 
 [float]
+[[define-teams-ui]]
+=== Define connector in Stack Management
+
+Define Teams connector properties.
+
+[role="screenshot"]
+image::user/connectors/images/teams-connector.png[Teams connector]
+
+Test Teams action parameters.
+
+[role="screenshot"]
+image::user/connectors/images/teams-params-test.png[Teams params test]
+
+[float]
 [[teams-action-configuration]]
 === Action configuration
 

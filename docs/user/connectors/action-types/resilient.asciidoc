@@ -47,6 +47,20 @@ Secrets defines sensitive information for the connector type.
 `apiKeySecret`:: A string that corresponds to *API Key secret*. Should be stored in the <<creating-keystore, {kib} keystore>>.
 
 [float]
+[[define-resilient-ui]]
+=== Define connector in Stack Management
+
+Define IBM Resilient connector properties.
+
+[role="screenshot"]
+image::user/connectors/images/resilient-connector.png[IBM Resilient connector]
+
+Test IBM Resilient action parameters.
+
+[role="screenshot"]
+image::user/connectors/images/resilient-params-test.png[IBM Resilient params test]
+
+[float]
 [[resilient-action-configuration]]
 === Action configuration
 
