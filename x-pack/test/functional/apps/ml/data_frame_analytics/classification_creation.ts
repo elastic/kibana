@@ -12,8 +12,7 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const editedDescription = 'Edited description';
 
-  // FLAKY: https://github.com/elastic/kibana/issues/91450
-  describe.skip('classification creation', function () {
+  describe('classification creation', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('ml/bm_classification');
       await ml.testResources.createIndexPatternIfNeeded('ft_bank_marketing', '@timestamp');
@@ -44,18 +43,18 @@ export default function ({ getService }: FtrProviderContext) {
         expected: {
           rocCurveColorState: [
             // tick/grid/axis
-            { key: '#DDDDDD', value: 50 },
+            { key: '#DDDDDD', percentage: 50 },
             // line
-            { key: '#98A2B3', value: 30 },
+            { key: '#98A2B3', percentage: 30 },
           ],
           scatterplotMatrixColorStats: [
             // marker colors
-            { key: '#7FC6B3', value: 1 },
-            { key: '#88ADD0', value: 0.03 },
+            { key: '#7FC6B3', percentage: 1 },
+            { key: '#88ADD0', percentage: 0.03 },
             // tick/grid/axis
-            { key: '#DDDDDD', value: 8 },
-            { key: '#D3DAE6', value: 8 },
-            { key: '#F5F7FA', value: 20 },
+            { key: '#DDDDDD', percentage: 8 },
+            { key: '#D3DAE6', percentage: 8 },
+            { key: '#F5F7FA', percentage: 20 },
           ],
           row: {
             type: 'classification',

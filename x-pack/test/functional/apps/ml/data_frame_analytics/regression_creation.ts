@@ -42,12 +42,12 @@ export default function ({ getService }: FtrProviderContext) {
         expected: {
           scatterplotMatrixColorStats: [
             // some marker colors of the continuous color scale
-            { key: '#61AFA3', value: 2 },
-            { key: '#D1E5E0', value: 2 },
+            { key: '#61AFA3', percentage: 2 },
+            { key: '#D1E5E0', percentage: 2 },
             // tick/grid/axis
-            { key: '#6A717D', value: 10 },
-            { key: '#F5F7FA', value: 12 },
-            { key: '#D3DAE6', value: 3 },
+            { key: '#6A717D', percentage: 10 },
+            { key: '#F5F7FA', percentage: 12 },
+            { key: '#D3DAE6', percentage: 3 },
           ],
           row: {
             type: 'regression',

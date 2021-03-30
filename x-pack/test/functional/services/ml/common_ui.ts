@@ -19,7 +19,7 @@ interface SetValueOptions {
 // value: the expected percentage of the color to be present in the canvas element
 export type CanvasElementColorStats = Array<{
   key: string;
-  value: number;
+  percentage: number;
 }>;
 
 export type MlCommonUI = ProvidedType<typeof MachineLearningCommonUIProvider>;

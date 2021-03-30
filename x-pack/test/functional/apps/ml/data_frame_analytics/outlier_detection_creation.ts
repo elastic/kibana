@@ -52,19 +52,19 @@ export default function ({ getService }: FtrProviderContext) {
           ],
           scatterplotMatrixColorsWizard: [
             // markers
-            { key: '#52B398', value: 25 },
+            { key: '#52B398', percentage: 25 },
             // grey boilerplate
-            { key: '#6A717D', value: 30 },
+            { key: '#6A717D', percentage: 30 },
           ],
           scatterplotMatrixColorStatsResults: [
             // red markers
-            { key: '#D98071', value: 1 },
+            { key: '#D98071', percentage: 1 },
             // tick/grid/axis, grey markers
-            { key: '#6A717D', value: 30 },
-            { key: '#D3DAE6', value: 8 },
-            { key: '#98A1B3', value: 25 },
+            { key: '#6A717D', percentage: 30 },
+            { key: '#D3DAE6', percentage: 8 },
+            { key: '#98A1B3', percentage: 25 },
             // anti-aliasing
-            { key: '#F5F7FA', value: 27 },
+            { key: '#F5F7FA', percentage: 27 },
           ],
           row: {
             type: 'outlier_detection',
