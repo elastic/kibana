@@ -53,29 +53,3 @@ export function serializeRestoreSettings(restoreSettings: RestoreSettings): Rest
 
   return removeUndefinedSettings(settings);
 }
-
-export function deserializeRestoreSettings(restoreSettingsEs: RestoreSettingsEs): RestoreSettings {
-  const {
-    indices,
-    rename_pattern: renamePattern,
-    rename_replacement: renameReplacement,
-    include_global_state: includeGlobalState,
-    partial,
-    index_settings: indexSettings,
-    ignore_index_settings: ignoreIndexSettings,
-    ignore_unavailable: ignoreUnavailable,
-  } = restoreSettingsEs;
-
-  const settings: RestoreSettings = {
-    indices,
-    renamePattern,
-    renameReplacement,
-    includeGlobalState,
-    partial,
-    indexSettings: indexSettings ? JSON.stringify(indexSettings) : undefined,
-    ignoreIndexSettings,
-    ignoreUnavailable,
-  };
-
-  return removeUndefinedSettings(settings);
-}
