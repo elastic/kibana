@@ -6,7 +6,7 @@
  */
 
 import { encode } from 'rison-node';
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { FetchData, FetchDataParams, LogsFetchDataResponse } from '../../../observability/public';
 import { DEFAULT_SOURCE_ID } from '../../common/constants';
 import { callFetchLogSourceConfigurationAPI } from '../containers/logs/log_source/api/fetch_log_source_configuration';
@@ -81,7 +81,7 @@ async function fetchLogsOverview(
   dataPlugin: InfraClientStartDeps['data']
 ): Promise<StatsAndSeries> {
   return new Promise((resolve, reject) => {
-    let esResponse: SearchResponse<any> | undefined;
+    let esResponse: estypes.SearchResponse<any> | undefined;
 
     dataPlugin.search
       .search({
@@ -99,7 +99,7 @@ async function fetchLogsOverview(
         (error) => reject(error),
         () => {
           if (esResponse?.aggregations) {
-            resolve(processLogsOverviewAggregations(esResponse!.aggregations));
+            resolve(processLogsOverviewAggregations(esResponse!.aggregations as any));
           } else {
             resolve({ stats: {}, series: {} });
           }

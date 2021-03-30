@@ -10,12 +10,14 @@ import { SavedObjectsRepository } from './repository';
 import { mockKibanaMigrator } from '../../migrations/kibana/kibana_migrator.mock';
 import { KibanaMigrator } from '../../migrations';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import { loggerMock, MockedLogger } from '../../../logging/logger.mock';
 
 jest.mock('./repository');
 
 const { SavedObjectsRepository: originalRepository } = jest.requireActual('./repository');
 
 describe('SavedObjectsRepository#createRepository', () => {
+  let logger: MockedLogger;
   const callAdminCluster = jest.fn();
 
   const typeRegistry = new SavedObjectTypeRegistry();
@@ -59,6 +61,7 @@ describe('SavedObjectsRepository#createRepository', () => {
   const RepositoryConstructor = (SavedObjectsRepository as unknown) as jest.Mock<SavedObjectsRepository>;
 
   beforeEach(() => {
+    logger = loggerMock.create();
     RepositoryConstructor.mockClear();
   });
 
@@ -69,6 +72,7 @@ describe('SavedObjectsRepository#createRepository', () => {
         typeRegistry,
         '.kibana-test',
         callAdminCluster,
+        logger,
         ['unMappedType1', 'unmappedType2']
       );
     } catch (e) {
@@ -84,6 +88,7 @@ describe('SavedObjectsRepository#createRepository', () => {
       typeRegistry,
       '.kibana-test',
       callAdminCluster,
+      logger,
       [],
       SavedObjectsRepository
     );
@@ -102,6 +107,7 @@ describe('SavedObjectsRepository#createRepository', () => {
       typeRegistry,
       '.kibana-test',
       callAdminCluster,
+      logger,
       ['hiddenType', 'hiddenType', 'hiddenType'],
       SavedObjectsRepository
     );

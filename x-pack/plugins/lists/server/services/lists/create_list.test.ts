@@ -29,6 +29,7 @@ describe('crete_list', () => {
     const options = getCreateListOptionsMock();
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.index.mockReturnValue(
+      // @ts-expect-error not full response interface
       elasticsearchClientMock.createSuccessTransportRequestPromise({ _id: 'elastic-id-123' })
     );
     const list = await createList({ ...options, esClient });
@@ -44,6 +45,7 @@ describe('crete_list', () => {
     };
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.index.mockReturnValue(
+      // @ts-expect-error not full response interface
       elasticsearchClientMock.createSuccessTransportRequestPromise({ _id: 'elastic-id-123' })
     );
     const list = await createList({ ...options, esClient });
@@ -74,6 +76,7 @@ describe('crete_list', () => {
     options.id = undefined;
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.index.mockReturnValue(
+      // @ts-expect-error not full response interface
       elasticsearchClientMock.createSuccessTransportRequestPromise({ _id: 'elastic-id-123' })
     );
     const list = await createList({ ...options, esClient });

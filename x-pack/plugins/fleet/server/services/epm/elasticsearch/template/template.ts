@@ -497,6 +497,7 @@ const updateExistingDataStream = async ({
     await esClient.indices.putMapping({
       index: dataStreamName,
       body: mappings,
+      // @ts-expect-error @elastic/elasticsearch doesn't declare it on PutMappingRequest
       write_index_only: true,
     });
     // if update fails, rollover data stream

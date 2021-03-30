@@ -112,7 +112,8 @@ export const RestoreSnapshotForm: React.FunctionComponent<Props> = ({
           errors={validation.errors}
           updateCurrentStep={updateCurrentStep}
         />
-        <EuiSpacer size="l" />
+
+        <EuiSpacer size="xl" />
 
         {saveError ? (
           <Fragment>

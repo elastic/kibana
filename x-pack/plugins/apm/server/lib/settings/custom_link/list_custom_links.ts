@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { QueryContainer } from '@elastic/elasticsearch/api/types';
 import {
   CustomLink,
   CustomLinkES,
@@ -31,7 +32,7 @@ export function listCustomLinks({
           should: [
             { term: { [key]: value } },
             { bool: { must_not: [{ exists: { field: key } }] } },
-          ],
+          ] as QueryContainer[],
         },
       };
     });
@@ -48,7 +49,7 @@ export function listCustomLinks({
         sort: [
           {
             'label.keyword': {
-              order: 'asc',
+              order: 'asc' as const,
             },
           },
         ],

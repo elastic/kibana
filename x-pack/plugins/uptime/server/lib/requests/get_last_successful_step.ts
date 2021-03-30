@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
 import { Ping } from '../../../common/runtime_types/ping';
 
@@ -18,7 +19,7 @@ export const getStepLastSuccessfulStep: UMElasticsearchQueryFn<
   GetStepScreenshotParams,
   any
 > = async ({ uptimeEsClient, monitorId, stepIndex, timestamp }) => {
-  const lastSuccessCheckParams = {
+  const lastSuccessCheckParams: estypes.SearchRequest['body'] = {
     size: 1,
     sort: [
       {

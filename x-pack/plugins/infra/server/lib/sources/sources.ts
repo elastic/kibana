@@ -23,7 +23,7 @@ import {
   SourceConfigurationSavedObjectRuntimeType,
   StaticSourceConfigurationRuntimeType,
   InfraSource,
-} from '../../../common/http_api/source_api';
+} from '../../../common/source_configuration/source_configuration';
 import { InfraConfig } from '../../../server';
 
 interface Libs {

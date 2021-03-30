@@ -60,11 +60,17 @@ export const postBulkAgentsUnenrollHandler: RequestHandler<
     : { kuery: request.body.agents };
 
   try {
-    await AgentService.unenrollAgents(soClient, esClient, {
+    const results = await AgentService.unenrollAgents(soClient, esClient, {
       ...agentOptions,
       force: request.body?.force,
     });
-    const body: PostBulkAgentUnenrollResponse = {};
+    const body = results.items.reduce<PostBulkAgentUnenrollResponse>((acc, so) => {
+      acc[so.id] = {
+        success: !so.error,
+        error: so.error?.message,
+      };
+      return acc;
+    }, {});
 
     return response.ok({ body });
   } catch (error) {
