@@ -368,7 +368,7 @@
                 "section": "def-server.DataPluginStart",
                 "text": "DataPluginStart"
               },
-              ">, { logger, expressions }: ",
+              ">, { expressions }: ",
               {
                 "pluginId": "data",
                 "scope": "server",
@@ -413,12 +413,12 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index_patterns/index_patterns_service.ts",
-                  "lineNumber": 49
+                  "lineNumber": 47
                 }
               },
               {
                 "type": "Object",
-                "label": "{ logger, expressions }",
+                "label": "{ expressions }",
                 "isRequired": true,
                 "signature": [
                   {
@@ -432,7 +432,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index_patterns/index_patterns_service.ts",
-                  "lineNumber": 50
+                  "lineNumber": 48
                 }
               }
             ],
@@ -440,7 +440,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/server/index_patterns/index_patterns_service.ts",
-              "lineNumber": 48
+              "lineNumber": 46
             }
           },
           {
@@ -472,7 +472,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\">, elasticsearchClient: ",
+              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">, elasticsearchClient: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -507,7 +507,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index_patterns/index_patterns_service.ts",
-                  "lineNumber": 76
+                  "lineNumber": 58
                 }
               },
               {
@@ -526,7 +526,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/index_patterns/index_patterns_service.ts",
-                  "lineNumber": 76
+                  "lineNumber": 58
                 }
               }
             ],
@@ -534,13 +534,13 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/server/index_patterns/index_patterns_service.ts",
-              "lineNumber": 76
+              "lineNumber": 58
             }
           }
         ],
         "source": {
           "path": "src/plugins/data/server/index_patterns/index_patterns_service.ts",
-          "lineNumber": 47
+          "lineNumber": 45
         },
         "initialIsOpen": false
       }
@@ -3992,7 +3992,7 @@
         "label": "getIndexPatternLoadMeta",
         "source": {
           "path": "src/plugins/data/common/index_patterns/expressions/load_index_pattern.ts",
-          "lineNumber": 41
+          "lineNumber": 42
         },
         "tags": [],
         "returnComment": [],
@@ -6040,7 +6040,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/expressions/load_index_pattern.ts",
-              "lineNumber": 18
+              "lineNumber": 19
             },
             "signature": [
               "\"index_pattern\""
@@ -6054,7 +6054,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/expressions/load_index_pattern.ts",
-              "lineNumber": 19
+              "lineNumber": 20
             },
             "signature": [
               {
@@ -6069,7 +6069,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/index_patterns/expressions/load_index_pattern.ts",
-          "lineNumber": 17
+          "lineNumber": 18
         },
         "initialIsOpen": false
       },
@@ -6780,7 +6780,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/index_patterns/expressions/load_index_pattern.ts",
-          "lineNumber": 34
+          "lineNumber": 35
         },
         "signature": [
           "ExpressionFunctionDefinition<\"indexPatternLoad\", null, Arguments, Output, ",
