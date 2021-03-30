@@ -28,7 +28,7 @@ const numberOptional = schema.maybe(schema.number());
 
 const queryObject = schema.object({
   language: schema.string(),
-  query: schema.string(),
+  query: schema.oneOf([schema.string(), schema.any()]),
 });
 const stringOrNumberOptionalNullable = schema.nullable(
   schema.oneOf([stringOptionalNullable, numberOptional])
@@ -36,6 +36,13 @@ const stringOrNumberOptionalNullable = schema.nullable(
 const numberOptionalOrEmptyString = schema.maybe(
   schema.oneOf([numberOptional, schema.literal('')])
 );
+
+export const indexPattern = schema.oneOf([
+  schema.maybe(schema.string()),
+  schema.object({
+    id: schema.string(),
+  }),
+]);
 
 export const fieldObject = stringOptionalNullable;
 
@@ -47,7 +54,7 @@ export const annotationsItems = schema.object({
   id: schema.string(),
   ignore_global_filters: numberIntegerOptional,
   ignore_panel_filters: numberIntegerOptional,
-  index_pattern: stringOptionalNullable,
+  index_pattern: indexPattern,
   query_string: schema.maybe(queryObject),
   template: stringOptionalNullable,
   time_field: fieldObject,
@@ -68,6 +75,7 @@ const gaugeColorRulesItems = schema.object({
   operator: stringOptionalNullable,
   value: schema.maybe(schema.nullable(schema.number())),
 });
+
 export const metricsItems = schema.object({
   field: fieldObject,
   id: stringRequired,
@@ -167,7 +175,7 @@ export const seriesItems = schema.object({
   point_size: numberOptionalOrEmptyString,
   separate_axis: numberIntegerOptional,
   seperate_axis: numberIntegerOptional,
-  series_index_pattern: stringOptionalNullable,
+  series_index_pattern: indexPattern,
   series_max_bars: numberIntegerOptional,
   series_time_field: fieldObject,
   series_interval: stringOptionalNullable,
@@ -195,6 +203,7 @@ export const seriesItems = schema.object({
 });
 
 export const panel = schema.object({
+  use_kibana_indexes: schema.maybe(schema.boolean()),
   annotations: schema.maybe(schema.arrayOf(annotationsItems)),
   axis_formatter: stringRequired,
   axis_position: stringRequired,
@@ -218,7 +227,7 @@ export const panel = schema.object({
   id: stringRequired,
   ignore_global_filters: numberOptional,
   ignore_global_filter: numberOptional,
-  index_pattern: stringRequired,
+  index_pattern: indexPattern,
   max_bars: numberIntegerOptional,
   interval: stringRequired,
   isModelInvalid: schema.maybe(schema.boolean()),

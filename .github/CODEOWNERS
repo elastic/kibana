@@ -59,6 +59,7 @@
 /x-pack/plugins/embeddable_enhanced/ @elastic/kibana-app-services
 /x-pack/plugins/ui_actions_enhanced/ @elastic/kibana-app-services
 /x-pack/plugins/runtime_fields @elastic/kibana-app-services
+/x-pack/test/search_sessions_integration/ @elastic/kibana-app-services
 #CC# /src/plugins/bfetch/ @elastic/kibana-app-services
 #CC# /src/plugins/index_pattern_management/ @elastic/kibana-app-services
 #CC# /src/plugins/inspector/ @elastic/kibana-app-services

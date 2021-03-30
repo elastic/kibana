@@ -20,9 +20,7 @@ import {
   EuiFieldText,
   EuiPageContent,
   EuiPageHeader,
-  EuiPageHeaderSection,
   EuiSpacer,
-  EuiText,
   EuiTitle,
   EuiButton,
 } from '@elastic/eui';
@@ -78,15 +76,16 @@ export const MetaEngineCreation: React.FC = () => {
   return (
     <div data-test-subj="MetaEngineCreation">
       <SetPageChrome trail={[META_ENGINE_CREATION_TITLE]} />
-      <EuiPageHeader>
-        <EuiPageHeaderSection>
-          <EuiTitle size="l">
-            <h1>{META_ENGINE_CREATION_TITLE}</h1>
-          </EuiTitle>
-          <EuiText>{META_ENGINE_CREATION_FORM_META_ENGINE_DESCRIPTION}</EuiText>
-          <EuiText>{META_ENGINE_CREATION_FORM_DOCUMENTATION_DESCRIPTION}</EuiText>
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
+      <EuiPageHeader
+        pageTitle={META_ENGINE_CREATION_TITLE}
+        description={
+          <>
+            {META_ENGINE_CREATION_FORM_META_ENGINE_DESCRIPTION}
+            <br />
+            {META_ENGINE_CREATION_FORM_DOCUMENTATION_DESCRIPTION}
+          </>
+        }
+      />
       <FlashMessages />
       <EuiPageContent>
         <EuiForm
@@ -98,7 +97,7 @@ export const MetaEngineCreation: React.FC = () => {
           }}
         >
           <EuiTitle>
-            <EuiText>{META_ENGINE_CREATION_FORM_TITLE}</EuiText>
+            <h2>{META_ENGINE_CREATION_FORM_TITLE}</h2>
           </EuiTitle>
           <EuiSpacer />
           <EuiFlexGroup>
@@ -140,14 +139,16 @@ export const MetaEngineCreation: React.FC = () => {
               }}
             />
           </EuiFormRow>
-          <EuiSpacer />
           {selectedIndexedEngineNames.length > maxEnginesPerMetaEngine && (
-            <EuiCallOut
-              color="warning"
-              title={META_ENGINE_CREATION_FORM_MAX_SOURCE_ENGINES_WARNING_TITLE(
-                maxEnginesPerMetaEngine
-              )}
-            />
+            <>
+              <EuiSpacer />
+              <EuiCallOut
+                color="warning"
+                title={META_ENGINE_CREATION_FORM_MAX_SOURCE_ENGINES_WARNING_TITLE(
+                  maxEnginesPerMetaEngine
+                )}
+              />
+            </>
           )}
           <EuiSpacer />
           <EuiButton
