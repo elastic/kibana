@@ -16,6 +16,7 @@ import { FileUploadComponentProps } from '../lazy_load_bundle';
 import { ImportResults } from '../importer';
 import { GeoJsonImporter } from '../importer/geojson_importer';
 import { Settings } from '../../common';
+import { hasImportPermission } from '../api';
 
 enum PHASE {
   CONFIGURE = 'CONFIGURE',
@@ -79,7 +80,22 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
     //
     // check permissions
     //
-    // set failedPermissionCheck
+    const canImport = await hasImportPermission({
+      checkCreateIndexPattern: true,
+      checkHasManagePipeline: false,
+      indexName: this.state.indexName,
+    });
+    if (!this._isMounted) {
+      return;
+    }
+    if (!canImport) {
+      this.setState({
+        phase: PHASE.COMPLETE,
+        failedPermissionCheck: true,
+      });
+      this.props.onIndexingError();
+      return;
+    }
 
     //
     // create index

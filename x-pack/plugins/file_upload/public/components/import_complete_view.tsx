@@ -114,8 +114,8 @@ export class ImportCompleteView extends Component<Props, {}> {
             target="_blank"
             external
           >
-            {i18n.translate('xpack.fileUpload.permission.learnMoreLinkText', {
-              defaultMessage: 'Learn about file import permissions.',
+            {i18n.translate('xpack.fileUpload.permission.docLink', {
+              defaultMessage: 'View file import permissions.',
             })}
           </EuiLink>
         </EuiCallOut>
