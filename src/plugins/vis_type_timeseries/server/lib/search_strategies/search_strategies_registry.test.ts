@@ -10,29 +10,27 @@ import { get } from 'lodash';
 import { SearchStrategyRegistry } from './search_strategy_registry';
 import { AbstractSearchStrategy, DefaultSearchStrategy } from './strategies';
 import { DefaultSearchCapabilities } from './capabilities/default_search_capabilities';
-import { Framework } from '../../plugin';
 import { VisTypeTimeseriesRequest, VisTypeTimeseriesRequestHandlerContext } from '../../types';
 
 const getPrivateField = <T>(registry: SearchStrategyRegistry, field: string) =>
   get(registry, field) as T;
 
 class MockSearchStrategy extends AbstractSearchStrategy {
-  checkForViability() {
-    return Promise.resolve({
+  async checkForViability() {
+    return {
       isViable: true,
       capabilities: {},
-    });
+    };
   }
 }
 
 describe('SearchStrategyRegister', () => {
-  const framework = {} as Framework;
   const requestContext = {} as VisTypeTimeseriesRequestHandlerContext;
   let registry: SearchStrategyRegistry;
 
   beforeAll(() => {
     registry = new SearchStrategyRegistry();
-    registry.addStrategy(new DefaultSearchStrategy(framework));
+    registry.addStrategy(new DefaultSearchStrategy());
   });
 
   test('should init strategies register', () => {
@@ -47,12 +45,11 @@ describe('SearchStrategyRegister', () => {
 
   test('should return a DefaultSearchStrategy instance', async () => {
     const req = {} as VisTypeTimeseriesRequest;
-    const indexPattern = '*';
 
     const { searchStrategy, capabilities } = (await registry.getViableStrategy(
       requestContext,
       req,
-      indexPattern
+      { indexPatternString: '*', indexPattern: undefined }
     ))!;
 
     expect(searchStrategy instanceof DefaultSearchStrategy).toBe(true);
@@ -60,7 +57,7 @@ describe('SearchStrategyRegister', () => {
   });
 
   test('should add a strategy if it is an instance of AbstractSearchStrategy', () => {
-    const anotherSearchStrategy = new MockSearchStrategy(framework);
+    const anotherSearchStrategy = new MockSearchStrategy();
     const addedStrategies = registry.addStrategy(anotherSearchStrategy);
 
     expect(addedStrategies.length).toEqual(2);
@@ -69,14 +66,13 @@ describe('SearchStrategyRegister', () => {
 
   test('should return a MockSearchStrategy instance', async () => {
     const req = {} as VisTypeTimeseriesRequest;
-    const indexPattern = '*';
-    const anotherSearchStrategy = new MockSearchStrategy(framework);
+    const anotherSearchStrategy = new MockSearchStrategy();
     registry.addStrategy(anotherSearchStrategy);
 
     const { searchStrategy, capabilities } = (await registry.getViableStrategy(
       requestContext,
       req,
-      indexPattern
+      { indexPatternString: '*', indexPattern: undefined }
     ))!;
 
     expect(searchStrategy instanceof MockSearchStrategy).toBe(true);

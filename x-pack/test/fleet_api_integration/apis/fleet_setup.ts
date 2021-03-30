@@ -80,6 +80,7 @@ export default function (providerContext: FtrProviderContext) {
             applications: [],
             run_as: [],
             metadata: {},
+            // @ts-expect-error @elastic/elasticsearch PutRoleRequest.body doesn't declare transient_metadata property
             transient_metadata: { enabled: true },
           },
         });

@@ -7,7 +7,6 @@
 
 import { get } from 'lodash/fp';
 import set from 'set-value';
-
 import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
 import {
   ThresholdNormalized,
@@ -29,10 +28,10 @@ import {
   getThresholdTermsHash,
 } from '../utils';
 import { BuildRuleMessage } from '../rule_messages';
-import {
+import type {
   MultiAggBucket,
-  SignalSearchResponse,
   SignalSource,
+  SignalSearchResponse,
   ThresholdSignalHistory,
 } from '../types';
 
@@ -141,7 +140,8 @@ const getTransformedHits = (
 
   // Recurse through the nested buckets and collect each unique combination of terms. Collect the
   // cardinality and document count from the leaf buckets and return a signal for each set of terms.
-  return getCombinations(results.aggregations[aggParts.name].buckets, 0, aggParts.field).reduce(
+  // @ts-expect-error @elastic/elasticsearch no way to declare a type for aggregation in the search response
+  return getCombinations(results.aggregations![aggParts.name].buckets, 0, aggParts.field).reduce(
     (acc: Array<BaseHit<SignalSource>>, bucket) => {
       const hit = bucket.topThresholdHits?.hits.hits[0];
       if (hit == null) {

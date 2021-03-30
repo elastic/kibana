@@ -11,7 +11,7 @@ import { XJson } from '../../../../es_ui_shared/public';
 
 const { collapseLiteralStrings, expandLiteralStrings } = XJson;
 
-export function textFromRequest(request: any) {
+export function textFromRequest(request: { method: string; url: string; data: string | string[] }) {
   let data = request.data;
   if (typeof data !== 'string') {
     data = data.join('\n');
@@ -19,7 +19,7 @@ export function textFromRequest(request: any) {
   return request.method + ' ' + request.url + '\n' + data;
 }
 
-export function jsonToString(data: any, indent: boolean) {
+export function jsonToString(data: object, indent: boolean) {
   return JSON.stringify(data, null, indent ? 2 : 0);
 }
 

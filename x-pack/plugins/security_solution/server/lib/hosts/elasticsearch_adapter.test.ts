@@ -37,6 +37,7 @@ import {
 } from '../../endpoint/mocks';
 import { PackageService } from '../../../../fleet/server/services';
 import { ElasticsearchAssetType } from '../../../../fleet/common/types/models';
+import { parseExperimentalConfigValue } from '../../../common/experimental_features';
 
 jest.mock('./query.hosts.dsl', () => {
   return {
@@ -187,6 +188,7 @@ describe('hosts elasticsearch_adapter', () => {
     logFactory: mockLogger,
     service: endpointAppContextService,
     config: jest.fn(),
+    experimentalFeatures: parseExperimentalConfigValue([]),
   };
   describe('#getHosts', () => {
     const mockCallWithRequest = jest.fn();

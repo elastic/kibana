@@ -1,12 +1,10 @@
 [[actions-and-connectors-legacy-api-list]]
 ==== Legacy List connector types API
 ++++
-<titleabbrev>Legacy List all connector types API</titleabbrev>
+<titleabbrev>Legacy List all connector types</titleabbrev>
 ++++
 
-deprecated::[7.13.0]
-
-Please use the <<actions-and-connectors-api-list>> instead.
+WARNING: Deprecated in 7.13.0. Use <<list-connector-types-api>> instead.
 
 Retrieves a list of all connector types.
 

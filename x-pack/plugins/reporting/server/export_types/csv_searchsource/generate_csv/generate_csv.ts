@@ -91,7 +91,7 @@ export class CsvGenerator {
     };
     const results = (
       await this.clients.data.search(searchParams, { strategy: ES_SEARCH_STRATEGY }).toPromise()
-    ).rawResponse;
+    ).rawResponse as SearchResponse<unknown>;
 
     return results;
   }

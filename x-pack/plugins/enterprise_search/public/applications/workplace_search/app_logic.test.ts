@@ -82,4 +82,14 @@ describe('AppLogic', () => {
       expect(AppLogic.values.account.canCreatePersonalSources).toEqual(true);
     });
   });
+
+  describe('setOrgName', () => {
+    it('sets property', () => {
+      const NAME = 'new name';
+      mount(DEFAULT_INITIAL_APP_DATA);
+      AppLogic.actions.setOrgName(NAME);
+
+      expect(AppLogic.values.organization.name).toEqual(NAME);
+    });
+  });
 });

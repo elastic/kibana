@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
 import { fetchCpuUsageNodeStats } from './fetch_cpu_usage_node_stats';
@@ -24,6 +25,7 @@ describe('fetchCpuUsageNodeStats', () => {
 
   it('fetch normal stats', async () => {
     esClient.search.mockReturnValue(
+      // @ts-expect-error @elastic/elasticsearch Aggregate only allows unknown values
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         aggregations: {
           clusters: {
@@ -77,6 +79,7 @@ describe('fetchCpuUsageNodeStats', () => {
 
   it('fetch container stats', async () => {
     esClient.search.mockReturnValue(
+      // @ts-expect-error @elastic/elasticsearch Aggregate only allows unknown values
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         aggregations: {
           clusters: {
@@ -143,6 +146,7 @@ describe('fetchCpuUsageNodeStats', () => {
 
   it('fetch properly return ccs', async () => {
     esClient.search.mockReturnValue(
+      // @ts-expect-error @elastic/elasticsearch Aggregate only allows unknown values
       elasticsearchClientMock.createSuccessTransportRequestPromise({
         aggregations: {
           clusters: {
@@ -193,7 +197,9 @@ describe('fetchCpuUsageNodeStats', () => {
     let params = null;
     esClient.search.mockImplementation((...args) => {
       params = args[0];
-      return elasticsearchClientMock.createSuccessTransportRequestPromise({});
+      return elasticsearchClientMock.createSuccessTransportRequestPromise(
+        {} as estypes.SearchResponse
+      );
     });
     await fetchCpuUsageNodeStats(esClient, clusters, index, startMs, endMs, size);
     expect(params).toStrictEqual({

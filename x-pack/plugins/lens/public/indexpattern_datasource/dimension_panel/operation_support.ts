@@ -8,7 +8,7 @@
 import _ from 'lodash';
 import { DatasourceDimensionDropProps } from '../../types';
 import { OperationType } from '../indexpattern';
-import { getAvailableOperationsByMetadata } from '../operations';
+import { memoizedGetAvailableOperationsByMetadata } from '../operations';
 import { IndexPatternPrivateState } from '../types';
 
 export interface OperationSupportMatrix {
@@ -30,7 +30,7 @@ export const getOperationSupportMatrix = (props: Props): OperationSupportMatrix 
   const layerId = props.layerId;
   const currentIndexPattern = props.state.indexPatterns[props.state.layers[layerId].indexPatternId];
 
-  const filteredOperationsByMetadata = getAvailableOperationsByMetadata(
+  const filteredOperationsByMetadata = memoizedGetAvailableOperationsByMetadata(
     currentIndexPattern
   ).filter((operation) => props.filterOperations(operation.operationMetaData));
 

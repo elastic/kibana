@@ -16,7 +16,7 @@ describe('dateHistogram(req, panel, series)', () => {
   let req;
   let capabilities;
   let config;
-  let indexPatternObject;
+  let indexPattern;
   let uiSettings;
 
   beforeEach(() => {
@@ -39,7 +39,7 @@ describe('dateHistogram(req, panel, series)', () => {
       allowLeadingWildcards: true,
       queryStringOptions: {},
     };
-    indexPatternObject = {};
+    indexPattern = {};
     capabilities = new DefaultSearchCapabilities(req);
     uiSettings = {
       get: async (key) => (key === UI_SETTINGS.HISTOGRAM_MAX_BARS ? 100 : 50),
@@ -49,15 +49,9 @@ describe('dateHistogram(req, panel, series)', () => {
   test('calls next when finished', async () => {
     const next = jest.fn();
 
-    await dateHistogram(
-      req,
-      panel,
-      series,
-      config,
-      indexPatternObject,
-      capabilities,
-      uiSettings
-    )(next)({});
+    await dateHistogram(req, panel, series, config, indexPattern, capabilities, uiSettings)(next)(
+      {}
+    );
 
     expect(next.mock.calls.length).toEqual(1);
   });
@@ -69,7 +63,7 @@ describe('dateHistogram(req, panel, series)', () => {
       panel,
       series,
       config,
-      indexPatternObject,
+      indexPattern,
       capabilities,
       uiSettings
     )(next)({});
@@ -110,7 +104,7 @@ describe('dateHistogram(req, panel, series)', () => {
       panel,
       series,
       config,
-      indexPatternObject,
+      indexPattern,
       capabilities,
       uiSettings
     )(next)({});
@@ -154,7 +148,7 @@ describe('dateHistogram(req, panel, series)', () => {
       panel,
       series,
       config,
-      indexPatternObject,
+      indexPattern,
       capabilities,
       uiSettings
     )(next)({});
@@ -198,7 +192,7 @@ describe('dateHistogram(req, panel, series)', () => {
         panel,
         series,
         config,
-        indexPatternObject,
+        indexPattern,
         capabilities,
         uiSettings
       )(next)({});
@@ -216,7 +210,7 @@ describe('dateHistogram(req, panel, series)', () => {
         panel,
         series,
         config,
-        indexPatternObject,
+        indexPattern,
         capabilities,
         uiSettings
       )(next)({});

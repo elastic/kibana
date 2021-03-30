@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 import {
   sampleDocSearchResultsNoSortId,
   mockLogger,
@@ -12,7 +12,6 @@ import {
 } from './__mocks__/es_results';
 import { singleSearchAfter } from './single_search_after';
 import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
-import { ShardError } from '../../types';
 import { buildRuleMessageFactory } from './rule_messages';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
@@ -69,7 +68,7 @@ describe('singleSearchAfter', () => {
     expect(searchErrors).toEqual([]);
   });
   test('if singleSearchAfter will return an error array', async () => {
-    const errors: ShardError[] = [
+    const errors: estypes.ShardFailure[] = [
       {
         shard: 1,
         index: 'index-123',

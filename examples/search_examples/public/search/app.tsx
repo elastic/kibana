@@ -145,7 +145,8 @@ export const SearchExamplesApp = ({
             setResponse(res.rawResponse);
             setTimeTook(res.rawResponse.took);
             const avgResult: number | undefined = res.rawResponse.aggregations
-              ? res.rawResponse.aggregations[1].value
+              ? // @ts-expect-error @elastic/elasticsearch no way to declare a type for aggregation in the search response
+                res.rawResponse.aggregations[1].value
               : undefined;
             const message = (
               <EuiText>

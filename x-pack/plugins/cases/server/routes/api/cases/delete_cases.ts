@@ -11,7 +11,7 @@ import { SavedObjectsClientContract } from 'src/core/server';
 import { buildCaseUserActionItem } from '../../../services/user_actions/helpers';
 import { RouteDeps } from '../types';
 import { wrapError } from '../utils';
-import { CASES_URL } from '../../../../common/constants';
+import { CASES_URL, ENABLE_CASE_CONNECTOR } from '../../../../common/constants';
 import { CaseServiceSetup } from '../../../services';
 
 async function deleteSubCases({
@@ -91,7 +91,10 @@ export function initDeleteCasesApi({ caseService, router, userActionService, log
           );
         }
 
-        await deleteSubCases({ caseService, client, caseIds: request.query.ids });
+        if (ENABLE_CASE_CONNECTOR) {
+          await deleteSubCases({ caseService, client, caseIds: request.query.ids });
+        }
+
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const { username, full_name, email } = await caseService.getUser({ request });
         const deleteDate = new Date().toISOString();
@@ -104,7 +107,14 @@ export function initDeleteCasesApi({ caseService, router, userActionService, log
               actionAt: deleteDate,
               actionBy: { username, full_name, email },
               caseId: id,
-              fields: ['comment', 'description', 'status', 'tags', 'title', 'sub_case'],
+              fields: [
+                'comment',
+                'description',
+                'status',
+                'tags',
+                'title',
+                ...(ENABLE_CASE_CONNECTOR ? ['sub_case'] : []),
+              ],
             })
           ),
         });

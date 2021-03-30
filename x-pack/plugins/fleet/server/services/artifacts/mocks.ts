@@ -10,7 +10,7 @@ import type { ApiResponse } from '@elastic/elasticsearch';
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 
 import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
-import type { ESSearchHit, ESSearchResponse } from '../../../../../../typings/elasticsearch';
+import type { SearchHit, ESSearchResponse } from '../../../../../../typings/elasticsearch';
 
 import type { Artifact, ArtifactElasticsearchProperties, ArtifactsClientInterface } from './types';
 import { newArtifactToElasticsearchProperties } from './mappings';
@@ -77,7 +77,7 @@ export const generateEsRequestErrorApiResponseMock = (
   );
 };
 
-export const generateArtifactEsGetSingleHitMock = (): ESSearchHit<ArtifactElasticsearchProperties> => {
+export const generateArtifactEsGetSingleHitMock = (): SearchHit<ArtifactElasticsearchProperties> => {
   const { id, created, ...newArtifact } = generateArtifactMock();
   const _source = {
     ...newArtifactToElasticsearchProperties(newArtifact),
