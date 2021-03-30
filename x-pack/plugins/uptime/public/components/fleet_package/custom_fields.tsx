@@ -20,6 +20,7 @@ import {
   EuiCheckbox,
 } from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
+import { CertsField, SSLRole } from './certs_field';
 import { ConfigKeys, DataStream, ICustomFields, Validation } from './types';
 import { ComboBox } from './combo_box';
 import { OptionalLabel } from './optional_label';
@@ -36,6 +37,7 @@ interface Props {
 
 export const CustomFields = memo<Props>(
   ({ defaultValues, typeEditable = false, validate, onChange }) => {
+    const [isSSLEnabled, setIsSSLEnabled] = useState<boolean>(false);
     const [fields, setFields] = useState<ICustomFields>(defaultValues);
     const { type } = fields;
 
@@ -51,6 +53,19 @@ export const CustomFields = memo<Props>(
         [ConfigKeys.URLS]: defaultValues[ConfigKeys.URLS],
       }));
     }, [defaultValues, type]);
+
+    useEffect(() => {
+      if (!isSSLEnabled) {
+        setFields((prevFields) => ({
+          ...prevFields,
+          [ConfigKeys.SSL_CERTIFICATE_AUTHORITIES]: '',
+          [ConfigKeys.SSL_CERTIFICATE]: '',
+          [ConfigKeys.SSL_KEY]: '',
+          [ConfigKeys.SSL_KEY_PASSPHRASE]: '',
+          [ConfigKeys.SSL_VERIFICATION_MODE]: undefined,
+        }));
+      }
+    }, [isSSLEnabled]);
 
     useDebounce(
       () => {
@@ -73,6 +88,20 @@ export const CustomFields = memo<Props>(
       [setFields]
     );
 
+    const handleChangeCerts = useCallback(
+      (certsFields) => {
+        setFields((prevFields) => ({
+          ...prevFields,
+          [ConfigKeys.SSL_CERTIFICATE_AUTHORITIES]: certsFields.certificateAuthorities,
+          [ConfigKeys.SSL_CERTIFICATE]: certsFields.certificate,
+          [ConfigKeys.SSL_KEY]: certsFields.key,
+          [ConfigKeys.SSL_KEY_PASSPHRASE]: certsFields.keyPassphrase,
+          [ConfigKeys.SSL_VERIFICATION_MODE]: certsFields.verificationMode,
+        }));
+      },
+      [setFields]
+    );
+
     return (
       <EuiForm>
         <EuiDescribedFormGroup
@@ -87,20 +116,7 @@ export const CustomFields = memo<Props>(
           description={
             <FormattedMessage
               id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSectionDescription"
-              defaultMessage="Configure your Heartbeat monitor with the following options. Find information about each option in the {link}."
-              values={{
-                link: (
-                  <EuiLink
-                    href="https://www.elastic.co/guide/en/beats/heartbeat/current/monitor-options.html"
-                    target="_blank"
-                  >
-                    <FormattedMessage
-                      id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.heartbeatDocs"
-                      defaultMessage="Heartbeat docs"
-                    />
-                  </EuiLink>
-                ),
-              }}
+              defaultMessage="Configure your Heartbeat monitor with the following options."
             />
           }
         >
@@ -192,11 +208,24 @@ export const CustomFields = memo<Props>(
                   <EuiFormRow
                     label={
                       <FormattedMessage
-                        id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.proxyURL"
+                        id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.proxyURL.label"
                         defaultMessage="Proxy URL"
                       />
                     }
                     labelAppend={<OptionalLabel />}
+                    helpText={
+                      isHTTP ? (
+                        <FormattedMessage
+                          id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.proxyUrl.http.helpText"
+                          defaultMessage="An optional HTTP proxy URL."
+                        />
+                      ) : (
+                        <FormattedMessage
+                          id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.proxyUrl.tcp.helpText"
+                          defaultMessage="The URL of the SOCKS5 proxy to use when connecting to the server. The value must be a URL with a scheme of socks5://."
+                        />
+                      )
+                    }
                   >
                     <EuiFieldText
                       value={fields[ConfigKeys.PROXY_URL]}
@@ -260,7 +289,7 @@ export const CustomFields = memo<Props>(
                   <EuiFormRow
                     label={
                       <FormattedMessage
-                        id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.wait"
+                        id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.wait.label"
                         defaultMessage="Wait in seconds"
                       />
                     }
@@ -272,6 +301,12 @@ export const CustomFields = memo<Props>(
                       />
                     }
                     labelAppend={<OptionalLabel />}
+                    helpText={
+                      <FormattedMessage
+                        id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.wait.helpText"
+                        defaultMessage="The duration to wait before emitting another ICMP Echo Request if no response is received."
+                      />
+                    }
                   >
                     <EuiFieldNumber
                       min={0}
@@ -285,11 +320,17 @@ export const CustomFields = memo<Props>(
                 <EuiFormRow
                   label={
                     <FormattedMessage
-                      id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.APMServiceName"
+                      id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.APMServiceName.label"
                       defaultMessage="APM service name"
                     />
                   }
                   labelAppend={<OptionalLabel />}
+                  helpText={
+                    <FormattedMessage
+                      id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.APMServiceName.helpText"
+                      defaultMessage="Optional APM service name for this monitor. Corresponds to the service.name ECS field. Set this when monitoring an app that is also using APM to enable integrations between Uptime and APM data in Kibana."
+                    />
+                  }
                 >
                   <EuiFieldText
                     value={fields[ConfigKeys.APM_SERVICE_NAME]}
@@ -394,6 +435,37 @@ export const CustomFields = memo<Props>(
               </EuiForm>
             </EuiFlexItem>
           </EuiFlexGroup>
+        </EuiDescribedFormGroup>
+        <EuiDescribedFormGroup
+          title={
+            <h4>
+              <FormattedMessage
+                id="xpack.uptime.createPackagePolicy.stepConfigure.certificateSettings.label"
+                defaultMessage="SSL settings"
+              />
+            </h4>
+          }
+          description={
+            <FormattedMessage
+              id="xpack.uptime.createPackagePolicy.stepConfigure.certificateSettings.description"
+              defaultMessage="Configure SSL options, including verification mode, certificate authorities, and client certificates."
+            />
+          }
+        >
+          <EuiCheckbox
+            id={'uptimeFleetIsSSLEnabled'}
+            checked={isSSLEnabled}
+            label={
+              <FormattedMessage
+                id="xpack.uptime.createPackagePolicy.stepConfigure.certificateSettings.enableSSLSettings.label"
+                defaultMessage="Enable SSL configuration"
+              />
+            }
+            onChange={(event) => setIsSSLEnabled(event.target.checked)}
+          />
+          {isSSLEnabled && (
+            <CertsField onChange={handleChangeCerts} sslRole={SSLRole.CLIENT} showLegend={false} />
+          )}
         </EuiDescribedFormGroup>
         {isHTTP && (
           <HTTPAdvancedFields
