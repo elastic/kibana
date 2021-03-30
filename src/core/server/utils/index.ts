@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './from_root';
 export * from './package_json';

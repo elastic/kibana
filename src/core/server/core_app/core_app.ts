@@ -10,8 +10,8 @@ import Path from 'path';
 import { stringify } from 'querystring';
 import { Env } from '@kbn/config';
 import { schema } from '@kbn/config-schema';
+import { fromRoot } from '@kbn/utils';
 
-import { fromRoot } from '../utils';
 import { InternalCoreSetup } from '../internal_types';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
