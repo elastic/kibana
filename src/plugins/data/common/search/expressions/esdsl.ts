@@ -11,7 +11,7 @@ import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 
 import { EsRawResponse } from './es_raw_response';
 import { RequestStatistics, RequestAdapter } from '../../../../inspector/common';
-import { IEsSearchResponse, ISearchGeneric, KibanaContext } from '..';
+import { ISearchGeneric, KibanaContext } from '..';
 import { buildEsQuery, getEsQueryConfig } from '../../es_query/es_query';
 import { UiSettingsCommon } from '../../index_patterns';
 
@@ -89,12 +89,11 @@ export const getEsdslFn = ({
           esQueryConfigs
         );
 
-        if (!dsl.query) {
-          dsl.query = query;
-        } else {
+        if (dsl.query) {
           query.bool.must.push(dsl.query);
-          dsl.query = query;
         }
+
+        dsl.query = query;
       }
 
       if (!inspectorAdapters.requests) {
@@ -125,9 +124,8 @@ export const getEsdslFn = ({
         },
       });
 
-      let res: IEsSearchResponse;
       try {
-        res = await search(
+        const { rawResponse } = await search(
           {
             params: {
               index: args.index,
@@ -139,16 +137,15 @@ export const getEsdslFn = ({
         ).toPromise();
 
         const stats: RequestStatistics = {};
-        const resp = res.rawResponse;
 
-        if (resp && resp.took) {
+        if (rawResponse?.took) {
           stats.queryTime = {
             label: i18n.translate('data.search.es_search.queryTimeLabel', {
               defaultMessage: 'Query time',
             }),
             value: i18n.translate('data.search.es_search.queryTimeValue', {
               defaultMessage: '{queryTime}ms',
-              values: { queryTime: resp.took },
+              values: { queryTime: rawResponse.took },
             }),
             description: i18n.translate('data.search.es_search.queryTimeDescription', {
               defaultMessage:
@@ -158,12 +155,12 @@ export const getEsdslFn = ({
           };
         }
 
-        if (resp && resp.hits) {
+        if (rawResponse?.hits) {
           stats.hitsTotal = {
             label: i18n.translate('data.search.es_search.hitsTotalLabel', {
               defaultMessage: 'Hits (total)',
             }),
-            value: `${resp.hits.total}`,
+            value: `${rawResponse.hits.total}`,
             description: i18n.translate('data.search.es_search.hitsTotalDescription', {
               defaultMessage: 'The number of documents that match the query.',
             }),
@@ -173,19 +170,19 @@ export const getEsdslFn = ({
             label: i18n.translate('data.search.es_search.hitsLabel', {
               defaultMessage: 'Hits',
             }),
-            value: `${resp.hits.hits.length}`,
+            value: `${rawResponse.hits.hits.length}`,
             description: i18n.translate('data.search.es_search.hitsDescription', {
               defaultMessage: 'The number of documents returned by the query.',
             }),
           };
         }
 
-        request.stats(stats).ok({ json: resp });
+        request.stats(stats).ok({ json: rawResponse });
         request.json(dsl);
 
         return {
           type: 'es_raw_response',
-          body: resp,
+          body: rawResponse,
         };
       } catch (e) {
         request.error({ json: e });
