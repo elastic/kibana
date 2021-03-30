@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const COMMENTS = i18n.translate('xpack.securitySolution.recentCases.commentsTooltip', {
+export const COMMENTS = i18n.translate('xpack.cases.recentCases.commentsTooltip', {
   defaultMessage: 'Comments',
 });
 
@@ -18,7 +18,7 @@ export const MY_RECENTLY_REPORTED_CASES = i18n.translate(
   }
 );
 
-export const NO_CASES = i18n.translate('xpack.securitySolution.recentCases.noCasesMessage', {
+export const NO_CASES = i18n.translate('xpack.cases.recentCases.noCasesMessage', {
   defaultMessage: 'No cases have been created yet. Put your detective hat on and',
 });
 

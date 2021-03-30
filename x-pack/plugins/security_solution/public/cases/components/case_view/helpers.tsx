@@ -5,26 +5,12 @@
  * 2.0.
  */
 
-import { isObject, get, isString, isNumber, isEmpty } from 'lodash';
+import { isObject, get, isString, isNumber } from 'lodash';
 import { useMemo } from 'react';
-import { CommentType, Comment } from '../../../../../cases/common';
-
 import { Ecs } from '../../../../common/ecs';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
-
-export const getManualAlertIdsWithNoRuleId = (comments: Comment[]): string[] => {
-  const dedupeAlerts = comments.reduce((alertIds, comment: Comment) => {
-    if (comment.type === CommentType.alert && isEmpty(comment.rule.id)) {
-      const ids = Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId];
-      ids.forEach((id) => alertIds.add(id));
-      return alertIds;
-    }
-    return alertIds;
-  }, new Set<string>());
-  return [...dedupeAlerts];
-};
 
 // TODO we need to allow ->  docValueFields: [{ field: "@timestamp" }],
 export const buildAlertsQuery = (alertIds: string[]) => {
