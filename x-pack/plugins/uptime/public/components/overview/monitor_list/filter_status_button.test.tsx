@@ -8,7 +8,7 @@
 import React from 'react';
 import { FilterStatusButton, FilterStatusButtonProps } from './filter_status_button';
 import { renderWithRouter, shallowWithRouter } from '../../../lib/helper/enzyme_helpers';
-import { MountWithReduxProvider } from '../../../lib';
+import { MountWithReduxProvider } from '../../../lib/helper/helper_with_redux';
 
 describe('FilterStatusButton', () => {
   let props: FilterStatusButtonProps;
