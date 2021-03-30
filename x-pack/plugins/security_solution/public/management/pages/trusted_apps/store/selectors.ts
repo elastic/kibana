@@ -30,14 +30,14 @@ export const needsRefreshOfListData = (state: Immutable<TrustedAppsListPageState
   const freshDataTimestamp = state.listView.freshDataTimestamp;
   const currentPage = state.listView.listResourceState;
   const location = state.location;
-
   return (
     Boolean(state.active) &&
     isOutdatedResourceState(currentPage, (data) => {
       return (
         data.pageIndex === location.page_index &&
         data.pageSize === location.page_size &&
-        data.timestamp >= freshDataTimestamp
+        data.timestamp >= freshDataTimestamp &&
+        data.filter === location.filter
       );
     })
   );
@@ -67,6 +67,10 @@ export const getCurrentLocationPageIndex = (state: Immutable<TrustedAppsListPage
 
 export const getCurrentLocationPageSize = (state: Immutable<TrustedAppsListPageState>): number => {
   return state.location.page_size;
+};
+
+export const getCurrentLocationFilter = (state: Immutable<TrustedAppsListPageState>): string => {
+  return state.location.filter;
 };
 
 export const getListTotalItemsCount = (state: Immutable<TrustedAppsListPageState>): number => {
