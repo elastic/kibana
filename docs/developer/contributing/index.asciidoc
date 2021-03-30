@@ -1,7 +1,7 @@
 [[contributing]]
 == Contributing
 
-Whether you want to fix a bug, implement a feature, add an improvement, add APIs, the following sections will 
+Whether you want to fix a bug, implement a feature, add an improvement, or add APIs, the following sections will 
 guide you on the process. After committing your code, check out the link:https://www.elastic.co/community/contributor[Elastic Contributor Program] where you can earn points and rewards for your contributions.
 
 Read <<development-getting-started>> to get your environment up and running, then read <<development-best-practices>>.
