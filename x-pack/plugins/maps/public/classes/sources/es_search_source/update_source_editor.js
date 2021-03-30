@@ -8,6 +8,7 @@
 import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFormRow, EuiSelect, EuiTitle, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { FIELD_ORIGIN } from '../../../../common/constants';
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { TooltipSelector } from '../../../components/tooltip_selector';
 
@@ -90,6 +91,7 @@ export class UpdateSourceEditor extends Component {
       return new ESDocField({
         fieldName: field.name,
         source: this.props.source,
+        origin: FIELD_ORIGIN.SOURCE,
       });
     });
 

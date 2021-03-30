@@ -12768,7 +12768,6 @@
     "xpack.maps.source.esSearch.topHitsSplitFieldLabel": "エンティティ",
     "xpack.maps.source.esSearch.topHitsSplitFieldSelectPlaceholder": "エンティティフィールドを選択",
     "xpack.maps.source.esSearch.useMVTVectorTiles": "ベクトルタイルを使用",
-    "xpack.maps.source.esSearch.useTopHitsLabel": "エンティティごとにトップヒットを表示。",
     "xpack.maps.source.esSearchDescription": "Elasticsearch の点、線、多角形",
     "xpack.maps.source.esSearchTitle": "ドキュメント",
     "xpack.maps.source.esSource.noGeoFieldErrorMessage": "インデックスパターン {indexPatternTitle} には現在ジオフィールド {geoField} が含まれていません",

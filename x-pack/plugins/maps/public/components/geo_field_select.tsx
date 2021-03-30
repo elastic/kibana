@@ -9,12 +9,12 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow } from '@elastic/eui';
 import { SingleFieldSelect } from './single_field_select';
-import { IndexPattern, IFieldType } from '../../../../../src/plugins/data/common';
+import { IFieldType } from '../../../../../src/plugins/data/common';
 
 interface Props {
   value: string;
   geoFields: IFieldType[];
-  onChange: (geoFieldName: string) => void;
+  onChange: (geoFieldName?: string) => void;
 }
 
 export function GeoFieldSelect(props: Props) {

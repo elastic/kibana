@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React, { Fragment, Component } from 'react';
-import { EuiFormRow, EuiPanel, EuiSpacer } from '@elastic/eui';
+import React, { Component } from 'react';
+import { EuiPanel } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
 import { SCALING_TYPES } from '../../../../../common/constants';
 import { GeoFieldSelect } from '../../../../components/geo_field_select';
 import { GeoIndexPatternSelect } from '../../../../components/geo_index_pattern_select';
@@ -20,9 +19,10 @@ import {
   SortDirection,
 } from '../../../../../../../../src/plugins/data/common';
 import { TopHitsForm } from './top_hits_form';
+import { OnSourceChangeArgs } from '../../../../connected_components/layer_panel/view';
 
 interface Props {
-  onSourceConfigChange: (sourceConfig: Partial<ESSearchSourceDescriptor>) => void;
+  onSourceConfigChange: (sourceConfig: Partial<ESSearchSourceDescriptor> | null) => void;
 }
 
 interface State {
@@ -35,7 +35,7 @@ interface State {
 }
 
 export class CreateSourceEditor extends Component<Props, State> {
-  state = {
+  state: State = {
     indexPattern: null,
     geoFields: [],
     geoFieldName: null,
@@ -63,16 +63,14 @@ export class CreateSourceEditor extends Component<Props, State> {
     );
   };
 
-  _onGeoFieldSelect = (geoFieldName: string) => {
-    this.setState({ geoFieldName }, this._previewLayer);
+  _onGeoFieldSelect = (geoFieldName?: string) => {
+    this.setState({ geoFieldName: geoFieldName ? geoFieldName : null }, this._previewLayer);
   };
 
-  _onTopHitsPropChange = ({ propName, value }) => {
-    // @ts-expect-error
+  _onTopHitsPropChange = ({ propName, value }: OnSourceChangeArgs) => {
     this.setState(
-      {
-        [propName]: value,
-      },
+      // @ts-expect-error
+      { [propName]: value },
       this._previewLayer
     );
   };
@@ -84,7 +82,7 @@ export class CreateSourceEditor extends Component<Props, State> {
     if (topHitsSplitField) {
       tooltipProperties.push(topHitsSplitField);
     }
-    if (indexPattern.timeFieldName) {
+    if (indexPattern && indexPattern.timeFieldName) {
       tooltipProperties.push(indexPattern.timeFieldName);
     }
 
@@ -107,7 +105,7 @@ export class CreateSourceEditor extends Component<Props, State> {
   _renderGeoSelect() {
     return this.state.indexPattern ? (
       <GeoFieldSelect
-        value={this.state.geoFieldName}
+        value={this.state.geoFieldName ? this.state.geoFieldName : ''}
         onChange={this._onGeoFieldSelect}
         geoFields={this.state.geoFields}
       />
@@ -115,7 +113,7 @@ export class CreateSourceEditor extends Component<Props, State> {
   }
 
   _renderTopHitsPanel() {
-    if (!this.state.indexPattern || !this.state.geoFieldName) {
+    if (!this.state.indexPattern || !this.state.indexPattern.id || !this.state.geoFieldName) {
       return null;
     }
 
@@ -135,7 +133,9 @@ export class CreateSourceEditor extends Component<Props, State> {
     return (
       <EuiPanel>
         <GeoIndexPatternSelect
-          value={this.state.indexPattern ? this.state.indexPattern.id : ''}
+          value={
+            this.state.indexPattern && this.state.indexPattern.id ? this.state.indexPattern.id : ''
+          }
           onChange={this._onIndexPatternSelect}
         />
 

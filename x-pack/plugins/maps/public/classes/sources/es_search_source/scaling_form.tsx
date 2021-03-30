@@ -19,7 +19,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { SingleFieldSelect } from '../../../components/single_field_select';
 import { getIndexPatternService } from '../../../kibana_services';
 import { DEFAULT_MAX_RESULT_WINDOW, LAYER_TYPE, SCALING_TYPES } from '../../../../common/constants';
 import { loadIndexSettings } from './load_index_settings';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, Component } from 'react';
+import React, { ChangeEvent, Component, Fragment } from 'react';
 import {
   EuiFormRow,
   EuiSelect,
@@ -17,16 +17,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { FIELD_ORIGIN } from '../../../../../common/constants';
 import { SingleFieldSelect } from '../../../../components/single_field_select';
 import { TooltipSelector } from '../../../../components/tooltip_selector';
 
 import { getIndexPatternService } from '../../../../kibana_services';
-import {
-  getGeoTileAggNotSupportedReason,
-  getTermsFields,
-  getSourceFields,
-  supportsGeoTileAgg,
-} from '../../../../index_pattern_util';
+import { getTermsFields, getSourceFields } from '../../../../index_pattern_util';
 import {
   SortDirection,
   indexPatterns,
@@ -35,24 +31,31 @@ import {
 import { ESDocField } from '../../../fields/es_doc_field';
 import { OnSourceChangeArgs } from '../../../../connected_components/layer_panel/view';
 import { TopHitsForm } from './top_hits_form';
+import { ESSearchSource } from '../es_search_source';
+import { IField } from '../../../fields/field';
 
 interface Props {
   filterByMapBounds: boolean;
   indexPatternId: string;
   onChange: (args: OnSourceChangeArgs) => void;
-  tooltipFields: string[];
+  tooltipFields: IField[];
+  topHitsSplitField: string;
+  topHitsSize: number;
   sortField: string;
   sortOrder: SortDirection;
   source: ESSearchSource;
 }
 
 interface State {
-  sourceFields: IFieldType[];
+  loadError?: string;
+  sourceFields: IField[];
   termFields: IFieldType[];
   sortFields: IFieldType[];
 }
 
 export class TopHitsUpdateSourceEditor extends Component<Props, State> {
+  private _isMounted = false;
+
   state: State = {
     sourceFields: [],
     termFields: [],
@@ -95,6 +98,7 @@ export class TopHitsUpdateSourceEditor extends Component<Props, State> {
       return new ESDocField({
         fieldName: field.name,
         source: this.props.source,
+        origin: FIELD_ORIGIN.SOURCE,
       });
     });
 
@@ -106,16 +110,16 @@ export class TopHitsUpdateSourceEditor extends Component<Props, State> {
       ),
     });
   }
-  _onTooltipPropertiesChange = (propertyNames) => {
+  _onTooltipPropertiesChange = (propertyNames: string[]) => {
     this.props.onChange({ propName: 'tooltipProperties', value: propertyNames });
   };
 
-  _onSortFieldChange = (sortField) => {
+  _onSortFieldChange = (sortField?: string) => {
     this.props.onChange({ propName: 'sortField', value: sortField });
   };
 
-  _onSortOrderChange = (e) => {
-    this.props.onChange({ propName: 'sortOrder', value: e.target.value });
+  _onSortOrderChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    this.props.onChange({ propName: 'sortOrder', value: event.target.value });
   };
 
   _onFilterByMapBoundsChange = (event: EuiSwitchEvent) => {

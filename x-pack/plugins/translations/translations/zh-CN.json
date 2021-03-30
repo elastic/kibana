@@ -12933,7 +12933,6 @@
     "xpack.maps.source.esSearch.topHitsSplitFieldLabel": "实体",
     "xpack.maps.source.esSearch.topHitsSplitFieldSelectPlaceholder": "选择实体字段",
     "xpack.maps.source.esSearch.useMVTVectorTiles": "使用矢量磁贴",
-    "xpack.maps.source.esSearch.useTopHitsLabel": "显示每个实体最高命中结果。",
     "xpack.maps.source.esSearchDescription": "Elasticsearch 的点、线和多边形",
     "xpack.maps.source.esSearchTitle": "文档",
     "xpack.maps.source.esSource.noGeoFieldErrorMessage": "索引模式“{indexPatternTitle}”不再包含地理字段 {geoField}",

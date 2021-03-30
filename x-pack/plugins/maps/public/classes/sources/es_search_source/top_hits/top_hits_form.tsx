@@ -10,6 +10,7 @@ import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SingleFieldSelect } from '../../../../components/single_field_select';
 import { getIndexPatternService } from '../../../../kibana_services';
+// @ts-expect-error
 import { ValidatedRange } from '../../../../components/validated_range';
 import { DEFAULT_MAX_INNER_RESULT_WINDOW } from '../../../../../common/constants';
 import { loadIndexSettings } from '../load_index_settings';
@@ -58,11 +59,9 @@ export class TopHitsForm extends Component<Props, State> {
   async loadIndexSettings() {
     try {
       const indexPattern = await getIndexPatternService().get(this.props.indexPatternId);
-      const { maxInnerResultWindow, maxResultWindow } = await loadIndexSettings(
-        indexPattern!.title
-      );
+      const { maxInnerResultWindow } = await loadIndexSettings(indexPattern!.title);
       if (this._isMounted) {
-        this.setState({ maxInnerResultWindow, maxResultWindow });
+        this.setState({ maxInnerResultWindow });
       }
     } catch (err) {
       return;
