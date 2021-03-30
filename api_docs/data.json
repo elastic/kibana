@@ -7111,8 +7111,7 @@
             "docId": "kibDataSearchPluginApi",
             "section": "def-common.ISearchRequestParams",
             "text": "ISearchRequestParams"
-          },
-          "<Record<string, any>>"
+          }
         ],
         "description": [],
         "children": [
@@ -8785,7 +8784,7 @@
             "section": "def-common.ISearchRequestParams",
             "text": "ISearchRequestParams"
           },
-          "<Record<string, any>>>"
+          ">"
         ],
         "description": [],
         "tags": [],
@@ -8798,7 +8797,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/es_search/types.ts",
-              "lineNumber": 20
+              "lineNumber": 19
             },
             "signature": [
               "string | undefined"
@@ -8807,7 +8806,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/es_search/types.ts",
-          "lineNumber": 19
+          "lineNumber": 18
         },
         "initialIsOpen": false
       },
@@ -10866,7 +10865,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/fetch/types.ts",
-              "lineNumber": 37
+              "lineNumber": 40
             }
           },
           {
@@ -10877,7 +10876,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/fetch/types.ts",
-              "lineNumber": 38
+              "lineNumber": 41
             }
           },
           {
@@ -10888,7 +10887,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/fetch/types.ts",
-              "lineNumber": 39
+              "lineNumber": 42
             }
           },
           {
@@ -10899,7 +10898,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/fetch/types.ts",
-              "lineNumber": 40
+              "lineNumber": 43
             }
           },
           {
@@ -10910,7 +10909,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/fetch/types.ts",
-              "lineNumber": 41
+              "lineNumber": 44
             }
           },
           {
@@ -10921,13 +10920,13 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/fetch/types.ts",
-              "lineNumber": 42
+              "lineNumber": 45
             }
           }
         ],
         "source": {
           "path": "src/plugins/data/common/search/search_source/fetch/types.ts",
-          "lineNumber": 36
+          "lineNumber": 39
         },
         "initialIsOpen": false
       },
@@ -11587,7 +11586,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/es_search/types.ts",
-          "lineNumber": 13
+          "lineNumber": 12
         },
         "signature": [
           "\"es\""
@@ -11711,7 +11710,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-          "lineNumber": 26
+          "lineNumber": 34
         },
         "signature": [
           "ExpressionFunctionDefinition<\"kibana_context\", ",
@@ -11854,10 +11853,10 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/es_search/types.ts",
-          "lineNumber": 23
+          "lineNumber": 22
         },
         "signature": [
-          "IKibanaSearchResponse<SearchResponse<Source>>"
+          "IKibanaSearchResponse<estypes.SearchResponse<Source>>"
         ],
         "initialIsOpen": false
       },
@@ -11950,7 +11949,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/index_patterns/expressions/load_index_pattern.ts",
-          "lineNumber": 34
+          "lineNumber": 35
         },
         "signature": [
           "ExpressionFunctionDefinition<\"indexPatternLoad\", null, Arguments, Output, ",
@@ -14590,15 +14589,7 @@
             "lineNumber": 46
           },
           "signature": [
-            "{ addQuerySuggestionProvider: (language: string, provider: ",
-            {
-              "pluginId": "data",
-              "scope": "public",
-              "docId": "kibDataAutocompletePluginApi",
-              "section": "def-public.QuerySuggestionGetFn",
-              "text": "QuerySuggestionGetFn"
-            },
-            ") => void; getQuerySuggestions: ",
+            "{ getQuerySuggestions: ",
             {
               "pluginId": "data",
               "scope": "public",
@@ -15266,7 +15257,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\">, elasticsearchClient: ",
+              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">, elasticsearchClient: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -15293,7 +15284,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/plugin.ts",
-                  "lineNumber": 107
+                  "lineNumber": 104
                 }
               }
             ],
@@ -15301,7 +15292,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/server/plugin.ts",
-              "lineNumber": 107
+              "lineNumber": 104
             }
           },
           {
@@ -15317,7 +15308,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/server/plugin.ts",
-              "lineNumber": 121
+              "lineNumber": 118
             }
           }
         ],
@@ -19756,7 +19747,7 @@
             "section": "def-common.ISearchRequestParams",
             "text": "ISearchRequestParams"
           },
-          "<Record<string, any>>>"
+          ">"
         ],
         "description": [],
         "tags": [],
@@ -19769,7 +19760,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/es_search/types.ts",
-              "lineNumber": 20
+              "lineNumber": 19
             },
             "signature": [
               "string | undefined"
@@ -19778,7 +19769,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/es_search/types.ts",
-          "lineNumber": 19
+          "lineNumber": 18
         },
         "initialIsOpen": false
       },
@@ -20682,7 +20673,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/es_search/types.ts",
-          "lineNumber": 13
+          "lineNumber": 12
         },
         "signature": [
           "\"es\""
@@ -20776,7 +20767,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-          "lineNumber": 26
+          "lineNumber": 34
         },
         "signature": [
           "ExpressionFunctionDefinition<\"kibana_context\", ",
@@ -20885,10 +20876,10 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/es_search/types.ts",
-          "lineNumber": 23
+          "lineNumber": 22
         },
         "signature": [
-          "IKibanaSearchResponse<SearchResponse<Source>>"
+          "IKibanaSearchResponse<estypes.SearchResponse<Source>>"
         ],
         "initialIsOpen": false
       },
@@ -20966,7 +20957,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/index_patterns/expressions/load_index_pattern.ts",
-          "lineNumber": 34
+          "lineNumber": 35
         },
         "signature": [
           "ExpressionFunctionDefinition<\"indexPatternLoad\", null, Arguments, Output, ",
