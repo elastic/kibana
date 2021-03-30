@@ -357,7 +357,7 @@ export class SearchEmbeddable
       // Apply the changes to the angular scope
       this.searchScope.$apply(() => {
         this.searchScope!.hits = resp.hits.hits;
-        this.searchScope!.totalHitCount = resp.hits.total;
+        this.searchScope!.totalHitCount = resp.hits.total as number;
         this.searchScope!.isLoading = false;
       });
     } catch (error) {

@@ -114,10 +114,11 @@ export abstract class BaseAuthenticationProvider {
    */
   protected async getUser(request: KibanaRequest, authHeaders: Headers = {}) {
     return this.authenticationInfoToAuthenticatedUser(
+      // @ts-expect-error @elastic/elasticsearch `AuthenticateResponse` type doesn't define `authentication_type` and `enabled`.
       (
         await this.options.client
           .asScoped({ headers: { ...request.headers, ...authHeaders } })
-          .asCurrentUser.security.authenticate<AuthenticationInfo>()
+          .asCurrentUser.security.authenticate()
       ).body
     );
   }

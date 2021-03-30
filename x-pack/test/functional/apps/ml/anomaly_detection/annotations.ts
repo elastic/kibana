@@ -8,6 +8,7 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { Job, Datafeed } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
 
+// @ts-expect-error doesn't implement the full interface
 const JOB_CONFIG: Job = {
   job_id: `fq_single_1_smv`,
   description: 'mean(responsetime) on farequote dataset with 15m bucket span',
@@ -27,6 +28,7 @@ const JOB_CONFIG: Job = {
   model_plot_config: { enabled: true },
 };
 
+// @ts-expect-error doesn't implement the full interface
 const DATAFEED_CONFIG: Datafeed = {
   datafeed_id: 'datafeed-fq_single_1_smv',
   indices: ['ft_farequote'],

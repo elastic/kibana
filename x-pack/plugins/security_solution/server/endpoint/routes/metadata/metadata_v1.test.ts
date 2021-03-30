@@ -36,6 +36,7 @@ import {
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
+import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
 import { Agent, EsAssetReference } from '../../../../../fleet/common/types/models';
 import { createV1SearchResponse } from './support/test_support';
 import { PackageService } from '../../../../../fleet/server/services';
@@ -84,6 +85,7 @@ describe('test endpoint route v1', () => {
       logFactory: loggingSystemMock.create(),
       service: endpointAppContextService,
       config: () => Promise.resolve(createMockConfig()),
+      experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
     });
   });
 

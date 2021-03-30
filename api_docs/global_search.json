@@ -527,7 +527,7 @@
           "lineNumber": 72
         },
         "signature": [
-          "Pick<GlobalSearchProviderResult, \"type\" | \"id\" | \"title\" | \"meta\" | \"icon\" | \"score\"> & { url: string; }"
+          "Pick<GlobalSearchProviderResult, \"type\" | \"title\" | \"id\" | \"meta\" | \"icon\" | \"score\"> & { url: string; }"
         ],
         "initialIsOpen": false
       }
@@ -1242,7 +1242,7 @@
           "lineNumber": 72
         },
         "signature": [
-          "Pick<GlobalSearchProviderResult, \"type\" | \"id\" | \"title\" | \"meta\" | \"icon\" | \"score\"> & { url: string; }"
+          "Pick<GlobalSearchProviderResult, \"type\" | \"title\" | \"id\" | \"meta\" | \"icon\" | \"score\"> & { url: string; }"
         ],
         "initialIsOpen": false
       }

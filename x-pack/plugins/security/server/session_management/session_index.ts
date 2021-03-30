@@ -39,7 +39,7 @@ const SESSION_INDEX_TEMPLATE_VERSION = 1;
  */
 export function getSessionIndexTemplate(indexName: string) {
   return Object.freeze({
-    index_patterns: indexName,
+    index_patterns: [indexName],
     order: 1000,
     settings: {
       index: {
@@ -52,7 +52,7 @@ export function getSessionIndexTemplate(indexName: string) {
       },
     },
     mappings: {
-      dynamic: 'strict',
+      dynamic: 'strict' as 'strict',
       properties: {
         usernameHash: { type: 'keyword' },
         provider: { properties: { name: { type: 'keyword' }, type: { type: 'keyword' } } },
@@ -151,13 +151,16 @@ export class SessionIndex {
    */
   async get(sid: string) {
     try {
-      const { body: response } = await this.options.elasticsearchClient.get(
+      const {
+        body: response,
+        statusCode,
+      } = await this.options.elasticsearchClient.get<SessionIndexValue>(
         { id: sid, index: this.indexName },
         { ignore: [404] }
       );
 
       const docNotFound = response.found === false;
-      const indexNotFound = response.status === 404;
+      const indexNotFound = statusCode === 404;
       if (docNotFound || indexNotFound) {
         this.options.logger.debug('Cannot find session value with the specified ID.');
         return null;
@@ -215,7 +218,7 @@ export class SessionIndex {
   async update(sessionValue: Readonly<SessionIndexValue>) {
     const { sid, metadata, ...sessionValueToStore } = sessionValue;
     try {
-      const { body: response } = await this.options.elasticsearchClient.index(
+      const { body: response, statusCode } = await this.options.elasticsearchClient.index(
         {
           id: sid,
           index: this.indexName,
@@ -230,7 +233,7 @@ export class SessionIndex {
       // We don't want to override changes that were made after we fetched session value or
       // re-create it if has been deleted already. If we detect such a case we discard changes and
       // return latest copy of the session value instead or `null` if doesn't exist anymore.
-      const sessionIndexValueUpdateConflict = response.status === 409;
+      const sessionIndexValueUpdateConflict = statusCode === 409;
       if (sessionIndexValueUpdateConflict) {
         this.options.logger.debug(
           'Cannot update session value due to conflict, session either does not exist or was already updated.'
@@ -457,7 +460,7 @@ export class SessionIndex {
         { ignore: [409, 404] }
       );
 
-      if (response.deleted > 0) {
+      if (response.deleted! > 0) {
         this.options.logger.debug(
           `Cleaned up ${response.deleted} invalid or expired session values.`
         );

@@ -2296,7 +2296,7 @@
             "children": [
               {
                 "type": "Object",
-                "label": "{ spaceId, user, config, callCluster }",
+                "label": "{ spaceId, user, config, esClient }",
                 "isRequired": true,
                 "signature": [
                   {

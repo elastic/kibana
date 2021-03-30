@@ -6,13 +6,23 @@ actitivies.
 ## Overview
 
 This plugin provides a persistent log of "events" that can be used by other
-plugins to record their processing, for later acccess.  Currently it's only
-used by the alerts and actions plugins.
+plugins to record their processing, for later accces. It is used by:
 
-The "events" are ECS documents, with some custom properties for Kibana, and
-alerting-specific properties within those Kibana properties.  The number of
-ECS fields is limited today, but can be extended fairly easily.  We are being
-conservative in adding new fields though, to help prevent indexing explosions.
+- `alerting` and `actions` plugins
+- [work in progress] `security_solution` (detection rules execution log)
+
+The "events" are [ECS documents](https://www.elastic.co/guide/en/ecs/current/index.html)
+containing both standard ECS fields and some custom fields for Kibana.
+
+- Standard fields are those which are defined in the ECS specification.
+  Examples: `@timestamp`, `message`, `event.provider`. The number of ECS fields
+  supported in Event Log is limited today, but can be extended fairly easily.
+  We are being conservative in adding new fields though, to help prevent
+  indexing explosions.
+- Custom fields are not part of the ECS spec. We defined a top-level `kibana`
+  field set where we have some Kibana-specific fields like `kibana.server_uuid`
+  and `kibana.saved_objects`. Plugins added a few custom fields as well,
+  for example `kibana.alerting` field set.
 
 A client API is available for other plugins to:
 
@@ -47,16 +57,25 @@ The structure of the event documents can be seen in the
 generated via a script when the structure changes.  See the
 [README.md](generated/README.md) for how to change the document structure.
 
-Below is an document in the expected structure, with descriptions of the fields:
+Below is a document in the expected structure, with descriptions of the fields:
 
 ```js
 {
+  // Base ECS fields.
+  // https://www.elastic.co/guide/en/ecs/current/ecs-base.html
   "@timestamp": "ISO date",
   tags: ["tags", "here"],
   message: "message for humans here",
+
+  // ECS version. This is set by the Event Log and should not be specified
+  // by a client of Event Log.
+  // https://www.elastic.co/guide/en/ecs/current/ecs-ecs.html
   ecs: {
     version: "version of ECS used by the event log",
   },
+
+  // Event fields. All of them are supported.
+  // https://www.elastic.co/guide/en/ecs/current/ecs-event.html
   event: {
     provider: "see below",
     action: "see below",
@@ -65,19 +84,44 @@ Below is an document in the expected structure, with descriptions of the fields:
     end: "ISO date of end time for events that capture a duration",
     outcome: "success | failure, for events that indicate an outcome",
     reason: "additional detail on failure outcome",
+    // etc
   },
+
+  // Error fields. All of them are supported.
+  // https://www.elastic.co/guide/en/ecs/current/ecs-error.html
   error: {
     message: "an error message, usually associated with outcome: failure",
+    // etc
   },
+
+  // Log fields. Only a subset is supported.
+  // https://www.elastic.co/guide/en/ecs/current/ecs-log.html
+  log: {
+    level: "info | warning | any log level keyword you need",
+    logger: "name of the logger",
+  },
+
+  // Rule fields. All of them are supported.
+  // https://www.elastic.co/guide/en/ecs/current/ecs-rule.html
+  rule: {
+    author: ["Elastic"],
+    id: "a823fd56-5467-4727-acb1-66809737d943",
+    // etc
+  },
+
+  // User fields. Only user.name is supported.
+  // https://www.elastic.co/guide/en/ecs/current/ecs-user.html
   user: {
     name: "name of Kibana user",
   }, 
-  kibana: { // custom ECS field
+
+  // Custom fields that are not part of ECS.
+  kibana: {
     server_uuid: "UUID of kibana server, for diagnosing multi-Kibana scenarios",
     alerting: {
       instance_id: "alert instance id, for relevant documents",
       action_group_id: "alert action group, for relevant documents",
-      action_subgroup_id: "alert action subgroup, for relevant documents",
+      action_subgroup: "alert action subgroup, for relevant documents",
       status: "overall alert status, after alert execution",
     },
     saved_objects: [
@@ -363,3 +407,14 @@ yarn test:jest x-pack/plugins/event_log --watch
 
 See: [`x-pack/test/plugin_api_integration/test_suites/event_log`](https://github.com/elastic/kibana/tree/master/x-pack/test/plugin_api_integration/test_suites/event_log).
 
+To develop integration tests, first start the test server from the root of the repo:
+
+```sh
+node scripts/functional_tests_server --config x-pack/test/plugin_api_integration/config.ts
+```
+
+Then start the test runner:
+
+```sh
+node scripts/functional_test_runner --config x-pack/test/plugin_api_integration/config.ts --include x-pack/test/plugin_api_integration/test_suites/event_log/index.ts
+```

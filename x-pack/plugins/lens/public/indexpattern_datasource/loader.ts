@@ -17,7 +17,7 @@ import {
   IndexPatternField,
   IndexPatternLayer,
 } from './types';
-import { updateLayerIndexPattern } from './operations';
+import { updateLayerIndexPattern, translateToOperationName } from './operations';
 import { DateRange, ExistingFields } from '../../common/types';
 import { BASE_API_URL } from '../../common';
 import {
@@ -109,7 +109,7 @@ export async function loadIndexPatterns({
             const restriction =
               typeMeta.aggs && typeMeta.aggs[agg] && typeMeta.aggs[agg][field.name];
             if (restriction) {
-              restrictionsObj[agg] = restriction;
+              restrictionsObj[translateToOperationName(agg)] = restriction;
             }
           });
           if (Object.keys(restrictionsObj).length) {
