@@ -43,7 +43,7 @@ export const ResultSettingsTextFieldsHeader: React.FC = () => {
           <EuiToolTip
             position="top"
             content={i18n.translate(
-              'xpack.enterpriseSearch.appSearch.engine.resultSettings.table.highlightingDescription',
+              'xpack.enterpriseSearch.appSearch.engine.resultSettings.table.highlightingTooltip',
               {
                 defaultMessage:
                   'A snippet is an escaped representaiton of a field value. Query matches are encapsulated in <em> tags for highlighting. Fallback will look for a snippet match, but fallback to an escaped raw value if none is found. Range is between 20-1000. Defaults to 100.',
