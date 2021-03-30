@@ -142,8 +142,6 @@ export const registerCollector: RegisterCollector = ({
         getEndpointTelemetryFromFleet(savedObjectsClient, endpointAppContext, esClient),
       ]);
 
-      // console.log(JSON.stringify(detectionMetrics));
-
       return {
         detections: detections.status === 'fulfilled' ? detections.value : defaultDetectionsUsage,
         detectionMetrics: detectionMetrics.status === 'fulfilled' ? detectionMetrics.value : {},

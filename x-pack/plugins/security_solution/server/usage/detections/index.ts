@@ -79,10 +79,12 @@ export interface MlJobMetric {
 }
 
 export interface DetectionRuleMetric {
+  rule_name: string;
   rule_id: string;
   enabled: boolean;
   created_on: string;
   updated_on: string;
+  tags: string[];
 }
 
 export const defaultDetectionsUsage = {

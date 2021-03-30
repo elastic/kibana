@@ -39,6 +39,7 @@ interface RuleSearchParams {
 }
 interface RuleSearchResult {
   alert: {
+    name: string;
     enabled: boolean;
     tags: string[];
     createdAt: string;
@@ -49,6 +50,7 @@ interface RuleSearchResult {
 
 interface DetectionRuleParms {
   ruleId: string;
+  version: string;
 }
 
 const isElasticRule = (tags: string[]) => tags.includes(`${INTERNAL_IMMUTABLE_KEY}:true`);
@@ -322,7 +324,7 @@ export const getDetectionRuleMetrics = async (
     filterPath: [],
     ignoreUnavailable: true,
     index,
-    size: 1000,
+    size: 11,
   };
 
   try {
@@ -335,10 +337,13 @@ export const getDetectionRuleMetrics = async (
 
       return elasticRules.map((hit) => {
         return {
+          rule_name: hit._source?.alert.name,
           rule_id: hit._source?.alert.params.ruleId,
+          rule_version: hit._source?.alert.params.version,
           enabled: hit._source?.alert.enabled,
           created_on: hit._source?.alert.createdAt,
           updated_on: hit._source?.alert.updatedAt,
+          tags: hit._source?.alert.tags,
         } as DetectionRuleMetric;
       });
     }
