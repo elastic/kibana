@@ -25,6 +25,8 @@ export class HeatmapVisualization {
     { expressions, formatFactory, editorFrame, charts }: HeatmapVisualizationPluginSetupPlugins
   ) {
     editorFrame.registerVisualization(async () => {
+      const timeZone = await core.uiSettings.get('dateFormat:tz');
+
       const { getHeatmapVisualization, heatmap, getHeatmapRenderer } = await import(
         '../async_services'
       );
@@ -37,6 +39,7 @@ export class HeatmapVisualization {
           formatFactory,
           chartsThemeService: charts.theme,
           paletteService: palettes,
+          timeZone,
         })
       );
       return getHeatmapVisualization({ paletteService: palettes });

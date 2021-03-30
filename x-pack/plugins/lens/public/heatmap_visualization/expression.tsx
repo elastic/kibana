@@ -13,7 +13,7 @@ import {
   ExpressionFunctionDefinition,
   IInterpreterRenderHandlers,
 } from '../../../../../src/plugins/expressions';
-import { FormatFactory, LensFilterEvent, LensMultiTable } from '../types';
+import { FormatFactory, LensMultiTable } from '../types';
 import { FUNCTION_NAME, LENS_HEATMAP_RENDERER } from './constants';
 import { HeatmapExpressionArgs, HeatmapExpressionProps, HeatmapRender } from './types';
 import { ChartsPluginSetup, PaletteRegistry } from '../../../../../src/plugins/charts/public';
@@ -57,11 +57,14 @@ export const heatmap: ExpressionFunctionDefinition<
       types: ['string'],
       help: '',
     },
+    palette: {
+      default: `{theme "palette" default={system_palette name="default"} }`,
+      help: '',
+      types: ['palette'],
+    },
   },
   inputTypes: ['lens_multitable'],
   fn(data: LensMultiTable, args: HeatmapExpressionArgs) {
-    console.log(data, '___data___');
-    console.log(args, '___args___');
     return {
       type: 'render',
       as: LENS_HEATMAP_RENDERER,
@@ -77,6 +80,7 @@ export const getHeatmapRenderer = (dependencies: {
   formatFactory: Promise<FormatFactory>;
   chartsThemeService: ChartsPluginSetup['theme'];
   paletteService: PaletteRegistry;
+  timeZone: string;
 }) => ({
   name: LENS_HEATMAP_RENDERER,
   displayName: i18n.translate('xpack.lens.heatmap.visualizationName', {
@@ -90,9 +94,17 @@ export const getHeatmapRenderer = (dependencies: {
     config: HeatmapExpressionProps,
     handlers: IInterpreterRenderHandlers
   ) => {
-    console.log(config, '___config___');
+    const formatFactory = await dependencies.formatFactory;
     ReactDOM.render(
-      <I18nProvider>{<HeatmapChartReportable {...config} />}</I18nProvider>,
+      <I18nProvider>
+        {
+          <HeatmapChartReportable
+            {...config}
+            timeZone={dependencies.timeZone}
+            formatFactory={formatFactory}
+          />
+        }
+      </I18nProvider>,
       domNode,
       () => {
         handlers.done();

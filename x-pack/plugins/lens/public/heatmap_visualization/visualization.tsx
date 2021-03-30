@@ -6,15 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Position } from '@elastic/charts';
 import { LensIconChartBar } from '../assets/chart_bar';
 import { PaletteRegistry } from '../../../../../src/plugins/charts/public';
-import { AccessorConfig, OperationMetadata, Visualization } from '../types';
-import { HeatmapLayerState, HeatmapVisualizationState } from './types';
+import { OperationMetadata, Visualization } from '../types';
+import { HeatmapVisualizationState } from './types';
 import { suggestions } from './suggestions';
-import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
 import { CHART_NAMES, CHART_SHAPES, FUNCTION_NAME, GROUP_ID, LENS_HEATMAP_ID } from './constants';
-import { ColumnState } from '../datatable_visualization/visualization';
 
 const groupLabelForBar = i18n.translate('xpack.lens.heatmapVisualization.heatmapGroupLabel', {
   defaultMessage: 'Heatmap',
@@ -37,9 +34,11 @@ function getAxisName(axis: 'x' | 'y') {
   return vertical;
 }
 
-const isTimeBucket = (op: OperationMetadata) => op.dataType === 'date';
-const isBucketed = (op: OperationMetadata) => op.isBucketed;
-const isNumericMetric = (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number';
+const filterOperationsXAxis = (op: OperationMetadata) => isTime(op) || isBucketed(op);
+
+const isTime = (op: OperationMetadata) => op.dataType === 'date';
+const isBucketed = (op: OperationMetadata) => op.isBucketed && op.scale === 'ordinal';
+const isNumericMetric = (op: OperationMetadata) => op.dataType === 'number';
 
 export const getHeatmapVisualization = ({
   paletteService,
@@ -97,10 +96,6 @@ export const getHeatmapVisualization = ({
       return { groups: [] };
     }
 
-    // console.log(originalOrder, '___originalOrder___');
-
-    // console.log(originalOrder, '___originalOrder___');
-
     return {
       groups: [
         {
@@ -108,7 +103,7 @@ export const getHeatmapVisualization = ({
           groupId: GROUP_ID.X,
           groupLabel: getAxisName(GROUP_ID.X),
           accessors: state.xAccessor ? [{ columnId: state.xAccessor }] : [],
-          filterOperations: isTimeBucket,
+          filterOperations: filterOperationsXAxis,
           supportsMoreColumns: true,
           required: true,
           dataTestSubj: 'lnsHeatmap_xDimensionPanel',
@@ -142,16 +137,7 @@ export const getHeatmapVisualization = ({
   },
 
   setDimension({ prevState, layerId, columnId, groupId, previousColumn }) {
-    // if (!newLayer) {
-    //   return prevState;
-    // }
-    //
-    //
-    // console.log(prevState, '___prevState___');
-    // console.log(columnId, '___columnId___');
-    // console.log(groupId, '___groupId___');
-
-    const update = {};
+    const update: Partial<HeatmapVisualizationState> = {};
     if (groupId === GROUP_ID.X) {
       update.xAccessor = columnId;
     }
@@ -161,7 +147,6 @@ export const getHeatmapVisualization = ({
     if (groupId === GROUP_ID.CELL) {
       update.valueAccessor = columnId;
     }
-
     return {
       ...prevState,
       ...update,
@@ -184,32 +169,15 @@ export const getHeatmapVisualization = ({
     return update;
   },
 
-  toExpression: (state, datasourceLayers, attributes) => {
+  toExpression(state, datasourceLayers, attributes): Ast | null {
     const datasource = datasourceLayers[state.layerId];
 
     const originalOrder = datasource.getTableSpec().map(({ columnId }) => columnId);
     // When we add a column it could be empty, and therefore have no order
 
-    console.log(state, '___state___');
-
     if (!originalOrder) {
-      return { groups: [] };
+      return null;
     }
-
-    const sortedColumns = originalOrder;
-
-    // if (
-    //   sortedColumns?.length &&
-    //   sortedColumns.filter((c) => !datasource!.getOperationForColumnId(c)?.isBucketed).length === 0
-    // ) {
-    //   return null;
-    // }
-
-    // console.log(state, '___state___');
-    // console.log(datasource, '___datasource___');
-    // console.log(originalOrder, '___originalOrder___');
-
-    console.log(attributes, '___attributes___');
 
     return {
       type: 'expression',
@@ -228,8 +196,6 @@ export const getHeatmapVisualization = ({
       ],
     };
   },
-
-  // toPreviewExpression: (state, layers) => toPreviewExpression(state, layers, paletteService),
 
   getErrorMessages(state) {
     // not possible to break it?

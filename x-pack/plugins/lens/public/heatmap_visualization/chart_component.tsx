@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import {
   Chart,
   Heatmap,
@@ -28,59 +28,74 @@ declare global {
   }
 }
 
-export const HeatmapComponent: FC<HeatmapRenderProps> = ({ data, args }) => {
+export const HeatmapComponent: FC<HeatmapRenderProps> = ({
+  data,
+  args,
+  timeZone,
+  formatFactory,
+}) => {
   const isDarkTheme = false;
   const onElementClick = () => {};
 
-  console.log(args, '___args___');
+  const table = Object.values(data.tables)[0];
 
-  const chartData = Object.values(data.tables)[0].rows;
-  console.log(chartData, '___data___');
+  const chartData = table.rows;
 
-  const config: HeatmapSpec['config'] = useMemo(() => {
-    return {
-      onBrushEnd: (e: HeatmapBrushEvent) => {},
-      grid: {
-        cellHeight: {
-          min: 30,
-          max: 30,
-        },
-        stroke: {
-          width: 1,
-          color: '#D3DAE6',
-        },
+  const xAxis = table.columns.find((v) => v.id === args.xAccessor);
+
+  if (!xAxis) {
+    // Chart is not ready
+    return null;
+  }
+
+  const xAxisMeta = xAxis.meta;
+  const xScaleType = xAxisMeta.type === 'date' ? ScaleType.Time : ScaleType.Ordinal;
+
+  const xValuesFormatter = formatFactory(xAxisMeta.params);
+
+  const config: HeatmapSpec['config'] = {
+    onBrushEnd: (e: HeatmapBrushEvent) => {},
+    grid: {
+      cellHeight: {
+        min: 30,
+        max: 30,
       },
-      cell: {
-        maxWidth: 'fill',
-        maxHeight: 'fill',
-        label: {
-          visible: false,
-        },
-        border: {
-          stroke: '#D3DAE6',
-          strokeWidth: 0,
-        },
+      stroke: {
+        width: 1,
+        color: '#D3DAE6',
       },
-      yAxisLabel: {
-        visible: true,
-        // eui color subdued
-        fill: `#6a717d`,
-        padding: 8,
+    },
+    cell: {
+      maxWidth: 'fill',
+      maxHeight: 'fill',
+      label: {
+        visible: false,
       },
-      xAxisLabel: {
-        visible: true,
-        // eui color subdued
-        fill: `#98A2B3`,
+      border: {
+        stroke: '#D3DAE6',
+        strokeWidth: 0,
       },
-      brushMask: {
-        fill: isDarkTheme ? 'rgb(30,31,35,80%)' : 'rgb(247,247,247,50%)',
-      },
-      brushArea: {
-        stroke: isDarkTheme ? 'rgb(255, 255, 255)' : 'rgb(105, 112, 125)',
-      },
-      timeZone: 'UTC',
-    };
-  }, [isDarkTheme]);
+    },
+    yAxisLabel: {
+      visible: true,
+      // eui color subdued
+      fill: `#6a717d`,
+      padding: 8,
+    },
+    xAxisLabel: {
+      visible: true,
+      // eui color subdued
+      fill: `#98A2B3`,
+      formatter: (v: number | string) => xValuesFormatter.convert(v),
+    },
+    brushMask: {
+      fill: isDarkTheme ? 'rgb(30,31,35,80%)' : 'rgb(247,247,247,50%)',
+    },
+    brushArea: {
+      stroke: isDarkTheme ? 'rgb(255, 255, 255)' : 'rgb(105, 112, 125)',
+    },
+    timeZone,
+  };
 
   return (
     <Chart>
@@ -103,7 +118,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({ data, args }) => {
         xAccessor={args.xAccessor}
         yAccessor={args.yAccessor}
         valueAccessor={args.valueAccessor}
-        xScaleType={ScaleType.Time}
+        xScaleType={xScaleType}
         ySortPredicate="dataIndex"
         config={config}
       />
@@ -123,8 +138,6 @@ export function HeatmapChartReportable(props: HeatmapRenderProps) {
   useEffect(() => {
     setState({ isReady: true });
   }, [setState]);
-
-  console.log(props, '___props___');
 
   return (
     <VisualizationContainer

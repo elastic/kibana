@@ -7,7 +7,7 @@
 
 import { Position } from '@elastic/charts';
 import { PaletteOutput } from '../../../../../src/plugins/charts/common';
-import { LensMultiTable } from '../types';
+import { FormatFactory, LensMultiTable } from '../types';
 import { CHART_SHAPES, LENS_HEATMAP_RENDERER } from './constants';
 
 export type ChartShapes = typeof CHART_SHAPES[keyof typeof CHART_SHAPES];
@@ -47,4 +47,5 @@ export interface HeatmapExpressionProps {
 
 export type HeatmapRenderProps = HeatmapExpressionProps & {
   timeZone: string;
+  formatFactory: FormatFactory;
 };
