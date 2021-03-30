@@ -792,7 +792,7 @@ describe('EnhancedSearchInterceptor', () => {
 
       // Time travel to make sure nothing appens
       await timeTravel(10);
-      expect(fetchMock).toBeCalledTimes(1);
+      expect(fetchMock).toBeCalledTimes(0);
       expect(next).toBeCalledTimes(0);
       expect(error).toBeCalledTimes(1);
       expect(complete).toBeCalledTimes(0);
@@ -808,7 +808,7 @@ describe('EnhancedSearchInterceptor', () => {
 
       // Should search again
       await timeTravel(10);
-      expect(fetchMock).toBeCalledTimes(2);
+      expect(fetchMock).toBeCalledTimes(1);
       expect(next2).toBeCalledTimes(1);
       expect(error2).toBeCalledTimes(0);
       expect(complete2).toBeCalledTimes(1);
@@ -833,8 +833,9 @@ describe('EnhancedSearchInterceptor', () => {
       // Search the same thing again, this will return the result from cache
       const error2 = jest.fn();
       const next2 = jest.fn();
+      const complete2 = jest.fn();
       const resp2$ = searchInterceptor.search(basicReq, { sessionId });
-      resp2$.subscribe({ next: next2, error: error2, complete });
+      resp2$.subscribe({ next: next2, error: error2, complete: complete2 });
 
       // Abort the original request
       abortController.abort();
@@ -843,7 +844,7 @@ describe('EnhancedSearchInterceptor', () => {
       expect(error).toBeCalledTimes(1);
       expect(next2).toBeCalledTimes(1);
 
-      await timeTravel(10);
+      await timeTravel(100);
       expect(next2).toBeCalledTimes(2);
     });
 

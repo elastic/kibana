@@ -7,7 +7,16 @@
 
 import { once } from 'lodash';
 import { throwError, Subscription, from, of } from 'rxjs';
-import { tap, finalize, catchError, filter, take, skip, switchMap } from 'rxjs/operators';
+import {
+  tap,
+  finalize,
+  catchError,
+  filter,
+  take,
+  skip,
+  switchMap,
+  shareReplay,
+} from 'rxjs/operators';
 import {
   TimeoutErrorMode,
   SearchInterceptor,
@@ -133,12 +142,12 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
             if (savedToBackgroundSub) {
               savedToBackgroundSub.unsubscribe();
             }
-          })
+          }),
+          shareReplay()
         );
 
         if (requestHash) {
-          // Cache and return from cache
-          return this.responseCache.set(requestHash, {
+          this.responseCache.set(requestHash, {
             response$: search$,
             searchAbortController,
           });

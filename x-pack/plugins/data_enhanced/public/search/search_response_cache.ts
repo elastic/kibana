@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Observable, ReplaySubject, Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { IKibanaSearchResponse, isErrorResponse } from '../../../../../src/plugins/data/public';
 import { SearchAbortController } from './search_abort_controller';
 
@@ -85,9 +85,8 @@ export class SearchResponseCache {
 
     const { response$, searchAbortController } = item;
 
-    const responseReplay$ = new ReplaySubject<IKibanaSearchResponse<any>>(1);
     const cacheItem: ResponseCacheItemInternal = {
-      response$: responseReplay$,
+      response$,
       searchAbortController,
       subs: new Subscription(),
       size: 0,
@@ -110,19 +109,14 @@ export class SearchResponseCache {
             // Evict and ignore.
             this.deleteItem(key);
           }
-
-          responseReplay$.next(r);
         },
         error: (e) => {
           // Evict item on error
           this.deleteItem(key);
-          responseReplay$.error(e);
         },
-        complete: () => responseReplay$.complete(),
       })
     );
     this.shrink();
-    return responseReplay$;
   }
 
   public get(key: string): ResponseCacheItem | undefined {
