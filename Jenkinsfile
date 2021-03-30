@@ -8,8 +8,8 @@ kibanaPipeline(timeoutMinutes: 210, checkPrChanges: true, setCommitStatus: true)
     githubPr.withDefaultPrComments {
       ciStats.trackBuild {
         catchError {
-          retryable.enable()
-          kibanaPipeline.allCiTasks()
+          kibanaPipeline.buildOss(20)
+          kibanaPipeline.ossCiGroupProcess(6, true)
         }
       }
     }
