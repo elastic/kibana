@@ -22,7 +22,7 @@ export const ResultSettingsDisabledFieldsBody: React.FC = () => {
         <EuiTableRow key={fieldName}>
           <EuiTableRowCell colSpan={6}>
             <EuiText size="s" data-test-subj="ResultSettingFieldName">
-              {fieldName}
+              <code>{fieldName}</code>
             </EuiText>
             <EuiHealth color="warning">
               {i18n.translate(
