@@ -273,6 +273,7 @@ export class TablePanelConfig extends Component<
           <EuiTab
             isSelected={selectedTab === PANEL_CONFIG_TABS.DATA}
             onClick={() => this.switchTab(PANEL_CONFIG_TABS.DATA)}
+            data-test-subj="tableEditorDataBtn"
           >
             <FormattedMessage
               id="visTypeTimeseries.table.dataTab.columnsButtonLabel"
@@ -282,6 +283,7 @@ export class TablePanelConfig extends Component<
           <EuiTab
             isSelected={selectedTab === PANEL_CONFIG_TABS.OPTIONS}
             onClick={() => this.switchTab(PANEL_CONFIG_TABS.OPTIONS)}
+            data-test-subj="tableEditorPanelOptionsBtn"
           >
             <FormattedMessage
               id="visTypeTimeseries.table.optionsTab.panelOptionsButtonLabel"
