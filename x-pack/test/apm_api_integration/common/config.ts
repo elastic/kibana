@@ -6,7 +6,7 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
-import supertestAsPromised from 'supertest-as-promised';
+import supertest from 'supertest';
 import { format, UrlObject } from 'url';
 import path from 'path';
 import { InheritedFtrProviderContext, InheritedServices } from './ftr_provider_context';
@@ -33,7 +33,7 @@ const supertestAsApmUser = (kibanaServer: UrlObject, apmUser: ApmUser) => async 
     auth: `${apmUser}:${APM_TEST_PASSWORD}`,
   });
 
-  return supertestAsPromised(url);
+  return supertest(url);
 };
 
 export function createTestConfig(config: Config) {
