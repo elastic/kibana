@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiTableHeader, EuiTableHeaderCell, EuiToolTip, EuiIcon } from '@elastic/eui';
+import { EuiTableRow, EuiTableHeader, EuiTableHeaderCell, EuiToolTip, EuiIcon } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -56,7 +56,7 @@ export const TextFieldsHeader: React.FC = () => {
           </EuiToolTip>
         </EuiTableHeaderCell>
       </EuiTableHeader>
-      <EuiTableHeader className="resultSettingsTable__textHeader">
+      <EuiTableRow className="resultSettingsTable__subHeader">
         <EuiTableHeaderCell align="left">
           {i18n.translate(
             'xpack.enterpriseSearch.appSearch.engine.resultSettings.table.column.textFieldsTitle',
@@ -96,7 +96,7 @@ export const TextFieldsHeader: React.FC = () => {
             { defaultMessage: 'Max size' }
           )}
         </EuiTableHeaderCell>
-      </EuiTableHeader>
+      </EuiTableRow>
     </>
   );
 };

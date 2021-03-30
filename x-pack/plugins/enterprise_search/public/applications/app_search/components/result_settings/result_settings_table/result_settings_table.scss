@@ -18,7 +18,7 @@
     }
   }
 
-  tbody + thead {
+  tbody + &__subHeader {
     // Since this table has multiple sets of thead + tbody's, this is our way of keeping
     // vertical space between the two
     border-top: solid $euiSizeL * 2 transparent;

@@ -7,18 +7,18 @@
 
 import React from 'react';
 
-import { EuiTableHeader, EuiTableHeaderCell } from '@elastic/eui';
+import { EuiTableRow, EuiTableHeaderCell } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export const DisabledFieldsHeader: React.FC = () => {
   return (
-    <EuiTableHeader className="resultSettingsTable__disabledHeader">
+    <EuiTableRow className="resultSettingsTable__subHeader">
       <EuiTableHeaderCell align="left" colSpan={5}>
         {i18n.translate(
           'xpack.enterpriseSearch.appSearch.engine.resultSettings.table.column.disabledFieldsTitle',
           { defaultMessage: 'Disabled fields' }
         )}
       </EuiTableHeaderCell>
-    </EuiTableHeader>
+    </EuiTableRow>
   );
 };

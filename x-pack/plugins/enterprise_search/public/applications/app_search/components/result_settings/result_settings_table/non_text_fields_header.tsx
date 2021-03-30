@@ -7,12 +7,12 @@
 
 import React from 'react';
 
-import { EuiTableHeader, EuiTableHeaderCell } from '@elastic/eui';
+import { EuiTableRow, EuiTableHeaderCell } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export const NonTextFieldsHeader: React.FC = () => {
   return (
-    <EuiTableHeader className="resultSettingsTable__nonTextHeader">
+    <EuiTableRow className="resultSettingsTable__subHeader">
       <EuiTableHeaderCell align="left">
         {i18n.translate(
           'xpack.enterpriseSearch.appSearch.engine.resultSettings.table.column.nonTextFieldsTitle',
@@ -26,6 +26,6 @@ export const NonTextFieldsHeader: React.FC = () => {
         )}
       </EuiTableHeaderCell>
       <EuiTableHeaderCell colSpan={4} aria-hidden />
-    </EuiTableHeader>
+    </EuiTableRow>
   );
 };
