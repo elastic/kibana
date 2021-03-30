@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { combineLatest, ConnectableObservable, EMPTY, Observable, Subscription } from 'rxjs';
+import { combineLatest, ConnectableObservable, Observable, Subscription } from 'rxjs';
 import { first, map, publishReplay, tap } from 'rxjs/operators';
 import { Server } from '@hapi/hapi';
 import {
@@ -55,7 +55,6 @@ export class LegacyService implements CoreService {
   /** Symbol to represent the legacy platform as a fake "plugin". Used by the ContextService */
   public readonly legacyId = Symbol();
   private readonly log: Logger;
-  private readonly devConfig$: Observable<DevConfig>;
   private readonly httpConfig$: Observable<HttpConfig>;
   private readonly opsConfig$: Observable<OpsConfigType>;
   private readonly legacyLoggingConfig$: Observable<LegacyLoggingConfig>;
@@ -69,9 +68,6 @@ export class LegacyService implements CoreService {
     const { logger, configService } = coreContext;
 
     this.log = logger.get('legacy-service');
-    this.devConfig$ = configService
-      .atPath<DevConfigType>(devConfig.path)
-      .pipe(map((rawConfig) => new DevConfig(rawConfig)));
     this.httpConfig$ = combineLatest(
       configService.atPath<HttpConfigType>(httpConfig.path),
       configService.atPath<CspConfigType>(cspConfig.path),
@@ -119,10 +115,12 @@ export class LegacyService implements CoreService {
 
     this.log.debug('starting legacy service');
 
-    // Receive initial config and create kbnServer/ClusterManager.
-    if (this.coreContext.env.isDevCliParent) {
-      // await this.setupCliDevMode(this.legacyRawConfig!);
-    }
+    this.kbnServer = await this.createKbnServer(
+      this.settings!,
+      this.legacyRawConfig!,
+      setupDeps,
+      startDeps
+    );
   }
 
   private async setupLegacyLogging(server: Server) {

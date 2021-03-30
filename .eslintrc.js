@@ -93,6 +93,7 @@ const SAFER_LODASH_SET_DEFINITELYTYPED_HEADER = `
 const DEV_PACKAGES = [
   'kbn-babel-code-parser',
   'kbn-dev-utils',
+  'kbn-cli-dev-mode',
   'kbn-docs-utils',
   'kbn-es*',
   'kbn-eslint*',

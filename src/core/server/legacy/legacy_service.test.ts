@@ -6,15 +6,10 @@
  * Side Public License, v 1.
  */
 
-jest.mock('./cli_dev_mode');
-
 import { BehaviorSubject, throwError } from 'rxjs';
 import { REPO_ROOT } from '@kbn/dev-utils';
 
-// @ts-expect-error js file to remove TS dependency on cli
-import { CliDevMode as MockCliDevMode } from './cli_dev_mode';
 import { Config, Env, ObjectToConfigAdapter } from '../config';
-import { BasePathProxyServer } from '../http';
 import { DiscoveredPlugin } from '../plugins';
 
 import { getEnvOptions, configServiceMock } from '../config/mocks';
@@ -128,7 +123,6 @@ describe('once LegacyService is set up with connection info', () => {
     );
 
     expect(MockKbnServer).not.toHaveBeenCalled();
-    expect(MockCliDevMode).not.toHaveBeenCalled();
   });
 
   test('reconfigures logging configuration if new config is received.', async () => {

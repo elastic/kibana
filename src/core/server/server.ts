@@ -119,13 +119,10 @@ export class Server {
       environment: environmentSetup,
     });
 
-    // rely on dev server to validate config, don't validate in the parent process
-    if (!this.env.isDevCliParent) {
-      // Immediately terminate in case of invalid configuration
-      // This needs to be done after plugin discovery
-      await this.configService.validate();
-      await ensureValidConfiguration(this.configService);
-    }
+    // Immediately terminate in case of invalid configuration
+    // This needs to be done after plugin discovery
+    await this.configService.validate();
+    await ensureValidConfiguration(this.configService);
 
     const contextServiceSetup = this.context.setup({
       // We inject a fake "legacy plugin" with dependencies on every plugin so that legacy plugins:
