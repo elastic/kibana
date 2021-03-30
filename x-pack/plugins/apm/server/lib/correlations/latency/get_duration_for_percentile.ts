@@ -13,11 +13,11 @@ import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 export async function getDurationForPercentile({
   durationPercentile,
-  backgroundFilters,
+  filters,
   setup,
 }: {
   durationPercentile: number;
-  backgroundFilters: ESFilter[];
+  filters: ESFilter[];
   setup: Setup & SetupTimeRange;
 }) {
   return withApmSpan('get_duration_for_percentiles', async () => {
@@ -29,7 +29,7 @@ export async function getDurationForPercentile({
       body: {
         size: 0,
         query: {
-          bool: { filter: backgroundFilters },
+          bool: { filter: filters },
         },
         aggs: {
           percentile: {

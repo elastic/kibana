@@ -58,6 +58,7 @@ import {
   rootTransactionByTraceIdRoute,
 } from './traces';
 import {
+  correlationsLatencyDistributionRoute,
   correlationsForSlowTransactionsRoute,
   correlationsForFailedTransactionsRoute,
 } from './correlations';
@@ -152,6 +153,7 @@ const createApmApi = () => {
     .add(createOrUpdateAgentConfigurationRoute)
 
     // Correlations
+    .add(correlationsLatencyDistributionRoute)
     .add(correlationsForSlowTransactionsRoute)
     .add(correlationsForFailedTransactionsRoute)
 

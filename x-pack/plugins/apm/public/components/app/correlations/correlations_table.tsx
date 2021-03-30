@@ -23,13 +23,15 @@ import { createHref, push } from '../../shared/Links/url_helpers';
 import { ImpactBar } from '../../shared/ImpactBar';
 import { useUiTracker } from '../../../../../observability/public';
 
-type CorrelationsApiResponse =
-  | APIReturnType<'GET /api/apm/correlations/failed_transactions'>
-  | APIReturnType<'GET /api/apm/correlations/slow_transactions'>;
+// type CorrelationsApiResponse =
+//   | APIReturnType<'GET /api/apm/correlations/errors/failed_transactions'>
+//   | APIReturnType<'GET /api/apm/correlations/latency/slow_transactions'>;
 
-type SignificantTerm = NonNullable<
-  NonNullable<CorrelationsApiResponse>['significantTerms']
->[0];
+// type SignificantTerm = NonNullable<
+//   NonNullable<CorrelationsApiResponse>['significantTerms']
+// >[0];
+type CorrelationsApiResponse = APIReturnType<'GET /api/apm/correlations/latency/slow_transactions'>;
+type SignificantTerm = CorrelationsApiResponse[0];
 
 export type SelectedSignificantTerm = Pick<
   SignificantTerm,

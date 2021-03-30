@@ -35,7 +35,7 @@ import { useLocalStorage } from '../../../hooks/useLocalStorage';
 import { useUiTracker } from '../../../../../observability/public';
 
 type CorrelationsApiResponse = NonNullable<
-  APIReturnType<'GET /api/apm/correlations/failed_transactions'>
+  APIReturnType<'GET /api/apm/correlations/errors/failed_transactions'>
 >;
 
 interface Props {
@@ -69,7 +69,7 @@ export function ErrorCorrelations({ onClose }: Props) {
     (callApmApi) => {
       if (start && end && hasFieldNames) {
         return callApmApi({
-          endpoint: 'GET /api/apm/correlations/failed_transactions',
+          endpoint: 'GET /api/apm/correlations/errors/failed_transactions',
           params: {
             query: {
               environment,

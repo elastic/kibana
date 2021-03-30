@@ -18,7 +18,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const range = archives_metadata[archiveName];
 
   const url = format({
-    pathname: `/api/apm/correlations/slow_transactions`,
+    pathname: `/api/apm/correlations/latency/slow_transactions`,
     query: {
       start: range.start,
       end: range.end,
@@ -37,7 +37,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   });
 
   registry.when('with data and default args', { config: 'trial', archives: ['apm_8.0.0'] }, () => {
-    type ResponseBody = APIReturnType<'GET /api/apm/correlations/slow_transactions'>;
+    type ResponseBody = APIReturnType<'GET /api/apm/correlations/latency/slow_transactions'>;
     let response: {
       status: number;
       body: NonNullable<ResponseBody>;
@@ -52,9 +52,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     it('returns significant terms', () => {
-      const significantTerms = response.body?.significantTerms as NonNullable<
-        typeof response.body.significantTerms
-      >;
+      const significantTerms = response.body;
       expect(significantTerms).to.have.length(9);
       const sortedFieldNames = significantTerms.map(({ fieldName }) => fieldName).sort();
       expectSnapshot(sortedFieldNames).toMatchInline(`
@@ -73,8 +71,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     it('returns a distribution per term', () => {
-      expectSnapshot(response.body?.significantTerms?.map((term) => term.distribution.length))
-        .toMatchInline(`
+      const significantTerms = response.body;
+      expectSnapshot(significantTerms.map((term) => term.distribution.length)).toMatchInline(`
         Array [
           15,
           15,
@@ -89,8 +87,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       `);
     });
 
-    it('returns overall distribution', () => {
-      expectSnapshot(response.body?.overall?.distribution.length).toMatchInline(`15`);
-    });
+    // it.skip('returns overall distribution', () => {
+    //   expectSnapshot(response.body?.overall?.distribution.length).toMatchInline(`15`);
+    // });
   });
 }

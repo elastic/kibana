@@ -5,44 +5,31 @@
  * 2.0.
  */
 
-import { isEmpty, dropRightWhile } from 'lodash';
+import { dropRightWhile } from 'lodash';
 import { AggregationOptionsByType } from '../../../../../../../typings/elasticsearch';
 import { ESFilter } from '../../../../../../../typings/elasticsearch';
 import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { TopSigTerm } from '../process_significant_term_aggs';
-import { getMaxLatency } from './get_max_latency';
 import { withApmSpan } from '../../../utils/with_apm_span';
+import { INTERVAL_BUCKETS } from './get_overall_latency_distribution';
 
 export async function getLatencyDistribution({
   setup,
-  backgroundFilters,
+  filters,
   topSigTerms,
+  maxLatency,
+  distributionInterval,
 }: {
   setup: Setup & SetupTimeRange;
-  backgroundFilters: ESFilter[];
+  filters: ESFilter[];
   topSigTerms: TopSigTerm[];
+  maxLatency: number;
+  distributionInterval: number;
 }) {
   return withApmSpan('get_latency_distribution', async () => {
     const { apmEventClient } = setup;
-
-    if (isEmpty(topSigTerms)) {
-      return {};
-    }
-
-    const maxLatency = await getMaxLatency({
-      setup,
-      backgroundFilters,
-      topSigTerms,
-    });
-
-    if (!maxLatency) {
-      return {};
-    }
-
-    const intervalBuckets = 15;
-    const distributionInterval = Math.floor(maxLatency / intervalBuckets);
 
     const distributionAgg = {
       // filter out outliers not included in the significant term docs
@@ -89,14 +76,8 @@ export async function getLatencyDistribution({
       apm: { events: [ProcessorEvent.transaction] },
       body: {
         size: 0,
-        query: { bool: { filter: backgroundFilters } },
-        aggs: {
-          // overall aggs
-          distribution: distributionAgg,
-
-          // per term aggs
-          ...perTermAggs,
-        },
+        query: { bool: { filter: filters } },
+        aggs: perTermAggs,
       },
     };
 
@@ -106,16 +87,17 @@ export async function getLatencyDistribution({
     type Agg = NonNullable<typeof response.aggregations>;
 
     if (!response.aggregations) {
-      return {};
+      return null;
     }
 
-    function formatDistribution(distribution: Agg['distribution']) {
+    function formatDistribution(distribution: Agg[string]['distribution']) {
       const total = distribution.doc_count;
 
       // remove trailing buckets that are empty and out of bounds of the desired number of buckets
       const buckets = dropRightWhile(
         distribution.dist_filtered_by_latency.buckets,
-        (bucket, index) => bucket.doc_count === 0 && index > intervalBuckets - 1
+        (bucket, index) =>
+          bucket.doc_count === 0 && index > INTERVAL_BUCKETS - 1
       );
 
       return buckets.map((bucket) => ({
@@ -124,20 +106,14 @@ export async function getLatencyDistribution({
       }));
     }
 
-    return {
-      distributionInterval,
-      overall: {
-        distribution: formatDistribution(response.aggregations.distribution),
-      },
-      significantTerms: topSigTerms.map((topSig, index) => {
-        // @ts-expect-error
-        const agg = response.aggregations[`term_${index}`] as Agg;
+    return topSigTerms.map((topSig, index) => {
+      // @ts-expect-error
+      const agg = response.aggregations[`term_${index}`] as Agg[string];
 
-        return {
-          ...topSig,
-          distribution: formatDistribution(agg.distribution),
-        };
-      }),
-    };
+      return {
+        ...topSig,
+        distribution: formatDistribution(agg.distribution),
+      };
+    });
   });
 }
