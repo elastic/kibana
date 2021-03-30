@@ -6,7 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter, IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
+import { CoreSetup, Logger } from 'src/core/server';
 import {
   MAX_FILE_SIZE_BYTES,
   IngestPipelineWrapper,
@@ -20,6 +21,8 @@ import { importDataProvider } from './import_data';
 
 import { updateTelemetry } from './telemetry';
 import { analyzeFileQuerySchema, importFileBodySchema, importFileQuerySchema } from './schemas';
+import { CheckPrivilegesPayload } from '../../security/server';
+import { StartDeps } from './types';
 
 function importData(
   client: IScopedClusterClient,
@@ -37,7 +40,55 @@ function importData(
 /**
  * Routes for the file upload.
  */
-export function fileUploadRoutes(router: IRouter) {
+export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logger: Logger) {
+  const router = coreSetup.http.createRouter();
+
+  router.get(
+    {
+      path: '/internal/file_upload/has_import_permission',
+      validate: {
+        query: schema.object({
+          indexName: schema.maybe(schema.string()),
+          checkCreateIndexPattern: schema.boolean(),
+          checkHasManagePipeline: schema.boolean(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const [, pluginsStart] = await coreSetup.getStartServices();
+        const { indexName, checkCreateIndexPattern, checkHasManagePipeline } = request.query;
+
+        const authorizationService = pluginsStart.security?.authz;
+        const requiresAuthz = authorizationService?.mode.useRbacForRequest(request) ?? false;
+
+        if (!authorizationService || !requiresAuthz) {
+          return response.ok({ body: { hasImportPermission: true } });
+        }
+
+        const checkPrivilegesPayload: CheckPrivilegesPayload = {
+          elasticsearch: {
+            cluster: checkHasManagePipeline ? ['manage_pipeline'] : [],
+            index: indexName ? { [indexName]: ['create', 'create_index'] } : {},
+          },
+        };
+        if (checkCreateIndexPattern) {
+          checkPrivilegesPayload.kibana = [
+            authorizationService.actions.savedObject.get('index-pattern', 'create'),
+          ];
+        }
+
+        const checkPrivileges = authorizationService.checkPrivilegesDynamicallyWithRequest(request);
+        const checkPrivilegesResp = await checkPrivileges(checkPrivilegesPayload);
+
+        return response.ok({ body: { hasImportPermission: checkPrivilegesResp.hasAllRequested } });
+      } catch (e) {
+        logger.warn(`Unable to check import permission, error: ${e.message}`);
+        return response.ok({ body: { hasImportPermission: false } });
+      }
+    }
+  );
+
   /**
    * @apiGroup FileDataVisualizer
    *
