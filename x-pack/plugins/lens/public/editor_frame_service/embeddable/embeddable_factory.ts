@@ -102,8 +102,8 @@ export class EmbeddableFactory implements EmbeddableFactoryDefinition {
         getTriggerCompatibleActions: uiActions?.getTriggerCompatibleActions,
         documentToExpression,
         capabilities: {
-          dashboardSave: Boolean(capabilities.dashboard?.showWriteControls),
-          visualizeSave: Boolean(capabilities.visualize.save),
+          canSaveDashboards: Boolean(capabilities.dashboard?.showWriteControls),
+          canSaveVisualizations: Boolean(capabilities.visualize.save),
         },
       },
       input,

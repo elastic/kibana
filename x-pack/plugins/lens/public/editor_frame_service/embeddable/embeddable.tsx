@@ -87,7 +87,7 @@ export interface LensEmbeddableDeps {
   basePath: IBasePath;
   getTrigger?: UiActionsStart['getTrigger'] | undefined;
   getTriggerCompatibleActions?: UiActionsStart['getTriggerCompatibleActions'];
-  capabilities: { visualizeSave: boolean; dashboardSave: boolean };
+  capabilities: { canSaveVisualizations: boolean; canSaveDashboards: boolean };
 }
 
 export class Embeddable
@@ -420,8 +420,8 @@ export class Embeddable
 
   private getIsEditable() {
     return (
-      this.deps.capabilities.visualizeSave ||
-      (!this.inputIsRefType(this.getInput()) && this.deps.capabilities.dashboardSave)
+      this.deps.capabilities.canSaveVisualizations ||
+      (!this.inputIsRefType(this.getInput()) && this.deps.capabilities.canSaveDashboards)
     );
   }
 

@@ -113,8 +113,8 @@ describe('embeddable', () => {
         basePath,
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
-          visualizeSave: true,
-          dashboardSave: true,
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
         },
         getTrigger,
         documentToExpression: () =>
@@ -154,7 +154,7 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         indexPatternService: {} as IndexPatternsContract,
-        capabilities: { visualizeSave: true, dashboardSave: true },
+        capabilities: { canSaveDashboards: true, canSaveVisualizations: true },
         getTrigger,
         documentToExpression: () =>
           Promise.resolve({
@@ -195,8 +195,8 @@ describe('embeddable', () => {
         basePath,
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
-          visualizeSave: true,
-          dashboardSave: true,
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
         },
         getTrigger,
         documentToExpression: () =>
@@ -238,8 +238,8 @@ describe('embeddable', () => {
           get: (id: string) => Promise.resolve({ id }),
         } as unknown) as IndexPatternsContract,
         capabilities: {
-          visualizeSave: true,
-          dashboardSave: true,
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
         },
         getTrigger,
         documentToExpression: () =>
@@ -276,8 +276,8 @@ describe('embeddable', () => {
         basePath,
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
-          visualizeSave: true,
-          dashboardSave: true,
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
         },
         getTrigger,
         documentToExpression: () =>
@@ -319,7 +319,7 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         indexPatternService: {} as IndexPatternsContract,
-        capabilities: { visualizeSave: true, dashboardSave: true },
+        capabilities: { canSaveDashboards: true, canSaveVisualizations: true },
         getTrigger,
         documentToExpression: () =>
           Promise.resolve({
@@ -359,8 +359,8 @@ describe('embeddable', () => {
         basePath,
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
-          visualizeSave: true,
-          dashboardSave: true,
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
         },
         getTrigger,
         documentToExpression: () =>
@@ -398,8 +398,8 @@ describe('embeddable', () => {
         basePath,
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
-          visualizeSave: true,
-          dashboardSave: true,
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
         },
         getTrigger,
         documentToExpression: () =>
@@ -451,8 +451,8 @@ describe('embeddable', () => {
         basePath,
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
-          visualizeSave: true,
-          dashboardSave: true,
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
         },
         getTrigger,
         documentToExpression: () =>
@@ -504,8 +504,8 @@ describe('embeddable', () => {
         basePath,
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
-          visualizeSave: true,
-          dashboardSave: true,
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
         },
         getTrigger,
         documentToExpression: () =>
@@ -556,8 +556,8 @@ describe('embeddable', () => {
         basePath,
         indexPatternService: ({ get: jest.fn() } as unknown) as IndexPatternsContract,
         capabilities: {
-          visualizeSave: true,
-          dashboardSave: true,
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
         },
         getTrigger,
         documentToExpression: () =>
@@ -597,8 +597,8 @@ describe('embeddable', () => {
         basePath,
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
-          visualizeSave: true,
-          dashboardSave: true,
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
         },
         getTrigger,
         documentToExpression: () =>
@@ -638,8 +638,8 @@ describe('embeddable', () => {
         basePath,
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
-          visualizeSave: true,
-          dashboardSave: true,
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
         },
         getTrigger,
         documentToExpression: () =>
@@ -679,8 +679,8 @@ describe('embeddable', () => {
         basePath,
         indexPatternService: {} as IndexPatternsContract,
         capabilities: {
-          visualizeSave: true,
-          dashboardSave: true,
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
         },
         getTrigger,
         documentToExpression: () =>
