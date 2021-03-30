@@ -7,8 +7,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { IEsSearchRequest, IEsSearchResponse } from './es_search';
-import { IndexPattern } from '..';
+import { IEsSearchRequest, IEsSearchResponse, IndexPattern } from '..';
 
 export type ISearchGeneric = <
   SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,

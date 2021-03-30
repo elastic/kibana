@@ -1345,6 +1345,7 @@ export class SearchSessionService implements ISearchSessionService {
         extend: () => Promise<never>;
         cancel: () => Promise<never>;
         delete: () => Promise<never>;
+        getConfig: () => never;
     };
 }
 
