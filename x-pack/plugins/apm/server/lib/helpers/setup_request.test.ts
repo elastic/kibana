@@ -51,7 +51,7 @@ function getMockRequest() {
     ) as APMConfig,
     params: {
       query: {
-        _debug: false,
+        _inspect: false,
       },
     },
     core: {
