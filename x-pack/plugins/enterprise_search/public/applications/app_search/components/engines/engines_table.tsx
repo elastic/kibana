@@ -42,7 +42,7 @@ export const NAME_COLUMN: EuiTableFieldDataColumnType<EngineDetails> = {
     // Note: the below props are valid props per https://elastic.github.io/eui/#/tabular-content/tables (Responsive tables), but EUI's types have a bug reporting it as an error
     // @ts-ignore
     enlarge: true,
-    fullWidth: true,
+    width: '100%',
     truncateText: false,
   },
 };
@@ -62,8 +62,7 @@ export const LANGUAGE_COLUMN: EuiTableFieldDataColumnType<EngineDetails> = {
     defaultMessage: 'Language',
   }),
   dataType: 'string',
-  render: (language: string, engine: EngineDetails) =>
-    engine.isMeta ? '' : language || UNIVERSAL_LANGUAGE,
+  render: (language: string) => language || UNIVERSAL_LANGUAGE,
 };
 
 export const DOCUMENT_COUNT_COLUMN: EuiTableFieldDataColumnType<EngineDetails> = {
