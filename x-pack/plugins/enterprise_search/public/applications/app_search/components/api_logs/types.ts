@@ -15,9 +15,13 @@ export interface ApiLog {
   user_agent: string;
   request_body: string; // JSON string
   response_body: string; // JSON string
+  // NOTE: The API also sends us back `path: null`, but we don't appear to be
+  // using it anywhere, so I've opted not to list it in our types
 }
 
 export interface ApiLogsData {
   results: ApiLog[];
   meta: Meta;
+  // NOTE: The API sends us back even more `meta` data than the normal (sort_direction, filters, query),
+  // but we currently don't use that data in our front-end code, so I'm opting not to list them in our types
 }
