@@ -22,18 +22,10 @@ import { AlertItem } from './alerts_table';
 type AlertsFlyoutProps = AlertItem & EuiFlyoutProps;
 
 export function AlertsFlyout(props: AlertsFlyoutProps) {
-  const {
-    actualValue,
-    affectedEntity,
-    expectedValue,
-    onClose,
-    reason,
-    severity,
-    severityLog,
-    status,
-    duration,
-    type,
-  } = props;
+  const { affectedEntity, expectedValue, onClose, reason, severityLog, status, type } = props;
+  const duration = props['alert.duration.us'];
+  const severity = props['alert.severity.level'];
+  const actualValue = props['alert.severity.value'];
   const timestamp = props['@timestamp'];
 
   const overviewListItems = [

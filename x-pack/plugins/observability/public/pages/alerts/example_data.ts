@@ -11,14 +11,14 @@
 export const wireframeData = [
   {
     '@timestamp': 1615392661000,
-    duration: '10 min 2 s',
-    severity: '-',
+    'alert.duration.us': 602000000,
+    'alert.severity.level': undefined,
     reason: 'Error count is greater than 100 (current value is 135) on shippingService',
-    service: { name: 'opbeans-go' },
+    'service.name': 'opbeans-go',
     affectedEntity: 'opbeans-go service',
     status: 'Active',
     expectedValue: '< 100',
-    actualValue: '135',
+    'alert.severity.value': '135',
     severityLog: [
       { '@timestamp': 1615392661000, severity: 'critical', message: 'Load is 3.5' },
       { '@timestamp': 1615392600000, severity: 'warning', message: 'Load is 2.5' },
@@ -28,24 +28,24 @@ export const wireframeData = [
   },
   {
     '@timestamp': 1615392600000,
-    duration: '11 min 1 s',
-    severity: '-',
+    'alert.duration.us': 661000000,
+    'alert.severity.level': undefined,
     reason: 'Latency is greater than 1500ms (current value is 1700ms) on frontend',
-    service: { name: 'opbeans-go' },
+    'service.name': 'opbeans-go',
     severityLog: [],
   },
   {
     '@timestamp': 1615392552000,
-    duration: '10 min 2 s',
-    severity: 'critical',
+    'alert.duration.us': 602000000,
+    'alert.severity.level': 'critical',
     reason: 'Latency anomaly score is 84 on checkoutService',
-    service: { name: 'opbeans-go' },
+    'service.name': 'opbeans-go',
     severityLog: [],
   },
   {
     '@timestamp': 1615392391000,
-    duration: '10 min 2 s',
-    severity: '-',
+    'alert.duration.us': 602000000,
+    'alert.severity.level': undefined,
     reason:
       'CPU is greater than a threshold of 75% (current value is 83%) on gke-eden-3-prod-pool-2-395ef018-06xg',
     pod: 'gke-dev-oblt-dev-oblt-pool-30f1ba48-skw',
@@ -53,8 +53,8 @@ export const wireframeData = [
   },
   {
     '@timestamp': 1615392363000,
-    duration: '10 min 2 s',
-    severity: '-',
+    'alert.duration.us': 602000000,
+    'alert.severity.level': undefined,
     reason:
       "Log count with 'Log.level.error' and 'service.name; frontend' is greater than 75 (current value 122)",
     log: true,
@@ -62,8 +62,8 @@ export const wireframeData = [
   },
   {
     '@timestamp': 1615392361000,
-    duration: '10 min 2 s',
-    severity: 'critical',
+    'alert.duration.us': 602000000,
+    'alert.severity.level': 'critical',
     reason: 'Load is greater than 2 (current value is 3.5) on gke-eden-3-prod-pool-2-395ef018-06xg',
     pod: 'gke-dev-oblt-dev-oblt-pool-30f1ba48-skw',
     severityLog: [],

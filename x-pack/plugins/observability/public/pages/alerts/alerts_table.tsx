@@ -9,9 +9,14 @@ import {
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiBasicTableProps,
+  EuiDataGrid,
+  EuiDataGridCellValueElementProps,
+  EuiDataGridColumn,
+  EuiDataGridControlColumn,
   DefaultItemAction,
   EuiTableSelectionType,
   EuiLink,
+  EuiDataGridColumnActions,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -27,18 +32,18 @@ import { AlertsFlyout } from './alerts_flyout';
 export interface AlertItem {
   '@timestamp': number;
   reason: string;
-  severity: string;
+  'alert.severity.level'?: string;
   // These are just made up so we can make example links
-  service?: { name?: string };
+  'service.name'?: string;
   pod?: string;
   log?: boolean;
   // Other fields used in the flyout
-  actualValue?: string;
+  'alert.severity.value'?: string;
   affectedEntity?: string;
   expectedValue?: string;
   severityLog?: Array<{ '@timestamp': number; severity: string; message: string }>;
   status?: string;
-  duration?: string;
+  'alert.duration.us'?: number;
   type?: string;
 }
 
@@ -47,7 +52,7 @@ type AlertsTableProps = Omit<
   'columns' | 'isSelectable' | 'pagination' | 'selection'
 >;
 
-export function AlertsTable(props: AlertsTableProps) {
+export function AlertsTable({ items }: AlertsTableProps) {
   const [flyoutAlert, setFlyoutAlert] = useState<AlertItem | undefined>(undefined);
   const handleFlyoutClose = () => setFlyoutAlert(undefined);
   const { prepend } = usePluginContext().core.http.basePath;
@@ -55,8 +60,10 @@ export function AlertsTable(props: AlertsTableProps) {
   // This is a contrived implementation of the reason field that shows how
   // you could link to certain types of resources based on what's contained
   // in their alert data.
-  function reasonRenderer(text: string, item: AlertItem) {
-    const serviceName = item.service?.name;
+  function ReasonRenderer(props: AlertItem) {
+    const item = props;
+    const text = props.reason;
+    const serviceName = item['service.name'];
     const pod = item.pod;
     const log = item.log;
 
@@ -71,7 +78,11 @@ export function AlertsTable(props: AlertsTableProps) {
     }
   }
 
-  const actions: Array<DefaultItemAction<AlertItem>> = [
+  function ActionCellRenderer(props: EuiDataGridCellValueElementProps) {
+    return null;
+  }
+
+  const actions: EuiDataGridColumnActions = [
     {
       name: 'Alert details',
       description: 'Alert details',
@@ -82,41 +93,55 @@ export function AlertsTable(props: AlertsTableProps) {
     },
   ];
 
-  const columns: Array<EuiBasicTableColumn<AlertItem>> = [
+  const columns: EuiDataGridColumn[] = [
     {
-      field: '@timestamp',
-      name: 'Triggered',
-      dataType: 'date',
+      id: '@timestamp',
+      display: 'Triggered',
+      schema: 'datetime',
     },
     {
-      field: 'duration',
-      name: 'Duration',
+      id: 'alert.duration.us',
+      display: 'Duration',
     },
     {
-      field: 'severity',
-      name: 'Severity',
+      id: 'alert.severity.level',
+      display: 'Severity',
     },
     {
-      field: 'reason',
-      name: 'Reason',
-      dataType: 'string',
-      render: reasonRenderer,
-    },
-    {
-      actions,
-      name: 'Actions',
+      id: 'reason',
+      display: 'Reason',
     },
   ];
+
+  const trailingControlColumns: EuiDataGridControlColumn[] = [
+    { id: 'actions', headerCellRender: () => null, rowCellRender: ActionCellRenderer, width: 40 },
+  ];
+
+  function CellValueRenderer({ columnId, rowIndex }: EuiDataGridCellValueElementProps) {
+    const item = items[rowIndex];
+    const value = item[columnId as keyof AlertItem];
+    switch (columnId) {
+      case '@timestamp':
+        return <>{new Date(value as number).toISOString()}</>;
+      case 'reason':
+        return <ReasonRenderer {...item} />;
+      default:
+        return value ? <>{value}</> : null;
+    }
+  }
+
+  const [visibleColumns, setVisibleColumns] = useState(columns.map(({ id }) => id));
 
   return (
     <>
       {flyoutAlert && <AlertsFlyout {...flyoutAlert} onClose={handleFlyoutClose} />}
-      <EuiBasicTable<AlertItem>
-        {...props}
-        isSelectable={true}
-        selection={{} as EuiTableSelectionType<AlertItem>}
+      <EuiDataGrid
+        aria-label="Observability alerts"
         columns={columns}
-        pagination={{ pageIndex: 0, pageSize: 0, totalItemCount: 0 }}
+        columnVisibility={{ setVisibleColumns, visibleColumns }}
+        renderCellValue={CellValueRenderer}
+        rowCount={items.length}
+        trailingControlColumns={trailingControlColumns}
       />
     </>
   );
