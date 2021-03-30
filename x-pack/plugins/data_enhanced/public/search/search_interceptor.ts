@@ -66,11 +66,12 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
   }
 
   private createRequestHash$(request: IKibanaSearchRequest, options: IAsyncSearchOptions) {
-    const { sessionId } = options;
+    const { sessionId, isRestore } = options;
     const { preference, ...params } = request.params || {};
     const hashOptions = {
       ...params,
       sessionId,
+      isRestore,
     };
 
     return from(sessionId ? createRequestHash(hashOptions) : of(undefined));
