@@ -120,7 +120,7 @@ describe('convertHistogramBucketsToTimeseies(keys, options, buckets)', () => {
   });
 
   it('should tranform top_metric aggregations', () => {
-    const topMetricOptions = {
+    const topMetricOptions: MetricsAPIRequest = {
       ...options,
       metrics: [
         { id: 'metric_0', aggregations: { metric_0: { avg: { field: 'system.cpu.user.pct' } } } },
@@ -130,7 +130,6 @@ describe('convertHistogramBucketsToTimeseies(keys, options, buckets)', () => {
             __metadata__: {
               top_metrics: {
                 metrics: [{ field: 'host.name' }, { field: 'host.ip' }],
-                sort: { '@timestamp': 'desc' },
               },
             },
           },
