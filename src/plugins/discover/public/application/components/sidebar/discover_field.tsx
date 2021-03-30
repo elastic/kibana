@@ -299,7 +299,7 @@ export function DiscoverField({
                 onEditField(field.name);
               }}
               iconType="pencil"
-              data-test-subj="discoverFieldListPanelEdit"
+              data-test-subj={`discoverFieldListPanelEdit-${field.name}`}
               aria-label={i18n.translate('discover.fieldChooser.discoverField.editFieldLabel', {
                 defaultMessage: 'Edit index pattern field',
               })}
