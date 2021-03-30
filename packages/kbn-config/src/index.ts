@@ -15,7 +15,7 @@ export type {
 } from './deprecation';
 
 export { applyDeprecations, configDeprecationFactory } from './deprecation';
-  
+
 export {
   RawConfigurationProvider,
   RawConfigService,
