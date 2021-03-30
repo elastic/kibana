@@ -81,7 +81,7 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
       }
 
       setOptions(
-        response.aggregations.field_values.buckets.map((value) => ({ label: value.key_as_string }))
+        response.aggregations.field_values.buckets.map((value) => ({ label: value.key + '' }))
       );
     }, 600),
     [selectedField]
