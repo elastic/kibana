@@ -25,7 +25,7 @@ export const ResultSettingsNonTextFieldsHeader: React.FC = () => {
           { defaultMessage: 'Raw' }
         )}
       </EuiTableHeaderCell>
-      <EuiTableHeaderCell colSpan={4} />
+      <EuiTableHeaderCell colSpan={4} aria-hidden />
     </EuiTableHeader>
   );
 };

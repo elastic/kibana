@@ -47,7 +47,7 @@ export const ResultSettingsNonTextFieldsBody: React.FC = () => {
               }}
             />
           </EuiTableRowCellCheckbox>
-          <EuiTableRowCell colSpan={4} />
+          <EuiTableRowCell colSpan={4} aria-hidden />
         </EuiTableRow>
       ))}
     </EuiTableBody>
