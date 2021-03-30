@@ -17,6 +17,7 @@ import {
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
 import { SEARCH_QUERY_LANGUAGE, ErrorMessage } from '../../../../../common/constants/search';
 import { explorerService } from '../../explorer_dashboard_service';
+import { InfluencersFilterQuery } from '../../../../../common/types/es_client';
 
 export const DEFAULT_QUERY_LANG = SEARCH_QUERY_LANGUAGE.KUERY;
 
@@ -29,7 +30,7 @@ export function getKqlQueryValues({
   queryLanguage: string;
   indexPattern: IIndexPattern;
 }): { clearSettings: boolean; settings: any } {
-  let influencersFilterQuery: any = {};
+  let influencersFilterQuery: InfluencersFilterQuery = {};
   const filteredFields: string[] = [];
   const ast = esKuery.fromKueryExpression(inputString);
   const isAndOperator = ast && ast.function === 'and';

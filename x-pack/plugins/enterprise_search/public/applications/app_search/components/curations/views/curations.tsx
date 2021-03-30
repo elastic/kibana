@@ -11,15 +11,14 @@ import { useValues, useActions } from 'kea';
 
 import {
   EuiPageHeader,
-  EuiPageHeaderSection,
   EuiPageContent,
-  EuiTitle,
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiEmptyPrompt,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { EDIT_BUTTON_LABEL, DELETE_BUTTON_LABEL } from '../../../../shared/constants';
 import { FlashMessages } from '../../../../shared/flash_messages';
 import { KibanaLogic } from '../../../../shared/kibana';
 import { Loading } from '../../../../shared/loading';
@@ -47,18 +46,14 @@ export const Curations: React.FC = () => {
 
   return (
     <>
-      <EuiPageHeader>
-        <EuiPageHeaderSection>
-          <EuiTitle size="l">
-            <h1>{CURATIONS_OVERVIEW_TITLE}</h1>
-          </EuiTitle>
-        </EuiPageHeaderSection>
-        <EuiPageHeaderSection>
+      <EuiPageHeader
+        pageTitle={CURATIONS_OVERVIEW_TITLE}
+        rightSideItems={[
           <EuiButtonTo to={generateEnginePath(ENGINE_CURATIONS_NEW_PATH)} fill>
             {CREATE_NEW_CURATION_TITLE}
-          </EuiButtonTo>
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
+          </EuiButtonTo>,
+        ]}
+      />
       <EuiPageContent>
         <FlashMessages />
         <CurationsTable />
@@ -111,10 +106,7 @@ export const CurationsTable: React.FC = () => {
       width: '120px',
       actions: [
         {
-          name: i18n.translate(
-            'xpack.enterpriseSearch.appSearch.engine.curations.table.editAction',
-            { defaultMessage: 'Edit' }
-          ),
+          name: EDIT_BUTTON_LABEL,
           description: i18n.translate(
             'xpack.enterpriseSearch.appSearch.engine.curations.table.editTooltip',
             { defaultMessage: 'Edit curation' }
@@ -130,10 +122,7 @@ export const CurationsTable: React.FC = () => {
           'data-test-subj': 'CurationsTableEditButton',
         },
         {
-          name: i18n.translate(
-            'xpack.enterpriseSearch.appSearch.engine.curations.table.deleteAction',
-            { defaultMessage: 'Delete' }
-          ),
+          name: DELETE_BUTTON_LABEL,
           description: i18n.translate(
             'xpack.enterpriseSearch.appSearch.engine.curations.table.deleteTooltip',
             { defaultMessage: 'Delete curation' }

@@ -5,26 +5,15 @@
  * 2.0.
  */
 
-import { ApiResponse } from '@elastic/elasticsearch';
 import { get } from 'lodash';
 import { ElasticsearchClient } from '../../../../../../../../src/core/server';
 import { readIndex } from '../../index/read_index';
-
-interface IndicesAliasResponse {
-  [index: string]: IndexAliasResponse;
-}
-
-interface IndexAliasResponse {
-  aliases: {
-    [aliasName: string]: Record<string, unknown>;
-  };
-}
 
 export const getIndexVersion = async (
   esClient: ElasticsearchClient,
   index: string
 ): Promise<number> => {
-  const { body: indexAlias }: ApiResponse<IndicesAliasResponse> = await esClient.indices.getAlias({
+  const { body: indexAlias } = await esClient.indices.getAlias({
     index,
   });
   const writeIndex = Object.keys(indexAlias).find(

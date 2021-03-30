@@ -38,7 +38,6 @@ import {
   showMultiBucketAnomalyTooltip,
 } from '../../util/chart_utils';
 import { LoadingIndicator } from '../../components/loading_indicator/loading_indicator';
-import { getTimeBucketsFromCache } from '../../util/time_buckets';
 import { mlFieldFormatService } from '../../services/field_format_service';
 
 const CONTENT_WRAPPER_HEIGHT = 215;
@@ -50,6 +49,7 @@ export class ExplorerChartSingleMetric extends React.Component {
     seriesConfig: PropTypes.object,
     severity: PropTypes.number.isRequired,
     tooltipService: PropTypes.object.isRequired,
+    timeBuckets: PropTypes.object.isRequired,
   };
 
   componentDidMount() {
@@ -61,7 +61,7 @@ export class ExplorerChartSingleMetric extends React.Component {
   }
 
   renderChart() {
-    const { tooManyBuckets, tooltipService } = this.props;
+    const { tooManyBuckets, tooltipService, timeBuckets } = this.props;
 
     const element = this.rootNode;
     const config = this.props.seriesConfig;
@@ -188,7 +188,6 @@ export class ExplorerChartSingleMetric extends React.Component {
 
     function drawLineChartAxes() {
       // Get the scaled date format to use for x axis tick labels.
-      const timeBuckets = getTimeBucketsFromCache();
       const bounds = { min: moment(config.plotEarliest), max: moment(config.plotLatest) };
       timeBuckets.setBounds(bounds);
       timeBuckets.setInterval('auto');

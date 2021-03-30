@@ -12,12 +12,12 @@ import {
 } from '../../../saved_object_api_integration/common/lib/saved_object_test_utils';
 import { TestUser } from '../../../saved_object_api_integration/common/lib/types';
 import { MULTI_NAMESPACE_SAVED_OBJECT_TEST_CASES as CASES } from '../../common/lib/saved_object_test_cases';
-import { TestInvoker } from '../../common/lib/types';
 import {
   shareRemoveTestSuiteFactory,
   ShareRemoveTestCase,
   ShareRemoveTestDefinition,
 } from '../../common/suites/share_remove';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 const {
   DEFAULT: { spaceId: DEFAULT_SPACE_ID },
@@ -60,7 +60,7 @@ const createTestCases = (spaceId: string) => {
 };
 
 // eslint-disable-next-line import/no-default-export
-export default function ({ getService }: TestInvoker) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 

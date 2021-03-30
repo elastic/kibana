@@ -426,7 +426,7 @@ export const getCustomQueryInvalidationText = () => cy.contains(CUSTOM_QUERY_REQ
 export const fillDefineIndicatorMatchRuleAndContinue = (rule: ThreatIndicatorRule) => {
   fillIndexAndIndicatorIndexPattern(rule.index, rule.indicatorIndexPattern);
   fillIndicatorMatchRow({
-    indexField: rule.indicatorMapping,
+    indexField: rule.indicatorMappingField,
     indicatorIndexField: rule.indicatorIndexField,
   });
   getDefineContinueButton().should('exist').click({ force: true });

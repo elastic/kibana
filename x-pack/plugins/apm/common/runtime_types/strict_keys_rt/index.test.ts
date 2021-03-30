@@ -45,10 +45,10 @@ describe('strictKeysRt', () => {
       {
         type: t.intersection([
           t.type({ query: t.type({ bar: t.string }) }),
-          t.partial({ query: t.partial({ _debug: t.boolean }) }),
+          t.partial({ query: t.partial({ _inspect: t.boolean }) }),
         ]),
-        passes: [{ query: { bar: '', _debug: true } }],
-        fails: [{ query: { _debug: true } }],
+        passes: [{ query: { bar: '', _inspect: true } }],
+        fails: [{ query: { _inspect: true } }],
       },
     ];
 
@@ -91,12 +91,12 @@ describe('strictKeysRt', () => {
     } as Record<string, any>);
 
     const typeB = t.partial({
-      query: t.partial({ _debug: jsonRt.pipe(t.boolean) }),
+      query: t.partial({ _inspect: jsonRt.pipe(t.boolean) }),
     });
 
     const value = {
       query: {
-        _debug: 'true',
+        _inspect: 'true',
         filterNames: JSON.stringify(['host', 'agentName']),
       },
     };

@@ -312,6 +312,7 @@ export default function ({ getService }: FtrProviderContext) {
             metadata: {
               foo: 'test-metadata',
             },
+            // @ts-expect-error @elastic/elasticsearch PutRoleRequest.body doesn't declare `transient_metadata` property
             transient_metadata: {
               enabled: true,
             },

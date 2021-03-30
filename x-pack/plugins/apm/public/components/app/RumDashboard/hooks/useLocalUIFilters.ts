@@ -68,7 +68,7 @@ export function useLocalUIFilters({
     });
   };
 
-  const { data = getInitialData(filterNames), status } = useFetcher(
+  const { data, status } = useFetcher(
     (callApmApi) => {
       if (shouldFetch && urlParams.start && urlParams.end) {
         return callApmApi({
@@ -96,7 +96,8 @@ export function useLocalUIFilters({
     ]
   );
 
-  const filters = data.map((filter) => ({
+  const localUiFilters = data?.localUiFilters ?? getInitialData(filterNames);
+  const filters = localUiFilters.map((filter) => ({
     ...filter,
     value: values[filter.name] || [],
   }));

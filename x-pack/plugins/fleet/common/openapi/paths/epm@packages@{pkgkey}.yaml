@@ -89,3 +89,11 @@ delete:
   operationId: post-epm-delete-pkgkey
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            force:
+              type: boolean

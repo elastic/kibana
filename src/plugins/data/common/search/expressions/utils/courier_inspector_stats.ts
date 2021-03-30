@@ -14,7 +14,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { ISearchSource } from 'src/plugins/data/public';
 import { RequestStatistics } from 'src/plugins/inspector/common';
 
@@ -50,7 +50,7 @@ export function getRequestInspectorStats(searchSource: ISearchSource) {
 
 /** @public */
 export function getResponseInspectorStats(
-  resp: SearchResponse<unknown>,
+  resp: estypes.SearchResponse<unknown>,
   searchSource?: ISearchSource
 ) {
   const lastRequest =

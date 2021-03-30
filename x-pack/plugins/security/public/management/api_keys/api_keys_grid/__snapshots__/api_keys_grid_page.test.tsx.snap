@@ -136,7 +136,7 @@ exports[`APIKeysGridPage renders permission denied if user does not have require
           paddingSize="l"
         >
           <div
-            className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--shadow euiPageContent euiPageContent--horizontalCenter"
+            className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--horizontalCenter"
           >
             <EuiEmptyPrompt
               body={

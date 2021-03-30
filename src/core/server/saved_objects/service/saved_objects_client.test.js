@@ -54,6 +54,45 @@ test(`#bulkCreate`, async () => {
   expect(result).toBe(returnValue);
 });
 
+describe(`#createPointInTimeFinder`, () => {
+  test(`calls repository with options and default dependencies`, () => {
+    const returnValue = Symbol();
+    const mockRepository = {
+      createPointInTimeFinder: jest.fn().mockReturnValue(returnValue),
+    };
+    const client = new SavedObjectsClient(mockRepository);
+
+    const options = Symbol();
+    const result = client.createPointInTimeFinder(options);
+
+    expect(mockRepository.createPointInTimeFinder).toHaveBeenCalledWith(options, {
+      client,
+    });
+    expect(result).toBe(returnValue);
+  });
+
+  test(`calls repository with options and custom dependencies`, () => {
+    const returnValue = Symbol();
+    const mockRepository = {
+      createPointInTimeFinder: jest.fn().mockReturnValue(returnValue),
+    };
+    const client = new SavedObjectsClient(mockRepository);
+
+    const options = Symbol();
+    const dependencies = {
+      client: {
+        find: Symbol(),
+        openPointInTimeForType: Symbol(),
+        closePointInTime: Symbol(),
+      },
+    };
+    const result = client.createPointInTimeFinder(options, dependencies);
+
+    expect(mockRepository.createPointInTimeFinder).toHaveBeenCalledWith(options, dependencies);
+    expect(result).toBe(returnValue);
+  });
+});
+
 test(`#delete`, async () => {
   const returnValue = Symbol();
   const mockRepository = {

@@ -14,6 +14,7 @@ const createStartContract = (): Start => {
     EmbeddableComponent: jest.fn(() => null),
     canUseEditor: jest.fn(() => true),
     navigateToPrefilledEditor: jest.fn(),
+    getXyVisTypes: jest.fn(),
   };
   return startContract;
 };

@@ -18,6 +18,7 @@ import {
   addFieldToDSL,
   getField,
   hitsToGeoJson,
+  isTotalHitsGreaterThan,
   PreIndexedShape,
 } from '../../../../common/elasticsearch_util';
 // @ts-expect-error
@@ -313,6 +314,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     };
 
     const searchSource = await this.makeSearchSource(searchFilters, 0);
+    searchSource.setField('trackTotalHits', false);
     searchSource.setField('aggs', {
       totalEntities: {
         cardinality: addFieldToDSL(cardinalityAgg, topHitsSplitField),
@@ -343,11 +345,10 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     const areEntitiesTrimmed = entityBuckets.length >= DEFAULT_MAX_BUCKETS_LIMIT;
     let areTopHitsTrimmed = false;
     entityBuckets.forEach((entityBucket: any) => {
-      const total = _.get(entityBucket, 'entityHits.hits.total', 0);
       const hits = _.get(entityBucket, 'entityHits.hits.hits', []);
       // Reverse hits list so top documents by sort are drawn on top
       allHits.push(...hits.reverse());
-      if (total > hits.length) {
+      if (isTotalHitsGreaterThan(entityBucket.entityHits.hits.total, hits.length)) {
         areTopHitsTrimmed = true;
       }
     });
@@ -385,6 +386,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       maxResultWindow,
       initialSearchContext
     );
+    searchSource.setField('trackTotalHits', maxResultWindow + 1);
     searchSource.setField('fieldsFromSource', searchFilters.fieldNames); // Setting "fields" filters out unused scripted fields
     if (sourceOnlyFields.length === 0) {
       searchSource.setField('source', false); // do not need anything from _source
@@ -408,7 +410,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       hits: resp.hits.hits.reverse(), // Reverse hits so top documents by sort are drawn on top
       meta: {
         resultsCount: resp.hits.hits.length,
-        areResultsTrimmed: resp.hits.total > resp.hits.hits.length,
+        areResultsTrimmed: isTotalHitsGreaterThan(resp.hits.total, resp.hits.hits.length),
       },
     };
   }
@@ -508,6 +510,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     const initialSearchContext = { docvalue_fields: docValueFields }; // Request fields in docvalue_fields insted of _source
     const searchService = getSearchService();
     const searchSource = await searchService.searchSource.create(initialSearchContext as object);
+    searchSource.setField('trackTotalHits', false);
 
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', 1);
@@ -520,7 +523,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     searchSource.setField('query', query);
     searchSource.setField('fieldsFromSource', this._getTooltipPropertyNames());
 
-    const resp = await searchSource.fetch();
+    const resp = await searchSource.fetch({ legacyHitsTotal: false });
 
     const hit = _.get(resp, 'hits.hits[0]');
     if (!hit) {
