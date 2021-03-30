@@ -66,10 +66,13 @@ export const createAnomalyDetectionJobsRoute = createRoute({
     }
 
     await createAnomalyDetectionJobs(setup, environments, context.logger);
+
     notifyFeatureUsage({
       licensingPlugin: context.licensing,
       featureName: 'ml',
     });
+
+    return { jobCreated: true };
   },
 });
 
@@ -84,10 +87,12 @@ export const anomalyDetectionEnvironmentsRoute = createRoute({
       setup
     );
 
-    return await getAllEnvironments({
+    const environments = await getAllEnvironments({
       setup,
       searchAggregatedTransactions,
       includeMissing: true,
     });
+
+    return { environments };
   },
 });

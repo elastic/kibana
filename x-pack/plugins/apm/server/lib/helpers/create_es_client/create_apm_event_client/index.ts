@@ -13,8 +13,8 @@ import {
 } from '../../../../../../../../src/core/server';
 import {
   ESSearchRequest,
-  ESSearchResponse,
-} from '../../../../../../../typings/elasticsearch';
+  InferSearchResponseOf,
+} from '../../../../../../../../typings/elasticsearch';
 import { unwrapEsResponse } from '../../../../../../observability/server';
 import { ProcessorEvent } from '../../../../../common/processor_event';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
@@ -54,7 +54,7 @@ type ESSearchRequestOf<TParams extends APMEventESSearchRequest> = Omit<
 
 type TypedSearchResponse<
   TParams extends APMEventESSearchRequest
-> = ESSearchResponse<
+> = InferSearchResponseOf<
   TypeOfProcessorEvent<ValuesType<TParams['apm']['events']>>,
   ESSearchRequestOf<TParams>
 >;
@@ -93,6 +93,9 @@ export function createApmEventClient({
         ignore_unavailable: true,
       };
 
+      // only "search" operation is currently supported
+      const requestType = 'search';
+
       return callAsyncWithDebug({
         cb: () => {
           const searchPromise = cancelEsRequestOnAbort(
@@ -103,10 +106,14 @@ export function createApmEventClient({
           return unwrapEsResponse(searchPromise);
         },
         getDebugMessage: () => ({
-          body: getDebugBody(searchParams, 'search'),
+          body: getDebugBody(searchParams, requestType),
           title: getDebugTitle(request),
         }),
+        isCalledWithInternalUser: false,
         debug,
+        request,
+        requestType,
+        requestParams: searchParams,
       });
     },
   };

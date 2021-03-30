@@ -45,6 +45,9 @@ import {
   isLensBrushEvent,
   isLensFilterEvent,
   isLensTableRowContextMenuClickEvent,
+  LensBrushEvent,
+  LensFilterEvent,
+  LensTableRowContextMenuEvent,
 } from '../../types';
 
 import { IndexPatternsContract } from '../../../../../../src/plugins/data/public';
@@ -63,6 +66,10 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
   renderMode?: RenderMode;
   style?: React.CSSProperties;
   className?: string;
+  onBrushEnd?: (data: LensBrushEvent['data']) => void;
+  onLoad?: (isLoading: boolean) => void;
+  onFilter?: (data: LensFilterEvent['data']) => void;
+  onTableRowClick?: (data: LensTableRowContextMenuEvent['data']) => void;
 }
 
 export type LensByValueInput = {
@@ -103,6 +110,8 @@ export class Embeddable
   private isInitialized = false;
   private activeData: Partial<DefaultInspectorAdapters> | undefined;
   private errors: ErrorMessage[] | undefined;
+  private inputReloadSubscriptions: Subscription[];
+  private isDestroyed?: boolean;
 
   private externalSearchContext: {
     timeRange?: TimeRange;
@@ -133,64 +142,79 @@ export class Embeddable
 
     const input$ = this.getInput$();
 
+    this.inputReloadSubscriptions = [];
+
     // Lens embeddable does not re-render when embeddable input changes in
     // general, to improve performance. This line makes sure the Lens embeddable
     // re-renders when anything in ".dynamicActions" (e.g. drilldowns) changes.
-    input$
-      .pipe(
-        map((input) => input.enhancements?.dynamicActions),
-        distinctUntilChanged((a, b) => isEqual(a, b)),
-        skip(1)
-      )
-      .subscribe((input) => {
-        this.reload();
-      });
+    this.inputReloadSubscriptions.push(
+      input$
+        .pipe(
+          map((input) => input.enhancements?.dynamicActions),
+          distinctUntilChanged((a, b) => isEqual(a, b)),
+          skip(1)
+        )
+        .subscribe((input) => {
+          this.reload();
+        })
+    );
 
     // Lens embeddable does not re-render when embeddable input changes in
     // general, to improve performance. This line makes sure the Lens embeddable
     // re-renders when dashboard view mode switches between "view/edit". This is
     // needed to see the changes to ".dynamicActions" (e.g. drilldowns) when
     // dashboard's mode is toggled.
-    input$
-      .pipe(
-        map((input) => input.viewMode),
-        distinctUntilChanged(),
-        skip(1)
-      )
-      .subscribe((input) => {
-        this.reload();
-      });
+    this.inputReloadSubscriptions.push(
+      input$
+        .pipe(
+          map((input) => input.viewMode),
+          distinctUntilChanged(),
+          skip(1)
+        )
+        .subscribe((input) => {
+          // only reload if drilldowns are set
+          if (this.getInput().enhancements?.dynamicActions) {
+            this.reload();
+          }
+        })
+    );
 
     // Re-initialize the visualization if either the attributes or the saved object id changes
-    input$
-      .pipe(
-        distinctUntilChanged((a, b) =>
-          isEqual(
-            ['attributes' in a && a.attributes, 'savedObjectId' in a && a.savedObjectId],
-            ['attributes' in b && b.attributes, 'savedObjectId' in b && b.savedObjectId]
-          )
-        ),
-        skip(1)
-      )
-      .subscribe(async (input) => {
-        await this.initializeSavedVis(input);
-        this.reload();
-      });
+
+    this.inputReloadSubscriptions.push(
+      input$
+        .pipe(
+          distinctUntilChanged((a, b) =>
+            isEqual(
+              ['attributes' in a && a.attributes, 'savedObjectId' in a && a.savedObjectId],
+              ['attributes' in b && b.attributes, 'savedObjectId' in b && b.savedObjectId]
+            )
+          ),
+          skip(1)
+        )
+        .subscribe(async (input) => {
+          await this.initializeSavedVis(input);
+          this.reload();
+        })
+    );
 
     // Update search context and reload on changes related to search
-    input$
-      .pipe(
-        distinctUntilChanged((a, b) =>
-          isEqual(
-            [a.filters, a.query, a.timeRange, a.searchSessionId],
-            [b.filters, b.query, b.timeRange, b.searchSessionId]
-          )
-        ),
-        skip(1)
-      )
-      .subscribe(async (input) => {
-        this.onContainerStateChanged(input);
-      });
+    this.inputReloadSubscriptions.push(
+      this.getUpdated$()
+        .pipe(map(() => this.getInput()))
+        .pipe(
+          distinctUntilChanged((a, b) =>
+            isEqual(
+              [a.filters, a.query, a.timeRange, a.searchSessionId],
+              [b.filters, b.query, b.timeRange, b.searchSessionId]
+            )
+          ),
+          skip(1)
+        )
+        .subscribe(async (input) => {
+          this.onContainerStateChanged(input);
+        })
+    );
   }
 
   public supportedTriggers() {
@@ -221,7 +245,7 @@ export class Embeddable
       this.onFatalError(e);
       return false;
     });
-    if (!attributes) {
+    if (!attributes || this.isDestroyed) {
       return;
     }
     this.savedVis = {
@@ -267,6 +291,10 @@ export class Embeddable
     inspectorAdapters?: Partial<DefaultInspectorAdapters> | undefined
   ) => {
     this.activeData = inspectorAdapters;
+    if (this.input.onLoad) {
+      // once onData$ is get's called from expression renderer, loading becomes false
+      this.input.onLoad(false);
+    }
   };
 
   /**
@@ -276,8 +304,11 @@ export class Embeddable
    */
   render(domNode: HTMLElement | Element) {
     this.domNode = domNode;
-    if (!this.savedVis || !this.isInitialized) {
+    if (!this.savedVis || !this.isInitialized || this.isDestroyed) {
       return;
+    }
+    if (this.input.onLoad) {
+      this.input.onLoad(true);
     }
     const input = this.getInput();
     render(
@@ -295,6 +326,7 @@ export class Embeddable
         hasCompatibleActions={this.hasCompatibleActions}
         className={input.className}
         style={input.style}
+        canEdit={this.deps.editable && input.viewMode === 'edit'}
       />,
       domNode
     );
@@ -354,12 +386,19 @@ export class Embeddable
         data: event.data,
         embeddable: this,
       });
+
+      if (this.input.onBrushEnd) {
+        this.input.onBrushEnd(event.data);
+      }
     }
     if (isLensFilterEvent(event)) {
       this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
         data: event.data,
         embeddable: this,
       });
+      if (this.input.onFilter) {
+        this.input.onFilter(event.data);
+      }
     }
 
     if (isLensTableRowContextMenuClickEvent(event)) {
@@ -370,10 +409,16 @@ export class Embeddable
         },
         true
       );
+      if (this.input.onTableRowClick) {
+        this.input.onTableRowClick((event.data as unknown) as LensTableRowContextMenuEvent['data']);
+      }
     }
   };
 
   async reload() {
+    if (!this.savedVis || !this.isInitialized || this.isDestroyed) {
+      return;
+    }
     this.handleContainerStateChanged(this.input);
     if (this.domNode) {
       this.render(this.domNode);
@@ -384,22 +429,19 @@ export class Embeddable
     if (!this.savedVis) {
       return;
     }
-    const promises = _.uniqBy(
-      this.savedVis.references.filter(({ type }) => type === 'index-pattern'),
-      'id'
-    )
-      .map(async ({ id }) => {
-        try {
-          return await this.deps.indexPatternService.get(id);
-        } catch (error) {
-          // Unable to load index pattern, ignore error as the index patterns are only used to
-          // configure the filter and query bar - there is still a good chance to get the visualization
-          // to show.
-          return null;
-        }
-      })
-      .filter((promise): promise is Promise<IndexPattern> => Boolean(promise));
-    const indexPatterns = await Promise.all(promises);
+    const responses = await Promise.allSettled(
+      _.uniqBy(
+        this.savedVis.references.filter(({ type }) => type === 'index-pattern'),
+        'id'
+      ).map(({ id }) => this.deps.indexPatternService.get(id))
+    );
+    const indexPatterns = responses
+      .filter(
+        (response): response is PromiseFulfilledResult<IndexPattern> =>
+          response.status === 'fulfilled'
+      )
+      .map(({ value }) => value);
+
     // passing edit url and index patterns to the output of this embeddable for
     // the container to pick them up and use them to configure filter bar and
     // config dropdown correctly.
@@ -443,6 +485,12 @@ export class Embeddable
 
   destroy() {
     super.destroy();
+    this.isDestroyed = true;
+    if (this.inputReloadSubscriptions.length > 0) {
+      this.inputReloadSubscriptions.forEach((reloadSub) => {
+        reloadSub.unsubscribe();
+      });
+    }
     if (this.domNode) {
       unmountComponentAtNode(this.domNode);
     }

@@ -21,7 +21,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const policyTestResources = getService('policyTestResources');
 
-  // Failing: See https://github.com/elastic/kibana/issues/92567
   describe('When on the Endpoint Policy Details Page', function () {
     this.tags(['ciGroup7']);
 

@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import type { SavedObjectsManagementColumn } from 'src/plugins/saved_objects_management/public';
-import type { SpacesApiUi, SpaceListProps } from 'src/plugins/spaces_oss/public';
+import type { SpaceListProps, SpacesApiUi } from 'src/plugins/spaces_oss/public';
 
 interface WrapperProps {
   spacesApiUi: SpacesApiUi;

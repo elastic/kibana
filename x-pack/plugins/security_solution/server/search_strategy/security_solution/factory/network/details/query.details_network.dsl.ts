@@ -40,7 +40,7 @@ const getAggs = (type: string, ip: string) => {
                 _source: [`${type}.as`],
                 sort: [
                   {
-                    '@timestamp': 'desc',
+                    '@timestamp': 'desc' as const,
                   },
                 ],
               },
@@ -60,7 +60,7 @@ const getAggs = (type: string, ip: string) => {
                 _source: [`${type}.geo`],
                 sort: [
                   {
-                    '@timestamp': 'desc',
+                    '@timestamp': 'desc' as const,
                   },
                 ],
               },
@@ -87,7 +87,7 @@ const getHostAggs = (ip: string) => {
             _source: ['host'],
             sort: [
               {
-                '@timestamp': 'desc',
+                '@timestamp': 'desc' as const,
               },
             ],
           },

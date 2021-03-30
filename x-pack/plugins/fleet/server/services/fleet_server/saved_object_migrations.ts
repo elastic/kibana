@@ -6,21 +6,23 @@
  */
 
 import { isBoom } from '@hapi/boom';
-import { KibanaRequest } from 'src/core/server';
+import type { KibanaRequest } from 'src/core/server';
+
 import {
   ENROLLMENT_API_KEYS_INDEX,
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
   AGENT_POLICY_INDEX,
   AGENTS_INDEX,
-  FleetServerEnrollmentAPIKey,
   AGENT_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
+} from '../../../common';
+import type {
+  FleetServerEnrollmentAPIKey,
   AgentSOAttributes,
   FleetServerAgent,
-  SO_SEARCH_LIMIT,
 } from '../../../common';
 import { listEnrollmentApiKeys, getEnrollmentAPIKey } from '../api_keys/enrollment_api_key_so';
 import { appContextService } from '../app_context';
-
 import { isAgentsSetup } from '../agents';
 import { agentPolicyService } from '../agent_policy';
 
@@ -167,6 +169,7 @@ async function migrateAgentPolicies() {
         track_total_hits: true,
       });
 
+      // @ts-expect-error value is number | TotalHits
       if (res.body.hits.total.value === 0) {
         return agentPolicyService.createFleetPolicyChangeFleetServer(
           soClient,

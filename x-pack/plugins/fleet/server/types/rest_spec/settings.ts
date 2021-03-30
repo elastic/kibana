@@ -6,14 +6,22 @@
  */
 
 import { schema } from '@kbn/config-schema';
+
 import { isDiffPathProtocol } from '../../../common';
 
 export const GetSettingsRequestSchema = {};
 
 export const PutSettingsRequestSchema = {
   body: schema.object({
-    agent_auto_upgrade: schema.maybe(schema.boolean()),
-    package_auto_upgrade: schema.maybe(schema.boolean()),
+    fleet_server_hosts: schema.maybe(
+      schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), {
+        validate: (value) => {
+          if (value.length && isDiffPathProtocol(value)) {
+            return 'Protocol and path must be the same for each URL';
+          }
+        },
+      })
+    ),
     kibana_urls: schema.maybe(
       schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), {
         validate: (value) => {

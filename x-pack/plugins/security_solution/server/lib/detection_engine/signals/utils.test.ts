@@ -9,7 +9,7 @@ import moment from 'moment';
 import sinon from 'sinon';
 import { ApiResponse, Context } from '@elastic/elasticsearch/lib/Transport';
 
-import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
+import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 import { listMock } from '../../../../../lists/server/mocks';
 import { buildRuleMessageFactory } from './rule_messages';
 import { ExceptionListClient } from '../../../../../lists/server';
@@ -69,7 +69,7 @@ const ruleStatusServiceMock = {
   find: jest.fn(),
   goingToRun: jest.fn(),
   error: jest.fn(),
-  warning: jest.fn(),
+  partialFailure: jest.fn(),
 };
 
 describe('utils', () => {
@@ -662,8 +662,8 @@ describe('utils', () => {
           return;
         }
         expect(moment(item.to).diff(moment(item.from), 's')).toEqual(13);
-        expect(item.to.diff(tuples[index - 1].to, 's')).toEqual(-10);
-        expect(item.from.diff(tuples[index - 1].from, 's')).toEqual(-10);
+        expect(item.to.diff(tuples[index - 1].to, 's')).toEqual(10);
+        expect(item.from.diff(tuples[index - 1].from, 's')).toEqual(10);
       });
       expect(remainingGap.asMilliseconds()).toEqual(12000);
     });
@@ -814,6 +814,7 @@ describe('utils', () => {
       const res = await hasTimestampFields(
         false,
         timestampField,
+        'myfakerulename',
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         timestampFieldCapsResponse as ApiResponse<Record<string, any>>,
         ['myfa*'],
@@ -854,6 +855,7 @@ describe('utils', () => {
       const res = await hasTimestampFields(
         false,
         timestampField,
+        'myfakerulename',
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         timestampFieldCapsResponse as ApiResponse<Record<string, any>>,
         ['myfa*'],
@@ -863,6 +865,60 @@ describe('utils', () => {
       );
       expect(mockLogger.error).toHaveBeenCalledWith(
         'The following indices are missing the timestamp field "@timestamp": ["myfakeindex-1","myfakeindex-2"] name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
+      );
+      expect(res).toBeTruthy();
+    });
+
+    test('returns true when missing logs-endpoint.alerts-* index and rule name is Endpoint Security', async () => {
+      const timestampField = '@timestamp';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const timestampFieldCapsResponse: Partial<ApiResponse<Record<string, any>, Context>> = {
+        body: {
+          indices: [],
+          fields: {},
+        },
+      };
+      mockLogger.error.mockClear();
+      const res = await hasTimestampFields(
+        false,
+        timestampField,
+        'Endpoint Security',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        timestampFieldCapsResponse as ApiResponse<Record<string, any>>,
+        ['logs-endpoint.alerts-*'],
+        ruleStatusServiceMock,
+        mockLogger,
+        buildRuleMessage
+      );
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is de-activated. If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent. name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
+      );
+      expect(res).toBeTruthy();
+    });
+
+    test('returns true when missing logs-endpoint.alerts-* index and rule name is NOT Endpoint Security', async () => {
+      const timestampField = '@timestamp';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const timestampFieldCapsResponse: Partial<ApiResponse<Record<string, any>, Context>> = {
+        body: {
+          indices: [],
+          fields: {},
+        },
+      };
+      mockLogger.error.mockClear();
+      const res = await hasTimestampFields(
+        false,
+        timestampField,
+        'NOT Endpoint Security',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        timestampFieldCapsResponse as ApiResponse<Record<string, any>>,
+        ['logs-endpoint.alerts-*'],
+        ruleStatusServiceMock,
+        mockLogger,
+        buildRuleMessage
+      );
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is de-activated. name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
       );
       expect(res).toBeTruthy();
     });
@@ -1052,6 +1108,7 @@ describe('utils', () => {
         lastLookBackDate: null,
         searchAfterTimes: [],
         success: true,
+        warning: false,
       };
       expect(newSearchResult).toEqual(expected);
     });
@@ -1070,6 +1127,7 @@ describe('utils', () => {
         lastLookBackDate: new Date('2020-04-20T21:27:45.000Z'),
         searchAfterTimes: [],
         success: true,
+        warning: false,
       };
       expect(newSearchResult).toEqual(expected);
     });
@@ -1077,6 +1135,7 @@ describe('utils', () => {
     test('result with error will create success: false within the result set', () => {
       const searchResult = sampleDocSearchResultsNoSortIdNoHits();
       searchResult._shards.failed = 1;
+      // @ts-expect-error not full interface
       searchResult._shards.failures = [{ reason: { reason: 'Not a sort failure' } }];
       const { success } = createSearchAfterReturnTypeFromResponse({
         searchResult,
@@ -1088,6 +1147,7 @@ describe('utils', () => {
     test('result with error will create success: false within the result set if failed is 2 or more', () => {
       const searchResult = sampleDocSearchResultsNoSortIdNoHits();
       searchResult._shards.failed = 2;
+      // @ts-expect-error not full interface
       searchResult._shards.failures = [{ reason: { reason: 'Not a sort failure' } }];
       const { success } = createSearchAfterReturnTypeFromResponse({
         searchResult,
@@ -1100,7 +1160,9 @@ describe('utils', () => {
       const searchResult = sampleDocSearchResultsNoSortIdNoHits();
       searchResult._shards.failed = 2;
       searchResult._shards.failures = [
+        // @ts-expect-error not full interface
         { reason: { reason: 'Not a sort failure' } },
+        // @ts-expect-error not full interface
         { reason: { reason: 'No mapping found for [@timestamp] in order to sort on' } },
       ];
       const { success } = createSearchAfterReturnTypeFromResponse({
@@ -1124,7 +1186,9 @@ describe('utils', () => {
       const searchResult = sampleDocSearchResultsNoSortIdNoHits();
       searchResult._shards.failed = 2;
       searchResult._shards.failures = [
+        // @ts-expect-error not full interface
         { reason: { reason: 'No mapping found for [event.ingested] in order to sort on' } },
+        // @ts-expect-error not full interface
         { reason: { reason: 'No mapping found for [@timestamp] in order to sort on' } },
       ];
       const { success } = createSearchAfterReturnTypeFromResponse({
@@ -1136,6 +1200,7 @@ describe('utils', () => {
 
     test('It will not set an invalid date time stamp from a non-existent @timestamp when the index is not 100% ECS compliant', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
+      // @ts-expect-error @elastic/elasticsearch _source is optional
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = undefined;
       if (searchResult.hits.hits[0].fields != null) {
         (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = undefined;
@@ -1149,6 +1214,7 @@ describe('utils', () => {
 
     test('It will not set an invalid date time stamp from a null @timestamp when the index is not 100% ECS compliant', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
+      // @ts-expect-error @elastic/elasticsearch _source is optional
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = null;
       if (searchResult.hits.hits[0].fields != null) {
         (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = null;
@@ -1162,6 +1228,7 @@ describe('utils', () => {
 
     test('It will not set an invalid date time stamp from an invalid @timestamp string', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
+      // @ts-expect-error @elastic/elasticsearch _source is optional
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = 'invalid';
       if (searchResult.hits.hits[0].fields != null) {
         (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = ['invalid'];
@@ -1177,6 +1244,7 @@ describe('utils', () => {
   describe('lastValidDate', () => {
     test('It returns undefined if the search result contains a null timestamp', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
+      // @ts-expect-error @elastic/elasticsearch _source is optional
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = null;
       if (searchResult.hits.hits[0].fields != null) {
         (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = null;
@@ -1187,6 +1255,7 @@ describe('utils', () => {
 
     test('It returns undefined if the search result contains a undefined timestamp', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
+      // @ts-expect-error @elastic/elasticsearch _source is optional
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = undefined;
       if (searchResult.hits.hits[0].fields != null) {
         (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = undefined;
@@ -1197,6 +1266,7 @@ describe('utils', () => {
 
     test('It returns undefined if the search result contains an invalid string value', () => {
       const searchResult = sampleDocSearchResultsNoSortId();
+      // @ts-expect-error @elastic/elasticsearch _source is optional
       (searchResult.hits.hits[0]._source['@timestamp'] as unknown) = 'invalid value';
       if (searchResult.hits.hits[0].fields != null) {
         (searchResult.hits.hits[0].fields['@timestamp'] as unknown) = ['invalid value'];
@@ -1230,7 +1300,7 @@ describe('utils', () => {
     test('It returns timestampOverride date time if set', () => {
       const override = '2020-10-07T19:20:28.049Z';
       const searchResult = sampleDocSearchResultsNoSortId();
-      searchResult.hits.hits[0]._source.different_timestamp = new Date(override).toISOString();
+      searchResult.hits.hits[0]._source!.different_timestamp = new Date(override).toISOString();
       const date = lastValidDate({ searchResult, timestampOverride: 'different_timestamp' });
       expect(date?.toISOString()).toEqual(override);
     });
@@ -1263,6 +1333,7 @@ describe('utils', () => {
         lastLookBackDate: null,
         searchAfterTimes: [],
         success: true,
+        warning: false,
       };
       expect(searchAfterReturnType).toEqual(expected);
     });
@@ -1276,6 +1347,7 @@ describe('utils', () => {
         lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
         searchAfterTimes: ['123'],
         success: false,
+        warning: true,
       });
       const expected: SearchAfterAndBulkCreateReturnType = {
         bulkCreateTimes: ['123'],
@@ -1285,6 +1357,7 @@ describe('utils', () => {
         lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'),
         searchAfterTimes: ['123'],
         success: false,
+        warning: true,
       };
       expect(searchAfterReturnType).toEqual(expected);
     });
@@ -1303,6 +1376,7 @@ describe('utils', () => {
         lastLookBackDate: null,
         searchAfterTimes: [],
         success: true,
+        warning: false,
       };
       expect(searchAfterReturnType).toEqual(expected);
     });
@@ -1319,6 +1393,7 @@ describe('utils', () => {
         lastLookBackDate: null,
         searchAfterTimes: [],
         success: true,
+        warning: false,
       };
       expect(merged).toEqual(expected);
     });
@@ -1392,6 +1467,7 @@ describe('utils', () => {
         lastLookBackDate: new Date('2020-09-21T18:51:25.193Z'), // takes the next lastLookBackDate
         searchAfterTimes: ['123', '567'], // concatenates the searchAfterTimes together
         success: true, // Defaults to success true is all of it was successful
+        warning: false,
       };
       expect(merged).toEqual(expected);
     });

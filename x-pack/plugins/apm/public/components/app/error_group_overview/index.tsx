@@ -68,7 +68,7 @@ export function ErrorGroupOverview({ serviceName }: ErrorGroupOverviewProps) {
   useTrackPageview({ app: 'apm', path: 'error_group_overview', delay: 15000 });
 
   if (!errorDistributionData || !errorGroupListData) {
-    return null;
+    return <SearchBar />;
   }
 
   return (
@@ -97,7 +97,7 @@ export function ErrorGroupOverview({ serviceName }: ErrorGroupOverviewProps) {
             <EuiSpacer size="s" />
 
             <ErrorGroupList
-              items={errorGroupListData}
+              items={errorGroupListData.errorGroups}
               serviceName={serviceName}
             />
           </EuiPanel>

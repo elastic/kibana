@@ -17,7 +17,7 @@ import { getConfigureCasesUrl, useFormatUrl } from '../../../common/components/l
 import { CaseCallOut } from '../callout';
 import { getLicenseError, getKibanaConfigError } from './helpers';
 import * as i18n from './translations';
-import { CaseConnector, ActionConnector, CaseStatuses } from '../../../../../case/common/api';
+import { CaseConnector, ActionConnector, CaseStatuses } from '../../../../../cases/common/api';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { LinkAnchor } from '../../../common/components/links';
 import { SecurityPageName } from '../../../app/types';
@@ -90,7 +90,7 @@ export const usePushToService = ({
           description: (
             <FormattedMessage
               defaultMessage="To open and update cases in external systems, you must configure a {link}."
-              id="xpack.securitySolution.case.caseView.pushToServiceDisableByNoConnectors"
+              id="xpack.securitySolution.cases.caseView.pushToServiceDisableByNoConnectors"
               values={{
                 link: (
                   <LinkAnchor
@@ -115,7 +115,7 @@ export const usePushToService = ({
           description: (
             <FormattedMessage
               defaultMessage="To open and update cases in external systems, you must select an external incident management system for this case."
-              id="xpack.securitySolution.case.caseView.pushToServiceDisableByNoCaseConfigDescription"
+              id="xpack.securitySolution.cases.caseView.pushToServiceDisableByNoCaseConfigDescription"
             />
           ),
         },
@@ -129,7 +129,7 @@ export const usePushToService = ({
           description: (
             <FormattedMessage
               defaultMessage="The connector used to send updates to external service has been deleted. To update cases in external systems, select a different connector or create a new one."
-              id="xpack.securitySolution.case.caseView.pushToServiceDisableByInvalidConnector"
+              id="xpack.securitySolution.cases.caseView.pushToServiceDisableByInvalidConnector"
             />
           ),
           errorType: 'danger',
@@ -145,7 +145,7 @@ export const usePushToService = ({
           description: (
             <FormattedMessage
               defaultMessage="Closed cases cannot be sent to external systems. Reopen the case if you want to open or update it in an external system."
-              id="xpack.securitySolution.case.caseView.pushToServiceDisableBecauseCaseClosedDescription"
+              id="xpack.securitySolution.cases.caseView.pushToServiceDisableBecauseCaseClosedDescription"
             />
           ),
         },

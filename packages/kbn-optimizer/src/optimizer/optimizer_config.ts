@@ -115,6 +115,9 @@ interface Options {
    *  - "k7light"
    */
   themes?: ThemeTag | '*' | ThemeTag[];
+
+  /** path to a limits.yml file that should be used to inform ci-stats of metric limits */
+  limitsPath?: string;
 }
 
 export interface ParsedOptions {
@@ -211,7 +214,7 @@ export class OptimizerConfig {
   }
 
   static create(inputOptions: Options) {
-    const limits = readLimits();
+    const limits = inputOptions.limitsPath ? readLimits(inputOptions.limitsPath) : {};
     const options = OptimizerConfig.parseOptions(inputOptions);
     const plugins = findKibanaPlatformPlugins(options.pluginScanDirs, options.pluginPaths);
     const bundles = [

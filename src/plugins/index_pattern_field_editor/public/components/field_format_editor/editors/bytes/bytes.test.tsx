@@ -8,9 +8,13 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
+import { coreMock } from 'src/core/public/mocks';
+import { createKibanaReactContext } from '../../../../../../kibana_react/public';
+import { FieldFormat } from 'src/plugins/data/public';
 
 import { BytesFormatEditor } from './bytes';
-import { FieldFormat } from 'src/plugins/data/public';
+
+type BytesFormatEditorProps = React.ComponentProps<typeof BytesFormatEditor>;
 
 const fieldType = 'number';
 const format = {
@@ -25,7 +29,20 @@ const formatParams = {
 const onChange = jest.fn();
 const onError = jest.fn();
 
+const KibanaReactContext = createKibanaReactContext(
+  coreMock.createStart({ basePath: 'my-base-path' })
+);
+
 describe('BytesFormatEditor', () => {
+  beforeAll(() => {
+    // Enzyme does not support the new Context API in shallow rendering.
+    // @see https://github.com/enzymejs/enzyme/issues/2189
+    (BytesFormatEditor as React.ComponentType<BytesFormatEditorProps>).contextTypes = {
+      services: () => null,
+    };
+    delete (BytesFormatEditor as Partial<typeof BytesFormatEditor>).contextType;
+  });
+
   it('should have a formatId', () => {
     expect(BytesFormatEditor.formatId).toEqual('bytes');
   });
@@ -38,7 +55,8 @@ describe('BytesFormatEditor', () => {
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}
-      />
+      />,
+      { context: KibanaReactContext.value }
     );
     expect(component).toMatchSnapshot();
   });

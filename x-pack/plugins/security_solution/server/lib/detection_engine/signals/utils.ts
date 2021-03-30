@@ -9,6 +9,7 @@ import { createHash } from 'crypto';
 import moment from 'moment';
 import uuidv5 from 'uuid/v5';
 import dateMath from '@elastic/datemath';
+import type { estypes } from '@elastic/elasticsearch';
 import { isEmpty, partition } from 'lodash';
 import { ApiResponse, Context } from '@elastic/elasticsearch/lib/Transport';
 
@@ -22,12 +23,11 @@ import {
   AlertInstanceState,
   AlertServices,
   parseDuration,
-} from '../../../../../alerts/server';
+} from '../../../../../alerting/server';
 import { ExceptionListClient, ListClient, ListPluginSetup } from '../../../../../lists/server';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { ListArray } from '../../../../common/detection_engine/schemas/types/lists';
 import {
-  BulkResponse,
   BulkResponseErrorAggregation,
   SignalHit,
   SearchAfterAndBulkCreateReturnType,
@@ -84,7 +84,7 @@ export const hasReadIndexPrivileges = async (
       indexesWithNoReadPrivileges
     )}`;
     logger.error(buildRuleMessage(errorString));
-    await ruleStatusService.warning(errorString);
+    await ruleStatusService.partialFailure(errorString);
     return true;
   } else if (
     indexesWithReadPrivileges.length === 0 &&
@@ -96,7 +96,7 @@ export const hasReadIndexPrivileges = async (
       indexesWithNoReadPrivileges
     )}`;
     logger.error(buildRuleMessage(errorString));
-    await ruleStatusService.warning(errorString);
+    await ruleStatusService.partialFailure(errorString);
     return true;
   }
   return false;
@@ -105,6 +105,7 @@ export const hasReadIndexPrivileges = async (
 export const hasTimestampFields = async (
   wroteStatus: boolean,
   timestampField: string,
+  ruleName: string,
   // any is derived from here
   // node_modules/@elastic/elasticsearch/api/kibana.d.ts
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -115,11 +116,15 @@ export const hasTimestampFields = async (
   buildRuleMessage: BuildRuleMessage
 ): Promise<boolean> => {
   if (!wroteStatus && isEmpty(timestampFieldCapsResponse.body.indices)) {
-    const errorString = `The following index patterns did not match any indices: ${JSON.stringify(
+    const errorString = `This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ${JSON.stringify(
       inputIndices
-    )}`;
-    logger.error(buildRuleMessage(errorString));
-    await ruleStatusService.warning(errorString);
+    )} was found. This warning will continue to appear until a matching index is created or this rule is de-activated. ${
+      ruleName === 'Endpoint Security'
+        ? 'If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent.'
+        : ''
+    }`;
+    logger.error(buildRuleMessage(errorString.trimEnd()));
+    await ruleStatusService.partialFailure(errorString.trimEnd());
     return true;
   } else if (
     !wroteStatus &&
@@ -140,7 +145,7 @@ export const hasTimestampFields = async (
         : timestampFieldCapsResponse.body.fields[timestampField]?.unmapped?.indices
     )}`;
     logger.error(buildRuleMessage(errorString));
-    await ruleStatusService.warning(errorString);
+    await ruleStatusService.partialFailure(errorString);
     return true;
   }
   return wroteStatus;
@@ -150,18 +155,20 @@ export const checkPrivileges = async (
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>,
   indices: string[]
 ): Promise<Privilege> =>
-  services.callCluster('transport.request', {
-    path: '/_security/user/_has_privileges',
-    method: 'POST',
-    body: {
-      index: [
-        {
-          names: indices ?? [],
-          privileges: ['read'],
-        },
-      ],
-    },
-  });
+  (
+    await services.scopedClusterClient.asCurrentUser.transport.request({
+      path: '/_security/user/_has_privileges',
+      method: 'POST',
+      body: {
+        index: [
+          {
+            names: indices ?? [],
+            privileges: ['read'],
+          },
+        ],
+      },
+    })
+  ).body as Privilege;
 
 export const getNumCatchupIntervals = ({
   gap,
@@ -200,7 +207,11 @@ export const getListsClient = ({
     throw new Error('lists plugin unavailable during rule execution');
   }
 
-  const listClient = lists.getListClient(services.callCluster, spaceId, updatedByUser ?? 'elastic');
+  const listClient = lists.getListClient(
+    services.scopedClusterClient.asCurrentUser,
+    spaceId,
+    updatedByUser ?? 'elastic'
+  );
   const exceptionsClient = lists.getExceptionListClient(
     savedObjectClient,
     updatedByUser ?? 'elastic'
@@ -215,7 +226,7 @@ export const getExceptions = async ({
 }: {
   client: ExceptionListClient;
   lists: ListArray;
-}): Promise<ExceptionListItemSchema[] | undefined> => {
+}): Promise<ExceptionListItemSchema[]> => {
   if (lists.length > 0) {
     try {
       const listIds = lists.map(({ list_id: listId }) => listId);
@@ -397,7 +408,7 @@ export const makeFloatString = (num: number): string => Number(num).toFixed(2);
  * @returns The aggregated example as shown above.
  */
 export const errorAggregator = (
-  response: BulkResponse,
+  response: estypes.BulkResponse,
   ignoreStatusCodes: number[]
 ): BulkResponseErrorAggregation => {
   return response.items.reduce<BulkResponseErrorAggregation>((accum, item) => {
@@ -470,7 +481,7 @@ export const getRuleRangeTuples = ({
     gap.asMilliseconds() - catchup * intervalDuration.asMilliseconds(),
     0
   );
-  return { tuples, remainingGap: moment.duration(remainingGapMilliseconds) };
+  return { tuples: tuples.reverse(), remainingGap: moment.duration(remainingGapMilliseconds) };
 };
 
 /**
@@ -557,7 +568,7 @@ export const lastValidDate = ({
   searchResult,
   timestampOverride,
 }: {
-  searchResult: SignalSearchResponse;
+  searchResult: estypes.SearchResponse;
   timestampOverride: TimestampOverrideOrUndefined;
 }): Date | undefined => {
   if (searchResult.hits.hits.length === 0) {
@@ -568,7 +579,8 @@ export const lastValidDate = ({
     const timestampValue =
       lastRecord.fields != null && lastRecord.fields[timestamp] != null
         ? lastRecord.fields[timestamp][0]
-        : lastRecord._source[timestamp];
+        : // @ts-expect-error @elastic/elasticsearch _source is optional
+          lastRecord._source[timestamp];
     const lastTimestamp =
       typeof timestampValue === 'string' || typeof timestampValue === 'number'
         ? timestampValue
@@ -588,7 +600,7 @@ export const createSearchAfterReturnTypeFromResponse = ({
   searchResult,
   timestampOverride,
 }: {
-  searchResult: SignalSearchResponse;
+  searchResult: estypes.SearchResponse;
   timestampOverride: TimestampOverrideOrUndefined;
 }): SearchAfterAndBulkCreateReturnType => {
   return createSearchAfterReturnType({
@@ -610,6 +622,7 @@ export const createSearchAfterReturnTypeFromResponse = ({
 
 export const createSearchAfterReturnType = ({
   success,
+  warning,
   searchAfterTimes,
   bulkCreateTimes,
   lastLookBackDate,
@@ -618,6 +631,7 @@ export const createSearchAfterReturnType = ({
   errors,
 }: {
   success?: boolean | undefined;
+  warning?: boolean;
   searchAfterTimes?: string[] | undefined;
   bulkCreateTimes?: string[] | undefined;
   lastLookBackDate?: Date | undefined;
@@ -627,6 +641,7 @@ export const createSearchAfterReturnType = ({
 } = {}): SearchAfterAndBulkCreateReturnType => {
   return {
     success: success ?? true,
+    warning: warning ?? false,
     searchAfterTimes: searchAfterTimes ?? [],
     bulkCreateTimes: bulkCreateTimes ?? [],
     lastLookBackDate: lastLookBackDate ?? null,
@@ -661,6 +676,7 @@ export const mergeReturns = (
   return searchAfters.reduce((prev, next) => {
     const {
       success: existingSuccess,
+      warning: existingWarning,
       searchAfterTimes: existingSearchAfterTimes,
       bulkCreateTimes: existingBulkCreateTimes,
       lastLookBackDate: existingLastLookBackDate,
@@ -671,6 +687,7 @@ export const mergeReturns = (
 
     const {
       success: newSuccess,
+      warning: newWarning,
       searchAfterTimes: newSearchAfterTimes,
       bulkCreateTimes: newBulkCreateTimes,
       lastLookBackDate: newLastLookBackDate,
@@ -681,6 +698,7 @@ export const mergeReturns = (
 
     return {
       success: existingSuccess && newSuccess,
+      warning: existingWarning || newWarning,
       searchAfterTimes: [...existingSearchAfterTimes, ...newSearchAfterTimes],
       bulkCreateTimes: [...existingBulkCreateTimes, ...newBulkCreateTimes],
       lastLookBackDate: newLastLookBackDate ?? existingLastLookBackDate,
@@ -719,6 +737,7 @@ export const mergeSearchResults = (searchResults: SignalSearchResponse[]) => {
         total: newShards.total + existingShards.total,
         successful: newShards.successful + existingShards.successful,
         failed: newShards.failed + existingShards.failed,
+        // @ts-expect-error @elastic/elaticsearch skipped is optional in ShardStatistics
         skipped: newShards.skipped + existingShards.skipped,
         failures: [
           ...(existingShards.failures != null ? existingShards.failures : []),
@@ -730,7 +749,7 @@ export const mergeSearchResults = (searchResults: SignalSearchResponse[]) => {
         total:
           createTotalHitsFromSearchResult({ searchResult: prev }) +
           createTotalHitsFromSearchResult({ searchResult: next }),
-        max_score: Math.max(newHits.max_score, existingHits.max_score),
+        max_score: Math.max(newHits.max_score!, existingHits.max_score!),
         hits: [...existingHits.hits, ...newHits.hits],
       },
     };
@@ -740,7 +759,7 @@ export const mergeSearchResults = (searchResults: SignalSearchResponse[]) => {
 export const createTotalHitsFromSearchResult = ({
   searchResult,
 }: {
-  searchResult: SignalSearchResponse;
+  searchResult: { hits: { total: number | { value: number } } };
 }): number => {
   const totalHits =
     typeof searchResult.hits.total === 'number'
@@ -787,4 +806,22 @@ export const getThresholdAggregationParts = (
       };
     }
   }
+};
+
+export const getThresholdTermsHash = (
+  terms: Array<{
+    field: string;
+    value: string;
+  }>
+): string => {
+  return createHash('sha256')
+    .update(
+      terms
+        .sort((term1, term2) => (term1.field > term2.field ? 1 : -1))
+        .map((field) => {
+          return field.value;
+        })
+        .join(',')
+    )
+    .digest('hex');
 };

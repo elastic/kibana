@@ -28,6 +28,7 @@ export interface AggFunctionsMapping
 |  [aggDateRange](./kibana-plugin-plugins-data-public.aggfunctionsmapping.aggdaterange.md) | <code>ReturnType&lt;typeof aggDateRange&gt;</code> |  |
 |  [aggDerivative](./kibana-plugin-plugins-data-public.aggfunctionsmapping.aggderivative.md) | <code>ReturnType&lt;typeof aggDerivative&gt;</code> |  |
 |  [aggFilter](./kibana-plugin-plugins-data-public.aggfunctionsmapping.aggfilter.md) | <code>ReturnType&lt;typeof aggFilter&gt;</code> |  |
+|  [aggFilteredMetric](./kibana-plugin-plugins-data-public.aggfunctionsmapping.aggfilteredmetric.md) | <code>ReturnType&lt;typeof aggFilteredMetric&gt;</code> |  |
 |  [aggFilters](./kibana-plugin-plugins-data-public.aggfunctionsmapping.aggfilters.md) | <code>ReturnType&lt;typeof aggFilters&gt;</code> |  |
 |  [aggGeoBounds](./kibana-plugin-plugins-data-public.aggfunctionsmapping.agggeobounds.md) | <code>ReturnType&lt;typeof aggGeoBounds&gt;</code> |  |
 |  [aggGeoCentroid](./kibana-plugin-plugins-data-public.aggfunctionsmapping.agggeocentroid.md) | <code>ReturnType&lt;typeof aggGeoCentroid&gt;</code> |  |

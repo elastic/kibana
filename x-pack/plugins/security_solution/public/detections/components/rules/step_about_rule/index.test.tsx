@@ -22,12 +22,13 @@ import {
   RuleStep,
 } from '../../../pages/detection_engine/rules/types';
 import { fillEmptySeverityMappings } from '../../../pages/detection_engine/rules/helpers';
+import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
 
-const mockTheme = {
+const mockTheme = getMockTheme({
   eui: {
     euiColorLightestShade: '#ece',
   },
-};
+});
 
 jest.mock('../../../../common/containers/source');
 jest.mock('@elastic/eui', () => {

@@ -17,7 +17,7 @@ import { ValidationResult } from '../../../../types';
 import {
   AlertExecutionStatusErrorReasons,
   ALERTS_FEATURE_ID,
-} from '../../../../../../alerts/common';
+} from '../../../../../../alerting/common';
 import { useKibana } from '../../../../common/lib/kibana';
 jest.mock('../../../../common/lib/kibana');
 
@@ -362,6 +362,28 @@ describe('alerts_list component with items', () => {
     );
     wrapper.find('EuiButton[data-test-subj="confirmModalConfirmButton"]').simulate('click');
     expect(global.open).toHaveBeenCalled();
+  });
+
+  it('sorts alerts when clicking the name column', async () => {
+    await setup();
+    wrapper
+      .find('[data-test-subj="tableHeaderCell_name_0"] .euiTableHeaderButton')
+      .first()
+      .simulate('click');
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(loadAlerts).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sort: {
+          field: 'name',
+          direction: 'desc',
+        },
+      })
+    );
   });
 });
 

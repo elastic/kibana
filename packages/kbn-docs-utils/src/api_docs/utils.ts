@@ -49,6 +49,13 @@ export function groupPluginApi(declarations: ApiDeclaration[]): ScopeApi {
     addApiDeclarationToScope(declaration, scope);
   });
 
+  scope.classes.sort((a, b) => a.label.localeCompare(b.label));
+  scope.interfaces.sort((a, b) => a.label.localeCompare(b.label));
+  scope.functions.sort((a, b) => a.label.localeCompare(b.label));
+  scope.objects.sort((a, b) => a.label.localeCompare(b.label));
+  scope.enums.sort((a, b) => a.label.localeCompare(b.label));
+  scope.misc.sort((a, b) => a.label.localeCompare(b.label));
+
   return scope;
 }
 
@@ -203,3 +210,7 @@ function scopeAccessor(scope: ApiScope): 'server' | 'common' | 'client' {
       return 'common';
   }
 }
+
+export const isInternal = (dec: ApiDeclaration) => {
+  return dec.tags && dec.tags.find((tag) => tag === 'internal');
+};

@@ -7,6 +7,8 @@
 
 import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks__';
 
+import { ENTERPRISE_SEARCH_KIBANA_COOKIE } from '../../../common/constants';
+
 import {
   registerAccountSourcesRoute,
   registerAccountSourcesStatusRoute,
@@ -23,6 +25,7 @@ import {
   registerAccountSourceSchemasRoute,
   registerAccountSourceReindexJobRoute,
   registerAccountSourceReindexJobStatusRoute,
+  registerAccountSourceDownloadDiagnosticsRoute,
   registerOrgSourcesRoute,
   registerOrgSourcesStatusRoute,
   registerOrgSourceRoute,
@@ -38,6 +41,7 @@ import {
   registerOrgSourceSchemasRoute,
   registerOrgSourceReindexJobRoute,
   registerOrgSourceReindexJobStatusRoute,
+  registerOrgSourceDownloadDiagnosticsRoute,
   registerOrgSourceOauthConfigurationsRoute,
   registerOrgSourceOauthConfigurationRoute,
   registerOauthConnectorParamsRoute,
@@ -561,6 +565,29 @@ describe('sources routes', () => {
     });
   });
 
+  describe('GET /api/workplace_search/account/sources/{sourceId}/download_diagnostics', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'get',
+        path: '/api/workplace_search/account/sources/{sourceId}/download_diagnostics',
+      });
+
+      registerAccountSourceDownloadDiagnosticsRoute({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request handler', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/ws/sources/:sourceId/download_diagnostics',
+      });
+    });
+  });
+
   describe('GET /api/workplace_search/org/sources', () => {
     let mockRouter: MockRouter;
 
@@ -1059,6 +1086,29 @@ describe('sources routes', () => {
     });
   });
 
+  describe('GET /api/workplace_search/org/sources/{sourceId}/download_diagnostics', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'get',
+        path: '/api/workplace_search/org/sources/{sourceId}/download_diagnostics',
+      });
+
+      registerOrgSourceDownloadDiagnosticsRoute({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request handler', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/ws/org/sources/:sourceId/download_diagnostics',
+      });
+    });
+  });
+
   describe('GET /api/workplace_search/org/settings/connectors', () => {
     let mockRouter: MockRouter;
 
@@ -1249,6 +1299,15 @@ describe('sources routes', () => {
   });
 
   describe('GET /api/workplace_search/sources/create', () => {
+    const tokenPackage = 'some_encrypted_secrets';
+
+    const mockRequest = {
+      headers: {
+        authorization: 'BASIC 123',
+        cookie: `${ENTERPRISE_SEARCH_KIBANA_COOKIE}=${tokenPackage}`,
+      },
+    };
+
     let mockRouter: MockRouter;
 
     beforeEach(() => {
@@ -1265,8 +1324,11 @@ describe('sources routes', () => {
     });
 
     it('creates a request handler', () => {
+      mockRouter.callRoute(mockRequest as any);
+
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/ws/sources/create',
+        params: { token_package: tokenPackage },
       });
     });
   });

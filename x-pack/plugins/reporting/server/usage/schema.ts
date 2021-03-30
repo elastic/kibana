@@ -16,6 +16,7 @@ const appCountsSchema: MakeSchemaFrom<AppCounts> = {
 
 const byAppCountsSchema: MakeSchemaFrom<RangeStats['statuses']['cancelled']> = {
   csv: appCountsSchema,
+  csv_searchsource: appCountsSchema,
   PNG: appCountsSchema,
   printable_pdf: appCountsSchema,
 };
@@ -27,6 +28,7 @@ const availableTotalSchema: MakeSchemaFrom<AvailableTotal> = {
 
 const jobTypesSchema: MakeSchemaFrom<JobTypes> = {
   csv: availableTotalSchema,
+  csv_searchsource: availableTotalSchema,
   PNG: availableTotalSchema,
   printable_pdf: {
     ...availableTotalSchema,

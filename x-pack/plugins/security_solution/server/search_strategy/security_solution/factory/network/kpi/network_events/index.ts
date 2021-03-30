@@ -28,6 +28,7 @@ export const networkKpiNetworkEvents: SecuritySolutionFactory<NetworkKpiQueries.
     return {
       ...response,
       inspect,
+      // @ts-expect-error code doesn't handle TotalHits
       networkEvents: response.rawResponse.hits.total,
     };
   },

@@ -10,8 +10,9 @@ import { ThemeProvider } from 'styled-components';
 import { mountWithIntl } from '@kbn/test/jest';
 
 import { ExceptionsViewerUtility } from './exceptions_utility';
+import { getMockTheme } from '../../../lib/kibana/kibana_react.mock';
 
-const mockTheme = {
+const mockTheme = getMockTheme({
   eui: {
     euiBreakpoints: {
       l: '1200px',
@@ -21,7 +22,7 @@ const mockTheme = {
     },
     euiBorderThin: '1px solid #ece',
   },
-};
+});
 
 describe('ExceptionsViewerUtility', () => {
   it('it renders correct pluralized text when more than one exception exists', () => {

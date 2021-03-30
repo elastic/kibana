@@ -408,7 +408,8 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
 
         await this.waitForVisualizationRenderingStabilized();
         // arbitrary color chosen, any available would do
-        const isOpen = await this.doesLegendColorChoiceExist('#EF843C');
+        const arbitraryColor = (await this.isVisTypeXYChart()) ? '#d36086' : '#EF843C';
+        const isOpen = await this.doesLegendColorChoiceExist(arbitraryColor);
         if (!isOpen) {
           throw new Error('legend color selector not open');
         }

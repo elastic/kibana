@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { EncryptedSavedObjectsPluginSetup, EncryptedSavedObjectsPluginStart } from './plugin';
-import { EncryptedSavedObjectsClient, EncryptedSavedObjectsClientOptions } from './saved_objects';
+import type { EncryptedSavedObjectsPluginSetup, EncryptedSavedObjectsPluginStart } from './plugin';
+import type {
+  EncryptedSavedObjectsClient,
+  EncryptedSavedObjectsClientOptions,
+} from './saved_objects';
 
 function createEncryptedSavedObjectsSetupMock(
   { canEncrypt }: { canEncrypt: boolean } = { canEncrypt: false }

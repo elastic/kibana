@@ -417,6 +417,7 @@ describe('buildRuleWithOverrides', () => {
         query: 'host.name: Braden',
       },
     ];
+    // @ts-expect-error @elastic/elasticsearch _source is optional
     const rule = buildRuleWithOverrides(ruleSO, sampleDocNoSortId()._source);
     const expected: RulesSchema = {
       ...expectedRule(),
@@ -433,6 +434,7 @@ describe('buildRuleWithOverrides', () => {
       `${INTERNAL_RULE_ID_KEY}:rule-1`,
       `${INTERNAL_IMMUTABLE_KEY}:true`,
     ];
+    // @ts-expect-error @elastic/elasticsearch _source is optional
     const rule = buildRuleWithOverrides(ruleSO, sampleDocNoSortId()._source);
     expect(rule).toEqual(expectedRule());
   });
@@ -440,6 +442,7 @@ describe('buildRuleWithOverrides', () => {
   test('it applies rule name override in buildRule', () => {
     const ruleSO = sampleRuleSO();
     ruleSO.attributes.params.ruleNameOverride = 'someKey';
+    // @ts-expect-error @elastic/elasticsearch _source is optional
     const rule = buildRuleWithOverrides(ruleSO, sampleDocNoSortId()._source);
     const expected = {
       ...expectedRule(),
@@ -465,7 +468,9 @@ describe('buildRuleWithOverrides', () => {
       },
     ];
     const doc = sampleDocNoSortId();
+    // @ts-expect-error @elastic/elasticsearch _source is optional
     doc._source.new_risk_score = newRiskScore;
+    // @ts-expect-error @elastic/elasticsearch _source is optional
     const rule = buildRuleWithOverrides(ruleSO, doc._source);
     const expected = {
       ...expectedRule(),
@@ -490,6 +495,7 @@ describe('buildRuleWithOverrides', () => {
       },
     ];
     const doc = sampleDocSeverity(Number(eventSeverity));
+    // @ts-expect-error @elastic/elasticsearch _source is optional
     const rule = buildRuleWithOverrides(ruleSO, doc._source);
     const expected = {
       ...expectedRule(),

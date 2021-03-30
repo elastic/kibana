@@ -11,25 +11,28 @@ jest.mock('./providers/saml');
 jest.mock('./providers/http');
 
 import Boom from '@hapi/boom';
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
-  loggingSystemMock,
-  httpServiceMock,
-  httpServerMock,
   elasticsearchServiceMock,
-} from '../../../../../src/core/server/mocks';
+  httpServerMock,
+  httpServiceMock,
+  loggingSystemMock,
+} from 'src/core/server/mocks';
+
+import type { SecurityLicenseFeatures } from '../../common/licensing';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { auditServiceMock, securityAuditLoggerMock } from '../audit/index.mock';
-import { sessionMock } from '../session_management/index.mock';
-import { SecurityLicenseFeatures } from '../../common/licensing';
 import { ConfigSchema, createConfig } from '../config';
-import { SessionValue } from '../session_management';
-import { AuthenticationResult } from './authentication_result';
-import { Authenticator, AuthenticatorOptions } from './authenticator';
-import { DeauthenticationResult } from './deauthentication_result';
-import { BasicAuthenticationProvider, SAMLAuthenticationProvider } from './providers';
 import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
+import type { SessionValue } from '../session_management';
+import { sessionMock } from '../session_management/index.mock';
+import { AuthenticationResult } from './authentication_result';
+import type { AuthenticatorOptions } from './authenticator';
+import { Authenticator } from './authenticator';
+import { DeauthenticationResult } from './deauthentication_result';
+import type { BasicAuthenticationProvider, SAMLAuthenticationProvider } from './providers';
 
 function getMockOptions({
   providers,
@@ -582,8 +585,8 @@ describe('Authenticator', () => {
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).not.toHaveBeenCalled();
       expect(mockOptions.session.extend).not.toHaveBeenCalled();
-      expect(mockOptions.session.clear).toHaveBeenCalledTimes(1);
-      expect(mockOptions.session.clear).toHaveBeenCalledWith(request);
+      expect(mockOptions.session.invalidate).toHaveBeenCalledTimes(1);
+      expect(mockOptions.session.invalidate).toHaveBeenCalledWith(request, { match: 'current' });
     });
 
     it('clears session if provider asked to do so in `succeeded` result.', async () => {
@@ -602,8 +605,8 @@ describe('Authenticator', () => {
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).not.toHaveBeenCalled();
       expect(mockOptions.session.extend).not.toHaveBeenCalled();
-      expect(mockOptions.session.clear).toHaveBeenCalledTimes(1);
-      expect(mockOptions.session.clear).toHaveBeenCalledWith(request);
+      expect(mockOptions.session.invalidate).toHaveBeenCalledTimes(1);
+      expect(mockOptions.session.invalidate).toHaveBeenCalledWith(request, { match: 'current' });
     });
 
     it('clears session if provider asked to do so in `redirected` result.', async () => {
@@ -621,8 +624,8 @@ describe('Authenticator', () => {
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).not.toHaveBeenCalled();
       expect(mockOptions.session.extend).not.toHaveBeenCalled();
-      expect(mockOptions.session.clear).toHaveBeenCalledTimes(1);
-      expect(mockOptions.session.clear).toHaveBeenCalledWith(request);
+      expect(mockOptions.session.invalidate).toHaveBeenCalledTimes(1);
+      expect(mockOptions.session.invalidate).toHaveBeenCalledWith(request, { match: 'current' });
     });
 
     describe('with Access Agreement', () => {
@@ -1188,7 +1191,7 @@ describe('Authenticator', () => {
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).not.toHaveBeenCalled();
       expect(mockOptions.session.extend).not.toHaveBeenCalled();
-      expect(mockOptions.session.clear).not.toHaveBeenCalled();
+      expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
     });
 
     it('extends session for non-system API calls.', async () => {
@@ -1210,7 +1213,7 @@ describe('Authenticator', () => {
       expect(mockOptions.session.extend).toHaveBeenCalledWith(request, mockSessVal);
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).not.toHaveBeenCalled();
-      expect(mockOptions.session.clear).not.toHaveBeenCalled();
+      expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
     });
 
     it('does not touch session for system API calls if authentication fails with non-401 reason.', async () => {
@@ -1231,7 +1234,7 @@ describe('Authenticator', () => {
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).not.toHaveBeenCalled();
       expect(mockOptions.session.extend).not.toHaveBeenCalled();
-      expect(mockOptions.session.clear).not.toHaveBeenCalled();
+      expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
     });
 
     it('does not touch session for non-system API calls if authentication fails with non-401 reason.', async () => {
@@ -1252,7 +1255,7 @@ describe('Authenticator', () => {
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).not.toHaveBeenCalled();
       expect(mockOptions.session.extend).not.toHaveBeenCalled();
-      expect(mockOptions.session.clear).not.toHaveBeenCalled();
+      expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
     });
 
     it('replaces existing session with the one returned by authentication provider for system API requests', async () => {
@@ -1278,7 +1281,7 @@ describe('Authenticator', () => {
       });
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.extend).not.toHaveBeenCalled();
-      expect(mockOptions.session.clear).not.toHaveBeenCalled();
+      expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
     });
 
     it('replaces existing session with the one returned by authentication provider for non-system API requests', async () => {
@@ -1304,7 +1307,7 @@ describe('Authenticator', () => {
       });
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.extend).not.toHaveBeenCalled();
-      expect(mockOptions.session.clear).not.toHaveBeenCalled();
+      expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
     });
 
     it('clears session if provider failed to authenticate system API request with 401 with active session.', async () => {
@@ -1321,8 +1324,8 @@ describe('Authenticator', () => {
         AuthenticationResult.failed(Boom.unauthorized())
       );
 
-      expect(mockOptions.session.clear).toHaveBeenCalledTimes(1);
-      expect(mockOptions.session.clear).toHaveBeenCalledWith(request);
+      expect(mockOptions.session.invalidate).toHaveBeenCalledTimes(1);
+      expect(mockOptions.session.invalidate).toHaveBeenCalledWith(request, { match: 'current' });
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).not.toHaveBeenCalled();
       expect(mockOptions.session.extend).not.toHaveBeenCalled();
@@ -1342,8 +1345,8 @@ describe('Authenticator', () => {
         AuthenticationResult.failed(Boom.unauthorized())
       );
 
-      expect(mockOptions.session.clear).toHaveBeenCalledTimes(1);
-      expect(mockOptions.session.clear).toHaveBeenCalledWith(request);
+      expect(mockOptions.session.invalidate).toHaveBeenCalledTimes(1);
+      expect(mockOptions.session.invalidate).toHaveBeenCalledWith(request, { match: 'current' });
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).not.toHaveBeenCalled();
       expect(mockOptions.session.extend).not.toHaveBeenCalled();
@@ -1361,8 +1364,8 @@ describe('Authenticator', () => {
         AuthenticationResult.redirectTo('some-url', { state: null })
       );
 
-      expect(mockOptions.session.clear).toHaveBeenCalledTimes(1);
-      expect(mockOptions.session.clear).toHaveBeenCalledWith(request);
+      expect(mockOptions.session.invalidate).toHaveBeenCalledTimes(1);
+      expect(mockOptions.session.invalidate).toHaveBeenCalledWith(request, { match: 'current' });
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).not.toHaveBeenCalled();
       expect(mockOptions.session.extend).not.toHaveBeenCalled();
@@ -1379,7 +1382,7 @@ describe('Authenticator', () => {
         AuthenticationResult.notHandled()
       );
 
-      expect(mockOptions.session.clear).not.toHaveBeenCalled();
+      expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).not.toHaveBeenCalled();
       expect(mockOptions.session.extend).not.toHaveBeenCalled();
@@ -1396,7 +1399,7 @@ describe('Authenticator', () => {
         AuthenticationResult.notHandled()
       );
 
-      expect(mockOptions.session.clear).not.toHaveBeenCalled();
+      expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).not.toHaveBeenCalled();
       expect(mockOptions.session.extend).not.toHaveBeenCalled();
@@ -1786,7 +1789,7 @@ describe('Authenticator', () => {
         DeauthenticationResult.notHandled()
       );
 
-      expect(mockOptions.session.clear).not.toHaveBeenCalled();
+      expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
     });
 
     it('clears session and returns whatever authentication provider returns.', async () => {
@@ -1801,7 +1804,7 @@ describe('Authenticator', () => {
       );
 
       expect(mockBasicAuthenticationProvider.logout).toHaveBeenCalledTimes(1);
-      expect(mockOptions.session.clear).toHaveBeenCalled();
+      expect(mockOptions.session.invalidate).toHaveBeenCalled();
     });
 
     it('if session does not exist but provider name is valid, returns whatever authentication provider returns.', async () => {
@@ -1820,7 +1823,7 @@ describe('Authenticator', () => {
 
       expect(mockBasicAuthenticationProvider.logout).toHaveBeenCalledTimes(1);
       expect(mockBasicAuthenticationProvider.logout).toHaveBeenCalledWith(request, null);
-      expect(mockOptions.session.clear).toHaveBeenCalled();
+      expect(mockOptions.session.invalidate).toHaveBeenCalled();
     });
 
     it('if session does not exist and provider name is not available, returns whatever authentication provider returns.', async () => {
@@ -1837,7 +1840,7 @@ describe('Authenticator', () => {
 
       expect(mockBasicAuthenticationProvider.logout).toHaveBeenCalledTimes(1);
       expect(mockBasicAuthenticationProvider.logout).toHaveBeenCalledWith(request);
-      expect(mockOptions.session.clear).not.toHaveBeenCalled();
+      expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
     });
 
     it('returns `notHandled` if session does not exist and provider name is invalid', async () => {
@@ -1849,7 +1852,7 @@ describe('Authenticator', () => {
       );
 
       expect(mockBasicAuthenticationProvider.logout).not.toHaveBeenCalled();
-      expect(mockOptions.session.clear).toHaveBeenCalled();
+      expect(mockOptions.session.invalidate).toHaveBeenCalled();
     });
   });
 

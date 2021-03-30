@@ -7,15 +7,18 @@
 
 import { act } from '@testing-library/react';
 import React from 'react';
+
+import { mountWithIntl } from '@kbn/test/jest';
+import { coreMock } from 'src/core/public/mocks';
+
 import { spacesManagerMock } from '../../../../../../../../spaces/public/spaces_manager/mocks';
 import { getUiApi } from '../../../../../../../../spaces/public/ui_api';
-import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
+import type { RoleKibanaPrivilege } from '../../../../../../../common/model';
 import { kibanaFeatures } from '../../../../__fixtures__/kibana_features';
-import { mountWithIntl } from '@kbn/test/jest';
-import { PrivilegeSummaryTable, PrivilegeSummaryTableProps } from './privilege_summary_table';
-import { RoleKibanaPrivilege } from '../../../../../../../common/model';
+import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 import { getDisplayedFeaturePrivileges } from './__fixtures__';
-import { coreMock } from 'src/core/public/mocks';
+import type { PrivilegeSummaryTableProps } from './privilege_summary_table';
+import { PrivilegeSummaryTable } from './privilege_summary_table';
 
 const createRole = (roleKibanaPrivileges: RoleKibanaPrivilege[]) => ({
   name: 'some-role',

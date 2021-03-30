@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { config, DevConfig, DevConfigType } from './dev_config';
+export { config } from './dev_config';

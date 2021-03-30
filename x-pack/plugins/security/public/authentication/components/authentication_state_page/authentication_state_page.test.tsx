@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { shallowWithIntl } from '@kbn/test/jest';
-import { AuthenticationStatePage } from './authentication_state_page';
 import React from 'react';
+
+import { shallowWithIntl } from '@kbn/test/jest';
+
+import { AuthenticationStatePage } from './authentication_state_page';
 
 describe('AuthenticationStatePage', () => {
   it('renders', () => {

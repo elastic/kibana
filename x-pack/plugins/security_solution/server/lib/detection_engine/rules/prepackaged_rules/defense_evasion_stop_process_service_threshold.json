@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "High Number of Process and/or Service Terminations",
   "query": "event.category:process and event.type:start and process.name:(net.exe or sc.exe or taskkill.exe) and process.args:(stop or pause or delete or \"/PID\" or \"/IM\" or \"/T\" or \"/F\" or \"/t\" or \"/f\" or \"/im\" or \"/pid\")",
   "risk_score": 47,
@@ -48,7 +48,9 @@
     }
   ],
   "threshold": {
-    "field": "host.id",
+    "field": [
+      "host.id"
+    ],
     "value": 10
   },
   "type": "threshold",

@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const ACTIONS_ARIA = i18n.translate(
-  'xpack.securitySolution.case.caseView.editActionsLinkAria',
+  'xpack.securitySolution.cases.caseView.editActionsLinkAria',
   {
     defaultMessage: 'click to see all actions',
   }

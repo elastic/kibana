@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Potential Process Herpaderping Attempt",
   "query": "sequence with maxspan=5s\n   [process where event.type == \"start\" and not process.parent.executable : \"C:\\\\Windows\\\\SoftwareDistribution\\\\*.exe\"] by host.id, process.executable, process.parent.entity_id\n   [file where event.type == \"change\" and event.action == \"overwrite\" and file.extension == \"exe\"] by host.id, file.path, process.entity_id\n",
   "references": [

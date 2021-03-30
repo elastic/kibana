@@ -16,8 +16,8 @@ import {
   AlertInstanceContext,
   AlertInstanceState,
   RecoveredActionGroup,
-} from '../../../../../alerts/common';
-import { AlertExecutorOptions } from '../../../../../alerts/server';
+} from '../../../../../alerting/common';
+import { AlertExecutorOptions } from '../../../../../alerting/server';
 import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
 import { InfraBackendLibs } from '../../infra_types';
 import { METRIC_FORMATTERS } from '../../../../common/formatters/snapshot_metric_formats';
@@ -68,8 +68,22 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
     sourceId || 'default'
   );
 
+  const logQueryFields = await libs.getLogQueryFields(
+    sourceId || 'default',
+    services.savedObjectsClient
+  );
+
   const results = await Promise.all(
-    criteria.map((c) => evaluateCondition(c, nodeType, source, services.callCluster, filterQuery))
+    criteria.map((c) =>
+      evaluateCondition(
+        c,
+        nodeType,
+        source,
+        logQueryFields,
+        services.scopedClusterClient.asCurrentUser,
+        filterQuery
+      )
+    )
   );
 
   const inventoryItems = Object.keys(first(results)!);

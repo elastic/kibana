@@ -27,7 +27,7 @@ interface AgentsTableProps {
 const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onChange }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(5);
-  const [sortField, setSortField] = useState<keyof Agent>('id');
+  const [sortField, setSortField] = useState<keyof Agent>('upgraded_at');
   const [sortDirection, setSortDirection] = useState<Direction>(Direction.asc);
   const [selectedItems, setSelectedItems] = useState([]);
   const tableRef = useRef<EuiBasicTable<Agent>>(null);
@@ -49,8 +49,11 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onCh
   const onSelectionChange: EuiTableSelectionType<{}>['onSelectionChange'] = useCallback(
     (newSelectedItems) => {
       setSelectedItems(newSelectedItems);
-      // @ts-expect-error
-      onChange(newSelectedItems.map((item) => item._id));
+
+      if (onChange) {
+        // @ts-expect-error update types
+        onChange(newSelectedItems.map((item) => item._id));
+      }
     },
     [onChange]
   );
@@ -61,7 +64,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onCh
     return <EuiHealth color={color}>{label}</EuiHealth>;
   };
 
-  const [, { agents, totalCount }] = useAllAgents({
+  const { data = {} } = useAllAgents({
     activePage: pageIndex,
     limit: pageSize,
     direction: sortDirection,
@@ -96,10 +99,12 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onCh
     () => ({
       pageIndex,
       pageSize,
-      totalItemCount: totalCount,
+      // @ts-expect-error update types
+      totalItemCount: data.totalCount ?? 0,
       pageSizeOptions: [3, 5, 8],
     }),
-    [pageIndex, pageSize, totalCount]
+    // @ts-expect-error update types
+    [pageIndex, pageSize, data.totalCount]
   );
 
   const sorting = useMemo(
@@ -123,18 +128,26 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onCh
   );
 
   useEffect(() => {
-    if (selectedAgents?.length && agents.length && selectedItems.length !== selectedAgents.length) {
+    if (
+      selectedAgents?.length &&
+      // @ts-expect-error update types
+      data.agents?.length &&
+      selectedItems.length !== selectedAgents.length
+    ) {
       tableRef?.current?.setSelection(
-        // @ts-expect-error
-        selectedAgents.map((agentId) => find({ _id: agentId }, agents))
+        // @ts-expect-error update types
+        selectedAgents.map((agentId) => find({ _id: agentId }, data.agents))
       );
     }
-  }, [selectedAgents, agents, selectedItems.length]);
+    // @ts-expect-error update types
+  }, [selectedAgents, data.agents, selectedItems.length]);
 
   return (
     <EuiBasicTable<Agent>
       ref={tableRef}
-      items={agents}
+      // @ts-expect-error update types
+      // eslint-disable-next-line react-perf/jsx-no-new-array-as-prop
+      items={data.agents ?? []}
       itemId="_id"
       columns={columns}
       pagination={pagination}

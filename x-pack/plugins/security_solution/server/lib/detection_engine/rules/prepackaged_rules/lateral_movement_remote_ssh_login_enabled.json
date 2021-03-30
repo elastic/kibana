@@ -9,7 +9,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Remote SSH Login Enabled via systemsetup Command",
   "query": "event.category:process and event.type:(start or process_started) and process.name:systemsetup and process.args:(\"-setremotelogin\" and on)",
   "references": [

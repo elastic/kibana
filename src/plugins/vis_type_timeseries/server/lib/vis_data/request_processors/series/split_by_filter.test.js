@@ -20,7 +20,7 @@ describe('splitByFilter(req, panel, series)', () => {
       filter: { query: 'host:example-01', language: 'lucene' },
     };
     req = {
-      payload: {
+      body: {
         timerange: {
           min: '2017-01-01T00:00:00Z',
           max: '2017-01-01T01:00:00Z',

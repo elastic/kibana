@@ -26,6 +26,7 @@ export const getMaxMetricAgg = () => {
     name: METRIC_TYPES.MAX,
     expressionName: aggMaxFnName,
     title: maxTitle,
+    valueType: 'number',
     makeLabel(aggConfig) {
       return i18n.translate('data.search.aggs.metrics.maxLabel', {
         defaultMessage: 'Max {field}',

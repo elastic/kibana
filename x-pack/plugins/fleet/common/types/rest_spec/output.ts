@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Output } from '../models';
+import type { Output } from '../models';
 
 export interface GetOneOutputResponse {
   item: Output;

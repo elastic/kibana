@@ -19,7 +19,7 @@ import {
   FUNCTIONAL_BOOST_FUNCTION_DISPLAY_MAP,
 } from '../../constants';
 import {
-  Boost,
+  FunctionalBoost,
   BoostFunction,
   BoostOperation,
   BoostType,
@@ -27,7 +27,7 @@ import {
 } from '../../types';
 
 interface Props {
-  boost: Boost;
+  boost: FunctionalBoost;
   index: number;
   name: string;
 }
@@ -39,7 +39,7 @@ const functionOptions = Object.values(FunctionalBoostFunction).map((boostFunctio
 
 const operationOptions = Object.values(BoostOperation).map((boostOperation) => ({
   value: boostOperation,
-  text: BOOST_OPERATION_DISPLAY_MAP[boostOperation as BoostOperation],
+  text: BOOST_OPERATION_DISPLAY_MAP[boostOperation],
 }));
 
 export const FunctionalBoostForm: React.FC<Props> = ({ boost, index, name }) => {

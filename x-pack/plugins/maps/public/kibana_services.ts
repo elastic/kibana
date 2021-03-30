@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import { CoreStart } from 'kibana/public';
-import { MapsLegacyConfig } from '../../../../src/plugins/maps_legacy/config';
+import type { MapsEmsConfig } from '../../../../src/plugins/maps_ems/public';
 import { MapsConfigType } from '../config';
 import { MapsPluginStartDependencies } from './plugin';
 import { EMSSettings } from '../common/ems_settings';
@@ -26,9 +26,7 @@ export function setStartServices(core: CoreStart, plugins: MapsPluginStartDepend
 export const getIndexPatternService = () => pluginsStart.data.indexPatterns;
 export const getAutocompleteService = () => pluginsStart.data.autocomplete;
 export const getInspector = () => pluginsStart.inspector;
-export const getFileUploadComponent = async () => {
-  return await pluginsStart.fileUpload.getFileUploadComponent();
-};
+export const getFileUpload = () => pluginsStart.fileUpload;
 export const getUiSettings = () => coreStart.uiSettings;
 export const getIsDarkMode = () => getUiSettings().get('theme:darkMode', false);
 export const getIndexPatternSelectComponent = () => pluginsStart.data.ui.IndexPatternSelect;
@@ -62,9 +60,9 @@ export const getEnabled = () => getMapAppConfig().enabled;
 export const getShowMapsInspectorAdapter = () => getMapAppConfig().showMapsInspectorAdapter;
 export const getPreserveDrawingBuffer = () => getMapAppConfig().preserveDrawingBuffer;
 
-// map.* kibana.yml settings from maps_legacy plugin that are shared between OSS map visualizations and maps app
-let kibanaCommonConfig: MapsLegacyConfig;
-export const setKibanaCommonConfig = (config: MapsLegacyConfig) => (kibanaCommonConfig = config);
+// map.* kibana.yml settings from maps_ems plugin that are shared between OSS map visualizations and maps app
+let kibanaCommonConfig: MapsEmsConfig;
+export const setKibanaCommonConfig = (config: MapsEmsConfig) => (kibanaCommonConfig = config);
 export const getKibanaCommonConfig = () => kibanaCommonConfig;
 
 let emsSettings: EMSSettings;

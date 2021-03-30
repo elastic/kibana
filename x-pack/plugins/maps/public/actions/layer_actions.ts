@@ -539,3 +539,12 @@ export function setHiddenLayers(hiddenLayerIds: string[]) {
     }
   };
 }
+
+export function setAreTilesLoaded(layerId: string, areTilesLoaded: boolean) {
+  return {
+    type: UPDATE_LAYER_PROP,
+    id: layerId,
+    propName: '__areTilesLoaded',
+    newValue: areTilesLoaded,
+  };
+}

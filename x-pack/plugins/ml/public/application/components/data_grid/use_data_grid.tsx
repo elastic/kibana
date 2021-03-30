@@ -10,6 +10,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiDataGridSorting, EuiDataGridColumn } from '@elastic/eui';
 
 import { HITS_TOTAL_RELATION } from '../../../../common/types/es_client';
+import { ChartData } from '../../../../common/types/field_histograms';
 
 import { INDEX_STATUS } from '../../data_frame_analytics/common';
 
@@ -26,7 +27,6 @@ import {
   RowCountRelation,
   UseDataGridReturnType,
 } from './types';
-import { ChartData } from './use_column_chart';
 
 export const useDataGrid = (
   columns: EuiDataGridColumn[],
@@ -112,7 +112,7 @@ export const useDataGrid = (
             <ColumnChart
               chartData={chartData}
               columnType={c}
-              dataTestSubj={`mlDataGridChart-${index}`}
+              dataTestSubj={`mlDataGridChart-${c.id}`}
             />
           ) : undefined,
       };

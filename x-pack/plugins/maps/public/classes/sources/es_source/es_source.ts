@@ -34,7 +34,7 @@ import {
 import { IVectorStyle } from '../../styles/vector/vector_style';
 import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 import { IField } from '../../fields/field';
-import { ES_GEO_FIELD_TYPE, FieldFormatter } from '../../../../common/constants';
+import { FieldFormatter } from '../../../../common/constants';
 import {
   Adapters,
   RequestResponder,
@@ -195,6 +195,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       resp = await searchSource.fetch({
         abortSignal: abortController.signal,
         sessionId: searchSessionId,
+        legacyHitsTotal: false,
       });
       if (inspectorRequest) {
         const responseStats = search.getResponseInspectorStats(resp, searchSource);
@@ -236,13 +237,8 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
         typeof searchFilters.geogridPrecision === 'number'
           ? expandToTileBoundaries(searchFilters.buffer, searchFilters.geogridPrecision)
           : searchFilters.buffer;
-      const extentFilter = createExtentFilter(
-        buffer,
-        geoField.name,
-        geoField.type as ES_GEO_FIELD_TYPE
-      );
+      const extentFilter = createExtentFilter(buffer, geoField.name);
 
-      // @ts-expect-error
       allFilters.push(extentFilter);
     }
     if (searchFilters.applyGlobalTime && (await this.isTimeAware())) {
@@ -252,6 +248,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       }
     }
     const searchService = getSearchService();
+
     const searchSource = await searchService.searchSource.create(initialSearchContext);
 
     searchSource.setField('index', indexPattern);
@@ -277,6 +274,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     registerCancelCallback: (callback: () => void) => void
   ): Promise<MapExtent | null> {
     const searchSource = await this.makeSearchSource(boundsFilters, 0);
+    searchSource.setField('trackTotalHits', false);
     searchSource.setField('aggs', {
       fitToBounds: {
         geo_bounds: {
@@ -289,12 +287,33 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     try {
       const abortController = new AbortController();
       registerCancelCallback(() => abortController.abort());
-      const esResp = await searchSource.fetch({ abortSignal: abortController.signal });
-      if (!esResp.aggregations.fitToBounds.bounds) {
+      const esResp = await searchSource.fetch({
+        abortSignal: abortController.signal,
+        legacyHitsTotal: false,
+      });
+
+      if (!esResp.aggregations) {
+        return null;
+      }
+
+      const fitToBounds = esResp.aggregations.fitToBounds as {
+        bounds?: {
+          top_left: {
+            lat: number;
+            lon: number;
+          };
+          bottom_right: {
+            lat: number;
+            lon: number;
+          };
+        };
+      };
+
+      if (!fitToBounds.bounds) {
         // aggregations.fitToBounds is empty object when there are no matching documents
         return null;
       }
-      esBounds = esResp.aggregations.fitToBounds.bounds;
+      esBounds = fitToBounds.bounds;
     } catch (error) {
       if (error.name === 'AbortError') {
         throw new DataRequestAbortError();

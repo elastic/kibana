@@ -75,7 +75,7 @@ export const GroupsTable: React.FC<{}> = () => {
     <>
       {showPagination ? <TablePaginationBar {...paginationOptions} /> : clearFiltersLink}
       <EuiSpacer size="m" />
-      <EuiTable className="groups-table" tableLayout="auto">
+      <EuiTable tableLayout="auto">
         <EuiTableHeader>
           <EuiTableHeaderCell>{GROUP_TABLE_HEADER}</EuiTableHeaderCell>
           <EuiTableHeaderCell>{SOURCES_TABLE_HEADER}</EuiTableHeaderCell>

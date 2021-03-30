@@ -9,7 +9,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Modification of Environment Variable via Launchctl",
   "query": "event.category:process and event.type:start and process.name:launchctl and process.args:(setenv and not (JAVA*_HOME or RUNTIME_JAVA_HOME or DBUS_LAUNCHD_SESSION_BUS_SOCKET or ANT_HOME))",
   "references": [

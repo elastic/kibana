@@ -65,9 +65,13 @@ export const getTaskStateBadge = (
 export const useColumns = (
   expandedRowItemIds: TransformId[],
   setExpandedRowItemIds: React.Dispatch<React.SetStateAction<TransformId[]>>,
+  transformNodes: number,
   transformSelection: TransformListRow[]
 ) => {
-  const { actions, modals } = useActions({ forceDisable: transformSelection.length > 0 });
+  const { actions, modals } = useActions({
+    forceDisable: transformSelection.length > 0,
+    transformNodes,
+  });
 
   function toggleDetails(item: TransformListRow) {
     const index = expandedRowItemIds.indexOf(item.config.id);

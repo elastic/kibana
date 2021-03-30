@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ISessionTimeout } from './session_timeout';
+import type { ISessionTimeout } from './session_timeout';
 
 export function createSessionTimeoutMock() {
   return {

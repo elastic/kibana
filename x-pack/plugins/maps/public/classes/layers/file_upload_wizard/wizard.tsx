@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
 import { FeatureCollection } from 'geojson';
 import { EuiPanel } from '@elastic/eui';
@@ -14,7 +15,7 @@ import {
   DEFAULT_MAX_RESULT_WINDOW,
   SCALING_TYPES,
 } from '../../../../common/constants';
-import { getFileUploadComponent } from '../../../kibana_services';
+import { getFileUpload } from '../../../kibana_services';
 import { GeoJsonFileSource } from '../../sources/geojson_file_source';
 import { VectorLayer } from '../../layers/vector_layer';
 import { createDefaultLayerDescriptor } from '../../sources/es_search_source';
@@ -64,13 +65,13 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
   }
 
   async _loadFileUploadComponent() {
-    const fileUploadComponent = await getFileUploadComponent();
+    const fileUploadComponent = await getFileUpload().getFileUploadComponent();
     if (this._isMounted) {
       this.setState({ fileUploadComponent });
     }
   }
 
-  _onFileUpload = (geojsonFile: FeatureCollection, name: string) => {
+  _onFileUpload = (geojsonFile: FeatureCollection, name: string, previewCoverage: number) => {
     if (!this._isMounted) {
       return;
     }
@@ -80,8 +81,19 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
       return;
     }
 
+    const areResultsTrimmed = previewCoverage < 100;
     const sourceDescriptor = GeoJsonFileSource.createDescriptor({
       __featureCollection: geojsonFile,
+      areResultsTrimmed,
+      tooltipContent: areResultsTrimmed
+        ? i18n.translate('xpack.maps.fileUpload.trimmedResultsMsg', {
+            defaultMessage: `Results limited to {numFeatures} features, {previewCoverage}% of file.`,
+            values: {
+              numFeatures: geojsonFile.features.length,
+              previewCoverage,
+            },
+          })
+        : null,
       name,
     });
     const layerDescriptor = VectorLayer.createDescriptor(
@@ -130,7 +142,8 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
       return;
     }
 
-    this.props.advanceToNextStep();
+    this.props.stopStepLoading();
+    this.props.disableNextBtn();
 
     this.setState({ indexingStage: INDEXING_STAGE.ERROR });
   };

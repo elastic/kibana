@@ -47,12 +47,14 @@ const mockReq = (
       plugins: {
         monitoring: {
           info: {
-            getSecurityFeature: () => {
-              return {
-                isAvailable: securityEnabled,
-                isEnabled: securityEnabled,
-              };
-            },
+            getLicenseService: () => ({
+              getSecurityFeature: () => {
+                return {
+                  isAvailable: securityEnabled,
+                  isEnabled: securityEnabled,
+                };
+              },
+            }),
           },
         },
         elasticsearch: {

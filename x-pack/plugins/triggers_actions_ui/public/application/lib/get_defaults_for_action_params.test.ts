@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { RecoveredActionGroup } from '../../../../alerts/common';
+import { RecoveredActionGroup } from '../../../../alerting/common';
 import { AlertProvidedActionVariables } from './action_variables';
 import { getDefaultsForActionParams } from './get_defaults_for_action_params';
 
 describe('getDefaultsForActionParams', () => {
   test('pagerduty defaults', async () => {
     expect(getDefaultsForActionParams('.pagerduty', 'test', false)).toEqual({
-      dedupKey: `{{${AlertProvidedActionVariables.alertId}}}:{{${AlertProvidedActionVariables.alertInstanceId}}}`,
+      dedupKey: `{{${AlertProvidedActionVariables.ruleId}}}:{{${AlertProvidedActionVariables.alertId}}}`,
       eventAction: 'trigger',
     });
   });
 
   test('pagerduty defaults for recovered action group', async () => {
     expect(getDefaultsForActionParams('.pagerduty', RecoveredActionGroup.id, true)).toEqual({
-      dedupKey: `{{${AlertProvidedActionVariables.alertId}}}:{{${AlertProvidedActionVariables.alertInstanceId}}}`,
+      dedupKey: `{{${AlertProvidedActionVariables.ruleId}}}:{{${AlertProvidedActionVariables.alertId}}}`,
       eventAction: 'resolve',
     });
   });

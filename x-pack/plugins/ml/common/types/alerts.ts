@@ -7,14 +7,14 @@
 
 import { AnomalyResultType } from './anomalies';
 import { ANOMALY_RESULT_TYPE } from '../constants/anomalies';
-import { AlertTypeParams } from '../../../alerts/common';
+import { AlertTypeParams } from '../../../alerting/common';
 
 export type PreviewResultsKeys = 'record_results' | 'bucket_results' | 'influencer_results';
 export type TopHitsResultsKeys = 'top_record_hits' | 'top_bucket_hits' | 'top_influencer_hits';
 
 export interface AlertExecutionResult {
   count: number;
-  key: number;
+  key?: number;
   alertInstanceKey: string;
   isInterim: boolean;
   jobIds: string[];

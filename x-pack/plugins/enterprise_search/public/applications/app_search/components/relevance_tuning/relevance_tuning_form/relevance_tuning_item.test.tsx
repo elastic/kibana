@@ -25,6 +25,7 @@ describe('RelevanceTuningItem', () => {
       {
         factor: 2,
         type: BoostType.Value,
+        value: [''],
       },
     ],
     field: {
@@ -54,6 +55,7 @@ describe('RelevanceTuningItem', () => {
           {
             factor: 2,
             type: BoostType.Value,
+            value: [''],
           },
           {
             factor: 3,

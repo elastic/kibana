@@ -40,9 +40,9 @@ export const plainColumnRenderer: ColumnRenderer = {
     linkValues?: string[] | null | undefined;
   }) =>
     values != null
-      ? values.map((value) => (
+      ? values.map((value, i) => (
           <FormattedFieldValue
-            key={`plain-column-renderer-formatted-field-value-${timelineId}-${columnName}-${eventId}-${field.id}-${value}`}
+            key={`plain-column-renderer-formatted-field-value-${timelineId}-${columnName}-${eventId}-${field.id}-${value}-${i}`}
             contextId={`plain-column-renderer-formatted-field-value-${timelineId}`}
             eventId={eventId}
             fieldFormat={field.format || ''}

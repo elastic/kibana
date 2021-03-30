@@ -190,6 +190,7 @@ module.exports = async ({ config: storybookConfig }) => {
           '../tasks/mocks/uiAbsoluteToParsedUrl'
         ),
       },
+      symlinks: false,
     },
   };
 

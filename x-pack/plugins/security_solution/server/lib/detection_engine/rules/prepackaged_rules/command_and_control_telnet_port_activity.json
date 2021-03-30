@@ -13,7 +13,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Telnet Port Activity",
   "query": "event.category:(network or network_traffic) and network.transport:tcp and destination.port:23",
   "risk_score": 47,
