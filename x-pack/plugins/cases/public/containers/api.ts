@@ -18,6 +18,7 @@ import {
   CaseUserActionsResponse,
   CommentRequest,
   CommentType,
+  StatusAll,
   SubCasePatchRequest,
   SubCaseResponse,
   SubCasesResponse,
@@ -44,7 +45,6 @@ import {
 } from '../../common';
 
 import { KibanaServices } from '../common/lib/kibana';
-import { StatusAll } from '../components/status';
 
 import {
   ActionLicense,

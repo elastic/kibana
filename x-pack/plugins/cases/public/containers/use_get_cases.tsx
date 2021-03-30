@@ -7,11 +7,18 @@
 
 import { useCallback, useEffect, useReducer, useRef } from 'react';
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from './constants';
-import { AllCases, SortFieldCase, FilterOptions, QueryParams, Case, UpdateByKey } from './types';
+import {
+  AllCases,
+  Case,
+  FilterOptions,
+  QueryParams,
+  SortFieldCase,
+  StatusAll,
+  UpdateByKey,
+} from './types';
 import { errorToToaster, useStateToaster } from '../components/toasters';
 import * as i18n from './translations';
 import { getCases, patchCase } from './api';
-import { StatusAll } from '../components/status';
 
 export interface UseGetCasesState {
   data: AllCases;
