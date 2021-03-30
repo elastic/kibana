@@ -7,7 +7,7 @@
 
 import { License } from '../../services';
 import { handleEsError } from '../../shared_imports';
-import { wrapEsError, isEsError } from '../../lib';
+import { wrapEsError } from '../../lib';
 import type { RouteDependencies } from '../../types';
 
 const license = new License();
@@ -21,7 +21,6 @@ export const routeDependencies: Omit<RouteDependencies, 'router'> = {
     isSlmEnabled: true,
   },
   lib: {
-    isEsError,
     wrapEsError,
     handleEsError,
   },

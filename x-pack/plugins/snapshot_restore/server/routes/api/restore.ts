@@ -18,7 +18,7 @@ import { restoreSettingsSchema } from './validate_schemas';
 export function registerRestoreRoutes({
   router,
   license,
-  lib: { isEsError, handleEsError },
+  lib: { handleEsError },
 }: RouteDependencies) {
   // GET all snapshot restores
   router.get(
@@ -82,11 +82,7 @@ export function registerRestoreRoutes({
 
         return res.ok({ body: snapshotRestores });
       } catch (e) {
-        if (isEsError(e)) {
-          return handleEsError({ error: e, response: res });
-        }
-        // Case: default
-        throw e;
+        return handleEsError({ error: e, response: res });
       }
     })
   );
@@ -117,11 +113,7 @@ export function registerRestoreRoutes({
 
         return res.ok({ body: response.body });
       } catch (e) {
-        if (isEsError(e)) {
-          return handleEsError({ error: e, response: res });
-        }
-        // Case: default
-        throw e;
+        return handleEsError({ error: e, response: res });
       }
     })
   );

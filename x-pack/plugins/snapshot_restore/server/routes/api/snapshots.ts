@@ -16,7 +16,7 @@ import { getManagedRepositoryName } from '../../lib';
 export function registerSnapshotsRoutes({
   router,
   license,
-  lib: { isEsError, wrapEsError, handleEsError },
+  lib: { wrapEsError, handleEsError },
 }: RouteDependencies) {
   // GET all snapshots
   router.get(
@@ -58,10 +58,7 @@ export function registerSnapshotsRoutes({
           });
         }
       } catch (e) {
-        if (isEsError(e)) {
-          return handleEsError({ error: e, response: res });
-        }
-        throw e;
+        return handleEsError({ error: e, response: res });
       }
 
       const snapshots: SnapshotDetails[] = [];
@@ -175,11 +172,7 @@ export function registerSnapshotsRoutes({
           ),
         });
       } catch (e) {
-        if (isEsError(e)) {
-          return handleEsError({ error: e, response: res });
-        }
-        // Case: default
-        throw e;
+        return handleEsError({ error: e, response: res });
       }
     })
   );
@@ -226,11 +219,7 @@ export function registerSnapshotsRoutes({
 
         return res.ok({ body: response });
       } catch (e) {
-        if (isEsError(e)) {
-          return handleEsError({ error: e, response: res });
-        }
-        // Case: default
-        throw e;
+        return handleEsError({ error: e, response: res });
       }
     })
   );

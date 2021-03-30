@@ -29,7 +29,7 @@ export function registerRepositoriesRoutes({
   router,
   license,
   config: { isCloudEnabled },
-  lib: { isEsError, wrapEsError, handleEsError },
+  lib: { wrapEsError, handleEsError },
 }: RouteDependencies) {
   // GET all repositories
   router.get(
@@ -62,11 +62,7 @@ export function registerRepositoriesRoutes({
           name: managedRepositoryName,
         };
       } catch (e) {
-        if (isEsError(e)) {
-          return handleEsError({ error: e, response: res });
-        }
-        // Case: default
-        throw e;
+        return handleEsError({ error: e, response: res });
       }
 
       // If a managed repository, we also need to check if a policy is associated to it
@@ -112,11 +108,7 @@ export function registerRepositoriesRoutes({
           repository: name,
         }));
       } catch (e) {
-        if (isEsError(e)) {
-          return handleEsError({ error: e, response: res });
-        }
-        // Case: default
-        throw e;
+        return handleEsError({ error: e, response: res });
       }
 
       const response = await clusterClient.asCurrentUser.snapshot.get({
@@ -186,11 +178,7 @@ export function registerRepositoriesRoutes({
         }
         return res.ok({ body: types });
       } catch (e) {
-        if (isEsError(e)) {
-          return handleEsError({ error: e, response: res });
-        }
-        // Case: default
-        throw e;
+        return handleEsError({ error: e, response: res });
       }
     })
   );
@@ -228,11 +216,7 @@ export function registerRepositoriesRoutes({
           },
         });
       } catch (e) {
-        if (isEsError(e)) {
-          return handleEsError({ error: e, response: res });
-        }
-        // Case: default
-        throw e;
+        return handleEsError({ error: e, response: res });
       }
     })
   );
@@ -270,11 +254,7 @@ export function registerRepositoriesRoutes({
           },
         });
       } catch (e) {
-        if (isEsError(e)) {
-          return handleEsError({ error: e, response: res });
-        }
-        // Case: default
-        throw e;
+        return handleEsError({ error: e, response: res });
       }
     })
   );
@@ -314,11 +294,7 @@ export function registerRepositoriesRoutes({
 
         return res.ok({ body: response.body });
       } catch (e) {
-        if (isEsError(e)) {
-          return handleEsError({ error: e, response: res });
-        }
-        // Case: default
-        throw e;
+        return handleEsError({ error: e, response: res });
       }
     })
   );
@@ -353,11 +329,7 @@ export function registerRepositoriesRoutes({
           body: response.body,
         });
       } catch (e) {
-        if (isEsError(e)) {
-          return handleEsError({ error: e, response: res });
-        }
-        // Case: default
-        throw e;
+        return handleEsError({ error: e, response: res });
       }
     })
   );
@@ -392,11 +364,7 @@ export function registerRepositoriesRoutes({
 
         return res.ok({ body: response });
       } catch (e) {
-        if (isEsError(e)) {
-          return handleEsError({ error: e, response: res });
-        }
-        // Case: default
-        throw e;
+        return handleEsError({ error: e, response: res });
       }
     })
   );
