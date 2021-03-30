@@ -25,11 +25,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     defaultIndex: 'logstash-*',
   };
 
-  describe.only('discover test', function describeIndexTests() {
+  describe('discover test', function describeIndexTests() {
     before(async function () {
       log.debug('load kibana index with default index pattern');
 
-      await kibanaServer.importExport.load('discover');
+      // await kibanaServer.importExport.load('discover');
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await kibanaServer.importExport.load('discover');
 
@@ -38,8 +38,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
-
-      throw new Error('force failure to get logs');
     });
 
     describe('query', function () {
