@@ -6,7 +6,7 @@
  */
 
 import { inflateSync } from 'zlib';
-import { SavedObject, SavedObjectsErrorHelpers } from 'src/core/server';
+import { SavedObject } from 'src/core/server';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { ENDPOINT_LIST_ID, ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../../lists/common';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
@@ -23,7 +23,6 @@ import {
   toArtifactRecords,
 } from '../../../lib/artifacts/mocks';
 import {
-  ArtifactConstants,
   ManifestConstants,
   getArtifactId,
   isCompressed,
