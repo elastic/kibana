@@ -11,13 +11,12 @@ import { EuiCodeEditor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isRuntimeMappings } from '../../../../../../../common/util/runtime_field_utils';
 
-// TODO: update types
 interface Props {
-  convertToJson: any;
-  setAdvancedRuntimeMappingsConfig: any;
-  setIsRuntimeMappingsEditorApplyButtonEnabled: any;
-  advancedEditorRuntimeMappingsLastApplied: any;
-  advancedRuntimeMappingsConfig: any;
+  convertToJson: (data: string) => string;
+  setAdvancedRuntimeMappingsConfig: React.Dispatch<string>;
+  setIsRuntimeMappingsEditorApplyButtonEnabled: React.Dispatch<React.SetStateAction<boolean>>;
+  advancedEditorRuntimeMappingsLastApplied: string | undefined;
+  advancedRuntimeMappingsConfig: string;
   xJsonMode: any;
 }
 
