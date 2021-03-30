@@ -37,6 +37,7 @@ import { JOB_ID } from '../../../../common/constants/anomalies';
 import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_updates_context';
 import { AnnotationUpdatesService } from '../../services/annotations_service';
 import { useExplorerUrlState } from '../../explorer/hooks/use_explorer_url_state';
+import { useTimeBuckets } from '../../components/custom_hooks/use_time_buckets';
 
 export const explorerRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -84,6 +85,8 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   const [lastRefresh, setLastRefresh] = useState(0);
   const [stoppedPartitions, setStoppedPartitions] = useState<string[] | undefined>();
   const [invalidTimeRangeError, setInValidTimeRangeError] = useState<boolean>(false);
+
+  const timeBuckets = useTimeBuckets();
   const timefilter = useTimefilter({ timeRangeSelector: true, autoRefreshSelector: true });
 
   const { jobIds } = useJobSelection(jobsWithTimeRange);
@@ -265,6 +268,8 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
           stoppedPartitions,
           invalidTimeRangeError,
           selectedJobsRunning,
+          timeBuckets,
+          timefilter,
         }}
       />
     </div>

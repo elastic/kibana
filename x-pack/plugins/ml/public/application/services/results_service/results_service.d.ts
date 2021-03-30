@@ -7,7 +7,11 @@
 
 import { IndicesOptions } from '../../../../common/types/anomaly_detection_jobs';
 import { MlApiServices } from '../ml_api_service';
+import type { AnomalyRecordDoc } from '../../../../common/types/anomalies';
+import { InfluencersFilterQuery } from '../../../../common/types/es_client';
+import { EntityField } from '../../../../common/util/anomaly_utils';
 
+type RecordForInfluencer = AnomalyRecordDoc;
 export function resultsServiceProvider(
   mlApiServices: MlApiServices
 ): {
@@ -27,7 +31,7 @@ export function resultsServiceProvider(
     perPage?: number,
     fromPage?: number,
     influencers?: any[],
-    influencersFilterQuery?: any
+    influencersFilterQuery?: InfluencersFilterQuery
   ): Promise<any>;
   getTopInfluencerValues(): Promise<any>;
   getOverallBucketScores(
@@ -47,10 +51,10 @@ export function resultsServiceProvider(
     maxResults: number,
     perPage: number,
     fromPage: number,
-    influencersFilterQuery: any
+    influencersFilterQuery: InfluencersFilterQuery
   ): Promise<any>;
   getRecordInfluencers(): Promise<any>;
-  getRecordsForInfluencer(): Promise<any>;
+  getRecordsForInfluencer(): Promise<RecordForInfluencer[]>;
   getRecordsForDetector(): Promise<any>;
   getRecords(): Promise<any>;
   getEventRateData(
@@ -64,11 +68,11 @@ export function resultsServiceProvider(
   ): Promise<any>;
   getEventDistributionData(
     index: string,
-    splitField: string,
-    filterField: string,
+    splitField: EntityField | undefined | null,
+    filterField: EntityField | undefined | null,
     query: any,
-    metricFunction: string, // ES aggregation name
-    metricFieldName: string,
+    metricFunction: string | undefined | null, // ES aggregation name
+    metricFieldName: string | undefined,
     timeFieldName: string,
     earliestMs: number,
     latestMs: number,
