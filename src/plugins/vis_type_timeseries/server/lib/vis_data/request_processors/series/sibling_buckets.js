@@ -17,13 +17,13 @@ export function siblingBuckets(
   panel,
   series,
   esQueryConfig,
-  indexPatternObject,
+  indexPattern,
   capabilities,
   uiSettings
 ) {
   return (next) => async (doc) => {
     const barTargetUiSettings = await uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET);
-    const { interval } = getIntervalAndTimefield(panel, series, indexPatternObject);
+    const { interval } = getIntervalAndTimefield(panel, series, indexPattern);
     const { bucketSize } = getBucketSize(req, interval, capabilities, barTargetUiSettings);
 
     series.metrics

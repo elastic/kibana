@@ -148,6 +148,7 @@ export const buildExpression = (
             },
           ],
           fittingFunction: [state.fittingFunction || 'None'],
+          curveType: [state.curveType || 'LINEAR'],
           axisTitlesVisibilitySettings: [
             {
               type: 'expression',
