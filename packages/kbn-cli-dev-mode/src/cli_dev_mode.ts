@@ -37,6 +37,7 @@ export type SomeCliArgs = Pick<
   CliArgs,
   | 'quiet'
   | 'silent'
+  | 'verbose'
   | 'disableOptimizer'
   | 'watch'
   | 'oss'
@@ -148,6 +149,7 @@ export class CliDevMode {
       dist: cliArgs.dist,
       quiet: !!cliArgs.quiet,
       silent: !!cliArgs.silent,
+      verbose: !!cliArgs.verbose,
       watch: cliArgs.watch,
     });
   }
