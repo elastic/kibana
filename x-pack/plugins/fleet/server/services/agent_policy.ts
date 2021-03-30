@@ -655,7 +655,7 @@ class AgentPolicyService {
       id: agentPolicy.id,
       outputs: {
         // TEMPORARY as we only support a default output
-        ...[defaultOutput].reduce(
+        ...[defaultOutput].reduce<FullAgentPolicy['outputs']>(
           // eslint-disable-next-line @typescript-eslint/naming-convention
           (outputs, { config_yaml, name, type, hosts, ca_sha256, api_key }) => {
             const configJs = config_yaml ? safeLoad(config_yaml) : {};
@@ -675,7 +675,7 @@ class AgentPolicyService {
 
             return outputs;
           },
-          {} as FullAgentPolicy['outputs']
+          {}
         ),
       },
       inputs: storedPackagePoliciesToAgentInputs(agentPolicy.package_policies as PackagePolicy[]),
@@ -697,6 +697,26 @@ class AgentPolicyService {
             },
           }),
     };
+
+    // Only add permissions if output.type is "elasticsearch"
+    fullAgentPolicy.output_permissions = Object.keys(fullAgentPolicy.outputs).reduce<
+      NonNullable<FullAgentPolicy['output_permissions']>
+    >((permissions, outputName) => {
+      const output = fullAgentPolicy.outputs[outputName];
+      if (output && output.type === 'elasticsearch') {
+        permissions[outputName] = {};
+        permissions[outputName]._fallback = {
+          cluster: ['monitor'],
+          indices: [
+            {
+              names: ['logs-*', 'metrics-*', 'traces-*', '.logs-endpoint.diagnostic.collection-*'],
+              privileges: ['auto_configure', 'create_doc'],
+            },
+          ],
+        };
+      }
+      return permissions;
+    }, {});
 
     // only add settings if not in standalone
     if (!standalone) {
