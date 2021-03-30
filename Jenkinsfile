@@ -10,7 +10,7 @@ kibanaPipeline(timeoutMinutes: 210, checkPrChanges: true, setCommitStatus: true)
         catchError {
           workers.ci(name: 'ci-worker', size: 'xxl', ramDisk: true) {
             kibanaPipeline.buildOss(20)
-            kibanaPipeline.ossCiGroupProcess(6, true)
+            kibanaPipeline.ossCiGroupProcess(6)()
           }
         }
       }
