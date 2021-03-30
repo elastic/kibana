@@ -88,7 +88,7 @@ export const DeprecationsOverview: FunctionComponent<Props> = ({ history }) => {
 
   return (
     <EuiPageBody>
-      <EuiPageContent>
+      <EuiPageContent data-test-subj="overviewPageContent">
         <EuiPageHeader
           pageTitle={i18nTexts.pageTitle}
           rightSideItems={[
@@ -111,7 +111,11 @@ export const DeprecationsOverview: FunctionComponent<Props> = ({ history }) => {
 
             <EuiSpacer />
 
-            <EuiCallOut title={i18nTexts.deprecationLoggingTitle} iconType="pin">
+            <EuiCallOut
+              title={i18nTexts.deprecationLoggingTitle}
+              iconType="pin"
+              data-test-subj="deprecationLoggingCallout"
+            >
               <p>
                 {i18nTexts.deprecationLoggingDescription(
                   docLinks.links.elasticsearch.deprecationLogging

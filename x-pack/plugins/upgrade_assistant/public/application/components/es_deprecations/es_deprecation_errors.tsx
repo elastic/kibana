@@ -47,7 +47,7 @@ export const EsDeprecationErrors: React.FunctionComponent<Props> = ({ error }) =
     case 'request_error':
     default:
       callout = (
-        <EuiCallOut title={message} color="danger" iconType="alert" data-test-subj="loadingError">
+        <EuiCallOut title={message} color="danger" iconType="alert" data-test-subj="requestError">
           {error.message}
         </EuiCallOut>
       );

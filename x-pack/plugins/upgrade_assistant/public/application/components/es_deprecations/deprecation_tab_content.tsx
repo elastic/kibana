@@ -68,7 +68,7 @@ export const DeprecationTabContent: FunctionComponent<CheckupTabProps> = ({
   };
 
   return (
-    <>
+    <div data-test-subj={`${checkupLabel}TabContent`}>
       <EuiSpacer />
 
       {error ? (
@@ -132,6 +132,6 @@ export const DeprecationTabContent: FunctionComponent<CheckupTabProps> = ({
           }
         />
       )}
-    </>
+    </div>
   );
 };

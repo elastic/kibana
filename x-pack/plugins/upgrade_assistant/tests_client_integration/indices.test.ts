@@ -124,14 +124,7 @@ describe('Indices tab', () => {
         testBed = await setupIndicesPage({ isReadOnlyMode: false });
       });
 
-      const { actions, component } = testBed;
-
-      component.update();
-
-      // Navigate to the indices tab
-      await act(async () => {
-        actions.clickTab('indices');
-      });
+      const { component } = testBed;
 
       component.update();
     });
@@ -163,7 +156,59 @@ describe('Indices tab', () => {
 
       expect(exists('permissionsError')).toBe(true);
       expect(find('permissionsError').text()).toContain(
-        'You do not have sufficient privileges to view this page.'
+        'You do not have sufficient privileges to view Elasticsearch deprecations.'
+      );
+    });
+
+    test('handles upgrade error', async () => {
+      const error = {
+        statusCode: 426,
+        error: 'Upgrade required',
+        message: 'There are some nodes running a different version of Elasticsearch',
+        attributes: {
+          allNodesUpgraded: true,
+        },
+      };
+
+      httpRequestsMockHelpers.setLoadStatusResponse(undefined, error);
+
+      await act(async () => {
+        testBed = await setupIndicesPage({ isReadOnlyMode: false });
+      });
+
+      const { component, exists, find } = testBed;
+
+      component.update();
+
+      expect(exists('upgradedCallout')).toBe(true);
+      expect(find('upgradedCallout').text()).toContain(
+        'All Elasticsearch nodes have been upgraded.'
+      );
+    });
+
+    test('handles partially upgrade error', async () => {
+      const error = {
+        statusCode: 426,
+        error: 'Upgrade required',
+        message: 'There are some nodes running a different version of Elasticsearch',
+        attributes: {
+          allNodesUpgraded: false,
+        },
+      };
+
+      httpRequestsMockHelpers.setLoadStatusResponse(undefined, error);
+
+      await act(async () => {
+        testBed = await setupIndicesPage({ isReadOnlyMode: false });
+      });
+
+      const { component, exists, find } = testBed;
+
+      component.update();
+
+      expect(exists('partiallyUpgradedWarning')).toBe(true);
+      expect(find('partiallyUpgradedWarning').text()).toContain(
+        'One or more Elasticsearch nodes have a newer version of Elasticsearch than Kibana.'
       );
     });
 
@@ -184,9 +229,9 @@ describe('Indices tab', () => {
 
       component.update();
 
-      expect(exists('upgradeStatusError')).toBe(true);
-      expect(find('upgradeStatusError').text()).toContain(
-        'An error occurred while retrieving the checkup results.'
+      expect(exists('requestError')).toBe(true);
+      expect(find('requestError').text()).toContain(
+        'An error occurred while retrieving Elasticsearch deprecations.'
       );
     });
   });

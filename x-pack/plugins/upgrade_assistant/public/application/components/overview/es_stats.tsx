@@ -56,10 +56,13 @@ export const ESDeprecationStats: FunctionComponent<Props> = ({ history }) => {
   );
 
   return (
-    <EuiPanel>
+    <EuiPanel data-test-subj="esStatsPanel">
       <EuiTitle size="s">
         <h3>
-          <EuiLink {...reactRouterNavigate(history, '/es_deprecations/cluster')}>
+          <EuiLink
+            {...reactRouterNavigate(history, '/es_deprecations/cluster')}
+            data-test-subj="esDeprecationsLink"
+          >
             {i18nTexts.statsTitle}
           </EuiLink>
         </h3>
@@ -70,6 +73,7 @@ export const ESDeprecationStats: FunctionComponent<Props> = ({ history }) => {
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiStat
+            data-test-subj="totalDeprecations"
             title={error ? '--' : allDeprecations.length}
             description={i18nTexts.totalDeprecationsTitle}
             isLoading={isLoading}
@@ -78,6 +82,7 @@ export const ESDeprecationStats: FunctionComponent<Props> = ({ history }) => {
 
         <EuiFlexItem>
           <EuiStat
+            data-test-subj="criticalDeprecations"
             title={error ? '--' : criticalDeprecations.length}
             description={i18nTexts.criticalDeprecationsTitle}
             titleColor="danger"

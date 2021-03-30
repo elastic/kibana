@@ -22,19 +22,57 @@ export const EsStatsErrors: React.FunctionComponent<Props> = ({ error }) => {
 
   switch (errorType) {
     case 'unauthorized_error':
-      iconContent = <EuiIconTip type="alert" color="danger" size="l" content={message} />;
+      iconContent = (
+        <EuiIconTip
+          type="alert"
+          color="danger"
+          size="l"
+          content={message}
+          iconProps={{
+            'data-test-subj': 'unauthorizedErrorIconTip',
+          }}
+        />
+      );
       break;
     case 'partially_upgraded_error':
-      iconContent = <EuiIconTip type="alert" color="warning" size="l" content={message} />;
+      iconContent = (
+        <EuiIconTip
+          type="alert"
+          color="warning"
+          size="l"
+          content={message}
+          iconProps={{
+            'data-test-subj': 'partiallyUpgradedErrorIconTip',
+          }}
+        />
+      );
       break;
     case 'upgraded_error':
       iconContent = (
-        <EuiIconTip type="checkInCircleFilled" color="success" size="l" content={message} />
+        <EuiIconTip
+          type="checkInCircleFilled"
+          color="success"
+          size="l"
+          content={message}
+          iconProps={{
+            'data-test-subj': 'upgradedErrorIconTip',
+          }}
+        />
       );
       break;
     case 'request_error':
     default:
-      iconContent = <EuiIconTip type="alert" color="danger" size="l" content={message} />;
+      iconContent = (
+        <EuiIconTip
+          type="alert"
+          color="danger"
+          size="l"
+          content={message}
+          iconProps={{
+            'data-test-subj': 'requestErrorIconTip',
+          }}
+        />
+      );
   }
 
   return (
