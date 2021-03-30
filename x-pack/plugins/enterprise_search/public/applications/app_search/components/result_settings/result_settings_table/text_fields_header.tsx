@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiTableRow, EuiTableHeader, EuiTableHeaderCell, EuiToolTip, EuiIcon } from '@elastic/eui';
+import { EuiTableRow, EuiTableHeader, EuiTableHeaderCell, EuiIconTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -20,7 +20,7 @@ export const TextFieldsHeader: React.FC = () => {
           {i18n.translate('xpack.enterpriseSearch.appSearch.engine.resultSettings.table.rawTitle', {
             defaultMessage: 'Raw',
           })}
-          <EuiToolTip
+          <EuiIconTip
             position="top"
             content={i18n.translate(
               'xpack.enterpriseSearch.appSearch.engine.resultSettings.table.rawTooltip',
@@ -29,10 +29,7 @@ export const TextFieldsHeader: React.FC = () => {
                   'A raw field is an exact representation of a field value. Must be at least 20 characters. Defaults to the entire field.',
               }
             )}
-          >
-            {/* TODO This should likely be an EuiButtonIcon to allow screen readers & keyboard users to interact w/ this tooltip */}
-            <EuiIcon type="questionInCircle" />
-          </EuiToolTip>
+          />
         </EuiTableHeaderCell>
         <EuiTableHeaderCell align="center" colSpan={3}>
           {i18n.translate(
@@ -41,7 +38,7 @@ export const TextFieldsHeader: React.FC = () => {
               defaultMessage: 'Highlighting',
             }
           )}
-          <EuiToolTip
+          <EuiIconTip
             position="top"
             content={i18n.translate(
               'xpack.enterpriseSearch.appSearch.engine.resultSettings.table.highlightingTooltip',
@@ -50,10 +47,7 @@ export const TextFieldsHeader: React.FC = () => {
                   'A snippet is an escaped representaiton of a field value. Query matches are encapsulated in <em> tags for highlighting. Fallback will look for a snippet match, but fallback to an escaped raw value if none is found. Range is between 20-1000. Defaults to 100.',
               }
             )}
-          >
-            {/* TODO This should likely be an EuiButtonIcon to allow screen readers & keyboard users to interact w/ this tooltip */}
-            <EuiIcon type="questionInCircle" />
-          </EuiToolTip>
+          />
         </EuiTableHeaderCell>
       </EuiTableHeader>
       <EuiTableRow className="resultSettingsTable__subHeader">
