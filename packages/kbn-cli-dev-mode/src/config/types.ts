@@ -6,14 +6,12 @@
  * Side Public License, v 1.
  */
 
-export const mockReadFileSync = jest.fn();
-jest.mock('fs', () => {
-  return { readFileSync: mockReadFileSync };
-});
+import type { DevConfig } from './dev_config';
+import type { HttpConfig } from './http_config';
+import type { PluginsConfig } from './plugins_config';
 
-export const mockReadPkcs12Keystore = jest.fn();
-export const mockReadPkcs12Truststore = jest.fn();
-jest.mock('../utils', () => ({
-  readPkcs12Keystore: mockReadPkcs12Keystore,
-  readPkcs12Truststore: mockReadPkcs12Truststore,
-}));
+export interface CliDevConfig {
+  dev: DevConfig;
+  http: HttpConfig;
+  plugins: PluginsConfig;
+}

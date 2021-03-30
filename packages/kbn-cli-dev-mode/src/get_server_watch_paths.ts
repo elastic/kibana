@@ -47,15 +47,7 @@ export function getServerWatchPaths({ pluginPaths, pluginScanDirs }: Options) {
         ...pluginScanDirs,
       ].map((path) => Path.resolve(path))
     )
-  );
-
-  for (const watchPath of watchPaths) {
-    if (!Fs.existsSync(fromRoot(watchPath))) {
-      throw new Error(
-        `A watch directory [${watchPath}] does not exist, which will cause chokidar to fail. Either make sure the directory exists or remove it as a watch source in the ClusterManger`
-      );
-    }
-  }
+  ).filter((path) => Fs.existsSync(fromRoot(path)));
 
   const ignorePaths = [
     /[\\\/](\..*|node_modules|bower_components|target|public|__[a-z0-9_]+__|coverage)([\\\/]|$)/,

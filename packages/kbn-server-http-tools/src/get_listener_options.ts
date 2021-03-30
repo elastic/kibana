@@ -6,4 +6,16 @@
  * Side Public License, v 1.
  */
 
-export { CliDevMode } from '../../../dev/cli_dev_mode';
+import { IHttpConfig } from './types';
+
+export interface ListenerOptions {
+  keepaliveTimeout: number;
+  socketTimeout: number;
+}
+
+export function getListenerOptions(config: IHttpConfig): ListenerOptions {
+  return {
+    keepaliveTimeout: config.keepaliveTimeout,
+    socketTimeout: config.socketTimeout,
+  };
+}
