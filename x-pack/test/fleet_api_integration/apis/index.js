@@ -8,6 +8,9 @@
 export default function ({ loadTestFile }) {
   describe('Fleet Endpoints', function () {
     this.tags('ciGroup10');
+    // EPM
+    loadTestFile(require.resolve('./epm/index'));
+
     // Fleet setup
     loadTestFile(require.resolve('./fleet_setup'));
 
@@ -25,12 +28,10 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./agents/actions'));
     loadTestFile(require.resolve('./agents/upgrade'));
     loadTestFile(require.resolve('./agents/reassign'));
+    loadTestFile(require.resolve('./agents/status'));
 
     // Enrollment API keys
     loadTestFile(require.resolve('./enrollment_api_keys/crud'));
-
-    // EPM
-    loadTestFile(require.resolve('./epm/index'));
 
     // Package policies
     loadTestFile(require.resolve('./package_policy/create'));

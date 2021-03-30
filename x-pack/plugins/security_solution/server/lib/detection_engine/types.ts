@@ -58,27 +58,27 @@ import { AlertTypeParams } from '../../../../alerting/common';
 export type PartialFilter = Partial<Filter>;
 
 export interface RuleTypeParams extends AlertTypeParams {
-  anomalyThreshold: AnomalyThresholdOrUndefined;
+  anomalyThreshold?: AnomalyThresholdOrUndefined;
   author: AuthorOrUndefined;
   buildingBlockType: BuildingBlockTypeOrUndefined;
   description: Description;
   note: NoteOrUndefined;
-  eventCategoryOverride: EventCategoryOverrideOrUndefined;
+  eventCategoryOverride?: EventCategoryOverrideOrUndefined;
   falsePositives: FalsePositives;
   from: From;
   ruleId: RuleId;
   immutable: Immutable;
-  index: IndexOrUndefined;
-  language: LanguageOrUndefined;
+  index?: IndexOrUndefined;
+  language?: LanguageOrUndefined;
   license: LicenseOrUndefined;
   outputIndex: OutputIndex;
-  savedId: SavedIdOrUndefined;
+  savedId?: SavedIdOrUndefined;
   timelineId: TimelineIdOrUndefined;
   timelineTitle: TimelineTitleOrUndefined;
   meta: MetaOrUndefined;
-  machineLearningJobId: MachineLearningJobIdOrUndefined;
-  query: QueryOrUndefined;
-  filters: PartialFilter[] | undefined;
+  machineLearningJobId?: MachineLearningJobIdOrUndefined;
+  query?: QueryOrUndefined;
+  filters?: unknown[];
   maxSignals: MaxSignals;
   riskScore: RiskScore;
   riskScoreMapping: RiskScoreMappingOrUndefined;
@@ -86,21 +86,21 @@ export interface RuleTypeParams extends AlertTypeParams {
   severity: Severity;
   severityMapping: SeverityMappingOrUndefined;
   threat: ThreatsOrUndefined;
-  threshold: ThresholdOrUndefined;
-  threatFilters: PartialFilter[] | undefined;
-  threatIndex: ThreatIndexOrUndefined;
-  threatIndicatorPath: ThreatIndicatorPathOrUndefined;
-  threatQuery: ThreatQueryOrUndefined;
-  threatMapping: ThreatMappingOrUndefined;
-  threatLanguage: ThreatLanguageOrUndefined;
+  threshold?: ThresholdOrUndefined;
+  threatFilters?: unknown[] | undefined;
+  threatIndex?: ThreatIndexOrUndefined;
+  threatIndicatorPath?: ThreatIndicatorPathOrUndefined;
+  threatQuery?: ThreatQueryOrUndefined;
+  threatMapping?: ThreatMappingOrUndefined;
+  threatLanguage?: ThreatLanguageOrUndefined;
   timestampOverride: TimestampOverrideOrUndefined;
   to: To;
   type: Type;
   references: References;
   version: Version;
   exceptionsList: ListArrayOrUndefined;
-  concurrentSearches: ConcurrentSearchesOrUndefined;
-  itemsPerSearch: ItemsPerSearchOrUndefined;
+  concurrentSearches?: ConcurrentSearchesOrUndefined;
+  itemsPerSearch?: ItemsPerSearchOrUndefined;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { setMockActions } from '../../../../../__mocks__';
+
 import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
@@ -14,9 +16,14 @@ import { EuiButton } from '@elastic/eui';
 import { AddResultButton } from './';
 
 describe('AddResultButton', () => {
+  const actions = {
+    openFlyout: jest.fn(),
+  };
+
   let wrapper: ShallowWrapper;
 
   beforeAll(() => {
+    setMockActions(actions);
     wrapper = shallow(<AddResultButton />);
   });
 
@@ -26,6 +33,6 @@ describe('AddResultButton', () => {
 
   it('opens the add result flyout on click', () => {
     wrapper.find(EuiButton).simulate('click');
-    // TODO: assert on logic action
+    expect(actions.openFlyout).toHaveBeenCalled();
   });
 });

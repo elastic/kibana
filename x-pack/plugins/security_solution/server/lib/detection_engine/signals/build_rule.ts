@@ -47,18 +47,21 @@ export const buildRule = ({
   throttle,
 }: BuildRuleParams): RulesSchema => {
   const { riskScore, riskScoreMeta } = buildRiskScoreFromMapping({
+    // @ts-expect-error @elastic/elasticsearch _source is optional
     eventSource: doc._source,
     riskScore: ruleParams.riskScore,
     riskScoreMapping: ruleParams.riskScoreMapping,
   });
 
   const { severity, severityMeta } = buildSeverityFromMapping({
+    // @ts-expect-error @elastic/elasticsearch _source is optional
     eventSource: doc._source,
     severity: ruleParams.severity,
     severityMapping: ruleParams.severityMapping,
   });
 
   const { ruleName, ruleNameMeta } = buildRuleNameFromMapping({
+    // @ts-expect-error @elastic/elasticsearch _source is optional
     eventSource: doc._source,
     ruleName: name,
     ruleNameMapping: ruleParams.ruleNameOverride,

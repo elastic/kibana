@@ -108,7 +108,9 @@ export class DocLinksService {
           sum: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-sum-aggregation.html`,
           top_hits: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-top-hits-aggregation.html`,
         },
-        runtimeFields: `${ELASTICSEARCH_DOCS}runtime.html`,
+        runtimeFields: {
+          mapping: `${ELASTICSEARCH_DOCS}runtime-mapping-fields.html`,
+        },
         scriptedFields: {
           scriptFields: `${ELASTICSEARCH_DOCS}search-request-script-fields.html`,
           scriptAggs: `${ELASTICSEARCH_DOCS}search-aggregations.html`,
@@ -187,10 +189,11 @@ export class DocLinksService {
         },
         visualize: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/dashboard.html`,
-          timelionDeprecation: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/create-panels-with-timelion.html`,
+          timelionDeprecation: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/timelion.html`,
           lens: `${ELASTIC_WEBSITE_URL}what-is/kibana-lens`,
-          lensPanels: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/dashboard.html#create-panels-with-lens`,
+          lensPanels: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/lens.html`,
           maps: `${ELASTIC_WEBSITE_URL}maps`,
+          vega: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/vega.html`,
         },
         observability: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/index.html`,
@@ -284,6 +287,7 @@ export class DocLinksService {
           registerSourceOnly: `${ELASTICSEARCH_DOCS}snapshots-register-repository.html#snapshots-source-only-repository`,
           registerUrl: `${ELASTICSEARCH_DOCS}snapshots-register-repository.html#snapshots-read-only-repository`,
           restoreSnapshot: `${ELASTICSEARCH_DOCS}snapshots-restore-snapshot.html`,
+          restoreSnapshotApi: `${ELASTICSEARCH_DOCS}restore-snapshot-api.html#restore-snapshot-api-request-body`,
         },
         ingest: {
           pipelines: `${ELASTICSEARCH_DOCS}ingest.html`,
@@ -379,7 +383,9 @@ export interface DocLinksStart {
       readonly sum: string;
       readonly top_hits: string;
     };
-    readonly runtimeFields: string;
+    readonly runtimeFields: {
+      readonly mapping: string;
+    };
     readonly scriptedFields: {
       readonly scriptFields: string;
       readonly scriptAggs: string;

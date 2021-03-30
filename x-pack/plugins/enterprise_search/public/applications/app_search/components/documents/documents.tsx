@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiPageHeader, EuiPageHeaderSection, EuiTitle, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiPageHeader, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { FlashMessages } from '../../../shared/flash_messages';
@@ -33,18 +33,14 @@ export const Documents: React.FC<Props> = ({ engineBreadcrumb }) => {
   return (
     <>
       <SetPageChrome trail={[...engineBreadcrumb, DOCUMENTS_TITLE]} />
-      <EuiPageHeader>
-        <EuiPageHeaderSection>
-          <EuiTitle size="l">
-            <h1>{DOCUMENTS_TITLE}</h1>
-          </EuiTitle>
-        </EuiPageHeaderSection>
-        {myRole.canManageEngineDocuments && !isMetaEngine && (
-          <EuiPageHeaderSection>
-            <DocumentCreationButton />
-          </EuiPageHeaderSection>
-        )}
-      </EuiPageHeader>
+      <EuiPageHeader
+        pageTitle={DOCUMENTS_TITLE}
+        rightSideItems={
+          myRole.canManageEngineDocuments && !isMetaEngine
+            ? [<DocumentCreationButton />]
+            : undefined
+        }
+      />
       <FlashMessages />
       {isMetaEngine && (
         <>

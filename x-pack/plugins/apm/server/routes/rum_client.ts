@@ -79,12 +79,14 @@ export const rumPageLoadDistributionRoute = createRoute({
       query: { minPercentile, maxPercentile, urlQuery },
     } = context.params;
 
-    return getPageLoadDistribution({
+    const pageLoadDistribution = await getPageLoadDistribution({
       setup,
       minPercentile,
       maxPercentile,
       urlQuery,
     });
+
+    return { pageLoadDistribution };
   },
 });
 
@@ -105,13 +107,15 @@ export const rumPageLoadDistBreakdownRoute = createRoute({
       query: { minPercentile, maxPercentile, breakdown, urlQuery },
     } = context.params;
 
-    return getPageLoadDistBreakdown({
+    const pageLoadDistBreakdown = await getPageLoadDistBreakdown({
       setup,
       minPercentile: Number(minPercentile),
       maxPercentile: Number(maxPercentile),
       breakdown,
       urlQuery,
     });
+
+    return { pageLoadDistBreakdown };
   },
 });
 
@@ -145,7 +149,8 @@ export const rumServicesRoute = createRoute({
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
 
-    return getRumServices({ setup });
+    const rumServices = await getRumServices({ setup });
+    return { rumServices };
   },
 });
 
@@ -322,12 +327,14 @@ function createLocalFiltersRoute<
         setup,
       });
 
-      return getLocalUIFilters({
+      const localUiFilters = await getLocalUIFilters({
         projection,
         setup,
         uiFilters,
         localFilterNames: filterNames,
       });
+
+      return { localUiFilters };
     },
   });
 }

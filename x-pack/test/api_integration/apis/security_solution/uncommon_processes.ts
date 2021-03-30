@@ -27,7 +27,8 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  describe('uncommon_processes', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/94535
+  describe.skip('uncommon_processes', () => {
     before(() => esArchiver.load('auditbeat/uncommon_processes'));
     after(() => esArchiver.unload('auditbeat/uncommon_processes'));
 

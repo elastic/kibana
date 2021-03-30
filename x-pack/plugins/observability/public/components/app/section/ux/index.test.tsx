@@ -11,7 +11,7 @@ import { HasDataContextValue } from '../../../../context/has_data_context';
 import * as fetcherHook from '../../../../hooks/use_fetcher';
 import * as hasDataHook from '../../../../hooks/use_has_data';
 import * as pluginContext from '../../../../hooks/use_plugin_context';
-import { ObservabilityPluginSetupDeps } from '../../../../plugin';
+import { ObservabilityPublicPluginsStart } from '../../../../plugin';
 import { render } from '../../../../utils/test_helper';
 import { UXSection } from './';
 import { response } from './mock_data/ux.mock';
@@ -52,7 +52,7 @@ describe('UXSection', () => {
             },
           },
         },
-      } as unknown) as ObservabilityPluginSetupDeps,
+      } as unknown) as ObservabilityPublicPluginsStart,
     }));
   });
   it('renders with core web vitals', () => {

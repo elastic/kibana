@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { ISearchOptions } from '../../../common';
 
 /**
@@ -14,7 +14,7 @@ import { ISearchOptions } from '../../../common';
  * not included as it is already included in `successful`.
  * @internal
  */
-export function getTotalLoaded(response: SearchResponse<unknown>) {
+export function getTotalLoaded(response: estypes.SearchResponse<unknown>) {
   const { total, failed, successful } = response._shards;
   const loaded = failed + successful;
   return { total, loaded };
@@ -24,7 +24,7 @@ export function getTotalLoaded(response: SearchResponse<unknown>) {
  * Get the Kibana representation of this response (see `IKibanaSearchResponse`).
  * @internal
  */
-export function toKibanaSearchResponse(rawResponse: SearchResponse<unknown>) {
+export function toKibanaSearchResponse(rawResponse: estypes.SearchResponse<unknown>) {
   return {
     rawResponse,
     isPartial: false,
@@ -41,7 +41,7 @@ export function toKibanaSearchResponse(rawResponse: SearchResponse<unknown>) {
  * @internal
  */
 export function shimHitsTotal(
-  response: SearchResponse<unknown>,
+  response: estypes.SearchResponse<unknown>,
   { legacyHitsTotal = true }: ISearchOptions = {}
 ) {
   if (!legacyHitsTotal) return response;

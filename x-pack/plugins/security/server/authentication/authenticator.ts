@@ -396,7 +396,7 @@ export class Authenticator {
       sessionValue?.provider.name ??
       request.url.searchParams.get(LOGOUT_PROVIDER_QUERY_STRING_PARAMETER);
     if (suggestedProviderName) {
-      await this.session.clear(request);
+      await this.invalidateSessionValue(request);
 
       // Provider name may be passed in a query param and sourced from the browser's local storage;
       // hence, we can't assume that this provider exists, so we have to check it.
@@ -522,7 +522,7 @@ export class Authenticator {
       this.logger.warn(
         `Attempted to retrieve session for the "${existingSessionValue.provider.type}/${existingSessionValue.provider.name}" provider, but it is not configured.`
       );
-      await this.session.clear(request);
+      await this.invalidateSessionValue(request);
       return null;
     }
 
@@ -556,7 +556,7 @@ export class Authenticator {
     // attempt didn't fail.
     if (authenticationResult.shouldClearState()) {
       this.logger.debug('Authentication provider requested to invalidate existing session.');
-      await this.session.clear(request);
+      await this.invalidateSessionValue(request);
       return null;
     }
 
@@ -570,7 +570,7 @@ export class Authenticator {
     if (authenticationResult.failed()) {
       if (ownsSession && getErrorStatusCode(authenticationResult.error) === 401) {
         this.logger.debug('Authentication attempt failed, existing session will be invalidated.');
-        await this.session.clear(request);
+        await this.invalidateSessionValue(request);
       }
       return null;
     }
@@ -608,17 +608,17 @@ export class Authenticator {
       this.logger.debug(
         'Authentication provider has changed, existing session will be invalidated.'
       );
-      await this.session.clear(request);
+      await this.invalidateSessionValue(request);
       existingSessionValue = null;
     } else if (sessionHasBeenAuthenticated) {
       this.logger.debug(
         'Session is authenticated, existing unauthenticated session will be invalidated.'
       );
-      await this.session.clear(request);
+      await this.invalidateSessionValue(request);
       existingSessionValue = null;
     } else if (usernameHasChanged) {
       this.logger.debug('Username has changed, existing session will be invalidated.');
-      await this.session.clear(request);
+      await this.invalidateSessionValue(request);
       existingSessionValue = null;
     }
 
@@ -649,6 +649,14 @@ export class Authenticator {
         isNewSessionAuthenticated &&
         (providerHasChanged || usernameHasChanged),
     };
+  }
+
+  /**
+   * Invalidates session value associated with the specified request.
+   * @param request Request instance.
+   */
+  private async invalidateSessionValue(request: KibanaRequest) {
+    await this.session.invalidate(request, { match: 'current' });
   }
 
   /**

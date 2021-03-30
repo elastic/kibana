@@ -12,11 +12,12 @@ import { useValues } from 'kea';
 
 import { APP_SEARCH_PLUGIN } from '../../../common/constants';
 import { InitialAppData } from '../../../common/types';
-import { getAppSearchUrl } from '../shared/enterprise_search_url';
 import { HttpLogic } from '../shared/http';
 import { KibanaLogic } from '../shared/kibana';
 import { Layout, SideNav, SideNavLink } from '../shared/layout';
 import { NotFound } from '../shared/not_found';
+
+import { ROLE_MAPPINGS_TITLE } from '../shared/role_mapping/constants';
 
 import { AppLogic } from './app_logic';
 import { Credentials, CREDENTIALS_TITLE } from './components/credentials';
@@ -26,7 +27,7 @@ import { EnginesOverview, ENGINES_TITLE } from './components/engines';
 import { ErrorConnecting } from './components/error_connecting';
 import { Library } from './components/library';
 import { MetaEngineCreation } from './components/meta_engine_creation';
-import { ROLE_MAPPINGS_TITLE } from './components/role_mappings';
+import { RoleMappingsRouter } from './components/role_mappings';
 import { Settings, SETTINGS_TITLE } from './components/settings';
 import { SetupGuide } from './components/setup_guide';
 import {
@@ -64,7 +65,7 @@ export const AppSearchUnconfigured: React.FC = () => (
 
 export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) => {
   const {
-    myRole: { canManageEngines, canManageMetaEngines },
+    myRole: { canManageEngines, canManageMetaEngines, canViewRoleMappings },
   } = useValues(AppLogic(props));
   const { errorConnecting, readOnlyMode } = useValues(HttpLogic);
 
@@ -101,6 +102,11 @@ export const AppSearchConfigured: React.FC<Required<InitialAppData>> = (props) =
               <Route exact path={CREDENTIALS_PATH}>
                 <Credentials />
               </Route>
+              {canViewRoleMappings && (
+                <Route path={ROLE_MAPPINGS_PATH}>
+                  <RoleMappingsRouter />
+                </Route>
+              )}
               {canManageEngines && (
                 <Route exact path={ENGINE_CREATION_PATH}>
                   <EngineCreation />
@@ -141,7 +147,7 @@ export const AppSearchNav: React.FC<AppSearchNavProps> = ({ subNav }) => {
         <SideNavLink to={CREDENTIALS_PATH}>{CREDENTIALS_TITLE}</SideNavLink>
       )}
       {canViewRoleMappings && (
-        <SideNavLink isExternal to={getAppSearchUrl(ROLE_MAPPINGS_PATH)}>
+        <SideNavLink shouldShowActiveForSubroutes to={ROLE_MAPPINGS_PATH}>
           {ROLE_MAPPINGS_TITLE}
         </SideNavLink>
       )}

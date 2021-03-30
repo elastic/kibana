@@ -7,7 +7,12 @@
 
 import { Dispatch, SetStateAction } from 'react';
 
-import { EuiDataGridPaginationProps, EuiDataGridSorting, EuiDataGridColumn } from '@elastic/eui';
+import {
+  EuiDataGridCellValueElementProps,
+  EuiDataGridPaginationProps,
+  EuiDataGridSorting,
+  EuiDataGridColumn,
+} from '@elastic/eui';
 
 import { Dictionary } from '../../../../common/types/common';
 import { HitsTotalRelation } from '../../../../common/types/es_client';
@@ -42,7 +47,7 @@ export type RenderCellValue = ({
 }: {
   rowIndex: number;
   columnId: string;
-  setCellProps: any;
+  setCellProps: EuiDataGridCellValueElementProps['setCellProps'];
 }) => any;
 
 export type EsSorting = Dictionary<{

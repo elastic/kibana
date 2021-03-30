@@ -106,7 +106,7 @@ const createStartContractMock = () => {
           },
           savedObjects: {
             customIndex: false,
-            maxImportExportSizeBytes: 10000,
+            maxImportExportSize: 10000,
             maxImportPayloadBytes: 26214400,
           },
         },

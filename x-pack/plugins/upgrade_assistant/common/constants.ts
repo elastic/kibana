@@ -32,3 +32,5 @@ export const indexSettingDeprecations = {
     settings: ['translog.retention.size', 'translog.retention.age'],
   },
 };
+
+export const API_BASE_PATH = '/api/upgrade_assistant';

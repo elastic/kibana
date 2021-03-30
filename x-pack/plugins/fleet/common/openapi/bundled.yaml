@@ -1038,6 +1038,14 @@ paths:
       operationId: post-epm-delete-pkgkey
       parameters:
         - $ref: '#/paths/~1setup/post/parameters/0'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                force:
+                  type: boolean
   '/agents/{agentId}':
     parameters:
       - schema:

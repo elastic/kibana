@@ -23,6 +23,7 @@ import { MANAGE_CURATION_TITLE, RESTORE_CONFIRMATION } from '../constants';
 import { CurationLogic } from './curation_logic';
 import { PromotedDocuments, OrganicDocuments, HiddenDocuments } from './documents';
 import { ActiveQuerySelect, ManageQueriesModal } from './queries';
+import { AddResultLogic, AddResultFlyout } from './results';
 
 interface Props {
   curationsBreadcrumb: BreadcrumbTrail;
@@ -32,6 +33,7 @@ export const Curation: React.FC<Props> = ({ curationsBreadcrumb }) => {
   const { curationId } = useParams() as { curationId: string };
   const { loadCuration, resetCuration } = useActions(CurationLogic({ curationId }));
   const { dataLoading, queries } = useValues(CurationLogic({ curationId }));
+  const { isFlyoutOpen } = useValues(AddResultLogic);
 
   useEffect(() => {
     loadCuration();
@@ -77,7 +79,7 @@ export const Curation: React.FC<Props> = ({ curationsBreadcrumb }) => {
       <EuiSpacer />
       <HiddenDocuments />
 
-      {/* TODO: AddResult flyout */}
+      {isFlyoutOpen && <AddResultFlyout />}
     </>
   );
 };

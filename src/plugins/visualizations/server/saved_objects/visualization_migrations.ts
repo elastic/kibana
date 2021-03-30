@@ -859,6 +859,7 @@ const migrateVislibAreaLineBarTypes: SavedObjectMigrationFn<any, any> = (doc) =>
       const isHorizontalBar = visState.type === 'horizontal_bar';
       const isLineOrArea =
         visState?.params?.type === CHART_TYPE_AREA || visState?.params?.type === CHART_TYPE_LINE;
+      const hasPalette = visState?.params?.palette;
       return {
         ...doc,
         attributes: {
@@ -867,10 +868,12 @@ const migrateVislibAreaLineBarTypes: SavedObjectMigrationFn<any, any> = (doc) =>
             ...visState,
             params: {
               ...visState.params,
-              palette: {
-                type: 'palette',
-                name: 'kibana_palette',
-              },
+              ...(!hasPalette && {
+                palette: {
+                  type: 'palette',
+                  name: 'kibana_palette',
+                },
+              }),
               categoryAxes:
                 visState.params.categoryAxes &&
                 decorateAxes(visState.params.categoryAxes, !isHorizontalBar),

@@ -62,6 +62,7 @@ const ActionsTableComponent = () => {
     () => ({ rowIndex, columnId }) => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const data = useContext(DataContext);
+      // @ts-expect-error fields is optional
       const value = data[rowIndex].fields[columnId];
 
       if (columnId === 'action_id') {

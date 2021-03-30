@@ -21,13 +21,18 @@ import { handleResponse } from './fetch';
 import {
   kibana,
   kibanaContext,
-  kibanaContextFunction,
   ISearchGeneric,
   SearchSourceDependencies,
   SearchSourceService,
   kibanaTimerangeFunction,
   luceneFunction,
   kqlFunction,
+  fieldFunction,
+  rangeFunction,
+  existsFilterFunction,
+  rangeFilterFunction,
+  kibanaFilterFunction,
+  phraseFilterFunction,
 } from '../../common/search';
 import { getCallMsearch } from './legacy';
 import { AggsService, AggsStartDependencies } from './aggs';
@@ -46,6 +51,7 @@ import {
 import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 import { DataPublicPluginStart, DataStartDependencies } from '../types';
 import { NowProviderInternalContract } from '../now_provider';
+import { getKibanaContext } from './expressions/kibana_context';
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
@@ -104,10 +110,20 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       })
     );
     expressions.registerFunction(kibana);
-    expressions.registerFunction(kibanaContextFunction);
+    expressions.registerFunction(
+      getKibanaContext({ getStartServices } as {
+        getStartServices: StartServicesAccessor<DataStartDependencies, DataPublicPluginStart>;
+      })
+    );
     expressions.registerFunction(luceneFunction);
     expressions.registerFunction(kqlFunction);
     expressions.registerFunction(kibanaTimerangeFunction);
+    expressions.registerFunction(fieldFunction);
+    expressions.registerFunction(rangeFunction);
+    expressions.registerFunction(kibanaFilterFunction);
+    expressions.registerFunction(existsFilterFunction);
+    expressions.registerFunction(rangeFilterFunction);
+    expressions.registerFunction(phraseFilterFunction);
     expressions.registerType(kibanaContext);
 
     expressions.registerFunction(esdsl);

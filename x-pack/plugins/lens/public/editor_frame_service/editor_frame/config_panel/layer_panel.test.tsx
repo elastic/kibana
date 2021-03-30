@@ -7,21 +7,37 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { EuiFormRow } from '@elastic/eui';
+import { mountWithIntl } from '@kbn/test/jest';
+import { Visualization } from '../../../types';
+import { LayerPanel } from './layer_panel';
+import { ChildDragDropProvider, DragDrop } from '../../../drag_drop';
+import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { generateId } from '../../../id_generator';
 import {
   createMockVisualization,
   createMockFramePublicAPI,
   createMockDatasource,
   DatasourceMock,
 } from '../../mocks';
-import { ChildDragDropProvider, DragDrop } from '../../../drag_drop';
-import { EuiFormRow } from '@elastic/eui';
-import { mountWithIntl } from '@kbn/test/jest';
-import { Visualization } from '../../../types';
-import { LayerPanel } from './layer_panel';
-import { coreMock } from 'src/core/public/mocks';
-import { generateId } from '../../../id_generator';
 
 jest.mock('../../../id_generator');
+
+let container: HTMLDivElement | undefined;
+
+beforeEach(() => {
+  container = document.createElement('div');
+  container.id = 'lensContainer';
+  document.body.appendChild(container);
+});
+
+afterEach(() => {
+  if (container && container.parentNode) {
+    container.parentNode.removeChild(container);
+  }
+
+  container = undefined;
+});
 
 const defaultContext = {
   dragging: undefined,
@@ -642,7 +658,8 @@ describe('LayerPanel', () => {
       const component = mountWithIntl(
         <ChildDragDropProvider {...defaultContext} dragging={draggingOperation}>
           <LayerPanel {...getDefaultProps()} />
-        </ChildDragDropProvider>
+        </ChildDragDropProvider>,
+        { attachTo: container }
       );
       act(() => {
         component.find(DragDrop).at(1).prop('onDrop')!(draggingOperation, 'reorder');

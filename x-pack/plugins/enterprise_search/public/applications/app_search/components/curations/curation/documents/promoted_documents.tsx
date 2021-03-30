@@ -62,7 +62,7 @@ export const PromotedDocuments: React.FC = () => {
       )}
       action={
         hasDocuments && (
-          <EuiFlexGroup gutterSize="s">
+          <EuiFlexGroup gutterSize="s" responsive={false} wrap>
             <EuiFlexItem>
               <AddResultButton />
             </EuiFlexItem>
