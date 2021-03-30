@@ -275,7 +275,7 @@ to exist for a feature to function correctly, that Saved Object should declare
 references to all the objects it requires. For example, a `dashboard`
 object might have panels for several `visualization` objects. When these
 `visualization` objects don't exist, the dashboard cannot be rendered
-correctly. The `dashboard` object should declare references to all it's
+correctly. The `dashboard` object should declare references to all its
 visualizations.
 
 However, `visualization` objects can continue to be rendered or embedded into
@@ -316,4 +316,3 @@ reference. This guarantees that the id the reference points to always remains
 up to date. If a visualization `id` was directly stored in
 `dashboard.panels[0].visualization` there is a risk that this `id` gets
 updated without updating the reference in the references array.
-
