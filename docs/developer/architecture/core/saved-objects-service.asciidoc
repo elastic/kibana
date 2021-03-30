@@ -267,7 +267,7 @@ in this code, there's really no reason not to aim for 100% test code coverage.
 
 When a Saved Object declares `references` to other Saved Objects, the
 Saved Objects Export API will automatically export the target object with all
-of it's references. This makes it easy for users to export the entire
+of its references. This makes it easy for users to export the entire
 reference graph of an object. 
 
 If a Saved Object can't be used on its own, that is, it needs other objects

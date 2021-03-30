@@ -2,7 +2,7 @@
 == Patterns
 [[scoped-services]]
 === Scoped services
-Whenever Kibana needs to get access to data saved in elasticsearch, it
+Whenever Kibana needs to get access to data saved in Elasticsearch, it
 should perform a check whether an end-user has access to the data. 
 The Kibana Platform introduced a handler interface on the server-side to perform that association
 internally. Core services, that require impersonation with an incoming
@@ -30,7 +30,7 @@ handler context] exposes the following scoped *core* services:
 
 Plugins can extend the handler context with a custom API that will be
 available to the plugin itself and all dependent plugins. For example,
-the plugin creates a custom elasticsearch client and wants to use it via
+the plugin creates a custom Elasticsearch client and wants to use it via
 the request handler context:
 
 [source,typescript]
