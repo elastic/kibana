@@ -63,12 +63,12 @@ Secrets defines sensitive information for the connector type.
 Define email connector properties.
 
 [role="screenshot"]
-image::images/email-connector.png[Email connector]
+image::user/connectors/images/email-connector.png[Email connector]
 
 Test email action parameters.
 
 [role="screenshot"]
-image::images/email-params-test.png[Email params test]
+image::user/connectors/images/email-params-test.png[Email params test]
 
 [float]
 [[email-action-configuration]]
