@@ -149,6 +149,8 @@ def buildArchives(destination) {
     "PATH=/var/lib/jenkins/.java/${props.ES_BUILD_JAVA}/bin:${env.PATH}",
     "JAVA_HOME=/var/lib/jenkins/.java/${props.ES_BUILD_JAVA}",
 
+    "HOME=/var/lib/jenkins", // A Vagrant error is thrown if HOME is missing
+
     // These Jenkins env vars trigger some automation in the elasticsearch repo that we don't want
     "BUILD_NUMBER=",
     "JENKINS_URL=",
