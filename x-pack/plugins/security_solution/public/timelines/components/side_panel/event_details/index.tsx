@@ -6,11 +6,19 @@
  */
 
 import { some } from 'lodash/fp';
-import { EuiFlyoutHeader, EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlyoutHeader,
+  EuiFlyoutBody,
+  EuiSpacer,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
 import { useTimelineEventsDetails } from '../../../containers/details';
@@ -58,9 +66,14 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
 
   const isAlert = some({ category: 'signal', field: 'signal.rule.id' }, detailsData);
 
+  const isEndpointAlert = some({ category: 'signal', field: 'signal.rule.type' }, detailsData);
+
   if (!expandedEvent?.eventId) {
     return null;
   }
+
+  // console.log('i am details data', detailsData);
+  // console.log('endpoint', isEndpointAlert);
 
   return isFlyoutView ? (
     <>
@@ -68,15 +81,26 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
         <ExpandableEventTitle isAlert={isAlert} loading={loading} />
       </EuiFlyoutHeader>
       <StyledEuiFlyoutBody>
-        <ExpandableEvent
-          browserFields={browserFields}
-          detailsData={detailsData}
-          event={expandedEvent}
-          isAlert={isAlert}
-          loading={loading}
-          timelineId={timelineId}
-          timelineTabType="flyout"
-        />
+        <EuiFlexGroup>
+          {isEndpointAlert && (
+            <EuiFlexItem>
+              <EuiButton onClick={}>
+                <FormattedMessage id="tempHi" defaultMessage="Hi" />
+              </EuiButton>
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem>
+            <ExpandableEvent
+              browserFields={browserFields}
+              detailsData={detailsData}
+              event={expandedEvent}
+              isAlert={isAlert}
+              loading={loading}
+              timelineId={timelineId}
+              timelineTabType="flyout"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </StyledEuiFlyoutBody>
     </>
   ) : (
