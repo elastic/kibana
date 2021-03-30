@@ -40,10 +40,22 @@ export const useAgentGroups = ({ osqueryPolicies, osqueryPoliciesLoading }: UseA
             factoryQueryType: OsqueryQueries.agents,
             aggregations: {
               platforms: {
-                field: 'local_metadata.os.platform',
-                subaggs: { policies: 'policy_id' },
+                terms: {
+                  field: 'local_metadata.os.platform',
+                },
+                aggs: {
+                  policies: {
+                    terms: {
+                      field: 'policy_id' 
+                    }
+                  }
+                },
               },
-              policies: 'policy_id',
+              policies: {
+                terms: {
+                  field: 'policy_id',
+                }
+              }
             },
             pagination: generateTablePaginationOptions(0, 9000),
             sort: {

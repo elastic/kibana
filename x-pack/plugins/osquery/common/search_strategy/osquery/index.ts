@@ -19,6 +19,7 @@ import { AgentsStrategyResponse, AgentsRequestOptions } from './agents';
 import { ResultsStrategyResponse, ResultsRequestOptions } from './results';
 
 import { DocValueFields, SortField, PaginationInputPaginated } from '../common';
+import type { estypes } from '@elastic/elasticsearch';
 
 export * from './actions';
 export * from './agents';
@@ -34,15 +35,9 @@ export enum OsqueryQueries {
 
 export type FactoryQueryTypes = OsqueryQueries;
 
-export type AggregationValue = string | { field: string; subaggs: Aggregation };
-
-export interface Aggregation {
-  [key: string]: AggregationValue;
-}
-
 export interface RequestBasicOptions extends IEsSearchRequest {
   filterQuery: ESQuery | string | undefined;
-  aggregations?: Aggregation;
+  aggregations?: Record<string, estypes.AggregationContainer>;
   docValueFields?: DocValueFields[];
   factoryQueryType?: FactoryQueryTypes;
 }

@@ -17,7 +17,7 @@ export const useOsqueryPolicies = () => {
     async () => {
       return await http.get('/api/fleet/package_policies', {
         query: {
-          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:osquery_elastic_managed`,
+          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:osquery_manager`,
         },
       });
     },

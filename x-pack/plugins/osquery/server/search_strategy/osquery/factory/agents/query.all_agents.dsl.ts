@@ -8,7 +8,6 @@
 import { ISearchRequestParams } from '../../../../../../../../src/plugins/data/common';
 import { AgentsRequestOptions } from '../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../common/utils/build_query';
-import { parseAggregator } from '../../helpers';
 
 export const buildAgentsQuery = ({
   filterQuery,
@@ -31,7 +30,7 @@ export const buildAgentsQuery = ({
           filter,
         },
       },
-      aggs: {},
+      aggs: aggregations,
       track_total_hits: true,
       sort: [
         {
@@ -45,9 +44,7 @@ export const buildAgentsQuery = ({
     },
   };
 
-  if (aggregations) {
-    dslQuery.body.aggs = parseAggregator(aggregations);
-  }
+  console.log(JSON.stringify(dslQuery, null, 2))
 
   return dslQuery;
 };
