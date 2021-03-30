@@ -458,19 +458,19 @@ def allCiTasks() {
   parallel([
     general: {
       withTasks {
-        tasks.check()
-        tasks.lint()
-        tasks.test()
+        // tasks.check()
+        // tasks.lint()
+        // tasks.test()
         tasks.functionalOss()
-        tasks.functionalXpack()
-        tasks.storybooksCi()
+        // tasks.functionalXpack()
+        // tasks.storybooksCi()
       }
     },
-    jest: {
-      workers.ci(name: 'jest', size: 'n2-standard-16', ramDisk: false) {
-        scriptTask('Jest Unit Tests', 'test/scripts/test/jest_unit.sh')()
-      }
-    },
+    // jest: {
+    //   workers.ci(name: 'jest', size: 'n2-standard-16', ramDisk: false) {
+    //     scriptTask('Jest Unit Tests', 'test/scripts/test/jest_unit.sh')()
+    //   }
+    // },
   ])
 }
 
