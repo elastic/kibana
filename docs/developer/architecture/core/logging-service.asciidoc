@@ -26,7 +26,7 @@ export class MyPlugin implements Plugin {
 }
 ----
 
-The way logging works in {kib} is inspired by `log4j 2` logging framework used by {ref-bare}/current/logging.html[Elasticsearch].
+The way logging works in {kib} is inspired by the `log4j 2` logging framework used by {ref-bare}/current/logging.html[Elasticsearch].
 The main idea is to have consistent logging behavior (configuration, log format etc.) across the entire Elastic Stack where possible.
 
 === Loggers, Appenders and Layouts
@@ -543,4 +543,3 @@ The log will be less verbose with `warn` level for the `server` logger:
 [2017-07-25T11:54:41.639-07:00][ERROR][server] Message with `error` log level.
 [2017-07-25T11:54:41.639-07:00][FATAL][server] Message with `fatal` log level.
 ----
-
