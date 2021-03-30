@@ -50,7 +50,13 @@ export const getSignalsTemplate = (index: string) => {
           ...ecsMapping.mappings.properties.threat,
           properties: {
             ...ecsMapping.mappings.properties.threat.properties,
-            ...indicatorMapping,
+            indicator: {
+              ...ecsMapping.mappings.properties.threat.properties.indicator,
+              properties: {
+                ...ecsMapping.mappings.properties.threat.properties.indicator.properties,
+                ...indicatorMapping,
+              },
+            },
           },
         },
       },
