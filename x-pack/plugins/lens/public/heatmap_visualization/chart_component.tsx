@@ -41,17 +41,20 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
 
   const chartData = table.rows;
 
-  const xAxis = table.columns.find((v) => v.id === args.xAccessor);
+  const xAxisDef = table.columns.find((v) => v.id === args.xAccessor);
+  const valueDef = table.columns.find((v) => v.id === args.valueAccessor);
 
-  if (!xAxis) {
+  if (!xAxisDef || !valueDef) {
     // Chart is not ready
     return null;
   }
 
-  const xAxisMeta = xAxis.meta;
+  const xAxisMeta = xAxisDef.meta;
   const xScaleType = xAxisMeta.type === 'date' ? ScaleType.Time : ScaleType.Ordinal;
 
   const xValuesFormatter = formatFactory(xAxisMeta.params);
+
+  const valueFormatter = formatFactory(valueDef.meta.params);
 
   const config: HeatmapSpec['config'] = {
     onBrushEnd: (e: HeatmapBrushEvent) => {},
@@ -118,6 +121,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
         xAccessor={args.xAccessor}
         yAccessor={args.yAccessor}
         valueAccessor={args.valueAccessor}
+        valueFormatter={(v: number) => valueFormatter.convert(v)}
         xScaleType={xScaleType}
         ySortPredicate="dataIndex"
         config={config}
