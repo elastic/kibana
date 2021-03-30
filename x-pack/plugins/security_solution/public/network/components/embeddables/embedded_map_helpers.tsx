@@ -17,7 +17,7 @@ import {
   MapEmbeddableInput,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../../plugins/maps/public/embeddable';
-import {
+import type {
   RenderTooltipContentParams,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../../plugins/maps/public/classes/tooltips/tooltip_property';
