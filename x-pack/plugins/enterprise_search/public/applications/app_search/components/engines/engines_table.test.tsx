@@ -159,23 +159,6 @@ describe('EnginesTable', () => {
       const tableContent = wrapper.find(EuiBasicTable).text();
       expect(tableContent).toContain('Universal');
     });
-
-    it('renders no language text if the engine is a Meta Engine', () => {
-      const wrapper = mountWithIntl(
-        <EnginesTable
-          {...props}
-          items={[
-            {
-              ...data[0],
-              language: null,
-              isMeta: true,
-            },
-          ]}
-        />
-      );
-      const tableContent = wrapper.find(EuiBasicTable).text();
-      expect(tableContent).not.toContain('Universal');
-    });
   });
 
   describe('actions', () => {
