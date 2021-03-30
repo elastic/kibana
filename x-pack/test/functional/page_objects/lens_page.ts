@@ -125,8 +125,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
 
       if (opts.palette) {
-        await testSubjects.click('lns-palettePicker');
-        await find.clickByCssSelector(`#${opts.palette}`);
+        await this.setPalette(opts.palette);
       }
 
       if (!opts.keepOpen) {
@@ -695,6 +694,19 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         );
       }
       return buttonEl.click();
+    },
+
+    async setTableDynamicColoring(coloringType: 'none' | 'cell' | 'text') {
+      await testSubjects.click('lnsDatatable_dynamicColoring_groups_' + coloringType);
+    },
+
+    async openTablePalettePanel() {
+      await testSubjects.click('lnsDatatable_dynamicColoring_trigger');
+    },
+
+    async setPalette(paletteName: string) {
+      await testSubjects.click('lns-palettePicker');
+      await find.clickByCssSelector(`#${paletteName}`);
     },
 
     async toggleColumnVisibility(dimension: string) {
