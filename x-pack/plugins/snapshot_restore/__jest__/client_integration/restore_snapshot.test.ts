@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { act } from 'react-dom/test-utils';
 
-import { nextTick, pageHelpers, setupEnvironment } from './helpers';
+import { pageHelpers, setupEnvironment } from './helpers';
 import { RestoreSnapshotTestBed } from './helpers/restore_snapshot.helpers';
 import * as fixtures from '../../test/fixtures';
 
@@ -20,11 +21,15 @@ describe('<RestoreSnapshot />', () => {
   afterAll(() => {
     server.restore();
   });
+
   describe('with data streams', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setGetSnapshotResponse(fixtures.getSnapshot());
-      testBed = await setup();
-      await nextTick();
+
+      await act(async () => {
+        testBed = await setup();
+      });
+
       testBed.component.update();
     });
 
@@ -37,14 +42,37 @@ describe('<RestoreSnapshot />', () => {
   describe('without data streams', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setGetSnapshotResponse(fixtures.getSnapshot({ totalDataStreams: 0 }));
-      testBed = await setup();
-      await nextTick();
+      await act(async () => {
+        testBed = await setup();
+      });
+
       testBed.component.update();
     });
 
     it('hides the data streams warning when the snapshot has data streams', () => {
       const { exists } = testBed;
       expect(exists('dataStreamWarningCallOut')).toBe(false);
+    });
+  });
+
+  describe('global state', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setGetSnapshotResponse(fixtures.getSnapshot());
+      await act(async () => {
+        testBed = await setup();
+      });
+
+      testBed.component.update();
+    });
+
+    it('shows an info callout when include_global_state is enabled', () => {
+      const { exists, actions } = testBed;
+
+      expect(exists('systemIndicesInfoCallOut')).toBe(false);
+
+      actions.toggleGlobalState();
+
+      expect(exists('systemIndicesInfoCallOut')).toBe(true);
     });
   });
 });

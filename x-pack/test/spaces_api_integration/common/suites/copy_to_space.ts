@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import { EsArchiver } from '@kbn/es-archiver';
+import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 import { CopyResponse } from '../../../../plugins/spaces/server/lib/copy_to_spaces';
 import { getUrlPrefix } from '../lib/space_test_utils';
@@ -70,12 +71,12 @@ const getDestinationWithConflicts = (originSpaceId?: string) =>
   !originSpaceId || originSpaceId === DEFAULT_SPACE_ID ? 'space_1' : DEFAULT_SPACE_ID;
 
 export function copyToSpaceTestSuiteFactory(
-  es: any,
+  es: KibanaClient,
   esArchiver: EsArchiver,
   supertest: SuperTest<any>
 ) {
   const collectSpaceContents = async () => {
-    const response = await es.search({
+    const { body: response } = await es.search({
       index: '.kibana',
       body: {
         size: 0,
@@ -90,7 +91,8 @@ export function copyToSpaceTestSuiteFactory(
     });
 
     return {
-      buckets: response.aggregations.count.buckets as SpaceBucket[],
+      // @ts-expect-error @elastic/elasticsearch doesn't defined `count.buckets`.
+      buckets: response.aggregations?.count.buckets as SpaceBucket[],
     };
   };
 
@@ -749,7 +751,7 @@ export function copyToSpaceTestSuiteFactory(
   };
 
   const copyToSpaceTest = makeCopyToSpaceTest(describe);
-  // @ts-ignore
+  // @ts-expect-error
   copyToSpaceTest.only = makeCopyToSpaceTest(describe.only);
 
   return {

@@ -121,8 +121,13 @@ export interface PostBulkAgentUnenrollRequest {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PostBulkAgentUnenrollResponse {}
+export type PostBulkAgentUnenrollResponse = Record<
+  Agent['id'],
+  {
+    success: boolean;
+    error?: string;
+  }
+>;
 
 export interface PostAgentUpgradeRequest {
   params: {
@@ -141,8 +146,14 @@ export interface PostBulkAgentUpgradeRequest {
     version: string;
   };
 }
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PostBulkAgentUpgradeResponse {}
+
+export type PostBulkAgentUpgradeResponse = Record<
+  Agent['id'],
+  {
+    success: boolean;
+    error?: string;
+  }
+>;
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PostAgentUpgradeResponse {}

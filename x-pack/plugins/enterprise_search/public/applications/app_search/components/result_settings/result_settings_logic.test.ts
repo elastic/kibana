@@ -26,20 +26,20 @@ describe('ResultSettingsLogic', () => {
     dataLoading: true,
     saving: false,
     openModal: OpenModal.None,
-    nonTextResultFields: {},
     resultFields: {},
-    serverResultFields: {},
-    textResultFields: {},
     lastSavedResultFields: {},
     schema: {},
     schemaConflicts: {},
   };
 
   const SELECTORS = {
+    serverResultFields: {},
     reducedServerResultFields: {},
     resultFieldsAtDefaultSettings: true,
     resultFieldsEmpty: true,
     stagedUpdates: false,
+    nonTextResultFields: {},
+    textResultFields: {},
   };
 
   // Values without selectors
@@ -138,37 +138,6 @@ describe('ResultSettingsLogic', () => {
               snippetFallback: false,
             },
           },
-          // The resultFields are also partitioned to either nonTextResultFields or textResultFields
-          // depending on their type within the passed schema
-          nonTextResultFields: {
-            bar: {
-              raw: true,
-              rawSize: 5,
-              snippet: false,
-              snippetFallback: false,
-            },
-          },
-          textResultFields: {
-            // Baz was not part of the original serverResultFields, it was injected based on the schema
-            baz: {
-              raw: false,
-              snippet: false,
-              snippetFallback: false,
-            },
-            foo: {
-              raw: true,
-              rawSize: 5,
-              snippet: false,
-              snippetFallback: false,
-            },
-          },
-          // It stores the originally passed results as serverResultFields
-          serverResultFields: {
-            foo: { raw: { size: 5 } },
-            // Baz was not part of the original serverResultFields, it was injected based on the schema
-            baz: {},
-            bar: { raw: { size: 5 } },
-          },
           // The modal should be reset back to closed if it had been opened previously
           openModal: OpenModal.None,
           // Stores the provided schema details
@@ -230,21 +199,9 @@ describe('ResultSettingsLogic', () => {
     describe('clearAllFields', () => {
       it('should remove all settings that have been set for each field', () => {
         mount({
-          nonTextResultFields: {
-            foo: { raw: false, snippet: false, snippetFallback: false },
-            bar: { raw: true, snippet: false, snippetFallback: true },
-          },
-          textResultFields: {
-            qux: { raw: false, snippet: false, snippetFallback: false },
-            quux: { raw: true, snippet: false, snippetFallback: true },
-          },
           resultFields: {
             quuz: { raw: false, snippet: false, snippetFallback: false },
             corge: { raw: true, snippet: false, snippetFallback: true },
-          },
-          serverResultFields: {
-            grault: { raw: { size: 5 } },
-            garply: { raw: true },
           },
         });
 
@@ -252,21 +209,9 @@ describe('ResultSettingsLogic', () => {
 
         expect(resultSettingLogicValues()).toEqual({
           ...DEFAULT_VALUES,
-          nonTextResultFields: {
-            foo: {},
-            bar: {},
-          },
-          textResultFields: {
-            qux: {},
-            quux: {},
-          },
           resultFields: {
             quuz: {},
             corge: {},
-          },
-          serverResultFields: {
-            grault: {},
-            garply: {},
           },
         });
       });
@@ -275,21 +220,9 @@ describe('ResultSettingsLogic', () => {
     describe('resetAllFields', () => {
       it('should reset all settings to their default values per field', () => {
         mount({
-          nonTextResultFields: {
-            foo: { raw: true, snippet: true, snippetFallback: true },
-            bar: { raw: true, snippet: true, snippetFallback: true },
-          },
-          textResultFields: {
-            qux: { raw: true, snippet: true, snippetFallback: true },
-            quux: { raw: true, snippet: true, snippetFallback: true },
-          },
           resultFields: {
             quuz: { raw: true, snippet: true, snippetFallback: true },
             corge: { raw: true, snippet: true, snippetFallback: true },
-          },
-          serverResultFields: {
-            grault: { raw: { size: 5 } },
-            garply: { raw: true },
           },
         });
 
@@ -297,21 +230,9 @@ describe('ResultSettingsLogic', () => {
 
         expect(resultSettingLogicValues()).toEqual({
           ...DEFAULT_VALUES,
-          nonTextResultFields: {
-            bar: { raw: true, snippet: false, snippetFallback: false },
-            foo: { raw: true, snippet: false, snippetFallback: false },
-          },
-          textResultFields: {
-            qux: { raw: true, snippet: false, snippetFallback: false },
-            quux: { raw: true, snippet: false, snippetFallback: false },
-          },
           resultFields: {
             quuz: { raw: true, snippet: false, snippetFallback: false },
             corge: { raw: true, snippet: false, snippetFallback: false },
-          },
-          serverResultFields: {
-            grault: { raw: {} },
-            garply: { raw: {} },
           },
         });
       });
@@ -332,21 +253,9 @@ describe('ResultSettingsLogic', () => {
 
     describe('updateField', () => {
       const initialValues = {
-        nonTextResultFields: {
-          foo: { raw: true, snippet: true, snippetFallback: true },
-          bar: { raw: true, snippet: true, snippetFallback: true },
-        },
-        textResultFields: {
-          foo: { raw: true, snippet: true, snippetFallback: true },
-          bar: { raw: true, snippet: true, snippetFallback: true },
-        },
         resultFields: {
           foo: { raw: true, snippet: true, snippetFallback: true },
           bar: { raw: true, snippet: true, snippetFallback: true },
-        },
-        serverResultFields: {
-          foo: { raw: { size: 5 } },
-          bar: { raw: true },
         },
       };
 
@@ -362,22 +271,9 @@ describe('ResultSettingsLogic', () => {
         expect(resultSettingLogicValues()).toEqual({
           ...DEFAULT_VALUES,
           // the settings for foo are updated below for any *ResultFields state in which they appear
-          nonTextResultFields: {
-            foo: { raw: true, snippet: false, snippetFallback: false },
-            bar: { raw: true, snippet: true, snippetFallback: true },
-          },
-          textResultFields: {
-            foo: { raw: true, snippet: false, snippetFallback: false },
-            bar: { raw: true, snippet: true, snippetFallback: true },
-          },
           resultFields: {
             foo: { raw: true, snippet: false, snippetFallback: false },
             bar: { raw: true, snippet: true, snippetFallback: true },
-          },
-          serverResultFields: {
-            // Note that the specified settings for foo get converted to a "server" format here
-            foo: { raw: {} },
-            bar: { raw: true },
           },
         });
       });
@@ -417,6 +313,49 @@ describe('ResultSettingsLogic', () => {
   });
 
   describe('selectors', () => {
+    describe('textResultFields', () => {
+      it('should return only resultFields that have a type of "text" in the engine schema', () => {
+        mount({
+          schema: {
+            foo: 'text',
+            bar: 'number',
+            baz: 'text',
+          },
+          resultFields: {
+            foo: { raw: true, rawSize: 5 },
+            bar: { raw: true, rawSize: 5 },
+            baz: { raw: true, rawSize: 5 },
+          },
+        });
+
+        expect(ResultSettingsLogic.values.textResultFields).toEqual({
+          baz: { raw: true, rawSize: 5 },
+          foo: { raw: true, rawSize: 5 },
+        });
+      });
+    });
+
+    describe('nonTextResultFields', () => {
+      it('should return only resultFields that have a type other than "text" in the engine schema', () => {
+        mount({
+          schema: {
+            foo: 'text',
+            bar: 'number',
+            baz: 'text',
+          },
+          resultFields: {
+            foo: { raw: true, rawSize: 5 },
+            bar: { raw: true, rawSize: 5 },
+            baz: { raw: true, rawSize: 5 },
+          },
+        });
+
+        expect(ResultSettingsLogic.values.nonTextResultFields).toEqual({
+          bar: { raw: true, rawSize: 5 },
+        });
+      });
+    });
+
     describe('resultFieldsAtDefaultSettings', () => {
       it('should return true if all fields are at their default settings', () => {
         mount({
@@ -499,11 +438,45 @@ describe('ResultSettingsLogic', () => {
       });
     });
 
-    describe('reducedServerResultFields', () => {
-      it('filters out fields that do not have any settings', () => {
+    describe('serverResultFields', () => {
+      it('returns resultFields formatted for the server', () => {
         mount({
-          serverResultFields: {
-            foo: { raw: { size: 5 } },
+          resultFields: {
+            foo: {
+              raw: true,
+              rawSize: 5,
+              snippet: true,
+              snippetFallback: true,
+              snippetSize: 3,
+            },
+            bar: {},
+            baz: {
+              raw: false,
+              snippet: false,
+              snippetFallback: false,
+            },
+          },
+        });
+
+        expect(ResultSettingsLogic.values.serverResultFields).toEqual({
+          foo: {
+            raw: { size: 5 },
+            snippet: { fallback: true, size: 3 },
+          },
+          bar: {},
+          baz: {},
+        });
+      });
+    });
+
+    describe('reducedServerResultFields', () => {
+      it('returns server formatted fields with empty settings filtered out', () => {
+        mount({
+          resultFields: {
+            foo: {
+              raw: true,
+              rawSize: 5,
+            },
             bar: {},
           },
         });
