@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '../../../../src/core/server';
-import { FileUploadPlugin } from './plugin';
+import { SecurityPluginStart } from '../..//security/server';
 
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new FileUploadPlugin(initializerContext);
+export interface StartDeps {
+  security?: SecurityPluginStart;
+}
