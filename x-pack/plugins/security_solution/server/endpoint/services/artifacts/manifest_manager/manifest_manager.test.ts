@@ -474,31 +474,22 @@ describe('ManifestManager', () => {
   });
 
   describe('pushArtifacts', () => {
-    test('Successfully invokes saved objects client and stores in the cache', async () => {
+    test('Successfully invokes artifactClient and stores in the cache', async () => {
       const context = buildManifestManagerContextMock({});
+      const artifactClient = context.artifactClient as jest.Mocked<EndpointArtifactClientInterface>;
       const manifestManager = new ManifestManager(context);
-
-      context.savedObjectsClient.create = jest
-        .fn()
-        .mockImplementation((type: string, artifact: InternalArtifactCompleteSchema) => artifact);
 
       await expect(
         manifestManager.pushArtifacts([ARTIFACT_EXCEPTIONS_MACOS, ARTIFACT_EXCEPTIONS_WINDOWS])
       ).resolves.toStrictEqual([]);
 
-      expect(context.savedObjectsClient.create).toHaveBeenCalledTimes(2);
-      expect(context.savedObjectsClient.create).toHaveBeenNthCalledWith(
-        1,
-        ArtifactConstants.SAVED_OBJECT_TYPE,
-        { ...ARTIFACT_EXCEPTIONS_MACOS, created: expect.anything() },
-        { id: ARTIFACT_ID_EXCEPTIONS_MACOS }
-      );
-      expect(context.savedObjectsClient.create).toHaveBeenNthCalledWith(
-        2,
-        ArtifactConstants.SAVED_OBJECT_TYPE,
-        { ...ARTIFACT_EXCEPTIONS_WINDOWS, created: expect.anything() },
-        { id: ARTIFACT_ID_EXCEPTIONS_WINDOWS }
-      );
+      expect(artifactClient.createArtifact).toHaveBeenCalledTimes(2);
+      expect(artifactClient.createArtifact).toHaveBeenNthCalledWith(1, {
+        ...ARTIFACT_EXCEPTIONS_MACOS,
+      });
+      expect(artifactClient.createArtifact).toHaveBeenNthCalledWith(2, {
+        ...ARTIFACT_EXCEPTIONS_WINDOWS,
+      });
       expect(
         await uncompressData(context.cache.get(getArtifactId(ARTIFACT_EXCEPTIONS_MACOS))!)
       ).toStrictEqual(await uncompressArtifact(ARTIFACT_EXCEPTIONS_MACOS));
@@ -509,19 +500,20 @@ describe('ManifestManager', () => {
 
     test('Returns errors for partial failures', async () => {
       const context = buildManifestManagerContextMock({});
+      const artifactClient = context.artifactClient as jest.Mocked<EndpointArtifactClientInterface>;
       const manifestManager = new ManifestManager(context);
       const error = new Error();
       const { body, ...incompleteArtifact } = ARTIFACT_TRUSTED_APPS_MACOS;
 
-      context.savedObjectsClient.create = jest
-        .fn()
-        .mockImplementation(async (type: string, artifact: InternalArtifactCompleteSchema) => {
+      artifactClient.createArtifact.mockImplementation(
+        async (artifact: InternalArtifactCompleteSchema) => {
           if (getArtifactId(artifact) === ARTIFACT_ID_EXCEPTIONS_WINDOWS) {
             throw error;
           } else {
-            return artifact;
+            return { attributes: artifact } as SavedObject<InternalArtifactCompleteSchema>;
           }
-        });
+        }
+      );
 
       await expect(
         manifestManager.pushArtifacts([
@@ -534,44 +526,14 @@ describe('ManifestManager', () => {
         new Error(`Incomplete artifact: ${ARTIFACT_ID_TRUSTED_APPS_MACOS}`),
       ]);
 
-      expect(context.savedObjectsClient.create).toHaveBeenCalledTimes(2);
-      expect(context.savedObjectsClient.create).toHaveBeenNthCalledWith(
-        1,
-        ArtifactConstants.SAVED_OBJECT_TYPE,
-        { ...ARTIFACT_EXCEPTIONS_MACOS, created: expect.anything() },
-        { id: ARTIFACT_ID_EXCEPTIONS_MACOS }
-      );
+      expect(artifactClient.createArtifact).toHaveBeenCalledTimes(2);
+      expect(artifactClient.createArtifact).toHaveBeenNthCalledWith(1, {
+        ...ARTIFACT_EXCEPTIONS_MACOS,
+      });
       expect(
         await uncompressData(context.cache.get(getArtifactId(ARTIFACT_EXCEPTIONS_MACOS))!)
       ).toStrictEqual(await uncompressArtifact(ARTIFACT_EXCEPTIONS_MACOS));
       expect(context.cache.get(getArtifactId(ARTIFACT_EXCEPTIONS_WINDOWS))).toBeUndefined();
-    });
-
-    test('Tolerates saved objects client conflict', async () => {
-      const context = buildManifestManagerContextMock({});
-      const manifestManager = new ManifestManager(context);
-
-      context.savedObjectsClient.create = jest
-        .fn()
-        .mockRejectedValue(
-          SavedObjectsErrorHelpers.createConflictError(
-            ArtifactConstants.SAVED_OBJECT_TYPE,
-            ARTIFACT_ID_EXCEPTIONS_MACOS
-          )
-        );
-
-      await expect(
-        manifestManager.pushArtifacts([ARTIFACT_EXCEPTIONS_MACOS])
-      ).resolves.toStrictEqual([]);
-
-      expect(context.savedObjectsClient.create).toHaveBeenCalledTimes(1);
-      expect(context.savedObjectsClient.create).toHaveBeenNthCalledWith(
-        1,
-        ArtifactConstants.SAVED_OBJECT_TYPE,
-        { ...ARTIFACT_EXCEPTIONS_MACOS, created: expect.anything() },
-        { id: ARTIFACT_ID_EXCEPTIONS_MACOS }
-      );
-      expect(context.cache.get(getArtifactId(ARTIFACT_EXCEPTIONS_MACOS))).toBeUndefined();
     });
   });
 
