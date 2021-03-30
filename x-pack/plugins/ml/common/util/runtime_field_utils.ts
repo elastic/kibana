@@ -6,7 +6,7 @@
  */
 
 import { isPopulatedObject } from './object_utils';
-import { RUNTIME_FIELD_TYPES } from '../../../../../src/plugins/data/common/index_patterns';
+import { RUNTIME_FIELD_TYPES } from '../../../../../src/plugins/data/common';
 import type { RuntimeField, RuntimeMappings } from '../types/fields';
 
 export function isRuntimeField(arg: unknown): arg is RuntimeField {
