@@ -83,18 +83,6 @@ export interface ITiledSingleLayerVectorSource extends IVectorSource {
 }
 
 export class AbstractVectorSource extends AbstractSource implements IVectorSource {
-  static async getGeoJson({
-    format,
-    featureCollectionPath,
-    fetchUrl,
-  }: {
-    format: FORMAT_TYPE;
-    featureCollectionPath: string;
-    fetchUrl: string;
-  }) {
-    return await fetchGeoJson(fetchUrl, format, featureCollectionPath);
-  }
-
   getFieldNames(): string[] {
     return [];
   }
