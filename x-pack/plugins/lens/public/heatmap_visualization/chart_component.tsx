@@ -42,9 +42,10 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
   const chartData = table.rows;
 
   const xAxisDef = table.columns.find((v) => v.id === args.xAccessor);
+  const yAxisDef = table.columns.find((v) => v.id === args.yAccessor);
   const valueDef = table.columns.find((v) => v.id === args.valueAccessor);
 
-  if (!xAxisDef || !valueDef) {
+  if (!xAxisDef || !valueDef || !yAxisDef) {
     // Chart is not ready
     return null;
   }
@@ -84,12 +85,14 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
       // eui color subdued
       fill: `#6a717d`,
       padding: 8,
+      name: yAxisDef.name,
     },
     xAxisLabel: {
       visible: true,
       // eui color subdued
       fill: `#98A2B3`,
       formatter: (v: number | string) => xValuesFormatter.convert(v),
+      name: xAxisDef.name,
     },
     brushMask: {
       fill: isDarkTheme ? 'rgb(30,31,35,80%)' : 'rgb(247,247,247,50%)',
@@ -106,15 +109,11 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
         onElementClick={onElementClick}
         showLegend
         legendPosition={Position.Top}
-        xDomain={{
-          min: data.dateRange?.fromDate.getTime(),
-          max: data.dateRange?.toDate.getTime(),
-          minInterval: 1800000,
-        }}
         debugState={window._echDebugStateFlag ?? false}
       />
       <Heatmap
         id={'test'}
+        name={valueDef.name}
         colorScale={ScaleType.Linear}
         data={chartData}
         ranges={[0, 40, 90]}
