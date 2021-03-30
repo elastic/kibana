@@ -21,9 +21,9 @@ import {
   htmlIdGenerator,
   EuiPopover,
   EuiButtonEmpty,
-  EuiFlexItem,
   EuiCopy,
-  EuiFlexGroup,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
 } from '@elastic/eui';
 import { IndexPattern } from '../../../kibana_services';
 import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
@@ -260,6 +260,64 @@ export const DiscoverGrid = ({
   ]);
   const lead = useMemo(() => getLeadControlColumns(), []);
 
+  const getMenuItems = useCallback(() => {
+    return [
+      isFilterActive ? (
+        <EuiContextMenuItem
+          key="showAllDocuments"
+          icon="eye"
+          onClick={() => {
+            setIsSelectionPopoverOpen(false);
+            setIsFilterActive(false);
+          }}
+        >
+          <FormattedMessage id="discover.showAllDocuments" defaultMessage="Show all documents" />
+        </EuiContextMenuItem>
+      ) : (
+        <EuiContextMenuItem
+          key="showSelectedDocuments"
+          icon="eye"
+          onClick={() => {
+            setIsSelectionPopoverOpen(false);
+            setIsFilterActive(true);
+          }}
+        >
+          <FormattedMessage
+            id="discover.showSelectedDocumentsOnly"
+            defaultMessage="Show selected documents only"
+          />
+        </EuiContextMenuItem>
+      ),
+
+      <EuiContextMenuItem
+        key="clearSelection"
+        icon="cross"
+        onClick={() => {
+          setIsSelectionPopoverOpen(false);
+          setSelectedDocs([]);
+          setIsFilterActive(false);
+        }}
+      >
+        <FormattedMessage id="discover.clearSelection" defaultMessage="Clear selection" />
+      </EuiContextMenuItem>,
+      <EuiCopy
+        key="copyJsonWrapper"
+        textToCopy={
+          !rows ? '' : JSON.stringify(rows.filter((row) => selectedDocs.includes(getDocId(row))))
+        }
+      >
+        {(copy) => (
+          <EuiContextMenuItem key="copyJSON" icon="copyClipboard" onClick={copy}>
+            <FormattedMessage
+              id="discover.copyToClipboardJSON"
+              defaultMessage="Copy documents to clipboard (JSON)"
+            />
+          </EuiContextMenuItem>
+        )}
+      </EuiCopy>,
+    ];
+  }, [isFilterActive, rows, selectedDocs]);
+
   const additionalControls = useMemo(
     () =>
       selectedDocs.length ? (
@@ -283,80 +341,10 @@ export const DiscoverGrid = ({
             </EuiButtonEmpty>
           }
         >
-          <EuiFlexGroup direction="column" alignItems="flexStart">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                color="text"
-                size="xs"
-                flush="left"
-                iconType="eye"
-                onClick={() => {
-                  setIsFilterActive(!isFilterActive);
-                }}
-              >
-                {isFilterActive ? (
-                  <FormattedMessage
-                    id="discover.showAllDocuments"
-                    defaultMessage="Show all documents"
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="discover.showSelectedDocumentsOnly"
-                    defaultMessage="Show selected documents only"
-                  />
-                )}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                color="text"
-                size="xs"
-                iconType="cross"
-                flush="left"
-                onClick={() => {
-                  setIsSelectionPopoverOpen(false);
-                  setSelectedDocs([]);
-                  setIsFilterActive(false);
-                }}
-              >
-                <FormattedMessage id="discover.clearSelection" defaultMessage="Clear selection" />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiCopy
-                textToCopy={
-                  !rows
-                    ? ''
-                    : JSON.stringify(rows.filter((row) => selectedDocs.includes(getDocId(row))))
-                }
-              >
-                {(copy) => (
-                  <EuiButtonEmpty
-                    color="text"
-                    size="xs"
-                    flush="left"
-                    iconType="copyClipboard"
-                    onClick={copy}
-                  >
-                    <FormattedMessage
-                      id="discover.copyToClipboardJSON"
-                      defaultMessage="Copy documents to clipboard (JSON)"
-                    />
-                  </EuiButtonEmpty>
-                )}
-              </EuiCopy>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiContextMenuPanel items={getMenuItems()} />
         </EuiPopover>
       ) : null,
-    [
-      isFilterActive,
-      selectedDocs,
-      setIsFilterActive,
-      setIsSelectionPopoverOpen,
-      isSelectionPopoverOpen,
-      rows,
-    ]
+    [selectedDocs, setIsSelectionPopoverOpen, isSelectionPopoverOpen, getMenuItems]
   );
 
   if (!rowCount) {
