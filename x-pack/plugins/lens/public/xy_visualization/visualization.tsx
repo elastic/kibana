@@ -250,14 +250,7 @@ export const getXyVisualization = ({
             {
               groupId: 'threshold',
               groupLabel: 'Threshold value',
-              accessors:
-                layer.layerType === 'threshold'
-                  ? layer.accessors.map((a) => ({ columnId: a }))
-                  : layer.constantThresholdValues
-                  ? layer.constantThresholdValues.map((_a, index) => ({
-                      columnId: String(index),
-                    }))
-                  : [],
+              accessors: layer.accessors.map((a) => ({ columnId: a })),
               filterOperations: isNumericMetric,
               supportsMoreColumns: true,
               required: false,
@@ -284,6 +277,23 @@ export const getXyVisualization = ({
     }
     if (groupId === 'y' || groupId === 'threshold') {
       newLayer.accessors = [...newLayer.accessors.filter((a) => a !== columnId), columnId];
+      if (groupId === 'threshold') {
+        const hasYConfig = newLayer.yConfig?.some((yConfig) => yConfig.forAccessor === columnId);
+        if (!hasYConfig) {
+          newLayer.yConfig = [
+            ...(newLayer.yConfig || []),
+            {
+              forAccessor: columnId,
+              // todo auto axis mode as well?
+              axisMode: 'left',
+              color: '#ddd',
+              icon: undefined,
+              lineStyle: 'solid',
+              lineWidth: 1,
+            },
+          ];
+        }
+      }
     }
     if (groupId === 'breakdown') {
       newLayer.splitAccessor = columnId;
@@ -321,7 +331,20 @@ export const getXyVisualization = ({
     };
   },
 
-  getLayerTypes: () => [{ name: 'data' }, { name: 'threshold' }],
+  getLayerTypes: () => [
+    {
+      name: 'data',
+      label: i18n.translate('xpack.lens.xyChart.addLayerLabel', {
+        defaultMessage: 'Add chart layer',
+      }),
+    },
+    {
+      name: 'threshold',
+      label: i18n.translate('xpack.lens.xyChart.addThresholdLayerLabel', {
+        defaultMessage: 'Add threshold layer',
+      }),
+    },
+  ],
 
   getLayerContextMenuIcon({ state, layerId }) {
     const layer = state.layers.find((l) => l.layerId === layerId);

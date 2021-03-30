@@ -30,7 +30,14 @@ import {
   VisualizationDimensionEditorProps,
   FormatFactory,
 } from '../types';
-import { State, SeriesType, visualizationTypes, YAxisMode, AxesSettingsConfig } from './types';
+import {
+  State,
+  SeriesType,
+  visualizationTypes,
+  YAxisMode,
+  AxesSettingsConfig,
+  YConfig,
+} from './types';
 import { isHorizontalChart, isHorizontalSeries, getSeriesColor } from './state_helpers';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import { LegendSettingsPopover } from '../shared_components';
@@ -391,7 +398,24 @@ export function DimensionEditor(
     );
   }
 
+  function setYConfig(yConfig: Partial<YConfig>) {
+    const newYConfigs = [...(layer.yConfig || [])];
+    const existingIndex = newYConfigs.findIndex(
+      (yAxisConfig) => yAxisConfig.forAccessor === accessor
+    );
+    if (existingIndex !== -1) {
+      newYConfigs[existingIndex] = { ...newYConfigs[existingIndex], ...yConfig };
+    } else {
+      newYConfigs.push({
+        forAccessor: accessor,
+        ...yConfig,
+      });
+    }
+    setState(updateLayer(state, { ...layer, yConfig: newYConfigs }, index));
+  }
+
   if (layer.layerType === 'threshold' && props.groupId === 'threshold') {
+    const currentYConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === props.accessor);
     return (
       <>
         <EuiFormRow
@@ -426,10 +450,10 @@ export function DimensionEditor(
                 'data-test-subj': 'lnsXY_axisSide_groups_right',
               },
             ]}
-            idSelected={`${idPrefix}${layer.thresholdAxis || 'left'}`}
+            idSelected={`${idPrefix}${currentYConfig?.axisMode || 'left'}`}
             onChange={(id) => {
               const newMode = id.replace(idPrefix, '') as 'left' | 'right' | 'bottom';
-              setState(updateLayer(state, { ...layer, thresholdAxis: newMode }, index));
+              setYConfig({ axisMode: newMode });
             }}
           />
         </EuiFormRow>
@@ -443,10 +467,10 @@ export function DimensionEditor(
           <EuiFieldNumber
             fullWidth
             data-test-subj="lnsXY_lineWidth"
-            value={layer.lineWidth || 0}
+            value={currentYConfig?.lineWidth || 1}
             onChange={(e) => {
               // TODO proper number input handling
-              setState(updateLayer(state, { ...layer, lineWidth: Number(e.target.value) }, index));
+              setYConfig({ lineWidth: Number(e.target.value) });
             }}
           />
         </EuiFormRow>
@@ -482,14 +506,14 @@ export function DimensionEditor(
                 'data-test-subj': 'lnsXY_line_style_dotted',
               },
             ]}
-            idSelected={`${idPrefix}${layer.lineStyle || 'solid'}`}
+            idSelected={`${idPrefix}${currentYConfig?.lineStyle || 'solid'}`}
             onChange={(id) => {
               const newMode = id.replace(idPrefix, '') as 'solid' | 'dashed' | 'dotted';
-              setState(updateLayer(state, { ...layer, lineStyle: newMode }, index));
+              setYConfig({ lineStyle: newMode });
             }}
           />
         </EuiFormRow>
-        <ColorPicker {...props} />
+        <ColorPicker {...props} allowClearing={false} />
         <EuiFormRow
           display="columnCompressed"
           fullWidth
@@ -498,15 +522,9 @@ export function DimensionEditor(
           })}
         >
           <IconSelect
-            value={layer.icon}
+            value={currentYConfig?.icon}
             onChange={(newIcon) => {
-              setState(
-                updateLayer(
-                  state,
-                  { ...layer, icon: newIcon === 'none' ? undefined : newIcon },
-                  index
-                )
-              );
+              setYConfig({ icon: newIcon });
             }}
           />
         </EuiFormRow>
@@ -608,9 +626,11 @@ const ColorPicker = ({
   frame,
   formatFactory,
   paletteService,
+  allowClearing = true,
 }: VisualizationDimensionEditorProps<State> & {
   formatFactory: FormatFactory;
   paletteService: PaletteRegistry;
+  allowClearing?: boolean;
 }) => {
   const index = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[index];
@@ -676,7 +696,7 @@ const ColorPicker = ({
     <EuiColorPicker
       data-test-subj="indexPattern-dimension-colorPicker"
       compressed
-      isClearable={Boolean(overwriteColor)}
+      isClearable={allowClearing && Boolean(overwriteColor)}
       onChange={handleColor}
       color={disabled ? '' : color || currentColor}
       disabled={disabled}

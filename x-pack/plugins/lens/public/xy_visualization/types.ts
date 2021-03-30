@@ -257,6 +257,19 @@ export const yAxisConfig: ExpressionFunctionDefinition<
       types: ['string'],
       help: 'The color of the series',
     },
+    lineStyle: {
+      types: ['string'],
+      options: ['dashed', 'dotted', 'solid'],
+      help: '',
+    },
+    lineWidth: {
+      types: ['number'],
+      help: '',
+    },
+    icon: {
+      types: ['string'],
+      help: '',
+    },
   },
   fn: function fn(input: unknown, args: YConfig) {
     return {
@@ -305,24 +318,6 @@ export const layerConfig: ExpressionFunctionDefinition<
     layerType: {
       types: ['string'],
       options: ['data', 'threshold'],
-      help: '',
-    },
-    thresholdAxis: {
-      types: ['string'],
-      options: ['bottom', 'left', 'right'],
-      help: '',
-    },
-    lineStyle: {
-      types: ['string'],
-      options: ['dashed', 'dotted', 'solid'],
-      help: '',
-    },
-    lineWidth: {
-      types: ['number'],
-      help: '',
-    },
-    icon: {
-      types: ['string'],
       help: '',
     },
     xScaleType: {
@@ -386,7 +381,7 @@ export type SeriesType =
   | 'area_stacked'
   | 'area_percentage_stacked';
 
-export type YAxisMode = 'auto' | 'left' | 'right';
+export type YAxisMode = 'auto' | 'left' | 'right' | 'bottom';
 
 export type ValueLabelConfig = 'hide' | 'inside' | 'outside';
 
@@ -394,6 +389,9 @@ export interface YConfig {
   forAccessor: string;
   axisMode?: YAxisMode;
   color?: string;
+  lineStyle?: 'solid' | 'dashed' | 'dotted';
+  lineWidth?: number;
+  icon?: string;
 }
 
 export interface XYLayerConfig {
@@ -402,11 +400,6 @@ export interface XYLayerConfig {
   xAccessor?: string;
   accessors: string[];
   yConfig?: YConfig[];
-  thresholdAxis?: 'left' | 'right' | 'bottom';
-  lineStyle?: 'solid' | 'dashed' | 'dotted';
-  lineWidth?: number;
-  icon?: string;
-  constantThresholdValues?: number[];
   seriesType: SeriesType;
   splitAccessor?: string;
   palette?: PaletteOutput;

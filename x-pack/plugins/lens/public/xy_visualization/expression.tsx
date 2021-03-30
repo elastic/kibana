@@ -840,38 +840,59 @@ export function XYChart({
         })
       )}
 
-      {thresholdLayers.map((thresholdLayer) => {
-        return (
-          <LineAnnotation
-            id={thresholdLayer.layerId}
-            key={thresholdLayer.layerId}
-            domainType={
-              thresholdLayer.thresholdAxis === 'bottom'
-                ? AnnotationDomainTypes.XDomain
-                : AnnotationDomainTypes.YDomain
+      {thresholdLayers.flatMap((thresholdLayer) => {
+        if (!thresholdLayer.yConfig) {
+          return [];
+        }
+        const columnToLabelMap: Record<string, string> = thresholdLayer.columnToLabel
+          ? JSON.parse(thresholdLayer.columnToLabel)
+          : {};
+        return thresholdLayer.yConfig.map((yConfig) => {
+          const table = data.tables[thresholdLayer.layerId];
+          const formatter = formatFactory(
+            table?.columns.find((column) => column.id === yConfig.forAccessor)?.meta?.params || {
+              id: 'number',
             }
-            dataValues={thresholdLayer.accessors.flatMap((accessor) =>
-              data.tables[thresholdLayer.layerId].rows.map((row) => ({
-                dataValue: row[accessor],
-              }))
-            )}
-            groupId={
-              thresholdLayer.thresholdAxis === 'bottom'
-                ? undefined
-                : thresholdLayer.thresholdAxis === 'right'
-                ? 'right'
-                : 'left'
-            }
-            style={{
-              line: {
-                strokeWidth: 3,
-                stroke: '#f00',
-                opacity: 1,
-              },
-            }}
-            marker={<EuiIcon type="alert" />}
-          />
-        );
+          );
+          return (
+            <LineAnnotation
+              id={`${thresholdLayer.layerId}-${yConfig.forAccessor}`}
+              key={`${thresholdLayer.layerId}-${yConfig.forAccessor}`}
+              domainType={
+                yConfig.axisMode === 'bottom'
+                  ? AnnotationDomainTypes.XDomain
+                  : AnnotationDomainTypes.YDomain
+              }
+              dataValues={data.tables[thresholdLayer.layerId].rows.map((row) => ({
+                dataValue: row[yConfig.forAccessor],
+                header: columnToLabelMap[yConfig.forAccessor],
+                details: formatter.convert(row[yConfig.forAccessor]),
+              }))}
+              groupId={
+                yConfig.axisMode === 'bottom'
+                  ? undefined
+                  : yConfig.axisMode === 'right'
+                  ? 'right'
+                  : 'left'
+              }
+              style={{
+                line: {
+                  // TODO add line mode here
+                  strokeWidth: yConfig.lineWidth || 1,
+                  stroke: yConfig.color || '#f00',
+                  dash:
+                    yConfig.lineStyle === 'dashed'
+                      ? [(yConfig.lineWidth || 1) * 3, yConfig.lineWidth || 1]
+                      : yConfig.lineStyle === 'dotted'
+                      ? [yConfig.lineWidth || 1, yConfig.lineWidth || 1]
+                      : undefined,
+                  opacity: 1,
+                },
+              }}
+              marker={yConfig.icon ? <EuiIcon type={yConfig.icon} /> : undefined}
+            />
+          );
+        });
       })}
     </Chart>
   );

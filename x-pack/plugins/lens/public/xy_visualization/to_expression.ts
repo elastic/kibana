@@ -243,6 +243,9 @@ export const buildExpression = (
                                 forAccessor: [yConfig.forAccessor],
                                 axisMode: yConfig.axisMode ? [yConfig.axisMode] : [],
                                 color: yConfig.color ? [yConfig.color] : [],
+                                lineStyle: yConfig.lineStyle ? [yConfig.lineStyle] : [],
+                                lineWidth: yConfig.lineWidth ? [yConfig.lineWidth] : [],
+                                icon: yConfig.icon ? [yConfig.icon] : [],
                               },
                             },
                           ],
@@ -250,7 +253,6 @@ export const buildExpression = (
                       : [],
                     seriesType: [layer.seriesType],
                     layerType: [layer.layerType || 'data'],
-                    thresholdAxis: layer.thresholdAxis ? [layer.thresholdAxis] : [],
                     accessors: layer.accessors,
                     columnToLabel: [JSON.stringify(columnToLabel)],
                     ...(layer.palette

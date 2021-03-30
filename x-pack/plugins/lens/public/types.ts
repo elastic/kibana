@@ -592,7 +592,7 @@ export interface Visualization<T = unknown> {
   /** Track added layers in internal state */
   appendLayer?: (state: T, layerId: string, layerType?: string) => T;
   /* if set, allows adding of multiple types of layers */
-  getLayerTypes?: (state: T) => Array<{ name: string }>;
+  getLayerTypes?: (state: T) => Array<{ name: string; label: string }>;
 
   /**
    * For consistency across different visualizations, the dimension configuration UI is standardized
