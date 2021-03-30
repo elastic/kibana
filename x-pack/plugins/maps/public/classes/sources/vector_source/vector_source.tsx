@@ -6,9 +6,6 @@
  */
 
 // @ts-expect-error
-import * as topojson from 'topojson-client';
-import _ from 'lodash';
-import { i18n } from '@kbn/i18n';
 import { FeatureCollection, GeoJsonProperties } from 'geojson';
 import { Filter, TimeRange } from 'src/plugins/data/public';
 import { FORMAT_TYPE, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
@@ -23,6 +20,7 @@ import {
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
 import { DataRequest } from '../../util/data_request';
+import { fetchGeoJson } from '../../../util';
 
 export interface SourceTooltipConfig {
   tooltipContent: string | null;
@@ -94,37 +92,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     featureCollectionPath: string;
     fetchUrl: string;
   }) {
-    let fetchedJson;
-    try {
-      const response = await fetch(fetchUrl);
-      if (!response.ok) {
-        throw new Error('Request failed');
-      }
-      fetchedJson = await response.json();
-    } catch (e) {
-      throw new Error(
-        i18n.translate('xpack.maps.source.vetorSource.requestFailedErrorMessage', {
-          defaultMessage: `Unable to fetch vector shapes from url: {fetchUrl}`,
-          values: { fetchUrl },
-        })
-      );
-    }
-
-    if (format === FORMAT_TYPE.GEOJSON) {
-      return fetchedJson;
-    }
-
-    if (format === FORMAT_TYPE.TOPOJSON) {
-      const features = _.get(fetchedJson, `objects.${featureCollectionPath}`);
-      return topojson.feature(fetchedJson, features);
-    }
-
-    throw new Error(
-      i18n.translate('xpack.maps.source.vetorSource.formatErrorMessage', {
-        defaultMessage: `Unable to fetch vector shapes from url: {format}`,
-        values: { format },
-      })
-    );
+    return await fetchGeoJson(fetchUrl, format, featureCollectionPath);
   }
 
   getFieldNames(): string[] {

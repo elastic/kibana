@@ -6,7 +6,7 @@
  */
 
 import type { FileLayer } from '@elastic/ems-client';
-import { getEmsFileLayers } from '../util';
+import { getEmsFileLayers, fetchGeoJson } from '../util';
 
 export interface ISampleValuesConfig {
   emsLayerIds?: string[];
@@ -75,7 +75,10 @@ export async function suggestEMSTermJoinConfig(
 
     if (sampleValuesConfig.emsLayerIds && sampleValuesConfig.emsLayerIds.length) {
       matches.push(
-        ...(await suggestByLayerId(sampleValuesConfig.emsLayerIds, sampleValuesConfig.sampleValues))
+        ...(await suggestByEMSLayerIds(
+          sampleValuesConfig.emsLayerIds,
+          sampleValuesConfig.sampleValues
+        ))
       );
     }
   }
@@ -132,7 +135,7 @@ function suggestByValues(values: Array<string | number>): IEMSTermJoinConfig[] {
 
 function existsInEMS(emsJson: any, emsFieldId: string, sampleValue: string): boolean {
   for (let i = 0; i < emsJson.features.length; i++) {
-    const emsFieldValue = emsJson.features.properties[emsFieldId].toString();
+    const emsFieldValue = emsJson.features[i].properties[emsFieldId].toString();
     if (emsFieldValue.toString() === sampleValue) {
       return true;
     }
@@ -143,7 +146,7 @@ function existsInEMS(emsJson: any, emsFieldId: string, sampleValue: string): boo
 function matchesEmsField(emsJson: any, emsFieldId: string, sampleValues: Array<string | number>) {
   for (let j = 0; j < sampleValues.length; j++) {
     const sampleValue = sampleValues[j].toString();
-    if (!existsInEMS(json, emsFieldId, sampleValue)) {
+    if (!existsInEMS(emsJson, emsFieldId, sampleValue)) {
       return false;
     }
   }
@@ -155,20 +158,17 @@ async function getMatchesForEMSLayer(
   sampleValues: Array<string | number>
 ): Promise<IEMSTermJoinConfig[]> {
   const fileLayers: FileLayer[] = await getEmsFileLayers();
-  const fileLayer: FileLayer | undefined = fileLayers.find((fl) => fl.hasId(emsLayerId));
+  const emsFileLayer: FileLayer | undefined = fileLayers.find((fl) => fl.hasId(emsLayerId));
 
-  if (!fileLayer) {
+  if (!emsFileLayer) {
     return [];
   }
 
-  const emsFields = fileLayer.getFields();
-  const url = await fileLayer.getDefaultFormatUrl();
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error('Request failed');
-  }
+  const emsFields = emsFileLayer.getFields();
+  const url = emsFileLayer.getDefaultFormatUrl();
+
   try {
-    const emsJson = await response.json();
+    const emsJson = await fetchGeoJson(url, emsFileLayer.getDefaultFormatType(), 'data');
     const matches: IEMSTermJoinConfig[] = [];
     for (let f = 0; f < emsFields.length; f++) {
       if (matchesEmsField(emsJson, emsFields[f].id, sampleValues)) {
@@ -184,7 +184,7 @@ async function getMatchesForEMSLayer(
   }
 }
 
-async function suggestByLayerId(
+async function suggestByEMSLayerIds(
   emsLayerIds: string[],
   values: Array<string | number>
 ): Promise<IEMSTermJoinConfig[]> {
