@@ -194,6 +194,9 @@ export function registerAccountSourceReauthPrepareRoute({
         params: schema.object({
           id: schema.string(),
         }),
+        query: schema.object({
+          kibana_host: schema.string(),
+        }),
       },
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -538,6 +541,9 @@ export function registerOrgSourceReauthPrepareRoute({
       validate: {
         params: schema.object({
           id: schema.string(),
+        }),
+        query: schema.object({
+          kibana_host: schema.string(),
         }),
       },
     },
