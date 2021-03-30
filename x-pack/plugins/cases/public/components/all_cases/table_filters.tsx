@@ -10,12 +10,11 @@ import { isEqual } from 'lodash/fp';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiFilterGroup } from '@elastic/eui';
 
-import { CaseStatuses } from '../../../common';
+import { CaseStatuses, CaseStatusWithAllStatus, StatusAll } from '../../../common';
 import { FilterOptions } from '../../containers/types';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useGetReporters } from '../../containers/use_get_reporters';
 import { FilterPopover } from '../filter_popover';
-import { CaseStatusWithAllStatus, StatusAll } from '../status';
 import { StatusFilter } from './status_filter';
 
 import * as i18n from './translations';

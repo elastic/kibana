@@ -8,8 +8,8 @@
 import React from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 
-import { CaseStatuses } from '../../../common';
-import { statuses, CaseStatusWithAllStatus } from '../status';
+import { CaseStatuses, CaseStatusWithAllStatus } from '../../../common';
+import { statuses } from '../status';
 import * as i18n from './translations';
 import { Case } from '../../containers/types';
 

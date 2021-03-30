@@ -6,12 +6,7 @@
  */
 
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
-import { CaseStatuses } from '../../../common';
-
-export const StatusAll = 'all' as const;
-type StatusAllType = typeof StatusAll;
-
-export type CaseStatusWithAllStatus = CaseStatuses | StatusAllType;
+import { CaseStatuses, StatusAllType } from '../../../common';
 
 export type AllCaseStatus = Record<StatusAllType, { color: string; label: string }>;
 

@@ -10,8 +10,8 @@ import { noop } from 'lodash/fp';
 import { EuiBadge } from '@elastic/eui';
 
 import { allCaseStatus, statuses } from './config';
-import { CaseStatusWithAllStatus, StatusAll } from './types';
 import * as i18n from './translations';
+import { CaseStatusWithAllStatus, StatusAll } from '../../../common';
 
 interface Props {
   type: CaseStatusWithAllStatus;

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from '../../common/ui';
+export * from './types';
