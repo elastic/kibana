@@ -43,7 +43,7 @@ export const ProxyConnection: FunctionComponent<Props> = (props) => {
             helpText={
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.fieldCloudUrlHelpText"
-                defaultMessage="Elasticsearch endpoint URL of the remote deployment copied from the Cloud deployment page."
+                defaultMessage="The URL can contain protocol (https://) and port"
               />
             }
           >
