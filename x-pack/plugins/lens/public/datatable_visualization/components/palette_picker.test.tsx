@@ -13,7 +13,6 @@ import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import { applyPaletteParams, CustomizablePalette, defaultParams } from './palette_picker';
 import { CustomPaletteParams } from '../expression';
 import { ReactWrapper } from 'enzyme';
-import { exists } from 'fp-ts/lib/Option';
 
 describe('palette utilities', () => {
   const paletteRegistry = chartPluginMock.createPaletteRegistry();
