@@ -19,7 +19,6 @@ import { Overview } from './index';
 import { useIngestEnabledCheck } from '../../common/hooks/endpoint/ingest_enabled';
 import { useSourcererScope } from '../../common/containers/sourcerer';
 import { useFetchIndex } from '../../common/containers/source';
-import { mockLocation, routeData } from '../../cases/components/__mock__/router';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/containers/source');
@@ -59,7 +58,6 @@ const mockUseFetchIndex = useFetchIndex as jest.Mock;
 const mockUseMessagesStorage: jest.Mock = useMessagesStorage as jest.Mock<UseMessagesStorage>;
 describe('Overview', () => {
   beforeEach(() => {
-    jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
     mockUseFetchIndex.mockReturnValue([
       false,
       {
