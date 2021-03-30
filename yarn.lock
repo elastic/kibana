@@ -2618,11 +2618,19 @@
   version "0.0.0"
   uid ""
 
+"@kbn/cli-dev-mode@link:packages/kbn-cli-dev-mode":
+  version "0.0.0"
+  uid ""
+
 "@kbn/config-schema@link:packages/kbn-config-schema":
   version "0.0.0"
   uid ""
 
 "@kbn/config@link:packages/kbn-config":
+  version "0.0.0"
+  uid ""
+
+"@kbn/crypto@link:packages/kbn-crypto":
   version "0.0.0"
   uid ""
 
@@ -2687,6 +2695,10 @@
   uid ""
 
 "@kbn/pm@link:packages/kbn-pm":
+  version "0.0.0"
+  uid ""
+
+"@kbn/server-http-tools@link:packages/kbn-server-http-tools":
   version "0.0.0"
   uid ""
 
