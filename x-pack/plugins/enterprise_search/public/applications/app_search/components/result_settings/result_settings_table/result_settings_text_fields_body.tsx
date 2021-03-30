@@ -44,7 +44,9 @@ export const ResultSettingsTextFieldsBody: React.FC = () => {
     <EuiTableBody>
       {resultSettingsArray.map(([fieldName, fieldSettings]) => (
         <EuiTableRow key={fieldName}>
-          <EuiTableRowCell data-test-subj="ResultSettingFieldName">{fieldName}</EuiTableRowCell>
+          <EuiTableRowCell data-test-subj="ResultSettingFieldName">
+            <code>{fieldName}</code>
+          </EuiTableRowCell>
           <EuiTableRowCellCheckbox>
             <EuiCheckbox
               data-test-subj="ResultSettingRawCheckBox"
