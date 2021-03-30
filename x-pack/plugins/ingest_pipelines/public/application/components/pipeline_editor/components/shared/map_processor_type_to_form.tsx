@@ -63,7 +63,7 @@ interface FieldDescriptor {
   /**
    * Default
    */
-  getDefaultDescription: (processorOptions: Record<string, string>) => string | undefined;
+  getDefaultDescription: (processorOptions: Record<string, any>) => string | undefined;
 }
 
 type MapProcessorTypeToDescriptor = Record<string, FieldDescriptor>;
@@ -155,12 +155,12 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.csv', {
       defaultMessage: 'Extracts field values from CSV data.',
     }),
-    getDefaultDescription: ({ field, target_field: targetField }) =>
+    getDefaultDescription: ({ field, target_fields: targetFields }) =>
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.csv', {
-        defaultMessage: 'Extract CSV values from "{field}" to "{target_field}"',
+        defaultMessage: 'Extract CSV values from "{field}" to {target_fields}',
         values: {
           field,
-          target_field: targetField,
+          target_fields: targetFields.map((v) => `"${v}"`).join(', '),
         },
       }),
   },
@@ -195,15 +195,25 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
         values={{ value: <EuiCode>{'my-index-yyyy-MM-dd'}</EuiCode> }}
       />
     ),
-    getDefaultDescription: ({ field, index_name_prefix: indexNamePrefix = 'with no prefix' }) =>
-      i18n.translate('xpack.ingestPipelines.processors.defaultDescription.date_index_name', {
+    getDefaultDescription: ({ field, index_name_prefix: indexNamePrefix }) => {
+      const prefix = indexNamePrefix
+        ? i18n.translate(
+            'xpack.ingestPipelines.processors.defaultDescription.dateIndexName.indexNamePrefixDefault.prefixValueLabel',
+            { defaultMessage: 'with the prefix "{prefix}"', values: { prefix: indexNamePrefix } }
+          )
+        : i18n.translate(
+            'xpack.ingestPipelines.processors.defaultDescription.dateIndexName.indexNamePrefixDefault.noPrefixValueLabel',
+            { defaultMessage: 'with no prefix' }
+          );
+      return i18n.translate('xpack.ingestPipelines.processors.defaultDescription.date_index_name', {
         defaultMessage:
-          'Sets the target index name based on timestamp value in "{field}", with the prefix "{index_name_prefix}"',
+          'Sets the target index name based on timestamp value in "{field}", {prefix}',
         values: {
           field,
-          index_name_prefix: indexNamePrefix,
+          prefix,
         },
-      }),
+      });
+    },
   },
   dissect: {
     FieldsComponent: Dissect,
@@ -321,14 +331,18 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.foreach', {
       defaultMessage: 'Applies an ingest processor to each value in an array.',
     }),
-    getDefaultDescription: ({ field, processor }) =>
-      i18n.translate('xpack.ingestPipelines.processors.defaultDescription.foreach', {
-        defaultMessage: 'For each object in "{field}", run the "{processorName}" processor.',
-        values: {
-          field,
-          processorName: ((processor as unknown) as { name: string }).name,
-        },
-      }),
+    getDefaultDescription: ({ field, processor }) => {
+      const processorName = Object.keys(processor ?? {})[0];
+      return processorName
+        ? i18n.translate('xpack.ingestPipelines.processors.defaultDescription.foreach', {
+            defaultMessage: 'For each object in "{field}", run the "{processorName}" processor.',
+            values: {
+              field,
+              processorName,
+            },
+          })
+        : undefined;
+    },
   },
   geoip: {
     FieldsComponent: GeoIP,
@@ -427,11 +441,14 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
       defaultMessage:
         'Uses a pre-trained data frame analytics model to infer against incoming data.',
     }),
-    getDefaultDescription: ({ field, target_field: targetField = field }) =>
+    getDefaultDescription: ({
+      model_id: modelId,
+      target_field: targetField = 'ml.inference.<processor_tag>',
+    }) =>
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.inference', {
-        defaultMessage: 'Renames the "{field}" to "{target_field}"',
+        defaultMessage: 'Runs the model "{modelId}" and stores result in "{target_field}"',
         values: {
-          field,
+          modelId,
           target_field: targetField,
         },
       }),
@@ -540,9 +557,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.remove', {
         defaultMessage: 'Removes field(s) "{field}"',
         values: {
-          field: Array.isArray(field as unknown)
-            ? ((field as unknown) as string[]).join(',')
-            : field,
+          field: Array.isArray(field) ? field.map((v) => `"${v}"`).join(', ') : field,
         },
       }),
   },
@@ -622,10 +637,19 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     getDefaultDescription: ({ field, target_field: targetField = field, order = 'asc' }) =>
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.sort', {
         defaultMessage:
-          'Sorts elements in the array "{field}" by order "{order}" to "{target_field}"',
+          'Sorts elements in the array "{field}" in {order} order to "{target_field}"',
         values: {
           field,
-          order,
+          order:
+            order === 'asc'
+              ? i18n.translate(
+                  'xpack.ingestPipelines.processors.defaultDescription.sort.orderAscendingLabel',
+                  { defaultMessage: 'ascending' }
+                )
+              : i18n.translate(
+                  'xpack.ingestPipelines.processors.defaultDescription.sort.orderDescendingLabel',
+                  { defaultMessage: 'descending' }
+                ),
           target_field: targetField,
         },
       }),
@@ -700,25 +724,6 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
         },
       }),
   },
-  user_agent: {
-    FieldsComponent: UserAgent,
-    docLinkPath: '/user-agent-processor.html',
-    label: i18n.translate('xpack.ingestPipelines.processors.label.userAgent', {
-      defaultMessage: 'User agent',
-    }),
-    typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.userAgent', {
-      defaultMessage: "Extracts values from a browser's user agent string.",
-    }),
-    getDefaultDescription: ({ field, target_field: targetField = 'user_agent' }) =>
-      i18n.translate('xpack.ingestPipelines.processors.defaultDescription.user_agent', {
-        defaultMessage:
-          'Extracts the user agent from "{field}" and stores the results in "{target_field}"',
-        values: {
-          field,
-          target_field: targetField,
-        },
-      }),
-  },
   uri_parts: {
     FieldsComponent: UriParts,
     docLinkPath: '/uri-parts-processor.html',
@@ -733,6 +738,25 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.uri_parts', {
         defaultMessage:
           'Splits up the URL string in "{field}" and stores the result in "{target_field}"',
+        values: {
+          field,
+          target_field: targetField,
+        },
+      }),
+  },
+  user_agent: {
+    FieldsComponent: UserAgent,
+    docLinkPath: '/user-agent-processor.html',
+    label: i18n.translate('xpack.ingestPipelines.processors.label.userAgent', {
+      defaultMessage: 'User agent',
+    }),
+    typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.userAgent', {
+      defaultMessage: "Extracts values from a browser's user agent string.",
+    }),
+    getDefaultDescription: ({ field, target_field: targetField = 'user_agent' }) =>
+      i18n.translate('xpack.ingestPipelines.processors.defaultDescription.user_agent', {
+        defaultMessage:
+          'Extracts the user agent from "{field}" and stores the results in "{target_field}"',
         values: {
           field,
           target_field: targetField,
