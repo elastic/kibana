@@ -23,11 +23,13 @@ import {
   CaseStatuses,
   SubCasesResponse,
   CasesResponse,
+  CasesFindResponse,
 } from '../../../../plugins/cases/common/api';
-import { postCollectionReq, postCommentGenAlertReq } from './mock';
+import { getPostCaseRequest, postCollectionReq, postCommentGenAlertReq } from './mock';
 import { getSubCasesUrl } from '../../../../plugins/cases/common/api/helpers';
 import { ContextTypeGeneratedAlertType } from '../../../../plugins/cases/server/connectors';
 import { SignalHit } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
+import { User } from './authentication/types';
 
 function toArray<T>(input: T | T[]): T[] {
   if (Array.isArray(input)) {
@@ -410,4 +412,59 @@ export const deleteConfiguration = async (es: KibanaClient): Promise<void> => {
 
 export const getSpaceUrlPrefix = (spaceId: string) => {
   return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
+};
+
+export const createCaseAsUser = async ({
+  supertestWithoutAuth,
+  user,
+  space,
+  scope,
+  expectedHttpCode = 200,
+}: {
+  supertestWithoutAuth: st.SuperTest<supertestAsPromised.Test>;
+  user: User;
+  space: string;
+  scope?: string;
+  expectedHttpCode?: number;
+}): Promise<CaseResponse> => {
+  const { body: theCase } = await supertestWithoutAuth
+    .post(`${getSpaceUrlPrefix(space)}${CASES_URL}`)
+    .auth(user.username, user.password)
+    .set('kbn-xsrf', 'true')
+    .send(getPostCaseRequest({ scope }))
+    .expect(expectedHttpCode);
+
+  return theCase;
+};
+
+export const findCasesAsUser = async ({
+  supertestWithoutAuth,
+  user,
+  space,
+  expectedHttpCode = 200,
+  appendToUrl = '',
+}: {
+  supertestWithoutAuth: st.SuperTest<supertestAsPromised.Test>;
+  user: User;
+  space: string;
+  expectedHttpCode?: number;
+  appendToUrl?: string;
+}): Promise<CasesFindResponse> => {
+  const { body: res } = await supertestWithoutAuth
+    .get(`${getSpaceUrlPrefix(space)}${CASES_URL}/_find?sortOrder=asc&${appendToUrl}`)
+    .auth(user.username, user.password)
+    .set('kbn-xsrf', 'true')
+    .send({})
+    .expect(expectedHttpCode);
+
+  return res;
+};
+
+export const expectCasesToBeValidScoped = (
+  cases: CaseResponse[],
+  numberOfExpectedCases: number,
+  scopes: string[]
+) => {
+  expect(cases.length).to.eql(numberOfExpectedCases);
+  cases.forEach((theCase) => expect(scopes.includes(theCase.scope)).to.be(true));
 };

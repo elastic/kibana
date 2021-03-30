@@ -17,7 +17,7 @@ import {
   postCaseResp,
   removeServerGeneratedPropertiesFromCase,
 } from '../../../../common/lib/mock';
-import { deleteCases, getSpaceUrlPrefix } from '../../../../common/lib/utils';
+import { createCaseAsUser, deleteCases, getSpaceUrlPrefix } from '../../../../common/lib/utils';
 import {
   secOnly,
   secOnlyRead,
@@ -102,45 +102,47 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('rbac', () => {
       it('User: security solution only - should create a case', async () => {
-        const { body: theCase } = await supertestWithoutAuth
-          .post(`${getSpaceUrlPrefix('space1')}${CASES_URL}`)
-          .auth(secOnly.username, secOnly.password)
-          .set('kbn-xsrf', 'true')
-          .send(getPostCaseRequest())
-          .expect(200);
-
+        const theCase = await createCaseAsUser({
+          supertestWithoutAuth,
+          user: secOnly,
+          space: 'space1',
+          scope: 'securitySolutionFixture',
+        });
         expect(theCase.scope).to.eql('securitySolutionFixture');
       });
 
       it('User: security solution only - should NOT create a case of different scope', async () => {
-        await supertestWithoutAuth
-          .post(`${getSpaceUrlPrefix('space1')}${CASES_URL}`)
-          .auth(secOnly.username, secOnly.password)
-          .set('kbn-xsrf', 'true')
-          .send({ ...getPostCaseRequest({ scope: 'observabilityFixture' }) })
-          .expect(403);
+        await createCaseAsUser({
+          supertestWithoutAuth,
+          user: secOnly,
+          space: 'space1',
+          scope: 'observabilityFixture',
+          expectedHttpCode: 403,
+        });
       });
 
       for (const user of [globalRead, secOnlyRead, obsOnlyRead, obsSecRead, noKibanaPrivileges]) {
         it(`User ${
           user.username
         } with role(s) ${user.roles.join()} - should NOT create a case`, async () => {
-          await supertestWithoutAuth
-            .post(`${getSpaceUrlPrefix('space1')}${CASES_URL}`)
-            .auth(user.username, user.password)
-            .set('kbn-xsrf', 'true')
-            .send(getPostCaseRequest())
-            .expect(403);
+          await createCaseAsUser({
+            supertestWithoutAuth,
+            user,
+            space: 'space1',
+            scope: 'securitySolutionFixture',
+            expectedHttpCode: 403,
+          });
         });
       }
 
       it('should NOT create a case in a space with no permissions', async () => {
-        await supertestWithoutAuth
-          .post(`${getSpaceUrlPrefix('space2')}${CASES_URL}`)
-          .auth(secOnly.username, secOnly.password)
-          .set('kbn-xsrf', 'true')
-          .send(getPostCaseRequest())
-          .expect(403);
+        await createCaseAsUser({
+          supertestWithoutAuth,
+          user: secOnly,
+          space: 'space2',
+          scope: 'securitySolutionFixture',
+          expectedHttpCode: 403,
+        });
       });
     });
   });

@@ -14,12 +14,7 @@ import {
   CASES_URL,
   SUB_CASES_PATCH_DEL_URL,
 } from '../../../../../../plugins/cases/common/constants';
-import {
-  postCaseReq,
-  postCommentUserReq,
-  findCasesResp,
-  getPostCaseRequest,
-} from '../../../../common/lib/mock';
+import { postCaseReq, postCommentUserReq, findCasesResp } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
   createSubCase,
@@ -27,7 +22,9 @@ import {
   CreateSubCaseResp,
   createCaseAction,
   deleteCaseAction,
-  getSpaceUrlPrefix,
+  createCaseAsUser,
+  expectCasesToBeValidScoped,
+  findCasesAsUser,
 } from '../../../../common/lib/utils';
 import {
   CasesFindResponse,
@@ -690,24 +687,27 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('rbac', () => {
-      // TODO: create util function for case creation. Example: createCaseAsUser(supertestWithoutAuth, user, space, scope)
-      // TODO: create validateCaseResponse(cases, scopes, numberOfExpectedCases)
+      afterEach(async () => {
+        await deleteAllCaseItems(es);
+      });
+
       it('should return the correct cases', async () => {
         // Create case owned by the security solution user
-        await supertestWithoutAuth
-          .post(`${getSpaceUrlPrefix('space1')}${CASES_URL}`)
-          .auth(secOnly.username, secOnly.password)
-          .set('kbn-xsrf', 'true')
-          .send(getPostCaseRequest())
-          .expect(200);
+
+        await createCaseAsUser({
+          supertestWithoutAuth,
+          user: secOnly,
+          space: 'space1',
+          scope: 'securitySolutionFixture',
+        });
 
         // Create case owned by the observability user
-        await supertestWithoutAuth
-          .post(`${getSpaceUrlPrefix('space1')}${CASES_URL}`)
-          .auth(obsOnly.username, obsOnly.password)
-          .set('kbn-xsrf', 'true')
-          .send(getPostCaseRequest({ scope: 'observabilityFixture' }))
-          .expect(200);
+        await createCaseAsUser({
+          supertestWithoutAuth,
+          user: obsOnly,
+          space: 'space1',
+          scope: 'observabilityFixture',
+        });
 
         for (const scenario of [
           {
@@ -728,17 +728,13 @@ export default ({ getService }: FtrProviderContext): void => {
             scopes: ['securitySolutionFixture', 'observabilityFixture'],
           },
         ]) {
-          const { body } = await supertestWithoutAuth
-            .get(`${getSpaceUrlPrefix('space1')}${CASES_URL}/_find?sortOrder=asc`)
-            .auth(scenario.user.username, scenario.user.password)
-            .set('kbn-xsrf', 'true')
-            .send()
-            .expect(200);
-          const res = body as CasesFindResponse;
-          expect(res.total).to.eql(scenario.numberOfExpectedCases);
-          res.cases.forEach((theCase) =>
-            expect(scenario.scopes.includes(theCase.scope)).to.be(true)
-          );
+          const res = await findCasesAsUser({
+            supertestWithoutAuth,
+            user: scenario.user,
+            space: 'space1',
+          });
+
+          expectCasesToBeValidScoped(res.cases, scenario.numberOfExpectedCases, scenario.scopes);
         }
       });
 
@@ -750,54 +746,48 @@ export default ({ getService }: FtrProviderContext): void => {
           scenario.space
         } - should NOT read a case`, async () => {
           // super user creates a case at the appropriate space
-          await supertestWithoutAuth
-            .post(`${getSpaceUrlPrefix(scenario.space)}${CASES_URL}`)
-            .auth(superUser.username, superUser.password)
-            .set('kbn-xsrf', 'true')
-            .send(getPostCaseRequest())
-            .expect(200);
+          await createCaseAsUser({
+            supertestWithoutAuth,
+            user: superUser,
+            space: scenario.space,
+            scope: 'securitySolutionFixture',
+          });
 
           // user should not be able to read cases at the appropriate space
-          await supertestWithoutAuth
-            .get(`${getSpaceUrlPrefix(scenario.space)}${CASES_URL}/_find?sortOrder=asc`)
-            .auth(scenario.user.username, scenario.user.password)
-            .set('kbn-xsrf', 'true')
-            .send(getPostCaseRequest())
-            .expect(403);
+          await findCasesAsUser({
+            supertestWithoutAuth,
+            user: scenario.user,
+            space: scenario.space,
+            expectedHttpCode: 403,
+          });
         });
       }
 
       it('should return the correct cases when trying to exploit RBAC through the search field', async () => {
         // super user creates a case with scope securitySolutionFixture
-        await supertestWithoutAuth
-          .post(`${getSpaceUrlPrefix('space1')}${CASES_URL}`)
-          .auth(superUser.username, superUser.password)
-          .set('kbn-xsrf', 'true')
-          .send(getPostCaseRequest())
-          .expect(200);
+        await createCaseAsUser({
+          supertestWithoutAuth,
+          user: superUser,
+          space: 'space1',
+          scope: 'securitySolutionFixture',
+        });
 
         // super user creates a case with scope observabilityFixture
-        await supertestWithoutAuth
-          .post(`${getSpaceUrlPrefix('space1')}${CASES_URL}`)
-          .auth(superUser.username, superUser.password)
-          .set('kbn-xsrf', 'true')
-          .send(getPostCaseRequest({ scope: 'observabilityFixture' }))
-          .expect(200);
+        await createCaseAsUser({
+          supertestWithoutAuth,
+          user: superUser,
+          space: 'space1',
+          scope: 'observabilityFixture',
+        });
 
-        const { body } = await supertestWithoutAuth
-          .get(
-            `${getSpaceUrlPrefix(
-              'space1'
-            )}${CASES_URL}/_find?sortOrder=asc&search=securitySolutionFixture+observabilityFixture&searchFields[0]=scope`
-          )
-          .auth(secOnly.username, secOnly.password)
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(200);
+        const res = await findCasesAsUser({
+          supertestWithoutAuth,
+          user: secOnly,
+          space: 'space1',
+          appendToUrl: 'search=securitySolutionFixture+observabilityFixture&searchFields[0]=scope',
+        });
 
-        const res = body as CasesFindResponse;
-        expect(res.total).to.eql(1);
-        res.cases.forEach((theCase) => expect(theCase.scope).to.be('securitySolutionFixture'));
+        expectCasesToBeValidScoped(res.cases, 1, ['securitySolutionFixture']);
       });
     });
   });
