@@ -58,7 +58,8 @@ Secrets defines sensitive information for the connector type.
 `password`:: A string that corresponds to *Password*. Should be stored in the <<creating-keystore, {kib} keystore>>. Required if `hasAuth` is set to `true`.
 
 [float]
-==== Define connector in Stack Management
+[[email-stack-management]]
+=== Define connector in Stack Management
 
 Define email connector properties.
 
