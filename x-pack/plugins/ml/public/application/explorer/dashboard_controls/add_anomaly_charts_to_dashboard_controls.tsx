@@ -32,7 +32,7 @@ export interface AddToDashboardControlProps {
   selectedCells?: AppStateSelectedCells;
   bounds?: TimeRangeBounds;
   interval?: number;
-  onClose: (callback?: () => Promise<any>) => void;
+  onClose: (callback?: () => Promise<void>) => void;
 }
 
 /**

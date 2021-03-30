@@ -17,7 +17,7 @@ export const useAddToDashboardActions = ({
   getPanelsData,
   selectedDashboards,
 }: {
-  onClose: (callback?: () => Promise<any>) => void;
+  onClose: (callback?: () => Promise<void>) => void;
   getPanelsData: (
     selectedDashboards: DashboardItem[]
   ) => Promise<Array<Pick<SavedDashboardPanel, 'title' | 'type' | 'embeddableConfig'>>>;

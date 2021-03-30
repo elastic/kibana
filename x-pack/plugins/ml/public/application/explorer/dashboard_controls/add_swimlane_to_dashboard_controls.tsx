@@ -37,7 +37,7 @@ function getDefaultEmbeddablePanelConfig(jobIds: JobId[]) {
 interface AddToDashboardControlProps {
   jobIds: JobId[];
   viewBy: string;
-  onClose: (callback?: () => Promise<any>) => void;
+  onClose: (callback?: () => Promise<void>) => void;
 }
 
 /**

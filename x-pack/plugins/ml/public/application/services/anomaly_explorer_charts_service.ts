@@ -7,8 +7,8 @@
 
 import { each, find, get, map, reduce, sortBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { from, of } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { map as mapObservable } from 'rxjs/operators';
 import { RecordForInfluencer } from './results_service/results_service';
 import {
   isMappableJob,
@@ -377,11 +377,10 @@ export class AnomalyExplorerChartsService {
       // Getting only necessary job config and datafeed config without the stats
       jobIds.map((jobId) => this.mlApiServices.jobs.jobForCloning(jobId))
     );
-    const combinedJobs = combinedResults
+    return combinedResults
       .filter(isDefined)
       .filter((r) => r.job !== undefined && r.datafeed !== undefined)
       .map(({ job, datafeed }) => ({ ...job, datafeed_config: datafeed } as CombinedJob));
-    return combinedJobs;
   }
 
   public loadDataForCharts$(
@@ -391,7 +390,7 @@ export class AnomalyExplorerChartsService {
     influencers: EntityField[] = [],
     selectedCells: AppStateSelectedCells | undefined,
     influencersFilterQuery: InfluencersFilterQuery
-  ) {
+  ): Observable<RecordForInfluencer[]> {
     if (
       selectedCells === undefined &&
       influencers.length === 0 &&
@@ -400,8 +399,8 @@ export class AnomalyExplorerChartsService {
       of([]);
     }
 
-    return from(
-      this.mlResultsService.getRecordsForInfluencer(
+    return this.mlResultsService
+      .getRecordsForInfluencer$(
         jobIds,
         influencers,
         0,
@@ -410,18 +409,18 @@ export class AnomalyExplorerChartsService {
         500,
         influencersFilterQuery
       )
-    ).pipe(
-      switchMap((resp) => {
-        if (
-          (selectedCells !== undefined && Object.keys(selectedCells).length > 0) ||
-          influencersFilterQuery !== undefined
-        ) {
-          return of(resp.records);
-        }
+      .pipe(
+        mapObservable((resp): RecordForInfluencer[] => {
+          if (
+            (selectedCells !== undefined && Object.keys(selectedCells).length > 0) ||
+            influencersFilterQuery !== undefined
+          ) {
+            return resp.records;
+          }
 
-        return of([]);
-      })
-    );
+          return [] as RecordForInfluencer[];
+        })
+      );
   }
 
   public async getAnomalyData(

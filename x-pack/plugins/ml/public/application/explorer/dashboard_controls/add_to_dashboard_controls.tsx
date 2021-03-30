@@ -39,7 +39,7 @@ export const columns: EuiTableProps['columns'] = [
 ];
 
 interface AddToDashboardControlProps extends ReturnType<typeof useDashboardTable> {
-  onClose: (callback?: () => Promise<any>) => void;
+  onClose: (callback?: () => Promise<void>) => void;
   addToDashboardAndEditCallback: () => Promise<void>;
   addToDashboardCallback: () => Promise<void>;
   title: React.ReactNode;

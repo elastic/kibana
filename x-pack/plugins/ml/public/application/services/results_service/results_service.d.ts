@@ -54,15 +54,6 @@ export function resultsServiceProvider(
     influencersFilterQuery: InfluencersFilterQuery
   ): Promise<any>;
   getRecordInfluencers(): Promise<any>;
-  getRecordsForInfluencer(
-    jobIds: string[],
-    influencers: EntityField[],
-    threshold: number,
-    earliestMs: number,
-    latestMs: number,
-    maxResults: number,
-    influencersFilterQuery: InfluencersFilterQuery
-  ): Promise<{ records: RecordForInfluencer[]; success: boolean }>;
   getRecordsForDetector(): Promise<any>;
   getRecords(): Promise<any>;
   getEventRateData(
