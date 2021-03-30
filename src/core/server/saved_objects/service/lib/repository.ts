@@ -534,6 +534,7 @@ export class SavedObjectsRepository {
               id: requestedId,
               type: rawMigratedDoc._source.type,
               error: getBulkOperationError(error, rawMigratedDoc._source.type, requestedId),
+              rawResponse: { error, ...rawResponse },
             };
           }
 
