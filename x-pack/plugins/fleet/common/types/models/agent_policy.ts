@@ -60,12 +60,25 @@ export interface FullAgentPolicyInput {
   [key: string]: any;
 }
 
+export interface FullAgentPolicyOutputPermissions {
+  [role: string]: {
+    cluster: string[];
+    indices: Array<{
+      names: string[];
+      privileges: string[];
+    }>;
+  };
+}
+
 export interface FullAgentPolicy {
   id: string;
   outputs: {
     [key: string]: Pick<Output, 'type' | 'hosts' | 'ca_sha256' | 'api_key'> & {
       [key: string]: any;
     };
+  };
+  output_permissions?: {
+    [output: string]: FullAgentPolicyOutputPermissions;
   };
   fleet?:
     | {
