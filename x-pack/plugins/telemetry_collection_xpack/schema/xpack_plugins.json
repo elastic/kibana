@@ -1838,19 +1838,34 @@
         "agents": {
           "properties": {
             "total_enrolled": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled agents, in any state"
+              }
             },
             "healthy": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled agents in a healthy state"
+              }
             },
             "unhealthy": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled agents in an unhealthy state"
+              }
             },
             "offline": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled agents currently offline"
+              }
             },
             "total_all_statuses": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The total number of agents in any state, both enrolled and inactive"
+              }
             }
           }
         },
