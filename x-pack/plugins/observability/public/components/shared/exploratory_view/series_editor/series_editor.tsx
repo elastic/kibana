@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import { SeriesFilter } from './columns/series_filter';
 import { ActionsCol } from './columns/actions_col';
@@ -23,7 +24,9 @@ export function SeriesEditor() {
 
   const columns = [
     {
-      name: 'Name',
+      name: i18n.translate('xpack.observability.expView.seriesEditor.name', {
+        defaultMessage: 'Name',
+      }),
       field: 'id',
       width: '15%',
       render: (val: string) => (
@@ -36,7 +39,9 @@ export function SeriesEditor() {
     ...(firstSeriesId !== NEW_SERIES_KEY
       ? [
           {
-            name: 'Filter',
+            name: i18n.translate('xpack.observability.expView.seriesEditor.filters', {
+              defaultMessage: 'Filters',
+            }),
             field: 'defaultFilters',
             width: '25%',
             render: (defaultFilters: string[], series: DataSeries) => (
@@ -44,7 +49,9 @@ export function SeriesEditor() {
             ),
           },
           {
-            name: 'Breakdowns',
+            name: i18n.translate('xpack.observability.expView.seriesEditor.breakdowns', {
+              defaultMessage: 'Breakdowns',
+            }),
             field: 'breakdowns',
             width: '15%',
             render: (val: string[], item: DataSeries) => (
@@ -61,7 +68,13 @@ export function SeriesEditor() {
         ]
       : []),
     {
-      name: <div>Time</div>,
+      name: (
+        <div>
+          {i18n.translate('xpack.observability.expView.seriesEditor.time', {
+            defaultMessage: 'Time',
+          })}
+        </div>
+      ),
       width: '20%',
       field: 'id',
       align: 'right' as const,
@@ -71,7 +84,9 @@ export function SeriesEditor() {
     ...(firstSeriesId !== NEW_SERIES_KEY
       ? [
           {
-            name: 'Actions',
+            name: i18n.translate('xpack.observability.expView.seriesEditor.actions', {
+              defaultMessage: 'Actions',
+            }),
             align: 'center' as const,
             width: '5%',
             field: 'id',
@@ -108,7 +123,9 @@ export function SeriesEditor() {
         rowHeader="firstName"
         columns={columns}
         rowProps={() => (firstSeriesId === NEW_SERIES_KEY ? {} : { height: 100 })}
-        noItemsMessage={'No series found, please add a series.'}
+        noItemsMessage={i18n.translate('xpack.observability.expView.seriesEditor.notFound', {
+          defaultMessage: 'No series found, please add a series.',
+        })}
         cellProps={{
           style: {
             verticalAlign: 'top',

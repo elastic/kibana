@@ -7,6 +7,7 @@
 
 import React, { useState } from 'react';
 
+import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiBasicTable, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { AppDataType, ReportViewTypeId, ReportViewTypes, SeriesUrl } from '../types';
@@ -64,19 +65,25 @@ export function SeriesBuilder() {
 
   const columns = [
     {
-      name: 'DataType',
+      name: i18n.translate('xpack.observability.expView.seriesBuilder.dataType', {
+        defaultMessage: 'Data Type',
+      }),
       width: '20%',
       render: (val: string) => <DataTypesCol />,
     },
     {
-      name: 'Report',
+      name: i18n.translate('xpack.observability.expView.seriesBuilder.report', {
+        defaultMessage: 'Report',
+      }),
       width: '20%',
       render: (val: string) => (
         <ReportTypesCol reportTypes={dataType ? ReportTypes[dataType] : []} />
       ),
     },
     {
-      name: 'Definition',
+      name: i18n.translate('xpack.observability.expView.seriesBuilder.definition', {
+        defaultMessage: 'Definition',
+      }),
       width: '30%',
       render: (val: string) =>
         reportType && indexPattern ? (
@@ -84,13 +91,17 @@ export function SeriesBuilder() {
         ) : null,
     },
     {
-      name: 'Filters',
+      name: i18n.translate('xpack.observability.expView.seriesBuilder.filters', {
+        defaultMessage: 'Filters',
+      }),
       width: '25%',
       render: (val: string) =>
         reportType && indexPattern ? <ReportFilters dataViewSeries={getDataViewSeries()} /> : null,
     },
     {
-      name: 'Breakdowns',
+      name: i18n.translate('xpack.observability.expView.seriesBuilder.breakdown', {
+        defaultMessage: 'Breakdowns',
+      }),
       width: '25%',
       field: 'id',
       render: (val: string) =>
@@ -138,19 +149,23 @@ export function SeriesBuilder() {
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiButton fill iconType="plus" color="primary" onClick={addSeries}>
-              Add
+              {i18n.translate('xpack.observability.expView.seriesBuilder.add', {
+                defaultMessage: 'Add',
+              })}
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
               iconType="cross"
-              color="danger"
+              color="text"
               onClick={() => {
                 removeSeries(NEW_SERIES_KEY);
                 setIsFlyoutVisible(false);
               }}
             >
-              Cancel
+              {i18n.translate('xpack.observability.expView.seriesBuilder.cancel', {
+                defaultMessage: 'Cancel',
+              })}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -169,7 +184,9 @@ export function SeriesBuilder() {
             onClick={() => setIsFlyoutVisible((prevState) => !prevState)}
             disabled={allSeriesIds.length > 0}
           >
-            {'Add series'}
+            {i18n.translate('xpack.observability.expView.seriesBuilder.addSeries', {
+              defaultMessage: 'Add series',
+            })}
           </EuiButton>
           <EuiSpacer />
         </>

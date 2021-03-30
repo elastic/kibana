@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { TypedLensByValueInput } from '../../../../../../lens/public';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
@@ -29,7 +30,12 @@ export function ExploratoryViewHeader({ seriesId, lensAttributes }: Props) {
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
       <EuiFlexItem>
         <EuiText>
-          <h2>{DataViewLabels[series.reportType] ?? 'Exploratory view'}</h2>
+          <h2>
+            {DataViewLabels[series.reportType] ??
+              i18n.translate('xpack.observability.expView.heading.label', {
+                defaultMessage: 'Exploratory view',
+              })}
+          </h2>
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -47,7 +53,9 @@ export function ExploratoryViewHeader({ seriesId, lensAttributes }: Props) {
             }
           }}
         >
-          Open in Lens
+          {i18n.translate('xpack.observability.expView.heading.openInLens', {
+            defaultMessage: 'Open in Lens',
+          })}
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>

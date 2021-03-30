@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiButtonGroup, EuiPopover } from '@elastic/eui';
 import { useUrlStorage } from '../../hooks/use_url_strorage';
 import { OperationType } from '../../../../../../../lens/public';
@@ -13,19 +14,27 @@ import { OperationType } from '../../../../../../../lens/public';
 const toggleButtons = [
   {
     id: `avg`,
-    label: 'Average',
+    label: i18n.translate('xpack.observability.expView.metricsSelect.average', {
+      defaultMessage: 'Average',
+    }),
   },
   {
     id: `median`,
-    label: 'Median',
+    label: i18n.translate('xpack.observability.expView.metricsSelect.median', {
+      defaultMessage: 'Median',
+    }),
   },
   {
     id: `95th`,
-    label: '95th Percentile',
+    label: i18n.translate('xpack.observability.expView.metricsSelect.9thPercentile', {
+      defaultMessage: '95th Percentile',
+    }),
   },
   {
     id: `99th`,
-    label: '99th Percentile',
+    label: i18n.translate('xpack.observability.expView.metricsSelect.99thPercentile', {
+      defaultMessage: '99th Percentile',
+    }),
   },
 ];
 

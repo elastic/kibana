@@ -40,7 +40,9 @@ export function SeriesChartTypes({
       onChange={onChange}
       value={seriesType}
       excludeChartTypes={['bar_percentage_stacked']}
-      label={'Chart type'}
+      label={i18n.translate('xpack.observability.expView.chartTypes.label', {
+        defaultMessage: 'Chart type',
+      })}
     />
   );
 }

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { useState, Fragment } from 'react';
 import {
   EuiButton,
@@ -58,7 +59,9 @@ export function SeriesFilter({ series, isNew, seriesId, defaultFilters = [] }: P
       isDisabled={disabled}
       size="s"
     >
-      Add filter
+      {i18n.translate('xpack.observability.expView.seriesEditor.addFilter', {
+        defaultMessage: 'Add filter',
+      })}
     </EuiButtonEmpty>
   );
 
@@ -125,7 +128,9 @@ export function SeriesFilter({ series, isNew, seriesId, defaultFilters = [] }: P
             isDisabled={disabled}
             size="s"
           >
-            Clear filters
+            {i18n.translate('xpack.observability.expView.seriesEditor.clearFilter', {
+              defaultMessage: 'Clear filters',
+            })}
           </EuiButtonEmpty>
         </EuiFlexItem>
       )}
