@@ -5,6 +5,10 @@
 # The #CC# prefix delineates Code Coverage,
 # used for the 'team' designator within Kibana Stats
 
+# Tech Leads
+/x-pack/plugins/* @elastic/kibana-tech-leads
+/src/plugins/* @elastic/kibana-tech-leads
+
 # App
 /x-pack/plugins/discover_enhanced/ @elastic/kibana-app
 /x-pack/plugins/lens/ @elastic/kibana-app
