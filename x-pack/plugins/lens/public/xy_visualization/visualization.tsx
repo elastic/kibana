@@ -250,7 +250,11 @@ export const getXyVisualization = ({
             {
               groupId: 'threshold',
               groupLabel: 'Threshold value',
-              accessors: layer.accessors.map((a) => ({ columnId: a })),
+              accessors: layer.accessors.map((a) => ({
+                columnId: a,
+                color: layer.yConfig?.find((yConfig) => yConfig.forAccessor === a)?.color,
+                triggerIcon: 'color',
+              })),
               filterOperations: isNumericMetric,
               supportsMoreColumns: true,
               required: false,
