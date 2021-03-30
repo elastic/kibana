@@ -92,18 +92,18 @@ export const IndexPattern = ({
 
   const timeRangeOptions = [
     {
-      label: i18n.translate('visTypeTimeseries.indexPattern.timeRange.lastValue', {
-        defaultMessage: 'Last value',
-      }),
-      value: TIME_RANGE_DATA_MODES.LAST_VALUE,
-      disabled: !isTimerangeModeEnabled(TIME_RANGE_DATA_MODES.LAST_VALUE, uiRestrictions),
-    },
-    {
       label: i18n.translate('visTypeTimeseries.indexPattern.timeRange.entireTimeRange', {
         defaultMessage: 'Entire time range',
       }),
       value: TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE,
       disabled: !isTimerangeModeEnabled(TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE, uiRestrictions),
+    },
+    {
+      label: i18n.translate('visTypeTimeseries.indexPattern.timeRange.lastValue', {
+        defaultMessage: 'Last value',
+      }),
+      value: TIME_RANGE_DATA_MODES.LAST_VALUE,
+      disabled: !isTimerangeModeEnabled(TIME_RANGE_DATA_MODES.LAST_VALUE, uiRestrictions),
     },
   ];
 
@@ -141,6 +141,7 @@ export const IndexPattern = ({
               })}
             >
               <EuiComboBox
+                data-test-subj="dataTimeRangeMode"
                 isClearable={false}
                 placeholder={i18n.translate(
                   'visTypeTimeseries.indexPattern.timeRange.selectTimeRange',

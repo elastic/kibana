@@ -8,9 +8,9 @@
 import React from 'react';
 import { EuiButtonIcon, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ColorIndicator } from './color_indicator';
-import { PaletteIndicator } from './palette_indicator';
-import { VisualizationDimensionGroupConfig, AccessorConfig } from '../../../types';
+import { ColorIndicator } from '../color_indicator';
+import { PaletteIndicator } from '../palette_indicator';
+import { VisualizationDimensionGroupConfig, AccessorConfig } from '../../../../types';
 
 const triggerLinkA11yText = (label: string) =>
   i18n.translate('xpack.lens.configure.editConfig', {

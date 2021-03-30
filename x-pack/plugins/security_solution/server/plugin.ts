@@ -78,6 +78,7 @@ import { licenseService } from './lib/license/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import { securitySolutionTimelineEqlSearchStrategyProvider } from './search_strategy/timeline/eql';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
+import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
 
 export interface SetupPlugins {
   alerting: AlertingSetup;
@@ -104,6 +105,7 @@ export interface StartPlugins {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginSetup {}
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginStart {}
 
@@ -339,12 +341,16 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   public start(core: CoreStart, plugins: StartPlugins) {
     const savedObjectsClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
     const registerIngestCallback = plugins.fleet?.registerExternalCallback;
+    const logger = this.logger;
     let manifestManager: ManifestManager | undefined;
 
     this.licensing$ = plugins.licensing.license$;
 
     if (this.lists && plugins.taskManager && plugins.fleet) {
       // Exceptions, Artifacts and Manifests start
+      const taskManager = plugins.taskManager;
+      const fleetServerEnabled = parseExperimentalConfigValue(this.config.enableExperimental)
+        .fleetServerEnabled;
       const exceptionListClient = this.lists.getExceptionListClient(savedObjectsClient, 'kibana');
       const artifactClient = (new EndpointArtifactClient(
         plugins.fleet.createArtifactsClient('endpoint')
@@ -356,19 +362,31 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           artifactClient,
           exceptionListClient,
           packagePolicyService: plugins.fleet.packagePolicyService,
-          logger: this.logger,
+          logger,
           cache: this.artifactsCache,
         },
-        parseExperimentalConfigValue(this.config.enableExperimental).fleetServerEnabled
+        fleetServerEnabled
       );
 
-      if (this.manifestTask) {
-        this.manifestTask.start({
-          taskManager: plugins.taskManager,
+      // Migrate artifacts to fleet and then start the minifest task after that is done
+      plugins.fleet.fleetSetupCompleted().then(() => {
+        migrateArtifactsToFleet(
+          savedObjectsClient,
+          artifactClient,
+          logger,
+          fleetServerEnabled
+        ).finally(() => {
+          logger.info('Fleet setup complete - Starting ManifestTask');
+
+          if (this.manifestTask) {
+            this.manifestTask.start({
+              taskManager,
+            });
+          } else {
+            logger.debug('User artifacts task not available.');
+          }
         });
-      } else {
-        this.logger.debug('User artifacts task not available.');
-      }
+      });
 
       // License related start
       licenseService.start(this.licensing$);
@@ -376,7 +394,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         plugins.fleet!.packagePolicyService,
         core.savedObjects,
         core.elasticsearch,
-        this.logger
+        logger
       );
       this.policyWatcher.start(licenseService);
     }
@@ -390,7 +408,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       security: this.setupPlugins!.security!,
       alerting: plugins.alerting,
       config: this.config!,
-      logger: this.logger,
+      logger,
       manifestManager,
       registerIngestCallback,
       savedObjectsStart: core.savedObjects,
