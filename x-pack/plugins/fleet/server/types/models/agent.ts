@@ -70,7 +70,7 @@ export const NewAgentActionSchema = schema.oneOf([
       schema.literal('POLICY_CHANGE'),
       schema.literal('UNENROLL'),
       schema.literal('UPGRADE'),
-      schema.literal('INTERNAL_POLICY_REASSIGN'),
+      schema.literal('POLICY_REASSIGN'),
     ]),
     data: schema.maybe(schema.any()),
     ack_data: schema.maybe(schema.any()),

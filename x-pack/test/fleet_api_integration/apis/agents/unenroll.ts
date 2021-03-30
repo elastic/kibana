@@ -45,9 +45,11 @@ export default function (providerContext: FtrProviderContext) {
         index: '.fleet-agents',
         id: 'agent1',
       });
-      // @ts-ignore
+      // @ts-expect-error agentDoc has unknown type
       agentDoc.access_api_key_id = accessAPIKeyId;
+      // @ts-expect-error agentDoc has unknown type
       agentDoc.default_api_key_id = outputAPIKeyBody.id;
+      // @ts-expect-error agentDoc has unknown type
       agentDoc.default_api_key = Buffer.from(
         `${outputAPIKeyBody.id}:${outputAPIKeyBody.api_key}`
       ).toString('base64');
@@ -117,7 +119,7 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
 
       // try to unenroll
-      await supertest
+      const { body: unenrolledBody } = await supertest
         .post(`/api/fleet/agents/bulk_unenroll`)
         .set('kbn-xsrf', 'xxx')
         .send({
@@ -126,6 +128,16 @@ export default function (providerContext: FtrProviderContext) {
         // http request succeeds
         .expect(200);
 
+      expect(unenrolledBody).to.eql({
+        agent2: {
+          success: false,
+          error: 'Cannot unenroll agent2 from a managed agent policy policy1',
+        },
+        agent3: {
+          success: false,
+          error: 'Cannot unenroll agent3 from a managed agent policy policy1',
+        },
+      });
       // but agents are still enrolled
       const [agent2data, agent3data] = await Promise.all([
         supertest.get(`/api/fleet/agents/agent2`),
@@ -146,17 +158,23 @@ export default function (providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .send({ name: 'Test policy', namespace: 'default', is_managed: false })
         .expect(200);
-      await supertest
+      const { body: unenrolledBody } = await supertest
         .post(`/api/fleet/agents/bulk_unenroll`)
         .set('kbn-xsrf', 'xxx')
         .send({
           agents: ['agent2', 'agent3'],
-        })
-        .expect(200);
+        });
+
+      expect(unenrolledBody).to.eql({
+        agent2: { success: true },
+        agent3: { success: true },
+      });
+
       const [agent2data, agent3data] = await Promise.all([
         supertest.get(`/api/fleet/agents/agent2`),
         supertest.get(`/api/fleet/agents/agent3`),
       ]);
+
       expect(typeof agent2data.body.item.unenrollment_started_at).to.eql('string');
       expect(agent2data.body.item.active).to.eql(true);
       expect(typeof agent3data.body.item.unenrollment_started_at).to.be('string');

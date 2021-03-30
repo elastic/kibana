@@ -91,7 +91,7 @@ describe('ServiceOverview', () => {
         isAggregationAccurate: true,
       },
       'GET /api/apm/services/{serviceName}/dependencies': [],
-      'GET /api/apm/services/{serviceName}/service_overview_instances': [],
+      'GET /api/apm/services/{serviceName}/service_overview_instances/primary_statistics': [],
     };
     /* eslint-enable @typescript-eslint/naming-convention */
 

@@ -1,12 +1,10 @@
 [[actions-and-connectors-legacy-api-delete]]
 ==== Legacy Delete connector API
 ++++
-<titleabbrev>Legacy Delete connector API</titleabbrev>
+<titleabbrev>Legacy Delete connector</titleabbrev>
 ++++
 
-deprecated::[7.13.0]
-
-Please use the <<actions-and-connectors-api-delete>> instead.
+WARNING: Deprecated in 7.13.0. Use <<delete-connector-api>> instead.
 
 Deletes a connector by ID.
 

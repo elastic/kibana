@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target",
+    "declaration": true,
+    "declarationMap": true
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "dependencies": {
+    "@kbn/std": "link:../kbn-std"
+  }
+}

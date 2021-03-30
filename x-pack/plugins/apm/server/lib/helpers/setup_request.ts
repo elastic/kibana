@@ -45,7 +45,7 @@ export interface SetupTimeRange {
 
 interface SetupRequestParams {
   query?: {
-    _debug?: boolean;
+    _inspect?: boolean;
 
     /**
      * Timestamp in ms since epoch
@@ -88,7 +88,7 @@ export async function setupRequest<TParams extends SetupRequestParams>(
       indices,
       apmEventClient: createApmEventClient({
         esClient: context.core.elasticsearch.client.asCurrentUser,
-        debug: context.params.query._debug,
+        debug: context.params.query._inspect,
         request,
         indices,
         options: { includeFrozen },

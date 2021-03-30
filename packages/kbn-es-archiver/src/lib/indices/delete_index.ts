@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { ToolingLog } from '@kbn/dev-utils';
 import { Stats } from '../stats';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
@@ -15,7 +15,7 @@ import { ES_CLIENT_HEADERS } from '../../client_headers';
 const PENDING_SNAPSHOT_STATUSES = ['INIT', 'STARTED', 'WAITING'];
 
 export async function deleteIndex(options: {
-  client: Client;
+  client: KibanaClient;
   stats: Stats;
   index: string | string[];
   log: ToolingLog;
@@ -84,7 +84,7 @@ export function isDeleteWhileSnapshotInProgressError(error: any) {
  * snapshotting this index to complete.
  */
 export async function waitForSnapshotCompletion(
-  client: Client,
+  client: KibanaClient,
   index: string | string[],
   log: ToolingLog
 ) {

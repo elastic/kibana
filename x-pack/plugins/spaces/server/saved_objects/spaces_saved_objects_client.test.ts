@@ -643,5 +643,43 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
         });
       });
     });
+
+    describe('#createPointInTimeFinder', () => {
+      test(`throws error if options.namespace is specified`, async () => {
+        const { client } = createSpacesSavedObjectsClient();
+
+        const options = { type: ['a', 'b'], search: 'query', namespace: 'oops' };
+        expect(() => client.createPointInTimeFinder(options)).toThrow(ERROR_NAMESPACE_SPECIFIED);
+      });
+
+      it('redirects request to underlying base client with default dependencies', () => {
+        const { client, baseClient } = createSpacesSavedObjectsClient();
+
+        const options = { type: ['a', 'b'], search: 'query' };
+        client.createPointInTimeFinder(options);
+
+        expect(baseClient.createPointInTimeFinder).toHaveBeenCalledTimes(1);
+        expect(baseClient.createPointInTimeFinder).toHaveBeenCalledWith(options, {
+          client,
+        });
+      });
+
+      it('redirects request to underlying base client with custom dependencies', () => {
+        const { client, baseClient } = createSpacesSavedObjectsClient();
+
+        const options = { type: ['a', 'b'], search: 'query' };
+        const dependencies = {
+          client: {
+            find: jest.fn(),
+            openPointInTimeForType: jest.fn(),
+            closePointInTime: jest.fn(),
+          },
+        };
+        client.createPointInTimeFinder(options, dependencies);
+
+        expect(baseClient.createPointInTimeFinder).toHaveBeenCalledTimes(1);
+        expect(baseClient.createPointInTimeFinder).toHaveBeenCalledWith(options, dependencies);
+      });
+    });
   });
 });

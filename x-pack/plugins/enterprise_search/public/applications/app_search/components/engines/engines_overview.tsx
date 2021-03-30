@@ -25,6 +25,7 @@ import { LicensingLogic } from '../../../shared/licensing';
 import { EuiButtonTo } from '../../../shared/react_router_helpers';
 import { convertMetaToPagination, handlePageChange } from '../../../shared/table_pagination';
 import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
+import { AppLogic } from '../../app_logic';
 import { EngineIcon, MetaEngineIcon } from '../../icons';
 import { ENGINE_CREATION_PATH, META_ENGINE_CREATION_PATH } from '../../routes';
 
@@ -44,6 +45,9 @@ import './engines_overview.scss';
 
 export const EnginesOverview: React.FC = () => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
+  const {
+    myRole: { canManageEngines },
+  } = useValues(AppLogic);
 
   const {
     dataLoading,
@@ -91,14 +95,16 @@ export const EnginesOverview: React.FC = () => {
             </EuiTitle>
           </EuiPageContentHeaderSection>
           <EuiPageContentHeaderSection>
-            <EuiButtonTo
-              color="primary"
-              fill
-              data-test-subj="appSearchEnginesEngineCreationButton"
-              to={ENGINE_CREATION_PATH}
-            >
-              {CREATE_AN_ENGINE_BUTTON_LABEL}
-            </EuiButtonTo>
+            {canManageEngines && (
+              <EuiButtonTo
+                color="primary"
+                fill
+                data-test-subj="appSearchEnginesEngineCreationButton"
+                to={ENGINE_CREATION_PATH}
+              >
+                {CREATE_AN_ENGINE_BUTTON_LABEL}
+              </EuiButtonTo>
+            )}
           </EuiPageContentHeaderSection>
         </EuiPageContentHeader>
         <EuiPageContentBody data-test-subj="appSearchEngines">
@@ -126,14 +132,16 @@ export const EnginesOverview: React.FC = () => {
                 </EuiTitle>
               </EuiPageContentHeaderSection>
               <EuiPageContentHeaderSection>
-                <EuiButtonTo
-                  color="primary"
-                  fill
-                  data-test-subj="appSearchEnginesMetaEngineCreationButton"
-                  to={META_ENGINE_CREATION_PATH}
-                >
-                  {CREATE_A_META_ENGINE_BUTTON_LABEL}
-                </EuiButtonTo>
+                {canManageEngines && (
+                  <EuiButtonTo
+                    color="primary"
+                    fill
+                    data-test-subj="appSearchEnginesMetaEngineCreationButton"
+                    to={META_ENGINE_CREATION_PATH}
+                  >
+                    {CREATE_A_META_ENGINE_BUTTON_LABEL}
+                  </EuiButtonTo>
+                )}
               </EuiPageContentHeaderSection>
             </EuiPageContentHeader>
             <EuiPageContentBody data-test-subj="appSearchMetaEngines">
@@ -149,13 +157,15 @@ export const EnginesOverview: React.FC = () => {
                     title={<h2>{META_ENGINE_EMPTY_PROMPT_TITLE}</h2>}
                     body={<p>{META_ENGINE_EMPTY_PROMPT_DESCRIPTION}</p>}
                     actions={
-                      <EuiButtonTo
-                        data-test-subj="appSearchMetaEnginesEmptyStateCreationButton"
-                        fill
-                        to={META_ENGINE_CREATION_PATH}
-                      >
-                        {CREATE_A_META_ENGINE_BUTTON_LABEL}
-                      </EuiButtonTo>
+                      canManageEngines && (
+                        <EuiButtonTo
+                          data-test-subj="appSearchMetaEnginesEmptyStateCreationButton"
+                          fill
+                          to={META_ENGINE_CREATION_PATH}
+                        >
+                          {CREATE_A_META_ENGINE_BUTTON_LABEL}
+                        </EuiButtonTo>
+                      )
                     }
                   />
                 }

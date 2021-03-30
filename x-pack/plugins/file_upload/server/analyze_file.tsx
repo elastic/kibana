@@ -6,13 +6,7 @@
  */
 
 import { IScopedClusterClient } from 'kibana/server';
-import {
-  AnalysisResult,
-  FormattedOverrides,
-  InputData,
-  InputOverrides,
-  FindFileStructureResponse,
-} from '../common';
+import { AnalysisResult, FormattedOverrides, InputData, InputOverrides } from '../common';
 
 export async function analyzeFile(
   client: IScopedClusterClient,
@@ -20,9 +14,7 @@ export async function analyzeFile(
   overrides: InputOverrides
 ): Promise<AnalysisResult> {
   overrides.explain = overrides.explain === undefined ? 'true' : overrides.explain;
-  const {
-    body,
-  } = await client.asInternalUser.textStructure.findStructure<FindFileStructureResponse>({
+  const { body } = await client.asInternalUser.textStructure.findStructure({
     body: data,
     ...overrides,
   });
@@ -31,6 +23,7 @@ export async function analyzeFile(
 
   return {
     ...(hasOverrides && { overrides: reducedOverrides }),
+    // @ts-expect-error type incompatible with FindFileStructureResponse
     results: body,
   };
 }

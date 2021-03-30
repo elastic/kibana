@@ -36,25 +36,9 @@ describe('monitoring plugin deprecations', function () {
       expect(log).not.toHaveBeenCalled();
     });
 
-    it(`shouldn't log when cluster alerts are disabled`, function () {
-      const settings = {
-        cluster_alerts: {
-          enabled: false,
-          email_notifications: {
-            enabled: true,
-          },
-        },
-      };
-
-      const log = jest.fn();
-      transformDeprecations(settings, fromPath, log);
-      expect(log).not.toHaveBeenCalled();
-    });
-
     it(`shouldn't log when email_address is specified`, function () {
       const settings = {
         cluster_alerts: {
-          enabled: true,
           email_notifications: {
             enabled: true,
             email_address: 'foo@bar.com',
@@ -70,7 +54,6 @@ describe('monitoring plugin deprecations', function () {
     it(`should log when email_address is missing, but alerts/notifications are both enabled`, function () {
       const settings = {
         cluster_alerts: {
-          enabled: true,
           email_notifications: {
             enabled: true,
           },

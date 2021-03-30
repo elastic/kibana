@@ -31,14 +31,13 @@ import type { Writable } from '@kbn/utility-types';
 
 // @ts-expect-error not typed yet
 import { SeriesEditor } from '../series_editor';
-// @ts-ignore should be typed after https://github.com/elastic/kibana/pull/92812 to reduce conflicts
+// @ts-expect-error not typed yet
 import { IndexPattern } from '../index_pattern';
 import { createSelectHandler } from '../lib/create_select_handler';
 import { ColorPicker } from '../color_picker';
 import { YesNo } from '../yes_no';
 // @ts-expect-error not typed yet
 import { MarkdownEditor } from '../markdown_editor';
-// @ts-ignore this is typed in https://github.com/elastic/kibana/pull/92812, remove ignore after merging
 import { QueryBarWrapper } from '../query_bar_wrapper';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { VisDataContext } from '../../contexts/vis_data_context';
@@ -143,6 +142,7 @@ export class MarkdownPanelConfig extends Component<
               fields={this.props.fields}
               model={this.props.model}
               onChange={this.props.onChange}
+              allowIndexSwitchingMode={true}
             />
 
             <EuiHorizontalRule />
@@ -161,13 +161,13 @@ export class MarkdownPanelConfig extends Component<
                 >
                   <QueryBarWrapper
                     query={{
-                      language: model.filter.language || getDefaultQueryLanguage(),
-                      query: model.filter.query || '',
+                      language: model.filter?.language || getDefaultQueryLanguage(),
+                      query: model.filter?.query || '',
                     }}
-                    onChange={(filter: PanelConfigProps['model']['filter']) =>
-                      this.props.onChange({ filter })
-                    }
-                    indexPatterns={[model.index_pattern || model.default_index_pattern]}
+                    onChange={(filter) => {
+                      this.props.onChange({ filter });
+                    }}
+                    indexPatterns={[model.index_pattern || model.default_index_pattern || '']}
                   />
                 </EuiFormRow>
               </EuiFlexItem>

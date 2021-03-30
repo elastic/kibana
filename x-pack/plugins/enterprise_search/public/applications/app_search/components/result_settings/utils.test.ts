@@ -12,9 +12,7 @@ import {
   areFieldsEmpty,
   convertServerResultFieldsToResultFields,
   convertToServerFieldResultSetting,
-  clearAllServerFields,
   clearAllFields,
-  resetAllServerFields,
   resetAllFields,
   splitResultFields,
 } from './utils';
@@ -33,20 +31,6 @@ describe('clearAllFields', () => {
   });
 });
 
-describe('clearAllServerFields', () => {
-  it('will reset every key in an object back to an empty object', () => {
-    expect(
-      clearAllServerFields({
-        foo: { raw: { size: 5 } },
-        bar: { raw: true },
-      })
-    ).toEqual({
-      foo: {},
-      bar: {},
-    });
-  });
-});
-
 describe('resetAllFields', () => {
   it('will reset every key in an object back to a default object', () => {
     expect(
@@ -57,20 +41,6 @@ describe('resetAllFields', () => {
     ).toEqual({
       foo: { raw: true, snippet: false, snippetFallback: false },
       bar: { raw: true, snippet: false, snippetFallback: false },
-    });
-  });
-});
-
-describe('resetAllServerFields', () => {
-  it('will reset every key in an object back to a default object', () => {
-    expect(
-      resetAllServerFields({
-        foo: { raw: { size: 5 } },
-        bar: { snippet: true },
-      })
-    ).toEqual({
-      foo: { raw: {} },
-      bar: { raw: {} },
     });
   });
 });
