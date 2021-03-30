@@ -39,7 +39,6 @@
     "**/*/test_helpers.ts",
     // x-pack/plugins/ui_actions_enhanced/public/components/action_wizard/test_data.tsx
     "**/*/test_data.tsx",
-    // x-pack/plugins/enterprise_search/public/applications/app_search/components/analytics/components/analytics_tables/shared_columns_tests.tsx
     "**/*/shared_columns_tests.tsx",
     // x-pack/plugins/uptime/server/lib/requests/helper.ts
     "**/*/requests/helper.ts",

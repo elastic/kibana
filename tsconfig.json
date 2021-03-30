@@ -80,7 +80,6 @@
     "x-pack/plugins/**/*/test_helper.tsx",
     "x-pack/plugins/**/*/test_helpers.ts",
     "x-pack/plugins/ui_actions_enhanced/public/components/action_wizard/test_data.tsx",
-    "x-pack/plugins/enterprise_search/public/applications/app_search/components/analytics/components/analytics_tables/shared_columns_tests.tsx",
     "x-pack/plugins/uptime/server/lib/requests/helper.ts",
     "x-pack/plugins/uptime/public/lib/helper/rtl_helpers.tsx",
     "x-pack/plugins/uptime/public/lib/helper/enzyme_helpers.tsx",
