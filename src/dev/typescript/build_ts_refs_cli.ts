@@ -44,10 +44,14 @@ export async function runBuildRefsCli() {
       const doInitCache = cacheEnabled && !doClean;
 
       /* eslint-disable no-console */
+      console.log('@@@ flags', flags);
+      console.log(
+        '@@@ process.env.BUILD_TS_REFS_CACHE_ENABLE:',
+        process.env.BUILD_TS_REFS_CACHE_ENABLE
+      );
       console.log('@@@ cacheEnabled:', cacheEnabled);
       console.log('@@@ doClean:', doClean);
       console.log('@@@ doInitCache:', doInitCache);
-      console.log('@@@ env:', process.env);
 
       if (doClean) {
         log.info('deleting', outDirs.length, 'ts output directories');
