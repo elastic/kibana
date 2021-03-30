@@ -9,24 +9,26 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText, EuiTitle } from 
 import React, { useMemo, useState } from 'react';
 
 import * as i18n from './translations';
-import { CaseDetailsHrefSchema } from '../links';
+import { CaseDetailsHrefSchema, LinkAnchor } from '../links';
 import { RecentCasesFilters } from './filters';
 import { RecentCasesComp } from './recent_cases';
 import { FilterMode as RecentCasesFilterMode } from './types';
 import { useCurrentUser } from '../../common/lib/kibana';
 
 export interface RecentCasesProps {
-  allCasesLink: JSX.Element;
+  allCasesHref: string;
   createCaseHref: string;
   getCaseDetailsHref: (caseDetails: CaseDetailsHrefSchema) => string;
+  goToAllCases: (ev: React.MouseEvent) => void;
   onCaseDetailsNavClick: (caseDetails: CaseDetailsHrefSchema) => void;
   perPage: number;
 }
 
 const RecentCases = ({
-  allCasesLink,
+  allCasesHref,
   createCaseHref,
   getCaseDetailsHref,
+  goToAllCases,
   onCaseDetailsNavClick,
   perPage,
 }: RecentCasesProps) => {
@@ -79,7 +81,12 @@ const RecentCases = ({
           perPage={perPage}
         />
         <EuiHorizontalRule margin="s" />
-        <EuiText size="xs">{allCasesLink}</EuiText>
+        <EuiText size="xs">
+          <LinkAnchor onClick={goToAllCases} href={allCasesHref}>
+            {' '}
+            {i18n.VIEW_ALL_CASES}
+          </LinkAnchor>
+        </EuiText>
       </EuiText>
     </>
   );

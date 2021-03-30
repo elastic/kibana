@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 
 import {
   getCaseDetailsUrl,
@@ -16,8 +16,6 @@ import { useKibana } from '../../../common/lib/kibana';
 import { APP_ID } from '../../../../common/constants';
 import { SecurityPageName } from '../../../app/types';
 import { AllCasesNavProps } from '../../../cases/components/all_cases';
-import { LinkAnchor } from '../../../common/components/links';
-import * as i18n from './translations';
 
 const MAX_CASES_TO_SHOW = 3;
 const RecentCasesComponent = () => {
@@ -35,22 +33,13 @@ const RecentCasesComponent = () => {
     [navigateToApp]
   );
 
-  const allCasesLink = useMemo(
-    () => (
-      <LinkAnchor onClick={goToCases} href={formatUrl('')}>
-        {' '}
-        {i18n.VIEW_ALL_CASES}
-      </LinkAnchor>
-    ),
-    [goToCases, formatUrl]
-  );
-
   return casesUi.getRecentCases({
-    allCasesLink,
+    allCasesHref: formatUrl(''),
     createCaseHref: formatUrl(getCreateCaseUrl()),
     getCaseDetailsHref: ({ detailName, subCaseId }: AllCasesNavProps) => {
       return formatUrl(getCaseDetailsUrl({ id: detailName, subCaseId }));
     },
+    goToAllCases: goToCases,
     onCaseDetailsNavClick: ({ detailName, subCaseId, search }: AllCasesNavProps) => {
       navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
         path: getCaseDetailsUrl({ id: detailName, search, subCaseId }),
