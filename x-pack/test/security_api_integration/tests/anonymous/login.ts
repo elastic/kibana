@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import request, { Cookie } from 'request';
-// @ts-expect-error
+// @ts-expect-error https://github.com/elastic/kibana/issues/95679
 import { adminTestUser } from '@kbn/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
 

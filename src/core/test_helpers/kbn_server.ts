@@ -9,19 +9,19 @@
 import { Client } from 'elasticsearch';
 import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
 import {
-  // @ts-expect-error
+  // @ts-expect-error https://github.com/elastic/kibana/issues/95679
   createLegacyEsTestCluster,
-  // @ts-expect-error
+  // @ts-expect-error https://github.com/elastic/kibana/issues/95679
   DEFAULT_SUPERUSER_PASS,
-  // @ts-expect-error
+  // @ts-expect-error https://github.com/elastic/kibana/issues/95679
   esTestConfig,
-  // @ts-expect-error
+  // @ts-expect-error https://github.com/elastic/kibana/issues/95679
   kbnTestConfig,
-  // @ts-expect-error
+  // @ts-expect-error https://github.com/elastic/kibana/issues/95679
   kibanaServerTestUser,
-  // @ts-expect-error
+  // @ts-expect-error https://github.com/elastic/kibana/issues/95679
   kibanaTestUser,
-  // @ts-expect-error
+  // @ts-expect-error https://github.com/elastic/kibana/issues/95679
   setupUsers,
 } from '@kbn/test';
 import { defaultsDeep, get } from 'lodash';
