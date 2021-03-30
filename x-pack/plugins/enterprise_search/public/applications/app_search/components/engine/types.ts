@@ -9,9 +9,9 @@ import { Schema, SchemaConflicts, IIndexingStatus } from '../../../shared/types'
 import { ApiToken } from '../credentials/types';
 
 export enum EngineTypes {
-  default,
-  indexed,
-  meta,
+  default = 'default',
+  indexed = 'indexed',
+  meta = 'meta',
 }
 export interface Engine {
   name: string;

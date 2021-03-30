@@ -9,11 +9,14 @@ import React, { useCallback, useEffect, useReducer } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
+import { HttpStart } from 'kibana/public';
+import { AutocompleteStart } from 'src/plugins/data/public';
+import { isEqlRule, isThresholdRule } from '../../../../../common/detection_engine/utils';
 import { addIdToItem } from '../../../../../common';
 import { Type } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { BuilderExceptionListItemComponent } from './exception_item';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 import {
+  BuilderExceptionListItemComponent,
   ExceptionListItemSchema,
   NamespaceType,
   exceptionListItemSchema,
@@ -22,7 +25,7 @@ import {
   CreateExceptionListItemSchema,
   ExceptionListType,
   entriesNested,
-} from '../../../../../public/lists_plugin_deps';
+} from '../../../../../public/shared_imports';
 import { AndOrBadge } from '../../and_or_badge';
 import { BuilderLogicButtons } from './logic_buttons';
 import { getNewExceptionItem, filterExceptionItems } from '../helpers';
@@ -67,6 +70,8 @@ interface OnChangeProps {
 }
 
 interface ExceptionBuilderProps {
+  httpService: HttpStart;
+  autocompleteService: AutocompleteStart;
   exceptionListItems: ExceptionsBuilderExceptionItem[];
   listType: ExceptionListType;
   listId: string;
@@ -82,6 +87,8 @@ interface ExceptionBuilderProps {
 }
 
 export const ExceptionBuilderComponent = ({
+  httpService,
+  autocompleteService,
   exceptionListItems,
   listType,
   listId,
@@ -377,9 +384,11 @@ export const ExceptionBuilderComponent = ({
               ))}
             <EuiFlexItem grow={false}>
               <BuilderExceptionListItemComponent
+                allowLargeValueLists={!isEqlRule(ruleType) && !isThresholdRule(ruleType)}
+                httpService={httpService}
+                autocompleteService={autocompleteService}
                 key={getExceptionListItemId(exceptionListItem, index)}
                 exceptionItem={exceptionListItem}
-                exceptionId={getExceptionListItemId(exceptionListItem, index)}
                 indexPattern={indexPatterns}
                 osTypes={osTypes}
                 listType={listType}
@@ -390,7 +399,6 @@ export const ExceptionBuilderComponent = ({
                 onChangeExceptionItem={handleExceptionItemChange}
                 onlyShowListOperators={containsValueListEntry(exceptions)}
                 setErrorsExist={setErrorsExist}
-                ruleType={ruleType}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

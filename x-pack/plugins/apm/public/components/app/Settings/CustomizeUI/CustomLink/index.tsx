@@ -35,7 +35,7 @@ export function CustomLinkOverview() {
     CustomLink | undefined
   >();
 
-  const { data: customLinks = [], status, refetch } = useFetcher(
+  const { data, status, refetch } = useFetcher(
     async (callApmApi) => {
       if (hasValidLicense) {
         return callApmApi({
@@ -45,6 +45,8 @@ export function CustomLinkOverview() {
     },
     [hasValidLicense]
   );
+
+  const customLinks = data?.customLinks ?? [];
 
   useEffect(() => {
     if (customLinkSelected) {

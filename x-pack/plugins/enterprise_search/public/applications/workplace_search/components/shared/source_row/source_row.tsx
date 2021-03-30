@@ -34,7 +34,7 @@ import {
 import { ContentSourceDetails } from '../../../types';
 import { SourceIcon } from '../source_icon';
 
-const CREDENTIALS_INVALID_ERROR_REASON = 1;
+const CREDENTIALS_INVALID_ERROR_REASON = 'credentials_invalid';
 
 export interface ISourceRow {
   showDetails?: boolean;

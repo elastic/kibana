@@ -26,8 +26,8 @@ import { useSendCurrentRequestToES } from './use_send_current_request_to_es';
 
 describe('useSendCurrentRequestToES', () => {
   let mockContextValue: ContextValue;
-  let dispatch: (...args: any[]) => void;
-  const contexts = ({ children }: { children?: any }) => (
+  let dispatch: (...args: unknown[]) => void;
+  const contexts = ({ children }: { children: JSX.Element }) => (
     <ServicesContextProvider value={mockContextValue}>{children}</ServicesContextProvider>
   );
 

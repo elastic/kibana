@@ -20,7 +20,7 @@ import {
   CommentAttributes,
   CommentRequestUserType,
   CommentRequestAlertType,
-} from '../../../common';
+} from '../../../common/api';
 import { ActionsClient } from '../../../../actions/server';
 import { externalServiceFormatters, FormatterConnectorTypes } from '../../connectors';
 import { CasesClientGetAlertsResponse } from '../../client/alerts/types';
@@ -184,7 +184,7 @@ export const createIncident = async ({
 
   if (totalAlerts > 0) {
     comments.push({
-      comment: `Elastic Alerts attached to the case: ${totalAlerts}`,
+      comment: `Elastic Security Alerts attached to the case: ${totalAlerts}`,
       commentId: `${theCase.id}-total-alerts`,
     });
   }

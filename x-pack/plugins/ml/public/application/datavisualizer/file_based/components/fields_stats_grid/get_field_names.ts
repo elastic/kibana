@@ -6,7 +6,7 @@
  */
 
 import { difference } from 'lodash';
-import type { FindFileStructureResponse } from '../../../../../../common/types/file_datavisualizer';
+import type { FindFileStructureResponse } from '../../../../../../../file_upload/common';
 import { MlJobFieldType } from '../../../../../../common/types/field_types';
 import { ML_JOB_FIELD_TYPES } from '../../../../../../common/constants/field_types';
 import { ES_FIELD_TYPES } from '../../../../../../../../../src/plugins/data/common';

@@ -8,8 +8,10 @@
 import type { RouteDefinitionParams } from '../';
 import { defineSessionExtendRoutes } from './extend';
 import { defineSessionInfoRoutes } from './info';
+import { defineInvalidateSessionsRoutes } from './invalidate';
 
 export function defineSessionManagementRoutes(params: RouteDefinitionParams) {
   defineSessionInfoRoutes(params);
   defineSessionExtendRoutes(params);
+  defineInvalidateSessionsRoutes(params);
 }

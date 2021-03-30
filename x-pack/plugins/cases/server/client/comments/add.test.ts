@@ -6,7 +6,7 @@
  */
 
 import { omit } from 'lodash/fp';
-import { CommentType } from '../../../common';
+import { CommentType } from '../../../common/api';
 import { isCaseError } from '../../common/error';
 import {
   createMockSavedObjectsRepository,

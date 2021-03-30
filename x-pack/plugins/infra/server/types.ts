@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { DataRequestHandlerContext } from '../../../../src/plugins/data/server';
+import type { RequestHandlerContext } from 'src/core/server';
+import type { SearchRequestHandlerContext } from '../../../../src/plugins/data/server';
 import { MlPluginSetup } from '../../ml/server';
 
 export type MlSystem = ReturnType<MlPluginSetup['mlSystemProvider']>;
@@ -26,6 +27,7 @@ export type InfraRequestHandlerContext = InfraMlRequestHandlerContext &
 /**
  * @internal
  */
-export interface InfraPluginRequestHandlerContext extends DataRequestHandlerContext {
+export interface InfraPluginRequestHandlerContext extends RequestHandlerContext {
   infra: InfraRequestHandlerContext;
+  search: SearchRequestHandlerContext;
 }

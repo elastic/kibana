@@ -26,13 +26,15 @@ export function buildFilter(
   disabled: boolean,
   params: any,
   alias: string | null,
-  store: FilterStateStore
+  store?: FilterStateStore
 ): Filter {
   const filter = buildBaseFilter(indexPattern, field, type, params);
   filter.meta.alias = alias;
   filter.meta.negate = negate;
   filter.meta.disabled = disabled;
-  filter.$state = { store };
+  if (store) {
+    filter.$state = { store };
+  }
   return filter;
 }
 

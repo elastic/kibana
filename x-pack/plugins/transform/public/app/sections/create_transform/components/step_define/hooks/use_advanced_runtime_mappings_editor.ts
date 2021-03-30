@@ -52,7 +52,8 @@ export const useAdvancedRuntimeMappingsEditor = (defaults: StepDefineExposedStat
   } = useXJsonMode(stringifiedRuntimeMappings ?? '');
 
   const applyRuntimeMappingsEditorChanges = () => {
-    const parsedRuntimeMappings = JSON.parse(advancedRuntimeMappingsConfig);
+    const parsedRuntimeMappings =
+      advancedRuntimeMappingsConfig === '' ? {} : JSON.parse(advancedRuntimeMappingsConfig);
     const prettySourceConfig = JSON.stringify(parsedRuntimeMappings, null, 2);
     setRuntimeMappingsUpdated(true);
     setRuntimeMappings(parsedRuntimeMappings);

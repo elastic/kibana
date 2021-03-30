@@ -9,7 +9,7 @@ import { ConfigSchema } from '.';
 import {
   FetchDataParams,
   HasDataParams,
-  ObservabilityPluginSetup,
+  ObservabilityPublicSetup,
 } from '../../observability/public';
 import {
   AppMountParameters,
@@ -52,7 +52,7 @@ export interface ApmPluginSetupDeps {
   home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
-  observability?: ObservabilityPluginSetup;
+  observability?: ObservabilityPublicSetup;
 }
 
 export interface ApmPluginStartDeps {
@@ -85,19 +85,19 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       const getApmDataHelper = async () => {
         const {
           fetchObservabilityOverviewPageData,
-          hasData,
+          getHasData,
           createCallApmApi,
         } = await import('./services/rest/apm_observability_overview_fetchers');
         // have to do this here as well in case app isn't mounted yet
-        createCallApmApi(core.http);
+        createCallApmApi(core);
 
-        return { fetchObservabilityOverviewPageData, hasData };
+        return { fetchObservabilityOverviewPageData, getHasData };
       };
       plugins.observability.dashboard.register({
         appName: 'apm',
         hasData: async () => {
           const dataHelper = await getApmDataHelper();
-          return await dataHelper.hasData();
+          return await dataHelper.getHasData();
         },
         fetchData: async (params: FetchDataParams) => {
           const dataHelper = await getApmDataHelper();
@@ -112,7 +112,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           createCallApmApi,
         } = await import('./components/app/RumDashboard/ux_overview_fetchers');
         // have to do this here as well in case app isn't mounted yet
-        createCallApmApi(core.http);
+        createCallApmApi(core);
 
         return { fetchUxOverviewDate, hasRumData };
       };

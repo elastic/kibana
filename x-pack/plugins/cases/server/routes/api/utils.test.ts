@@ -30,7 +30,7 @@ import {
   AssociationType,
   CaseType,
   CaseResponse,
-} from '../../../common';
+} from '../../../common/api';
 
 describe('Utils', () => {
   describe('transformNewCase', () => {

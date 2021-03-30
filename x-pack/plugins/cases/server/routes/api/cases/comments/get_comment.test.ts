@@ -17,7 +17,7 @@ import {
 } from '../../__fixtures__';
 import { flattenCommentSavedObject } from '../../utils';
 import { initGetCommentApi } from './get_comment';
-import { CASE_COMMENT_DETAILS_URL } from '../../../../../common';
+import { CASE_COMMENT_DETAILS_URL } from '../../../../../common/constants';
 
 describe('GET comment', () => {
   let routeHandler: RequestHandler<any, any, any>;
