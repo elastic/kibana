@@ -31,7 +31,7 @@ The main idea is to have consistent logging behavior (configuration, log format 
 
 === Loggers, Appenders and Layouts
 
-{kib} logging system has three main components: _loggers_, _appenders_ and _layouts_. These components allow us to log
+The {kib} logging system has three main components: _loggers_, _appenders_ and _layouts_. These components allow us to log
 messages according to message type and level, to control how these messages are formatted and where the final logs
 will be displayed or stored.
 
