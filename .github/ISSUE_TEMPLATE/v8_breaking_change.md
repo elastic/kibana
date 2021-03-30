@@ -30,13 +30,13 @@ breaking change is applicable to.
 <!-- e.g. Based on telemetry data, roughly 75% of our users will need to make changes to x. -->
 <!-- e.g. A majority of users will need to make changes to x. -->
 
-**Can the change be registered with the Kibana deprecation service?**
+**Can the change be registered with the [Kibana deprecation service](https://github.com/elastic/kibana/blob/master/docs/development/core/server/kibana-plugin-core-server.deprecationsservicesetup.md)?**
 
 <!-- The deprecation service is consumed by the Upgrade Assistant to surface Kibana deprecations.
-  It provides a way for Kibana deprecations to be resolved via an API
+  It provides a way for Kibana deprecations to be resolved automatically via an API
   or manually by providing step-by-step instructions for users to follow. -->
 
-<!-- Each plugin owner is responsible for registering the deprecation. 
+<!-- Each plugin owner is responsible for registering their deprecations via the service.
   Please link to the issue/PR that will add this functionality. -->
 
 **Are there any edge cases?**
