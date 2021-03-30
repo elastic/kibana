@@ -18,7 +18,7 @@ export const uploadLayerWizardConfig: LayerWizard = {
   }),
   disabledReason: i18n.translate('xpack.maps.fileUploadWizard.disabledDesc', {
     defaultMessage:
-      'You do not have the required file upload privileges. You are missing the Kibana privilege "Index Pattern Management".',
+      'Unable to upload files, you are missing the Kibana privilege "Index Pattern Management".',
   }),
   getIsDisabled: async () => {
     const hasImportPermission = await getFileUpload().hasImportPermission({
