@@ -7,9 +7,9 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { readPkcs12Keystore, readPkcs12Truststore } from '@kbn/crypto';
 import { constants as cryptoConstants } from 'crypto';
 import { readFileSync } from 'fs';
-import { readPkcs12Keystore, readPkcs12Truststore } from '../utils';
 
 const protocolMap = new Map<string, number>([
   ['TLSv1', cryptoConstants.SSL_OP_NO_TLSv1],
@@ -81,14 +81,13 @@ type SslConfigType = TypeOf<typeof sslSchema>;
 
 export class SslConfig {
   public enabled: boolean;
-  public redirectHttpFromPort: number | undefined;
-  public key: string | undefined;
-  public certificate: string | undefined;
-  public certificateAuthorities: string[] | undefined;
-  public keyPassphrase: string | undefined;
+  public redirectHttpFromPort?: number;
+  public key?: string;
+  public certificate?: string;
+  public certificateAuthorities?: string[];
+  public keyPassphrase?: string;
   public requestCert: boolean;
   public rejectUnauthorized: boolean;
-
   public cipherSuites: string[];
   public supportedProtocols: string[];
 
@@ -164,6 +163,4 @@ export class SslConfig {
   }
 }
 
-const readFile = (file: string) => {
-  return readFileSync(file, 'utf8');
-};
+const readFile = (file: string) => readFileSync(file, 'utf8');
