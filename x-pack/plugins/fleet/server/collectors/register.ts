@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import type { CoreSetup } from 'kibana/server';
 
@@ -49,11 +50,46 @@ export function registerFleetUsageCollector(
     schema: {
       agents_enabled: { type: 'boolean' },
       agents: {
-        total_enrolled: { type: 'long' },
-        healthy: { type: 'long' },
-        unhealthy: { type: 'long' },
-        offline: { type: 'long' },
-        total_all_statuses: { type: 'long' },
+        total_enrolled: {
+          type: 'long',
+          _meta: {
+            description: i18n.translate('xpack.fleet.telemetry.agentsTotalEnrolledDescription', {
+              defaultMessage: 'The total number of enrolled agents, in any state',
+            }),
+          },
+        },
+        healthy: {
+          type: 'long',
+          _meta: {
+            description: i18n.translate('xpack.fleet.telemetry.agentsHealthyDescription', {
+              defaultMessage: 'The total number of enrolled agents in a healthy state',
+            }),
+          },
+        },
+        unhealthy: {
+          type: 'long',
+          _meta: {
+            description: i18n.translate('xpack.fleet.telemetry.agentsUnhealthyDescription', {
+              defaultMessage: 'The total number of enrolled agents in an unhealthy state',
+            }),
+          },
+        },
+        offline: {
+          type: 'long',
+          _meta: {
+            description: i18n.translate('xpack.fleet.telemetry.agentsOfflineDescription', {
+              defaultMessage: 'The total number of enrolled agents currently offline',
+            }),
+          },
+        },
+        total_all_statuses: {
+          type: 'long',
+          _meta: {
+            description: i18n.translate('xpack.fleet.telemetry.agentsTotalALlStatusesDescription', {
+              defaultMessage: 'The total number of agents in any state, both enrolled and inactive',
+            }),
+          },
+        },
       },
       packages: {
         type: 'array',
