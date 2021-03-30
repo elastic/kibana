@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { combineLatest, ConnectableObservable, EMPTY, Observable, Subscription } from 'rxjs';
+import { combineLatest, ConnectableObservable, Observable, Subscription } from 'rxjs';
 import { first, map, publishReplay, tap } from 'rxjs/operators';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { PathConfigType } from '@kbn/utils';
@@ -18,9 +18,7 @@ import { CoreService } from '../../types';
 import { Config } from '../config';
 import { CoreContext } from '../core_context';
 import { CspConfigType, config as cspConfig } from '../csp';
-import { DevConfig, DevConfigType, config as devConfig } from '../dev';
 import {
-  BasePathProxyServer,
   HttpConfig,
   HttpConfigType,
   config as httpConfig,
@@ -64,7 +62,6 @@ export class LegacyService implements CoreService {
   /** Symbol to represent the legacy platform as a fake "plugin". Used by the ContextService */
   public readonly legacyId = Symbol();
   private readonly log: Logger;
-  private readonly devConfig$: Observable<DevConfig>;
   private readonly httpConfig$: Observable<HttpConfig>;
   private kbnServer?: LegacyKbnServer;
   private configSubscription?: Subscription;
@@ -77,9 +74,6 @@ export class LegacyService implements CoreService {
     const { logger, configService } = coreContext;
 
     this.log = logger.get('legacy-service');
-    this.devConfig$ = configService
-      .atPath<DevConfigType>(devConfig.path)
-      .pipe(map((rawConfig) => new DevConfig(rawConfig)));
     this.httpConfig$ = combineLatest(
       configService.atPath<HttpConfigType>(httpConfig.path),
       configService.atPath<CspConfigType>(cspConfig.path),
@@ -142,17 +136,12 @@ export class LegacyService implements CoreService {
 
     this.log.debug('starting legacy service');
 
-    // Receive initial config and create kbnServer/ClusterManager.
-    if (this.coreContext.env.isDevCliParent) {
-      await this.setupCliDevMode(this.legacyRawConfig!);
-    } else {
-      this.kbnServer = await this.createKbnServer(
-        this.settings!,
-        this.legacyRawConfig!,
-        setupDeps,
-        startDeps
-      );
-    }
+    this.kbnServer = await this.createKbnServer(
+      this.settings!,
+      this.legacyRawConfig!,
+      setupDeps,
+      startDeps
+    );
   }
 
   public async stop() {
@@ -167,26 +156,6 @@ export class LegacyService implements CoreService {
       await this.kbnServer.close();
       this.kbnServer = undefined;
     }
-  }
-
-  private async setupCliDevMode(config: LegacyConfig) {
-    const basePathProxy$ = this.coreContext.env.cliArgs.basePath
-      ? combineLatest([this.devConfig$, this.httpConfig$]).pipe(
-          first(),
-          map(
-            ([dev, http]) =>
-              new BasePathProxyServer(this.coreContext.logger.get('server'), http, dev)
-          )
-        )
-      : EMPTY;
-
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { CliDevMode } = require('./cli_dev_mode');
-    CliDevMode.fromCoreServices(
-      this.coreContext.env.cliArgs,
-      config,
-      await basePathProxy$.toPromise()
-    );
   }
 
   private async createKbnServer(

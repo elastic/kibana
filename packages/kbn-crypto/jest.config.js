@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-export * from './cli_dev_mode';
-export * from './log';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-crypto'],
+};
