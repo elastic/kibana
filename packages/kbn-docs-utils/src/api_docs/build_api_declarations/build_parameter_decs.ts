@@ -14,6 +14,7 @@ import { buildApiDeclaration } from './build_api_declaration';
 import { getJSDocParamComment } from './js_doc_utils';
 import { getSourceForNode } from './utils';
 import { getTypeKind } from './get_type_kind';
+import { getApiSectionId } from '../utils';
 
 /**
  * A helper function to capture function parameters, whether it comes from an arrow function, a regular function or
@@ -28,11 +29,18 @@ import { getTypeKind } from './get_type_kind';
 export function buildApiDecsForParameters(
   params: ParameterDeclaration[],
   plugins: KibanaPlatformPlugin[],
-  anchorLink: AnchorLink,
+  parentAnchorLink: AnchorLink,
   log: ToolingLog,
   jsDocs?: JSDoc[]
 ): ApiDeclaration[] {
   return params.reduce((acc, param) => {
+    const apiName = param.getName();
+    const apiId = parentAnchorLink.apiName ? parentAnchorLink.apiName + '.' + apiName : apiName;
+    const anchorLink: AnchorLink = {
+      scope: parentAnchorLink.scope,
+      pluginName: parentAnchorLink.pluginName,
+      apiName: apiId,
+    };
     const label = param.getName();
     log.debug(`Getting parameter doc def for ${label} of kind ${param.getKindName()}`);
     // Literal types are non primitives that aren't references to other types. We add them as a more
@@ -52,6 +60,7 @@ export function buildApiDecsForParameters(
       );
     } else {
       acc.push({
+        id: getApiSectionId(anchorLink),
         type: getTypeKind(param),
         label,
         isRequired: param.getType().isNullable() === false,

@@ -115,7 +115,7 @@ function getScopeFromPath(path: string, plugin: KibanaPlatformPlugin, log: Tooli
   } else if (path.startsWith(`${plugin.directory}/common/`)) {
     return ApiScope.COMMON;
   } else {
-    log.warning(`Unexpected path encountered ${path}`);
+    log.warning(`Unexpected path encountered ${path} for plugin directory ${plugin.directory}`);
     return ApiScope.COMMON;
   }
 }

@@ -169,11 +169,22 @@ export function addApiDeclarationToScope(declaration: ApiDeclaration, scope: Sco
   }
 }
 
+/**
+ * Loops through the signatures of every API declarations for the given pluginApi. If any are external references that
+ * don't actually exist inside `pluginApiMap`, it will remove the link and replace the signature with just the text. This way we avoid
+ * broken links in the docs system.
+ * @param pluginApi - The plugin API that will have all missing reference links removed.
+ * @param missingApiItems - Collects all the missing API items encountered so this information can be displayed as stats.
+ * @param pluginApiMap - Used to look up the referenced API items from other plugins.
+ * @param log
+ */
 export function removeBrokenLinks(
   pluginApi: PluginApi,
-  missingApiItems: { [key: string]: string[] },
-  pluginApiMap: { [key: string]: PluginApi }
+  missingApiItems: { [key: string]: { [key: string]: string[] } },
+  pluginApiMap: { [key: string]: PluginApi },
+  log: ToolingLog
 ) {
+  let missingCnt = 0;
   (['client', 'common', 'server'] as Array<'client' | 'server' | 'common'>).forEach((scope) => {
     pluginApi[scope].forEach((api) => {
       if (api.signature) {
@@ -181,17 +192,31 @@ export function removeBrokenLinks(
           if (typeof sig !== 'string') {
             if (apiItemExists(sig.text, sig.scope, pluginApiMap[sig.pluginId]) === false) {
               if (missingApiItems[sig.pluginId] === undefined) {
-                missingApiItems[sig.pluginId] = [];
+                missingApiItems[sig.pluginId] = {};
               }
-              missingApiItems[sig.pluginId].push(`${sig.scope}.${sig.text}`);
+              const sourceId = `${sig.pluginId}-${sig.scope}-${sig.text}`;
+              if (missingApiItems[sig.pluginId][sourceId] === undefined) {
+                missingApiItems[sig.pluginId][sourceId] = [];
+              }
+
+              missingApiItems[sig.pluginId][sourceId].push(`${pluginApi.id}-${api.id}`);
+
+              missingCnt++;
               return sig.text;
             }
+            return sig;
           }
           return sig;
         });
       }
     });
   });
+
+  if (missingCnt > 0) {
+    log.debug(
+      `${pluginApi.id} had ${missingCnt} API item references removed to avoid broken links use the flag '--stats exports' to get a list of every missing export `
+    );
+  }
 }
 
 function apiItemExists(name: string, scope: ApiScope, pluginApi: PluginApi): boolean {

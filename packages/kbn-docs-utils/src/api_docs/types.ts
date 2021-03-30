@@ -111,7 +111,7 @@ export interface ApiDeclaration {
    * Used for an anchor link to this Api. Can't use label as there can be two labels with the same
    * text within the Client section and the Server section.
    */
-  id?: string;
+  id: string;
 
   /**
    * The name of the api.
