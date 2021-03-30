@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-// @ts-expect-error
 import { FeatureCollection, GeoJsonProperties } from 'geojson';
 import { Filter, TimeRange } from 'src/plugins/data/public';
-import { FORMAT_TYPE, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
+import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { TooltipProperty, ITooltipProperty } from '../../tooltips/tooltip_property';
 import { AbstractSource, ISource } from '../source';
 import { IField } from '../../fields/field';
@@ -20,7 +19,6 @@ import {
   VectorSourceSyncMeta,
 } from '../../../../common/descriptor_types';
 import { DataRequest } from '../../util/data_request';
-import { fetchGeoJson } from '../../../util';
 
 export interface SourceTooltipConfig {
   tooltipContent: string | null;

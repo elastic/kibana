@@ -175,8 +175,6 @@ export class MapsPlugin
       plugins.visualizations.unRegisterAlias(APP_ID);
     }
 
-    window._suggestEMSTermJoinConfig = suggestEMSTermJoinConfig;
-
     return {
       createLayerDescriptors,
       registerLayerWizard,
