@@ -150,6 +150,7 @@ export function CustomizablePalette({
   return (
     <>
       <PalettePicker
+        data-test-subj="lnsDatatable_dynamicColoring_palette_picker"
         palettes={palettes}
         activePalette={activePalette}
         setPalette={(newPalette) => {
@@ -188,6 +189,7 @@ export function CustomizablePalette({
         display="columnCompressedSwitch"
       >
         <EuiSwitch
+          data-test-subj="lnsDatatable_dynamicColoring_auto_range"
           checked={isAutoRange}
           onChange={(newValue) => {
             const isNewAutoRange = newValue.target.checked;
@@ -217,7 +219,7 @@ export function CustomizablePalette({
           legend={i18n.translate('xpack.lens.table.dynamicColoring.stopValue.label', {
             defaultMessage: 'Color stop value',
           })}
-          data-test-subj="lnsDatatable_dynamicColoring_stopValue_groups"
+          data-test-subj="lnsDatatable_dynamicColoring_custom_range_groups"
           name="dynamicColoringStopValue"
           buttonSize="compressed"
           options={[
@@ -252,6 +254,7 @@ export function CustomizablePalette({
       {!isAutoRange ? (
         <>
           <EuiFormRow
+            data-test-subj="lnsDatatable_dynamicColoring_min_range_label"
             label={i18n.translate('xpack.lens.table.dynamicColoring.progression.minStop', {
               defaultMessage: 'Min color stop',
             })}
@@ -266,6 +269,7 @@ export function CustomizablePalette({
             }
           >
             <EuiFieldNumber
+              data-test-subj="lnsDatatable_dynamicColoring_min_range"
               value={minLocalValue}
               onChange={({ target }) => {
                 setMinLocalValue(target.value);
@@ -275,6 +279,7 @@ export function CustomizablePalette({
             />
           </EuiFormRow>
           <EuiFormRow
+            data-test-subj="lnsDatatable_dynamicColoring_max_range_label"
             label={i18n.translate('xpack.lens.table.dynamicColoring.progression.maxStop', {
               defaultMessage: 'Max color stop',
             })}
@@ -289,6 +294,7 @@ export function CustomizablePalette({
             }
           >
             <EuiFieldNumber
+              data-test-subj="lnsDatatable_dynamicColoring_max_range"
               value={maxLocalValue}
               onChange={({ target }) => {
                 setMaxLocalValue(target.value);
@@ -307,7 +313,10 @@ export function CustomizablePalette({
           display="columnCompressed"
         >
           <EuiColorStops
-            label="Color progression"
+            data-test-subj="lnsDatatable_dynamicColoring_progression_custom_stops"
+            label={i18n.translate('xpack.lens.table.dynamicColoring.progression.label', {
+              defaultMessage: 'Color progression',
+            })}
             onChange={(colorSteps) =>
               setPalette(
                 mergePaletteParams(activePalette, {
@@ -389,6 +398,7 @@ export function CustomizablePalette({
           display="columnCompressed"
         >
           <EuiRange
+            data-test-subj="lnsDatatable_dynamicColoring_progression_steps"
             value={activePalette?.params?.steps || DEFAULT_COLOR_STEPS}
             onChange={({
               currentTarget,
@@ -413,15 +423,23 @@ export function CustomizablePalette({
           />
         </EuiFormRow>
       )}
-      <EuiFormRow label="Reverse colors" display="columnCompressedSwitch">
+      <EuiFormRow
+        label={i18n.translate('xpack.lens.table.dynamicColoring.reverse.label', {
+          defaultMessage: 'Reverse colors',
+        })}
+        display="columnCompressedSwitch"
+      >
         <EuiSwitch
+          data-test-subj="lnsDatatable_dynamicColoring_reverse"
           checked={Boolean(activePalette.params?.reverse ?? defaultParams.reverse)}
           onChange={(newValue) =>
             setPalette(mergePaletteParams(activePalette, { reverse: newValue.target.checked }))
           }
           compressed
           showLabel={false}
-          label="Reverse colors"
+          label={i18n.translate('xpack.lens.table.dynamicColoring.reverse.label', {
+            defaultMessage: 'Reverse colors',
+          })}
         />
       </EuiFormRow>
     </>

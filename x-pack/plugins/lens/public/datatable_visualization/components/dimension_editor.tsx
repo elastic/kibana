@@ -227,13 +227,14 @@ export function TableDimensionEditor(
               <EuiFlexGroup style={{ height: 32 }} alignItems="center" gutterSize="none">
                 <EuiFlexItem>
                   <EuiColorPaletteDisplay
-                    data-test-subj="lns-paletteGradientPicker"
+                    data-test-subj="lnsDatatable_dynamicColoring_palette"
                     palette={colorStops || []}
                     type={paletteMode}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
+                    data-test-subj="lnsDatatable_dynamicColoring_trigger"
                     iconType="controlsHorizontal"
                     onClick={() => {
                       setIsPaletteOpen(!isPaletteOpen);
