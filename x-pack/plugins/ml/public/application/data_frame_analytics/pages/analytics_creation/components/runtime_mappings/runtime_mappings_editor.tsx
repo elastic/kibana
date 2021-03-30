@@ -9,7 +9,7 @@ import { isEqual } from 'lodash';
 import React, { memo, FC } from 'react';
 import { EuiCodeEditor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isRuntimeMappings } from './types';
+import { isRuntimeMappings } from '../../../../../../../common/util/runtime_field_utils';
 
 // TODO: update types
 interface Props {
@@ -32,7 +32,7 @@ export const RuntimeMappingsEditor: FC<Props> = memo(
   }) => {
     return (
       <EuiCodeEditor
-        data-test-subj="transformAdvancedRuntimeMappingsEditor"
+        data-test-subj="mlDataFrameAnalyticsAdvancedRuntimeMappingsEditor"
         style={{ border: '1px solid #e3e6ef' }}
         height="250px"
         width="100%"
@@ -66,9 +66,12 @@ export const RuntimeMappingsEditor: FC<Props> = memo(
           fontSize: '12px',
         }}
         theme="textmate"
-        aria-label={i18n.translate('xpack.transform.stepDefineForm.advancedEditorAriaLabel', {
-          defaultMessage: 'Advanced pivot editor',
-        })}
+        aria-label={i18n.translate(
+          'xpack.ml.dataframe.analytics.createWizard.runtimeMappings.advancedEditorAriaLabel',
+          {
+            defaultMessage: 'Advanced runtime editor',
+          }
+        )}
       />
     );
   },

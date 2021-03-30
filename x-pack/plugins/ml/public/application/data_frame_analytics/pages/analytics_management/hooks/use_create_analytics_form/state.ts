@@ -9,6 +9,7 @@ import { RuntimeMappings } from '../../../../../../../common/types/fields';
 import { DeepPartial, DeepReadonly } from '../../../../../../../common/types/common';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../../ml_nodes_check';
+import { isPopulatedObject } from '../../../../../../../common/util/object_utils';
 
 import { defaultSearchQuery, getAnalysisType } from '../../../../common/analytics';
 import { CloneDataFrameAnalyticsConfig } from '../../components/action_clone';
@@ -219,7 +220,7 @@ export const getJobConfigFromFormState = (
         ? formState.sourceIndex.split(',').map((d) => d.trim())
         : formState.sourceIndex,
       query: formState.jobConfigQuery,
-      ...(formState.runtimeMappings && Object.keys(formState.runtimeMappings).length > 0
+      ...(isPopulatedObject(formState.runtimeMappings)
         ? { runtime_mappings: formState.runtimeMappings }
         : {}),
     },

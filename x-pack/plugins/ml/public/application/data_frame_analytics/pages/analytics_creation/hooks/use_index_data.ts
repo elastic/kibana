@@ -13,6 +13,7 @@ import { CoreSetup } from 'src/core/public';
 
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
 import { RuntimeMappings } from '../../../../../../common/types/fields';
+import { isPopulatedObject } from '../../../../../../common/util/object_utils';
 
 import { DataLoader } from '../../../../datavisualizer/index_based/data_loader';
 
@@ -107,7 +108,7 @@ export const useIndexData = (
         fields: ['*'],
         _source: false,
         ...(Object.keys(sort).length > 0 ? { sort } : {}),
-        ...(combinedRuntimeMappings && Object.keys(combinedRuntimeMappings).length > 0
+        ...(isPopulatedObject(combinedRuntimeMappings)
           ? { runtime_mappings: combinedRuntimeMappings }
           : {}),
       },

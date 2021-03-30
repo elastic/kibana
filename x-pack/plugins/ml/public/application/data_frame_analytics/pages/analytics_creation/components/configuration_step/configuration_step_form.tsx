@@ -31,6 +31,7 @@ import {
 } from '../../../../common/analytics';
 import { getScatterplotMatrixLegendType } from '../../../../common/get_scatterplot_matrix_legend_type';
 import { RuntimeMappings as RuntimeMappingsType } from '../../../../../../../common/types/fields';
+import { isPopulatedObject } from '../../../../../../../common/util/object_utils';
 import { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { Messages } from '../shared';
 import {
@@ -209,7 +210,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
 
         if (
           isClone &&
-          typeof formState.runtimeMappings === 'object' &&
+          isPopulatedObject(formState.runtimeMappings) &&
           Object.keys(formState.runtimeMappings).includes(form.dependentVariable)
         ) {
           resetDependentVariable = false;
