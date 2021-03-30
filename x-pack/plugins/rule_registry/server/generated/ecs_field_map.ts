@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { pickWithPatterns } from '../rule_registry/field_map/pick_with_patterns';
+
 export const ecsFieldMap = {
   '@timestamp': {
     type: 'date',

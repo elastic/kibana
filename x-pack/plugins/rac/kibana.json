@@ -16,6 +16,7 @@
     "data",
     "features",
     "navigation",
+    "ruleRegistry",
     "taskManager"
   ],
   "server": true,

@@ -72,6 +72,7 @@ export const lifecycleRuleAlertType: AlertType<
     state: [{ name: 'cpuUsage', description: 'CPU usage' }],
   },
   minimumLicenseRequired: 'basic',
+  producer: 'rac',
   async executor({
     alertId,
     startedAt,
@@ -123,5 +124,4 @@ export const lifecycleRuleAlertType: AlertType<
       lastChecked: new Date(),
     };
   },
-  producer: 'rac',
 };

@@ -14,9 +14,13 @@ import {
 } from '../../../../src/plugins/telemetry/server';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { LicensingPluginStart } from '../../licensing/server';
+import { RuleRegistryPluginSetupContract } from '../../rule_registry/server';
+import { ecsFieldMap } from '../../rule_registry/server/generated/ecs_field_map';
+import { pickWithPatterns } from '../../rule_registry/server/rule_registry/field_map/pick_with_patterns';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { PLUGIN_ID, RacPageName } from '../common';
 import { LIFECYCLE_RULE_ALERT_TYPE_ID } from '../public/types';
+import { legacySignalFieldMap } from './field_mappings/legacy_signal_field_map';
 import { lifecycleRuleAlertType } from './rules/lifecycle_rule_alert_type';
 import { PluginSetupContract as FeaturesSetup } from '../../features/server';
 
@@ -30,7 +34,7 @@ import { defineRoutes } from './routes';
 import { createEsContext, EsContext } from './es';
 
 export interface SetupPlugins {
-  alerting: AlertingSetup;
+  ruleRegistry: RuleRegistryPluginSetupContract;
   data: DataPluginSetup;
   features: FeaturesSetup;
   taskManager?: TaskManagerSetupContract;
@@ -52,6 +56,8 @@ const racSubPlugins = [
   `${PLUGIN_ID}:${RacPageName.alerts}`,
   `${PLUGIN_ID}:${RacPageName.cases}`,
 ];
+
+export type RacRuleRegistry = SetupPlugins['ruleRegistry'];
 
 export class RacPlugin implements Plugin<RacPluginSetup, RacPluginStart> {
   private readonly logger: Logger;
@@ -129,9 +135,19 @@ export class RacPlugin implements Plugin<RacPluginSetup, RacPluginStart> {
       },
     });
 
-    plugins.alerting.registerType(lifecycleRuleAlertType);
+    // Create a couple test registries
+    const ruleRegistry = plugins.ruleRegistry.create({
+      namespace: 'rac',
+      fieldMap: {
+        ...legacySignalFieldMap,
+      },
+    });
 
-    return {};
+    ruleRegistry.registerType(lifecycleRuleAlertType);
+
+    return {
+      ruleRegistry,
+    };
   }
 
   public start(core: CoreStart) {

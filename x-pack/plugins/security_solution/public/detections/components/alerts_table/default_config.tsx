@@ -156,6 +156,33 @@ export const alertsHeaders: ColumnHeaderOptions[] = [
   },
 ];
 
+export const alertsHeadersO11y: ColumnHeaderOptions[] = [
+  {
+    columnHeaderType: defaultColumnHeaderType,
+    id: '@timestamp',
+    label: 'Triggered',
+    width: DEFAULT_DATE_COLUMN_MIN_WIDTH + 5,
+  },
+  {
+    columnHeaderType: defaultColumnHeaderType,
+    id: 'signal.rule.interval',
+    label: 'Duration',
+    width: DEFAULT_COLUMN_MIN_WIDTH,
+  },
+  {
+    columnHeaderType: defaultColumnHeaderType,
+    id: 'signal.rule.severity',
+    label: i18n.ALERTS_HEADERS_SEVERITY,
+    width: 105,
+  },
+  {
+    columnHeaderType: defaultColumnHeaderType,
+    id: 'signal.rule.description',
+    label: 'Reason',
+    width: 300,
+  },
+];
+
 export const alertsDefaultModel: SubsetTimelineModel = {
   ...timelineDefaults,
   columns: alertsHeaders,
