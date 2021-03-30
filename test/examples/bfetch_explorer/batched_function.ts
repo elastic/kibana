@@ -38,18 +38,27 @@ export default function ({ getService }: FtrProviderContext) {
         {
           num: 300,
           result: {
+            meta: {
+              size: 30,
+            },
             num: 600,
           },
         },
         {
           num: 1000,
           result: {
+            meta: {
+              size: 30,
+            },
             num: 2000,
           },
         },
         {
           num: 2000,
           result: {
+            meta: {
+              size: 30,
+            },
             num: 4000,
           },
         },
