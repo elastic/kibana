@@ -8,7 +8,7 @@ kibanaPipeline(timeoutMinutes: 210, checkPrChanges: true, setCommitStatus: true)
     githubPr.withDefaultPrComments {
       ciStats.trackBuild {
         catchError {
-          worker.ci(name: 'ci-worker', size: 'xxl', ramDisk: true) {
+          workers.ci(name: 'ci-worker', size: 'xxl', ramDisk: true) {
             kibanaPipeline.buildOss(20)
             kibanaPipeline.ossCiGroupProcess(6, true)
           }
