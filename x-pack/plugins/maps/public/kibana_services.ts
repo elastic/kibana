@@ -26,9 +26,7 @@ export function setStartServices(core: CoreStart, plugins: MapsPluginStartDepend
 export const getIndexPatternService = () => pluginsStart.data.indexPatterns;
 export const getAutocompleteService = () => pluginsStart.data.autocomplete;
 export const getInspector = () => pluginsStart.inspector;
-export const getFileUploadComponent = async () => {
-  return await pluginsStart.fileUpload.getFileUploadComponent();
-};
+export const getFileUpload = () => pluginsStart.fileUpload;
 export const getUiSettings = () => coreStart.uiSettings;
 export const getIsDarkMode = () => getUiSettings().get('theme:darkMode', false);
 export const getIndexPatternSelectComponent = () => pluginsStart.data.ui.IndexPatternSelect;

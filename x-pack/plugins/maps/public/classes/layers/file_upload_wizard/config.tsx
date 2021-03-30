@@ -9,12 +9,24 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
 import { ClientFileCreateSourceEditor, INDEX_SETUP_STEP_ID, INDEXING_STEP_ID } from './wizard';
+import { getFileUpload } from '../../../kibana_services';
 
 export const uploadLayerWizardConfig: LayerWizard = {
   categories: [],
   description: i18n.translate('xpack.maps.fileUploadWizard.description', {
     defaultMessage: 'Index GeoJSON data in Elasticsearch',
   }),
+  disabledReason: i18n.translate('xpack.maps.fileUploadWizard.disabledDesc', {
+    defaultMessage:
+      'Unable to upload files, you are missing the Kibana privilege "Index Pattern Management".',
+  }),
+  getIsDisabled: async () => {
+    const hasImportPermission = await getFileUpload().hasImportPermission({
+      checkCreateIndexPattern: true,
+      checkHasManagePipeline: false,
+    });
+    return !hasImportPermission;
+  },
   icon: 'importAction',
   prerequisiteSteps: [
     {
