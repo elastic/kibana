@@ -11,29 +11,28 @@ import { CloudConfigType } from '.';
 import { getFullCloudUrl } from './utils';
 
 export const createUserMenuLinks = (config: CloudConfigType): UserMenuLink[] => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { profile_url, organization_url, base_url } = config;
+  const { profile_url: profileUrl, organization_url: organizationUrl, base_url: baseUrl } = config;
   const userMenuLinks = [] as UserMenuLink[];
 
-  if (base_url && profile_url) {
+  if (baseUrl && profileUrl) {
     userMenuLinks.push({
       label: i18n.translate('xpack.cloud.userMenuLinks.profileLinkText', {
         defaultMessage: 'Profile',
       }),
       iconType: 'user',
-      href: getFullCloudUrl(base_url, profile_url),
+      href: getFullCloudUrl(baseUrl, profileUrl),
       order: 100,
       setAsProfile: true,
     });
   }
 
-  if (base_url && organization_url) {
+  if (baseUrl && organizationUrl) {
     userMenuLinks.push({
       label: i18n.translate('xpack.cloud.userMenuLinks.accountLinkText', {
         defaultMessage: 'Account & Billing',
       }),
       iconType: 'gear',
-      href: getFullCloudUrl(base_url, organization_url),
+      href: getFullCloudUrl(baseUrl, organizationUrl),
       order: 200,
     });
   }

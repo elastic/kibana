@@ -51,39 +51,44 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   }
 
   public setup(core: CoreSetup, { home }: CloudSetupDependencies) {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { id, cname, profile_url, organization_url, deployment_url, base_url } = this.config;
+    const {
+      id,
+      cname,
+      profile_url: profileUrl,
+      organization_url: organizationUrl,
+      deployment_url: deploymentUrl,
+      base_url: baseUrl,
+    } = this.config;
     this.isCloudEnabled = getIsCloudEnabled(id);
 
     if (home) {
       home.environment.update({ cloud: this.isCloudEnabled });
       if (this.isCloudEnabled) {
-        home.tutorials.setVariable('cloud', { id, base_url, profile_url });
+        home.tutorials.setVariable('cloud', { id, baseUrl, profileUrl });
       }
     }
 
     return {
       cloudId: id,
       cname,
-      baseUrl: base_url,
-      deploymentUrl: getFullCloudUrl(base_url, deployment_url),
-      profileUrl: getFullCloudUrl(base_url, profile_url),
-      organizationUrl: getFullCloudUrl(base_url, organization_url),
+      baseUrl,
+      deploymentUrl: getFullCloudUrl(baseUrl, deploymentUrl),
+      profileUrl: getFullCloudUrl(baseUrl, profileUrl),
+      organizationUrl: getFullCloudUrl(baseUrl, organizationUrl),
       isCloudEnabled: this.isCloudEnabled,
     };
   }
 
   public start(coreStart: CoreStart, { security }: CloudStartDependencies) {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { deployment_url, base_url } = this.config;
+    const { deployment_url: deploymentUrl, base_url: baseUrl } = this.config;
     coreStart.chrome.setHelpSupportUrl(ELASTIC_SUPPORT_LINK);
-    if (base_url && deployment_url) {
+    if (baseUrl && deploymentUrl) {
       coreStart.chrome.setCustomNavLink({
         title: i18n.translate('xpack.cloud.deploymentLinkLabel', {
           defaultMessage: 'Manage this deployment',
         }),
         euiIconType: 'arrowLeft',
-        href: getFullCloudUrl(base_url, deployment_url),
+        href: getFullCloudUrl(baseUrl, deploymentUrl),
       });
     }
 

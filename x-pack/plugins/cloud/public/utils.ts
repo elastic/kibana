@@ -6,11 +6,9 @@
  */
 
 export function getFullCloudUrl(baseUrl: string | undefined, dirPath: string | undefined) {
-  let fullCloudUrl = '';
-
-  if (typeof baseUrl !== 'undefined' && typeof dirPath !== 'undefined') {
-    fullCloudUrl = baseUrl.concat(dirPath);
+  if (baseUrl && dirPath) {
+    return `${baseUrl}${dirPath}`;
   }
 
-  return fullCloudUrl;
+  return '';
 }
