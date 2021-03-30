@@ -593,11 +593,16 @@ export function DashboardTopNav({
                 })}
                 onClick={createNew}
                 iconType="plusInCircleFilled"
-                data-test-subj="dashboardAddPanelButton"
+                data-test-subj="dashboardAddNewPanelButton"
               />
             ),
             quickButtonGroup: <QuickButtonGroup buttons={quickButtons} />,
-            addFromLibraryButton: <AddFromLibraryButton onClick={addFromLibrary} />,
+            addFromLibraryButton: (
+              <AddFromLibraryButton
+                onClick={addFromLibrary}
+                data-test-subj="dashboardAddPanelButton"
+              />
+            ),
           }}
         </SolutionToolbar>
       ) : null}
