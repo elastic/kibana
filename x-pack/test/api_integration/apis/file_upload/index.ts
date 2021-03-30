@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '../../../../src/core/server';
-import { FileUploadPlugin } from './plugin';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new FileUploadPlugin(initializerContext);
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('File upload', function () {
+    loadTestFile(require.resolve('./has_import_permission'));
+  });
+}
