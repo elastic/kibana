@@ -89,8 +89,7 @@ export function MachineLearningAnomalyExplorerProvider({ getService }: FtrProvid
         true
       );
       await testSubjects.clickWhenNotDisabled('mlAddAndEditDashboardButton');
-      // changing to the dashboard app might take sime time
-      const embeddable = await testSubjects.find('mlAnomalySwimlaneEmbeddableWrapper', 30 * 1000);
+      const embeddable = await testSubjects.find('mlAnomalySwimlaneEmbeddableWrapper');
       const swimlane = await embeddable.findByClassName('mlSwimLaneContainer');
       expect(await swimlane.isDisplayed()).to.eql(
         true,
