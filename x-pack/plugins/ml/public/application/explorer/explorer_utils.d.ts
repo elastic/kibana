@@ -150,6 +150,7 @@ export declare const loadDataForCharts: (
 ) => Promise<ChartRecord[] | undefined>;
 
 export declare const loadFilteredTopInfluencers: (
+  mlResultsService: MlResultsService,
   jobIds: string[],
   earliestMs: number,
   latestMs: number,

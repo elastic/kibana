@@ -234,7 +234,7 @@ const loadExplorerDataProvider = (
               timefilter,
               tableSeverity
             ),
-            influencers:
+            filteredTopInfluencers:
               (selectionInfluencers.length > 0 || influencersFilterQuery !== undefined) &&
               anomalyChartRecords !== undefined &&
               anomalyChartRecords.length > 0
@@ -269,10 +269,10 @@ const loadExplorerDataProvider = (
             tap(({ anomalyChartsData }) => {
               explorerService.setCharts(anomalyChartsData as ExplorerChartsData);
             }),
-            map(({ viewBySwimlaneState }) => {
+            map(({ viewBySwimlaneState, filteredTopInfluencers }) => {
               return {
                 annotations: annotationsData,
-                influencers: influencers as any,
+                influencers: filteredTopInfluencers as any,
                 loading: false,
                 viewBySwimlaneDataLoading: false,
                 anomalyChartsDataLoading: false,
