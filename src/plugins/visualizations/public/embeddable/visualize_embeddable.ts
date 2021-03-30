@@ -135,6 +135,7 @@ export class VisualizeEmbeddable
       parent
     );
     this.deps = deps;
+    this.query = this.input.query;
     this.timefilter = timefilter;
     this.syncColors = this.input.syncColors;
     this.vis = vis;
