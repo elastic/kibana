@@ -35,7 +35,8 @@ export const globalRead: Role = {
     kibana: [
       {
         feature: {
-          cases: ['read'],
+          securitySolutionFixture: ['read'],
+          observabilityFixture: ['all'],
         },
         spaces: ['*'],
       },

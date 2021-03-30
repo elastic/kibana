@@ -41,6 +41,8 @@ import {
   secOnlyRead,
   noKibanaPrivileges,
   superUser,
+  globalRead,
+  obsSecRead,
 } from '../../../../common/lib/authentication/users';
 
 interface CaseAttributes {
@@ -705,60 +707,63 @@ export default ({ getService }: FtrProviderContext): void => {
           .send(getPostCaseRequest({ scope: 'observabilityFixture' }))
           .expect(200);
 
-        // Get all cases as security solution user
-        const { body: secBody } = await supertestWithoutAuth
-          .get(`${getSpaceUrlPrefix('space1')}${CASES_URL}/_find?sortOrder=asc`)
-          .auth(secOnlyRead.username, secOnlyRead.password)
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(200);
-
-        // Get all cases as observability user
-        const { body: obsBody } = await supertestWithoutAuth
-          .get(`${getSpaceUrlPrefix('space1')}${CASES_URL}/_find?sortOrder=asc`)
-          .auth(obsOnlyRead.username, obsOnlyRead.password)
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(200);
-
-        const secRes = secBody as CasesFindResponse;
-        const obsRes = obsBody as CasesFindResponse;
-
-        expect(secRes.total).to.eql(1);
-        expect(obsRes.total).to.eql(1);
-
-        secRes.cases.forEach((theCase) => expect(theCase.scope).to.eql('securitySolutionFixture'));
-        obsRes.cases.forEach((theCase) => expect(theCase.scope).to.eql('observabilityFixture'));
+        for (const scenario of [
+          {
+            user: globalRead,
+            numberOfExpectedCases: 2,
+            scopes: ['securitySolutionFixture', 'observabilityFixture'],
+          },
+          {
+            user: superUser,
+            numberOfExpectedCases: 2,
+            scopes: ['securitySolutionFixture', 'observabilityFixture'],
+          },
+          { user: secOnlyRead, numberOfExpectedCases: 1, scopes: ['securitySolutionFixture'] },
+          { user: obsOnlyRead, numberOfExpectedCases: 1, scopes: ['observabilityFixture'] },
+          {
+            user: obsSecRead,
+            numberOfExpectedCases: 2,
+            scopes: ['securitySolutionFixture', 'observabilityFixture'],
+          },
+        ]) {
+          const { body } = await supertestWithoutAuth
+            .get(`${getSpaceUrlPrefix('space1')}${CASES_URL}/_find?sortOrder=asc`)
+            .auth(scenario.user.username, scenario.user.password)
+            .set('kbn-xsrf', 'true')
+            .send()
+            .expect(200);
+          const res = body as CasesFindResponse;
+          expect(res.total).to.eql(scenario.numberOfExpectedCases);
+          res.cases.forEach((theCase) =>
+            expect(scenario.scopes.includes(theCase.scope)).to.be(true)
+          );
+        }
       });
 
-      it(`User ${
-        noKibanaPrivileges.username
-      } with role(s) ${noKibanaPrivileges.roles.join()} - should NOT create a case`, async () => {
-        await supertestWithoutAuth
-          .post(`${getSpaceUrlPrefix('space1')}${CASES_URL}`)
-          .auth(noKibanaPrivileges.username, noKibanaPrivileges.password)
-          .set('kbn-xsrf', 'true')
-          .send(getPostCaseRequest())
-          .expect(403);
-      });
+      for (const scenario of [
+        { user: noKibanaPrivileges, space: 'space1' },
+        { user: secOnly, space: 'space2' },
+      ]) {
+        it(`User ${scenario.user.username} with role(s) ${scenario.user.roles.join()} and space ${
+          scenario.space
+        } - should NOT read a case`, async () => {
+          // super user creates a case at the appropriate space
+          await supertestWithoutAuth
+            .post(`${getSpaceUrlPrefix(scenario.space)}${CASES_URL}`)
+            .auth(superUser.username, superUser.password)
+            .set('kbn-xsrf', 'true')
+            .send(getPostCaseRequest())
+            .expect(200);
 
-      it('should NOT read a case from a space with no permissions', async () => {
-        // Create a case owned by the super user on space2 for securitySolutionFixture
-        await supertestWithoutAuth
-          .post(`${getSpaceUrlPrefix('space2')}${CASES_URL}`)
-          .auth(superUser.username, superUser.password)
-          .set('kbn-xsrf', 'true')
-          .send(getPostCaseRequest())
-          .expect(200);
-
-        // secOnly user has permission only on space1
-        await supertestWithoutAuth
-          .get(`${getSpaceUrlPrefix('space2')}${CASES_URL}/_find?sortOrder=asc`)
-          .auth(secOnly.username, secOnly.password)
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(403);
-      });
+          // user should not be able to read cases at the appropriate space
+          await supertestWithoutAuth
+            .get(`${getSpaceUrlPrefix(scenario.space)}${CASES_URL}/_find?sortOrder=asc`)
+            .auth(scenario.user.username, scenario.user.password)
+            .set('kbn-xsrf', 'true')
+            .send(getPostCaseRequest())
+            .expect(403);
+        });
+      }
     });
   });
 };
