@@ -8,6 +8,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
+import classNames from 'classnames';
 import './discover_grid.scss';
 import {
   EuiDataGridSorting,
@@ -327,11 +328,18 @@ export const DiscoverGrid = ({
           button={
             <EuiButtonEmpty
               size="xs"
+              color="text"
               iconType="documents"
-              className="euiDataGrid__controlBtn"
               onClick={() => setIsSelectionPopoverOpen(true)}
               data-selected-documents={selectedDocs.length}
               data-test-subj="dscGridSelectionBtn"
+              isSelected={isFilterActive}
+              className={classNames({
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                euiDataGrid__controlBtn: true,
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                'euiDataGrid__controlBtn--active': isFilterActive,
+              })}
             >
               <FormattedMessage
                 id="discover.selectedDocumentsNumber"
@@ -344,7 +352,7 @@ export const DiscoverGrid = ({
           <EuiContextMenuPanel items={getMenuItems()} />
         </EuiPopover>
       ) : null,
-    [selectedDocs, setIsSelectionPopoverOpen, isSelectionPopoverOpen, getMenuItems]
+    [selectedDocs, setIsSelectionPopoverOpen, isSelectionPopoverOpen, getMenuItems, isFilterActive]
   );
 
   if (!rowCount) {
