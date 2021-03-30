@@ -215,8 +215,9 @@ the changes.
 
 [horizontal]
 [[xpackdashboardmode-roles]]`xpackDashboardMode:roles`::
-**Deprecated. Use <<kibana-feature-privileges,feature privileges>> instead.**
-The roles that belong to <<xpack-dashboard-only-mode, dashboard only mode>>.
+deprecated:[7.7.0] The roles that belong to
+<<xpack-dashboard-only-mode, dashboard only mode>>. Use
+<<kibana-feature-privileges,feature privileges>> instead.
 
 [float]
 [[kibana-discover-settings]]
@@ -335,11 +336,11 @@ changes.
 
 [horizontal]
 [[courier-batchsearches]]`courier:batchSearches`::
-**Deprecated in 7.6. Starting in 8.0, this setting will be optimized internally.**
+deprecated:[7.6.0]
 When disabled, dashboard panels will load individually, and search requests will
 terminate when users navigate away or update the query. When enabled, dashboard
 panels will load together when all of the data is loaded, and searches will not
-terminate.
+terminate. Starting in 8.0, this setting will be optimized internally.
 
 [[courier-customrequestpreference]]`courier:customRequestPreference`::
 {ref}/search-request-body.html#request-body-search-preference[Request preference]
@@ -456,7 +457,7 @@ of buckets to try to represent.
 Enables the legacy charts library for aggregation-based area, line, and bar charts in *Visualize*.
 
 [[visualization-colormapping]]`visualization:colorMapping`::
-**This setting is deprecated and will not be supported as of 8.0.**
+deprecated:[7.11.0,This setting will not be supported as of 8.0.]
 Maps values to specific colors in charts using the *Compatibility* palette.
 
 [[visualization-dimmingopacity]]`visualization:dimmingOpacity`::
