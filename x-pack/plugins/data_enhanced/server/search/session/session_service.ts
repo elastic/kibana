@@ -448,6 +448,7 @@ export class SearchSessionService
         extend: this.extend.bind(this, deps, user),
         cancel: this.cancel.bind(this, deps, user),
         delete: this.delete.bind(this, deps, user),
+        getConfig: () => this.config.search.sessions,
       };
     };
   };

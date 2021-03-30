@@ -6,10 +6,13 @@
  * Side Public License, v 1.
  */
 
-export * from './types';
-export * from './strategies/es_search';
-export * from './strategies/ese_search';
-export * from './strategies/eql_search';
-export { usageProvider, SearchUsage, searchUsageObserver } from './collectors';
-export * from './aggs';
-export * from './session';
+import { ISearchOptions } from '../../types';
+
+export const ENHANCED_ES_SEARCH_STRATEGY = 'ese';
+
+export interface IAsyncSearchOptions extends ISearchOptions {
+  /**
+   * The number of milliseconds to wait between receiving a response and sending another request
+   */
+  pollInterval?: number;
+}

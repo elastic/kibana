@@ -6,10 +6,7 @@
  * Side Public License, v 1.
  */
 
-export * from './types';
-export * from './strategies/es_search';
-export * from './strategies/ese_search';
-export * from './strategies/eql_search';
-export { usageProvider, SearchUsage, searchUsageObserver } from './collectors';
-export * from './aggs';
-export * from './session';
+export { esSearchStrategyProvider } from './es_search_strategy';
+export * from './request_utils';
+export * from './response_utils';
+export { ES_SEARCH_STRATEGY, IEsSearchRequest, IEsSearchResponse } from '../../../../common';

@@ -28,7 +28,6 @@ import { IEsSearchRequest, IEsSearchResponse } from './es_search';
 import { IScopedSearchSessionsClient, ISearchSessionService } from './session';
 
 export interface SearchEnhancements {
-  defaultStrategy: string;
   sessionService: ISearchSessionService;
 }
 

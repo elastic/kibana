@@ -7,9 +7,3 @@
  */
 
 export * from './types';
-export * from './strategies/es_search';
-export * from './strategies/ese_search';
-export * from './strategies/eql_search';
-export { usageProvider, SearchUsage, searchUsageObserver } from './collectors';
-export * from './aggs';
-export * from './session';

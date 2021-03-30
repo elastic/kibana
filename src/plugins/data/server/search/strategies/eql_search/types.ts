@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-export * from './types';
-export * from './strategies/es_search';
-export * from './strategies/ese_search';
-export * from './strategies/eql_search';
-export { usageProvider, SearchUsage, searchUsageObserver } from './collectors';
-export * from './aggs';
-export * from './session';
+import { SearchResponse } from 'elasticsearch';
+
+export interface EqlSearchResponse<T = unknown> extends SearchResponse<T> {
+  id?: string;
+  is_partial: boolean;
+  is_running: boolean;
+}
