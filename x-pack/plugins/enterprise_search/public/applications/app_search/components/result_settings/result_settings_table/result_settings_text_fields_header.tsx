@@ -23,7 +23,7 @@ export const ResultSettingsTextFieldsHeader: React.FC = () => {
           <EuiToolTip
             position="top"
             content={i18n.translate(
-              'xpack.enterpriseSearch.appSearch.engine.resultSettings.table.rawDescription',
+              'xpack.enterpriseSearch.appSearch.engine.resultSettings.table.rawTooltip',
               {
                 defaultMessage:
                   'A raw field is an exact representation of a field value. Must be at least 20 characters. Defaults to the entire field.',
