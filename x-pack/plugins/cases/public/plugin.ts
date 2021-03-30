@@ -14,6 +14,7 @@ import { getCaseViewLazy } from './methods/get_case_view';
 import { getConfigureCasesLazy } from './methods/get_configure_cases';
 import { getCreateCaseLazy } from './methods/get_create_case';
 import { getRecentCasesLazy } from './methods/get_recent_cases';
+import { ENABLE_CASE_CONNECTOR } from '../common';
 
 /**
  * @public
@@ -26,7 +27,9 @@ export class CasesUiPlugin implements Plugin<void, CasesUiStart, SetupPlugins, S
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
   public setup(core: CoreSetup, plugins: SetupPlugins) {
-    plugins.triggersActionsUi.actionTypeRegistry.register(getCaseConnectorUi());
+    if (ENABLE_CASE_CONNECTOR) {
+      plugins.triggersActionsUi.actionTypeRegistry.register(getCaseConnectorUi());
+    }
   }
 
   public start(core: CoreStart, plugins: StartPlugins): CasesUiStart {
