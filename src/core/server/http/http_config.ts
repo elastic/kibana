@@ -7,12 +7,12 @@
  */
 
 import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
+import { IHttpConfig, SslConfig, sslSchema } from '@kbn/server-http-tools';
 import { hostname } from 'os';
 import url from 'url';
 
 import { CspConfigType, CspConfig, ICspConfig } from '../csp';
 import { ExternalUrlConfig, IExternalUrlConfig } from '../external_url';
-import { SslConfig, sslSchema } from './ssl_config';
 
 const validBasePathRegex = /^\/.*[^\/]$/;
 const uuidRegexp = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -151,7 +151,7 @@ export const config = {
 };
 export type HttpConfigType = TypeOf<typeof config.schema>;
 
-export class HttpConfig {
+export class HttpConfig implements IHttpConfig {
   public name: string;
   public autoListen: boolean;
   public host: string;
