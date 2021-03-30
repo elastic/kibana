@@ -250,8 +250,20 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
     if (jobTypeChanged) {
       setLoadingFieldOptions(true);
     }
+    // Ensure runtime field is in 'includes' table if it is set as dependent variable
+    const formCopy = cloneDeep(form);
+    const depVarIsRuntimeField =
+      runtimeMappings &&
+      Object.keys(runtimeMappings).includes(dependentVariable) &&
+      includes.length > 0;
+    const unique = depVarIsRuntimeField
+      ? Array.from(new Set([...includes, dependentVariable]))
+      : undefined;
+    formCopy.includes = unique ? unique : formCopy.includes;
 
-    const { success, expectedMemory, fieldSelection, errorMessage } = await fetchExplainData(form);
+    const { success, expectedMemory, fieldSelection, errorMessage } = await fetchExplainData(
+      formCopy
+    );
 
     if (success) {
       if (shouldUpdateEstimatedMml) {
@@ -565,11 +577,8 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
               options={dependentVariableOptions}
               selectedOptions={dependentVariable ? [{ label: dependentVariable }] : []}
               onChange={(selectedOptions) => {
-                // dependentVariable always needs to be in includes fields
-                const unique = new Set([...includes, selectedOptions[0].label]);
                 setFormState({
                   dependentVariable: selectedOptions[0].label || '',
-                  includes: Array.from(unique),
                 });
               }}
               isClearable={false}
