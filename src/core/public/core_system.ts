@@ -28,6 +28,7 @@ import { DocLinksService } from './doc_links';
 import { RenderingService } from './rendering';
 import { SavedObjectsService } from './saved_objects';
 import { IntegrationsService } from './integrations';
+import { DeprecationsService } from './deprecations';
 import { CoreApp } from './core_app';
 import type { InternalApplicationSetup, InternalApplicationStart } from './application/types';
 
@@ -82,7 +83,7 @@ export class CoreSystem {
   private readonly rendering: RenderingService;
   private readonly integrations: IntegrationsService;
   private readonly coreApp: CoreApp;
-
+  private readonly deprecations: DeprecationsService;
   private readonly rootDomElement: HTMLElement;
   private readonly coreContext: CoreContext;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
@@ -113,6 +114,7 @@ export class CoreSystem {
     this.rendering = new RenderingService();
     this.application = new ApplicationService();
     this.integrations = new IntegrationsService();
+    this.deprecations = new DeprecationsService();
 
     this.coreContext = { coreId: Symbol('core'), env: injectedMetadata.env };
     this.plugins = new PluginsService(this.coreContext, injectedMetadata.uiPlugins);
@@ -195,6 +197,7 @@ export class CoreSystem {
         injectedMetadata,
         notifications,
       });
+      const deprecations = this.deprecations.start({ http });
 
       this.coreApp.start({ application, http, notifications, uiSettings });
 
@@ -210,6 +213,7 @@ export class CoreSystem {
         overlays,
         uiSettings,
         fatalErrors,
+        deprecations,
       };
 
       await this.plugins.start(core);
@@ -252,6 +256,7 @@ export class CoreSystem {
     this.chrome.stop();
     this.i18n.stop();
     this.application.stop();
+    this.deprecations.stop();
     this.rootDomElement.textContent = '';
   }
 }
