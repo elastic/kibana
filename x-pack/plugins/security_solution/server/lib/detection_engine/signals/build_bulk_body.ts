@@ -74,7 +74,9 @@ export const buildBulkBody = ({
     ...additionalSignalFields(doc),
   };
   const event = buildEventTypeSignal(doc);
-  const { threshold_result: thresholdResult, ...filteredSource } = doc._source;
+  const { threshold_result: thresholdResult, ...filteredSource } = doc._source || {
+    threshold_result: null,
+  };
   const signalHit: SignalHit = {
     ...filteredSource,
     '@timestamp': new Date().toISOString(),
