@@ -350,6 +350,11 @@ export class SavedObjectsRepository {
     objects: Array<SavedObjectsBulkCreateObject<T>>,
     options: SavedObjectsCreateOptions = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
+    this._logger.error('savedObjects.bulkCreate', {
+      objects,
+      options,
+    });
+
     const { overwrite = false, refresh = DEFAULT_REFRESH_SETTING } = options;
     const namespace = normalizeNamespace(options.namespace);
     const time = this._getCurrentTime();
