@@ -186,5 +186,18 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       expect(isConfirmationModalVisible).to.eql(true, 'Expect confirmation modal to be visible');
       await testSubjects.click('confirmModalConfirmButton');
     },
+    async ensureRuleActionToggleApplied(
+      ruleName: string,
+      switchName: string,
+      shouldBeCheckedAsString: string
+    ) {
+      await retry.try(async () => {
+        await this.searchAlerts(ruleName);
+        await testSubjects.click('collapsedItemActions');
+        const switchControl = await testSubjects.find(switchName);
+        const isChecked = await switchControl.getAttribute('aria-checked');
+        expect(isChecked).to.eql(shouldBeCheckedAsString);
+      });
+    },
   };
 }
