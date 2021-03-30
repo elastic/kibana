@@ -339,7 +339,7 @@ function runFullASTValidation(
     }
     const nodeOperation = operations[node.name];
     const errors: ErrorWrapper[] = [];
-    const { namedArguments, functions } = groupArgsByType(node.args);
+    const { namedArguments, functions, variables } = groupArgsByType(node.args);
     const [firstArg] = node?.args || [];
 
     if (!nodeOperation) {
@@ -379,7 +379,8 @@ function runFullASTValidation(
             }
           }
         } else {
-          if (firstArg) {
+          // Named arguments only
+          if (functions?.length || variables?.length) {
             errors.push(
               getMessageFromId({
                 messageId: 'shouldNotHaveField',

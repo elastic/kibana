@@ -71,9 +71,17 @@ export const counterRateOperation: OperationDefinition<
   toExpression: (layer, columnId) => {
     return dateBasedOperationToExpression(layer, columnId, 'lens_counter_rate');
   },
-  buildColumn: ({ referenceIds, previousColumn, layer }) => {
+  buildColumn: ({ referenceIds, previousColumn, layer }, columnParams) => {
     const metric = layer.columns[referenceIds[0]];
     const timeScale = previousColumn?.timeScale || DEFAULT_TIME_SCALE;
+    let filter = previousColumn?.filter;
+    if (columnParams) {
+      if ('kql' in columnParams) {
+        filter = { query: columnParams.kql ?? '', language: 'kuery' };
+      } else if ('lucene' in columnParams) {
+        filter = { query: columnParams.lucene ?? '', language: 'lucene' };
+      }
+    }
     return {
       label: ofName(metric && 'sourceField' in metric ? metric.sourceField : undefined, timeScale),
       dataType: 'number',
@@ -82,7 +90,7 @@ export const counterRateOperation: OperationDefinition<
       scale: 'ratio',
       references: referenceIds,
       timeScale,
-      filter: previousColumn?.filter,
+      filter,
       params: getFormatFromPreviousColumn(previousColumn),
     };
   },

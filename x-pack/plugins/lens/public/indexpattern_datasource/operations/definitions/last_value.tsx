@@ -141,7 +141,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
     }
     return errorMessages.length ? errorMessages : undefined;
   },
-  buildColumn({ field, previousColumn, indexPattern }) {
+  buildColumn({ field, previousColumn, indexPattern }, columnParams) {
     const sortField = isTimeFieldNameDateField(indexPattern)
       ? indexPattern.timeFieldName
       : indexPattern.fields.find((f) => f.type === 'date')?.name;
@@ -154,6 +154,14 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       );
     }
 
+    let filter = previousColumn?.filter;
+    if (columnParams) {
+      if ('kql' in columnParams) {
+        filter = { query: columnParams.kql ?? '', language: 'kuery' };
+      } else if ('lucene' in columnParams) {
+        filter = { query: columnParams.lucene ?? '', language: 'lucene' };
+      }
+    }
     return {
       label: ofName(field.displayName),
       dataType: field.type as DataType,
@@ -161,7 +169,7 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       isBucketed: false,
       scale: field.type === 'string' ? 'ordinal' : 'ratio',
       sourceField: field.name,
-      filter: previousColumn?.filter,
+      filter,
       params: {
         sortField,
         ...getFormatFromPreviousColumn(previousColumn),

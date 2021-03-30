@@ -36,6 +36,11 @@ function inLocation(cursorPosition: number, location: TinymathLocation) {
   return cursorPosition >= location.min && cursorPosition < location.max;
 }
 
+const filterableOperationParams = [
+  { name: 'kql', type: 'string', required: false },
+  { name: 'lucene', type: 'string', required: false },
+];
+
 const MARKER = 'LENS_MATH_MARKER';
 
 function getInfoAtPosition(
@@ -76,16 +81,16 @@ export function offsetToRowColumn(expression: string, offset: number): monaco.Po
   throw new Error('Algorithm failure');
 }
 
-export function monacoPositionToOffset(expression: string, position: monaco.Position): number {
-  const lines = expression.split(/\n/);
-  return lines
-    .slice(0, position.lineNumber - 1)
-    .reduce(
-      (prev, current, index) =>
-        prev + index === position.lineNumber - 1 ? position.column - 1 : current.length,
-      0
-    );
-}
+// export function monacoPositionToOffset(expression: string, position: monaco.Position): number {
+//   const lines = expression.split(/\n/);
+//   return lines
+//     .slice(0, position.lineNumber - 1)
+//     .reduce(
+//       (prev, current, index) =>
+//         prev + index === position.lineNumber - 1 ? position.column - 1 : current.length,
+//       0
+//     );
+// }
 
 export async function suggest(
   expression: string,
@@ -178,23 +183,30 @@ function getArgumentSuggestions(
     return { list: [], type: SUGGESTION_TYPE.FIELD };
   }
 
-  if (position > 0) {
+  if (position > 0 || operation.type === 'count') {
+    const { namedArguments } = groupArgsByType(ast.args);
+    const list = [];
+    if (operation.filterable) {
+      if (!namedArguments.find((arg) => arg.name === 'kql')) {
+        list.push('kql');
+      }
+      if (!namedArguments.find((arg) => arg.name === 'lucene')) {
+        list.push('lucene');
+      }
+    }
     if ('operationParams' in operation) {
       // Exclude any previously used named args
-      const { namedArguments } = groupArgsByType(ast.args);
-      const suggestedParam = operation
-        .operationParams!.filter(
-          (param) =>
-            // Keep the param if it's the first use
-            !namedArguments.find((arg) => arg.name === param.name)
-        )
-        .map((p) => p.name);
-      return {
-        list: suggestedParam,
-        type: SUGGESTION_TYPE.NAMED_ARGUMENT,
-      };
+      list.push(
+        ...operation
+          .operationParams!.filter(
+            (param) =>
+              // Keep the param if it's the first use
+              !namedArguments.find((arg) => arg.name === param.name)
+          )
+          .map((p) => p.name)
+      );
     }
-    return { list: [], type: SUGGESTION_TYPE.FIELD };
+    return { list, type: SUGGESTION_TYPE.NAMED_ARGUMENT };
   }
 
   if (operation.input === 'field' && position === 0) {
@@ -207,12 +219,12 @@ function getArgumentSuggestions(
       ({ operationMetaData }) =>
         operationMetaData.dataType === 'number' && !operationMetaData.isBucketed
     );
-    if (validOperation && operation.type !== 'count') {
+    if (validOperation) {
       const fields = validOperation.operations
         .filter((op) => op.operationType === operation.type)
         .map((op) => ('field' in op ? op.field : undefined))
         .filter((field) => field);
-      return { list: fields, type: SUGGESTION_TYPE.FIELD };
+      return { list: fields as string[], type: SUGGESTION_TYPE.FIELD };
     } else {
       return { list: [], type: SUGGESTION_TYPE.FIELD };
     }
@@ -288,12 +300,14 @@ export function getSuggestion(
         } else {
           const def = operationDefinitionMap[suggestion.label];
           kind = monaco.languages.CompletionItemKind.Constant;
-          if ('operationParams' in def) {
+          if (suggestion.label === 'count' && 'operationParams' in def) {
+            label = `${label}(${def
+              .operationParams!.map((p) => `${p.name}=${p.type}`)
+              .join(', ')})`;
+          } else if ('operationParams' in def) {
             label = `${label}(expression, ${def
               .operationParams!.map((p) => `${p.name}=${p.type}`)
-              .join(', ')}`;
-          } else if (suggestion.label === 'count') {
-            label = `${label}()`;
+              .join(', ')})`;
           } else {
             label = `${label}(expression)`;
           }
@@ -309,6 +323,10 @@ export function getSuggestion(
         id: 'editor.action.triggerSuggest',
       };
       kind = monaco.languages.CompletionItemKind.Keyword;
+      if (label === 'kql' || label === 'lucene') {
+        insertText = `${label}='$0'`;
+        insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
+      }
       label = `${label}=`;
       detail = '';
       break;

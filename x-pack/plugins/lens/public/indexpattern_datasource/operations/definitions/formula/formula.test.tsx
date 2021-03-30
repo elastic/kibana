@@ -19,12 +19,12 @@ jest.mock('../../layer_helpers', () => {
 });
 
 const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
-  avg: ({
+  average: ({
     input: 'field',
     buildColumn: ({ field }: { field: IndexPatternField }) => ({
       label: 'avg',
       dataType: 'number',
-      operationType: 'avg',
+      operationType: 'average',
       sourceField: field.name,
       isBucketed: false,
       scale: 'ratio',
@@ -35,7 +35,19 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
   sum: { input: 'field' } as GenericOperationDefinition,
   last_value: { input: 'field' } as GenericOperationDefinition,
   max: { input: 'field' } as GenericOperationDefinition,
-  count: { input: 'field' } as GenericOperationDefinition,
+  count: ({
+    input: 'field',
+    operationParams: [{ name: 'kql', type: 'string', required: false }],
+    buildColumn: ({ field }: { field: IndexPatternField }) => ({
+      label: 'avg',
+      dataType: 'number',
+      operationType: 'count',
+      sourceField: field.name,
+      isBucketed: false,
+      scale: 'ratio',
+      timeScale: false,
+    }),
+  } as unknown) as GenericOperationDefinition,
   derivative: { input: 'fullReference' } as GenericOperationDefinition,
   moving_average: {
     input: 'fullReference',
@@ -184,7 +196,7 @@ describe('formula', () => {
                   dataType: 'number',
                   isBucketed: false,
                   label: 'col1X0',
-                  operationType: 'avg',
+                  operationType: 'average',
                   scale: 'ratio',
                   sourceField: 'bytes',
                   timeScale: 'd',
@@ -204,7 +216,7 @@ describe('formula', () => {
         scale: 'ratio',
         params: {
           isFormulaBroken: false,
-          formula: 'moving_average(avg(bytes), window=3)',
+          formula: 'moving_average(average(bytes), window=3)',
         },
         references: [],
       });
@@ -257,7 +269,7 @@ describe('formula', () => {
     it('should mutate the layer with new columns for valid formula expressions', () => {
       expect(
         regenerateLayerFromAst(
-          'avg(bytes)',
+          'average(bytes)',
           layer,
           'col1',
           currentColumn,
@@ -274,7 +286,7 @@ describe('formula', () => {
             references: ['col1X1'],
             params: {
               ...currentColumn.params,
-              formula: 'avg(bytes)',
+              formula: 'average(bytes)',
               isFormulaBroken: false,
             },
           },
@@ -283,7 +295,7 @@ describe('formula', () => {
             dataType: 'number',
             isBucketed: false,
             label: 'col1X0',
-            operationType: 'avg',
+            operationType: 'average',
             scale: 'ratio',
             sourceField: 'bytes',
             timeScale: false,
@@ -307,12 +319,12 @@ describe('formula', () => {
     it('returns no change but error if the formula cannot be parsed', () => {
       const formulas = [
         '+',
-        'avg((',
-        'avg((bytes)',
-        'avg(bytes) +',
-        'avg(""',
-        'moving_average(avg(bytes), window=)',
-        'avg(bytes) + moving_average(avg(bytes), window=)',
+        'average((',
+        'average((bytes)',
+        'average(bytes) +',
+        'average(""',
+        'moving_average(average(bytes), window=)',
+        'average(bytes) + moving_average(average(bytes), window=)',
       ];
       for (const formula of formulas) {
         testIsBrokenFormula(formula);
@@ -326,10 +338,10 @@ describe('formula', () => {
     it('returns no change but error if at least one field in the formula is missing', () => {
       const formulas = [
         'noField',
-        'avg(noField)',
+        'average(noField)',
         'noField + 1',
-        'derivative(avg(noField))',
-        'avg(bytes) + derivative(avg(noField))',
+        'derivative(average(noField))',
+        'average(bytes) + derivative(average(noField))',
       ];
 
       for (const formula of formulas) {
@@ -341,13 +353,13 @@ describe('formula', () => {
       const formulas = [
         'noFn()',
         'noFn(bytes)',
-        'avg(bytes) + noFn()',
+        'average(bytes) + noFn()',
         'derivative(noFn())',
         'noFn() + noFnTwo()',
         'noFn(noFnTwo())',
         'noFn() + noFnTwo() + 5',
-        'avg(bytes) + derivative(noFn())',
-        'derivative(avg(bytes) + noFn())',
+        'average(bytes) + derivative(noFn())',
+        'derivative(average(bytes) + noFn())',
       ];
 
       for (const formula of formulas) {
@@ -357,17 +369,17 @@ describe('formula', () => {
 
     it('returns no change but error if one operation has the wrong first argument', () => {
       const formulas = [
-        'avg(7)',
-        'avg()',
-        'avg(avg(bytes))',
-        'avg(1 + 2)',
-        'avg(bytes + 5)',
-        'avg(bytes + bytes)',
+        'average(7)',
+        'average()',
+        'average(average(bytes))',
+        'average(1 + 2)',
+        'average(bytes + 5)',
+        'average(bytes + bytes)',
         'derivative(7)',
         'derivative(bytes + 7)',
         'derivative(bytes + bytes)',
-        'derivative(bytes + avg(bytes))',
-        'derivative(bytes + 7 + avg(bytes))',
+        'derivative(bytes + average(bytes))',
+        'derivative(bytes + 7 + average(bytes))',
       ];
 
       for (const formula of formulas) {
@@ -375,7 +387,7 @@ describe('formula', () => {
       }
     });
 
-    it('returns no change by error if an argument is passed to count operation', () => {
+    it('returns no change but error if an argument is passed to count operation', () => {
       const formulas = ['count(7)', 'count("bytes")', 'count(bytes)'];
 
       for (const formula of formulas) {
@@ -384,17 +396,17 @@ describe('formula', () => {
     });
 
     it('returns no change but error if a required parameter is not passed to the operation in formula', () => {
-      const formula = 'moving_average(avg(bytes))';
+      const formula = 'moving_average(average(bytes))';
       testIsBrokenFormula(formula);
     });
 
     it('returns no change but error if a required parameter passed with the wrong type in formula', () => {
-      const formula = 'moving_average(avg(bytes), window="m")';
+      const formula = 'moving_average(average(bytes), window="m")';
       testIsBrokenFormula(formula);
     });
 
     it('returns error if a required parameter is passed multiple time', () => {
-      const formula = 'moving_average(avg(bytes), window=7, window=3)';
+      const formula = 'moving_average(average(bytes), window=7, window=3)';
       testIsBrokenFormula(formula);
     });
 
@@ -444,10 +456,21 @@ describe('formula', () => {
       ).toEqual(undefined);
     });
 
+    it('returns undefined if count is passed with only a named argument', () => {
+      expect(
+        formulaOperation.getErrorMessage!(
+          getNewLayerWithFormula(`count(kql='*')`, false),
+          'col1',
+          indexPattern,
+          operationDefinitionMap
+        )
+      ).toEqual(undefined);
+    });
+
     it('returns undefined if a field operation is passed with the correct first argument', () => {
       expect(
         formulaOperation.getErrorMessage!(
-          getNewLayerWithFormula('avg(bytes)'),
+          getNewLayerWithFormula('average(bytes)'),
           'col1',
           indexPattern,
           operationDefinitionMap
@@ -456,7 +479,7 @@ describe('formula', () => {
       // note that field names can be wrapped in quotes as well
       expect(
         formulaOperation.getErrorMessage!(
-          getNewLayerWithFormula('avg("bytes")'),
+          getNewLayerWithFormula('average("bytes")'),
           'col1',
           indexPattern,
           operationDefinitionMap
@@ -467,7 +490,7 @@ describe('formula', () => {
     it('returns undefined if a fullReference operation is passed with the correct first argument', () => {
       expect(
         formulaOperation.getErrorMessage!(
-          getNewLayerWithFormula('derivative(avg(bytes))'),
+          getNewLayerWithFormula('derivative(average(bytes))'),
           'col1',
           indexPattern,
           operationDefinitionMap
@@ -476,7 +499,7 @@ describe('formula', () => {
 
       expect(
         formulaOperation.getErrorMessage!(
-          getNewLayerWithFormula('derivative(avg("bytes"))'),
+          getNewLayerWithFormula('derivative(average("bytes"))'),
           'col1',
           indexPattern,
           operationDefinitionMap
@@ -487,7 +510,7 @@ describe('formula', () => {
     it('returns undefined if a fullReference operation is passed with the arguments', () => {
       expect(
         formulaOperation.getErrorMessage!(
-          getNewLayerWithFormula('moving_average(avg(bytes), window=7)'),
+          getNewLayerWithFormula('moving_average(average(bytes), window=7)'),
           'col1',
           indexPattern,
           operationDefinitionMap
@@ -497,7 +520,7 @@ describe('formula', () => {
       // Not sure it will be supported
       //   expect(
       //     formulaOperation.getErrorMessage!(
-      //       getNewLayerWithFormula('moving_average(avg("bytes"), "window"=7)'),
+      //       getNewLayerWithFormula('moving_average(average("bytes"), "window"=7)'),
       //       'col1',
       //       indexPattern,
       //       operationDefinitionMap
@@ -528,11 +551,11 @@ describe('formula', () => {
     it('returns an error if parsing a syntax invalid formula', () => {
       const formulas = [
         '+',
-        'avg((',
-        'avg((bytes)',
-        'avg(bytes) +',
-        'avg(""',
-        'moving_average(avg(bytes), window=)',
+        'average((',
+        'average((bytes)',
+        'average(bytes) +',
+        'average(""',
+        'moving_average(average(bytes), window=)',
       ];
 
       for (const formula of formulas) {
@@ -548,7 +571,12 @@ describe('formula', () => {
     });
 
     it('returns an error if the field is missing', () => {
-      const formulas = ['noField', 'avg(noField)', 'noField + 1', 'derivative(avg(noField))'];
+      const formulas = [
+        'noField',
+        'average(noField)',
+        'noField + 1',
+        'derivative(average(noField))',
+      ];
 
       for (const formula of formulas) {
         expect(
@@ -578,7 +606,7 @@ describe('formula', () => {
     });
 
     it('returns an error if an operation is unknown', () => {
-      const formulas = ['noFn()', 'noFn(bytes)', 'avg(bytes) + noFn()', 'derivative(noFn())'];
+      const formulas = ['noFn()', 'noFn(bytes)', 'average(bytes) + noFn()', 'derivative(noFn())'];
 
       for (const formula of formulas) {
         expect(
@@ -607,12 +635,12 @@ describe('formula', () => {
 
     it('returns an error if field operation in formula have the wrong first argument', () => {
       const formulas = [
-        'avg(7)',
-        'avg()',
-        'avg(avg(bytes))',
-        'avg(1 + 2)',
-        'avg(bytes + 5)',
-        'avg(bytes + bytes)',
+        'average(7)',
+        'average()',
+        'average(average(bytes))',
+        'average(1 + 2)',
+        'average(bytes + 5)',
+        'average(bytes + bytes)',
         'derivative(7)',
       ];
 
@@ -653,7 +681,7 @@ describe('formula', () => {
     it('returns an error if an operation with required parameters does not receive them', () => {
       expect(
         formulaOperation.getErrorMessage!(
-          getNewLayerWithFormula('moving_average(avg(bytes))'),
+          getNewLayerWithFormula('moving_average(average(bytes))'),
           'col1',
           indexPattern,
           operationDefinitionMap
@@ -664,7 +692,7 @@ describe('formula', () => {
 
       expect(
         formulaOperation.getErrorMessage!(
-          getNewLayerWithFormula('moving_average(avg(bytes), myparam=7)'),
+          getNewLayerWithFormula('moving_average(average(bytes), myparam=7)'),
           'col1',
           indexPattern,
           operationDefinitionMap
@@ -677,18 +705,18 @@ describe('formula', () => {
     it('returns an error if a parameter is passed to an operation with no parameters', () => {
       expect(
         formulaOperation.getErrorMessage!(
-          getNewLayerWithFormula('avg(bytes, myparam=7)'),
+          getNewLayerWithFormula('average(bytes, myparam=7)'),
           'col1',
           indexPattern,
           operationDefinitionMap
         )
-      ).toEqual(['The operation avg does not accept any parameter']);
+      ).toEqual(['The operation average does not accept any parameter']);
     });
 
     it('returns an error if the parameter passed to an operation is of the wrong type', () => {
       expect(
         formulaOperation.getErrorMessage!(
-          getNewLayerWithFormula('moving_average(avg(bytes), window="m")'),
+          getNewLayerWithFormula('moving_average(average(bytes), window="m")'),
           'col1',
           indexPattern,
           operationDefinitionMap
@@ -718,8 +746,8 @@ describe('formula', () => {
     it('returns no error if a math operation is passed to fullReference operations', () => {
       const formulas = [
         'derivative(7+1)',
-        'derivative(7+avg(bytes))',
-        'moving_average(7+avg(bytes), window=7)',
+        'derivative(7+average(bytes))',
+        'moving_average(7+average(bytes), window=7)',
       ];
       for (const formula of formulas) {
         expect(
@@ -736,8 +764,8 @@ describe('formula', () => {
     it('returns errors if math operations are used with no arguments', () => {
       const formulas = [
         'derivative(7+1)',
-        'derivative(7+avg(bytes))',
-        'moving_average(7+avg(bytes), window=7)',
+        'derivative(7+average(bytes))',
+        'moving_average(7+average(bytes), window=7)',
       ];
       for (const formula of formulas) {
         expect(

@@ -69,7 +69,15 @@ export const cumulativeSumOperation: OperationDefinition<
   toExpression: (layer, columnId) => {
     return dateBasedOperationToExpression(layer, columnId, 'cumulative_sum');
   },
-  buildColumn: ({ referenceIds, previousColumn, layer }) => {
+  buildColumn: ({ referenceIds, previousColumn, layer }, columnParams) => {
+    let filter = previousColumn?.filter;
+    if (columnParams) {
+      if ('kql' in columnParams) {
+        filter = { query: columnParams.kql ?? '', language: 'kuery' };
+      } else if ('lucene' in columnParams) {
+        filter = { query: columnParams.lucene ?? '', language: 'lucene' };
+      }
+    }
     const ref = layer.columns[referenceIds[0]];
     return {
       label: ofName(ref && 'sourceField' in ref ? ref.sourceField : undefined),
@@ -77,7 +85,7 @@ export const cumulativeSumOperation: OperationDefinition<
       operationType: 'cumulative_sum',
       isBucketed: false,
       scale: 'ratio',
-      filter: previousColumn?.filter,
+      filter,
       references: referenceIds,
       params: getFormatFromPreviousColumn(previousColumn),
     };

@@ -247,6 +247,11 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    * If set to optional, time scaling won't be enabled by default and can be removed.
    */
   timeScalingMode?: TimeScalingMode;
+  /**
+   * Filterable operations can have a KQL or Lucene query added at the dimension level.
+   * This flag is used by the formula to assign the kql= and lucene= named arguments and set up
+   * autocomplete.
+   */
   filterable?: boolean;
 
   getHelpMessage?: (props: HelpProps<C>) => React.ReactNode;
@@ -323,7 +328,7 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
       field: IndexPatternField;
       previousColumn?: IndexPatternColumn;
     },
-    columnParams?: (IndexPatternColumn & C)['params']
+    columnParams?: (IndexPatternColumn & C)['params'] & { kql?: string; lucene?: string }
   ) => C;
   /**
    * This method will be called if the user changes the field of an operation.
@@ -417,7 +422,10 @@ interface FullReferenceOperationDefinition<C extends BaseIndexPatternColumn> {
       referenceIds: string[];
       previousColumn?: IndexPatternColumn;
     },
-    columnParams?: (ReferenceBasedIndexPatternColumn & C)['params']
+    columnParams?: (ReferenceBasedIndexPatternColumn & C)['params'] & {
+      kql?: string;
+      lucene?: string;
+    }
   ) => ReferenceBasedIndexPatternColumn & C;
   /**
    * Returns the meta data of the operation if applied. Undefined

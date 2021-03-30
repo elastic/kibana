@@ -88,6 +88,14 @@ export const movingAverageOperation: OperationDefinition<
   ) => {
     const metric = layer.columns[referenceIds[0]];
     const { window = WINDOW_DEFAULT_VALUE } = columnParams;
+    let filter = previousColumn?.filter;
+    if (columnParams) {
+      if ('kql' in columnParams) {
+        filter = { query: columnParams.kql ?? '', language: 'kuery' };
+      } else if ('lucene' in columnParams) {
+        filter = { query: columnParams.lucene ?? '', language: 'lucene' };
+      }
+    }
     return {
       label: ofName(metric?.label, previousColumn?.timeScale),
       dataType: 'number',
@@ -96,7 +104,7 @@ export const movingAverageOperation: OperationDefinition<
       scale: 'ratio',
       references: referenceIds,
       timeScale: previousColumn?.timeScale,
-      filter: previousColumn?.filter,
+      filter,
       params: {
         window,
         ...getFormatFromPreviousColumn(previousColumn),
