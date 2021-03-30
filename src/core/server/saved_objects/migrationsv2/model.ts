@@ -16,24 +16,7 @@ import { IndexMapping } from '../mappings';
 import { ResponseType } from './next';
 import { SavedObjectsMigrationVersion } from '../types';
 import { disableUnknownTypeMappingFields } from '../migrations/core/migration_context';
-
-/**
- * How many times to retry a step that fails with retryable_es_client_error
- * such as a statusCode: 503 or a snapshot_in_progress_exception.
- *
- * We don't want to immediately crash Kibana and cause a reboot for these
- * intermittent. However, if we're still receiving e.g. a 503 after 10 minutes
- * this is probably not just a temporary problem so we stop trying and exit
- * with a fatal error.
- *
- * Because of the exponential backoff the total time we will retry such errors
- * is:
- * max_retry_time = 2+4+8+16+32+64*(DEFAULT_RETRY_ATTEMPTS-5) + ACTION_DURATION*DEFAULT_RETRY_ATTEMPTS
- *
- * For DEFAULT_RETRY_ATTEMPTS=15, ACTION_DURATION=0
- * max_task_runtime = 11.7 minutes
- */
-const DEFAULT_RETRY_ATTEMPTS = 15;
+import { SavedObjectsMigrationConfigType } from '../saved_objects_config';
 
 /**
  * A helper function/type for ensuring that all control state's are handled.
@@ -115,6 +98,7 @@ function getAliases(indices: FetchIndexResponse) {
 const delayRetryState = <S extends State>(
   state: S,
   errorMessage: string,
+  /** How many times to retry a step that fails */
   maxRetryAttempts: number
 ): S => {
   if (state.retryCount >= maxRetryAttempts) {
@@ -176,7 +160,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   // by the control state specific code below.
   if (Either.isLeft<unknown, unknown>(resW) && resW.left.type === 'retryable_es_client_error') {
     // Retry the same step after an exponentially increasing delay.
-    return delayRetryState(stateP, resW.left.message, DEFAULT_RETRY_ATTEMPTS);
+    return delayRetryState(stateP, resW.left.message, stateP.retryAttempts);
   } else {
     // If the action didn't fail with a retryable_es_client_error, reset the
     // retry counter and retryDelay state
@@ -729,12 +713,14 @@ export const createInitialState = ({
   preMigrationScript,
   migrationVersionPerType,
   indexPrefix,
+  migrationsConfig,
 }: {
   kibanaVersion: string;
   targetMappings: IndexMapping;
   preMigrationScript?: string;
   migrationVersionPerType: SavedObjectsMigrationVersion;
   indexPrefix: string;
+  migrationsConfig: SavedObjectsMigrationConfigType;
 }): InitState => {
   const outdatedDocumentsQuery = {
     bool: {
@@ -774,6 +760,7 @@ export const createInitialState = ({
     outdatedDocumentsQuery,
     retryCount: 0,
     retryDelay: 0,
+    retryAttempts: migrationsConfig.retryAttempts,
     logs: [],
   };
   return initialState;

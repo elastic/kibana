@@ -35,6 +35,7 @@ import { SavedObjectsRawDoc } from '..';
 import { AliasAction, RetryableEsClientError } from './actions';
 import { createInitialState, model } from './model';
 import { ResponseType } from './next';
+import { SavedObjectsMigrationConfigType } from '../saved_objects_config';
 
 describe('migrations v2 model', () => {
   const baseState: BaseState = {
@@ -44,6 +45,7 @@ describe('migrations v2 model', () => {
     logs: [],
     retryCount: 0,
     retryDelay: 0,
+    retryAttempts: 15,
     indexPrefix: '.kibana',
     outdatedDocumentsQuery: {},
     targetIndexMappings: {
@@ -1177,6 +1179,9 @@ describe('migrations v2 model', () => {
     });
   });
   describe('createInitialState', () => {
+    const migrationsConfig = ({
+      retryAttempts: 15,
+    } as unknown) as SavedObjectsMigrationConfigType;
     it('creates the initial state for the model based on the passed in paramaters', () => {
       expect(
         createInitialState({
@@ -1187,6 +1192,7 @@ describe('migrations v2 model', () => {
           },
           migrationVersionPerType: {},
           indexPrefix: '.kibana_task_manager',
+          migrationsConfig,
         })
       ).toMatchInlineSnapshot(`
         Object {
@@ -1204,6 +1210,7 @@ describe('migrations v2 model', () => {
           "preMigrationScript": Object {
             "_tag": "None",
           },
+          "retryAttempts": 15,
           "retryCount": 0,
           "retryDelay": 0,
           "targetIndexMappings": Object {
@@ -1247,6 +1254,7 @@ describe('migrations v2 model', () => {
         preMigrationScript,
         migrationVersionPerType: {},
         indexPrefix: '.kibana_task_manager',
+        migrationsConfig,
       });
 
       expect(Option.isSome(initialState.preMigrationScript)).toEqual(true);
@@ -1266,6 +1274,7 @@ describe('migrations v2 model', () => {
             preMigrationScript: undefined,
             migrationVersionPerType: {},
             indexPrefix: '.kibana_task_manager',
+            migrationsConfig,
           }).preMigrationScript
         )
       ).toEqual(true);
@@ -1281,6 +1290,7 @@ describe('migrations v2 model', () => {
           preMigrationScript: "ctx._id = ctx._source.type + ':' + ctx._id",
           migrationVersionPerType: { my_dashboard: '7.10.1', my_viz: '8.0.0' },
           indexPrefix: '.kibana_task_manager',
+          migrationsConfig,
         }).outdatedDocumentsQuery
       ).toMatchInlineSnapshot(`
         Object {
