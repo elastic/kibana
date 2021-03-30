@@ -28,13 +28,13 @@ export const loadConfig = async ({
   const configService = new ConfigService(rawConfigService, env, logger);
   configService.setSchema('dev', devConfigSchema);
   configService.setSchema('plugins', pluginsConfigSchema);
-  configService.setSchema('http', httpConfigSchema);
+  configService.setSchema('server', httpConfigSchema);
 
   await configService.validate();
 
   const devConfig = configService.atPathSync<DevConfigType>('dev');
   const pluginsConfig = configService.atPathSync<PluginsConfigType>('plugins');
-  const httpConfig = configService.atPathSync<HttpConfigType>('http');
+  const httpConfig = configService.atPathSync<HttpConfigType>('server');
 
   return {
     dev: new DevConfig(devConfig),

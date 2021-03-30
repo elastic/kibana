@@ -5,22 +5,40 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
+
+import { useValues, useActions } from 'kea';
 
 import { EuiPageHeader, EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { FlashMessages } from '../../../shared/flash_messages';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { BreadcrumbTrail } from '../../../shared/kibana_chrome/generate_breadcrumbs';
+import { Loading } from '../../../shared/loading';
 
 import { LogRetentionCallout, LogRetentionTooltip, LogRetentionOptions } from '../log_retention';
 
 import { API_LOGS_TITLE, RECENT_API_EVENTS } from './constants';
 
+import { ApiLogsLogic } from './';
+
 interface Props {
   engineBreadcrumb: BreadcrumbTrail;
 }
 export const ApiLogs: React.FC<Props> = ({ engineBreadcrumb }) => {
+  const { dataLoading, apiLogs, meta } = useValues(ApiLogsLogic);
+  const { fetchApiLogs, pollForApiLogs } = useActions(ApiLogsLogic);
+
+  useEffect(() => {
+    fetchApiLogs();
+  }, [meta.page.current]);
+
+  useEffect(() => {
+    pollForApiLogs();
+  }, []);
+
+  if (dataLoading && !apiLogs.length) return <Loading />;
+
   return (
     <>
       <SetPageChrome trail={[...engineBreadcrumb, API_LOGS_TITLE]} />
