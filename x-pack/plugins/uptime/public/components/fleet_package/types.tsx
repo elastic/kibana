@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { VerificationMode } from './certs_field';
+
 export enum DataStream {
   HTTP = 'http',
   TCP = 'tcp',
@@ -14,13 +16,7 @@ export enum DataStream {
 export enum HTTPMethod {
   GET = 'GET',
   POST = 'POST',
-  PUT = 'PUT',
-  DELETE = 'DELETE',
   HEAD = 'HEAD',
-  CONNECT = 'CONNECT',
-  OPTIONS = 'OPTIONS',
-  TRACE = 'TRACE',
-  PATCH = 'PATCH',
 }
 
 export enum ResponseBodyIndexPolicy {
@@ -69,6 +65,11 @@ export enum ConfigKeys {
   REQUEST_SEND_CHECK = 'check.send',
   SCHEDULE = 'schedule',
   APM_SERVICE_NAME = 'service.name',
+  SSL_CERTIFICATE_AUTHORITIES = 'ssl.certificate_authorities',
+  SSL_CERTIFICATE = 'ssl.certificate',
+  SSL_KEY = 'ssl.key',
+  SSL_KEY_PASSPHRASE = 'ssl.key_passphrase',
+  SSL_VERIFICATION_MODE = 'ssl.verification_mode',
   TAGS = 'tags',
   TIMEOUT = 'timeout',
   URLS = 'urls',
@@ -83,6 +84,11 @@ export interface ISimpleFields {
   [ConfigKeys.PROXY_USE_LOCAL_RESOLVER]: boolean;
   [ConfigKeys.SCHEDULE]: { number: string; unit: ScheduleUnit };
   [ConfigKeys.APM_SERVICE_NAME]: string;
+  [ConfigKeys.SSL_CERTIFICATE_AUTHORITIES]: string;
+  [ConfigKeys.SSL_CERTIFICATE]: string;
+  [ConfigKeys.SSL_KEY]: string;
+  [ConfigKeys.SSL_KEY_PASSPHRASE]: string;
+  [ConfigKeys.SSL_VERIFICATION_MODE]?: VerificationMode;
   [ConfigKeys.TIMEOUT]: number;
   [ConfigKeys.URLS]: string;
   [ConfigKeys.TAGS]: string[];
