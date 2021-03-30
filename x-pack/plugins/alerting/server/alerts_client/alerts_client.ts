@@ -125,7 +125,7 @@ interface IndexType {
   [key: string]: unknown;
 }
 
-interface AggregateResult {
+export interface AggregateResult {
   alertExecutionStatus: { [status: string]: number };
 }
 
@@ -157,7 +157,7 @@ export interface CreateOptions<Params extends AlertTypeParams> {
   };
 }
 
-interface UpdateOptions<Params extends AlertTypeParams> {
+export interface UpdateOptions<Params extends AlertTypeParams> {
   id: string;
   data: {
     name: string;
@@ -170,7 +170,7 @@ interface UpdateOptions<Params extends AlertTypeParams> {
   };
 }
 
-interface GetAlertInstanceSummaryParams {
+export interface GetAlertInstanceSummaryParams {
   id: string;
   dateStart?: string;
 }
@@ -229,7 +229,7 @@ export class AlertsClient {
   public async create<Params extends AlertTypeParams = never>({
     data,
     options,
-  }: CreateOptions<Params>): Promise<Alert<Params>> {
+  }: CreateOptions<Params>): Promise<SanitizedAlert<Params>> {
     const id = options?.id || SavedObjectsUtils.generateId();
 
     try {
