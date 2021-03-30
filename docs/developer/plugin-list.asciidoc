@@ -538,7 +538,7 @@ Documentation: https://www.elastic.co/guide/en/kibana/master/task-manager-produc
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/timeline/README.md[timeline]
-|This plugin provides a common timeline table component and supporting functionality for use in other plugins.
+|Timeline is a plugin that provides a grid component with accompanying server side apis to help users identify events of interest and perform root cause analysis within Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/transform/readme.md[transform]
