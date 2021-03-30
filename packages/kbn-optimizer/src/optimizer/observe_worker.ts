@@ -61,9 +61,12 @@ function usingWorkerProc<T>(
 ) {
   return Rx.using(
     (): ProcResource => {
-      const proc = execa.node(require.resolve('../worker/run_worker'), [], {
+      const workerPath = require.resolve('../worker/run_worker');
+      const workerFromSourcePath = require.resolve('../worker/run_worker_from_source');
+      const proc = execa.node(workerPath.endsWith('.ts') ? workerFromSourcePath : workerPath, [], {
         nodeOptions: [
-          ...process.execArgv,
+          '--preserve-symlinks',
+          '--preserve-symlinks-main',
           ...(inspectFlag && config.inspectWorkers
             ? [`${inspectFlag}=${inspectPortCounter++}`]
             : []),
