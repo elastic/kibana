@@ -39,7 +39,7 @@ import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
  * @param filters any existing global filters
  * @param indexPatterns list of index patterns to configure layers for
  * @param query initial query constraints as Query
- * @param startDate
+ * @param startDatecdx-parse
  * @param endDate
  * @param setQuery function as provided by the GlobalTime component for reacting to refresh
  * @param portalNode wrapper for MapToolTip so it is not rendered in the embeddables component tree
