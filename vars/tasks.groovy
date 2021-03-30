@@ -40,9 +40,8 @@ def test() {
 }
 
 def ossCiGroups() {
-  tasks([
-    kibanaPipeline.ossCiGroupProcess(it)
-  ])
+  def ciGroups = 1..12
+  tasks(ciGroups.collect { kibanaPipeline.ossCiGroupProcess(it, true) })
 }
 
 def xpackCiGroups() {
@@ -62,10 +61,11 @@ def functionalOss(Map params = [:]) {
 
   task {
     kibanaPipeline.buildOss(20)
+    task(kibanaPipeline.ossCiGroupProcess(6))
 
-    if (config.ciGroups) {
-      ossCiGroups()
-    }
+    // if (config.ciGroups) {
+    //   ossCiGroups()
+    // }
 
     // if (config.firefox) {
     //   task(kibanaPipeline.functionalTestProcess('oss-firefox', './test/scripts/jenkins_firefox_smoke.sh'))
