@@ -9,6 +9,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
+  const browser = getService('browser');
   const { common, detections } = getPageObjects(['common', 'detections']);
   const security = getService('security');
   const toasts = getService('toasts');
@@ -17,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Security Solution', () => {
     before(async () => {
       await security.testUser.setRoles(['superuser'], false);
+      await browser.setWindowSize(1600, 1200);
       await common.navigateToApp('security');
     });
 
