@@ -107,6 +107,9 @@ const setFilterDataActionCreator = (
 export const explorerService = {
   appState$: explorerAppState$,
   state$: explorerState$,
+  clearExplorerData: () => {
+    explorerAction$.next({ type: EXPLORER_ACTION.CLEAR_EXPLORER_DATA });
+  },
   clearInfluencerFilterSettings: () => {
     explorerAction$.next({ type: EXPLORER_ACTION.CLEAR_INFLUENCER_FILTER_SETTINGS });
   },
