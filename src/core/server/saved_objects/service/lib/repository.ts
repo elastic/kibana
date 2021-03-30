@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { inspect } from 'util';
+
 import { omit, isObject } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '../../../elasticsearch/';
@@ -350,10 +352,17 @@ export class SavedObjectsRepository {
     objects: Array<SavedObjectsBulkCreateObject<T>>,
     options: SavedObjectsCreateOptions = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
-    this._logger.error('savedObjects.bulkCreate', {
-      objects,
-      options,
-    });
+    this._logger.error(
+      `savedObjects.bulkCreate ${inspect(
+        {
+          objects,
+          options,
+        },
+        {
+          depth: 100,
+        }
+      )}`
+    );
 
     const { overwrite = false, refresh = DEFAULT_REFRESH_SETTING } = options;
     const namespace = normalizeNamespace(options.namespace);
