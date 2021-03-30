@@ -99,7 +99,6 @@ test('injects legacy dependency to context#setup()', async () => {
     pluginDependencies: new Map([
       [pluginA, []],
       [pluginB, [pluginA]],
-      [mockLegacyService.legacyId, [pluginA, pluginB]],
     ]),
   });
 });
@@ -108,12 +107,10 @@ test('runs services on "start"', async () => {
   const server = new Server(rawConfigService, env, logger);
 
   expect(mockHttpService.setup).not.toHaveBeenCalled();
-  expect(mockLegacyService.start).not.toHaveBeenCalled();
 
   await server.setup();
 
   expect(mockHttpService.start).not.toHaveBeenCalled();
-  expect(mockLegacyService.start).not.toHaveBeenCalled();
   expect(mockSavedObjectsService.start).not.toHaveBeenCalled();
   expect(mockUiSettingsService.start).not.toHaveBeenCalled();
   expect(mockMetricsService.start).not.toHaveBeenCalled();
@@ -121,7 +118,6 @@ test('runs services on "start"', async () => {
   await server.start();
 
   expect(mockHttpService.start).toHaveBeenCalledTimes(1);
-  expect(mockLegacyService.start).toHaveBeenCalledTimes(1);
   expect(mockSavedObjectsService.start).toHaveBeenCalledTimes(1);
   expect(mockUiSettingsService.start).toHaveBeenCalledTimes(1);
   expect(mockMetricsService.start).toHaveBeenCalledTimes(1);

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { configServiceMock } from './mocks';
 import { ensureValidConfiguration } from './ensure_valid_configuration';
-import { configServiceMock } from '../../config/mocks';
 
 describe('ensureValidConfiguration', () => {
   let configService: ReturnType<typeof configServiceMock.create>;
