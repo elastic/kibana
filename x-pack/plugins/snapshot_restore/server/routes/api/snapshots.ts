@@ -6,12 +6,11 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { GetSnapshotResponse } from '@elastic/elasticsearch/api/types';
-import { RouteDependencies } from '../../types';
-import { addBasePath } from '../helpers';
-import { SnapshotDetails, SnapshotDetailsEs } from '../../../common/types';
+import type { SnapshotDetails, SnapshotDetailsEs } from '../../../common/types';
 import { deserializeSnapshotDetails } from '../../../common/lib';
+import type { RouteDependencies } from '../../types';
 import { getManagedRepositoryName } from '../../lib';
+import { addBasePath } from '../helpers';
 
 export function registerSnapshotsRoutes({
   router,

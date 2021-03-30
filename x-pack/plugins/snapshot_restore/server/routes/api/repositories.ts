@@ -6,7 +6,7 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { SnapshotRepositorySettings, GetSnapshotResponse } from '@elastic/elasticsearch/api/types';
+import type { SnapshotRepositorySettings } from '@elastic/elasticsearch/api/types';
 
 import { DEFAULT_REPOSITORY_TYPES, REPOSITORY_PLUGINS_MAP } from '../../../common/constants';
 import { Repository, RepositoryType } from '../../../common/types';
