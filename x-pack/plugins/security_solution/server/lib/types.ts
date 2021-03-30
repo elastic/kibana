@@ -14,7 +14,7 @@ import { Hosts } from './hosts';
 import { IndexFields } from './index_fields';
 import { SourceStatus } from './source_status';
 import { Sources } from './sources';
-import { Note } from './timeline/saved_object/notes';
+import { Notes } from './timeline/saved_object/notes';
 import { PinnedEvent } from './timeline/saved_object/pinned_events';
 import { Timeline } from './timeline/saved_object/timelines';
 import { TotalValue, BaseHit, Explanation } from '../../common/detection_engine/types';
@@ -31,7 +31,7 @@ export interface AppBackendLibs extends AppDomainLibs {
   sources: Sources;
   sourceStatus: SourceStatus;
   timeline: Timeline;
-  note: Note;
+  note: Notes;
   pinnedEvent: PinnedEvent;
 }
 

@@ -10,7 +10,7 @@ import { PageInfoNote, ResponseNote, ResponseNotes, SortNote } from '../../../..
 import { SavedNote, NoteSavedObject } from '../../../../../common/types/timeline/note';
 
 export * from './saved_object';
-export interface Note {
+export interface Notes {
   deleteNote: (request: FrameworkRequest, noteIds: string[]) => Promise<void>;
   deleteNoteByTimelineId: (request: FrameworkRequest, noteIds: string) => Promise<void>;
   getNote: (request: FrameworkRequest, noteId: string) => Promise<NoteSavedObject>;
