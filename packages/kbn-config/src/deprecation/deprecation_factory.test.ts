@@ -139,8 +139,8 @@ describe('DeprecationFactory', () => {
             Object {
               "correctiveActions": Object {
                 "manualSteps": Array [
-                  "Make sure \\"myplugin.renamed\\" contains the correct value in the config file, CLI flag, or environment variable (in Docker only).\\"",
-                  "Remove \\"myplugin.deprecated\\" from the config.\\"",
+                  "Make sure \\"myplugin.renamed\\" contains the correct value in the config file, CLI flag, or environment variable (in Docker only).",
+                  "Remove \\"myplugin.deprecated\\" from the config.",
                 ],
               },
               "message": "\\"myplugin.deprecated\\" is deprecated and has been replaced by \\"myplugin.renamed\\". However both key are present, ignoring \\"myplugin.deprecated\\"",
@@ -283,8 +283,8 @@ describe('DeprecationFactory', () => {
             Object {
               "correctiveActions": Object {
                 "manualSteps": Array [
-                  "Make sure \\"myplugin.renamed\\" contains the correct value in the config file, CLI flag, or environment variable (in Docker only).\\"",
-                  "Remove \\"myplugin.deprecated\\" from the config.\\"",
+                  "Make sure \\"myplugin.renamed\\" contains the correct value in the config file, CLI flag, or environment variable (in Docker only).",
+                  "Remove \\"myplugin.deprecated\\" from the config.",
                 ],
               },
               "message": "\\"myplugin.deprecated\\" is deprecated and has been replaced by \\"myplugin.renamed\\". However both key are present, ignoring \\"myplugin.deprecated\\"",
@@ -321,7 +321,7 @@ describe('DeprecationFactory', () => {
             Object {
               "correctiveActions": Object {
                 "manualSteps": Array [
-                  "Remove \\"myplugin.deprecated\\" from the Kibana config file, CLI flag, or environment variable (in Docker only)\\"",
+                  "Remove \\"myplugin.deprecated\\" from the Kibana config file, CLI flag, or environment variable (in Docker only)",
                 ],
               },
               "message": "myplugin.deprecated is deprecated and is no longer used",
@@ -360,7 +360,7 @@ describe('DeprecationFactory', () => {
             Object {
               "correctiveActions": Object {
                 "manualSteps": Array [
-                  "Remove \\"myplugin.section.deprecated\\" from the Kibana config file, CLI flag, or environment variable (in Docker only)\\"",
+                  "Remove \\"myplugin.section.deprecated\\" from the Kibana config file, CLI flag, or environment variable (in Docker only)",
                 ],
               },
               "message": "myplugin.section.deprecated is deprecated and is no longer used",
@@ -423,7 +423,7 @@ describe('DeprecationFactory', () => {
             Object {
               "correctiveActions": Object {
                 "manualSteps": Array [
-                  "Remove \\"myplugin.deprecated\\" from the Kibana config file, CLI flag, or environment variable (in Docker only)\\"",
+                  "Remove \\"myplugin.deprecated\\" from the Kibana config file, CLI flag, or environment variable (in Docker only)",
                 ],
               },
               "message": "myplugin.deprecated is deprecated and is no longer used",

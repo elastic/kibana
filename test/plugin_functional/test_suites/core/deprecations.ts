@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
         '"corePluginDeprecations.oldProperty" is deprecated and has been replaced by "corePluginDeprecations.newProperty"',
       correctiveActions: {
         manualSteps: [
-          'Replace "corePluginDeprecations.oldProperty" in the kibana.yml file with "corePluginDeprecations.newProperty"',
+          'Replace "corePluginDeprecations.oldProperty" with "corePluginDeprecations.newProperty" in the Kibana config file, CLI flag, or environment variable (in Docker only).',
         ],
       },
       domainId: 'corePluginDeprecations',
@@ -33,7 +33,9 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       level: 'critical',
       message: 'corePluginDeprecations.noLongerUsed is deprecated and is no longer used',
       correctiveActions: {
-        manualSteps: ['Remove "corePluginDeprecations.noLongerUsed" from the kibana.yml file."'],
+        manualSteps: [
+          'Remove "corePluginDeprecations.noLongerUsed" from the Kibana config file, CLI flag, or environment variable (in Docker only)',
+        ],
       },
       domainId: 'corePluginDeprecations',
     },

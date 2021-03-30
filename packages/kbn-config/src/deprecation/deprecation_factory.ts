@@ -51,8 +51,8 @@ const _rename = (
       message: `"${fullOldPath}" is deprecated and has been replaced by "${fullNewPath}". However both key are present, ignoring "${fullOldPath}"`,
       correctiveActions: {
         manualSteps: [
-          `Make sure "${fullNewPath}" contains the correct value in the config file, CLI flag, or environment variable (in Docker only)."`,
-          `Remove "${fullOldPath}" from the config."`,
+          `Make sure "${fullNewPath}" contains the correct value in the config file, CLI flag, or environment variable (in Docker only).`,
+          `Remove "${fullOldPath}" from the config.`,
         ],
       },
       ...details,
@@ -78,7 +78,7 @@ const _unused = (
     message: `${fullPath} is deprecated and is no longer used`,
     correctiveActions: {
       manualSteps: [
-        `Remove "${fullPath}" from the Kibana config file, CLI flag, or environment variable (in Docker only)"`,
+        `Remove "${fullPath}" from the Kibana config file, CLI flag, or environment variable (in Docker only)`,
       ],
     },
     ...details,
