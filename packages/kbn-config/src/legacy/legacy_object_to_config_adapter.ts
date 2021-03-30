@@ -48,6 +48,7 @@ export class LegacyObjectToConfigAdapter extends ObjectToConfigAdapter {
       },
       root: { level: 'info', ...root },
       loggers,
+      ...legacyLoggingConfig,
     };
 
     if (configValue.silent) {
