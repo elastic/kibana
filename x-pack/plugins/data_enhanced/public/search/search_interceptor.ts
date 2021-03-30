@@ -109,45 +109,52 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
     });
 
     return this.createRequestHash$(request, options).pipe(
+      tap(() => {
+        this.pendingCount$.next(this.pendingCount$.getValue() + 1);
+      }),
       switchMap((requestHash) => {
         const cached = requestHash ? this.responseCache.get(requestHash) : undefined;
+        const searchAbortController = cached
+          ? cached.searchAbortController
+          : new SearchAbortController(abortSignal, this.searchTimeout);
+
         if (cached) {
           if (abortSignal) cached.searchAbortController.addAbortSignal(abortSignal);
-          return cached.response$;
         }
 
-        const searchAbortController = new SearchAbortController(abortSignal, this.searchTimeout);
-        this.pendingCount$.next(this.pendingCount$.getValue() + 1);
         const untrackSearch = this.deps.session.isCurrentSession(options.sessionId)
           ? this.deps.session.trackSearch({ abort: () => searchAbortController.abort() })
           : undefined;
 
-        const search$ = pollSearch(search, cancel, {
-          ...options,
-          abortSignal: searchAbortController.getSignal(),
-        }).pipe(
-          tap((response) => (id = response.id)),
-          catchError((e: Error) => {
-            cancel();
-            return throwError(
-              this.handleSearchError(e, options, searchAbortController.isTimeout())
+        const search$ = cached
+          ? cached.response$
+          : pollSearch(search, cancel, {
+              ...options,
+              abortSignal: searchAbortController.getSignal(),
+            }).pipe(
+              tap((response) => (id = response.id)),
+              catchError((e: Error) => {
+                cancel();
+                return throwError(
+                  this.handleSearchError(e, options, searchAbortController.isTimeout())
+                );
+              }),
+              finalize(() => {
+                searchAbortController.cleanup();
+                if (savedToBackgroundSub) {
+                  savedToBackgroundSub.unsubscribe();
+                }
+              }),
+              shareReplay(1),
+              finalize(() => {
+                if (untrackSearch && this.deps.session.isCurrentSession(options.sessionId)) {
+                  // untrack if this search still belongs to current session
+                  untrackSearch();
+                }
+              })
             );
-          }),
-          finalize(() => {
-            this.pendingCount$.next(this.pendingCount$.getValue() - 1);
-            searchAbortController.cleanup();
-            if (untrackSearch && this.deps.session.isCurrentSession(options.sessionId)) {
-              // untrack if this search still belongs to current session
-              untrackSearch();
-            }
-            if (savedToBackgroundSub) {
-              savedToBackgroundSub.unsubscribe();
-            }
-          }),
-          shareReplay()
-        );
 
-        if (requestHash) {
+        if (requestHash && !cached) {
           this.responseCache.set(requestHash, {
             response$: search$,
             searchAbortController,
@@ -155,6 +162,9 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
         }
 
         return search$;
+      }),
+      finalize(() => {
+        this.pendingCount$.next(this.pendingCount$.getValue() - 1);
       })
     );
   }

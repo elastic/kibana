@@ -41,6 +41,7 @@ export class SearchAbortController {
   };
 
   public cleanup() {
+    if (this.destroyed) return;
     this.destroyed = true;
     this.timeoutSub?.unsubscribe();
     this.inputAbortSignals.forEach((abortSignal) => {
