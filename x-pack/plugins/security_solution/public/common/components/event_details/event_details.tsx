@@ -107,6 +107,7 @@ const EventDetailsComponent: React.FC<Props> = ({
       },
       {
         id: EventsViewType.jsonView,
+        'data-test-subj': 'jsonViewTab',
         name: i18n.JSON_VIEW,
         content: (
           <>

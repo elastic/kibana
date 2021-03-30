@@ -7,12 +7,14 @@
 
 import React, { ReactElement } from 'react';
 import { of } from 'rxjs';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { render as reactTestLibRender, RenderOptions } from '@testing-library/react';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory, History } from 'history';
 import { CoreStart } from 'kibana/public';
 import { I18nProvider } from '@kbn/i18n/react';
 import { coreMock } from 'src/core/public/mocks';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { configure } from '@testing-library/dom';
 import { mockState } from '../__mocks__/uptime_store.mock';
 import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';

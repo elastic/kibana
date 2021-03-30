@@ -21,6 +21,7 @@ export interface NewAgentPolicy {
   is_default_fleet_server?: boolean; // Optional when creating a policy
   is_managed?: boolean; // Optional when creating a policy
   monitoring_enabled?: Array<ValueOf<DataType>>;
+  preconfiguration_id?: string; // Uniqifies preconfigured policies by something other than `name`
 }
 
 export interface AgentPolicy extends NewAgentPolicy {
@@ -66,9 +67,13 @@ export interface FullAgentPolicy {
       [key: string]: any;
     };
   };
-  fleet?: {
-    kibana: FullAgentPolicyKibanaConfig;
-  };
+  fleet?:
+    | {
+        hosts: string[];
+      }
+    | {
+        kibana: FullAgentPolicyKibanaConfig;
+      };
   inputs: FullAgentPolicyInput[];
   revision?: number;
   agent?: {
