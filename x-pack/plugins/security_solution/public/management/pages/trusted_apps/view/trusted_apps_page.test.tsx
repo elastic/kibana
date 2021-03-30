@@ -43,8 +43,7 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
 jest.mock('../../../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
-// Failing: See https://github.com/elastic/kibana/issues/95596
-describe.skip('When on the Trusted Apps Page', () => {
+describe('When on the Trusted Apps Page', () => {
   const expectedAboutInfo =
     'Add a trusted application to improve performance or alleviate conflicts with other applications running on your hosts. Trusted applications will be applied to hosts running Endpoint Security.';
 
@@ -716,12 +715,16 @@ describe.skip('When on the Trusted Apps Page', () => {
       it('should hide agents policy if feature flag is disabled', async () => {
         useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
         const renderResult = await renderAndClickAddButton();
-        expect(renderResult).toMatchSnapshot();
+        expect(
+          renderResult.queryByTestId('addTrustedAppFlyout-createForm-policySelection')
+        ).toBeNull();
       });
       it('should display agents policy if feature flag is enabled', async () => {
         useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
         const renderResult = await renderAndClickAddButton();
-        expect(renderResult).toMatchSnapshot();
+        expect(
+          renderResult.queryByTestId('addTrustedAppFlyout-createForm-policySelection')
+        ).toBeTruthy();
       });
     });
   });
