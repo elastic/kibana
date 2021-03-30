@@ -6,30 +6,25 @@
  */
 
 import React, { useState } from 'react';
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { I18LABELS } from '../translations';
 import { BreakdownFilter } from '../Breakdowns/BreakdownFilter';
 import { PageViewsChart } from '../Charts/PageViewsChart';
 import { BreakdownItem } from '../../../../../typings/ui_filters';
-import { createExploratoryViewUrl } from '../../../../../../observability/public';
 
 export function PageViewsTrend() {
   const { urlParams, uiFilters } = useUrlParams();
 
-  const { start, end, rangeFrom, rangeTo, searchTerm, serviceName } = urlParams;
+  const { start, end, searchTerm } = urlParams;
 
   const [breakdown, setBreakdown] = useState<BreakdownItem | null>(null);
 
   const { data, status } = useFetcher(
     (callApmApi) => {
+      const { serviceName } = uiFilters;
+
       if (start && end && serviceName) {
         return callApmApi({
           endpoint: 'GET /api/apm/rum-client/page-view-trends',
@@ -50,20 +45,7 @@ export function PageViewsTrend() {
       }
       return Promise.resolve(undefined);
     },
-    [end, start, uiFilters, breakdown, searchTerm, serviceName]
-  );
-
-  const analyzeHref = createExploratoryViewUrl(
-    {
-      'page-views': {
-        reportType: 'kpi',
-        reportDefinitions: {
-          'service.name': serviceName as string,
-        },
-        time: { from: rangeFrom!, to: rangeTo! },
-      },
-    },
-    ''
+    [end, start, uiFilters, breakdown, searchTerm]
   );
 
   return (
@@ -80,11 +62,6 @@ export function PageViewsTrend() {
             onBreakdownChange={setBreakdown}
             dataTestSubj={'pvBreakdownFilter'}
           />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton size="s" href={analyzeHref}>
-            Analyze
-          </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />

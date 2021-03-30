@@ -16,8 +16,7 @@ import {
   XYChartElementEvent,
   ElementClickListener,
 } from '@elastic/charts';
-import rison from 'rison-node';
-import { EuiTitle, EuiSpacer, EuiFlexItem, EuiFlexGroup, EuiButton } from '@elastic/eui';
+import { EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -27,7 +26,7 @@ import { getChartDateLabel } from '../../../lib/helper';
 import { ChartWrapper } from './chart_wrapper';
 import { UptimeThemeContext } from '../../../contexts';
 import { HistogramResult } from '../../../../common/runtime_types';
-import { useGetUrlParams, useUrlParams } from '../../../hooks';
+import { useUrlParams } from '../../../hooks';
 import { ChartEmptyState } from './chart_empty_state';
 import { getDateRangeFromChartElement } from './utils';
 import { STATUS_DOWN_LABEL, STATUS_UP_LABEL } from '../translations';
@@ -69,8 +68,6 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
     colors: { danger, gray },
     chartTheme,
   } = useContext(UptimeThemeContext);
-
-  const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
 
   const [, updateUrlParams] = useUrlParams();
 
@@ -182,37 +179,16 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
     );
   }
 
-  const analyzeHref = {
-    ['uptime-pings-histogram']: {
-      rt: 'upp',
-      time: { from: dateRangeStart, to: dateRangeEnd },
-      bd: 'monitor.status',
-    },
-  };
-
   return (
     <>
-      <EuiFlexGroup gutterSize="none">
-        <EuiFlexItem>
-          <EuiTitle size="s">
-            <h3>
-              <FormattedMessage
-                id="xpack.uptime.snapshot.pingsOverTimeTitle"
-                defaultMessage="Pings over time"
-              />
-            </h3>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            size="s"
-            href={`/app/observability/exploratory-view#?sr=${rison.encode(analyzeHref)}`}
-          >
-            Analyze
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
+      <EuiTitle size="s">
+        <h3>
+          <FormattedMessage
+            id="xpack.uptime.snapshot.pingsOverTimeTitle"
+            defaultMessage="Pings over time"
+          />
+        </h3>
+      </EuiTitle>
       <EuiSpacer size="m" />
       {content}
     </>
