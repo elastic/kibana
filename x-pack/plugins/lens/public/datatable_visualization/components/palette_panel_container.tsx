@@ -70,7 +70,7 @@ export function PalettePanelContainer({
                   onClick={closeFlyout}
                   iconType="sortLeft"
                   aria-label={i18n.translate('xpack.lens.table.palettePanelContainer.back', {
-                    defaultMessage: 'back',
+                    defaultMessage: 'Back',
                   })}
                 />
               </EuiFlexItem>
