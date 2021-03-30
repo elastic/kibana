@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-export interface IKibanaSearchResponse<RawResponse = any> 
+export interface IKibanaSearchResponse<RawResponse = any> extends BatchResultBase 
 ```
 
 ## Properties

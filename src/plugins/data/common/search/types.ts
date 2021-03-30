@@ -9,6 +9,7 @@
 import { Observable } from 'rxjs';
 import { IEsSearchRequest, IEsSearchResponse } from './es_search';
 import { IndexPattern } from '..';
+import { BatchResultBase } from '../../../bfetch/common';
 
 export type ISearchGeneric = <
   SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
@@ -37,7 +38,7 @@ export interface ISearchClient {
   extend: ISearchExtendGeneric;
 }
 
-export interface IKibanaSearchResponse<RawResponse = any> {
+export interface IKibanaSearchResponse<RawResponse = any> extends BatchResultBase {
   /**
    * Some responses may contain a unique id to identify the request this response came from.
    */

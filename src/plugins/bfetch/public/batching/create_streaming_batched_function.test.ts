@@ -310,8 +310,8 @@ describe('createStreamingBatchedFunction()', () => {
       expect(await isPending(promise1)).toBe(true);
       expect(await isPending(promise2)).toBe(false);
       expect(await isPending(promise3)).toBe(false);
-      expect(await promise2).toEqual({ foo: 'bar' });
-      expect(await promise3).toEqual({ foo: 'bar 2' });
+      expect(await promise2).toEqual({ foo: 'bar', meta: { size: 31 } });
+      expect(await promise3).toEqual({ foo: 'bar 2', meta: { size: 33 } });
     });
 
     test('resolves falsy results', async () => {
@@ -429,9 +429,9 @@ describe('createStreamingBatchedFunction()', () => {
       const [, error2] = await promise2;
       const [result3] = await promise3;
 
-      expect(result1).toEqual({ b: '1' });
+      expect(result1).toEqual({ b: '1', meta: { size: 27 } });
       expect(error2).toEqual({ b: '2' });
-      expect(result3).toEqual({ b: '3' });
+      expect(result3).toEqual({ b: '3', meta: { size: 27 } });
     });
 
     describe('when requests are aborted', () => {
@@ -497,7 +497,7 @@ describe('createStreamingBatchedFunction()', () => {
         await new Promise((r) => setTimeout(r, 1));
 
         const [result2] = await of(promise2);
-        expect(result2).toEqual({ b: '2' });
+        expect(result2).toEqual({ b: '2', meta: { size: 27 } });
       });
     });
 
