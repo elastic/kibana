@@ -158,7 +158,7 @@ strategy when the configured policy triggers.
 
 ===== Triggering Policies
 
-The triggering policy determines when a rolling should occur.
+The triggering policy determines when a rollover should occur.
 
 There are currently two policies supported: `size-limit` and `time-interval`.
 
