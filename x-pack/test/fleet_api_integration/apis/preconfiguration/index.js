@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-export * from './agent_policy';
-export * from './agent';
-export * from './package_policy';
-export * from './output';
-export * from './enrollment_api_key';
-export * from './preconfiguration';
+export default function loadTests({ loadTestFile }) {
+  describe('Preconfiguration Endpoints', () => {
+    loadTestFile(require.resolve('./preconfiguration'));
+  });
+}
