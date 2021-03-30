@@ -43,6 +43,12 @@ export async function runBuildRefsCli() {
       const doClean = !!flags.clean || doCapture;
       const doInitCache = cacheEnabled && !doClean;
 
+      /* eslint-disable no-console */
+      console.log('@@@ cacheEnabled:', cacheEnabled);
+      console.log('@@@ doClean:', doClean);
+      console.log('@@@ doInitCache:', doInitCache);
+      console.log('@@@ env:', process.env);
+
       if (doClean) {
         log.info('deleting', outDirs.length, 'ts output directories');
         await concurrentMap(100, outDirs, (outDir) => del(outDir));
