@@ -8,7 +8,7 @@
 
 import _ from 'lodash';
 import { merge, Subject, Subscription } from 'rxjs';
-import { debounceTime, tap } from 'rxjs/operators';
+import { debounceTime, tap, filter } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { createSearchSessionRestorationDataProvider, getState, splitState } from './discover_state';
 import { RequestAdapter } from '../../../../inspector/public';
@@ -493,6 +493,8 @@ function discoverController($route, $scope) {
     showUnmappedFields,
   };
 
+  // handler emitted by `timefilter.getAutoRefreshFetch$()`
+  // to notify when data completed loading and to start a new autorefresh loop
   let autoRefreshDoneCb;
   const fetch$ = merge(
     refetch$,
@@ -501,7 +503,8 @@ function discoverController($route, $scope) {
     timefilter.getAutoRefreshFetch$().pipe(
       tap((done) => {
         autoRefreshDoneCb = done;
-      })
+      }),
+      filter(() => $scope.fetchStatus !== fetchStatuses.LOADING)
     ),
     data.query.queryString.getUpdates$(),
     searchSessionManager.newSearchSessionIdFromURL$
@@ -516,8 +519,8 @@ function discoverController($route, $scope) {
           try {
             await $scope.fetch();
           } finally {
-            // notify auto refresh service that
-            // the last fetch is completed so it starts the next auto refresh loop
+            // if there is a saved `autoRefreshDoneCb`, notify auto refresh service that
+            // the last fetch is completed so it starts the next auto refresh loop if needed
             autoRefreshDoneCb?.();
             autoRefreshDoneCb = undefined;
           }
