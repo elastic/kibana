@@ -47,12 +47,12 @@ export const applyMetadataToLastPath = (
         source.configuration.fields
       );
       // Set the label as the name and fallback to the id OR path.value
-      lastPath.label = (firstMetaDoc[inventoryFields.name] as string | undefined) ?? lastPath.value;
+      lastPath.label = get(firstMetaDoc, inventoryFields.name, lastPath.value) as string;
       // If the inventory fields contain an ip address, we need to try and set that
       // on the path object. IP addersses are typically stored as multiple fields. We will
       // use the first IPV4 address we find.
       if (inventoryFields.ip) {
-        const ipAddresses = firstMetaDoc[inventoryFields.ip] as string | undefined;
+        const ipAddresses = get(firstMetaDoc, inventoryFields.ip) as string[];
         if (Array.isArray(ipAddresses)) {
           lastPath.ip = ipAddresses.find(isIPv4) || null;
         } else if (typeof ipAddresses === 'string') {

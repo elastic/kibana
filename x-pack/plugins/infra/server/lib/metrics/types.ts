@@ -89,11 +89,6 @@ export const HistogramResponseRT = rt.type({
   }),
 });
 
-const GroupingKeyRT = rt.intersection([
-  rt.type({ histogram: rt.number }),
-  rt.record(rt.string, rt.union([rt.string, rt.number])),
-]);
-
 const GroupingBucketRT = rt.intersection([
   rt.type({
     key: rt.record(rt.string, rt.string),
