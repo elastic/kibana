@@ -22,6 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async function () {
+      // ensure .kibana index exists for next suite
       await esArchiver.load('empty_kibana');
     });
 
