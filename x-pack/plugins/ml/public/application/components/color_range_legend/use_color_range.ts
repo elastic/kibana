@@ -7,9 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import d3 from 'd3';
-import { useContext } from 'react';
-import { ThemeContext } from 'styled-components';
-import { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
+import { useEuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
 
 /**
  * Custom color scale factory that takes the amount of feature influencers
@@ -148,16 +146,16 @@ export const useColorRange = (
   colorRangeScale = COLOR_RANGE_SCALE.LINEAR,
   featureCount = 1
 ) => {
-  const { euiTheme } = useCurrentEuiTheme();
+  const { eui } = useEuiTheme();
 
   const colorRanges: Record<COLOR_RANGE, string[]> = {
     [COLOR_RANGE.BLUE]: [
-      d3.rgb(euiTheme.euiColorEmptyShade).toString(),
-      d3.rgb(euiTheme.euiColorVis1).toString(),
+      d3.rgb(eui.euiColorEmptyShade).toString(),
+      d3.rgb(eui.euiColorVis1).toString(),
     ],
     [COLOR_RANGE.RED]: [
-      d3.rgb(euiTheme.euiColorEmptyShade).toString(),
-      d3.rgb(euiTheme.euiColorDanger).toString(),
+      d3.rgb(eui.euiColorEmptyShade).toString(),
+      d3.rgb(eui.euiColorDanger).toString(),
     ],
     [COLOR_RANGE.RED_GREEN]: ['red', 'green'],
     [COLOR_RANGE.GREEN_RED]: ['green', 'red'],
@@ -184,7 +182,3 @@ export const useColorRange = (
 
   return scaleTypes[colorRangeScale];
 };
-
-export function useCurrentEuiTheme() {
-  return { euiTheme: useContext<EuiTheme>(ThemeContext).eui };
-}

@@ -21,8 +21,8 @@ import {
 } from '@elastic/charts';
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import { useEuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
 import { Coordinate } from '../../../../typings/timeseries';
-import { useTheme } from '../../../hooks/use_theme';
 
 interface ChartPreviewProps {
   yTickFormat?: TickFormatter;
@@ -35,7 +35,7 @@ export function ChartPreview({
   yTickFormat,
   threshold,
 }: ChartPreviewProps) {
-  const theme = useTheme();
+  const theme = useEuiTheme();
   const thresholdOpacity = 0.3;
   const timestamps = data.map((d) => d.x);
   const xMin = Math.min(...timestamps);

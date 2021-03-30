@@ -17,6 +17,7 @@ import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useEuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
 import { getDurationFormatter } from '../../../../common/utils/formatters';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
@@ -26,7 +27,6 @@ import {
   SelectedSignificantTerm,
 } from './correlations_table';
 import { ChartContainer } from '../../shared/charts/chart_container';
-import { useTheme } from '../../../hooks/use_theme';
 import { CustomFields, PercentileOption } from './custom_fields';
 import { useFieldNames } from './use_field_names';
 import { useLocalStorage } from '../../../hooks/useLocalStorage';
@@ -207,7 +207,7 @@ function LatencyDistributionChart({
   selectedSignificantTerm: SelectedSignificantTerm | null;
   status: FETCH_STATUS;
 }) {
-  const theme = useTheme();
+  const theme = useEuiTheme();
   const xMax = Math.max(
     ...(data?.overall?.distribution.map((p) => p.x ?? 0) ?? [])
   );

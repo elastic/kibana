@@ -19,6 +19,7 @@ import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useEuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
@@ -28,7 +29,6 @@ import {
   SelectedSignificantTerm,
 } from './correlations_table';
 import { ChartContainer } from '../../shared/charts/chart_container';
-import { useTheme } from '../../../hooks/use_theme';
 import { CustomFields } from './custom_fields';
 import { useFieldNames } from './use_field_names';
 import { useLocalStorage } from '../../../hooks/useLocalStorage';
@@ -176,7 +176,7 @@ function ErrorTimeseriesChart({
   selectedSignificantTerm: SelectedSignificantTerm | null;
   status: FETCH_STATUS;
 }) {
-  const theme = useTheme();
+  const theme = useEuiTheme();
   const dateFormatter = timeFormatter('HH:mm:ss');
 
   return (
