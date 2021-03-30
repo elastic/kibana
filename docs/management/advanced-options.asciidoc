@@ -213,9 +213,14 @@ the changes.
 [[kibana-banners-settings]]
 ==== Banners
 
+[NOTE]
+====
+Banners are a https://www.elastic.co/subscriptions[subscription feature].
+====
+
 [horizontal]
 [[banners-placement]]`banners:placement`::
-Set to `Top` to display a banner above the Elastic header. Defaults to the value of 
+Set to `Top` to display a banner above the Elastic header for this space. Defaults to the value of 
 the `xpack.banners.placement` configuration property.
 
 [[banners-textcontent]]`banners:textContent`::
