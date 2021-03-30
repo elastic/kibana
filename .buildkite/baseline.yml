@@ -1,0 +1,12 @@
+steps:
+  - command: .buildkite/scripts/build-setup.sh
+    label: Pre-Build
+
+  - command: echo test
+    label: Test
+
+  - wait: ~
+    continue_on_failure: true
+
+  - command: .buildkite/scripts/post-build.sh
+    label: Post-Build
