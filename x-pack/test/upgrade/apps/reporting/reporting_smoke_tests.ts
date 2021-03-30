@@ -54,15 +54,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
     spaces.forEach(({ space, basePath }) => {
       describe('generate report space ' + space, () => {
-        before(async () => {
-          usage = (await usageAPI.getUsageStats()) as UsageStats;
-          completedReportCount = reportingAPI.getCompletedReportCount(usage);
-        });
         beforeEach(async () => {
           await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
             basePath,
           });
           await PageObjects.header.waitUntilLoadingHasFinished();
+          usage = (await usageAPI.getUsageStats()) as UsageStats;
+          completedReportCount = reportingAPI.getCompletedReportCount(usage);
         });
         reportingTests.forEach(({ name, type, link }) => {
           it('name ' + name + ' type ' + type, async () => {

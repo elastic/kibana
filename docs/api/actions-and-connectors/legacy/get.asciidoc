@@ -1,12 +1,10 @@
 [[actions-and-connectors-legacy-api-get]]
 ==== Legacy Get connector API
 ++++
-<titleabbrev>Legacy Get connector API</titleabbrev>
+<titleabbrev>Legacy Get connector</titleabbrev>
 ++++
 
-deprecated::[7.13.0]
-
-Please use the <<actions-and-connectors-api-get>> instead.
+WARNING: Deprecated in 7.13.0. Use <<get-connector-api>> instead.
 
 Retrieves a connector by ID.
 

@@ -715,12 +715,16 @@ describe('When on the Trusted Apps Page', () => {
       it('should hide agents policy if feature flag is disabled', async () => {
         useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
         const renderResult = await renderAndClickAddButton();
-        expect(renderResult).toMatchSnapshot();
+        expect(
+          renderResult.queryByTestId('addTrustedAppFlyout-createForm-policySelection')
+        ).toBeNull();
       });
       it('should display agents policy if feature flag is enabled', async () => {
         useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
         const renderResult = await renderAndClickAddButton();
-        expect(renderResult).toMatchSnapshot();
+        expect(
+          renderResult.queryByTestId('addTrustedAppFlyout-createForm-policySelection')
+        ).toBeTruthy();
       });
     });
   });

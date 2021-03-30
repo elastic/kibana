@@ -790,6 +790,35 @@ const removeTSVBSearchSource: SavedObjectMigrationFn<any, any> = (doc) => {
   return doc;
 };
 
+const addSupportOfDualIndexSelectionModeInTSVB: SavedObjectMigrationFn<any, any> = (doc) => {
+  const visStateJSON = get(doc, 'attributes.visState');
+  let visState;
+
+  if (visStateJSON) {
+    try {
+      visState = JSON.parse(visStateJSON);
+    } catch (e) {
+      // Let it go, the data is invalid and we'll leave it as is
+    }
+    if (visState && visState.type === 'metrics') {
+      const { params } = visState;
+
+      if (typeof params?.index_pattern === 'string') {
+        params.use_kibana_indexes = false;
+      }
+
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          visState: JSON.stringify(visState),
+        },
+      };
+    }
+  }
+  return doc;
+};
+
 // [Data table visualization] Enable toolbar by default
 const enableDataTableVisToolbar: SavedObjectMigrationFn<any, any> = (doc) => {
   let visState;
@@ -929,4 +958,5 @@ export const visualizationSavedObjectTypeMigrations = {
   '7.10.0': flow(migrateFilterRatioQuery, removeTSVBSearchSource),
   '7.11.0': flow(enableDataTableVisToolbar),
   '7.12.0': flow(migrateVislibAreaLineBarTypes, migrateSchema),
+  '7.13.0': flow(addSupportOfDualIndexSelectionModeInTSVB),
 };

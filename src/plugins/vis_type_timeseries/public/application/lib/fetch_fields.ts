@@ -9,12 +9,14 @@
 import { i18n } from '@kbn/i18n';
 import { getCoreStart, getDataStart } from '../../services';
 import { ROUTES } from '../../../common/constants';
-import { SanitizedFieldType } from '../../../common/types';
+import { SanitizedFieldType, IndexPatternValue } from '../../../common/types';
+import { getIndexPatternKey } from '../../../common/index_patterns_utils';
+import { toSanitizedFieldType } from '../../../common/fields_utils';
 
 export type VisFields = Record<string, SanitizedFieldType[]>;
 
 export async function fetchFields(
-  indexes: string[] = [],
+  indexes: IndexPatternValue[] = [],
   signal?: AbortSignal
 ): Promise<VisFields> {
   const patterns = Array.isArray(indexes) ? indexes : [indexes];
@@ -25,26 +27,33 @@ export async function fetchFields(
     const defaultIndexPattern = await dataStart.indexPatterns.getDefault();
     const indexFields = await Promise.all(
       patterns.map(async (pattern) => {
-        return coreStart.http.get(ROUTES.FIELDS, {
-          query: {
-            index: pattern,
-          },
-          signal,
-        });
+        if (typeof pattern !== 'string' && pattern?.id) {
+          return toSanitizedFieldType(
+            (await dataStart.indexPatterns.get(pattern.id)).getNonScriptedFields()
+          );
+        } else {
+          return coreStart.http.get(ROUTES.FIELDS, {
+            query: {
+              index: `${pattern ?? ''}`,
+            },
+            signal,
+          });
+        }
       })
     );
 
     const fields: VisFields = patterns.reduce(
       (cumulatedFields, currentPattern, index) => ({
         ...cumulatedFields,
-        [currentPattern]: indexFields[index],
+        [getIndexPatternKey(currentPattern)]: indexFields[index],
       }),
       {}
     );
 
-    if (defaultIndexPattern?.title && patterns.includes(defaultIndexPattern.title)) {
-      fields[''] = fields[defaultIndexPattern.title];
+    if (defaultIndexPattern) {
+      fields[''] = toSanitizedFieldType(await defaultIndexPattern.getNonScriptedFields());
     }
+
     return fields;
   } catch (error) {
     if (error.name !== 'AbortError') {
