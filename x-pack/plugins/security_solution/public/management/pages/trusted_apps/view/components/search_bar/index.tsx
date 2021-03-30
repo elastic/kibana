@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useState } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -16,6 +16,13 @@ export interface SearchBarProps {
 
 export const SearchBar = memo<SearchBarProps>(({ defaultValue = '', onSearch }) => {
   const [query, setQuery] = useState<string>(defaultValue);
+
+  const handleOnChangeSearchField = useCallback(
+    (ev: React.ChangeEvent<HTMLInputElement>) => setQuery(ev.target.value),
+    [setQuery]
+  );
+  const handleOnSearch = useCallback(() => onSearch(query), [query, onSearch]);
+
   return (
     <EuiFlexGroup direction="row" alignItems="center" gutterSize="l">
       <EuiFlexItem>
@@ -27,18 +34,14 @@ export const SearchBar = memo<SearchBarProps>(({ defaultValue = '', onSearch }) 
               defaultMessage: 'Search',
             }
           )}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={handleOnChangeSearchField}
           onSearch={onSearch}
           isClearable
           fullWidth
           data-test-subj="trustedAppSearchField"
         />
       </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-        onClick={() => onSearch(query)}
-        data-test-subj="trustedAppSearchButton"
-      >
+      <EuiFlexItem grow={false} onClick={handleOnSearch} data-test-subj="trustedAppSearchButton">
         <EuiButton iconType="refresh">
           {i18n.translate('xpack.securitySolution.trustedapps.list.search.button', {
             defaultMessage: 'Refresh',
