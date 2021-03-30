@@ -321,6 +321,7 @@ export class GaugePanelConfig extends Component<
           <EuiTab
             isSelected={selectedTab === PANEL_CONFIG_TABS.DATA}
             onClick={() => this.switchTab(PANEL_CONFIG_TABS.DATA)}
+            data-test-subj="gaugeEditorDataBtn"
           >
             <FormattedMessage
               id="visTypeTimeseries.gauge.dataTab.dataButtonLabel"
@@ -330,6 +331,7 @@ export class GaugePanelConfig extends Component<
           <EuiTab
             isSelected={selectedTab === PANEL_CONFIG_TABS.OPTIONS}
             onClick={() => this.switchTab(PANEL_CONFIG_TABS.OPTIONS)}
+            data-test-subj="gaugeEditorPanelOptionsBtn"
           >
             <FormattedMessage
               id="visTypeTimeseries.gauge.optionsTab.panelOptionsButtonLabel"
