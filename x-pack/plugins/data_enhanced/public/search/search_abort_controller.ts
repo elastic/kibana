@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { NEVER, Subscription, timer } from 'rxjs';
+import { Subscription, timer } from 'rxjs';
 
 export enum AbortReason {
   Timeout = 'timeout',
@@ -24,8 +24,7 @@ export class SearchAbortController {
     }
 
     if (timeout) {
-      const timeout$ = timeout ? timer(timeout) : NEVER;
-      this.timeoutSub = timeout$.subscribe(() => {
+      this.timeoutSub = timer(timeout).subscribe(() => {
         this.reason = AbortReason.Timeout;
         this.abortController.abort();
         this.timeoutSub!.unsubscribe();
