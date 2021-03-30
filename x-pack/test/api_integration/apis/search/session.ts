@@ -434,6 +434,94 @@ export default function ({ getService }: FtrProviderContext) {
       );
     });
 
+    it('waits for session completes', async () => {
+      const sessionId = `my-session-${Math.random()}`;
+
+      // run search
+      const searchRes1 = await supertest
+        .post(`/internal/search/ese`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          sessionId,
+          params: {
+            body: {
+              query: {
+                term: {
+                  agent: '1',
+                },
+              },
+            },
+            wait_for_completion_timeout: '1ms',
+          },
+        })
+        .expect(200);
+
+      const { id: id1 } = searchRes1.body;
+
+      // persist session
+      await supertest
+        .post(`/internal/session`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          sessionId,
+          name: 'My Session',
+          appId: 'discover',
+          expires: '123',
+          urlGeneratorId: 'discover',
+        })
+        .expect(200);
+
+      // run search
+      const searchRes2 = await supertest
+        .post(`/internal/search/ese`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          sessionId,
+          params: {
+            body: {
+              query: {
+                term: {
+                  agent: '2',
+                },
+              },
+            },
+            wait_for_completion_timeout: '1ms',
+          },
+        })
+        .expect(200);
+
+      const { id: id2 } = searchRes2.body;
+
+      await retry.waitForWithTimeout('searches persisted into session', 5000, async () => {
+        const resp = await supertest
+          .get(`/internal/session/${sessionId}`)
+          .set('kbn-xsrf', 'foo')
+          .expect(200);
+
+        const { name, touched, created, persisted, idMapping } = resp.body.attributes;
+        expect(persisted).to.be(true);
+        expect(name).to.be('My Session');
+        expect(touched).not.to.be(undefined);
+        expect(created).not.to.be(undefined);
+
+        const idMappings = Object.values(idMapping).map((value: any) => value.id);
+        expect(idMappings).to.contain(id1);
+        expect(idMappings).to.contain(id2);
+        return true;
+      });
+
+      await retry.waitForWithTimeout('wait for session to complete', 15000, async () => {
+        const resp = await supertest
+          .get(`/internal/session/${sessionId}`)
+          .set('kbn-xsrf', 'foo')
+          .expect(200);
+
+        const { status } = resp.body.attributes;
+        expect(status).to.be(SearchSessionStatus.COMPLETE);
+        return true;
+      });
+    });
+
     describe('with security', () => {
       before(async () => {
         await security.user.create('other_user', {
