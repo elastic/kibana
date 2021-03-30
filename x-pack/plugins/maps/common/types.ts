@@ -22,3 +22,9 @@ export interface IndexSourceMappings {
 export interface BodySettings {
   [key: string]: any;
 }
+
+export interface WriteSettings {
+  index: string;
+  body: object;
+  [key: string]: any;
+}

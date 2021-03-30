@@ -59,7 +59,7 @@ export const OPERATOR_TITLE: { [K in ConditionEntry['operator']]: string } = {
 };
 
 export const PROPERTY_TITLES: Readonly<
-  { [K in keyof Omit<TrustedApp, 'id' | 'entries'>]: string }
+  { [K in keyof Omit<TrustedApp, 'id' | 'entries' | 'version'>]: string }
 > = {
   name: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.name', {
     defaultMessage: 'Name',
@@ -73,8 +73,17 @@ export const PROPERTY_TITLES: Readonly<
   created_by: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.createdBy', {
     defaultMessage: 'Created By',
   }),
+  updated_at: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.updatedAt', {
+    defaultMessage: 'Date Updated',
+  }),
+  updated_by: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.updatedBy', {
+    defaultMessage: 'Updated By',
+  }),
   description: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.description', {
     defaultMessage: 'Description',
+  }),
+  effectScope: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.effectScope', {
+    defaultMessage: 'Effect scope',
   }),
 };
 
@@ -117,6 +126,13 @@ export const CARD_DELETE_BUTTON_LABEL = i18n.translate(
   'xpack.securitySolution.trustedapps.card.removeButtonLabel',
   {
     defaultMessage: 'Remove',
+  }
+);
+
+export const CARD_EDIT_BUTTON_LABEL = i18n.translate(
+  'xpack.securitySolution.trustedapps.card.editButtonLabel',
+  {
+    defaultMessage: 'Edit',
   }
 );
 

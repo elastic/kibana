@@ -125,7 +125,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
                       <EuiButtonEmpty iconType="gear" onClick={() => setIsSettingsFlyoutOpen(true)}>
                         <FormattedMessage
                           id="xpack.fleet.appNavigation.settingsButton"
-                          defaultMessage="Settings"
+                          defaultMessage="Fleet settings"
                         />
                       </EuiButtonEmpty>
                     </EuiFlexItem>
