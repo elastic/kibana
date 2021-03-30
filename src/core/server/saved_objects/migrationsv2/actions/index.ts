@@ -739,11 +739,11 @@ export const createIndex = (
         // If the cluster state was updated and all shards ackd we're done
         return TaskEither.right('create_index_succeeded');
       } else {
-        // Otherwise, wait until the target index has a 'green' status.
+        // Otherwise, wait until the target index has a 'yellow' status.
         return pipe(
-          waitForIndexStatusYellow(client, indexName),
+          waitForIndexStatusYellow(client, indexName, DEFAULT_TIMEOUT),
           TaskEither.map(() => {
-            /** When the index status is 'green' we know that all shards were started */
+            /** When the index status is 'yellow' we know that all shards were started */
             return 'create_index_succeeded';
           })
         );
