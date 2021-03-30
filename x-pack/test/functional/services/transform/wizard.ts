@@ -249,7 +249,9 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
 
               const actualColorStats = await canvasElement.getColorStats(
                 `[data-test-subj="mlDataGridChart-${id}-histogram"] .echCanvasRenderer`,
-                sortedExpectedColorStats
+                sortedExpectedColorStats,
+                undefined,
+                4
               );
 
               expect(actualColorStats.length).to.eql(

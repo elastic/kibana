@@ -40,10 +40,10 @@ export function createInternalESClient({
 
   function callEs<T extends { body: any }>({
     cb,
-    operationName,
+    requestType,
     params,
   }: {
-    operationName: string;
+    requestType: string;
     cb: () => TransportRequestPromise<T>;
     params: Record<string, any>;
   }) {
@@ -51,9 +51,13 @@ export function createInternalESClient({
       cb: () => unwrapEsResponse(cancelEsRequestOnAbort(cb(), request)),
       getDebugMessage: () => ({
         title: getDebugTitle(request),
-        body: getDebugBody(params, operationName),
+        body: getDebugBody(params, requestType),
       }),
-      debug: context.params.query._debug,
+      debug: context.params.query._inspect,
+      isCalledWithInternalUser: true,
+      request,
+      requestType,
+      requestParams: params,
     });
   }
 
@@ -65,28 +69,28 @@ export function createInternalESClient({
       params: TSearchRequest
     ): Promise<ESSearchResponse<TDocument, TSearchRequest>> => {
       return callEs({
-        operationName: 'search',
+        requestType: 'search',
         cb: () => asInternalUser.search(params),
         params,
       });
     },
     index: <T>(params: APMIndexDocumentParams<T>) => {
       return callEs({
-        operationName: 'index',
+        requestType: 'index',
         cb: () => asInternalUser.index(params),
         params,
       });
     },
     delete: (params: DeleteRequest): Promise<{ result: string }> => {
       return callEs({
-        operationName: 'delete',
+        requestType: 'delete',
         cb: () => asInternalUser.delete(params),
         params,
       });
     },
     indicesCreate: (params: CreateIndexRequest) => {
       return callEs({
-        operationName: 'indices.create',
+        requestType: 'indices.create',
         cb: () => asInternalUser.indices.create(params),
         params,
       });
