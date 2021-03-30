@@ -66,6 +66,11 @@ Example.args = {
       latency: 18565471.348388012,
       throughput: 0.3261219384041683,
     },
+    {
+      serviceNodeName: '_service_node_name_missing_',
+      latency: 20065471.348388012,
+      throughput: 0.3261219384041683,
+    },
   ],
 } as InstancesLatencyDistributionChartProps;
 

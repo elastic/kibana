@@ -8,6 +8,7 @@
 import { TooltipInfo } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { getServiceNodeName } from '../../../../../common/service_nodes';
 import {
   asTransactionRate,
   TimeFormatter,
@@ -43,7 +44,9 @@ function SingleInstanceCustomTooltip({
 
   return (
     <>
-      <div className="echTooltip__header">{serviceNodeName}</div>
+      <div className="echTooltip__header">
+        {getServiceNodeName(serviceNodeName)}
+      </div>
       <div className="echTooltip__list">
         <div className="echTooltip__item">
           <div
@@ -122,7 +125,9 @@ function MultipleInstanceCustomTooltip({
                 />
               </div>
               <div className="echTooltip__item--container">
-                <span className="echTooltip__label">{serviceNodeName}</span>
+                <span className="echTooltip__label">
+                  {getServiceNodeName(serviceNodeName)}
+                </span>
               </div>
             </div>
             <div className="echTooltip__item">

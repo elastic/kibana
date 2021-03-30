@@ -5,4 +5,12 @@
  * 2.0.
  */
 
+import { UNIDENTIFIED_SERVICE_NODES_LABEL } from './i18n';
+
 export const SERVICE_NODE_NAME_MISSING = '_service_node_name_missing_';
+
+export function getServiceNodeName(serviceNodeName?: string) {
+  return serviceNodeName === SERVICE_NODE_NAME_MISSING
+    ? UNIDENTIFIED_SERVICE_NODES_LABEL
+    : serviceNodeName;
+}
