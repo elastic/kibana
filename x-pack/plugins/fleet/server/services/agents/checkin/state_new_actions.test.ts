@@ -144,6 +144,9 @@ describe('test agent checkin new action services', () => {
               api_key: undefined,
             },
           },
+          output_permissions: {
+            default: { _fallback: { cluster: [], indices: [] } },
+          },
           inputs: [],
         },
       },
@@ -159,6 +162,7 @@ describe('test agent checkin new action services', () => {
               id: 'policy1',
               inputs: [],
               outputs: { default: { api_key: 'MOCK_API_KEY', hosts: [], type: 'elasticsearch' } },
+              output_permissions: { default: { _fallback: { cluster: [], indices: [] } } },
             },
           },
           id: 'action1',
@@ -213,7 +217,7 @@ describe('test agent checkin new action services', () => {
       ).toEqual(expectedResult);
     });
 
-    it('should return CONNFIG_CHANGE and data.config for agent version <= 7.9', async () => {
+    it('should return CONFIG_CHANGE and data.config for agent version <= 7.9', async () => {
       const expectedResult = [
         {
           agent_id: 'agent1',
@@ -223,6 +227,7 @@ describe('test agent checkin new action services', () => {
               id: 'policy1',
               inputs: [],
               outputs: { default: { api_key: 'MOCK_API_KEY', hosts: [], type: 'elasticsearch' } },
+              output_permissions: { default: { _fallback: { cluster: [], indices: [] } } },
             },
           },
           id: 'action1',
