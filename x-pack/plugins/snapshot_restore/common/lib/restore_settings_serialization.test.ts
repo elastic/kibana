@@ -56,6 +56,7 @@ describe('restore_settings_serialization()', () => {
         indexSettings: '{"modified_setting":123}',
         ignoreIndexSettings: ['setting1'],
         ignoreUnavailable: true,
+        includeAliases: true,
       })
     ).toEqual({
       indices: ['foo', 'bar'],
@@ -66,6 +67,7 @@ describe('restore_settings_serialization()', () => {
       index_settings: { modified_setting: 123 },
       ignore_index_settings: ['setting1'],
       ignore_unavailable: true,
+      include_aliases: true,
     });
   });
 

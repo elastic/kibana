@@ -26,6 +26,7 @@ export function serializeRestoreSettings(restoreSettings: RestoreSettings): Rest
     indexSettings,
     ignoreIndexSettings,
     ignoreUnavailable,
+    includeAliases,
   } = restoreSettings;
 
   let parsedIndexSettings: RestoreSettingsEs['index_settings'] | undefined;
@@ -47,6 +48,7 @@ export function serializeRestoreSettings(restoreSettings: RestoreSettings): Rest
     index_settings: parsedIndexSettings,
     ignore_index_settings: ignoreIndexSettings,
     ignore_unavailable: ignoreUnavailable,
+    include_aliases: includeAliases,
   };
 
   return removeUndefinedSettings(settings);
