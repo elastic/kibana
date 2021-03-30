@@ -56,15 +56,13 @@ export const servicesRoute = createRoute({
       setup
     );
 
-    const services = await getServices({
+    return getServices({
       environment,
       kuery,
       setup,
       searchAggregatedTransactions,
       logger: context.logger,
     });
-
-    return services;
   },
 });
 
@@ -465,7 +463,7 @@ export const serviceInstancesPrimaryStatisticsRoute = createRoute({
 
     const { start, end } = setup;
 
-    return getServiceInstancesPrimaryStatistics({
+    const serviceInstances = await getServiceInstancesPrimaryStatistics({
       environment,
       kuery,
       latencyAggregationType,
@@ -476,6 +474,8 @@ export const serviceInstancesPrimaryStatisticsRoute = createRoute({
       start,
       end,
     });
+
+    return { serviceInstances };
   },
 });
 
@@ -558,12 +558,14 @@ export const serviceDependenciesRoute = createRoute({
     const { serviceName } = context.params.path;
     const { environment, numBuckets } = context.params.query;
 
-    return getServiceDependencies({
+    const serviceDependencies = await getServiceDependencies({
       serviceName,
       environment,
       setup,
       numBuckets,
     });
+
+    return { serviceDependencies };
   },
 });
 
@@ -586,12 +588,14 @@ export const serviceProfilingTimelineRoute = createRoute({
       query: { environment, kuery },
     } = context.params;
 
-    return getServiceProfilingTimeline({
+    const profilingTimeline = await getServiceProfilingTimeline({
       kuery,
       setup,
       serviceName,
       environment,
     });
+
+    return { profilingTimeline };
   },
 });
 
