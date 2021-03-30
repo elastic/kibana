@@ -16,7 +16,12 @@ export {
   ConfigDeprecationWithContext,
 } from './deprecation';
 
-export { RawConfigurationProvider, RawConfigService, getConfigFromFiles } from './raw';
+export {
+  RawConfigurationProvider,
+  RawConfigService,
+  RawConfigAdapter,
+  getConfigFromFiles,
+} from './raw';
 
 export { ConfigService, IConfigService } from './config_service';
 export { Config, ConfigPath, isConfigPath, hasConfigPathIntersection } from './config';

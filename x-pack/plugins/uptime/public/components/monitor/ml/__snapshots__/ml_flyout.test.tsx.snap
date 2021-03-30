@@ -91,7 +91,7 @@ exports[`ML Flyout component shows license info if no ml available 1`] = `
   >
     <button
       aria-label="Close this dialog"
-      class="euiButtonIcon euiButtonIcon--text euiFlyout__closeButton"
+      class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiFlyout__closeButton"
       data-test-subj="euiFlyoutCloseButton"
       type="button"
     >
