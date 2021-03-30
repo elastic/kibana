@@ -8,6 +8,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.QueryStringInput.props",
             "type": "Object",
             "label": "props",
             "isRequired": true,

@@ -136,6 +136,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.SavedObjectFinderUi.Unnamed.props",
                 "type": "CompoundType",
                 "label": "props",
                 "isRequired": true,
@@ -272,6 +273,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.SavedObjectLoader.Unnamed.SavedObjectClass",
                 "type": "Any",
                 "label": "SavedObjectClass",
                 "isRequired": true,
@@ -285,6 +287,7 @@
                 }
               },
               {
+                "id": "def-public.SavedObjectLoader.Unnamed.savedObjectsClient",
                 "type": "Object",
                 "label": "savedObjectsClient",
                 "isRequired": true,
@@ -297,7 +300,7 @@
                     "section": "def-public.SavedObjectsClient",
                     "text": "SavedObjectsClient"
                   },
-                  ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\">"
+                  ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"update\" | \"bulkUpdate\">"
                 ],
                 "description": [],
                 "source": {
@@ -325,6 +328,7 @@
             ],
             "children": [
               {
+                "id": "def-public.SavedObjectLoader.get.opts",
                 "type": "CompoundType",
                 "label": "opts",
                 "isRequired": false,
@@ -355,6 +359,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.SavedObjectLoader.urlFor.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -385,6 +390,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.SavedObjectLoader.delete.ids",
                 "type": "CompoundType",
                 "label": "ids",
                 "isRequired": true,
@@ -425,6 +431,7 @@
             ],
             "children": [
               {
+                "id": "def-public.SavedObjectLoader.mapHitSource.source",
                 "type": "Object",
                 "label": "source",
                 "isRequired": true,
@@ -438,6 +445,7 @@
                 }
               },
               {
+                "id": "def-public.SavedObjectLoader.mapHitSource.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -451,6 +459,7 @@
                 }
               },
               {
+                "id": "def-public.SavedObjectLoader.mapHitSource.references",
                 "type": "Array",
                 "label": "references",
                 "isRequired": true,
@@ -500,7 +509,7 @@
             ],
             "children": [
               {
-                "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.{\n-   attributes,\n    id,\n    references = [],\n  }",
+                "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.{\n-   attributes,\n    id,\n    references = [],\n  }.{\n    attributes,\n    id,\n    references = [],\n  }",
                 "type": "Object",
                 "label": "{\n    attributes,\n    id,\n    references = [],\n  }",
                 "tags": [],
@@ -508,7 +517,7 @@
                 "children": [
                   {
                     "tags": [],
-                    "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.{\n-   attributes,\n    id,\n    references = [],\n  }.attributes",
+                    "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.{\n-   attributes,\n    id,\n    references = [],\n  }.{\n    attributes,\n    id,\n    references = [],\n  }.attributes",
                     "type": "Object",
                     "label": "attributes",
                     "description": [],
@@ -522,7 +531,7 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.{\n-   attributes,\n    id,\n    references = [],\n  }.id",
+                    "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.{\n-   attributes,\n    id,\n    references = [],\n  }.{\n    attributes,\n    id,\n    references = [],\n  }.id",
                     "type": "string",
                     "label": "id",
                     "description": [],
@@ -533,7 +542,7 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.{\n-   attributes,\n    id,\n    references = [],\n  }.references",
+                    "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.{\n-   attributes,\n    id,\n    references = [],\n  }.{\n    attributes,\n    id,\n    references = [],\n  }.references",
                     "type": "Array",
                     "label": "references",
                     "description": [],
@@ -586,6 +595,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.SavedObjectLoader.find.search",
                 "type": "string",
                 "label": "search",
                 "isRequired": true,
@@ -599,6 +609,7 @@
                 }
               },
               {
+                "id": "def-public.SavedObjectLoader.find.sizeOrOptions",
                 "type": "CompoundType",
                 "label": "sizeOrOptions",
                 "isRequired": true,
@@ -786,6 +797,7 @@
         ],
         "children": [
           {
+            "id": "def-public.checkForDuplicateTitle.savedObject",
             "type": "Object",
             "label": "savedObject",
             "isRequired": true,
@@ -807,6 +819,7 @@
             }
           },
           {
+            "id": "def-public.checkForDuplicateTitle.isTitleDuplicateConfirmed",
             "type": "boolean",
             "label": "isTitleDuplicateConfirmed",
             "isRequired": true,
@@ -820,6 +833,7 @@
             }
           },
           {
+            "id": "def-public.checkForDuplicateTitle.onTitleDuplicate",
             "type": "Function",
             "label": "onTitleDuplicate",
             "isRequired": false,
@@ -833,6 +847,7 @@
             }
           },
           {
+            "id": "def-public.checkForDuplicateTitle.services",
             "type": "Object",
             "label": "services",
             "isRequired": true,
@@ -867,6 +882,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.getSavedObjectFinder.savedObject",
             "type": "Object",
             "label": "savedObject",
             "isRequired": true,
@@ -886,6 +902,7 @@
             }
           },
           {
+            "id": "def-public.getSavedObjectFinder.uiSettings",
             "type": "Object",
             "label": "uiSettings",
             "isRequired": true,
@@ -946,7 +963,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.isErrorNonFatal.error",
+            "id": "def-public.isErrorNonFatal.error.error",
             "type": "Object",
             "label": "error",
             "tags": [],
@@ -954,7 +971,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-public.isErrorNonFatal.error.message",
+                "id": "def-public.isErrorNonFatal.error.error.message",
                 "type": "string",
                 "label": "message",
                 "description": [],
@@ -998,6 +1015,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.SavedObjectSaveModalOrigin.props",
             "type": "Object",
             "label": "props",
             "isRequired": true,
@@ -1048,7 +1066,7 @@
             "section": "def-public.SavedObjectsClient",
             "text": "SavedObjectsClient"
           },
-          ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\">; overlays: ",
+          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"update\" | \"bulkUpdate\">; overlays: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -1070,6 +1088,7 @@
         ],
         "children": [
           {
+            "id": "def-public.saveWithConfirmation.source",
             "type": "Object",
             "label": "source",
             "isRequired": true,
@@ -1091,14 +1110,14 @@
             }
           },
           {
-            "id": "def-public.saveWithConfirmation.savedObject",
+            "id": "def-public.saveWithConfirmation.savedObject.savedObject",
             "type": "Object",
             "label": "savedObject",
             "tags": [],
             "description": [],
             "children": [
               {
-                "id": "def-public.saveWithConfirmation.savedObject.getEsType",
+                "id": "def-public.saveWithConfirmation.savedObject.savedObject.getEsType",
                 "type": "Function",
                 "label": "getEsType",
                 "signature": [
@@ -1115,7 +1134,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.saveWithConfirmation.savedObject.title",
+                "id": "def-public.saveWithConfirmation.savedObject.savedObject.title",
                 "type": "string",
                 "label": "title",
                 "description": [],
@@ -1126,7 +1145,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.saveWithConfirmation.savedObject.displayName",
+                "id": "def-public.saveWithConfirmation.savedObject.savedObject.displayName",
                 "type": "string",
                 "label": "displayName",
                 "description": [],
@@ -1142,6 +1161,7 @@
             }
           },
           {
+            "id": "def-public.saveWithConfirmation.options",
             "type": "Object",
             "label": "options",
             "isRequired": true,
@@ -1163,7 +1183,7 @@
             }
           },
           {
-            "id": "def-public.saveWithConfirmation.services",
+            "id": "def-public.saveWithConfirmation.services.services",
             "type": "Object",
             "label": "services",
             "tags": [],
@@ -1171,7 +1191,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-public.saveWithConfirmation.services.savedObjectsClient",
+                "id": "def-public.saveWithConfirmation.services.services.savedObjectsClient",
                 "type": "Object",
                 "label": "savedObjectsClient",
                 "description": [],
@@ -1188,12 +1208,12 @@
                     "section": "def-public.SavedObjectsClient",
                     "text": "SavedObjectsClient"
                   },
-                  ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\">"
+                  ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"update\" | \"bulkUpdate\">"
                 ]
               },
               {
                 "tags": [],
-                "id": "def-public.saveWithConfirmation.services.overlays",
+                "id": "def-public.saveWithConfirmation.services.services.overlays",
                 "type": "Object",
                 "label": "overlays",
                 "description": [],
@@ -1240,6 +1260,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.showSaveModal.saveModal",
             "type": "Object",
             "label": "saveModal",
             "isRequired": true,
@@ -1253,6 +1274,7 @@
             }
           },
           {
+            "id": "def-public.showSaveModal.I18nContext",
             "type": "Function",
             "label": "I18nContext",
             "isRequired": true,
@@ -1266,6 +1288,7 @@
             }
           },
           {
+            "id": "def-public.showSaveModal.Wrapper",
             "type": "Function",
             "label": "Wrapper",
             "isRequired": false,
@@ -2450,6 +2473,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.SavedObjectMetaData.getIconForSavedObject.savedObject",
                 "type": "Object",
                 "label": "savedObject",
                 "isRequired": true,
@@ -2495,6 +2519,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.SavedObjectMetaData.getTooltipForSavedObject.savedObject",
                 "type": "Object",
                 "label": "savedObject",
                 "isRequired": true,
@@ -2540,6 +2565,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.SavedObjectMetaData.showSavedObject.savedObject",
                 "type": "Object",
                 "label": "savedObject",
                 "isRequired": true,

@@ -19,6 +19,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ReportingAPIClient.Unnamed.http",
                 "type": "Object",
                 "label": "http",
                 "isRequired": true,
@@ -55,6 +56,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ReportingAPIClient.getReportURL.jobId",
                 "type": "string",
                 "label": "jobId",
                 "isRequired": true,
@@ -85,6 +87,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ReportingAPIClient.downloadReport.jobId",
                 "type": "string",
                 "label": "jobId",
                 "isRequired": true,
@@ -115,6 +118,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ReportingAPIClient.deleteReport.jobId",
                 "type": "string",
                 "label": "jobId",
                 "isRequired": true,
@@ -140,6 +144,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ReportingAPIClient.list.page",
                 "type": "number",
                 "label": "page",
                 "isRequired": true,
@@ -153,6 +158,7 @@
                 }
               },
               {
+                "id": "def-public.ReportingAPIClient.list.jobIds",
                 "type": "Array",
                 "label": "jobIds",
                 "isRequired": true,
@@ -220,6 +226,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ReportingAPIClient.getContent.jobId",
                 "type": "string",
                 "label": "jobId",
                 "isRequired": true,
@@ -258,6 +265,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ReportingAPIClient.getInfo.jobId",
                 "type": "string",
                 "label": "jobId",
                 "isRequired": true,
@@ -283,6 +291,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ReportingAPIClient.findForJobIds.jobIds",
                 "type": "Array",
                 "label": "jobIds",
                 "isRequired": true,
@@ -321,6 +330,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ReportingAPIClient.getReportingJobPath.exportType",
                 "type": "string",
                 "label": "exportType",
                 "isRequired": true,
@@ -334,6 +344,7 @@
                 }
               },
               {
+                "id": "def-public.ReportingAPIClient.getReportingJobPath.jobParams",
                 "type": "Object",
                 "label": "jobParams",
                 "isRequired": true,
@@ -364,6 +375,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ReportingAPIClient.createReportingJob.exportType",
                 "type": "string",
                 "label": "exportType",
                 "isRequired": true,
@@ -377,6 +389,7 @@
                 }
               },
               {
+                "id": "def-public.ReportingAPIClient.createReportingJob.jobParams",
                 "type": "Any",
                 "label": "jobParams",
                 "isRequired": true,
@@ -423,6 +436,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ReportingAPIClient.getDownloadLink.jobId",
                 "type": "string",
                 "label": "jobId",
                 "isRequired": true,
@@ -595,6 +609,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ReportingPublicPlugin.Unnamed.initializerContext",
                 "type": "Object",
                 "label": "initializerContext",
                 "isRequired": true,
@@ -655,6 +670,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ReportingPublicPlugin.setup.core",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -675,6 +691,7 @@
                 }
               },
               {
+                "id": "def-public.ReportingPublicPlugin.setup.{-home, management, licensing, uiActions, share }",
                 "type": "Object",
                 "label": "{ home, management, licensing, uiActions, share }",
                 "isRequired": true,
@@ -726,6 +743,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ReportingPublicPlugin.start.core",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -836,6 +854,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.ReportingCore.Unnamed.logger",
                 "type": "Object",
                 "label": "logger",
                 "isRequired": true,
@@ -855,6 +874,7 @@
                 }
               },
               {
+                "id": "def-server.ReportingCore.Unnamed.context",
                 "type": "Object",
                 "label": "context",
                 "isRequired": true,
@@ -902,6 +922,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.ReportingCore.pluginSetup.setupDeps",
                 "type": "Object",
                 "label": "setupDeps",
                 "isRequired": true,
@@ -946,6 +967,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.ReportingCore.pluginStart.startDeps",
                 "type": "Object",
                 "label": "startDeps",
                 "isRequired": true,
@@ -1038,6 +1060,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.ReportingCore.setConfig.config",
                 "type": "Object",
                 "label": "config",
                 "isRequired": true,
@@ -1186,6 +1209,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.ReportingCore.scheduleTask.report",
                 "type": "Object",
                 "label": "report",
                 "isRequired": true,
@@ -1352,7 +1376,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">) => Promise<",
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">) => Promise<",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -1365,6 +1389,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.ReportingCore.getUiSettingsServiceFactory.savedObjectsClient",
                 "type": "Object",
                 "label": "savedObjectsClient",
                 "isRequired": true,
@@ -1377,7 +1402,7 @@
                     "section": "def-server.SavedObjectsClient",
                     "text": "SavedObjectsClient"
                   },
-                  ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
+                  ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
                 ],
                 "description": [],
                 "source": {
@@ -1419,6 +1444,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.ReportingCore.getSpaceId.request",
                 "type": "Object",
                 "label": "request",
                 "isRequired": true,
@@ -1439,6 +1465,7 @@
                 }
               },
               {
+                "id": "def-server.ReportingCore.getSpaceId.logger",
                 "type": "Object",
                 "label": "logger",
                 "isRequired": true,
@@ -1491,6 +1518,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.ReportingCore.getFakeRequest.baseRequest",
                 "type": "Uncategorized",
                 "label": "baseRequest",
                 "isRequired": true,
@@ -1504,6 +1532,7 @@
                 }
               },
               {
+                "id": "def-server.ReportingCore.getFakeRequest.spaceId",
                 "type": "string",
                 "label": "spaceId",
                 "isRequired": false,
@@ -1517,6 +1546,7 @@
                 }
               },
               {
+                "id": "def-server.ReportingCore.getFakeRequest.logger",
                 "type": "Object",
                 "label": "logger",
                 "isRequired": true,
@@ -1577,6 +1607,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.ReportingCore.getUiSettingsClient.request",
                 "type": "Object",
                 "label": "request",
                 "isRequired": true,
@@ -1597,6 +1628,7 @@
                 }
               },
               {
+                "id": "def-server.ReportingCore.getUiSettingsClient.logger",
                 "type": "Object",
                 "label": "logger",
                 "isRequired": true,
@@ -1681,6 +1713,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.ReportingCore.trackReport.reportId",
                 "type": "string",
                 "label": "reportId",
                 "isRequired": true,
@@ -1711,6 +1744,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.ReportingCore.untrackReport.reportId",
                 "type": "string",
                 "label": "reportId",
                 "isRequired": true,
@@ -1805,6 +1839,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.ReportingPlugin.Unnamed.context",
                 "type": "Object",
                 "label": "context",
                 "isRequired": true,
@@ -1860,6 +1895,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.ReportingPlugin.setup.core",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -1880,6 +1916,7 @@
                 }
               },
               {
+                "id": "def-server.ReportingPlugin.setup.plugins",
                 "type": "Object",
                 "label": "plugins",
                 "isRequired": true,
@@ -1932,6 +1969,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.ReportingPlugin.start.core",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -1951,6 +1989,7 @@
                 }
               },
               {
+                "id": "def-server.ReportingPlugin.start.plugins",
                 "type": "Object",
                 "label": "plugins",
                 "isRequired": true,
@@ -2254,6 +2293,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.CancellationToken.on.callback",
                 "type": "Object",
                 "label": "callback",
                 "isRequired": true,
@@ -2335,6 +2375,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.Poller.Unnamed.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,

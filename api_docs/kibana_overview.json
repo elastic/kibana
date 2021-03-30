@@ -1,0 +1,88 @@
+{
+  "id": "kibanaOverview",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "tags": [],
+        "id": "def-common.PLUGIN_ICON",
+        "type": "string",
+        "label": "PLUGIN_ICON",
+        "description": [],
+        "source": {
+          "path": "src/plugins/kibana_overview/common/index.ts",
+          "lineNumber": 12
+        },
+        "signature": [
+          "\"logoKibana\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "label": "PLUGIN_ID",
+        "description": [],
+        "source": {
+          "path": "src/plugins/kibana_overview/common/index.ts",
+          "lineNumber": 9
+        },
+        "signature": [
+          "\"kibanaOverview\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "source": {
+          "path": "src/plugins/kibana_overview/common/index.ts",
+          "lineNumber": 10
+        },
+        "signature": [
+          "\"Overview\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.PLUGIN_PATH",
+        "type": "string",
+        "label": "PLUGIN_PATH",
+        "description": [],
+        "source": {
+          "path": "src/plugins/kibana_overview/common/index.ts",
+          "lineNumber": 11
+        },
+        "signature": [
+          "\"/app/kibana_overview\""
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

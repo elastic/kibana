@@ -37,6 +37,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.EncryptionError.Unnamed.message",
                 "type": "string",
                 "label": "message",
                 "isRequired": true,
@@ -50,6 +51,7 @@
                 }
               },
               {
+                "id": "def-server.EncryptionError.Unnamed.attributeName",
                 "type": "string",
                 "label": "attributeName",
                 "isRequired": true,
@@ -63,6 +65,7 @@
                 }
               },
               {
+                "id": "def-server.EncryptionError.Unnamed.operation",
                 "type": "Enum",
                 "label": "operation",
                 "isRequired": true,
@@ -82,6 +85,7 @@
                 }
               },
               {
+                "id": "def-server.EncryptionError.Unnamed.cause",
                 "type": "Object",
                 "label": "cause",
                 "isRequired": false,

@@ -23,6 +23,7 @@
         ],
         "children": [
           {
+            "id": "def-public.getSpaceColor.space",
             "type": "Object",
             "label": "space",
             "isRequired": true,
@@ -72,6 +73,7 @@
         ],
         "children": [
           {
+            "id": "def-public.getSpaceImageUrl.space",
             "type": "Object",
             "label": "space",
             "isRequired": true,
@@ -121,6 +123,7 @@
         ],
         "children": [
           {
+            "id": "def-public.getSpaceInitials.space",
             "type": "Object",
             "label": "space",
             "isRequired": true,
@@ -391,6 +394,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-server.addSpaceIdToPath.basePath",
             "type": "string",
             "label": "basePath",
             "isRequired": true,
@@ -404,6 +408,7 @@
             }
           },
           {
+            "id": "def-server.addSpaceIdToPath.spaceId",
             "type": "string",
             "label": "spaceId",
             "isRequired": true,
@@ -417,6 +422,7 @@
             }
           },
           {
+            "id": "def-server.addSpaceIdToPath.requestedPath",
             "type": "string",
             "label": "requestedPath",
             "isRequired": true,
@@ -682,6 +688,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SpacesServiceSetup.getSpaceId.request",
                 "type": "Object",
                 "label": "request",
                 "isRequired": true,
@@ -723,6 +730,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SpacesServiceSetup.spaceIdToNamespace.spaceId",
                 "type": "string",
                 "label": "spaceId",
                 "isRequired": true,
@@ -757,6 +765,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SpacesServiceSetup.namespaceToSpaceId.namespace",
                 "type": "string",
                 "label": "namespace",
                 "isRequired": false,
@@ -845,6 +854,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SpacesServiceStart.getSpaceId.request",
                 "type": "Object",
                 "label": "request",
                 "isRequired": true,
@@ -892,6 +902,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SpacesServiceStart.isInDefaultSpace.request",
                 "type": "Object",
                 "label": "request",
                 "isRequired": true,
@@ -947,6 +958,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SpacesServiceStart.getActiveSpace.request",
                 "type": "Object",
                 "label": "request",
                 "isRequired": true,
@@ -986,6 +998,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SpacesServiceStart.spaceIdToNamespace.spaceId",
                 "type": "string",
                 "label": "spaceId",
                 "isRequired": true,
@@ -1018,6 +1031,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SpacesServiceStart.namespaceToSpaceId.namespace",
                 "type": "string",
                 "label": "namespace",
                 "isRequired": false,
@@ -1194,6 +1208,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.addSpaceIdToPath.basePath",
             "type": "string",
             "label": "basePath",
             "isRequired": true,
@@ -1207,6 +1222,7 @@
             }
           },
           {
+            "id": "def-common.addSpaceIdToPath.spaceId",
             "type": "string",
             "label": "spaceId",
             "isRequired": true,
@@ -1220,6 +1236,7 @@
             }
           },
           {
+            "id": "def-common.addSpaceIdToPath.requestedPath",
             "type": "string",
             "label": "requestedPath",
             "isRequired": true,
@@ -1251,6 +1268,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.getSpaceIdFromPath.requestBasePath",
             "type": "CompoundType",
             "label": "requestBasePath",
             "isRequired": false,
@@ -1264,6 +1282,7 @@
             }
           },
           {
+            "id": "def-common.getSpaceIdFromPath.serverBasePath",
             "type": "CompoundType",
             "label": "serverBasePath",
             "isRequired": false,
@@ -1305,6 +1324,7 @@
         ],
         "children": [
           {
+            "id": "def-common.isReservedSpace.space",
             "type": "CompoundType",
             "label": "space",
             "isRequired": false,

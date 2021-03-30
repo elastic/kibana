@@ -201,6 +201,7 @@
             ],
             "children": [
               {
+                "id": "def-public.ILicense.hasAtLeast.minimumLicenseRequired",
                 "type": "CompoundType",
                 "label": "minimumLicenseRequired",
                 "isRequired": true,
@@ -242,6 +243,7 @@
             ],
             "children": [
               {
+                "id": "def-public.ILicense.check.pluginName",
                 "type": "string",
                 "label": "pluginName",
                 "isRequired": true,
@@ -257,6 +259,7 @@
                 }
               },
               {
+                "id": "def-public.ILicense.check.minimumLicenseRequired",
                 "type": "CompoundType",
                 "label": "minimumLicenseRequired",
                 "isRequired": true,
@@ -298,6 +301,7 @@
             ],
             "children": [
               {
+                "id": "def-public.ILicense.getFeature.name",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -902,6 +906,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-server.wrapRouteWithLicenseCheck.checkLicense",
             "type": "Function",
             "label": "checkLicense",
             "isRequired": true,
@@ -921,6 +926,7 @@
             }
           },
           {
+            "id": "def-server.wrapRouteWithLicenseCheck.handler",
             "type": "Function",
             "label": "handler",
             "isRequired": true,
@@ -1035,6 +1041,7 @@
             ],
             "children": [
               {
+                "id": "def-server.FeatureUsageServiceSetup.register.featureName",
                 "type": "string",
                 "label": "featureName",
                 "isRequired": true,
@@ -1048,6 +1055,7 @@
                 }
               },
               {
+                "id": "def-server.FeatureUsageServiceSetup.register.licenseType",
                 "type": "CompoundType",
                 "label": "licenseType",
                 "isRequired": true,
@@ -1096,6 +1104,7 @@
             ],
             "children": [
               {
+                "id": "def-server.FeatureUsageServiceStart.notifyUsage.featureName",
                 "type": "string",
                 "label": "featureName",
                 "isRequired": true,
@@ -1111,6 +1120,7 @@
                 }
               },
               {
+                "id": "def-server.FeatureUsageServiceStart.notifyUsage.usedAt",
                 "type": "CompoundType",
                 "label": "usedAt",
                 "isRequired": false,
@@ -1363,6 +1373,7 @@
             ],
             "children": [
               {
+                "id": "def-server.ILicense.hasAtLeast.minimumLicenseRequired",
                 "type": "CompoundType",
                 "label": "minimumLicenseRequired",
                 "isRequired": true,
@@ -1404,6 +1415,7 @@
             ],
             "children": [
               {
+                "id": "def-server.ILicense.check.pluginName",
                 "type": "string",
                 "label": "pluginName",
                 "isRequired": true,
@@ -1419,6 +1431,7 @@
                 }
               },
               {
+                "id": "def-server.ILicense.check.minimumLicenseRequired",
                 "type": "CompoundType",
                 "label": "minimumLicenseRequired",
                 "isRequired": true,
@@ -1460,6 +1473,7 @@
             ],
             "children": [
               {
+                "id": "def-server.ILicense.getFeature.name",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,

@@ -65,6 +65,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.AddPanelAction.Unnamed.getFactory",
                 "type": "Function",
                 "label": "getFactory",
                 "isRequired": true,
@@ -117,6 +118,7 @@
                 }
               },
               {
+                "id": "def-public.AddPanelAction.Unnamed.getAllFactories",
                 "type": "Function",
                 "label": "getAllFactories",
                 "isRequired": true,
@@ -169,6 +171,7 @@
                 }
               },
               {
+                "id": "def-public.AddPanelAction.Unnamed.overlays",
                 "type": "Object",
                 "label": "overlays",
                 "isRequired": true,
@@ -188,6 +191,7 @@
                 }
               },
               {
+                "id": "def-public.AddPanelAction.Unnamed.notifications",
                 "type": "Object",
                 "label": "notifications",
                 "isRequired": true,
@@ -207,6 +211,7 @@
                 }
               },
               {
+                "id": "def-public.AddPanelAction.Unnamed.SavedObjectFinder",
                 "type": "CompoundType",
                 "label": "SavedObjectFinder",
                 "isRequired": true,
@@ -277,6 +282,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.AddPanelAction.isCompatible.context",
                 "type": "CompoundType",
                 "label": "context",
                 "isRequired": true,
@@ -322,6 +328,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.AddPanelAction.execute.context",
                 "type": "CompoundType",
                 "label": "context",
                 "isRequired": true,
@@ -383,6 +390,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.AttributeService.Unnamed.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -396,6 +404,7 @@
                 }
               },
               {
+                "id": "def-public.AttributeService.Unnamed.showSaveModal",
                 "type": "Function",
                 "label": "showSaveModal",
                 "isRequired": true,
@@ -409,6 +418,7 @@
                 }
               },
               {
+                "id": "def-public.AttributeService.Unnamed.i18nContext",
                 "type": "Function",
                 "label": "i18nContext",
                 "isRequired": true,
@@ -422,6 +432,7 @@
                 }
               },
               {
+                "id": "def-public.AttributeService.Unnamed.toasts",
                 "type": "Object",
                 "label": "toasts",
                 "isRequired": true,
@@ -443,6 +454,7 @@
                 }
               },
               {
+                "id": "def-public.AttributeService.Unnamed.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -463,6 +475,7 @@
                 }
               },
               {
+                "id": "def-public.AttributeService.Unnamed.getEmbeddableFactory",
                 "type": "Function",
                 "label": "getEmbeddableFactory",
                 "isRequired": false,
@@ -532,6 +545,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.AttributeService.unwrapAttributes.input",
                 "type": "CompoundType",
                 "label": "input",
                 "isRequired": true,
@@ -562,6 +576,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.AttributeService.wrapAttributes.newAttributes",
                 "type": "Uncategorized",
                 "label": "newAttributes",
                 "isRequired": true,
@@ -575,6 +590,7 @@
                 }
               },
               {
+                "id": "def-public.AttributeService.wrapAttributes.useRefType",
                 "type": "boolean",
                 "label": "useRefType",
                 "isRequired": true,
@@ -588,6 +604,7 @@
                 }
               },
               {
+                "id": "def-public.AttributeService.wrapAttributes.input",
                 "type": "CompoundType",
                 "label": "input",
                 "isRequired": false,
@@ -613,6 +630,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.AttributeService.inputIsRefType.input",
                 "type": "CompoundType",
                 "label": "input",
                 "isRequired": true,
@@ -672,6 +690,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.AttributeService.getExplicitInputFromEmbeddable.embeddable",
                 "type": "Object",
                 "label": "embeddable",
                 "isRequired": true,
@@ -720,6 +739,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.AttributeService.getInputAsValueType.input",
                 "type": "CompoundType",
                 "label": "input",
                 "isRequired": true,
@@ -750,6 +770,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.AttributeService.getInputAsRefType.input",
                 "type": "CompoundType",
                 "label": "input",
                 "isRequired": true,
@@ -763,6 +784,7 @@
                 }
               },
               {
+                "id": "def-public.AttributeService.getInputAsRefType.saveOptions",
                 "type": "CompoundType",
                 "label": "saveOptions",
                 "isRequired": false,
@@ -861,6 +883,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.Container.Unnamed.input",
                 "type": "Uncategorized",
                 "label": "input",
                 "isRequired": true,
@@ -874,6 +897,7 @@
                 }
               },
               {
+                "id": "def-public.Container.Unnamed.output",
                 "type": "Uncategorized",
                 "label": "output",
                 "isRequired": true,
@@ -887,6 +911,7 @@
                 }
               },
               {
+                "id": "def-public.Container.Unnamed.getFactory",
                 "type": "Function",
                 "label": "getFactory",
                 "isRequired": true,
@@ -939,6 +964,7 @@
                 }
               },
               {
+                "id": "def-public.Container.Unnamed.parent",
                 "type": "Object",
                 "label": "parent",
                 "isRequired": false,
@@ -1008,6 +1034,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.Container.updateInputForChild.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -1021,6 +1048,7 @@
                 }
               },
               {
+                "id": "def-public.Container.updateInputForChild.changes",
                 "type": "Object",
                 "label": "changes",
                 "isRequired": true,
@@ -1106,6 +1134,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.Container.addNewEmbeddable.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -1119,6 +1148,7 @@
                 }
               },
               {
+                "id": "def-public.Container.addNewEmbeddable.explicitInput",
                 "type": "Object",
                 "label": "explicitInput",
                 "isRequired": true,
@@ -1149,6 +1179,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.Container.removeEmbeddable.embeddableId",
                 "type": "string",
                 "label": "embeddableId",
                 "isRequired": true,
@@ -1219,6 +1250,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.Container.getChild.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -1265,6 +1297,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.Container.getInputForChild.embeddableId",
                 "type": "string",
                 "label": "embeddableId",
                 "isRequired": true,
@@ -1343,6 +1376,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.Container.untilEmbeddableLoaded.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -1412,6 +1446,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.Container.createNewPanelState.factory",
                 "type": "Object",
                 "label": "factory",
                 "isRequired": true,
@@ -1440,6 +1475,7 @@
                 }
               },
               {
+                "id": "def-public.Container.createNewPanelState.partial",
                 "type": "Object",
                 "label": "partial",
                 "isRequired": true,
@@ -1494,6 +1530,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.Container.getPanelState.embeddableId",
                 "type": "string",
                 "label": "embeddableId",
                 "isRequired": true,
@@ -1526,6 +1563,7 @@
             ],
             "children": [
               {
+                "id": "def-public.Container.getInheritedInput.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -1641,6 +1679,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.EditPanelAction.Unnamed.getEmbeddableFactory",
                 "type": "Function",
                 "label": "getEmbeddableFactory",
                 "isRequired": true,
@@ -1693,6 +1732,7 @@
                 }
               },
               {
+                "id": "def-public.EditPanelAction.Unnamed.application",
                 "type": "Object",
                 "label": "application",
                 "isRequired": true,
@@ -1712,6 +1752,7 @@
                 }
               },
               {
+                "id": "def-public.EditPanelAction.Unnamed.stateTransfer",
                 "type": "Object",
                 "label": "stateTransfer",
                 "isRequired": false,
@@ -1749,6 +1790,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.EditPanelAction.getDisplayName.{-embeddable }",
                 "type": "Object",
                 "label": "{ embeddable }",
                 "isRequired": true,
@@ -1795,6 +1837,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.EditPanelAction.isCompatible.{-embeddable }",
                 "type": "Object",
                 "label": "{ embeddable }",
                 "isRequired": true,
@@ -1825,6 +1868,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.EditPanelAction.execute.context",
                 "type": "Object",
                 "label": "context",
                 "isRequired": true,
@@ -1855,6 +1899,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.EditPanelAction.getAppTarget.{-embeddable }",
                 "type": "Object",
                 "label": "{ embeddable }",
                 "isRequired": true,
@@ -1885,6 +1930,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.EditPanelAction.getHref.{-embeddable }",
                 "type": "Object",
                 "label": "{ embeddable }",
                 "isRequired": true,
@@ -2101,6 +2147,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.Embeddable.Unnamed.input",
                 "type": "Uncategorized",
                 "label": "input",
                 "isRequired": true,
@@ -2114,6 +2161,7 @@
                 }
               },
               {
+                "id": "def-public.Embeddable.Unnamed.output",
                 "type": "Uncategorized",
                 "label": "output",
                 "isRequired": true,
@@ -2127,6 +2175,7 @@
                 }
               },
               {
+                "id": "def-public.Embeddable.Unnamed.parent",
                 "type": "Object",
                 "label": "parent",
                 "isRequired": false,
@@ -2399,6 +2448,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.Embeddable.updateInput.changes",
                 "type": "Object",
                 "label": "changes",
                 "isRequired": true,
@@ -2429,6 +2479,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.Embeddable.render.el",
                 "type": "Object",
                 "label": "el",
                 "isRequired": true,
@@ -2507,6 +2558,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.Embeddable.updateOutput.outputChanges",
                 "type": "Object",
                 "label": "outputChanges",
                 "isRequired": true,
@@ -2537,6 +2589,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.Embeddable.onFatalError.e",
                 "type": "Object",
                 "label": "e",
                 "isRequired": true,
@@ -2672,6 +2725,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.EmbeddableChildPanel.Unnamed.props",
                 "type": "Object",
                 "label": "props",
                 "isRequired": true,
@@ -2791,6 +2845,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.EmbeddableFactoryNotFoundError.Unnamed.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -2845,6 +2900,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.EmbeddablePanel.Unnamed.props",
                 "type": "Object",
                 "label": "props",
                 "isRequired": true,
@@ -2902,6 +2958,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.EmbeddablePanel.onFocus.focusedPanelIndex",
                 "type": "string",
                 "label": "focusedPanelIndex",
                 "isRequired": true,
@@ -2932,6 +2989,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.EmbeddablePanel.onBlur.blurredPanelIndex",
                 "type": "string",
                 "label": "blurredPanelIndex",
                 "isRequired": true,
@@ -3039,6 +3097,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.EmbeddableRoot.Unnamed.props",
                 "type": "Object",
                 "label": "props",
                 "isRequired": true,
@@ -3085,6 +3144,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.EmbeddableRoot.componentDidUpdate.prevProps",
                 "type": "Object",
                 "label": "prevProps",
                 "isRequired": false,
@@ -3115,6 +3175,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.EmbeddableRoot.shouldComponentUpdate.newProps",
                 "type": "Object",
                 "label": "newProps",
                 "isRequired": true,
@@ -3190,6 +3251,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.EmbeddableStateTransfer.Unnamed.navigateToApp",
                 "type": "Function",
                 "label": "navigateToApp",
                 "isRequired": true,
@@ -3211,6 +3273,7 @@
                 }
               },
               {
+                "id": "def-public.EmbeddableStateTransfer.Unnamed.currentAppId$",
                 "type": "Object",
                 "label": "currentAppId$",
                 "isRequired": true,
@@ -3225,6 +3288,7 @@
                 }
               },
               {
+                "id": "def-public.EmbeddableStateTransfer.Unnamed.appList",
                 "type": "Object",
                 "label": "appList",
                 "isRequired": false,
@@ -3246,6 +3310,7 @@
                 }
               },
               {
+                "id": "def-public.EmbeddableStateTransfer.Unnamed.customStorage",
                 "type": "Object",
                 "label": "customStorage",
                 "isRequired": false,
@@ -3278,6 +3343,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.EmbeddableStateTransfer.getAppNameFromId.appId",
                 "type": "string",
                 "label": "appId",
                 "isRequired": true,
@@ -3325,6 +3391,7 @@
             ],
             "children": [
               {
+                "id": "def-public.EmbeddableStateTransfer.getIncomingEditorState.appId",
                 "type": "string",
                 "label": "appId",
                 "isRequired": true,
@@ -3340,6 +3407,7 @@
                 }
               },
               {
+                "id": "def-public.EmbeddableStateTransfer.getIncomingEditorState.removeAfterFetch",
                 "type": "CompoundType",
                 "label": "removeAfterFetch",
                 "isRequired": false,
@@ -3374,6 +3442,7 @@
             ],
             "children": [
               {
+                "id": "def-public.EmbeddableStateTransfer.clearEditorState.appId",
                 "type": "string",
                 "label": "appId",
                 "isRequired": false,
@@ -3416,6 +3485,7 @@
             ],
             "children": [
               {
+                "id": "def-public.EmbeddableStateTransfer.getIncomingEmbeddablePackage.appId",
                 "type": "string",
                 "label": "appId",
                 "isRequired": true,
@@ -3431,6 +3501,7 @@
                 }
               },
               {
+                "id": "def-public.EmbeddableStateTransfer.getIncomingEmbeddablePackage.removeAfterFetch",
                 "type": "CompoundType",
                 "label": "removeAfterFetch",
                 "isRequired": false,
@@ -3473,6 +3544,7 @@
             ],
             "children": [
               {
+                "id": "def-public.EmbeddableStateTransfer.navigateToEditor.appId",
                 "type": "string",
                 "label": "appId",
                 "isRequired": true,
@@ -3486,7 +3558,7 @@
                 }
               },
               {
-                "id": "def-public.EmbeddableStateTransfer.navigateToEditor.options",
+                "id": "def-public.EmbeddableStateTransfer.navigateToEditor.options.options",
                 "type": "Object",
                 "label": "options",
                 "tags": [],
@@ -3494,7 +3566,7 @@
                 "children": [
                   {
                     "tags": [],
-                    "id": "def-public.EmbeddableStateTransfer.navigateToEditor.options.path",
+                    "id": "def-public.EmbeddableStateTransfer.navigateToEditor.options.options.path",
                     "type": "string",
                     "label": "path",
                     "description": [],
@@ -3508,7 +3580,7 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-public.EmbeddableStateTransfer.navigateToEditor.options.state",
+                    "id": "def-public.EmbeddableStateTransfer.navigateToEditor.options.options.state",
                     "type": "Object",
                     "label": "state",
                     "description": [],
@@ -3560,6 +3632,7 @@
             ],
             "children": [
               {
+                "id": "def-public.EmbeddableStateTransfer.navigateToWithEmbeddablePackage.appId",
                 "type": "string",
                 "label": "appId",
                 "isRequired": true,
@@ -3573,7 +3646,7 @@
                 }
               },
               {
-                "id": "def-public.EmbeddableStateTransfer.navigateToWithEmbeddablePackage.options",
+                "id": "def-public.EmbeddableStateTransfer.navigateToWithEmbeddablePackage.options.options",
                 "type": "Object",
                 "label": "options",
                 "tags": [],
@@ -3581,7 +3654,7 @@
                 "children": [
                   {
                     "tags": [],
-                    "id": "def-public.EmbeddableStateTransfer.navigateToWithEmbeddablePackage.options.path",
+                    "id": "def-public.EmbeddableStateTransfer.navigateToWithEmbeddablePackage.options.options.path",
                     "type": "string",
                     "label": "path",
                     "description": [],
@@ -3595,7 +3668,7 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-public.EmbeddableStateTransfer.navigateToWithEmbeddablePackage.options.state",
+                    "id": "def-public.EmbeddableStateTransfer.navigateToWithEmbeddablePackage.options.options.state",
                     "type": "Object",
                     "label": "state",
                     "description": [],
@@ -3713,6 +3786,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ErrorEmbeddable.Unnamed.error",
                 "type": "CompoundType",
                 "label": "error",
                 "isRequired": true,
@@ -3726,6 +3800,7 @@
                 }
               },
               {
+                "id": "def-public.ErrorEmbeddable.Unnamed.input",
                 "type": "Object",
                 "label": "input",
                 "isRequired": true,
@@ -3745,6 +3820,7 @@
                 }
               },
               {
+                "id": "def-public.ErrorEmbeddable.Unnamed.parent",
                 "type": "Object",
                 "label": "parent",
                 "isRequired": false,
@@ -3814,6 +3890,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ErrorEmbeddable.render.dom",
                 "type": "Object",
                 "label": "dom",
                 "isRequired": true,
@@ -3915,6 +3992,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.defaultEmbeddableFactoryProvider.def",
             "type": "CompoundType",
             "label": "def",
             "isRequired": true,
@@ -3992,6 +4070,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.EmbeddableRenderer.props",
             "type": "CompoundType",
             "label": "props",
             "isRequired": true,
@@ -4050,6 +4129,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.isContextMenuTriggerContext.context",
             "type": "Unknown",
             "label": "context",
             "isRequired": true,
@@ -4113,6 +4193,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.isEmbeddable.x",
             "type": "Unknown",
             "label": "x",
             "isRequired": true,
@@ -4181,6 +4262,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.isErrorEmbeddable.embeddable",
             "type": "CompoundType",
             "label": "embeddable",
             "isRequired": true,
@@ -4214,6 +4296,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.isRangeSelectTriggerContext.context",
             "type": "CompoundType",
             "label": "context",
             "isRequired": true,
@@ -4320,6 +4403,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.isReferenceOrValueEmbeddable.incoming",
             "type": "Unknown",
             "label": "incoming",
             "isRequired": true,
@@ -4346,6 +4430,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.isRowClickTriggerContext.context",
             "type": "CompoundType",
             "label": "context",
             "isRequired": true,
@@ -4468,6 +4553,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.isSavedObjectEmbeddableInput.input",
             "type": "CompoundType",
             "label": "input",
             "isRequired": true,
@@ -4508,6 +4594,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.isValueClickTriggerContext.context",
             "type": "CompoundType",
             "label": "context",
             "isRequired": true,
@@ -4653,7 +4740,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.openAddPanelFlyout.options",
+            "id": "def-public.openAddPanelFlyout.options.options",
             "type": "Object",
             "label": "options",
             "tags": [],
@@ -4661,7 +4748,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-public.openAddPanelFlyout.options.embeddable",
+                "id": "def-public.openAddPanelFlyout.options.options.embeddable",
                 "type": "Object",
                 "label": "embeddable",
                 "description": [],
@@ -4698,7 +4785,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.openAddPanelFlyout.options.getFactory",
+                "id": "def-public.openAddPanelFlyout.options.options.getFactory",
                 "type": "Function",
                 "label": "getFactory",
                 "description": [],
@@ -4751,7 +4838,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.openAddPanelFlyout.options.getAllFactories",
+                "id": "def-public.openAddPanelFlyout.options.options.getAllFactories",
                 "type": "Function",
                 "label": "getAllFactories",
                 "description": [],
@@ -4804,7 +4891,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.openAddPanelFlyout.options.overlays",
+                "id": "def-public.openAddPanelFlyout.options.options.overlays",
                 "type": "Object",
                 "label": "overlays",
                 "description": [],
@@ -4824,7 +4911,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.openAddPanelFlyout.options.notifications",
+                "id": "def-public.openAddPanelFlyout.options.options.notifications",
                 "type": "Object",
                 "label": "notifications",
                 "description": [],
@@ -4844,7 +4931,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.openAddPanelFlyout.options.SavedObjectFinder",
+                "id": "def-public.openAddPanelFlyout.options.options.SavedObjectFinder",
                 "type": "CompoundType",
                 "label": "SavedObjectFinder",
                 "description": [],
@@ -4876,6 +4963,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.withEmbeddableSubscription.WrappedComponent",
             "type": "CompoundType",
             "label": "WrappedComponent",
             "isRequired": true,
@@ -5467,6 +5555,7 @@
             ],
             "children": [
               {
+                "id": "def-public.EmbeddableFactory.getDefaultInput.partial",
                 "type": "Object",
                 "label": "partial",
                 "isRequired": true,
@@ -5549,6 +5638,7 @@
             ],
             "children": [
               {
+                "id": "def-public.EmbeddableFactory.createFromSavedObject.savedObjectId",
                 "type": "string",
                 "label": "savedObjectId",
                 "isRequired": true,
@@ -5562,6 +5652,7 @@
                 }
               },
               {
+                "id": "def-public.EmbeddableFactory.createFromSavedObject.input",
                 "type": "Object",
                 "label": "input",
                 "isRequired": true,
@@ -5577,6 +5668,7 @@
                 }
               },
               {
+                "id": "def-public.EmbeddableFactory.createFromSavedObject.parent",
                 "type": "Object",
                 "label": "parent",
                 "isRequired": false,
@@ -5664,6 +5756,7 @@
             ],
             "children": [
               {
+                "id": "def-public.EmbeddableFactory.create.initialInput",
                 "type": "Uncategorized",
                 "label": "initialInput",
                 "isRequired": true,
@@ -5677,6 +5770,7 @@
                 }
               },
               {
+                "id": "def-public.EmbeddableFactory.create.parent",
                 "type": "Object",
                 "label": "parent",
                 "isRequired": false,
@@ -6203,6 +6297,7 @@
             ],
             "children": [
               {
+                "id": "def-public.IContainer.untilEmbeddableLoaded.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -6243,6 +6338,7 @@
             ],
             "children": [
               {
+                "id": "def-public.IContainer.getInputForChild.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -6283,6 +6379,7 @@
             ],
             "children": [
               {
+                "id": "def-public.IContainer.updateInputForChild.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -6296,6 +6393,7 @@
                 }
               },
               {
+                "id": "def-public.IContainer.updateInputForChild.changes",
                 "type": "Object",
                 "label": "changes",
                 "isRequired": true,
@@ -6367,6 +6465,7 @@
             ],
             "children": [
               {
+                "id": "def-public.IContainer.getChild.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -6399,6 +6498,7 @@
             ],
             "children": [
               {
+                "id": "def-public.IContainer.removeEmbeddable.embeddableId",
                 "type": "string",
                 "label": "embeddableId",
                 "isRequired": true,
@@ -6470,6 +6570,7 @@
             ],
             "children": [
               {
+                "id": "def-public.IContainer.addNewEmbeddable.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -6483,6 +6584,7 @@
                 }
               },
               {
+                "id": "def-public.IContainer.addNewEmbeddable.explicitInput",
                 "type": "Object",
                 "label": "explicitInput",
                 "isRequired": true,
@@ -6743,6 +6845,7 @@
             ],
             "children": [
               {
+                "id": "def-public.IEmbeddable.updateInput.changes",
                 "type": "Object",
                 "label": "changes",
                 "isRequired": true,
@@ -6890,6 +6993,7 @@
             ],
             "children": [
               {
+                "id": "def-public.IEmbeddable.render.domNode",
                 "type": "CompoundType",
                 "label": "domNode",
                 "isRequired": true,
@@ -8385,6 +8489,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.extractBaseEmbeddableInput.state",
             "type": "CompoundType",
             "label": "state",
             "isRequired": true,
@@ -8440,6 +8545,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.getExtractFunction.embeddables",
             "type": "Object",
             "label": "embeddables",
             "isRequired": true,
@@ -8503,6 +8609,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.getInjectFunction.embeddables",
             "type": "Object",
             "label": "embeddables",
             "isRequired": true,
@@ -8565,6 +8672,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.getMigrateFunction.embeddables",
             "type": "Object",
             "label": "embeddables",
             "isRequired": true,
@@ -8625,6 +8733,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.getTelemetryFunction.embeddables",
             "type": "Object",
             "label": "embeddables",
             "isRequired": true,
@@ -8678,6 +8787,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.injectBaseEmbeddableInput.state",
             "type": "CompoundType",
             "label": "state",
             "isRequired": true,
@@ -8697,6 +8807,7 @@
             }
           },
           {
+            "id": "def-common.injectBaseEmbeddableInput.references",
             "type": "Array",
             "label": "references",
             "isRequired": true,
@@ -8773,6 +8884,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.isSavedObjectEmbeddableInput.input",
             "type": "CompoundType",
             "label": "input",
             "isRequired": true,
@@ -8813,6 +8925,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.telemetryBaseEmbeddableInput.state",
             "type": "CompoundType",
             "label": "state",
             "isRequired": true,
@@ -8832,6 +8945,7 @@
             }
           },
           {
+            "id": "def-common.telemetryBaseEmbeddableInput.telemetryData",
             "type": "Object",
             "label": "telemetryData",
             "isRequired": true,

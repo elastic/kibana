@@ -99,6 +99,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.getTagsCapabilities.capabilities",
             "type": "Object",
             "label": "capabilities",
             "isRequired": true,
@@ -145,6 +146,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.validateTagColor.color",
             "type": "string",
             "label": "color",
             "isRequired": true,
@@ -176,6 +178,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.validateTagDescription.description",
             "type": "string",
             "label": "description",
             "isRequired": true,
@@ -207,6 +210,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.validateTagName.name",
             "type": "string",
             "label": "name",
             "isRequired": true,
@@ -268,6 +272,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.ITagsClient.create.attributes",
                 "type": "Object",
                 "label": "attributes",
                 "isRequired": true,
@@ -312,6 +317,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.ITagsClient.get.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -358,6 +364,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.ITagsClient.getAll.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -395,6 +402,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.ITagsClient.delete.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -441,6 +449,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.ITagsClient.update.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -454,6 +463,7 @@
                 }
               },
               {
+                "id": "def-common.ITagsClient.update.attributes",
                 "type": "Object",
                 "label": "attributes",
                 "isRequired": true,

@@ -8,6 +8,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.TrackApplicationView.props",
             "type": "CompoundType",
             "label": "props",
             "isRequired": true,
@@ -257,6 +258,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.Collector.Unnamed.log",
                 "type": "Object",
                 "label": "log",
                 "isRequired": true,
@@ -270,6 +272,7 @@
                 }
               },
               {
+                "id": "def-server.Collector.Unnamed.{\n-     type,\n      init,\n      fetch,\n      isReady,\n      extendFetchContext = {},\n      ...options\n    }",
                 "type": "CompoundType",
                 "label": "{\n      type,\n      init,\n      fetch,\n      isReady,\n      extendFetchContext = {},\n      ...options\n    }",
                 "isRequired": true,

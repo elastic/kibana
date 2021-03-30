@@ -138,6 +138,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.BoolFormat.textConvert.value",
                 "type": "Any",
                 "label": "value",
                 "isRequired": true,
@@ -370,6 +371,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.ColorFormat.findColorRuleForVal.val",
                 "type": "Any",
                 "label": "val",
                 "isRequired": true,
@@ -395,6 +397,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.ColorFormat.htmlConvert.val",
                 "type": "Any",
                 "label": "val",
                 "isRequired": true,
@@ -578,6 +581,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.DurationFormat.textConvert.val",
                 "type": "Any",
                 "label": "val",
                 "isRequired": true,
@@ -812,6 +816,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.FieldFormat.Unnamed._params",
                 "type": "Object",
                 "label": "_params",
                 "isRequired": true,
@@ -831,6 +836,7 @@
                 }
               },
               {
+                "id": "def-common.FieldFormat.Unnamed.getConfig",
                 "type": "Function",
                 "label": "getConfig",
                 "isRequired": false,
@@ -886,6 +892,7 @@
             ],
             "children": [
               {
+                "id": "def-common.FieldFormat.convert.value",
                 "type": "Any",
                 "label": "value",
                 "isRequired": true,
@@ -899,6 +906,7 @@
                 }
               },
               {
+                "id": "def-common.FieldFormat.convert.contentType",
                 "type": "CompoundType",
                 "label": "contentType",
                 "isRequired": true,
@@ -920,6 +928,7 @@
                 }
               },
               {
+                "id": "def-common.FieldFormat.convert.options",
                 "type": "CompoundType",
                 "label": "options",
                 "isRequired": false,
@@ -980,6 +989,7 @@
             ],
             "children": [
               {
+                "id": "def-common.FieldFormat.getConverterFor.contentType",
                 "type": "CompoundType",
                 "label": "contentType",
                 "isRequired": true,
@@ -1046,6 +1056,7 @@
             ],
             "children": [
               {
+                "id": "def-common.FieldFormat.param.name",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -1131,6 +1142,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.FieldFormat.from.convertFn",
                 "type": "Function",
                 "label": "convertFn",
                 "isRequired": true,
@@ -1198,6 +1210,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.FieldFormat.isInstanceOfFieldFormat.fieldFormat",
                 "type": "Any",
                 "label": "fieldFormat",
                 "isRequired": true,
@@ -1263,6 +1276,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.FieldFormatNotFoundError.Unnamed.message",
                 "type": "string",
                 "label": "message",
                 "isRequired": true,
@@ -1276,6 +1290,7 @@
                 }
               },
               {
+                "id": "def-common.FieldFormatNotFoundError.Unnamed.formatId",
                 "type": "string",
                 "label": "formatId",
                 "isRequired": true,
@@ -1382,6 +1397,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.FieldFormatsRegistry.deserialize.mapping",
                 "type": "Object",
                 "label": "mapping",
                 "isRequired": false,
@@ -1455,6 +1471,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.FieldFormatsRegistry.init.getConfig",
                 "type": "Function",
                 "label": "getConfig",
                 "isRequired": true,
@@ -1474,6 +1491,7 @@
                 }
               },
               {
+                "id": "def-common.FieldFormatsRegistry.init.metaParamsOptions",
                 "type": "Object",
                 "label": "metaParamsOptions",
                 "isRequired": true,
@@ -1487,6 +1505,7 @@
                 }
               },
               {
+                "id": "def-common.FieldFormatsRegistry.init.defaultFieldConverters",
                 "type": "Array",
                 "label": "defaultFieldConverters",
                 "isRequired": true,
@@ -1519,6 +1538,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.FieldFormatsRegistry.getDefaultConfig.fieldType",
                 "type": "Enum",
                 "label": "fieldType",
                 "isRequired": true,
@@ -1538,6 +1558,7 @@
                 }
               },
               {
+                "id": "def-common.FieldFormatsRegistry.getDefaultConfig.esTypes",
                 "type": "Array",
                 "label": "esTypes",
                 "isRequired": false,
@@ -1602,6 +1623,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.FieldFormatsRegistry.getType.formatId",
                 "type": "string",
                 "label": "formatId",
                 "isRequired": true,
@@ -1644,6 +1666,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.FieldFormatsRegistry.getTypeWithoutMetaParams.formatId",
                 "type": "string",
                 "label": "formatId",
                 "isRequired": true,
@@ -1682,6 +1705,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.FieldFormatsRegistry.getDefaultType.fieldType",
                 "type": "Enum",
                 "label": "fieldType",
                 "isRequired": true,
@@ -1701,6 +1725,7 @@
                 }
               },
               {
+                "id": "def-common.FieldFormatsRegistry.getDefaultType.esTypes",
                 "type": "Array",
                 "label": "esTypes",
                 "isRequired": false,
@@ -1766,6 +1791,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.FieldFormatsRegistry.getTypeNameByEsTypes.esTypes",
                 "type": "Array",
                 "label": "esTypes",
                 "isRequired": false,
@@ -1823,6 +1849,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.FieldFormatsRegistry.getDefaultTypeName.fieldType",
                 "type": "Enum",
                 "label": "fieldType",
                 "isRequired": true,
@@ -1842,6 +1869,7 @@
                 }
               },
               {
+                "id": "def-common.FieldFormatsRegistry.getDefaultTypeName.esTypes",
                 "type": "Array",
                 "label": "esTypes",
                 "isRequired": false,
@@ -1940,6 +1968,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.FieldFormatsRegistry.getDefaultInstancePlain.fieldType",
                 "type": "Enum",
                 "label": "fieldType",
                 "isRequired": true,
@@ -1959,6 +1988,7 @@
                 }
               },
               {
+                "id": "def-common.FieldFormatsRegistry.getDefaultInstancePlain.esTypes",
                 "type": "Array",
                 "label": "esTypes",
                 "isRequired": false,
@@ -1979,6 +2009,7 @@
                 }
               },
               {
+                "id": "def-common.FieldFormatsRegistry.getDefaultInstancePlain.params",
                 "type": "Object",
                 "label": "params",
                 "isRequired": true,
@@ -2059,6 +2090,7 @@
             ],
             "children": [
               {
+                "id": "def-common.FieldFormatsRegistry.getDefaultInstanceCacheResolver.fieldType",
                 "type": "Enum",
                 "label": "fieldType",
                 "isRequired": true,
@@ -2078,6 +2110,7 @@
                 }
               },
               {
+                "id": "def-common.FieldFormatsRegistry.getDefaultInstanceCacheResolver.esTypes",
                 "type": "Array",
                 "label": "esTypes",
                 "isRequired": true,
@@ -2135,6 +2168,7 @@
             ],
             "children": [
               {
+                "id": "def-common.FieldFormatsRegistry.getByFieldType.fieldType",
                 "type": "Enum",
                 "label": "fieldType",
                 "isRequired": true,
@@ -2215,6 +2249,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.FieldFormatsRegistry.parseDefaultTypeMap.value",
                 "type": "Any",
                 "label": "value",
                 "isRequired": true,
@@ -2253,6 +2288,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.FieldFormatsRegistry.register.fieldFormats",
                 "type": "Array",
                 "label": "fieldFormats",
                 "isRequired": true,
@@ -2425,6 +2461,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.HistogramFormat.textConvert.val",
                 "type": "Any",
                 "label": "val",
                 "isRequired": true,
@@ -2537,6 +2574,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.IpFormat.textConvert.val",
                 "type": "Any",
                 "label": "val",
                 "isRequired": true,
@@ -2779,6 +2817,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.PercentFormat.textConvert.val",
                 "type": "Any",
                 "label": "val",
                 "isRequired": true,
@@ -2891,6 +2930,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.RelativeDateFormat.textConvert.val",
                 "type": "Any",
                 "label": "val",
                 "isRequired": true,
@@ -3003,6 +3043,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.SourceFormat.textConvert.value",
                 "type": "Any",
                 "label": "value",
                 "isRequired": true,
@@ -3033,6 +3074,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.SourceFormat.htmlConvert.value",
                 "type": "Any",
                 "label": "value",
                 "isRequired": true,
@@ -3046,6 +3088,7 @@
                 }
               },
               {
+                "id": "def-common.SourceFormat.htmlConvert.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -3190,6 +3233,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.StaticLookupFormat.textConvert.val",
                 "type": "Any",
                 "label": "val",
                 "isRequired": true,
@@ -3333,6 +3377,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.StringFormat.textConvert.val",
                 "type": "Any",
                 "label": "val",
                 "isRequired": true,
@@ -3445,6 +3490,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.TruncateFormat.textConvert.val",
                 "type": "Any",
                 "label": "val",
                 "isRequired": true,
@@ -3577,6 +3623,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.UrlFormat.Unnamed.params",
                 "type": "Object",
                 "label": "params",
                 "isRequired": true,
@@ -3624,6 +3671,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.UrlFormat.textConvert.value",
                 "type": "Any",
                 "label": "value",
                 "isRequired": true,
@@ -3654,6 +3702,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.UrlFormat.htmlConvert.rawValue",
                 "type": "Any",
                 "label": "rawValue",
                 "isRequired": true,
@@ -3667,6 +3716,7 @@
                 }
               },
               {
+                "id": "def-common.UrlFormat.htmlConvert.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -3726,6 +3776,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.getHighlightRequest.query",
             "type": "Any",
             "label": "query",
             "isRequired": true,
@@ -3739,6 +3790,7 @@
             }
           },
           {
+            "id": "def-common.getHighlightRequest.shouldHighlight",
             "type": "boolean",
             "label": "shouldHighlight",
             "isRequired": true,

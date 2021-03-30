@@ -8,6 +8,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.getIndexListUri.filter",
             "type": "string",
             "label": "filter",
             "isRequired": false,
@@ -21,6 +22,7 @@
             }
           },
           {
+            "id": "def-public.getIndexListUri.includeHiddenIndices",
             "type": "CompoundType",
             "label": "includeHiddenIndices",
             "isRequired": false,
@@ -675,6 +677,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.getTemplateParameter.template",
             "type": "CompoundType",
             "label": "template",
             "isRequired": true,
@@ -702,6 +705,7 @@
             }
           },
           {
+            "id": "def-common.getTemplateParameter.setting",
             "type": "CompoundType",
             "label": "setting",
             "isRequired": true,

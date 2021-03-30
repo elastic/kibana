@@ -61,6 +61,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.TaskManagerPlugin.Unnamed.initContext",
                 "type": "Object",
                 "label": "initContext",
                 "isRequired": true,
@@ -113,6 +114,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.TaskManagerPlugin.setup.core",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -165,6 +167,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.TaskManagerPlugin.start.{-savedObjects, elasticsearch }",
                 "type": "Object",
                 "label": "{ savedObjects, elasticsearch }",
                 "isRequired": true,
@@ -212,6 +215,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-server.isUnrecoverableError.error",
             "type": "CompoundType",
             "label": "error",
             "isRequired": true,
@@ -250,6 +254,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-server.throwUnrecoverableError.error",
             "type": "Object",
             "label": "error",
             "isRequired": true,

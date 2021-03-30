@@ -13,6 +13,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.ActionMenu.props",
             "type": "CompoundType",
             "label": "props",
             "isRequired": true,
@@ -63,6 +64,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.FieldValueSuggestions.props",
             "type": "Object",
             "label": "props",
             "isRequired": true,
@@ -100,7 +102,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.getApmTraceUrl.{\n- traceId,\n  rangeFrom,\n  rangeTo,\n}",
+            "id": "def-public.getApmTraceUrl.{\n- traceId,\n  rangeFrom,\n  rangeTo,\n}.{\n  traceId,\n  rangeFrom,\n  rangeTo,\n}",
             "type": "Object",
             "label": "{\n  traceId,\n  rangeFrom,\n  rangeTo,\n}",
             "tags": [],
@@ -108,7 +110,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-public.getApmTraceUrl.{\n- traceId,\n  rangeFrom,\n  rangeTo,\n}.traceId",
+                "id": "def-public.getApmTraceUrl.{\n- traceId,\n  rangeFrom,\n  rangeTo,\n}.{\n  traceId,\n  rangeFrom,\n  rangeTo,\n}.traceId",
                 "type": "string",
                 "label": "traceId",
                 "description": [],
@@ -119,7 +121,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.getApmTraceUrl.{\n- traceId,\n  rangeFrom,\n  rangeTo,\n}.rangeFrom",
+                "id": "def-public.getApmTraceUrl.{\n- traceId,\n  rangeFrom,\n  rangeTo,\n}.{\n  traceId,\n  rangeFrom,\n  rangeTo,\n}.rangeFrom",
                 "type": "string",
                 "label": "rangeFrom",
                 "description": [],
@@ -130,7 +132,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.getApmTraceUrl.{\n- traceId,\n  rangeFrom,\n  rangeTo,\n}.rangeTo",
+                "id": "def-public.getApmTraceUrl.{\n- traceId,\n  rangeFrom,\n  rangeTo,\n}.{\n  traceId,\n  rangeFrom,\n  rangeTo,\n}.rangeTo",
                 "type": "string",
                 "label": "rangeTo",
                 "description": [],
@@ -166,6 +168,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.getCoreVitalsComponent.props",
             "type": "Object",
             "label": "props",
             "isRequired": true,
@@ -205,6 +208,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.HeaderMenuPortal.props",
             "type": "Object",
             "label": "props",
             "isRequired": true,
@@ -260,6 +264,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.SectionLink.props",
             "type": "CompoundType",
             "label": "props",
             "isRequired": true,
@@ -295,6 +300,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.SectionLinks.{-children, ...props }",
             "type": "CompoundType",
             "label": "{ children, ...props }",
             "isRequired": true,
@@ -347,7 +353,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.SectionSubtitle.{-children }",
+            "id": "def-public.SectionSubtitle.{-children }.{ children }",
             "type": "Object",
             "label": "{ children }",
             "tags": [],
@@ -355,7 +361,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-public.SectionSubtitle.{-children }.children",
+                "id": "def-public.SectionSubtitle.{-children }.{ children }.children",
                 "type": "CompoundType",
                 "label": "children",
                 "description": [],
@@ -392,7 +398,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.SectionTitle.{-children }",
+            "id": "def-public.SectionTitle.{-children }.{ children }",
             "type": "Object",
             "label": "{ children }",
             "tags": [],
@@ -400,7 +406,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-public.SectionTitle.{-children }.children",
+                "id": "def-public.SectionTitle.{-children }.{ children }.children",
                 "type": "CompoundType",
                 "label": "children",
                 "description": [],
@@ -465,6 +471,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.useFetcher.fn",
             "type": "Function",
             "label": "fn",
             "isRequired": true,
@@ -478,6 +485,7 @@
             }
           },
           {
+            "id": "def-public.useFetcher.fnDeps",
             "type": "Array",
             "label": "fnDeps",
             "isRequired": true,
@@ -491,7 +499,7 @@
             }
           },
           {
-            "id": "def-public.useFetcher.options",
+            "id": "def-public.useFetcher.options.options",
             "type": "Object",
             "label": "options",
             "tags": [],
@@ -499,7 +507,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-public.useFetcher.options.preservePreviousData",
+                "id": "def-public.useFetcher.options.options.preservePreviousData",
                 "type": "CompoundType",
                 "label": "preservePreviousData",
                 "description": [],
@@ -568,6 +576,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.useTrackMetric.{-app, metric, metricType = METRIC_TYPE.COUNT, delay = 0 }",
             "type": "CompoundType",
             "label": "{ app, metric, metricType = METRIC_TYPE.COUNT, delay = 0 }",
             "isRequired": true,
@@ -587,6 +596,7 @@
             }
           },
           {
+            "id": "def-public.useTrackMetric.effectDependencies",
             "type": "Array",
             "label": "effectDependencies",
             "isRequired": true,
@@ -618,6 +628,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.useTrackPageview.{-path, ...rest }",
             "type": "CompoundType",
             "label": "{ path, ...rest }",
             "isRequired": true,
@@ -631,6 +642,7 @@
             }
           },
           {
+            "id": "def-public.useTrackPageview.effectDependencies",
             "type": "Array",
             "label": "effectDependencies",
             "isRequired": true,
@@ -670,7 +682,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.useUiTracker.{\n- app: defaultApp,\n}",
+            "id": "def-public.useUiTracker.{\n- app: defaultApp,\n}.{\n  app: defaultApp,\n}",
             "type": "Object",
             "label": "{\n  app: defaultApp,\n}",
             "tags": [],
@@ -678,7 +690,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-public.useUiTracker.{\n- app: defaultApp,\n}.app",
+                "id": "def-public.useUiTracker.{\n- app: defaultApp,\n}.{\n  app: defaultApp,\n}.app",
                 "type": "CompoundType",
                 "label": "app",
                 "description": [],
@@ -1949,6 +1961,21 @@
         "initialIsOpen": false
       },
       {
+        "tags": [],
+        "id": "def-public.enableInspectEsQueries",
+        "type": "string",
+        "label": "enableInspectEsQueries",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
+          "lineNumber": 9
+        },
+        "signature": [
+          "\"observability:enableInspectEsQueries\""
+        ],
+        "initialIsOpen": false
+      },
+      {
         "id": "def-public.FetchData",
         "type": "Type",
         "label": "FetchData",
@@ -2177,6 +2204,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.WrappedElasticsearchClientError.Unnamed.originalError",
                 "type": "Object",
                 "label": "originalError",
                 "isRequired": true,
@@ -2234,7 +2262,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-server.createOrUpdateIndex.{\n- index,\n  mappings,\n  client,\n  logger,\n}",
+            "id": "def-server.createOrUpdateIndex.{\n- index,\n  mappings,\n  client,\n  logger,\n}.{\n  index,\n  mappings,\n  client,\n  logger,\n}",
             "type": "Object",
             "label": "{\n  index,\n  mappings,\n  client,\n  logger,\n}",
             "tags": [],
@@ -2242,7 +2270,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-server.createOrUpdateIndex.{\n- index,\n  mappings,\n  client,\n  logger,\n}.index",
+                "id": "def-server.createOrUpdateIndex.{\n- index,\n  mappings,\n  client,\n  logger,\n}.{\n  index,\n  mappings,\n  client,\n  logger,\n}.index",
                 "type": "string",
                 "label": "index",
                 "description": [],
@@ -2253,7 +2281,7 @@
               },
               {
                 "tags": [],
-                "id": "def-server.createOrUpdateIndex.{\n- index,\n  mappings,\n  client,\n  logger,\n}.mappings",
+                "id": "def-server.createOrUpdateIndex.{\n- index,\n  mappings,\n  client,\n  logger,\n}.{\n  index,\n  mappings,\n  client,\n  logger,\n}.mappings",
                 "type": "CompoundType",
                 "label": "mappings",
                 "description": [],
@@ -2273,7 +2301,7 @@
               },
               {
                 "tags": [],
-                "id": "def-server.createOrUpdateIndex.{\n- index,\n  mappings,\n  client,\n  logger,\n}.client",
+                "id": "def-server.createOrUpdateIndex.{\n- index,\n  mappings,\n  client,\n  logger,\n}.{\n  index,\n  mappings,\n  client,\n  logger,\n}.client",
                 "type": "CompoundType",
                 "label": "client",
                 "description": [],
@@ -2293,7 +2321,7 @@
               },
               {
                 "tags": [],
-                "id": "def-server.createOrUpdateIndex.{\n- index,\n  mappings,\n  client,\n  logger,\n}.logger",
+                "id": "def-server.createOrUpdateIndex.{\n- index,\n  mappings,\n  client,\n  logger,\n}.{\n  index,\n  mappings,\n  client,\n  logger,\n}.logger",
                 "type": "Object",
                 "label": "logger",
                 "description": [],
@@ -2332,6 +2360,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-server.unwrapEsResponse.responsePromise",
             "type": "Uncategorized",
             "label": "responsePromise",
             "isRequired": true,

@@ -53,6 +53,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.NavigationPublicPlugin.Unnamed.initializerContext",
                 "type": "Object",
                 "label": "initializerContext",
                 "isRequired": true,
@@ -105,6 +106,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.NavigationPublicPlugin.setup.core",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -165,6 +167,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.NavigationPublicPlugin.start.{-i18n }",
                 "type": "Object",
                 "label": "{ i18n }",
                 "isRequired": true,
@@ -184,6 +187,7 @@
                 }
               },
               {
+                "id": "def-public.NavigationPublicPlugin.start.{-data }",
                 "type": "Object",
                 "label": "{ data }",
                 "isRequired": true,
@@ -253,6 +257,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.TopNavMenu.props",
             "type": "CompoundType",
             "label": "props",
             "isRequired": true,

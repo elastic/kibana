@@ -106,6 +106,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.DashboardContainer.Unnamed.initialInput",
                 "type": "Object",
                 "label": "initialInput",
                 "isRequired": true,
@@ -125,6 +126,7 @@
                 }
               },
               {
+                "id": "def-public.DashboardContainer.Unnamed.services",
                 "type": "Object",
                 "label": "services",
                 "isRequired": true,
@@ -144,6 +146,7 @@
                 }
               },
               {
+                "id": "def-public.DashboardContainer.Unnamed.parent",
                 "type": "Object",
                 "label": "parent",
                 "isRequired": false,
@@ -236,6 +239,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.DashboardContainer.createNewPanelState.factory",
                 "type": "Object",
                 "label": "factory",
                 "isRequired": true,
@@ -264,6 +268,7 @@
                 }
               },
               {
+                "id": "def-public.DashboardContainer.createNewPanelState.partial",
                 "type": "Object",
                 "label": "partial",
                 "isRequired": true,
@@ -318,6 +323,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.DashboardContainer.showPlaceholderUntil.newStateComplete",
                 "type": "Object",
                 "label": "newStateComplete",
                 "isRequired": true,
@@ -339,6 +345,7 @@
                 }
               },
               {
+                "id": "def-public.DashboardContainer.showPlaceholderUntil.placementMethod",
                 "type": "Function",
                 "label": "placementMethod",
                 "isRequired": false,
@@ -359,6 +366,7 @@
                 }
               },
               {
+                "id": "def-public.DashboardContainer.showPlaceholderUntil.placementArgs",
                 "type": "Uncategorized",
                 "label": "placementArgs",
                 "isRequired": false,
@@ -413,6 +421,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.DashboardContainer.replacePanel.previousPanelState",
                 "type": "Object",
                 "label": "previousPanelState",
                 "isRequired": true,
@@ -441,6 +450,7 @@
                 }
               },
               {
+                "id": "def-public.DashboardContainer.replacePanel.newPanelState",
                 "type": "Object",
                 "label": "newPanelState",
                 "isRequired": true,
@@ -462,6 +472,7 @@
                 }
               },
               {
+                "id": "def-public.DashboardContainer.replacePanel.generateNewId",
                 "type": "CompoundType",
                 "label": "generateNewId",
                 "isRequired": false,
@@ -531,6 +542,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.DashboardContainer.addOrUpdateEmbeddable.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -544,6 +556,7 @@
                 }
               },
               {
+                "id": "def-public.DashboardContainer.addOrUpdateEmbeddable.explicitInput",
                 "type": "Object",
                 "label": "explicitInput",
                 "isRequired": true,
@@ -557,6 +570,7 @@
                 }
               },
               {
+                "id": "def-public.DashboardContainer.addOrUpdateEmbeddable.embeddableId",
                 "type": "string",
                 "label": "embeddableId",
                 "isRequired": false,
@@ -587,6 +601,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.DashboardContainer.render.dom",
                 "type": "Object",
                 "label": "dom",
                 "isRequired": true,
@@ -624,6 +639,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.DashboardContainer.getInheritedInput.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -737,6 +753,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.DashboardContainerFactoryDefinition.Unnamed.getStartServices",
                 "type": "Function",
                 "label": "getStartServices",
                 "isRequired": true,
@@ -826,6 +843,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.DashboardContainerFactoryDefinition.create.initialInput",
                 "type": "Object",
                 "label": "initialInput",
                 "isRequired": true,
@@ -845,6 +863,7 @@
                 }
               },
               {
+                "id": "def-public.DashboardContainerFactoryDefinition.create.parent",
                 "type": "Object",
                 "label": "parent",
                 "isRequired": false,
@@ -951,6 +970,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.createDashboardEditUrl.id",
             "type": "string",
             "label": "id",
             "isRequired": false,
@@ -964,6 +984,7 @@
             }
           },
           {
+            "id": "def-public.createDashboardEditUrl.editMode",
             "type": "CompoundType",
             "label": "editMode",
             "isRequired": false,
@@ -990,6 +1011,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.createDashboardUrlGenerator.getStartServices",
             "type": "Function",
             "label": "getStartServices",
             "isRequired": true,
@@ -2105,11 +2127,102 @@
   },
   "server": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "id": "def-server.findByValueEmbeddables",
+        "type": "Function",
+        "children": [
+          {
+            "id": "def-server.findByValueEmbeddables.savedObjectClient",
+            "type": "Object",
+            "label": "savedObjectClient",
+            "isRequired": true,
+            "signature": [
+              "Pick<Pick<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsRepository",
+                "text": "SavedObjectsRepository"
+              },
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">, \"find\">"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/dashboard/server/usage/find_by_value_embeddables.ts",
+              "lineNumber": 13
+            }
+          },
+          {
+            "id": "def-server.findByValueEmbeddables.embeddableType",
+            "type": "string",
+            "label": "embeddableType",
+            "isRequired": true,
+            "signature": [
+              "string"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/dashboard/server/usage/find_by_value_embeddables.ts",
+              "lineNumber": 14
+            }
+          }
+        ],
+        "signature": [
+          "(savedObjectClient: Pick<Pick<",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreSavedObjectsPluginApi",
+            "section": "def-server.SavedObjectsRepository",
+            "text": "SavedObjectsRepository"
+          },
+          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">, \"find\">, embeddableType: string) => Promise<{ [key: string]: unknown; }[]>"
+        ],
+        "description": [],
+        "label": "findByValueEmbeddables",
+        "source": {
+          "path": "src/plugins/dashboard/server/usage/find_by_value_embeddables.ts",
+          "lineNumber": 12
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [],
+    "setup": {
+      "id": "def-server.DashboardPluginSetup",
+      "type": "Interface",
+      "label": "DashboardPluginSetup",
+      "description": [],
+      "tags": [],
+      "children": [],
+      "source": {
+        "path": "src/plugins/dashboard/server/types.ts",
+        "lineNumber": 10
+      },
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "id": "def-server.DashboardPluginStart",
+      "type": "Interface",
+      "label": "DashboardPluginStart",
+      "description": [],
+      "tags": [],
+      "children": [],
+      "source": {
+        "path": "src/plugins/dashboard/server/types.ts",
+        "lineNumber": 12
+      },
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
   },
   "common": {
     "classes": [],
@@ -2139,6 +2252,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.migratePanelsTo730.panels",
             "type": "Array",
             "label": "panels",
             "isRequired": true,
@@ -2191,6 +2305,7 @@
             }
           },
           {
+            "id": "def-common.migratePanelsTo730.version",
             "type": "string",
             "label": "version",
             "isRequired": true,
@@ -2204,6 +2319,7 @@
             }
           },
           {
+            "id": "def-common.migratePanelsTo730.useMargins",
             "type": "boolean",
             "label": "useMargins",
             "isRequired": true,
@@ -2217,14 +2333,14 @@
             }
           },
           {
-            "id": "def-common.migratePanelsTo730.uiState",
+            "id": "def-common.migratePanelsTo730.uiState.uiState",
             "type": "Object",
             "label": "uiState",
             "tags": [],
             "description": [],
             "children": [
               {
-                "id": "def-common.migratePanelsTo730.uiState.Unnamed",
+                "id": "def-common.migratePanelsTo730.uiState.uiState.Unnamed",
                 "type": "Any",
                 "label": "Unnamed",
                 "tags": [],

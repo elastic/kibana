@@ -30,6 +30,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-server.asHttpRequestExecutionSource.source",
             "type": "Object",
             "label": "source",
             "isRequired": true,
@@ -71,6 +72,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-server.asSavedObjectExecutionSource.source",
             "type": "Object",
             "label": "source",
             "isRequired": true,
@@ -386,6 +388,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.ActionType.renderParameterTemplates.params",
                 "type": "Uncategorized",
                 "label": "params",
                 "isRequired": true,
@@ -399,6 +402,7 @@
                 }
               },
               {
+                "id": "def-server.ActionType.renderParameterTemplates.variables",
                 "type": "Object",
                 "label": "variables",
                 "isRequired": true,
@@ -992,6 +996,7 @@
           "description": [],
           "children": [
             {
+              "id": "def-server.PluginSetupContract.registerType.actionType",
               "type": "Object",
               "label": "actionType",
               "isRequired": true,
@@ -1044,6 +1049,7 @@
           "description": [],
           "children": [
             {
+              "id": "def-server.PluginStartContract.isActionTypeEnabled.id",
               "type": "string",
               "label": "id",
               "isRequired": true,
@@ -1057,7 +1063,7 @@
               }
             },
             {
-              "id": "def-server.PluginStartContract.isActionTypeEnabled.options",
+              "id": "def-server.PluginStartContract.isActionTypeEnabled.options.options",
               "type": "Object",
               "label": "options",
               "tags": [],
@@ -1065,7 +1071,7 @@
               "children": [
                 {
                   "tags": [],
-                  "id": "def-server.PluginStartContract.isActionTypeEnabled.options.notifyUsage",
+                  "id": "def-server.PluginStartContract.isActionTypeEnabled.options.options.notifyUsage",
                   "type": "boolean",
                   "label": "notifyUsage",
                   "description": [],
@@ -1098,6 +1104,7 @@
           "description": [],
           "children": [
             {
+              "id": "def-server.PluginStartContract.isActionExecutable.actionId",
               "type": "string",
               "label": "actionId",
               "isRequired": true,
@@ -1111,6 +1118,7 @@
               }
             },
             {
+              "id": "def-server.PluginStartContract.isActionExecutable.actionTypeId",
               "type": "string",
               "label": "actionTypeId",
               "isRequired": true,
@@ -1124,7 +1132,7 @@
               }
             },
             {
-              "id": "def-server.PluginStartContract.isActionExecutable.options",
+              "id": "def-server.PluginStartContract.isActionExecutable.options.options",
               "type": "Object",
               "label": "options",
               "tags": [],
@@ -1132,7 +1140,7 @@
               "children": [
                 {
                   "tags": [],
-                  "id": "def-server.PluginStartContract.isActionExecutable.options.notifyUsage",
+                  "id": "def-server.PluginStartContract.isActionExecutable.options.options.notifyUsage",
                   "type": "boolean",
                   "label": "notifyUsage",
                   "description": [],
@@ -1181,6 +1189,7 @@
           "description": [],
           "children": [
             {
+              "id": "def-server.PluginStartContract.getActionsClientWithRequest.request",
               "type": "Object",
               "label": "request",
               "isRequired": true,
@@ -1234,6 +1243,7 @@
           "description": [],
           "children": [
             {
+              "id": "def-server.PluginStartContract.getActionsAuthorizationWithRequest.request",
               "type": "Object",
               "label": "request",
               "isRequired": true,
@@ -1292,6 +1302,7 @@
           "description": [],
           "children": [
             {
+              "id": "def-server.PluginStartContract.renderActionParameterTemplates.actionTypeId",
               "type": "string",
               "label": "actionTypeId",
               "isRequired": true,
@@ -1305,6 +1316,7 @@
               }
             },
             {
+              "id": "def-server.PluginStartContract.renderActionParameterTemplates.params",
               "type": "Uncategorized",
               "label": "params",
               "isRequired": true,
@@ -1318,6 +1330,7 @@
               }
             },
             {
+              "id": "def-server.PluginStartContract.renderActionParameterTemplates.variables",
               "type": "Object",
               "label": "variables",
               "isRequired": true,
@@ -1360,6 +1373,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.isActionTypeExecutorResult.result",
             "type": "Unknown",
             "label": "result",
             "isRequired": true,

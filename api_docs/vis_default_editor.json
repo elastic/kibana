@@ -1,0 +1,955 @@
+{
+  "id": "visDefaultEditor",
+  "client": {
+    "classes": [
+      {
+        "id": "def-public.DefaultEditorController",
+        "type": "Class",
+        "tags": [],
+        "label": "DefaultEditorController",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "visDefaultEditor",
+            "scope": "public",
+            "docId": "kibVisDefaultEditorPluginApi",
+            "section": "def-public.DefaultEditorController",
+            "text": "DefaultEditorController"
+          },
+          " implements ",
+          {
+            "pluginId": "visualize",
+            "scope": "public",
+            "docId": "kibVisualizePluginApi",
+            "section": "def-public.IEditorController",
+            "text": "IEditorController"
+          }
+        ],
+        "children": [
+          {
+            "id": "def-public.DefaultEditorController.Unnamed",
+            "type": "Function",
+            "label": "Constructor",
+            "signature": [
+              "any"
+            ],
+            "description": [],
+            "children": [
+              {
+                "id": "def-public.DefaultEditorController.Unnamed.el",
+                "type": "Object",
+                "label": "el",
+                "isRequired": true,
+                "signature": [
+                  "HTMLElement"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/vis_default_editor/public/default_editor_controller.tsx",
+                  "lineNumber": 22
+                }
+              },
+              {
+                "id": "def-public.DefaultEditorController.Unnamed.vis",
+                "type": "Object",
+                "label": "vis",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "visualizations",
+                    "scope": "public",
+                    "docId": "kibVisualizationsPluginApi",
+                    "section": "def-public.Vis",
+                    "text": "Vis"
+                  },
+                  "<",
+                  {
+                    "pluginId": "visualizations",
+                    "scope": "common",
+                    "docId": "kibVisualizationsPluginApi",
+                    "section": "def-common.VisParams",
+                    "text": "VisParams"
+                  },
+                  ">"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/vis_default_editor/public/default_editor_controller.tsx",
+                  "lineNumber": 23
+                }
+              },
+              {
+                "id": "def-public.DefaultEditorController.Unnamed.eventEmitter",
+                "type": "Object",
+                "label": "eventEmitter",
+                "isRequired": true,
+                "signature": [
+                  "EventEmitter"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/vis_default_editor/public/default_editor_controller.tsx",
+                  "lineNumber": 24
+                }
+              },
+              {
+                "id": "def-public.DefaultEditorController.Unnamed.embeddableHandler",
+                "type": "Object",
+                "label": "embeddableHandler",
+                "isRequired": true,
+                "signature": [
+                  "Pick<",
+                  {
+                    "pluginId": "visualizations",
+                    "scope": "public",
+                    "docId": "kibVisualizationsPluginApi",
+                    "section": "def-public.VisualizeEmbeddable",
+                    "text": "VisualizeEmbeddable"
+                  },
+                  ", \"type\" | \"id\" | \"destroy\" | \"parent\" | \"render\" | \"getDescription\" | \"getInspectorAdapters\" | \"openInspector\" | \"transferCustomizationsToUiState\" | \"hasInspector\" | \"onContainerLoading\" | \"onContainerRender\" | \"onContainerError\" | \"reload\" | \"supportedTriggers\" | \"inputIsRefType\" | \"getInputAsValueType\" | \"getInputAsRefType\" | \"runtimeId\" | \"isContainer\" | \"fatalError\" | \"getIsContainer\" | \"getUpdated$\" | \"getInput$\" | \"getOutput$\" | \"getOutput\" | \"getInput\" | \"getTitle\" | \"getRoot\" | \"updateInput\">"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/vis_default_editor/public/default_editor_controller.tsx",
+                  "lineNumber": 25
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/plugins/vis_default_editor/public/default_editor_controller.tsx",
+              "lineNumber": 21
+            }
+          },
+          {
+            "id": "def-public.DefaultEditorController.render",
+            "type": "Function",
+            "label": "render",
+            "signature": [
+              "(props: ",
+              {
+                "pluginId": "visualize",
+                "scope": "public",
+                "docId": "kibVisualizePluginApi",
+                "section": "def-public.EditorRenderProps",
+                "text": "EditorRenderProps"
+              },
+              ") => void"
+            ],
+            "description": [],
+            "children": [
+              {
+                "id": "def-public.DefaultEditorController.render.props",
+                "type": "Object",
+                "label": "props",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "visualize",
+                    "scope": "public",
+                    "docId": "kibVisualizePluginApi",
+                    "section": "def-public.EditorRenderProps",
+                    "text": "EditorRenderProps"
+                  }
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/vis_default_editor/public/default_editor_controller.tsx",
+                  "lineNumber": 28
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/plugins/vis_default_editor/public/default_editor_controller.tsx",
+              "lineNumber": 28
+            }
+          },
+          {
+            "id": "def-public.DefaultEditorController.destroy",
+            "type": "Function",
+            "label": "destroy",
+            "signature": [
+              "() => void"
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/plugins/vis_default_editor/public/default_editor_controller.tsx",
+              "lineNumber": 57
+            }
+          }
+        ],
+        "source": {
+          "path": "src/plugins/vis_default_editor/public/default_editor_controller.tsx",
+          "lineNumber": 20
+        },
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "id": "def-public.BasicOptions",
+        "type": "Function",
+        "label": "BasicOptions",
+        "signature": [
+          "({\n  stateParams,\n  setValue,\n  legendPositions,\n}: ",
+          {
+            "pluginId": "visualizations",
+            "scope": "public",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-public.VisEditorOptionsProps",
+            "text": "VisEditorOptionsProps"
+          },
+          "<VisParams> & { legendPositions: LegendPositions; }) => JSX.Element"
+        ],
+        "description": [],
+        "children": [
+          {
+            "id": "def-public.BasicOptions.{\n- stateParams,\n  setValue,\n  legendPositions,\n}",
+            "type": "CompoundType",
+            "label": "{\n  stateParams,\n  setValue,\n  legendPositions,\n}",
+            "isRequired": true,
+            "signature": [
+              {
+                "pluginId": "visualizations",
+                "scope": "public",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-public.VisEditorOptionsProps",
+                "text": "VisEditorOptionsProps"
+              },
+              "<VisParams> & { legendPositions: LegendPositions; }"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/vis_default_editor/public/components/options/basic_options.tsx",
+              "lineNumber": 27
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "src/plugins/vis_default_editor/public/components/options/basic_options.tsx",
+          "lineNumber": 27
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.ColorRanges",
+        "type": "Function",
+        "label": "ColorRanges",
+        "signature": [
+          "({\n  'data-test-subj': dataTestSubj,\n  colorsRange,\n  setValue,\n  setValidity,\n  setTouched,\n}: ColorRangesProps) => JSX.Element"
+        ],
+        "description": [],
+        "children": [
+          {
+            "id": "def-public.ColorRanges.{\n- 'data-test-subj': dataTestSubj,\n  colorsRange,\n  setValue,\n  setValidity,\n  setTouched,\n}",
+            "type": "Object",
+            "label": "{\n  'data-test-subj': dataTestSubj,\n  colorsRange,\n  setValue,\n  setValidity,\n  setTouched,\n}",
+            "isRequired": true,
+            "signature": [
+              "ColorRangesProps"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/vis_default_editor/public/components/options/color_ranges.tsx",
+              "lineNumber": 26
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "src/plugins/vis_default_editor/public/components/options/color_ranges.tsx",
+          "lineNumber": 26
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.ColorSchemaOptions",
+        "type": "Function",
+        "label": "ColorSchemaOptions",
+        "signature": [
+          "({\n  disabled,\n  colorSchema,\n  colorSchemas,\n  invertColors,\n  uiState,\n  setValue,\n  showHelpText = true,\n}: ColorSchemaOptionsProps) => JSX.Element"
+        ],
+        "description": [],
+        "children": [
+          {
+            "id": "def-public.ColorSchemaOptions.{\n- disabled,\n  colorSchema,\n  colorSchemas,\n  invertColors,\n  uiState,\n  setValue,\n  showHelpText = true,\n}",
+            "type": "Object",
+            "label": "{\n  disabled,\n  colorSchema,\n  colorSchemas,\n  invertColors,\n  uiState,\n  setValue,\n  showHelpText = true,\n}",
+            "isRequired": true,
+            "signature": [
+              "ColorSchemaOptionsProps"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/vis_default_editor/public/components/options/color_schema.tsx",
+              "lineNumber": 32
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "src/plugins/vis_default_editor/public/components/options/color_schema.tsx",
+          "lineNumber": 32
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.getInitialWidth",
+        "type": "Function",
+        "children": [
+          {
+            "id": "def-public.getInitialWidth.size",
+            "type": "Enum",
+            "label": "size",
+            "isRequired": true,
+            "signature": [
+              {
+                "pluginId": "visDefaultEditor",
+                "scope": "public",
+                "docId": "kibVisDefaultEditorPluginApi",
+                "section": "def-public.DefaultEditorSize",
+                "text": "DefaultEditorSize"
+              }
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/vis_default_editor/public/editor_size.ts",
+              "lineNumber": 15
+            }
+          }
+        ],
+        "signature": [
+          "(size: ",
+          {
+            "pluginId": "visDefaultEditor",
+            "scope": "public",
+            "docId": "kibVisDefaultEditorPluginApi",
+            "section": "def-public.DefaultEditorSize",
+            "text": "DefaultEditorSize"
+          },
+          ") => 15 | 30 | 50"
+        ],
+        "description": [],
+        "label": "getInitialWidth",
+        "source": {
+          "path": "src/plugins/vis_default_editor/public/editor_size.ts",
+          "lineNumber": 15
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.groupAndSortBy",
+        "type": "Function",
+        "label": "groupAndSortBy",
+        "signature": [
+          "(objects: T[], groupBy: TGroupBy, labelName: TLabelName, keyName: TKeyName | undefined) => ",
+          {
+            "pluginId": "visDefaultEditor",
+            "scope": "public",
+            "docId": "kibVisDefaultEditorPluginApi",
+            "section": "def-public.ComboBoxGroupedOptions",
+            "text": "ComboBoxGroupedOptions"
+          },
+          "<T>"
+        ],
+        "description": [
+          "\nGroups and sorts alphabetically objects and returns an array of options that are compatible with EuiComboBox options.\n"
+        ],
+        "children": [
+          {
+            "id": "def-public.groupAndSortBy.objects",
+            "type": "Array",
+            "label": "objects",
+            "isRequired": true,
+            "signature": [
+              "T[]"
+            ],
+            "description": [
+              "An array of objects that will be grouped."
+            ],
+            "source": {
+              "path": "src/plugins/vis_default_editor/public/utils.ts",
+              "lineNumber": 39
+            }
+          },
+          {
+            "id": "def-public.groupAndSortBy.groupBy",
+            "type": "Uncategorized",
+            "label": "groupBy",
+            "isRequired": true,
+            "signature": [
+              "TGroupBy"
+            ],
+            "description": [
+              "A field name which objects are grouped by."
+            ],
+            "source": {
+              "path": "src/plugins/vis_default_editor/public/utils.ts",
+              "lineNumber": 40
+            }
+          },
+          {
+            "id": "def-public.groupAndSortBy.labelName",
+            "type": "Uncategorized",
+            "label": "labelName",
+            "isRequired": true,
+            "signature": [
+              "TLabelName"
+            ],
+            "description": [
+              "A name of a property which value will be displayed."
+            ],
+            "source": {
+              "path": "src/plugins/vis_default_editor/public/utils.ts",
+              "lineNumber": 41
+            }
+          },
+          {
+            "id": "def-public.groupAndSortBy.keyName",
+            "type": "Uncategorized",
+            "label": "keyName",
+            "isRequired": false,
+            "signature": [
+              "TKeyName | undefined"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/vis_default_editor/public/utils.ts",
+              "lineNumber": 42
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [
+          "An array of grouped and sorted alphabetically `objects` that are compatible with EuiComboBox options."
+        ],
+        "source": {
+          "path": "src/plugins/vis_default_editor/public/utils.ts",
+          "lineNumber": 33
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.NumberInputOption",
+        "type": "Function",
+        "label": "NumberInputOption",
+        "signature": [
+          "({\n  disabled,\n  error,\n  isInvalid,\n  label,\n  max,\n  min,\n  paramName,\n  step,\n  value = '',\n  setValue,\n  'data-test-subj': dataTestSubj,\n}: NumberInputOptionProps<ParamName>) => JSX.Element"
+        ],
+        "description": [
+          "\nDo not use this component anymore.\nPlease, use NumberInputOption in 'required_number_input.tsx'.\nIt is required for compatibility with TS 3.7.0\nThis should be removed in the future"
+        ],
+        "children": [
+          {
+            "id": "def-public.NumberInputOption.{\n- disabled,\n  error,\n  isInvalid,\n  label,\n  max,\n  min,\n  paramName,\n  step,\n  value = '',\n  setValue,\n  'data-test-subj': dataTestSubj,\n}",
+            "type": "Object",
+            "label": "{\n  disabled,\n  error,\n  isInvalid,\n  label,\n  max,\n  min,\n  paramName,\n  step,\n  value = '',\n  setValue,\n  'data-test-subj': dataTestSubj,\n}",
+            "isRequired": true,
+            "signature": [
+              "NumberInputOptionProps<ParamName>"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/vis_default_editor/public/components/options/number_input.tsx",
+              "lineNumber": 32
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "src/plugins/vis_default_editor/public/components/options/number_input.tsx",
+          "lineNumber": 32
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.PalettePicker",
+        "type": "Function",
+        "label": "PalettePicker",
+        "signature": [
+          "({\n  activePalette,\n  palettes,\n  paramName,\n  setPalette,\n}: ",
+          "PalettePickerProps",
+          "<ParamName>) => JSX.Element"
+        ],
+        "description": [],
+        "children": [
+          {
+            "id": "def-public.PalettePicker.{\n- activePalette,\n  palettes,\n  paramName,\n  setPalette,\n}",
+            "type": "Object",
+            "label": "{\n  activePalette,\n  palettes,\n  paramName,\n  setPalette,\n}",
+            "isRequired": true,
+            "signature": [
+              {
+                "pluginId": "visDefaultEditor",
+                "scope": "public",
+                "docId": "kibVisDefaultEditorPluginApi",
+                "section": "def-public.PalettePickerProps",
+                "text": "PalettePickerProps"
+              },
+              "<ParamName>"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/vis_default_editor/public/components/controls/palette_picker.tsx",
+              "lineNumber": 22
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "src/plugins/vis_default_editor/public/components/controls/palette_picker.tsx",
+          "lineNumber": 22
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.PercentageModeOption",
+        "type": "Function",
+        "label": "PercentageModeOption",
+        "signature": [
+          "({\n  'data-test-subj': dataTestSubj,\n  setValue,\n  percentageMode,\n  formatPattern,\n}: ",
+          "PercentageModeOptionProps",
+          ") => JSX.Element"
+        ],
+        "description": [],
+        "children": [
+          {
+            "id": "def-public.PercentageModeOption.{\n- 'data-test-subj': dataTestSubj,\n  setValue,\n  percentageMode,\n  formatPattern,\n}",
+            "type": "Object",
+            "label": "{\n  'data-test-subj': dataTestSubj,\n  setValue,\n  percentageMode,\n  formatPattern,\n}",
+            "isRequired": true,
+            "signature": [
+              {
+                "pluginId": "visDefaultEditor",
+                "scope": "public",
+                "docId": "kibVisDefaultEditorPluginApi",
+                "section": "def-public.PercentageModeOptionProps",
+                "text": "PercentageModeOptionProps"
+              }
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/vis_default_editor/public/components/options/percentage_mode.tsx",
+              "lineNumber": 27
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "src/plugins/vis_default_editor/public/components/options/percentage_mode.tsx",
+          "lineNumber": 27
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.RangeOption",
+        "type": "Function",
+        "label": "RangeOption",
+        "signature": [
+          "({\n  label,\n  max,\n  min,\n  showInput,\n  showLabels,\n  showValue = true,\n  step,\n  paramName,\n  value,\n  setValue,\n}: RangeOptionProps<ParamName>) => JSX.Element"
+        ],
+        "description": [],
+        "children": [
+          {
+            "id": "def-public.RangeOption.{\n- label,\n  max,\n  min,\n  showInput,\n  showLabels,\n  showValue = true,\n  step,\n  paramName,\n  value,\n  setValue,\n}",
+            "type": "Object",
+            "label": "{\n  label,\n  max,\n  min,\n  showInput,\n  showLabels,\n  showValue = true,\n  step,\n  paramName,\n  value,\n  setValue,\n}",
+            "isRequired": true,
+            "signature": [
+              "RangeOptionProps<ParamName>"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/vis_default_editor/public/components/options/range.tsx",
+              "lineNumber": 26
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "src/plugins/vis_default_editor/public/components/options/range.tsx",
+          "lineNumber": 26
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.RangesParamEditor",
+        "type": "Function",
+        "label": "RangesParamEditor",
+        "signature": [
+          "({\n  'data-test-subj': dataTestSubj = 'range',\n  addRangeValues,\n  error,\n  value = [],\n  hidePlaceholders,\n  setValue,\n  setTouched,\n  setValidity,\n  validateRange,\n}: RangesParamEditorProps) => JSX.Element"
+        ],
+        "description": [],
+        "children": [
+          {
+            "id": "def-public.RangesParamEditor.{\n- 'data-test-subj': dataTestSubj = 'range',\n  addRangeValues,\n  error,\n  value = [],\n  hidePlaceholders,\n  setValue,\n  setTouched,\n  setValidity,\n  validateRange,\n}",
+            "type": "Object",
+            "label": "{\n  'data-test-subj': dataTestSubj = 'range',\n  addRangeValues,\n  error,\n  value = [],\n  hidePlaceholders,\n  setValue,\n  setTouched,\n  setValidity,\n  validateRange,\n}",
+            "isRequired": true,
+            "signature": [
+              "RangesParamEditorProps"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/vis_default_editor/public/components/controls/ranges.tsx",
+              "lineNumber": 56
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "src/plugins/vis_default_editor/public/components/controls/ranges.tsx",
+          "lineNumber": 56
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.RequiredNumberInputOption",
+        "type": "Function",
+        "label": "RequiredNumberInputOption",
+        "signature": [
+          "({\n  disabled,\n  error,\n  isInvalid,\n  label,\n  max,\n  min,\n  paramName,\n  step,\n  value,\n  setValue,\n  setValidity,\n  'data-test-subj': dataTestSubj,\n}: NumberInputOptionProps<ParamName>) => JSX.Element"
+        ],
+        "description": [
+          "\nUse only this component instead of NumberInputOption in 'number_input.tsx'.\nIt is required for compatibility with TS 3.7.0\n"
+        ],
+        "children": [
+          {
+            "id": "def-public.RequiredNumberInputOption.{\n- disabled,\n  error,\n  isInvalid,\n  label,\n  max,\n  min,\n  paramName,\n  step,\n  value,\n  setValue,\n  setValidity,\n  'data-test-subj': dataTestSubj,\n}",
+            "type": "Object",
+            "label": "{\n  disabled,\n  error,\n  isInvalid,\n  label,\n  max,\n  min,\n  paramName,\n  step,\n  value,\n  setValue,\n  setValidity,\n  'data-test-subj': dataTestSubj,\n}",
+            "isRequired": true,
+            "signature": [
+              "NumberInputOptionProps<ParamName>"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/vis_default_editor/public/components/options/required_number_input.tsx",
+              "lineNumber": 33
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "src/plugins/vis_default_editor/public/components/options/required_number_input.tsx",
+          "lineNumber": 33
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.SelectOption",
+        "type": "Function",
+        "label": "SelectOption",
+        "signature": [
+          "({\n  disabled,\n  helpText,\n  id,\n  label,\n  labelAppend,\n  options,\n  paramName,\n  value,\n  setValue,\n  'data-test-subj': dataTestSubj,\n}: SelectOptionProps<ParamName, ValidParamValues>) => JSX.Element"
+        ],
+        "description": [],
+        "children": [
+          {
+            "id": "def-public.SelectOption.{\n- disabled,\n  helpText,\n  id,\n  label,\n  labelAppend,\n  options,\n  paramName,\n  value,\n  setValue,\n  'data-test-subj': dataTestSubj,\n}",
+            "type": "Object",
+            "label": "{\n  disabled,\n  helpText,\n  id,\n  label,\n  labelAppend,\n  options,\n  paramName,\n  value,\n  setValue,\n  'data-test-subj': dataTestSubj,\n}",
+            "isRequired": true,
+            "signature": [
+              "SelectOptionProps<ParamName, ValidParamValues>"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/vis_default_editor/public/components/options/select.tsx",
+              "lineNumber": 27
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "src/plugins/vis_default_editor/public/components/options/select.tsx",
+          "lineNumber": 27
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.SwitchOption",
+        "type": "Function",
+        "label": "SwitchOption",
+        "signature": [
+          "({\n  'data-test-subj': dataTestSubj,\n  tooltip,\n  label,\n  disabled,\n  paramName,\n  value = false,\n  setValue,\n}: SwitchOptionProps<ParamName>) => JSX.Element"
+        ],
+        "description": [],
+        "children": [
+          {
+            "id": "def-public.SwitchOption.{\n- 'data-test-subj': dataTestSubj,\n  tooltip,\n  label,\n  disabled,\n  paramName,\n  value = false,\n  setValue,\n}",
+            "type": "Object",
+            "label": "{\n  'data-test-subj': dataTestSubj,\n  tooltip,\n  label,\n  disabled,\n  paramName,\n  value = false,\n  setValue,\n}",
+            "isRequired": true,
+            "signature": [
+              "SwitchOptionProps<ParamName>"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/vis_default_editor/public/components/options/switch.tsx",
+              "lineNumber": 23
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "src/plugins/vis_default_editor/public/components/options/switch.tsx",
+          "lineNumber": 23
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.TextInputOption",
+        "type": "Function",
+        "label": "TextInputOption",
+        "signature": [
+          "({\n  'data-test-subj': dataTestSubj,\n  disabled,\n  helpText,\n  label,\n  paramName,\n  value = '',\n  setValue,\n}: TextInputOptionProps<ParamName>) => JSX.Element"
+        ],
+        "description": [],
+        "children": [
+          {
+            "id": "def-public.TextInputOption.{\n- 'data-test-subj': dataTestSubj,\n  disabled,\n  helpText,\n  label,\n  paramName,\n  value = '',\n  setValue,\n}",
+            "type": "Object",
+            "label": "{\n  'data-test-subj': dataTestSubj,\n  disabled,\n  helpText,\n  label,\n  paramName,\n  value = '',\n  setValue,\n}",
+            "isRequired": true,
+            "signature": [
+              "TextInputOptionProps<ParamName>"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/vis_default_editor/public/components/options/text_input.tsx",
+              "lineNumber": 22
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "src/plugins/vis_default_editor/public/components/options/text_input.tsx",
+          "lineNumber": 22
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.useValidation",
+        "type": "Function",
+        "label": "useValidation",
+        "signature": [
+          "(setValidity: (isValid: boolean) => void, isValid: boolean) => void"
+        ],
+        "description": [
+          "\nthe effect is used to set up the editor form validity\nand reset it if a param has been removed"
+        ],
+        "children": [
+          {
+            "id": "def-public.useValidation.setValidity",
+            "type": "Function",
+            "label": "setValidity",
+            "isRequired": true,
+            "signature": [
+              "(isValid: boolean) => void"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/vis_default_editor/public/components/controls/utils/agg_utils.ts",
+              "lineNumber": 92
+            }
+          },
+          {
+            "id": "def-public.useValidation.isValid",
+            "type": "boolean",
+            "label": "isValid",
+            "isRequired": true,
+            "signature": [
+              "boolean"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/vis_default_editor/public/components/controls/utils/agg_utils.ts",
+              "lineNumber": 92
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "src/plugins/vis_default_editor/public/components/controls/utils/agg_utils.ts",
+          "lineNumber": 92
+        },
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "id": "def-public.RangeValues",
+        "type": "Interface",
+        "label": "RangeValues",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.RangeValues.type",
+            "type": "string",
+            "label": "type",
+            "description": [],
+            "source": {
+              "path": "src/plugins/vis_default_editor/public/components/controls/ranges.tsx",
+              "lineNumber": 35
+            },
+            "signature": [
+              "\"range\" | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.RangeValues.from",
+            "type": "number",
+            "label": "from",
+            "description": [],
+            "source": {
+              "path": "src/plugins/vis_default_editor/public/components/controls/ranges.tsx",
+              "lineNumber": 36
+            },
+            "signature": [
+              "number | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.RangeValues.to",
+            "type": "number",
+            "label": "to",
+            "description": [],
+            "source": {
+              "path": "src/plugins/vis_default_editor/public/components/controls/ranges.tsx",
+              "lineNumber": 37
+            },
+            "signature": [
+              "number | undefined"
+            ]
+          }
+        ],
+        "source": {
+          "path": "src/plugins/vis_default_editor/public/components/controls/ranges.tsx",
+          "lineNumber": 34
+        },
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "id": "def-public.DefaultEditorSize",
+        "type": "Enum",
+        "label": "DefaultEditorSize",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/vis_default_editor/public/editor_size.ts",
+          "lineNumber": 9
+        },
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [
+      {
+        "id": "def-public.ComboBoxGroupedOptions",
+        "type": "Type",
+        "label": "ComboBoxGroupedOptions",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/vis_default_editor/public/utils.ts",
+          "lineNumber": 22
+        },
+        "signature": [
+          "GroupOrOption<T>[]"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.SetColorRangeValue",
+        "type": "Type",
+        "label": "SetColorRangeValue",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/vis_default_editor/public/components/options/color_ranges.tsx",
+          "lineNumber": 16
+        },
+        "signature": [
+          "(paramName: string, value: ",
+          {
+            "pluginId": "visDefaultEditor",
+            "scope": "public",
+            "docId": "kibVisDefaultEditorPluginApi",
+            "section": "def-public.RangeValues",
+            "text": "RangeValues"
+          },
+          "[]) => void"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.SetColorSchemaOptionsValue",
+        "type": "Type",
+        "label": "SetColorSchemaOptionsValue",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/vis_default_editor/public/components/options/color_schema.tsx",
+          "lineNumber": 19
+        },
+        "signature": [
+          "(paramName: T, value: ",
+          {
+            "pluginId": "charts",
+            "scope": "public",
+            "docId": "kibChartsPluginApi",
+            "section": "def-public.ColorSchemaParams",
+            "text": "ColorSchemaParams"
+          },
+          "[T]) => void"
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

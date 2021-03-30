@@ -15,6 +15,7 @@
         ],
         "children": [
           {
+            "id": "def-public.getDisplayText.id",
             "type": "CompoundType",
             "label": "id",
             "isRequired": true,

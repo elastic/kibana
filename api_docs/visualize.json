@@ -1,0 +1,437 @@
+{
+  "id": "visualize",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "id": "def-public.EditorRenderProps",
+        "type": "Interface",
+        "label": "EditorRenderProps",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.EditorRenderProps.core",
+            "type": "Object",
+            "label": "core",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualize/public/application/types.ts",
+              "lineNumber": 131
+            },
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.CoreStart",
+                "text": "CoreStart"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.EditorRenderProps.data",
+            "type": "Object",
+            "label": "data",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualize/public/application/types.ts",
+              "lineNumber": 132
+            },
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataPluginApi",
+                "section": "def-public.DataPublicPluginStart",
+                "text": "DataPublicPluginStart"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.EditorRenderProps.filters",
+            "type": "Array",
+            "label": "filters",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualize/public/application/types.ts",
+              "lineNumber": 133
+            },
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.EditorRenderProps.timeRange",
+            "type": "Object",
+            "label": "timeRange",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualize/public/application/types.ts",
+              "lineNumber": 134
+            },
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.EditorRenderProps.query",
+            "type": "Object",
+            "label": "query",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualize/public/application/types.ts",
+              "lineNumber": 135
+            },
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.EditorRenderProps.savedSearch",
+            "type": "Object",
+            "label": "savedSearch",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualize/public/application/types.ts",
+              "lineNumber": 136
+            },
+            "signature": [
+              {
+                "pluginId": "savedObjects",
+                "scope": "public",
+                "docId": "kibSavedObjectsPluginApi",
+                "section": "def-public.SavedObject",
+                "text": "SavedObject"
+              },
+              " | undefined"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.EditorRenderProps.uiState",
+            "type": "Object",
+            "label": "uiState",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualize/public/application/types.ts",
+              "lineNumber": 137
+            },
+            "signature": [
+              {
+                "pluginId": "visualizations",
+                "scope": "public",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-public.PersistedState",
+                "text": "PersistedState"
+              }
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-public.EditorRenderProps.linked",
+            "type": "boolean",
+            "label": "linked",
+            "description": [
+              "\nFlag to determine if visualiztion is linked to the saved search"
+            ],
+            "source": {
+              "path": "src/plugins/visualize/public/application/types.ts",
+              "lineNumber": 141
+            }
+          }
+        ],
+        "source": {
+          "path": "src/plugins/visualize/public/application/types.ts",
+          "lineNumber": 130
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.IEditorController",
+        "type": "Interface",
+        "label": "IEditorController",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "id": "def-public.IEditorController.render",
+            "type": "Function",
+            "label": "render",
+            "signature": [
+              "(props: ",
+              {
+                "pluginId": "visualize",
+                "scope": "public",
+                "docId": "kibVisualizePluginApi",
+                "section": "def-public.EditorRenderProps",
+                "text": "EditorRenderProps"
+              },
+              ") => void | Promise<void>"
+            ],
+            "description": [],
+            "children": [
+              {
+                "id": "def-public.IEditorController.render.props",
+                "type": "Object",
+                "label": "props",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "visualize",
+                    "scope": "public",
+                    "docId": "kibVisualizePluginApi",
+                    "section": "def-public.EditorRenderProps",
+                    "text": "EditorRenderProps"
+                  }
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/visualize/public/application/types.ts",
+                  "lineNumber": 126
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/plugins/visualize/public/application/types.ts",
+              "lineNumber": 126
+            }
+          },
+          {
+            "id": "def-public.IEditorController.destroy",
+            "type": "Function",
+            "label": "destroy",
+            "signature": [
+              "() => void"
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/plugins/visualize/public/application/types.ts",
+              "lineNumber": 127
+            }
+          }
+        ],
+        "source": {
+          "path": "src/plugins/visualize/public/application/types.ts",
+          "lineNumber": 125
+        },
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "id": "def-public.VisualizeConstants",
+        "type": "Object",
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.VisualizeConstants.VISUALIZE_BASE_PATH",
+            "type": "string",
+            "label": "VISUALIZE_BASE_PATH",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualize/public/application/visualize_constants.ts",
+              "lineNumber": 12
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.VisualizeConstants.LANDING_PAGE_PATH",
+            "type": "string",
+            "label": "LANDING_PAGE_PATH",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualize/public/application/visualize_constants.ts",
+              "lineNumber": 13
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.VisualizeConstants.WIZARD_STEP_1_PAGE_PATH",
+            "type": "string",
+            "label": "WIZARD_STEP_1_PAGE_PATH",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualize/public/application/visualize_constants.ts",
+              "lineNumber": 14
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.VisualizeConstants.WIZARD_STEP_2_PAGE_PATH",
+            "type": "string",
+            "label": "WIZARD_STEP_2_PAGE_PATH",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualize/public/application/visualize_constants.ts",
+              "lineNumber": 15
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.VisualizeConstants.CREATE_PATH",
+            "type": "string",
+            "label": "CREATE_PATH",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualize/public/application/visualize_constants.ts",
+              "lineNumber": 16
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.VisualizeConstants.EDIT_PATH",
+            "type": "string",
+            "label": "EDIT_PATH",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualize/public/application/visualize_constants.ts",
+              "lineNumber": 17
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.VisualizeConstants.EDIT_BY_VALUE_PATH",
+            "type": "string",
+            "label": "EDIT_BY_VALUE_PATH",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualize/public/application/visualize_constants.ts",
+              "lineNumber": 18
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-public.VisualizeConstants.APP_ID",
+            "type": "string",
+            "label": "APP_ID",
+            "description": [],
+            "source": {
+              "path": "src/plugins/visualize/public/application/visualize_constants.ts",
+              "lineNumber": 19
+            }
+          }
+        ],
+        "description": [],
+        "label": "VisualizeConstants",
+        "source": {
+          "path": "src/plugins/visualize/public/application/visualize_constants.ts",
+          "lineNumber": 11
+        },
+        "initialIsOpen": false
+      }
+    ],
+    "setup": {
+      "id": "def-public.VisualizePluginSetup",
+      "type": "Interface",
+      "label": "VisualizePluginSetup",
+      "description": [],
+      "tags": [],
+      "children": [
+        {
+          "tags": [],
+          "id": "def-public.VisualizePluginSetup.visEditorsRegistry",
+          "type": "Object",
+          "label": "visEditorsRegistry",
+          "description": [],
+          "source": {
+            "path": "src/plugins/visualize/public/plugin.ts",
+            "lineNumber": 67
+          },
+          "signature": [
+            "{ registerDefault: (editor: ",
+            {
+              "pluginId": "visualize",
+              "scope": "public",
+              "docId": "kibVisualizePluginApi",
+              "section": "def-public.VisEditorConstructor",
+              "text": "VisEditorConstructor"
+            },
+            "<",
+            {
+              "pluginId": "visualizations",
+              "scope": "common",
+              "docId": "kibVisualizationsPluginApi",
+              "section": "def-common.VisParams",
+              "text": "VisParams"
+            },
+            ">) => void; register: <TVisParams>(name: string, editor: ",
+            {
+              "pluginId": "visualize",
+              "scope": "public",
+              "docId": "kibVisualizePluginApi",
+              "section": "def-public.VisEditorConstructor",
+              "text": "VisEditorConstructor"
+            },
+            "<TVisParams>) => void; get: (name: string) => ",
+            {
+              "pluginId": "visualize",
+              "scope": "public",
+              "docId": "kibVisualizePluginApi",
+              "section": "def-public.VisEditorConstructor",
+              "text": "VisEditorConstructor"
+            },
+            "<any> | undefined; }"
+          ]
+        }
+      ],
+      "source": {
+        "path": "src/plugins/visualize/public/plugin.ts",
+        "lineNumber": 66
+      },
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

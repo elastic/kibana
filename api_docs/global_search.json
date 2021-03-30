@@ -409,6 +409,7 @@
             ],
             "children": [
               {
+                "id": "def-public.GlobalSearchResultProvider.find.search",
                 "type": "Object",
                 "label": "search",
                 "isRequired": true,
@@ -428,6 +429,7 @@
                 }
               },
               {
+                "id": "def-public.GlobalSearchResultProvider.find.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -704,7 +706,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">; typeRegistry: Pick<",
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">; typeRegistry: Pick<",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -997,6 +999,7 @@
             ],
             "children": [
               {
+                "id": "def-server.GlobalSearchResultProvider.find.search",
                 "type": "Object",
                 "label": "search",
                 "isRequired": true,
@@ -1016,6 +1019,7 @@
                 }
               },
               {
+                "id": "def-server.GlobalSearchResultProvider.find.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -1035,6 +1039,7 @@
                 }
               },
               {
+                "id": "def-server.GlobalSearchResultProvider.find.context",
                 "type": "Object",
                 "label": "context",
                 "isRequired": true,
@@ -1141,6 +1146,7 @@
             ],
             "children": [
               {
+                "id": "def-server.RouteHandlerGlobalSearchContext.find.params",
                 "type": "Object",
                 "label": "params",
                 "isRequired": true,
@@ -1160,6 +1166,7 @@
                 }
               },
               {
+                "id": "def-server.RouteHandlerGlobalSearchContext.find.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,

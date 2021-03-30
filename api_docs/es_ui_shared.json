@@ -39,6 +39,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.CronEditor.getDerivedStateFromProps.props",
                 "type": "Object",
                 "label": "props",
                 "isRequired": true,
@@ -69,6 +70,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.CronEditor.Unnamed.props",
                 "type": "Object",
                 "label": "props",
                 "isRequired": true,
@@ -94,6 +96,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.CronEditor.onChangeFrequency.frequency",
                 "type": "CompoundType",
                 "label": "frequency",
                 "isRequired": true,
@@ -138,6 +141,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.CronEditor.onChangeFields.fields",
                 "type": "Object",
                 "label": "fields",
                 "isRequired": true,
@@ -223,6 +227,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.attemptToURIDecode.value",
             "type": "string",
             "label": "value",
             "isRequired": false,
@@ -254,6 +259,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.AuthorizationProvider.{-privilegesEndpoint, httpClient, children }",
             "type": "Object",
             "label": "{ privilegesEndpoint, httpClient, children }",
             "isRequired": true,
@@ -292,6 +298,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.extractQueryParams.queryString",
             "type": "string",
             "label": "queryString",
             "isRequired": true,
@@ -333,6 +340,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.NotAuthorizedSection.{-title, message }",
             "type": "Object",
             "label": "{ title, message }",
             "isRequired": true,
@@ -364,6 +372,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.SectionError.{\n- title,\n  error,\n  actions,\n  ...rest\n}",
             "type": "CompoundType",
             "label": "{\n  title,\n  error,\n  actions,\n  ...rest\n}",
             "isRequired": true,
@@ -395,6 +404,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.SectionLoading.{-inline, children, ...rest }",
             "type": "CompoundType",
             "label": "{ inline, children, ...rest }",
             "isRequired": true,
@@ -426,6 +436,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.sendRequest.httpClient",
             "type": "Object",
             "label": "httpClient",
             "isRequired": true,
@@ -445,6 +456,7 @@
             }
           },
           {
+            "id": "def-public.sendRequest.{-path, method, body, query, asSystemRequest }",
             "type": "Object",
             "label": "{ path, method, body, query, asSystemRequest }",
             "isRequired": true,
@@ -523,6 +535,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.useRequest.httpClient",
             "type": "Object",
             "label": "httpClient",
             "isRequired": true,
@@ -542,6 +555,7 @@
             }
           },
           {
+            "id": "def-public.useRequest.{-path, method, query, body, pollIntervalMs, initialData, deserializer }",
             "type": "Object",
             "label": "{ path, method, query, body, pollIntervalMs, initialData, deserializer }",
             "isRequired": true,
@@ -603,6 +617,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.WithPrivileges.{-privileges: requiredPrivileges, children }",
             "type": "Object",
             "label": "{ privileges: requiredPrivileges, children }",
             "isRequired": true,
@@ -1287,6 +1302,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-server.handleEsError.{\n- error,\n  response,\n  handleCustomError,\n}",
             "type": "Object",
             "label": "{\n  error,\n  response,\n  handleCustomError,\n}",
             "isRequired": true,
@@ -1331,6 +1347,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-server.isEsError.err",
             "type": "Object",
             "label": "err",
             "isRequired": true,
@@ -1357,6 +1374,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-server.parseEsError.err",
             "type": "string",
             "label": "err",
             "isRequired": true,

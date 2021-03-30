@@ -40,6 +40,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.KibanaFeature.Unnamed.config",
                 "type": "Object",
                 "label": "config",
                 "isRequired": true,
@@ -891,6 +892,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.ElasticsearchFeature.Unnamed.config",
                 "type": "Object",
                 "label": "config",
                 "isRequired": true,
@@ -1058,6 +1060,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.KibanaFeature.Unnamed.config",
                 "type": "Object",
                 "label": "config",
                 "isRequired": true,
@@ -1899,6 +1902,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.PluginSetupContract.registerKibanaFeature.feature",
                 "type": "Object",
                 "label": "feature",
                 "isRequired": true,
@@ -1943,6 +1947,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.PluginSetupContract.registerElasticsearchFeature.feature",
                 "type": "Object",
                 "label": "feature",
                 "isRequired": true,
@@ -2149,6 +2154,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.ElasticsearchFeature.Unnamed.config",
                 "type": "Object",
                 "label": "config",
                 "isRequired": true,
@@ -2316,6 +2322,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.KibanaFeature.Unnamed.config",
                 "type": "Object",
                 "label": "config",
                 "isRequired": true,
@@ -2550,6 +2557,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.SubFeature.Unnamed.config",
                 "type": "Object",
                 "label": "config",
                 "isRequired": true,

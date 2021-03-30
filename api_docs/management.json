@@ -81,6 +81,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ManagementApp.Unnamed.args",
                 "type": "Object",
                 "label": "args",
                 "isRequired": true,
@@ -163,6 +164,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ManagementSection.Unnamed.args",
                 "type": "Object",
                 "label": "args",
                 "isRequired": true,
@@ -216,6 +218,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ManagementSection.registerApp.args",
                 "type": "Object",
                 "label": "args",
                 "isRequired": true,
@@ -262,6 +265,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ManagementSection.getApp.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,

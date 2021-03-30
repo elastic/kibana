@@ -139,6 +139,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.SavedObjectsManagementAction.setActionContext.actionContext",
                 "type": "Object",
                 "label": "actionContext",
                 "isRequired": true,
@@ -169,6 +170,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.SavedObjectsManagementAction.registerOnFinishCallback.callback",
                 "type": "Object",
                 "label": "callback",
                 "isRequired": true,
@@ -207,6 +209,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.SavedObjectsManagementAction.start.record",
                 "type": "Object",
                 "label": "record",
                 "isRequired": true,
@@ -277,6 +280,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.processImportResponse.response",
             "type": "Object",
             "label": "response",
             "isRequired": true,

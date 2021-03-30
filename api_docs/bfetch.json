@@ -8,6 +8,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.split.delimiter",
             "type": "string",
             "label": "delimiter",
             "isRequired": true,
@@ -395,6 +396,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.ItemBuffer.Unnamed.params",
                 "type": "Object",
                 "label": "params",
                 "isRequired": true,
@@ -447,6 +449,7 @@
             ],
             "children": [
               {
+                "id": "def-common.ItemBuffer.write.item",
                 "type": "Uncategorized",
                 "label": "item",
                 "isRequired": true,
@@ -545,6 +548,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.TimedItemBuffer.Unnamed.params",
                 "type": "Object",
                 "label": "params",
                 "isRequired": true,
@@ -582,6 +586,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.TimedItemBuffer.write.item",
                 "type": "Uncategorized",
                 "label": "item",
                 "isRequired": true,
@@ -648,6 +653,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.createBatchedFunction.params",
             "type": "Object",
             "label": "params",
             "isRequired": true,
@@ -702,6 +708,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.normalizeError.err",
             "type": "Any",
             "label": "err",
             "isRequired": true,
@@ -749,6 +756,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.removeLeadingSlash.text",
             "type": "string",
             "label": "text",
             "isRequired": true,
@@ -1068,6 +1076,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.StreamingResponseHandler.getResponseStream.payload",
                 "type": "Uncategorized",
                 "label": "payload",
                 "isRequired": true,

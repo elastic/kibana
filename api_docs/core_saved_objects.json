@@ -18,6 +18,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.SavedObjectsClient.create.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -31,6 +32,7 @@
                 }
               },
               {
+                "id": "def-public.SavedObjectsClient.create.attributes",
                 "type": "Uncategorized",
                 "label": "attributes",
                 "isRequired": true,
@@ -44,6 +46,7 @@
                 }
               },
               {
+                "id": "def-public.SavedObjectsClient.create.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -98,6 +101,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.SavedObjectsClient.bulkCreate.objects",
                 "type": "Array",
                 "label": "objects",
                 "isRequired": true,
@@ -118,6 +122,7 @@
                 }
               },
               {
+                "id": "def-public.SavedObjectsClient.bulkCreate.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -184,6 +189,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.SavedObjectsClient.delete.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -197,6 +203,7 @@
                 }
               },
               {
+                "id": "def-public.SavedObjectsClient.delete.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -210,6 +217,7 @@
                 }
               },
               {
+                "id": "def-public.SavedObjectsClient.delete.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -257,6 +265,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.SavedObjectsClient.find.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -317,6 +326,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.SavedObjectsClient.get.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -330,6 +340,7 @@
                 }
               },
               {
+                "id": "def-public.SavedObjectsClient.get.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -372,6 +383,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.SavedObjectsClient.bulkGet.objects",
                 "type": "Array",
                 "label": "objects",
                 "isRequired": true,
@@ -437,6 +449,7 @@
             ],
             "children": [
               {
+                "id": "def-public.SavedObjectsClient.update.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -450,6 +463,7 @@
                 }
               },
               {
+                "id": "def-public.SavedObjectsClient.update.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -463,6 +477,7 @@
                 }
               },
               {
+                "id": "def-public.SavedObjectsClient.update.attributes",
                 "type": "Uncategorized",
                 "label": "attributes",
                 "isRequired": true,
@@ -476,6 +491,7 @@
                 }
               },
               {
+                "id": "def-public.SavedObjectsClient.update.{-version, migrationVersion, references }",
                 "type": "Object",
                 "label": "{ version, migrationVersion, references }",
                 "isRequired": true,
@@ -532,6 +548,7 @@
             ],
             "children": [
               {
+                "id": "def-public.SavedObjectsClient.bulkUpdate.objects",
                 "type": "Array",
                 "label": "objects",
                 "isRequired": true,
@@ -728,6 +745,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.SimpleSavedObject.Unnamed.client",
                 "type": "Object",
                 "label": "client",
                 "isRequired": true,
@@ -740,7 +758,7 @@
                     "section": "def-public.SavedObjectsClient",
                     "text": "SavedObjectsClient"
                   },
-                  ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\">"
+                  ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"update\" | \"bulkUpdate\">"
                 ],
                 "description": [],
                 "source": {
@@ -749,6 +767,7 @@
                 }
               },
               {
+                "id": "def-public.SimpleSavedObject.Unnamed.{\n-     id,\n      type,\n      version,\n      attributes,\n      error,\n      references,\n      migrationVersion,\n      coreMigrationVersion,\n    }",
                 "type": "Object",
                 "label": "{\n      id,\n      type,\n      version,\n      attributes,\n      error,\n      references,\n      migrationVersion,\n      coreMigrationVersion,\n    }",
                 "isRequired": true,
@@ -786,6 +805,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.SimpleSavedObject.get.key",
                 "type": "string",
                 "label": "key",
                 "isRequired": true,
@@ -816,6 +836,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.SimpleSavedObject.set.key",
                 "type": "string",
                 "label": "key",
                 "isRequired": true,
@@ -829,6 +850,7 @@
                 }
               },
               {
+                "id": "def-public.SimpleSavedObject.set.value",
                 "type": "Any",
                 "label": "value",
                 "isRequired": true,
@@ -859,6 +881,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.SimpleSavedObject.has.key",
                 "type": "string",
                 "label": "key",
                 "isRequired": true,
@@ -1400,7 +1423,7 @@
                 "section": "def-public.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\">"
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"find\" | \"bulkGet\" | \"update\" | \"bulkUpdate\">"
             ]
           }
         ],
@@ -1502,7 +1525,7 @@
           "lineNumber": 138
         },
         "signature": [
-          "{ get: <T>(type: string, id: string) => Promise<SimpleSavedObject<T>>; delete: (type: string, id: string, options?: SavedObjectsDeleteOptions | undefined) => Promise<{}>; create: <T>(type: string, attributes: T, options?: SavedObjectsCreateOptions) => Promise<SimpleSavedObject<T>>; find: <T>(options: Pick<SavedObjectFindOptionsServer, \"type\" | \"filter\" | \"fields\" | \"search\" | \"page\" | \"perPage\" | \"sortField\" | \"searchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"preference\">) => Promise<SavedObjectsFindResponsePublic<T>>; update: <T = unknown>(type: string, id: string, attributes: T, { version, migrationVersion, references }?: SavedObjectsUpdateOptions) => Promise<SimpleSavedObject<T>>; bulkCreate: (objects?: SavedObjectsBulkCreateObject<unknown>[], options?: SavedObjectsBulkCreateOptions) => Promise<SavedObjectsBatchResponse<unknown>>; bulkGet: (objects?: { id: string; type: string; }[]) => Promise<SavedObjectsBatchResponse<unknown>>; bulkUpdate: <T>(objects?: SavedObjectsBulkUpdateObject<unknown>[]) => Promise<SavedObjectsBatchResponse<unknown>>; }"
+          "{ get: <T>(type: string, id: string) => Promise<SimpleSavedObject<T>>; delete: (type: string, id: string, options?: SavedObjectsDeleteOptions | undefined) => Promise<{}>; create: <T>(type: string, attributes: T, options?: SavedObjectsCreateOptions) => Promise<SimpleSavedObject<T>>; bulkCreate: (objects?: SavedObjectsBulkCreateObject<unknown>[], options?: SavedObjectsBulkCreateOptions) => Promise<SavedObjectsBatchResponse<unknown>>; find: <T>(options: Pick<SavedObjectFindOptionsServer, \"type\" | \"filter\" | \"fields\" | \"search\" | \"page\" | \"perPage\" | \"sortField\" | \"searchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"preference\">) => Promise<SavedObjectsFindResponsePublic<T>>; bulkGet: (objects?: { id: string; type: string; }[]) => Promise<SavedObjectsBatchResponse<unknown>>; update: <T = unknown>(type: string, id: string, attributes: T, { version, migrationVersion, references }?: SavedObjectsUpdateOptions) => Promise<SimpleSavedObject<T>>; bulkUpdate: <T>(objects?: SavedObjectsBulkUpdateObject<unknown>[]) => Promise<SavedObjectsBatchResponse<unknown>>; }"
         ],
         "initialIsOpen": false
       }
@@ -1592,6 +1615,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsClient.create.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -1605,6 +1629,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsClient.create.attributes",
                 "type": "Uncategorized",
                 "label": "attributes",
                 "isRequired": true,
@@ -1618,6 +1643,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsClient.create.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -1681,6 +1707,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsClient.bulkCreate.objects",
                 "type": "Array",
                 "label": "objects",
                 "isRequired": true,
@@ -1701,6 +1728,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsClient.bulkCreate.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -1764,6 +1792,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsClient.checkConflicts.objects",
                 "type": "Array",
                 "label": "objects",
                 "isRequired": true,
@@ -1784,6 +1813,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsClient.checkConflicts.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -1830,6 +1860,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsClient.delete.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -1843,6 +1874,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsClient.delete.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -1856,6 +1888,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsClient.delete.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -1910,6 +1943,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsClient.find.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -1972,6 +2006,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsClient.bulkGet.objects",
                 "type": "Array",
                 "label": "objects",
                 "isRequired": true,
@@ -1994,6 +2029,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsClient.bulkGet.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -2048,6 +2084,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsClient.get.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -2063,6 +2100,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsClient.get.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -2078,6 +2116,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsClient.get.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -2132,6 +2171,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsClient.resolve.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -2147,6 +2187,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsClient.resolve.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -2162,6 +2203,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsClient.resolve.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -2216,6 +2258,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsClient.update.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -2229,6 +2272,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsClient.update.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -2242,6 +2286,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsClient.update.attributes",
                 "type": "Object",
                 "label": "attributes",
                 "isRequired": true,
@@ -2255,6 +2300,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsClient.update.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -2309,6 +2355,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsClient.addToNamespaces.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -2322,6 +2369,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsClient.addToNamespaces.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -2335,6 +2383,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsClient.addToNamespaces.namespaces",
                 "type": "Array",
                 "label": "namespaces",
                 "isRequired": true,
@@ -2348,6 +2397,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsClient.addToNamespaces.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -2402,6 +2452,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsClient.deleteFromNamespaces.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -2415,6 +2466,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsClient.deleteFromNamespaces.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -2428,6 +2480,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsClient.deleteFromNamespaces.namespaces",
                 "type": "Array",
                 "label": "namespaces",
                 "isRequired": true,
@@ -2441,6 +2494,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsClient.deleteFromNamespaces.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -2503,6 +2557,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsClient.bulkUpdate.objects",
                 "type": "Array",
                 "label": "objects",
                 "isRequired": true,
@@ -2523,6 +2578,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsClient.bulkUpdate.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -2578,6 +2634,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsClient.removeReferencesTo.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -2591,6 +2648,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsClient.removeReferencesTo.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -2604,6 +2662,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsClient.removeReferencesTo.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -2659,6 +2718,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsClient.openPointInTimeForType.type",
                 "type": "CompoundType",
                 "label": "type",
                 "isRequired": true,
@@ -2672,6 +2732,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsClient.openPointInTimeForType.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -2726,6 +2787,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsClient.closePointInTime.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -2739,6 +2801,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsClient.closePointInTime.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -2801,6 +2864,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsClient.createPointInTimeFinder.findOptions",
                 "type": "Object",
                 "label": "findOptions",
                 "isRequired": true,
@@ -2822,6 +2886,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsClient.createPointInTimeFinder.dependencies",
                 "type": "Object",
                 "label": "dependencies",
                 "isRequired": false,
@@ -2883,6 +2948,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.SavedObjectsErrorHelpers.isSavedObjectsClientError.error",
                 "type": "Any",
                 "label": "error",
                 "isRequired": true,
@@ -2921,6 +2987,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.SavedObjectsErrorHelpers.decorateBadRequestError.error",
                 "type": "Object",
                 "label": "error",
                 "isRequired": true,
@@ -2934,6 +3001,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsErrorHelpers.decorateBadRequestError.reason",
                 "type": "string",
                 "label": "reason",
                 "isRequired": false,
@@ -2972,6 +3040,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.SavedObjectsErrorHelpers.createBadRequestError.reason",
                 "type": "string",
                 "label": "reason",
                 "isRequired": false,
@@ -3010,6 +3079,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.SavedObjectsErrorHelpers.createUnsupportedTypeError.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -3048,6 +3118,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.SavedObjectsErrorHelpers.isBadRequestError.error",
                 "type": "CompoundType",
                 "label": "error",
                 "isRequired": true,
@@ -3093,6 +3164,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.SavedObjectsErrorHelpers.createInvalidVersionError.versionInput",
                 "type": "string",
                 "label": "versionInput",
                 "isRequired": false,
@@ -3131,6 +3203,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.SavedObjectsErrorHelpers.isInvalidVersionError.error",
                 "type": "CompoundType",
                 "label": "error",
                 "isRequired": true,
@@ -3176,6 +3249,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.SavedObjectsErrorHelpers.decorateNotAuthorizedError.error",
                 "type": "Object",
                 "label": "error",
                 "isRequired": true,
@@ -3189,6 +3263,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsErrorHelpers.decorateNotAuthorizedError.reason",
                 "type": "string",
                 "label": "reason",
                 "isRequired": false,
@@ -3227,6 +3302,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.SavedObjectsErrorHelpers.isNotAuthorizedError.error",
                 "type": "CompoundType",
                 "label": "error",
                 "isRequired": true,
@@ -3272,6 +3348,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.SavedObjectsErrorHelpers.decorateForbiddenError.error",
                 "type": "Object",
                 "label": "error",
                 "isRequired": true,
@@ -3285,6 +3362,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsErrorHelpers.decorateForbiddenError.reason",
                 "type": "string",
                 "label": "reason",
                 "isRequired": false,
@@ -3323,6 +3401,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.SavedObjectsErrorHelpers.isForbiddenError.error",
                 "type": "CompoundType",
                 "label": "error",
                 "isRequired": true,
@@ -3368,6 +3447,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.SavedObjectsErrorHelpers.decorateRequestEntityTooLargeError.error",
                 "type": "Object",
                 "label": "error",
                 "isRequired": true,
@@ -3381,6 +3461,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsErrorHelpers.decorateRequestEntityTooLargeError.reason",
                 "type": "string",
                 "label": "reason",
                 "isRequired": false,
@@ -3419,6 +3500,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.SavedObjectsErrorHelpers.isRequestEntityTooLargeError.error",
                 "type": "CompoundType",
                 "label": "error",
                 "isRequired": true,
@@ -3464,6 +3546,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.SavedObjectsErrorHelpers.createGenericNotFoundError.type",
                 "type": "CompoundType",
                 "label": "type",
                 "isRequired": false,
@@ -3477,6 +3560,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsErrorHelpers.createGenericNotFoundError.id",
                 "type": "CompoundType",
                 "label": "id",
                 "isRequired": false,
@@ -3515,6 +3599,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.SavedObjectsErrorHelpers.createIndexAliasNotFoundError.alias",
                 "type": "string",
                 "label": "alias",
                 "isRequired": true,
@@ -3553,6 +3638,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.SavedObjectsErrorHelpers.decorateIndexAliasNotFoundError.error",
                 "type": "Object",
                 "label": "error",
                 "isRequired": true,
@@ -3566,6 +3652,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsErrorHelpers.decorateIndexAliasNotFoundError.alias",
                 "type": "string",
                 "label": "alias",
                 "isRequired": true,
@@ -3604,6 +3691,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.SavedObjectsErrorHelpers.isNotFoundError.error",
                 "type": "CompoundType",
                 "label": "error",
                 "isRequired": true,
@@ -3649,6 +3737,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.SavedObjectsErrorHelpers.decorateConflictError.error",
                 "type": "Object",
                 "label": "error",
                 "isRequired": true,
@@ -3662,6 +3751,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsErrorHelpers.decorateConflictError.reason",
                 "type": "string",
                 "label": "reason",
                 "isRequired": false,
@@ -3700,6 +3790,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.SavedObjectsErrorHelpers.createConflictError.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -3713,6 +3804,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsErrorHelpers.createConflictError.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -3726,6 +3818,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsErrorHelpers.createConflictError.reason",
                 "type": "string",
                 "label": "reason",
                 "isRequired": false,
@@ -3764,6 +3857,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.SavedObjectsErrorHelpers.isConflictError.error",
                 "type": "CompoundType",
                 "label": "error",
                 "isRequired": true,
@@ -3809,6 +3903,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.SavedObjectsErrorHelpers.decorateTooManyRequestsError.error",
                 "type": "Object",
                 "label": "error",
                 "isRequired": true,
@@ -3822,6 +3917,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsErrorHelpers.decorateTooManyRequestsError.reason",
                 "type": "string",
                 "label": "reason",
                 "isRequired": false,
@@ -3860,6 +3956,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.SavedObjectsErrorHelpers.createTooManyRequestsError.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -3873,6 +3970,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsErrorHelpers.createTooManyRequestsError.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -3911,6 +4009,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.SavedObjectsErrorHelpers.isTooManyRequestsError.error",
                 "type": "CompoundType",
                 "label": "error",
                 "isRequired": true,
@@ -3956,6 +4055,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.SavedObjectsErrorHelpers.decorateEsCannotExecuteScriptError.error",
                 "type": "Object",
                 "label": "error",
                 "isRequired": true,
@@ -3969,6 +4069,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsErrorHelpers.decorateEsCannotExecuteScriptError.reason",
                 "type": "string",
                 "label": "reason",
                 "isRequired": false,
@@ -4007,6 +4108,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.SavedObjectsErrorHelpers.isEsCannotExecuteScriptError.error",
                 "type": "CompoundType",
                 "label": "error",
                 "isRequired": true,
@@ -4052,6 +4154,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.SavedObjectsErrorHelpers.decorateEsUnavailableError.error",
                 "type": "Object",
                 "label": "error",
                 "isRequired": true,
@@ -4065,6 +4168,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsErrorHelpers.decorateEsUnavailableError.reason",
                 "type": "string",
                 "label": "reason",
                 "isRequired": false,
@@ -4103,6 +4207,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.SavedObjectsErrorHelpers.isEsUnavailableError.error",
                 "type": "CompoundType",
                 "label": "error",
                 "isRequired": true,
@@ -4148,6 +4253,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.SavedObjectsErrorHelpers.decorateGeneralError.error",
                 "type": "Object",
                 "label": "error",
                 "isRequired": true,
@@ -4161,6 +4267,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsErrorHelpers.decorateGeneralError.reason",
                 "type": "string",
                 "label": "reason",
                 "isRequired": false,
@@ -4199,6 +4306,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.SavedObjectsErrorHelpers.isGeneralError.error",
                 "type": "CompoundType",
                 "label": "error",
                 "isRequired": true,
@@ -4261,7 +4369,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
             ]
           },
           {
@@ -4321,7 +4429,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsExporter.Unnamed.{\n-   savedObjectsClient,\n    typeRegistry,\n    exportSizeLimit,\n    logger,\n  }",
+                "id": "def-server.SavedObjectsExporter.Unnamed.{\n-   savedObjectsClient,\n    typeRegistry,\n    exportSizeLimit,\n    logger,\n  }.{\n    savedObjectsClient,\n    typeRegistry,\n    exportSizeLimit,\n    logger,\n  }",
                 "type": "Object",
                 "label": "{\n    savedObjectsClient,\n    typeRegistry,\n    exportSizeLimit,\n    logger,\n  }",
                 "tags": [],
@@ -4329,7 +4437,7 @@
                 "children": [
                   {
                     "tags": [],
-                    "id": "def-server.SavedObjectsExporter.Unnamed.{\n-   savedObjectsClient,\n    typeRegistry,\n    exportSizeLimit,\n    logger,\n  }.savedObjectsClient",
+                    "id": "def-server.SavedObjectsExporter.Unnamed.{\n-   savedObjectsClient,\n    typeRegistry,\n    exportSizeLimit,\n    logger,\n  }.{\n    savedObjectsClient,\n    typeRegistry,\n    exportSizeLimit,\n    logger,\n  }.savedObjectsClient",
                     "type": "Object",
                     "label": "savedObjectsClient",
                     "description": [],
@@ -4346,12 +4454,12 @@
                         "section": "def-server.SavedObjectsClient",
                         "text": "SavedObjectsClient"
                       },
-                      ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
+                      ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
                     ]
                   },
                   {
                     "tags": [],
-                    "id": "def-server.SavedObjectsExporter.Unnamed.{\n-   savedObjectsClient,\n    typeRegistry,\n    exportSizeLimit,\n    logger,\n  }.typeRegistry",
+                    "id": "def-server.SavedObjectsExporter.Unnamed.{\n-   savedObjectsClient,\n    typeRegistry,\n    exportSizeLimit,\n    logger,\n  }.{\n    savedObjectsClient,\n    typeRegistry,\n    exportSizeLimit,\n    logger,\n  }.typeRegistry",
                     "type": "Object",
                     "label": "typeRegistry",
                     "description": [],
@@ -4373,7 +4481,7 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-server.SavedObjectsExporter.Unnamed.{\n-   savedObjectsClient,\n    typeRegistry,\n    exportSizeLimit,\n    logger,\n  }.exportSizeLimit",
+                    "id": "def-server.SavedObjectsExporter.Unnamed.{\n-   savedObjectsClient,\n    typeRegistry,\n    exportSizeLimit,\n    logger,\n  }.{\n    savedObjectsClient,\n    typeRegistry,\n    exportSizeLimit,\n    logger,\n  }.exportSizeLimit",
                     "type": "number",
                     "label": "exportSizeLimit",
                     "description": [],
@@ -4384,7 +4492,7 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-server.SavedObjectsExporter.Unnamed.{\n-   savedObjectsClient,\n    typeRegistry,\n    exportSizeLimit,\n    logger,\n  }.logger",
+                    "id": "def-server.SavedObjectsExporter.Unnamed.{\n-   savedObjectsClient,\n    typeRegistry,\n    exportSizeLimit,\n    logger,\n  }.{\n    savedObjectsClient,\n    typeRegistry,\n    exportSizeLimit,\n    logger,\n  }.logger",
                     "type": "Object",
                     "label": "logger",
                     "description": [],
@@ -4432,6 +4540,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsExporter.exportByTypes.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -4482,6 +4591,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsExporter.exportByObjects.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -4546,6 +4656,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.SavedObjectsExportError.Unnamed.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -4559,6 +4670,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsExportError.Unnamed.message",
                 "type": "string",
                 "label": "message",
                 "isRequired": true,
@@ -4572,6 +4684,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsExportError.Unnamed.attributes",
                 "type": "Object",
                 "label": "attributes",
                 "isRequired": false,
@@ -4610,6 +4723,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.SavedObjectsExportError.exportSizeExceeded.limit",
                 "type": "number",
                 "label": "limit",
                 "isRequired": true,
@@ -4648,6 +4762,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.SavedObjectsExportError.objectFetchError.objects",
                 "type": "Array",
                 "label": "objects",
                 "isRequired": true,
@@ -4695,6 +4810,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsExportError.objectTransformError.objects",
                 "type": "Array",
                 "label": "objects",
                 "isRequired": true,
@@ -4715,6 +4831,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsExportError.objectTransformError.cause",
                 "type": "Object",
                 "label": "cause",
                 "isRequired": true,
@@ -4755,6 +4872,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsExportError.invalidTransformError.objectKeys",
                 "type": "Array",
                 "label": "objectKeys",
                 "isRequired": true,
@@ -4810,7 +4928,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
             ]
           },
           {
@@ -4878,7 +4996,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsImporter.Unnamed.{\n-   savedObjectsClient,\n    typeRegistry,\n    importSizeLimit,\n  }",
+                "id": "def-server.SavedObjectsImporter.Unnamed.{\n-   savedObjectsClient,\n    typeRegistry,\n    importSizeLimit,\n  }.{\n    savedObjectsClient,\n    typeRegistry,\n    importSizeLimit,\n  }",
                 "type": "Object",
                 "label": "{\n    savedObjectsClient,\n    typeRegistry,\n    importSizeLimit,\n  }",
                 "tags": [],
@@ -4886,7 +5004,7 @@
                 "children": [
                   {
                     "tags": [],
-                    "id": "def-server.SavedObjectsImporter.Unnamed.{\n-   savedObjectsClient,\n    typeRegistry,\n    importSizeLimit,\n  }.savedObjectsClient",
+                    "id": "def-server.SavedObjectsImporter.Unnamed.{\n-   savedObjectsClient,\n    typeRegistry,\n    importSizeLimit,\n  }.{\n    savedObjectsClient,\n    typeRegistry,\n    importSizeLimit,\n  }.savedObjectsClient",
                     "type": "Object",
                     "label": "savedObjectsClient",
                     "description": [],
@@ -4903,12 +5021,12 @@
                         "section": "def-server.SavedObjectsClient",
                         "text": "SavedObjectsClient"
                       },
-                      ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
+                      ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
                     ]
                   },
                   {
                     "tags": [],
-                    "id": "def-server.SavedObjectsImporter.Unnamed.{\n-   savedObjectsClient,\n    typeRegistry,\n    importSizeLimit,\n  }.typeRegistry",
+                    "id": "def-server.SavedObjectsImporter.Unnamed.{\n-   savedObjectsClient,\n    typeRegistry,\n    importSizeLimit,\n  }.{\n    savedObjectsClient,\n    typeRegistry,\n    importSizeLimit,\n  }.typeRegistry",
                     "type": "Object",
                     "label": "typeRegistry",
                     "description": [],
@@ -4930,7 +5048,7 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-server.SavedObjectsImporter.Unnamed.{\n-   savedObjectsClient,\n    typeRegistry,\n    importSizeLimit,\n  }.importSizeLimit",
+                    "id": "def-server.SavedObjectsImporter.Unnamed.{\n-   savedObjectsClient,\n    typeRegistry,\n    importSizeLimit,\n  }.{\n    savedObjectsClient,\n    typeRegistry,\n    importSizeLimit,\n  }.importSizeLimit",
                     "type": "number",
                     "label": "importSizeLimit",
                     "description": [],
@@ -4981,6 +5099,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsImporter.import.{\n-   readStream,\n    createNewCopies,\n    namespace,\n    overwrite,\n  }",
                 "type": "Object",
                 "label": "{\n    readStream,\n    createNewCopies,\n    namespace,\n    overwrite,\n  }",
                 "isRequired": true,
@@ -5037,6 +5156,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsImporter.resolveImportErrors.{\n-   readStream,\n    createNewCopies,\n    namespace,\n    retries,\n  }",
                 "type": "Object",
                 "label": "{\n    readStream,\n    createNewCopies,\n    namespace,\n    retries,\n  }",
                 "isRequired": true,
@@ -5109,6 +5229,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.SavedObjectsImportError.importSizeExceeded.limit",
                 "type": "number",
                 "label": "limit",
                 "isRequired": true,
@@ -5147,6 +5268,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.SavedObjectsImportError.nonUniqueImportObjects.nonUniqueEntries",
                 "type": "Array",
                 "label": "nonUniqueEntries",
                 "isRequired": true,
@@ -5185,6 +5307,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.SavedObjectsImportError.nonUniqueRetryObjects.nonUniqueRetryObjects",
                 "type": "Array",
                 "label": "nonUniqueRetryObjects",
                 "isRequired": true,
@@ -5223,6 +5346,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.SavedObjectsImportError.nonUniqueRetryDestinations.nonUniqueRetryDestinations",
                 "type": "Array",
                 "label": "nonUniqueRetryDestinations",
                 "isRequired": true,
@@ -5261,6 +5385,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.SavedObjectsImportError.referencesFetchError.objects",
                 "type": "Array",
                 "label": "objects",
                 "isRequired": true,
@@ -5332,6 +5457,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsRepository.create.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -5345,6 +5471,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsRepository.create.attributes",
                 "type": "Uncategorized",
                 "label": "attributes",
                 "isRequired": true,
@@ -5358,6 +5485,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsRepository.create.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -5424,6 +5552,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsRepository.bulkCreate.objects",
                 "type": "Array",
                 "label": "objects",
                 "isRequired": true,
@@ -5446,6 +5575,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsRepository.bulkCreate.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -5512,6 +5642,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsRepository.checkConflicts.objects",
                 "type": "Array",
                 "label": "objects",
                 "isRequired": true,
@@ -5532,6 +5663,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsRepository.checkConflicts.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -5578,6 +5710,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsRepository.delete.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -5591,6 +5724,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsRepository.delete.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -5604,6 +5738,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsRepository.delete.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -5652,6 +5787,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsRepository.deleteByNamespace.namespace",
                 "type": "string",
                 "label": "namespace",
                 "isRequired": true,
@@ -5665,6 +5801,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsRepository.deleteByNamespace.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -5719,6 +5856,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.SavedObjectsRepository.find.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -5785,6 +5923,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsRepository.bulkGet.objects",
                 "type": "Array",
                 "label": "objects",
                 "isRequired": true,
@@ -5807,6 +5946,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsRepository.bulkGet.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -5865,6 +6005,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsRepository.get.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -5878,6 +6019,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsRepository.get.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -5891,6 +6033,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsRepository.get.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -5949,6 +6092,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsRepository.resolve.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -5962,6 +6106,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsRepository.resolve.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -5975,6 +6120,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsRepository.resolve.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -6033,6 +6179,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsRepository.update.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -6046,6 +6193,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsRepository.update.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -6059,6 +6207,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsRepository.update.attributes",
                 "type": "Object",
                 "label": "attributes",
                 "isRequired": true,
@@ -6072,6 +6221,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsRepository.update.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -6128,6 +6278,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsRepository.addToNamespaces.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -6141,6 +6292,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsRepository.addToNamespaces.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -6154,6 +6306,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsRepository.addToNamespaces.namespaces",
                 "type": "Array",
                 "label": "namespaces",
                 "isRequired": true,
@@ -6167,6 +6320,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsRepository.addToNamespaces.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -6221,6 +6375,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsRepository.deleteFromNamespaces.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -6234,6 +6389,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsRepository.deleteFromNamespaces.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -6247,6 +6403,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsRepository.deleteFromNamespaces.namespaces",
                 "type": "Array",
                 "label": "namespaces",
                 "isRequired": true,
@@ -6260,6 +6417,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsRepository.deleteFromNamespaces.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -6322,6 +6480,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsRepository.bulkUpdate.objects",
                 "type": "Array",
                 "label": "objects",
                 "isRequired": true,
@@ -6344,6 +6503,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsRepository.bulkUpdate.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -6402,6 +6562,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsRepository.removeReferencesTo.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -6415,6 +6576,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsRepository.removeReferencesTo.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -6428,6 +6590,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsRepository.removeReferencesTo.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -6490,6 +6653,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsRepository.incrementCounter.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -6505,6 +6669,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsRepository.incrementCounter.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -6520,6 +6685,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsRepository.incrementCounter.counterFields",
                 "type": "Array",
                 "label": "counterFields",
                 "isRequired": true,
@@ -6543,6 +6709,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsRepository.incrementCounter.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -6602,6 +6769,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsRepository.openPointInTimeForType.type",
                 "type": "CompoundType",
                 "label": "type",
                 "isRequired": true,
@@ -6615,6 +6783,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsRepository.openPointInTimeForType.{-keepAlive = '5m', preference }",
                 "type": "Object",
                 "label": "{ keepAlive = '5m', preference }",
                 "isRequired": true,
@@ -6673,6 +6842,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsRepository.closePointInTime.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -6686,6 +6856,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsRepository.closePointInTime.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -6752,6 +6923,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsRepository.createPointInTimeFinder.findOptions",
                 "type": "Object",
                 "label": "findOptions",
                 "isRequired": true,
@@ -6773,6 +6945,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsRepository.createPointInTimeFinder.dependencies",
                 "type": "Object",
                 "label": "dependencies",
                 "isRequired": false,
@@ -6846,6 +7019,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsSerializer.isRawSavedObject.doc",
                 "type": "Object",
                 "label": "doc",
                 "isRequired": true,
@@ -6867,6 +7041,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsSerializer.isRawSavedObject.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -6931,6 +7106,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsSerializer.rawToSavedObject.doc",
                 "type": "Object",
                 "label": "doc",
                 "isRequired": true,
@@ -6952,6 +7128,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsSerializer.rawToSavedObject.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": true,
@@ -7007,6 +7184,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsSerializer.savedObjectToRaw.savedObj",
                 "type": "CompoundType",
                 "label": "savedObj",
                 "isRequired": true,
@@ -7048,6 +7226,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsSerializer.generateRawId.namespace",
                 "type": "string",
                 "label": "namespace",
                 "isRequired": false,
@@ -7063,6 +7242,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsSerializer.generateRawId.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -7078,6 +7258,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsSerializer.generateRawId.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -7112,6 +7293,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsSerializer.generateRawLegacyUrlAliasId.namespace",
                 "type": "string",
                 "label": "namespace",
                 "isRequired": true,
@@ -7127,6 +7309,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsSerializer.generateRawLegacyUrlAliasId.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -7142,6 +7325,7 @@
                 }
               },
               {
+                "id": "def-server.SavedObjectsSerializer.generateRawLegacyUrlAliasId.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -7185,6 +7369,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-server.SavedObjectsUtils.namespaceIdToString.namespace",
                 "type": "string",
                 "label": "namespace",
                 "isRequired": false,
@@ -7217,6 +7402,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-server.SavedObjectsUtils.namespaceStringToId.namespace",
                 "type": "string",
                 "label": "namespace",
                 "isRequired": true,
@@ -7249,6 +7435,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-server.SavedObjectsUtils.createEmptyFindResponse.{\n-   page = FIND_DEFAULT_PAGE,\n    perPage = FIND_DEFAULT_PER_PAGE,\n  }",
                 "type": "Object",
                 "label": "{\n    page = FIND_DEFAULT_PAGE,\n    perPage = FIND_DEFAULT_PER_PAGE,\n  }",
                 "isRequired": true,
@@ -7344,6 +7531,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectsUtils.isRandomId.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": false,
@@ -7406,6 +7594,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectTypeRegistry.registerType.type",
                 "type": "Object",
                 "label": "type",
                 "isRequired": true,
@@ -7452,6 +7641,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectTypeRegistry.getType.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -7562,6 +7752,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectTypeRegistry.isNamespaceAgnostic.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -7594,6 +7785,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectTypeRegistry.isSingleNamespace.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -7626,6 +7818,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectTypeRegistry.isMultiNamespace.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -7658,6 +7851,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectTypeRegistry.isShareable.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -7690,6 +7884,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectTypeRegistry.isHidden.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -7722,6 +7917,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectTypeRegistry.getIndex.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -7754,6 +7950,7 @@
             ],
             "children": [
               {
+                "id": "def-server.SavedObjectTypeRegistry.isImportableAndExportable.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -8840,7 +9037,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
             ]
           },
           {
@@ -9335,7 +9532,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">, \"find\" | \"openPointInTimeForType\" | \"closePointInTime\">"
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">, \"find\" | \"openPointInTimeForType\" | \"closePointInTime\">"
             ]
           }
         ],
@@ -11869,7 +12066,7 @@
                 "section": "def-server.SavedObjectsRepository",
                 "text": "SavedObjectsRepository"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"deleteByNamespace\" | \"incrementCounter\">"
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
             ]
           },
           {
@@ -11893,7 +12090,7 @@
                 "section": "def-server.SavedObjectsRepository",
                 "text": "SavedObjectsRepository"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"deleteByNamespace\" | \"incrementCounter\">"
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
             ]
           }
         ],
@@ -12208,7 +12405,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
             ]
           },
           {
@@ -12240,7 +12437,7 @@
                 "section": "def-server.SavedObjectsRepository",
                 "text": "SavedObjectsRepository"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"deleteByNamespace\" | \"incrementCounter\">"
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
             ]
           },
           {
@@ -12264,7 +12461,7 @@
                 "section": "def-server.SavedObjectsRepository",
                 "text": "SavedObjectsRepository"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"deleteByNamespace\" | \"incrementCounter\">"
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
             ]
           },
           {
@@ -12311,7 +12508,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">) => Pick<",
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">) => Pick<",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -12343,7 +12540,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">) => Pick<",
+              ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">) => Pick<",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -13056,7 +13253,7 @@
           "lineNumber": 143
         },
         "signature": [
-          "{ get: <T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions) => Promise<SavedObject<T>>; delete: (type: string, id: string, options?: SavedObjectsDeleteOptions) => Promise<{}>; create: <T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions) => Promise<SavedObject<T>>; find: <T = unknown>(options: SavedObjectsFindOptions) => Promise<SavedObjectsFindResponse<T>>; update: <T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions) => Promise<SavedObjectsUpdateResponse<T>>; bulkCreate: <T = unknown>(objects: SavedObjectsBulkCreateObject<T>[], options?: SavedObjectsCreateOptions) => Promise<SavedObjectsBulkResponse<T>>; bulkGet: <T = unknown>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjectsBaseOptions) => Promise<SavedObjectsBulkResponse<T>>; bulkUpdate: <T = unknown>(objects: SavedObjectsBulkUpdateObject<T>[], options?: SavedObjectsBulkUpdateOptions) => Promise<SavedObjectsBulkUpdateResponse<T>>; checkConflicts: (objects?: SavedObjectsCheckConflictsObject[], options?: SavedObjectsBaseOptions) => Promise<SavedObjectsCheckConflictsResponse>; resolve: <T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions) => Promise<SavedObjectsResolveResponse<T>>; addToNamespaces: (type: string, id: string, namespaces: string[], options?: SavedObjectsAddToNamespacesOptions) => Promise<SavedObjectsAddToNamespacesResponse>; deleteFromNamespaces: (type: string, id: string, namespaces: string[], options?: SavedObjectsDeleteFromNamespacesOptions) => Promise<SavedObjectsDeleteFromNamespacesResponse>; removeReferencesTo: (type: string, id: string, options?: SavedObjectsRemoveReferencesToOptions) => Promise<SavedObjectsRemoveReferencesToResponse>; openPointInTimeForType: (type: string | string[], { keepAlive, preference }?: SavedObjectsOpenPointInTimeOptions) => Promise<SavedObjectsOpenPointInTimeResponse>; closePointInTime: (id: string, options?: SavedObjectsBaseOptions | undefined) => Promise<SavedObjectsClosePointInTimeResponse>; createPointInTimeFinder: (findOptions: Pick<SavedObjectsFindOptions, \"type\" | \"filter\" | \"fields\" | \"search\" | \"perPage\" | \"sortField\" | \"sortOrder\" | \"searchFields\" | \"rootSearchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"typeToNamespacesMap\" | \"preference\">, dependencies?: SavedObjectsCreatePointInTimeFinderDependencies | undefined) => ISavedObjectsPointInTimeFinder; deleteByNamespace: (namespace: string, options?: SavedObjectsDeleteByNamespaceOptions) => Promise<any>; incrementCounter: <T>(type: string, id: string, counterFields: (string | SavedObjectsIncrementCounterField)[], options?: SavedObjectsIncrementCounterOptions<T>) => Promise<SavedObject<T>>; }"
+          "{ get: <T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions) => Promise<SavedObject<T>>; delete: (type: string, id: string, options?: SavedObjectsDeleteOptions) => Promise<{}>; create: <T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions) => Promise<SavedObject<T>>; bulkCreate: <T = unknown>(objects: SavedObjectsBulkCreateObject<T>[], options?: SavedObjectsCreateOptions) => Promise<SavedObjectsBulkResponse<T>>; checkConflicts: (objects?: SavedObjectsCheckConflictsObject[], options?: SavedObjectsBaseOptions) => Promise<SavedObjectsCheckConflictsResponse>; deleteByNamespace: (namespace: string, options?: SavedObjectsDeleteByNamespaceOptions) => Promise<any>; find: <T = unknown>(options: SavedObjectsFindOptions) => Promise<SavedObjectsFindResponse<T>>; bulkGet: <T = unknown>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjectsBaseOptions) => Promise<SavedObjectsBulkResponse<T>>; resolve: <T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions) => Promise<SavedObjectsResolveResponse<T>>; update: <T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions) => Promise<SavedObjectsUpdateResponse<T>>; addToNamespaces: (type: string, id: string, namespaces: string[], options?: SavedObjectsAddToNamespacesOptions) => Promise<SavedObjectsAddToNamespacesResponse>; deleteFromNamespaces: (type: string, id: string, namespaces: string[], options?: SavedObjectsDeleteFromNamespacesOptions) => Promise<SavedObjectsDeleteFromNamespacesResponse>; bulkUpdate: <T = unknown>(objects: SavedObjectsBulkUpdateObject<T>[], options?: SavedObjectsBulkUpdateOptions) => Promise<SavedObjectsBulkUpdateResponse<T>>; removeReferencesTo: (type: string, id: string, options?: SavedObjectsRemoveReferencesToOptions) => Promise<SavedObjectsRemoveReferencesToResponse>; incrementCounter: <T>(type: string, id: string, counterFields: (string | SavedObjectsIncrementCounterField)[], options?: SavedObjectsIncrementCounterOptions<T>) => Promise<SavedObject<T>>; openPointInTimeForType: (type: string | string[], { keepAlive, preference }?: SavedObjectsOpenPointInTimeOptions) => Promise<SavedObjectsOpenPointInTimeResponse>; closePointInTime: (id: string, options?: SavedObjectsBaseOptions | undefined) => Promise<SavedObjectsClosePointInTimeResponse>; createPointInTimeFinder: (findOptions: Pick<SavedObjectsFindOptions, \"type\" | \"filter\" | \"fields\" | \"search\" | \"perPage\" | \"sortField\" | \"sortOrder\" | \"searchFields\" | \"rootSearchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"typeToNamespacesMap\" | \"preference\">, dependencies?: SavedObjectsCreatePointInTimeFinderDependencies | undefined) => ISavedObjectsPointInTimeFinder; }"
         ],
         "initialIsOpen": false
       },
@@ -13191,29 +13388,29 @@
             "section": "def-server.SavedObjectsCreateOptions",
             "text": "SavedObjectsCreateOptions"
           },
-          " | undefined) => Promise<SavedObject<T>>; find: <T = unknown>(options: SavedObjectsFindOptions) => Promise<",
+          " | undefined) => Promise<SavedObject<T>>; bulkCreate: <T>(objects: ",
           {
             "pluginId": "core",
             "scope": "server",
             "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectsFindResponse",
-            "text": "SavedObjectsFindResponse"
+            "section": "def-server.SavedObjectsBulkCreateObject",
+            "text": "SavedObjectsBulkCreateObject"
           },
-          "<T>>; update: <T = unknown>(type: string, id: string, attributes: Partial<T>, options?: ",
+          "<T>[], options?: ",
           {
             "pluginId": "core",
             "scope": "server",
             "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectsUpdateOptions",
-            "text": "SavedObjectsUpdateOptions"
+            "section": "def-server.SavedObjectsCreateOptions",
+            "text": "SavedObjectsCreateOptions"
           },
-          ") => Promise<",
+          " | undefined) => Promise<",
           {
             "pluginId": "core",
             "scope": "server",
             "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectsUpdateResponse",
-            "text": "SavedObjectsUpdateResponse"
+            "section": "def-server.SavedObjectsBulkResponse",
+            "text": "SavedObjectsBulkResponse"
           }
         ],
         "initialIsOpen": false
@@ -13249,7 +13446,7 @@
             "section": "def-server.SavedObjectsClient",
             "text": "SavedObjectsClient"
           },
-          ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
+          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
         ],
         "initialIsOpen": false
       },
@@ -13318,7 +13515,7 @@
             "section": "def-server.SavedObjectsClient",
             "text": "SavedObjectsClient"
           },
-          ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
+          ", \"get\" | \"delete\" | \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"find\" | \"bulkGet\" | \"resolve\" | \"update\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
         ],
         "initialIsOpen": false
       },

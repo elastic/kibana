@@ -16,6 +16,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-server.initServerWithKibana.server",
             "type": "Object",
             "label": "server",
             "isRequired": true,
@@ -35,6 +36,7 @@
             }
           },
           {
+            "id": "def-server.initServerWithKibana.plugins",
             "type": "Object",
             "label": "plugins",
             "isRequired": true,

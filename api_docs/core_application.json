@@ -35,6 +35,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ScopedHistory.Unnamed.parentHistory",
                 "type": "Object",
                 "label": "parentHistory",
                 "isRequired": true,
@@ -49,6 +50,7 @@
                 }
               },
               {
+                "id": "def-public.ScopedHistory.Unnamed.basePath",
                 "type": "string",
                 "label": "basePath",
                 "isRequired": true,
@@ -74,6 +76,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ScopedHistory.createSubHistory.basePath",
                 "type": "string",
                 "label": "basePath",
                 "isRequired": true,
@@ -160,6 +163,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ScopedHistory.push.pathOrLocation",
                 "type": "CompoundType",
                 "label": "pathOrLocation",
                 "isRequired": true,
@@ -175,6 +179,7 @@
                 }
               },
               {
+                "id": "def-public.ScopedHistory.push.state",
                 "type": "Uncategorized",
                 "label": "state",
                 "isRequired": false,
@@ -209,6 +214,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ScopedHistory.replace.pathOrLocation",
                 "type": "CompoundType",
                 "label": "pathOrLocation",
                 "isRequired": true,
@@ -224,6 +230,7 @@
                 }
               },
               {
+                "id": "def-public.ScopedHistory.replace.state",
                 "type": "Uncategorized",
                 "label": "state",
                 "isRequired": false,
@@ -258,6 +265,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ScopedHistory.go.n",
                 "type": "number",
                 "label": "n",
                 "isRequired": true,
@@ -326,6 +334,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ScopedHistory.block.prompt",
                 "type": "CompoundType",
                 "label": "prompt",
                 "isRequired": false,
@@ -363,6 +372,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ScopedHistory.listen.listener",
                 "type": "Function",
                 "label": "listener",
                 "isRequired": true,
@@ -406,6 +416,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ScopedHistory.createHref.location",
                 "type": "Object",
                 "label": "location",
                 "isRequired": true,
@@ -420,7 +431,7 @@
                 }
               },
               {
-                "id": "def-public.ScopedHistory.createHref.{-prependBasePath = true }",
+                "id": "def-public.ScopedHistory.createHref.{-prependBasePath = true }.{ prependBasePath = true }",
                 "type": "Object",
                 "label": "{ prependBasePath = true }",
                 "tags": [],
@@ -428,7 +439,7 @@
                 "children": [
                   {
                     "tags": [],
-                    "id": "def-public.ScopedHistory.createHref.{-prependBasePath = true }.prependBasePath",
+                    "id": "def-public.ScopedHistory.createHref.{-prependBasePath = true }.{ prependBasePath = true }.prependBasePath",
                     "type": "CompoundType",
                     "label": "prependBasePath",
                     "description": [],
@@ -963,6 +974,7 @@
             ],
             "children": [
               {
+                "id": "def-public.ApplicationSetup.register.app",
                 "type": "Object",
                 "label": "app",
                 "isRequired": true,
@@ -1014,6 +1026,7 @@
             ],
             "children": [
               {
+                "id": "def-public.ApplicationSetup.registerAppUpdater.appUpdater$",
                 "type": "Object",
                 "label": "appUpdater$",
                 "isRequired": true,
@@ -1120,6 +1133,7 @@
             ],
             "children": [
               {
+                "id": "def-public.ApplicationStart.navigateToApp.appId",
                 "type": "string",
                 "label": "appId",
                 "isRequired": true,
@@ -1133,6 +1147,7 @@
                 }
               },
               {
+                "id": "def-public.ApplicationStart.navigateToApp.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -1174,6 +1189,7 @@
             ],
             "children": [
               {
+                "id": "def-public.ApplicationStart.navigateToUrl.url",
                 "type": "string",
                 "label": "url",
                 "isRequired": true,
@@ -1208,6 +1224,7 @@
             ],
             "children": [
               {
+                "id": "def-public.ApplicationStart.getUrlForApp.appId",
                 "type": "string",
                 "label": "appId",
                 "isRequired": true,
@@ -1221,7 +1238,7 @@
                 }
               },
               {
-                "id": "def-public.ApplicationStart.getUrlForApp.options",
+                "id": "def-public.ApplicationStart.getUrlForApp.options.options",
                 "type": "Object",
                 "label": "options",
                 "tags": [],
@@ -1229,7 +1246,7 @@
                 "children": [
                   {
                     "tags": [],
-                    "id": "def-public.ApplicationStart.getUrlForApp.options.path",
+                    "id": "def-public.ApplicationStart.getUrlForApp.options.options.path",
                     "type": "string",
                     "label": "path",
                     "description": [],
@@ -1243,7 +1260,7 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-public.ApplicationStart.getUrlForApp.options.absolute",
+                    "id": "def-public.ApplicationStart.getUrlForApp.options.options.absolute",
                     "type": "CompoundType",
                     "label": "absolute",
                     "description": [],

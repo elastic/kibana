@@ -30,6 +30,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.PersistedState.Unnamed.value",
                 "type": "Any",
                 "label": "value",
                 "isRequired": true,
@@ -43,6 +44,7 @@
                 }
               },
               {
+                "id": "def-public.PersistedState.Unnamed.path",
                 "type": "CompoundType",
                 "label": "path",
                 "isRequired": false,
@@ -73,6 +75,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.PersistedState.get.key",
                 "type": "CompoundType",
                 "label": "key",
                 "isRequired": false,
@@ -86,6 +89,7 @@
                 }
               },
               {
+                "id": "def-public.PersistedState.get.defaultValue",
                 "type": "Any",
                 "label": "defaultValue",
                 "isRequired": true,
@@ -116,6 +120,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.PersistedState.set.key",
                 "type": "Any",
                 "label": "key",
                 "isRequired": true,
@@ -129,6 +134,7 @@
                 }
               },
               {
+                "id": "def-public.PersistedState.set.value",
                 "type": "Any",
                 "label": "value",
                 "isRequired": true,
@@ -159,6 +165,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.PersistedState.setSilent.key",
                 "type": "Any",
                 "label": "key",
                 "isRequired": true,
@@ -172,6 +179,7 @@
                 }
               },
               {
+                "id": "def-public.PersistedState.setSilent.value",
                 "type": "Any",
                 "label": "value",
                 "isRequired": true,
@@ -218,6 +226,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.PersistedState.reset.path",
                 "type": "CompoundType",
                 "label": "path",
                 "isRequired": true,
@@ -296,6 +305,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.PersistedState.fromString.input",
                 "type": "string",
                 "label": "input",
                 "isRequired": true,
@@ -453,6 +463,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.Vis.Unnamed.visType",
                 "type": "string",
                 "label": "visType",
                 "isRequired": true,
@@ -466,6 +477,7 @@
                 }
               },
               {
+                "id": "def-public.Vis.Unnamed.visState",
                 "type": "Object",
                 "label": "visState",
                 "isRequired": true,
@@ -535,6 +547,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.Vis.setState.state",
                 "type": "Object",
                 "label": "state",
                 "isRequired": true,
@@ -673,6 +686,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.getVisSchemas.vis",
             "type": "Object",
             "label": "vis",
             "isRequired": true,
@@ -693,6 +707,7 @@
             }
           },
           {
+            "id": "def-public.getVisSchemas.{-timeRange, timefilter }",
             "type": "Object",
             "label": "{ timeRange, timefilter }",
             "isRequired": true,
@@ -768,6 +783,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.updateOldState.oldState",
             "type": "Unknown",
             "label": "oldState",
             "isRequired": true,
@@ -794,6 +810,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.VisualizationContainer.{\n- 'data-test-subj': dataTestSubj = '',\n  className,\n  children,\n  handlers,\n  showNoResult = false,\n}",
             "type": "Object",
             "label": "{\n  'data-test-subj': dataTestSubj = '',\n  className,\n  children,\n  handlers,\n  showNoResult = false,\n}",
             "isRequired": true,
@@ -1867,6 +1884,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.VisEditorOptionsProps.setValue.paramName",
                 "type": "Uncategorized",
                 "label": "paramName",
                 "isRequired": true,
@@ -1880,6 +1898,7 @@
                 }
               },
               {
+                "id": "def-public.VisEditorOptionsProps.setValue.value",
                 "type": "Uncategorized",
                 "label": "value",
                 "isRequired": true,
@@ -1910,6 +1929,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.VisEditorOptionsProps.setValidity.isValid",
                 "type": "boolean",
                 "label": "isValid",
                 "isRequired": true,
@@ -1940,6 +1960,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.VisEditorOptionsProps.setTouched.isTouched",
                 "type": "boolean",
                 "label": "isTouched",
                 "isRequired": true,

@@ -69,6 +69,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.DevToolsPlugin.setup.coreSetup",
                 "type": "Object",
                 "label": "coreSetup",
                 "isRequired": true,
@@ -89,7 +90,7 @@
                 }
               },
               {
-                "id": "def-public.DevToolsPlugin.setup.{-urlForwarding }",
+                "id": "def-public.DevToolsPlugin.setup.{-urlForwarding }.{ urlForwarding }",
                 "type": "Object",
                 "label": "{ urlForwarding }",
                 "tags": [],
@@ -97,7 +98,7 @@
                 "children": [
                   {
                     "tags": [],
-                    "id": "def-public.DevToolsPlugin.setup.{-urlForwarding }.urlForwarding",
+                    "id": "def-public.DevToolsPlugin.setup.{-urlForwarding }.{ urlForwarding }.urlForwarding",
                     "type": "Object",
                     "label": "urlForwarding",
                     "description": [],

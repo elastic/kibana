@@ -52,6 +52,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.KibanaURL.Unnamed.path",
                 "type": "string",
                 "label": "path",
                 "isRequired": true,
@@ -149,6 +150,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.UrlGeneratorsService.setup.core",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -201,6 +203,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.UrlGeneratorsService.start.core",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -272,6 +275,7 @@
         ],
         "children": [
           {
+            "id": "def-public.downloadFileAs.filename",
             "type": "string",
             "label": "filename",
             "isRequired": true,
@@ -287,6 +291,7 @@
             }
           },
           {
+            "id": "def-public.downloadFileAs.payload",
             "type": "CompoundType",
             "label": "payload",
             "isRequired": true,
@@ -338,6 +343,7 @@
         ],
         "children": [
           {
+            "id": "def-public.downloadMultipleAs.files",
             "type": "Object",
             "label": "files",
             "isRequired": true,
@@ -788,6 +794,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.UrlGeneratorContract.createUrl.state",
                 "type": "Uncategorized",
                 "label": "state",
                 "isRequired": true,
@@ -860,6 +867,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.UrlGeneratorContract.migrate.state",
                 "type": "Uncategorized",
                 "label": "state",
                 "isRequired": true,

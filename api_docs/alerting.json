@@ -125,6 +125,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-server.parseDuration.duration",
             "type": "string",
             "label": "duration",
             "isRequired": true,
@@ -889,6 +890,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.PluginSetupContract.registerType.alertType",
                 "type": "Object",
                 "label": "alertType",
                 "isRequired": true,
@@ -978,6 +980,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.PluginStartContract.getAlertsClientWithRequest.request",
                 "type": "Object",
                 "label": "request",
                 "isRequired": true,
@@ -1239,6 +1242,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.getBuiltinActionGroups.customRecoveryGroup",
             "type": "Object",
             "label": "customRecoveryGroup",
             "isRequired": false,
@@ -1277,6 +1281,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.getDurationNumberInItsUnit.duration",
             "type": "string",
             "label": "duration",
             "isRequired": true,
@@ -1308,6 +1313,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.getDurationUnitValue.duration",
             "type": "string",
             "label": "duration",
             "isRequired": true,
@@ -1339,6 +1345,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.isActionGroupDisabledForActionTypeId.actionGroup",
             "type": "string",
             "label": "actionGroup",
             "isRequired": true,
@@ -1352,6 +1359,7 @@
             }
           },
           {
+            "id": "def-common.isActionGroupDisabledForActionTypeId.actionTypeId",
             "type": "string",
             "label": "actionTypeId",
             "isRequired": true,
@@ -1383,6 +1391,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.parseDuration.duration",
             "type": "string",
             "label": "duration",
             "isRequired": true,
@@ -1414,6 +1423,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.validateDurationSchema.duration",
             "type": "string",
             "label": "duration",
             "isRequired": true,
@@ -1445,6 +1455,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.validateNotifyWhenType.notifyWhen",
             "type": "string",
             "label": "notifyWhen",
             "isRequired": true,

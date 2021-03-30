@@ -8,6 +8,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.ColorPicker.{\n- onChange,\n  color: selectedColor,\n  label,\n  useLegacyColors = true,\n  colorIsOverwritten = true,\n  onKeyDown,\n}",
             "type": "Object",
             "label": "{\n  onChange,\n  color: selectedColor,\n  label,\n  useLegacyColors = true,\n  colorIsOverwritten = true,\n  onKeyDown,\n}",
             "isRequired": true,
@@ -46,6 +47,7 @@
         ],
         "children": [
           {
+            "id": "def-public.createColorPalette.num",
             "type": "number",
             "label": "num",
             "isRequired": true,
@@ -72,6 +74,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.CurrentTime.{-isDarkMode, domainEnd }",
             "type": "CompoundType",
             "label": "{ isDarkMode, domainEnd }",
             "isRequired": true,
@@ -105,6 +108,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.Endzones.{\n- isDarkMode,\n  domainStart,\n  domainEnd,\n  interval,\n  domainMin,\n  domainMax,\n  hideTooltips = true,\n  isFullBin = false,\n}",
             "type": "CompoundType",
             "label": "{\n  isDarkMode,\n  domainStart,\n  domainEnd,\n  interval,\n  domainMin,\n  domainMax,\n  hideTooltips = true,\n  isFullBin = false,\n}",
             "isRequired": true,
@@ -136,6 +140,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.getAdjustedInterval.xValues",
             "type": "Array",
             "label": "xValues",
             "isRequired": true,
@@ -149,6 +154,7 @@
             }
           },
           {
+            "id": "def-public.getAdjustedInterval.esValue",
             "type": "number",
             "label": "esValue",
             "isRequired": true,
@@ -162,6 +168,7 @@
             }
           },
           {
+            "id": "def-public.getAdjustedInterval.esUnit",
             "type": "CompoundType",
             "label": "esUnit",
             "isRequired": true,
@@ -175,6 +182,7 @@
             }
           },
           {
+            "id": "def-public.getAdjustedInterval.timeZone",
             "type": "string",
             "label": "timeZone",
             "isRequired": true,
@@ -208,6 +216,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.getBrushFromChartBrushEventFn.table",
             "type": "Object",
             "label": "table",
             "isRequired": true,
@@ -227,6 +236,7 @@
             }
           },
           {
+            "id": "def-public.getBrushFromChartBrushEventFn.xAccessor",
             "type": "CompoundType",
             "label": "xAccessor",
             "isRequired": true,
@@ -280,6 +290,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.getFilterFromChartClickEventFn.table",
             "type": "Object",
             "label": "table",
             "isRequired": true,
@@ -299,6 +310,7 @@
             }
           },
           {
+            "id": "def-public.getFilterFromChartClickEventFn.xAccessor",
             "type": "CompoundType",
             "label": "xAccessor",
             "isRequired": true,
@@ -313,6 +325,7 @@
             }
           },
           {
+            "id": "def-public.getFilterFromChartClickEventFn.splitSeriesAccessorFnMap",
             "type": "Object",
             "label": "splitSeriesAccessorFnMap",
             "isRequired": false,
@@ -328,6 +341,7 @@
             }
           },
           {
+            "id": "def-public.getFilterFromChartClickEventFn.splitChartAccessor",
             "type": "CompoundType",
             "label": "splitChartAccessor",
             "isRequired": false,
@@ -343,6 +357,7 @@
             }
           },
           {
+            "id": "def-public.getFilterFromChartClickEventFn.negate",
             "type": "boolean",
             "label": "negate",
             "isRequired": true,
@@ -391,6 +406,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.getFilterFromSeriesFn.table",
             "type": "Object",
             "label": "table",
             "isRequired": true,
@@ -456,6 +472,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.getHeatmapColors.value",
             "type": "Any",
             "label": "value",
             "isRequired": true,
@@ -469,6 +486,7 @@
             }
           },
           {
+            "id": "def-public.getHeatmapColors.colorSchemaName",
             "type": "string",
             "label": "colorSchemaName",
             "isRequired": true,
@@ -510,6 +528,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.renderEndzoneTooltip.xInterval",
             "type": "number",
             "label": "xInterval",
             "isRequired": false,
@@ -523,6 +542,7 @@
             }
           },
           {
+            "id": "def-public.renderEndzoneTooltip.domainStart",
             "type": "number",
             "label": "domainStart",
             "isRequired": false,
@@ -536,6 +556,7 @@
             }
           },
           {
+            "id": "def-public.renderEndzoneTooltip.domainEnd",
             "type": "number",
             "label": "domainEnd",
             "isRequired": false,
@@ -549,6 +570,7 @@
             }
           },
           {
+            "id": "def-public.renderEndzoneTooltip.formatter",
             "type": "Function",
             "label": "formatter",
             "isRequired": false,
@@ -562,6 +584,7 @@
             }
           },
           {
+            "id": "def-public.renderEndzoneTooltip.renderValue",
             "type": "boolean",
             "label": "renderValue",
             "isRequired": true,

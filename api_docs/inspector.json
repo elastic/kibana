@@ -74,6 +74,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.InspectorPublicPlugin.Unnamed.initializerContext",
                 "type": "Object",
                 "label": "initializerContext",
                 "isRequired": true,
@@ -135,6 +136,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.InspectorPublicPlugin.setup.core",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -211,6 +213,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.InspectorPublicPlugin.start.core",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -325,6 +328,7 @@
             ],
             "children": [
               {
+                "id": "def-public.RequestAdapter.start.name",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -340,6 +344,7 @@
                 }
               },
               {
+                "id": "def-public.RequestAdapter.start.params",
                 "type": "Object",
                 "label": "params",
                 "isRequired": true,
@@ -396,6 +401,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.RequestAdapter.resetRequest.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -466,6 +472,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.RequestResponder.Unnamed.request",
                 "type": "Object",
                 "label": "request",
                 "isRequired": true,
@@ -485,6 +492,7 @@
                 }
               },
               {
+                "id": "def-public.RequestResponder.Unnamed.onChange",
                 "type": "Function",
                 "label": "onChange",
                 "isRequired": true,
@@ -522,6 +530,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.RequestResponder.json.reqJson",
                 "type": "Uncategorized",
                 "label": "reqJson",
                 "isRequired": true,
@@ -567,6 +576,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.RequestResponder.stats.stats",
                 "type": "Object",
                 "label": "stats",
                 "isRequired": true,
@@ -619,6 +629,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.RequestResponder.finish.status",
                 "type": "Enum",
                 "label": "status",
                 "isRequired": true,
@@ -638,6 +649,7 @@
                 }
               },
               {
+                "id": "def-public.RequestResponder.finish.response",
                 "type": "Object",
                 "label": "response",
                 "isRequired": true,
@@ -682,6 +694,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.RequestResponder.ok.response",
                 "type": "Object",
                 "label": "response",
                 "isRequired": true,
@@ -726,6 +739,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.RequestResponder.error.response",
                 "type": "Object",
                 "label": "response",
                 "isRequired": true,
@@ -1371,6 +1385,7 @@
             ],
             "children": [
               {
+                "id": "def-common.RequestAdapter.start.name",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -1386,6 +1401,7 @@
                 }
               },
               {
+                "id": "def-common.RequestAdapter.start.params",
                 "type": "Object",
                 "label": "params",
                 "isRequired": true,
@@ -1442,6 +1458,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.RequestAdapter.resetRequest.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -1512,6 +1529,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.RequestResponder.Unnamed.request",
                 "type": "Object",
                 "label": "request",
                 "isRequired": true,
@@ -1531,6 +1549,7 @@
                 }
               },
               {
+                "id": "def-common.RequestResponder.Unnamed.onChange",
                 "type": "Function",
                 "label": "onChange",
                 "isRequired": true,
@@ -1568,6 +1587,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.RequestResponder.json.reqJson",
                 "type": "Uncategorized",
                 "label": "reqJson",
                 "isRequired": true,
@@ -1613,6 +1633,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.RequestResponder.stats.stats",
                 "type": "Object",
                 "label": "stats",
                 "isRequired": true,
@@ -1665,6 +1686,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.RequestResponder.finish.status",
                 "type": "Enum",
                 "label": "status",
                 "isRequired": true,
@@ -1684,6 +1706,7 @@
                 }
               },
               {
+                "id": "def-common.RequestResponder.finish.response",
                 "type": "Object",
                 "label": "response",
                 "isRequired": true,
@@ -1728,6 +1751,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.RequestResponder.ok.response",
                 "type": "Object",
                 "label": "response",
                 "isRequired": true,
@@ -1772,6 +1796,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.RequestResponder.error.response",
                 "type": "Object",
                 "label": "response",
                 "isRequired": true,

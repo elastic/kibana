@@ -94,7 +94,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.IndexPatternCreationConfig.Unnamed.{\n-   type = undefined,\n    name = indexPatternTypeName,\n    showSystemIndices = true,\n    httpClient = null,\n    isBeta = false,\n  }",
+                "id": "def-public.IndexPatternCreationConfig.Unnamed.{\n-   type = undefined,\n    name = indexPatternTypeName,\n    showSystemIndices = true,\n    httpClient = null,\n    isBeta = false,\n  }.{\n    type = undefined,\n    name = indexPatternTypeName,\n    showSystemIndices = true,\n    httpClient = null,\n    isBeta = false,\n  }",
                 "type": "Object",
                 "label": "{\n    type = undefined,\n    name = indexPatternTypeName,\n    showSystemIndices = true,\n    httpClient = null,\n    isBeta = false,\n  }",
                 "tags": [],
@@ -102,7 +102,7 @@
                 "children": [
                   {
                     "tags": [],
-                    "id": "def-public.IndexPatternCreationConfig.Unnamed.{\n-   type = undefined,\n    name = indexPatternTypeName,\n    showSystemIndices = true,\n    httpClient = null,\n    isBeta = false,\n  }.type",
+                    "id": "def-public.IndexPatternCreationConfig.Unnamed.{\n-   type = undefined,\n    name = indexPatternTypeName,\n    showSystemIndices = true,\n    httpClient = null,\n    isBeta = false,\n  }.{\n    type = undefined,\n    name = indexPatternTypeName,\n    showSystemIndices = true,\n    httpClient = null,\n    isBeta = false,\n  }.type",
                     "type": "string",
                     "label": "type",
                     "description": [],
@@ -116,7 +116,7 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-public.IndexPatternCreationConfig.Unnamed.{\n-   type = undefined,\n    name = indexPatternTypeName,\n    showSystemIndices = true,\n    httpClient = null,\n    isBeta = false,\n  }.name",
+                    "id": "def-public.IndexPatternCreationConfig.Unnamed.{\n-   type = undefined,\n    name = indexPatternTypeName,\n    showSystemIndices = true,\n    httpClient = null,\n    isBeta = false,\n  }.{\n    type = undefined,\n    name = indexPatternTypeName,\n    showSystemIndices = true,\n    httpClient = null,\n    isBeta = false,\n  }.name",
                     "type": "string",
                     "label": "name",
                     "description": [],
@@ -130,7 +130,7 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-public.IndexPatternCreationConfig.Unnamed.{\n-   type = undefined,\n    name = indexPatternTypeName,\n    showSystemIndices = true,\n    httpClient = null,\n    isBeta = false,\n  }.showSystemIndices",
+                    "id": "def-public.IndexPatternCreationConfig.Unnamed.{\n-   type = undefined,\n    name = indexPatternTypeName,\n    showSystemIndices = true,\n    httpClient = null,\n    isBeta = false,\n  }.{\n    type = undefined,\n    name = indexPatternTypeName,\n    showSystemIndices = true,\n    httpClient = null,\n    isBeta = false,\n  }.showSystemIndices",
                     "type": "CompoundType",
                     "label": "showSystemIndices",
                     "description": [],
@@ -144,7 +144,7 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-public.IndexPatternCreationConfig.Unnamed.{\n-   type = undefined,\n    name = indexPatternTypeName,\n    showSystemIndices = true,\n    httpClient = null,\n    isBeta = false,\n  }.httpClient",
+                    "id": "def-public.IndexPatternCreationConfig.Unnamed.{\n-   type = undefined,\n    name = indexPatternTypeName,\n    showSystemIndices = true,\n    httpClient = null,\n    isBeta = false,\n  }.{\n    type = undefined,\n    name = indexPatternTypeName,\n    showSystemIndices = true,\n    httpClient = null,\n    isBeta = false,\n  }.httpClient",
                     "type": "CompoundType",
                     "label": "httpClient",
                     "description": [],
@@ -158,7 +158,7 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-public.IndexPatternCreationConfig.Unnamed.{\n-   type = undefined,\n    name = indexPatternTypeName,\n    showSystemIndices = true,\n    httpClient = null,\n    isBeta = false,\n  }.isBeta",
+                    "id": "def-public.IndexPatternCreationConfig.Unnamed.{\n-   type = undefined,\n    name = indexPatternTypeName,\n    showSystemIndices = true,\n    httpClient = null,\n    isBeta = false,\n  }.{\n    type = undefined,\n    name = indexPatternTypeName,\n    showSystemIndices = true,\n    httpClient = null,\n    isBeta = false,\n  }.isBeta",
                     "type": "CompoundType",
                     "label": "isBeta",
                     "description": [],
@@ -209,6 +209,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.IndexPatternCreationConfig.getIndexPatternCreationOption.urlHandler",
                 "type": "Function",
                 "label": "urlHandler",
                 "isRequired": true,
@@ -309,6 +310,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.IndexPatternCreationConfig.getIndexTags.indexName",
                 "type": "string",
                 "label": "indexName",
                 "isRequired": true,
@@ -347,6 +349,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.IndexPatternCreationConfig.checkIndicesForErrors.indices",
                 "type": "Array",
                 "label": "indices",
                 "isRequired": true,
@@ -492,6 +495,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.IndexPatternListConfig.getIndexPatternTags.indexPattern",
                 "type": "CompoundType",
                 "label": "indexPattern",
                 "isRequired": true,
@@ -528,6 +532,7 @@
                 }
               },
               {
+                "id": "def-public.IndexPatternListConfig.getIndexPatternTags.isDefault",
                 "type": "boolean",
                 "label": "isDefault",
                 "isRequired": true,
@@ -574,6 +579,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.IndexPatternListConfig.getFieldInfo.indexPattern",
                 "type": "Object",
                 "label": "indexPattern",
                 "isRequired": true,
@@ -593,6 +599,7 @@
                 }
               },
               {
+                "id": "def-public.IndexPatternListConfig.getFieldInfo.field",
                 "type": "Object",
                 "label": "field",
                 "isRequired": true,
@@ -637,6 +644,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.IndexPatternListConfig.areScriptedFieldsEnabled.indexPattern",
                 "type": "Object",
                 "label": "indexPattern",
                 "isRequired": true,

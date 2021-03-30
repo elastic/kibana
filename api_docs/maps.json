@@ -1,7 +1,848 @@
 {
   "id": "maps",
   "client": {
-    "classes": [],
+    "classes": [
+      {
+        "id": "def-public.MapEmbeddable",
+        "type": "Class",
+        "tags": [],
+        "label": "MapEmbeddable",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "maps",
+            "scope": "public",
+            "docId": "kibMapsPluginApi",
+            "section": "def-public.MapEmbeddable",
+            "text": "MapEmbeddable"
+          },
+          " extends ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.Embeddable",
+            "text": "Embeddable"
+          },
+          "<",
+          {
+            "pluginId": "maps",
+            "scope": "public",
+            "docId": "kibMapsPluginApi",
+            "section": "def-public.MapEmbeddableInput",
+            "text": "MapEmbeddableInput"
+          },
+          ", ",
+          "MapEmbeddableOutput",
+          "> implements ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.ReferenceOrValueEmbeddable",
+            "text": "ReferenceOrValueEmbeddable"
+          }
+        ],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-public.MapEmbeddable.type",
+            "type": "string",
+            "label": "type",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+              "lineNumber": 94
+            }
+          },
+          {
+            "id": "def-public.MapEmbeddable.Unnamed",
+            "type": "Function",
+            "label": "Constructor",
+            "signature": [
+              "any"
+            ],
+            "description": [],
+            "children": [
+              {
+                "id": "def-public.MapEmbeddable.Unnamed.config",
+                "type": "Object",
+                "label": "config",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "maps",
+                    "scope": "public",
+                    "docId": "kibMapsPluginApi",
+                    "section": "def-public.MapEmbeddableConfig",
+                    "text": "MapEmbeddableConfig"
+                  }
+                ],
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                  "lineNumber": 111
+                }
+              },
+              {
+                "id": "def-public.MapEmbeddable.Unnamed.initialInput",
+                "type": "CompoundType",
+                "label": "initialInput",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "maps",
+                    "scope": "public",
+                    "docId": "kibMapsPluginApi",
+                    "section": "def-public.MapEmbeddableInput",
+                    "text": "MapEmbeddableInput"
+                  }
+                ],
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                  "lineNumber": 111
+                }
+              },
+              {
+                "id": "def-public.MapEmbeddable.Unnamed.parent",
+                "type": "Object",
+                "label": "parent",
+                "isRequired": false,
+                "signature": [
+                  {
+                    "pluginId": "embeddable",
+                    "scope": "public",
+                    "docId": "kibEmbeddablePluginApi",
+                    "section": "def-public.IContainer",
+                    "text": "IContainer"
+                  },
+                  "<{}, ",
+                  {
+                    "pluginId": "embeddable",
+                    "scope": "public",
+                    "docId": "kibEmbeddablePluginApi",
+                    "section": "def-public.ContainerInput",
+                    "text": "ContainerInput"
+                  },
+                  "<{}>, ",
+                  {
+                    "pluginId": "embeddable",
+                    "scope": "public",
+                    "docId": "kibEmbeddablePluginApi",
+                    "section": "def-public.ContainerOutput",
+                    "text": "ContainerOutput"
+                  },
+                  "> | undefined"
+                ],
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                  "lineNumber": 111
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+              "lineNumber": 111
+            }
+          },
+          {
+            "id": "def-public.MapEmbeddable.inputIsRefType",
+            "type": "Function",
+            "label": "inputIsRefType",
+            "signature": [
+              "(input: ",
+              {
+                "pluginId": "maps",
+                "scope": "public",
+                "docId": "kibMapsPluginApi",
+                "section": "def-public.MapEmbeddableInput",
+                "text": "MapEmbeddableInput"
+              },
+              ") => input is ",
+              {
+                "pluginId": "maps",
+                "scope": "public",
+                "docId": "kibMapsPluginApi",
+                "section": "def-public.MapByReferenceInput",
+                "text": "MapByReferenceInput"
+              }
+            ],
+            "description": [],
+            "children": [
+              {
+                "id": "def-public.MapEmbeddable.inputIsRefType.input",
+                "type": "CompoundType",
+                "label": "input",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "maps",
+                    "scope": "public",
+                    "docId": "kibMapsPluginApi",
+                    "section": "def-public.MapEmbeddableInput",
+                    "text": "MapEmbeddableInput"
+                  }
+                ],
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                  "lineNumber": 186
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+              "lineNumber": 185
+            }
+          },
+          {
+            "id": "def-public.MapEmbeddable.getInputAsRefType",
+            "type": "Function",
+            "label": "getInputAsRefType",
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "maps",
+                "scope": "public",
+                "docId": "kibMapsPluginApi",
+                "section": "def-public.MapByReferenceInput",
+                "text": "MapByReferenceInput"
+              },
+              ">"
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+              "lineNumber": 191
+            }
+          },
+          {
+            "id": "def-public.MapEmbeddable.getInputAsValueType",
+            "type": "Function",
+            "label": "getInputAsValueType",
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "maps",
+                "scope": "public",
+                "docId": "kibMapsPluginApi",
+                "section": "def-public.MapByValueInput",
+                "text": "MapByValueInput"
+              },
+              ">"
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+              "lineNumber": 199
+            }
+          },
+          {
+            "id": "def-public.MapEmbeddable.getDescription",
+            "type": "Function",
+            "label": "getDescription",
+            "signature": [
+              "() => string | undefined"
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+              "lineNumber": 204
+            }
+          },
+          {
+            "id": "def-public.MapEmbeddable.supportedTriggers",
+            "type": "Function",
+            "label": "supportedTriggers",
+            "signature": [
+              "() => string[]"
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+              "lineNumber": 208
+            }
+          },
+          {
+            "id": "def-public.MapEmbeddable.setRenderTooltipContent",
+            "type": "Function",
+            "children": [
+              {
+                "id": "def-public.MapEmbeddable.setRenderTooltipContent.renderTooltipContent",
+                "type": "Function",
+                "label": "renderTooltipContent",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "maps",
+                    "scope": "public",
+                    "docId": "kibMapsPluginApi",
+                    "section": "def-public.RenderToolTipContent",
+                    "text": "RenderToolTipContent"
+                  }
+                ],
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                  "lineNumber": 212
+                }
+              }
+            ],
+            "signature": [
+              "(renderTooltipContent: ",
+              {
+                "pluginId": "maps",
+                "scope": "public",
+                "docId": "kibMapsPluginApi",
+                "section": "def-public.RenderToolTipContent",
+                "text": "RenderToolTipContent"
+              },
+              ") => void"
+            ],
+            "description": [],
+            "label": "setRenderTooltipContent",
+            "source": {
+              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+              "lineNumber": 212
+            },
+            "tags": [],
+            "returnComment": []
+          },
+          {
+            "id": "def-public.MapEmbeddable.setEventHandlers",
+            "type": "Function",
+            "children": [
+              {
+                "id": "def-public.MapEmbeddable.setEventHandlers.eventHandlers",
+                "type": "Object",
+                "label": "eventHandlers",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "maps",
+                    "scope": "public",
+                    "docId": "kibMapsPluginApi",
+                    "section": "def-public.EventHandlers",
+                    "text": "EventHandlers"
+                  }
+                ],
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                  "lineNumber": 216
+                }
+              }
+            ],
+            "signature": [
+              "(eventHandlers: ",
+              {
+                "pluginId": "maps",
+                "scope": "public",
+                "docId": "kibMapsPluginApi",
+                "section": "def-public.EventHandlers",
+                "text": "EventHandlers"
+              },
+              ") => void"
+            ],
+            "description": [],
+            "label": "setEventHandlers",
+            "source": {
+              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+              "lineNumber": 216
+            },
+            "tags": [],
+            "returnComment": []
+          },
+          {
+            "id": "def-public.MapEmbeddable.getInspectorAdapters",
+            "type": "Function",
+            "label": "getInspectorAdapters",
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Adapters",
+                "text": "Adapters"
+              }
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+              "lineNumber": 220
+            }
+          },
+          {
+            "id": "def-public.MapEmbeddable.onUpdate",
+            "type": "Function",
+            "label": "onUpdate",
+            "signature": [
+              "() => void"
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+              "lineNumber": 224
+            }
+          },
+          {
+            "id": "def-public.MapEmbeddable._dispatchSetQuery",
+            "type": "Function",
+            "label": "_dispatchSetQuery",
+            "signature": [
+              "({ forceRefresh }: { forceRefresh: boolean; }) => void"
+            ],
+            "description": [],
+            "children": [
+              {
+                "id": "def-public.MapEmbeddable._dispatchSetQuery.{-forceRefresh }.{ forceRefresh }",
+                "type": "Object",
+                "label": "{ forceRefresh }",
+                "tags": [],
+                "description": [],
+                "children": [
+                  {
+                    "tags": [],
+                    "id": "def-public.MapEmbeddable._dispatchSetQuery.{-forceRefresh }.{ forceRefresh }.forceRefresh",
+                    "type": "boolean",
+                    "label": "forceRefresh",
+                    "description": [],
+                    "source": {
+                      "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                      "lineNumber": 256
+                    }
+                  }
+                ],
+                "source": {
+                  "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                  "lineNumber": 256
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+              "lineNumber": 256
+            }
+          },
+          {
+            "id": "def-public.MapEmbeddable._dispatchSetRefreshConfig",
+            "type": "Function",
+            "label": "_dispatchSetRefreshConfig",
+            "signature": [
+              "(refreshConfig: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.RefreshInterval",
+                "text": "RefreshInterval"
+              },
+              ") => void"
+            ],
+            "description": [],
+            "children": [
+              {
+                "id": "def-public.MapEmbeddable._dispatchSetRefreshConfig.refreshConfig",
+                "type": "Object",
+                "label": "refreshConfig",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataQueryPluginApi",
+                    "section": "def-common.RefreshInterval",
+                    "text": "RefreshInterval"
+                  }
+                ],
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                  "lineNumber": 278
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+              "lineNumber": 278
+            }
+          },
+          {
+            "id": "def-public.MapEmbeddable._dispatchSetChartsPaletteServiceGetColor",
+            "type": "Function",
+            "label": "_dispatchSetChartsPaletteServiceGetColor",
+            "signature": [
+              "(syncColors?: boolean | undefined) => Promise<void>"
+            ],
+            "description": [],
+            "children": [
+              {
+                "id": "def-public.MapEmbeddable._dispatchSetChartsPaletteServiceGetColor.syncColors",
+                "type": "CompoundType",
+                "label": "syncColors",
+                "isRequired": false,
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                  "lineNumber": 288
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+              "lineNumber": 288
+            }
+          },
+          {
+            "id": "def-public.MapEmbeddable.render",
+            "type": "Function",
+            "label": "render",
+            "signature": [
+              "(domNode: HTMLElement) => void"
+            ],
+            "description": [
+              "\n"
+            ],
+            "children": [
+              {
+                "id": "def-public.MapEmbeddable.render.domNode",
+                "type": "Object",
+                "label": "domNode",
+                "isRequired": true,
+                "signature": [
+                  "HTMLElement"
+                ],
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                  "lineNumber": 306
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+              "lineNumber": 306
+            }
+          },
+          {
+            "id": "def-public.MapEmbeddable.setLayerList",
+            "type": "Function",
+            "label": "setLayerList",
+            "signature": [
+              "(layerList: ",
+              {
+                "pluginId": "maps",
+                "scope": "common",
+                "docId": "kibMapsPluginApi",
+                "section": "def-common.LayerDescriptor",
+                "text": "LayerDescriptor"
+              },
+              "[]) => void"
+            ],
+            "description": [],
+            "children": [
+              {
+                "id": "def-public.MapEmbeddable.setLayerList.layerList",
+                "type": "Array",
+                "label": "layerList",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "maps",
+                    "scope": "common",
+                    "docId": "kibMapsPluginApi",
+                    "section": "def-common.LayerDescriptor",
+                    "text": "LayerDescriptor"
+                  },
+                  "[]"
+                ],
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                  "lineNumber": 332
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+              "lineNumber": 332
+            }
+          },
+          {
+            "id": "def-public.MapEmbeddable.onSingleValueTrigger",
+            "type": "Function",
+            "children": [
+              {
+                "id": "def-public.MapEmbeddable.onSingleValueTrigger.actionId",
+                "type": "string",
+                "label": "actionId",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                  "lineNumber": 349
+                }
+              },
+              {
+                "id": "def-public.MapEmbeddable.onSingleValueTrigger.key",
+                "type": "string",
+                "label": "key",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                  "lineNumber": 349
+                }
+              },
+              {
+                "id": "def-public.MapEmbeddable.onSingleValueTrigger.value",
+                "type": "CompoundType",
+                "label": "value",
+                "isRequired": false,
+                "signature": [
+                  {
+                    "pluginId": "maps",
+                    "scope": "common",
+                    "docId": "kibMapsPluginApi",
+                    "section": "def-common.RawValue",
+                    "text": "RawValue"
+                  }
+                ],
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                  "lineNumber": 349
+                }
+              }
+            ],
+            "signature": [
+              "(actionId: string, key: string, value: ",
+              {
+                "pluginId": "maps",
+                "scope": "common",
+                "docId": "kibMapsPluginApi",
+                "section": "def-common.RawValue",
+                "text": "RawValue"
+              },
+              ") => void"
+            ],
+            "description": [],
+            "label": "onSingleValueTrigger",
+            "source": {
+              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+              "lineNumber": 349
+            },
+            "tags": [],
+            "returnComment": []
+          },
+          {
+            "id": "def-public.MapEmbeddable.addFilters",
+            "type": "Function",
+            "children": [
+              {
+                "id": "def-public.MapEmbeddable.addFilters.filters",
+                "type": "Array",
+                "label": "filters",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataPluginApi",
+                    "section": "def-common.Filter",
+                    "text": "Filter"
+                  },
+                  "[]"
+                ],
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                  "lineNumber": 363
+                }
+              },
+              {
+                "id": "def-public.MapEmbeddable.addFilters.actionId",
+                "type": "string",
+                "label": "actionId",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [],
+                "source": {
+                  "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+                  "lineNumber": 363
+                }
+              }
+            ],
+            "signature": [
+              "(filters: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[], actionId?: string) => Promise<void>"
+            ],
+            "description": [],
+            "label": "addFilters",
+            "source": {
+              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+              "lineNumber": 363
+            },
+            "tags": [],
+            "returnComment": []
+          },
+          {
+            "id": "def-public.MapEmbeddable.getFilterActions",
+            "type": "Function",
+            "children": [],
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Action",
+                "text": "Action"
+              },
+              "<object>[]>"
+            ],
+            "description": [],
+            "label": "getFilterActions",
+            "source": {
+              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+              "lineNumber": 375
+            },
+            "tags": [],
+            "returnComment": []
+          },
+          {
+            "id": "def-public.MapEmbeddable.getActionContext",
+            "type": "Function",
+            "children": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionExecutionContext",
+                "text": "ActionExecutionContext"
+              },
+              "<object>"
+            ],
+            "description": [],
+            "label": "getActionContext",
+            "source": {
+              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+              "lineNumber": 396
+            },
+            "tags": [],
+            "returnComment": []
+          },
+          {
+            "id": "def-public.MapEmbeddable.destroy",
+            "type": "Function",
+            "label": "destroy",
+            "signature": [
+              "() => void"
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+              "lineNumber": 407
+            }
+          },
+          {
+            "id": "def-public.MapEmbeddable.reload",
+            "type": "Function",
+            "label": "reload",
+            "signature": [
+              "() => void"
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+              "lineNumber": 423
+            }
+          },
+          {
+            "id": "def-public.MapEmbeddable._handleStoreChanges",
+            "type": "Function",
+            "label": "_handleStoreChanges",
+            "signature": [
+              "() => void"
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+              "lineNumber": 429
+            }
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
+          "lineNumber": 91
+        },
+        "initialIsOpen": false
+      }
+    ],
     "functions": [],
     "interfaces": [
       {
@@ -21,6 +862,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.RenderTooltipContentParams.addFilters.filter",
                 "type": "Uncategorized",
                 "label": "filter",
                 "isRequired": true,
@@ -34,6 +876,7 @@
                 }
               },
               {
+                "id": "def-public.RenderTooltipContentParams.addFilters.actionId",
                 "type": "string",
                 "label": "actionId",
                 "isRequired": true,
@@ -112,6 +955,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.RenderTooltipContentParams.getLayerName.layerId",
                 "type": "string",
                 "label": "layerId",
                 "isRequired": true,
@@ -158,6 +1002,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.RenderTooltipContentParams.loadFeatureProperties.{-layerId, featureId }",
                 "type": "Object",
                 "label": "{ layerId, featureId }",
                 "isRequired": true,
@@ -209,6 +1054,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.RenderTooltipContentParams.loadFeatureGeometry.{-layerId, featureId }",
                 "type": "Object",
                 "label": "{ layerId, featureId }",
                 "isRequired": true,
@@ -257,6 +1103,23 @@
         },
         "signature": [
           "\"map\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.MapEmbeddableInput",
+        "type": "Type",
+        "label": "MapEmbeddableInput",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/maps/public/embeddable/types.ts",
+          "lineNumber": 41
+        },
+        "signature": [
+          "MapByValueInput",
+          " | ",
+          "MapByReferenceInput"
         ],
         "initialIsOpen": false
       }
@@ -333,6 +1196,7 @@
           "description": [],
           "children": [
             {
+              "id": "def-public.MapsStartApi.registerLayerWizard.layerWizard",
               "type": "Object",
               "label": "layerWizard",
               "isRequired": true,
@@ -377,6 +1241,7 @@
           "description": [],
           "children": [
             {
+              "id": "def-public.MapsStartApi.registerSource.entry",
               "type": "Object",
               "label": "entry",
               "isRequired": true,
@@ -433,6 +1298,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.getEditPath.id",
             "type": "string",
             "label": "id",
             "isRequired": true,
@@ -464,6 +1330,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.getExistingMapPath.id",
             "type": "string",
             "label": "id",
             "isRequired": true,
@@ -610,6 +1477,59 @@
         "source": {
           "path": "x-pack/plugins/maps/common/types.ts",
           "lineNumber": 13
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.WriteSettings",
+        "type": "Interface",
+        "label": "WriteSettings",
+        "description": [],
+        "tags": [],
+        "children": [
+          {
+            "tags": [],
+            "id": "def-common.WriteSettings.index",
+            "type": "string",
+            "label": "index",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/maps/common/types.ts",
+              "lineNumber": 27
+            }
+          },
+          {
+            "tags": [],
+            "id": "def-common.WriteSettings.body",
+            "type": "Uncategorized",
+            "label": "body",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/maps/common/types.ts",
+              "lineNumber": 28
+            },
+            "signature": [
+              "object"
+            ]
+          },
+          {
+            "id": "def-common.WriteSettings.Unnamed",
+            "type": "Any",
+            "label": "Unnamed",
+            "tags": [],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/maps/common/types.ts",
+              "lineNumber": 29
+            },
+            "signature": [
+              "any"
+            ]
+          }
+        ],
+        "source": {
+          "path": "x-pack/plugins/maps/common/types.ts",
+          "lineNumber": 26
         },
         "initialIsOpen": false
       }
@@ -1667,6 +2587,21 @@
           "path": "x-pack/plugins/maps/common/constants.ts",
           "lineNumber": 38
         },
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.MAX_DRAWING_SIZE_BYTES",
+        "type": "number",
+        "label": "MAX_DRAWING_SIZE_BYTES",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/maps/common/constants.ts",
+          "lineNumber": 302
+        },
+        "signature": [
+          "10485760"
+        ],
         "initialIsOpen": false
       },
       {

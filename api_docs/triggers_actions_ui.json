@@ -84,6 +84,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.Plugin.setup.core",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -104,6 +105,7 @@
                 }
               },
               {
+                "id": "def-public.Plugin.setup.plugins",
                 "type": "Object",
                 "label": "plugins",
                 "isRequired": true,
@@ -363,6 +365,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.getFields.http",
             "type": "Object",
             "label": "http",
             "isRequired": true,
@@ -382,6 +385,7 @@
             }
           },
           {
+            "id": "def-public.getFields.indexes",
             "type": "Array",
             "label": "indexes",
             "isRequired": true,
@@ -421,6 +425,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.getIndexOptions.http",
             "type": "Object",
             "label": "http",
             "isRequired": true,
@@ -440,6 +445,7 @@
             }
           },
           {
+            "id": "def-public.getIndexOptions.pattern",
             "type": "string",
             "label": "pattern",
             "isRequired": true,
@@ -453,6 +459,7 @@
             }
           },
           {
+            "id": "def-public.getIndexOptions.indexPatternsParam",
             "type": "Array",
             "label": "indexPatternsParam",
             "isRequired": true,
@@ -567,6 +574,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.getTimeFieldOptions.fields",
             "type": "Array",
             "label": "fields",
             "isRequired": true,
@@ -598,6 +606,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.getTimeOptions.unitSize",
             "type": "number",
             "label": "unitSize",
             "isRequired": true,
@@ -650,6 +659,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.getTimeUnitLabel.timeUnit",
             "type": "Enum",
             "label": "timeUnit",
             "isRequired": true,
@@ -669,6 +679,7 @@
             }
           },
           {
+            "id": "def-public.getTimeUnitLabel.timeValue",
             "type": "string",
             "label": "timeValue",
             "isRequired": true,
@@ -733,7 +744,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.loadActionTypes.{-http }",
+            "id": "def-public.loadActionTypes.{-http }.{ http }",
             "type": "Object",
             "label": "{ http }",
             "tags": [],
@@ -741,7 +752,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-public.loadActionTypes.{-http }.http",
+                "id": "def-public.loadActionTypes.{-http }.{ http }.http",
                 "type": "Object",
                 "label": "http",
                 "description": [],
@@ -3245,6 +3256,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-server.validateCoreQueryBody.anyParams",
             "type": "Unknown",
             "label": "anyParams",
             "isRequired": true,
@@ -3276,6 +3288,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-server.validateTimeWindowUnits.timeWindowUnit",
             "type": "string",
             "label": "timeWindowUnit",
             "isRequired": true,
@@ -3312,7 +3325,7 @@
           "lineNumber": 40
         },
         "signature": [
-          "{ readonly termSize?: number | undefined; readonly termField?: string | undefined; readonly aggField?: string | undefined; readonly index: string | string[]; readonly groupBy: string; readonly timeWindowSize: number; readonly timeWindowUnit: string; readonly aggType: string; readonly timeField: string; }"
+          "{ readonly termSize?: number | undefined; readonly termField?: string | undefined; readonly aggField?: string | undefined; readonly index: string | string[]; readonly aggType: string; readonly groupBy: string; readonly timeWindowSize: number; readonly timeWindowUnit: string; readonly timeField: string; }"
         ],
         "initialIsOpen": false
       },
@@ -3372,7 +3385,7 @@
           "lineNumber": 29
         },
         "signature": [
-          "{ readonly interval?: string | undefined; readonly termSize?: number | undefined; readonly termField?: string | undefined; readonly aggField?: string | undefined; readonly dateStart?: string | undefined; readonly dateEnd?: string | undefined; readonly index: string | string[]; readonly groupBy: string; readonly timeWindowSize: number; readonly timeWindowUnit: string; readonly aggType: string; readonly timeField: string; }"
+          "{ readonly interval?: string | undefined; readonly termSize?: number | undefined; readonly termField?: string | undefined; readonly aggField?: string | undefined; readonly dateStart?: string | undefined; readonly dateEnd?: string | undefined; readonly index: string | string[]; readonly aggType: string; readonly groupBy: string; readonly timeWindowSize: number; readonly timeWindowUnit: string; readonly timeField: string; }"
         ],
         "initialIsOpen": false
       }

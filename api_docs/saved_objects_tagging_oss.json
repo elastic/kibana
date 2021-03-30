@@ -396,6 +396,7 @@
             ],
             "children": [
               {
+                "id": "def-public.SavedObjectsTaggingApiUi.getTag.tagId",
                 "type": "string",
                 "label": "tagId",
                 "isRequired": true,
@@ -443,6 +444,7 @@
             ],
             "children": [
               {
+                "id": "def-public.SavedObjectsTaggingApiUi.hasTagDecoration.object",
                 "type": "Object",
                 "label": "object",
                 "isRequired": true,
@@ -490,6 +492,7 @@
             ],
             "children": [
               {
+                "id": "def-public.SavedObjectsTaggingApiUi.getSearchBarFilter.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -565,6 +568,7 @@
             ],
             "children": [
               {
+                "id": "def-public.SavedObjectsTaggingApiUi.convertNameToReference.tagName",
                 "type": "string",
                 "label": "tagName",
                 "isRequired": true,
@@ -612,6 +616,7 @@
             ],
             "children": [
               {
+                "id": "def-public.SavedObjectsTaggingApiUi.parseSearchQuery.query",
                 "type": "string",
                 "label": "query",
                 "isRequired": true,
@@ -627,6 +632,7 @@
                 }
               },
               {
+                "id": "def-public.SavedObjectsTaggingApiUi.parseSearchQuery.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -684,6 +690,7 @@
             ],
             "children": [
               {
+                "id": "def-public.SavedObjectsTaggingApiUi.getTagIdsFromReferences.references",
                 "type": "Array",
                 "label": "references",
                 "isRequired": true,
@@ -732,6 +739,7 @@
             ],
             "children": [
               {
+                "id": "def-public.SavedObjectsTaggingApiUi.getTagIdFromName.tagName",
                 "type": "string",
                 "label": "tagName",
                 "isRequired": true,
@@ -780,6 +788,7 @@
             ],
             "children": [
               {
+                "id": "def-public.SavedObjectsTaggingApiUi.updateTagsReferences.references",
                 "type": "Array",
                 "label": "references",
                 "isRequired": true,
@@ -800,6 +809,7 @@
                 }
               },
               {
+                "id": "def-public.SavedObjectsTaggingApiUi.updateTagsReferences.newTagIds",
                 "type": "Array",
                 "label": "newTagIds",
                 "isRequired": true,
@@ -1104,6 +1114,7 @@
           ],
           "children": [
             {
+              "id": "def-public.SavedObjectTaggingOssPluginSetup.registerTaggingApi.provider",
               "type": "Object",
               "label": "provider",
               "isRequired": true,
@@ -1273,6 +1284,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.ITagsClient.create.attributes",
                 "type": "Object",
                 "label": "attributes",
                 "isRequired": true,
@@ -1317,6 +1329,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.ITagsClient.get.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -1363,6 +1376,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.ITagsClient.getAll.options",
                 "type": "Object",
                 "label": "options",
                 "isRequired": false,
@@ -1400,6 +1414,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.ITagsClient.delete.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -1446,6 +1461,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.ITagsClient.update.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -1459,6 +1475,7 @@
                 }
               },
               {
+                "id": "def-common.ITagsClient.update.attributes",
                 "type": "Object",
                 "label": "attributes",
                 "isRequired": true,

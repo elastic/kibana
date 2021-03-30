@@ -120,6 +120,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.APMPlugin.Unnamed.initContext",
                 "type": "Object",
                 "label": "initContext",
                 "isRequired": true,
@@ -136,7 +137,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/apm/server/plugin.ts",
-                  "lineNumber": 61
+                  "lineNumber": 62
                 }
               }
             ],
@@ -144,7 +145,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/apm/server/plugin.ts",
-              "lineNumber": 61
+              "lineNumber": 62
             }
           },
           {
@@ -160,7 +161,15 @@
                 "section": "def-server.CoreSetup",
                 "text": "CoreSetup"
               },
-              "<object, unknown>, plugins: { apmOss: ",
+              "<object, unknown>, plugins: { spaces?: ",
+              {
+                "pluginId": "spaces",
+                "scope": "server",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-server.SpacesPluginSetup",
+                "text": "SpacesPluginSetup"
+              },
+              " | undefined; apmOss: ",
               {
                 "pluginId": "apmOss",
                 "scope": "server",
@@ -183,19 +192,12 @@
                 "docId": "kibLicensingPluginApi",
                 "section": "def-server.LicensingPluginSetup",
                 "text": "LicensingPluginSetup"
-              },
-              "; cloud?: ",
-              {
-                "pluginId": "cloud",
-                "scope": "server",
-                "docId": "kibCloudPluginApi",
-                "section": "def-server.CloudSetup",
-                "text": "CloudSetup"
               }
             ],
             "description": [],
             "children": [
               {
+                "id": "def-server.APMPlugin.setup.core",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -212,11 +214,11 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/apm/server/plugin.ts",
-                  "lineNumber": 66
+                  "lineNumber": 67
                 }
               },
               {
-                "id": "def-server.APMPlugin.setup.plugins",
+                "id": "def-server.APMPlugin.setup.plugins.plugins",
                 "type": "Object",
                 "label": "plugins",
                 "tags": [],
@@ -224,13 +226,34 @@
                 "children": [
                   {
                     "tags": [],
-                    "id": "def-server.APMPlugin.setup.plugins.apmOss",
+                    "id": "def-server.APMPlugin.setup.plugins.plugins.spaces",
+                    "type": "Object",
+                    "label": "spaces",
+                    "description": [],
+                    "source": {
+                      "path": "x-pack/plugins/apm/server/plugin.ts",
+                      "lineNumber": 69
+                    },
+                    "signature": [
+                      {
+                        "pluginId": "spaces",
+                        "scope": "server",
+                        "docId": "kibSpacesPluginApi",
+                        "section": "def-server.SpacesPluginSetup",
+                        "text": "SpacesPluginSetup"
+                      },
+                      " | undefined"
+                    ]
+                  },
+                  {
+                    "tags": [],
+                    "id": "def-server.APMPlugin.setup.plugins.plugins.apmOss",
                     "type": "Object",
                     "label": "apmOss",
                     "description": [],
                     "source": {
                       "path": "x-pack/plugins/apm/server/plugin.ts",
-                      "lineNumber": 68
+                      "lineNumber": 70
                     },
                     "signature": [
                       {
@@ -244,13 +267,13 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-server.APMPlugin.setup.plugins.home",
+                    "id": "def-server.APMPlugin.setup.plugins.plugins.home",
                     "type": "Object",
                     "label": "home",
                     "description": [],
                     "source": {
                       "path": "x-pack/plugins/apm/server/plugin.ts",
-                      "lineNumber": 69
+                      "lineNumber": 71
                     },
                     "signature": [
                       {
@@ -264,13 +287,13 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-server.APMPlugin.setup.plugins.licensing",
+                    "id": "def-server.APMPlugin.setup.plugins.plugins.licensing",
                     "type": "Object",
                     "label": "licensing",
                     "description": [],
                     "source": {
                       "path": "x-pack/plugins/apm/server/plugin.ts",
-                      "lineNumber": 70
+                      "lineNumber": 72
                     },
                     "signature": [
                       {
@@ -284,13 +307,13 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-server.APMPlugin.setup.plugins.cloud",
+                    "id": "def-server.APMPlugin.setup.plugins.plugins.cloud",
                     "type": "Object",
                     "label": "cloud",
                     "description": [],
                     "source": {
                       "path": "x-pack/plugins/apm/server/plugin.ts",
-                      "lineNumber": 71
+                      "lineNumber": 73
                     },
                     "signature": [
                       {
@@ -305,13 +328,13 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-server.APMPlugin.setup.plugins.usageCollection",
+                    "id": "def-server.APMPlugin.setup.plugins.plugins.usageCollection",
                     "type": "Object",
                     "label": "usageCollection",
                     "description": [],
                     "source": {
                       "path": "x-pack/plugins/apm/server/plugin.ts",
-                      "lineNumber": 72
+                      "lineNumber": 74
                     },
                     "signature": [
                       "Pick<",
@@ -327,13 +350,13 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-server.APMPlugin.setup.plugins.taskManager",
+                    "id": "def-server.APMPlugin.setup.plugins.plugins.taskManager",
                     "type": "CompoundType",
                     "label": "taskManager",
                     "description": [],
                     "source": {
                       "path": "x-pack/plugins/apm/server/plugin.ts",
-                      "lineNumber": 73
+                      "lineNumber": 75
                     },
                     "signature": [
                       {
@@ -348,13 +371,13 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-server.APMPlugin.setup.plugins.alerting",
+                    "id": "def-server.APMPlugin.setup.plugins.plugins.alerting",
                     "type": "Object",
                     "label": "alerting",
                     "description": [],
                     "source": {
                       "path": "x-pack/plugins/apm/server/plugin.ts",
-                      "lineNumber": 74
+                      "lineNumber": 76
                     },
                     "signature": [
                       {
@@ -369,13 +392,13 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-server.APMPlugin.setup.plugins.actions",
+                    "id": "def-server.APMPlugin.setup.plugins.plugins.actions",
                     "type": "Object",
                     "label": "actions",
                     "description": [],
                     "source": {
                       "path": "x-pack/plugins/apm/server/plugin.ts",
-                      "lineNumber": 75
+                      "lineNumber": 77
                     },
                     "signature": [
                       {
@@ -390,13 +413,13 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-server.APMPlugin.setup.plugins.observability",
+                    "id": "def-server.APMPlugin.setup.plugins.plugins.observability",
                     "type": "Object",
                     "label": "observability",
                     "description": [],
                     "source": {
                       "path": "x-pack/plugins/apm/server/plugin.ts",
-                      "lineNumber": 76
+                      "lineNumber": 78
                     },
                     "signature": [
                       {
@@ -411,13 +434,13 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-server.APMPlugin.setup.plugins.features",
+                    "id": "def-server.APMPlugin.setup.plugins.plugins.features",
                     "type": "Object",
                     "label": "features",
                     "description": [],
                     "source": {
                       "path": "x-pack/plugins/apm/server/plugin.ts",
-                      "lineNumber": 77
+                      "lineNumber": 79
                     },
                     "signature": [
                       {
@@ -431,13 +454,13 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-server.APMPlugin.setup.plugins.security",
+                    "id": "def-server.APMPlugin.setup.plugins.plugins.security",
                     "type": "Object",
                     "label": "security",
                     "description": [],
                     "source": {
                       "path": "x-pack/plugins/apm/server/plugin.ts",
-                      "lineNumber": 78
+                      "lineNumber": 80
                     },
                     "signature": [
                       {
@@ -452,13 +475,13 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-server.APMPlugin.setup.plugins.ml",
+                    "id": "def-server.APMPlugin.setup.plugins.plugins.ml",
                     "type": "CompoundType",
                     "label": "ml",
                     "description": [],
                     "source": {
                       "path": "x-pack/plugins/apm/server/plugin.ts",
-                      "lineNumber": 79
+                      "lineNumber": 81
                     },
                     "signature": [
                       {
@@ -474,7 +497,7 @@
                 ],
                 "source": {
                   "path": "x-pack/plugins/apm/server/plugin.ts",
-                  "lineNumber": 67
+                  "lineNumber": 68
                 }
               }
             ],
@@ -482,7 +505,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/apm/server/plugin.ts",
-              "lineNumber": 65
+              "lineNumber": 66
             }
           },
           {
@@ -503,6 +526,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.APMPlugin.start.core",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -518,7 +542,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/apm/server/plugin.ts",
-                  "lineNumber": 196
+                  "lineNumber": 194
                 }
               }
             ],
@@ -526,7 +550,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/apm/server/plugin.ts",
-              "lineNumber": 196
+              "lineNumber": 194
             }
           },
           {
@@ -542,13 +566,13 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/apm/server/plugin.ts",
-              "lineNumber": 215
+              "lineNumber": 213
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/apm/server/plugin.ts",
-          "lineNumber": 58
+          "lineNumber": 59
         },
         "initialIsOpen": false
       }
@@ -568,6 +592,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-server.mergeConfigs.apmOssConfig",
             "type": "Object",
             "label": "apmOssConfig",
             "isRequired": true,
@@ -581,6 +606,7 @@
             }
           },
           {
+            "id": "def-server.mergeConfigs.apmConfig",
             "type": "Object",
             "label": "apmConfig",
             "isRequired": true,
@@ -674,7 +700,7 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/apm/server/plugin.ts",
-            "lineNumber": 49
+            "lineNumber": 50
           },
           "signature": [
             "Observable",
@@ -697,7 +723,7 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/apm/server/plugin.ts",
-            "lineNumber": 50
+            "lineNumber": 51
           },
           "signature": [
             "() => Promise<",
@@ -719,7 +745,7 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/apm/server/plugin.ts",
-            "lineNumber": 51
+            "lineNumber": 52
           },
           "signature": [
             "(params: { debug?: boolean | undefined; request: ",
@@ -755,7 +781,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/apm/server/plugin.ts",
-        "lineNumber": 48
+        "lineNumber": 49
       },
       "lifecycle": "setup",
       "initialIsOpen": true

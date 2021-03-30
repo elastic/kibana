@@ -37,6 +37,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.MlUrlGenerator.Unnamed.params",
                 "type": "Object",
                 "label": "params",
                 "isRequired": true,
@@ -76,6 +77,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.MlUrlGenerator.createUrl.mlUrlGeneratorParams",
                 "type": "CompoundType",
                 "label": "mlUrlGeneratorParams",
                 "isRequired": true,
@@ -136,6 +138,7 @@
         ],
         "children": [
           {
+            "id": "def-public.getFormattedSeverityScore.score",
             "type": "number",
             "label": "score",
             "isRequired": true,
@@ -145,7 +148,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
-              "lineNumber": 116
+              "lineNumber": 124
             }
           }
         ],
@@ -153,7 +156,7 @@
         "returnComment": [],
         "source": {
           "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
-          "lineNumber": 116
+          "lineNumber": 124
         },
         "initialIsOpen": false
       },
@@ -186,6 +189,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.getSeverityColor.normalizedScore",
             "type": "number",
             "label": "normalizedScore",
             "isRequired": true,
@@ -195,7 +199,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
-              "lineNumber": 177
+              "lineNumber": 185
             }
           }
         ],
@@ -203,7 +207,7 @@
         "returnComment": [],
         "source": {
           "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
-          "lineNumber": 177
+          "lineNumber": 185
         },
         "initialIsOpen": false
       },
@@ -224,6 +228,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.getSeverityType.normalizedScore",
             "type": "number",
             "label": "normalizedScore",
             "isRequired": true,
@@ -233,7 +238,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
-              "lineNumber": 138
+              "lineNumber": 146
             }
           }
         ],
@@ -241,7 +246,7 @@
         "returnComment": [],
         "source": {
           "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
-          "lineNumber": 138
+          "lineNumber": 146
         },
         "initialIsOpen": false
       },
@@ -250,6 +255,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.useMlHref.ml",
             "type": "Object",
             "label": "ml",
             "isRequired": false,
@@ -271,6 +277,7 @@
             }
           },
           {
+            "id": "def-public.useMlHref.basePath",
             "type": "string",
             "label": "basePath",
             "isRequired": false,
@@ -284,6 +291,7 @@
             }
           },
           {
+            "id": "def-public.useMlHref.params",
             "type": "CompoundType",
             "label": "params",
             "isRequired": true,
@@ -1236,7 +1244,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/ml/public/embeddables/types.ts",
-          "lineNumber": 40
+          "lineNumber": 49
         },
         "signature": [
           "EmbeddableInput & AnomalySwimlaneEmbeddableCustomInput"
@@ -1310,16 +1318,18 @@
     "objects": [
       {
         "tags": [],
-        "id": "def-public.HITS_TOTAL_RELATION",
+        "id": "def-public.ES_CLIENT_TOTAL_HITS_RELATION",
         "type": "Object",
-        "label": "HITS_TOTAL_RELATION",
+        "label": "ES_CLIENT_TOTAL_HITS_RELATION",
         "description": [],
         "source": {
           "path": "x-pack/plugins/ml/common/types/es_client.ts",
-          "lineNumber": 10
+          "lineNumber": 20
         },
         "signature": [
-          "{ readonly EQ: \"eq\"; readonly GTE: \"gte\"; }"
+          "Record<\"GTE\" | \"EQ\", ",
+          "TotalHitsRelation",
+          ">"
         ],
         "initialIsOpen": false
       },
@@ -1401,6 +1411,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.InsufficientMLCapabilities.Unnamed.message",
                 "type": "string",
                 "label": "message",
                 "isRequired": false,
@@ -1455,6 +1466,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.MLPrivilegesUninitialized.Unnamed.message",
                 "type": "string",
                 "label": "message",
                 "isRequired": false,
@@ -1509,6 +1521,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.UnknownMLCapabilitiesError.Unnamed.message",
                 "type": "string",
                 "label": "message",
                 "isRequired": false,
@@ -1543,6 +1556,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-server.getHistogramsForFields.client",
             "type": "Object",
             "label": "client",
             "isRequired": true,
@@ -1562,6 +1576,7 @@
             }
           },
           {
+            "id": "def-server.getHistogramsForFields.indexPatternTitle",
             "type": "string",
             "label": "indexPatternTitle",
             "isRequired": true,
@@ -1575,6 +1590,7 @@
             }
           },
           {
+            "id": "def-server.getHistogramsForFields.query",
             "type": "Any",
             "label": "query",
             "isRequired": true,
@@ -1588,6 +1604,7 @@
             }
           },
           {
+            "id": "def-server.getHistogramsForFields.fields",
             "type": "Array",
             "label": "fields",
             "isRequired": true,
@@ -1608,6 +1625,7 @@
             }
           },
           {
+            "id": "def-server.getHistogramsForFields.samplerShardSize",
             "type": "number",
             "label": "samplerShardSize",
             "isRequired": true,
@@ -1621,6 +1639,7 @@
             }
           },
           {
+            "id": "def-server.getHistogramsForFields.runtimeMappings",
             "type": "Object",
             "label": "runtimeMappings",
             "isRequired": false,
@@ -1671,6 +1690,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-server.isCombinedJobWithStats.arg",
             "type": "Any",
             "label": "arg",
             "isRequired": true,
@@ -4491,6 +4511,7 @@
         ],
         "children": [
           {
+            "id": "def-common.composeValidators.validators",
             "type": "Array",
             "label": "validators",
             "isRequired": true,
@@ -4517,6 +4538,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.extractErrorMessage.error",
             "type": "CompoundType",
             "label": "error",
             "isRequired": false,
@@ -4561,6 +4583,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.getSeverityColor.normalizedScore",
             "type": "number",
             "label": "normalizedScore",
             "isRequired": true,
@@ -4570,7 +4593,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
-              "lineNumber": 177
+              "lineNumber": 185
             }
           }
         ],
@@ -4578,7 +4601,7 @@
         "returnComment": [],
         "source": {
           "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
-          "lineNumber": 177
+          "lineNumber": 185
         },
         "initialIsOpen": false
       },
@@ -4599,6 +4622,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.getSeverityType.normalizedScore",
             "type": "number",
             "label": "normalizedScore",
             "isRequired": true,
@@ -4608,7 +4632,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
-              "lineNumber": 138
+              "lineNumber": 146
             }
           }
         ],
@@ -4616,7 +4640,85 @@
         "returnComment": [],
         "source": {
           "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
-          "lineNumber": 138
+          "lineNumber": 146
+        },
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.isPopulatedObject",
+        "type": "Function",
+        "children": [
+          {
+            "id": "def-common.isPopulatedObject.arg",
+            "type": "Unknown",
+            "label": "arg",
+            "isRequired": true,
+            "signature": [
+              "unknown"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/ml/common/util/object_utils.ts",
+              "lineNumber": 26
+            }
+          },
+          {
+            "id": "def-common.isPopulatedObject.requiredAttributes",
+            "type": "Array",
+            "label": "requiredAttributes",
+            "isRequired": true,
+            "signature": [
+              "U[]"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/ml/common/util/object_utils.ts",
+              "lineNumber": 27
+            }
+          }
+        ],
+        "signature": [
+          "<U extends string = string>(arg: unknown, requiredAttributes?: U[]) => arg is Record<U, unknown>"
+        ],
+        "description": [],
+        "label": "isPopulatedObject",
+        "source": {
+          "path": "x-pack/plugins/ml/common/util/object_utils.ts",
+          "lineNumber": 25
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.isRuntimeMappings",
+        "type": "Function",
+        "label": "isRuntimeMappings",
+        "signature": [
+          "(arg: unknown) => boolean"
+        ],
+        "description": [],
+        "children": [
+          {
+            "id": "def-common.isRuntimeMappings.arg",
+            "type": "Unknown",
+            "label": "arg",
+            "isRequired": true,
+            "signature": [
+              "unknown"
+            ],
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/ml/common/util/runtime_field_utils.ts",
+              "lineNumber": 27
+            }
+          }
+        ],
+        "tags": [],
+        "returnComment": [],
+        "source": {
+          "path": "x-pack/plugins/ml/common/util/runtime_field_utils.ts",
+          "lineNumber": 27
         },
         "initialIsOpen": false
       },
@@ -4632,6 +4734,7 @@
         ],
         "children": [
           {
+            "id": "def-common.patternValidator.pattern",
             "type": "Object",
             "label": "pattern",
             "isRequired": true,
@@ -4654,110 +4757,7 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [
-      {
-        "id": "def-common.SearchResponse7",
-        "type": "Interface",
-        "label": "SearchResponse7",
-        "signature": [
-          {
-            "pluginId": "ml",
-            "scope": "common",
-            "docId": "kibMlPluginApi",
-            "section": "def-common.SearchResponse7",
-            "text": "SearchResponse7"
-          },
-          "<T>"
-        ],
-        "description": [],
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.SearchResponse7.took",
-            "type": "number",
-            "label": "took",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/es_client.ts",
-              "lineNumber": 26
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.SearchResponse7.timed_out",
-            "type": "boolean",
-            "label": "timed_out",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/es_client.ts",
-              "lineNumber": 27
-            }
-          },
-          {
-            "tags": [],
-            "id": "def-common.SearchResponse7._scroll_id",
-            "type": "string",
-            "label": "_scroll_id",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/es_client.ts",
-              "lineNumber": 28
-            },
-            "signature": [
-              "string | undefined"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.SearchResponse7._shards",
-            "type": "Object",
-            "label": "_shards",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/es_client.ts",
-              "lineNumber": 29
-            },
-            "signature": [
-              "ShardsResponse"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.SearchResponse7.hits",
-            "type": "Object",
-            "label": "hits",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/es_client.ts",
-              "lineNumber": 30
-            },
-            "signature": [
-              "SearchResponse7Hits<T>"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.SearchResponse7.aggregations",
-            "type": "Any",
-            "label": "aggregations",
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/ml/common/types/es_client.ts",
-              "lineNumber": 31
-            },
-            "signature": [
-              "any"
-            ]
-          }
-        ],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/es_client.ts",
-          "lineNumber": 25
-        },
-        "initialIsOpen": false
-      }
-    ],
+    "interfaces": [],
     "enums": [
       {
         "id": "def-common.ANOMALY_SEVERITY",
@@ -4803,36 +4803,23 @@
           "UnsupportedChartData"
         ],
         "initialIsOpen": false
-      },
-      {
-        "id": "def-common.HitsTotalRelation",
-        "type": "Type",
-        "label": "HitsTotalRelation",
-        "tags": [],
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/ml/common/types/es_client.ts",
-          "lineNumber": 14
-        },
-        "signature": [
-          "\"gte\" | \"eq\""
-        ],
-        "initialIsOpen": false
       }
     ],
     "objects": [
       {
         "tags": [],
-        "id": "def-common.HITS_TOTAL_RELATION",
+        "id": "def-common.ES_CLIENT_TOTAL_HITS_RELATION",
         "type": "Object",
-        "label": "HITS_TOTAL_RELATION",
+        "label": "ES_CLIENT_TOTAL_HITS_RELATION",
         "description": [],
         "source": {
           "path": "x-pack/plugins/ml/common/types/es_client.ts",
-          "lineNumber": 10
+          "lineNumber": 20
         },
         "signature": [
-          "{ readonly EQ: \"eq\"; readonly GTE: \"gte\"; }"
+          "Record<\"GTE\" | \"EQ\", ",
+          "TotalHitsRelation",
+          ">"
         ],
         "initialIsOpen": false
       },

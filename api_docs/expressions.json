@@ -209,6 +209,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.Execution.Unnamed.execution",
                 "type": "Object",
                 "label": "execution",
                 "isRequired": true,
@@ -265,6 +266,7 @@
             ],
             "children": [
               {
+                "id": "def-public.Execution.start.input",
                 "type": "Uncategorized",
                 "label": "input",
                 "isRequired": true,
@@ -303,6 +305,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.Execution.invokeChain.chainArr",
                 "type": "Array",
                 "label": "chainArr",
                 "isRequired": true,
@@ -323,6 +326,7 @@
                 }
               },
               {
+                "id": "def-public.Execution.invokeChain.input",
                 "type": "Unknown",
                 "label": "input",
                 "isRequired": true,
@@ -361,6 +365,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.Execution.invokeFunction.fn",
                 "type": "Object",
                 "label": "fn",
                 "isRequired": true,
@@ -380,6 +385,7 @@
                 }
               },
               {
+                "id": "def-public.Execution.invokeFunction.input",
                 "type": "Unknown",
                 "label": "input",
                 "isRequired": true,
@@ -393,6 +399,7 @@
                 }
               },
               {
+                "id": "def-public.Execution.invokeFunction.args",
                 "type": "Object",
                 "label": "args",
                 "isRequired": true,
@@ -423,6 +430,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.Execution.cast.value",
                 "type": "Any",
                 "label": "value",
                 "isRequired": true,
@@ -436,6 +444,7 @@
                 }
               },
               {
+                "id": "def-public.Execution.cast.toTypeNames",
                 "type": "Array",
                 "label": "toTypeNames",
                 "isRequired": false,
@@ -474,6 +483,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.Execution.resolveArgs.fnDef",
                 "type": "Object",
                 "label": "fnDef",
                 "isRequired": true,
@@ -493,6 +503,7 @@
                 }
               },
               {
+                "id": "def-public.Execution.resolveArgs.input",
                 "type": "Unknown",
                 "label": "input",
                 "isRequired": true,
@@ -506,6 +517,7 @@
                 }
               },
               {
+                "id": "def-public.Execution.resolveArgs.argAsts",
                 "type": "Any",
                 "label": "argAsts",
                 "isRequired": true,
@@ -544,6 +556,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.Execution.interpret.ast",
                 "type": "CompoundType",
                 "label": "ast",
                 "isRequired": true,
@@ -563,6 +576,7 @@
                 }
               },
               {
+                "id": "def-public.Execution.interpret.input",
                 "type": "Uncategorized",
                 "label": "input",
                 "isRequired": true,
@@ -630,6 +644,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ExecutionContract.Unnamed.execution",
                 "type": "Object",
                 "label": "execution",
                 "isRequired": true,
@@ -836,6 +851,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.Executor.createWithDefaults.state",
                 "type": "Object",
                 "label": "state",
                 "isRequired": false,
@@ -938,6 +954,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.Executor.Unnamed.state",
                 "type": "Object",
                 "label": "state",
                 "isRequired": false,
@@ -991,6 +1008,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.Executor.registerFunction.functionDefinition",
                 "type": "CompoundType",
                 "label": "functionDefinition",
                 "isRequired": true,
@@ -1044,6 +1062,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.Executor.getFunction.name",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -1114,6 +1133,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.Executor.registerType.typeDefinition",
                 "type": "CompoundType",
                 "label": "typeDefinition",
                 "isRequired": true,
@@ -1167,6 +1187,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.Executor.getType.name",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -1221,6 +1242,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.Executor.extendContext.extraContext",
                 "type": "Object",
                 "label": "extraContext",
                 "isRequired": true,
@@ -1283,6 +1305,7 @@
             ],
             "children": [
               {
+                "id": "def-public.Executor.run.ast",
                 "type": "CompoundType",
                 "label": "ast",
                 "isRequired": true,
@@ -1305,6 +1328,7 @@
                 }
               },
               {
+                "id": "def-public.Executor.run.input",
                 "type": "Uncategorized",
                 "label": "input",
                 "isRequired": true,
@@ -1320,6 +1344,7 @@
                 }
               },
               {
+                "id": "def-public.Executor.run.params",
                 "type": "Object",
                 "label": "params",
                 "isRequired": true,
@@ -1388,6 +1413,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.Executor.createExecution.ast",
                 "type": "CompoundType",
                 "label": "ast",
                 "isRequired": true,
@@ -1408,6 +1434,7 @@
                 }
               },
               {
+                "id": "def-public.Executor.createExecution.params",
                 "type": "Object",
                 "label": "params",
                 "isRequired": true,
@@ -1467,6 +1494,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.Executor.inject.ast",
                 "type": "Object",
                 "label": "ast",
                 "isRequired": true,
@@ -1486,6 +1514,7 @@
                 }
               },
               {
+                "id": "def-public.Executor.inject.references",
                 "type": "Array",
                 "label": "references",
                 "isRequired": true,
@@ -1547,6 +1576,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.Executor.extract.ast",
                 "type": "Object",
                 "label": "ast",
                 "isRequired": true,
@@ -1591,6 +1621,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.Executor.telemetry.ast",
                 "type": "Object",
                 "label": "ast",
                 "isRequired": true,
@@ -1610,6 +1641,7 @@
                 }
               },
               {
+                "id": "def-public.Executor.telemetry.telemetryData",
                 "type": "Object",
                 "label": "telemetryData",
                 "isRequired": true,
@@ -1655,6 +1687,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.Executor.migrate.ast",
                 "type": "Object",
                 "label": "ast",
                 "isRequired": true,
@@ -1674,6 +1707,7 @@
                 }
               },
               {
+                "id": "def-public.Executor.migrate.version",
                 "type": "string",
                 "label": "version",
                 "isRequired": true,
@@ -2008,6 +2042,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ExpressionFunction.Unnamed.functionDefinition",
                 "type": "Object",
                 "label": "functionDefinition",
                 "isRequired": true,
@@ -2039,6 +2074,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ExpressionFunction.accepts.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -2199,6 +2235,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ExpressionFunctionParameter.Unnamed.name",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -2212,6 +2249,7 @@
                 }
               },
               {
+                "id": "def-public.ExpressionFunctionParameter.Unnamed.arg",
                 "type": "CompoundType",
                 "label": "arg",
                 "isRequired": true,
@@ -2249,6 +2287,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ExpressionFunctionParameter.accepts.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -2383,6 +2422,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ExpressionRenderer.Unnamed.config",
                 "type": "Object",
                 "label": "config",
                 "isRequired": true,
@@ -2476,6 +2516,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ExpressionRendererRegistry.register.definition",
                 "type": "CompoundType",
                 "label": "definition",
                 "isRequired": true,
@@ -2529,6 +2570,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ExpressionRendererRegistry.get.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -2674,6 +2716,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ExpressionRenderHandler.Unnamed.element",
                 "type": "Object",
                 "label": "element",
                 "isRequired": true,
@@ -2687,6 +2730,7 @@
                 }
               },
               {
+                "id": "def-public.ExpressionRenderHandler.Unnamed.{\n-     onRenderError,\n      renderMode,\n      syncColors,\n      hasCompatibleActions = async () => false,\n    }",
                 "type": "Object",
                 "label": "{\n      onRenderError,\n      renderMode,\n      syncColors,\n      hasCompatibleActions = async () => false,\n    }",
                 "isRequired": true,
@@ -2718,6 +2762,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ExpressionRenderHandler.render.value",
                 "type": "Any",
                 "label": "value",
                 "isRequired": true,
@@ -2731,6 +2776,7 @@
                 }
               },
               {
+                "id": "def-public.ExpressionRenderHandler.render.uiState",
                 "type": "Any",
                 "label": "uiState",
                 "isRequired": true,
@@ -2793,6 +2839,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ExpressionRenderHandler.handleRenderError.error",
                 "type": "Object",
                 "label": "error",
                 "isRequired": true,
@@ -2867,6 +2914,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ExpressionsInspectorAdapter.logAST.ast",
                 "type": "Any",
                 "label": "ast",
                 "isRequired": true,
@@ -2959,6 +3007,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ExpressionsPublicPlugin.Unnamed.initializerContext",
                 "type": "Object",
                 "label": "initializerContext",
                 "isRequired": true,
@@ -3012,6 +3061,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ExpressionsPublicPlugin.setup.core",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -3064,6 +3114,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ExpressionsPublicPlugin.start.core",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -3164,6 +3215,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ExpressionsPublicPlugin.Unnamed.initializerContext",
                 "type": "Object",
                 "label": "initializerContext",
                 "isRequired": true,
@@ -3217,6 +3269,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ExpressionsPublicPlugin.setup.core",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -3269,6 +3322,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ExpressionsPublicPlugin.start.core",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -3404,6 +3458,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ExpressionsService.Unnamed.{\n-   executor = Executor.createWithDefaults(),\n    renderers = new ExpressionRendererRegistry(),\n  }",
                 "type": "Object",
                 "label": "{\n    executor = Executor.createWithDefaults(),\n    renderers = new ExpressionRendererRegistry(),\n  }",
                 "isRequired": true,
@@ -3435,6 +3490,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ExpressionsService.registerFunction.functionDefinition",
                 "type": "CompoundType",
                 "label": "functionDefinition",
                 "isRequired": true,
@@ -3498,6 +3554,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ExpressionsService.registerType.typeDefinition",
                 "type": "CompoundType",
                 "label": "typeDefinition",
                 "isRequired": true,
@@ -3559,6 +3616,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ExpressionsService.registerRenderer.definition",
                 "type": "CompoundType",
                 "label": "definition",
                 "isRequired": true,
@@ -3620,6 +3678,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ExpressionsService.run.ast",
                 "type": "CompoundType",
                 "label": "ast",
                 "isRequired": true,
@@ -3640,6 +3699,7 @@
                 }
               },
               {
+                "id": "def-public.ExpressionsService.run.input",
                 "type": "Uncategorized",
                 "label": "input",
                 "isRequired": true,
@@ -3653,6 +3713,7 @@
                 }
               },
               {
+                "id": "def-public.ExpressionsService.run.params",
                 "type": "Object",
                 "label": "params",
                 "isRequired": false,
@@ -3706,6 +3767,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ExpressionsService.getFunction.name",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -3770,6 +3832,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ExpressionsService.getRenderer.name",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -3834,6 +3897,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ExpressionsService.getType.name",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -3959,6 +4023,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ExpressionsService.telemetry.state",
                 "type": "Object",
                 "label": "state",
                 "isRequired": true,
@@ -3978,6 +4043,7 @@
                 }
               },
               {
+                "id": "def-public.ExpressionsService.telemetry.telemetryData",
                 "type": "Object",
                 "label": "telemetryData",
                 "isRequired": true,
@@ -4018,6 +4084,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ExpressionsService.extract.state",
                 "type": "Object",
                 "label": "state",
                 "isRequired": true,
@@ -4082,6 +4149,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ExpressionsService.inject.state",
                 "type": "Object",
                 "label": "state",
                 "isRequired": true,
@@ -4101,6 +4169,7 @@
                 }
               },
               {
+                "id": "def-public.ExpressionsService.inject.references",
                 "type": "Array",
                 "label": "references",
                 "isRequired": true,
@@ -4165,6 +4234,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ExpressionsService.migrate.state",
                 "type": "Object",
                 "label": "state",
                 "isRequired": true,
@@ -4184,6 +4254,7 @@
                 }
               },
               {
+                "id": "def-public.ExpressionsService.migrate.version",
                 "type": "string",
                 "label": "version",
                 "isRequired": true,
@@ -4403,6 +4474,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ExpressionType.Unnamed.definition",
                 "type": "Object",
                 "label": "definition",
                 "isRequired": true,
@@ -4434,6 +4506,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ExpressionType.getToFn.typeName",
                 "type": "string",
                 "label": "typeName",
                 "isRequired": true,
@@ -4472,6 +4545,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ExpressionType.getFromFn.typeName",
                 "type": "string",
                 "label": "typeName",
                 "isRequired": true,
@@ -4510,6 +4584,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ExpressionType.castsTo.value",
                 "type": "Any",
                 "label": "value",
                 "isRequired": true,
@@ -4540,6 +4615,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ExpressionType.castsFrom.value",
                 "type": "Any",
                 "label": "value",
                 "isRequired": true,
@@ -4570,6 +4646,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ExpressionType.to.value",
                 "type": "Any",
                 "label": "value",
                 "isRequired": true,
@@ -4583,6 +4660,7 @@
                 }
               },
               {
+                "id": "def-public.ExpressionType.to.toTypeName",
                 "type": "string",
                 "label": "toTypeName",
                 "isRequired": true,
@@ -4596,6 +4674,7 @@
                 }
               },
               {
+                "id": "def-public.ExpressionType.to.types",
                 "type": "Object",
                 "label": "types",
                 "isRequired": true,
@@ -4642,6 +4721,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ExpressionType.from.value",
                 "type": "Any",
                 "label": "value",
                 "isRequired": true,
@@ -4655,6 +4735,7 @@
                 }
               },
               {
+                "id": "def-public.ExpressionType.from.types",
                 "type": "Object",
                 "label": "types",
                 "isRequired": true,
@@ -4746,6 +4827,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.FunctionsRegistry.Unnamed.executor",
                 "type": "Object",
                 "label": "executor",
                 "isRequired": true,
@@ -4799,6 +4881,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.FunctionsRegistry.register.functionDefinition",
                 "type": "CompoundType",
                 "label": "functionDefinition",
                 "isRequired": true,
@@ -4852,6 +4935,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.FunctionsRegistry.get.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -4963,6 +5047,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.TablesAdapter.logDatatable.name",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -4976,6 +5061,7 @@
                 }
               },
               {
+                "id": "def-public.TablesAdapter.logDatatable.datatable",
                 "type": "Object",
                 "label": "datatable",
                 "isRequired": true,
@@ -5074,6 +5160,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.TypesRegistry.Unnamed.executor",
                 "type": "Object",
                 "label": "executor",
                 "isRequired": true,
@@ -5127,6 +5214,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.TypesRegistry.register.typeDefinition",
                 "type": "CompoundType",
                 "label": "typeDefinition",
                 "isRequired": true,
@@ -5180,6 +5268,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.TypesRegistry.get.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -5300,6 +5389,7 @@
         ],
         "children": [
           {
+            "id": "def-public.buildExpression.initialState",
             "type": "CompoundType",
             "label": "initialState",
             "isRequired": false,
@@ -5395,6 +5485,7 @@
         ],
         "children": [
           {
+            "id": "def-public.buildExpressionFunction.fnName",
             "type": "Uncategorized",
             "label": "fnName",
             "isRequired": true,
@@ -5417,6 +5508,7 @@
             }
           },
           {
+            "id": "def-public.buildExpressionFunction.initialArgs",
             "type": "Object",
             "label": "initialArgs",
             "isRequired": true,
@@ -5478,6 +5570,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.format.ast",
             "type": "Uncategorized",
             "label": "ast",
             "isRequired": true,
@@ -5491,6 +5584,7 @@
             }
           },
           {
+            "id": "def-public.format.type",
             "type": "Uncategorized",
             "label": "type",
             "isRequired": true,
@@ -5540,6 +5634,7 @@
         ],
         "children": [
           {
+            "id": "def-public.formatExpression.ast",
             "type": "Object",
             "label": "ast",
             "isRequired": true,
@@ -5581,6 +5676,7 @@
         ],
         "children": [
           {
+            "id": "def-public.isExpressionAstBuilder.val",
             "type": "Any",
             "label": "val",
             "isRequired": true,
@@ -5633,6 +5729,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-public.parse.expression",
             "type": "Uncategorized",
             "label": "expression",
             "isRequired": true,
@@ -5646,6 +5743,7 @@
             }
           },
           {
+            "id": "def-public.parse.startRule",
             "type": "Uncategorized",
             "label": "startRule",
             "isRequired": true,
@@ -5686,6 +5784,7 @@
         ],
         "children": [
           {
+            "id": "def-public.parseExpression.expression",
             "type": "string",
             "label": "expression",
             "isRequired": true,
@@ -5714,6 +5813,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-public.ReactExpressionRenderer.{\n- className,\n  dataAttrs,\n  padding,\n  renderError,\n  expression,\n  onEvent,\n  onData$,\n  reload$,\n  debounce,\n  ...expressionLoaderOptions\n}",
             "type": "Object",
             "label": "{\n  className,\n  dataAttrs,\n  padding,\n  renderError,\n  expression,\n  onEvent,\n  onData$,\n  reload$,\n  debounce,\n  ...expressionLoaderOptions\n}",
             "isRequired": true,
@@ -6910,6 +7010,7 @@
             ],
             "children": [
               {
+                "id": "def-public.ExpressionFunctionDefinition.fn.input",
                 "type": "Uncategorized",
                 "label": "input",
                 "isRequired": true,
@@ -6925,6 +7026,7 @@
                 }
               },
               {
+                "id": "def-public.ExpressionFunctionDefinition.fn.args",
                 "type": "Uncategorized",
                 "label": "args",
                 "isRequired": true,
@@ -6940,6 +7042,7 @@
                 }
               },
               {
+                "id": "def-public.ExpressionFunctionDefinition.fn.context",
                 "type": "Uncategorized",
                 "label": "context",
                 "isRequired": true,
@@ -8271,6 +8374,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.IRegistry.get.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -9837,6 +9941,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.Execution.Unnamed.execution",
                 "type": "Object",
                 "label": "execution",
                 "isRequired": true,
@@ -9893,6 +9998,7 @@
             ],
             "children": [
               {
+                "id": "def-server.Execution.start.input",
                 "type": "Uncategorized",
                 "label": "input",
                 "isRequired": true,
@@ -9931,6 +10037,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.Execution.invokeChain.chainArr",
                 "type": "Array",
                 "label": "chainArr",
                 "isRequired": true,
@@ -9951,6 +10058,7 @@
                 }
               },
               {
+                "id": "def-server.Execution.invokeChain.input",
                 "type": "Unknown",
                 "label": "input",
                 "isRequired": true,
@@ -9989,6 +10097,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.Execution.invokeFunction.fn",
                 "type": "Object",
                 "label": "fn",
                 "isRequired": true,
@@ -10008,6 +10117,7 @@
                 }
               },
               {
+                "id": "def-server.Execution.invokeFunction.input",
                 "type": "Unknown",
                 "label": "input",
                 "isRequired": true,
@@ -10021,6 +10131,7 @@
                 }
               },
               {
+                "id": "def-server.Execution.invokeFunction.args",
                 "type": "Object",
                 "label": "args",
                 "isRequired": true,
@@ -10051,6 +10162,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.Execution.cast.value",
                 "type": "Any",
                 "label": "value",
                 "isRequired": true,
@@ -10064,6 +10176,7 @@
                 }
               },
               {
+                "id": "def-server.Execution.cast.toTypeNames",
                 "type": "Array",
                 "label": "toTypeNames",
                 "isRequired": false,
@@ -10102,6 +10215,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.Execution.resolveArgs.fnDef",
                 "type": "Object",
                 "label": "fnDef",
                 "isRequired": true,
@@ -10121,6 +10235,7 @@
                 }
               },
               {
+                "id": "def-server.Execution.resolveArgs.input",
                 "type": "Unknown",
                 "label": "input",
                 "isRequired": true,
@@ -10134,6 +10249,7 @@
                 }
               },
               {
+                "id": "def-server.Execution.resolveArgs.argAsts",
                 "type": "Any",
                 "label": "argAsts",
                 "isRequired": true,
@@ -10172,6 +10288,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.Execution.interpret.ast",
                 "type": "CompoundType",
                 "label": "ast",
                 "isRequired": true,
@@ -10191,6 +10308,7 @@
                 }
               },
               {
+                "id": "def-server.Execution.interpret.input",
                 "type": "Uncategorized",
                 "label": "input",
                 "isRequired": true,
@@ -10269,6 +10387,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.Executor.createWithDefaults.state",
                 "type": "Object",
                 "label": "state",
                 "isRequired": false,
@@ -10371,6 +10490,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.Executor.Unnamed.state",
                 "type": "Object",
                 "label": "state",
                 "isRequired": false,
@@ -10424,6 +10544,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.Executor.registerFunction.functionDefinition",
                 "type": "CompoundType",
                 "label": "functionDefinition",
                 "isRequired": true,
@@ -10477,6 +10598,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.Executor.getFunction.name",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -10547,6 +10669,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.Executor.registerType.typeDefinition",
                 "type": "CompoundType",
                 "label": "typeDefinition",
                 "isRequired": true,
@@ -10600,6 +10723,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.Executor.getType.name",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -10654,6 +10778,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.Executor.extendContext.extraContext",
                 "type": "Object",
                 "label": "extraContext",
                 "isRequired": true,
@@ -10716,6 +10841,7 @@
             ],
             "children": [
               {
+                "id": "def-server.Executor.run.ast",
                 "type": "CompoundType",
                 "label": "ast",
                 "isRequired": true,
@@ -10738,6 +10864,7 @@
                 }
               },
               {
+                "id": "def-server.Executor.run.input",
                 "type": "Uncategorized",
                 "label": "input",
                 "isRequired": true,
@@ -10753,6 +10880,7 @@
                 }
               },
               {
+                "id": "def-server.Executor.run.params",
                 "type": "Object",
                 "label": "params",
                 "isRequired": true,
@@ -10821,6 +10949,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.Executor.createExecution.ast",
                 "type": "CompoundType",
                 "label": "ast",
                 "isRequired": true,
@@ -10841,6 +10970,7 @@
                 }
               },
               {
+                "id": "def-server.Executor.createExecution.params",
                 "type": "Object",
                 "label": "params",
                 "isRequired": true,
@@ -10900,6 +11030,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.Executor.inject.ast",
                 "type": "Object",
                 "label": "ast",
                 "isRequired": true,
@@ -10919,6 +11050,7 @@
                 }
               },
               {
+                "id": "def-server.Executor.inject.references",
                 "type": "Array",
                 "label": "references",
                 "isRequired": true,
@@ -10980,6 +11112,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.Executor.extract.ast",
                 "type": "Object",
                 "label": "ast",
                 "isRequired": true,
@@ -11024,6 +11157,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.Executor.telemetry.ast",
                 "type": "Object",
                 "label": "ast",
                 "isRequired": true,
@@ -11043,6 +11177,7 @@
                 }
               },
               {
+                "id": "def-server.Executor.telemetry.telemetryData",
                 "type": "Object",
                 "label": "telemetryData",
                 "isRequired": true,
@@ -11088,6 +11223,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.Executor.migrate.ast",
                 "type": "Object",
                 "label": "ast",
                 "isRequired": true,
@@ -11107,6 +11243,7 @@
                 }
               },
               {
+                "id": "def-server.Executor.migrate.version",
                 "type": "string",
                 "label": "version",
                 "isRequired": true,
@@ -11441,6 +11578,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.ExpressionFunction.Unnamed.functionDefinition",
                 "type": "Object",
                 "label": "functionDefinition",
                 "isRequired": true,
@@ -11472,6 +11610,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-server.ExpressionFunction.accepts.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -11632,6 +11771,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.ExpressionFunctionParameter.Unnamed.name",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -11645,6 +11785,7 @@
                 }
               },
               {
+                "id": "def-server.ExpressionFunctionParameter.Unnamed.arg",
                 "type": "CompoundType",
                 "label": "arg",
                 "isRequired": true,
@@ -11682,6 +11823,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.ExpressionFunctionParameter.accepts.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -11816,6 +11958,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.ExpressionRenderer.Unnamed.config",
                 "type": "Object",
                 "label": "config",
                 "isRequired": true,
@@ -11909,6 +12052,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.ExpressionRendererRegistry.register.definition",
                 "type": "CompoundType",
                 "label": "definition",
                 "isRequired": true,
@@ -11962,6 +12106,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.ExpressionRendererRegistry.get.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -12108,6 +12253,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.ExpressionsServerPlugin.Unnamed.initializerContext",
                 "type": "Object",
                 "label": "initializerContext",
                 "isRequired": true,
@@ -12161,6 +12307,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.ExpressionsServerPlugin.setup.core",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -12213,6 +12360,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.ExpressionsServerPlugin.start.core",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -12333,6 +12481,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.ExpressionsServerPlugin.Unnamed.initializerContext",
                 "type": "Object",
                 "label": "initializerContext",
                 "isRequired": true,
@@ -12386,6 +12535,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.ExpressionsServerPlugin.setup.core",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -12438,6 +12588,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.ExpressionsServerPlugin.start.core",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -12588,6 +12739,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.ExpressionType.Unnamed.definition",
                 "type": "Object",
                 "label": "definition",
                 "isRequired": true,
@@ -12619,6 +12771,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-server.ExpressionType.getToFn.typeName",
                 "type": "string",
                 "label": "typeName",
                 "isRequired": true,
@@ -12657,6 +12810,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-server.ExpressionType.getFromFn.typeName",
                 "type": "string",
                 "label": "typeName",
                 "isRequired": true,
@@ -12695,6 +12849,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-server.ExpressionType.castsTo.value",
                 "type": "Any",
                 "label": "value",
                 "isRequired": true,
@@ -12725,6 +12880,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-server.ExpressionType.castsFrom.value",
                 "type": "Any",
                 "label": "value",
                 "isRequired": true,
@@ -12755,6 +12911,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-server.ExpressionType.to.value",
                 "type": "Any",
                 "label": "value",
                 "isRequired": true,
@@ -12768,6 +12925,7 @@
                 }
               },
               {
+                "id": "def-server.ExpressionType.to.toTypeName",
                 "type": "string",
                 "label": "toTypeName",
                 "isRequired": true,
@@ -12781,6 +12939,7 @@
                 }
               },
               {
+                "id": "def-server.ExpressionType.to.types",
                 "type": "Object",
                 "label": "types",
                 "isRequired": true,
@@ -12827,6 +12986,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-server.ExpressionType.from.value",
                 "type": "Any",
                 "label": "value",
                 "isRequired": true,
@@ -12840,6 +13000,7 @@
                 }
               },
               {
+                "id": "def-server.ExpressionType.from.types",
                 "type": "Object",
                 "label": "types",
                 "isRequired": true,
@@ -12931,6 +13092,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.FunctionsRegistry.Unnamed.executor",
                 "type": "Object",
                 "label": "executor",
                 "isRequired": true,
@@ -12984,6 +13146,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.FunctionsRegistry.register.functionDefinition",
                 "type": "CompoundType",
                 "label": "functionDefinition",
                 "isRequired": true,
@@ -13037,6 +13200,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.FunctionsRegistry.get.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -13155,6 +13319,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.TypesRegistry.Unnamed.executor",
                 "type": "Object",
                 "label": "executor",
                 "isRequired": true,
@@ -13208,6 +13373,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.TypesRegistry.register.typeDefinition",
                 "type": "CompoundType",
                 "label": "typeDefinition",
                 "isRequired": true,
@@ -13261,6 +13427,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.TypesRegistry.get.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -13381,6 +13548,7 @@
         ],
         "children": [
           {
+            "id": "def-server.buildExpression.initialState",
             "type": "CompoundType",
             "label": "initialState",
             "isRequired": false,
@@ -13476,6 +13644,7 @@
         ],
         "children": [
           {
+            "id": "def-server.buildExpressionFunction.fnName",
             "type": "Uncategorized",
             "label": "fnName",
             "isRequired": true,
@@ -13498,6 +13667,7 @@
             }
           },
           {
+            "id": "def-server.buildExpressionFunction.initialArgs",
             "type": "Object",
             "label": "initialArgs",
             "isRequired": true,
@@ -13559,6 +13729,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-server.format.ast",
             "type": "Uncategorized",
             "label": "ast",
             "isRequired": true,
@@ -13572,6 +13743,7 @@
             }
           },
           {
+            "id": "def-server.format.type",
             "type": "Uncategorized",
             "label": "type",
             "isRequired": true,
@@ -13621,6 +13793,7 @@
         ],
         "children": [
           {
+            "id": "def-server.formatExpression.ast",
             "type": "Object",
             "label": "ast",
             "isRequired": true,
@@ -13662,6 +13835,7 @@
         ],
         "children": [
           {
+            "id": "def-server.isExpressionAstBuilder.val",
             "type": "Any",
             "label": "val",
             "isRequired": true,
@@ -13714,6 +13888,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-server.parse.expression",
             "type": "Uncategorized",
             "label": "expression",
             "isRequired": true,
@@ -13727,6 +13902,7 @@
             }
           },
           {
+            "id": "def-server.parse.startRule",
             "type": "Uncategorized",
             "label": "startRule",
             "isRequired": true,
@@ -13767,6 +13943,7 @@
         ],
         "children": [
           {
+            "id": "def-server.parseExpression.expression",
             "type": "string",
             "label": "expression",
             "isRequired": true,
@@ -14910,6 +15087,7 @@
             ],
             "children": [
               {
+                "id": "def-server.ExpressionFunctionDefinition.fn.input",
                 "type": "Uncategorized",
                 "label": "input",
                 "isRequired": true,
@@ -14925,6 +15103,7 @@
                 }
               },
               {
+                "id": "def-server.ExpressionFunctionDefinition.fn.args",
                 "type": "Uncategorized",
                 "label": "args",
                 "isRequired": true,
@@ -14940,6 +15119,7 @@
                 }
               },
               {
+                "id": "def-server.ExpressionFunctionDefinition.fn.context",
                 "type": "Uncategorized",
                 "label": "context",
                 "isRequired": true,
@@ -15758,6 +15938,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-server.IRegistry.get.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -16962,6 +17143,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.Execution.Unnamed.execution",
                 "type": "Object",
                 "label": "execution",
                 "isRequired": true,
@@ -17018,6 +17200,7 @@
             ],
             "children": [
               {
+                "id": "def-common.Execution.start.input",
                 "type": "Uncategorized",
                 "label": "input",
                 "isRequired": true,
@@ -17056,6 +17239,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.Execution.invokeChain.chainArr",
                 "type": "Array",
                 "label": "chainArr",
                 "isRequired": true,
@@ -17076,6 +17260,7 @@
                 }
               },
               {
+                "id": "def-common.Execution.invokeChain.input",
                 "type": "Unknown",
                 "label": "input",
                 "isRequired": true,
@@ -17114,6 +17299,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.Execution.invokeFunction.fn",
                 "type": "Object",
                 "label": "fn",
                 "isRequired": true,
@@ -17133,6 +17319,7 @@
                 }
               },
               {
+                "id": "def-common.Execution.invokeFunction.input",
                 "type": "Unknown",
                 "label": "input",
                 "isRequired": true,
@@ -17146,6 +17333,7 @@
                 }
               },
               {
+                "id": "def-common.Execution.invokeFunction.args",
                 "type": "Object",
                 "label": "args",
                 "isRequired": true,
@@ -17176,6 +17364,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.Execution.cast.value",
                 "type": "Any",
                 "label": "value",
                 "isRequired": true,
@@ -17189,6 +17378,7 @@
                 }
               },
               {
+                "id": "def-common.Execution.cast.toTypeNames",
                 "type": "Array",
                 "label": "toTypeNames",
                 "isRequired": false,
@@ -17227,6 +17417,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.Execution.resolveArgs.fnDef",
                 "type": "Object",
                 "label": "fnDef",
                 "isRequired": true,
@@ -17246,6 +17437,7 @@
                 }
               },
               {
+                "id": "def-common.Execution.resolveArgs.input",
                 "type": "Unknown",
                 "label": "input",
                 "isRequired": true,
@@ -17259,6 +17451,7 @@
                 }
               },
               {
+                "id": "def-common.Execution.resolveArgs.argAsts",
                 "type": "Any",
                 "label": "argAsts",
                 "isRequired": true,
@@ -17297,6 +17490,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.Execution.interpret.ast",
                 "type": "CompoundType",
                 "label": "ast",
                 "isRequired": true,
@@ -17316,6 +17510,7 @@
                 }
               },
               {
+                "id": "def-common.Execution.interpret.input",
                 "type": "Uncategorized",
                 "label": "input",
                 "isRequired": true,
@@ -17383,6 +17578,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.ExecutionContract.Unnamed.execution",
                 "type": "Object",
                 "label": "execution",
                 "isRequired": true,
@@ -17589,6 +17785,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.Executor.createWithDefaults.state",
                 "type": "Object",
                 "label": "state",
                 "isRequired": false,
@@ -17691,6 +17888,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.Executor.Unnamed.state",
                 "type": "Object",
                 "label": "state",
                 "isRequired": false,
@@ -17744,6 +17942,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.Executor.registerFunction.functionDefinition",
                 "type": "CompoundType",
                 "label": "functionDefinition",
                 "isRequired": true,
@@ -17797,6 +17996,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.Executor.getFunction.name",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -17867,6 +18067,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.Executor.registerType.typeDefinition",
                 "type": "CompoundType",
                 "label": "typeDefinition",
                 "isRequired": true,
@@ -17920,6 +18121,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.Executor.getType.name",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -17974,6 +18176,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.Executor.extendContext.extraContext",
                 "type": "Object",
                 "label": "extraContext",
                 "isRequired": true,
@@ -18036,6 +18239,7 @@
             ],
             "children": [
               {
+                "id": "def-common.Executor.run.ast",
                 "type": "CompoundType",
                 "label": "ast",
                 "isRequired": true,
@@ -18058,6 +18262,7 @@
                 }
               },
               {
+                "id": "def-common.Executor.run.input",
                 "type": "Uncategorized",
                 "label": "input",
                 "isRequired": true,
@@ -18073,6 +18278,7 @@
                 }
               },
               {
+                "id": "def-common.Executor.run.params",
                 "type": "Object",
                 "label": "params",
                 "isRequired": true,
@@ -18141,6 +18347,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.Executor.createExecution.ast",
                 "type": "CompoundType",
                 "label": "ast",
                 "isRequired": true,
@@ -18161,6 +18368,7 @@
                 }
               },
               {
+                "id": "def-common.Executor.createExecution.params",
                 "type": "Object",
                 "label": "params",
                 "isRequired": true,
@@ -18220,6 +18428,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.Executor.inject.ast",
                 "type": "Object",
                 "label": "ast",
                 "isRequired": true,
@@ -18239,6 +18448,7 @@
                 }
               },
               {
+                "id": "def-common.Executor.inject.references",
                 "type": "Array",
                 "label": "references",
                 "isRequired": true,
@@ -18300,6 +18510,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.Executor.extract.ast",
                 "type": "Object",
                 "label": "ast",
                 "isRequired": true,
@@ -18344,6 +18555,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.Executor.telemetry.ast",
                 "type": "Object",
                 "label": "ast",
                 "isRequired": true,
@@ -18363,6 +18575,7 @@
                 }
               },
               {
+                "id": "def-common.Executor.telemetry.telemetryData",
                 "type": "Object",
                 "label": "telemetryData",
                 "isRequired": true,
@@ -18408,6 +18621,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.Executor.migrate.ast",
                 "type": "Object",
                 "label": "ast",
                 "isRequired": true,
@@ -18427,6 +18641,7 @@
                 }
               },
               {
+                "id": "def-common.Executor.migrate.version",
                 "type": "string",
                 "label": "version",
                 "isRequired": true,
@@ -18761,6 +18976,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.ExpressionFunction.Unnamed.functionDefinition",
                 "type": "Object",
                 "label": "functionDefinition",
                 "isRequired": true,
@@ -18792,6 +19008,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.ExpressionFunction.accepts.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -18952,6 +19169,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.ExpressionFunctionParameter.Unnamed.name",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -18965,6 +19183,7 @@
                 }
               },
               {
+                "id": "def-common.ExpressionFunctionParameter.Unnamed.arg",
                 "type": "CompoundType",
                 "label": "arg",
                 "isRequired": true,
@@ -19002,6 +19221,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.ExpressionFunctionParameter.accepts.type",
                 "type": "string",
                 "label": "type",
                 "isRequired": true,
@@ -19136,6 +19356,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.ExpressionRenderer.Unnamed.config",
                 "type": "Object",
                 "label": "config",
                 "isRequired": true,
@@ -19229,6 +19450,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.ExpressionRendererRegistry.register.definition",
                 "type": "CompoundType",
                 "label": "definition",
                 "isRequired": true,
@@ -19282,6 +19504,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.ExpressionRendererRegistry.get.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -19385,6 +19608,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.ExpressionsInspectorAdapter.logAST.ast",
                 "type": "Any",
                 "label": "ast",
                 "isRequired": true,
@@ -19512,6 +19736,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.ExpressionsService.Unnamed.{\n-   executor = Executor.createWithDefaults(),\n    renderers = new ExpressionRendererRegistry(),\n  }",
                 "type": "Object",
                 "label": "{\n    executor = Executor.createWithDefaults(),\n    renderers = new ExpressionRendererRegistry(),\n  }",
                 "isRequired": true,
@@ -19543,6 +19768,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.ExpressionsService.registerFunction.functionDefinition",
                 "type": "CompoundType",
                 "label": "functionDefinition",
                 "isRequired": true,
@@ -19606,6 +19832,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.ExpressionsService.registerType.typeDefinition",
                 "type": "CompoundType",
                 "label": "typeDefinition",
                 "isRequired": true,
@@ -19667,6 +19894,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.ExpressionsService.registerRenderer.definition",
                 "type": "CompoundType",
                 "label": "definition",
                 "isRequired": true,
@@ -19728,6 +19956,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.ExpressionsService.run.ast",
                 "type": "CompoundType",
                 "label": "ast",
                 "isRequired": true,
@@ -19748,6 +19977,7 @@
                 }
               },
               {
+                "id": "def-common.ExpressionsService.run.input",
                 "type": "Uncategorized",
                 "label": "input",
                 "isRequired": true,
@@ -19761,6 +19991,7 @@
                 }
               },
               {
+                "id": "def-common.ExpressionsService.run.params",
                 "type": "Object",
                 "label": "params",
                 "isRequired": false,
@@ -19814,6 +20045,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.ExpressionsService.getFunction.name",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -19878,6 +20110,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.ExpressionsService.getRenderer.name",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -19942,6 +20175,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.ExpressionsService.getType.name",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -20067,6 +20301,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.ExpressionsService.telemetry.state",
                 "type": "Object",
                 "label": "state",
                 "isRequired": true,
@@ -20086,6 +20321,7 @@
                 }
               },
               {
+                "id": "def-common.ExpressionsService.telemetry.telemetryData",
                 "type": "Object",
                 "label": "telemetryData",
                 "isRequired": true,
@@ -20126,6 +20362,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.ExpressionsService.extract.state",
                 "type": "Object",
                 "label": "state",
                 "isRequired": true,
@@ -20190,6 +20427,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.ExpressionsService.inject.state",
                 "type": "Object",
                 "label": "state",
                 "isRequired": true,
@@ -20209,6 +20447,7 @@
                 }
               },
               {
+                "id": "def-common.ExpressionsService.inject.references",
                 "type": "Array",
                 "label": "references",
                 "isRequired": true,
@@ -20273,6 +20512,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.ExpressionsService.migrate.state",
                 "type": "Object",
                 "label": "state",
                 "isRequired": true,
@@ -20292,6 +20532,7 @@
                 }
               },
               {
+                "id": "def-common.ExpressionsService.migrate.version",
                 "type": "string",
                 "label": "version",
                 "isRequired": true,
@@ -20511,6 +20752,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.ExpressionType.Unnamed.definition",
                 "type": "Object",
                 "label": "definition",
                 "isRequired": true,
@@ -20542,6 +20784,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.ExpressionType.getToFn.typeName",
                 "type": "string",
                 "label": "typeName",
                 "isRequired": true,
@@ -20580,6 +20823,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.ExpressionType.getFromFn.typeName",
                 "type": "string",
                 "label": "typeName",
                 "isRequired": true,
@@ -20618,6 +20862,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.ExpressionType.castsTo.value",
                 "type": "Any",
                 "label": "value",
                 "isRequired": true,
@@ -20648,6 +20893,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.ExpressionType.castsFrom.value",
                 "type": "Any",
                 "label": "value",
                 "isRequired": true,
@@ -20678,6 +20924,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.ExpressionType.to.value",
                 "type": "Any",
                 "label": "value",
                 "isRequired": true,
@@ -20691,6 +20938,7 @@
                 }
               },
               {
+                "id": "def-common.ExpressionType.to.toTypeName",
                 "type": "string",
                 "label": "toTypeName",
                 "isRequired": true,
@@ -20704,6 +20952,7 @@
                 }
               },
               {
+                "id": "def-common.ExpressionType.to.types",
                 "type": "Object",
                 "label": "types",
                 "isRequired": true,
@@ -20750,6 +20999,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.ExpressionType.from.value",
                 "type": "Any",
                 "label": "value",
                 "isRequired": true,
@@ -20763,6 +21013,7 @@
                 }
               },
               {
+                "id": "def-common.ExpressionType.from.types",
                 "type": "Object",
                 "label": "types",
                 "isRequired": true,
@@ -20854,6 +21105,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.FunctionsRegistry.Unnamed.executor",
                 "type": "Object",
                 "label": "executor",
                 "isRequired": true,
@@ -20907,6 +21159,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.FunctionsRegistry.register.functionDefinition",
                 "type": "CompoundType",
                 "label": "functionDefinition",
                 "isRequired": true,
@@ -20960,6 +21213,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.FunctionsRegistry.get.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -21071,6 +21325,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.TablesAdapter.logDatatable.name",
                 "type": "string",
                 "label": "name",
                 "isRequired": true,
@@ -21084,6 +21339,7 @@
                 }
               },
               {
+                "id": "def-common.TablesAdapter.logDatatable.datatable",
                 "type": "Object",
                 "label": "datatable",
                 "isRequired": true,
@@ -21182,6 +21438,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.TypesRegistry.Unnamed.executor",
                 "type": "Object",
                 "label": "executor",
                 "isRequired": true,
@@ -21235,6 +21492,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.TypesRegistry.register.typeDefinition",
                 "type": "CompoundType",
                 "label": "typeDefinition",
                 "isRequired": true,
@@ -21288,6 +21546,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.TypesRegistry.get.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -21408,6 +21667,7 @@
         ],
         "children": [
           {
+            "id": "def-common.buildExpression.initialState",
             "type": "CompoundType",
             "label": "initialState",
             "isRequired": false,
@@ -21503,6 +21763,7 @@
         ],
         "children": [
           {
+            "id": "def-common.buildExpressionFunction.fnName",
             "type": "Uncategorized",
             "label": "fnName",
             "isRequired": true,
@@ -21525,6 +21786,7 @@
             }
           },
           {
+            "id": "def-common.buildExpressionFunction.initialArgs",
             "type": "Object",
             "label": "initialArgs",
             "isRequired": true,
@@ -21596,6 +21858,7 @@
         ],
         "children": [
           {
+            "id": "def-common.buildResultColumns.input",
             "type": "Object",
             "label": "input",
             "isRequired": true,
@@ -21617,6 +21880,7 @@
             }
           },
           {
+            "id": "def-common.buildResultColumns.outputColumnId",
             "type": "string",
             "label": "outputColumnId",
             "isRequired": true,
@@ -21632,6 +21896,7 @@
             }
           },
           {
+            "id": "def-common.buildResultColumns.inputColumnId",
             "type": "string",
             "label": "inputColumnId",
             "isRequired": true,
@@ -21647,6 +21912,7 @@
             }
           },
           {
+            "id": "def-common.buildResultColumns.outputColumnName",
             "type": "string",
             "label": "outputColumnName",
             "isRequired": false,
@@ -21662,7 +21928,7 @@
             }
           },
           {
-            "id": "def-common.buildResultColumns.options",
+            "id": "def-common.buildResultColumns.options.options",
             "type": "Object",
             "label": "options",
             "tags": [],
@@ -21670,7 +21936,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-common.buildResultColumns.options.allowColumnOverwrite",
+                "id": "def-common.buildResultColumns.options.options.allowColumnOverwrite",
                 "type": "boolean",
                 "label": "allowColumnOverwrite",
                 "description": [],
@@ -21699,6 +21965,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.createError.err",
             "type": "CompoundType",
             "label": "err",
             "isRequired": true,
@@ -21769,6 +22036,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.createExecutionContainer.state",
             "type": "Object",
             "label": "state",
             "isRequired": true,
@@ -21823,6 +22091,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.createExecutorContainer.state",
             "type": "Object",
             "label": "state",
             "isRequired": true,
@@ -21873,41 +22142,6 @@
         "initialIsOpen": false
       },
       {
-        "id": "def-common.createMockContext",
-        "type": "Function",
-        "children": [],
-        "signature": [
-          "() => ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExecutionContext",
-            "text": "ExecutionContext"
-          },
-          "<",
-          {
-            "pluginId": "inspector",
-            "scope": "common",
-            "docId": "kibInspectorPluginApi",
-            "section": "def-common.Adapters",
-            "text": "Adapters"
-          },
-          ", ",
-          "SerializableState",
-          ">"
-        ],
-        "description": [],
-        "label": "createMockContext",
-        "source": {
-          "path": "src/plugins/expressions/common/util/test_utils.ts",
-          "lineNumber": 11
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
         "id": "def-common.format",
         "type": "Function",
         "label": "format",
@@ -21925,6 +22159,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.format.ast",
             "type": "Uncategorized",
             "label": "ast",
             "isRequired": true,
@@ -21938,6 +22173,7 @@
             }
           },
           {
+            "id": "def-common.format.type",
             "type": "Uncategorized",
             "label": "type",
             "isRequired": true,
@@ -21987,6 +22223,7 @@
         ],
         "children": [
           {
+            "id": "def-common.formatExpression.ast",
             "type": "Object",
             "label": "ast",
             "isRequired": true,
@@ -22028,6 +22265,7 @@
         ],
         "children": [
           {
+            "id": "def-common.getBucketIdentifier.row",
             "type": "Object",
             "label": "row",
             "isRequired": true,
@@ -22041,6 +22279,7 @@
             }
           },
           {
+            "id": "def-common.getBucketIdentifier.groupColumns",
             "type": "Array",
             "label": "groupColumns",
             "isRequired": false,
@@ -22074,6 +22313,7 @@
         ],
         "children": [
           {
+            "id": "def-common.getByAlias.node",
             "type": "CompoundType",
             "label": "node",
             "isRequired": true,
@@ -22087,6 +22327,7 @@
             }
           },
           {
+            "id": "def-common.getByAlias.nodeName",
             "type": "string",
             "label": "nodeName",
             "isRequired": true,
@@ -22118,6 +22359,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.getType.node",
             "type": "Any",
             "label": "node",
             "isRequired": true,
@@ -22144,6 +22386,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.isDatatable.datatable",
             "type": "Unknown",
             "label": "datatable",
             "isRequired": true,
@@ -22191,6 +22434,7 @@
         ],
         "children": [
           {
+            "id": "def-common.isExpressionAstBuilder.val",
             "type": "Any",
             "label": "val",
             "isRequired": true,
@@ -22223,6 +22467,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.isExpressionValueError.value",
             "type": "Any",
             "label": "value",
             "isRequired": true,
@@ -22298,6 +22543,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.parse.expression",
             "type": "Uncategorized",
             "label": "expression",
             "isRequired": true,
@@ -22311,6 +22557,7 @@
             }
           },
           {
+            "id": "def-common.parse.startRule",
             "type": "Uncategorized",
             "label": "startRule",
             "isRequired": true,
@@ -22351,6 +22598,7 @@
         ],
         "children": [
           {
+            "id": "def-common.parseExpression.expression",
             "type": "string",
             "label": "expression",
             "isRequired": true,
@@ -22379,6 +22627,7 @@
         "type": "Function",
         "children": [
           {
+            "id": "def-common.serializeProvider.types",
             "type": "Object",
             "label": "types",
             "isRequired": true,
@@ -22439,6 +22688,7 @@
         "description": [],
         "children": [
           {
+            "id": "def-common.unboxExpressionValue.{\n- type,\n  ...value\n}",
             "type": "CompoundType",
             "label": "{\n  type,\n  ...value\n}",
             "isRequired": true,
@@ -24745,6 +24995,7 @@
             ],
             "children": [
               {
+                "id": "def-common.ExpressionFunctionDefinition.fn.input",
                 "type": "Uncategorized",
                 "label": "input",
                 "isRequired": true,
@@ -24760,6 +25011,7 @@
                 }
               },
               {
+                "id": "def-common.ExpressionFunctionDefinition.fn.args",
                 "type": "Uncategorized",
                 "label": "args",
                 "isRequired": true,
@@ -24775,6 +25027,7 @@
                 }
               },
               {
+                "id": "def-common.ExpressionFunctionDefinition.fn.context",
                 "type": "Uncategorized",
                 "label": "context",
                 "isRequired": true,
@@ -25832,6 +26085,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.IRegistry.get.id",
                 "type": "string",
                 "label": "id",
                 "isRequired": true,
@@ -27580,6 +27834,7 @@
                 "type": "Function",
                 "children": [
                   {
+                    "id": "def-common.boolean.from.number.n",
                     "type": "Any",
                     "label": "n",
                     "isRequired": true,
@@ -27610,6 +27865,7 @@
                 "type": "Function",
                 "children": [
                   {
+                    "id": "def-common.boolean.from.string.s",
                     "type": "Any",
                     "label": "s",
                     "isRequired": true,
@@ -27653,6 +27909,7 @@
                 "type": "Function",
                 "children": [
                   {
+                    "id": "def-common.boolean.to.render.value",
                     "type": "boolean",
                     "label": "value",
                     "isRequired": true,
@@ -27691,6 +27948,7 @@
                 "type": "Function",
                 "children": [
                   {
+                    "id": "def-common.boolean.to.datatable.value",
                     "type": "boolean",
                     "label": "value",
                     "isRequired": true,
@@ -27817,6 +28075,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.clog.fn.input",
                 "type": "Unknown",
                 "label": "input",
                 "isRequired": true,
@@ -28177,6 +28436,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.cumulativeSum.fn.input",
                 "type": "Object",
                 "label": "input",
                 "isRequired": true,
@@ -28196,6 +28456,7 @@
                 }
               },
               {
+                "id": "def-common.cumulativeSum.fn.{-by, inputColumnId, outputColumnId, outputColumnName }",
                 "type": "Object",
                 "label": "{ by, inputColumnId, outputColumnId, outputColumnName }",
                 "isRequired": true,
@@ -28257,6 +28518,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.datatable.validate.table",
                 "type": "Any",
                 "label": "table",
                 "isRequired": true,
@@ -28287,6 +28549,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.datatable.serialize.table",
                 "type": "Object",
                 "label": "table",
                 "isRequired": true,
@@ -28339,6 +28602,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.datatable.deserialize.table",
                 "type": "Object",
                 "label": "table",
                 "isRequired": true,
@@ -28412,6 +28676,7 @@
                 "type": "Function",
                 "children": [
                   {
+                    "id": "def-common.datatable.from.pointseries.value",
                     "type": "CompoundType",
                     "label": "value",
                     "isRequired": true,
@@ -28486,6 +28751,7 @@
                 "type": "Function",
                 "children": [
                   {
+                    "id": "def-common.datatable.to.render.table",
                     "type": "Object",
                     "label": "table",
                     "isRequired": true,
@@ -28538,6 +28804,7 @@
                 "type": "Function",
                 "children": [
                   {
+                    "id": "def-common.datatable.to.pointseries.table",
                     "type": "Object",
                     "label": "table",
                     "isRequired": true,
@@ -28986,6 +29253,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.derivative.fn.input",
                 "type": "Object",
                 "label": "input",
                 "isRequired": true,
@@ -29005,6 +29273,7 @@
                 }
               },
               {
+                "id": "def-common.derivative.fn.{-by, inputColumnId, outputColumnId, outputColumnName }",
                 "type": "Object",
                 "label": "{ by, inputColumnId, outputColumnId, outputColumnName }",
                 "isRequired": true,
@@ -29086,6 +29355,7 @@
                 "type": "Function",
                 "children": [
                   {
+                    "id": "def-common.error.to.render.input",
                     "type": "CompoundType",
                     "label": "input",
                     "isRequired": true,
@@ -29200,6 +29470,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.executionPureTransitions.start.state",
                 "type": "Object",
                 "label": "state",
                 "isRequired": true,
@@ -29269,6 +29540,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.executionPureTransitions.setResult.state",
                 "type": "Object",
                 "label": "state",
                 "isRequired": true,
@@ -29338,6 +29610,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.executionPureTransitions.setError.state",
                 "type": "Object",
                 "label": "state",
                 "isRequired": true,
@@ -30034,6 +30307,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.font.fn.input",
                 "type": "Uncategorized",
                 "label": "input",
                 "isRequired": true,
@@ -30047,6 +30321,7 @@
                 }
               },
               {
+                "id": "def-common.font.fn.args",
                 "type": "Object",
                 "label": "args",
                 "isRequired": true,
@@ -30178,6 +30453,7 @@
                 "type": "Function",
                 "children": [
                   {
+                    "id": "def-common.image.to.render.input",
                     "type": "Object",
                     "label": "input",
                     "isRequired": true,
@@ -30633,6 +30909,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.mapColumn.fn.input",
                 "type": "Object",
                 "label": "input",
                 "isRequired": true,
@@ -30652,6 +30929,7 @@
                 }
               },
               {
+                "id": "def-common.mapColumn.fn.args",
                 "type": "Object",
                 "label": "args",
                 "isRequired": true,
@@ -30896,6 +31174,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.math.fn.input",
                 "type": "CompoundType",
                 "label": "input",
                 "isRequired": true,
@@ -30915,6 +31194,7 @@
                 }
               },
               {
+                "id": "def-common.math.fn.args",
                 "type": "Object",
                 "label": "args",
                 "isRequired": true,
@@ -31346,6 +31626,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.movingAverage.fn.input",
                 "type": "Object",
                 "label": "input",
                 "isRequired": true,
@@ -31365,6 +31646,7 @@
                 }
               },
               {
+                "id": "def-common.movingAverage.fn.{-by, inputColumnId, outputColumnId, outputColumnName, window }",
                 "type": "Object",
                 "label": "{ by, inputColumnId, outputColumnId, outputColumnName, window }",
                 "isRequired": true,
@@ -31519,6 +31801,7 @@
                 "type": "Function",
                 "children": [
                   {
+                    "id": "def-common.num.from.boolean.b",
                     "type": "Any",
                     "label": "b",
                     "isRequired": true,
@@ -31549,6 +31832,7 @@
                 "type": "Function",
                 "children": [
                   {
+                    "id": "def-common.num.from.string.n",
                     "type": "Any",
                     "label": "n",
                     "isRequired": true,
@@ -31579,6 +31863,7 @@
                 "type": "Function",
                 "children": [
                   {
+                    "id": "def-common.num.from.'*'.value",
                     "type": "Any",
                     "label": "value",
                     "isRequired": true,
@@ -31622,6 +31907,7 @@
                 "type": "Function",
                 "children": [
                   {
+                    "id": "def-common.num.to.render.{-value }",
                     "type": "CompoundType",
                     "label": "{ value }",
                     "isRequired": true,
@@ -31675,6 +31961,7 @@
                 "type": "Function",
                 "children": [
                   {
+                    "id": "def-common.num.to.datatable.{-value }",
                     "type": "CompoundType",
                     "label": "{ value }",
                     "isRequired": true,
@@ -31784,6 +32071,7 @@
                 "type": "Function",
                 "children": [
                   {
+                    "id": "def-common.number.from.boolean.b",
                     "type": "Any",
                     "label": "b",
                     "isRequired": true,
@@ -31814,6 +32102,7 @@
                 "type": "Function",
                 "children": [
                   {
+                    "id": "def-common.number.from.string.n",
                     "type": "Any",
                     "label": "n",
                     "isRequired": true,
@@ -31857,6 +32146,7 @@
                 "type": "Function",
                 "children": [
                   {
+                    "id": "def-common.number.to.render.value",
                     "type": "number",
                     "label": "value",
                     "isRequired": true,
@@ -31895,6 +32185,7 @@
                 "type": "Function",
                 "children": [
                   {
+                    "id": "def-common.number.to.datatable.value",
                     "type": "number",
                     "label": "value",
                     "isRequired": true,
@@ -32047,6 +32338,7 @@
                 "type": "Function",
                 "children": [
                   {
+                    "id": "def-common.pointseries.to.render.pseries",
                     "type": "CompoundType",
                     "label": "pseries",
                     "isRequired": true,
@@ -32075,6 +32367,7 @@
                     }
                   },
                   {
+                    "id": "def-common.pointseries.to.render.types",
                     "type": "Object",
                     "label": "types",
                     "isRequired": true,
@@ -32159,6 +32452,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.pureSelectors.getFunction.state",
                 "type": "Object",
                 "label": "state",
                 "isRequired": true,
@@ -32211,6 +32505,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.pureSelectors.getType.state",
                 "type": "Object",
                 "label": "state",
                 "isRequired": true,
@@ -32263,6 +32558,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.pureSelectors.getContext.{-context }",
                 "type": "Object",
                 "label": "{ context }",
                 "isRequired": true,
@@ -32322,6 +32618,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.pureTransitions.addFunction.state",
                 "type": "Object",
                 "label": "state",
                 "isRequired": true,
@@ -32391,6 +32688,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.pureTransitions.addType.state",
                 "type": "Object",
                 "label": "state",
                 "isRequired": true,
@@ -32460,6 +32758,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.pureTransitions.extendContext.state",
                 "type": "Object",
                 "label": "state",
                 "isRequired": true,
@@ -32590,6 +32889,7 @@
                 "type": "Function",
                 "children": [
                   {
+                    "id": "def-common.range.to.render.value",
                     "type": "Object",
                     "label": "value",
                     "isRequired": true,
@@ -32683,6 +32983,7 @@
                 "type": "Function",
                 "children": [
                   {
+                    "id": "def-common.render.from.'*'.v",
                     "type": "Uncategorized",
                     "label": "v",
                     "isRequired": true,
@@ -32762,6 +33063,7 @@
                 "type": "Function",
                 "children": [
                   {
+                    "id": "def-common.shape.to.render.input",
                     "type": "CompoundType",
                     "label": "input",
                     "isRequired": true,
@@ -32872,6 +33174,7 @@
                 "type": "Function",
                 "children": [
                   {
+                    "id": "def-common.string.from.boolean.b",
                     "type": "Any",
                     "label": "b",
                     "isRequired": true,
@@ -32902,6 +33205,7 @@
                 "type": "Function",
                 "children": [
                   {
+                    "id": "def-common.string.from.number.n",
                     "type": "Any",
                     "label": "n",
                     "isRequired": true,
@@ -32945,6 +33249,7 @@
                 "type": "Function",
                 "children": [
                   {
+                    "id": "def-common.string.to.render.text",
                     "type": "Uncategorized",
                     "label": "text",
                     "isRequired": true,
@@ -32983,6 +33288,7 @@
                 "type": "Function",
                 "children": [
                   {
+                    "id": "def-common.string.to.datatable.value",
                     "type": "string",
                     "label": "value",
                     "isRequired": true,
@@ -33255,6 +33561,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-common.theme.fn.input",
                 "type": "Uncategorized",
                 "label": "input",
                 "isRequired": true,
@@ -33268,6 +33575,7 @@
                 }
               },
               {
+                "id": "def-common.theme.fn.args",
                 "type": "Object",
                 "label": "args",
                 "isRequired": true,
@@ -33281,6 +33589,7 @@
                 }
               },
               {
+                "id": "def-common.theme.fn.handlers",
                 "type": "Object",
                 "label": "handlers",
                 "isRequired": true,
@@ -33505,6 +33814,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.variable.fn.input",
                 "type": "Unknown",
                 "label": "input",
                 "isRequired": true,
@@ -33518,6 +33828,7 @@
                 }
               },
               {
+                "id": "def-common.variable.fn.args",
                 "type": "Object",
                 "label": "args",
                 "isRequired": true,
@@ -33531,6 +33842,7 @@
                 }
               },
               {
+                "id": "def-common.variable.fn.context",
                 "type": "Object",
                 "label": "context",
                 "isRequired": true,
@@ -33764,6 +34076,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-common.variableSet.fn.input",
                 "type": "Unknown",
                 "label": "input",
                 "isRequired": true,
@@ -33777,6 +34090,7 @@
                 }
               },
               {
+                "id": "def-common.variableSet.fn.args",
                 "type": "Object",
                 "label": "args",
                 "isRequired": true,
@@ -33790,6 +34104,7 @@
                 }
               },
               {
+                "id": "def-common.variableSet.fn.context",
                 "type": "Object",
                 "label": "context",
                 "isRequired": true,

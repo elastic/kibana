@@ -73,6 +73,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.DiscoverEnhancedPlugin.Unnamed.context",
                 "type": "Object",
                 "label": "context",
                 "isRequired": true,
@@ -134,6 +135,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.DiscoverEnhancedPlugin.setup.core",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -162,6 +164,7 @@
                 }
               },
               {
+                "id": "def-public.DiscoverEnhancedPlugin.setup.{-uiActions, share }",
                 "type": "Object",
                 "label": "{ uiActions, share }",
                 "isRequired": true,
@@ -214,6 +217,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.DiscoverEnhancedPlugin.start.core",
                 "type": "Object",
                 "label": "core",
                 "isRequired": true,
@@ -233,6 +237,7 @@
                 }
               },
               {
+                "id": "def-public.DiscoverEnhancedPlugin.start.plugins",
                 "type": "Object",
                 "label": "plugins",
                 "isRequired": true,
@@ -374,6 +379,7 @@
             "description": [],
             "children": [
               {
+                "id": "def-public.ExploreDataChartAction.isCompatible.context",
                 "type": "Object",
                 "label": "context",
                 "isRequired": true,
@@ -405,6 +411,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ExploreDataChartAction.getUrl.context",
                 "type": "Object",
                 "label": "context",
                 "isRequired": true,
@@ -535,6 +542,7 @@
             "type": "Function",
             "children": [
               {
+                "id": "def-public.ExploreDataContextMenuAction.getUrl.context",
                 "type": "Object",
                 "label": "context",
                 "isRequired": true,
