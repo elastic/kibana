@@ -8,6 +8,7 @@
 import type { SearchResponse7 } from '../../../ml/common';
 
 import type { EsIndex } from '../types/es_index';
+import { isPopulatedObject } from '../utils/object_utils';
 
 // To be able to use the type guards on the client side, we need to make sure we don't import
 // the code of '@kbn/config-schema' but just its types, otherwise the client side code will
@@ -25,13 +26,9 @@ import type {
 import type { GetTransformsStatsResponseSchema } from './transforms_stats';
 import type { PostTransformsUpdateResponseSchema } from './update_transforms';
 
-const isBasicObject = (arg: any) => {
-  return typeof arg === 'object' && arg !== null;
-};
-
 const isGenericResponseSchema = <T>(arg: any): arg is T => {
   return (
-    isBasicObject(arg) &&
+    isPopulatedObject(arg) &&
     {}.hasOwnProperty.call(arg, 'count') &&
     {}.hasOwnProperty.call(arg, 'transforms') &&
     Array.isArray(arg.transforms)
@@ -52,7 +49,7 @@ export const isDeleteTransformsResponseSchema = (
   arg: any
 ): arg is DeleteTransformsResponseSchema => {
   return (
-    isBasicObject(arg) &&
+    isPopulatedObject(arg) &&
     Object.values(arg).every((d) => ({}.hasOwnProperty.call(d, 'transformDeleted')))
   );
 };
@@ -62,7 +59,7 @@ export const isEsIndices = (arg: any): arg is EsIndex[] => {
 };
 
 export const isEsSearchResponse = (arg: any): arg is SearchResponse7 => {
-  return isBasicObject(arg) && {}.hasOwnProperty.call(arg, 'hits');
+  return isPopulatedObject(arg) && {}.hasOwnProperty.call(arg, 'hits');
 };
 
 export const isFieldHistogramsResponseSchema = (arg: any): arg is FieldHistogramsResponseSchema => {
@@ -79,7 +76,7 @@ export const isPostTransformsPreviewResponseSchema = (
   arg: any
 ): arg is PostTransformsPreviewResponseSchema => {
   return (
-    isBasicObject(arg) &&
+    isPopulatedObject(arg) &&
     {}.hasOwnProperty.call(arg, 'generated_dest_index') &&
     {}.hasOwnProperty.call(arg, 'preview') &&
     typeof arg.generated_dest_index !== undefined &&
@@ -90,12 +87,12 @@ export const isPostTransformsPreviewResponseSchema = (
 export const isPostTransformsUpdateResponseSchema = (
   arg: any
 ): arg is PostTransformsUpdateResponseSchema => {
-  return isBasicObject(arg) && {}.hasOwnProperty.call(arg, 'id') && typeof arg.id === 'string';
+  return isPopulatedObject(arg) && {}.hasOwnProperty.call(arg, 'id') && typeof arg.id === 'string';
 };
 
 export const isPutTransformsResponseSchema = (arg: any): arg is PutTransformsResponseSchema => {
   return (
-    isBasicObject(arg) &&
+    isPopulatedObject(arg) &&
     {}.hasOwnProperty.call(arg, 'transformsCreated') &&
     {}.hasOwnProperty.call(arg, 'errors') &&
     Array.isArray(arg.transformsCreated) &&
@@ -104,7 +101,7 @@ export const isPutTransformsResponseSchema = (arg: any): arg is PutTransformsRes
 };
 
 const isGenericSuccessResponseSchema = (arg: any) =>
-  isBasicObject(arg) && Object.values(arg).every((d) => ({}.hasOwnProperty.call(d, 'success')));
+  isPopulatedObject(arg) && Object.values(arg).every((d) => ({}.hasOwnProperty.call(d, 'success')));
 
 export const isStartTransformsResponseSchema = (arg: any): arg is StartTransformsResponseSchema => {
   return isGenericSuccessResponseSchema(arg);
