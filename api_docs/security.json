@@ -982,7 +982,7 @@
               "lineNumber": 109
             },
             "signature": [
-              "{ type: string; reason: string; caused_by: { type: string; reason: string; }; }[] | undefined"
+              "{ type: string; reason: string; caused_by?: { type: string; reason: string; } | undefined; }[] | undefined"
             ]
           }
         ],

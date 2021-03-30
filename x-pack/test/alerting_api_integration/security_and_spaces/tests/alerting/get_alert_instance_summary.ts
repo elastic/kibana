@@ -32,14 +32,16 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
       describe(scenario.id, () => {
         it('should handle getAlertInstanceSummary alert request appropriately', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}/_instance_summary`)
+            .get(
+              `${getUrlPrefix(space.id)}/internal/alerting/rule/${createdAlert.id}/_alert_summary`
+            )
             .auth(user.username, user.password);
 
           switch (scenario.id) {
@@ -58,27 +60,31 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
-              const { id, statusStartDate, statusEndDate } = response.body;
+              const {
+                id,
+                status_start_date: statusStartDate,
+                status_end_date: statusEndDate,
+              } = response.body;
               expect(id).to.equal(createdAlert.id);
               expect(Date.parse(statusStartDate)).to.be.lessThan(Date.parse(statusEndDate));
 
               const stableBody = omit(response.body, [
                 'id',
-                'statusStartDate',
-                'statusEndDate',
-                'lastRun',
+                'status_start_date',
+                'status_end_date',
+                'last_run',
               ]);
               expect(stableBody).to.eql({
                 name: 'abc',
                 tags: ['foo'],
-                alertTypeId: 'test.noop',
+                rule_type_id: 'test.noop',
                 consumer: 'alertsFixture',
                 status: 'OK',
-                muteAll: false,
+                mute_all: false,
                 throttle: '1m',
                 enabled: true,
-                errorMessages: [],
-                instances: {},
+                error_messages: [],
+                alerts: {},
               });
               break;
             default:
@@ -88,19 +94,21 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
 
         it('should handle getAlertInstanceSummary alert request appropriately when unauthorized', async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(
               getTestAlertData({
-                alertTypeId: 'test.unrestricted-noop',
+                rule_type_id: 'test.unrestricted-noop',
                 consumer: 'alertsFixture',
               })
             )
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}/_instance_summary`)
+            .get(
+              `${getUrlPrefix(space.id)}/internal/alerting/rule/${createdAlert.id}/_alert_summary`
+            )
             .auth(user.username, user.password);
 
           switch (scenario.id) {
@@ -134,7 +142,7 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
-              expect(response.body).to.key('id', 'instances', 'errorMessages');
+              expect(response.body).to.key('id', 'alerts', 'error_messages');
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -143,14 +151,16 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
 
         it(`shouldn't getAlertInstanceSummary for an alert from another space`, async () => {
           const { body: createdAlert } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(getTestAlertData())
             .expect(200);
-          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+          objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix('other')}/api/alerts/alert/${createdAlert.id}/_instance_summary`)
+            .get(
+              `${getUrlPrefix('other')}/internal/alerting/rule/${createdAlert.id}/_alert_summary`
+            )
             .auth(user.username, user.password);
 
           expect(response.statusCode).to.eql(404);
@@ -175,7 +185,7 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
 
         it(`should handle getAlertInstanceSummary request appropriately when alert doesn't exist`, async () => {
           const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix(space.id)}/api/alerts/alert/1/_instance_summary`)
+            .get(`${getUrlPrefix(space.id)}/internal/alerting/rule/1/_alert_summary`)
             .auth(user.username, user.password);
 
           switch (scenario.id) {

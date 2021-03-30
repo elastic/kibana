@@ -15,7 +15,7 @@ export default function basicAlertTest({ getService }: FtrProviderContext) {
   describe('basic alert', () => {
     it('should return 200 when creating a basic license alert', async () => {
       await supertest
-        .post(`/api/alerts/alert`)
+        .post(`/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData())
         .expect(200);
