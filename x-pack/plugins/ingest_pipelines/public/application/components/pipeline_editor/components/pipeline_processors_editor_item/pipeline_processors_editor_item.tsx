@@ -158,8 +158,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
     };
 
     return (
-      // TODO: Add hasBorder={true} here
-      <EuiPanel hasShadow={false} paddingSize="s" className={panelClasses}>
+      <EuiPanel hasBorder hasShadow={false} paddingSize="s" className={panelClasses}>
         <EuiFlexGroup
           gutterSize="none"
           responsive={false}
