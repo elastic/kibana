@@ -679,4 +679,205 @@ describe('embeddable', () => {
 
     expect(expressionRenderer).toHaveBeenCalledTimes(1);
   });
+
+  it('should call onload after rerender and onData$ call ', async () => {
+    const onLoad = jest.fn();
+
+    expressionRenderer = jest.fn(({ onData$ }) => {
+      setTimeout(() => {
+        onData$?.({});
+      }, 10);
+
+      return null;
+    });
+
+    const embeddable = new Embeddable(
+      {
+        timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
+        attributeService,
+        expressionRenderer,
+        basePath,
+        indexPatternService: {} as IndexPatternsContract,
+        editable: true,
+        getTrigger,
+        documentToExpression: () =>
+          Promise.resolve({
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            errors: undefined,
+          }),
+      },
+      ({ id: '123', onLoad } as unknown) as LensEmbeddableInput
+    );
+
+    await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
+    embeddable.render(mountpoint);
+
+    expect(onLoad).toHaveBeenCalledWith(true);
+    expect(onLoad).toHaveBeenCalledTimes(1);
+
+    await new Promise((resolve) => setTimeout(resolve, 20));
+
+    // loading should become false
+    expect(onLoad).toHaveBeenCalledTimes(2);
+    expect(onLoad).toHaveBeenNthCalledWith(2, false);
+
+    expect(expressionRenderer).toHaveBeenCalledTimes(1);
+
+    embeddable.updateInput({
+      searchSessionId: 'newSession',
+    });
+    embeddable.reload();
+
+    // loading should become again true
+    expect(onLoad).toHaveBeenCalledTimes(3);
+    expect(onLoad).toHaveBeenNthCalledWith(3, true);
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(expressionRenderer).toHaveBeenCalledTimes(2);
+
+    await new Promise((resolve) => setTimeout(resolve, 20));
+
+    // loading should again become false
+    expect(onLoad).toHaveBeenCalledTimes(4);
+    expect(onLoad).toHaveBeenNthCalledWith(4, false);
+  });
+
+  it('should call onFilter event on filter call ', async () => {
+    const onFilter = jest.fn();
+
+    expressionRenderer = jest.fn(({ onEvent }) => {
+      setTimeout(() => {
+        onEvent?.({ name: 'filter', data: { pings: false } });
+      }, 10);
+
+      return null;
+    });
+
+    const embeddable = new Embeddable(
+      {
+        timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
+        attributeService,
+        expressionRenderer,
+        basePath,
+        indexPatternService: {} as IndexPatternsContract,
+        editable: true,
+        getTrigger,
+        documentToExpression: () =>
+          Promise.resolve({
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            errors: undefined,
+          }),
+      },
+      ({ id: '123', onFilter } as unknown) as LensEmbeddableInput
+    );
+
+    await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
+    embeddable.render(mountpoint);
+
+    await new Promise((resolve) => setTimeout(resolve, 20));
+
+    expect(onFilter).toHaveBeenCalledWith({ pings: false });
+    expect(onFilter).toHaveBeenCalledTimes(1);
+  });
+
+  it('should call onBrush event on brushing', async () => {
+    const onBrushEnd = jest.fn();
+
+    expressionRenderer = jest.fn(({ onEvent }) => {
+      setTimeout(() => {
+        onEvent?.({ name: 'brush', data: { range: [0, 1] } });
+      }, 10);
+
+      return null;
+    });
+
+    const embeddable = new Embeddable(
+      {
+        timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
+        attributeService,
+        expressionRenderer,
+        basePath,
+        indexPatternService: {} as IndexPatternsContract,
+        editable: true,
+        getTrigger,
+        documentToExpression: () =>
+          Promise.resolve({
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            errors: undefined,
+          }),
+      },
+      ({ id: '123', onBrushEnd } as unknown) as LensEmbeddableInput
+    );
+
+    await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
+    embeddable.render(mountpoint);
+
+    await new Promise((resolve) => setTimeout(resolve, 20));
+
+    expect(onBrushEnd).toHaveBeenCalledWith({ range: [0, 1] });
+    expect(onBrushEnd).toHaveBeenCalledTimes(1);
+  });
+
+  it('should call onTableRowClick event ', async () => {
+    const onTableRowClick = jest.fn();
+
+    expressionRenderer = jest.fn(({ onEvent }) => {
+      setTimeout(() => {
+        onEvent?.({ name: 'tableRowContextMenuClick', data: { name: 'test' } });
+      }, 10);
+
+      return null;
+    });
+
+    const embeddable = new Embeddable(
+      {
+        timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
+        attributeService,
+        expressionRenderer,
+        basePath,
+        indexPatternService: {} as IndexPatternsContract,
+        editable: true,
+        getTrigger,
+        documentToExpression: () =>
+          Promise.resolve({
+            ast: {
+              type: 'expression',
+              chain: [
+                { type: 'function', function: 'my', arguments: {} },
+                { type: 'function', function: 'expression', arguments: {} },
+              ],
+            },
+            errors: undefined,
+          }),
+      },
+      ({ id: '123', onTableRowClick } as unknown) as LensEmbeddableInput
+    );
+
+    await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
+    embeddable.render(mountpoint);
+
+    await new Promise((resolve) => setTimeout(resolve, 20));
+
+    expect(onTableRowClick).toHaveBeenCalledWith({ name: 'test' });
+    expect(onTableRowClick).toHaveBeenCalledTimes(1);
+  });
 });
