@@ -11,14 +11,7 @@ import { getServices, chance } from './lib';
 export const docMissingAndIndexReadOnlySuite = (savedObjectsIndex: string) => () => {
   // ensure the kibana index has no documents
   beforeEach(async () => {
-    const { kbnServer, callCluster } = getServices();
-
-    // write a setting to ensure kibana index is created
-    await kbnServer.inject({
-      method: 'POST',
-      url: '/api/kibana/settings/defaultIndex',
-      payload: { value: 'abc' },
-    });
+    const { callCluster } = getServices();
 
     // delete all docs from kibana index to ensure savedConfig is not found
     await callCluster('deleteByQuery', {
@@ -59,16 +52,11 @@ export const docMissingAndIndexReadOnlySuite = (savedObjectsIndex: string) => ()
 
   describe('get route', () => {
     it('returns simulated doc with buildNum', async () => {
-      const { kbnServer } = getServices();
+      const { kbn } = getServices();
 
-      const { statusCode, result } = await kbnServer.inject({
-        method: 'GET',
-        url: '/api/kibana/settings',
-      });
+      const { body } = await kbn.supertest('get', '/api/kibana/settings').expect(200);
 
-      expect(statusCode).toBe(200);
-
-      expect(result).toMatchObject({
+      expect(body).toMatchObject({
         settings: {
           buildNum: {
             userValue: expect.any(Number),
@@ -84,18 +72,18 @@ export const docMissingAndIndexReadOnlySuite = (savedObjectsIndex: string) => ()
 
   describe('set route', () => {
     it('fails with 403 forbidden', async () => {
-      const { kbnServer } = getServices();
+      const { kbn } = getServices();
 
       const defaultIndex = chance.word();
-      const { statusCode, result } = await kbnServer.inject({
-        method: 'POST',
-        url: '/api/kibana/settings/defaultIndex',
-        payload: { value: defaultIndex },
-      });
 
-      expect(statusCode).toBe(403);
+      const { body } = await kbn
+        .supertest('post', '/api/kibana/settings/defaultIndex')
+        .send({
+          value: defaultIndex,
+        })
+        .expect(403);
 
-      expect(result).toEqual({
+      expect(body).toEqual({
         error: 'Forbidden',
         message: expect.stringContaining('index read-only'),
         statusCode: 403,
@@ -105,19 +93,17 @@ export const docMissingAndIndexReadOnlySuite = (savedObjectsIndex: string) => ()
 
   describe('setMany route', () => {
     it('fails with 403 forbidden', async () => {
-      const { kbnServer } = getServices();
-
+      const { kbn } = getServices();
       const defaultIndex = chance.word();
-      const { statusCode, result } = await kbnServer.inject({
-        method: 'POST',
-        url: '/api/kibana/settings',
-        payload: {
-          changes: { defaultIndex },
-        },
-      });
 
-      expect(statusCode).toBe(403);
-      expect(result).toEqual({
+      const { body } = await kbn
+        .supertest('post', '/api/kibana/settings')
+        .send({
+          changes: { defaultIndex },
+        })
+        .expect(403);
+
+      expect(body).toEqual({
         error: 'Forbidden',
         message: expect.stringContaining('index read-only'),
         statusCode: 403,
@@ -127,15 +113,13 @@ export const docMissingAndIndexReadOnlySuite = (savedObjectsIndex: string) => ()
 
   describe('delete route', () => {
     it('fails with 403 forbidden', async () => {
-      const { kbnServer } = getServices();
+      const { kbn } = getServices();
 
-      const { statusCode, result } = await kbnServer.inject({
-        method: 'DELETE',
-        url: '/api/kibana/settings/defaultIndex',
-      });
+      const { body } = await kbn
+        .supertest('delete', '/api/kibana/settings/defaultIndex')
+        .expect(403);
 
-      expect(statusCode).toBe(403);
-      expect(result).toEqual({
+      expect(body).toEqual({
         error: 'Forbidden',
         message: expect.stringContaining('index read-only'),
         statusCode: 403,

@@ -17,7 +17,7 @@ import { docMissingAndIndexReadOnlySuite } from './doc_missing_and_index_read_on
 const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
 const savedObjectIndex = `.kibana_${kibanaVersion}_001`;
 
-describe('uiSettings/routes', function () {
+describe.skip('uiSettings/routes', function () {
   jest.setTimeout(10000);
 
   beforeAll(startServers);

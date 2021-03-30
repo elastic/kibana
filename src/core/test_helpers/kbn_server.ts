@@ -22,7 +22,7 @@ import { resolve } from 'path';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
 
-import { CoreStart } from 'src/core/server';
+import { InternalCoreSetup, InternalCoreStart } from '../server/internal_types';
 import { LegacyAPICaller } from '../server/elasticsearch';
 import { CliArgs, Env } from '../server/config';
 import { Root } from '../server/root';
@@ -148,7 +148,9 @@ export interface TestElasticsearchUtils {
 
 export interface TestKibanaUtils {
   root: Root;
-  coreStart: CoreStart;
+  supertest: (method: HttpMethod, path: string) => supertest.Test;
+  coreSetup: InternalCoreSetup;
+  coreStart: InternalCoreStart;
   stop: () => Promise<void>;
 }
 
@@ -266,12 +268,14 @@ export function createTestServers({
     startKibana: async () => {
       const root = createRootWithCorePlugins(kbnSettings);
 
-      await root.setup();
+      const coreSetup = await root.setup();
       const coreStart = await root.start();
 
       return {
         root,
+        coreSetup,
         coreStart,
+        supertest: (method: HttpMethod, path: string) => getSupertest(root, method, path),
         stop: async () => await root.shutdown(),
       };
     },

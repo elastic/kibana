@@ -21,13 +21,11 @@ let servers: TestUtils;
 let esServer: TestElasticsearchUtils;
 let kbn: TestKibanaUtils;
 
-let kbnServer: TestKibanaUtils['kbnServer'];
-
 interface AllServices {
-  kbnServer: TestKibanaUtils['kbnServer'];
   savedObjectsClient: SavedObjectsClientContract;
   callCluster: LegacyAPICaller;
   uiSettings: IUiSettingsClient;
+  kbn: TestKibanaUtils;
 }
 
 let services: AllServices;
@@ -47,7 +45,6 @@ export async function startServers() {
   });
   esServer = await servers.startES();
   kbn = await servers.startKibana();
-  kbnServer = kbn.kbnServer;
 }
 
 export function getServices() {
@@ -61,12 +58,10 @@ export function getServices() {
     httpServerMock.createKibanaRequest()
   );
 
-  const uiSettings = kbnServer.newPlatform.start.core.uiSettings.asScopedToClient(
-    savedObjectsClient
-  );
+  const uiSettings = kbn.coreStart.uiSettings.asScopedToClient(savedObjectsClient);
 
   services = {
-    kbnServer,
+    kbn,
     callCluster,
     savedObjectsClient,
     uiSettings,
@@ -77,7 +72,6 @@ export function getServices() {
 
 export async function stopServers() {
   services = null!;
-  kbnServer = null!;
   if (servers) {
     await esServer.stop();
     await kbn.stop();
