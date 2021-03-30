@@ -21,7 +21,7 @@ import { PaletteRegistry } from 'src/plugins/charts/public';
 import { VisualizationDimensionEditorProps } from '../../types';
 import { DatatableVisualizationState } from '../visualization';
 import { getOriginalId } from '../transpose_helpers';
-import { CustomizablePalette, applyPaletteParams, defaultParams } from './gradient_picker';
+import { CustomizablePalette, applyPaletteParams, defaultParams } from './palette_picker';
 import { PalettePanelContainer } from './palette_panel_container';
 
 const idPrefix = htmlIdGenerator()();
