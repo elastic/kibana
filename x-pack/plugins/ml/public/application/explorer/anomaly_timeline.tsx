@@ -251,7 +251,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
               filterActive={filterActive}
               maskAll={
                 maskAll &&
-                !hasMatchiisRunngPoints({
+                !hasMatchingPoints({
                   filteredFields,
                   swimlaneData: viewBySwimlaneData,
                 })

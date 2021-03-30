@@ -108,4 +108,4 @@ export interface AggCardinality {
 
 export type RollupFields = Record<FieldId, [Record<'agg', ES_AGGREGATION>]>;
 
-export type RuntimeMappings = Record<string, estypes.RuntimeField>;
+export type RuntimeMappings = estypes.RuntimeFields;
