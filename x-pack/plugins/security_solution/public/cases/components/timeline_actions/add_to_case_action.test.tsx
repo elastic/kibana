@@ -6,7 +6,7 @@
  */
 
 /* eslint-disable react/display-name */
-import React, { ReactNode } from 'react';
+import React from 'react';
 import { mount } from 'enzyme';
 import { EuiGlobalToastList } from '@elastic/eui';
 
@@ -15,6 +15,7 @@ import { useStateToaster } from '../../../common/components/toasters';
 import { TestProviders } from '../../../common/mock';
 import { AddToCaseAction } from './add_to_case_action';
 import { Case } from '../../../../../cases/common';
+import { useAllCasesModal } from '../use_all_cases_modal';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -25,6 +26,8 @@ jest.mock('../../../common/components/toasters', () => {
     useStateToaster: jest.fn(),
   };
 });
+
+jest.mock('../use_all_cases_modal');
 
 jest.mock('../all_cases', () => {
   return {
@@ -48,56 +51,6 @@ jest.mock('../all_cases', () => {
   };
 });
 
-jest.mock('../create/form_context', () => {
-  return {
-    FormContext: ({
-      children,
-      onSuccess,
-      afterCaseCreated,
-    }: {
-      children: ReactNode;
-      onSuccess: (theCase: Partial<Case>) => Promise<void>;
-      afterCaseCreated: (theCase: Partial<Case>) => Promise<void>;
-    }) => {
-      return (
-        <>
-          <button
-            type="button"
-            data-test-subj="form-context-on-success"
-            onClick={() => {
-              afterCaseCreated({
-                id: 'new-case',
-                title: 'the new case',
-                settings: { syncAlerts: true },
-              });
-              onSuccess({ id: 'new-case', title: 'the new case', settings: { syncAlerts: true } });
-            }}
-          >
-            {'submit'}
-          </button>
-          {children}
-        </>
-      );
-    },
-  };
-});
-
-jest.mock('../create/form', () => {
-  return {
-    CreateCaseForm: () => {
-      return <>{'form'}</>;
-    },
-  };
-});
-
-jest.mock('../create/submit_button', () => {
-  return {
-    SubmitCaseButton: () => {
-      return <>{'Submit'}</>;
-    },
-  };
-});
-
 describe('AddToCaseAction', () => {
   const props = {
     ecsRowData: {
@@ -109,12 +62,20 @@ describe('AddToCaseAction', () => {
 
   const mockDispatchToaster = jest.fn();
   const mockNavigateToApp = jest.fn();
+  const mockCreateCase = jest.fn();
+  const mockUseCasesModal = useAllCasesModal as jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // mockUseCasesModal.mockReturnValue()
     (useStateToaster as jest.Mock).mockReturnValue([jest.fn(), mockDispatchToaster]);
     (useKibana as jest.Mock).mockReturnValue({
-      services: { application: { navigateToApp: mockNavigateToApp } },
+      services: {
+        application: { navigateToApp: mockNavigateToApp },
+        cases: {
+          getCreateCase: mockCreateCase,
+        },
+      },
     });
     (useGetUserSavedObjectPermissions as jest.Mock).mockReturnValue({
       crud: true,
@@ -153,32 +114,7 @@ describe('AddToCaseAction', () => {
 
     wrapper.find(`[data-test-subj="attach-alert-to-case-button"]`).first().simulate('click');
     wrapper.find(`[data-test-subj="add-new-case-item"]`).first().simulate('click');
-
-    expect(wrapper.find(`[data-test-subj="form-context-on-success"]`).exists()).toBeTruthy();
-  });
-
-  it('it attach the alert to case on case creation', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <AddToCaseAction {...props} />
-      </TestProviders>
-    );
-
-    wrapper.find(`[data-test-subj="attach-alert-to-case-button"]`).first().simulate('click');
-    wrapper.find(`[data-test-subj="add-new-case-item"]`).first().simulate('click');
-
-    wrapper.find(`[data-test-subj="form-context-on-success"]`).first().simulate('click');
-
-    // expect(postComment.mock.calls[0][0].caseId).toBe('new-case');
-    // expect(postComment.mock.calls[0][0].data).toEqual({
-    //   alertId: 'test-id',
-    //   index: 'test-index',
-    //   rule: {
-    //     id: 'rule-id',
-    //     name: 'rule-name',
-    //   },
-    //   type: 'alert',
-    // });
+    expect(mockCreateCase).toHaveBeenCalled();
   });
 
   it('it opens the all cases modal', async () => {
@@ -192,30 +128,6 @@ describe('AddToCaseAction', () => {
     wrapper.find(`[data-test-subj="add-existing-case-menu-item"]`).first().simulate('click');
 
     expect(wrapper.find(`[data-test-subj="all-cases-modal-button"]`).exists()).toBeTruthy();
-  });
-
-  it('it attach the alert to case after selecting a case', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <AddToCaseAction {...props} />
-      </TestProviders>
-    );
-
-    wrapper.find(`[data-test-subj="attach-alert-to-case-button"]`).first().simulate('click');
-    wrapper.find(`[data-test-subj="add-existing-case-menu-item"]`).first().simulate('click');
-
-    wrapper.find(`[data-test-subj="all-cases-modal-button"]`).first().simulate('click');
-
-    // expect(postComment.mock.calls[0][0].caseId).toBe('selected-case');
-    // expect(postComment.mock.calls[0][0].data).toEqual({
-    //   alertId: 'test-id',
-    //   index: 'test-index',
-    //   rule: {
-    //     id: 'rule-id',
-    //     name: 'rule-name',
-    //   },
-    //   type: 'alert',
-    // });
   });
 
   it('it set rule information as null when missing', async () => {
@@ -234,19 +146,7 @@ describe('AddToCaseAction', () => {
 
     wrapper.find(`[data-test-subj="attach-alert-to-case-button"]`).first().simulate('click');
     wrapper.find(`[data-test-subj="add-new-case-item"]`).first().simulate('click');
-
-    wrapper.find(`[data-test-subj="form-context-on-success"]`).first().simulate('click');
-
-    // expect(postComment.mock.calls[0][0].caseId).toBe('new-case');
-    // expect(postComment.mock.calls[0][0].data).toEqual({
-    //   alertId: 'test-id',
-    //   index: 'test-index',
-    //   rule: {
-    //     id: 'rule-id',
-    //     name: null,
-    //   },
-    //   type: 'alert',
-    // });
+    console.log('MOCKMOCK', mockCreateCase.mock.calls);
   });
 
   it('navigates to case view when attach to a new case', async () => {

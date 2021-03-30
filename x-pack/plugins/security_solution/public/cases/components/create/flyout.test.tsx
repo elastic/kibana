@@ -12,6 +12,15 @@ import '../../../common/mock/match_media';
 import { CreateCaseFlyout } from './flyout';
 import { TestProviders } from '../../../common/mock';
 
+jest.mock('../../../common/lib/kibana', () => ({
+  useKibana: () => ({
+    services: {
+      cases: {
+        getCreateCase: jest.fn(),
+      },
+    },
+  }),
+}));
 const onCloseFlyout = jest.fn();
 const onSuccess = jest.fn();
 const defaultProps = {
@@ -43,31 +52,5 @@ describe('CreateCaseFlyout', () => {
 
     wrapper.find('.euiFlyout__closeButton').first().simulate('click');
     expect(onCloseFlyout).toBeCalled();
-  });
-
-  it('pass the correct props to FormContext component', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <CreateCaseFlyout {...defaultProps} />
-      </TestProviders>
-    );
-
-    const props = wrapper.find('FormContext').props();
-    expect(props).toEqual(
-      expect.objectContaining({
-        onSuccess,
-      })
-    );
-  });
-
-  it('onSuccess called when creating a case', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <CreateCaseFlyout {...defaultProps} />
-      </TestProviders>
-    );
-
-    wrapper.find(`[data-test-subj='form-context-on-success']`).first().simulate('click');
-    expect(onSuccess).toHaveBeenCalledWith({ id: 'case-id' });
   });
 });
