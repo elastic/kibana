@@ -69,8 +69,8 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
       index: string,
       entityFields: any[],
       query: object | undefined,
-      metricFunction: string, // ES aggregation name
-      metricFieldName: string,
+      metricFunction: string | null, // ES aggregation name
+      metricFieldName: string | undefined,
       summaryCountFieldName: string | undefined,
       timeFieldName: string,
       earliestMs: number,
@@ -243,7 +243,7 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
     getModelPlotOutput(
       jobId: string,
       detectorIndex: number,
-      criteriaFields: any[],
+      criteriaFields: CriteriaField[],
       earliestMs: number,
       latestMs: number,
       intervalMs: number,
