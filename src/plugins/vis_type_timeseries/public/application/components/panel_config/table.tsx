@@ -31,16 +31,17 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { FieldSelect } from '../aggs/field_select';
 // @ts-expect-error not typed yet
 import { SeriesEditor } from '../series_editor';
-// @ts-ignore should be typed after https://github.com/elastic/kibana/pull/92812 to reduce conflicts
+// @ts-expect-error not typed yet
 import { IndexPattern } from '../index_pattern';
 import { YesNo } from '../yes_no';
-// @ts-ignore this is typed in https://github.com/elastic/kibana/pull/92812, remove ignore after merging
+
 import { QueryBarWrapper } from '../query_bar_wrapper';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { VisDataContext } from '../../contexts/vis_data_context';
 import { BUCKET_TYPES } from '../../../../common/metric_types';
 import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
 import { TimeseriesVisParams } from '../../../types';
+import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
 
 export class TablePanelConfig extends Component<
   PanelConfigProps,
@@ -66,7 +67,7 @@ export class TablePanelConfig extends Component<
   handlePivotChange = (selectedOption: Array<EuiComboBoxOptionOption<string>>) => {
     const { fields, model } = this.props;
     const pivotId = get(selectedOption, '[0].value', null);
-    const field = fields[model.index_pattern].find((f) => f.name === pivotId);
+    const field = fields[getIndexPatternKey(model.index_pattern)].find((f) => f.name === pivotId);
     const pivotType = get(field, 'type', model.pivot_type);
 
     this.props.onChange({
@@ -237,15 +238,13 @@ export class TablePanelConfig extends Component<
                 >
                   <QueryBarWrapper
                     query={{
-                      language: model.filter.language
-                        ? model.filter.language
-                        : getDefaultQueryLanguage(),
-                      query: model.filter.query || '',
+                      language: model.filter?.language || getDefaultQueryLanguage(),
+                      query: model.filter?.query || '',
                     }}
-                    onChange={(filter: PanelConfigProps['model']['filter']) =>
-                      this.props.onChange({ filter })
-                    }
-                    indexPatterns={[model.index_pattern || model.default_index_pattern]}
+                    onChange={(filter) => {
+                      this.props.onChange({ filter });
+                    }}
+                    indexPatterns={[model.index_pattern || model.default_index_pattern || '']}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -274,6 +273,7 @@ export class TablePanelConfig extends Component<
           <EuiTab
             isSelected={selectedTab === PANEL_CONFIG_TABS.DATA}
             onClick={() => this.switchTab(PANEL_CONFIG_TABS.DATA)}
+            data-test-subj="tableEditorDataBtn"
           >
             <FormattedMessage
               id="visTypeTimeseries.table.dataTab.columnsButtonLabel"
@@ -283,6 +283,7 @@ export class TablePanelConfig extends Component<
           <EuiTab
             isSelected={selectedTab === PANEL_CONFIG_TABS.OPTIONS}
             onClick={() => this.switchTab(PANEL_CONFIG_TABS.OPTIONS)}
+            data-test-subj="tableEditorPanelOptionsBtn"
           >
             <FormattedMessage
               id="visTypeTimeseries.table.optionsTab.panelOptionsButtonLabel"
