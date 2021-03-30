@@ -7,7 +7,7 @@
 
 import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
-import { Source } from '../../../containers/source';
+import { Source } from '../../../containers/metrics_source';
 import { MetricsTimeProvider } from './hooks/use_metrics_time';
 
 export const withMetricPageProviders = <T extends object>(Component: React.ComponentType<T>) => (

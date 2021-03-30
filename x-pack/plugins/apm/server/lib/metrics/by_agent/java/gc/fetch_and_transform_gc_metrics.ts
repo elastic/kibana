@@ -6,6 +6,7 @@
  */
 
 import { sum, round } from 'lodash';
+import { isFiniteNumber } from '../../../../../../common/utils/is_finite_number';
 import { Setup, SetupTimeRange } from '../../../../helpers/setup_request';
 import { getMetricsDateHistogramParams } from '../../../../helpers/metrics';
 import { ChartBase } from '../../../types';
@@ -125,10 +126,9 @@ export async function fetchAndTransformGcMetrics({
     const data = timeseriesData.buckets.map((bucket) => {
       // derivative/value will be undefined for the first hit and if the `max` value is null
       const bucketValue = bucket.value?.value;
-      const y =
-        bucketValue !== null && bucketValue !== undefined && bucket.value
-          ? round(bucketValue * (60 / bucketSize), 1)
-          : null;
+      const y = isFiniteNumber(bucketValue)
+        ? round(bucketValue * (60 / bucketSize), 1)
+        : null;
 
       return {
         y,

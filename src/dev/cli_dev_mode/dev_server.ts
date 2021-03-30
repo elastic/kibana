@@ -16,6 +16,7 @@ import {
   share,
   mergeMap,
   switchMap,
+  scan,
   takeUntil,
   ignoreElements,
 } from 'rxjs/operators';
@@ -71,6 +72,32 @@ export class DevServer {
 
   getPhase$() {
     return this.phase$.asObservable();
+  }
+
+  /**
+   * returns an observable of objects describing server start time.
+   */
+  getRestartTime$() {
+    return this.phase$.pipe(
+      scan((acc: undefined | { phase: string; time: number }, phase) => {
+        if (phase === 'starting') {
+          return { phase, time: Date.now() };
+        }
+
+        if (phase === 'listening' && acc?.phase === 'starting') {
+          return { phase, time: Date.now() - acc.time };
+        }
+
+        return undefined;
+      }, undefined),
+      mergeMap((desc) => {
+        if (desc?.phase !== 'listening') {
+          return [];
+        }
+
+        return [{ ms: desc.time }];
+      })
+    );
   }
 
   /**

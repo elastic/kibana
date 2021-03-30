@@ -123,6 +123,7 @@ async function handleTransformInstall({
     await esClient.transform.putTransform({
       transform_id: transform.installationName,
       defer_validation: true,
+      // @ts-expect-error expect object, but given a string
       body: transform.content,
     });
   } catch (err) {

@@ -10,7 +10,16 @@ import Path from 'path';
 
 import { REPO_ROOT, CiStatsReporter } from '@kbn/dev-utils';
 import * as Rx from 'rxjs';
-import { map, mapTo, filter, take, tap, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import {
+  map,
+  mapTo,
+  filter,
+  take,
+  tap,
+  distinctUntilChanged,
+  switchMap,
+  concatMap,
+} from 'rxjs/operators';
 
 import { CliArgs } from '../../core/server/config';
 import { LegacyConfig } from '../../core/server/legacy';
@@ -167,29 +176,10 @@ export class CliDevMode {
     this.subscription = new Rx.Subscription();
     this.startTime = Date.now();
 
-    this.subscription.add(
-      this.getStarted$()
-        .pipe(
-          switchMap(async (success) => {
-            const reporter = CiStatsReporter.fromEnv(this.log.toolingLog);
-            await reporter.timings({
-              timings: [
-                {
-                  group: 'yarn start',
-                  id: 'started',
-                  ms: Date.now() - this.startTime!,
-                  meta: { success },
-                },
-              ],
-            });
-          })
-        )
-        .subscribe({
-          error: (error) => {
-            this.log.bad(`[ci-stats/timings] unable to record startup time:`, error.stack);
-          },
-        })
-    );
+    const reporter = CiStatsReporter.fromEnv(this.log.toolingLog);
+    if (reporter.isEnabled()) {
+      this.subscription.add(this.reportTimings(reporter));
+    }
 
     if (basePathProxy) {
       const serverReady$ = new Rx.BehaviorSubject(false);
@@ -243,6 +233,64 @@ export class CliDevMode {
     this.subscription.add(this.optimizer.run$.subscribe(this.observer('@kbn/optimizer')));
     this.subscription.add(this.watcher.run$.subscribe(this.observer('watcher')));
     this.subscription.add(this.devServer.run$.subscribe(this.observer('dev server')));
+  }
+
+  private reportTimings(reporter: CiStatsReporter) {
+    const sub = new Rx.Subscription();
+
+    sub.add(
+      this.getStarted$()
+        .pipe(
+          concatMap(async (success) => {
+            await reporter.timings({
+              timings: [
+                {
+                  group: 'yarn start',
+                  id: 'started',
+                  ms: Date.now() - this.startTime!,
+                  meta: { success },
+                },
+              ],
+            });
+          })
+        )
+        .subscribe({
+          error: (error) => {
+            this.log.bad(`[ci-stats/timings] unable to record startup time:`, error.stack);
+          },
+        })
+    );
+
+    sub.add(
+      this.devServer
+        .getRestartTime$()
+        .pipe(
+          concatMap(async ({ ms }, i) => {
+            await reporter.timings({
+              timings: [
+                {
+                  group: 'yarn start',
+                  id: 'dev server restart',
+                  ms,
+                  meta: {
+                    sequence: i + 1,
+                  },
+                },
+              ],
+            });
+          })
+        )
+        .subscribe({
+          error: (error) => {
+            this.log.bad(
+              `[ci-stats/timings] unable to record dev server restart time:`,
+              error.stack
+            );
+          },
+        })
+    );
+
+    return sub;
   }
 
   /**

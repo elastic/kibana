@@ -6,8 +6,12 @@
  */
 
 import { KibanaRequest } from 'src/core/server';
-import { RequestParams } from '@elastic/elasticsearch';
 import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
+import {
+  CreateIndexRequest,
+  DeleteRequest,
+  IndexRequest,
+} from '@elastic/elasticsearch/api/types';
 import { unwrapEsResponse } from '../../../../../../observability/server';
 import { APMRequestHandlerContext } from '../../../../routes/typings';
 import {
@@ -21,7 +25,7 @@ import {
 } from '../call_async_with_debug';
 import { cancelEsRequestOnAbort } from '../cancel_es_request_on_abort';
 
-export type APMIndexDocumentParams<T> = RequestParams.Index<T>;
+export type APMIndexDocumentParams<T> = IndexRequest<T>;
 
 export type APMInternalClient = ReturnType<typeof createInternalESClient>;
 
@@ -36,10 +40,10 @@ export function createInternalESClient({
 
   function callEs<T extends { body: any }>({
     cb,
-    operationName,
+    requestType,
     params,
   }: {
-    operationName: string;
+    requestType: string;
     cb: () => TransportRequestPromise<T>;
     params: Record<string, any>;
   }) {
@@ -47,9 +51,13 @@ export function createInternalESClient({
       cb: () => unwrapEsResponse(cancelEsRequestOnAbort(cb(), request)),
       getDebugMessage: () => ({
         title: getDebugTitle(request),
-        body: getDebugBody(params, operationName),
+        body: getDebugBody(params, requestType),
       }),
-      debug: context.params.query._debug,
+      debug: context.params.query._inspect,
+      isCalledWithInternalUser: true,
+      request,
+      requestType,
+      requestParams: params,
     });
   }
 
@@ -61,28 +69,28 @@ export function createInternalESClient({
       params: TSearchRequest
     ): Promise<ESSearchResponse<TDocument, TSearchRequest>> => {
       return callEs({
-        operationName: 'search',
+        requestType: 'search',
         cb: () => asInternalUser.search(params),
         params,
       });
     },
     index: <T>(params: APMIndexDocumentParams<T>) => {
       return callEs({
-        operationName: 'index',
+        requestType: 'index',
         cb: () => asInternalUser.index(params),
         params,
       });
     },
-    delete: (params: RequestParams.Delete): Promise<{ result: string }> => {
+    delete: (params: DeleteRequest): Promise<{ result: string }> => {
       return callEs({
-        operationName: 'delete',
+        requestType: 'delete',
         cb: () => asInternalUser.delete(params),
         params,
       });
     },
-    indicesCreate: (params: RequestParams.IndicesCreate) => {
+    indicesCreate: (params: CreateIndexRequest) => {
       return callEs({
-        operationName: 'indices.create',
+        requestType: 'indices.create',
         cb: () => asInternalUser.indices.create(params),
         params,
       });

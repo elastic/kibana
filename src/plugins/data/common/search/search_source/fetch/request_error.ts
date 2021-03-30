@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { KbnError } from '../../../../../kibana_utils/common';
 import { SearchError } from './types';
 
@@ -16,8 +16,8 @@ import { SearchError } from './types';
  * @param {Object} resp - optional HTTP response
  */
 export class RequestFailure extends KbnError {
-  public resp?: SearchResponse<any>;
-  constructor(err: SearchError | null = null, resp?: SearchResponse<any>) {
+  public resp?: estypes.SearchResponse<any>;
+  constructor(err: SearchError | null = null, resp?: estypes.SearchResponse<any>) {
     super(`Request to Elasticsearch failed: ${JSON.stringify(resp || err?.message)}`);
 
     this.resp = resp;

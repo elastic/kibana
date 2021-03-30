@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getPageObjects }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
 
   describe('lens drag and drop tests', () => {
@@ -132,7 +132,38 @@ export default function ({ getPageObjects }: FtrProviderContext) {
           'Top values of @message.raw',
         ]);
       });
+
+      it('Should duplicate and swap elements when dragging over secondary drop targets', async () => {
+        await PageObjects.lens.removeLayer();
+        await PageObjects.lens.switchToVisualization('bar');
+        await PageObjects.lens.dragFieldToWorkspace('@timestamp');
+
+        await PageObjects.lens.dragDimensionToExtraDropType(
+          'lnsXY_xDimensionPanel > lns-dimensionTrigger',
+          'lnsXY_splitDimensionPanel',
+          'duplicate'
+        );
+        expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_splitDimensionPanel')).to.eql(
+          '@timestamp [1]'
+        );
+        await PageObjects.lens.dragFieldToDimensionTrigger(
+          '@message.raw',
+          'lnsXY_yDimensionPanel > lns-dimensionTrigger'
+        );
+        await PageObjects.lens.dragDimensionToExtraDropType(
+          'lnsXY_splitDimensionPanel > lns-dimensionTrigger',
+          'lnsXY_yDimensionPanel',
+          'swap'
+        );
+        expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
+          'Unique count of @timestamp'
+        );
+        expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_splitDimensionPanel')).to.eql(
+          'Top values of @message.raw'
+        );
+      });
     });
+
     describe('keyboard drag and drop', () => {
       it('should drop a field to workspace', async () => {
         await PageObjects.visualize.navigateToNewVisualization();

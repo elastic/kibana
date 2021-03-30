@@ -86,7 +86,7 @@ describe('getSearchDsl', () => {
       const opts = {
         type: 'foo',
         sortField: 'bar',
-        sortOrder: 'baz',
+        sortOrder: 'asc' as const,
         pit: { id: 'abc123' },
       };
 
@@ -109,10 +109,10 @@ describe('getSearchDsl', () => {
     it('returns searchAfter if provided', () => {
       getQueryParams.mockReturnValue({ a: 'a' });
       getSortingParams.mockReturnValue({ b: 'b' });
-      expect(getSearchDsl(mappings, registry, { type: 'foo', searchAfter: [1, 'bar'] })).toEqual({
+      expect(getSearchDsl(mappings, registry, { type: 'foo', searchAfter: ['1', 'bar'] })).toEqual({
         a: 'a',
         b: 'b',
-        search_after: [1, 'bar'],
+        search_after: ['1', 'bar'],
       });
     });
 
@@ -123,14 +123,14 @@ describe('getSearchDsl', () => {
       expect(
         getSearchDsl(mappings, registry, {
           type: 'foo',
-          searchAfter: [1, 'bar'],
+          searchAfter: ['1', 'bar'],
           pit: { id: 'abc123' },
         })
       ).toEqual({
         a: 'a',
         b: 'b',
         pit: { id: 'abc123' },
-        search_after: [1, 'bar'],
+        search_after: ['1', 'bar'],
       });
     });
   });

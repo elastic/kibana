@@ -114,7 +114,7 @@ export const renderApp = (
   // render APM feedback link in global help menu
   setHelpExtension(core);
   setReadonlyBadge(core);
-  createCallApmApi(core.http);
+  createCallApmApi(core);
 
   // Automatically creates static index pattern and stores as saved object
   createStaticIndexPattern().catch((e) => {
