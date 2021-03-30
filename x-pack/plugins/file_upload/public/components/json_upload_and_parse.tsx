@@ -31,6 +31,7 @@ function getWritingToIndexMsg(progress: number) {
 }
 
 interface State {
+  failedPermissionCheck: boolean;
   geoFieldType: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE;
   importStatus: string;
   importResults?: ImportResults;
@@ -45,6 +46,7 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
   private _isMounted = false;
 
   state: State = {
+    failedPermissionCheck: false,
     geoFieldType: ES_FIELD_TYPES.GEO_SHAPE,
     importStatus: '',
     indexName: '',
@@ -77,6 +79,7 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
     //
     // check permissions
     //
+    // set failedPermissionCheck
 
     //
     // create index
@@ -260,6 +263,8 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
         <ImportCompleteView
           importResults={this.state.importResults}
           indexPatternResp={this.state.indexPatternResp}
+          indexName={this.state.indexName}
+          failedPermissionCheck={this.state.failedPermissionCheck}
         />
       );
     }

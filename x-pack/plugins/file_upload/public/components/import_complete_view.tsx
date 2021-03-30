@@ -14,12 +14,13 @@ import {
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { CodeEditor, KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
-import { getHttp, getUiSettings } from '../kibana_services';
+import { getDocLinks, getHttp, getUiSettings } from '../kibana_services';
 import { ImportResults } from '../importer';
 
 const services = {
@@ -27,8 +28,10 @@ const services = {
 };
 
 interface Props {
+  failedPermissionCheck: boolean;
   importResults?: ImportResults;
   indexPatternResp?: object;
+  indexName: string;
 }
 
 export class ImportCompleteView extends Component<Props, {}> {
@@ -90,6 +93,35 @@ export class ImportCompleteView extends Component<Props, {}> {
   }
 
   _getStatusMsg() {
+    if (this.props.failedPermissionCheck) {
+      return (
+        <EuiCallOut
+          title={i18n.translate('xpack.fileUpload.uploadFailureTitle', {
+            defaultMessage: 'File upload failed',
+          })}
+          color="danger"
+          iconType="alert"
+        >
+          <p>
+            {i18n.translate('xpack.fileUpload.permissionFailureMsg', {
+              defaultMessage:
+                'You do not have permission to create or import data into index "{indexName}".',
+              values: { indexName: this.props.indexName },
+            })}
+          </p>
+          <EuiLink
+            href={getDocLinks().links.maps.importGeospatialPrivileges}
+            target="_blank"
+            external
+          >
+            {i18n.translate('xpack.fileUpload.permission.learnMoreLinkText', {
+              defaultMessage: 'Learn about file import permissions.',
+            })}
+          </EuiLink>
+        </EuiCallOut>
+      );
+    }
+
     if (!this.props.importResults || !this.props.importResults.success) {
       const errorMsg = this.props.importResults.error
         ? i18n.translate('xpack.fileUpload.uploadFailureMsgErrorBlock', {
