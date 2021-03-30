@@ -19,7 +19,7 @@ import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 
 export const getDocId = (doc: ElasticSearchHit & { _routing?: string }) => {
   const routing = doc._routing ? doc._routing : '';
-  return [doc._index, doc._id, routing].join(' - ');
+  return [doc._index, doc._id, routing].join('--');
 };
 
 const SelectButton = ({ rowIndex }: { rowIndex: number }) => {
@@ -27,11 +27,13 @@ const SelectButton = ({ rowIndex }: { rowIndex: number }) => {
   const doc = useMemo(() => ctx.rows[rowIndex], [ctx.rows, rowIndex]);
   const id = useMemo(() => getDocId(doc), [doc]);
   const checked = useMemo(() => ctx.selectedDocs.includes(id), [ctx.selectedDocs, id]);
+
   return (
     <EuiCheckbox
       id={id}
       label=""
       checked={checked}
+      data-test-subj={`dscGridSelectDoc-${id}`}
       onChange={() => {
         if (checked) {
           const newSelection = ctx.selectedDocs.filter((docId) => docId !== id);

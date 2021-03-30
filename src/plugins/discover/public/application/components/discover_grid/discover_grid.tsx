@@ -272,6 +272,8 @@ export const DiscoverGrid = ({
               iconType="documents"
               className="euiDataGrid__controlBtn"
               onClick={() => setIsSelectionPopoverOpen(true)}
+              data-selected-documents={selectedDocs.length}
+              data-test-subj="dscGridSelectionBtn"
             >
               <FormattedMessage
                 id="discover.selectedDocumentsNumber"
