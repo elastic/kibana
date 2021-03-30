@@ -63,5 +63,5 @@ export interface GetDeprecationsContext {
 }
 
 export interface DeprecationsGetResponse {
-  deprecationsInfo: DomainDeprecationDetails[];
+  deprecations: DomainDeprecationDetails[];
 }

@@ -25,7 +25,7 @@ export class DeprecationsFactory {
     this.logger = logger;
   }
 
-  public createRegistry = (domainId: string): DeprecationsRegistry => {
+  public getRegistry = (domainId: string): DeprecationsRegistry => {
     const existing = this.registries.get(domainId);
     if (existing) {
       return existing;
@@ -33,10 +33,6 @@ export class DeprecationsFactory {
     const registry = new DeprecationsRegistry();
     this.registries.set(domainId, registry);
     return registry;
-  };
-
-  public getRegistry = (domainId: string): DeprecationsRegistry | undefined => {
-    return this.registries.get(domainId);
   };
 
   public getDeprecations = async (

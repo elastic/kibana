@@ -25,9 +25,8 @@ export const registerGetRoute = (router: IRouter, { deprecationsFactory }: Route
         savedObjectsClient: context.core.savedObjects.client,
       };
 
-      const deprecationsInfo = await deprecationsFactory.getAllDeprecations(dependencies);
       const body: DeprecationsGetResponse = {
-        deprecationsInfo,
+        deprecations: await deprecationsFactory.getAllDeprecations(dependencies),
       };
 
       return res.ok({ body });

@@ -16,11 +16,12 @@ describe('DeprecationsFactory', () => {
     loggerMock.clear(logger);
   });
 
-  describe('createRegistry', () => {
+  describe('getRegistry', () => {
+    const domainId = 'test-plugin';
+
     it('creates a registry for a domainId', async () => {
       const deprecationsFactory = new DeprecationsFactory({ logger });
-      const domainId = 'test-plugin';
-      const registry = deprecationsFactory.createRegistry(domainId);
+      const registry = deprecationsFactory.getRegistry(domainId);
 
       expect(registry).toHaveProperty('registerDeprecations');
       expect(registry).toHaveProperty('getDeprecations');
@@ -28,23 +29,28 @@ describe('DeprecationsFactory', () => {
 
     it('creates one registry for a domainId', async () => {
       const deprecationsFactory = new DeprecationsFactory({ logger });
-      const domainId = 'test-plugin';
-      const registry = deprecationsFactory.createRegistry(domainId);
-      const sameRegistry = deprecationsFactory.createRegistry(domainId);
+      const registry = deprecationsFactory.getRegistry(domainId);
+      const sameRegistry = deprecationsFactory.getRegistry(domainId);
 
       expect(registry).toStrictEqual(sameRegistry);
     });
-  });
 
-  describe('getRegistry', () => {
-    const domainId = 'test-plugin';
-    const deprecationsFactory = new DeprecationsFactory({ logger });
     it('returns a registered registry', () => {
-      const registry = deprecationsFactory.createRegistry(domainId);
-      expect(deprecationsFactory.getRegistry(domainId)).toStrictEqual(registry);
-    });
-    it('returns undefined if no registry is defined', () => {
-      expect(deprecationsFactory.getRegistry('never-registered-plugin')).toBe(undefined);
+      const deprecationsFactory = new DeprecationsFactory({ logger });
+      const mockRegistry = 'mock-reg';
+      const mockRegistries = {
+        set: jest.fn(),
+        get: jest.fn().mockReturnValue(mockRegistry),
+      };
+
+      // @ts-expect-error
+      deprecationsFactory.registries = mockRegistries;
+      const result = deprecationsFactory.getRegistry(domainId);
+
+      expect(mockRegistries.get).toBeCalledTimes(1);
+      expect(mockRegistries.get).toBeCalledWith(domainId);
+      expect(mockRegistries.set).toBeCalledTimes(0);
+      expect(result).toStrictEqual(mockRegistry);
     });
   });
 
@@ -82,8 +88,8 @@ describe('DeprecationsFactory', () => {
         },
       ];
 
-      const mockPluginRegistry = deprecationsFactory.createRegistry('mockPlugin');
-      const anotherMockPluginRegistry = deprecationsFactory.createRegistry('anotherMockPlugin');
+      const mockPluginRegistry = deprecationsFactory.getRegistry('mockPlugin');
+      const anotherMockPluginRegistry = deprecationsFactory.getRegistry('anotherMockPlugin');
       mockPluginRegistry.registerDeprecations({
         getDeprecations: jest.fn().mockResolvedValue(mockPluginDeprecationsInfo),
       });
@@ -91,8 +97,8 @@ describe('DeprecationsFactory', () => {
         getDeprecations: jest.fn().mockResolvedValue(anotherMockPluginDeprecationsInfo),
       });
 
-      const derpecationsInfo = await deprecationsFactory.getAllDeprecations(mockDependencies);
-      expect(derpecationsInfo).toStrictEqual(
+      const derpecations = await deprecationsFactory.getAllDeprecations(mockDependencies);
+      expect(derpecations).toStrictEqual(
         [
           mockPluginDeprecationsInfo.map((info) => ({ ...info, domainId: 'mockPlugin' })),
           anotherMockPluginDeprecationsInfo.map((info) => ({
@@ -108,17 +114,17 @@ describe('DeprecationsFactory', () => {
       const domainId = 'mockPlugin';
       const mockError = new Error();
 
-      const deprecationsRegistry = deprecationsFactory.createRegistry(domainId);
+      const deprecationsRegistry = deprecationsFactory.getRegistry(domainId);
       deprecationsRegistry.registerDeprecations({
         getDeprecations: jest.fn().mockRejectedValue(mockError),
       });
-      const derpecationsInfo = await deprecationsFactory.getAllDeprecations(mockDependencies);
+      const derpecations = await deprecationsFactory.getAllDeprecations(mockDependencies);
       expect(logger.warn).toBeCalledTimes(1);
       expect(logger.warn).toBeCalledWith(
         `Failed to get deprecations info for plugin "${domainId}".`,
         mockError
       );
-      expect(derpecationsInfo).toStrictEqual([
+      expect(derpecations).toStrictEqual([
         {
           domainId,
           message: `Failed to get deprecations info for plugin "${domainId}".`,
@@ -132,8 +138,8 @@ describe('DeprecationsFactory', () => {
 
     it(`returns successful results even when some getDeprecations fail`, async () => {
       const deprecationsFactory = new DeprecationsFactory({ logger });
-      const mockPluginRegistry = deprecationsFactory.createRegistry('mockPlugin');
-      const anotherMockPluginRegistry = deprecationsFactory.createRegistry('anotherMockPlugin');
+      const mockPluginRegistry = deprecationsFactory.getRegistry('mockPlugin');
+      const anotherMockPluginRegistry = deprecationsFactory.getRegistry('anotherMockPlugin');
       const mockError = new Error();
       const mockPluginDeprecationsInfo = [
         {
@@ -150,14 +156,14 @@ describe('DeprecationsFactory', () => {
       anotherMockPluginRegistry.registerDeprecations({
         getDeprecations: jest.fn().mockRejectedValue(mockError),
       });
-      const derpecationsInfo = await deprecationsFactory.getAllDeprecations(mockDependencies);
+      const derpecations = await deprecationsFactory.getAllDeprecations(mockDependencies);
 
       expect(logger.warn).toBeCalledTimes(1);
       expect(logger.warn).toBeCalledWith(
         `Failed to get deprecations info for plugin "anotherMockPlugin".`,
         mockError
       );
-      expect(derpecationsInfo).toStrictEqual([
+      expect(derpecations).toStrictEqual([
         ...mockPluginDeprecationsInfo.map((info) => ({ ...info, domainId: 'mockPlugin' })),
         {
           domainId: 'anotherMockPlugin',
@@ -179,8 +185,8 @@ describe('DeprecationsFactory', () => {
 
     it('returns a flattened array of DeprecationInfo', async () => {
       const deprecationsFactory = new DeprecationsFactory({ logger });
-      const deprecationsRegistry = deprecationsFactory.createRegistry('mockPlugin');
-      const deprecationsInfoBody = [
+      const deprecationsRegistry = deprecationsFactory.getRegistry('mockPlugin');
+      const deprecationsBody = [
         {
           message: 'mockPlugin message',
           level: 'critical',
@@ -200,22 +206,22 @@ describe('DeprecationsFactory', () => {
       ];
 
       deprecationsRegistry.registerDeprecations({
-        getDeprecations: jest.fn().mockResolvedValue(deprecationsInfoBody),
+        getDeprecations: jest.fn().mockResolvedValue(deprecationsBody),
       });
 
-      const derpecationsInfo = await deprecationsFactory.getDeprecations(
+      const derpecations = await deprecationsFactory.getDeprecations(
         'mockPlugin',
         mockDependencies
       );
-      expect(derpecationsInfo).toStrictEqual(
-        deprecationsInfoBody.flat().map((body) => ({ ...body, domainId: 'mockPlugin' }))
+      expect(derpecations).toStrictEqual(
+        deprecationsBody.flat().map((body) => ({ ...body, domainId: 'mockPlugin' }))
       );
     });
 
     it('removes empty entries from the returned array', async () => {
       const deprecationsFactory = new DeprecationsFactory({ logger });
-      const deprecationsRegistry = deprecationsFactory.createRegistry('mockPlugin');
-      const deprecationsInfoBody = [
+      const deprecationsRegistry = deprecationsFactory.getRegistry('mockPlugin');
+      const deprecationsBody = [
         {
           message: 'mockPlugin message',
           level: 'critical',
@@ -228,17 +234,15 @@ describe('DeprecationsFactory', () => {
       ];
 
       deprecationsRegistry.registerDeprecations({
-        getDeprecations: jest.fn().mockResolvedValue(deprecationsInfoBody),
+        getDeprecations: jest.fn().mockResolvedValue(deprecationsBody),
       });
 
-      const derpecationsInfo = await deprecationsFactory.getDeprecations(
+      const derpecations = await deprecationsFactory.getDeprecations(
         'mockPlugin',
         mockDependencies
       );
-      expect(derpecationsInfo).toHaveLength(1);
-      expect(derpecationsInfo).toStrictEqual([
-        { ...deprecationsInfoBody[0], domainId: 'mockPlugin' },
-      ]);
+      expect(derpecations).toHaveLength(1);
+      expect(derpecations).toStrictEqual([{ ...deprecationsBody[0], domainId: 'mockPlugin' }]);
     });
   });
 });

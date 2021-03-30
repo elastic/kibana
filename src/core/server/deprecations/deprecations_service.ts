@@ -106,7 +106,7 @@ export interface DeprecationsServiceSetup {
 
 /** @internal */
 export interface InternalDeprecationsServiceSetup {
-  createRegistry: (domainId: string) => DeprecationsServiceSetup;
+  getRegistry: (domainId: string) => DeprecationsServiceSetup;
 }
 
 /** @internal */
@@ -121,7 +121,7 @@ export class DeprecationsService implements CoreService<InternalDeprecationsServ
   private readonly logger: Logger;
 
   constructor(private readonly coreContext: CoreContext) {
-    this.logger = coreContext.logger.get('deprecations');
+    this.logger = coreContext.logger.get('deprecations-service');
   }
 
   public setup({ http }: DeprecationsSetupDeps): InternalDeprecationsServiceSetup {
@@ -134,8 +134,8 @@ export class DeprecationsService implements CoreService<InternalDeprecationsServ
     this.registerConfigDeprecationsInfo(deprecationsFactory);
 
     return {
-      createRegistry: (domainId: string): DeprecationsServiceSetup => {
-        const registry = deprecationsFactory.createRegistry(domainId);
+      getRegistry: (domainId: string): DeprecationsServiceSetup => {
+        const registry = deprecationsFactory.getRegistry(domainId);
         return {
           registerDeprecations: registry.registerDeprecations,
         };
@@ -150,7 +150,7 @@ export class DeprecationsService implements CoreService<InternalDeprecationsServ
     const handledDeprecatedConfigs = this.coreContext.configService.getHandledDeprecatedConfigs();
 
     for (const [domainId, deprecationsContexts] of handledDeprecatedConfigs) {
-      const deprecationsRegistry = deprecationsFactory.createRegistry(domainId);
+      const deprecationsRegistry = deprecationsFactory.getRegistry(domainId);
       deprecationsRegistry.registerDeprecations({
         getDeprecations: () => {
           return deprecationsContexts.map(({ message, correctiveActions, documentationUrl }) => {

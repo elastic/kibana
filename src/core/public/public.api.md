@@ -480,7 +480,7 @@ export interface DeprecationsServiceStart {
     getAllDeprecations: () => Promise<DomainDeprecationDetails[]>;
     getDeprecations: (domainId: string) => Promise<DomainDeprecationDetails[]>;
     isDeprecationResolvable: (details: DomainDeprecationDetails) => boolean;
-    resolveDeprecation: <Payload = unknown>(details: DomainDeprecationDetails) => Promise<ResolveDeprecationResponse<Payload>>;
+    resolveDeprecation: (details: DomainDeprecationDetails) => Promise<ResolveDeprecationResponse>;
 }
 
 // @public (undocumented)
@@ -1087,12 +1087,11 @@ export type PublicUiSettingsParams = Omit<UiSettingsParams, 'schema'>;
 // Warning: (ae-missing-release-tag) "ResolveDeprecationResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type ResolveDeprecationResponse<Payload> = {
+export type ResolveDeprecationResponse = {
     status: 'ok';
-    payload: Payload;
 } | {
     status: 'fail';
-    payload: string | Error;
+    reason: string;
 };
 
 // Warning: (ae-missing-release-tag) "SavedObject" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)

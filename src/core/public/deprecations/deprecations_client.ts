@@ -15,15 +15,7 @@ export interface DeprecationsClientDeps {
 }
 
 /* @internal */
-export type ResolveDeprecationResponse<Payload> =
-  | {
-      status: 'ok';
-      payload: Payload;
-    }
-  | {
-      status: 'fail';
-      payload: string | Error;
-    };
+export type ResolveDeprecationResponse = { status: 'ok' } | { status: 'fail'; reason: string };
 
 export class DeprecationsClient {
   private readonly http: Pick<HttpStart, 'fetch'>;
@@ -32,14 +24,11 @@ export class DeprecationsClient {
   }
 
   private fetchDeprecations = async (): Promise<DomainDeprecationDetails[]> => {
-    const { deprecationsInfo } = await this.http.fetch<DeprecationsGetResponse>(
-      '/api/deprecations/',
-      {
-        asSystemRequest: true,
-      }
-    );
+    const { deprecations } = await this.http.fetch<DeprecationsGetResponse>('/api/deprecations/', {
+      asSystemRequest: true,
+    });
 
-    return deprecationsInfo;
+    return deprecations;
   };
 
   public getAllDeprecations = async () => {
@@ -55,21 +44,21 @@ export class DeprecationsClient {
     return typeof details.correctiveActions.api === 'object';
   };
 
-  public resolveDeprecation = async <Payload = unknown>(
+  public resolveDeprecation = async (
     details: DomainDeprecationDetails
-  ): Promise<ResolveDeprecationResponse<Payload>> => {
+  ): Promise<ResolveDeprecationResponse> => {
     const { domainId, correctiveActions } = details;
     // explicit check required for TS type guard
     if (typeof correctiveActions.api !== 'object') {
       return {
         status: 'fail',
-        payload: new Error('deprecation has no correctiveAction via api.'),
+        reason: 'deprecation has no correctiveAction via api.',
       };
     }
 
     const { body, method, path } = correctiveActions.api;
     try {
-      const payload = await this.http.fetch<Payload>({
+      await this.http.fetch<void>({
         path,
         method,
         asSystemRequest: true,
@@ -78,12 +67,11 @@ export class DeprecationsClient {
           deprecationDetails: { domainId },
         }),
       });
-
-      return { status: 'ok', payload };
+      return { status: 'ok' };
     } catch (err) {
       return {
         status: 'fail',
-        payload: err,
+        reason: err.body.message,
       };
     }
   };

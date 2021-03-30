@@ -12,7 +12,7 @@ import type { DomainDeprecationDetails } from '../../server/types';
 
 describe('DeprecationsClient', () => {
   const http = httpServiceMock.createSetupContract();
-  const mockDeprecationsInfo = [
+  const mockDeprecations = [
     { domainId: 'testPluginId-1' },
     { domainId: 'testPluginId-1' },
     { domainId: 'testPluginId-2' },
@@ -20,7 +20,7 @@ describe('DeprecationsClient', () => {
 
   beforeEach(() => {
     http.fetch.mockReset();
-    http.fetch.mockResolvedValue({ deprecationsInfo: mockDeprecationsInfo });
+    http.fetch.mockResolvedValue({ deprecations: mockDeprecations });
   });
 
   describe('getAllDeprecations', () => {
@@ -32,7 +32,7 @@ describe('DeprecationsClient', () => {
         asSystemRequest: true,
       });
 
-      expect(deprecations).toEqual(mockDeprecationsInfo);
+      expect(deprecations).toEqual(mockDeprecations);
     });
   });
 
@@ -58,10 +58,10 @@ describe('DeprecationsClient', () => {
     it('calls the fetch api', async () => {
       const deprecationsClient = new DeprecationsClient({ http });
       http.fetch.mockResolvedValueOnce({
-        deprecationsInfo: [{ domainId: 'testPluginId-1' }, { domainId: 'testPluginId-1' }],
+        deprecations: [{ domainId: 'testPluginId-1' }, { domainId: 'testPluginId-1' }],
       });
       http.fetch.mockResolvedValueOnce({
-        deprecationsInfo: [{ domainId: 'testPluginId-2' }, { domainId: 'testPluginId-2' }],
+        deprecations: [{ domainId: 'testPluginId-2' }, { domainId: 'testPluginId-2' }],
       });
       const results = [
         ...(await deprecationsClient.getDeprecations('testPluginId-1')),
@@ -126,13 +126,12 @@ describe('DeprecationsClient', () => {
 
       expect(result).toEqual({
         status: 'fail',
-        payload: new Error('deprecation has no correctiveAction via api.'),
+        reason: 'deprecation has no correctiveAction via api.',
       });
     });
 
     it('fetches the deprecation api', async () => {
       const deprecationsClient = new DeprecationsClient({ http });
-      const mockPayload = {};
       const mockDeprecationDetails: DomainDeprecationDetails = {
         domainId: 'testPluginId-1',
         message: 'some-message',
@@ -147,7 +146,6 @@ describe('DeprecationsClient', () => {
           },
         },
       };
-      http.fetch.mockResolvedValue(mockPayload);
       const result = await deprecationsClient.resolveDeprecation(mockDeprecationDetails);
 
       expect(http.fetch).toBeCalledTimes(1);
@@ -160,12 +158,12 @@ describe('DeprecationsClient', () => {
           deprecationDetails: { domainId: 'testPluginId-1' },
         }),
       });
-      expect(result).toEqual({ status: 'ok', payload: mockPayload });
+      expect(result).toEqual({ status: 'ok' });
     });
 
     it('fails when fetch fails', async () => {
       const deprecationsClient = new DeprecationsClient({ http });
-      const mockPayload = new Error('Failed to fetch');
+      const mockResponse = 'Failed to fetch';
       const mockDeprecationDetails: DomainDeprecationDetails = {
         domainId: 'testPluginId-1',
         message: 'some-message',
@@ -180,10 +178,10 @@ describe('DeprecationsClient', () => {
           },
         },
       };
-      http.fetch.mockRejectedValue(mockPayload);
+      http.fetch.mockRejectedValue({ body: { message: mockResponse } });
       const result = await deprecationsClient.resolveDeprecation(mockDeprecationDetails);
 
-      expect(result).toEqual({ status: 'fail', payload: mockPayload });
+      expect(result).toEqual({ status: 'fail', reason: mockResponse });
     });
   });
 });

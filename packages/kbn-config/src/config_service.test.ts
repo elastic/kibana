@@ -97,12 +97,12 @@ test('re-validate config when updated', async () => {
 
   rawConfig$.next({ key: 123 });
 
-  await expect(valuesReceived).toMatchInlineSnapshot(`
-                  Array [
-                    "value",
-                    [Error: [config validation of [key]]: expected value of type [string] but got [number]],
-                  ]
-          `);
+  expect(valuesReceived).toMatchInlineSnapshot(`
+    Array [
+      "value",
+      [Error: [config validation of [key]]: expected value of type [string] but got [number]],
+    ]
+  `);
 });
 
 test("does not push new configs when reloading if config at path hasn't changed", async () => {
@@ -440,12 +440,19 @@ test('logs deprecation warning during validation', async () => {
 test('does not log warnings for silent deprecations during validation', async () => {
   const rawConfig = getRawConfigProvider({});
   const configService = new ConfigService(rawConfig, defaultEnv, logger);
-  mockApplyDeprecations.mockImplementationOnce((config, deprecations, createAddDeprecation) => {
-    const addDeprecation = createAddDeprecation!('');
-    addDeprecation({ message: 'some deprecation message', silent: true });
-    addDeprecation({ message: 'another deprecation message' });
-    return config;
-  });
+
+  mockApplyDeprecations
+    .mockImplementationOnce((config, deprecations, createAddDeprecation) => {
+      const addDeprecation = createAddDeprecation!('');
+      addDeprecation({ message: 'some deprecation message', silent: true });
+      addDeprecation({ message: 'another deprecation message' });
+      return config;
+    })
+    .mockImplementationOnce((config, deprecations, createAddDeprecation) => {
+      const addDeprecation = createAddDeprecation!('');
+      addDeprecation({ message: 'I am silent', silent: true });
+      return config;
+    });
 
   loggerMock.clear(logger);
   await configService.validate();
@@ -456,6 +463,9 @@ test('does not log warnings for silent deprecations during validation', async ()
       ],
     ]
   `);
+  loggerMock.clear(logger);
+  await configService.validate();
+  expect(loggerMock.collect(logger).warn).toMatchInlineSnapshot(`Array []`);
 });
 
 describe('atPathSync', () => {

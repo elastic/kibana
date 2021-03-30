@@ -39,14 +39,20 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       });
-      expect(addDeprecation).toBeCalledWith({
-        correctiveActions: {
-          manualSteps: [
-            'Replace "myplugin.deprecated" in the kibana.yml file with "myplugin.renamed"',
+      expect(addDeprecation.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            Object {
+              "correctiveActions": Object {
+                "manualSteps": Array [
+                  "Replace \\"myplugin.deprecated\\" with \\"myplugin.renamed\\" in the Kibana config file, CLI flag, or environment variable (in Docker only).",
+                ],
+              },
+              "message": "\\"myplugin.deprecated\\" is deprecated and has been replaced by \\"myplugin.renamed\\"",
+            },
           ],
-        },
-        message: '"myplugin.deprecated" is deprecated and has been replaced by "myplugin.renamed"',
-      });
+        ]
+      `);
     });
     it('does not alter config and does not log if old property is not present', () => {
       const rawConfig = {
@@ -99,15 +105,20 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       });
-      expect(addDeprecation).toBeCalledWith({
-        correctiveActions: {
-          manualSteps: [
-            'Replace "myplugin.oldsection.deprecated" in the kibana.yml file with "myplugin.newsection.renamed"',
+      expect(addDeprecation.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            Object {
+              "correctiveActions": Object {
+                "manualSteps": Array [
+                  "Replace \\"myplugin.oldsection.deprecated\\" with \\"myplugin.newsection.renamed\\" in the Kibana config file, CLI flag, or environment variable (in Docker only).",
+                ],
+              },
+              "message": "\\"myplugin.oldsection.deprecated\\" is deprecated and has been replaced by \\"myplugin.newsection.renamed\\"",
+            },
           ],
-        },
-        message:
-          '"myplugin.oldsection.deprecated" is deprecated and has been replaced by "myplugin.newsection.renamed"',
-      });
+        ]
+      `);
     });
     it('remove the old property but does not overrides the new one if they both exist, and logs a specific message', () => {
       const rawConfig = {
@@ -122,16 +133,21 @@ describe('DeprecationFactory', () => {
           renamed: 'renamed',
         },
       });
-      expect(addDeprecation).toBeCalledWith({
-        correctiveActions: {
-          manualSteps: [
-            'Make sure "myplugin.renamed" contains the correct value in the kibana.yml file."',
-            'Remove "myplugin.deprecated" from the kibana.yml file."',
+      expect(addDeprecation.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            Object {
+              "correctiveActions": Object {
+                "manualSteps": Array [
+                  "Make sure \\"myplugin.renamed\\" contains the correct value in the config file, CLI flag, or environment variable (in Docker only).\\"",
+                  "Remove \\"myplugin.deprecated\\" from the config.\\"",
+                ],
+              },
+              "message": "\\"myplugin.deprecated\\" is deprecated and has been replaced by \\"myplugin.renamed\\". However both key are present, ignoring \\"myplugin.deprecated\\"",
+            },
           ],
-        },
-        message:
-          '"myplugin.deprecated" is deprecated and has been replaced by "myplugin.renamed". However both key are present, ignoring "myplugin.deprecated"',
-      });
+        ]
+      `);
     });
   });
 
@@ -160,14 +176,20 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       });
-      expect(addDeprecation).toBeCalledWith({
-        correctiveActions: {
-          manualSteps: [
-            'Replace "myplugin.deprecated" in the kibana.yml file with "myplugin.renamed"',
+      expect(addDeprecation.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            Object {
+              "correctiveActions": Object {
+                "manualSteps": Array [
+                  "Replace \\"myplugin.deprecated\\" with \\"myplugin.renamed\\" in the Kibana config file, CLI flag, or environment variable (in Docker only).",
+                ],
+              },
+              "message": "\\"myplugin.deprecated\\" is deprecated and has been replaced by \\"myplugin.renamed\\"",
+            },
           ],
-        },
-        message: '"myplugin.deprecated" is deprecated and has been replaced by "myplugin.renamed"',
-      });
+        ]
+      `);
     });
 
     it('can move a property to a different namespace', () => {
@@ -194,15 +216,20 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       });
-      expect(addDeprecation).toBeCalledWith({
-        correctiveActions: {
-          manualSteps: [
-            'Replace "oldplugin.deprecated" in the kibana.yml file with "newplugin.renamed"',
+      expect(addDeprecation.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            Object {
+              "correctiveActions": Object {
+                "manualSteps": Array [
+                  "Replace \\"oldplugin.deprecated\\" with \\"newplugin.renamed\\" in the Kibana config file, CLI flag, or environment variable (in Docker only).",
+                ],
+              },
+              "message": "\\"oldplugin.deprecated\\" is deprecated and has been replaced by \\"newplugin.renamed\\"",
+            },
           ],
-        },
-        message:
-          '"oldplugin.deprecated" is deprecated and has been replaced by "newplugin.renamed"',
-      });
+        ]
+      `);
     });
 
     it('does not alter config and does not log if old property is not present', () => {
@@ -250,16 +277,21 @@ describe('DeprecationFactory', () => {
         },
       });
 
-      expect(addDeprecation).toBeCalledWith({
-        correctiveActions: {
-          manualSteps: [
-            'Make sure "myplugin.renamed" contains the correct value in the kibana.yml file."',
-            'Remove "myplugin.deprecated" from the kibana.yml file."',
+      expect(addDeprecation.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            Object {
+              "correctiveActions": Object {
+                "manualSteps": Array [
+                  "Make sure \\"myplugin.renamed\\" contains the correct value in the config file, CLI flag, or environment variable (in Docker only).\\"",
+                  "Remove \\"myplugin.deprecated\\" from the config.\\"",
+                ],
+              },
+              "message": "\\"myplugin.deprecated\\" is deprecated and has been replaced by \\"myplugin.renamed\\". However both key are present, ignoring \\"myplugin.deprecated\\"",
+            },
           ],
-        },
-        message:
-          '"myplugin.deprecated" is deprecated and has been replaced by "myplugin.renamed". However both key are present, ignoring "myplugin.deprecated"',
-      });
+        ]
+      `);
     });
   });
 
@@ -283,12 +315,20 @@ describe('DeprecationFactory', () => {
           property: 'value',
         },
       });
-      expect(addDeprecation).toBeCalledWith({
-        correctiveActions: {
-          manualSteps: ['Remove "myplugin.deprecated" from the kibana.yml file."'],
-        },
-        message: 'myplugin.deprecated is deprecated and is no longer used',
-      });
+      expect(addDeprecation.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            Object {
+              "correctiveActions": Object {
+                "manualSteps": Array [
+                  "Remove \\"myplugin.deprecated\\" from the Kibana config file, CLI flag, or environment variable (in Docker only)\\"",
+                ],
+              },
+              "message": "myplugin.deprecated is deprecated and is no longer used",
+            },
+          ],
+        ]
+      `);
     });
 
     it('handles deeply nested keys', () => {
@@ -314,12 +354,20 @@ describe('DeprecationFactory', () => {
         },
       });
 
-      expect(addDeprecation).toBeCalledWith({
-        correctiveActions: {
-          manualSteps: ['Remove "myplugin.section.deprecated" from the kibana.yml file."'],
-        },
-        message: 'myplugin.section.deprecated is deprecated and is no longer used',
-      });
+      expect(addDeprecation.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            Object {
+              "correctiveActions": Object {
+                "manualSteps": Array [
+                  "Remove \\"myplugin.section.deprecated\\" from the Kibana config file, CLI flag, or environment variable (in Docker only)\\"",
+                ],
+              },
+              "message": "myplugin.section.deprecated is deprecated and is no longer used",
+            },
+          ],
+        ]
+      `);
     });
 
     it('does not alter config and does not log if unused property is not present', () => {
@@ -369,12 +417,20 @@ describe('DeprecationFactory', () => {
         },
       });
 
-      expect(addDeprecation).toBeCalledWith({
-        correctiveActions: {
-          manualSteps: ['Remove "myplugin.deprecated" from the kibana.yml file."'],
-        },
-        message: 'myplugin.deprecated is deprecated and is no longer used',
-      });
+      expect(addDeprecation.mock.calls).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            Object {
+              "correctiveActions": Object {
+                "manualSteps": Array [
+                  "Remove \\"myplugin.deprecated\\" from the Kibana config file, CLI flag, or environment variable (in Docker only)\\"",
+                ],
+              },
+              "message": "myplugin.deprecated is deprecated and is no longer used",
+            },
+          ],
+        ]
+      `);
     });
 
     it('does not alter config and does not log if unused property is not present', () => {

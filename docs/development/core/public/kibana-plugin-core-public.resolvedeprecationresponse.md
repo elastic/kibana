@@ -7,11 +7,10 @@
 <b>Signature:</b>
 
 ```typescript
-export declare type ResolveDeprecationResponse<Payload> = {
+export declare type ResolveDeprecationResponse = {
     status: 'ok';
-    payload: Payload;
 } | {
     status: 'fail';
-    payload: string | Error;
+    reason: string;
 };
 ```

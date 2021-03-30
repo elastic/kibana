@@ -7,7 +7,7 @@
  */
 
 import type { Plugin, CoreSetup, GetDeprecationsContext, DeprecationsDetails } from 'kibana/server';
-
+import { registerRoutes } from './routes';
 async function getDeprecations({
   savedObjectsClient,
 }: GetDeprecationsContext): Promise<DeprecationsDetails[]> {
@@ -37,6 +37,7 @@ async function getDeprecations({
 
 export class CorePluginDeprecationsPlugin implements Plugin {
   public setup(core: CoreSetup, deps: {}) {
+    registerRoutes(core.http);
     core.savedObjects.registerType({
       name: 'test-deprecations-plugin',
       hidden: false,

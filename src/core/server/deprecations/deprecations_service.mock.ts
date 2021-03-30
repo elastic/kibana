@@ -24,10 +24,10 @@ const createSetupContractMock = () => {
 
 const createInternalSetupContractMock = () => {
   const internalSetupContract: jest.Mocked<InternalDeprecationsServiceSetup> = {
-    createRegistry: jest.fn(),
+    getRegistry: jest.fn(),
   };
 
-  internalSetupContract.createRegistry.mockReturnValue(createSetupContractMock());
+  internalSetupContract.getRegistry.mockReturnValue(createSetupContractMock());
   return internalSetupContract;
 };
 

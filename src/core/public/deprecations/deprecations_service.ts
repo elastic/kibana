@@ -39,9 +39,7 @@ export interface DeprecationsServiceStart {
    *
    * @param {DomainDeprecationDetails} details
    */
-  resolveDeprecation: <Payload = unknown>(
-    details: DomainDeprecationDetails
-  ) => Promise<ResolveDeprecationResponse<Payload>>;
+  resolveDeprecation: (details: DomainDeprecationDetails) => Promise<ResolveDeprecationResponse>;
 }
 
 export class DeprecationsService implements CoreService<void, DeprecationsServiceStart> {
