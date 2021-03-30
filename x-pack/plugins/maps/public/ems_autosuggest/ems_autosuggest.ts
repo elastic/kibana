@@ -7,6 +7,7 @@
 
 import type { FileLayer } from '@elastic/ems-client';
 import { getEmsFileLayers, fetchGeoJson } from '../util';
+import { FORMAT_TYPE } from '../../common';
 
 export interface ISampleValuesConfig {
   emsLayerIds?: string[];
@@ -71,8 +72,6 @@ export async function suggestEMSTermJoinConfig(
   }
 
   if (sampleValuesConfig.sampleValues && sampleValuesConfig.sampleValues.length) {
-    matches.push(...suggestByValues(sampleValuesConfig.sampleValues));
-
     if (sampleValuesConfig.emsLayerIds && sampleValuesConfig.emsLayerIds.length) {
       matches.push(
         ...(await suggestByEMSLayerIds(
@@ -80,6 +79,8 @@ export async function suggestEMSTermJoinConfig(
           sampleValuesConfig.sampleValues
         ))
       );
+    } else {
+      matches.push(...suggestByValues(sampleValuesConfig.sampleValues));
     }
   }
 
@@ -158,7 +159,9 @@ async function getMatchesForEMSLayer(
   sampleValues: Array<string | number>
 ): Promise<IEMSTermJoinConfig[]> {
   const fileLayers: FileLayer[] = await getEmsFileLayers();
-  const emsFileLayer: FileLayer | undefined = fileLayers.find((fl) => fl.hasId(emsLayerId));
+  const emsFileLayer: FileLayer | undefined = fileLayers.find((fl: FileLayer) =>
+    fl.hasId(emsLayerId)
+  );
 
   if (!emsFileLayer) {
     return [];
@@ -168,7 +171,11 @@ async function getMatchesForEMSLayer(
   const url = emsFileLayer.getDefaultFormatUrl();
 
   try {
-    const emsJson = await fetchGeoJson(url, emsFileLayer.getDefaultFormatType(), 'data');
+    const emsJson = await fetchGeoJson(
+      url,
+      emsFileLayer.getDefaultFormatType() as FORMAT_TYPE,
+      'data'
+    );
     const matches: IEMSTermJoinConfig[] = [];
     for (let f = 0; f < emsFields.length; f++) {
       if (matchesEmsField(emsJson, emsFields[f].id, sampleValues)) {
