@@ -10,24 +10,12 @@ import { BehaviorSubject, throwError } from 'rxjs';
 import { REPO_ROOT } from '@kbn/dev-utils';
 
 import { Config, Env, ObjectToConfigAdapter } from '../config';
-import { DiscoveredPlugin } from '../plugins';
 
 import { getEnvOptions, configServiceMock } from '../config/mocks';
 import { loggingSystemMock } from '../logging/logging_system.mock';
-import { contextServiceMock } from '../context/context_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
-import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
-import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
-import { capabilitiesServiceMock } from '../capabilities/capabilities_service.mock';
-import { httpResourcesMock } from '../http_resources/http_resources_service.mock';
-import { setupMock as renderingServiceMock } from '../rendering/__mocks__/rendering_service';
 import { environmentServiceMock } from '../environment/environment_service.mock';
-import { LegacyServiceSetupDeps } from './types';
-import { LegacyService } from './legacy_service';
-import { statusServiceMock } from '../status/status_service.mock';
-import { loggingServiceMock } from '../logging/logging_service.mock';
-import { metricsServiceMock } from '../metrics/metrics_service.mock';
-import { i18nServiceMock } from '../i18n/i18n_service.mock';
+import { LegacyService, LegacyServiceSetupDeps } from './legacy_service';
 
 let coreId: symbol;
 let env: Env;
@@ -46,45 +34,7 @@ beforeEach(() => {
   environmentSetup = environmentServiceMock.createSetupContract();
 
   setupDeps = {
-    core: {
-      capabilities: capabilitiesServiceMock.createSetupContract(),
-      context: contextServiceMock.createSetupContract(),
-      elasticsearch: { legacy: {} } as any,
-      i18n: i18nServiceMock.createSetupContract(),
-      uiSettings: uiSettingsServiceMock.createSetupContract(),
-      http: {
-        ...httpServiceMock.createInternalSetupContract(),
-        auth: {
-          getAuthHeaders: () => undefined,
-        } as any,
-      },
-      httpResources: httpResourcesMock.createSetupContract(),
-      savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
-      plugins: {
-        initialized: true,
-        contracts: new Map([['plugin-id', 'plugin-value']]),
-      },
-      rendering: renderingServiceMock,
-      environment: environmentSetup,
-      status: statusServiceMock.createInternalSetupContract(),
-      logging: loggingServiceMock.createInternalSetupContract(),
-      metrics: metricsServiceMock.createInternalSetupContract(),
-    },
-    plugins: { 'plugin-id': 'plugin-value' },
-    uiPlugins: {
-      public: new Map([['plugin-id', {} as DiscoveredPlugin]]),
-      internal: new Map([
-        [
-          'plugin-id',
-          {
-            requiredBundles: [],
-            publicTargetDir: 'path/to/target/public',
-            publicAssetsDir: '/plugins/name/assets/',
-          },
-        ],
-      ]),
-      browserConfigs: new Map(),
-    },
+    http: httpServiceMock.createInternalSetupContract(),
   };
 
   config$ = new BehaviorSubject<Config>(

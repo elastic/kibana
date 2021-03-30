@@ -8,7 +8,6 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { LegacyService } from './legacy_service';
-import { LegacyServiceSetupDeps } from './types';
 
 type LegacyServiceMock = jest.Mocked<PublicMethodsOf<LegacyService>>;
 
@@ -19,5 +18,4 @@ const createLegacyServiceMock = (): LegacyServiceMock => ({
 
 export const legacyServiceMock = {
   create: createLegacyServiceMock,
-  createSetupContract: (deps: LegacyServiceSetupDeps) => createLegacyServiceMock().setup(deps),
 };

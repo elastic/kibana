@@ -8,15 +8,20 @@
 
 import apm from 'elastic-apm-node';
 import { config as pathConfig } from '@kbn/utils';
-import { mapToObject } from '@kbn/std';
-import { ConfigService, Env, RawConfigurationProvider, coreDeprecationProvider } from './config';
+import {
+  ConfigService,
+  Env,
+  RawConfigurationProvider,
+  coreDeprecationProvider,
+  ensureValidConfiguration,
+} from './config';
 import { CoreApp } from './core_app';
 import { I18nService } from './i18n';
 import { ElasticsearchService } from './elasticsearch';
 import { HttpService } from './http';
 import { HttpResourcesService } from './http_resources';
 import { RenderingService } from './rendering';
-import { LegacyService, ensureValidConfiguration } from './legacy';
+import { LegacyService } from './legacy';
 import { Logger, LoggerFactory, LoggingService, ILoggingSystem } from './logging';
 import { UiSettingsService } from './ui_settings';
 import { PluginsService, config as pluginsConfig } from './plugins';
@@ -121,7 +126,6 @@ export class Server {
 
     // Immediately terminate in case of invalid configuration
     // This needs to be done after plugin discovery
-    await this.configService.validate();
     await ensureValidConfiguration(this.configService);
 
     const contextServiceSetup = this.context.setup({
@@ -204,9 +208,7 @@ export class Server {
     this.#pluginsInitialized = pluginsSetup.initialized;
 
     await this.legacy.setup({
-      core: { ...coreSetup, plugins: pluginsSetup, rendering: renderingSetup },
-      plugins: mapToObject(pluginsSetup.contracts),
-      uiPlugins,
+      http: httpSetup,
     });
 
     this.registerCoreContext(coreSetup);
@@ -249,8 +251,6 @@ export class Server {
     };
 
     await this.plugins.start(this.coreStart);
-
-    await this.legacy.start();
 
     await this.http.start();
 

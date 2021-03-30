@@ -9,13 +9,13 @@
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { Server } from '@hapi/hapi';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   reconfigureLogging,
   setupLogging,
   setupLoggingRotate,
   LegacyLoggingConfig,
 } from '@kbn/legacy-logging';
-import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { CoreContext } from '../core_context';
 import { config as loggingConfig } from '../logging';
@@ -23,7 +23,7 @@ import { opsConfig, OpsConfigType } from '../metrics';
 import { Logger } from '../logging';
 import { InternalHttpServiceSetup } from '../http';
 
-interface LegacyServiceSetupDeps {
+export interface LegacyServiceSetupDeps {
   http: InternalHttpServiceSetup;
 }
 

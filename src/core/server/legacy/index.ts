@@ -7,7 +7,5 @@
  */
 
 /** @internal */
-export { ensureValidConfiguration } from './config';
-/** @internal */
 export type { ILegacyService } from './legacy_service';
 export { LegacyService } from './legacy_service';

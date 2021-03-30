@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { ConfigService } from '../../config';
-import { CriticalError } from '../../errors';
+import { ConfigService } from '@kbn/config';
+import { CriticalError } from '../errors';
 
 export async function ensureValidConfiguration(configService: ConfigService) {
+  await configService.validate();
+
   const unusedConfigKeys = await configService.getUnusedPaths();
 
   if (unusedConfigKeys.length > 0) {
