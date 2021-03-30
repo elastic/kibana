@@ -9,8 +9,9 @@ import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { mount } from 'enzyme';
 
+import { getMockTheme } from '../../../common/test_utils/kibana_react.mock';
+
 import { BuilderAndBadgeComponent } from './and_badge';
-import { getMockTheme } from '../../../lib/kibana/kibana_react.mock';
 
 const mockTheme = getMockTheme({ eui: { euiColorLightShade: '#ece' } });
 

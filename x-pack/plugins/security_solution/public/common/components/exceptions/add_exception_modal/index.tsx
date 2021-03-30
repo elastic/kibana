@@ -115,7 +115,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   onRuleChange,
   alertStatus,
 }: AddExceptionModalProps) {
-  const { http } = useKibana().services;
+  const { http, data } = useKibana().services;
   const [errorsExist, setErrorExists] = useState(false);
   const [comment, setComment] = useState('');
   const { rule: maybeRule, loading: isRuleLoading } = useRuleAsync(ruleId);
@@ -394,6 +394,8 @@ export const AddExceptionModal = memo(function AddExceptionModal({
               <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
               <EuiSpacer />
               <ExceptionBuilderComponent
+                httpService={http}
+                autocompleteService={data.autocomplete}
                 exceptionListItems={initialExceptionItems}
                 listType={exceptionListType}
                 listId={ruleExceptionList.list_id}
