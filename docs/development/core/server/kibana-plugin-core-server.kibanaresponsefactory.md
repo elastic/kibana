@@ -10,10 +10,10 @@ Set of helpers used to create `KibanaResponse` to form HTTP response on an incom
 
 ```typescript
 kibanaResponseFactory: {
-    custom: <T extends string | Record<string, any> | Buffer | Error | Stream | {
+    custom: <T extends string | Record<string, any> | Error | Buffer | {
         message: string | Error;
         attributes?: Record<string, any> | undefined;
-    } | undefined>(options: CustomHttpResponseOptions<T>) => KibanaResponse<T>;
+    } | Stream | undefined>(options: CustomHttpResponseOptions<T>) => KibanaResponse<T>;
     badRequest: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
     unauthorized: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
     forbidden: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
