@@ -295,7 +295,7 @@ interface AllowlistFields {
 
 // Allow list process fields within events.  This includes "process" and "Target.process".'
 /* eslint-disable @typescript-eslint/naming-convention */
-const allowlistEventFields: ProcessAllowlistFields = {
+const allowlistProcessFields: ProcessAllowlistFields = {
   name: true,
   executable: true,
   command_line: true,
@@ -371,9 +371,9 @@ const allowlistEventFields: AllowlistFields = {
   host: {
     os: true,
   },
-  process: ProcessAllowlistFields,
+  process: allowlistProcessFields,
   Target: {
-    process: ProcessAllowlistFields,
+    process: allowlistProcessFields,
   },
 };
 
