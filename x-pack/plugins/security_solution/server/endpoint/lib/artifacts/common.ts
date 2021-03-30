@@ -14,6 +14,10 @@ import {
 
 export const ArtifactConstants = {
   GLOBAL_ALLOWLIST_NAME: 'endpoint-exceptionlist',
+  /**
+   * Saved objects no longer used for storing artifacts. Value
+   * @deprecated
+   */
   SAVED_OBJECT_TYPE: 'endpoint:user-artifact',
   SUPPORTED_OPERATING_SYSTEMS: ['macos', 'windows'],
   SUPPORTED_TRUSTED_APPS_OPERATING_SYSTEMS: ['macos', 'windows', 'linux'],

@@ -6,9 +6,10 @@
  */
 
 import { ElasticsearchClient, Logger } from 'src/core/server';
+import { PropertyBase } from '@elastic/elasticsearch/api/types';
 import {
   createOrUpdateIndex,
-  MappingsDefinition,
+  Mappings,
 } from '../../../../../observability/server';
 import { APMConfig } from '../../..';
 import { getApmIndicesConfig } from '../apm_indices/get_apm_indices';
@@ -31,7 +32,7 @@ export const createApmCustomLinkIndex = async ({
   });
 };
 
-const mappings: MappingsDefinition = {
+const mappings: Mappings = {
   dynamic: 'strict',
   properties: {
     '@timestamp': {
@@ -45,7 +46,8 @@ const mappings: MappingsDefinition = {
           type: 'keyword',
         },
       },
-    },
+      // FIXME: PropertyBase type is missing .fields
+    } as PropertyBase,
     url: {
       type: 'keyword',
     },

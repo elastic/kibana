@@ -58,7 +58,7 @@ export const buildHostsQuery = ({
                 sort: [
                   {
                     '@timestamp': {
-                      order: 'desc',
+                      order: 'desc' as const,
                     },
                   },
                 ],

@@ -64,11 +64,14 @@ describe('Discover grid columns ', function () {
             "showMoveLeft": false,
             "showMoveRight": false,
           },
-          "cellActions": undefined,
+          "cellActions": Array [
+            [Function],
+            [Function],
+          ],
           "display": undefined,
           "id": "extension",
           "isSortable": false,
-          "schema": "kibana-json",
+          "schema": "string",
         },
         Object {
           "actions": Object {
@@ -80,7 +83,7 @@ describe('Discover grid columns ', function () {
           "display": undefined,
           "id": "message",
           "isSortable": false,
-          "schema": "kibana-json",
+          "schema": "string",
         },
       ]
     `);
@@ -101,12 +104,15 @@ describe('Discover grid columns ', function () {
             "showMoveLeft": true,
             "showMoveRight": true,
           },
-          "cellActions": undefined,
+          "cellActions": Array [
+            [Function],
+            [Function],
+          ],
           "display": "Time (timestamp)",
           "id": "timestamp",
           "initialWidth": 180,
-          "isSortable": false,
-          "schema": "kibana-json",
+          "isSortable": true,
+          "schema": "datetime",
         },
         Object {
           "actions": Object {
@@ -117,11 +123,14 @@ describe('Discover grid columns ', function () {
             "showMoveLeft": true,
             "showMoveRight": true,
           },
-          "cellActions": undefined,
+          "cellActions": Array [
+            [Function],
+            [Function],
+          ],
           "display": undefined,
           "id": "extension",
           "isSortable": false,
-          "schema": "kibana-json",
+          "schema": "string",
         },
         Object {
           "actions": Object {
@@ -136,7 +145,7 @@ describe('Discover grid columns ', function () {
           "display": undefined,
           "id": "message",
           "isSortable": false,
-          "schema": "kibana-json",
+          "schema": "string",
         },
       ]
     `);

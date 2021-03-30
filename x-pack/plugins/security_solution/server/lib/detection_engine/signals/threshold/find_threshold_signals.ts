@@ -20,7 +20,7 @@ import {
 import { Logger } from '../../../../../../../../src/core/server';
 import { BuildRuleMessage } from '../rule_messages';
 import { singleSearchAfter } from '../single_search_after';
-import { SignalSearchResponse } from '../types';
+import type { SignalSearchResponse } from '../types';
 
 interface FindThresholdSignalsParams {
   from: string;
@@ -56,7 +56,7 @@ export const findThresholdSignals = async ({
         sort: [
           {
             [timestampOverride ?? '@timestamp']: {
-              order: 'desc',
+              order: 'desc' as const,
             },
           },
         ],
@@ -137,6 +137,7 @@ export const findThresholdSignals = async ({
     to,
     services,
     logger,
+    // @ts-expect-error refactor to pass type explicitly instead of unknown
     filter,
     pageSize: 1,
     sortOrder: 'desc',

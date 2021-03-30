@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 
 import { NoIndices } from '../../../components/empty_states/no_indices';
-import { ViewSourceConfigurationButton } from '../../../components/source_configuration';
+import { ViewSourceConfigurationButton } from '../../../components/source_configuration/view_source_configuration_button';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { useLinkProps } from '../../../hooks/use_link_props';
 
