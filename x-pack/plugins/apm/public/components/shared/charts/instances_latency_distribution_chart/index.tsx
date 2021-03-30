@@ -50,6 +50,9 @@ export function InstancesLatencyDistributionChart({
     bubbleSeriesStyle: {
       point: { strokeWidth: 0, fill: theme.eui.euiColorVis1, radius: 4 },
     },
+    // This additional padding makes it so items with small values don't look like
+    // zeroes right up against the origin.
+    chartPaddings: { top: 0, left: 10, right: 10, bottom: 10 },
   };
 
   const maxLatency = Math.max(...items.map((item) => item.latency ?? 0));
@@ -62,6 +65,11 @@ export function InstancesLatencyDistributionChart({
       <CustomTooltip {...props} latencyFormatter={latencyFormatter} />
     ),
   };
+
+  // When we only have a single point, we want to use an ordinal scale instead
+  // of linear because an ordinal scale will place the point in the middle, while
+  // linear will place it at the origin.
+  const xScaleType = items.length === 1 ? ScaleType.Ordinal : ScaleType.Linear;
 
   return (
     <EuiPanel>
@@ -79,7 +87,6 @@ export function InstancesLatencyDistributionChart({
             tooltip={tooltip}
             showLegend
             theme={chartTheme}
-            xDomain={{ min: 0, max: 16 }}
           />
           <BubbleSeries
             color={theme.eui.euiColorVis1}
@@ -89,7 +96,7 @@ export function InstancesLatencyDistributionChart({
               { defaultMessage: 'Instances' }
             )}
             xAccessor={(item) => item.throughput}
-            xScaleType={ScaleType.Linear}
+            xScaleType={xScaleType}
             yAccessors={[(item) => item.latency]}
             yScaleType={ScaleType.Linear}
           />
