@@ -12812,8 +12812,6 @@
     "xpack.maps.source.pewPewDescription": "ソースとデスティネーションの間の集約データパスです。",
     "xpack.maps.source.pewPewTitle": "ソースとデスティネーションの接続",
     "xpack.maps.source.urlLabel": "Url",
-    "xpack.maps.source.vetorSource.formatErrorMessage": "URL からベクターシェイプを取得できません：{format}",
-    "xpack.maps.source.vetorSource.requestFailedErrorMessage": "URL からベクターシェイプを取得できません：{fetchUrl}",
     "xpack.maps.source.wms.attributionLink": "属性テキストにはリンクが必要です",
     "xpack.maps.source.wms.attributionText": "属性 URL にはテキストが必要です",
     "xpack.maps.source.wms.getCapabilitiesButtonText": "負荷容量",
