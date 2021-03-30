@@ -73,7 +73,6 @@ export const ESDeprecationStats: FunctionComponent<Props> = ({ history }) => {
             title={error ? '--' : allDeprecations.length}
             description={i18nTexts.totalDeprecationsTitle}
             isLoading={isLoading}
-            textAlign="right"
           />
         </EuiFlexItem>
 
@@ -82,7 +81,6 @@ export const ESDeprecationStats: FunctionComponent<Props> = ({ history }) => {
             title={error ? '--' : criticalDeprecations.length}
             description={i18nTexts.criticalDeprecationsTitle}
             titleColor="danger"
-            textAlign="right"
             isLoading={isLoading}
           >
             {error && <EsStatsErrors error={error} />}

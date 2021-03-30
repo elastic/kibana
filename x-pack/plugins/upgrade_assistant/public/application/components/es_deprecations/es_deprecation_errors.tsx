@@ -8,80 +8,50 @@
 import React from 'react';
 
 import { EuiCallOut } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 import { ResponseError } from '../../lib/api';
-
-const i18nTexts = {
-  permissionsError: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecationErrors.permissionsErrorMessage',
-    {
-      defaultMessage: 'You do not have sufficient privileges to view Elasticsearch deprecations.',
-    }
-  ),
-  partiallyUpgradedWarning: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecationErrors.partiallyUpgradedWarningMessage',
-    {
-      defaultMessage:
-        'One or more Elasticsearch nodes have a newer version of Elasticsearch than Kibana.',
-    }
-  ),
-  upgradedMessage: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecationErrors.upgradedWarningMessage',
-    {
-      defaultMessage: 'All Elasticsearch nodes have been upgraded.',
-    }
-  ),
-  loadingError: i18n.translate('xpack.upgradeAssistant.esDeprecationErrors.loadingErrorMessage', {
-    defaultMessage: 'An error occurred while retrieving Elasticsearch deprecations.',
-  }),
-};
-
+import { getEsDeprecationError } from '../../lib/es_deprecation_errors';
 interface Props {
   error: ResponseError;
 }
 
 export const EsDeprecationErrors: React.FunctionComponent<Props> = ({ error }) => {
-  if (error.statusCode === 403) {
-    return (
-      <EuiCallOut
-        title={i18nTexts.permissionsError}
-        color="danger"
-        iconType="alert"
-        data-test-subj="permissionsError"
-      />
-    );
+  let callout: React.ReactNode;
+
+  const { code: errorType, message } = getEsDeprecationError(error);
+
+  switch (errorType) {
+    case 'unauthorized_error':
+      callout = (
+        <EuiCallOut
+          title={message}
+          color="danger"
+          iconType="alert"
+          data-test-subj="permissionsError"
+        />
+      );
+      break;
+    case 'partially_upgraded_error':
+      callout = (
+        <EuiCallOut
+          title={message}
+          color="warning"
+          iconType="alert"
+          data-test-subj="partiallyUpgradedWarning"
+        />
+      );
+      break;
+    case 'upgraded_error':
+      callout = <EuiCallOut title={message} iconType="pin" data-test-subj="upgradedCallout" />;
+      break;
+    case 'request_error':
+    default:
+      callout = (
+        <EuiCallOut title={message} color="danger" iconType="alert" data-test-subj="loadingError">
+          {error.message}
+        </EuiCallOut>
+      );
   }
 
-  if (error?.statusCode === 426 && error.attributes?.allNodesUpgraded === false) {
-    return (
-      <EuiCallOut
-        title={i18nTexts.partiallyUpgradedWarning}
-        color="warning"
-        iconType="alert"
-        data-test-subj="partiallyUpgradedWarning"
-      />
-    );
-  }
-
-  if (error?.statusCode === 426 && error.attributes?.allNodesUpgraded === true) {
-    return (
-      <EuiCallOut
-        title={i18nTexts.upgradedMessage}
-        iconType="pin"
-        data-test-subj="upgradedCallout"
-      />
-    );
-  }
-
-  return (
-    <EuiCallOut
-      title={i18nTexts.loadingError}
-      color="danger"
-      iconType="alert"
-      data-test-subj="loadingError"
-    >
-      {error.message}
-    </EuiCallOut>
-  );
+  return <>{callout}</>;
 };

@@ -129,7 +129,7 @@ export const DeprecationsOverview: FunctionComponent<Props> = ({ history }) => {
             <EuiSpacer size="xl" />
 
             <EuiFlexGroup>
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem grow={false} style={{ minWidth: 400 }}>
                 <ESDeprecationStats history={history} />
               </EuiFlexItem>
             </EuiFlexGroup>
