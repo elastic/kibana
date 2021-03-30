@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async function () {
-      await esArchiver.unload('invalid_scripted_field');
+      await esArchiver.load('empty_kibana');
     });
 
     // this is the same test as in OSS but it catches different error message issue in different licences
