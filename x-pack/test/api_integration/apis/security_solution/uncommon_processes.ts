@@ -27,7 +27,8 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  describe('uncommon_processes', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/94535
+  describe.skip('uncommon_processes', () => {
     before(() => esArchiver.load('auditbeat/uncommon_processes'));
     after(() => esArchiver.unload('auditbeat/uncommon_processes'));
 
@@ -49,7 +50,7 @@ export default function ({ getService }: FtrProviderContext) {
             fakePossibleCount: 3,
             querySize: 1,
           },
-          defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          defaultIndex: ['auditbeat-uncommon-processes'],
           docValueFields: [],
           inspect: false,
         })
@@ -78,7 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
               fakePossibleCount: 3,
               querySize: 2,
             },
-            defaultIndex: ['auditbeat-*'],
+            defaultIndex: ['auditbeat-uncommon-processes'],
             docValueFields: [],
             inspect: false,
             wait_for_completion_timeout: '10s',
@@ -109,7 +110,7 @@ export default function ({ getService }: FtrProviderContext) {
               fakePossibleCount: 3,
               querySize: 1,
             },
-            defaultIndex: ['auditbeat-*'],
+            defaultIndex: ['auditbeat-uncommon-processes'],
             docValueFields: [],
             inspect: false,
             wait_for_completion_timeout: '10s',

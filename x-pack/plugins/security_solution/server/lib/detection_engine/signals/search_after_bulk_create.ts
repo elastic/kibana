@@ -17,7 +17,6 @@ import {
   createSearchResultReturnType,
   createSearchAfterReturnTypeFromResponse,
   createTotalHitsFromSearchResult,
-  getSignalTimeTuples,
   mergeReturns,
   mergeSearchResults,
 } from './utils';
@@ -25,8 +24,7 @@ import { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType } fr
 
 // search_after through documents and re-index using bulk endpoint.
 export const searchAfterAndBulkCreate = async ({
-  gap,
-  previousStartedAt,
+  tuples: totalToFromTuples,
   ruleParams,
   exceptionsList,
   services,
@@ -64,16 +62,6 @@ export const searchAfterAndBulkCreate = async ({
   // to ensure we don't exceed maxSignals
   let signalsCreatedCount = 0;
 
-  const totalToFromTuples = getSignalTimeTuples({
-    logger,
-    ruleParamsFrom: ruleParams.from,
-    ruleParamsTo: ruleParams.to,
-    ruleParamsMaxSignals: ruleParams.maxSignals,
-    gap,
-    previousStartedAt,
-    interval,
-    buildRuleMessage,
-  });
   const tuplesToBeLogged = [...totalToFromTuples];
   logger.debug(buildRuleMessage(`totalToFromTuples: ${totalToFromTuples.length}`));
 
@@ -107,6 +95,7 @@ export const searchAfterAndBulkCreate = async ({
             to: tuple.to.toISOString(),
             services,
             logger,
+            // @ts-expect-error please, declare a type explicitly instead of unknown
             filter,
             pageSize: Math.ceil(Math.min(tuple.maxSignals, pageSize)),
             timestampOverride: ruleParams.timestampOverride,
@@ -116,6 +105,7 @@ export const searchAfterAndBulkCreate = async ({
           // call this function setSortIdOrExit()
           const lastSortId = searchResultB?.hits?.hits[searchResultB.hits.hits.length - 1]?.sort;
           if (lastSortId != null && lastSortId.length !== 0) {
+            // @ts-expect-error @elastic/elasticsearch SortResults contains null not assignable to backupSortId
             backupSortId = lastSortId[0];
             hasBackupSortId = true;
           } else {
@@ -147,6 +137,7 @@ export const searchAfterAndBulkCreate = async ({
             to: tuple.to.toISOString(),
             services,
             logger,
+            // @ts-expect-error please, declare a type explicitly instead of unknown
             filter,
             pageSize: Math.ceil(Math.min(tuple.maxSignals, pageSize)),
             timestampOverride: ruleParams.timestampOverride,
@@ -167,6 +158,7 @@ export const searchAfterAndBulkCreate = async ({
 
           const lastSortId = searchResult.hits.hits[searchResult.hits.hits.length - 1]?.sort;
           if (lastSortId != null && lastSortId.length !== 0) {
+            // @ts-expect-error @elastic/elasticsearch SortResults contains null not assignable to sortId
             sortId = lastSortId[0];
             hasSortId = true;
           } else {

@@ -6,9 +6,11 @@
  */
 
 import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
+
+import type { AgentPolicy, NewAgentPolicy, Output } from '../types';
+
 import { agentPolicyService } from './agent_policy';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
-import type { AgentPolicy, NewAgentPolicy, Output } from '../types';
 
 function getSavedObjectMock(agentPolicyAttributes: any) {
   const mock = savedObjectsClientMock.create();
@@ -169,6 +171,7 @@ describe('agent policy', () => {
         inputs: [],
         revision: 1,
         fleet: {
+          hosts: ['http://localhost:5603'],
           kibana: {
             hosts: ['localhost:5603'],
             protocol: 'http',
@@ -204,6 +207,7 @@ describe('agent policy', () => {
         inputs: [],
         revision: 1,
         fleet: {
+          hosts: ['http://localhost:5603'],
           kibana: {
             hosts: ['localhost:5603'],
             protocol: 'http',
@@ -240,6 +244,7 @@ describe('agent policy', () => {
         inputs: [],
         revision: 1,
         fleet: {
+          hosts: ['http://localhost:5603'],
           kibana: {
             hosts: ['localhost:5603'],
             protocol: 'http',

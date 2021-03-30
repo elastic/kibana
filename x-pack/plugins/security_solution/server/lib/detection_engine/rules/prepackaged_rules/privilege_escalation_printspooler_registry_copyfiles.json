@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Suspicious Print Spooler Point and Print DLL",
   "query": "sequence by host.id with maxspan=30s\n[registry where\n registry.path : \"HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Print\\\\Printers\\\\*\\\\SpoolDirectory\" and\n registry.data.strings : \"C:\\\\Windows\\\\System32\\\\spool\\\\drivers\\\\x64\\\\4\"]\n[registry where\n registry.path : \"HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\Print\\\\Printers\\\\*\\\\CopyFiles\\\\Payload\\\\Module\" and\n registry.data.strings : \"C:\\\\Windows\\\\System32\\\\spool\\\\drivers\\\\x64\\\\4\\\\*\"]\n",
   "references": [

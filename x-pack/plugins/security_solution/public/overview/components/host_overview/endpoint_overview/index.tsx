@@ -20,79 +20,73 @@ import * as i18n from './translations';
 interface Props {
   contextID?: string;
   data: EndpointFields | null;
-  isInDetailsSidePanel?: boolean;
 }
 
-export const EndpointOverview = React.memo<Props>(
-  ({ contextID, data, isInDetailsSidePanel = false }) => {
-    const getDefaultRenderer = useCallback(
-      (fieldName: string, fieldData: EndpointFields, attrName: string) => (
-        <DefaultFieldRenderer
-          rowItems={[getOr('', fieldName, fieldData)]}
-          attrName={attrName}
-          idPrefix={contextID ? `endpoint-overview-${contextID}` : 'endpoint-overview'}
-        />
-      ),
-      [contextID]
-    );
-    const descriptionLists: Readonly<DescriptionList[][]> = useMemo(
-      () => [
-        [
-          {
-            title: i18n.ENDPOINT_POLICY,
-            description:
-              data != null && data.endpointPolicy != null
-                ? data.endpointPolicy
-                : getEmptyTagValue(),
-          },
-        ],
-        [
-          {
-            title: i18n.POLICY_STATUS,
-            description:
-              data != null && data.policyStatus != null ? (
-                <EuiHealth
-                  aria-label={data.policyStatus}
-                  color={
-                    data.policyStatus === HostPolicyResponseActionStatus.failure
-                      ? 'danger'
-                      : data.policyStatus
-                  }
-                >
-                  {data.policyStatus}
-                </EuiHealth>
-              ) : (
-                getEmptyTagValue()
-              ),
-          },
-        ],
-        [
-          {
-            title: i18n.SENSORVERSION,
-            description:
-              data != null && data.sensorVersion != null
-                ? getDefaultRenderer('sensorVersion', data, 'agent.version')
-                : getEmptyTagValue(),
-          },
-        ],
-        [], // needs 4 columns for design
+export const EndpointOverview = React.memo<Props>(({ contextID, data }) => {
+  const getDefaultRenderer = useCallback(
+    (fieldName: string, fieldData: EndpointFields, attrName: string) => (
+      <DefaultFieldRenderer
+        rowItems={[getOr('', fieldName, fieldData)]}
+        attrName={attrName}
+        idPrefix={contextID ? `endpoint-overview-${contextID}` : 'endpoint-overview'}
+      />
+    ),
+    [contextID]
+  );
+  const descriptionLists: Readonly<DescriptionList[][]> = useMemo(
+    () => [
+      [
+        {
+          title: i18n.ENDPOINT_POLICY,
+          description:
+            data != null && data.endpointPolicy != null ? data.endpointPolicy : getEmptyTagValue(),
+        },
       ],
-      [data, getDefaultRenderer]
-    );
+      [
+        {
+          title: i18n.POLICY_STATUS,
+          description:
+            data != null && data.policyStatus != null ? (
+              <EuiHealth
+                aria-label={data.policyStatus}
+                color={
+                  data.policyStatus === HostPolicyResponseActionStatus.failure
+                    ? 'danger'
+                    : data.policyStatus
+                }
+              >
+                {data.policyStatus}
+              </EuiHealth>
+            ) : (
+              getEmptyTagValue()
+            ),
+        },
+      ],
+      [
+        {
+          title: i18n.SENSORVERSION,
+          description:
+            data != null && data.sensorVersion != null
+              ? getDefaultRenderer('sensorVersion', data, 'agent.version')
+              : getEmptyTagValue(),
+        },
+      ],
+      [], // needs 4 columns for design
+    ],
+    [data, getDefaultRenderer]
+  );
 
-    return (
-      <>
-        {descriptionLists.map((descriptionList, index) => (
-          <OverviewDescriptionList
-            dataTestSubj="endpoint-overview"
-            descriptionList={descriptionList}
-            isInDetailsSidePanel={isInDetailsSidePanel}
-            key={index}
-          />
-        ))}
-      </>
-    );
-  }
-);
+  return (
+    <>
+      {descriptionLists.map((descriptionList, index) => (
+        <OverviewDescriptionList
+          dataTestSubj="endpoint-overview"
+          descriptionList={descriptionList}
+          key={index}
+        />
+      ))}
+    </>
+  );
+});
 
 EndpointOverview.displayName = 'EndpointOverview';

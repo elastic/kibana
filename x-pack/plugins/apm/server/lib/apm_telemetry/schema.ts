@@ -116,7 +116,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
     },
   },
   environments: {
-    services_without_environments: long,
+    services_without_environment: long,
     services_with_multiple_environments: long,
     top_environments: { type: 'array', items: { type: 'keyword' } },
   },
@@ -192,5 +192,6 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
     agents: { took: { ms: long } },
     indices_stats: { took: { ms: long } },
     cardinality: { took: { ms: long } },
+    environments: { took: { ms: long } },
   },
 };

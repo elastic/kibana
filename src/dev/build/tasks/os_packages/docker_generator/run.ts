@@ -83,6 +83,16 @@ export async function runDockerGenerator(
     revision: config.getBuildSha(),
   };
 
+  type HostArchitectureToDocker = Record<string, string>;
+  const hostTarget: HostArchitectureToDocker = {
+    x64: 'x64',
+    arm64: 'aarch64',
+  };
+  const buildArchitectureSupported = hostTarget[process.arch] === flags.architecture;
+  if (flags.architecture && !buildArchitectureSupported) {
+    return;
+  }
+
   // Verify if we have the needed kibana target in order
   // to build the kibana docker image.
   // Also create the docker build target folder
@@ -132,13 +142,7 @@ export async function runDockerGenerator(
   await chmodAsync(`${resolve(dockerBuildDir, 'build_docker.sh')}`, '755');
 
   // Only build images on native targets
-  type HostArchitectureToDocker = Record<string, string>;
-  const hostTarget: HostArchitectureToDocker = {
-    x64: 'x64',
-    arm64: 'aarch64',
-  };
-  const buildImage = hostTarget[process.arch] === flags.architecture && flags.image;
-  if (buildImage) {
+  if (flags.image) {
     await exec(log, `./build_docker.sh`, [], {
       cwd: dockerBuildDir,
       level: 'info',

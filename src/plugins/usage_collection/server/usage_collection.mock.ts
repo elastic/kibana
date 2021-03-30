@@ -10,7 +10,7 @@ import {
   elasticsearchServiceMock,
   httpServerMock,
   loggingSystemMock,
-  savedObjectsRepositoryMock,
+  savedObjectsClientMock,
 } from '../../../../src/core/server/mocks';
 
 import { CollectorOptions, Collector, UsageCollector } from './collector';
@@ -40,7 +40,7 @@ export const createUsageCollectionSetupMock = () => {
 export function createCollectorFetchContextMock(): jest.Mocked<CollectorFetchContext<false>> {
   const collectorFetchClientsMock: jest.Mocked<CollectorFetchContext<false>> = {
     esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
-    soClient: savedObjectsRepositoryMock.create(),
+    soClient: savedObjectsClientMock.create(),
   };
   return collectorFetchClientsMock;
 }
@@ -50,7 +50,7 @@ export function createCollectorFetchContextWithKibanaMock(): jest.Mocked<
 > {
   const collectorFetchClientsMock: jest.Mocked<CollectorFetchContext<true>> = {
     esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
-    soClient: savedObjectsRepositoryMock.create(),
+    soClient: savedObjectsClientMock.create(),
     kibanaRequest: httpServerMock.createKibanaRequest(),
   };
   return collectorFetchClientsMock;

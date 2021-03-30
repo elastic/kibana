@@ -30,7 +30,6 @@ import { DiscoverHistogram, DiscoverUninitialized } from '../angular/directives'
 import { DiscoverNoResults } from './no_results';
 import { LoadingSpinner } from './loading_spinner/loading_spinner';
 import { DocTableLegacy } from '../angular/doc_table/create_doc_table_react';
-import { SkipBottomButton } from './skip_bottom_button';
 import { esFilters, IndexPatternField, search } from '../../../../data/public';
 import { DiscoverSidebarResponsive } from './sidebar';
 import { DiscoverProps } from './types';
@@ -42,30 +41,33 @@ import { DocViewFilterFn } from '../doc_views/doc_views_types';
 import { DiscoverGrid } from './discover_grid/discover_grid';
 import { DiscoverTopNav } from './discover_topnav';
 import { ElasticSearchHit } from '../doc_views/doc_views_types';
+import { setBreadcrumbsTitle } from '../helpers/breadcrumbs';
+import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
 import { InspectorSession } from '../../../../inspector/public';
 
 const DocTableLegacyMemoized = React.memo(DocTableLegacy);
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const DataGridMemoized = React.memo(DiscoverGrid);
 const TopNavMemoized = React.memo(DiscoverTopNav);
+const TimechartHeaderMemoized = React.memo(TimechartHeader);
+const DiscoverHistogramMemoized = React.memo(DiscoverHistogram);
 
 export function Discover({
   fetch,
   fetchCounter,
   fetchError,
   fieldCounts,
+  fetchStatus,
   histogramData,
   hits,
   indexPattern,
   minimumVisibleRows,
-  onSkipBottomButtonClick,
   opts,
   resetQuery,
   resultState,
   rows,
   searchSource,
   state,
-  timeRange,
   unmappedFieldsConfig,
 }: DiscoverProps) {
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
@@ -82,13 +84,16 @@ export function Discover({
   }, [state, opts]);
   const hideChart = useMemo(() => state.hideChart, [state]);
   const { savedSearch, indexPatternList, config, services, data, setAppState } = opts;
-  const { trackUiMetric, capabilities, indexPatterns } = services;
+  const { trackUiMetric, capabilities, indexPatterns, chrome, docLinks } = services;
+
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
-  const bucketAggConfig = opts.chartAggConfigs?.aggs[1];
-  const bucketInterval =
-    bucketAggConfig && search.aggs.isDateHistogramBucketAggConfig(bucketAggConfig)
+  const bucketInterval = useMemo(() => {
+    const bucketAggConfig = opts.chartAggConfigs?.aggs[1];
+    return bucketAggConfig && search.aggs.isDateHistogramBucketAggConfig(bucketAggConfig)
       ? bucketAggConfig.buckets?.getInterval()
       : undefined;
+  }, [opts.chartAggConfigs]);
+
   const contentCentered = resultState === 'uninitialized';
   const isLegacy = services.uiSettings.get('doc_table:legacy');
   const useNewFieldsApi = !services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
@@ -101,6 +106,14 @@ export function Discover({
     },
     [opts]
   );
+
+  useEffect(() => {
+    const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
+    chrome.docTitle.change(`Discover${pageTitleSuffix}`);
+
+    setBreadcrumbsTitle(savedSearch, chrome);
+    addHelpMenuToAppChrome(chrome, docLinks);
+  }, [savedSearch, chrome, docLinks]);
 
   const { onAddColumn, onRemoveColumn, onMoveColumn, onSetColumns } = useMemo(
     () =>
@@ -307,9 +320,9 @@ export function Discover({
                         </EuiFlexItem>
                         {!hideChart && (
                           <EuiFlexItem className="dscResultCount__actions">
-                            <TimechartHeader
+                            <TimechartHeaderMemoized
+                              data={opts.data}
                               dateFormat={opts.config.get('dateFormat')}
-                              timeRange={timeRange}
                               options={search.aggs.intervalOptions}
                               onChangeInterval={onChangeInterval}
                               stateInterval={state.interval || ''}
@@ -338,7 +351,6 @@ export function Discover({
                           </EuiFlexItem>
                         )}
                       </EuiFlexGroup>
-                      {isLegacy && <SkipBottomButton onClick={onSkipBottomButtonClick} />}
                     </EuiFlexItem>
                     {!hideChart && opts.timefield && (
                       <EuiFlexItem grow={false}>
@@ -356,7 +368,7 @@ export function Discover({
                               className={isLegacy ? 'dscHistogram' : 'dscHistogramGrid'}
                               data-test-subj="discoverChart"
                             >
-                              <DiscoverHistogram
+                              <DiscoverHistogramMemoized
                                 chartData={histogramData}
                                 timefilterUpdateHandler={timefilterUpdateHandler}
                               />
@@ -408,6 +420,7 @@ export function Discover({
                               columns={columns}
                               expandedDoc={expandedDoc}
                               indexPattern={indexPattern}
+                              isLoading={fetchStatus === 'loading'}
                               rows={rows}
                               sort={(state.sort as SortPairArr[]) || []}
                               sampleSize={opts.sampleSize}

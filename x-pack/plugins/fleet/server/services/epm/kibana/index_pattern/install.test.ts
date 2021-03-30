@@ -7,19 +7,23 @@
 
 import path from 'path';
 import { readFileSync } from 'fs';
+
 import glob from 'glob';
 import { safeLoad } from 'js-yaml';
+
+import type { FieldSpec } from 'src/plugins/data/common';
+
+import type { Fields, Field } from '../../fields/field';
+
 import {
   flattenFields,
   dedupeFields,
   transformField,
   findFieldByPath,
-  IndexPatternField,
   createFieldFormatMap,
   createIndexPatternFields,
   createIndexPattern,
 } from './install';
-import { Fields, Field } from '../../fields/field';
 import { dupeFields } from './tests/test_data';
 
 // Add our own serialiser to just do JSON.stringify
@@ -90,7 +94,6 @@ describe('creating index patterns from yaml fields', () => {
       const mergedField = deduped.find((field) => field.name === '1');
       expect(mergedField?.searchable).toBe(true);
       expect(mergedField?.aggregatable).toBe(true);
-      expect(mergedField?.analyzed).toBe(true);
       expect(mergedField?.count).toBe(0);
     });
   });
@@ -153,7 +156,7 @@ describe('creating index patterns from yaml fields', () => {
       { fields: [{ name: 'testField', type: 'short' }], expect: 'number' },
       { fields: [{ name: 'testField', type: 'byte' }], expect: 'number' },
       { fields: [{ name: 'testField', type: 'keyword' }], expect: 'string' },
-      { fields: [{ name: 'testField', type: 'invalidType' }], expect: undefined },
+      { fields: [{ name: 'testField', type: 'invalidType' }], expect: 'string' },
       { fields: [{ name: 'testField', type: 'text' }], expect: 'string' },
       { fields: [{ name: 'testField', type: 'date' }], expect: 'date' },
       { fields: [{ name: 'testField', type: 'geo_point' }], expect: 'geo_point' },
@@ -168,7 +171,7 @@ describe('creating index patterns from yaml fields', () => {
 
   test('transformField changes values based on other values', () => {
     interface TestWithAttr extends Test {
-      attr: keyof IndexPatternField;
+      attr: keyof FieldSpec;
     }
 
     const tests: TestWithAttr[] = [
@@ -206,43 +209,6 @@ describe('creating index patterns from yaml fields', () => {
         fields: [{ name, aggregatable: true, type: 'object', enabled: false }],
         expect: false,
         attr: 'aggregatable',
-      },
-
-      // analyzed
-      { fields: [{ name }], expect: false, attr: 'analyzed' },
-      { fields: [{ name, analyzed: true }], expect: true, attr: 'analyzed' },
-      { fields: [{ name, analyzed: false }], expect: false, attr: 'analyzed' },
-      { fields: [{ name, type: 'binary' }], expect: false, attr: 'analyzed' },
-      { fields: [{ name, analyzed: true, type: 'binary' }], expect: false, attr: 'analyzed' },
-      {
-        fields: [{ name, analyzed: true, type: 'object', enabled: false }],
-        expect: false,
-        attr: 'analyzed',
-      },
-
-      // doc_values always set to true except for meta fields
-      { fields: [{ name }], expect: true, attr: 'doc_values' },
-      { fields: [{ name, doc_values: true }], expect: true, attr: 'doc_values' },
-      { fields: [{ name, doc_values: false }], expect: false, attr: 'doc_values' },
-      { fields: [{ name, script: 'doc[]' }], expect: false, attr: 'doc_values' },
-      { fields: [{ name, doc_values: true, script: 'doc[]' }], expect: false, attr: 'doc_values' },
-      { fields: [{ name, type: 'binary' }], expect: false, attr: 'doc_values' },
-      { fields: [{ name, doc_values: true, type: 'binary' }], expect: true, attr: 'doc_values' },
-      {
-        fields: [{ name, doc_values: true, type: 'object', enabled: false }],
-        expect: false,
-        attr: 'doc_values',
-      },
-
-      // enabled - only applies to objects (and only if set)
-      { fields: [{ name, type: 'binary', enabled: false }], expect: undefined, attr: 'enabled' },
-      { fields: [{ name, type: 'binary', enabled: true }], expect: undefined, attr: 'enabled' },
-      { fields: [{ name, type: 'object', enabled: true }], expect: true, attr: 'enabled' },
-      { fields: [{ name, type: 'object', enabled: false }], expect: false, attr: 'enabled' },
-      {
-        fields: [{ name, type: 'object', enabled: false }],
-        expect: false,
-        attr: 'doc_values',
       },
 
       // indexed

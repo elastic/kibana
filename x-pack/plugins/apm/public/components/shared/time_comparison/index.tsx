@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import { useUiTracker } from '../../../../../observability/public';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { getDateDifference } from '../../../../common/utils/formatters';
 import { useUrlParams } from '../../../context/url_params_context/use_url_params';
@@ -84,12 +85,14 @@ function getSelectOptions({
     }),
   };
 
-  const dateDiff = getDateDifference({
-    start: momentStart,
-    end: momentEnd,
-    unitOfTime: 'days',
-    precise: true,
-  });
+  const dateDiff = Number(
+    getDateDifference({
+      start: momentStart,
+      end: momentEnd,
+      unitOfTime: 'days',
+      precise: true,
+    }).toFixed(2)
+  );
 
   const isRangeToNow = rangeTo === 'now';
 
@@ -130,6 +133,7 @@ function getSelectOptions({
 }
 
 export function TimeComparison() {
+  const trackApmEvent = useUiTracker({ app: 'apm' });
   const history = useHistory();
   const { isMedium, isLarge } = useBreakPoints();
   const {
@@ -179,9 +183,17 @@ export function TimeComparison() {
             })}
             checked={comparisonEnabled}
             onChange={() => {
+              const nextComparisonEnabledValue = !comparisonEnabled;
+              if (nextComparisonEnabledValue === false) {
+                trackApmEvent({
+                  metric: 'time_comparison_disabled',
+                });
+              }
               urlHelpers.push(history, {
                 query: {
-                  comparisonEnabled: Boolean(!comparisonEnabled).toString(),
+                  comparisonEnabled: Boolean(
+                    nextComparisonEnabledValue
+                  ).toString(),
                 },
               });
             }}
@@ -189,6 +201,9 @@ export function TimeComparison() {
         </PrependContainer>
       }
       onChange={(e) => {
+        trackApmEvent({
+          metric: `time_comparison_type_change_${e.target.value}`,
+        });
         urlHelpers.push(history, {
           query: {
             comparisonType: e.target.value,

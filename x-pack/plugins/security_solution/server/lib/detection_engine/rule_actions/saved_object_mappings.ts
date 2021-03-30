@@ -6,6 +6,7 @@
  */
 
 import { SavedObjectsType } from '../../../../../../../src/core/server';
+import { ruleActionsSavedObjectMigration } from './migrations';
 
 export const ruleActionsSavedObjectType = 'siem-detection-engine-rule-actions';
 
@@ -45,4 +46,5 @@ export const type: SavedObjectsType = {
   hidden: false,
   namespaceType: 'single',
   mappings: ruleActionsSavedObjectMappings,
+  migrations: ruleActionsSavedObjectMigration,
 };

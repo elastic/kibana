@@ -23,7 +23,7 @@ run(async ({ log }) => {
       // include files from node_modules in the result, but it still
       // loads all of the files from node_modules before filtering
       // so it's still super slow. This prevents loading the files
-      // and still relies on gitignore to to final ignores
+      // and still relies on gitignore to final ignores
       '**/node_modules',
     ],
   });

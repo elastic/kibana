@@ -37,6 +37,7 @@ const bodySchema = schema.object({
     hot: schema.any(),
     warm: schema.maybe(schema.any()),
     cold: schema.maybe(schema.any()),
+    frozen: schema.maybe(schema.any()),
     delete: schema.maybe(schema.any()),
   }),
 });

@@ -6,9 +6,11 @@
  */
 
 import React, { useState, useContext, useEffect } from 'react';
+
+import type { GetFleetStatusResponse } from '../types';
+
 import { useConfig } from './use_config';
 import { sendGetFleetStatus } from './use_request';
-import { GetFleetStatusResponse } from '../types';
 
 interface FleetStatusState {
   enabled: boolean;

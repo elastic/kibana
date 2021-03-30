@@ -63,6 +63,15 @@ describe('RoleMappingsTable', () => {
     expect(wrapper.find(EuiTableRow)).toHaveLength(0);
   });
 
+  it('handles input change with special chars', () => {
+    const wrapper = shallow(<RoleMappingsTable {...props} />);
+    const input = wrapper.find(EuiFieldSearch);
+    const value = '*//username';
+    input.simulate('change', { target: { value } });
+
+    expect(wrapper.find(EuiTableRow)).toHaveLength(1);
+  });
+
   it('shows default message when "accessAllEngines" is true', () => {
     const wrapper = shallow(
       <RoleMappingsTable {...props} roleMappings={[asRoleMapping as any]} accessItemKey="engines" />
@@ -72,7 +81,7 @@ describe('RoleMappingsTable', () => {
   });
 
   it('handles display when no items present', () => {
-    const noItemsRoleMapping = { ...asRoleMapping };
+    const noItemsRoleMapping = { ...asRoleMapping, engines: [] };
     noItemsRoleMapping.accessAllEngines = false;
 
     const wrapper = shallow(

@@ -13,6 +13,10 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./update'));
     loadTestFile(require.resolve('./create_job'));
+    loadTestFile(require.resolve('./start'));
+    loadTestFile(require.resolve('./stop'));
+    loadTestFile(require.resolve('./start_spaces'));
+    loadTestFile(require.resolve('./stop_spaces'));
     loadTestFile(require.resolve('./get_spaces'));
     loadTestFile(require.resolve('./update_spaces'));
     loadTestFile(require.resolve('./delete_spaces'));

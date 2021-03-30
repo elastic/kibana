@@ -31,6 +31,9 @@ const { Optimizer } = jest.requireMock('./optimizer');
 jest.mock('./dev_server');
 const { DevServer } = jest.requireMock('./dev_server');
 
+jest.mock('@kbn/dev-utils/target/ci_stats_reporter');
+const { CiStatsReporter } = jest.requireMock('@kbn/dev-utils/target/ci_stats_reporter');
+
 jest.mock('./get_server_watch_paths', () => ({
   getServerWatchPaths: jest.fn(() => ({
     watchPaths: ['<mock watch paths>'],
@@ -189,6 +192,7 @@ describe('#start()/#stop()', () => {
       optimizerReady$ = new Rx.Subject();
       return {
         isReady$: jest.fn(() => optimizerReady$),
+        getPhase$: jest.fn(() => Rx.NEVER),
         run$: optimizerRun$,
       };
     });
@@ -203,7 +207,13 @@ describe('#start()/#stop()', () => {
       devServerReady$ = new Rx.Subject();
       return {
         isReady$: jest.fn(() => devServerReady$),
+        getPhase$: jest.fn(() => Rx.NEVER),
         run$: devServerRun$,
+      };
+    });
+    CiStatsReporter.fromEnv.mockImplementation(() => {
+      return {
+        isEnabled: jest.fn().mockReturnValue(false),
       };
     });
   });

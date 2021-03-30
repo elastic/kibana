@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AggregationOptionsByType } from '../../../../../../typings/elasticsearch/aggregations';
-import { ESFilter } from '../../../../../../typings/elasticsearch';
+import { AggregationOptionsByType } from '../../../../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../../../typings/elasticsearch';
 import {
   environmentQuery,
   rangeQuery,
@@ -72,6 +72,10 @@ export async function getCorrelationsForSlowTransactions({
       backgroundFilters,
       setup,
     });
+
+    if (!durationForPercentile) {
+      return {};
+    }
 
     const response = await withApmSpan('get_significant_terms', () => {
       const params = {

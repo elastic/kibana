@@ -132,7 +132,7 @@ class TimeseriesVisualization extends Component {
   };
 
   render() {
-    const { model, visData, onBrush } = this.props;
+    const { model, visData, onBrush, syncColors, palettesService } = this.props;
     const series = get(visData, `${model.id}.series`, []);
     const interval = getInterval(visData, model);
     const yAxisIdGenerator = htmlIdGenerator('yaxis');
@@ -163,6 +163,13 @@ class TimeseriesVisualization extends Component {
         seriesGroup,
         this.props.getConfig
       );
+      const palette = {
+        ...seriesGroup.palette,
+        name:
+          seriesGroup.split_color_mode === 'kibana'
+            ? 'kibana_palette'
+            : seriesGroup.split_color_mode || seriesGroup.palette?.name,
+      };
       const yScaleType = hasSeparateAxis
         ? TimeseriesVisualization.getAxisScaleType(seriesGroup)
         : mainAxisScaleType;
@@ -182,6 +189,9 @@ class TimeseriesVisualization extends Component {
           seriesDataRow.groupId = groupId;
           seriesDataRow.yScaleType = yScaleType;
           seriesDataRow.hideInLegend = Boolean(seriesGroup.hide_in_legend);
+          seriesDataRow.palette = palette;
+          seriesDataRow.baseColor = seriesGroup.color;
+          seriesDataRow.isSplitByTerms = seriesGroup.split_mode === 'terms';
         });
 
       if (isCustomDomain) {
@@ -223,6 +233,8 @@ class TimeseriesVisualization extends Component {
           xAxisLabel={getAxisLabelString(interval)}
           xAxisFormatter={this.xAxisFormatter(interval)}
           annotations={this.prepareAnnotations()}
+          syncColors={syncColors}
+          palettesService={palettesService}
         />
       </div>
     );

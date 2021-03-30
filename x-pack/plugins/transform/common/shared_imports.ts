@@ -6,5 +6,9 @@
  */
 
 export type { HitsTotalRelation, SearchResponse7 } from '../../ml/common';
-export { HITS_TOTAL_RELATION } from '../../ml/common';
-export { composeValidators, patternValidator } from '../../ml/common';
+export {
+  composeValidators,
+  patternValidator,
+  ChartData,
+  HITS_TOTAL_RELATION,
+} from '../../ml/common';

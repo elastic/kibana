@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { SavedObjectMigrationContext } from 'src/core/server';
+
 import { migrateToKibana660 } from './migrate_6x';
-import { SavedObjectMigrationContext } from 'src/core/server';
 
 const mockContext = {} as SavedObjectMigrationContext;
 

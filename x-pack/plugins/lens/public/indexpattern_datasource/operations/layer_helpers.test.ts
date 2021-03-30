@@ -104,6 +104,7 @@ describe('state_helpers', () => {
           indexPattern,
           op: 'missing' as OperationType,
           columnId: 'none',
+          visualizationGroups: [],
         });
       }).toThrow();
     });
@@ -119,7 +120,7 @@ describe('state_helpers', () => {
             isBucketed: false,
 
             // Private
-            operationType: 'avg',
+            operationType: 'average',
             sourceField: 'bytes',
           },
         },
@@ -130,6 +131,7 @@ describe('state_helpers', () => {
           indexPattern,
           columnId: 'col2',
           op: 'filters',
+          visualizationGroups: [],
         })
       ).toEqual(expect.objectContaining({ columnOrder: ['col2', 'col1'] }));
     });
@@ -145,7 +147,7 @@ describe('state_helpers', () => {
             isBucketed: false,
 
             // Private
-            operationType: 'avg',
+            operationType: 'average',
             sourceField: 'bytes',
           },
         },
@@ -157,6 +159,7 @@ describe('state_helpers', () => {
           columnId: 'col2',
           op: 'date_histogram',
           field: indexPattern.fields[0],
+          visualizationGroups: [],
         })
       ).toEqual(expect.objectContaining({ columnOrder: ['col2', 'col1'] }));
     });
@@ -187,6 +190,7 @@ describe('state_helpers', () => {
           columnId: 'col2',
           op: 'count',
           field: documentField,
+          visualizationGroups: [],
         })
       ).toEqual(expect.objectContaining({ columnOrder: ['col1', 'col2'] }));
     });
@@ -225,6 +229,7 @@ describe('state_helpers', () => {
           columnId: 'col2',
           op: 'count',
           field: documentField,
+          visualizationGroups: [],
         })
       ).toEqual(expect.objectContaining({ columnOrder: ['col1', 'col2', 'col3'] }));
     });
@@ -263,6 +268,7 @@ describe('state_helpers', () => {
           indexPattern,
           columnId: 'col2',
           op: 'filters',
+          visualizationGroups: [],
         })
       ).toEqual(expect.objectContaining({ columnOrder: ['col1', 'col2', 'col3'] }));
     });
@@ -275,6 +281,7 @@ describe('state_helpers', () => {
           indexPattern,
           op: 'terms',
           field: indexPattern.fields[0],
+          visualizationGroups: [],
         })
       ).toEqual(
         expect.objectContaining({
@@ -310,6 +317,7 @@ describe('state_helpers', () => {
           indexPattern,
           op: 'terms',
           field: indexPattern.fields[2],
+          visualizationGroups: [],
         })
       ).toEqual(expect.objectContaining({ columnOrder: ['col2', 'col1'] }));
     });
@@ -339,6 +347,7 @@ describe('state_helpers', () => {
           indexPattern,
           op: 'date_histogram',
           field: indexPattern.fields[0],
+          visualizationGroups: [],
         })
       ).toEqual(expect.objectContaining({ columnOrder: ['col1', 'col2'] }));
     });
@@ -356,7 +365,7 @@ describe('state_helpers', () => {
                 isBucketed: false,
 
                 // Private
-                operationType: 'avg',
+                operationType: 'average',
                 sourceField: 'bytes',
               },
               col2: {
@@ -374,6 +383,7 @@ describe('state_helpers', () => {
           indexPattern,
           op: 'sum',
           field: indexPattern.fields[2],
+          visualizationGroups: [],
         })
       ).toEqual(expect.objectContaining({ columnOrder: ['col1', 'col2', 'col3'] }));
     });
@@ -395,6 +405,7 @@ describe('state_helpers', () => {
             indexPattern,
             columnId: 'col2',
             op: 'testReference' as OperationType,
+            visualizationGroups: [],
           });
         }).toThrow();
       });
@@ -406,6 +417,7 @@ describe('state_helpers', () => {
           indexPattern,
           columnId: 'col2',
           op: 'testReference' as OperationType,
+          visualizationGroups: [],
         });
 
         expect(operationDefinitionMap.testReference.buildColumn).toHaveBeenCalledWith(
@@ -470,6 +482,7 @@ describe('state_helpers', () => {
             columnId: 'ref1',
             op: 'count',
             field: documentField,
+            visualizationGroups: [],
           })
         ).toEqual(
           expect.objectContaining({
@@ -492,6 +505,7 @@ describe('state_helpers', () => {
           op: 'count',
           field: documentField,
           columnId: 'none',
+          visualizationGroups: [],
         });
       }).toThrow();
     });
@@ -503,6 +517,7 @@ describe('state_helpers', () => {
           indexPattern,
           op: 'missing' as OperationType,
           columnId: 'none',
+          visualizationGroups: [],
         });
       }).toThrow();
     });
@@ -518,7 +533,7 @@ describe('state_helpers', () => {
             isBucketed: false,
 
             // Private
-            operationType: 'avg',
+            operationType: 'average',
             sourceField: 'bytes',
           },
           col2: {
@@ -539,6 +554,7 @@ describe('state_helpers', () => {
           columnId: 'col2',
           op: 'date_histogram',
           field: indexPattern.fields[0], // date
+          visualizationGroups: [],
         })
       ).toEqual(
         expect.objectContaining({
@@ -572,6 +588,7 @@ describe('state_helpers', () => {
           indexPattern,
           op: 'date_histogram',
           field: indexPattern.fields[0],
+          visualizationGroups: [],
         });
       }).toThrow();
     });
@@ -600,6 +617,7 @@ describe('state_helpers', () => {
           columnId: 'col1',
           indexPattern,
           op: 'terms',
+          visualizationGroups: [],
         })
       ).toEqual(
         expect.objectContaining({
@@ -636,6 +654,7 @@ describe('state_helpers', () => {
           indexPattern,
           op: 'date_histogram',
           field: indexPattern.fields[1],
+          visualizationGroups: [],
         }).columns.col1
       ).toEqual(
         expect.objectContaining({
@@ -671,6 +690,7 @@ describe('state_helpers', () => {
           indexPattern,
           columnId: 'col1',
           op: 'filters',
+          visualizationGroups: [],
         })
       ).toEqual(
         expect.objectContaining({
@@ -706,6 +726,7 @@ describe('state_helpers', () => {
           columnId: 'col1',
           op: 'date_histogram',
           field: indexPattern.fields[0],
+          visualizationGroups: [],
         }).columns.col1
       ).toEqual(
         expect.objectContaining({
@@ -740,6 +761,7 @@ describe('state_helpers', () => {
           columnId: 'col1',
           op: 'date_histogram',
           field: indexPattern.fields[1],
+          visualizationGroups: [],
         }).columns.col1
       ).toEqual(
         expect.objectContaining({
@@ -775,6 +797,7 @@ describe('state_helpers', () => {
           columnId: 'col1',
           op: 'terms',
           field: indexPattern.fields[0],
+          visualizationGroups: [],
         }).columns.col1
       ).toEqual(
         expect.objectContaining({
@@ -817,8 +840,9 @@ describe('state_helpers', () => {
         },
         indexPattern,
         columnId: 'col2',
-        op: 'avg',
+        op: 'average',
         field: indexPattern.fields[2], // bytes field
+        visualizationGroups: [],
       });
 
       expect(operationDefinitionMap.terms.onOtherColumnChanged).toHaveBeenCalledWith(
@@ -832,7 +856,7 @@ describe('state_helpers', () => {
               dataType: 'number',
               isBucketed: false,
               sourceField: 'bytes',
-              operationType: 'avg',
+              operationType: 'average',
             }),
           },
           incompleteColumns: {},
@@ -876,6 +900,7 @@ describe('state_helpers', () => {
         indexPattern,
         columnId: 'willBeReference',
         op: 'cumulative_sum',
+        visualizationGroups: [],
       });
 
       expect(operationDefinitionMap.terms.onOtherColumnChanged).toHaveBeenCalledWith(
@@ -925,6 +950,7 @@ describe('state_helpers', () => {
           indexPattern,
           columnId: 'col1',
           op: 'testReference' as OperationType,
+          visualizationGroups: [],
         });
 
         expect(operationDefinitionMap.testReference.buildColumn).toHaveBeenCalledWith(
@@ -935,6 +961,49 @@ describe('state_helpers', () => {
         expect(result.columnOrder).toEqual(['id1', 'col1']);
         expect(result.columns).toEqual(
           expect.objectContaining({
+            id1: expectedColumn,
+            col1: expect.any(Object),
+          })
+        );
+      });
+
+      it('should remove filter from the wrapped column if it gets wrapped (case new1)', () => {
+        const expectedColumn = {
+          label: 'Count',
+          customLabel: true,
+          dataType: 'number' as const,
+          isBucketed: false,
+          sourceField: 'Records',
+          operationType: 'count' as const,
+        };
+
+        const testFilter = { language: 'kuery', query: '' };
+
+        const layer: IndexPatternLayer = {
+          indexPatternId: '1',
+          columnOrder: ['col1'],
+          columns: { col1: { ...expectedColumn, filter: testFilter } },
+        };
+        const result = replaceColumn({
+          layer,
+          indexPattern,
+          columnId: 'col1',
+          op: 'testReference' as OperationType,
+          visualizationGroups: [],
+        });
+
+        expect(operationDefinitionMap.testReference.buildColumn).toHaveBeenCalledWith(
+          expect.objectContaining({
+            referenceIds: ['id1'],
+            previousColumn: expect.objectContaining({
+              // filter should be passed to the buildColumn function of the target operation
+              filter: testFilter,
+            }),
+          })
+        );
+        expect(result.columns).toEqual(
+          expect.objectContaining({
+            // filter should be stripped from the original column
             id1: expectedColumn,
             col1: expect.any(Object),
           })
@@ -958,7 +1027,7 @@ describe('state_helpers', () => {
               dataType: 'number' as const,
               isBucketed: false,
               sourceField: 'bytes',
-              operationType: 'avg' as const,
+              operationType: 'average' as const,
             },
           },
         };
@@ -987,7 +1056,7 @@ describe('state_helpers', () => {
           {
             input: ['field'],
             validateMetadata: () => true,
-            specificOperations: ['cardinality', 'sum', 'avg'], // this order is ignored
+            specificOperations: ['unique_count', 'sum', 'average'], // this order is ignored
           },
         ];
         const layer: IndexPatternLayer = {
@@ -1014,7 +1083,7 @@ describe('state_helpers', () => {
         expect(result.columnOrder).toEqual(['id1', 'col1']);
         expect(result.columns).toEqual({
           id1: expect.objectContaining({
-            operationType: 'avg',
+            operationType: 'average',
           }),
           col1: expect.objectContaining({
             operationType: 'testReference',
@@ -1028,7 +1097,7 @@ describe('state_helpers', () => {
           {
             input: ['field'],
             validateMetadata: () => true,
-            specificOperations: ['cardinality'],
+            specificOperations: ['unique_count'],
           },
         ];
         const layer: IndexPatternLayer = {
@@ -1053,7 +1122,7 @@ describe('state_helpers', () => {
         });
 
         expect(result.incompleteColumns).toEqual({
-          id1: { operationType: 'cardinality' },
+          id1: { operationType: 'unique_count' },
         });
         expect(result.columns).toEqual({
           col1: expect.objectContaining({
@@ -1278,7 +1347,7 @@ describe('state_helpers', () => {
             columns: {
               id1: expect.objectContaining({
                 sourceField: 'timestamp',
-                operationType: 'cardinality',
+                operationType: 'unique_count',
               }),
               output: expect.objectContaining({ references: ['id1'] }),
             },
@@ -1333,6 +1402,7 @@ describe('state_helpers', () => {
             indexPattern,
             columnId: 'col2',
             op: 'filters',
+            visualizationGroups: [],
           })
         ).toEqual(
           expect.objectContaining({
@@ -1376,6 +1446,7 @@ describe('state_helpers', () => {
             columnId: 'col2',
             op: 'count',
             field: documentField,
+            visualizationGroups: [],
           })
         ).toEqual(
           expect.objectContaining({
@@ -1392,7 +1463,7 @@ describe('state_helpers', () => {
           dataType: 'number' as const,
           isBucketed: false,
           sourceField: 'bytes',
-          operationType: 'avg' as const,
+          operationType: 'average' as const,
         };
 
         const layer: IndexPatternLayer = {
@@ -1404,7 +1475,7 @@ describe('state_helpers', () => {
               label: 'Reference',
               dataType: 'number',
               isBucketed: false,
-              operationType: 'derivative',
+              operationType: 'differences',
               references: ['metric'],
             },
           },
@@ -1414,6 +1485,7 @@ describe('state_helpers', () => {
           indexPattern,
           columnId: 'ref',
           op: 'sum',
+          visualizationGroups: [],
         });
 
         expect(result.columnOrder).toEqual(['ref']);
@@ -1466,6 +1538,7 @@ describe('state_helpers', () => {
           columnId: 'col1',
           op: 'count',
           field: documentField,
+          visualizationGroups: [],
         })
       ).toEqual(
         expect.objectContaining({
@@ -1756,7 +1829,7 @@ describe('state_helpers', () => {
         dataType: 'number',
         isBucketed: false,
         // Private
-        operationType: 'avg',
+        operationType: 'average',
         sourceField: 'bytes',
       };
 
@@ -1842,7 +1915,7 @@ describe('state_helpers', () => {
               isBucketed: false,
 
               // Private
-              operationType: 'avg',
+              operationType: 'average',
               sourceField: 'bytes',
             },
             col3: {
@@ -1890,7 +1963,7 @@ describe('state_helpers', () => {
               isBucketed: false,
 
               // Private
-              operationType: 'avg',
+              operationType: 'average',
               sourceField: 'bytes',
             },
             ref2: {
@@ -1933,7 +2006,7 @@ describe('state_helpers', () => {
         searchable: true,
         type: 'number',
         aggregationRestrictions: {
-          avg: {
+          average: {
             agg: 'avg',
           },
         },
@@ -2003,7 +2076,7 @@ describe('state_helpers', () => {
             dataType: 'number',
             isBucketed: false,
             label: '',
-            operationType: 'avg',
+            operationType: 'average',
             sourceField: 'xxx',
           },
         },
@@ -2034,7 +2107,7 @@ describe('state_helpers', () => {
             dataType: 'number',
             isBucketed: false,
             label: '',
-            operationType: 'avg',
+            operationType: 'average',
             sourceField: 'fieldB',
           },
         },
@@ -2097,7 +2170,7 @@ describe('state_helpers', () => {
             dataType: 'number',
             isBucketed: false,
             label: '',
-            operationType: 'avg',
+            operationType: 'average',
             sourceField: 'fieldD',
           },
         },
@@ -2147,14 +2220,14 @@ describe('state_helpers', () => {
   describe('getErrorMessages', () => {
     it('should collect errors from metric-type operation definitions', () => {
       const mock = jest.fn().mockReturnValue(['error 1']);
-      operationDefinitionMap.avg.getErrorMessage = mock;
+      operationDefinitionMap.average.getErrorMessage = mock;
       const errors = getErrorMessages(
         {
           indexPatternId: '1',
           columnOrder: [],
           columns: {
             // @ts-expect-error invalid column
-            col1: { operationType: 'avg' },
+            col1: { operationType: 'average' },
           },
         },
         indexPattern

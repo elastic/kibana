@@ -5,27 +5,40 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
 import { ISearchRequestParams } from '../../../../../../../../src/plugins/data/common';
 import { AgentsRequestOptions } from '../../../../../common/search_strategy';
-import { createQueryFilterClauses } from '../../../../../common/utils/build_query';
+// import { createQueryFilterClauses } from '../../../../../common/utils/build_query';
 
 export const buildAgentsQuery = ({
-  docValueFields,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   filterQuery,
-  pagination: { querySize },
+  pagination: { cursorStart, querySize },
   sort,
 }: AgentsRequestOptions): ISearchRequestParams => {
-  const filter = [...createQueryFilterClauses(filterQuery)];
+  // const filter = [...createQueryFilterClauses(filterQuery)];
 
   const dslQuery = {
     allowNoIndices: true,
     index: '.fleet-agents',
     ignoreUnavailable: true,
     body: {
-      ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
-      query: { bool: { filter } },
+      query: {
+        term: {
+          active: {
+            value: 'true',
+          },
+        },
+      },
       track_total_hits: true,
+      sort: [
+        {
+          [sort.field]: {
+            order: sort.direction,
+          },
+        },
+      ],
+      size: querySize,
+      from: cursorStart,
     },
   };
 

@@ -6,10 +6,15 @@
  */
 
 import { EuiFieldText, EuiFormRow, EuiLink } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import React, { ChangeEvent, Component, Fragment } from 'react';
-import { Space } from '../../../../../../../src/plugins/spaces_oss/common';
-import { SpaceValidator, toSpaceIdentifier } from '../../lib';
+import type { ChangeEvent } from 'react';
+import React, { Component, Fragment } from 'react';
+
+import type { InjectedIntl } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import type { Space } from 'src/plugins/spaces_oss/common';
+
+import type { SpaceValidator } from '../../lib';
+import { toSpaceIdentifier } from '../../lib';
 
 interface Props {
   space: Partial<Space>;

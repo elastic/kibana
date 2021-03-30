@@ -7,18 +7,19 @@
 
 import { deepFreeze } from '@kbn/std';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import {
+import type {
+  Headers,
+  HttpServiceSetup,
+  IClusterClient,
   KibanaRequest,
   Logger,
-  HttpServiceSetup,
-  Headers,
-  IClusterClient,
-} from '../../../../../../src/core/server';
+} from 'src/core/server';
+
 import type { AuthenticatedUser } from '../../../common/model';
 import type { AuthenticationInfo } from '../../elasticsearch';
 import { AuthenticationResult } from '../authentication_result';
-import { DeauthenticationResult } from '../deauthentication_result';
-import { Tokens } from '../tokens';
+import type { DeauthenticationResult } from '../deauthentication_result';
+import type { Tokens } from '../tokens';
 
 /**
  * Represents available provider options.
@@ -112,10 +113,11 @@ export abstract class BaseAuthenticationProvider {
    */
   protected async getUser(request: KibanaRequest, authHeaders: Headers = {}) {
     return this.authenticationInfoToAuthenticatedUser(
+      // @ts-expect-error @elastic/elasticsearch `AuthenticateResponse` type doesn't define `authentication_type` and `enabled`.
       (
         await this.options.client
           .asScoped({ headers: { ...request.headers, ...authHeaders } })
-          .asCurrentUser.security.authenticate<AuthenticationInfo>()
+          .asCurrentUser.security.authenticate()
       ).body
     );
   }

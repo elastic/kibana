@@ -208,8 +208,8 @@ export const setup = async (arg?: {
     };
   };
 
-  const setFreeze = createFormToggleAction('freezeSwitch');
-  const freezeExists = () => exists('freezeSwitch');
+  const createSetFreeze = (phase: Phases) => createFormToggleAction(`${phase}-freezeSwitch`);
+  const createFreezeExists = (phase: Phases) => () => exists(`${phase}-freezeSwitch`);
 
   const createReadonlyActions = (phase: Phases) => {
     const toggleSelector = `${phase}-readonlySwitch`;
@@ -222,12 +222,10 @@ export const setup = async (arg?: {
   const createSearchableSnapshotActions = (phase: Phases) => {
     const fieldSelector = `searchableSnapshotField-${phase}`;
     const licenseCalloutSelector = `${fieldSelector}.searchableSnapshotDisabledDueToLicense`;
-    const rolloverCalloutSelector = `${fieldSelector}.searchableSnapshotFieldsNoRolloverCallout`;
     const toggleSelector = `${fieldSelector}.searchableSnapshotToggle`;
 
     const toggleSearchableSnapshot = createFormToggleAction(toggleSelector);
     return {
-      searchableSnapshotDisabledDueToRollover: () => exists(rolloverCalloutSelector),
       searchableSnapshotDisabled: () =>
         exists(licenseCalloutSelector) && find(licenseCalloutSelector).props().disabled === true,
       searchableSnapshotsExists: () => exists(fieldSelector),
@@ -277,21 +275,21 @@ export const setup = async (arg?: {
     const dataTierSelector = `${controlsSelector}.dataTierSelect`;
     const nodeAttrsSelector = `${phase}-selectedNodeAttrs`;
 
+    const openNodeAttributesSection = async () => {
+      await act(async () => {
+        find(dataTierSelector).simulate('click');
+      });
+      component.update();
+    };
+
     return {
       hasDataTierAllocationControls: () => exists(controlsSelector),
-      openNodeAttributesSection: async () => {
-        await act(async () => {
-          find(dataTierSelector).simulate('click');
-        });
-        component.update();
-      },
+      openNodeAttributesSection,
       hasNodeAttributesSelect: (): boolean => exists(nodeAttrsSelector),
       getNodeAttributesSelectOptions: () => find(nodeAttrsSelector).find('option'),
       setDataAllocation: async (value: DataTierAllocationType) => {
-        act(() => {
-          find(dataTierSelector).simulate('click');
-        });
-        component.update();
+        await openNodeAttributesSection();
+
         await act(async () => {
           switch (value) {
             case 'node_roles':
@@ -361,6 +359,7 @@ export const setup = async (arg?: {
         hasHotPhase: () => exists('ilmTimelineHotPhase'),
         hasWarmPhase: () => exists('ilmTimelineWarmPhase'),
         hasColdPhase: () => exists('ilmTimelineColdPhase'),
+        hasFrozenPhase: () => exists('ilmTimelineFrozenPhase'),
         hasDeletePhase: () => exists('ilmTimelineDeletePhase'),
       },
       hot: {
@@ -392,12 +391,18 @@ export const setup = async (arg?: {
         enable: enable('cold'),
         ...createMinAgeActions('cold'),
         setReplicas: setReplicas('cold'),
-        setFreeze,
-        freezeExists,
+        setFreeze: createSetFreeze('cold'),
+        freezeExists: createFreezeExists('cold'),
         hasErrorIndicator: () => exists('phaseErrorIndicator-cold'),
         ...createIndexPriorityActions('cold'),
         ...createSearchableSnapshotActions('cold'),
         ...createNodeAllocationActions('cold'),
+      },
+      frozen: {
+        enable: enable('frozen'),
+        ...createMinAgeActions('frozen'),
+        hasErrorIndicator: () => exists('phaseErrorIndicator-frozen'),
+        ...createSearchableSnapshotActions('frozen'),
       },
       delete: {
         isShown: () => exists('delete-phaseContent'),

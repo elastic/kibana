@@ -178,7 +178,8 @@ export class Embeddable
       });
 
     // Update search context and reload on changes related to search
-    input$
+    this.getUpdated$()
+      .pipe(map(() => this.getInput()))
       .pipe(
         distinctUntilChanged((a, b) =>
           isEqual(
@@ -295,6 +296,7 @@ export class Embeddable
         hasCompatibleActions={this.hasCompatibleActions}
         className={input.className}
         style={input.style}
+        canEdit={this.deps.editable && input.viewMode === 'edit'}
       />,
       domNode
     );
@@ -374,6 +376,9 @@ export class Embeddable
   };
 
   async reload() {
+    if (!this.savedVis || !this.isInitialized) {
+      return;
+    }
     this.handleContainerStateChanged(this.input);
     if (this.domNode) {
       this.render(this.domNode);
@@ -384,22 +389,19 @@ export class Embeddable
     if (!this.savedVis) {
       return;
     }
-    const promises = _.uniqBy(
-      this.savedVis.references.filter(({ type }) => type === 'index-pattern'),
-      'id'
-    )
-      .map(async ({ id }) => {
-        try {
-          return await this.deps.indexPatternService.get(id);
-        } catch (error) {
-          // Unable to load index pattern, ignore error as the index patterns are only used to
-          // configure the filter and query bar - there is still a good chance to get the visualization
-          // to show.
-          return null;
-        }
-      })
-      .filter((promise): promise is Promise<IndexPattern> => Boolean(promise));
-    const indexPatterns = await Promise.all(promises);
+    const responses = await Promise.allSettled(
+      _.uniqBy(
+        this.savedVis.references.filter(({ type }) => type === 'index-pattern'),
+        'id'
+      ).map(({ id }) => this.deps.indexPatternService.get(id))
+    );
+    const indexPatterns = responses
+      .filter(
+        (response): response is PromiseFulfilledResult<IndexPattern> =>
+          response.status === 'fulfilled'
+      )
+      .map(({ value }) => value);
+
     // passing edit url and index patterns to the output of this embeddable for
     // the container to pick them up and use them to configure filter bar and
     // config dropdown correctly.

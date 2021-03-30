@@ -22,6 +22,8 @@ export interface Meta {
   page: MetaPage;
 }
 
+export type Role = 'admin' | 'user';
+
 export interface Group {
   id: string;
   name: string;
@@ -104,7 +106,7 @@ export interface ContentSourceDetails extends ContentSource {
   isFederatedSource: boolean;
   searchable: boolean;
   supportedByLicense: boolean;
-  errorReason: number;
+  errorReason: string | null;
   allowsReauth: boolean;
   boost: number;
 }

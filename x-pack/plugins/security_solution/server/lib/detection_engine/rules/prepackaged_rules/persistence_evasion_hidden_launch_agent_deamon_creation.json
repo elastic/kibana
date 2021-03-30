@@ -9,7 +9,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Creation of Hidden Launch Agent or Daemon",
   "query": "file where event.type != \"deletion\" and\n  file.path : \n  (\n    \"/System/Library/LaunchAgents/.*.plist\",\n    \"/Library/LaunchAgents/.*.plist\",\n    \"/Users/*/Library/LaunchAgents/.*.plist\",\n    \"/System/Library/LaunchDaemons/.*.plist\",\n    \"/Library/LaunchDaemons/.*.plist\"\n  )\n",
   "references": [

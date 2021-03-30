@@ -22,9 +22,11 @@ type ErrorGroupComparisonStatistics = APIReturnType<'GET /api/apm/services/{serv
 export function getColumns({
   serviceName,
   errorGroupComparisonStatistics,
+  comparisonEnabled,
 }: {
   serviceName: string;
   errorGroupComparisonStatistics: ErrorGroupComparisonStatistics;
+  comparisonEnabled?: boolean;
 }): Array<EuiBasicTableColumn<ErrorGroupPrimaryStatistics['error_groups'][0]>> {
   return [
     {
@@ -71,12 +73,17 @@ export function getColumns({
       ),
       width: px(unit * 12),
       render: (_, { occurrences, group_id: errorGroupId }) => {
-        const timeseries =
-          errorGroupComparisonStatistics?.[errorGroupId]?.timeseries;
+        const currentPeriodTimeseries =
+          errorGroupComparisonStatistics?.currentPeriod?.[errorGroupId]
+            ?.timeseries;
+        const previousPeriodTimeseries =
+          errorGroupComparisonStatistics?.previousPeriod?.[errorGroupId]
+            ?.timeseries;
+
         return (
           <SparkPlot
             color="euiColorVis7"
-            series={timeseries}
+            series={currentPeriodTimeseries}
             valueLabel={i18n.translate(
               'xpack.apm.serviceOveriew.errorsTableOccurrences',
               {
@@ -86,6 +93,9 @@ export function getColumns({
                 },
               }
             )}
+            comparisonSeries={
+              comparisonEnabled ? previousPeriodTimeseries : undefined
+            }
           />
         );
       },

@@ -10,7 +10,7 @@ import { Errors, identity } from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { pick } from 'lodash';
-import { alertStateSchema, AlertingFrameworkHealth } from '../../../../alerts/common';
+import { alertStateSchema, AlertingFrameworkHealth } from '../../../../alerting/common';
 import { BASE_ALERT_API_PATH } from '../constants';
 import {
   Alert,
@@ -19,6 +19,8 @@ import {
   AlertUpdates,
   AlertTaskState,
   AlertInstanceSummary,
+  Pagination,
+  Sorting,
 } from '../../types';
 
 export async function loadAlertTypes({ http }: { http: HttpSetup }): Promise<AlertType[]> {
@@ -103,13 +105,15 @@ export async function loadAlerts({
   typesFilter,
   actionTypesFilter,
   alertStatusesFilter,
+  sort = { field: 'name', direction: 'asc' },
 }: {
   http: HttpSetup;
-  page: { index: number; size: number };
+  page: Pagination;
   searchText?: string;
   typesFilter?: string[];
   actionTypesFilter?: string[];
   alertStatusesFilter?: string[];
+  sort?: Sorting;
 }): Promise<{
   page: number;
   perPage: number;
@@ -125,8 +129,8 @@ export async function loadAlerts({
       search: searchText,
       filter: filters.length ? filters.join(' and ') : undefined,
       default_search_operator: 'AND',
-      sort_field: 'name.keyword',
-      sort_order: 'asc',
+      sort_field: sort.field,
+      sort_order: sort.direction,
     },
   });
 }

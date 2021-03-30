@@ -6,7 +6,7 @@
  */
 
 import { usageStatsClientMock } from './usage_stats_client.mock';
-import { UsageStatsServiceSetup } from './usage_stats_service';
+import type { UsageStatsServiceSetup } from './usage_stats_service';
 
 const createSetupContractMock = (usageStatsClient = usageStatsClientMock.create()) => {
   const setupContract: jest.Mocked<UsageStatsServiceSetup> = {

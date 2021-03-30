@@ -24,6 +24,7 @@ describe('buildTimelineDetailsQuery', () => {
       Object {
         "allowNoIndices": true,
         "body": Object {
+          "_source": true,
           "docvalue_fields": Array [
             Object {
               "field": "@timestamp",
@@ -37,6 +38,9 @@ describe('buildTimelineDetailsQuery', () => {
             Object {
               "field": "agent.name",
             },
+          ],
+          "fields": Array [
+            "*",
           ],
           "query": Object {
             "terms": Object {

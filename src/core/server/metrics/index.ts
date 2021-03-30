@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-export {
+export type {
   InternalMetricsServiceStart,
   InternalMetricsServiceSetup,
   MetricsServiceSetup,
   MetricsServiceStart,
   OpsMetrics,
 } from './types';
-export { OpsProcessMetrics, OpsServerMetrics, OpsOsMetrics } from './collectors';
+export type { OpsProcessMetrics, OpsServerMetrics, OpsOsMetrics } from './collectors';
 export { MetricsService } from './metrics_service';
 export { opsConfig } from './ops_config';

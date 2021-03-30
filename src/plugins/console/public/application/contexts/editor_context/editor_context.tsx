@@ -11,11 +11,11 @@ import * as editor from '../../stores/editor';
 import { DevToolsSettings } from '../../../services';
 import { createUseContext } from '../create_use_context';
 
-const EditorReadContext = createContext<editor.Store>(null as any);
-const EditorActionContext = createContext<Dispatch<editor.Action>>(null as any);
+const EditorReadContext = createContext<editor.Store>(editor.initialValue);
+const EditorActionContext = createContext<Dispatch<editor.Action>>(() => {});
 
 export interface EditorContextArgs {
-  children: any;
+  children: JSX.Element;
   settings: DevToolsSettings;
 }
 
@@ -25,7 +25,7 @@ export function EditorContextProvider({ children, settings }: EditorContextArgs)
     settings,
   }));
   return (
-    <EditorReadContext.Provider value={state as any}>
+    <EditorReadContext.Provider value={state}>
       <EditorActionContext.Provider value={dispatch}>{children}</EditorActionContext.Provider>
     </EditorReadContext.Provider>
   );

@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Potential Secure File Deletion via SDelete Utility",
   "note": "Verify process details such as command line and hash to confirm this activity legitimacy.",
   "query": "file where event.type == \"change\" and file.name : \"*AAA.AAA\"\n",

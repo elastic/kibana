@@ -5,11 +5,9 @@
  * 2.0.
  */
 
+import React, { MouseEvent, useEffect } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import React from 'react';
-import moment from 'moment';
 import { nextAriaLabel, prevAriaLabel } from './translations';
-import { getShortTimeStamp } from '../../../../overview/monitor_list/columns/monitor_status_column';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 
 export interface StepImageCaptionProps {
@@ -18,7 +16,8 @@ export interface StepImageCaptionProps {
   maxSteps?: number;
   setStepNumber: React.Dispatch<React.SetStateAction<number>>;
   stepNumber: number;
-  timestamp: string;
+  label?: string;
+  onVisible: (val: boolean) => void;
   isLoading: boolean;
 }
 
@@ -35,19 +34,34 @@ export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
   maxSteps,
   setStepNumber,
   stepNumber,
-  timestamp,
   isLoading,
+  label,
+  onVisible,
 }) => {
+  useEffect(() => {
+    onVisible(true);
+    return () => {
+      onVisible(false);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
-    <ImageCaption>
+    <ImageCaption
+      onClick={(evt) => {
+        // we don't want this to be captured by row click which leads to step list page
+        evt.stopPropagation();
+      }}
+    >
       <div className="stepArrowsFullScreen">
         {imgSrc && (
           <EuiFlexGroup alignItems="center" justifyContent="center">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 disabled={stepNumber === 1}
-                onClick={() => {
+                onClick={(evt: MouseEvent<HTMLButtonElement>) => {
                   setStepNumber(stepNumber - 1);
+                  evt.preventDefault();
                 }}
                 iconType="arrowLeft"
                 aria-label={prevAriaLabel}
@@ -62,8 +76,9 @@ export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 disabled={stepNumber === maxSteps}
-                onClick={() => {
+                onClick={(evt: MouseEvent<HTMLButtonElement>) => {
                   setStepNumber(stepNumber + 1);
+                  evt.stopPropagation();
                 }}
                 iconType="arrowRight"
                 iconSide="right"
@@ -75,7 +90,7 @@ export const StepImageCaption: React.FC<StepImageCaptionProps> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         )}
-        <span className="eui-textNoWrap">{getShortTimeStamp(moment(timestamp))}</span>
+        <span className="eui-textNoWrap">{label}</span>
       </div>
     </ImageCaption>
   );

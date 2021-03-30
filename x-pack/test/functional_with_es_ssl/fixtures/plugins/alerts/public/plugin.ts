@@ -7,24 +7,24 @@
 
 import React from 'react';
 import { Plugin, CoreSetup, AppMountParameters } from 'kibana/public';
-import { PluginSetupContract as AlertingSetup } from '../../../../../../plugins/alerts/public';
-import { AlertType, SanitizedAlert } from '../../../../../../plugins/alerts/common';
+import { PluginSetupContract as AlertingSetup } from '../../../../../../plugins/alerting/public';
+import { AlertType, SanitizedAlert } from '../../../../../../plugins/alerting/common';
 import { TriggersAndActionsUIPublicPluginSetup } from '../../../../../../plugins/triggers_actions_ui/public';
 
 export type Setup = void;
 export type Start = void;
 
 export interface AlertingExamplePublicSetupDeps {
-  alerts: AlertingSetup;
+  alerting: AlertingSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 }
 
 export class AlertingFixturePlugin implements Plugin<Setup, Start, AlertingExamplePublicSetupDeps> {
-  public setup(core: CoreSetup, { alerts, triggersActionsUi }: AlertingExamplePublicSetupDeps) {
-    alerts.registerNavigation(
+  public setup(core: CoreSetup, { alerting, triggersActionsUi }: AlertingExamplePublicSetupDeps) {
+    alerting.registerNavigation(
       'alerting_fixture',
       'test.noop',
-      (alert: SanitizedAlert, alertType: AlertType) => `/alert/${alert.id}`
+      (alert: SanitizedAlert, alertType: AlertType) => `/rule/${alert.id}`
     );
 
     triggersActionsUi.alertTypeRegistry.register({

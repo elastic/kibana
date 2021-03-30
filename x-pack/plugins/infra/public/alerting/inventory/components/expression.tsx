@@ -43,7 +43,7 @@ import {
   AlertTypeParamsExpressionProps,
 } from '../../../../../triggers_actions_ui/public';
 import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
-import { useSourceViaHttp } from '../../../containers/source/use_source_via_http';
+import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
 import { sqsMetricTypes } from '../../../../common/inventory_models/aws_sqs/toolbar_items';
 import { ec2MetricTypes } from '../../../../common/inventory_models/aws_ec2/toolbar_items';
 import { s3MetricTypes } from '../../../../common/inventory_models/aws_s3/toolbar_items';
@@ -71,6 +71,7 @@ import {
 import { validateMetricThreshold } from './validation';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
+import { ExpressionChart } from './expression_chart';
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
 export interface AlertContextMeta {
@@ -123,21 +124,20 @@ export const Expressions: React.FC<Props> = (props) => {
   } = props;
   const { source, createDerivedIndexPattern } = useSourceViaHttp({
     sourceId: 'default',
-    type: 'metrics',
     fetch: http.fetch,
     toastWarning: notifications.toasts.addWarning,
   });
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<Unit>('m');
 
-  const derivedIndexPattern = useMemo(() => createDerivedIndexPattern('metrics'), [
+  const derivedIndexPattern = useMemo(() => createDerivedIndexPattern(), [
     createDerivedIndexPattern,
   ]);
 
   const updateParams = useCallback(
     (id, e: InventoryMetricConditions) => {
       const exp = alertParams.criteria ? alertParams.criteria.slice() : [];
-      exp[id] = { ...exp[id], ...e };
+      exp[id] = e;
       setAlertParams('criteria', exp);
     },
     [setAlertParams, alertParams.criteria]
@@ -291,11 +291,13 @@ export const Expressions: React.FC<Props> = (props) => {
       </EuiText>
       <StyledExpression>
         <StyledExpressionRow>
-          <NodeTypeExpression
-            options={nodeTypes}
-            value={alertParams.nodeType || 'host'}
-            onChange={updateNodeType}
-          />
+          <NonCollapsibleExpression>
+            <NodeTypeExpression
+              options={nodeTypes}
+              value={alertParams.nodeType || 'host'}
+              onChange={updateNodeType}
+            />
+          </NonCollapsibleExpression>
         </StyledExpressionRow>
       </StyledExpression>
       <EuiSpacer size={'xs'} />
@@ -313,17 +315,27 @@ export const Expressions: React.FC<Props> = (props) => {
               errors={(errors[idx] as IErrorObject) || emptyError}
               expression={e || {}}
               fields={derivedIndexPattern.fields}
-            />
+            >
+              <ExpressionChart
+                expression={e}
+                filterQuery={alertParams.filterQuery}
+                nodeType={alertParams.nodeType}
+                sourceId={alertParams.sourceId}
+                data-test-subj="preview-chart"
+              />
+            </ExpressionRow>
           );
         })}
 
-      <ForLastExpression
-        timeWindowSize={timeSize}
-        timeWindowUnit={timeUnit}
-        errors={emptyError}
-        onChangeWindowSize={updateTimeSize}
-        onChangeWindowUnit={updateTimeUnit}
-      />
+      <NonCollapsibleExpression>
+        <ForLastExpression
+          timeWindowSize={timeSize}
+          timeWindowUnit={timeUnit}
+          errors={emptyError}
+          onChangeWindowSize={updateTimeSize}
+          onChangeWindowUnit={updateTimeUnit}
+        />
+      </NonCollapsibleExpression>
 
       <div>
         <EuiButtonEmpty
@@ -424,6 +436,10 @@ interface ExpressionRowProps {
   fields: IFieldType[];
 }
 
+const NonCollapsibleExpression = euiStyled.div`
+  margin-left: 28px;
+`;
+
 const StyledExpressionRow = euiStyled(EuiFlexGroup)`
   display: flex;
   flex-wrap: wrap;
@@ -439,7 +455,19 @@ const StyledHealth = euiStyled(EuiHealth)`
 `;
 
 export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
-  const { setAlertParams, expression, errors, expressionId, remove, canDelete, fields } = props;
+  const [isExpanded, setRowState] = useState(true);
+  const toggleRowState = useCallback(() => setRowState(!isExpanded), [isExpanded]);
+
+  const {
+    children,
+    setAlertParams,
+    expression,
+    errors,
+    expressionId,
+    remove,
+    canDelete,
+    fields,
+  } = props;
   const {
     metric,
     comparator = Comparator.GT,
@@ -579,6 +607,16 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   return (
     <>
       <EuiFlexGroup gutterSize="xs">
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+            onClick={toggleRowState}
+            aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.expandRowLabel', {
+              defaultMessage: 'Expand row.',
+            })}
+          />
+        </EuiFlexItem>
+
         <EuiFlexItem grow>
           <StyledExpressionRow>
             <StyledExpression>
@@ -670,6 +708,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
+      {isExpanded ? <div style={{ padding: '0 0 0 28px' }}>{children}</div> : null}
       <EuiSpacer size={'s'} />
     </>
   );

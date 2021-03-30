@@ -17,6 +17,6 @@ describe('CurationsRouter', () => {
     const wrapper = shallow(<CurationsRouter engineBreadcrumb={['Engines', 'some-engine']} />);
 
     expect(wrapper.find(Switch)).toHaveLength(1);
-    expect(wrapper.find(Route)).toHaveLength(5);
+    expect(wrapper.find(Route)).toHaveLength(4);
   });
 });

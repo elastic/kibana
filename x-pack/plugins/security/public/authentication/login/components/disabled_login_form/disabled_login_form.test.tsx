@@ -7,6 +7,7 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
+
 import { DisabledLoginForm } from './disabled_login_form';
 
 describe('DisabledLoginForm', () => {

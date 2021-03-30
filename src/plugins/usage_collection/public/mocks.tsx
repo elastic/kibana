@@ -13,11 +13,20 @@ import { ApplicationUsageContext } from './components/track_application_view';
 
 export type Setup = jest.Mocked<UsageCollectionSetup>;
 
-export const createApplicationUsageTrackerMock = (): ApplicationUsageTracker => {
-  const applicationUsageTrackerMock: jest.Mocked<ApplicationUsageTracker> = {
-    setCurrentAppId: jest.fn(),
+// This is to avoid having to mock every private property of the class
+type ApplicationUsageTrackerPublic = Pick<ApplicationUsageTracker, keyof ApplicationUsageTracker>;
+
+export const createApplicationUsageTrackerMock = (): ApplicationUsageTrackerPublic => {
+  const applicationUsageTrackerMock: jest.Mocked<ApplicationUsageTrackerPublic> = {
     trackApplicationViewUsage: jest.fn(),
-  } as any;
+    flushTrackedView: jest.fn(),
+    updateViewClickCounter: jest.fn(),
+    setCurrentAppId: jest.fn(),
+    start: jest.fn(),
+    stop: jest.fn(),
+    pauseTrackingAll: jest.fn(),
+    resumeTrackingAll: jest.fn(),
+  };
 
   return applicationUsageTrackerMock;
 };
@@ -32,7 +41,6 @@ const createSetupContract = (): Setup => {
         </ApplicationUsageContext.Provider>
       ),
     },
-    applicationUsageTracker: applicationUsageTrackerMock,
     reportUiCounter: jest.fn(),
   };
 

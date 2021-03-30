@@ -35,10 +35,10 @@ export const useGetSingleIssue = ({
 }: Props): UseGetSingleIssue => {
   const [isLoading, setIsLoading] = useState(false);
   const [issue, setIssue] = useState<Issue | null>(null);
+  const didCancel = useRef(false);
   const abortCtrl = useRef(new AbortController());
 
   useEffect(() => {
-    let didCancel = false;
     const fetchData = async () => {
       if (!actionConnector || !id) {
         setIsLoading(false);
@@ -55,7 +55,7 @@ export const useGetSingleIssue = ({
           id,
         });
 
-        if (!didCancel) {
+        if (!didCancel.current) {
           setIsLoading(false);
           setIssue(res.data ?? null);
           if (res.status && res.status === 'error') {
@@ -66,22 +66,24 @@ export const useGetSingleIssue = ({
           }
         }
       } catch (error) {
-        if (!didCancel) {
+        if (!didCancel.current) {
           setIsLoading(false);
-          toastNotifications.addDanger({
-            title: i18n.GET_ISSUE_API_ERROR(id),
-            text: error.message,
-          });
+          if (error.name !== 'AbortError') {
+            toastNotifications.addDanger({
+              title: i18n.GET_ISSUE_API_ERROR(id),
+              text: error.message,
+            });
+          }
         }
       }
     };
 
+    didCancel.current = false;
     abortCtrl.current.abort();
     fetchData();
 
     return () => {
-      didCancel = true;
-      setIsLoading(false);
+      didCancel.current = true;
       abortCtrl.current.abort();
     };
   }, [http, actionConnector, id, toastNotifications]);

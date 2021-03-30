@@ -73,7 +73,7 @@ export const createMigration = async ({
   return {
     destinationIndex: migrationIndex,
     sourceIndex: index,
-    taskId: response.body.task,
+    taskId: String(response.body.task!),
     version,
   };
 };

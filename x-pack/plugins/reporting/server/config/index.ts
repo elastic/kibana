@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
 import { PluginConfigDescriptor } from 'kibana/server';
+import { get } from 'lodash';
+
 import { ConfigSchema, ReportingConfigType } from './schema';
 export { buildConfig } from './config';
+export { registerUiSettings } from './ui_settings';
 export { ConfigSchema, ReportingConfigType };
 
 export const config: PluginConfigDescriptor<ReportingConfigType> = {

@@ -7,22 +7,16 @@
 
 import { isEmpty } from 'lodash';
 import { ErrorRaw } from '../../../../../../../typings/es_schemas/raw/error_raw';
-import {
-  IWaterfallError,
-  IServiceColors,
-} from '../Waterfall/waterfall_helpers/waterfall_helpers';
+import { IWaterfallError } from '../Waterfall/waterfall_helpers/waterfall_helpers';
 import { Mark } from '.';
 
 export interface ErrorMark extends Mark {
   type: 'errorMark';
   error: ErrorRaw;
-  serviceColor?: string;
+  serviceColor: string;
 }
 
-export const getErrorMarks = (
-  errorItems: IWaterfallError[],
-  serviceColors: IServiceColors
-): ErrorMark[] => {
+export const getErrorMarks = (errorItems: IWaterfallError[]): ErrorMark[] => {
   if (isEmpty(errorItems)) {
     return [];
   }
@@ -33,6 +27,6 @@ export const getErrorMarks = (
     verticalLine: false,
     id: error.doc.error.id,
     error: error.doc,
-    serviceColor: serviceColors[error.doc.service.name],
+    serviceColor: error.color,
   }));
 };

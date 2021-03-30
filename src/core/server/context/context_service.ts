@@ -7,7 +7,7 @@
  */
 
 import { PluginOpaqueId } from '../../server';
-import { IContextContainer, ContextContainer, HandlerFunction } from './container';
+import { IContextContainer, ContextContainer } from './container';
 import { CoreContext } from '../core_context';
 
 interface SetupDeps {
@@ -20,8 +20,8 @@ export class ContextService {
 
   public setup({ pluginDependencies }: SetupDeps): ContextSetup {
     return {
-      createContextContainer: <THandler extends HandlerFunction<any>>() => {
-        return new ContextContainer<THandler>(pluginDependencies, this.core.coreId);
+      createContextContainer: () => {
+        return new ContextContainer(pluginDependencies, this.core.coreId);
       },
     };
   }
@@ -93,5 +93,5 @@ export interface ContextSetup {
   /**
    * Creates a new {@link IContextContainer} for a service owner.
    */
-  createContextContainer<THandler extends HandlerFunction<any>>(): IContextContainer<THandler>;
+  createContextContainer(): IContextContainer;
 }

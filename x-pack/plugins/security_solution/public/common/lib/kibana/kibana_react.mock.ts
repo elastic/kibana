@@ -9,6 +9,7 @@
 
 import React from 'react';
 
+import { RecursivePartial } from '@elastic/eui/src/components/common';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
@@ -36,6 +37,7 @@ import {
 import { StartServices } from '../../../types';
 import { createSecuritySolutionStorageMock } from '../../mock/mock_local_storage';
 import { MlUrlGenerator } from '../../../../../ml/public';
+import { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
@@ -148,3 +150,6 @@ export const createKibanaContextProviderMock = () => {
   return ({ children }: { children: React.ReactNode }) =>
     React.createElement(KibanaContextProvider, { services }, children);
 };
+
+export const getMockTheme = (partialTheme: RecursivePartial<EuiTheme>): EuiTheme =>
+  partialTheme as EuiTheme;

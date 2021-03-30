@@ -11,7 +11,7 @@ import { KibanaContext } from '../../data/public';
 import { getTimezone, validateInterval } from './application';
 import { getUISettings, getDataStart, getCoreStart } from './services';
 import { MAX_BUCKETS_SETTING, ROUTES } from '../common/constants';
-import { TimeseriesVisParams } from './metrics_fn';
+import { TimeseriesVisParams } from './types';
 import { TimeseriesVisData } from '../common/types';
 
 interface MetricsRequestHandlerParams {

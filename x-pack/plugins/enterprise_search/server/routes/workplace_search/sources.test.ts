@@ -7,6 +7,8 @@
 
 import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks__';
 
+import { ENTERPRISE_SEARCH_KIBANA_COOKIE } from '../../../common/constants';
+
 import {
   registerAccountSourcesRoute,
   registerAccountSourcesStatusRoute,
@@ -1249,6 +1251,15 @@ describe('sources routes', () => {
   });
 
   describe('GET /api/workplace_search/sources/create', () => {
+    const tokenPackage = 'some_encrypted_secrets';
+
+    const mockRequest = {
+      headers: {
+        authorization: 'BASIC 123',
+        cookie: `${ENTERPRISE_SEARCH_KIBANA_COOKIE}=${tokenPackage}`,
+      },
+    };
+
     let mockRouter: MockRouter;
 
     beforeEach(() => {
@@ -1265,8 +1276,11 @@ describe('sources routes', () => {
     });
 
     it('creates a request handler', () => {
+      mockRouter.callRoute(mockRequest as any);
+
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/ws/sources/create',
+        params: { token_package: tokenPackage },
       });
     });
   });

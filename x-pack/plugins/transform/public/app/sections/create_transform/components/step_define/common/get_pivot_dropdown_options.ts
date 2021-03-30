@@ -26,7 +26,7 @@ import {
 import { getDefaultAggregationConfig } from './get_default_aggregation_config';
 import { getDefaultGroupByConfig } from './get_default_group_by_config';
 import type { Field, StepDefineExposedState } from './types';
-import { isPopulatedObject } from '../../../../../common/utils/object_utils';
+import { isRuntimeMappings } from './types';
 
 const illegalEsAggNameChars = /[[\]>]/g;
 
@@ -71,13 +71,18 @@ export function getPivotDropdownOptions(
   const indexPatternFields = indexPattern.fields
     .filter(
       (field) =>
-        field.aggregatable === true && !ignoreFieldNames.includes(field.name) && !field.runtimeField
+        field.aggregatable === true &&
+        !ignoreFieldNames.includes(field.name) &&
+        !field.runtimeField &&
+        // runtime fix, we experienced Kibana index patterns with `undefined` type for fields
+        // even when the TS interface is a non-optional `string`.
+        typeof field.type !== 'undefined'
     )
     .map((field): Field => ({ name: field.name, type: field.type as KBN_FIELD_TYPES }));
 
   // Support for runtime_mappings that are defined by queries
   let runtimeFields: Field[] = [];
-  if (isPopulatedObject(runtimeMappings)) {
+  if (isRuntimeMappings(runtimeMappings)) {
     runtimeFields = Object.keys(runtimeMappings).map((fieldName) => {
       const field = runtimeMappings[fieldName];
       return { name: fieldName, type: getKibanaFieldTypeFromEsType(field.type) };

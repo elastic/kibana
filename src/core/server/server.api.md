@@ -50,6 +50,7 @@ import { DetailedPeerCertificate } from 'tls';
 import { Duration } from 'moment';
 import { Duration as Duration_2 } from 'moment-timezone';
 import { EnvironmentMode } from '@kbn/config';
+import { estypes } from '@elastic/elasticsearch';
 import { ExistsParams } from 'elasticsearch';
 import { ExplainParams } from 'elasticsearch';
 import { FieldStatsParams } from 'elasticsearch';
@@ -383,7 +384,7 @@ export { ConfigService }
 
 // @public
 export interface ContextSetup {
-    createContextContainer<THandler extends HandlerFunction<any>>(): IContextContainer<THandler>;
+    createContextContainer(): IContextContainer;
 }
 
 // @internal
@@ -452,7 +453,7 @@ export interface CoreConfigUsageData {
     savedObjects: {
         customIndex: boolean;
         maxImportPayloadBytes: number;
-        maxImportExportSizeBytes: number;
+        maxImportExportSize: number;
     };
 }
 
@@ -924,16 +925,6 @@ export interface ErrorHttpResponseOptions {
     headers?: ResponseHeaders;
 }
 
-// @public (undocumented)
-export interface Explanation {
-    // (undocumented)
-    description: string;
-    // (undocumented)
-    details: Explanation[];
-    // (undocumented)
-    value: number;
-}
-
 // @public
 export interface FakeRequest {
     headers: Headers;
@@ -1073,8 +1064,8 @@ export interface IClusterClient {
 }
 
 // @public
-export interface IContextContainer<THandler extends RequestHandler> {
-    createHandler(pluginOpaqueId: PluginOpaqueId, handler: THandler): (...rest: HandlerParameters<THandler>) => ShallowPromise<ReturnType<THandler>>;
+export interface IContextContainer {
+    createHandler(pluginOpaqueId: PluginOpaqueId, handler: RequestHandler): (...rest: HandlerParameters<RequestHandler>) => ShallowPromise<ReturnType<RequestHandler>>;
     registerContext<Context extends RequestHandlerContext, ContextName extends keyof Context>(pluginOpaqueId: PluginOpaqueId, contextName: ContextName, provider: IContextProvider<Context, ContextName>): this;
 }
 
@@ -1186,6 +1177,12 @@ export type ISavedObjectsExporter = PublicMethodsOf<SavedObjectsExporter>;
 
 // @public (undocumented)
 export type ISavedObjectsImporter = PublicMethodsOf<SavedObjectsImporter>;
+
+// @public (undocumented)
+export interface ISavedObjectsPointInTimeFinder {
+    close: () => Promise<void>;
+    find: () => AsyncGenerator<SavedObjectsFindResponse>;
+}
 
 // @public
 export type ISavedObjectsRepository = Pick<SavedObjectsRepository, keyof SavedObjectsRepository>;
@@ -1942,7 +1939,7 @@ export interface RequestHandlerContext {
 }
 
 // @public
-export type RequestHandlerContextContainer = IContextContainer<RequestHandler>;
+export type RequestHandlerContextContainer = IContextContainer;
 
 // @public
 export type RequestHandlerContextProvider<Context extends RequestHandlerContext, ContextName extends keyof Context> = IContextProvider<Context, ContextName>;
@@ -2229,6 +2226,7 @@ export class SavedObjectsClient {
     checkConflicts(objects?: SavedObjectsCheckConflictsObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsCheckConflictsResponse>;
     closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions): Promise<SavedObjectsClosePointInTimeResponse>;
     create<T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SavedObject<T>>;
+    createPointInTimeFinder(findOptions: SavedObjectsCreatePointInTimeFinderOptions, dependencies?: SavedObjectsCreatePointInTimeFinderDependencies): ISavedObjectsPointInTimeFinder;
     delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
     deleteFromNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsDeleteFromNamespacesOptions): Promise<SavedObjectsDeleteFromNamespacesResponse>;
     // (undocumented)
@@ -2330,6 +2328,15 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
     refresh?: MutatingOperationRefreshSetting;
     version?: string;
 }
+
+// @public (undocumented)
+export interface SavedObjectsCreatePointInTimeFinderDependencies {
+    // (undocumented)
+    client: Pick<SavedObjectsClientContract, 'find' | 'openPointInTimeForType' | 'closePointInTime'>;
+}
+
+// @public (undocumented)
+export type SavedObjectsCreatePointInTimeFinderOptions = Omit<SavedObjectsFindOptions, 'page' | 'pit' | 'searchAfter'>;
 
 // @public (undocumented)
 export interface SavedObjectsDeleteByNamespaceOptions extends SavedObjectsBaseOptions {
@@ -2501,12 +2508,12 @@ export interface SavedObjectsFindOptions {
     preference?: string;
     rootSearchFields?: string[];
     search?: string;
-    searchAfter?: unknown[];
+    searchAfter?: estypes.Id[];
     searchFields?: string[];
     // (undocumented)
     sortField?: string;
     // (undocumented)
-    sortOrder?: string;
+    sortOrder?: estypes.SortOrder;
     // (undocumented)
     type: string | string[];
     typeToNamespacesMap?: Map<string, string[] | undefined>;
@@ -2537,7 +2544,7 @@ export interface SavedObjectsFindResponse<T = unknown> {
 // @public (undocumented)
 export interface SavedObjectsFindResult<T = unknown> extends SavedObject<T> {
     score: number;
-    sort?: unknown[];
+    sort?: string[];
 }
 
 // @public
@@ -2728,11 +2735,12 @@ export interface SavedObjectsIncrementCounterField {
 }
 
 // @public (undocumented)
-export interface SavedObjectsIncrementCounterOptions extends SavedObjectsBaseOptions {
+export interface SavedObjectsIncrementCounterOptions<Attributes = unknown> extends SavedObjectsBaseOptions {
     initialize?: boolean;
     // (undocumented)
     migrationVersion?: SavedObjectsMigrationVersion;
     refresh?: MutatingOperationRefreshSetting;
+    upsertAttributes?: Attributes;
 }
 
 // @public
@@ -2821,17 +2829,18 @@ export class SavedObjectsRepository {
     checkConflicts(objects?: SavedObjectsCheckConflictsObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsCheckConflictsResponse>;
     closePointInTime(id: string, options?: SavedObjectsClosePointInTimeOptions): Promise<SavedObjectsClosePointInTimeResponse>;
     create<T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SavedObject<T>>;
+    createPointInTimeFinder(findOptions: SavedObjectsCreatePointInTimeFinderOptions, dependencies?: SavedObjectsCreatePointInTimeFinderDependencies): ISavedObjectsPointInTimeFinder;
     // Warning: (ae-forgotten-export) The symbol "IKibanaMigrator" needs to be exported by the entry point index.d.ts
     //
     // @internal
-    static createRepository(migrator: IKibanaMigrator, typeRegistry: SavedObjectTypeRegistry, indexName: string, client: ElasticsearchClient, includedHiddenTypes?: string[], injectedConstructor?: any): ISavedObjectsRepository;
+    static createRepository(migrator: IKibanaMigrator, typeRegistry: SavedObjectTypeRegistry, indexName: string, client: ElasticsearchClient, logger: Logger, includedHiddenTypes?: string[], injectedConstructor?: any): ISavedObjectsRepository;
     delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
     deleteByNamespace(namespace: string, options?: SavedObjectsDeleteByNamespaceOptions): Promise<any>;
     deleteFromNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsDeleteFromNamespacesOptions): Promise<SavedObjectsDeleteFromNamespacesResponse>;
     // (undocumented)
     find<T = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
     get<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
-    incrementCounter<T = unknown>(type: string, id: string, counterFields: Array<string | SavedObjectsIncrementCounterField>, options?: SavedObjectsIncrementCounterOptions): Promise<SavedObject<T>>;
+    incrementCounter<T = unknown>(type: string, id: string, counterFields: Array<string | SavedObjectsIncrementCounterField>, options?: SavedObjectsIncrementCounterOptions<T>): Promise<SavedObject<T>>;
     openPointInTimeForType(type: string | string[], { keepAlive, preference }?: SavedObjectsOpenPointInTimeOptions): Promise<SavedObjectsOpenPointInTimeResponse>;
     removeReferencesTo(type: string, id: string, options?: SavedObjectsRemoveReferencesToOptions): Promise<SavedObjectsRemoveReferencesToResponse>;
     resolve<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObjectsResolveResponse<T>>;
@@ -3198,6 +3207,7 @@ export const validBodyOutput: readonly ["data", "stream"];
 
 // Warnings were encountered during analysis:
 //
+// src/core/server/elasticsearch/client/types.ts:94:7 - (ae-forgotten-export) The symbol "Explanation" needs to be exported by the entry point index.d.ts
 // src/core/server/http/router/response.ts:297:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/types.ts:286:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/types.ts:286:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts

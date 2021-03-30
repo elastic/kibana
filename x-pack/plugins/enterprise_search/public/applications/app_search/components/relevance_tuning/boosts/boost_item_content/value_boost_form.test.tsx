@@ -13,12 +13,14 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiButton, EuiButtonIcon, EuiFieldText } from '@elastic/eui';
 
-import { Boost, BoostType } from '../../types';
+import { ValueBoost, BoostType } from '../../types';
 
 import { ValueBoostForm } from './value_boost_form';
 
 describe('ValueBoostForm', () => {
-  const boost: Boost = {
+  const boost: ValueBoost = {
+    operation: undefined,
+    function: undefined,
     factor: 2,
     type: 'value' as BoostType,
     value: ['bar', '', 'baz'],
@@ -46,20 +48,6 @@ describe('ValueBoostForm', () => {
     expect(valueInput(wrapper, 0).prop('value')).toEqual('bar');
     expect(valueInput(wrapper, 1).prop('value')).toEqual('');
     expect(valueInput(wrapper, 2).prop('value')).toEqual('baz');
-  });
-
-  it('renders a single empty text box if the boost has no value', () => {
-    const wrapper = shallow(
-      <ValueBoostForm
-        boost={{
-          ...boost,
-          value: undefined,
-        }}
-        index={3}
-        name="foo"
-      />
-    );
-    expect(valueInput(wrapper, 0).prop('value')).toEqual('');
   });
 
   it('updates the corresponding value in state whenever a user changes the value in a text input', () => {

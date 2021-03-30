@@ -10,16 +10,14 @@ import { get, has } from 'lodash';
 import { leastCommonInterval, isCalendarInterval } from '../lib/interval_helper';
 
 import { DefaultSearchCapabilities } from './default_search_capabilities';
-
-import type { VisPayload } from '../../../../common/types';
-import type { ReqFacade } from '../strategies/abstract_search_strategy';
+import { VisTypeTimeseriesRequest } from '../../../types';
 
 export class RollupSearchCapabilities extends DefaultSearchCapabilities {
   rollupIndex: string;
   availableMetrics: Record<string, any>;
 
   constructor(
-    req: ReqFacade<VisPayload>,
+    req: VisTypeTimeseriesRequest,
     fieldsCapabilities: Record<string, any>,
     rollupIndex: string
   ) {

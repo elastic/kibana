@@ -232,10 +232,16 @@ export class AggConfig {
     const output = this.write(aggConfigs) as any;
 
     const configDsl = {} as any;
-    configDsl[this.type.dslName || this.type.name] = output.params;
+    if (!this.type.hasNoDslParams) {
+      configDsl[this.type.dslName || this.type.name] = output.params;
+    }
 
     // if the config requires subAggs, write them to the dsl as well
-    if (this.subAggs.length && !output.subAggs) output.subAggs = this.subAggs;
+    if (this.subAggs.length) {
+      if (!output.subAggs) output.subAggs = this.subAggs;
+      else output.subAggs.push(...this.subAggs);
+    }
+
     if (output.subAggs) {
       const subDslLvl = configDsl.aggs || (configDsl.aggs = {});
       output.subAggs.forEach(function nestAdhocSubAggs(subAggConfig: any) {

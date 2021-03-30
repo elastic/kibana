@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Disable Windows Firewall Rules via Netsh",
   "query": "event.category:process and event.type:(start or process_started) and process.name:netsh.exe and process.args:(disable and firewall and set) or process.args:(advfirewall and off and state)",
   "risk_score": 47,

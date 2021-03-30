@@ -10,7 +10,7 @@ import styled, { css } from 'styled-components';
 
 import { EuiCallOut } from '@elastic/eui';
 
-import { SUPPORTED_CONNECTORS } from '../../../../../case/common/constants';
+import { SUPPORTED_CONNECTORS } from '../../../../../cases/common/constants';
 import { useKibana } from '../../../common/lib/kibana';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { useActionTypes } from '../../containers/configure/use_action_types';

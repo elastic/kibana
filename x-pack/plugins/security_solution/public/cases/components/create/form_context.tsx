@@ -19,7 +19,7 @@ import { usePostPushToService } from '../../containers/use_post_push_to_service'
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { Case } from '../../containers/types';
-import { CaseType } from '../../../../../case/common/api';
+import { CaseType, ConnectorTypes } from '../../../../../cases/common/api';
 
 const initialCaseValue: FormProps = {
   description: '',
@@ -31,13 +31,17 @@ const initialCaseValue: FormProps = {
 };
 
 interface Props {
+  afterCaseCreated?: (theCase: Case) => Promise<void>;
   caseType?: CaseType;
-  onSuccess?: (theCase: Case) => void;
+  hideConnectorServiceNowSir?: boolean;
+  onSuccess?: (theCase: Case) => Promise<void>;
 }
 
 export const FormContext: React.FC<Props> = ({
+  afterCaseCreated,
   caseType = CaseType.individual,
   children,
+  hideConnectorServiceNowSir,
   onSuccess,
 }) => {
   const { connectors } = useConnectors();
@@ -45,13 +49,22 @@ export const FormContext: React.FC<Props> = ({
   const { postCase } = usePostCase();
   const { pushCaseToExternalService } = usePostPushToService();
 
-  const connectorId = useMemo(
-    () =>
-      connectors.some((connector) => connector.id === configurationConnector.id)
-        ? configurationConnector.id
-        : 'none',
-    [configurationConnector.id, connectors]
-  );
+  const connectorId = useMemo(() => {
+    if (
+      hideConnectorServiceNowSir &&
+      configurationConnector.type === ConnectorTypes.serviceNowSIR
+    ) {
+      return 'none';
+    }
+    return connectors.some((connector) => connector.id === configurationConnector.id)
+      ? configurationConnector.id
+      : 'none';
+  }, [
+    configurationConnector.id,
+    configurationConnector.type,
+    connectors,
+    hideConnectorServiceNowSir,
+  ]);
 
   const submitCase = useCallback(
     async (
@@ -72,6 +85,10 @@ export const FormContext: React.FC<Props> = ({
           settings: { syncAlerts },
         });
 
+        if (afterCaseCreated && updatedCase) {
+          await afterCaseCreated(updatedCase);
+        }
+
         if (updatedCase?.id && dataConnectorId !== 'none') {
           await pushCaseToExternalService({
             caseId: updatedCase.id,
@@ -80,11 +97,11 @@ export const FormContext: React.FC<Props> = ({
         }
 
         if (onSuccess && updatedCase) {
-          onSuccess(updatedCase);
+          await onSuccess(updatedCase);
         }
       }
     },
-    [caseType, connectors, postCase, onSuccess, pushCaseToExternalService]
+    [caseType, connectors, postCase, onSuccess, pushCaseToExternalService, afterCaseCreated]
   );
 
   const { form } = useForm<FormProps>({

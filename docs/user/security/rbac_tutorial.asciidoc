@@ -74,16 +74,18 @@ should use the index patterns for your indices.
 image::security/images/role-index-privilege.png["Index privilege"]
 
 [float]
-==== Give the role permission to create visualizations and dashboards
+==== Give the role permissions to {kib} apps
 
-By default, roles do not give Kibana privileges.  Click **Add space
-privilege** and associate this role with the `Dev Mortgage` space.
+To enable users to create dashboards, visualizations, and saved searches, add {kib} privileges to the `dev-mortgage` role.
 
-To enable users with the `dev-mortgage` role to create visualizations
-and dashboards, click *All* for *Visualize* and *Dashboard*. Also
-assign *All* for *Discover* because it is common for developers
-to create saved searches while designing visualizations.
+. On the *{kib} privileges* window, select *Dev Mortgage* from the *Space* dropdown.
 
+. Click **Add space privilege**.
+
+. For *Dashboard*, *Visualize Library*, and *Discover*, click *All*.
++
+It is common to create saved searches in *Discover* while creating visualizations.
++
 [role="screenshot"]
 image::security/images/role-space-visualization.png["Associate space"]
 

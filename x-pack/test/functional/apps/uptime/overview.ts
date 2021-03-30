@@ -95,7 +95,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await uptime.pageUrlContains('pagination');
       await uptime.setMonitorListPageSize(50);
       // the pagination parameter should be cleared after a size change
-      await uptime.pageUrlContains('pagination', false);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await retry.try(async () => {
+        await uptime.pageUrlContains('pagination', false);
+      });
     });
 
     it('pagination size updates to reflect current selection', async () => {

@@ -9,7 +9,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Emond Rules Creation or Modification",
   "query": "file where event.type != \"deletion\" and\n file.path : (\"/private/etc/emond.d/rules/*.plist\", \"/etc/emon.d/rules/*.plist\")\n",
   "references": [

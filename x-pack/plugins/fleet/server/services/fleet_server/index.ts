@@ -6,8 +6,10 @@
  */
 
 import { first } from 'rxjs/operators';
+
 import { appContextService } from '../app_context';
 import { licenseService } from '../license';
+
 import { setupFleetServerIndexes } from './elastic_index';
 import { runFleetServerMigration } from './saved_object_migrations';
 
@@ -20,7 +22,7 @@ export function isFleetServerSetup() {
   return _isFleetServerSetup;
 }
 
-export function awaitIfFleetServerSetupPending() {
+export async function awaitIfFleetServerSetupPending() {
   if (!_isPending) {
     return;
   }

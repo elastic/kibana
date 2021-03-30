@@ -9,6 +9,7 @@ import { RouteDependencies } from '../../plugin';
 
 import { registerGroupsRoutes } from './groups';
 import { registerOverviewRoute } from './overview';
+import { registerRoleMappingsRoutes } from './role_mappings';
 import { registerSecurityRoutes } from './security';
 import { registerSettingsRoutes } from './settings';
 import { registerSourcesRoutes } from './sources';
@@ -16,6 +17,7 @@ import { registerSourcesRoutes } from './sources';
 export const registerWorkplaceSearchRoutes = (dependencies: RouteDependencies) => {
   registerOverviewRoute(dependencies);
   registerGroupsRoutes(dependencies);
+  registerRoleMappingsRoutes(dependencies);
   registerSourcesRoutes(dependencies);
   registerSettingsRoutes(dependencies);
   registerSecurityRoutes(dependencies);
