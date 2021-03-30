@@ -16,3 +16,12 @@ export const swimLaneSelectionTrigger: Trigger = {
   title: '',
   description: 'Swim lane selection triggered',
 };
+
+export const EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER = 'EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER';
+export const entityFieldSelectionTrigger: Trigger = {
+  id: EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER,
+  // This is empty string to hide title of ui_actions context menu that appears
+  // when this trigger is executed.
+  title: '',
+  description: 'Entity field selection triggered',
+};

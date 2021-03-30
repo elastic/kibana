@@ -10,8 +10,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBox, EuiComboBoxProps, EuiComboBoxOptionOption } from '@elastic/eui';
 import { METRIC_TYPES } from '../../../../common/metric_types';
-
-import type { SanitizedFieldType } from '../../../../common/types';
+import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
+import type { SanitizedFieldType, IndexPatternValue } from '../../../../common/types';
 import type { TimeseriesUIRestrictions } from '../../../../common/ui_restrictions';
 
 // @ts-ignore
@@ -20,7 +20,7 @@ import { isFieldEnabled } from '../../lib/check_ui_restrictions';
 interface FieldSelectProps {
   type: string;
   fields: Record<string, SanitizedFieldType[]>;
-  indexPattern: string;
+  indexPattern: IndexPatternValue;
   value?: string | null;
   onChange: (options: Array<EuiComboBoxOptionOption<string>>) => void;
   disabled?: boolean;
@@ -62,8 +62,10 @@ export function FieldSelect({
 
   const selectedOptions: Array<EuiComboBoxOptionOption<string>> = [];
   let newPlaceholder = placeholder;
+  const fieldsSelector = getIndexPatternKey(indexPattern);
+
   const groupedOptions: EuiComboBoxProps<string>['options'] = Object.values(
-    (fields[indexPattern] || []).reduce<Record<string, EuiComboBoxOptionOption<string>>>(
+    (fields[fieldsSelector] || []).reduce<Record<string, EuiComboBoxOptionOption<string>>>(
       (acc, field) => {
         if (placeholder === field?.name) {
           newPlaceholder = field.label ?? field.name;
