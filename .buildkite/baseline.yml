@@ -2,6 +2,8 @@ steps:
   - command: .buildkite/scripts/build-setup.sh
     label: Pre-Build
 
+  - wait
+
   - command: echo test
     label: Test
 
