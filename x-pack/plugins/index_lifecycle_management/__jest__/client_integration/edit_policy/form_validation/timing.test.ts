@@ -53,7 +53,7 @@ describe('<EditPolicy /> timing validation', () => {
     {
       name: `doesn't allow empty timing`,
       value: '',
-      error: [i18nTexts.editPolicy.errors.nonNegativeNumberRequired],
+      error: [i18nTexts.editPolicy.errors.numberRequired],
     },
     {
       name: `allows 0 for timing`,

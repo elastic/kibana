@@ -95,23 +95,6 @@ export const integerValidator: ValidationFunc<FormInternal, string, string> = (a
   }
 };
 
-export const minAgeValidator: Array<ValidationConfig<FormInternal, string, string>> = [
-  {
-    validator: (arg) =>
-      numberGreaterThanField({
-        than: 0,
-        allowEquality: true,
-        message: i18nTexts.editPolicy.errors.nonNegativeNumberRequired,
-      })({
-        ...arg,
-        value: arg.value === '' ? -Infinity : parseInt(arg.value, 10),
-      }),
-  },
-  {
-    validator: integerValidator,
-  },
-];
-
 export const createPolicyNameValidations = ({
   policies,
   saveAsNewPolicy,

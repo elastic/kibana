@@ -15,7 +15,6 @@ import {
   ifExistsNumberGreaterThanZero,
   ifExistsNumberNonNegative,
   rolloverThresholdsValidator,
-  minAgeValidator,
   integerValidator,
 } from './validations';
 
@@ -118,6 +117,20 @@ const getPriorityField = (phase: 'hot' | 'warm' | 'cold' | 'frozen') => ({
   serializer: serializers.stringToNumber,
 });
 
+const getMinAgeField = (defaultValue: string = '0') => ({
+  defaultValue,
+  validations: [
+    {
+      validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
+    },
+    {
+      validator: ifExistsNumberNonNegative,
+    },
+    {
+      validator: integerValidator,
+    },
+  ],
+});
 export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
   _meta: {
     hot: {
@@ -307,10 +320,7 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
       },
     },
     warm: {
-      min_age: {
-        defaultValue: '0',
-        validations: minAgeValidator,
-      },
+      min_age: getMinAgeField(),
       actions: {
         allocate: {
           number_of_replicas: numberOfReplicasField,
@@ -327,10 +337,7 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
       },
     },
     cold: {
-      min_age: {
-        defaultValue: '0',
-        validations: minAgeValidator,
-      },
+      min_age: getMinAgeField(),
       actions: {
         allocate: {
           number_of_replicas: numberOfReplicasField,
@@ -342,10 +349,7 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
       },
     },
     frozen: {
-      min_age: {
-        defaultValue: '0',
-        validations: minAgeValidator,
-      },
+      min_age: getMinAgeField(),
       actions: {
         allocate: {
           number_of_replicas: numberOfReplicasField,
@@ -357,10 +361,7 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
       },
     },
     delete: {
-      min_age: {
-        defaultValue: '365',
-        validations: minAgeValidator,
-      },
+      min_age: getMinAgeField('365'),
       actions: {
         wait_for_snapshot: {
           policy: {
