@@ -6,12 +6,27 @@
  */
 
 import { PluginInitializerContext, PluginInitializer } from 'kibana/public';
-import { Plugin, ObservabilityPluginSetup, ObservabilityPluginStart } from './plugin';
-export type { ObservabilityPluginSetup, ObservabilityPluginStart };
+import {
+  Plugin,
+  ObservabilityPublicPluginsStart,
+  ObservabilityPublicPluginsSetup,
+  ObservabilityPublicStart,
+  ObservabilityPublicSetup,
+} from './plugin';
+export type {
+  ObservabilityPublicSetup,
+  ObservabilityPublicStart,
+  ObservabilityPublicPluginsSetup,
+  ObservabilityPublicPluginsStart,
+};
+export { enableInspectEsQueries } from '../common/ui_settings_keys';
 
-export const plugin: PluginInitializer<ObservabilityPluginSetup, ObservabilityPluginStart> = (
-  context: PluginInitializerContext
-) => {
+export const plugin: PluginInitializer<
+  ObservabilityPublicSetup,
+  ObservabilityPublicStart,
+  ObservabilityPublicPluginsSetup,
+  ObservabilityPublicPluginsStart
+> = (context: PluginInitializerContext) => {
   return new Plugin(context);
 };
 

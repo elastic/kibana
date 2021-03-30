@@ -84,8 +84,9 @@ export class AlertService {
         return;
       }
 
-      const results = await scopedClusterClient.mget<AlertsResponse>({ body: { docs } });
+      const results = await scopedClusterClient.mget<Alert>({ body: { docs } });
 
+      // @ts-expect-error @elastic/elasticsearch _source is optional
       return results.body;
     } catch (error) {
       throw createCaseError({

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { FetchHandlers, SearchRequest } from '../fetch';
 import { defaultSearchStrategy } from './default_search_strategy';
 import { ISearchOptions } from '../../index';
@@ -21,7 +21,7 @@ export function callClient(
     [SearchRequest, ISearchOptions]
   > = searchRequests.map((request, i) => [request, requestsOptions[i]]);
   const requestOptionsMap = new Map<SearchRequest, ISearchOptions>(requestOptionEntries);
-  const requestResponseMap = new Map<SearchRequest, Promise<SearchResponse<any>>>();
+  const requestResponseMap = new Map<SearchRequest, Promise<estypes.SearchResponse<any>>>();
 
   const { searching, abort } = defaultSearchStrategy.search({
     searchRequests,

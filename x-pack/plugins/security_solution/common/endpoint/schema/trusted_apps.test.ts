@@ -5,8 +5,18 @@
  * 2.0.
  */
 
-import { GetTrustedAppsRequestSchema, PostTrustedAppCreateRequestSchema } from './trusted_apps';
-import { ConditionEntryField, OperatingSystem } from '../types';
+import {
+  GetTrustedAppsRequestSchema,
+  PostTrustedAppCreateRequestSchema,
+  PutTrustedAppUpdateRequestSchema,
+} from './trusted_apps';
+import {
+  ConditionEntry,
+  ConditionEntryField,
+  NewTrustedApp,
+  OperatingSystem,
+  PutTrustedAppsRequestParams,
+} from '../types';
 
 describe('When invoking Trusted Apps Schema', () => {
   describe('for GET List', () => {
@@ -72,17 +82,18 @@ describe('When invoking Trusted Apps Schema', () => {
   });
 
   describe('for POST Create', () => {
-    const createConditionEntry = <T>(data?: T) => ({
+    const createConditionEntry = <T>(data?: T): ConditionEntry => ({
       field: ConditionEntryField.PATH,
       type: 'match',
       operator: 'included',
       value: 'c:/programs files/Anti-Virus',
       ...(data || {}),
     });
-    const createNewTrustedApp = <T>(data?: T) => ({
+    const createNewTrustedApp = <T>(data?: T): NewTrustedApp => ({
       name: 'Some Anti-Virus App',
       description: 'this one is ok',
-      os: 'windows',
+      os: OperatingSystem.WINDOWS,
+      effectScope: { type: 'global' },
       entries: [createConditionEntry()],
       ...(data || {}),
     });
@@ -327,6 +338,57 @@ describe('When invoking Trusted Apps Schema', () => {
           );
         }).toThrow();
       });
+    });
+  });
+
+  describe('for PUT Update', () => {
+    const createConditionEntry = <T>(data?: T): ConditionEntry => ({
+      field: ConditionEntryField.PATH,
+      type: 'match',
+      operator: 'included',
+      value: 'c:/programs files/Anti-Virus',
+      ...(data || {}),
+    });
+    const createNewTrustedApp = <T>(data?: T): NewTrustedApp => ({
+      name: 'Some Anti-Virus App',
+      description: 'this one is ok',
+      os: OperatingSystem.WINDOWS,
+      effectScope: { type: 'global' },
+      entries: [createConditionEntry()],
+      ...(data || {}),
+    });
+
+    const updateParams = <T>(data?: T): PutTrustedAppsRequestParams => ({
+      id: 'validId',
+      ...(data || {}),
+    });
+
+    const body = PutTrustedAppUpdateRequestSchema.body;
+    const params = PutTrustedAppUpdateRequestSchema.params;
+
+    it('should not error on a valid message', () => {
+      const bodyMsg = createNewTrustedApp();
+      const paramsMsg = updateParams();
+      expect(body.validate(bodyMsg)).toStrictEqual(bodyMsg);
+      expect(params.validate(paramsMsg)).toStrictEqual(paramsMsg);
+    });
+
+    it('should validate `id` params is required', () => {
+      expect(() => params.validate(updateParams({ id: undefined }))).toThrow();
+    });
+
+    it('should validate `id` params to be string', () => {
+      expect(() => params.validate(updateParams({ id: 1 }))).toThrow();
+    });
+
+    it('should validate `version`', () => {
+      const bodyMsg = createNewTrustedApp({ version: 'v1' });
+      expect(body.validate(bodyMsg)).toStrictEqual(bodyMsg);
+    });
+
+    it('should validate `version` must be string', () => {
+      const bodyMsg = createNewTrustedApp({ version: 1 });
+      expect(() => body.validate(bodyMsg)).toThrow();
     });
   });
 });

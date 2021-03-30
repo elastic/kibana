@@ -41,7 +41,7 @@ export const RecentActivity: React.FC = () => {
 
   return (
     <ContentSection title={RECENT_ACTIVITY_TITLE} headerSpacer="m">
-      <EuiPanel>
+      <EuiPanel color="subdued" hasShadow={false}>
         {activityFeed.length > 0 ? (
           <>
             {activityFeed.map((props: FeedActivity, index) => (

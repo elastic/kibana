@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 import numeral from '@elastic/numeral';
 import { IScopedClusterClient } from 'kibana/server';
 import { MLCATEGORY } from '../../../common/constants/field_types';
@@ -89,12 +89,15 @@ const cardinalityCheckProvider = (client: IScopedClusterClient) => {
       new Set<string>()
     );
 
-    const maxBucketFieldCardinalities: string[] = influencers.filter(
+    const normalizedInfluencers: estypes.Field[] = Array.isArray(influencers)
+      ? influencers
+      : [influencers];
+    const maxBucketFieldCardinalities = normalizedInfluencers.filter(
       (influencerField) =>
         !!influencerField &&
         !excludedKeywords.has(influencerField) &&
         !overallCardinalityFields.has(influencerField)
-    ) as string[];
+    );
 
     if (overallCardinalityFields.size > 0) {
       overallCardinality = await fieldsService.getCardinalityOfFields(
@@ -116,7 +119,7 @@ const cardinalityCheckProvider = (client: IScopedClusterClient) => {
         timeFieldName,
         earliestMs,
         latestMs,
-        bucketSpan,
+        bucketSpan as string, // update to Time type
         datafeedConfig
       );
     }
