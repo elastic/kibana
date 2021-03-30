@@ -458,12 +458,12 @@ def allCiTasks() {
   parallel([
     general: {
       withTasks {
-        tasks.check()
-        tasks.lint()
-        tasks.test()
+        // tasks.check()
+        // tasks.lint()
+        // tasks.test()
         tasks.functionalOss()
-        tasks.functionalXpack()
-        tasks.storybooksCi()
+        // tasks.functionalXpack()
+        // tasks.storybooksCi()
       }
     },
     jest: {

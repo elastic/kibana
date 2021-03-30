@@ -25,10 +25,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     defaultIndex: 'logstash-*',
   };
 
-  describe('discover test', function describeIndexTests() {
+  describe.only('discover test', function describeIndexTests() {
     before(async function () {
       log.debug('load kibana index with default index pattern');
 
+      await kibanaServer.importExport.load('discover');
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await kibanaServer.importExport.load('discover');
 
