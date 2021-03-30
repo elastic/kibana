@@ -204,10 +204,11 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
                   disabled={isEditorNotInIdleMode}
                   onChange={onDescriptionChange}
                   ariaLabel={i18nTexts.processorTypeLabel({ type: processor.type })}
-                  text={
-                    description ?? processorDescriptor?.getDefaultDescription(processor.options)
+                  text={description}
+                  placeholder={
+                    processorDescriptor?.getDefaultDescription(processor.options) ??
+                    i18nTexts.descriptionPlaceholder
                   }
-                  placeholder={i18nTexts.descriptionPlaceholder}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

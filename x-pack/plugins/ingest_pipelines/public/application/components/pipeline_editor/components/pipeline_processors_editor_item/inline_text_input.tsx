@@ -70,31 +70,35 @@ function _InlineTextInput({
     };
   }, [isShowingTextInput, submitChange, setIsShowingTextInput]);
 
-  return isShowingTextInput && !disabled ? (
-    <div className={`pipelineProcessorsEditor__item__textContainer ${containerClasses}`}>
-      <EuiFieldText
-        controlOnly
-        onBlur={submitChange}
-        fullWidth
-        compressed
-        value={textValue}
-        aria-label={ariaLabel}
-        className="pipelineProcessorsEditor__item__textInput"
-        inputRef={(el) => el?.focus()}
-        onChange={(event) => setTextValue(event.target.value)}
-      />
-    </div>
-  ) : (
-    <div
-      className={containerClasses}
-      tabIndex={disabled ? -1 : 0}
-      onFocus={() => setIsShowingTextInput(true)}
-    >
-      <EuiText size="s" color="subdued">
-        <div className="pipelineProcessorsEditor__item__description">
-          {text || <em>{placeholder}</em>}
+  return (
+    <div title={text ?? placeholder}>
+      {isShowingTextInput && !disabled ? (
+        <div className={`pipelineProcessorsEditor__item__textContainer ${containerClasses}`}>
+          <EuiFieldText
+            controlOnly
+            onBlur={submitChange}
+            fullWidth
+            compressed
+            value={textValue}
+            aria-label={ariaLabel}
+            className="pipelineProcessorsEditor__item__textInput"
+            inputRef={(el) => el?.focus()}
+            onChange={(event) => setTextValue(event.target.value)}
+          />
         </div>
-      </EuiText>
+      ) : (
+        <div
+          className={containerClasses}
+          tabIndex={disabled ? -1 : 0}
+          onFocus={() => setIsShowingTextInput(true)}
+        >
+          <EuiText size="s" color="subdued">
+            <div className="pipelineProcessorsEditor__item__description">
+              {text || <em>{placeholder}</em>}
+            </div>
+          </EuiText>
+        </div>
+      )}
     </div>
   );
 }
