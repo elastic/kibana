@@ -20,6 +20,7 @@ import {
 import { CustomFields } from './custom_fields';
 import { useUpdatePolicy } from './use_update_policy';
 import { validate } from './validation';
+import { VerificationMode } from './certs_field';
 
 /**
  * Exports Synthetics-specific package policy instructions
@@ -87,6 +88,11 @@ const defaultValues = {
     unit: ScheduleUnit.SECONDS,
   },
   [ConfigKeys.APM_SERVICE_NAME]: '',
+  [ConfigKeys.SSL_CERTIFICATE_AUTHORITIES]: '',
+  [ConfigKeys.SSL_CERTIFICATE]: '',
+  [ConfigKeys.SSL_KEY]: '',
+  [ConfigKeys.SSL_KEY_PASSPHRASE]: '',
+  [ConfigKeys.SSL_VERIFICATION_MODE]: VerificationMode.FULL,
   [ConfigKeys.TAGS]: [],
   [ConfigKeys.TIMEOUT]: 16,
   [ConfigKeys.URLS]: '',
