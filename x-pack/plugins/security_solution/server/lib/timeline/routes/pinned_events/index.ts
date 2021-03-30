@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { deletPinnedEventOnTimelineRoute } from './delete_pinned_events';
-export { getAllPinnedEventsByTimelineIdRoute } from './get_all_pinned_events_by_timeline_id';
 export { persistPinnedEventsRoute } from './persist_pinned_event_on_timeline';

@@ -16,7 +16,7 @@ import { ConfigType } from '../../../..';
 import { transformError, buildSiemResponse } from '../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../utils/common';
-import { persistPinnedEventSchema } from '../../schemas/pinned_events/persist_pinned_event_schema';
+import { persistPinnedEventSchema } from '../../schemas/pinned_events';
 import { persistPinnedEventOnTimeline } from '../../saved_object/pinned_events';
 
 export const persistPinnedEventsRoute = (

@@ -16,7 +16,7 @@ import { ConfigType } from '../../../..';
 import { transformError, buildSiemResponse } from '../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../utils/common';
-import { persistNoteSchema } from '../../schemas/notes/persist_note_schema';
+import { persistNoteSchema } from '../../schemas/notes';
 import { persistNote } from '../../saved_object/notes';
 
 export const persistNoteRoute = (
