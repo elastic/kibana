@@ -23,7 +23,9 @@ import {
   ALL_AGENTS_LABEL,
   AGENT_PLATFORMS_LABEL,
   AGENT_POLICY_LABEL,
+  SELECT_AGENT_LABEL,
   AGENT_SELECTION_LABEL,
+  generateSelectedAgentsMessage,
 } from './translations';
 
 import { AGENT_GROUP_KEY, SelectedGroups, AgentOptionValue, GroupOptionValue } from './types';
@@ -204,13 +206,10 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ onChange }) => {
       </span>
     );
   }, []);
-  const selectedAgentsText = `${numAgentsSelected} agent${
-    numAgentsSelected === 1 ? '' : 's'
-  } selected.`;
   return (
     <div>
-      <h2>Select Agents</h2>
-      {numAgentsSelected > 0 ? <span>{selectedAgentsText}</span> : ''}
+      <h2>{SELECT_AGENT_LABEL}</h2>
+      {numAgentsSelected > 0 ? <span>{generateSelectedAgentsMessage(numAgentsSelected)}</span> : ''}
       &nbsp;
       <EuiComboBox
         placeholder="Select or create options"

@@ -44,7 +44,5 @@ export const buildAgentsQuery = ({
     },
   };
 
-  console.log(JSON.stringify(dslQuery, null, 2))
-
   return dslQuery;
 };
