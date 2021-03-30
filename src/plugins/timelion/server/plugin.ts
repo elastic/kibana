@@ -47,6 +47,7 @@ export class TimelionPlugin implements Plugin {
     core.capabilities.registerProvider(() => ({
       timelion: {
         save: true,
+        show: true,
       },
     }));
     core.savedObjects.registerType(timelionSheetSavedObjectType);

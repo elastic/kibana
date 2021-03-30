@@ -49,10 +49,10 @@ const Culprit = euiStyled.div`
   font-family: ${fontFamilyCode};
 `;
 
-type ErrorGroupListAPIResponse = APIReturnType<'GET /api/apm/services/{serviceName}/errors'>;
+type ErrorGroupItem = APIReturnType<'GET /api/apm/services/{serviceName}/errors'>['errorGroups'][0];
 
 interface Props {
-  items: ErrorGroupListAPIResponse;
+  items: ErrorGroupItem[];
   serviceName: string;
 }
 
@@ -128,7 +128,7 @@ function ErrorGroupList({ items, serviceName }: Props) {
         field: 'message',
         sortable: false,
         width: '50%',
-        render: (message: string, item: ErrorGroupListAPIResponse[0]) => {
+        render: (message: string, item: ErrorGroupItem) => {
           return (
             <MessageAndCulpritCell>
               <EuiToolTip

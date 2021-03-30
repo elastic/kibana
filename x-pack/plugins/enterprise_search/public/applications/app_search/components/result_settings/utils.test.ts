@@ -8,11 +8,11 @@
 import { SchemaTypes } from '../../../shared/types';
 
 import {
+  areFieldsAtDefaultSettings,
+  areFieldsEmpty,
   convertServerResultFieldsToResultFields,
   convertToServerFieldResultSetting,
-  clearAllServerFields,
   clearAllFields,
-  resetAllServerFields,
   resetAllFields,
   splitResultFields,
 } from './utils';
@@ -31,20 +31,6 @@ describe('clearAllFields', () => {
   });
 });
 
-describe('clearAllServerFields', () => {
-  it('will reset every key in an object back to an empty object', () => {
-    expect(
-      clearAllServerFields({
-        foo: { raw: { size: 5 } },
-        bar: { raw: true },
-      })
-    ).toEqual({
-      foo: {},
-      bar: {},
-    });
-  });
-});
-
 describe('resetAllFields', () => {
   it('will reset every key in an object back to a default object', () => {
     expect(
@@ -55,20 +41,6 @@ describe('resetAllFields', () => {
     ).toEqual({
       foo: { raw: true, snippet: false, snippetFallback: false },
       bar: { raw: true, snippet: false, snippetFallback: false },
-    });
-  });
-});
-
-describe('resetAllServerFields', () => {
-  it('will reset every key in an object back to a default object', () => {
-    expect(
-      resetAllServerFields({
-        foo: { raw: { size: 5 } },
-        bar: { snippet: true },
-      })
-    ).toEqual({
-      foo: { raw: {} },
-      bar: { raw: {} },
     });
   });
 });
@@ -170,5 +142,70 @@ describe('splitResultFields', () => {
       },
       textResultFields: { foo: { raw: true, rawSize: 5, snippet: false, snippetFallback: false } },
     });
+  });
+});
+
+describe('areFieldsEmpty', () => {
+  it('should return true if all fields are empty objects', () => {
+    expect(
+      areFieldsEmpty({
+        foo: {},
+        bar: {},
+      })
+    ).toBe(true);
+  });
+  it('should return false otherwise', () => {
+    expect(
+      areFieldsEmpty({
+        foo: {
+          raw: true,
+          rawSize: 5,
+          snippet: false,
+          snippetFallback: false,
+        },
+        bar: {
+          raw: true,
+          rawSize: 5,
+          snippet: false,
+          snippetFallback: false,
+        },
+      })
+    ).toBe(false);
+  });
+});
+
+describe('areFieldsAtDefaultSettings', () => {
+  it('will return true if all settings for all fields are at their defaults', () => {
+    expect(
+      areFieldsAtDefaultSettings({
+        foo: {
+          raw: true,
+          snippet: false,
+          snippetFallback: false,
+        },
+        bar: {
+          raw: true,
+          snippet: false,
+          snippetFallback: false,
+        },
+      })
+    ).toEqual(true);
+  });
+
+  it('will return false otherwise', () => {
+    expect(
+      areFieldsAtDefaultSettings({
+        foo: {
+          raw: true,
+          snippet: false,
+          snippetFallback: false,
+        },
+        bar: {
+          raw: false,
+          snippet: true,
+          snippetFallback: true,
+        },
+      })
+    ).toEqual(false);
   });
 });

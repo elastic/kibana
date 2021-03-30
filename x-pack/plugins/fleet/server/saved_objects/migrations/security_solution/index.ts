@@ -7,3 +7,4 @@
 
 export { migratePackagePolicyToV7110 } from './to_v7_11_0';
 export { migratePackagePolicyToV7120 } from './to_v7_12_0';
+export { migrateEndpointPackagePolicyToV7130 } from './to_v7_13_0';
