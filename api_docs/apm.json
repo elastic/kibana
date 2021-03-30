@@ -747,7 +747,7 @@
               "text": "APMEventESSearchRequest"
             },
             ">(params: TParams, { includeLegacyData }?: { includeLegacyData?: boolean | undefined; }): Promise<",
-            "ESSearchResponse",
+            "InferSearchResponseOf",
             "<TypeOfProcessorEvent<",
             "ValuesType"
           ]

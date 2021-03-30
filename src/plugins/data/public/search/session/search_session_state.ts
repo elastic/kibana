@@ -7,6 +7,7 @@
  */
 
 import uuid from 'uuid';
+import deepEqual from 'fast-deep-equal';
 import { Observable } from 'rxjs';
 import { distinctUntilChanged, map, shareReplay } from 'rxjs/operators';
 import { createStateContainer, StateContainer } from '../../../../kibana_utils/public';
@@ -107,9 +108,19 @@ export interface SessionStateInternal<SearchDescriptor = unknown> {
   isCanceled: boolean;
 
   /**
-   * Start time of current session
+   * Start time of the current session (from browser perspective)
    */
   startTime?: Date;
+
+  /**
+   * Time when all the searches from the current session are completed (from browser perspective)
+   */
+  completedTime?: Date;
+
+  /**
+   * Time when the session was canceled by user, by hitting "stop"
+   */
+  canceledTime?: Date;
 }
 
 const createSessionDefaultState: <
@@ -170,12 +181,15 @@ export const sessionPureTransitions: SessionPureTransitions = {
       ...state,
       isStarted: true,
       pendingSearches: state.pendingSearches.concat(search),
+      completedTime: undefined,
     };
   },
   unTrackSearch: (state) => (search) => {
+    const pendingSearches = state.pendingSearches.filter((s) => s !== search);
     return {
       ...state,
-      pendingSearches: state.pendingSearches.filter((s) => s !== search),
+      pendingSearches,
+      completedTime: pendingSearches.length === 0 ? new Date() : state.completedTime,
     };
   },
   cancel: (state) => () => {
@@ -185,6 +199,7 @@ export const sessionPureTransitions: SessionPureTransitions = {
       ...state,
       pendingSearches: [],
       isCanceled: true,
+      canceledTime: new Date(),
       isStored: false,
       searchSessionSavedObject: undefined,
     };
@@ -205,11 +220,24 @@ export const sessionPureTransitions: SessionPureTransitions = {
   },
 };
 
+/**
+ * Consolidate meta info about current seach session
+ * Contains both deferred properties and plain properties from state
+ */
+export interface SessionMeta {
+  state: SearchSessionState;
+  name?: string;
+  startTime?: Date;
+  canceledTime?: Date;
+  completedTime?: Date;
+}
+
 export interface SessionPureSelectors<
   SearchDescriptor = unknown,
   S = SessionStateInternal<SearchDescriptor>
 > {
   getState: (state: S) => () => SearchSessionState;
+  getMeta: (state: S) => () => SessionMeta;
 }
 
 export const sessionPureSelectors: SessionPureSelectors = {
@@ -233,6 +261,21 @@ export const sessionPureSelectors: SessionPureSelectors = {
     }
     return SearchSessionState.None;
   },
+  getMeta(state) {
+    const sessionState = this.getState(state)();
+
+    return () => ({
+      state: sessionState,
+      name: state.searchSessionSavedObject?.attributes.name,
+      startTime: state.searchSessionSavedObject?.attributes.created
+        ? new Date(state.searchSessionSavedObject?.attributes.created)
+        : state.startTime,
+      completedTime: state.searchSessionSavedObject?.attributes.completed
+        ? new Date(state.searchSessionSavedObject?.attributes.completed)
+        : state.completedTime,
+      canceledTime: state.canceledTime,
+    });
+  },
 };
 
 export type SessionStateContainer<SearchDescriptor = unknown> = StateContainer<
@@ -246,9 +289,7 @@ export const createSessionStateContainer = <SearchDescriptor = unknown>(
 ): {
   stateContainer: SessionStateContainer<SearchDescriptor>;
   sessionState$: Observable<SearchSessionState>;
-  sessionStartTime$: Observable<Date | undefined>;
-  searchSessionSavedObject$: Observable<SearchSessionSavedObject | undefined>;
-  searchSessionName$: Observable<string | undefined>;
+  sessionMeta$: Observable<SessionMeta>;
 } => {
   const stateContainer = createStateContainer(
     createSessionDefaultState(),
@@ -257,33 +298,20 @@ export const createSessionStateContainer = <SearchDescriptor = unknown>(
     freeze ? undefined : { freeze: (s) => s }
   ) as SessionStateContainer<SearchDescriptor>;
 
-  const sessionState$: Observable<SearchSessionState> = stateContainer.state$.pipe(
-    map(() => stateContainer.selectors.getState()),
-    distinctUntilChanged(),
+  const sessionMeta$: Observable<SessionMeta> = stateContainer.state$.pipe(
+    map(() => stateContainer.selectors.getMeta()),
+    distinctUntilChanged(deepEqual),
     shareReplay(1)
   );
 
-  const sessionStartTime$: Observable<Date | undefined> = stateContainer.state$.pipe(
-    map(() => stateContainer.get().startTime),
-    distinctUntilChanged(),
-    shareReplay(1)
-  );
-
-  const searchSessionSavedObject$ = stateContainer.state$.pipe(
-    map(() => stateContainer.get().searchSessionSavedObject),
-    distinctUntilChanged(),
-    shareReplay(1)
-  );
-
-  const searchSessionName$ = searchSessionSavedObject$.pipe(
-    map((savedObject) => savedObject?.attributes?.name)
+  const sessionState$: Observable<SearchSessionState> = sessionMeta$.pipe(
+    map((meta) => meta.state),
+    distinctUntilChanged()
   );
 
   return {
     stateContainer,
     sessionState$,
-    sessionStartTime$,
-    searchSessionSavedObject$,
-    searchSessionName$,
+    sessionMeta$,
   };
 };
