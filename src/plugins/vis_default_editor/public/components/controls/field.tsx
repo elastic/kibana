@@ -13,7 +13,13 @@ import useMount from 'react-use/lib/useMount';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { AggParam, IAggConfig, IFieldParamType, IndexPatternField } from 'src/plugins/data/public';
+import {
+  AggParam,
+  IAggConfig,
+  IFieldParamType,
+  IndexPatternField,
+  KBN_FIELD_TYPES,
+} from '../../../../../plugins/data/public';
 import { formatListAsProse, parseCommaSeparatedList, useValidation } from './utils';
 import { AggParamEditorProps } from '../agg_param_props';
 import { ComboBoxGroupedOptions } from '../../utils';
@@ -55,6 +61,7 @@ function FieldParamEditor({
     }
   };
   const errors = customError ? [customError] : [];
+  let showErrorMessageImmediately = false;
 
   if (!indexedFields.length) {
     errors.push(
@@ -69,7 +76,7 @@ function FieldParamEditor({
     );
   }
 
-  if (value && value.type === 'missing') {
+  if (value && value.type === KBN_FIELD_TYPES.MISSING) {
     errors.push(
       i18n.translate('visDefaultEditor.controls.field.fieldIsNotExists', {
         defaultMessage:
@@ -79,6 +86,7 @@ function FieldParamEditor({
         },
       })
     );
+    showErrorMessageImmediately = true;
   } else if (
     value &&
     !getFieldTypes(agg).find((type: string) => type === value.type || type === '*')
@@ -93,11 +101,13 @@ function FieldParamEditor({
         },
       })
     );
+    showErrorMessageImmediately = true;
   }
 
   const isValid = !!value && !errors.length && !isDirty;
   // we show an error message right away if there is no compatible fields
-  const showErrorMessage = (showValidation || !indexedFields.length) && !isValid;
+  const showErrorMessage =
+    (showValidation || !indexedFields.length || showErrorMessageImmediately) && !isValid;
 
   useValidation(setValidity, isValid);
   useMount(() => {

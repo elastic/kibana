@@ -47,7 +47,7 @@ export class FieldParamType extends BaseParamType {
           );
         }
 
-        if (field.type === 'missing') {
+        if (field.type === KBN_FIELD_TYPES.MISSING) {
           throw new SavedObjectNotFound(
             'index-pattern-field',
             field.name,
@@ -109,7 +109,7 @@ export class FieldParamType extends BaseParamType {
 
       if (!field) {
         return new IndexPatternField({
-          type: 'missing',
+          type: KBN_FIELD_TYPES.MISSING,
           name: fieldName,
           searchable: false,
           aggregatable: false,
