@@ -9,10 +9,7 @@ import LRU from 'lru-cache';
 import { savedObjectsClientMock, loggingSystemMock } from 'src/core/server/mocks';
 import { Logger } from 'src/core/server';
 import { PackagePolicyServiceInterface } from '../../../../../../fleet/server';
-import {
-  createArtifactsClientMock,
-  createPackagePolicyServiceMock,
-} from '../../../../../../fleet/server/mocks';
+import { createPackagePolicyServiceMock } from '../../../../../../fleet/server/mocks';
 import { ExceptionListClient } from '../../../../../../lists/server';
 import { listMock } from '../../../../../../lists/server/mocks';
 import { ExceptionListItemSchema } from '../../../../../../lists/common/schemas/response';
@@ -23,8 +20,7 @@ import {
   getMockArtifactsWithDiff,
   getEmptyMockArtifacts,
 } from '../../../lib/artifacts/mocks';
-import { EndpointArtifactClient } from '../artifact_client';
-import { getManifestClientMock } from '../mocks';
+import { createEndpointArtifactClientMock, getManifestClientMock } from '../mocks';
 import { ManifestManager, ManifestManagerContext } from './manifest_manager';
 
 export const createExceptionListResponse = (data: ExceptionListItemSchema[], total?: number) => ({
@@ -87,7 +83,7 @@ export const buildManifestManagerContextMock = (
 
   return {
     ...fullOpts,
-    artifactClient: new EndpointArtifactClient(createArtifactsClientMock()),
+    artifactClient: createEndpointArtifactClientMock(),
     logger: loggingSystemMock.create().get() as jest.Mocked<Logger>,
   };
 };

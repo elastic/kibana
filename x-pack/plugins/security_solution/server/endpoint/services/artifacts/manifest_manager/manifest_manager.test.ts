@@ -6,7 +6,7 @@
  */
 
 import { inflateSync } from 'zlib';
-import { SavedObjectsErrorHelpers } from 'src/core/server';
+import { SavedObject, SavedObjectsErrorHelpers } from 'src/core/server';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { ENDPOINT_LIST_ID, ENDPOINT_TRUSTED_APPS_LIST_ID } from '../../../../../../lists/common';
 import { getExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
@@ -37,6 +37,7 @@ import {
 } from './manifest_manager.mock';
 
 import { ManifestManager } from './manifest_manager';
+import { EndpointArtifactClientInterface } from '../artifact_client';
 
 const uncompressData = async (data: Buffer) => JSON.parse(await inflateSync(data).toString());
 
@@ -145,9 +146,8 @@ describe('ManifestManager', () => {
 
     test('Retrieves non empty manifest successfully', async () => {
       const savedObjectsClient = savedObjectsClientMock.create();
-      const manifestManager = new ManifestManager(
-        buildManifestManagerContextMock({ savedObjectsClient })
-      );
+      const manifestManagerContext = buildManifestManagerContextMock({ savedObjectsClient });
+      const manifestManager = new ManifestManager(manifestManagerContext);
 
       savedObjectsClient.get = jest
         .fn()
@@ -169,12 +169,19 @@ describe('ManifestManager', () => {
               },
               version: '2.0.0',
             };
-          } else if (objectType === ArtifactConstants.SAVED_OBJECT_TYPE) {
-            return { attributes: ARTIFACTS_BY_ID[id], version: '2.1.1' };
           } else {
             return null;
           }
         });
+
+      (manifestManagerContext.artifactClient as jest.Mocked<EndpointArtifactClientInterface>).getArtifact.mockImplementation(
+        async (id) => {
+          return {
+            attributes: ARTIFACTS_BY_ID[id],
+            version: '2.1.1',
+          } as SavedObject<InternalArtifactCompleteSchema>;
+        }
+      );
 
       const manifest = await manifestManager.getLastComputedManifest();
 
@@ -418,8 +425,6 @@ describe('ManifestManager', () => {
       const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
 
-      context.savedObjectsClient.delete = jest.fn().mockResolvedValue({});
-
       await expect(
         manifestManager.deleteArtifacts([
           ARTIFACT_ID_EXCEPTIONS_MACOS,
@@ -427,32 +432,27 @@ describe('ManifestManager', () => {
         ])
       ).resolves.toStrictEqual([]);
 
-      expect(context.savedObjectsClient.delete).toHaveBeenNthCalledWith(
+      expect(context.artifactClient.deleteArtifact).toHaveBeenNthCalledWith(
         1,
-        ArtifactConstants.SAVED_OBJECT_TYPE,
         ARTIFACT_ID_EXCEPTIONS_MACOS
       );
-      expect(context.savedObjectsClient.delete).toHaveBeenNthCalledWith(
+      expect(context.artifactClient.deleteArtifact).toHaveBeenNthCalledWith(
         2,
-        ArtifactConstants.SAVED_OBJECT_TYPE,
         ARTIFACT_ID_EXCEPTIONS_WINDOWS
       );
     });
 
     test('Returns errors for partial failures', async () => {
       const context = buildManifestManagerContextMock({});
+      const artifactClient = context.artifactClient as jest.Mocked<EndpointArtifactClientInterface>;
       const manifestManager = new ManifestManager(context);
       const error = new Error();
 
-      context.savedObjectsClient.delete = jest
-        .fn()
-        .mockImplementation(async (type: string, id: string) => {
-          if (id === ARTIFACT_ID_EXCEPTIONS_WINDOWS) {
-            throw error;
-          } else {
-            return {};
-          }
-        });
+      artifactClient.deleteArtifact.mockImplementation(async (id) => {
+        if (id === ARTIFACT_ID_EXCEPTIONS_WINDOWS) {
+          throw error;
+        }
+      });
 
       await expect(
         manifestManager.deleteArtifacts([
@@ -461,15 +461,13 @@ describe('ManifestManager', () => {
         ])
       ).resolves.toStrictEqual([error]);
 
-      expect(context.savedObjectsClient.delete).toHaveBeenCalledTimes(2);
-      expect(context.savedObjectsClient.delete).toHaveBeenNthCalledWith(
+      expect(artifactClient.deleteArtifact).toHaveBeenCalledTimes(2);
+      expect(artifactClient.deleteArtifact).toHaveBeenNthCalledWith(
         1,
-        ArtifactConstants.SAVED_OBJECT_TYPE,
         ARTIFACT_ID_EXCEPTIONS_MACOS
       );
-      expect(context.savedObjectsClient.delete).toHaveBeenNthCalledWith(
+      expect(artifactClient.deleteArtifact).toHaveBeenNthCalledWith(
         2,
-        ArtifactConstants.SAVED_OBJECT_TYPE,
         ARTIFACT_ID_EXCEPTIONS_WINDOWS
       );
     });
