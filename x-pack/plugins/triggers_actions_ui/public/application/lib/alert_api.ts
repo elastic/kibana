@@ -11,7 +11,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { pick } from 'lodash';
 import { alertStateSchema, AlertingFrameworkHealth } from '../../../../alerting/common';
-import { BASE_ALERT_API_PATH } from '../constants';
+import { LEGACY_BASE_ALERT_API_PATH } from '../constants';
 import {
   Alert,
   AlertAggregations,
@@ -24,7 +24,7 @@ import {
 } from '../../types';
 
 export async function loadAlertTypes({ http }: { http: HttpSetup }): Promise<AlertType[]> {
-  return await http.get(`${BASE_ALERT_API_PATH}/list_alert_types`);
+  return await http.get(`${LEGACY_BASE_ALERT_API_PATH}/list_alert_types`);
 }
 
 export async function loadAlert({
@@ -34,7 +34,7 @@ export async function loadAlert({
   http: HttpSetup;
   alertId: string;
 }): Promise<Alert> {
-  return await http.get(`${BASE_ALERT_API_PATH}/alert/${alertId}`);
+  return await http.get(`${LEGACY_BASE_ALERT_API_PATH}/alert/${alertId}`);
 }
 
 type EmptyHttpResponse = '';
@@ -46,7 +46,7 @@ export async function loadAlertState({
   alertId: string;
 }): Promise<AlertTaskState> {
   return await http
-    .get(`${BASE_ALERT_API_PATH}/alert/${alertId}/state`)
+    .get(`${LEGACY_BASE_ALERT_API_PATH}/alert/${alertId}/state`)
     .then((state: AlertTaskState | EmptyHttpResponse) => (state ? state : {}))
     .then((state: AlertTaskState) => {
       return pipe(
@@ -65,7 +65,7 @@ export async function loadAlertInstanceSummary({
   http: HttpSetup;
   alertId: string;
 }): Promise<AlertInstanceSummary> {
-  return await http.get(`${BASE_ALERT_API_PATH}/alert/${alertId}/_instance_summary`);
+  return await http.get(`${LEGACY_BASE_ALERT_API_PATH}/alert/${alertId}/_instance_summary`);
 }
 
 export const mapFiltersToKql = ({
@@ -121,7 +121,7 @@ export async function loadAlerts({
   data: Alert[];
 }> {
   const filters = mapFiltersToKql({ typesFilter, actionTypesFilter, alertStatusesFilter });
-  return await http.get(`${BASE_ALERT_API_PATH}/_find`, {
+  return await http.get(`${LEGACY_BASE_ALERT_API_PATH}/_find`, {
     query: {
       page: page.index + 1,
       per_page: page.size,
@@ -149,7 +149,7 @@ export async function loadAlertAggregations({
   alertStatusesFilter?: string[];
 }): Promise<AlertAggregations> {
   const filters = mapFiltersToKql({ typesFilter, actionTypesFilter, alertStatusesFilter });
-  return await http.get(`${BASE_ALERT_API_PATH}/_aggregate`, {
+  return await http.get(`${LEGACY_BASE_ALERT_API_PATH}/_aggregate`, {
     query: {
       search_fields: searchText ? JSON.stringify(['name', 'tags']) : undefined,
       search: searchText,
@@ -168,7 +168,7 @@ export async function deleteAlerts({
 }): Promise<{ successes: string[]; errors: string[] }> {
   const successes: string[] = [];
   const errors: string[] = [];
-  await Promise.all(ids.map((id) => http.delete(`${BASE_ALERT_API_PATH}/alert/${id}`))).then(
+  await Promise.all(ids.map((id) => http.delete(`${LEGACY_BASE_ALERT_API_PATH}/alert/${id}`))).then(
     function (fulfilled) {
       successes.push(...fulfilled);
     },
@@ -189,7 +189,7 @@ export async function createAlert({
     'createdBy' | 'updatedBy' | 'muteAll' | 'mutedInstanceIds' | 'executionStatus'
   >;
 }): Promise<Alert> {
-  return await http.post(`${BASE_ALERT_API_PATH}/alert`, {
+  return await http.post(`${LEGACY_BASE_ALERT_API_PATH}/alert`, {
     body: JSON.stringify(alert),
   });
 }
@@ -206,7 +206,7 @@ export async function updateAlert({
   >;
   id: string;
 }): Promise<Alert> {
-  return await http.put(`${BASE_ALERT_API_PATH}/alert/${id}`, {
+  return await http.put(`${LEGACY_BASE_ALERT_API_PATH}/alert/${id}`, {
     body: JSON.stringify(
       pick(alert, ['throttle', 'name', 'tags', 'schedule', 'params', 'actions', 'notifyWhen'])
     ),
@@ -214,7 +214,7 @@ export async function updateAlert({
 }
 
 export async function enableAlert({ id, http }: { id: string; http: HttpSetup }): Promise<void> {
-  await http.post(`${BASE_ALERT_API_PATH}/alert/${id}/_enable`);
+  await http.post(`${LEGACY_BASE_ALERT_API_PATH}/alert/${id}/_enable`);
 }
 
 export async function enableAlerts({
@@ -228,7 +228,7 @@ export async function enableAlerts({
 }
 
 export async function disableAlert({ id, http }: { id: string; http: HttpSetup }): Promise<void> {
-  await http.post(`${BASE_ALERT_API_PATH}/alert/${id}/_disable`);
+  await http.post(`${LEGACY_BASE_ALERT_API_PATH}/alert/${id}/_disable`);
 }
 
 export async function disableAlerts({
@@ -250,7 +250,7 @@ export async function muteAlertInstance({
   instanceId: string;
   http: HttpSetup;
 }): Promise<void> {
-  await http.post(`${BASE_ALERT_API_PATH}/alert/${id}/alert_instance/${instanceId}/_mute`);
+  await http.post(`${LEGACY_BASE_ALERT_API_PATH}/alert/${id}/alert_instance/${instanceId}/_mute`);
 }
 
 export async function unmuteAlertInstance({
@@ -262,11 +262,11 @@ export async function unmuteAlertInstance({
   instanceId: string;
   http: HttpSetup;
 }): Promise<void> {
-  await http.post(`${BASE_ALERT_API_PATH}/alert/${id}/alert_instance/${instanceId}/_unmute`);
+  await http.post(`${LEGACY_BASE_ALERT_API_PATH}/alert/${id}/alert_instance/${instanceId}/_unmute`);
 }
 
 export async function muteAlert({ id, http }: { id: string; http: HttpSetup }): Promise<void> {
-  await http.post(`${BASE_ALERT_API_PATH}/alert/${id}/_mute_all`);
+  await http.post(`${LEGACY_BASE_ALERT_API_PATH}/alert/${id}/_mute_all`);
 }
 
 export async function muteAlerts({ ids, http }: { ids: string[]; http: HttpSetup }): Promise<void> {
@@ -274,7 +274,7 @@ export async function muteAlerts({ ids, http }: { ids: string[]; http: HttpSetup
 }
 
 export async function unmuteAlert({ id, http }: { id: string; http: HttpSetup }): Promise<void> {
-  await http.post(`${BASE_ALERT_API_PATH}/alert/${id}/_unmute_all`);
+  await http.post(`${LEGACY_BASE_ALERT_API_PATH}/alert/${id}/_unmute_all`);
 }
 
 export async function unmuteAlerts({
@@ -292,5 +292,5 @@ export async function alertingFrameworkHealth({
 }: {
   http: HttpSetup;
 }): Promise<AlertingFrameworkHealth> {
-  return await http.get(`${BASE_ALERT_API_PATH}/_health`);
+  return await http.get(`${LEGACY_BASE_ALERT_API_PATH}/_health`);
 }
