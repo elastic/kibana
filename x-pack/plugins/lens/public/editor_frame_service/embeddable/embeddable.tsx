@@ -172,7 +172,10 @@ export class Embeddable
           skip(1)
         )
         .subscribe((input) => {
-          this.reload();
+          // only reload if drilldowns are set
+          if (this.getInput().enhancements?.dynamicActions) {
+            this.reload();
+          }
         })
     );
 
