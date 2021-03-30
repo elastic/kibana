@@ -97,7 +97,7 @@ export function ErrorGroupOverview({ serviceName }: ErrorGroupOverviewProps) {
             <EuiSpacer size="s" />
 
             <ErrorGroupList
-              items={errorGroupListData}
+              items={errorGroupListData.errorGroups}
               serviceName={serviceName}
             />
           </EuiPanel>
