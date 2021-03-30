@@ -335,10 +335,12 @@ describe('queryPreviewReducer', () => {
       const update = reducer(initialState, {
         type: 'setThresholdQueryVals',
         threshold: {
-          field: 'agent.hostname',
-          value: 200,
-          cardinality_field: 'user.name',
-          cardinality_value: 2,
+          field: ['agent.hostname'],
+          value: '200',
+          cardinality: {
+            field: ['user.name'],
+            value: '2',
+          },
         },
         ruleType: 'threshold',
       });
@@ -349,14 +351,16 @@ describe('queryPreviewReducer', () => {
       expect(update.warnings).toEqual([]);
     });
 
-    test('should set thresholdFieldExists to false if threshold field is not defined', () => {
+    test('should set thresholdFieldExists to false if threshold field is empty array', () => {
       const update = reducer(initialState, {
         type: 'setThresholdQueryVals',
         threshold: {
-          field: undefined,
-          value: 200,
-          cardinality_field: 'user.name',
-          cardinality_value: 2,
+          field: [],
+          value: '200',
+          cardinality: {
+            field: ['user.name'],
+            value: '2',
+          },
         },
         ruleType: 'threshold',
       });
@@ -371,10 +375,12 @@ describe('queryPreviewReducer', () => {
       const update = reducer(initialState, {
         type: 'setThresholdQueryVals',
         threshold: {
-          field: '    ',
-          value: 200,
-          cardinality_field: 'user.name',
-          cardinality_value: 2,
+          field: ['    '],
+          value: '200',
+          cardinality: {
+            field: ['user.name'],
+            value: '2',
+          },
         },
         ruleType: 'threshold',
       });
@@ -389,10 +395,12 @@ describe('queryPreviewReducer', () => {
       const update = reducer(initialState, {
         type: 'setThresholdQueryVals',
         threshold: {
-          field: 'agent.hostname',
-          value: 200,
-          cardinality_field: 'user.name',
-          cardinality_value: 2,
+          field: ['agent.hostname'],
+          value: '200',
+          cardinality: {
+            field: ['user.name'],
+            value: '2',
+          },
         },
         ruleType: 'eql',
       });
@@ -406,10 +414,12 @@ describe('queryPreviewReducer', () => {
       const update = reducer(initialState, {
         type: 'setThresholdQueryVals',
         threshold: {
-          field: 'agent.hostname',
-          value: 200,
-          cardinality_field: 'user.name',
-          cardinality_value: 2,
+          field: ['agent.hostname'],
+          value: '200',
+          cardinality: {
+            field: ['user.name'],
+            value: '2',
+          },
         },
         ruleType: 'query',
       });
@@ -423,10 +433,12 @@ describe('queryPreviewReducer', () => {
       const update = reducer(initialState, {
         type: 'setThresholdQueryVals',
         threshold: {
-          field: 'agent.hostname',
-          value: 200,
-          cardinality_field: 'user.name',
-          cardinality_value: 2,
+          field: ['agent.hostname'],
+          value: '200',
+          cardinality: {
+            field: ['user.name'],
+            value: '2',
+          },
         },
         ruleType: 'saved_query',
       });

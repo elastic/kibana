@@ -175,7 +175,6 @@ export const EventColumnView = React.memo<Props>(
                 ariaLabel={i18n.ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues })}
                 key="attach-to-case"
                 ecsRowData={ecsData}
-                disabled={eventType !== 'signal'}
               />,
             ]
           : []),

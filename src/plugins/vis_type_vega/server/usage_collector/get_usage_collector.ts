@@ -7,14 +7,12 @@
  */
 
 import { parse } from 'hjson';
-import { SearchResponse } from 'elasticsearch';
 import { ElasticsearchClient, SavedObject } from 'src/core/server';
 
 import { VegaSavedObjectAttributes, VisTypeVegaPluginSetupDependencies } from '../types';
 
 type UsageCollectorDependencies = Pick<VisTypeVegaPluginSetupDependencies, 'home'>;
 
-type ESResponse = SearchResponse<{ visualization: { visState: string } }>;
 type VegaType = 'vega' | 'vega-lite';
 
 function isVegaType(attributes: any): attributes is VegaSavedObjectAttributes {
@@ -80,7 +78,9 @@ export const getStats = async (
     },
   };
 
-  const { body: esResponse } = await esClient.search<ESResponse>(searchParams);
+  const { body: esResponse } = await esClient.search<{ visualization: { visState: string } }>(
+    searchParams
+  );
   const size = esResponse?.hits?.hits?.length ?? 0;
 
   if (!size) {

@@ -40,6 +40,7 @@ import {
 
 import {
   FEATURE_IMPORTANCE,
+  FEATURE_INFLUENCE,
   OUTLIER_SCORE,
   TOP_CLASSES,
 } from '../../data_frame_analytics/common/constants';
@@ -109,6 +110,7 @@ export const getRuntimeFieldsMapping = (
   if (isPopulatedObject(ipRuntimeMappings)) {
     indexPatternFields.forEach((ipField) => {
       if (ipRuntimeMappings.hasOwnProperty(ipField)) {
+        // @ts-expect-error
         combinedRuntimeMappings[ipField] = ipRuntimeMappings[ipField];
       }
     });
@@ -163,6 +165,10 @@ export const getDataGridSchemasFromFieldTypes = (fieldTypes: FieldTypes, results
 
     if (field.includes(`${resultsField}.${FEATURE_IMPORTANCE}`)) {
       schema = 'featureImportance';
+    }
+
+    if (field === `${resultsField}.${FEATURE_INFLUENCE}`) {
+      schema = 'featureInfluence';
     }
 
     return { id: field, schema, isSortable };
@@ -333,7 +339,7 @@ export const useRenderCellValue = (
         return null;
       }
 
-      let format: any;
+      let format: ReturnType<typeof mlFieldFormatService.getFieldFormatFromIndexPattern>;
 
       if (indexPattern !== undefined) {
         format = mlFieldFormatService.getFieldFormatFromIndexPattern(indexPattern, columnId, '');

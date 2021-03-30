@@ -58,10 +58,10 @@ export class ListPlugin
           user,
         });
       },
-      getListClient: (callCluster, spaceId, user): ListClient => {
+      getListClient: (esClient, spaceId, user): ListClient => {
         return new ListClient({
-          callCluster,
           config,
+          esClient,
           spaceId,
           user,
         });
@@ -86,9 +86,7 @@ export class ListPlugin
         core: {
           savedObjects: { client: savedObjectsClient },
           elasticsearch: {
-            legacy: {
-              client: { callAsCurrentUser: callCluster },
-            },
+            client: { asCurrentUser: esClient },
           },
         },
       } = context;
@@ -105,8 +103,8 @@ export class ListPlugin
             }),
           getListClient: (): ListClient =>
             new ListClient({
-              callCluster,
               config,
+              esClient,
               spaceId,
               user,
             }),

@@ -17,7 +17,7 @@ import React from 'react';
 
 import { shallow, ReactWrapper } from 'enzyme';
 
-import { EuiBasicTable, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiPageHeader, EuiBasicTable, EuiEmptyPrompt } from '@elastic/eui';
 
 import { Loading } from '../../../../shared/loading';
 
@@ -51,7 +51,7 @@ describe('Curations', () => {
 
   const actions = {
     loadCurations: jest.fn(),
-    deleteCurationSet: jest.fn(),
+    deleteCuration: jest.fn(),
     onPaginate: jest.fn(),
   };
 
@@ -64,7 +64,7 @@ describe('Curations', () => {
   it('renders', () => {
     const wrapper = shallow(<Curations />);
 
-    expect(wrapper.find('h1').text()).toEqual('Curated results');
+    expect(wrapper.find(EuiPageHeader).prop('pageTitle')).toEqual('Curated results');
     expect(wrapper.find(CurationsTable)).toHaveLength(1);
   });
 
@@ -134,12 +134,12 @@ describe('Curations', () => {
           expect(navigateToUrl).toHaveBeenCalledWith('/engines/some-engine/curations/cur-id-2');
         });
 
-        it('delete action calls deleteCurationSet', () => {
+        it('delete action calls deleteCuration', () => {
           wrapper.find('[data-test-subj="CurationsTableDeleteButton"]').first().simulate('click');
-          expect(actions.deleteCurationSet).toHaveBeenCalledWith('cur-id-1');
+          expect(actions.deleteCuration).toHaveBeenCalledWith('cur-id-1');
 
           wrapper.find('[data-test-subj="CurationsTableDeleteButton"]').last().simulate('click');
-          expect(actions.deleteCurationSet).toHaveBeenCalledWith('cur-id-2');
+          expect(actions.deleteCuration).toHaveBeenCalledWith('cur-id-2');
         });
       });
     });

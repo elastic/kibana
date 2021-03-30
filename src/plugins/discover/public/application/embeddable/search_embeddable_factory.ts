@@ -36,7 +36,7 @@ export class SearchEmbeddableFactory
       defaultMessage: 'Saved search',
     }),
     type: 'search',
-    getIconForSavedObject: () => 'search',
+    getIconForSavedObject: () => 'discoverApp',
   };
 
   constructor(

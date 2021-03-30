@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { AlertNotifyWhenType } from '../../../../../alerts/common';
+import { AlertNotifyWhenType } from '../../../../../alerting/common';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { FORMATTERS } from '../../../../common/formatters';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths

@@ -16,14 +16,14 @@ import {
   ALERT_TYPES_CONFIG,
   ANOMALY_ALERT_SEVERITY_TYPES,
 } from '../../../common/alert_types';
-import { AlertingPlugin } from '../../../../alerts/server';
+import { AlertingPlugin } from '../../../../alerting/server';
 import { APMConfig } from '../..';
 import { MlPluginSetup } from '../../../../ml/server';
 import { getMLJobs } from '../service_map/get_service_anomalies';
 import { apmActionVariables } from './action_variables';
 
 interface RegisterAlertParams {
-  alerts: AlertingPlugin['setup'];
+  alerting: AlertingPlugin['setup'];
   ml?: MlPluginSetup;
   config$: Observable<APMConfig>;
 }
@@ -46,11 +46,11 @@ const alertTypeConfig =
   ALERT_TYPES_CONFIG[AlertType.TransactionDurationAnomaly];
 
 export function registerTransactionDurationAnomalyAlertType({
-  alerts,
+  alerting,
   ml,
   config$,
 }: RegisterAlertParams) {
-  alerts.registerType({
+  alerting.registerType({
     id: AlertType.TransactionDurationAnomaly,
     name: alertTypeConfig.name,
     actionGroups: alertTypeConfig.actionGroups,

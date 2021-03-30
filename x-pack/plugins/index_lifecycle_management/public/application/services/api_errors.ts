@@ -11,7 +11,10 @@ import { fatalErrors, toasts } from './notification';
 function createToastConfig(error: IHttpFetchError, errorTitle: string) {
   if (error && error.body) {
     // Error body shape is defined by the API.
-    const { error: errorString, statusCode, message } = error.body;
+    const { error: errorString, statusCode, message: errorMessage, attributes } = error.body;
+    const message = attributes?.causes?.length
+      ? attributes.causes[attributes.causes.length - 1]
+      : errorMessage;
 
     return {
       title: errorTitle,

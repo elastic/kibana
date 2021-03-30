@@ -51,6 +51,7 @@ export const getRocCurveChartVegaLiteSpec = (
 
   return {
     $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+    background: 'transparent',
     // Left padding of 45px to align the left axis of the chart with the confusion matrix above.
     padding: { left: 45, top: 0, right: 0, bottom: 0 },
     config: {
@@ -124,6 +125,10 @@ export const getRocCurveChartVegaLiteSpec = (
     },
     height: SIZE,
     width: SIZE,
-    mark: 'line',
+    mark: {
+      type: 'line',
+      strokeCap: 'round',
+      strokeJoin: 'round',
+    },
   };
 };

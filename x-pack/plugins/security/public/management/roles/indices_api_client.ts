@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpStart } from 'src/core/public';
+import type { HttpStart } from 'src/core/public';
 
 export class IndicesAPIClient {
   constructor(private readonly http: HttpStart) {}

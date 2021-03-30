@@ -51,7 +51,7 @@ function getMockRequest() {
     ) as APMConfig,
     params: {
       query: {
-        _debug: false,
+        _inspect: false,
       },
     },
     core: {
@@ -157,7 +157,9 @@ describe('setupRequest', () => {
         apm: {
           events: [ProcessorEvent.transaction],
         },
-        body: { query: { bool: { filter: [{ term: 'someTerm' }] } } },
+        body: {
+          query: { bool: { filter: [{ term: { field: 'someTerm' } }] } },
+        },
       });
       const params =
         mockContext.core.elasticsearch.client.asCurrentUser.search.mock
@@ -166,7 +168,7 @@ describe('setupRequest', () => {
         query: {
           bool: {
             filter: [
-              { term: 'someTerm' },
+              { term: { field: 'someTerm' } },
               { terms: { [PROCESSOR_EVENT]: ['transaction'] } },
               { range: { 'observer.version_major': { gte: 7 } } },
             ],
@@ -183,7 +185,9 @@ describe('setupRequest', () => {
           apm: {
             events: [ProcessorEvent.error],
           },
-          body: { query: { bool: { filter: [{ term: 'someTerm' }] } } },
+          body: {
+            query: { bool: { filter: [{ term: { field: 'someTerm' } }] } },
+          },
         },
         {
           includeLegacyData: true,
@@ -196,7 +200,7 @@ describe('setupRequest', () => {
         query: {
           bool: {
             filter: [
-              { term: 'someTerm' },
+              { term: { field: 'someTerm' } },
               {
                 terms: {
                   [PROCESSOR_EVENT]: ['error'],

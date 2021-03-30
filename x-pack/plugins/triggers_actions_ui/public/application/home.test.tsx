@@ -21,10 +21,10 @@ describe('home', () => {
       location: createLocation('/'),
       match: {
         isExact: true,
-        path: `/alerts`,
+        path: `/rules`,
         url: '',
         params: {
-          section: 'alerts',
+          section: 'rules',
         },
       },
     };

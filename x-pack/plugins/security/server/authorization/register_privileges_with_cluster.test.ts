@@ -7,11 +7,11 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { Logger } from 'kibana/server';
-import { RawKibanaPrivileges } from '../../common/model';
-import { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
+import type { Logger } from 'src/core/server';
+import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 
-import { elasticsearchServiceMock, loggingSystemMock } from '../../../../../src/core/server/mocks';
+import type { RawKibanaPrivileges } from '../../common/model';
+import { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
 
 const application = 'default-application';
 const registerPrivilegesWithClusterTest = (

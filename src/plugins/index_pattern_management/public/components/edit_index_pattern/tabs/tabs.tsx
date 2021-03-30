@@ -178,7 +178,7 @@ export function Tabs({
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton fill onClick={() => openFieldEditor()}>
+                <EuiButton fill onClick={() => openFieldEditor()} data-test-subj="addField">
                   {addFieldButtonLabel}
                 </EuiButton>
               </EuiFlexItem>

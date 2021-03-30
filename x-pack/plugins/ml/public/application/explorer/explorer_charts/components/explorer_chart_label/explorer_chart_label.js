@@ -7,18 +7,20 @@
 
 import './_explorer_chart_label.scss';
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { Fragment, useCallback } from 'react';
 
 import { EuiIconTip } from '@elastic/eui';
 
 import { ExplorerChartLabelBadge } from './explorer_chart_label_badge';
 import { ExplorerChartInfoTooltip } from '../../explorer_chart_info_tooltip';
+import { EntityFilter } from './entity_filter';
 
 export function ExplorerChartLabel({
   detectorLabel,
   entityFields,
   infoTooltip,
   wrapLabel = false,
+  onSelectEntity,
 }) {
   // Depending on whether we wrap the entityField badges to a new line, we render this differently:
   //
@@ -37,9 +39,27 @@ export function ExplorerChartLabel({
       <React.Fragment>&nbsp;&ndash;&nbsp;</React.Fragment>
     );
 
-  const entityFieldBadges = entityFields.map((entity) => (
-    <ExplorerChartLabelBadge entity={entity} key={`${entity.fieldName} ${entity.fieldValue}`} />
-  ));
+  const applyFilter = useCallback(
+    ({ influencerFieldName, influencerFieldValue, action }) =>
+      onSelectEntity(influencerFieldName, influencerFieldValue, action),
+    [onSelectEntity]
+  );
+
+  const entityFieldBadges = entityFields.map((entity) => {
+    const key = `${infoTooltip.chartFunction}-${entity.fieldName}-${entity.fieldType}-${entity.fieldValue}`;
+    return (
+      <Fragment key={`badge-wrapper-${key}`}>
+        <ExplorerChartLabelBadge entity={entity} />
+        {onSelectEntity !== undefined && (
+          <EntityFilter
+            onFilter={applyFilter}
+            influencerFieldName={entity.fieldName}
+            influencerFieldValue={entity.fieldValue}
+          />
+        )}
+      </Fragment>
+    );
+  });
 
   const infoIcon = (
     <span className="ml-explorer-chart-info-icon">

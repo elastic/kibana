@@ -9,6 +9,7 @@ import { Action } from 'redux';
 
 import { NewTrustedApp, TrustedApp } from '../../../../../common/endpoint/types';
 import { AsyncResourceState, TrustedAppsListData } from '../state';
+import { GetPolicyListResponse } from '../../policy/types';
 
 export type TrustedAppsListDataOutdated = Action<'trustedAppsListDataOutdated'>;
 
@@ -51,12 +52,20 @@ export type TrustedAppCreationDialogFormStateUpdated = Action<'trustedAppCreatio
   };
 };
 
+export type TrustedAppCreationEditItemStateChanged = Action<'trustedAppCreationEditItemStateChanged'> & {
+  payload: AsyncResourceState<TrustedApp>;
+};
+
 export type TrustedAppCreationDialogConfirmed = Action<'trustedAppCreationDialogConfirmed'>;
 
 export type TrustedAppCreationDialogClosed = Action<'trustedAppCreationDialogClosed'>;
 
 export type TrustedAppsExistResponse = Action<'trustedAppsExistStateChanged'> & {
   payload: AsyncResourceState<boolean>;
+};
+
+export type TrustedAppsPoliciesStateChanged = Action<'trustedAppsPoliciesStateChanged'> & {
+  payload: AsyncResourceState<GetPolicyListResponse>;
 };
 
 export type TrustedAppsPageAction =
@@ -67,8 +76,10 @@ export type TrustedAppsPageAction =
   | TrustedAppDeletionDialogConfirmed
   | TrustedAppDeletionDialogClosed
   | TrustedAppCreationSubmissionResourceStateChanged
+  | TrustedAppCreationEditItemStateChanged
   | TrustedAppCreationDialogStarted
   | TrustedAppCreationDialogFormStateUpdated
   | TrustedAppCreationDialogConfirmed
   | TrustedAppsExistResponse
+  | TrustedAppsPoliciesStateChanged
   | TrustedAppCreationDialogClosed;

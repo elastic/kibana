@@ -6,9 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
+
+import type { RouteDefinitionParams } from '../';
 import { SAMLLogin } from '../../authentication';
 import { SAMLAuthenticationProvider } from '../../authentication/providers';
-import { RouteDefinitionParams } from '..';
 
 /**
  * Defines routes required for SAML authentication.

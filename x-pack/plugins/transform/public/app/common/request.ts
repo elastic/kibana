@@ -17,12 +17,13 @@ import type {
   PutTransformsPivotRequestSchema,
   PutTransformsRequestSchema,
 } from '../../../common/api_schemas/transforms';
+import { isPopulatedObject } from '../../../common/utils/object_utils';
 import { DateHistogramAgg, HistogramAgg, TermsAgg } from '../../../common/types/pivot_group_by';
+import { isIndexPattern } from '../../../common/types/index_pattern';
 
 import type { SavedSearchQuery } from '../hooks/use_search_items';
 import type { StepDefineExposedState } from '../sections/create_transform/components/step_define';
 import type { StepDetailsExposedState } from '../sections/create_transform/components/step_details';
-import { isPopulatedObject } from './utils/object_utils';
 
 import {
   getEsAggFromAggConfig,
@@ -57,13 +58,19 @@ export function getPivotQuery(search: string | SavedSearchQuery): PivotQuery {
   return search;
 }
 
-export function isSimpleQuery(arg: any): arg is SimpleQuery {
-  return arg.query_string !== undefined;
+export function isSimpleQuery(arg: unknown): arg is SimpleQuery {
+  return isPopulatedObject(arg) && arg.hasOwnProperty('query_string');
 }
 
 export const matchAllQuery = { match_all: {} };
-export function isMatchAllQuery(query: any): boolean {
-  return query.match_all !== undefined && Object.keys(query.match_all).length === 0;
+export function isMatchAllQuery(query: unknown): boolean {
+  return (
+    isPopulatedObject(query) &&
+    query.hasOwnProperty('match_all') &&
+    typeof query.match_all === 'object' &&
+    query.match_all !== null &&
+    Object.keys(query.match_all).length === 0
+  );
 }
 
 export const defaultQuery: PivotQuery = { query_string: { query: '*' } };
@@ -77,18 +84,24 @@ export function getCombinedRuntimeMappings(
 ): StepDefineExposedState['runtimeMappings'] | undefined {
   let combinedRuntimeMappings = {};
 
+  // And runtime field mappings defined by index pattern
+  if (isIndexPattern(indexPattern)) {
+    const computedFields = indexPattern.getComputedFields();
+    if (computedFields?.runtimeFields !== undefined) {
+      const ipRuntimeMappings = computedFields.runtimeFields;
+      if (isPopulatedObject(ipRuntimeMappings)) {
+        combinedRuntimeMappings = { ...combinedRuntimeMappings, ...ipRuntimeMappings };
+      }
+    }
+  }
+
   // Use runtime field mappings defined inline from API
+  // and override fields with same name from index pattern
   if (isPopulatedObject(runtimeMappings)) {
     combinedRuntimeMappings = { ...combinedRuntimeMappings, ...runtimeMappings };
   }
 
-  // And runtime field mappings defined by index pattern
-  if (indexPattern !== undefined) {
-    const ipRuntimeMappings = indexPattern.getComputedFields().runtimeFields;
-    combinedRuntimeMappings = { ...combinedRuntimeMappings, ...ipRuntimeMappings };
-  }
-
-  if (isPopulatedObject(combinedRuntimeMappings)) {
+  if (isPopulatedObject<StepDefineExposedState['runtimeMappings']>(combinedRuntimeMappings)) {
     return combinedRuntimeMappings;
   }
   return undefined;

@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Volume Shadow Copy Deletion via WMIC",
   "query": "event.category:process and event.type:(start or process_started) and process.name:WMIC.exe and process.args:(delete and shadowcopy)",
   "risk_score": 73,

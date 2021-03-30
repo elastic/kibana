@@ -12,19 +12,7 @@ import { configSchema, MapsLegacyConfig } from '../config';
 import { getUiSettings } from './ui_settings';
 
 export const config: PluginConfigDescriptor<MapsLegacyConfig> = {
-  exposeToBrowser: {
-    includeElasticMapsService: true,
-    proxyElasticMapsServiceInMaps: true,
-    tilemap: true,
-    regionmap: true,
-    manifestServiceUrl: true,
-    emsUrl: true,
-    emsFileApiUrl: true,
-    emsTileApiUrl: true,
-    emsLandingPageUrl: true,
-    emsFontLibraryUrl: true,
-    emsTileLayerId: true,
-  },
+  exposeToBrowser: {},
   schema: configSchema,
 };
 

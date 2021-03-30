@@ -5,28 +5,42 @@
  * 2.0.
  */
 
+import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { Switch, Route, useRouteMatch } from 'react-router-dom';
+import { useMutation } from 'react-query';
+import { useLocation } from 'react-router-dom';
 
-import { QueriesPage } from './queries';
-import { NewLiveQueryPage } from './new';
-import { EditLiveQueryPage } from './edit';
+import { useKibana } from '../common/lib/kibana';
+import { LiveQueryForm } from './form';
+import { ResultTabs } from '../queries/edit/tabs';
 
 const LiveQueryComponent = () => {
-  const match = useRouteMatch();
+  const location = useLocation();
+  const { http } = useKibana().services;
+
+  const createActionMutation = useMutation((payload: Record<string, unknown>) =>
+    http.post('/internal/osquery/action', {
+      body: JSON.stringify(payload),
+    })
+  );
 
   return (
-    <Switch>
-      <Route path={`${match.url}/queries/new`}>
-        <NewLiveQueryPage />
-      </Route>
-      <Route path={`${match.url}/queries/:actionId`}>
-        <EditLiveQueryPage />
-      </Route>
-      <Route path={`${match.url}/queries`}>
-        <QueriesPage />
-      </Route>
-    </Switch>
+    <>
+      {
+        <LiveQueryForm
+          defaultValue={location.state?.query}
+          // @ts-expect-error update types
+          onSubmit={createActionMutation.mutate}
+        />
+      }
+
+      {createActionMutation.data && (
+        <>
+          <EuiSpacer />
+          <ResultTabs actionId={createActionMutation.data?.action.action_id} />
+        </>
+      )}
+    </>
   );
 };
 

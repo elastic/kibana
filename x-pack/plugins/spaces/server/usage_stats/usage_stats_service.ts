@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { Logger, CoreSetup } from '../../../../../src/core/server';
-import { UsageStatsClient } from './usage_stats_client';
+import type { CoreSetup, Logger } from 'src/core/server';
+
 import { SPACES_USAGE_STATS_TYPE } from './constants';
+import { UsageStatsClient } from './usage_stats_client';
 
 export interface UsageStatsServiceSetup {
   getClient(): UsageStatsClient;

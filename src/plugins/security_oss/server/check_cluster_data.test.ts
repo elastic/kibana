@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { elasticsearchServiceMock, loggingSystemMock } from '../../../core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
+
 import { createClusterDataCheck } from './check_cluster_data';
 
 describe('checkClusterForUserData', () => {
@@ -26,6 +27,7 @@ describe('checkClusterForUserData', () => {
   it('returns false if data only exists in system indices', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.cat.indices.mockResolvedValue(
+      // @ts-expect-error @elastic/elasticsearch ES types don't support array response format
       elasticsearchServiceMock.createApiResponse({
         body: [
           {
@@ -54,6 +56,7 @@ describe('checkClusterForUserData', () => {
   it('returns true if data exists in non-system indices', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.cat.indices.mockResolvedValue(
+      // @ts-expect-error @elastic/elasticsearch ES types don't support array response format
       elasticsearchServiceMock.createApiResponse({
         body: [
           {
@@ -84,6 +87,7 @@ describe('checkClusterForUserData', () => {
       )
       .mockRejectedValueOnce(new Error('something terrible happened'))
       .mockResolvedValueOnce(
+        // @ts-expect-error @elastic/elasticsearch ES types don't support array response format
         elasticsearchServiceMock.createApiResponse({
           body: [
             {
@@ -94,6 +98,7 @@ describe('checkClusterForUserData', () => {
         })
       )
       .mockResolvedValueOnce(
+        // @ts-expect-error @elastic/elasticsearch ES types don't support array response format
         elasticsearchServiceMock.createApiResponse({
           body: [
             {

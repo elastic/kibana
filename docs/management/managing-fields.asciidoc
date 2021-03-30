@@ -57,9 +57,15 @@ include::field-formatters/string-formatter.asciidoc[]
 [[field-formatters-numeric]]
 === Numeric field formatters
 
-Numeric fields support the `Url`, `Bytes`, `Duration`, `Number`, `Percentage`, `String`, and `Color` formatters.
+Numeric fields support the `Url`, `Bytes`, `Duration`, `Number`, `Percentage`, `Histogram`, `String`, and `Color` formatters.
 
 The `Bytes`, `Number`, and `Percentage` formatters enable you to choose the display formats of numbers in this field using
+the <<numeral, Elastic numeral pattern>> syntax that {kib} maintains.
+
+The `Histogram` formatter is only used for the {ref}/histogram.html[histogram field type]. When using the `Histogram` formatter,
+you can apply the `Number`, `Bytes`, or `Percentage` format to the aggregated data.
+
+`Number`, and `Percentage` formatters enable you to choose the display formats of numbers in this field using
 the <<numeral, Elastic numeral pattern>> syntax that {kib} maintains.
 
 include::field-formatters/url-formatter.asciidoc[]

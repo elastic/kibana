@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import {
+import type {
   PackageInfo,
   RegistryPolicyTemplate,
   RegistryVarsEntry,
   RegistryStream,
   PackagePolicyConfigRecord,
-  PackagePolicyConfigRecordEntry,
   NewPackagePolicyInput,
   NewPackagePolicyInputStream,
   NewPackagePolicy,
+  PackagePolicyConfigRecordEntry,
 } from '../types';
 
 const getStreamsForInputType = (

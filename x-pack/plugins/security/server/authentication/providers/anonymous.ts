@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '../../../../../../src/core/server';
+import type { KibanaRequest } from 'src/core/server';
+
 import { getErrorStatusCode } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
@@ -14,7 +15,8 @@ import {
   BasicHTTPAuthorizationHeaderCredentials,
   HTTPAuthorizationHeader,
 } from '../http_authentication';
-import { AuthenticationProviderOptions, BaseAuthenticationProvider } from './base';
+import type { AuthenticationProviderOptions } from './base';
+import { BaseAuthenticationProvider } from './base';
 
 /**
  * Credentials that are based on the username and password.

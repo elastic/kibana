@@ -153,7 +153,7 @@ const EventsViewerComponent: React.FC<Props> = ({
   utilityBar,
   graphEventId,
 }) => {
-  const { globalFullScreen } = useGlobalFullScreen();
+  const { globalFullScreen, setGlobalFullScreen } = useGlobalFullScreen();
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const kibana = useKibana();
   const [isQueryLoading, setIsQueryLoading] = useState(false);
@@ -176,11 +176,11 @@ const EventsViewerComponent: React.FC<Props> = ({
       <TitleFlexGroup alignItems="center" data-test-subj="title-flex-group" gutterSize="none">
         <EuiFlexItem grow={false}>{justTitle}</EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <ExitFullScreen />
+          <ExitFullScreen fullScreen={globalFullScreen} setFullScreen={setGlobalFullScreen} />
         </EuiFlexItem>
       </TitleFlexGroup>
     ),
-    [justTitle]
+    [globalFullScreen, justTitle, setGlobalFullScreen]
   );
 
   const combinedQueries = combineQueries({

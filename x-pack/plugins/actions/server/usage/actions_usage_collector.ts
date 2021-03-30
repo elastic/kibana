@@ -23,6 +23,7 @@ const byTypeSchema: MakeSchemaFrom<ActionsUsage>['count_by_type'] = {
   __servicenow: { type: 'long' },
   __jira: { type: 'long' },
   __resilient: { type: 'long' },
+  __teams: { type: 'long' },
 };
 
 export function createActionsUsageCollector(
@@ -45,7 +46,7 @@ export function createActionsUsageCollector(
       try {
         const doc = await getLatestTaskState(await taskManager);
         // get the accumulated state from the recurring task
-        const state: ActionsUsage = get(doc, 'state') as ActionsUsage;
+        const { runs, ...state } = get(doc, 'state') as ActionsUsage & { runs: number };
 
         return {
           ...state,

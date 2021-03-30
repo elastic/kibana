@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { KibanaRequest, IBasePath } from 'src/core/server';
-import { SpacesClientServiceStart } from '../spaces_client';
+import type { IBasePath, KibanaRequest } from 'src/core/server';
+import type { Space } from 'src/plugins/spaces_oss/common';
+
 import { getSpaceIdFromPath } from '../../common';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
-import { spaceIdToNamespace, namespaceToSpaceId } from '../lib/utils/namespace';
-import { Space } from '..';
+import { namespaceToSpaceId, spaceIdToNamespace } from '../lib/utils/namespace';
+import type { SpacesClientServiceStart } from '../spaces_client';
 
 export interface SpacesServiceSetup {
   /**

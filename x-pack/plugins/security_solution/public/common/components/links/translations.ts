@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export * from '../../../network/components/details/translations';
 
 export const CASE_DETAILS_LINK_ARIA = (detailName: string) =>
-  i18n.translate('xpack.securitySolution.case.caseTable.caseDetailsLinkAria', {
+  i18n.translate('xpack.securitySolution.cases.caseTable.caseDetailsLinkAria', {
     values: { detailName },
     defaultMessage: 'click to visit case with title {detailName}',
   });

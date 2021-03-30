@@ -9,6 +9,7 @@
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { DocLinksStart, NotificationsStart, CoreStart } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 import {
   IndexPatternField,
@@ -98,11 +99,7 @@ export const FieldEditorFlyoutContentContainer = ({
 
       if (fieldTypeToProcess === 'runtime') {
         try {
-          usageCollection.reportUiCounter(
-            pluginName,
-            usageCollection.METRIC_TYPE.COUNT,
-            'save_runtime'
-          );
+          usageCollection.reportUiCounter(pluginName, METRIC_TYPE.COUNT, 'save_runtime');
           // eslint-disable-next-line no-empty
         } catch {}
         // rename an existing runtime field
@@ -116,11 +113,7 @@ export const FieldEditorFlyoutContentContainer = ({
         });
       } else {
         try {
-          usageCollection.reportUiCounter(
-            pluginName,
-            usageCollection.METRIC_TYPE.COUNT,
-            'save_concrete'
-          );
+          usageCollection.reportUiCounter(pluginName, METRIC_TYPE.COUNT, 'save_concrete');
           // eslint-disable-next-line no-empty
         } catch {}
       }

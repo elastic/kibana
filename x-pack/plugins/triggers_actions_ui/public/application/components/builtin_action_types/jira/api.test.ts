@@ -102,7 +102,7 @@ describe('Jira API', () => {
       const res = await getIssueTypes({ http, signal: abortCtrl.signal, connectorId: 'test' });
 
       expect(res).toEqual(issueTypesResponse);
-      expect(http.post).toHaveBeenCalledWith('/api/actions/action/test/_execute', {
+      expect(http.post).toHaveBeenCalledWith('/api/actions/connector/test/_execute', {
         body: '{"params":{"subAction":"issueTypes","subActionParams":{}}}',
         signal: abortCtrl.signal,
       });
@@ -121,7 +121,7 @@ describe('Jira API', () => {
       });
 
       expect(res).toEqual(fieldsResponse);
-      expect(http.post).toHaveBeenCalledWith('/api/actions/action/test/_execute', {
+      expect(http.post).toHaveBeenCalledWith('/api/actions/connector/test/_execute', {
         body: '{"params":{"subAction":"fieldsByIssueType","subActionParams":{"id":"10006"}}}',
         signal: abortCtrl.signal,
       });
@@ -140,7 +140,7 @@ describe('Jira API', () => {
       });
 
       expect(res).toEqual(issuesResponse);
-      expect(http.post).toHaveBeenCalledWith('/api/actions/action/test/_execute', {
+      expect(http.post).toHaveBeenCalledWith('/api/actions/connector/test/_execute', {
         body: '{"params":{"subAction":"issues","subActionParams":{"title":"test issue"}}}',
         signal: abortCtrl.signal,
       });
@@ -159,7 +159,7 @@ describe('Jira API', () => {
       });
 
       expect(res).toEqual(issuesResponse);
-      expect(http.post).toHaveBeenCalledWith('/api/actions/action/test/_execute', {
+      expect(http.post).toHaveBeenCalledWith('/api/actions/connector/test/_execute', {
         body: '{"params":{"subAction":"issue","subActionParams":{"id":"RJ-107"}}}',
         signal: abortCtrl.signal,
       });

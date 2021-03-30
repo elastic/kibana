@@ -7,7 +7,8 @@
  */
 
 import util from 'util';
-import { KbnClient, ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
+import { KbnClient } from '@kbn/test';
 
 export class RoleMappings {
   constructor(private log: ToolingLog, private kbnClient: KbnClient) {}

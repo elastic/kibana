@@ -82,7 +82,7 @@ There are two types of layout supported at the moment: `pattern` and `json`.
 
 ### Pattern layout
 With `pattern` layout it's possible to define a string pattern with special placeholders `%conversion_pattern` (see the table below) that
-will be replaced with data from the actual log message. By default the following pattern is used: 
+will be replaced with data from the actual log message. By default the following pattern is used:
 `[%date][%level][%logger] %message`. Also `highlight` option can be enabled for `pattern` layout so that
 some parts of the log message are highlighted with different colors that may be quite handy if log messages are forwarded
 to the terminal with color support.
@@ -143,7 +143,7 @@ Example of `%date` output:
 Outputs the process ID.
 
 ### JSON layout
-With `json` layout log messages will be formatted as JSON strings that include timestamp, log level, context name, message
+With `json` layout log messages will be formatted as JSON strings in [ECS format](https://www.elastic.co/guide/en/ecs/current/ecs-reference.html) that includes a timestamp, log level, context name, message
 text and any other metadata that may be associated with the log message itself.
 
 ## Appenders
@@ -277,6 +277,124 @@ The default value is `-%i`
 The maximum number of files to keep. Once this number is reached, oldest files will be deleted.
 
 The default value is `7`
+
+### Rewrite Appender
+
+*This appender is currently considered experimental and is not intended
+for public consumption. The API is subject to change at any time.*
+
+Similar to log4j's `RewriteAppender`, this appender serves as a sort of middleware,
+modifying the provided log events before passing them along to another
+appender.
+
+```yaml
+logging:
+  appenders:
+    my-rewrite-appender:
+      type: rewrite
+      appenders: [console, file] # name of "destination" appender(s)
+      policy:
+        # ...
+```
+
+The most common use case for the `RewriteAppender` is when you want to
+filter or censor sensitive data that may be contained in a log entry.
+In fact, with a default configuration, Kibana will automatically redact
+any `authorization`, `cookie`, or `set-cookie` headers when logging http
+requests & responses.
+
+To configure additional rewrite rules, you'll need to specify a `RewritePolicy`.
+
+#### Rewrite Policies
+
+Rewrite policies exist to indicate which parts of a log record can be
+modified within the rewrite appender.
+
+**Meta**
+
+The `meta` rewrite policy can read and modify any data contained in the
+`LogMeta` before passing it along to a destination appender.
+
+Meta policies must specify one of three modes, which indicate which action
+to perform on the configured properties:
+- `update` updates an existing property at the provided `path`.
+- `remove` removes an existing property at the provided `path`.
+
+The `properties` are listed as a `path` and `value` pair, where `path` is
+the dot-delimited path to the target property in the `LogMeta` object, and
+`value` is the value to add or update in that target property. When using
+the `remove` mode, a `value` is not necessary.
+
+Here's an example of how you would replace any `cookie` header values with `[REDACTED]`:
+
+```yaml
+logging:
+  appenders:
+    my-rewrite-appender:
+      type: rewrite
+      appenders: [console]
+      policy:
+        type: meta # indicates that we want to rewrite the LogMeta
+        mode: update # will update an existing property only
+        properties:
+          - path: "http.request.headers.cookie" # path to property
+            value: "[REDACTED]" # value to replace at path
+```
+
+Rewrite appenders can even be passed to other rewrite appenders to apply
+multiple filter policies/modes, as long as it doesn't create a circular
+reference. Each rewrite appender is applied sequentially (one after the other).
+```yaml
+logging:
+  appenders:
+    remove-request-headers:
+      type: rewrite
+      appenders: [censor-response-headers] # redirect to the next rewrite appender
+      policy:
+        type: meta
+        mode: remove
+        properties:
+          - path: "http.request.headers" # remove all request headers
+    censor-response-headers:
+      type: rewrite
+      appenders: [console] # output to console
+      policy:
+        type: meta
+        mode: update
+        properties:
+          - path: "http.response.headers.set-cookie"
+            value: "[REDACTED]"
+```
+
+#### Complete Example
+```yaml
+logging:
+  appenders:
+    console:
+      type: console
+      layout:
+        type: pattern
+        highlight: true
+        pattern: "[%date][%level][%logger] %message %meta"
+    file:
+      type: file
+      fileName: ./kibana.log
+      layout:
+        type: json
+    censor:
+      type: rewrite
+      appenders: [console, file]
+      policy:
+        type: meta
+        mode: update
+        properties:
+          - path: "http.request.headers.cookie"
+            value: "[REDACTED]"
+  loggers:
+    - name: http.server.response
+      appenders: [censor] # pass these logs to our rewrite appender
+      level: debug
+```
 
 ## Configuration
 
@@ -445,9 +563,9 @@ The log will be less verbose with `warn` level for the `server` context name:
 
 ### Logging config migration
 Compatibility with the legacy logging system is assured until the end of the `v7` version.
-All log messages handled by `root` context are forwarded to the legacy logging service. If you re-write
+All log messages handled by `root` context are forwarded to the legacy logging service using a `default` appender. If you re-write
 root appenders, make sure that it contains `default` appender to provide backward compatibility.
-**Note**: If you define an appender for a context name, the log messages aren't handled by the
+**Note**: If you define an appender for a context name, the log messages for that specific context aren't handled by the
 `root` context anymore and not forwarded to the legacy logging service.
 
 #### logging.dest
@@ -540,6 +658,23 @@ and you can enable them by adjusting the minimum required [logging level](#log-l
 
 #### logging.filter
 TBD
+
+#### logging.rotate
+Specify the options for the logging rotate feature and only applicable when logs are written to file.
+With the new logging config, the log rotation feature is provided by the `rolling-file` [appender](#rolling-file-appender).
+
+**`logging.rotate.enabled` and `logging.rotate.usePolling`**
+Enables log rotation when `enabled` is set to `true`. The `usePolling` option is optional and can be used in systems where the watch api is not accurate.
+With the new logging config log rotation is provided by the rolling file appender. Polling will apply by default when the `rolling-file` appender is configured.
+
+**`logging.rotate.pollingInterval`**
+The number of milliseconds for the polling strategy in the case when `logging.rotate.usePolling` is enabled and defaults to 10000.
+Possible range from 5000 to 3600000. With the new logging config an time interval can be configured with the
+[TimeIntervalTriggeringPolicy](#timeintervaltriggeringpolicy)
+
+**`logging.rotate.everyBytes` and `logging.rotate.keepFiles`**
+Maximum size of a log file and the number of most recent log files to keep on disk. With the new logging config the log size limit can be configured with the
+[SizeLimitTriggeringPolicy](#sizelimitriggeringpolicy) and the number of files to keep with the `numeric` strategy `max` option.
 
 ### Logging configuration via CLI
 

@@ -5,16 +5,24 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { ReactNode } from 'react';
 
-import { useActions } from 'kea';
+import { useActions, useValues } from 'kea';
 
-import { EuiBasicTable, EuiBasicTableColumn, CriteriaWithPagination } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  CriteriaWithPagination,
+  EuiTableActionsColumnType,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedNumber } from '@kbn/i18n/react';
+import { FormattedNumber } from '@kbn/i18n/react';
 
+import { MANAGE_BUTTON_LABEL, DELETE_BUTTON_LABEL } from '../../../shared/constants';
+import { KibanaLogic } from '../../../shared/kibana';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
 import { TelemetryLogic } from '../../../shared/telemetry';
+import { AppLogic } from '../../app_logic';
 import { UNIVERSAL_LANGUAGE } from '../../constants';
 import { ENGINE_PATH } from '../../routes';
 import { generateEncodedPath } from '../../utils/encode_path_params';
@@ -24,6 +32,7 @@ import { EngineDetails } from '../engine/types';
 interface EnginesTableProps {
   items: EngineDetails[];
   loading: boolean;
+  noItemsMessage?: ReactNode;
   pagination: {
     pageIndex: number;
     pageSize: number;
@@ -31,24 +40,30 @@ interface EnginesTableProps {
     hidePerPageOptions: boolean;
   };
   onChange(criteria: CriteriaWithPagination<EngineDetails>): void;
+  onDeleteEngine(engine: EngineDetails): void;
 }
 
 export const EnginesTable: React.FC<EnginesTableProps> = ({
   items,
   loading,
+  noItemsMessage,
   pagination,
   onChange,
+  onDeleteEngine,
 }) => {
   const { sendAppSearchTelemetry } = useActions(TelemetryLogic);
+  const { navigateToUrl } = useValues(KibanaLogic);
+  const {
+    myRole: { canManageEngines },
+  } = useValues(AppLogic);
 
-  const engineLinkProps = (engineName: string) => ({
-    to: generateEncodedPath(ENGINE_PATH, { engineName }),
-    onClick: () =>
-      sendAppSearchTelemetry({
-        action: 'clicked',
-        metric: 'engine_table_link',
-      }),
-  });
+  const generateEncodedEnginePath = (engineName: string) =>
+    generateEncodedPath(ENGINE_PATH, { engineName });
+  const sendEngineTableLinkClickTelemetry = () =>
+    sendAppSearchTelemetry({
+      action: 'clicked',
+      metric: 'engine_table_link',
+    });
 
   const columns: Array<EuiBasicTableColumn<EngineDetails>> = [
     {
@@ -57,7 +72,11 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
         defaultMessage: 'Name',
       }),
       render: (name: string) => (
-        <EuiLinkTo data-test-subj="engineNameLink" {...engineLinkProps(name)}>
+        <EuiLinkTo
+          data-test-subj="EngineNameLink"
+          to={generateEncodedEnginePath(name)}
+          onClick={sendEngineTableLinkClickTelemetry}
+        >
           {name}
         </EuiLinkTo>
       ),
@@ -119,27 +138,64 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
       render: (number: number) => <FormattedNumber value={number} />,
       truncateText: true,
     },
-    {
-      field: 'name',
-      name: i18n.translate(
-        'xpack.enterpriseSearch.appSearch.enginesOverview.table.column.actions',
-        {
-          defaultMessage: 'Actions',
-        }
-      ),
-      dataType: 'string',
-      render: (name: string) => (
-        <EuiLinkTo {...engineLinkProps(name)}>
-          <FormattedMessage
-            id="xpack.enterpriseSearch.appSearch.enginesOverview.table.action.manage"
-            defaultMessage="Manage"
-          />
-        </EuiLinkTo>
-      ),
-      align: 'right',
-      width: '100px',
-    },
   ];
+
+  const actionsColumn: EuiTableActionsColumnType<EngineDetails> = {
+    name: i18n.translate('xpack.enterpriseSearch.appSearch.enginesOverview.table.column.actions', {
+      defaultMessage: 'Actions',
+    }),
+    actions: [
+      {
+        name: MANAGE_BUTTON_LABEL,
+        description: i18n.translate(
+          'xpack.enterpriseSearch.appSearch.enginesOverview.table.action.manage.buttonDescription',
+          {
+            defaultMessage: 'Manage this engine',
+          }
+        ),
+        type: 'icon',
+        icon: 'eye',
+        onClick: (engineDetails) => {
+          sendEngineTableLinkClickTelemetry();
+          navigateToUrl(generateEncodedEnginePath(engineDetails.name));
+        },
+      },
+      {
+        name: DELETE_BUTTON_LABEL,
+        description: i18n.translate(
+          'xpack.enterpriseSearch.appSearch.enginesOverview.table.action.delete.buttonDescription',
+          {
+            defaultMessage: 'Delete this engine',
+          }
+        ),
+        type: 'icon',
+        icon: 'trash',
+        color: 'danger',
+        onClick: (engine) => {
+          if (
+            window.confirm(
+              i18n.translate(
+                'xpack.enterpriseSearch.appSearch.enginesOverview.table.action.delete.confirmationPopupMessage',
+                {
+                  defaultMessage:
+                    'Are you sure you want to permanently delete "{engineName}" and all of its content?',
+                  values: {
+                    engineName: engine.name,
+                  },
+                }
+              )
+            )
+          ) {
+            onDeleteEngine(engine);
+          }
+        },
+      },
+    ],
+  };
+
+  if (canManageEngines) {
+    columns.push(actionsColumn);
+  }
 
   return (
     <EuiBasicTable
@@ -148,6 +204,7 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
       loading={loading}
       pagination={pagination}
       onChange={onChange}
+      noItemsMessage={noItemsMessage}
     />
   );
 };

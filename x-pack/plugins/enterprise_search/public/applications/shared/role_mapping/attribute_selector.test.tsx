@@ -11,7 +11,9 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiComboBox, EuiFieldText } from '@elastic/eui';
 
-import { AttributeSelector, AttributeName } from './attribute_selector';
+import { AttributeName } from '../types';
+
+import { AttributeSelector } from './attribute_selector';
 import { ANY_AUTH_PROVIDER, ANY_AUTH_PROVIDER_OPTION_LABEL } from './constants';
 
 const handleAttributeSelectorChange = jest.fn();

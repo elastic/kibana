@@ -45,6 +45,8 @@ export function registerEnginesRoutes({
         body: schema.object({
           name: schema.string(),
           language: schema.maybe(schema.string()),
+          source_engines: schema.maybe(schema.arrayOf(schema.string())),
+          type: schema.maybe(schema.string()),
         }),
       },
     },
@@ -65,6 +67,19 @@ export function registerEnginesRoutes({
     },
     enterpriseSearchRequestHandler.createRequest({
       path: '/as/engines/:name/details',
+    })
+  );
+  router.delete(
+    {
+      path: '/api/app_search/engines/{name}',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/engines/:name',
     })
   );
   router.get(

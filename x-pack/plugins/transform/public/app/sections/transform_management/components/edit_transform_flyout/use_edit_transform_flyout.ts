@@ -130,7 +130,7 @@ export const stringValidator: Validator = (value, isOptional = true) => {
   return [];
 };
 
-function parseDurationAboveZero(arg: any, errorMessage: string): ParsedDuration | string[] {
+function parseDurationAboveZero(arg: unknown, errorMessage: string): ParsedDuration | string[] {
   if (typeof arg !== 'string' || arg === null) {
     return [stringNotValidErrorMessage];
   }

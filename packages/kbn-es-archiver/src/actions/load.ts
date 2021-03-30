@@ -9,8 +9,9 @@
 import { resolve } from 'path';
 import { createReadStream } from 'fs';
 import { Readable } from 'stream';
-import { ToolingLog, KbnClient } from '@kbn/dev-utils';
-import { Client } from '@elastic/elasticsearch';
+import { ToolingLog } from '@kbn/dev-utils';
+import { KbnClient } from '@kbn/test';
+import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { createPromiseFromStreams, concatStreamProviders } from '@kbn/utils';
 import { ES_CLIENT_HEADERS } from '../client_headers';
 
@@ -47,7 +48,7 @@ export async function loadAction({
   name: string;
   skipExisting: boolean;
   useCreate: boolean;
-  client: Client;
+  client: KibanaClient;
   dataDir: string;
   log: ToolingLog;
   kbnClient: KbnClient;

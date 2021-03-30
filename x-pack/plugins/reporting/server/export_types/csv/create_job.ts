@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { CSV_JOB_TYPE_DEPRECATED } from '../../../common/constants';
 import { cryptoFactory } from '../../lib';
 import { CreateJobFn, CreateJobFnFactory } from '../../types';
 import {
@@ -16,9 +15,7 @@ import {
 
 export const createJobFnFactory: CreateJobFnFactory<
   CreateJobFn<JobParamsDeprecatedCSV, TaskPayloadDeprecatedCSV>
-> = function createJobFactoryFn(reporting, parentLogger) {
-  const logger = parentLogger.clone([CSV_JOB_TYPE_DEPRECATED, 'create-job']);
-
+> = function createJobFactoryFn(reporting, logger) {
   const config = reporting.getConfig();
   const crypto = cryptoFactory(config.get('encryptionKey'));
 

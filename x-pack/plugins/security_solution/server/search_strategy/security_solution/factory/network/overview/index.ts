@@ -24,6 +24,7 @@ export const networkOverview: SecuritySolutionFactory<NetworkQueries.overview> =
     options: NetworkOverviewRequestOptions,
     response: IEsSearchResponse<OverviewNetworkHit>
   ): Promise<NetworkOverviewStrategyResponse> => {
+    // @ts-expect-error @elastic/elasticsearch no way to declare type for aggregations
     const aggregations: OverviewNetworkHit = get('aggregations', response.rawResponse) || {};
     const inspect = {
       dsl: [inspectStringifyObject(buildOverviewNetworkQuery(options))],

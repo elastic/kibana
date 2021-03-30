@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaFeature } from '../../../features/server';
+import type { KibanaFeature } from '../../../features/server';
 
 export function validateReservedPrivileges(features: KibanaFeature[]) {
   const seenPrivilegeIds = new Set<string>();

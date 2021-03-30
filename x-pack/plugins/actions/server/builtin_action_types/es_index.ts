@@ -88,13 +88,13 @@ async function executor(
   };
 
   try {
-    const result = await services.callCluster('bulk', bulkParams);
+    const { body: result } = await services.scopedClusterClient.bulk(bulkParams);
 
     const err = find(result.items, 'index.error.reason');
     if (err) {
       return wrapErr(
-        `${err.index.error!.reason}${
-          err.index.error?.caused_by ? ` (${err.index.error?.caused_by?.reason})` : ''
+        `${err.index?.error?.reason}${
+          err.index?.error?.caused_by ? ` (${err.index?.error?.caused_by?.reason})` : ''
         }`,
         actionId,
         logger

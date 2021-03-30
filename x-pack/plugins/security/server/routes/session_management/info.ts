@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SessionInfo } from '../../../common/types';
-import { RouteDefinitionParams } from '..';
+import type { RouteDefinitionParams } from '../';
+import type { SessionInfo } from '../../../common/types';
 
 /**
  * Defines routes required for the session info.

@@ -111,10 +111,14 @@ export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
       flyoutOptions: encode({
         surroundingLogsId: id,
       }),
-      logFilter: encode({
-        expression: `${partitionField}: ${dataset}`,
-        kind: 'kuery',
-      }),
+      ...(dataset
+        ? {
+            logFilter: encode({
+              expression: `${partitionField}: ${dataset}`,
+              kind: 'kuery',
+            }),
+          }
+        : {}),
     },
   });
 

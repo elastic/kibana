@@ -8,8 +8,9 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiButton, EuiPortal } from '@elastic/eui';
-import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
+import type { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import { useRouteMatch } from 'react-router-dom';
+
 import { PAGE_ROUTING_PATHS } from '../../../constants';
 import { WithHeaderLayout } from '../../../layouts';
 import { useCapabilities, useLink, useGetAgentPolicies } from '../../../hooks';

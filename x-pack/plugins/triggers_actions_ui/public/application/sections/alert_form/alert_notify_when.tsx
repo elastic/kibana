@@ -49,7 +49,7 @@ const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>> = [
         <EuiText size="s" color="subdued">
           <p>
             <FormattedMessage
-              defaultMessage="Actions run when the alert status changes."
+              defaultMessage="Actions run when the rule status changes."
               id="xpack.triggersActionsUI.sections.alertForm.alertNotifyWhen.onActionGroupChange.description"
             />
           </p>
@@ -62,7 +62,7 @@ const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>> = [
     inputDisplay: i18n.translate(
       'xpack.triggersActionsUI.sections.alertForm.alertNotifyWhen.onActiveAlert.display',
       {
-        defaultMessage: 'Every time alert is active',
+        defaultMessage: 'Every time rule is active',
       }
     ),
     'data-test-subj': 'onActiveAlert',
@@ -70,14 +70,14 @@ const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>> = [
       <Fragment>
         <strong>
           <FormattedMessage
-            defaultMessage="Every time alert is active"
+            defaultMessage="Every time rule is active"
             id="xpack.triggersActionsUI.sections.alertForm.alertNotifyWhen.onActiveAlert.label"
           />
         </strong>
         <EuiText size="s" color="subdued">
           <p>
             <FormattedMessage
-              defaultMessage="Actions run with every active alert interval."
+              defaultMessage="Actions run with every active rule interval."
               id="xpack.triggersActionsUI.sections.alertForm.alertNotifyWhen.onActiveAlert.description"
             />
           </p>
@@ -166,7 +166,7 @@ export const AlertNotifyWhen = ({
         position="right"
         type="questionInCircle"
         content={i18n.translate('xpack.triggersActionsUI.sections.alertForm.renotifyWithTooltip', {
-          defaultMessage: 'Define how often to repeat the action while the alert is active.',
+          defaultMessage: 'Define how often to repeat the action while the rule is active.',
         })}
       />
     </>

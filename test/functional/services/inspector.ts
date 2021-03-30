@@ -12,7 +12,6 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export function InspectorProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const retry = getService('retry');
-  const browser = getService('browser');
   const renderable = getService('renderable');
   const flyout = getService('flyout');
   const testSubjects = getService('testSubjects');
@@ -234,18 +233,6 @@ export function InspectorProvider({ getService }: FtrProviderContext) {
 
     public getOpenRequestDetailResponseButton() {
       return testSubjects.find('inspectorRequestDetailResponse');
-    }
-
-    public async getCodeEditorValue() {
-      let request: string = '';
-
-      await retry.try(async () => {
-        request = await browser.execute(
-          () => (window as any).MonacoEnvironment.monaco.editor.getModels()[0].getValue() as string
-        );
-      });
-
-      return request;
     }
   }
 

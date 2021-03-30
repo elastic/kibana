@@ -13,11 +13,13 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
+import React, { useEffect, useState } from 'react';
+import { first } from 'rxjs/operators';
+
 import { FormattedMessage } from '@kbn/i18n/react';
-import { firstValueFrom } from '@kbn/std';
-import React, { useState, useEffect } from 'react';
 import type { ApplicationStart, StartServicesAccessor } from 'src/core/public';
 import type { LegacyUrlConflictProps } from 'src/plugins/spaces_oss/public';
+
 import type { PluginsStart } from '../../plugin';
 import { DEFAULT_OBJECT_NOUN } from './constants';
 
@@ -41,7 +43,7 @@ export const LegacyUrlConflictInternal = (props: InternalProps & LegacyUrlConfli
   useEffect(() => {
     async function setup() {
       const [{ application }] = await getStartServices();
-      const appIdValue = await firstValueFrom(application.currentAppId$); // retrieve the most recent value from the BehaviorSubject
+      const appIdValue = await application.currentAppId$.pipe(first()).toPromise(); // retrieve the most recent value from the BehaviorSubject
       setApplicationStart(application);
       setAppId(appIdValue);
     }

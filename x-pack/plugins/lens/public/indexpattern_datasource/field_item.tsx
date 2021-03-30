@@ -72,6 +72,8 @@ export interface FieldItemProps {
   itemIndex: number;
   groupIndex: number;
   dropOntoWorkspace: DatasourceDataPanelProps['dropOntoWorkspace'];
+  editField?: (name: string) => void;
+  removeField?: (name: string) => void;
   hasSuggestionForField: DatasourceDataPanelProps['hasSuggestionForField'];
 }
 
@@ -105,9 +107,33 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
     itemIndex,
     groupIndex,
     dropOntoWorkspace,
+    editField,
+    removeField,
   } = props;
 
   const [infoIsOpen, setOpen] = useState(false);
+
+  const closeAndEdit = useMemo(
+    () =>
+      editField
+        ? (name: string) => {
+            editField(name);
+            setOpen(false);
+          }
+        : undefined,
+    [editField, setOpen]
+  );
+
+  const closeAndRemove = useMemo(
+    () =>
+      removeField
+        ? (name: string) => {
+            removeField(name);
+            setOpen(false);
+          }
+        : undefined,
+    [removeField, setOpen]
+  );
 
   const dropOntoWorkspaceAndClose = useCallback(
     (droppedField: DragDropIdentifier) => {
@@ -122,7 +148,8 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
   });
 
   function fetchData() {
-    if (state.isLoading) {
+    // Range types don't have any useful stats we can show
+    if (state.isLoading || field.type === 'document' || field.type.includes('range')) {
       return;
     }
 
@@ -255,6 +282,8 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
         <FieldItemPopoverContents
           {...state}
           {...props}
+          editField={closeAndEdit}
+          removeField={closeAndRemove}
           dropOntoWorkspace={dropOntoWorkspaceAndClose}
         />
       </EuiPopover>
@@ -269,11 +298,15 @@ function FieldPanelHeader({
   field,
   hasSuggestionForField,
   dropOntoWorkspace,
+  editField,
+  removeField,
 }: {
   field: IndexPatternField;
   indexPatternId: string;
   hasSuggestionForField: DatasourceDataPanelProps['hasSuggestionForField'];
   dropOntoWorkspace: DatasourceDataPanelProps['dropOntoWorkspace'];
+  editField?: (name: string) => void;
+  removeField?: (name: string) => void;
 }) {
   const draggableField = {
     indexPatternId,
@@ -285,10 +318,10 @@ function FieldPanelHeader({
   };
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem>
         <EuiTitle size="xxs">
-          <h5 className="lnsFieldItem__fieldPanelTitle">{field.displayName}</h5>
+          <h5 className="eui-textBreakWord lnsFieldItem__fieldPanelTitle">{field.displayName}</h5>
         </EuiTitle>
       </EuiFlexItem>
 
@@ -297,6 +330,43 @@ function FieldPanelHeader({
         dropOntoWorkspace={dropOntoWorkspace}
         field={draggableField}
       />
+      {editField && (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            content={i18n.translate('xpack.lens.indexPattern.editFieldLabel', {
+              defaultMessage: 'Edit index pattern field',
+            })}
+          >
+            <EuiButtonIcon
+              onClick={() => editField(field.name)}
+              iconType="pencil"
+              data-test-subj="lnsFieldListPanelEdit"
+              aria-label={i18n.translate('xpack.lens.indexPattern.editFieldLabel', {
+                defaultMessage: 'Edit index pattern field',
+              })}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
+      {removeField && field.runtime && (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            content={i18n.translate('xpack.lens.indexPattern.removeFieldLabel', {
+              defaultMessage: 'Remove index pattern field',
+            })}
+          >
+            <EuiButtonIcon
+              onClick={() => removeField(field.name)}
+              iconType="trash"
+              data-test-subj="lnsFieldListPanelRemove"
+              color="danger"
+              aria-label={i18n.translate('xpack.lens.indexPattern.removeFieldLabel', {
+                defaultMessage: 'Remove index pattern field',
+              })}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 }
@@ -313,6 +383,8 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
     chartsThemeService,
     data: { fieldFormats },
     dropOntoWorkspace,
+    editField,
+    removeField,
     hasSuggestionForField,
     hideDetails,
   } = props;
@@ -344,6 +416,8 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
       field={field}
       dropOntoWorkspace={dropOntoWorkspace}
       hasSuggestionForField={hasSuggestionForField}
+      editField={editField}
+      removeField={removeField}
     />
   );
 
@@ -376,6 +450,18 @@ function FieldItemPopoverContents(props: State & FieldItemProps) {
 
   if (props.isLoading) {
     return <EuiLoadingSpinner />;
+  } else if (field.type.includes('range')) {
+    return (
+      <>
+        <EuiPopoverTitle>{panelHeader}</EuiPopoverTitle>
+
+        <EuiText size="s">
+          {i18n.translate('xpack.lens.indexPattern.fieldStatsLimited', {
+            defaultMessage: `Summary information is not available for range type fields.`,
+          })}
+        </EuiText>
+      </>
+    );
   } else if (
     (!props.histogram || props.histogram.buckets.length === 0) &&
     (!props.topValues || props.topValues.buckets.length === 0)

@@ -47,28 +47,44 @@ describe('LayerControl', () => {
   describe('isLayerTOCOpen', () => {
     test('Should render expand button', () => {
       const component = shallow(<LayerControl {...defaultProps} isLayerTOCOpen={false} />);
-
       expect(component).toMatchSnapshot();
     });
 
-    test('Should render expand button with loading icon when layer is loading', () => {
+    describe('spinner icon', () => {
+      const isLayerLoading = true;
+      let isVisible = true;
       const mockLayerThatIsLoading = {
         hasErrors: () => {
           return false;
         },
         isLayerLoading: () => {
-          return true;
+          return isLayerLoading;
+        },
+        isVisible: () => {
+          return isVisible;
         },
       };
-      const component = shallow(
-        <LayerControl
-          {...defaultProps}
-          isLayerTOCOpen={false}
-          layerList={[mockLayerThatIsLoading]}
-        />
-      );
-
-      expect(component).toMatchSnapshot();
+      test('Should render expand button with loading icon when layer is loading', () => {
+        const component = shallow(
+          <LayerControl
+            {...defaultProps}
+            isLayerTOCOpen={false}
+            layerList={[mockLayerThatIsLoading]}
+          />
+        );
+        expect(component).toMatchSnapshot();
+      });
+      test('Should not render expand button with loading icon when layer is invisible', () => {
+        isVisible = false;
+        const component = shallow(
+          <LayerControl
+            {...defaultProps}
+            isLayerTOCOpen={false}
+            layerList={[mockLayerThatIsLoading]}
+          />
+        );
+        expect(component).toMatchSnapshot();
+      });
     });
 
     test('Should render expand button with error icon when layer has error', () => {

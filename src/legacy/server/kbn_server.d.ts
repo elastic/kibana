@@ -33,7 +33,6 @@ declare module 'hapi' {
 
   interface Server {
     config: () => KibanaConfig;
-    logWithMetadata: (tags: string[], message: string, meta: Record<string, any>) => void;
     newPlatform: KbnServer['newPlatform'];
   }
 }

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export const ATTACH_ALERT_TO_CASE_BUTTON = '[data-test-subj="attach-alert-to-case-button"]';
+
 export const BULK_ACTIONS_BTN = '[data-test-subj="bulkActions"] span';
 
 export const CREATE_NEW_RULE_BTN = '[data-test-subj="create-new-rule"]';
@@ -16,6 +18,12 @@ export const CUSTOM_RULES_BTN = '[data-test-subj="showCustomRulesFilterButton"]'
 export const DELETE_RULE_ACTION_BTN = '[data-test-subj="deleteRuleAction"]';
 
 export const EDIT_RULE_ACTION_BTN = '[data-test-subj="editRuleAction"]';
+
+export const DUPLICATE_RULE_ACTION_BTN = '[data-test-subj="duplicateRuleAction"]';
+
+export const DUPLICATE_RULE_MENU_PANEL_BTN = '[data-test-subj="rules-details-duplicate-rule"]';
+
+export const REFRESH_BTN = '[data-test-subj="refreshRulesAction"] button';
 
 export const DELETE_RULE_BULK_BTN = '[data-test-subj="deleteRuleBulk"]';
 

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { of, BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
+
 import { licenseMock } from '../../../licensing/common/licensing.mock';
 import { SecurityLicenseService } from './license_service';
 

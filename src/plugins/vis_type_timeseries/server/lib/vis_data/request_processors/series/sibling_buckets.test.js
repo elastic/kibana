@@ -37,7 +37,7 @@ describe('siblingBuckets(req, panel, series)', () => {
       ],
     };
     req = {
-      payload: {
+      body: {
         timerange: {
           min: '2017-01-01T00:00:00Z',
           max: '2017-01-01T01:00:00Z',

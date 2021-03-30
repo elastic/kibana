@@ -6,14 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { RoleMapping } from '../../../../common/model';
-import { FieldRule, FieldRuleValue } from './field_rule';
+
+import type { RoleMapping } from '../../../../common/model';
 import { AllRule } from './all_rule';
 import { AnyRule } from './any_rule';
-import { Rule } from './rule';
 import { ExceptAllRule } from './except_all_rule';
 import { ExceptAnyRule } from './except_any_rule';
-import { RuleBuilderError } from '.';
+import type { FieldRuleValue } from './field_rule';
+import { FieldRule } from './field_rule';
+import type { Rule } from './rule';
+import { RuleBuilderError } from './rule_builder_error';
 
 interface RuleBuilderResult {
   /** The maximum rule depth within the parsed rule set. */

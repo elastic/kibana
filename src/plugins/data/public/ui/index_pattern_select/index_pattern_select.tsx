@@ -25,6 +25,7 @@ export type IndexPatternSelectProps = Required<
   indexPatternId: string;
   fieldTypes?: string[];
   onNoIndexPatterns?: () => void;
+  maxIndexPatterns?: number;
 };
 
 export type IndexPatternSelectInternalProps = IndexPatternSelectProps & {
@@ -41,6 +42,10 @@ interface IndexPatternSelectState {
 // Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
 export default class IndexPatternSelect extends Component<IndexPatternSelectInternalProps> {
+  static defaultProps: {
+    maxIndexPatterns: 1000;
+  };
+
   private isMounted: boolean = false;
   state: IndexPatternSelectState;
 
@@ -103,7 +108,10 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectInte
 
   debouncedFetch = _.debounce(async (searchValue: string) => {
     const { fieldTypes, onNoIndexPatterns, indexPatternService } = this.props;
-    const indexPatterns = await indexPatternService.find(`${searchValue}*`, 100);
+    const indexPatterns = await indexPatternService.find(
+      `${searchValue}*`,
+      this.props.maxIndexPatterns
+    );
 
     // We need this check to handle the case where search results come back in a different
     // order than they were sent out. Only load results for the most recent search.

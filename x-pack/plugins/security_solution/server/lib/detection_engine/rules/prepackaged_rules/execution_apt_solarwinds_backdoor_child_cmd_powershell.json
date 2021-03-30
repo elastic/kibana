@@ -13,7 +13,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Command Execution via SolarWinds Process",
   "query": "process where event.type in (\"start\", \"process_started\") and process.name: (\"cmd.exe\", \"powershell.exe\") and\nprocess.parent.name: (\n     \"ConfigurationWizard*.exe\",\n     \"NetflowDatabaseMaintenance*.exe\",\n     \"NetFlowService*.exe\",\n     \"SolarWinds.Administration*.exe\",\n     \"SolarWinds.Collector.Service*.exe\",\n     \"SolarwindsDiagnostics*.exe\"\n     )\n",
   "references": [

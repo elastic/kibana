@@ -61,6 +61,8 @@ export function LatencyCorrelations({ onClose }: Props) {
     `apm.correlations.latency.fields:${serviceName}`,
     defaultFieldNames
   );
+  const hasFieldNames = fieldNames.length > 0;
+
   const [
     durationPercentile,
     setDurationPercentile,
@@ -71,7 +73,7 @@ export function LatencyCorrelations({ onClose }: Props) {
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (start && end) {
+      if (start && end && hasFieldNames) {
         return callApmApi({
           endpoint: 'GET /api/apm/correlations/slow_transactions',
           params: {
@@ -100,6 +102,7 @@ export function LatencyCorrelations({ onClose }: Props) {
       transactionType,
       durationPercentile,
       fieldNames,
+      hasFieldNames,
     ]
   );
 
@@ -110,7 +113,7 @@ export function LatencyCorrelations({ onClose }: Props) {
     <>
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
-          <EuiText size="s">
+          <EuiText size="s" color="subdued">
             <p>
               {i18n.translate('xpack.apm.correlations.latency.description', {
                 defaultMessage:
@@ -131,7 +134,7 @@ export function LatencyCorrelations({ onClose }: Props) {
                 </h4>
               </EuiTitle>
               <LatencyDistributionChart
-                data={data}
+                data={hasFieldNames ? data : undefined}
                 status={status}
                 selectedSignificantTerm={selectedSignificantTerm}
               />
@@ -144,7 +147,7 @@ export function LatencyCorrelations({ onClose }: Props) {
               'xpack.apm.correlations.latency.percentageColumnName',
               { defaultMessage: '% of slow transactions' }
             )}
-            significantTerms={data?.significantTerms}
+            significantTerms={hasFieldNames ? data?.significantTerms : []}
             status={status}
             setSelectedSignificantTerm={setSelectedSignificantTerm}
             onFilter={onClose}
@@ -250,6 +253,7 @@ function LatencyDistributionChart({
           yScaleType={ScaleType.Linear}
           xAccessor={'x'}
           yAccessors={['y']}
+          color={theme.eui.euiColorVis1}
           data={data?.overall?.distribution || []}
           minBarHeight={5}
           tickFormat={(d) => `${roundFloat(d)}%`}
@@ -271,7 +275,7 @@ function LatencyDistributionChart({
             yScaleType={ScaleType.Linear}
             xAccessor={'x'}
             yAccessors={['y']}
-            color={theme.eui.euiColorAccent}
+            color={theme.eui.euiColorVis2}
             data={getSelectedDistribution(data, selectedSignificantTerm)}
             minBarHeight={5}
             tickFormat={(d) => `${roundFloat(d)}%`}
