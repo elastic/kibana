@@ -32,5 +32,5 @@ export const useAllAgents = ({ osqueryPolicies, osqueryPoliciesLoading }: UseAll
     }
   );
 
-  return { agentsLoading, agentData };
+  return { agentsLoading, agents: agentData?.list };
 };

@@ -49,7 +49,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ onChange }) => {
   const { loading: groupsLoading, totalCount: totalNumAgents, groups } = useAgentGroups(
     osqueryPolicyData
   );
-  const { agentData } = useAllAgents(osqueryPolicyData);
+  const { agents } = useAllAgents(osqueryPolicyData);
   const [loading, setLoading] = useState<boolean>(true);
   const [options, setOptions] = useState<GroupOption[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<GroupOption[]>([]);
@@ -94,11 +94,11 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ onChange }) => {
       });
     }
 
-    if (agentData && agentData.list.length > 0) {
+    if (agents && agents.length > 0) {
       const groupType = AGENT_GROUP_KEY.Agent;
       opts.push({
         label: AGENT_SELECTION_LABEL,
-        options: (agentData.list as Agent[]).map((agent: Agent) => ({
+        options: (agents as Agent[]).map((agent: Agent) => ({
           label: agent.local_metadata.host.hostname,
           color: getColor(groupType),
           value: {
@@ -112,7 +112,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ onChange }) => {
     }
     setLoading(false);
     setOptions(opts);
-  }, [groups.platforms, groups.policies, totalNumAgents, groupsLoading, agentData]);
+  }, [groups.platforms, groups.policies, totalNumAgents, groupsLoading, agents]);
 
   const onSelection = useCallback(
     (selection: GroupOption[]) => {
