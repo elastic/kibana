@@ -8,6 +8,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginInitializerContext } from 'src/core/server';
 import { RuleRegistryPlugin, RuleRegistryPluginSetupContract } from './plugin';
+import { createLifecycleRuleTypeFactory } from './rule_registry/rule_type_helpers/create_lifecycle_rule_type_factory';
 
 export const config = {
   schema: schema.object({
@@ -20,4 +21,4 @@ export type RuleRegistryConfig = TypeOf<typeof config.schema>;
 export const plugin = (initContext: PluginInitializerContext) =>
   new RuleRegistryPlugin(initContext);
 
-export { RuleRegistryPluginSetupContract };
+export { RuleRegistryPluginSetupContract, createLifecycleRuleTypeFactory };

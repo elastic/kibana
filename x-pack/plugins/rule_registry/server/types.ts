@@ -5,115 +5,89 @@
  * 2.0.
  */
 import { Type, TypeOf } from '@kbn/config-schema';
-import { ActionVariable, AlertTypeState } from '../../alerting/common';
+import {
+  ActionVariable,
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertTypeParams,
+  AlertTypeState,
+} from '../../alerting/common';
 import { ActionGroup, AlertExecutorOptions } from '../../alerting/server';
-import { AlertSeverityLevel } from '../common';
+import { ScopedRuleRegistryClient } from './rule_registry/create_scoped_rule_registry_client/types';
 import { DefaultFieldMap } from './rule_registry/defaults/field_map';
-import { TypeOfFieldMap } from './rule_registry/field_map/runtime_type_from_fieldmap';
-import { FieldMap } from './rule_registry/types';
 
-enum ESFieldType {
-  keyword = 'keyword',
-  text = 'text',
-  date = 'date',
-  boolean = 'boolean',
-  long = 'long',
-  integer = 'integer',
-  short = 'short',
-  byte = 'byte',
-  double = 'double',
-  float = 'half_float',
-  scaled_float = 'scaled_float',
-  unsigned_long = 'unsigned_long',
-}
-
-type RuleTypeFieldMap = Record<string, { type: ESFieldType }>;
-
-type RuleParams = Type<any>;
-
-export type AlertContext<TFieldName extends string = string> = Record<
-  string,
-  {
-    description: string;
-    field?: TFieldName;
-    type: Type<any>;
-  }
->;
-
-export interface AlertCheck<TFieldMap extends FieldMap, TActionVariable extends ActionVariable> {
-  name: string;
-  value?: number;
-  threshold?: number;
-  context: {
-    [key in TActionVariable['name']]: any;
-  };
-  fields: Omit<Partial<TypeOfFieldMap<TFieldMap>>, keyof DefaultFieldMap>;
-}
+export type RuleParams = Type<any>;
 
 type TypeOfRuleParams<TRuleParams extends RuleParams> = TypeOf<TRuleParams>;
 
 type RuleExecutorServices<
-  TFieldMap extends FieldMap,
+  TFieldMap extends DefaultFieldMap,
   TActionVariable extends ActionVariable
-> = Omit<AlertExecutorOptions['services'], 'alertInstanceFactory'> & {
-  check: { warning: (check: AlertCheck<TFieldMap, TActionVariable>) => void };
+> = AlertExecutorOptions<
+  AlertTypeParams,
+  AlertTypeState,
+  AlertInstanceState,
+  { [key in TActionVariable['name']]: any },
+  string
+>['services'] & {
+  scopedRuleRegistryClient: ScopedRuleRegistryClient<TFieldMap>;
 };
 
 type PassthroughAlertExecutorOptions = Pick<
-  AlertExecutorOptions,
-  'previousStartedAt' | 'startedAt'
+  AlertExecutorOptions<
+    AlertTypeParams,
+    AlertTypeState,
+    AlertInstanceState,
+    AlertInstanceContext,
+    string
+  >,
+  'previousStartedAt' | 'startedAt' | 'state'
 >;
 
 type RuleExecutorFunction<
-  TFieldMap extends FieldMap,
+  TFieldMap extends DefaultFieldMap,
   TRuleParams extends RuleParams,
-  TActionVariable extends ActionVariable
+  TActionVariable extends ActionVariable,
+  TAdditionalRuleExecutorServices extends Record<string, any>
 > = (
   options: PassthroughAlertExecutorOptions & {
-    services: RuleExecutorServices<TFieldMap, TActionVariable>;
+    services: RuleExecutorServices<TFieldMap, TActionVariable> & TAdditionalRuleExecutorServices;
     params: TypeOfRuleParams<TRuleParams>;
+    rule: {
+      id: string;
+      uuid: string;
+      name: string;
+      category: string;
+    };
+    producer: string;
   }
 ) => Promise<Record<string, any>>;
 
-export interface RuleType {
+interface RuleTypeBase {
   id: string;
   name: string;
-  fields?: RuleTypeFieldMap;
-  params?: RuleParams;
-  levels?: AlertSeverityLevel[];
-  context?: AlertContext;
   actionGroups: Array<ActionGroup<string>>;
   defaultActionGroupId: string;
   producer: string;
   minimumLicenseRequired: 'basic' | 'gold' | 'trial';
-  executor: RuleExecutorFunction<FieldMap, RuleParams, ActionVariable>;
 }
 
-export type RegisterRuleType<TFieldMap extends FieldMap> = <
+export type RuleType<
+  TFieldMap extends DefaultFieldMap,
   TRuleParams extends RuleParams,
-  TActionVariable extends ActionVariable
->(ruleType: {
-  id: string;
-  name: string;
+  TActionVariable extends ActionVariable,
+  TAdditionalRuleExecutorServices extends Record<string, any> = {}
+> = RuleTypeBase & {
   validate: {
     params: TRuleParams;
   };
   actionVariables: {
     context: TActionVariable[];
   };
-  actionGroups: Array<ActionGroup<string>>;
-  defaultActionGroupId: string;
-  producer: string;
-  minimumLicenseRequired: 'basic' | 'gold' | 'trial';
-  executor: RuleExecutorFunction<TFieldMap, TRuleParams, TActionVariable>;
-}) => void;
-
-export interface RuleAlertState {
-  created: number;
-  alertId: string;
-}
-
-export type RuleState = AlertTypeState & {
-  wrappedRuleState: Record<string, unknown>;
-  alerts: Record<string, RuleAlertState>;
+  executor: RuleExecutorFunction<
+    TFieldMap,
+    TRuleParams,
+    TActionVariable,
+    TAdditionalRuleExecutorServices
+  >;
 };

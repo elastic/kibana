@@ -5,26 +5,33 @@
  * 2.0.
  */
 
-import { Mutable } from 'utility-types';
 import { ecsFieldMap } from '../../generated/ecs_field_map';
 import { pickWithPatterns } from '../field_map/pick_with_patterns';
 
 export const defaultFieldMap = {
-  ...pickWithPatterns(ecsFieldMap, '@timestamp', 'event.*', 'rule.*'),
+  ...pickWithPatterns(
+    ecsFieldMap,
+    '@timestamp',
+    'event.kind',
+    'event.action',
+    'rule.uuid',
+    'rule.id',
+    'rule.name',
+    'rule.category',
+    'tags'
+  ),
+  producer: { type: 'keyword' },
+  'alert.uuid': { type: 'keyword' },
   'alert.id': { type: 'keyword' },
-  'alert.type': { type: 'keyword' },
-  'alert.name': { type: 'keyword' },
-  'alert.series_id': { type: 'keyword' }, // rule.id + alert.name
-  'alert.check.value': { type: 'scaled_float', scaling_factor: 100 },
-  'alert.check.threshold': { type: 'scaled_float', scaling_factor: 100 },
-  'alert.check.influencers': { type: 'flattened' },
-  'rule_type.producer': { type: 'keyword', required: true },
+  'alert.start': { type: 'date' },
+  'alert.end': { type: 'date' },
+  'alert.duration.us': { type: 'long' },
+  'alert.severity.level': { type: 'keyword' },
+  'alert.severity.value': { type: 'long' },
+  'alert.status': { type: 'keyword' },
+  'evaluation.value': { type: 'scaled_float', scaling_factor: 100 },
+  'evaluation.threshold': { type: 'scaled_float', scaling_factor: 100 },
+  'evaluation.status': { type: 'keyword' },
 } as const;
 
-type DefaultFieldMapReadOnly = typeof defaultFieldMap;
-
-export type DefaultFieldMap = Mutable<
-  {
-    [key in keyof DefaultFieldMapReadOnly]: Mutable<DefaultFieldMapReadOnly[key]>;
-  }
->;
+export type DefaultFieldMap = typeof defaultFieldMap;

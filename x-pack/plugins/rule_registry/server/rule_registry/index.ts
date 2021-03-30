@@ -6,25 +6,21 @@
  */
 
 import { CoreSetup, Logger } from 'kibana/server';
-import { omitBy, compact } from 'lodash';
 import { inspect } from 'util';
-import uuid from 'uuid';
-import { PathReporter } from 'io-ts/lib/PathReporter';
-import { isLeft } from 'fp-ts/lib/Either';
-import { ESSearchRequest, ESSearchResponse } from '../../../../../typings/elasticsearch';
+import {
+  ActionVariable,
+  AlertInstanceState,
+  AlertTypeParams,
+  AlertTypeState,
+} from '../../../alerting/common';
 import { createReadySignal, ClusterClientAdapter } from '../../../event_log/server';
 import { FieldMap, ILMPolicy } from './types';
-import { RegisterRuleType, RuleState, RuleAlertState } from '../types';
+import { RuleParams, RuleType } from '../types';
 import { mergeFieldMaps } from './field_map/merge_field_maps';
-import {
-  FieldMapType,
-  runtimeTypeFromFieldMap,
-  TypeOfFieldMap,
-} from './field_map/runtime_type_from_fieldmap';
+import { OutputOfFieldMap } from './field_map/runtime_type_from_fieldmap';
 import { mappingFromFieldMap } from './field_map/mapping_from_field_map';
 import { PluginSetupContract as AlertingPluginSetupContract } from '../../../alerting/server';
-import { createCheckService } from './check_service';
-import { AlertSeverityLevel, getAlertSeverityLevelValue } from '../../common';
+import { createScopedRuleRegistryClient } from './create_scoped_rule_registry_client';
 import { DefaultFieldMap } from './defaults/field_map';
 
 interface RuleRegistryOptions<TFieldMap extends FieldMap> {
@@ -39,21 +35,20 @@ interface RuleRegistryOptions<TFieldMap extends FieldMap> {
   parent?: RuleRegistry<DefaultFieldMap>;
 }
 
-export class RuleRegistry<TFieldMap extends FieldMap> {
+export class RuleRegistry<TFieldMap extends DefaultFieldMap> {
   private readonly esAdapter: ClusterClientAdapter<{
-    body: TypeOfFieldMap<DefaultFieldMap>;
+    body: OutputOfFieldMap<TFieldMap>;
     index: string;
   }>;
-  private readonly docRt: FieldMapType<DefaultFieldMap>;
-  private readonly children: Array<RuleRegistry<DefaultFieldMap>> = [];
+  private readonly children: Array<RuleRegistry<TFieldMap>> = [];
 
-  constructor(private readonly options: RuleRegistryOptions<DefaultFieldMap>) {
+  constructor(private readonly options: RuleRegistryOptions<TFieldMap>) {
     const { logger, core } = options;
 
     const { wait, signal } = createReadySignal<boolean>();
 
     this.esAdapter = new ClusterClientAdapter<{
-      body: TypeOfFieldMap<DefaultFieldMap>;
+      body: OutputOfFieldMap<TFieldMap>;
       index: string;
     }>({
       wait,
@@ -62,8 +57,6 @@ export class RuleRegistry<TFieldMap extends FieldMap> {
         .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
       logger: logger.get('esAdapter'),
     });
-
-    this.docRt = runtimeTypeFromFieldMap(options.fieldMap);
 
     this.initialize()
       .then(() => {
@@ -129,220 +122,53 @@ export class RuleRegistry<TFieldMap extends FieldMap> {
     }
   }
 
-  async search<TSearchRequest extends ESSearchRequest>(
-    ruleIds: string[],
-    request: TSearchRequest
-  ): Promise<ESSearchResponse<unknown, TSearchRequest>> {
-    const [{ elasticsearch }] = await this.options.core.getStartServices();
-
-    const query = {
-      bool: {
-        filter: [
-          {
-            terms: {
-              'rule.uuid': ruleIds,
-            },
-          },
-          ...compact([request.body?.query]),
-        ],
-      },
-    };
-
-    const response = await elasticsearch.client.asInternalUser.search({
-      ...request,
-      body: {
-        ...request.body,
-        query,
-      },
-    });
-
-    return (response.body as unknown) as ESSearchResponse<unknown, TSearchRequest>;
-  }
-
-  registerType: RegisterRuleType<DefaultFieldMap> = (type) => {
+  registerType<TRuleParams extends RuleParams, TActionVariable extends ActionVariable>(
+    type: RuleType<TFieldMap, TRuleParams, TActionVariable>
+  ) {
     this.options.alertingPluginSetupContract.registerType<
-      Record<string, any>,
-      RuleState,
-      Record<string, any>,
-      Record<string, any>,
-      string,
+      AlertTypeParams,
+      AlertTypeState,
+      AlertInstanceState,
+      { [key in TActionVariable['name']]: any },
       string
     >({
       ...type,
-      executor: async (options) => {
-        const {
-          services,
-          previousStartedAt,
-          startedAt,
-          state: maybePrevAlertState,
-          alertId: ruleId,
-          name: ruleName,
-          params,
-          // namespace,
-        } = options;
+      executor: async (executorOptions) => {
+        const { services, namespace, alertId, name } = executorOptions;
 
-        const prevAlertState =
-          maybePrevAlertState && 'alerts' in maybePrevAlertState
-            ? maybePrevAlertState
-            : { alerts: {}, wrappedRuleState: maybePrevAlertState };
+        const rule = {
+          id: type.id,
+          uuid: alertId,
+          category: type.name,
+          name,
+        };
 
-        const { alertInstanceFactory, ...passthroughServices } = services;
+        const producer = type.producer;
 
-        const checkService = createCheckService({
-          alertInstanceFactory: services.alertInstanceFactory as any,
-          levels: [{ level: AlertSeverityLevel.warning, actionGroupId: type.defaultActionGroupId }],
+        const scopedRuleRegistryClient = await createScopedRuleRegistryClient({
+          savedObjectsClient: services.savedObjectsClient,
+          scopedClusterClient: services.scopedClusterClient,
+          clusterClientAdapter: this.esAdapter,
+          fieldMap: this.options.fieldMap,
+          index: this.getEsNames().indexAliasName,
+          namespace,
+          producer,
+          rule,
+          logger: this.options.logger,
         });
 
-        const executorOptions = {
-          previousStartedAt,
-          startedAt,
-          params,
+        return type.executor({
+          ...executorOptions,
+          rule,
+          producer,
           services: {
-            ...passthroughServices,
-            check: checkService.check as any,
+            ...services,
+            scopedRuleRegistryClient,
           },
-        };
-
-        const ruleState = await type.executor(executorOptions);
-
-        const activeAlerts = checkService.getAlerts();
-        const previousAlertStates = prevAlertState.alerts;
-
-        const previousAlertNames = Object.keys(previousAlertStates);
-        const activeAlertNames = Object.keys(activeAlerts);
-
-        const newAlertNames = activeAlertNames.filter(
-          (alertName) => !previousAlertNames.includes(alertName)
-        );
-
-        const mergedAlertStates = {
-          ...previousAlertStates,
-          ...newAlertNames.reduce((prev, alertName) => {
-            prev[alertName] = {
-              alertId: uuid.v4(), // for log-type alerts, use alertName
-              created: startedAt.getTime(),
-            };
-            return prev;
-          }, {} as Record<string, RuleAlertState>),
-        };
-
-        // const idsOfLastAlertEventsToFetch = Object.values(mergedAlertStates).map(
-        //   (state) => state.alertId
-        // );
-
-        // const start = new Date().getTime() - 60 * 60 * 1000;
-
-        // const response = await this.search([ruleId], {
-        //   body: {
-        //     size: idsOfLastAlertEventsToFetch.length,
-        //     query: {
-        //       bool: {
-        //         filter: [
-        //           {
-        //             terms: {
-        //               'alert.id': idsOfLastAlertEventsToFetch,
-        //             },
-        //           },
-        //           {
-        //             range: {
-        //               '@timestamp': {
-        //                 gte: start,
-        //                 format: 'epoch_millis',
-        //               },
-        //             },
-        //           },
-        //         ],
-        //       },
-        //     },
-        //     collapse: {
-        //       field: 'alert.id',
-        //     },
-        //     sort: {
-        //       '@timestamp': 'desc',
-        //     },
-        //     _source: false,
-        //     fields: Object.keys(this.options.fieldMap),
-        //   },
-        // });
-
-        // const lastEventByAlertId = response.hits.hits.reduce((prev, hit) => {
-        //   const alertId = hit.fields['alert.id']![0] as string;
-        //   prev[alertId] = hit.fields as Record<string, unknown[]>;
-        //   return prev;
-        // }, {} as Record<string, Record<string, unknown[]>>);
-
-        const index = this.getEsNames().indexAliasName;
-
-        const updates = Object.entries(mergedAlertStates).map(([alertName, state]) => {
-          const active = activeAlertNames.includes(alertName);
-
-          const nextState = active ? activeAlerts[alertName] : undefined;
-
-          const createdAt = new Date(state.created);
-
-          const body: TypeOfFieldMap<DefaultFieldMap> = {
-            ...(nextState
-              ? {
-                  ...nextState.fields,
-                  'event.severity': getAlertSeverityLevelValue(nextState.level),
-                  'alert.check.value': nextState.value,
-                  'alert.check.threshold': nextState.threshold,
-                  'event.action': 'active-alert',
-                }
-              : {
-                  'event.end': startedAt.toISOString(),
-                  'event.action': 'recovered-alert',
-                }),
-            'event.kind': 'alert',
-            '@timestamp': startedAt.toISOString(),
-            'rule.uuid': ruleId,
-            'rule.id': type.id,
-            'rule.category': type.name,
-            'rule.name': ruleName,
-            // 'rule.namespace': namespace,
-            'rule_type.producer': type.producer,
-            'alert.id': state.alertId,
-            'event.start': createdAt.toISOString(),
-            'event.duration': (startedAt.getTime() - createdAt.getTime()) * 1000,
-            'alert.name': alertName,
-            'alert.series_id': [ruleId, alertName].join('|'),
-          };
-
-          return {
-            index,
-            body,
-          };
         });
-
-        let indexedCount = 0;
-
-        updates.forEach((update) => {
-          const decode = this.docRt.decode(update.body);
-          if (isLeft(decode)) {
-            const error = new Error(`Failed to validate alert event`);
-            error.stack += '\n' + PathReporter.report(decode).join('\n');
-            this.options.logger.error(error);
-          } else {
-            this.esAdapter.indexDocument(update);
-            indexedCount++;
-          }
-        });
-
-        if (indexedCount > 0) {
-          this.options.logger.debug(`Indexed ${indexedCount} events`);
-        }
-
-        const nextState = omitBy(mergedAlertStates, (_, alertName) => {
-          return activeAlerts[alertName] === undefined;
-        });
-
-        return {
-          wrappedRuleState: ruleState,
-          alerts: nextState,
-        };
       },
     });
-  };
+  }
 
   create<TNextFieldMap extends FieldMap>({
     namespace,
@@ -357,17 +183,19 @@ export class RuleRegistry<TFieldMap extends FieldMap> {
       ? mergeFieldMaps(this.options.fieldMap, fieldMap)
       : this.options.fieldMap;
 
-    const child = new RuleRegistry<TFieldMap & TNextFieldMap>({
+    const child = new RuleRegistry({
       ...this.options,
       logger: this.options.logger.get(namespace),
       namespace: [this.options.namespace, namespace].filter(Boolean).join('-'),
       fieldMap: mergedFieldMap,
       ...(ilmPolicy ? { ilmPolicy } : {}),
+      // @ts-expect-error Types of property 'body' are incompatible.
       parent: this,
     });
 
     this.children.push(child);
 
+    // @ts-expect-error could be instantiated with a different subtype of constraint
     return child;
   }
 }

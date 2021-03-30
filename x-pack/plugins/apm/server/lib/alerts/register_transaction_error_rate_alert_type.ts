@@ -22,6 +22,7 @@ import { environmentQuery } from '../../../server/utils/queries';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
+import { createAPMLifecyleRuleType } from './create_apm_lifecycle_rule_type';
 import { RegisterRuleDependencies } from './register_apm_alerts';
 
 const paramsSchema = schema.object({
@@ -39,155 +40,162 @@ export function registerTransactionErrorRateAlertType({
   registry,
   config$,
 }: RegisterRuleDependencies) {
-  registry.registerType({
-    id: AlertType.TransactionErrorRate,
-    name: alertTypeConfig.name,
-    actionGroups: alertTypeConfig.actionGroups,
-    defaultActionGroupId: alertTypeConfig.defaultActionGroupId,
-    validate: {
-      params: paramsSchema,
-    },
-    actionVariables: {
-      context: [
-        apmActionVariables.transactionType,
-        apmActionVariables.serviceName,
-        apmActionVariables.environment,
-        apmActionVariables.threshold,
-        apmActionVariables.triggerValue,
-        apmActionVariables.interval,
-      ],
-    },
-    producer: 'apm',
-    minimumLicenseRequired: 'basic',
-    executor: async ({ services, params: alertParams }) => {
-      const config = await config$.pipe(take(1)).toPromise();
-      const indices = await getApmIndices({
-        config,
-        savedObjectsClient: services.savedObjectsClient,
-      });
+  registry.registerType(
+    createAPMLifecyleRuleType({
+      id: AlertType.TransactionErrorRate,
+      name: alertTypeConfig.name,
+      actionGroups: alertTypeConfig.actionGroups,
+      defaultActionGroupId: alertTypeConfig.defaultActionGroupId,
+      validate: {
+        params: paramsSchema,
+      },
+      actionVariables: {
+        context: [
+          apmActionVariables.transactionType,
+          apmActionVariables.serviceName,
+          apmActionVariables.environment,
+          apmActionVariables.threshold,
+          apmActionVariables.triggerValue,
+          apmActionVariables.interval,
+        ],
+      },
+      producer: 'apm',
+      minimumLicenseRequired: 'basic',
+      executor: async ({ services, params: alertParams }) => {
+        const config = await config$.pipe(take(1)).toPromise();
+        const indices = await getApmIndices({
+          config,
+          savedObjectsClient: services.savedObjectsClient,
+        });
 
-      const searchParams = {
-        index: indices['apm_oss.transactionIndices'],
-        size: 0,
-        body: {
-          query: {
-            bool: {
-              filter: [
-                {
-                  range: {
-                    '@timestamp': {
-                      gte: `now-${alertParams.windowSize}${alertParams.windowUnit}`,
+        const searchParams = {
+          index: indices['apm_oss.transactionIndices'],
+          size: 0,
+          body: {
+            query: {
+              bool: {
+                filter: [
+                  {
+                    range: {
+                      '@timestamp': {
+                        gte: `now-${alertParams.windowSize}${alertParams.windowUnit}`,
+                      },
+                    },
+                  },
+                  { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
+                  {
+                    terms: {
+                      [EVENT_OUTCOME]: [
+                        EventOutcome.failure,
+                        EventOutcome.success,
+                      ],
+                    },
+                  },
+                  ...(alertParams.serviceName
+                    ? [{ term: { [SERVICE_NAME]: alertParams.serviceName } }]
+                    : []),
+                  ...(alertParams.transactionType
+                    ? [
+                        {
+                          term: {
+                            [TRANSACTION_TYPE]: alertParams.transactionType,
+                          },
+                        },
+                      ]
+                    : []),
+                  ...environmentQuery(alertParams.environment),
+                ],
+              },
+            },
+            aggs: {
+              series: {
+                multi_terms: {
+                  terms: [
+                    { field: SERVICE_NAME },
+                    { field: SERVICE_ENVIRONMENT },
+                    { field: TRANSACTION_TYPE },
+                  ],
+                  size: 10000,
+                },
+                aggs: {
+                  outcomes: {
+                    terms: {
+                      field: EVENT_OUTCOME,
                     },
                   },
                 },
-                { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
-                {
-                  terms: {
-                    [EVENT_OUTCOME]: [
-                      EventOutcome.failure,
-                      EventOutcome.success,
-                    ],
-                  },
-                },
-                ...(alertParams.serviceName
-                  ? [{ term: { [SERVICE_NAME]: alertParams.serviceName } }]
-                  : []),
-                ...(alertParams.transactionType
-                  ? [
-                      {
-                        term: {
-                          [TRANSACTION_TYPE]: alertParams.transactionType,
-                        },
-                      },
-                    ]
-                  : []),
-                ...environmentQuery(alertParams.environment),
-              ],
-            },
-          },
-          aggs: {
-            series: {
-              multi_terms: {
-                terms: [
-                  { field: SERVICE_NAME },
-                  { field: SERVICE_ENVIRONMENT },
-                  { field: TRANSACTION_TYPE },
-                ],
-                size: 10000,
-              },
-              aggs: {
-                outcomes: {
-                  terms: {
-                    field: EVENT_OUTCOME,
-                  },
-                },
               },
             },
           },
-        },
-      };
+        };
 
-      const response = await alertingEsClient(
-        services.scopedClusterClient,
-        searchParams
-      );
+        const response = await alertingEsClient(
+          services.scopedClusterClient,
+          searchParams
+        );
 
-      if (!response.aggregations) {
-        return {};
-      }
+        if (!response.aggregations) {
+          return {};
+        }
 
-      const results = response.aggregations.series.buckets
-        .map((bucket) => {
-          const [serviceName, environment, transactionType] = bucket.key;
+        const results = response.aggregations.series.buckets
+          .map((bucket) => {
+            const [serviceName, environment, transactionType] = bucket.key;
 
-          const failed =
-            bucket.outcomes.buckets.find(
-              (outcomeBucket) => outcomeBucket.key === EventOutcome.failure
-            )?.doc_count ?? 0;
-          const succesful =
-            bucket.outcomes.buckets.find(
-              (outcomeBucket) => outcomeBucket.key === EventOutcome.success
-            )?.doc_count ?? 0;
+            const failed =
+              bucket.outcomes.buckets.find(
+                (outcomeBucket) => outcomeBucket.key === EventOutcome.failure
+              )?.doc_count ?? 0;
+            const succesful =
+              bucket.outcomes.buckets.find(
+                (outcomeBucket) => outcomeBucket.key === EventOutcome.success
+              )?.doc_count ?? 0;
 
-          return {
+            return {
+              serviceName,
+              environment,
+              transactionType,
+              errorRate: (failed / (failed + succesful)) * 100,
+            };
+          })
+          .filter((result) => result.errorRate >= alertParams.threshold);
+
+        results.forEach((result) => {
+          const {
             serviceName,
             environment,
             transactionType,
-            errorRate: (failed / failed + succesful) * 100,
-          };
-        })
-        .filter((result) => result.errorRate >= alertParams.threshold);
+            errorRate,
+          } = result;
 
-      results.forEach((result) => {
-        const { serviceName, environment, transactionType, errorRate } = result;
-        services.check.warning({
-          name: [
-            AlertType.TransactionErrorRate,
-            serviceName,
-            transactionType,
-            environment,
-          ]
-            .filter((name) => name)
-            .join('_'),
-          threshold: alertParams.threshold,
-          value: errorRate,
-          context: {
-            serviceName,
-            transactionType,
-            environment,
-            threshold: alertParams.threshold,
-            triggerValue: asDecimalOrInteger(errorRate),
-            interval: `${alertParams.windowSize}${alertParams.windowUnit}`,
-          },
-          fields: {
-            [SERVICE_NAME]: serviceName,
-            ...(environment ? { [SERVICE_ENVIRONMENT]: environment } : {}),
-            [TRANSACTION_TYPE]: transactionType,
-          },
+          services
+            .alertWithLifecycle({
+              id: [
+                AlertType.TransactionErrorRate,
+                serviceName,
+                transactionType,
+                environment,
+              ]
+                .filter((name) => name)
+                .join('_'),
+              fields: {
+                [SERVICE_NAME]: serviceName,
+                ...(environment ? { [SERVICE_ENVIRONMENT]: environment } : {}),
+                [TRANSACTION_TYPE]: transactionType,
+              },
+            })
+            .scheduleActions(alertTypeConfig.defaultActionGroupId, {
+              serviceName,
+              transactionType,
+              environment,
+              threshold: alertParams.threshold,
+              triggerValue: asDecimalOrInteger(errorRate),
+              interval: `${alertParams.windowSize}${alertParams.windowUnit}`,
+            });
         });
-      });
 
-      return {};
-    },
-  });
+        return {};
+      },
+    })
+  );
 }

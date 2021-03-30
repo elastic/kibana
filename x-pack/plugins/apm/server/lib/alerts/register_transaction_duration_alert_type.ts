@@ -7,6 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 import { take } from 'rxjs/operators';
+import { QueryContainer } from '@elastic/elasticsearch/api/types';
+import { parseEnvironmentUrlParam } from '../../../common/environment_filter_values';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
 import {
   PROCESSOR_EVENT,
@@ -22,6 +24,7 @@ import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
 import { RegisterRuleDependencies } from './register_apm_alerts';
+import { createAPMLifecyleRuleType } from './create_apm_lifecycle_rule_type';
 
 const paramsSchema = schema.object({
   serviceName: schema.string(),
@@ -43,115 +46,121 @@ export function registerTransactionDurationAlertType({
   registry,
   config$,
 }: RegisterRuleDependencies) {
-  registry.registerType({
-    id: AlertType.TransactionDuration,
-    name: alertTypeConfig.name,
-    actionGroups: alertTypeConfig.actionGroups,
-    defaultActionGroupId: alertTypeConfig.defaultActionGroupId,
-    validate: {
-      params: paramsSchema,
-    },
-    actionVariables: {
-      context: [
-        apmActionVariables.serviceName,
-        apmActionVariables.transactionType,
-        apmActionVariables.environment,
-        apmActionVariables.threshold,
-        apmActionVariables.triggerValue,
-        apmActionVariables.interval,
-      ],
-    },
-    producer: 'apm',
-    minimumLicenseRequired: 'basic',
-    executor: async ({ services, params }) => {
-      const config = await config$.pipe(take(1)).toPromise();
-      const alertParams = params;
-      const indices = await getApmIndices({
-        config,
-        savedObjectsClient: services.savedObjectsClient,
-      });
-      const maxServiceEnvironments = config['xpack.apm.maxServiceEnvironments'];
+  registry.registerType(
+    createAPMLifecyleRuleType({
+      id: AlertType.TransactionDuration,
+      name: alertTypeConfig.name,
+      actionGroups: alertTypeConfig.actionGroups,
+      defaultActionGroupId: alertTypeConfig.defaultActionGroupId,
+      validate: {
+        params: paramsSchema,
+      },
+      actionVariables: {
+        context: [
+          apmActionVariables.serviceName,
+          apmActionVariables.transactionType,
+          apmActionVariables.environment,
+          apmActionVariables.threshold,
+          apmActionVariables.triggerValue,
+          apmActionVariables.interval,
+        ],
+      },
+      producer: 'apm',
+      minimumLicenseRequired: 'basic',
+      executor: async ({ services, params }) => {
+        const config = await config$.pipe(take(1)).toPromise();
+        const alertParams = params;
+        const indices = await getApmIndices({
+          config,
+          savedObjectsClient: services.savedObjectsClient,
+        });
 
-      const searchParams = {
-        index: indices['apm_oss.transactionIndices'],
-        size: 0,
-        body: {
-          query: {
-            bool: {
-              filter: [
-                {
-                  range: {
-                    '@timestamp': {
-                      gte: `now-${alertParams.windowSize}${alertParams.windowUnit}`,
+        const searchParams = {
+          index: indices['apm_oss.transactionIndices'],
+          size: 0,
+          body: {
+            query: {
+              bool: {
+                filter: [
+                  {
+                    range: {
+                      '@timestamp': {
+                        gte: `now-${alertParams.windowSize}${alertParams.windowUnit}`,
+                      },
                     },
                   },
-                },
-                { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
-                { term: { [SERVICE_NAME]: alertParams.serviceName } },
-                { term: { [TRANSACTION_TYPE]: alertParams.transactionType } },
-                ...environmentQuery(alertParams.environment),
-              ],
+                  { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
+                  { term: { [SERVICE_NAME]: alertParams.serviceName } },
+                  { term: { [TRANSACTION_TYPE]: alertParams.transactionType } },
+                  ...environmentQuery(alertParams.environment),
+                ] as QueryContainer[],
+              },
+            },
+            aggs: {
+              metric:
+                alertParams.aggregationType === 'avg'
+                  ? { avg: { field: TRANSACTION_DURATION } }
+                  : {
+                      percentiles: {
+                        field: TRANSACTION_DURATION,
+                        percents: [
+                          alertParams.aggregationType === '95th' ? 95 : 99,
+                        ],
+                      },
+                    },
             },
           },
-          aggs: {
-            metric:
-              alertParams.aggregationType === 'avg'
-                ? { avg: { field: TRANSACTION_DURATION } }
-                : {
-                    percentiles: {
-                      field: TRANSACTION_DURATION,
-                      percents: [
-                        alertParams.aggregationType === '95th' ? 95 : 99,
-                      ],
-                    },
-                  },
-          },
-        },
-      };
+        };
 
-      const response = await alertingEsClient(
-        services.scopedClusterClient,
-        searchParams
-      );
+        const response = await alertingEsClient(
+          services.scopedClusterClient,
+          searchParams
+        );
 
-      if (!response.aggregations) {
+        if (!response.aggregations) {
+          return {};
+        }
+
+        const { metric } = response.aggregations;
+
+        const transactionDuration =
+          'values' in metric ? Object.values(metric.values)[0] : metric?.value;
+
+        const threshold = alertParams.threshold * 1000;
+
+        if (transactionDuration && transactionDuration > threshold) {
+          const durationFormatter = getDurationFormatter(transactionDuration);
+          const transactionDurationFormatted = durationFormatter(
+            transactionDuration
+          ).formatted;
+
+          const environmentParsed = parseEnvironmentUrlParam(
+            alertParams.environment
+          );
+
+          services
+            .alertWithLifecycle({
+              id: `${AlertType.TransactionDuration}_${environmentParsed.text}`,
+              fields: {
+                [SERVICE_NAME]: alertParams.serviceName,
+                ...(environmentParsed.esFieldValue
+                  ? { [SERVICE_ENVIRONMENT]: environmentParsed.esFieldValue }
+                  : {}),
+                [TRANSACTION_TYPE]: alertParams.transactionType,
+              },
+            })
+            .scheduleActions(alertTypeConfig.defaultActionGroupId, {
+              transactionType: alertParams.transactionType,
+              serviceName: alertParams.serviceName,
+              environment: environmentParsed.text,
+              threshold,
+              triggerValue: transactionDurationFormatted,
+              interval: `${alertParams.windowSize}${alertParams.windowUnit}`,
+            });
+        }
+
         return {};
-      }
-
-      const { metric } = response.aggregations;
-
-      const transactionDuration =
-        'values' in metric ? Object.values(metric.values)[0] : metric?.value;
-
-      const threshold = alertParams.threshold * 1000;
-
-      if (transactionDuration && transactionDuration > threshold) {
-        const durationFormatter = getDurationFormatter(transactionDuration);
-        const transactionDurationFormatted = durationFormatter(
-          transactionDuration
-        ).formatted;
-
-        services.check.warning({
-          name: `${AlertType.TransactionDuration}_${environment}`,
-          threshold,
-          value: transactionDuration,
-          context: {
-            transactionType: alertParams.transactionType,
-            serviceName: alertParams.serviceName,
-            environment,
-            threshold,
-            triggerValue: transactionDurationFormatted,
-            interval: `${alertParams.windowSize}${alertParams.windowUnit}`,
-          },
-          fields: {
-            'service.name': alertParams.serviceName,
-            'service.environment': environment,
-            'transaction.type': alertParams.transactionType,
-          },
-        });
-      }
-
-      return {};
-    },
-  });
+      },
+    })
+  );
 }

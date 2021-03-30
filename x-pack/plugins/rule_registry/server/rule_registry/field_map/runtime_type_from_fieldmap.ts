@@ -7,7 +7,7 @@
 
 import { mapValues, pickBy } from 'lodash';
 import * as t from 'io-ts';
-import { PickByValueExact } from 'utility-types';
+import { Mutable, PickByValueExact } from 'utility-types';
 import { FieldMap } from '../types';
 
 const esFieldTypeMap = {
@@ -48,17 +48,42 @@ type IntersectionTypeOf<
   ]
 >;
 
+type CastArray<T extends t.Type<any>> = t.Type<
+  t.TypeOf<T> | Array<t.TypeOf<T>>,
+  Array<t.TypeOf<T>>,
+  unknown
+>;
+type CastSingle<T extends t.Type<any>> = t.Type<
+  t.TypeOf<T> | Array<t.TypeOf<T>>,
+  t.TypeOf<T>,
+  unknown
+>;
+
+const createCastArrayRt = <T extends t.Type<any>>(type: T): CastArray<T> => {
+  const union = t.union([type, t.array(type)]);
+
+  return new t.Type('castArray', union.is, union.validate, (a) => (Array.isArray(a) ? a : [a]));
+};
+
+const createCastSingleRt = <T extends t.Type<any>>(type: T): CastSingle<T> => {
+  const union = t.union([type, t.array(type)]);
+
+  return new t.Type('castSingle', union.is, union.validate, (a) => (Array.isArray(a) ? a[0] : a));
+};
+
 type MapTypeValues<T extends FieldMap> = {
   [key in keyof T]: {
     required: T[key]['required'];
     type: T[key]['array'] extends true
-      ? t.ArrayC<EsFieldTypeOf<T[key]['type']>>
-      : EsFieldTypeOf<T[key]['type']>;
+      ? CastArray<EsFieldTypeOf<T[key]['type']>>
+      : CastSingle<EsFieldTypeOf<T[key]['type']>>;
   };
 };
-export type FieldMapType<T extends FieldMap> = IntersectionTypeOf<MapTypeValues<T>>;
 
-export type TypeOfFieldMap<T extends FieldMap> = t.TypeOf<FieldMapType<T>>;
+type FieldMapType<T extends FieldMap> = IntersectionTypeOf<MapTypeValues<T>>;
+
+export type TypeOfFieldMap<T extends FieldMap> = Mutable<t.TypeOf<FieldMapType<T>>>;
+export type OutputOfFieldMap<T extends FieldMap> = Mutable<t.OutputOf<FieldMapType<T>>>;
 
 export function runtimeTypeFromFieldMap<TFieldMap extends FieldMap>(
   fieldMap: TFieldMap
@@ -70,7 +95,7 @@ export function runtimeTypeFromFieldMap<TFieldMap extends FieldMap>(
           ? esFieldTypeMap[field.type as keyof EsFieldTypeMap]
           : t.unknown;
 
-      return field.array ? t.array(type) : type;
+      return field.array ? createCastArrayRt(type) : createCastSingleRt(type);
     });
   }
 

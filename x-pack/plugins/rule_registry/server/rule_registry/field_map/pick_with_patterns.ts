@@ -7,7 +7,6 @@
 
 import { ValuesType, SetIntersection, OmitByValueExact } from 'utility-types';
 import { pick } from 'lodash';
-import { ecsFieldMap } from '../../generated/ecs_field_map';
 
 type SplitByDot<
   TPath extends string,
@@ -17,28 +16,32 @@ type SplitByDot<
   : [`${TPrefix}${TPath}`];
 
 type PatternMapOf<T extends Record<string, any>> = {
-  [TKey in keyof T]: ValuesType<TKey extends string ? SplitByDot<TKey> : never>;
+  [TKey in keyof T]: ValuesType<TKey extends string ? ['*', ...SplitByDot<TKey>] : never>;
 };
 
-type PickByPatterns<T extends Record<string, any>, TPatterns extends string[]> = OmitByValueExact<
+export type PickWithPatterns<
+  T extends Record<string, any>,
+  TPatterns extends string[]
+> = OmitByValueExact<
   {
     [TFieldName in keyof T]: SetIntersection<
       ValuesType<TPatterns>,
       PatternMapOf<T>[TFieldName]
     > extends never
-      ? undefined
+      ? never
       : T[TFieldName];
   },
-  undefined
+  never
 >;
 
-const allEcsFields = Object.keys(ecsFieldMap) as Array<keyof typeof ecsFieldMap>;
+export type PatternsUnionOf<T extends Record<string, any>> = '*' | ValuesType<PatternMapOf<T>>;
 
 export function pickWithPatterns<
   T extends Record<string, any>,
-  TPatterns extends Array<ValuesType<PatternMapOf<T>>>
->(map: T, ...patterns: TPatterns): PickByPatterns<T, TPatterns> {
-  const matchedFields = allEcsFields.filter((field) =>
+  TPatterns extends Array<PatternsUnionOf<T>>
+>(map: T, ...patterns: TPatterns): PickWithPatterns<T, TPatterns> {
+  const allFields = Object.keys(map);
+  const matchedFields = allFields.filter((field) =>
     patterns.some((pattern) => {
       if (pattern === field) {
         return true;
@@ -52,12 +55,12 @@ export function pickWithPatterns<
       }
 
       return fieldParts.every((fieldPart, index) => {
-        const patternPart = patternParts.length < index ? '*' : patternParts[index];
+        const patternPart = patternParts.length - 1 < index ? '*' : patternParts[index];
 
         return fieldPart === patternPart || patternPart === '*';
       });
     })
   );
 
-  return (pick(ecsFieldMap, matchedFields) as unknown) as PickByPatterns<T, TPatterns>;
+  return (pick(map, matchedFields) as unknown) as PickWithPatterns<T, TPatterns>;
 }
