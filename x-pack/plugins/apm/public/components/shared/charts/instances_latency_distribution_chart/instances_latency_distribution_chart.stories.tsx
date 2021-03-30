@@ -16,11 +16,6 @@ import {
 export default {
   title: 'shared/charts/InstancesLatencyDistributionChart',
   component: InstancesLatencyDistributionChart,
-  argTypes: {
-    items: {
-      control: { type: 'object' },
-    },
-  },
   decorators: [
     (Story: ComponentType) => (
       <EuiThemeProvider>

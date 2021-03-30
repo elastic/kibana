@@ -25,11 +25,6 @@ function getLatencyFormatter(props: TooltipInfo) {
 export default {
   title: 'shared/charts/InstancesLatencyDistributionChart/CustomTooltip',
   component: CustomTooltip,
-  argTypes: {
-    values: {
-      control: { type: 'object' },
-    },
-  },
   decorators: [
     (Story: ComponentType) => (
       <EuiThemeProvider>
