@@ -95,11 +95,10 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
       }),
       finalize(() => {
         this.pendingCount$.next(this.pendingCount$.getValue() - 1);
-        if (this.deps.session.isCurrentSession(options.sessionId)) {
+        searchAbortController.cleanup();
+        if (untrackSearch && this.deps.session.isCurrentSession(options.sessionId)) {
           // untrack if this search still belongs to current session
-          untrackSearch?.();
-        } else {
-          searchAbortController.cleanup();
+          untrackSearch();
         }
         if (savedToBackgroundSub) {
           savedToBackgroundSub.unsubscribe();
