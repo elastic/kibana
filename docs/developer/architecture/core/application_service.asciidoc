@@ -1,6 +1,6 @@
 [[application-service]]
 == Application service
-Kibana has migrated to be a Single Page Application. Plugins should use `Application service` API to instruct Kibana what an application should be loaded & rendered in the UI in response to user interactions. The service also provides utilities for controlling the navigation link state, seamlessly integrating routing between applications, and loading async chunks on demand.
+Kibana has migrated to be a Single Page Application. Plugins should use `Application service` API to instruct Kibana that an application should be loaded and rendered in the UI in response to user interactions. The service also provides utilities for controlling the navigation link state, seamlessly integrating routing between applications, and loading async chunks on demand.
 
 NOTE: The Application service is only available client side.
 
@@ -38,5 +38,4 @@ export class MyPlugin implements Plugin {
 NOTE: you are free to use any UI library to render a plugin application in DOM.
 However, we recommend using React and https://elastic.github.io/eui[EUI] for all your basic UI
 components to create a consistent UI experience.
-
 
