@@ -6,11 +6,11 @@
  */
 
 import cytoscape from 'cytoscape';
+import { EuiTheme } from '../../../../../../../../../src/plugins/kibana_react/common';
 import {
   ANALYSIS_CONFIG_TYPE,
   JOB_MAP_NODE_TYPES,
 } from '../../../../../../common/constants/data_frame_analytics';
-import { EuiThemeType } from '../../../../components/color_range_legend';
 import classificationJobIcon from './icons/ml_classification_job.svg';
 import outlierDetectionJobIcon from './icons/ml_outlier_detection_job.svg';
 import regressionJobIcon from './icons/ml_regression_job.svg';
@@ -25,7 +25,7 @@ const MAP_SHAPES = {
 } as const;
 type MapShapes = typeof MAP_SHAPES[keyof typeof MAP_SHAPES];
 
-function shapeForNode(el: cytoscape.NodeSingular, theme: EuiThemeType): MapShapes {
+function shapeForNode(el: cytoscape.NodeSingular, theme: EuiTheme['eui']): MapShapes {
   const type = el.data('type');
   switch (type) {
     case JOB_MAP_NODE_TYPES.ANALYTICS:
@@ -56,7 +56,7 @@ function iconForNode(el: cytoscape.NodeSingular) {
   }
 }
 
-function borderColorForNode(el: cytoscape.NodeSingular, theme: EuiThemeType) {
+function borderColorForNode(el: cytoscape.NodeSingular, theme: EuiTheme['eui']) {
   if (el.selected()) {
     return theme.euiColorPrimary;
   }
@@ -77,7 +77,7 @@ function borderColorForNode(el: cytoscape.NodeSingular, theme: EuiThemeType) {
   }
 }
 
-export const getCytoscapeOptions = (theme: EuiThemeType): cytoscape.CytoscapeOptions => ({
+export const getCytoscapeOptions = (theme: EuiTheme['eui']): cytoscape.CytoscapeOptions => ({
   autoungrabify: true,
   boxSelectionEnabled: false,
   maxZoom: 3,

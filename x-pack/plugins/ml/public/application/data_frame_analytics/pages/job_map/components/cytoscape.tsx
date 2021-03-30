@@ -17,7 +17,7 @@ import React, {
 import cytoscape from 'cytoscape';
 // @ts-ignore no declaration file
 import dagre from 'cytoscape-dagre';
-import { EuiThemeType } from '../../../../components/color_range_legend';
+import { EuiTheme } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { getCytoscapeOptions } from './cytoscape_options';
 
 cytoscape.use(dagre);
@@ -27,7 +27,7 @@ export const CytoscapeContext = createContext<cytoscape.Core | undefined>(undefi
 interface CytoscapeProps {
   children?: ReactNode;
   elements: cytoscape.ElementDefinition[];
-  theme: EuiThemeType;
+  theme: EuiTheme['eui'];
   height: number;
   itemsDeleted: boolean;
   resetCy: boolean;

@@ -9,16 +9,17 @@ import React, { FC, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiTheme } from '../../../../../../../../src/plugins/kibana_react/common';
 import { Cytoscape, Controls, JobMapLegend } from './components';
 import { useMlKibana, useMlUrlGenerator } from '../../../contexts/kibana';
 import { JOB_MAP_NODE_TYPES } from '../../../../../common/constants/data_frame_analytics';
 import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
-import { useCurrentEuiTheme, EuiThemeType } from '../../../components/color_range_legend';
+import { useCurrentEuiTheme } from '../../../components/color_range_legend';
 import { useRefDimensions } from './components/use_ref_dimensions';
 import { useFetchAnalyticsMapData } from './use_fetch_analytics_map_data';
 import { JobMapTitle } from './job_map_title';
 
-const getCytoscapeDivStyle = (theme: EuiThemeType) => ({
+const getCytoscapeDivStyle = (theme: EuiTheme['eui']) => ({
   background: `linear-gradient(
   90deg,
   ${theme.euiPageBackgroundColor}

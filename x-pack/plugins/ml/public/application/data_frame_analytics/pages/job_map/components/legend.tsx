@@ -17,8 +17,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiTheme } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { JOB_MAP_NODE_TYPES } from '../../../../../../common/constants/data_frame_analytics';
-import { EuiThemeType } from '../../../../components/color_range_legend';
 
 const getJobTypeList = () => (
   <>
@@ -32,7 +32,7 @@ const getJobTypeList = () => (
   </>
 );
 
-export const JobMapLegend: FC<{ theme: EuiThemeType }> = ({ theme }) => {
+export const JobMapLegend: FC<{ theme: EuiTheme['eui'] }> = ({ theme }) => {
   const [showJobTypes, setShowJobTypes] = useState<boolean>(false);
 
   return (
