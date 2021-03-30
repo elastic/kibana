@@ -11,6 +11,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   CasesFindResponse,
   CasesFindRequest,
@@ -32,7 +33,7 @@ interface FindParams {
   savedObjectsClient: SavedObjectsClientContract;
   caseService: CaseServiceSetup;
   logger: Logger;
-  auth: Authorization;
+  auth: PublicMethodsOf<Authorization>;
   options: CasesFindRequest;
 }
 

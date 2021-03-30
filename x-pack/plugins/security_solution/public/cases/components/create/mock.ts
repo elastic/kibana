@@ -24,6 +24,7 @@ export const sampleData: CasePostRequest = {
   settings: {
     syncAlerts: true,
   },
+  scope: 'securitySolution',
 };
 
 export const sampleConnectorData = { loading: false, connectors: [] };

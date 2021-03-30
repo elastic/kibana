@@ -18,6 +18,7 @@ import {
   createUserActionServiceMock,
   createAlertServiceMock,
 } from '../services/mocks';
+import { createAuthorizationMock } from '../authorization/mock';
 
 jest.mock('./client');
 import { CasesClientHandler } from './client';
@@ -31,6 +32,7 @@ const caseService = createCaseServiceMock();
 const connectorMappingsService = connectorMappingsServiceMock();
 const savedObjectsClient = savedObjectsClientMock.create();
 const userActionService = createUserActionServiceMock();
+const authorization = createAuthorizationMock();
 
 describe('createExternalCasesClient()', () => {
   test('it creates the client correctly', async () => {
@@ -44,6 +46,7 @@ describe('createExternalCasesClient()', () => {
       savedObjectsClient,
       userActionService,
       logger,
+      authorization,
     });
     expect(CasesClientHandler).toHaveBeenCalledTimes(1);
   });

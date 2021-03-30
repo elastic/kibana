@@ -28,6 +28,7 @@ describe('usePostCase', () => {
     settings: {
       syncAlerts: true,
     },
+    scope: 'securitySolution',
   };
   beforeEach(() => {
     jest.clearAllMocks();

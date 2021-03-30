@@ -10,6 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { SavedObjectsClientContract, Logger } from 'src/core/server';
 import { flattenCaseSavedObject, transformNewCase } from '../../routes/api/utils';
 
@@ -47,7 +48,7 @@ interface CreateCaseArgs {
   userActionService: CaseUserActionServiceSetup;
   theCase: CasePostRequest;
   logger: Logger;
-  auth: Authorization;
+  auth: PublicMethodsOf<Authorization>;
 }
 
 /**

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ElasticsearchClient, SavedObjectsClientContract, Logger } from 'kibana/server';
 import { ActionsClient } from '../../../actions/server';
 import {
@@ -78,7 +79,7 @@ export interface CasesClientConstructorArguments {
   userActionService: CaseUserActionServiceSetup;
   alertsService: AlertServiceContract;
   logger: Logger;
-  authorization: Authorization;
+  authorization: PublicMethodsOf<Authorization>;
 }
 
 export interface ConfigureFields {

@@ -27,6 +27,7 @@ export const newCase: CasePostRequest = {
   settings: {
     syncAlerts: true,
   },
+  scope: 'securitySolution',
 };
 
 export const getActions = (): FindActionResult[] => [

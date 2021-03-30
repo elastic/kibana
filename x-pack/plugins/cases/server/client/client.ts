@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ElasticsearchClient, SavedObjectsClientContract, Logger } from 'src/core/server';
 import {
   CasesClientConstructorArguments,
@@ -53,7 +54,7 @@ export class CasesClientHandler implements CasesClient {
   private readonly _userActionService: CaseUserActionServiceSetup;
   private readonly _alertsService: AlertServiceContract;
   private readonly logger: Logger;
-  private readonly authorization: Authorization;
+  private readonly authorization: PublicMethodsOf<Authorization>;
 
   constructor(clientArgs: CasesClientConstructorArguments) {
     this._scopedClusterClient = clientArgs.scopedClusterClient;

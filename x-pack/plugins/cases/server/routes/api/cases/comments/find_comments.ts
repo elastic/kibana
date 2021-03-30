@@ -14,6 +14,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
+import { esKuery } from '../../../../../../../../src/plugins/data/server';
 import {
   AssociationType,
   CommentsResponseRt,
@@ -63,6 +64,7 @@ export function initFindCaseCommentsApi({ caseService, router, logger }: RouteDe
 
         const id = query.subCaseId ?? request.params.case_id;
         const associationType = query.subCaseId ? AssociationType.subCase : AssociationType.case;
+        const { filter, ...queryWithoutFilter } = query;
         const args = query
           ? {
               caseService,
@@ -75,7 +77,8 @@ export function initFindCaseCommentsApi({ caseService, router, logger }: RouteDe
                 page: defaultPage,
                 perPage: defaultPerPage,
                 sortField: 'created_at',
-                ...query,
+                filter: filter != null ? esKuery.fromKueryExpression(filter) : filter,
+                ...queryWithoutFilter,
               },
               associationType,
             }
