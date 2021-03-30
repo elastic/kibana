@@ -154,7 +154,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     public async getMarkdownText(): Promise<string> {
-      const el = await find.byCssSelector('.tvbEditorVisualization');
+      const el = await find.byCssSelector('.tvbVis');
       const text = await el.getVisibleText();
       return text;
     }
