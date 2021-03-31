@@ -55,6 +55,8 @@ export const useUpdatePolicy = ({ defaultConfig, newPolicy, onChange, validate }
               break;
             case ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE:
             case ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE:
+              configItem.value = config[key].length ? JSON.stringify(config[key]) : null;
+              break;
             case ConfigKeys.RESPONSE_HEADERS_CHECK:
             case ConfigKeys.RESPONSE_RECEIVE_CHECK:
             case ConfigKeys.RESPONSE_STATUS_CHECK:
