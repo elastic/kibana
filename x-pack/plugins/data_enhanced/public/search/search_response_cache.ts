@@ -71,6 +71,10 @@ export class SearchResponseCache {
     }
   }
 
+  public has(key: string) {
+    return this.responseCache.has(key);
+  }
+
   /**
    *
    * @param key key to cache

@@ -6,7 +6,7 @@
  */
 
 import { once } from 'lodash';
-import { throwError, Subscription, from, of } from 'rxjs';
+import { throwError, Subscription, from, of, fromEvent, EMPTY } from 'rxjs';
 import {
   tap,
   finalize,
@@ -16,7 +16,10 @@ import {
   skip,
   switchMap,
   shareReplay,
+  map,
+  takeUntil,
 } from 'rxjs/operators';
+import { AbortError } from 'src/plugins/kibana_utils/public';
 import {
   TimeoutErrorMode,
   SearchInterceptor,
@@ -77,13 +80,17 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
     return from(sessionId ? createRequestHash(hashOptions) : of(undefined));
   }
 
-  public search({ id, ...request }: IKibanaSearchRequest, options: IAsyncSearchOptions = {}) {
-    const searchOptions = {
-      strategy: ENHANCED_ES_SEARCH_STRATEGY,
-      ...options,
-    };
-    const { sessionId, strategy, abortSignal } = searchOptions;
-    const search = () => this.runSearch({ id, ...request }, searchOptions);
+  /**
+   * @internal
+   * Creates a new pollSearch that share replays its results
+   */
+  private runSearch$(
+    { id, ...request }: IKibanaSearchRequest,
+    options: IAsyncSearchOptions,
+    searchAbortController: SearchAbortController
+  ) {
+    const search = () => this.runSearch({ id, ...request }, options);
+    const { sessionId, strategy } = options;
 
     // track if this search's session will be send to background
     // if yes, then we don't need to cancel this search when it is aborted
@@ -108,63 +115,101 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
       if (id && !isSavedToBackground) this.deps.http.delete(`/internal/search/${strategy}/${id}`);
     });
 
-    return this.createRequestHash$(request, options).pipe(
-      tap(() => {
-        this.pendingCount$.next(this.pendingCount$.getValue() + 1);
+    return pollSearch(search, cancel, {
+      ...options,
+      abortSignal: searchAbortController.getSignal(),
+    }).pipe(
+      tap((response) => (id = response.id)),
+      catchError((e: Error) => {
+        cancel();
+        return throwError(e);
       }),
-      switchMap((requestHash) => {
-        const cached = requestHash ? this.responseCache.get(requestHash) : undefined;
-        const searchAbortController = cached
-          ? cached.searchAbortController
-          : new SearchAbortController(abortSignal, this.searchTimeout);
-
-        if (cached) {
-          if (abortSignal) cached.searchAbortController.addAbortSignal(abortSignal);
+      finalize(() => {
+        searchAbortController.cleanup();
+        if (savedToBackgroundSub) {
+          savedToBackgroundSub.unsubscribe();
         }
+      }),
+      shareReplay(1)
+    );
+  }
 
-        const untrackSearch = this.deps.session.isCurrentSession(options.sessionId)
+  /**
+   * @internal
+   * Creates a new search observable and a corresponding search abort controller
+   * If requestHash is defined, tries to return them first from cache.
+   */
+  private getSearchResponse$(
+    request: IKibanaSearchRequest,
+    options: IAsyncSearchOptions,
+    requestHash?: string
+  ) {
+    const cached = requestHash ? this.responseCache.get(requestHash) : undefined;
+
+    const searchAbortController =
+      cached?.searchAbortController || new SearchAbortController(this.searchTimeout);
+
+    // Create a new abort signal if one was not passed. This fake signal will never be aborted,
+    // So the underlaying search will not be aborted, even if the other consumers abort.
+    searchAbortController.addAbortSignal(options.abortSignal || new AbortController().signal);
+    const response$ = cached?.response$ || this.runSearch$(request, options, searchAbortController);
+
+    if (requestHash && !this.responseCache.has(requestHash)) {
+      this.responseCache.set(requestHash, {
+        response$,
+        searchAbortController,
+      });
+    }
+
+    return {
+      response$,
+      searchAbortController,
+    };
+  }
+
+  public search({ id, ...request }: IKibanaSearchRequest, options: IAsyncSearchOptions = {}) {
+    const searchOptions = {
+      strategy: ENHANCED_ES_SEARCH_STRATEGY,
+      ...options,
+    };
+    const { sessionId, abortSignal } = searchOptions;
+
+    return this.createRequestHash$(request, options).pipe(
+      switchMap((requestHash) => {
+        const { searchAbortController, response$ } = this.getSearchResponse$(
+          request,
+          options,
+          requestHash
+        );
+
+        this.pendingCount$.next(this.pendingCount$.getValue() + 1);
+        const untrackSearch = this.deps.session.isCurrentSession(sessionId)
           ? this.deps.session.trackSearch({ abort: () => searchAbortController.abort() })
           : undefined;
 
-        const search$ = cached
-          ? cached.response$
-          : pollSearch(search, cancel, {
-              ...options,
-              abortSignal: searchAbortController.getSignal(),
-            }).pipe(
-              tap((response) => (id = response.id)),
-              catchError((e: Error) => {
-                cancel();
-                return throwError(
-                  this.handleSearchError(e, options, searchAbortController.isTimeout())
-                );
-              }),
-              finalize(() => {
-                searchAbortController.cleanup();
-                if (savedToBackgroundSub) {
-                  savedToBackgroundSub.unsubscribe();
-                }
-              }),
-              shareReplay(1),
-              finalize(() => {
-                if (untrackSearch && this.deps.session.isCurrentSession(options.sessionId)) {
-                  // untrack if this search still belongs to current session
-                  untrackSearch();
-                }
-              })
+        // Abort the replay if the abortSignal is aborted.
+        // The underlaying search will not abort unless searchAbortController fires.
+        const aborted$ = (abortSignal ? fromEvent(abortSignal, 'abort') : EMPTY).pipe(
+          map(() => {
+            throw new AbortError();
+          })
+        );
+
+        return response$.pipe(
+          takeUntil(aborted$),
+          catchError((e) => {
+            return throwError(
+              this.handleSearchError(e, options, searchAbortController.isTimeout())
             );
-
-        if (requestHash && !cached) {
-          this.responseCache.set(requestHash, {
-            response$: search$,
-            searchAbortController,
-          });
-        }
-
-        return search$;
-      }),
-      finalize(() => {
-        this.pendingCount$.next(this.pendingCount$.getValue() - 1);
+          }),
+          finalize(() => {
+            this.pendingCount$.next(this.pendingCount$.getValue() - 1);
+            if (untrackSearch && this.deps.session.isCurrentSession(sessionId)) {
+              // untrack if this search still belongs to current session
+              untrackSearch();
+            }
+          })
+        );
       })
     );
   }

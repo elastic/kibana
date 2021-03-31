@@ -52,12 +52,7 @@ describe('', () => {
         if (responses[i].rawResponse.throw === true) {
           return throwError('nooo');
         } else {
-          return of({
-            ...responses[i],
-            meta: {
-              size: JSON.stringify(responses[i]).length,
-            },
-          });
+          return of(responses[i]);
         }
       }),
       shareReplay(1)
@@ -231,7 +226,7 @@ describe('', () => {
     test('caches a response and re-emits it', async () => {
       const s$ = getSearchObservable$();
       cache.set('123', wrapWithAbotController(s$));
-      const { meta, ...finalRes } = await cache.get('123')!.response$.toPromise();
+      const finalRes = await cache.get('123')!.response$.toPromise();
       expect(finalRes).toStrictEqual(r[r.length - 1]);
     });
 
@@ -250,7 +245,7 @@ describe('', () => {
       await s$!.toPromise();
 
       // get final response from cached$
-      const { meta, ...finalRes } = await cached$!.response$.toPromise();
+      const finalRes = await cached$!.response$.toPromise();
       expect(finalRes).toStrictEqual(r[r.length - 1]);
       expect(next).toHaveBeenCalledTimes(4);
     });
@@ -275,7 +270,7 @@ describe('', () => {
       // wait for original search to complete
       await s$!.toPromise();
 
-      const { meta, ...finalRes } = await cached$!.toPromise();
+      const finalRes = await cached$!.toPromise();
 
       expect(finalRes).toStrictEqual(r[r.length - 1]);
       expect(next).toHaveBeenCalledTimes(2);
@@ -295,7 +290,7 @@ describe('', () => {
         next,
       });
 
-      const { meta, ...finalRes } = await cached$!.response$.toPromise();
+      const finalRes = await cached$!.response$.toPromise();
 
       expect(finalRes).toStrictEqual(r[r.length - 1]);
       expect(next).toHaveBeenCalledTimes(1);
@@ -314,7 +309,7 @@ describe('', () => {
         next,
       });
 
-      const { meta, ...finalRes } = await cached$!.response$.toPromise();
+      const finalRes = await cached$!.response$.toPromise();
 
       expect(finalRes).toStrictEqual(r[r.length - 1]);
       expect(next).toHaveBeenCalledTimes(1);
