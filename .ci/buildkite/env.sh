@@ -43,6 +43,6 @@ export NODE_VERSION=14.16.0
 
 export DEFAULT_BUILD_LOCATION="$WORKSPACE/kibana-build-xpack"
 
-if [[ "$BUILD_TS_REFS_CACHE_ENABLE" != "true" ]]; then
+if [[ "${BUILD_TS_REFS_CACHE_ENABLE:-}" != "true" ]]; then
   export BUILD_TS_REFS_CACHE_ENABLE=false
 fi

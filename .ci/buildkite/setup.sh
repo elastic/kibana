@@ -19,7 +19,7 @@ echo "build --remote_header=x-buildbuddy-api-key=$KIBANA_BUILDBUDDY_CI_API_KEY" 
 ###
 ### remove write permissions on buildbuddy remote cache for prs
 ###
-if [[ "$BUILDKITE_PULL_REQUEST" && "$BUILDKITE_PULL_REQUEST" != "false" ]] ; then
+if [[ "${BUILDKITE_PULL_REQUEST:-}" && "$BUILDKITE_PULL_REQUEST" != "false" ]] ; then
   {
     echo "# Uploads logs & artifacts without writing to cache"
     echo "build --noremote_upload_local_results"
