@@ -13,6 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const listingTable = getService('listingTable');
   const find = getService('find');
   const retry = getService('retry');
+  const testSubjects = getService('testSubjects');
 
   describe('lens datatable', () => {
     it('should able to sort a table by a column', async () => {
@@ -92,6 +93,57 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.changeTableSortingBy(2, 'ascending');
       await PageObjects.header.waitUntilLoadingHasFinished();
       expect(await PageObjects.lens.getDatatableCellText(0, 2)).to.eql('17,246');
+    });
+
+    it('should show dynamic coloring feature for numeric columns', async () => {
+      await PageObjects.lens.openDimensionEditor('lnsDatatable_metrics > lns-dimensionTrigger');
+      await PageObjects.lens.setTableDynamicColoring('text');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const styleObj = await PageObjects.lens.getDatatableCellStyle(0, 2);
+      expect(styleObj['background-color']).to.be(undefined);
+      expect(styleObj.color).to.be('rgb(235, 244, 242)');
+    });
+
+    it('should allow to color cell background rather than text', async () => {
+      await PageObjects.lens.setTableDynamicColoring('cell');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const styleObj = await PageObjects.lens.getDatatableCellStyle(0, 2);
+      expect(styleObj['background-color']).to.be('rgb(235, 244, 242)');
+      // should also set text color when in cell mode
+      expect(styleObj.color).to.be('rgb(52, 55, 65)');
+    });
+
+    it('should open the palette panel to customize the palette look', async () => {
+      await PageObjects.lens.openTablePalettePanel();
+      await PageObjects.lens.setPalette('custom');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const styleObj = await PageObjects.lens.getDatatableCellStyle(0, 2);
+      expect(styleObj['background-color']).to.be('rgb(187, 218, 211)');
+    });
+
+    it('should set a specific range for the dynamic coloring', async () => {
+      await testSubjects.click('lnsDatatable_dynamicColoring_stopValue_groups_percent');
+      await testSubjects.setValue('lnsDatatable_dynamicColoring_min_range', '20', {
+        clearWithKeyboard: true,
+      });
+      await testSubjects.setValue('lnsDatatable_dynamicColoring_max_range', '30', {
+        clearWithKeyboard: true,
+      });
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const styleObj = await PageObjects.lens.getDatatableCellStyle(0, 2);
+      expect(styleObj['background-color']).to.be('rgb(187, 218, 211)');
+      // should also set text color when in cell mode
+      expect(styleObj.color).to.be('rgb(52, 55, 65)');
+    });
+
+    it('should allow the user to change a step color', async () => {
+      await PageObjects.lens.openColorStopPopup(0);
+      await PageObjects.lens.setColorStopValue(25);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const styleObj = await PageObjects.lens.getDatatableCellStyle(0, 2);
+      expect(styleObj['background-color']).to.be('rgb(34, 68, 61)');
+      // should also set text color when in cell mode
+      expect(styleObj.color).to.be('rgb(255, 255, 255)');
     });
   });
 }

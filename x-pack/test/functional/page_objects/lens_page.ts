@@ -653,6 +653,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return el.getVisibleText();
     },
 
+    async getDatatableCellStyle(rowIndex = 0, colIndex = 0) {
+      const el = await this.getDatatableCell(rowIndex, colIndex);
+      const styleString = await el.getAttribute('style');
+      return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {
+        const [prop, value] = cssLine.split(':');
+        if (prop && value) {
+          memo[prop.trim()] = value.trim();
+        }
+        return memo;
+      }, {});
+    },
+
     async getDatatableHeader(index = 0) {
       return find.byCssSelector(
         `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridHeader"] [role=columnheader]:nth-child(${
@@ -707,6 +719,17 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async setPalette(paletteName: string) {
       await testSubjects.click('lns-palettePicker');
       await find.clickByCssSelector(`#${paletteName}`);
+    },
+
+    async openColorStopPopup(index = 0) {
+      const stopEls = await testSubjects.findAll('euiColorStopThumb');
+      if (stopEls[index]) {
+        await stopEls[index].click();
+      }
+    },
+
+    async setColorStopValue(value: number | string) {
+      await testSubjects.setValue('euiColorStopPopover', '' + value);
     },
 
     async toggleColumnVisibility(dimension: string) {
