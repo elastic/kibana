@@ -195,7 +195,14 @@ const ScheduledQueryFormComponent = ({ defaultValue, editMode = false }) => {
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton color="primary" fill size="m" iconType="save" onClick={submit}>
+                <EuiButton
+                  isLoading={isLoading}
+                  color="primary"
+                  fill
+                  size="m"
+                  iconType="save"
+                  onClick={submit}
+                >
                   Save query
                 </EuiButton>
               </EuiFlexItem>

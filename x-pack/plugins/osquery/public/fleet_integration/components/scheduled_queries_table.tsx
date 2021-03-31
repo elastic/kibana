@@ -20,7 +20,7 @@ export const ScheduledQueryQueriesTable = ({ data, onEditClick }) => {
         color="primary"
         // eslint-disable-next-line react/jsx-no-bind
         onClick={() => onEditClick(item)}
-        iconType="arrowRight"
+        iconType="pencil"
         aria-label={`Edit ${item.vars.id.value}`}
       />
     ),

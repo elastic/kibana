@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { EuiCodeEditor } from '@elastic/eui';
 import 'brace/theme/tomorrow';
 
@@ -30,28 +30,19 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
   defaultValue,
   // disabled,
   onChange,
-}) => {
-  const handleChange = useCallback(
-    (newValue) => {
-      onChange(newValue);
-    },
-    [onChange]
-  );
-
-  return (
-    <EuiCodeEditor
-      value={defaultValue}
-      mode="osquery"
-      // isReadOnly={disabled}
-      theme="tomorrow"
-      onChange={handleChange}
-      name="osquery_editor"
-      setOptions={EDITOR_SET_OPTIONS}
-      editorProps={EDITOR_PROPS}
-      height="100px"
-      width="100%"
-    />
-  );
-};
+}) => (
+  <EuiCodeEditor
+    value={defaultValue}
+    mode="osquery"
+    // isReadOnly={disabled}
+    theme="tomorrow"
+    onChange={onChange}
+    name="osquery_editor"
+    setOptions={EDITOR_SET_OPTIONS}
+    editorProps={EDITOR_PROPS}
+    height="100px"
+    width="100%"
+  />
+);
 
 export const OsqueryEditor = React.memo(OsqueryEditorComponent);

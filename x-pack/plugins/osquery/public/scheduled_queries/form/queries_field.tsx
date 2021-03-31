@@ -7,7 +7,7 @@
 
 /* eslint-disable react/display-name */
 
-import { mapKeys } from 'lodash';
+import { findIndex, mapKeys } from 'lodash';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -47,7 +47,7 @@ interface PropsRepositoryCombobox {
 
 export const QueriesField = ({ field }: PropsRepositoryCombobox) => {
   const [showAddQueryFlyout, setShowAddQueryFlyout] = useState(false);
-  const [showEditQueryFlyout, setShowEditQueryFlyout] = useState(null);
+  const [showEditQueryFlyout, setShowEditQueryFlyout] = useState<number | null>(null);
 
   const handleShowAddFlyout = useCallback(() => setShowAddQueryFlyout(true), []);
   const handleHideAddFlyout = useCallback(() => setShowAddQueryFlyout(false), []);
@@ -57,73 +57,83 @@ export const QueriesField = ({ field }: PropsRepositoryCombobox) => {
 
   console.error('field', field);
 
+  const handleEditClick = useCallback(
+    (stream) => {
+      const streamIndex = findIndex(field.value[0].streams, [
+        'vars.id.value',
+        stream.vars.id.value,
+      ]);
+
+      setShowEditQueryFlyout(streamIndex);
+    },
+    [field.value]
+  );
+
   const handleEditQuery = useCallback(
     (updatedQuery) => {
-      const updatedValue = produce(value, (draft) => {
-        draft[0].streams.push({
-          data_stream: { type: 'logs', dataset: 'osquery_manager.result' },
-          enabled: true,
-          id: 'osquery-osquery_manager.result-7e451187-d06d-4e7e-ae43-88f06e3aa9cd',
-          vars: {
-            id: { type: 'text', value: updatedQuery.id },
-            interval: {
-              type: 'text',
-              value: updatedQuery.interval,
-            },
-            query: { type: 'text', value: updatedQuery.query },
-          },
-        });
-        return draft;
-      });
+      if (showEditQueryFlyout) {
+        setValue(
+          produce((draft) => {
+            draft[0].streams[showEditQueryFlyout] = {
+              data_stream: { type: 'logs', dataset: 'osquery_manager.result' },
+              enabled: true,
+              id: 'osquery-osquery_manager.result-7e451187-d06d-4e7e-ae43-88f06e3aa9cd',
+              vars: {
+                id: { type: 'text', value: updatedQuery.id },
+                interval: {
+                  type: 'text',
+                  value: updatedQuery.interval,
+                },
+                query: { type: 'text', value: updatedQuery.query },
+              },
+            };
+            return draft;
+          })
+        );
+      }
 
-      setValue(updatedValue);
       handleHideEditFlyout();
     },
-    [handleHideEditFlyout, setValue, value]
+    [handleHideEditFlyout, setValue, showEditQueryFlyout]
   );
 
   const handleAddQuery = useCallback(
     (newQuery) => {
-      const updatedValue = produce(value, (draft) => {
-        draft[0].streams.push({
-          data_stream: { type: 'logs', dataset: 'osquery_manager.result' },
-          enabled: true,
-          id: 'osquery-osquery_manager.result-7e451187-d06d-4e7e-ae43-88f06e3aa9cd',
-          vars: {
-            id: { type: 'text', value: newQuery.id },
-            interval: {
-              type: 'text',
-              value: newQuery.interval,
+      setValue(
+        produce((draft) => {
+          draft[0].streams.push({
+            data_stream: { type: 'logs', dataset: 'osquery_manager.result' },
+            enabled: true,
+            id: 'osquery-osquery_manager.result-7e451187-d06d-4e7e-ae43-88f06e3aa9cd',
+            vars: {
+              id: { type: 'text', value: newQuery.id },
+              interval: {
+                type: 'text',
+                value: newQuery.interval,
+              },
+              query: { type: 'text', value: newQuery.query },
             },
-            query: { type: 'text', value: newQuery.query },
-          },
-        });
-        return draft;
-      });
-
-      setValue(updatedValue);
+          });
+          return draft;
+        })
+      );
       handleHideAddFlyout();
     },
-    [handleHideAddFlyout, setValue, value]
+    [handleHideAddFlyout, setValue]
   );
-
-  console.error('aa', showEditQueryFlyout);
 
   return (
     <>
-      <ScheduledQueryQueriesTable
-        data={{ inputs: field.value }}
-        onEditClick={setShowEditQueryFlyout}
-      />
+      <ScheduledQueryQueriesTable data={{ inputs: field.value }} onEditClick={handleEditClick} />
       <EuiSpacer />
       {showAddQueryFlyout && (
         <AddQueryFlyout onSave={handleAddQuery} onClose={handleHideAddFlyout} />
       )}
-      {showEditQueryFlyout && (
+      {showEditQueryFlyout != null && showEditQueryFlyout >= 0 && (
         <EditQueryFlyout
-          defaultValue={showEditQueryFlyout}
+          defaultValue={field.value[0].streams[showEditQueryFlyout]}
           onSave={handleEditQuery}
-          onClose={handleHideAddFlyout}
+          onClose={handleHideEditFlyout}
         />
       )}
       <EuiButton fill onClick={handleShowAddFlyout}>

@@ -20,7 +20,7 @@ export const findScheduledQueryRoute = (router: IRouter, osqueryContext: Osquery
       },
     },
     async (context, request, response) => {
-      const kuery = `ingest-package-policies.attributes.package.name: ${OSQUERY_INTEGRATION_NAME}`;
+      const kuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.package.name: ${OSQUERY_INTEGRATION_NAME}`;
       const packagePolicyService = osqueryContext.service.getPackagePolicyService();
       const policies = await packagePolicyService?.list(context.core.savedObjects.client, {
         kuery,

@@ -22,6 +22,7 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
+  EuiLink,
 } from '@elastic/eui';
 import React from 'react';
 
@@ -59,6 +60,11 @@ export const AddQueryFlyout = ({ onSave, onClose }) => {
       query: {
         type: FIELD_TYPES.TEXT,
         label: 'Query',
+        helpText: (
+          <EuiLink href="https://osquery.io/schema/4.7.0" target="_blank">
+            {'Osquery schema'}
+          </EuiLink>
+        ),
       },
       interval: {
         type: FIELD_TYPES.NUMBER,
