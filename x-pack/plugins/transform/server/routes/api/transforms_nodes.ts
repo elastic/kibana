@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isPopulatedObject } from '../../../common/utils/object_utils';
+import { isPopulatedObject } from '../../../common/shared_imports';
 
 import { RouteDependencies } from '../../types';
 

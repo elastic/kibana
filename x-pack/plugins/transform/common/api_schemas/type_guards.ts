@@ -8,7 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 
 import type { EsIndex } from '../types/es_index';
-import { isPopulatedObject } from '../utils/object_utils';
+import { isPopulatedObject } from '../shared_imports';
 
 // To be able to use the type guards on the client side, we need to make sure we don't import
 // the code of '@kbn/config-schema' but just its types, otherwise the client side code will

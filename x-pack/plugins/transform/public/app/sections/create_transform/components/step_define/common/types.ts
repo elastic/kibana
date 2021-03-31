@@ -24,7 +24,7 @@ import {
 } from '../../../../../../../common/types/transform';
 import { LatestFunctionConfig } from '../../../../../../../common/api_schemas/transforms';
 
-import { isPopulatedObject } from '../../../../../../../common/utils/object_utils';
+import { isPopulatedObject } from '../../../../../../../common/shared_imports';
 
 export interface ErrorMessage {
   query: string;
@@ -70,23 +70,6 @@ export interface StepDefineExposedState {
   runtimeMappings?: RuntimeMappings;
   runtimeMappingsUpdated: boolean;
   isRuntimeMappingsEditorEnabled: boolean;
-}
-
-export function isRuntimeField(arg: unknown): arg is RuntimeField {
-  return (
-    ((isPopulatedObject(arg, ['type']) && Object.keys(arg).length === 1) ||
-      (isPopulatedObject(arg, ['type', 'script']) &&
-        Object.keys(arg).length === 2 &&
-        (typeof arg.script === 'string' ||
-          (isPopulatedObject(arg.script, ['source']) &&
-            Object.keys(arg.script).length === 1 &&
-            typeof arg.script.source === 'string')))) &&
-    RUNTIME_FIELD_TYPES.includes(arg.type as RuntimeType)
-  );
-}
-
-export function isRuntimeMappings(arg: unknown): arg is RuntimeMappings {
-  return isPopulatedObject(arg) && Object.values(arg).every((d) => isRuntimeField(d));
 }
 
 export function isPivotPartialRequest(arg: unknown): arg is { pivot: PivotConfigDefinition } {

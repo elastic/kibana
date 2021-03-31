@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { isRuntimeField, isRuntimeMappings } from './types';
+import { isRuntimeField, isRuntimeMappings } from './runtime_field_utils';
 
-describe('Transform: step_define type guards', () => {
-  it('isRuntimeField()', () => {
+describe('ML runtime field utils', () => {
+  describe('isRuntimeField()', () => {
     expect(isRuntimeField(1)).toBe(false);
     expect(isRuntimeField(null)).toBe(false);
     expect(isRuntimeField([])).toBe(false);
@@ -21,7 +21,7 @@ describe('Transform: step_define type guards', () => {
     expect(isRuntimeField({ type: 'keyword', script: 'some script' })).toBe(true);
   });
 
-  it('isRuntimeMappings()', () => {
+  describe('isRuntimeMappings()', () => {
     expect(isRuntimeMappings(1)).toBe(false);
     expect(isRuntimeMappings(null)).toBe(false);
     expect(isRuntimeMappings([])).toBe(false);

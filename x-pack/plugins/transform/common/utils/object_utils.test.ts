@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getNestedProperty, isPopulatedObject } from './object_utils';
+import { getNestedProperty } from './object_utils';
 
 describe('object_utils', () => {
   test('getNestedProperty()', () => {
@@ -67,27 +67,5 @@ describe('object_utils', () => {
     const test11 = getNestedProperty(falseyObj, 'the.other_nested.value');
     expect(typeof test11).toBe('number');
     expect(test11).toBe(0);
-  });
-
-  test('isPopulatedObject()', () => {
-    expect(isPopulatedObject(0)).toBe(false);
-    expect(isPopulatedObject('')).toBe(false);
-    expect(isPopulatedObject(null)).toBe(false);
-    expect(isPopulatedObject({})).toBe(false);
-    expect(isPopulatedObject({ attribute: 'value' })).toBe(true);
-    expect(isPopulatedObject({ attribute: 'value' }, ['otherAttribute'])).toBe(false);
-    expect(isPopulatedObject({ attribute: 'value' }, ['attribute'])).toBe(true);
-    expect(
-      isPopulatedObject({ attribute1: 'value1', attribute2: 'value2' }, [
-        'attribute1',
-        'attribute2',
-      ])
-    ).toBe(true);
-    expect(
-      isPopulatedObject({ attribute1: 'value1', attribute2: 'value2' }, [
-        'attribute1',
-        'otherAttribute',
-      ])
-    ).toBe(false);
   });
 });
