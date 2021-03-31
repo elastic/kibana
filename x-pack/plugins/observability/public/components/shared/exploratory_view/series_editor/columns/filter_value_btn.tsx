@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { EuiFilterButton, hexToRgb } from '@elastic/eui';
 import { useIndexPatternContext } from '../../hooks/use_default_index_pattern';
@@ -61,9 +61,13 @@ export function FilterValueButton({
           setIsNestedOpen({ value: '', negate });
         }
       }}
-      className=""
     >
-      {negate ? `Not ${value}` : value}
+      {negate
+        ? i18n.translate('xpack.observability.expView.filterValueButton.negate', {
+            defaultMessage: 'Not {value}',
+            values: { value },
+          })
+        : value}
     </FilterButton>
   );
 

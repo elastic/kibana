@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiButtonIcon } from '@elastic/eui';
 import { DataSeries } from '../../types';
@@ -22,7 +23,9 @@ export function RemoveSeries({ series }: Props) {
   };
   return (
     <EuiButtonIcon
-      aria-label={'Click to remove series'}
+      aria-label={i18n.translate('xpack.observability.expView.seriesEditor.removeSeries', {
+        defaultMessage: 'Click to remove series',
+      })}
       iconType="cross"
       color="primary"
       onClick={onClick}

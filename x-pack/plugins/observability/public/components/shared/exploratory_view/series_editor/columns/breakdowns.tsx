@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FieldLabels } from '../../configurations/constants';
@@ -17,8 +17,6 @@ interface Props {
 }
 
 export function Breakdowns({ seriesId, breakdowns = [] }: Props) {
-  const items = breakdowns.map((breakdown) => ({ id: breakdown, label: FieldLabels[breakdown] }));
-
   const { setSeries, series } = useUrlStorage(seriesId);
 
   const selectedBreakdown = series.breakdown;
@@ -38,8 +36,7 @@ export function Breakdowns({ seriesId, breakdowns = [] }: Props) {
     }
   };
 
-  useEffect(() => {}, [selectedBreakdown]);
-
+  const items = breakdowns.map((breakdown) => ({ id: breakdown, label: FieldLabels[breakdown] }));
   items.push({
     id: NO_BREAKDOWN,
     label: i18n.translate('xpack.observability.exp.breakDownFilter.noBreakdown', {
