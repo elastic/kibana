@@ -197,15 +197,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async searchField(name: string) {
-      const fieldSearchTestSubj = 'lnsIndexPatternFieldSearch';
-      await retry.try(async () => {
-        await testSubjects.setValue(fieldSearchTestSubj, '');
-        const val = await (await testSubjects.find(fieldSearchTestSubj)).getAttribute('value');
-        if (val !== '') {
-          throw new Error('not cleared yet');
-        }
+      await testSubjects.setValue('lnsIndexPatternFieldSearch', name, {
+        clearWithKeyboard: true,
+        typeCharByChar: true,
       });
-      await testSubjects.setValue(fieldSearchTestSubj, name);
     },
 
     async waitForField(field: string) {
