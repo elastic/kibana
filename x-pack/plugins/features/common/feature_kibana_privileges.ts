@@ -104,6 +104,34 @@ export interface FeatureKibanaPrivileges {
      */
     read?: readonly string[];
   };
+
+  /**
+   * Solutions should specify owners of alerts here which will provide the solution read / write access to those alerts.
+   */
+  alerts?: {
+    /**
+     * List of owners of alerts which users should have full read/write access to when granted this privilege.
+     * @example
+     * ```ts
+     *  {
+     *    all: ['securitySolution']
+     *  }
+     * ```
+     */
+    all?: readonly string[];
+
+    /**
+     * List of owners of alerts which users should have read-only access to when granted this privilege.
+     * @example
+     * ```ts
+     *  {
+     *    read: ['securitySolution', 'observability']
+     *  }
+     * ```
+     */
+    read?: readonly string[];
+  };
+
   /**
    * If your feature requires access to specific saved objects, then specify your access needs here.
    */
