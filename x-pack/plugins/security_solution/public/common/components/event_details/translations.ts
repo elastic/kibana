@@ -15,8 +15,8 @@ export const THREAT_SUMMARY = i18n.translate('xpack.securitySolution.alertDetail
   defaultMessage: 'Threat Summary',
 });
 
-export const THREAT_INFO = i18n.translate('xpack.securitySolution.alertDetails.threatInfo', {
-  defaultMessage: 'Threat Info',
+export const THREAT_DETAILS = i18n.translate('xpack.securitySolution.alertDetails.threatDetails', {
+  defaultMessage: 'Threat Details',
 });
 
 export const INVESTIGATION_GUIDE = i18n.translate(

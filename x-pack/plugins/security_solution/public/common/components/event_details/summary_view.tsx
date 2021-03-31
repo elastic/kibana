@@ -47,6 +47,7 @@ interface SummaryRow {
     value: string;
     fieldType?: string;
     linkValue?: string;
+    keySuffix?: string;
   };
 }
 type Summary = SummaryRow[];
@@ -108,9 +109,10 @@ const getDescription = ({
   value,
   fieldType = '',
   linkValue,
+  keySuffix,
 }: SummaryRow['description']) => (
   <FormattedFieldValue
-    contextId={`alert-details-value-formatted-field-value-${contextId}-${eventId}-${fieldName}-${value}`}
+    contextId={`alert-details-value-formatted-field-value-${contextId}-${eventId}-${fieldName}-${value}-${keySuffix}`}
     eventId={eventId}
     fieldName={fieldName}
     fieldType={fieldType}
@@ -138,20 +140,31 @@ const getSummary = ({
   if (isDisplayingThreatSummary || isDisplayingThreatInfo) {
     return data.reduce<Summary>((acc, { category, field, originalValue }) => {
       if (isDisplayingThreatInfo && field === 'threat.indicator' && originalValue) {
-        const threatData = Array.isArray(originalValue)
-          ? originalValue.length === 1
-            ? JSON.parse(originalValue[0])
-            : originalValue.map((threatDataItem) => JSON.parse(threatDataItem))
+        const isOriginalValueArray = Array.isArray(originalValue);
+        const isArrayIndexVisible = isOriginalValueArray && originalValue.length > 1;
+        const threatData = isArrayIndexVisible
+          ? originalValue.map((threatDataItem: string) => JSON.parse(threatDataItem))
+          : isOriginalValueArray
+          ? JSON.parse(originalValue[0])
           : JSON.parse(originalValue);
-        return getDataFromSourceHits(threatData).map((threatInfoItem) => ({
-          title: threatInfoItem.field,
-          description: {
-            contextId,
-            eventId,
-            fieldName: threatInfoItem.field,
-            value: threatInfoItem.originalValue[0],
-          },
-        }));
+
+        return getDataFromSourceHits(threatData).map((threatInfoItem) => {
+          const fieldName = `threat.indicator.${
+            isArrayIndexVisible
+              ? threatInfoItem.field.split('.').slice(1).join('.')
+              : threatInfoItem.field
+          }`;
+          return {
+            title: threatInfoItem.field,
+            description: {
+              contextId,
+              eventId,
+              fieldName,
+              value: threatInfoItem.originalValue[0],
+              keySuffix: isArrayIndexVisible ? threatInfoItem.field.split('.')[0] : undefined,
+            },
+          };
+        });
       } else if (
         isDisplayingThreatSummary &&
         field.startsWith('threat.indicator.') &&
@@ -162,7 +175,7 @@ const getSummary = ({
           {
             title: field.substring('threat.indicator.'.length),
             description: {
-              value: originalValue,
+              value: Array.isArray(originalValue) ? originalValue.join(', ') : originalValue,
               contextId,
               eventId,
               fieldName: field,

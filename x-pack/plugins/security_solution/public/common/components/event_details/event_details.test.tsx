@@ -101,7 +101,7 @@ describe('EventDetails', () => {
   });
 
   describe('threat tabs', () => {
-    ['Threat Summary', 'Threat Info'].forEach((tab) => {
+    ['Threat Summary', 'Threat Details'].forEach((tab) => {
       test(`it renders the ${tab} tab`, () => {
         expect(
           alertsWrapper

@@ -664,7 +664,7 @@ export const mockAlertDetailsData = [
   {
     category: 'threat',
     field: 'threat.indicator.matched',
-    values: [`{"verybad":true}`],
-    originalValue: [`{"verybad":true}`],
+    values: [`{"malware":true}`],
+    originalValue: [`{"malware":true}`],
   },
 ];
