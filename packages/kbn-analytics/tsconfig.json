@@ -1,20 +1,19 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
+    "incremental": false,
     "outDir": "./target/types",
     "stripInternal": true,
+    "emitDeclarationOnly": true,
+    "declaration": true,
     "declarationMap": true,
+    "sourceMap": true,
+    "sourceRoot": "../../../../../packages/kbn-analytics/src",
     "types": [
-      "jest",
       "node"
     ]
   },
   "include": [
     "src/**/*"
-  ],
-  "exclude": [
-    "target"
   ]
 }

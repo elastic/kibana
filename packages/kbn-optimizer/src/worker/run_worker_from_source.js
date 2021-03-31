@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * from './src/index';
+require('@kbn/optimizer').registerNodeAutoTranspilation();
+require('./run_worker');
