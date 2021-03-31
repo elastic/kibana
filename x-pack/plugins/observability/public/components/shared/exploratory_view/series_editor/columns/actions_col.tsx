@@ -21,9 +21,9 @@ export function ActionsCol({ series }: Props) {
       <EuiFlexItem grow={false}>
         <SeriesChartTypes seriesId={series.id} defaultChartType={series.seriesTypes[0]} />
       </EuiFlexItem>
-      {series.metricType && (
+      {series.hasMetricType && (
         <EuiFlexItem grow={false}>
-          <MetricSelection seriesId={series.id} isDisabled={!series.metricType} />
+          <MetricSelection seriesId={series.id} isDisabled={!series.hasMetricType} />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

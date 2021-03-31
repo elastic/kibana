@@ -112,6 +112,7 @@ export const KUBERNETES = 'kubernetes';
 export const POD_NAME = 'kubernetes.pod.name';
 
 export const CLIENT_GEO_COUNTRY_ISO_CODE = 'client.geo.country_iso_code';
+export const CLIENT_GEO_COUNTRY_NAME = 'client.geo.country_name';
 
 // RUM Labels
 export const TRANSACTION_URL = 'url.full';

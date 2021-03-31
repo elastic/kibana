@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, within } from '@testing-library/react';
+import { within } from '@testing-library/react';
 import { fireEvent, screen, waitFor } from '@testing-library/dom';
 import { render, mockUrlStorage, mockCore } from './rtl_helpers';
 import { ExploratoryView } from './exploratory_view';
@@ -52,9 +52,7 @@ describe('ExploratoryView', () => {
   it('can add, cancel new series', async () => {
     render(<ExploratoryView />);
 
-    await act(async () => {
-      await fireEvent.click(screen.getByText(/add series/i));
-    });
+    await fireEvent.click(screen.getByText(/add series/i));
 
     await waitFor(() => {
       screen.getByText(/open in lens/i);
@@ -64,9 +62,7 @@ describe('ExploratoryView', () => {
       within(button).getByText(/add/i);
     });
 
-    await act(async () => {
-      await fireEvent.click(screen.getByText(/cancel/i));
-    });
+    await fireEvent.click(screen.getByText(/cancel/i));
 
     await waitFor(() => {
       screen.getByText(/add series/i);

@@ -54,7 +54,7 @@ export function ExploratoryView() {
 
       {lensAttributes && seriesId && series?.reportType && series?.time ? (
         <LensComponent
-          id=""
+          id="exploratoryView"
           style={{ height: 550 }}
           timeRange={series?.time}
           attributes={lensAttributes}

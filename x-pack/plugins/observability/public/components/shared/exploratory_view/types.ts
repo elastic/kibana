@@ -57,7 +57,7 @@ export interface DataSeries {
   filters?: PersistableFilter[];
   reportDefinitions: ReportDefinition[];
   labels: Record<string, string>;
-  metricType: boolean;
+  hasMetricType: boolean;
   palette?: PaletteOutput;
 }
 

@@ -15,6 +15,8 @@ import {
   SeriesType,
   TypedLensByValueInput,
   XYState,
+  XYCurveType,
+  DataType,
 } from '../../../../../../lens/public';
 import {
   buildPhraseFilter,
@@ -23,11 +25,6 @@ import {
 } from '../../../../../../../../src/plugins/data/common';
 import { FieldLabels } from './constants';
 import { DataSeries, UrlFilter } from '../types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { XYCurveType } from '../../../../../../lens/public/xy_visualization/types';
-
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { DataType } from '../../../../../../lens/public/types';
 
 function getLayerReferenceName(layerId: string) {
   return `indexpattern-datasource-layer-${layerId}`;
@@ -170,7 +167,7 @@ export class LensAttributes {
       dataType: 'number',
       isBucketed: false,
       label: 'Count of records',
-      operationType: 'count' as any,
+      operationType: 'count',
       scale: 'ratio',
       sourceField: 'Records',
       ...this.reportViewConfig.yAxisColumn,
@@ -193,13 +190,11 @@ export class LensAttributes {
       legend: { isVisible: true, position: 'right' },
       valueLabels: 'hide',
       fittingFunction: 'Linear',
-      // fittingFunction: 'None',
       curveType: 'CURVE_MONOTONE_X' as XYCurveType,
       axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
       gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       preferredSeriesType: 'line',
-      // preferredSeriesType: 'bar_stacked',
       layers: [
         {
           accessors: ['y-axis-column'],

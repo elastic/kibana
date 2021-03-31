@@ -27,7 +27,7 @@ export function getCPUUsageLensConfig({ seriesId }: Props): DataSeries {
       sourceField: 'system.cpu.user.pct',
       label: 'CPU Usage %',
     },
-    metricType: true,
+    hasMetricType: true,
     defaultFilters: [],
     breakdowns: ['host.hostname'],
     filters: [],

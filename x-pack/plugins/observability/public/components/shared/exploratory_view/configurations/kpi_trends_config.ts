@@ -8,6 +8,17 @@
 import { ConfigProps, DataSeries } from '../types';
 import { FieldLabels } from './constants';
 import { buildPhraseFilter } from './utils';
+import {
+  CLIENT_GEO_COUNTRY_NAME,
+  PROCESSOR_EVENT,
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  TRANSACTION_TYPE,
+  USER_AGENT_DEVICE,
+  USER_AGENT_NAME,
+  USER_AGENT_OS,
+  USER_AGENT_VERSION,
+} from './data/elasticsearch_fieldnames';
 
 export function getKPITrendsLensConfig({ seriesId, indexPattern }: ConfigProps): DataSeries {
   return {
@@ -22,34 +33,29 @@ export function getKPITrendsLensConfig({ seriesId, indexPattern }: ConfigProps):
       operationType: 'count',
       label: 'Page views',
     },
-    metricType: false,
+    hasMetricType: false,
     defaultFilters: [
-      'user_agent.os.name',
-      'client.geo.country_name',
-      'user_agent.device.name',
+      USER_AGENT_OS,
+      CLIENT_GEO_COUNTRY_NAME,
+      USER_AGENT_DEVICE,
       {
-        field: 'user_agent.name',
-        nested: 'user_agent.version',
+        field: USER_AGENT_NAME,
+        nested: USER_AGENT_VERSION,
       },
     ],
-    breakdowns: [
-      'user_agent.name',
-      'user_agent.os.name',
-      'client.geo.country_name',
-      'user_agent.device.name',
-    ],
+    breakdowns: [USER_AGENT_NAME, USER_AGENT_OS, CLIENT_GEO_COUNTRY_NAME, USER_AGENT_DEVICE],
     filters: [
-      buildPhraseFilter('transaction.type', 'page-load', indexPattern),
-      buildPhraseFilter('processor.event', 'transaction', indexPattern),
+      buildPhraseFilter(TRANSACTION_TYPE, 'page-load', indexPattern),
+      buildPhraseFilter(PROCESSOR_EVENT, 'transaction', indexPattern),
     ],
-    labels: { ...FieldLabels, 'service.name': 'Web Application' },
+    labels: { ...FieldLabels, SERVICE_NAME: 'Web Application' },
     reportDefinitions: [
       {
-        field: 'service.name',
+        field: SERVICE_NAME,
         required: true,
       },
       {
-        field: 'service.environment',
+        field: SERVICE_ENVIRONMENT,
       },
       {
         field: 'Business.KPI',

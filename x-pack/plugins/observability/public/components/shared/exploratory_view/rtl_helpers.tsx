@@ -8,13 +8,13 @@
 import { of } from 'rxjs';
 import React, { ReactElement } from 'react';
 import { stringify } from 'query-string';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { render as reactTestLibRender, RenderOptions } from '@testing-library/react';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory, History } from 'history';
 import { CoreStart } from 'kibana/public';
 import { I18nProvider } from '@kbn/i18n/react';
 import { coreMock } from 'src/core/public/mocks';
-import { configure } from '@testing-library/dom';
 import {
   KibanaServices,
   KibanaContextProvider,
@@ -36,7 +36,7 @@ import * as useValuesListHook from '../../../hooks/use_values_list';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getStubIndexPattern } from '../../../../../../../src/plugins/data/public/index_patterns/index_pattern.stub';
-import indexPatternData from './configurations/data/index_pattern.json';
+import indexPatternData from './configurations/data/test_index_pattern.json';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { setIndexPatterns } from '../../../../../../../src/plugins/data/public/services';
@@ -173,7 +173,6 @@ export function MockRouter<ExtraCore>({
     </Router>
   );
 }
-configure({ testIdAttribute: 'data-test-subj' });
 
 /* Custom react testing library render */
 export function render<ExtraCore>(

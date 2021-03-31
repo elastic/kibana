@@ -24,7 +24,7 @@ export function getLogsFrequencyLensConfig({ seriesId }: Props): DataSeries {
     yAxisColumn: {
       operationType: 'count',
     },
-    metricType: false,
+    hasMetricType: false,
     defaultFilters: [],
     breakdowns: ['agent.hostname'],
     filters: [],

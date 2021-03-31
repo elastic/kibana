@@ -27,7 +27,7 @@ export function getMonitorDurationConfig({ seriesId }: Props): DataSeries {
       sourceField: 'monitor.duration.us',
       label: 'Monitor duration (ms)',
     },
-    metricType: true,
+    hasMetricType: true,
     defaultFilters: ['monitor.type', 'observer.geo.name', 'tags'],
     breakdowns: [
       'observer.geo.name',

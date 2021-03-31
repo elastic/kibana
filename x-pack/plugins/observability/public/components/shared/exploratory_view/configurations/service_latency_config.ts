@@ -24,7 +24,7 @@ export function getServiceLatencyLensConfig({ seriesId, indexPattern }: ConfigPr
       sourceField: 'transaction.duration.us',
       label: 'Latency',
     },
-    metricType: true,
+    hasMetricType: true,
     defaultFilters: [
       'user_agent.name',
       'user_agent.os.name',

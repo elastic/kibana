@@ -10,7 +10,7 @@
   "include": [
     "common/**/*",
     "public/**/*",
-    "public/components/shared/exploratory_view/configurations/data/index_pattern.json",
+    "public/**/*.json",
     "server/**/*",
     "typings/**/*",
     "../../../typings/**/*"

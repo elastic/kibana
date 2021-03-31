@@ -35,16 +35,16 @@ export function DataTypesCol() {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
-      {dataTypes.map(({ id: dt, label }) => (
-        <EuiFlexItem key={dt}>
+      {dataTypes.map(({ id: dataTypeId, label }) => (
+        <EuiFlexItem key={dataTypeId}>
           <EuiButton
             size="s"
             iconSide="right"
             iconType="arrowRight"
-            color={selectedDataType === dt ? 'primary' : 'text'}
-            fill={selectedDataType === dt}
+            color={selectedDataType === dataTypeId ? 'primary' : 'text'}
+            fill={selectedDataType === dataTypeId}
             onClick={() => {
-              onDataTypeChange(dt === selectedDataType ? undefined : dt);
+              onDataTypeChange(dataTypeId === selectedDataType ? undefined : dataTypeId);
             }}
           >
             {label}

@@ -8,14 +8,23 @@
 import { ConfigProps, DataSeries } from '../types';
 import { FieldLabels } from './constants';
 import { buildPhraseFilter } from './utils';
-
-export const TRANSACTION_DURATION = 'transaction.duration.us';
-export const FCP_FIELD = 'transaction.marks.agent.firstContentfulPaint';
-export const LCP_FIELD = 'transaction.marks.agent.largestContentfulPaint';
-export const TBT_FIELD = 'transaction.experience.tbt';
-export const FID_FIELD = 'transaction.experience.fid';
-export const CLS_FIELD = 'transaction.experience.cls';
-export const SERVICE_NAME = 'service.name';
+import {
+  CLIENT_GEO_COUNTRY_NAME,
+  CLS_FIELD,
+  FCP_FIELD,
+  FID_FIELD,
+  LCP_FIELD,
+  PROCESSOR_EVENT,
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  TBT_FIELD,
+  TRANSACTION_DURATION,
+  TRANSACTION_TYPE,
+  USER_AGENT_DEVICE,
+  USER_AGENT_NAME,
+  USER_AGENT_OS,
+  USER_AGENT_VERSION,
+} from './data/elasticsearch_fieldnames';
 
 export function getPerformanceDistLensConfig({ seriesId, indexPattern }: ConfigProps): DataSeries {
   return {
@@ -30,29 +39,24 @@ export function getPerformanceDistLensConfig({ seriesId, indexPattern }: ConfigP
       operationType: 'count',
       label: 'Pages loaded',
     },
-    metricType: false,
+    hasMetricType: false,
     defaultFilters: [
-      'user_agent.os.name',
-      'client.geo.country_name',
-      'user_agent.device.name',
+      USER_AGENT_OS,
+      CLIENT_GEO_COUNTRY_NAME,
+      USER_AGENT_DEVICE,
       {
-        field: 'user_agent.name',
-        nested: 'user_agent.version',
+        field: USER_AGENT_NAME,
+        nested: USER_AGENT_VERSION,
       },
     ],
-    breakdowns: [
-      'user_agent.name',
-      'user_agent.os.name',
-      'client.geo.country_name',
-      'user_agent.device.name',
-    ],
+    breakdowns: [USER_AGENT_NAME, USER_AGENT_OS, CLIENT_GEO_COUNTRY_NAME, USER_AGENT_DEVICE],
     reportDefinitions: [
       {
-        field: 'service.name',
+        field: SERVICE_NAME,
         required: true,
       },
       {
-        field: 'service.environment',
+        field: SERVICE_ENVIRONMENT,
       },
       {
         field: 'performance.metric',
@@ -62,6 +66,7 @@ export function getPerformanceDistLensConfig({ seriesId, indexPattern }: ConfigP
           { label: 'Page load time', field: TRANSACTION_DURATION },
           { label: 'First contentful paint', field: FCP_FIELD },
           { label: 'Total blocking time', field: TBT_FIELD },
+          // FIXME, review if we need these descriptions
           { label: 'Largest contentful paint', field: LCP_FIELD, description: 'Core web vital' },
           { label: 'First input delay', field: FID_FIELD, description: 'Core web vital' },
           { label: 'Cumulative layout shift', field: CLS_FIELD, description: 'Core web vital' },
@@ -69,12 +74,12 @@ export function getPerformanceDistLensConfig({ seriesId, indexPattern }: ConfigP
       },
     ],
     filters: [
-      buildPhraseFilter('transaction.type', 'page-load', indexPattern),
-      buildPhraseFilter('processor.event', 'transaction', indexPattern),
+      buildPhraseFilter(TRANSACTION_TYPE, 'page-load', indexPattern),
+      buildPhraseFilter(PROCESSOR_EVENT, 'transaction', indexPattern),
     ],
     labels: {
       ...FieldLabels,
-      'service.name': 'Web Application',
+      [SERVICE_NAME]: 'Web Application',
       [TRANSACTION_DURATION]: 'Page load time',
     },
   };

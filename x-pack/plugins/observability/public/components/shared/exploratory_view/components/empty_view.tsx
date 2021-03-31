@@ -28,5 +28,5 @@ export function EmptyView() {
 const Wrapper = styled.div`
   text-align: center;
   opacity: 0.4;
-  height: 550pz;
+  height: 550px;
 `;

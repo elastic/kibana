@@ -71,7 +71,7 @@ export function FilterLabel({
   return indexPattern ? (
     <FilterItem
       indexPatterns={[indexPattern]}
-      id="browser"
+      id={`${field}-${value}-${negate}`}
       filter={filter}
       onRemove={() => {
         removeFilter(field, value, false);
