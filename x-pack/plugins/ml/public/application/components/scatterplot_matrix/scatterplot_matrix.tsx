@@ -26,6 +26,7 @@ import { i18n } from '@kbn/i18n';
 
 import { IndexPattern } from '../../../../../../../src/plugins/data/public';
 import { extractErrorMessage } from '../../../../common';
+import { isRuntimeMappings } from '../../../../common/util/runtime_field_utils';
 import { stringHash } from '../../../../common/util/string_utils';
 import { RuntimeMappings } from '../../../../common/types/fields';
 import type { ResultsSearchQuery } from '../../data_frame_analytics/common/analytics';
@@ -203,7 +204,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
             query,
             from: 0,
             size: fetchSize,
-            ...(combinedRuntimeMappings && Object.keys(combinedRuntimeMappings).length > 0
+            ...(isRuntimeMappings(combinedRuntimeMappings)
               ? { runtime_mappings: combinedRuntimeMappings }
               : {}),
           },

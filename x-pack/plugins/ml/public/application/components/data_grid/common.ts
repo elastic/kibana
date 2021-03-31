@@ -51,6 +51,7 @@ import { mlFieldFormatService } from '../../services/field_format_service';
 import { DataGridItem, IndexPagination, RenderCellValue } from './types';
 import { RuntimeMappings, RuntimeField } from '../../../../common/types/fields';
 import { isPopulatedObject } from '../../../../common/util/object_utils';
+import { isRuntimeMappings } from '../../../../common/util/runtime_field_utils';
 
 export const INIT_MAX_COLUMNS = 10;
 export const COLUMN_CHART_DEFAULT_VISIBILITY_ROWS_THRESHOLED = 10000;
@@ -132,20 +133,20 @@ export function getCombinedRuntimeMappings(
   if (indexPattern) {
     const computedFields = indexPattern?.getComputedFields();
     if (computedFields?.runtimeFields !== undefined) {
-      const ipRuntimeMappings = computedFields.runtimeFields;
-      if (isPopulatedObject(ipRuntimeMappings)) {
-        combinedRuntimeMappings = { ...combinedRuntimeMappings, ...ipRuntimeMappings };
+      const indexPatternRuntimeMappings = computedFields.runtimeFields;
+      if (isRuntimeMappings(indexPatternRuntimeMappings)) {
+        combinedRuntimeMappings = { ...combinedRuntimeMappings, ...indexPatternRuntimeMappings };
       }
     }
   }
 
   // Use runtime field mappings defined inline from API
   // and override fields with same name from index pattern
-  if (isPopulatedObject(runtimeMappings)) {
+  if (isRuntimeMappings(runtimeMappings)) {
     combinedRuntimeMappings = { ...combinedRuntimeMappings, ...runtimeMappings };
   }
 
-  if (isPopulatedObject<RuntimeMappings>(combinedRuntimeMappings)) {
+  if (isRuntimeMappings(combinedRuntimeMappings)) {
     return combinedRuntimeMappings;
   }
 }

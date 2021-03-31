@@ -31,7 +31,10 @@ import {
 } from '../../../../common/analytics';
 import { getScatterplotMatrixLegendType } from '../../../../common/get_scatterplot_matrix_legend_type';
 import { RuntimeMappings as RuntimeMappingsType } from '../../../../../../../common/types/fields';
-import { isPopulatedObject } from '../../../../../../../common/util/object_utils';
+import {
+  isRuntimeMappings,
+  isRuntimeField,
+} from '../../../../../../../common/util/runtime_field_utils';
 import { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
 import { Messages } from '../shared';
 import {
@@ -81,8 +84,7 @@ function getRuntimeDepVarOptions(jobType: AnalyticsJobType, runtimeMappings: Run
   const runtimeOptions: EuiComboBoxOptionOption[] = [];
   Object.keys(runtimeMappings).forEach((id) => {
     const field = runtimeMappings[id];
-    // @ts-ignore
-    if (shouldAddAsDepVarOption(id, field.type, jobType)) {
+    if (isRuntimeField(field) && shouldAddAsDepVarOption(id, field.type, jobType)) {
       runtimeOptions.push({
         label: id,
         key: `runtime_mapping_${id}`,
@@ -210,7 +212,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
 
         if (
           isClone &&
-          isPopulatedObject(formState.runtimeMappings) &&
+          isRuntimeMappings(formState.runtimeMappings) &&
           Object.keys(formState.runtimeMappings).includes(form.dependentVariable)
         ) {
           resetDependentVariable = false;
@@ -253,6 +255,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
     // Ensure runtime field is in 'includes' table if it is set as dependent variable
     const formCopy = cloneDeep(form);
     const depVarIsRuntimeField =
+      isJobTypeWithDepVar &&
       runtimeMappings &&
       Object.keys(runtimeMappings).includes(dependentVariable) &&
       includes.length > 0;
@@ -283,6 +286,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
         setFormState({
           ...(shouldUpdateModelMemoryLimit ? { modelMemoryLimit: expectedMemory } : {}),
           requiredFieldsError: !hasRequiredFields ? requiredFieldsErrorText : undefined,
+          includes: unique ? unique : formCopy.includes,
         });
       } else {
         setFormState({
@@ -370,7 +374,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
           dependentVariable: '',
           includes: includes.filter((field) => {
             const isRemovedRuntimeField = previousRuntimeMapping && previousRuntimeMapping[field];
-            return field !== dependentVariable || !isRemovedRuntimeField;
+            return field !== dependentVariable && !isRemovedRuntimeField;
           }),
         });
       } else if (hasBasicRequiredFields && hasRequiredAnalysisFields) {

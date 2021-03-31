@@ -25,6 +25,7 @@ import { useMlContext } from '../../../../../contexts/ml';
 import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { XJson } from '../../../../../../../../../../src/plugins/es_ui_shared/public';
 import { getCombinedRuntimeMappings } from '../../../../../components/data_grid/common';
+import { isPopulatedObject } from '../../../../../../../common/util/object_utils';
 import { RuntimeMappingsEditor } from './runtime_mappings_editor';
 
 const advancedEditorsSidebarWidth = '220px';
@@ -137,7 +138,7 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
       >
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem grow={true}>
-            {runtimeMappings !== undefined && Object.keys(runtimeMappings).length > 0 ? (
+            {isPopulatedObject(runtimeMappings) ? (
               <FormattedMessage
                 id="xpack.ml.dataframe.analytics.createWizard.runtimeMappingsListLabel"
                 defaultMessage="{runtimeFields}"
