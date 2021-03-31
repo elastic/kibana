@@ -24,10 +24,32 @@ const initTestBed = registerTestBed<RestoreSnapshotFormTestSubject>(
 );
 
 const setupActions = (testBed: TestBed<RestoreSnapshotFormTestSubject>) => {
-  const { find, component, form } = testBed;
+  const { find, component, form, exists } = testBed;
   return {
     findDataStreamCallout() {
       return find('dataStreamWarningCallOut');
+    },
+
+    goToNextStep() {
+      act(() => {
+        find('restoreSnapshotsForm.nextButton').simulate('click');
+      });
+      component.update();
+    },
+
+    canGoToADifferentStep() {
+      const canGoNext = find('restoreSnapshotsForm.nextButton').props().disabled !== true;
+      const canGoPrevious = exists('restoreSnapshotsForm.backButton')
+        ? find('restoreSnapshotsForm.nextButton').props().disabled !== true
+        : true;
+      return canGoNext && canGoPrevious;
+    },
+
+    toggleModifyIndexSettings() {
+      act(() => {
+        form.toggleEuiSwitch('modifyIndexSettingsSwitch');
+      });
+      component.update();
     },
 
     toggleGlobalState() {
@@ -59,4 +81,7 @@ export type RestoreSnapshotFormTestSubject =
   | 'snapshotRestoreStepLogistics'
   | 'includeGlobalStateSwitch'
   | 'systemIndicesInfoCallOut'
-  | 'dataStreamWarningCallOut';
+  | 'dataStreamWarningCallOut'
+  | 'restoreSnapshotsForm.backButton'
+  | 'restoreSnapshotsForm.nextButton'
+  | 'modifyIndexSettingsSwitch';
