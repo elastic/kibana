@@ -48,3 +48,4 @@ export const LodashFp = require('lodash/fp');
 export const TsLib = require('tslib');
 export const KbnAnalytics = require('@kbn/analytics');
 export const KbnStd = require('@kbn/std');
+export const SaferLodashSet = require('@elastic/safer-lodash-set');
