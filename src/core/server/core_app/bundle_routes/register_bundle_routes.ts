@@ -27,7 +27,7 @@ import { registerRouteForBundle } from './bundles_route';
  */
 export function registerBundleRoutes({
   router,
-  serverBasePath, // serverBasePath
+  serverBasePath,
   uiPlugins,
   packageInfo,
 }: {
