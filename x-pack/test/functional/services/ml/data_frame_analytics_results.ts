@@ -10,7 +10,8 @@ import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrap
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-import type { CanvasElementColorStats, MlCommonUI } from './common_ui';
+import type { CanvasElementColorStats } from '../canvas_element';
+import type { MlCommonUI } from './common_ui';
 
 export function MachineLearningDataFrameAnalyticsResultsProvider(
   { getService }: FtrProviderContext,
