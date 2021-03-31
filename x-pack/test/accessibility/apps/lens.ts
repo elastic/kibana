@@ -112,8 +112,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    // Skip until https://github.com/elastic/kibana/issues/88661 gets closed
-    it.skip('lens XY chart with multiple layers', async () => {
+    it('lens XY chart with multiple layers', async () => {
       await PageObjects.lens.createLayer();
 
       await PageObjects.lens.switchToVisualization('area');
