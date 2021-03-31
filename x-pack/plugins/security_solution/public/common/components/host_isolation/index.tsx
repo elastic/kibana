@@ -6,10 +6,15 @@
  */
 
 import React from 'react';
-import { EuiFlyout } from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutBody } from '@elastic/eui';
+import { HostIsolationContent } from './content';
 
 export const HostIsolationModal = React.memo(() => {
-  return <EuiFlyout />;
+  return (
+    <EuiFlyoutBody>
+      <HostIsolationContent />
+    </EuiFlyoutBody>
+  );
 });
 
 HostIsolationModal.displayName = 'HostIsolationModal';

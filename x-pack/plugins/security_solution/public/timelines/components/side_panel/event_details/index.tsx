@@ -82,9 +82,9 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
       </EuiFlyoutHeader>
       <StyledEuiFlyoutBody>
         <EuiFlexGroup>
-          {isEndpointAlert && (
+          {!isEndpointAlert && (
             <EuiFlexItem>
-              <EuiButton onClick={}>
+              <EuiButton onClick={console.log('wow')}>
                 <FormattedMessage id="tempHi" defaultMessage="Hi" />
               </EuiButton>
             </EuiFlexItem>

@@ -11,6 +11,7 @@ import {
   EuiTextColor,
   EuiLoadingContent,
   EuiTitle,
+  EuiText,
   EuiSpacer,
   EuiDescriptionList,
   EuiDescriptionListTitle,
@@ -31,6 +32,7 @@ import {
 import { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import { LineClamp } from '../../../../common/components/line_clamp';
 import * as i18n from './translations';
+import { HostIsolationContent } from '../../../../common/components/host_isolation/content';
 
 export type HandleOnEventClosed = () => void;
 interface Props {
@@ -137,6 +139,9 @@ export const ExpandableEvent = React.memo<Props>(
             view={view}
           />
         </StyledEuiFlexItem>
+        <EuiFlexItem>
+          <HostIsolationContent />
+        </EuiFlexItem>
       </StyledFlexGroup>
     );
   }
