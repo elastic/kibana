@@ -44,7 +44,7 @@ describe('artifact_client', () => {
     test('can delete artifact', async () => {
       await artifactClient.deleteArtifact('endpoint-trustlist-linux-v1-sha26hash');
       expect(fleetArtifactClient.listArtifacts).toHaveBeenCalledWith({
-        kuery: `decodedSha256: "sha26hash" AND identifier: "endpoint-trustlist-linux-v1"`,
+        kuery: `decoded_sha256: "sha26hash" AND identifier: "endpoint-trustlist-linux-v1"`,
         perPage: 1,
       });
       expect(fleetArtifactClient.deleteArtifact).toHaveBeenCalledWith('123');
