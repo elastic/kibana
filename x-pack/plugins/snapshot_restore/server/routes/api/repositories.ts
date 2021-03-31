@@ -111,12 +111,18 @@ export function registerRepositoriesRoutes({
         return handleEsError({ error: e, response: res });
       }
 
-      const { snapshots } = await clusterClient.asCurrentUser.snapshot.get('snapshot.get', {
-        repository: name,
-        snapshot: '_all',
-      }).catch((e: any) => ({
-        snapshots: null,
-      }));
+      const {
+        body: { snapshots },
+      } = await clusterClient.asCurrentUser.snapshot
+        .get({
+          repository: name,
+          snapshot: '_all',
+        })
+        .catch((e) => ({
+          body: {
+            snapshots: null,
+          },
+        }));
 
       if (repositoryByName[name]) {
         const { type = '', settings = {} } = repositoryByName[name];

@@ -67,23 +67,24 @@ export function registerSnapshotsRoutes({
       const fetchSnapshotsForRepository = async (repository: string) => {
         try {
           // If any of these repositories 504 they will cost the request significant time.
-          const {
-            snapshots: fetchedSnapshots,
-          }: {
-            snapshots: SnapshotDetailsEs[];
-          } = await clusterClient.asCurrentUser.snapshot.get('snapshot.get', {
+          const response = await clusterClient.asCurrentUser.snapshot.get({
             repository,
             snapshot: '_all',
             ignore_unavailable: true, // Allow request to succeed even if some snapshots are unavailable.
           });
 
-          // @ts-expect-error @elastic/elasticsearch remove this "as unknown" workaround when the types for this endpoint are correct. Track progress at https://github.com/elastic/elastic-client-generator/issues/250.
-          const { responses: fetchedResponses } = response.body;
+          const { snapshots: fetchedSnapshots } = response.body;
 
           // Decorate each snapshot with the repository with which it's associated.
 
-          fetchedSnapshots.forEach((snapshot: SnapshotDetailsEs) => {
-            snapshots.push(deserializeSnapshotDetails(repository, snapshot, managedRepository));
+          fetchedSnapshots.forEach((snapshot) => {
+            snapshots.push(
+              deserializeSnapshotDetails(
+                repository,
+                snapshot as SnapshotDetailsEs,
+                managedRepository
+              )
+            );
           });
 
           repositories.push(repository);
@@ -124,15 +125,13 @@ export function registerSnapshotsRoutes({
       const managedRepository = await getManagedRepositoryName(clusterClient.asCurrentUser);
 
       try {
-        const {
-          snapshots: fetchedSnapshots,
-        }: {
-          snapshots: SnapshotDetailsEs[];
-        } = await clusterClient.asCurrentUser.snapshot.get('snapshot.get', {
+        const response = await clusterClient.asCurrentUser.snapshot.get({
           repository,
           snapshot: '_all',
           ignore_unavailable: true,
         });
+
+        const fetchedSnapshots = response.body.snapshots;
 
         const selectedSnapshot = fetchedSnapshots.find(
           ({ snapshot: snapshotName }) => snapshot === snapshotName
