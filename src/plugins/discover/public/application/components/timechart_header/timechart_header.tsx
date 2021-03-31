@@ -15,9 +15,11 @@ import {
   EuiSelect,
   EuiIconTip,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import './timechart_header.scss';
 import moment from 'moment';
+import { i18n } from '@kbn/i18n';
+import dateMath from '@elastic/datemath';
+import { DataPublicPluginStart } from '../../../../../data/public';
+import './timechart_header.scss';
 
 export interface TimechartHeaderProps {
   /**
@@ -32,13 +34,7 @@ export interface TimechartHeaderProps {
     description?: string;
     scale?: number;
   };
-  /**
-   * Range of dates to be displayed
-   */
-  timeRange?: {
-    from: string;
-    to: string;
-  };
+  data: DataPublicPluginStart;
   /**
    * Interval Options
    */
@@ -56,21 +52,27 @@ export interface TimechartHeaderProps {
 export function TimechartHeader({
   bucketInterval,
   dateFormat,
-  timeRange,
+  data,
   options,
   onChangeInterval,
   stateInterval,
 }: TimechartHeaderProps) {
+  const { timefilter } = data.query.timefilter;
+  const { from, to } = timefilter.getTime();
+  const timeRange = {
+    from: dateMath.parse(from),
+    to: dateMath.parse(to, { roundUp: true }),
+  };
   const [interval, setInterval] = useState(stateInterval);
   const toMoment = useCallback(
-    (datetime: string) => {
+    (datetime: moment.Moment | undefined) => {
       if (!datetime) {
         return '';
       }
       if (!dateFormat) {
-        return datetime;
+        return String(datetime);
       }
-      return moment(datetime).format(dateFormat);
+      return datetime.format(dateFormat);
     },
     [dateFormat]
   );

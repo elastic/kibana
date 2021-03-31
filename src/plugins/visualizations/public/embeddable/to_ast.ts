@@ -10,7 +10,7 @@ import { ExpressionFunctionKibana, ExpressionFunctionKibanaContext } from '../..
 import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
 
 import { VisToExpressionAst } from '../types';
-import { queryToAst } from '../../../data/common';
+import { queryToAst, filtersToAst } from '../../../data/common';
 
 /**
  * Creates an ast expression for a visualization based on kibana context (query, filters, timerange)
@@ -22,12 +22,15 @@ import { queryToAst } from '../../../data/common';
 export const toExpressionAst: VisToExpressionAst = async (vis, params) => {
   const { savedSearchId, searchSource } = vis.data;
   const query = searchSource?.getField('query');
-  const filters = searchSource?.getField('filter');
+  let filters = searchSource?.getField('filter');
+  if (typeof filters === 'function') {
+    filters = filters();
+  }
 
   const kibana = buildExpressionFunction<ExpressionFunctionKibana>('kibana', {});
   const kibanaContext = buildExpressionFunction<ExpressionFunctionKibanaContext>('kibana_context', {
     q: query && queryToAst(query),
-    filters: filters && JSON.stringify(filters),
+    filters: filters && filtersToAst(filters),
     savedSearchId,
   });
 

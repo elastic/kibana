@@ -19,6 +19,7 @@ import { formatHistogramData } from '../common';
 import { buildUniquePrivateIpsQuery } from './query.network_kpi_unique_private_ips.dsl';
 
 export const networkKpiUniquePrivateIps: SecuritySolutionFactory<NetworkKpiQueries.uniquePrivateIps> = {
+  // @ts-expect-error auto_date_histogram.buckets is incompatible
   buildDsl: (options: NetworkKpiUniquePrivateIpsRequestOptions) =>
     buildUniquePrivateIpsQuery(options),
   parse: async (

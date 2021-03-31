@@ -1,6 +1,16 @@
 {
   "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./target",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "sourceRoot": "../../../../packages/elastic-datemath/src",
+    "types": [
+      "node"
+    ]
+  },
   "include": [
-    "index.d.ts"
+    "src/index.ts"
   ]
 }

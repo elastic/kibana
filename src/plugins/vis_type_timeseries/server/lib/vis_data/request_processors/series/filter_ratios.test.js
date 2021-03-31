@@ -13,7 +13,7 @@ describe('ratios(req, panel, series, esQueryConfig, indexPatternObject)', () => 
   let series;
   let req;
   let esQueryConfig;
-  let indexPatternObject;
+  let indexPattern;
   beforeEach(() => {
     panel = {
       time_field: 'timestamp',
@@ -47,18 +47,18 @@ describe('ratios(req, panel, series, esQueryConfig, indexPatternObject)', () => 
       queryStringOptions: { analyze_wildcard: true },
       ignoreFilterIfFieldNotInIndex: false,
     };
-    indexPatternObject = {};
+    indexPattern = {};
   });
 
   test('calls next when finished', () => {
     const next = jest.fn();
-    ratios(req, panel, series, esQueryConfig, indexPatternObject)(next)({});
+    ratios(req, panel, series, esQueryConfig, indexPattern)(next)({});
     expect(next.mock.calls.length).toEqual(1);
   });
 
   test('returns filter ratio aggs', () => {
     const next = (doc) => doc;
-    const doc = ratios(req, panel, series, esQueryConfig, indexPatternObject)(next)({});
+    const doc = ratios(req, panel, series, esQueryConfig, indexPattern)(next)({});
     expect(doc).toEqual({
       aggs: {
         test: {
@@ -135,7 +135,7 @@ describe('ratios(req, panel, series, esQueryConfig, indexPatternObject)', () => 
   test('returns empty object when field is not set', () => {
     delete series.metrics[0].field;
     const next = (doc) => doc;
-    const doc = ratios(req, panel, series, esQueryConfig, indexPatternObject)(next)({});
+    const doc = ratios(req, panel, series, esQueryConfig, indexPattern)(next)({});
     expect(doc).toEqual({
       aggs: {
         test: {

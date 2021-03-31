@@ -453,20 +453,20 @@ The only case in which this handler will not be used to evaluate the navigation 
 
 You can use the `registerNavigation` api to specify as many AlertType specific handlers as you like, but you can only use it once per AlertType as we wouldn't know which handler to use if you specified two for the same AlertType. For the same reason, you can only use `registerDefaultNavigation` once per plugin, as it covers all cases for your specific plugin.
 
-## Experimental RESTful API
+## Internal HTTP APIs
 
-Using of the alert type requires you to create an alert that will contain parameters and actions for a given alert type. API description for CRUD operations is a part of the [user documentation](https://www.elastic.co/guide/en/kibana/master/alerts-api-update.html).
-API listed below is experimental and could be changed or removed in the future.
+Using of the rule type requires you to create a rule that will contain parameters and actions for a given rule type. API description for CRUD operations is a part of the [user documentation](https://www.elastic.co/guide/en/kibana/master/alerting-apis.html).
+API listed below are internal and should not be consumed by plugin outside the alerting plugins.
 
-### `GET /api/alerts/alert/{id}/state`: Get alert state
+### `GET /internal/alerting/rule/{id}/state`: Get rule state
 
 Params:
 
 |Property|Description|Type|
 |---|---|---|
-|id|The id of the alert whose state you're trying to get.|string|
+|id|The id of the rule whose state you're trying to get.|string|
 
-### `GET /api/alerts/alert/{id}/_instance_summary`: Get alert instance summary
+### `GET /internal/alerting/rule/{id}/_alert_summary`: Get rule alert summary
 
 Similar to the `GET state` call, but collects additional information from
 the event log.
@@ -475,7 +475,7 @@ Params:
 
 |Property|Description|Type|
 |---|---|---|
-|id|The id of the alert whose instance summary you're trying to get.|string|
+|id|The id of the rule whose alert summary you're trying to get.|string|
 
 Query:
 
@@ -483,11 +483,11 @@ Query:
 |---|---|---|
 |dateStart|The date to start looking for alert events in the event log. Either an ISO date string, or a duration string indicating time since now.|string|
 
-### `POST /api/alerts/alert/{id}/_update_api_key`: Update alert API key
+### `POST /internal/alerting/rule/{id}/_update_api_key`: Update rule API key
 
 |Property|Description|Type|
 |---|---|---|
-|id|The id of the alert you're trying to update the API key for. System will use user in request context to generate an API key for.|string|
+|id|The id of the rule you're trying to update the API key for. System will use user in request context to generate an API key for.|string|
 
 ## Alert instance factory
 

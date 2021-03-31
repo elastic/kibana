@@ -40,7 +40,7 @@ describe('test filtering endpoint hosts by agent status', () => {
       mockAgentService,
       mockSavedObjectClient,
       mockElasticsearchClient,
-      ['online']
+      ['healthy']
     );
     expect(result).toBeDefined();
   });
@@ -101,9 +101,9 @@ describe('test filtering endpoint hosts by agent status', () => {
       mockAgentService,
       mockSavedObjectClient,
       mockElasticsearchClient,
-      ['unenrolling', 'error']
+      ['updating', 'unhealthy']
     );
-    const unenrollKuery = AgentStatusKueryHelper.buildKueryForUnenrollingAgents();
+    const unenrollKuery = AgentStatusKueryHelper.buildKueryForUpdatingAgents();
     const errorKuery = AgentStatusKueryHelper.buildKueryForErrorAgents();
     expect(mockAgentService.listAgents.mock.calls[0][1].kuery).toEqual(
       expect.stringContaining(`${unenrollKuery} OR ${errorKuery}`)

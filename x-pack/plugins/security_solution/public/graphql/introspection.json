@@ -1637,7 +1637,18 @@
             "isDeprecated": false,
             "deprecationReason": null
           },
-          { "name": "warning", "description": "", "isDeprecated": false, "deprecationReason": null }
+          {
+            "name": "warning",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "unsupported",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
         ],
         "possibleTypes": null
       },

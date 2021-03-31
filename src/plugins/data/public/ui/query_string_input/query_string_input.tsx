@@ -264,7 +264,8 @@ export default class QueryStringInputUI extends Component<Props, State> {
   };
 
   private onInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    this.onQueryStringChange(event.target.value);
+    const value = this.formatTextAreaValue(event.target.value);
+    this.onQueryStringChange(value);
     if (event.target.value === '') {
       this.handleRemoveHeight();
     } else {
@@ -274,7 +275,8 @@ export default class QueryStringInputUI extends Component<Props, State> {
 
   private onClickInput = (event: React.MouseEvent<HTMLTextAreaElement>) => {
     if (event.target instanceof HTMLTextAreaElement) {
-      this.onQueryStringChange(event.target.value);
+      const value = this.formatTextAreaValue(event.target.value);
+      this.onQueryStringChange(value);
     }
   };
 
@@ -282,7 +284,8 @@ export default class QueryStringInputUI extends Component<Props, State> {
     if ([KEY_CODES.LEFT, KEY_CODES.RIGHT, KEY_CODES.HOME, KEY_CODES.END].includes(event.keyCode)) {
       this.setState({ isSuggestionsVisible: true });
       if (event.target instanceof HTMLTextAreaElement) {
-        this.onQueryStringChange(event.target.value);
+        const value = this.formatTextAreaValue(event.target.value);
+        this.onQueryStringChange(value);
       }
     }
   };
@@ -698,7 +701,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
                     defaultMessage: 'Search',
                   })
                 }
-                value={this.getQueryString()}
+                value={this.forwardNewValueIfNeeded(this.getQueryString())}
                 onKeyDown={this.onKeyDown}
                 onKeyUp={this.onKeyUp}
                 onChange={this.onInputChange}
@@ -734,7 +737,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
                 data-test-subj={this.props.dataTestSubj || 'queryInput'}
                 isInvalid={this.props.isInvalid}
               >
-                {this.getQueryString()}
+                {this.forwardNewValueIfNeeded(this.getQueryString())}
               </EuiTextArea>
               {this.props.iconType ? (
                 <div className="euiFormControlLayoutIcons">
@@ -787,5 +790,35 @@ export default class QueryStringInputUI extends Component<Props, State> {
         )}
       </div>
     );
+  }
+
+  /**
+   * Used to apply any string formatting to textarea value before converting it to {@link Query} and emitting it to the parent.
+   * This is a bit lower level then {@link fromUser} and needed to address any cross-browser inconsistencies where
+   * {@link forwardNewValueIfNeeded} should be kept in mind
+   */
+  private formatTextAreaValue(newValue: string): string {
+    // Safari has a bug that it sometimes uses a non-breaking space instead of a regular space
+    // this breaks the search query: https://github.com/elastic/kibana/issues/87176
+    return newValue.replace(/\u00A0/g, ' ');
+  }
+
+  /**
+   * When passing a "value" prop into a textarea,
+   * check first if value has changed because of {@link formatTextAreaValue},
+   * if this is just a formatting change, then skip this update by re-using current textarea value.
+   * This is needed to avoid re-rendering to preserve focus and selection
+   * @private
+   */
+  private forwardNewValueIfNeeded(newQueryString: string) {
+    const oldQueryString = this.inputRef?.value ?? '';
+
+    const formattedNewQueryString = this.formatTextAreaValue(newQueryString);
+    // if old & new values are equal with formatting applied, then return an old query without formatting applied
+    if (formattedNewQueryString === this.formatTextAreaValue(oldQueryString)) {
+      return oldQueryString;
+    } else {
+      return formattedNewQueryString;
+    }
   }
 }

@@ -21,7 +21,7 @@ import {
   getEmptyMockArtifacts,
 } from '../../../lib/artifacts/mocks';
 import { ArtifactClient } from '../artifact_client';
-import { getManifestClientMock } from '../manifest_client.mock';
+import { getManifestClientMock } from '../mocks';
 import { ManifestManager, ManifestManagerContext } from './manifest_manager';
 
 export const createExceptionListResponse = (data: ExceptionListItemSchema[], total?: number) => ({

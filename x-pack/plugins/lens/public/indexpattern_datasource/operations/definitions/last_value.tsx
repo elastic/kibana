@@ -161,12 +161,14 @@ export const lastValueOperation: OperationDefinition<LastValueIndexPatternColumn
       isBucketed: false,
       scale: field.type === 'string' ? 'ordinal' : 'ratio',
       sourceField: field.name,
+      filter: previousColumn?.filter,
       params: {
         sortField,
         ...getFormatFromPreviousColumn(previousColumn),
       },
     };
   },
+  filterable: true,
   toEsAggsFn: (column, columnId) => {
     return buildExpressionFunction<AggFunctionsMapping['aggTopHit']>('aggTopHit', {
       id: columnId,
