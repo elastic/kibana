@@ -1,7 +1,7 @@
 const ciStats = require('./ci_stats');
 
-// TODO make this real
-const BUILD_STATUS = process.env.BUILD_STATUS === 'SUCCESS' ? 'SUCCESS' : 'FAILURE';
+// TODO
+const BUILD_STATUS = process.env.BUILD_FAILED === 'true' ? 'FAILURE' : 'SUCCESS';
 
 (async () => {
   try {
