@@ -25,6 +25,7 @@ export interface Options {
   repoRoot: string;
   quiet: boolean;
   silent: boolean;
+  verbose: boolean;
   watch: boolean;
   cache: boolean;
   dist: boolean;
@@ -80,6 +81,7 @@ export class Optimizer {
 
     const { flags: levelFlags } = parseLogLevel(
       pickLevelFromFlags({
+        verbose: options.verbose,
         quiet: options.quiet,
         silent: options.silent,
       })

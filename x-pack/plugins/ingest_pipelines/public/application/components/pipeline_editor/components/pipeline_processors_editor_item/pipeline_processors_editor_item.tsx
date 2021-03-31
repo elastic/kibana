@@ -164,7 +164,7 @@ export const PipelineProcessorsEditorItem: FunctionComponent<Props> = memo(
     };
 
     return (
-      <EuiPanel className={panelClasses} paddingSize="s">
+      <EuiPanel hasBorder hasShadow={false} paddingSize="s" className={panelClasses}>
         <EuiFlexGroup
           gutterSize="none"
           responsive={false}
