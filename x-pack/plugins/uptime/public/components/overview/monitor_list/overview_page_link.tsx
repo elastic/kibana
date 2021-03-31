@@ -52,7 +52,7 @@ export const OverviewPageLink: FunctionComponent<OverviewPageLinkProps> = ({
       data-test-subj={dataTestSubj}
       iconType={icon}
       aria-label={!pagination ? disableLinkLabel : ariaLabel}
-      disabled={!pagination}
+      isDisabled={!pagination}
     />
   );
 };
