@@ -21,8 +21,8 @@ To upload GeoJson files in {kib} with *Maps*, you must have:
 privilege for the `Maps` feature
 * [ ] `all` {kib}
 privilege for the `Index Pattern Management` feature
-* [ ] `create`, `create_index`, and `read` index privileges for destination indices.
-Its recommended that users also have `view_index_metadata` index privilege for destination indices.
+* [ ] `create` and `create_index`index privileges for destination indices.
+To use the index in Maps, you must also have `read` and `view_index_metadata` index privileges.
 
 To upload CSV files in {kib} with the *{file-data-viz}*, in addition to upload GeoJson privileges, to you must have:
 * [ ] `manage_pipeline` cluster privilege
