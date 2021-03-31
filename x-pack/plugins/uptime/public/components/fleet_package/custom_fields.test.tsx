@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent, waitFor, waitForElement } from '@testing-library/react';
 import { render } from '../../lib/helper/rtl_helpers';
 import { defaultConfig } from './synthetics_policy_create_extension';
 import { CustomFields } from './custom_fields';
