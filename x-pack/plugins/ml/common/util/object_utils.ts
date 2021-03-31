@@ -5,10 +5,23 @@
  * 2.0.
  */
 
-export const isPopulatedObject = <T = Record<string, unknown>>(
+/*
+ * A type guard to check record like object structures.
+ *
+ * Examples:
+ * - `isPopulatedObject({...})`
+ *      limits type to Record<string, unknown>
+ *
+ * - `isPopulatedObject({...}, ['attribute'])`
+ *      limits type to Record<'attribute', unknown>
+ *
+ * - `isPopulatedObject<keyof MyInterface>({...})`
+ *      limits type to a record with keys of the given interface
+ */
+export const isPopulatedObject = <U extends string = string>(
   arg: unknown,
-  requiredAttributes: string[] = []
-): arg is T => {
+  requiredAttributes: U[] = []
+): arg is Record<U, unknown> => {
   return (
     typeof arg === 'object' &&
     arg !== null &&

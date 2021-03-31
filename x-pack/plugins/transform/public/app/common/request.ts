@@ -100,7 +100,7 @@ export function getCombinedRuntimeMappings(
     combinedRuntimeMappings = { ...combinedRuntimeMappings, ...runtimeMappings };
   }
 
-  if (isPopulatedObject<StepDefineExposedState['runtimeMappings']>(combinedRuntimeMappings)) {
+  if (isPopulatedObject<keyof StepDefineExposedState['runtimeMappings']>(combinedRuntimeMappings)) {
     return combinedRuntimeMappings;
   }
   return undefined;

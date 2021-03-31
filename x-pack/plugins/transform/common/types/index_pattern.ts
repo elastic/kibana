@@ -13,9 +13,10 @@ import { isPopulatedObject } from '../shared_imports';
 export function isIndexPattern(arg: any): arg is IndexPattern {
   return (
     isPopulatedObject(arg, ['title', 'fields']) &&
-    // `getComputedFields` is inherited, so not possible to check with `hasOwnProperty`
-    'getComputedFields' in arg &&
-    typeof arg.getComputedFields === 'function' &&
+    // `getComputedFields` is inherited, so it's not possible to
+    // check with `hasOwnProperty` which is used by isPopulatedObject()
+    'getComputedFields' in (arg as IndexPattern) &&
+    typeof (arg as IndexPattern).getComputedFields === 'function' &&
     typeof arg.title === 'string' &&
     Array.isArray(arg.fields)
   );
