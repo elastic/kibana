@@ -314,21 +314,64 @@ export const getMlJobMetrics = async (
   return [];
 };
 
+interface AlertsAggregationResponse {
+  hits: {
+    total: { value: number };
+  };
+  aggregations: {
+    [aggName: string]: {
+      buckets: Array<{ key: string; doc_count: number }>;
+    };
+  };
+}
+
 export const getDetectionRuleMetrics = async (
   index: string,
-  esClient: ElasticsearchClient,
-  savedObjectClient: SavedObjectsClientContract
+  esClient: ElasticsearchClient
 ): Promise<DetectionRuleMetric[]> => {
   const ruleSearchOptions: RuleSearchParams = {
     body: { query: { bool: { filter: { term: { 'alert.alertTypeId': SIGNALS_ID } } } } },
     filterPath: [],
     ignoreUnavailable: true,
     index,
-    size: 11,
+    size: 10000,
   };
 
   try {
     const { body: ruleResults } = await esClient.search<RuleSearchResult>(ruleSearchOptions);
+
+    const detectionAlertsResp: AlertsAggregationResponse | undefined;
+    // @ts-expect-error `SearchResponse['hits']['total']` incorrectly expects `number` type instead of `{ value: number }`.
+    ({ body: detectionAlertsResp } = await esClient.search({
+      index: '.siem-signals-pjhampton-default', // TODO:PH pass in siem-sigs index
+      size: 0,
+      body: {
+        aggs: {
+          detectionAlerts: {
+            terms: { field: 'signal.rule.rule_id' },
+          },
+        },
+        query: {
+          bool: {
+            filter: [
+              {
+                range: {
+                  '@timestamp': {
+                    gte: 'now-24h',
+                    lte: 'now',
+                  },
+                },
+              },
+            ],
+          },
+        },
+      },
+    }));
+
+    const alertBuckets = detectionAlertsResp!.aggregations?.detectionAlerts?.buckets ?? [];
+
+    const alertsCache = new Map();
+    alertBuckets.map((bucket) => alertsCache.set(bucket.key, bucket.doc_count));
 
     if (ruleResults.hits?.hits?.length > 0) {
       const elasticRules = ruleResults.hits.hits.filter((hit) =>
@@ -336,14 +379,15 @@ export const getDetectionRuleMetrics = async (
       );
 
       return elasticRules.map((hit) => {
+        const ruleId = hit._source?.alert.params.ruleId;
         return {
           rule_name: hit._source?.alert.name,
-          rule_id: hit._source?.alert.params.ruleId,
+          rule_id: ruleId,
           rule_version: hit._source?.alert.params.version,
           enabled: hit._source?.alert.enabled,
           created_on: hit._source?.alert.createdAt,
           updated_on: hit._source?.alert.updatedAt,
-          tags: hit._source?.alert.tags,
+          alert_count_daily: alertsCache.get(ruleId) || 0,
         } as DetectionRuleMetric;
       });
     }
