@@ -37,6 +37,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'Sep 22, 2015 @ 06:00:00.000',
           'Sep 22, 2015 @ 11:00:00.000'
         );
+        await visualBuilder.markdownSwitchSubTab('options');
+        await visualBuilder.setMetricsDataTimerangeMode('Last value');
+        await visualBuilder.markdownSwitchSubTab('markdown');
       });
 
       it('should render subtabs and table variables markdown components', async () => {
