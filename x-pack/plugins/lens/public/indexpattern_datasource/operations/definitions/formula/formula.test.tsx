@@ -37,7 +37,7 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
   max: { input: 'field' } as GenericOperationDefinition,
   count: ({
     input: 'field',
-    operationParams: [{ name: 'kql', type: 'string', required: false }],
+    filterable: true,
     buildColumn: ({ field }: { field: IndexPatternField }) => ({
       label: 'avg',
       dataType: 'number',
@@ -465,6 +465,21 @@ describe('formula', () => {
           operationDefinitionMap
         )
       ).toEqual(undefined);
+    });
+
+    it('returns a syntax error if the kql argument does not parse', () => {
+      expect(
+        formulaOperation.getErrorMessage!(
+          getNewLayerWithFormula(`count(kql='invalid: "')`, false),
+          'col1',
+          indexPattern,
+          operationDefinitionMap
+        )
+      ).toEqual([
+        `Expected "(", "{", value, whitespace but """ found.
+invalid: "
+---------^`,
+      ]);
     });
 
     it('returns undefined if a field operation is passed with the correct first argument', () => {

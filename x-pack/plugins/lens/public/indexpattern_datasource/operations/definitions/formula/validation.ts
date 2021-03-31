@@ -10,6 +10,12 @@ import { i18n } from '@kbn/i18n';
 import { parse, TinymathLocation } from '@kbn/tinymath';
 import type { TinymathAST, TinymathFunction, TinymathNamedArgument } from '@kbn/tinymath';
 import {
+  AggFunctionsMapping,
+  Query,
+  esKuery,
+  esQuery,
+} from '../../../../../../../../src/plugins/data/public';
+import {
   findMathNodes,
   findVariables,
   getOperationParams,
@@ -71,6 +77,23 @@ export interface ErrorWrapper {
 export function isParsingError(message: string) {
   return message.includes(validationErrors.failedParsing.message);
 }
+
+export const getQueryValidationError = (
+  query: string,
+  language: 'kql' | 'lucene',
+  indexPattern: IndexPattern
+): string | undefined => {
+  try {
+    if (language === 'kql') {
+      esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(query), indexPattern);
+    } else {
+      esQuery.luceneStringToDsl(query);
+    }
+    return;
+  } catch (e) {
+    return e.message;
+  }
+};
 
 function getMessageFromId<K extends ErrorTypes>({
   messageId,
@@ -271,12 +294,32 @@ function checkMissingVariableOrFunctions(
   return [...missingErrors, ...invalidVariableErrors];
 }
 
+function getQueryValidationErrors(
+  namedArguments: TinymathNamedArgument[] | undefined,
+  indexPattern: IndexPattern
+): ErrorWrapper[] {
+  const errors: ErrorWrapper[] = [];
+  (namedArguments ?? []).forEach((arg) => {
+    if (arg.name === 'kql' || arg.name === 'lucene') {
+      const message = getQueryValidationError(arg.value, arg.name, indexPattern);
+      if (message) {
+        errors.push({
+          message,
+          locations: [arg.location],
+        });
+      }
+    }
+  });
+  return errors;
+}
+
 function validateNameArguments(
   node: TinymathFunction,
   nodeOperation:
     | OperationDefinition<IndexPatternColumn, 'field'>
     | OperationDefinition<IndexPatternColumn, 'fullReference'>,
-  namedArguments: TinymathNamedArgument[] | undefined
+  namedArguments: TinymathNamedArgument[] | undefined,
+  indexPattern: IndexPattern
 ) {
   const errors = [];
   const missingParams = getMissingParams(nodeOperation, namedArguments);
@@ -317,6 +360,10 @@ function validateNameArguments(
         locations: [node.location],
       })
     );
+  }
+  const queryValidationErrors = getQueryValidationErrors(namedArguments, indexPattern);
+  if (queryValidationErrors.length) {
+    errors.push(...queryValidationErrors);
   }
   return errors;
 }
@@ -403,7 +450,12 @@ function runFullASTValidation(
             })
           );
         } else {
-          const argumentsErrors = validateNameArguments(node, nodeOperation, namedArguments);
+          const argumentsErrors = validateNameArguments(
+            node,
+            nodeOperation,
+            namedArguments,
+            indexPattern
+          );
           if (argumentsErrors.length) {
             errors.push(...argumentsErrors);
           }
@@ -459,7 +511,7 @@ export function canHaveParams(
     | OperationDefinition<IndexPatternColumn, 'field'>
     | OperationDefinition<IndexPatternColumn, 'fullReference'>
 ) {
-  return Boolean((operation.operationParams || []).length);
+  return Boolean((operation.operationParams || []).length) || operation.filterable;
 }
 
 export function getInvalidParams(
@@ -516,6 +568,12 @@ export function validateParams(
 ) {
   const paramsObj = getOperationParams(operation, params);
   const formalArgs = operation.operationParams || [];
+  if (operation.filterable) {
+    formalArgs.push(
+      { name: 'kql', type: 'string', required: false },
+      { name: 'lucene', type: 'string', required: false }
+    );
+  }
   return formalArgs.map(({ name, type, required }) => ({
     name,
     isMissing: !(name in paramsObj),

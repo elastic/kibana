@@ -10,6 +10,7 @@ import { createMockedIndexPattern } from '../../../mocks';
 import { GenericOperationDefinition } from '../index';
 import type { IndexPatternField } from '../../../types';
 import type { OperationMetadata } from '../../../../types';
+import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
 import { tinymathFunctions } from './util';
 import { getSignatureHelp, getHover, suggest } from './math_completion';
 
@@ -185,17 +186,18 @@ describe('math completion', () => {
     it('should list all valid functions at the top level (fake test)', async () => {
       // This test forces an invalid scenario, since the autocomplete actually requires
       // some typing
-      const results = await suggest(
-        '',
-        1,
-        {
+      const results = await suggest({
+        expression: '',
+        position: 1,
+        context: {
           triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
           triggerCharacter: '',
         },
-        createMockedIndexPattern(),
+        indexPattern: createMockedIndexPattern(),
         operationDefinitionMap,
-        { word: '', startColumn: 1, endColumn: 1 }
-      );
+        data: dataPluginMock.createStartContract(),
+        word: { word: '', startColumn: 1, endColumn: 1 },
+      });
       expect(results.list).toHaveLength(4 + Object.keys(tinymathFunctions).length);
       ['sum', 'moving_average', 'cumulative_sum', 'last_value'].forEach((key) => {
         expect(results.list).toEqual(expect.arrayContaining([{ label: key, type: 'operation' }]));
@@ -206,17 +208,18 @@ describe('math completion', () => {
     });
 
     it('should list all valid sub-functions for a fullReference', async () => {
-      const results = await suggest(
-        'moving_average()',
-        15,
-        {
+      const results = await suggest({
+        expression: 'moving_average()',
+        position: 15,
+        context: {
           triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
           triggerCharacter: '(',
         },
-        createMockedIndexPattern(),
+        indexPattern: createMockedIndexPattern(),
         operationDefinitionMap,
-        { word: '', startColumn: 15, endColumn: 15 }
-      );
+        data: dataPluginMock.createStartContract(),
+        word: { word: '', startColumn: 15, endColumn: 15 },
+      });
       expect(results.list).toHaveLength(2);
       ['sum', 'last_value'].forEach((key) => {
         expect(results.list).toEqual(expect.arrayContaining([{ label: key, type: 'operation' }]));
@@ -224,47 +227,50 @@ describe('math completion', () => {
     });
 
     it('should list all valid named arguments for a fullReference', async () => {
-      const results = await suggest(
-        'moving_average(count(),)',
-        23,
-        {
+      const results = await suggest({
+        expression: 'moving_average(count(),)',
+        position: 23,
+        context: {
           triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
           triggerCharacter: ',',
         },
-        createMockedIndexPattern(),
+        indexPattern: createMockedIndexPattern(),
         operationDefinitionMap,
-        { word: '', startColumn: 23, endColumn: 23 }
-      );
+        data: dataPluginMock.createStartContract(),
+        word: { word: '', startColumn: 23, endColumn: 23 },
+      });
       expect(results.list).toEqual(['window']);
     });
 
     it('should not list named arguments when they are already in use', async () => {
-      const results = await suggest(
-        'moving_average(count(), window=5, )',
-        34,
-        {
+      const results = await suggest({
+        expression: 'moving_average(count(), window=5, )',
+        position: 34,
+        context: {
           triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
           triggerCharacter: ',',
         },
-        createMockedIndexPattern(),
+        indexPattern: createMockedIndexPattern(),
         operationDefinitionMap,
-        { word: '', startColumn: 34, endColumn: 34 }
-      );
+        data: dataPluginMock.createStartContract(),
+        word: { word: '', startColumn: 34, endColumn: 34 },
+      });
       expect(results.list).toEqual([]);
     });
 
     it('should list all valid positional arguments for a tinymath function used by name', async () => {
-      const results = await suggest(
-        'divide(count(), )',
-        16,
-        {
+      const results = await suggest({
+        expression: 'divide(count(), )',
+        position: 16,
+        context: {
           triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
           triggerCharacter: ',',
         },
-        createMockedIndexPattern(),
+        indexPattern: createMockedIndexPattern(),
         operationDefinitionMap,
-        { word: '', startColumn: 16, endColumn: 16 }
-      );
+        data: dataPluginMock.createStartContract(),
+        word: { word: '', startColumn: 16, endColumn: 16 },
+      });
       expect(results.list).toHaveLength(4 + Object.keys(tinymathFunctions).length);
       ['sum', 'moving_average', 'cumulative_sum', 'last_value'].forEach((key) => {
         expect(results.list).toEqual(expect.arrayContaining([{ label: key, type: 'math' }]));
@@ -275,17 +281,18 @@ describe('math completion', () => {
     });
 
     it('should list all valid positional arguments for a tinymath function used with alias', async () => {
-      const results = await suggest(
-        'count() / ',
-        10,
-        {
+      const results = await suggest({
+        expression: 'count() / ',
+        position: 10,
+        context: {
           triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
           triggerCharacter: ',',
         },
-        createMockedIndexPattern(),
+        indexPattern: createMockedIndexPattern(),
         operationDefinitionMap,
-        { word: '', startColumn: 10, endColumn: 10 }
-      );
+        data: dataPluginMock.createStartContract(),
+        word: { word: '', startColumn: 10, endColumn: 10 },
+      });
       expect(results.list).toHaveLength(4 + Object.keys(tinymathFunctions).length);
       ['sum', 'moving_average', 'cumulative_sum', 'last_value'].forEach((key) => {
         expect(results.list).toEqual(expect.arrayContaining([{ label: key, type: 'math' }]));
@@ -296,47 +303,50 @@ describe('math completion', () => {
     });
 
     it('should not autocomplete any fields for the count function', async () => {
-      const results = await suggest(
-        'count()',
-        6,
-        {
+      const results = await suggest({
+        expression: 'count()',
+        position: 6,
+        context: {
           triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
           triggerCharacter: '(',
         },
-        createMockedIndexPattern(),
+        indexPattern: createMockedIndexPattern(),
         operationDefinitionMap,
-        { word: '', startColumn: 6, endColumn: 6 }
-      );
+        data: dataPluginMock.createStartContract(),
+        word: { word: '', startColumn: 6, endColumn: 6 },
+      });
       expect(results.list).toHaveLength(0);
     });
 
     it('should autocomplete and validate the right type of field', async () => {
-      const results = await suggest(
-        'sum()',
-        4,
-        {
+      const results = await suggest({
+        expression: 'sum()',
+        position: 4,
+        context: {
           triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
           triggerCharacter: '(',
         },
-        createMockedIndexPattern(),
+        indexPattern: createMockedIndexPattern(),
         operationDefinitionMap,
-        { word: '', startColumn: 4, endColumn: 4 }
-      );
+        data: dataPluginMock.createStartContract(),
+        word: { word: '', startColumn: 4, endColumn: 4 },
+      });
       expect(results.list).toEqual(['bytes', 'memory']);
     });
 
     it('should autocomplete only operations that provide numeric output', async () => {
-      const results = await suggest(
-        'last_value()',
-        11,
-        {
+      const results = await suggest({
+        expression: 'last_value()',
+        position: 11,
+        context: {
           triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
           triggerCharacter: '(',
         },
-        createMockedIndexPattern(),
+        indexPattern: createMockedIndexPattern(),
         operationDefinitionMap,
-        { word: '', startColumn: 11, endColumn: 11 }
-      );
+        data: dataPluginMock.createStartContract(),
+        word: { word: '', startColumn: 11, endColumn: 11 },
+      });
       expect(results.list).toEqual(['bytes', 'memory']);
     });
   });

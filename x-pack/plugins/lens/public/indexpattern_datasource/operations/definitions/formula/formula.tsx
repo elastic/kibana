@@ -211,6 +211,7 @@ function FormulaEditor({
   columnId,
   indexPattern,
   operationDefinitionMap,
+  data,
 }: ParamEditorProps<FormulaIndexPatternColumn>) {
   const [text, setText] = useState(currentColumn.params.formula);
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -337,13 +338,14 @@ function FormulaEditor({
 
           // Retrieve suggestions for subexpressions
           // TODO: make this work for expressions nested more than one level deep
-          aSuggestions = await suggest(
-            innerText.substring(0, innerText.length - lengthAfterPosition) + ')',
-            innerText.length - lengthAfterPosition,
+          aSuggestions = await suggest({
+            expression: innerText.substring(0, innerText.length - lengthAfterPosition) + ')',
+            position: innerText.length - lengthAfterPosition,
             context,
             indexPattern,
-            operationDefinitionMap
-          );
+            operationDefinitionMap,
+            data,
+          });
         }
       } else {
         const wordUntil = model.getWordUntilPosition(position);
@@ -353,14 +355,15 @@ function FormulaEditor({
           position.lineNumber,
           wordUntil.endColumn
         );
-        aSuggestions = await suggest(
-          innerText,
-          innerText.length - lengthAfterPosition,
+        aSuggestions = await suggest({
+          expression: innerText,
+          position: innerText.length - lengthAfterPosition,
           context,
           indexPattern,
           operationDefinitionMap,
-          wordUntil
-        );
+          word: wordUntil,
+          data,
+        });
       }
 
       return {
@@ -369,7 +372,7 @@ function FormulaEditor({
         ),
       };
     },
-    [indexPattern, operationDefinitionMap]
+    [indexPattern, operationDefinitionMap, data]
   );
 
   const provideSignatureHelp = useCallback(
@@ -443,7 +446,7 @@ function FormulaEditor({
   useEffect(() => {
     // Because the monaco model is owned by Lens, we need to manually attach and remove handlers
     const { dispose: dispose1 } = monaco.languages.registerCompletionItemProvider(LANGUAGE_ID, {
-      triggerCharacters: ['.', ',', '(', '=', ' '],
+      triggerCharacters: ['.', ',', '(', '=', ' ', ':'],
       provideCompletionItems,
     });
     const { dispose: dispose2 } = monaco.languages.registerSignatureHelpProvider(LANGUAGE_ID, {

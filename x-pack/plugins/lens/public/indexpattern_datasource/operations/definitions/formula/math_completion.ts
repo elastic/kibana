@@ -7,8 +7,14 @@
 
 import { uniq, startsWith } from 'lodash';
 import { monaco } from '@kbn/monaco';
-
-import { parse, TinymathLocation, TinymathAST, TinymathFunction } from '@kbn/tinymath';
+import {
+  parse,
+  TinymathLocation,
+  TinymathAST,
+  TinymathFunction,
+  TinymathNamedArgument,
+} from '@kbn/tinymath';
+import { DataPublicPluginStart, QuerySuggestion } from 'src/plugins/data/public';
 import { IndexPattern } from '../../../types';
 import { memoizedGetAvailableOperationsByMetadata } from '../../operations';
 import { tinymathFunctions, groupArgsByType } from './util';
@@ -18,6 +24,7 @@ export enum SUGGESTION_TYPE {
   FIELD = 'field',
   NAMED_ARGUMENT = 'named_argument',
   FUNCTIONS = 'functions',
+  KQL = 'kql',
 }
 
 export type LensMathSuggestion =
@@ -25,7 +32,8 @@ export type LensMathSuggestion =
   | {
       label: string;
       type: 'operation' | 'math';
-    };
+    }
+  | QuerySuggestion;
 
 export interface LensMathSuggestions {
   list: LensMathSuggestion[];
@@ -92,22 +100,43 @@ export function offsetToRowColumn(expression: string, offset: number): monaco.Po
 //     );
 // }
 
-export async function suggest(
-  expression: string,
-  position: number,
-  context: monaco.languages.CompletionContext,
-  indexPattern: IndexPattern,
-  operationDefinitionMap: Record<string, GenericOperationDefinition>,
-  word?: monaco.editor.IWordAtPosition
-): Promise<{ list: LensMathSuggestion[]; type: SUGGESTION_TYPE }> {
+export async function suggest({
+  expression,
+  position,
+  context,
+  indexPattern,
+  operationDefinitionMap,
+  data,
+  word,
+}: {
+  expression: string;
+  position: number;
+  context: monaco.languages.CompletionContext;
+  indexPattern: IndexPattern;
+  operationDefinitionMap: Record<string, GenericOperationDefinition>;
+  data: DataPublicPluginStart;
+  word?: monaco.editor.IWordAtPosition;
+}): Promise<{ list: LensMathSuggestion[]; type: SUGGESTION_TYPE }> {
   const text = expression.substr(0, position) + MARKER + expression.substr(position);
   try {
     const ast = parse(text);
 
     const tokenInfo = getInfoAtPosition(ast, position);
 
-    if (context.triggerCharacter === '=' && tokenInfo?.parent) {
-      // TODO
+    const isNamedArgument =
+      tokenInfo?.parent &&
+      typeof tokenInfo?.ast !== 'number' &&
+      'type' in tokenInfo.ast &&
+      tokenInfo.ast.type === 'namedArgument';
+    if (tokenInfo?.parent && (context.triggerCharacter === '=' || isNamedArgument)) {
+      return await getNamedArgumentSuggestions({
+        expression: text,
+        ast: tokenInfo.ast as TinymathNamedArgument,
+        position,
+        data,
+        indexPattern,
+        operationDefinitionMap,
+      });
     } else if (tokenInfo?.parent) {
       return getArgumentSuggestions(
         tokenInfo.parent,
@@ -260,6 +289,41 @@ function getArgumentSuggestions(
   return { list: [], type: SUGGESTION_TYPE.FIELD };
 }
 
+export async function getNamedArgumentSuggestions({
+  ast,
+  expression,
+  position,
+  data,
+  indexPattern,
+  operationDefinitionMap,
+}: {
+  ast: TinymathNamedArgument;
+  expression: string;
+  position: number;
+  indexPattern: IndexPattern;
+  operationDefinitionMap: Record<string, GenericOperationDefinition>;
+  data: DataPublicPluginStart;
+}) {
+  if (ast.name !== 'kql' && ast.name !== 'lucene') {
+    return { list: [], type: SUGGESTION_TYPE.KQL };
+  }
+  if (!data.autocomplete.hasQuerySuggestions(ast.name === 'kql' ? 'kuery' : 'lucene')) {
+    return { list: [], type: SUGGESTION_TYPE.KQL };
+  }
+
+  const before = ast.value.split(MARKER)[0];
+  // TODO
+  const suggestions = await data.autocomplete.getQuerySuggestions({
+    language: 'kuery',
+    query: ast.value.split(MARKER)[0],
+    selectionStart: before.length,
+    selectionEnd: before.length,
+    indexPatterns: [indexPattern],
+    boolFilter: [],
+  });
+  return { list: suggestions ?? [], type: SUGGESTION_TYPE.KQL };
+}
+
 export function getSuggestion(
   suggestion: LensMathSuggestion,
   type: SUGGESTION_TYPE,
@@ -267,7 +331,12 @@ export function getSuggestion(
   operationDefinitionMap: Record<string, GenericOperationDefinition>
 ): monaco.languages.CompletionItem {
   let kind: monaco.languages.CompletionItemKind = monaco.languages.CompletionItemKind.Method;
-  let label: string = typeof suggestion === 'string' ? suggestion : suggestion.label;
+  let label: string =
+    typeof suggestion === 'string'
+      ? suggestion
+      : 'label' in suggestion
+      ? suggestion.label
+      : suggestion.text;
   let insertText: string | undefined;
   let insertTextRules: monaco.languages.CompletionItem['insertTextRules'];
   let detail: string = '';
@@ -329,6 +398,13 @@ export function getSuggestion(
       }
       label = `${label}=`;
       detail = '';
+      break;
+    case SUGGESTION_TYPE.NAMED_ARGUMENT:
+      command = {
+        title: 'Trigger Suggestion Dialog',
+        id: 'editor.action.triggerSuggest',
+      };
+      kind = monaco.languages.CompletionItemKind.Field;
       break;
   }
 
