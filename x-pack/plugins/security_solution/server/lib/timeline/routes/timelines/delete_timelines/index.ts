@@ -38,7 +38,7 @@ export const deleteTimelinesRoute = (
         const { savedObjectIds } = request.body;
 
         await deleteTimeline(frameworkRequest, savedObjectIds);
-        return response.ok();
+        return response.ok({ body: { data: { deleteTimeline: true } } });
       } catch (err) {
         const error = transformError(err);
         return siemResponse.error({
