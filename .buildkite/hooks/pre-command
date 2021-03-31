@@ -24,6 +24,5 @@ if [[ "$CI_STATS_BUILD_ID" ]]; then
 fi
 
 if [[ -d .ci/buildkite ]]; then
-  source .ci/buildkite/env.sh
-  source .ci/buildkite/setup_node.sh
+  source .ci/buildkite/setup.sh
 fi

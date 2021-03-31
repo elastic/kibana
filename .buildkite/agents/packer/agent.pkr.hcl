@@ -29,6 +29,11 @@ build {
     source      = "startup.sh"
   }
 
+  provisioner "file" {
+    destination = "/tmp/bk-hooks"
+    source      = "hooks"
+  }
+
   provisioner "shell" {
     execute_command  = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
     script           = "setup.sh"

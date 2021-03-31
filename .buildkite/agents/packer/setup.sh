@@ -21,6 +21,10 @@ apt-get install --yes \
   software-properties-common \
   buildkite-agent
 
+# TODO
+curl -fsSL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+sudo apt-get install -y nodejs
+
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
 add-apt-repository \
    "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
@@ -99,7 +103,7 @@ hooks-path="/etc/buildkite-agent/hooks"
 plugins-path="/etc/buildkite-agent/plugins"
 experiment="git-mirrors"
 git-mirrors-path="/var/lib/gitmirrors"
-git-clone-flags="--dissociate"
+#git-clone-flags="--dissociate"
 git-clone-mirror-flags="-v --bare"
 tags-from-gcp=true
 tags-from-gcp-labels=true
@@ -108,13 +112,18 @@ timestamp-lines=true
 debug=true
 EOF
 
+mkdir -p /etc/buildkite-agent/hooks
+mv /tmp/bk-hooks/* /etc/buildkite-agent/hooks/
+chown -R "$AGENT_USER:$AGENT_USER" /etc/buildkite-agent/hooks
+chmod +x /etc/buildkite-agent/hooks/*
+
 gcloud auth configure-docker --quiet
 
 # Setup git mirrors
 {
   mkdir -p /var/lib/gitmirrors
   cd /var/lib/gitmirrors
-  docker pull gcr.io/elastic-kibana-184716/buildkite/ci/base:0afe7a0463e6a512646aaff775df5d3978dfb87b &
+  # docker pull gcr.io/elastic-kibana-184716/buildkite/ci/base:0afe7a0463e6a512646aaff775df5d3978dfb87b &
   git clone --mirror https://github.com/elastic/kibana.git https---github-com-elastic-kibana-git &
   git clone --mirror https://github.com/elastic/elasticsearch.git https---github-com-elastic-elasticsearch-git &
   wait

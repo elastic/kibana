@@ -11,7 +11,14 @@ export NODE_BIN_DIR="$NODE_DIR/bin"
 export YARN_OFFLINE_CACHE="$CACHE_DIR/yarn-offline-cache"
 
 if [[ ! -d "$NODE_DIR" ]]; then
-  nodeUrl="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64.tar.gz"
+  hostArch="$(command uname -m)"
+  case "${hostArch}" in
+    x86_64 | amd64) nodeArch="x64" ;;
+    aarch64) nodeArch="arm64" ;;
+    *) nodeArch="${hostArch}" ;;
+  esac
+
+  nodeUrl="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-$nodeArch.tar.gz"
 
   echo "node.js v$NODE_VERSION not found at $NODE_DIR, downloading from $nodeUrl"
 
