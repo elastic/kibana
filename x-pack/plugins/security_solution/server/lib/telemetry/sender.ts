@@ -327,9 +327,6 @@ const allowlistProcessFields: AllowlistFields = {
     pid: true,
     ppid: true,
   },
-  token: {
-    integrity_level_name: true,
-  },
   thread: true,
 };
 
@@ -383,7 +380,7 @@ export function copyAllowlistedFields(
 ): TelemetryEvent {
   return Object.entries(allowlist).reduce<TelemetryEvent>((newEvent, [allowKey, allowValue]) => {
     const eventValue = event[allowKey];
-    if (eventValue) {
+    if (null != eventValue) {
       if (allowValue === true) {
         return { ...newEvent, [allowKey]: eventValue };
       } else if (typeof allowValue === 'object' && typeof eventValue === 'object') {
