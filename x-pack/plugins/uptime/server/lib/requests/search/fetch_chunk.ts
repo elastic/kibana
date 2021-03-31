@@ -9,6 +9,7 @@ import { refinePotentialMatches } from './refine_potential_matches';
 import { findPotentialMatches } from './find_potential_matches';
 import { ChunkFetcher, ChunkResult } from './monitor_summary_iterator';
 import { QueryContext } from './query_context';
+import { getListOfMonitors } from './list_of_monitors';
 
 /**
  * Fetches a single 'chunk' of data with a single query, then uses a secondary query to filter out erroneous matches.
@@ -24,6 +25,10 @@ export const fetchChunk: ChunkFetcher = async (
   searchAfter: any,
   size: number
 ): Promise<ChunkResult> => {
+  if (queryContext.skipRefinePhase) {
+    return getListOfMonitors(queryContext);
+  }
+
   const { monitorIds, searchAfter: foundSearchAfter } = await findPotentialMatches(
     queryContext,
     searchAfter,

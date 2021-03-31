@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { MonitorSummariesPage } from './monitor_summary_iterator';
+import { ChunkResult } from './monitor_summary_iterator';
 import { QueryContext } from './query_context';
 import { MonitorSummary } from '../../../../common/runtime_types/monitor';
 import { Ping } from '../../../../common/runtime_types/ping';
@@ -45,9 +46,7 @@ export const summaryByLocAggs = {
   },
 };
 
-export const getListOfMonitors = async (
-  queryContext: QueryContext
-): Promise<MonitorSummariesPage> => {
+export const getListOfMonitors = async (queryContext: QueryContext): Promise<ChunkResult> => {
   const params = {
     body: {
       size: 0,
@@ -129,10 +128,8 @@ export const getListOfMonitors = async (
     summaries.push(summaryPingsToSummary(summaryPings));
   }
 
-  const afterKey = data.aggregations.monitors.after_key;
-
   return {
     monitorSummaries: summaries,
-    nextPagePagination: { cursorKey: afterKey },
+    searchAfter: data.aggregations?.monitors?.after_key,
   };
 };

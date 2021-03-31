@@ -11,7 +11,6 @@ import { SortOrder, CursorDirection, MonitorSummariesResult } from '../../../com
 import { QueryContext, MonitorSummaryIterator } from './search';
 import { HistogramPoint, Histogram } from '../../../common/runtime_types';
 import { getHistogramInterval } from '../helper/get_histogram_interval';
-import { getListOfMonitors } from './search/list_of_monitors';
 
 export interface CursorPagination {
   cursorKey?: any;
@@ -68,17 +67,11 @@ export const getMonitorStates: UMElasticsearchQueryFn<
     query
   );
 
-  let page;
+  const size = Math.min(queryContext.size, QUERY.DEFAULT_AGGS_CAP);
 
-  if (parsedFilters === null && !statusFilter) {
-    page = await getListOfMonitors(queryContext);
-  } else {
-    const size = Math.min(queryContext.size, QUERY.DEFAULT_AGGS_CAP);
+  const iterator = new MonitorSummaryIterator(queryContext);
 
-    const iterator = new MonitorSummaryIterator(queryContext);
-
-    page = await iterator.nextPage(size);
-  }
+  const page = await iterator.nextPage(size);
 
   const minInterval = getHistogramInterval(
     queryContext.dateRangeStart,
@@ -86,16 +79,16 @@ export const getMonitorStates: UMElasticsearchQueryFn<
     12
   );
 
-  // const histograms = await getHistogramForMonitors(
-  //   queryContext,
-  //   page.monitorSummaries.map((s) => s.monitor_id),
-  //   minInterval
-  // );
-  //
-  // page.monitorSummaries.forEach((s) => {
-  //   s.histogram = histograms[s.monitor_id];
-  //   s.minInterval = minInterval;
-  // });
+  const histograms = await getHistogramForMonitors(
+    queryContext,
+    page.monitorSummaries.map((s) => s.monitor_id),
+    minInterval
+  );
+
+  page.monitorSummaries.forEach((s) => {
+    s.histogram = histograms[s.monitor_id];
+    s.minInterval = minInterval;
+  });
 
   return {
     summaries: page.monitorSummaries,

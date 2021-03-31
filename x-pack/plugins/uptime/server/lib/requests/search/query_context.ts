@@ -22,6 +22,7 @@ export class QueryContext {
   statusFilter?: string;
   hasTimespanCache?: boolean;
   query?: string;
+  skipRefinePhase?: boolean;
 
   constructor(
     database: UptimeESClient,
@@ -41,6 +42,7 @@ export class QueryContext {
     this.size = size;
     this.statusFilter = statusFilter;
     this.query = query;
+    this.skipRefinePhase = filterClause === null && !statusFilter;
   }
 
   async search<TParams>(params: TParams) {
@@ -144,7 +146,8 @@ export class QueryContext {
       this.pagination,
       this.filterClause,
       this.size,
-      this.statusFilter
+      this.statusFilter,
+      this.query
     );
   }
 

@@ -156,7 +156,7 @@ export class MonitorSummaryIterator {
 
     // Remember, the chunk fetcher might return no results in one chunk, but still have more matching
     // results, so we use the searchAfter field to determine whether we keep going.
-    if (!results.searchAfter) {
+    if (!results.searchAfter || this.queryContext.skipRefinePhase) {
       this.endOfResults = true;
     }
 
