@@ -300,6 +300,10 @@ export default function (providerContext: FtrProviderContext) {
             id: 'sample_ml_module',
             type: 'ml-module',
           },
+          {
+            id: 'sample_security_rule',
+            type: 'security-rule',
+          },
         ],
         installed_es: [
           {
