@@ -64,10 +64,18 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
     delete rawConfig.xpack;
   }
 
-  // only used to set cliArgs.envName
+  // only used to set cliArgs.envName, we don't want to inject that into the config
   delete extraCliOptions.env;
 
   if (opts.dev) {
+    if (!has('elasticsearch.username')) {
+      set('elasticsearch.username', 'kibana_system');
+    }
+
+    if (!has('elasticsearch.password')) {
+      set('elasticsearch.password', 'changeme');
+    }
+
     if (opts.ssl) {
       // @kbn/dev-utils is part of devDependencies
       // eslint-disable-next-line import/no-extraneous-dependencies
