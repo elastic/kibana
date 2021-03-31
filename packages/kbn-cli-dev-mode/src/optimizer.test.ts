@@ -46,6 +46,7 @@ const defaultOptions: Options = {
   pluginScanDirs: ['/some-scan-path'],
   quiet: true,
   silent: true,
+  verbose: false,
   repoRoot: '/app',
   runExamples: true,
   watch: true,
