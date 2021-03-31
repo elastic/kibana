@@ -77,7 +77,7 @@ export function createScopedRuleRegistryClient<TFieldMap extends DefaultFieldMap
     producer: string;
     tags: string[];
   };
-}): Promise<ScopedRuleRegistryClient<TFieldMap>> {
+}): ScopedRuleRegistryClient<TFieldMap> {
   const docRt = runtimeTypeFromFieldMap(fieldMap);
 
   const defaults = ruleData
@@ -91,84 +91,80 @@ export function createScopedRuleRegistryClient<TFieldMap extends DefaultFieldMap
       }
     : {};
 
-  const createClient = async () => {
-    const ruleUuids = await getRuleUuids({
-      savedObjectsClient,
-      namespace,
-    });
+  const client: ScopedRuleRegistryClient<TFieldMap> = {
+    search: async (searchRequest) => {
+      const ruleUuids = await getRuleUuids({
+        savedObjectsClient,
+        namespace,
+      });
 
-    const client: ScopedRuleRegistryClient<TFieldMap> = {
-      search: async (searchRequest) => {
-        const response = await scopedClusterClient.asInternalUser.search({
-          ...searchRequest,
-          index,
-          body: {
-            ...searchRequest.body,
-            query: {
-              bool: {
-                filter: [
-                  { terms: { 'rule.uuid': ruleUuids } },
-                  ...(searchRequest.body?.query ? [searchRequest.body.query] : []),
-                ],
-              },
+      const response = await scopedClusterClient.asInternalUser.search({
+        ...searchRequest,
+        index,
+        body: {
+          ...searchRequest.body,
+          query: {
+            bool: {
+              filter: [
+                { terms: { 'rule.uuid': ruleUuids } },
+                ...(searchRequest.body?.query ? [searchRequest.body.query] : []),
+              ],
             },
           },
-        });
+        },
+      });
 
-        return {
-          body: response.body as any,
-          events: compact(
-            response.body.hits.hits.map((hit) => {
-              const validation = docRt.decode(hit.fields);
-              if (isLeft(validation)) {
-                const error = createPathReporterError(validation);
-                logger.error(error);
-                return undefined;
-              }
-              return docRt.encode(validation.right);
-            })
-          ) as EventsOf<ESSearchRequest, TFieldMap>,
-        };
-      },
-      index: (doc) => {
-        const validation = docRt.decode({
+      return {
+        body: response.body as any,
+        events: compact(
+          response.body.hits.hits.map((hit) => {
+            const validation = docRt.decode(hit.fields);
+            if (isLeft(validation)) {
+              const error = createPathReporterError(validation);
+              logger.error(error);
+              return undefined;
+            }
+            return docRt.encode(validation.right);
+          })
+        ) as EventsOf<ESSearchRequest, TFieldMap>,
+      };
+    },
+    index: (doc) => {
+      const validation = docRt.decode({
+        ...doc,
+        ...defaults,
+      });
+
+      if (isLeft(validation)) {
+        throw createPathReporterError(validation);
+      }
+
+      clusterClientAdapter.indexDocument({ body: validation.right, index });
+    },
+    bulkIndex: (docs) => {
+      const validations = docs.map((doc) => {
+        return docRt.decode({
           ...doc,
           ...defaults,
         });
+      });
 
-        if (isLeft(validation)) {
-          throw createPathReporterError(validation);
-        }
+      const errors = compact(
+        validations.map((validation) =>
+          isLeft(validation) ? createPathReporterError(validation) : null
+        )
+      );
 
-        clusterClientAdapter.indexDocument({ body: validation.right, index });
-      },
-      bulkIndex: (docs) => {
-        const validations = docs.map((doc) => {
-          return docRt.decode({
-            ...doc,
-            ...defaults,
-          });
-        });
+      errors.forEach((error) => {
+        logger.error(error);
+      });
 
-        const errors = compact(
-          validations.map((validation) =>
-            isLeft(validation) ? createPathReporterError(validation) : null
-          )
-        );
+      const operations = compact(
+        validations.map((validation) => (isRight(validation) ? validation.right : null))
+      ).map((doc) => ({ body: doc, index }));
 
-        errors.forEach((error) => {
-          logger.error(error);
-        });
-
-        const operations = compact(
-          validations.map((validation) => (isRight(validation) ? validation.right : null))
-        ).map((doc) => ({ body: doc, index }));
-
-        return clusterClientAdapter.indexDocuments(operations);
-      },
-    };
-    return client;
+      return clusterClientAdapter.indexDocuments(operations);
+    },
   };
-
-  return createClient();
+  return client;
 }

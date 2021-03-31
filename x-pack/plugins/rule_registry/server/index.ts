@@ -7,8 +7,12 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginInitializerContext } from 'src/core/server';
-import { RuleRegistryPlugin, RuleRegistryPluginSetupContract } from './plugin';
-import { createLifecycleRuleTypeFactory } from './rule_registry/rule_type_helpers/create_lifecycle_rule_type_factory';
+import { RuleRegistryPlugin } from './plugin';
+
+export { RuleRegistryPluginSetupContract } from './plugin';
+export { createLifecycleRuleTypeFactory } from './rule_registry/rule_type_helpers/create_lifecycle_rule_type_factory';
+export { ecsFieldMap } from './generated/ecs_field_map';
+export { pickWithPatterns } from './rule_registry/field_map/pick_with_patterns';
 
 export const config = {
   schema: schema.object({
@@ -20,5 +24,3 @@ export type RuleRegistryConfig = TypeOf<typeof config.schema>;
 
 export const plugin = (initContext: PluginInitializerContext) =>
   new RuleRegistryPlugin(initContext);
-
-export { RuleRegistryPluginSetupContract, createLifecycleRuleTypeFactory };

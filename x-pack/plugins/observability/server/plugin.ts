@@ -6,7 +6,7 @@
  */
 
 import { PluginInitializerContext, Plugin, CoreSetup } from 'src/core/server';
-import { pickWithPatterns } from '../../rule_registry/server/rule_registry/field_map/pick_with_patterns';
+import { pickWithPatterns } from '../../rule_registry/server';
 import { ObservabilityConfig } from '.';
 import {
   bootstrapAnnotations,
@@ -15,7 +15,7 @@ import {
 } from './lib/annotations/bootstrap_annotations';
 import type { RuleRegistryPluginSetupContract } from '../../rule_registry/server';
 import { uiSettings } from './ui_settings';
-import { ecsFieldMap } from '../../rule_registry/server/generated/ecs_field_map';
+import { ecsFieldMap } from '../../rule_registry/server';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
 

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { CoreSetup, Logger } from 'kibana/server';
+import { CoreSetup, KibanaRequest, Logger, RequestHandlerContext } from 'kibana/server';
 import { inspect } from 'util';
+import { getSpaceIdFromPath } from '../../../spaces/common';
 import {
   ActionVariable,
   AlertInstanceState,
@@ -22,6 +23,7 @@ import { mappingFromFieldMap } from './field_map/mapping_from_field_map';
 import { PluginSetupContract as AlertingPluginSetupContract } from '../../../alerting/server';
 import { createScopedRuleRegistryClient } from './create_scoped_rule_registry_client';
 import { DefaultFieldMap } from './defaults/field_map';
+import { ScopedRuleRegistryClient } from './create_scoped_rule_registry_client/types';
 
 interface RuleRegistryOptions<TFieldMap extends FieldMap> {
   kibanaIndex: string;
@@ -122,6 +124,23 @@ export class RuleRegistry<TFieldMap extends DefaultFieldMap> {
     }
   }
 
+  createScopedRuleRegistryClient(
+    request: KibanaRequest,
+    context: RequestHandlerContext
+  ): ScopedRuleRegistryClient<TFieldMap> {
+    const { spaceId: namespace } = getSpaceIdFromPath(request.url.pathname);
+
+    return createScopedRuleRegistryClient({
+      savedObjectsClient: context.core.savedObjects.client,
+      scopedClusterClient: context.core.elasticsearch.client,
+      clusterClientAdapter: this.esAdapter,
+      fieldMap: this.options.fieldMap,
+      index: this.getEsNames().indexAliasName,
+      namespace,
+      logger: this.options.logger,
+    });
+  }
+
   registerType<TRuleParams extends RuleParams, TActionVariable extends ActionVariable>(
     type: RuleType<TFieldMap, TRuleParams, TActionVariable>
   ) {
@@ -147,7 +166,7 @@ export class RuleRegistry<TFieldMap extends DefaultFieldMap> {
 
         const producer = type.producer;
 
-        const scopedRuleRegistryClient = await createScopedRuleRegistryClient({
+        const scopedRuleRegistryClient = createScopedRuleRegistryClient({
           savedObjectsClient: services.savedObjectsClient,
           scopedClusterClient: services.scopedClusterClient,
           clusterClientAdapter: this.esAdapter,
