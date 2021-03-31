@@ -97,6 +97,17 @@ describe('<EditPolicy /> hot phase validation', () => {
       actions.expectErrorMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
     });
 
+    test(`doesn't allow decimals for max age`, async () => {
+      const { actions } = testBed;
+
+      await actions.hot.toggleDefaultRollover(false);
+      await actions.hot.setMaxAge('5.5');
+
+      runTimers();
+
+      actions.expectErrorMessages([i18nTexts.editPolicy.errors.integerRequired]);
+    });
+
     test(`doesn't allow -1 for max docs`, async () => {
       const { actions } = testBed;
 
@@ -117,6 +128,17 @@ describe('<EditPolicy /> hot phase validation', () => {
       runTimers();
 
       actions.expectErrorMessages([i18nTexts.editPolicy.errors.numberGreatThan0Required]);
+    });
+
+    test(`doesn't allow decimals for max docs`, async () => {
+      const { actions } = testBed;
+
+      await actions.hot.toggleDefaultRollover(false);
+      await actions.hot.setMaxDocs('5.5');
+
+      runTimers();
+
+      actions.expectErrorMessages([i18nTexts.editPolicy.errors.integerRequired]);
     });
   });
 
