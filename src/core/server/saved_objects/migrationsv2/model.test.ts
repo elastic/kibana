@@ -162,7 +162,7 @@ describe('migrations v2 model', () => {
       expect(newState.retryDelay).toEqual(0);
     });
 
-    test('terminates to FATAL after 10 retries', () => {
+    test('terminates to FATAL after retryAttempts retries', () => {
       const newState = model(
         { ...state, ...{ retryCount: 15, retryDelay: 64000 } },
         Either.left(retryableError)
@@ -612,6 +612,7 @@ describe('migrations v2 model', () => {
       test('LEGACY_SET_WRITE_BLOCK -> LEGACY_CREATE_REINDEX_TARGET if action fails with index_not_found_exception', () => {
         const res: ResponseType<'LEGACY_SET_WRITE_BLOCK'> = Either.left({
           type: 'index_not_found_exception',
+          index: 'legacy_index_name',
         });
         const newState = model(legacySetWriteBlockState, res);
         expect(newState.controlState).toEqual('LEGACY_CREATE_REINDEX_TARGET');
