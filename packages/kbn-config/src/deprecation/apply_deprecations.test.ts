@@ -32,8 +32,9 @@ describe('applyDeprecations', () => {
     expect(handlerC).toHaveBeenCalledTimes(1);
   });
 
-  it('calls handlers with correct arguments', () => {
-    const logger = () => undefined;
+  it('passes path to addDeprecation factory', () => {
+    const addDeprecation = jest.fn();
+    const createAddDeprecation = jest.fn().mockReturnValue(addDeprecation);
     const initialConfig = { foo: 'bar', deprecated: 'deprecated' };
     const alteredConfig = { foo: 'bar' };
 
@@ -43,11 +44,33 @@ describe('applyDeprecations', () => {
     applyDeprecations(
       initialConfig,
       [wrapHandler(handlerA, 'pathA'), wrapHandler(handlerB, 'pathB')],
-      logger
+      createAddDeprecation
     );
 
-    expect(handlerA).toHaveBeenCalledWith(initialConfig, 'pathA', logger);
-    expect(handlerB).toHaveBeenCalledWith(alteredConfig, 'pathB', logger);
+    expect(handlerA).toHaveBeenCalledWith(initialConfig, 'pathA', addDeprecation);
+    expect(handlerB).toHaveBeenCalledWith(alteredConfig, 'pathB', addDeprecation);
+    expect(createAddDeprecation).toBeCalledTimes(2);
+    expect(createAddDeprecation).toHaveBeenNthCalledWith(1, 'pathA');
+    expect(createAddDeprecation).toHaveBeenNthCalledWith(2, 'pathB');
+  });
+
+  it('calls handlers with correct arguments', () => {
+    const addDeprecation = jest.fn();
+    const createAddDeprecation = jest.fn().mockReturnValue(addDeprecation);
+    const initialConfig = { foo: 'bar', deprecated: 'deprecated' };
+    const alteredConfig = { foo: 'bar' };
+
+    const handlerA = jest.fn().mockReturnValue(alteredConfig);
+    const handlerB = jest.fn().mockImplementation((conf) => conf);
+
+    applyDeprecations(
+      initialConfig,
+      [wrapHandler(handlerA, 'pathA'), wrapHandler(handlerB, 'pathB')],
+      createAddDeprecation
+    );
+
+    expect(handlerA).toHaveBeenCalledWith(initialConfig, 'pathA', addDeprecation);
+    expect(handlerB).toHaveBeenCalledWith(alteredConfig, 'pathB', addDeprecation);
   });
 
   it('returns the migrated config', () => {
