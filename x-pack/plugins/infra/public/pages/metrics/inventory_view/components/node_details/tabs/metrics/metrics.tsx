@@ -23,7 +23,7 @@ import { EuiLoadingChart, EuiSpacer, EuiFlexGrid, EuiFlexItem } from '@elastic/e
 import { TabContent, TabProps } from '../shared';
 import { useSnapshot } from '../../../../hooks/use_snaphot';
 import { useWaffleOptionsContext } from '../../../../hooks/use_waffle_options';
-import { useSourceContext } from '../../../../../../../containers/source';
+import { useSourceContext } from '../../../../../../../containers/metrics_source';
 import { findInventoryFields } from '../../../../../../../../common/inventory_models';
 import { convertKueryToElasticSearchQuery } from '../../../../../../../utils/kuery';
 import { SnapshotMetricType } from '../../../../../../../../common/inventory_models/types';

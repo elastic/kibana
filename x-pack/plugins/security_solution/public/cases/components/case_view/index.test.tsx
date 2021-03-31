@@ -28,7 +28,8 @@ import { useConnectors } from '../../containers/configure/use_connectors';
 import { connectorsMock } from '../../containers/configure/mock';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
-import { CaseType, ConnectorTypes } from '../../../../../cases/common';
+import { ConnectorTypes } from '../../../../../cases/common/api/connectors';
+import { CaseType } from '../../../../../cases/common/api';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {

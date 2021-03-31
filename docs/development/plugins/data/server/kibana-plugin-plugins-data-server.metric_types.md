@@ -20,6 +20,7 @@ export declare enum METRIC_TYPES
 |  COUNT | <code>&quot;count&quot;</code> |  |
 |  CUMULATIVE\_SUM | <code>&quot;cumulative_sum&quot;</code> |  |
 |  DERIVATIVE | <code>&quot;derivative&quot;</code> |  |
+|  FILTERED\_METRIC | <code>&quot;filtered_metric&quot;</code> |  |
 |  GEO\_BOUNDS | <code>&quot;geo_bounds&quot;</code> |  |
 |  GEO\_CENTROID | <code>&quot;geo_centroid&quot;</code> |  |
 |  MAX | <code>&quot;max&quot;</code> |  |

@@ -63,6 +63,7 @@ export const createMetricVisTypeDefinition = (): VisTypeDefinition<VisParams> =>
           '!moving_avg',
           '!cumulative_sum',
           '!geo_bounds',
+          '!filtered_metric',
         ],
         aggSettings: {
           top_hits: {

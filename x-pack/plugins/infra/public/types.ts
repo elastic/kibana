@@ -19,8 +19,8 @@ import type {
 } from '../../../plugins/triggers_actions_ui/public';
 import type { DataEnhancedSetup, DataEnhancedStart } from '../../data_enhanced/public';
 import type {
-  ObservabilityPluginSetup,
-  ObservabilityPluginStart,
+  ObservabilityPublicSetup,
+  ObservabilityPublicStart,
 } from '../../observability/public';
 import type { SpacesPluginStart } from '../../spaces/public';
 import { MlPluginStart, MlPluginSetup } from '../../ml/public';
@@ -33,7 +33,7 @@ export type InfraClientStartExports = void;
 export interface InfraClientSetupDeps {
   dataEnhanced: DataEnhancedSetup;
   home?: HomePublicPluginSetup;
-  observability: ObservabilityPluginSetup;
+  observability: ObservabilityPublicSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   usageCollection: UsageCollectionSetup;
   ml: MlPluginSetup;
@@ -43,7 +43,7 @@ export interface InfraClientSetupDeps {
 export interface InfraClientStartDeps {
   data: DataPublicPluginStart;
   dataEnhanced: DataEnhancedStart;
-  observability: ObservabilityPluginStart;
+  observability: ObservabilityPublicStart;
   spaces: SpacesPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   usageCollection: UsageCollectionStart;

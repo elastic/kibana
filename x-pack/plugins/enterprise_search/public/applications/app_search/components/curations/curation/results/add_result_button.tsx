@@ -7,12 +7,18 @@
 
 import React from 'react';
 
+import { useActions } from 'kea';
+
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { AddResultLogic } from './';
+
 export const AddResultButton: React.FC = () => {
+  const { openFlyout } = useActions(AddResultLogic);
+
   return (
-    <EuiButton onClick={() => {} /* TODO */} iconType="plusInCircle" size="s" fill>
+    <EuiButton onClick={openFlyout} iconType="plusInCircle" size="s" fill>
       {i18n.translate('xpack.enterpriseSearch.appSearch.engine.curations.addResult.buttonLabel', {
         defaultMessage: 'Add result manually',
       })}

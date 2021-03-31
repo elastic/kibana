@@ -14,7 +14,7 @@ import * as hasDataHook from '../../../../hooks/use_has_data';
 import * as pluginContext from '../../../../hooks/use_plugin_context';
 import { HasDataContextValue } from '../../../../context/has_data_context';
 import { AppMountParameters, CoreStart } from 'kibana/public';
-import { ObservabilityPluginSetupDeps } from '../../../../plugin';
+import { ObservabilityPublicPluginsStart } from '../../../../plugin';
 
 jest.mock('react-router-dom', () => ({
   useLocation: () => ({
@@ -53,7 +53,7 @@ describe('APMSection', () => {
             },
           },
         },
-      } as unknown) as ObservabilityPluginSetupDeps,
+      } as unknown) as ObservabilityPublicPluginsStart,
     }));
   });
   it('renders with transaction series and stats', () => {

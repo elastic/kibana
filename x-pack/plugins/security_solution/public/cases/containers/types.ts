@@ -6,20 +6,20 @@
  */
 
 import {
-  AssociationType,
-  CaseAttributes,
-  CaseConnector,
-  CasePatchRequest,
-  CaseStatuses,
-  CaseType,
-  CommentRequest,
   User,
-  UserAction,
   UserActionField,
-} from '../../../../cases/common';
+  UserAction,
+  CaseConnector,
+  CommentRequest,
+  CaseStatuses,
+  CaseAttributes,
+  CasePatchRequest,
+  CaseType,
+  AssociationType,
+} from '../../../../cases/common/api';
 import { CaseStatusWithAllStatus } from '../components/status';
 
-export { CaseConnector, ActionConnector, CaseStatuses } from '../../../../cases/common';
+export { CaseConnector, ActionConnector, CaseStatuses } from '../../../../cases/common/api';
 
 export type Comment = CommentRequest & {
   associationType: AssociationType;

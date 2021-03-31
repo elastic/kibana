@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import {
   StatsGetter,
   StatsCollectionContext,
 } from 'src/plugins/telemetry_collection_manager/server';
-import { getClusterInfo, ESClusterInfo } from './get_cluster_info';
+import { getClusterInfo } from './get_cluster_info';
 import { getClusterStats } from './get_cluster_stats';
 import { getKibana, handleKibanaStats, KibanaUsageStats } from './get_kibana';
 import { getNodesUsage } from './get_nodes_usage';
@@ -27,7 +28,7 @@ import { getDataTelemetry, DATA_TELEMETRY_ID, DataTelemetryPayload } from './get
  */
 export function handleLocalStats(
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  { cluster_name, cluster_uuid, version }: ESClusterInfo,
+  { cluster_name, cluster_uuid, version }: estypes.RootNodeInfoResponse,
   { _nodes, cluster_name: clusterName, ...clusterStats }: any,
   kibana: KibanaUsageStats | undefined,
   dataTelemetry: DataTelemetryPayload | undefined,

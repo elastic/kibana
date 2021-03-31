@@ -28,7 +28,11 @@ import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { useChartTheme } from '../../../../../observability/public';
 import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
-import { RectCoordinate, TimeSeries } from '../../../../typings/timeseries';
+import {
+  Coordinate,
+  RectCoordinate,
+  TimeSeries,
+} from '../../../../typings/timeseries';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
 import { useAnnotationsContext } from '../../../context/annotations/use_annotations_context';
@@ -43,7 +47,7 @@ interface Props {
   fetchStatus: FETCH_STATUS;
   height?: number;
   onToggleLegend?: LegendItemListener;
-  timeseries: TimeSeries[];
+  timeseries: Array<TimeSeries<Coordinate>>;
   /**
    * Formatter for y-axis tick values
    */
@@ -85,12 +89,10 @@ export function TimeseriesChart({
   const max = Math.max(...xValues);
 
   const xFormatter = niceTimeFormatter([min, max]);
-
   const isEmpty = isTimeseriesEmpty(timeseries);
-
   const annotationColor = theme.eui.euiColorSecondary;
-
   const allSeries = [...timeseries, ...(anomalyTimeseries?.boundaries ?? [])];
+  const xDomain = isEmpty ? { min: 0, max: 1 } : { min, max };
 
   return (
     <ChartContainer hasData={!isEmpty} height={height} status={fetchStatus}>
@@ -111,7 +113,7 @@ export function TimeseriesChart({
           showLegend
           showLegendExtra
           legendPosition={Position.Bottom}
-          xDomain={{ min, max }}
+          xDomain={xDomain}
           onLegendItemClick={(legend) => {
             if (onToggleLegend) {
               onToggleLegend(legend);

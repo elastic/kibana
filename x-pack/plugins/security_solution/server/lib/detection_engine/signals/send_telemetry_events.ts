@@ -16,7 +16,8 @@ export interface SearchResultWithSource {
 }
 
 export function selectEvents(filteredEvents: SignalSearchResponse): TelemetryEvent[] {
-  const sources = filteredEvents.hits.hits.map(function (
+  // @ts-expect-error @elastic/elasticsearch _source is optional
+  const sources: TelemetryEvent[] = filteredEvents.hits.hits.map(function (
     obj: SearchResultWithSource
   ): TelemetryEvent {
     return obj._source;

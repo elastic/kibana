@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-setup(core: CoreSetup<DataPluginStartDependencies, DataPluginStart>, { logger, expressions }: IndexPatternsServiceSetupDeps): void;
+setup(core: CoreSetup<DataPluginStartDependencies, DataPluginStart>, { expressions }: IndexPatternsServiceSetupDeps): void;
 ```
 
 ## Parameters
@@ -15,7 +15,7 @@ setup(core: CoreSetup<DataPluginStartDependencies, DataPluginStart>, { logger, e
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  core | <code>CoreSetup&lt;DataPluginStartDependencies, DataPluginStart&gt;</code> |  |
-|  { logger, expressions } | <code>IndexPatternsServiceSetupDeps</code> |  |
+|  { expressions } | <code>IndexPatternsServiceSetupDeps</code> |  |
 
 <b>Returns:</b>
 

@@ -1,19 +1,19 @@
-[[actions-and-connectors-api-get]]
+[[get-connector-api]]
 === Get connector API
 ++++
-<titleabbrev>Get connector API</titleabbrev>
+<titleabbrev>Get connector</titleabbrev>
 ++++
 
 Retrieves a connector by ID.
 
-[[actions-and-connectors-api-get-request]]
+[[get-connector-api-request]]
 ==== Request
 
 `GET <kibana host>:<port>/api/actions/connector/<id>`
 
 `GET <kibana host>:<port>/s/<space_id>/api/actions/connector/<id>`
 
-[[actions-and-connectors-api-get-params]]
+[[get-connector-api-params]]
 ==== Path parameters
 
 `id`::
@@ -22,13 +22,13 @@ Retrieves a connector by ID.
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
-[[actions-and-connectors-api-get-codes]]
+[[get-connector-api-codes]]
 ==== Response code
 
 `200`::
     Indicates a successful call.
 
-[[actions-and-connectors-api-get-example]]
+[[get-connector-api-example]]
 ==== Example
 
 [source,sh]
