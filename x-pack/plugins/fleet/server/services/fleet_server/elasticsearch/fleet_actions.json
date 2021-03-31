@@ -25,12 +25,8 @@
       "type": {
         "type": "keyword"
       },
-      "user" : {
-        "properties": {
-          "id" : {
-            "type" : "keyword"
-          }
-        }
+      "user_id" : {
+        "type": "keyword"
       }
     }
   }
