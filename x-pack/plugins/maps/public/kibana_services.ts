@@ -6,12 +6,12 @@
  */
 
 import _ from 'lodash';
-import { CoreStart } from 'kibana/public';
+import type { CoreStart } from 'kibana/public';
 import type { MapsEmsConfig } from '../../../../src/plugins/maps_ems/public';
 import { MapsConfigType } from '../config';
-import { MapsPluginStartDependencies } from './plugin';
-import { EMSSettings } from '../common/ems_settings';
-import { PaletteRegistry } from '../../../../src/plugins/charts/public';
+import type { MapsPluginStartDependencies } from './plugin';
+import type { EMSSettings } from '../common/ems_settings';
+import type { PaletteRegistry } from '../../../../src/plugins/charts/public';
 
 let kibanaVersion: string;
 export const setKibanaVersion = (version: string) => (kibanaVersion = version);

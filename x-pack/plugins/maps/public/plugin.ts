@@ -62,7 +62,7 @@ import {
   setLicensingPluginStart,
 } from './licensed_features';
 import { EMSSettings } from '../common/ems_settings';
-import { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
+import type { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
 import type { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 
 export interface MapsPluginSetupDependencies {
