@@ -58,5 +58,6 @@ exports.externals = {
    */
   tslib: '__kbnSharedDeps__.TsLib',
   '@kbn/analytics': '__kbnSharedDeps__.KbnAnalytics',
+  '@kbn/std': '__kbnSharedDeps__.KbnStd',
 };
 exports.publicPathLoader = require.resolve('./public_path_loader');
