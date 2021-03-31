@@ -53,7 +53,7 @@ export const WorkplaceSearch: React.FC<InitialAppData> = (props) => {
 export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
   const { hasInitialized } = useValues(AppLogic);
   const { initializeAppData, setContext } = useActions(AppLogic);
-  const { renderHeaderActions } = useValues(KibanaLogic);
+  const { renderHeaderActions, setChromeIsVisible } = useValues(KibanaLogic);
   const { errorConnecting, readOnlyMode } = useValues(HttpLogic);
 
   const { pathname } = useLocation();
@@ -71,6 +71,9 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
   // TODO: Once auth is figured out, we need to have a check for the equivilent of `isAdmin`.
   const isOrganization = !pathname.match(personalSourceUrlRegex);
   setContext(isOrganization);
+
+  // We hide the chrome on app registration and need to unhide it for non-personal routes.
+  setChromeIsVisible(isOrganization);
 
   useEffect(() => {
     if (!hasInitialized) {
