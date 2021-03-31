@@ -97,11 +97,11 @@ describe('useBarChartsHooks', () => {
                 type: 'yaml',
               },
               'check.response.body.positive': {
-                value: '[]',
+                value: null,
                 type: 'yaml',
               },
               'check.response.body.negative': {
-                value: '[]',
+                value: null,
                 type: 'yaml',
               },
               'ssl.certificate_authorities': {
@@ -290,16 +290,15 @@ describe('useBarChartsHooks', () => {
       result.current.updatedPolicy.inputs[0]?.streams[0]?.vars?.[
         ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE
       ].value
-    ).toEqual(JSON.stringify(defaultConfig[ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE]));
+    ).toEqual(null);
     expect(
       result.current.updatedPolicy.inputs[0]?.streams[0]?.vars?.[
-        ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE
+        ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE
       ].value
-    ).toEqual(JSON.stringify(defaultConfig[ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]));
+    ).toEqual(null);
     expect(
-      result.current.updatedPolicy.inputs[0]?.streams[0]?.vars?.[
-        ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE
-      ].value
+      result.current.updatedPolicy.inputs[0]?.streams[0]?.vars?.[ConfigKeys.RESPONSE_STATUS_CHECK]
+        .value
     ).toEqual(JSON.stringify(defaultConfig[ConfigKeys.RESPONSE_STATUS_CHECK]));
     expect(
       result.current.updatedPolicy.inputs[0]?.streams[0]?.vars?.[ConfigKeys.REQUEST_HEADERS_CHECK]
@@ -317,6 +316,74 @@ describe('useBarChartsHooks', () => {
       result.current.updatedPolicy.inputs[0]?.streams[0]?.vars?.[ConfigKeys.RESPONSE_HEADERS_INDEX]
         .value
     ).toEqual(defaultConfig[ConfigKeys.RESPONSE_HEADERS_INDEX]);
+  });
+
+  it('returns null for empty array values', () => {
+    const onChange = jest.fn();
+    const { result, rerender } = renderHook((props) => useUpdatePolicy(props), {
+      initialProps: { defaultConfig, newPolicy, onChange, validate },
+    });
+
+    act(() => {
+      result.current.setConfig({
+        ...defaultConfig,
+        [ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE]: ['hi'],
+        [ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]: ['hi'],
+        [ConfigKeys.RESPONSE_STATUS_CHECK]: ['hi'],
+        [ConfigKeys.TAGS]: ['hi'],
+      });
+    });
+
+    // expect only http to be enabled
+    expect(result.current.updatedPolicy.inputs[0].enabled).toBe(true);
+    expect(result.current.updatedPolicy.inputs[1].enabled).toBe(false);
+    expect(result.current.updatedPolicy.inputs[2].enabled).toBe(false);
+
+    expect(
+      result.current.updatedPolicy.inputs[0]?.streams[0]?.vars?.[
+        ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE
+      ].value
+    ).toEqual('["hi"]');
+    expect(
+      result.current.updatedPolicy.inputs[0]?.streams[0]?.vars?.[
+        ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE
+      ].value
+    ).toEqual('["hi"]');
+    expect(
+      result.current.updatedPolicy.inputs[0]?.streams[0]?.vars?.[ConfigKeys.RESPONSE_STATUS_CHECK]
+        .value
+    ).toEqual('["hi"]');
+    expect(
+      result.current.updatedPolicy.inputs[0]?.streams[0]?.vars?.[ConfigKeys.TAGS].value
+    ).toEqual('["hi"]');
+
+    act(() => {
+      result.current.setConfig({
+        ...defaultConfig,
+        [ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE]: [],
+        [ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]: [],
+        [ConfigKeys.RESPONSE_STATUS_CHECK]: [],
+        [ConfigKeys.TAGS]: [],
+      });
+    });
+
+    expect(
+      result.current.updatedPolicy.inputs[0]?.streams[0]?.vars?.[
+        ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE
+      ].value
+    ).toEqual(null);
+    expect(
+      result.current.updatedPolicy.inputs[0]?.streams[0]?.vars?.[
+        ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE
+      ].value
+    ).toEqual(null);
+    expect(
+      result.current.updatedPolicy.inputs[0]?.streams[0]?.vars?.[ConfigKeys.RESPONSE_STATUS_CHECK]
+        .value
+    ).toEqual(null);
+    expect(
+      result.current.updatedPolicy.inputs[0]?.streams[0]?.vars?.[ConfigKeys.TAGS].value
+    ).toEqual(null);
   });
 
   it('handles tcp data stream', () => {
