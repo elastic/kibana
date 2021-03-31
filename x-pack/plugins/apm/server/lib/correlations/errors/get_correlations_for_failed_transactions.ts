@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty, omit, merge } from 'lodash';
+import { isEmpty, omit } from 'lodash';
 import { EventOutcome } from '../../../../common/event_outcome';
 import {
   processSignificantTermAggs,
@@ -18,7 +18,7 @@ import { ProcessorEvent } from '../../../../common/processor_event';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import {
-  getOutcomeAggregation,
+  getTimeseriesAggregation,
   getTransactionErrorRateTimeSeries,
 } from '../../helpers/transaction_error_rate';
 import { withApmSpan } from '../../../utils/with_apm_span';
@@ -72,7 +72,7 @@ export async function getCorrelationsForFailedTransactions(options: Options) {
 
     const response = await apmEventClient.search(params);
     if (!response.aggregations) {
-      return {};
+      return { significantTerms: [] };
     }
 
     const sigTermAggs = omit(
@@ -99,20 +99,10 @@ export async function getErrorRateTimeSeries({
     const { intervalString } = getBucketSize({ start, end, numBuckets: 15 });
 
     if (isEmpty(topSigTerms)) {
-      return {};
+      return { significantTerms: [] };
     }
 
-    const timeseriesAgg = {
-      date_histogram: {
-        field: '@timestamp',
-        fixed_interval: intervalString,
-        min_doc_count: 0,
-        extended_bounds: { min: start, max: end },
-      },
-      aggs: {
-        outcomes: getOutcomeAggregation(),
-      },
-    };
+    const timeseriesAgg = getTimeseriesAggregation(start, end, intervalString);
 
     const perTermAggs = topSigTerms.reduce(
       (acc, term, index) => {
@@ -136,7 +126,7 @@ export async function getErrorRateTimeSeries({
       body: {
         size: 0,
         query: { bool: { filter: filters } },
-        aggs: merge({ timeseries: timeseriesAgg }, perTermAggs),
+        aggs: perTermAggs,
       },
     };
 
@@ -144,15 +134,10 @@ export async function getErrorRateTimeSeries({
     const { aggregations } = response;
 
     if (!aggregations) {
-      return {};
+      return { significantTerms: [] };
     }
 
     return {
-      overall: {
-        timeseries: getTransactionErrorRateTimeSeries(
-          aggregations.timeseries.buckets
-        ),
-      },
       significantTerms: topSigTerms.map((topSig, index) => {
         const agg = aggregations[`term_${index}`]!;
 

@@ -15,6 +15,29 @@ import { TopSigTerm } from '../process_significant_term_aggs';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { INTERVAL_BUCKETS } from './get_overall_latency_distribution';
 
+export function getDistributionAggregation(
+  maxLatency: number,
+  distributionInterval: number
+) {
+  return {
+    filter: { range: { [TRANSACTION_DURATION]: { lte: maxLatency } } },
+    aggs: {
+      dist_filtered_by_latency: {
+        histogram: {
+          // TODO: add support for metrics
+          field: TRANSACTION_DURATION,
+          interval: distributionInterval,
+          min_doc_count: 0,
+          extended_bounds: {
+            min: 0,
+            max: maxLatency,
+          },
+        },
+      },
+    },
+  };
+}
+
 export async function getLatencyDistribution({
   setup,
   filters,
@@ -31,24 +54,10 @@ export async function getLatencyDistribution({
   return withApmSpan('get_latency_distribution', async () => {
     const { apmEventClient } = setup;
 
-    const distributionAgg = {
-      // filter out outliers not included in the significant term docs
-      filter: { range: { [TRANSACTION_DURATION]: { lte: maxLatency } } },
-      aggs: {
-        dist_filtered_by_latency: {
-          histogram: {
-            // TODO: add support for metrics
-            field: TRANSACTION_DURATION,
-            interval: distributionInterval,
-            min_doc_count: 0,
-            extended_bounds: {
-              min: 0,
-              max: maxLatency,
-            },
-          },
-        },
-      },
-    };
+    const distributionAgg = getDistributionAggregation(
+      maxLatency,
+      distributionInterval
+    );
 
     const perTermAggs = topSigTerms.reduce(
       (acc, term, index) => {

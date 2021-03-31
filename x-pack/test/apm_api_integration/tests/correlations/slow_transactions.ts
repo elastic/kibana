@@ -52,7 +52,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     it('returns significant terms', () => {
-      const significantTerms = response.body;
+      const { significantTerms } = response.body;
       expect(significantTerms).to.have.length(9);
       const sortedFieldNames = significantTerms.map(({ fieldName }) => fieldName).sort();
       expectSnapshot(sortedFieldNames).toMatchInline(`
@@ -71,7 +71,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     it('returns a distribution per term', () => {
-      const significantTerms = response.body;
+      const { significantTerms } = response.body;
       expectSnapshot(significantTerms.map((term) => term.distribution.length)).toMatchInline(`
         Array [
           15,

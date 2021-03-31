@@ -60,6 +60,7 @@ import {
 import {
   correlationsLatencyDistributionRoute,
   correlationsForSlowTransactionsRoute,
+  correlationsErrorDistributionRoute,
   correlationsForFailedTransactionsRoute,
 } from './correlations';
 import {
@@ -155,6 +156,7 @@ const createApmApi = () => {
     // Correlations
     .add(correlationsLatencyDistributionRoute)
     .add(correlationsForSlowTransactionsRoute)
+    .add(correlationsErrorDistributionRoute)
     .add(correlationsForFailedTransactionsRoute)
 
     // APM indices

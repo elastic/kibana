@@ -179,7 +179,7 @@ export function LatencyCorrelations({ onClose }: Props) {
               </EuiTitle>
               <LatencyDistributionChart
                 overallData={overallData}
-                data={
+                correlationsData={
                   hasFieldNames && correlationsData
                     ? correlationsData?.significantTerms
                     : undefined
@@ -247,12 +247,12 @@ function getSelectedDistribution(
 
 function LatencyDistributionChart({
   overallData,
-  data,
+  correlationsData,
   selectedSignificantTerm,
   status,
 }: {
   overallData?: OverallLatencyApiResponse;
-  data?: CorrelationsApiResponse['significantTerms'];
+  correlationsData?: CorrelationsApiResponse['significantTerms'];
   selectedSignificantTerm: SelectedSignificantTerm | null;
   status: FETCH_STATUS;
 }) {
@@ -308,7 +308,7 @@ function LatencyDistributionChart({
           tickFormat={(d) => `${roundFloat(d)}%`}
         />
 
-        {data && selectedSignificantTerm ? (
+        {correlationsData && selectedSignificantTerm ? (
           <BarSeries
             id={i18n.translate(
               'xpack.apm.correlations.latency.chart.selectedTermLatencyDistributionLabel',
@@ -325,7 +325,10 @@ function LatencyDistributionChart({
             xAccessor={'x'}
             yAccessors={['y']}
             color={theme.eui.euiColorVis2}
-            data={getSelectedDistribution(data, selectedSignificantTerm)}
+            data={getSelectedDistribution(
+              correlationsData,
+              selectedSignificantTerm
+            )}
             minBarHeight={5}
             tickFormat={(d) => `${roundFloat(d)}%`}
           />

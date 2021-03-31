@@ -38,7 +38,7 @@ export async function getCorrelationsForSlowTransactions(options: Options) {
     });
 
     if (!durationForPercentile) {
-      return [];
+      return { significantTerms: [] };
     }
 
     const response = await withApmSpan('get_significant_terms', () => {
@@ -96,19 +96,21 @@ export async function getCorrelationsForSlowTransactions(options: Options) {
       return apmEventClient.search(params);
     });
     if (!response.aggregations) {
-      return [];
+      return { significantTerms: [] };
     }
 
     const topSigTerms = processSignificantTermAggs({
       sigTermAggs: response.aggregations,
     });
 
-    return getLatencyDistribution({
+    const significantTerms = await getLatencyDistribution({
       setup,
       filters,
       topSigTerms,
       maxLatency,
       distributionInterval,
     });
+
+    return { significantTerms };
   });
 }

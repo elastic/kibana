@@ -6,11 +6,11 @@
  */
 
 import { dropRightWhile } from 'lodash';
-import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { getMaxLatency } from './get_max_latency';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { CorrelationsOptions, getCorrelationsFilters } from '../get_filters';
+import { getDistributionAggregation } from './get_latency_distribution';
 
 export const INTERVAL_BUCKETS = 15;
 
@@ -31,6 +31,7 @@ export async function getOverallLatencyDistribution(
       };
     }
     const distributionInterval = Math.floor(maxLatency / INTERVAL_BUCKETS);
+
     const params = {
       // TODO: add support for metrics
       apm: { events: [ProcessorEvent.transaction] },
@@ -39,24 +40,10 @@ export async function getOverallLatencyDistribution(
         query: { bool: { filter: filters } },
         aggs: {
           // overall distribution agg
-          distribution: {
-            // filter out outliers not included in the significant term docs
-            filter: { range: { [TRANSACTION_DURATION]: { lte: maxLatency } } },
-            aggs: {
-              dist_filtered_by_latency: {
-                histogram: {
-                  // TODO: add support for metrics
-                  field: TRANSACTION_DURATION,
-                  interval: distributionInterval,
-                  min_doc_count: 0,
-                  extended_bounds: {
-                    min: 0,
-                    max: maxLatency,
-                  },
-                },
-              },
-            },
-          },
+          distribution: getDistributionAggregation(
+            maxLatency,
+            distributionInterval
+          ),
         },
       },
     };

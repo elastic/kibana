@@ -9,7 +9,8 @@ import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import * as t from 'io-ts';
 import { isActivePlatinumLicense } from '../../common/license_check';
-import { getCorrelationsForFailedTransactions } from '../lib/correlations/get_correlations_for_failed_transactions';
+import { getCorrelationsForFailedTransactions } from '../lib/correlations/errors/get_correlations_for_failed_transactions';
+import { getOverallErrorDistribution } from '../lib/correlations/errors/get_overall_error_distribution';
 import { getCorrelationsForSlowTransactions } from '../lib/correlations/latency/get_correlations_for_slow_transactions';
 import { getOverallLatencyDistribution } from '../lib/correlations/latency/get_overall_latency_distribution';
 import { setupRequest } from '../lib/helpers/setup_request';
@@ -101,7 +102,7 @@ export const correlationsForSlowTransactionsRoute = createRoute({
       distributionInterval,
     } = context.params.query;
 
-    const significantTerms = await getCorrelationsForSlowTransactions({
+    return getCorrelationsForSlowTransactions({
       environment,
       kuery,
       serviceName,
@@ -113,8 +114,45 @@ export const correlationsForSlowTransactionsRoute = createRoute({
       maxLatency: parseInt(maxLatency, 10),
       distributionInterval: parseInt(distributionInterval, 10),
     });
+  },
+});
 
-    return { significantTerms };
+export const correlationsErrorDistributionRoute = createRoute({
+  endpoint: 'GET /api/apm/correlations/errors/overall_distribution',
+  params: t.type({
+    query: t.intersection([
+      t.partial({
+        serviceName: t.string,
+        transactionName: t.string,
+        transactionType: t.string,
+      }),
+      environmentRt,
+      kueryRt,
+      rangeRt,
+    ]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async ({ context, request }) => {
+    if (!isActivePlatinumLicense(context.licensing.license)) {
+      throw Boom.forbidden(INVALID_LICENSE);
+    }
+    const setup = await setupRequest(context, request);
+    const {
+      environment,
+      kuery,
+      serviceName,
+      transactionType,
+      transactionName,
+    } = context.params.query;
+
+    return getOverallErrorDistribution({
+      environment,
+      kuery,
+      serviceName,
+      transactionType,
+      transactionName,
+      setup,
+    });
   },
 });
 
