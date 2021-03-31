@@ -288,7 +288,7 @@ export function DiscoverField({
   };
 
   const canEditField = onEditField && field.type !== 'unknown';
-  const displayNameGrow = canEditField ? 9 : 10;
+  const displayNameGrow = onEditField ? 9 : 10;
   const popoverTitle = (
     <EuiPopoverTitle style={{ textTransform: 'none' }} className="eui-textBreakWord">
       <EuiFlexGroup>

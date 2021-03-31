@@ -242,7 +242,7 @@ export function DiscoverSidebar({
     return null;
   }
 
-  const editField = (fieldName: string) => {
+  const editField = (fieldName?: string) => {
     if (!canEditIndexPatternField) {
       return;
     }
@@ -257,7 +257,10 @@ export function DiscoverSidebar({
     });
   };
 
-  const addField = () => {};
+  const addField = () => {
+    editField(undefined);
+  };
+
   if (useFlyout) {
     return (
       <section
