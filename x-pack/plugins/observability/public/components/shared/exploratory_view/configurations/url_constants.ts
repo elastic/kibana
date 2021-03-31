@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-export const URL_KEYS = {
-  METRIC_TYPE: 'mt',
-  REPORT_TYPE: 'rt',
-  SERIES_TYPE: 'st',
-  BREAK_DOWN: 'bd',
-  FILTERS: 'ft',
-  REPORT_DEFINITIONS: 'rdf',
-};
+export enum URL_KEYS {
+  METRIC_TYPE = 'mt',
+  REPORT_TYPE = 'rt',
+  SERIES_TYPE = 'st',
+  BREAK_DOWN = 'bd',
+  FILTERS = 'ft',
+  REPORT_DEFINITIONS = 'rdf',
+}
