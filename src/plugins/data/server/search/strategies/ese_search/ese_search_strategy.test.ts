@@ -73,14 +73,6 @@ describe('ES search strategy', () => {
     },
   });
 
-  const mockConfig: any = {
-    search: {
-      sessions: {
-        defaultExpiration: moment.duration('1', 'm'),
-      },
-    },
-  };
-
   beforeEach(() => {
     mockApiCaller.mockClear();
     mockGetCaller.mockClear();
