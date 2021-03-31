@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { Type, TypeOf } from '@kbn/config-schema';
+import { Logger } from 'kibana/server';
 import {
   ActionVariable,
   AlertInstanceContext,
@@ -30,6 +31,7 @@ type RuleExecutorServices<
   { [key in TActionVariable['name']]: any },
   string
 >['services'] & {
+  logger: Logger;
   scopedRuleRegistryClient: ScopedRuleRegistryClient<TFieldMap>;
 };
 

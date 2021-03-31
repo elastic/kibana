@@ -10,12 +10,13 @@ import { PathReporter } from 'io-ts/lib/PathReporter';
 import { Logger, SavedObjectsClientContract } from 'kibana/server';
 import { IScopedClusterClient as ScopedClusterClient } from 'src/core/server';
 import { compact } from 'lodash';
+import { ESSearchRequest } from 'typings/elasticsearch';
 import { ClusterClientAdapter } from '../../../../event_log/server';
 import { runtimeTypeFromFieldMap, OutputOfFieldMap } from '../field_map/runtime_type_from_fieldmap';
-import { ScopedRuleRegistryClient } from './types';
+import { ScopedRuleRegistryClient, EventsOf } from './types';
 import { DefaultFieldMap } from '../defaults/field_map';
 
-const getRuleIds = async ({
+const getRuleUuids = async ({
   savedObjectsClient,
   namespace,
 }: {
@@ -29,15 +30,15 @@ const getRuleIds = async ({
 
   const pitFinder = savedObjectsClient.createPointInTimeFinder(options);
 
-  const ruleIds: string[] = [];
+  const ruleUuids: string[] = [];
 
   for await (const response of pitFinder.find()) {
-    ruleIds.push(...response.saved_objects.map((object) => object.id));
+    ruleUuids.push(...response.saved_objects.map((object) => object.id));
   }
 
   await pitFinder.close();
 
-  return ruleIds;
+  return ruleUuids;
 };
 
 const createPathReporterError = (either: Either<Errors, unknown>) => {
@@ -54,8 +55,7 @@ export function createScopedRuleRegistryClient<TFieldMap extends DefaultFieldMap
   clusterClientAdapter,
   index,
   logger,
-  rule,
-  producer,
+  ruleData,
 }: {
   fieldMap: TFieldMap;
   scopedClusterClient: ScopedClusterClient;
@@ -67,26 +67,32 @@ export function createScopedRuleRegistryClient<TFieldMap extends DefaultFieldMap
   }>;
   index: string;
   logger: Logger;
-  rule: {
-    id: string;
-    uuid: string;
-    category: string;
-    name: string;
+  ruleData?: {
+    rule: {
+      id: string;
+      uuid: string;
+      category: string;
+      name: string;
+    };
+    producer: string;
+    tags: string[];
   };
-  producer: string;
 }): Promise<ScopedRuleRegistryClient<TFieldMap>> {
   const docRt = runtimeTypeFromFieldMap(fieldMap);
 
-  const defaults = {
-    'rule.uuid': rule.uuid,
-    'rule.id': rule.id,
-    'rule.name': rule.name,
-    'rule.category': rule.category,
-    producer,
-  };
+  const defaults = ruleData
+    ? {
+        'rule.uuid': ruleData.rule.uuid,
+        'rule.id': ruleData.rule.id,
+        'rule.name': ruleData.rule.name,
+        'rule.category': ruleData.rule.category,
+        producer: ruleData.producer,
+        tags: ruleData?.tags,
+      }
+    : {};
 
   const createClient = async () => {
-    const ruleIds = await getRuleIds({
+    const ruleUuids = await getRuleUuids({
       savedObjectsClient,
       namespace,
     });
@@ -94,12 +100,14 @@ export function createScopedRuleRegistryClient<TFieldMap extends DefaultFieldMap
     const client: ScopedRuleRegistryClient<TFieldMap> = {
       search: async (searchRequest) => {
         const response = await scopedClusterClient.asInternalUser.search({
+          ...searchRequest,
           index,
           body: {
+            ...searchRequest.body,
             query: {
               bool: {
                 filter: [
-                  { terms: { 'rule.uuid': ruleIds } },
+                  { terms: { 'rule.uuid': ruleUuids } },
                   ...(searchRequest.body?.query ? [searchRequest.body.query] : []),
                 ],
               },
@@ -107,7 +115,20 @@ export function createScopedRuleRegistryClient<TFieldMap extends DefaultFieldMap
           },
         });
 
-        return response.body as any;
+        return {
+          body: response.body as any,
+          events: compact(
+            response.body.hits.hits.map((hit) => {
+              const validation = docRt.decode(hit.fields);
+              if (isLeft(validation)) {
+                const error = createPathReporterError(validation);
+                logger.error(error);
+                return undefined;
+              }
+              return docRt.encode(validation.right);
+            })
+          ) as EventsOf<ESSearchRequest, TFieldMap>,
+        };
       },
       index: (doc) => {
         const validation = docRt.decode({
@@ -123,7 +144,10 @@ export function createScopedRuleRegistryClient<TFieldMap extends DefaultFieldMap
       },
       bulkIndex: (docs) => {
         const validations = docs.map((doc) => {
-          return docRt.decode(doc);
+          return docRt.decode({
+            ...doc,
+            ...defaults,
+          });
         });
 
         const errors = compact(

@@ -125,6 +125,8 @@ export class RuleRegistry<TFieldMap extends DefaultFieldMap> {
   registerType<TRuleParams extends RuleParams, TActionVariable extends ActionVariable>(
     type: RuleType<TFieldMap, TRuleParams, TActionVariable>
   ) {
+    const logger = this.options.logger.get(type.id);
+
     this.options.alertingPluginSetupContract.registerType<
       AlertTypeParams,
       AlertTypeState,
@@ -134,7 +136,7 @@ export class RuleRegistry<TFieldMap extends DefaultFieldMap> {
     >({
       ...type,
       executor: async (executorOptions) => {
-        const { services, namespace, alertId, name } = executorOptions;
+        const { services, namespace, alertId, name, tags } = executorOptions;
 
         const rule = {
           id: type.id,
@@ -152,8 +154,11 @@ export class RuleRegistry<TFieldMap extends DefaultFieldMap> {
           fieldMap: this.options.fieldMap,
           index: this.getEsNames().indexAliasName,
           namespace,
-          producer,
-          rule,
+          ruleData: {
+            producer,
+            rule,
+            tags,
+          },
           logger: this.options.logger,
         });
 
@@ -163,6 +168,7 @@ export class RuleRegistry<TFieldMap extends DefaultFieldMap> {
           producer,
           services: {
             ...services,
+            logger,
             scopedRuleRegistryClient,
           },
         });

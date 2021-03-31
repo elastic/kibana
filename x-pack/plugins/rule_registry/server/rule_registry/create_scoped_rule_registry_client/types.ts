@@ -28,7 +28,7 @@ type FieldsESSearchRequest<TFieldMap extends DefaultFieldMap> = ESSearchRequest 
   body?: { fields: FieldsOf<TFieldMap> };
 };
 
-type EventsOf<
+export type EventsOf<
   TFieldsESSearchRequest extends ESSearchRequest,
   TFieldMap extends DefaultFieldMap
 > = TFieldsESSearchRequest extends { body: { fields: infer TFields } }

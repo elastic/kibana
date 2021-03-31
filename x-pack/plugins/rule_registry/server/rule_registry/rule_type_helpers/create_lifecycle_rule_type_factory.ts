@@ -43,7 +43,7 @@ type CreateLifecycleRuleType<TFieldMap extends DefaultFieldMap> = <
 const trackedAlertStateRt = t.type({
   alertId: t.string,
   alertUuid: t.string,
-  started: t.number,
+  started: t.string,
 });
 
 const wrappedStateRt = t.type({
@@ -63,7 +63,7 @@ export function createLifecycleRuleTypeFactory(): CreateLifecycleRuleType<Defaul
       ...type,
       executor: async (options) => {
         const {
-          services: { scopedRuleRegistryClient, alertInstanceFactory },
+          services: { scopedRuleRegistryClient, alertInstanceFactory, logger },
           state: previousState,
           rule,
         } = options;
@@ -101,11 +101,16 @@ export function createLifecycleRuleTypeFactory(): CreateLifecycleRuleType<Defaul
 
         const currentAlertIds = Object.keys(currentAlerts);
         const trackedAlertIds = Object.keys(state.trackedAlerts);
+        const newAlertIds = currentAlertIds.filter((alertId) => !trackedAlertIds.includes(alertId));
 
         const allAlertIds = [...new Set(currentAlertIds.concat(trackedAlertIds))];
 
         const trackedAlertStatesOfRecovered = Object.values(state.trackedAlerts).filter(
-          (trackedAlertState) => currentAlerts[trackedAlertState.alertId]
+          (trackedAlertState) => !currentAlerts[trackedAlertState.alertId]
+        );
+
+        logger.debug(
+          `Tracking ${allAlertIds.length} alerts (${newAlertIds.length} new, ${trackedAlertStatesOfRecovered.length} recovered)`
         );
 
         const alertsDataMap: Record<string, UserDefinedAlertFields<DefaultFieldMap>> = {
@@ -120,7 +125,7 @@ export function createLifecycleRuleTypeFactory(): CreateLifecycleRuleType<Defaul
                   filter: [
                     {
                       term: {
-                        'rule.id': rule.id,
+                        'rule.uuid': rule.uuid,
                       },
                     },
                     {
@@ -155,6 +160,10 @@ export function createLifecycleRuleTypeFactory(): CreateLifecycleRuleType<Defaul
           (alertId) => {
             const alertData = alertsDataMap[alertId];
 
+            if (!alertData) {
+              logger.warn(`Could not find alert data for ${alertId}`);
+            }
+
             const event: OutputOfFieldMap<DefaultFieldMap> = {
               ...alertData,
               '@timestamp': timestamp,
@@ -167,9 +176,15 @@ export function createLifecycleRuleTypeFactory(): CreateLifecycleRuleType<Defaul
             const isActiveButNotNew = !isNew && !isRecovered;
             const isActive = !isRecovered;
 
+            const { alertUuid, started } = state.trackedAlerts[alertId] ?? {
+              alertUuid: v4(),
+              started: timestamp,
+            };
+
+            event['alert.start'] = started;
+            event['alert.uuid'] = alertUuid;
+
             if (isNew) {
-              event['alert.uuid'] = v4();
-              event['alert.start'] = timestamp;
               event['event.action'] = 'open';
             }
 
@@ -194,11 +209,24 @@ export function createLifecycleRuleTypeFactory(): CreateLifecycleRuleType<Defaul
           }
         );
 
-        await scopedRuleRegistryClient.bulkIndex(eventsToIndex);
+        if (eventsToIndex.length) {
+          await scopedRuleRegistryClient.bulkIndex(eventsToIndex);
+        }
+
+        const nextTrackedAlerts = Object.fromEntries(
+          eventsToIndex
+            .filter((event) => event['alert.status'] !== 'closed')
+            .map((event) => {
+              const alertId = event['alert.id']!;
+              const alertUuid = event['alert.uuid']!;
+              const started = new Date(event['alert.start']!).toISOString();
+              return [alertId, { alertId, alertUuid, started }];
+            })
+        );
 
         return {
           wrapped: nextWrappedState,
-          trackedAlerts: eventsToIndex,
+          trackedAlerts: nextTrackedAlerts,
         };
       },
     };

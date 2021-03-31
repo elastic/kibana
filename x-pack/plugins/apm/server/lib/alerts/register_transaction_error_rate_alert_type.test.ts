@@ -5,56 +5,18 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
-import * as Rx from 'rxjs';
-import { toArray, map } from 'rxjs/operators';
-import { APMConfig } from '../..';
 import { registerTransactionErrorRateAlertType } from './register_transaction_error_rate_alert_type';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
-import { APMRuleRegistry } from '../../plugin';
-
-type Operator<T1, T2> = (source: Rx.Observable<T1>) => Rx.Observable<T2>;
-const pipeClosure = <T1, T2>(fn: Operator<T1, T2>): Operator<T1, T2> => {
-  return (source: Rx.Observable<T1>) => {
-    return Rx.defer(() => fn(source));
-  };
-};
-const mockedConfig$ = (Rx.of('apm_oss.errorIndices').pipe(
-  pipeClosure((source$) => {
-    return source$.pipe(map((i) => i));
-  }),
-  toArray()
-) as unknown) as Observable<APMConfig>;
+import { createRuleTypeMocks } from './test_utils';
 
 describe('Transaction error rate alert', () => {
   it("doesn't send an alert when rate is less than threshold", async () => {
-    let alertExecutor: any;
-    const registry = {
-      registerType: ({ executor }) => {
-        alertExecutor = executor;
-      },
-    } as APMRuleRegistry;
+    const { services, dependencies, executor } = createRuleTypeMocks();
 
     registerTransactionErrorRateAlertType({
-      registry,
-      config$: mockedConfig$,
-      logger: {} as any,
+      ...dependencies,
     });
-
-    expect(alertExecutor).toBeDefined();
-
-    const scheduleActions = jest.fn();
-
-    const services = {
-      scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
-      scopedRuleRegistryClient: {
-        bulkIndex: jest.fn(),
-      },
-      alertInstanceFactory: jest.fn(() => ({ scheduleActions })),
-      alertWithLifecycle: jest.fn(),
-    };
 
     const params = { threshold: 1 };
 
@@ -83,36 +45,21 @@ describe('Transaction error rate alert', () => {
       })
     );
 
-    await alertExecutor!({ services, params, startedAt: new Date() });
+    await executor({ params });
     expect(services.alertInstanceFactory).not.toBeCalled();
   });
 
   it('sends alerts for services that exceeded the threshold', async () => {
-    let alertExecutor: any;
-    const registry = {
-      registerType: ({ executor }) => {
-        alertExecutor = executor;
-      },
-    } as APMRuleRegistry;
+    const {
+      services,
+      dependencies,
+      executor,
+      scheduleActions,
+    } = createRuleTypeMocks();
 
     registerTransactionErrorRateAlertType({
-      registry,
-      config$: mockedConfig$,
-      logger: {} as any,
+      ...dependencies,
     });
-
-    expect(alertExecutor).toBeDefined();
-
-    const scheduleActions = jest.fn();
-
-    const services = {
-      scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
-      scopedRuleRegistryClient: {
-        bulkIndex: jest.fn(),
-      },
-      alertInstanceFactory: jest.fn(() => ({ scheduleActions })),
-      alertWithLifecycle: jest.fn(),
-    };
 
     services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise({
@@ -172,7 +119,7 @@ describe('Transaction error rate alert', () => {
 
     const params = { threshold: 10, windowSize: 5, windowUnit: 'm' };
 
-    await alertExecutor!({ services, params, startedAt: new Date() });
+    await executor({ params });
 
     expect(services.alertInstanceFactory).toHaveBeenCalledTimes(1);
 

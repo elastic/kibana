@@ -4,30 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { Observable } from 'rxjs';
-import * as Rx from 'rxjs';
-import { toArray, map } from 'rxjs/operators';
 import { registerTransactionDurationAnomalyAlertType } from './register_transaction_duration_anomaly_alert_type';
-import { APMConfig } from '../..';
 import { ANOMALY_SEVERITY } from '../../../../ml/common';
 import { Job, MlPluginSetup } from '../../../../ml/server';
 import * as GetServiceAnomalies from '../service_map/get_service_anomalies';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
-import { APMRuleRegistry } from '../../plugin';
-
-type Operator<T1, T2> = (source: Rx.Observable<T1>) => Rx.Observable<T2>;
-const pipeClosure = <T1, T2>(fn: Operator<T1, T2>): Operator<T1, T2> => {
-  return (source: Rx.Observable<T1>) => {
-    return Rx.defer(() => fn(source));
-  };
-};
-const mockedConfig$ = (Rx.of('apm_oss.errorIndices').pipe(
-  pipeClosure((source$) => {
-    return source$.pipe(map((i) => i));
-  }),
-  toArray()
-) as unknown) as Observable<APMConfig>;
+import { createRuleTypeMocks } from './test_utils';
 
 describe('Transaction duration anomaly alert', () => {
   afterEach(() => {
@@ -35,37 +16,21 @@ describe('Transaction duration anomaly alert', () => {
   });
   describe("doesn't send alert", () => {
     it('ml is not defined', async () => {
-      let alertExecutor: any;
-      const registry = {
-        registerType: ({ executor }) => {
-          alertExecutor = executor;
-        },
-      } as APMRuleRegistry;
+      const { services, dependencies, executor } = createRuleTypeMocks();
 
       registerTransactionDurationAnomalyAlertType({
-        registry,
+        ...dependencies,
         ml: undefined,
-        config$: mockedConfig$,
-        logger: {} as any,
       });
-      expect(alertExecutor).toBeDefined();
 
-      const scheduleActions = jest.fn();
-
-      const services = {
-        scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
-        scopedRuleRegistryClient: {
-          bulkIndex: jest.fn(),
-        },
-        alertInstanceFactory: jest.fn(() => ({ scheduleActions })),
-        alertWithLifecycle: jest.fn(),
-      };
       const params = { anomalySeverityType: ANOMALY_SEVERITY.MINOR };
 
-      await alertExecutor!({ services, params, startedAt: new Date() });
+      await executor({ params });
+
       expect(
         services.scopedClusterClient.asCurrentUser.search
       ).not.toHaveBeenCalled();
+
       expect(services.alertInstanceFactory).not.toHaveBeenCalled();
     });
 
@@ -74,23 +39,7 @@ describe('Transaction duration anomaly alert', () => {
         .spyOn(GetServiceAnomalies, 'getMLJobs')
         .mockReturnValue(Promise.resolve([]));
 
-      let alertExecutor: any;
-      const registry = {
-        registerType: ({ executor }) => {
-          alertExecutor = executor;
-        },
-      } as APMRuleRegistry;
-
-      const scheduleActions = jest.fn();
-
-      const services = {
-        scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
-        scopedRuleRegistryClient: {
-          bulkIndex: jest.fn(),
-        },
-        alertInstanceFactory: jest.fn(() => ({ scheduleActions })),
-        alertWithLifecycle: jest.fn(),
-      };
+      const { services, dependencies, executor } = createRuleTypeMocks();
 
       const ml = ({
         mlSystemProvider: () => ({ mlAnomalySearch: jest.fn() }),
@@ -98,20 +47,17 @@ describe('Transaction duration anomaly alert', () => {
       } as unknown) as MlPluginSetup;
 
       registerTransactionDurationAnomalyAlertType({
-        registry,
+        ...dependencies,
         ml,
-        config$: mockedConfig$,
-        logger: {} as any,
       });
-
-      expect(alertExecutor).toBeDefined();
 
       const params = { anomalySeverityType: ANOMALY_SEVERITY.MINOR };
 
-      await alertExecutor!({ services, params, startedAt: new Date() });
+      await executor({ params });
       expect(
         services.scopedClusterClient.asCurrentUser.search
       ).not.toHaveBeenCalled();
+
       expect(services.alertInstanceFactory).not.toHaveBeenCalled();
     });
 
@@ -129,12 +75,7 @@ describe('Transaction duration anomaly alert', () => {
         ] as unknown) as Job[])
       );
 
-      let alertExecutor: any;
-      const registry = {
-        registerType: ({ executor }) => {
-          alertExecutor = executor;
-        },
-      } as APMRuleRegistry;
+      const { services, dependencies, executor } = createRuleTypeMocks();
 
       const ml = ({
         mlSystemProvider: () => ({
@@ -157,36 +98,14 @@ describe('Transaction duration anomaly alert', () => {
       } as unknown) as MlPluginSetup;
 
       registerTransactionDurationAnomalyAlertType({
-        registry,
+        ...dependencies,
         ml,
-        config$: mockedConfig$,
-        logger: {} as any,
       });
-
-      expect(alertExecutor).toBeDefined();
-
-      const scheduleActions = jest.fn();
-
-      const services = {
-        scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
-        scopedRuleRegistryClient: {
-          bulkIndex: jest.fn(),
-        },
-        alertInstanceFactory: jest.fn(() => ({ scheduleActions })),
-        alertWithLifecycle: jest.fn(),
-      };
-
-      registerTransactionDurationAnomalyAlertType({
-        registry,
-        ml,
-        config$: mockedConfig$,
-        logger: {} as any,
-      });
-      expect(alertExecutor).toBeDefined();
 
       const params = { anomalySeverityType: ANOMALY_SEVERITY.MINOR };
 
-      await alertExecutor!({ services, params, startedAt: new Date() });
+      await executor({ params });
+
       expect(
         services.scopedClusterClient.asCurrentUser.search
       ).not.toHaveBeenCalled();
@@ -209,13 +128,12 @@ describe('Transaction duration anomaly alert', () => {
         ] as unknown) as Job[])
       );
 
-      let alertExecutor: any;
-
-      const registry = {
-        registerType: ({ executor }) => {
-          alertExecutor = executor;
-        },
-      } as APMRuleRegistry;
+      const {
+        services,
+        dependencies,
+        executor,
+        scheduleActions,
+      } = createRuleTypeMocks();
 
       const ml = ({
         mlSystemProvider: () => ({
@@ -260,28 +178,13 @@ describe('Transaction duration anomaly alert', () => {
       } as unknown) as MlPluginSetup;
 
       registerTransactionDurationAnomalyAlertType({
-        registry,
+        ...dependencies,
         ml,
-        config$: mockedConfig$,
-        logger: {} as any,
       });
-
-      expect(alertExecutor).toBeDefined();
-
-      const scheduleActions = jest.fn();
-
-      const services = {
-        scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
-        scopedRuleRegistryClient: {
-          bulkIndex: jest.fn(),
-        },
-        alertInstanceFactory: jest.fn(() => ({ scheduleActions })),
-        alertWithLifecycle: jest.fn(),
-      };
 
       const params = { anomalySeverityType: ANOMALY_SEVERITY.MINOR };
 
-      await alertExecutor!({ services, params, startedAt: new Date() });
+      await executor({ params });
 
       expect(services.alertInstanceFactory).toHaveBeenCalledTimes(1);
 
