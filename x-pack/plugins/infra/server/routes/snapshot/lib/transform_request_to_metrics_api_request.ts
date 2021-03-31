@@ -12,7 +12,7 @@ import { InfraSource } from '../../../lib/sources';
 import { createTimeRangeWithInterval } from './create_timerange_with_interval';
 import { parseFilterQuery } from '../../../utils/serialized_query';
 import { transformSnapshotMetricsToMetricsAPIMetrics } from './transform_snapshot_metrics_to_metrics_api_metrics';
-import { META_KEY } from './constants';
+import { META_KEY, DEFAULT_COMPOSITE_SIZE } from './constants';
 import { SourceOverrides } from './get_nodes';
 
 export const transformRequestToMetricsAPIRequest = async (
@@ -36,7 +36,9 @@ export const transformRequestToMetricsAPIRequest = async (
       interval: timeRangeWithIntervalApplied.interval,
     },
     metrics: transformSnapshotMetricsToMetricsAPIMetrics(snapshotRequest),
-    limit: snapshotRequest.overrideCompositeSize ? snapshotRequest.overrideCompositeSize : 5,
+    limit: snapshotRequest.overrideCompositeSize
+      ? snapshotRequest.overrideCompositeSize
+      : DEFAULT_COMPOSITE_SIZE,
     alignDataToEnd: true,
   };
 
