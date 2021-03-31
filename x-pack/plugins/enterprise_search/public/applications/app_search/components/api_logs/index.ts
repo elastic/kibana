@@ -7,3 +7,4 @@
 
 export { API_LOGS_TITLE } from './constants';
 export { ApiLogs } from './api_logs';
+export { ApiLogsLogic } from './api_logs_logic';
