@@ -1,11 +1,11 @@
 import { CoreSetup, Plugin, PluginInitializerContext } from '../../../../src/core/public';
-import { TimelinePluginSetup, TimelineProps } from './types';
+import { TimelinesPluginSetup, TimelineProps } from './types';
 import { getTimelineLazy } from './methods';
 
-export class TimelinePlugin implements Plugin<TimelinePluginSetup> {
+export class TimelinesPlugin implements Plugin<TimelinesPluginSetup> {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup): TimelinePluginSetup {
+  public setup(core: CoreSetup): TimelinesPluginSetup {
     const config = this.initializerContext.config.get<{ enabled: boolean }>();
     if (!config.enabled) {
       return {};

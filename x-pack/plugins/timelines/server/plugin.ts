@@ -6,10 +6,10 @@ import {
   Logger,
 } from '../../../../src/core/server';
 
-import { TimelinePluginSetup, TimelinePluginStart } from './types';
+import { TimelinesPluginSetup, TimelinesPluginStart } from './types';
 import { defineRoutes } from './routes';
 
-export class TimelinePlugin implements Plugin<TimelinePluginSetup, TimelinePluginStart> {
+export class TimelinesPlugin implements Plugin<TimelinesPluginSetup, TimelinesPluginStart> {
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -17,7 +17,7 @@ export class TimelinePlugin implements Plugin<TimelinePluginSetup, TimelinePlugi
   }
 
   public setup(core: CoreSetup) {
-    this.logger.debug('timeline: Setup');
+    this.logger.debug('timelines: Setup');
     const router = core.http.createRouter();
 
     // Register server side APIs
@@ -27,7 +27,7 @@ export class TimelinePlugin implements Plugin<TimelinePluginSetup, TimelinePlugi
   }
 
   public start(core: CoreStart) {
-    this.logger.debug('timeline: Started');
+    this.logger.debug('timelines: Started');
     return {};
   }
 

@@ -5,7 +5,7 @@
  */
 
 import { PluginInitializerContext } from '../../../../src/core/server';
-import { TimelinePlugin } from './plugin';
+import { TimelinesPlugin } from './plugin';
 import { ConfigSchema } from './config';
 
 export const config = {
@@ -15,7 +15,7 @@ export const config = {
   },
 };
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new TimelinePlugin(initializerContext);
+  return new TimelinesPlugin(initializerContext);
 }
 
-export { TimelinePluginSetup, TimelinePluginStart } from './types';
+export { TimelinesPluginSetup, TimelinesPluginStart } from './types';

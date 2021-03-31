@@ -7,14 +7,14 @@
 
 import { PluginInitializer } from 'kibana/public';
 import {
-  TimelineTestPlugin,
-  TimelineTestPluginSetupDependencies,
-  TimelineTestPluginStartDependencies,
+  TimelinesTestPlugin,
+  TimelinesTestPluginSetupDependencies,
+  TimelinesTestPluginStartDependencies,
 } from './plugin';
 
 export const plugin: PluginInitializer<
   void,
   void,
-  TimelineTestPluginSetupDependencies,
-  TimelineTestPluginStartDependencies
-> = () => new TimelineTestPlugin();
+  TimelinesTestPluginSetupDependencies,
+  TimelinesTestPluginStartDependencies
+> = () => new TimelinesTestPlugin();

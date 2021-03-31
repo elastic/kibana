@@ -1,6 +1,6 @@
 import { ReactElement } from 'react';
 
-export interface TimelinePluginSetup {
+export interface TimelinesPluginSetup {
   getTimeline?: (props: TimelineProps) => ReactElement<TimelineProps>;
 }
 

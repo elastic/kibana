@@ -1,4 +1,4 @@
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface TimelinePluginSetup {}
+export interface TimelinesPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface TimelinePluginStart {}
+export interface TimelinesPluginStart {}

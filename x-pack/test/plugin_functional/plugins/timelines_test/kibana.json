@@ -1,9 +1,9 @@
 {
-  "id": "timelineTest",
+  "id": "timelinesTest",
   "version": "1.0.0",
   "kibanaVersion": "kibana",
-  "configPath": ["xpack", "timelineTest"],
-  "requiredPlugins": ["timeline"],
+  "configPath": ["xpack", "timelinesTest"],
+  "requiredPlugins": ["timelines"],
   "requiredBundles": [
     "kibanaReact"
   ],

@@ -1,11 +1,11 @@
 import './index.scss';
 
 import { PluginInitializerContext } from 'src/core/public';
-import { TimelinePlugin } from './plugin';
+import { TimelinesPlugin } from './plugin';
 
 // This exports static code and TypeScript types,
 // as well as, Kibana Platform `plugin()` initializer.
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new TimelinePlugin(initializerContext);
+  return new TimelinesPlugin(initializerContext);
 }
-export { TimelinePluginSetup } from './types';
+export { TimelinesPluginSetup } from './types';

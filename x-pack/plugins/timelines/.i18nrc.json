@@ -1,7 +1,7 @@
 {
-  "prefix": "timeline",
+  "prefix": "timelines",
   "paths": {
-    "timeline": "."
+    "timelines": "."
   },
   "translations": ["translations/ja-JP.json"]
 }
