@@ -11,7 +11,6 @@ import {
   Heatmap,
   HeatmapBrushEvent,
   HeatmapSpec,
-  Position,
   ScaleType,
   Settings,
 } from '@elastic/charts';
@@ -60,10 +59,6 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
   const config: HeatmapSpec['config'] = {
     onBrushEnd: (e: HeatmapBrushEvent) => {},
     grid: {
-      cellHeight: {
-        min: 30,
-        max: 30,
-      },
       stroke: {
         width: 1,
         color: '#D3DAE6',
@@ -107,16 +102,15 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
     <Chart>
       <Settings
         onElementClick={onElementClick}
-        showLegend
-        legendPosition={Position.Top}
+        showLegend={args.legend.isVisible}
+        legendPosition={args.legend.position}
         debugState={window._echDebugStateFlag ?? false}
       />
       <Heatmap
-        id={'test'}
+        id={'heatmap'}
         name={valueDef.name}
         colorScale={ScaleType.Linear}
         data={chartData}
-        ranges={[0, 40, 90]}
         xAccessor={args.xAccessor}
         yAccessor={args.yAccessor}
         valueAccessor={args.valueAccessor}

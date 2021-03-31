@@ -27,12 +27,16 @@ export class HeatmapVisualization {
     editorFrame.registerVisualization(async () => {
       const timeZone = await core.uiSettings.get('dateFormat:tz');
 
-      const { getHeatmapVisualization, heatmap, getHeatmapRenderer } = await import(
-        '../async_services'
-      );
+      const {
+        getHeatmapVisualization,
+        heatmap,
+        heatmapLegendConfig,
+        getHeatmapRenderer,
+      } = await import('../async_services');
       const palettes = await charts.palettes.getPalettes();
 
       expressions.registerFunction(() => heatmap);
+      expressions.registerFunction(() => heatmapLegendConfig);
 
       expressions.registerRenderer(
         getHeatmapRenderer({

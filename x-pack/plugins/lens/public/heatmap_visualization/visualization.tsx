@@ -5,13 +5,26 @@
  * 2.0.
  */
 
+import React from 'react';
+import { render } from 'react-dom';
 import { i18n } from '@kbn/i18n';
+import { I18nProvider } from '@kbn/i18n/react';
+import { Ast } from '@kbn/interpreter/common';
+import { Position } from '@elastic/charts';
 import { LensIconChartBar } from '../assets/chart_bar';
 import { PaletteRegistry } from '../../../../../src/plugins/charts/public';
 import { OperationMetadata, Visualization } from '../types';
 import { HeatmapVisualizationState } from './types';
 import { suggestions } from './suggestions';
-import { CHART_NAMES, CHART_SHAPES, FUNCTION_NAME, GROUP_ID, LENS_HEATMAP_ID } from './constants';
+import {
+  CHART_NAMES,
+  CHART_SHAPES,
+  FUNCTION_NAME,
+  GROUP_ID,
+  LEGEND_FUNCTION,
+  LENS_HEATMAP_ID,
+} from './constants';
+import { HeatmapToolbar } from './toolbar_component';
 
 const groupLabelForBar = i18n.translate('xpack.lens.heatmapVisualization.heatmapGroupLabel', {
   defaultMessage: 'Heatmap',
@@ -75,13 +88,20 @@ export const getHeatmapVisualization = ({
   },
 
   initialize(frame, state, mainPalette) {
-    return (
-      state || {
+    return {
+      // default state
+      ...{
         layerId: frame.addNewLayer(),
         title: 'Empty Heatmap chart',
         shape: CHART_SHAPES.HEATMAP,
-      }
-    );
+        legend: {
+          isVisible: true,
+          position: Position.Top,
+          type: LEGEND_FUNCTION,
+        },
+      },
+      ...state,
+    };
   },
 
   getSuggestions: suggestions,
@@ -169,6 +189,15 @@ export const getHeatmapVisualization = ({
     return update;
   },
 
+  renderToolbar(domElement, props) {
+    render(
+      <I18nProvider>
+        <HeatmapToolbar {...props} />
+      </I18nProvider>,
+      domElement
+    );
+  },
+
   toExpression(state, datasourceLayers, attributes): Ast | null {
     const datasource = datasourceLayers[state.layerId];
 
@@ -188,9 +217,24 @@ export const getHeatmapVisualization = ({
           arguments: {
             title: [attributes?.title ?? ''],
             description: [attributes?.description ?? ''],
-            xAccessor: [state.xAccessor],
-            yAccessor: [state.yAccessor],
-            valueAccessor: [state.valueAccessor],
+            xAccessor: [state.xAccessor ?? ''],
+            yAccessor: [state.yAccessor ?? ''],
+            valueAccessor: [state.valueAccessor ?? ''],
+            legend: [
+              {
+                type: 'expression',
+                chain: [
+                  {
+                    type: 'function',
+                    function: LEGEND_FUNCTION,
+                    arguments: {
+                      isVisible: [state.legend.isVisible],
+                      position: [state.legend.position],
+                    },
+                  },
+                ],
+              },
+            ],
           },
         },
       ],

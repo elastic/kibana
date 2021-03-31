@@ -38,3 +38,5 @@ export const CHART_SHAPES = {
 } as const;
 
 export const FUNCTION_NAME = 'lens_heatmap';
+
+export const LEGEND_FUNCTION = 'lens_heatmap_legendConfig';

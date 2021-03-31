@@ -8,7 +8,7 @@
 import { Position } from '@elastic/charts';
 import { PaletteOutput } from '../../../../../src/plugins/charts/common';
 import { FormatFactory, LensMultiTable } from '../types';
-import { CHART_SHAPES, LENS_HEATMAP_RENDERER } from './constants';
+import { CHART_SHAPES, LEGEND_FUNCTION, LENS_HEATMAP_RENDERER } from './constants';
 
 export type ChartShapes = typeof CHART_SHAPES[keyof typeof CHART_SHAPES];
 
@@ -17,7 +17,7 @@ export interface SharedHeatmapLayerState {
   xAccessor?: string;
   yAccessor?: string;
   valueAccessor?: string;
-  legend?: { isVisible: true; position: Position };
+  legend: LegendConfigResult;
 }
 
 export type HeatmapLayerState = SharedHeatmapLayerState & {
@@ -49,3 +49,16 @@ export type HeatmapRenderProps = HeatmapExpressionProps & {
   timeZone: string;
   formatFactory: FormatFactory;
 };
+
+export interface LegendConfig {
+  /**
+   * Flag whether the legend should be shown. If there is just a single series, it will be hidden
+   */
+  isVisible: boolean;
+  /**
+   * Position of the legend relative to the chart
+   */
+  position: Position;
+}
+
+export type LegendConfigResult = LegendConfig & { type: typeof LEGEND_FUNCTION };

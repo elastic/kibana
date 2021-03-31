@@ -9,15 +9,60 @@ import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 import ReactDOM from 'react-dom';
 import React from 'react';
+import { Position } from '@elastic/charts';
 import {
   ExpressionFunctionDefinition,
   IInterpreterRenderHandlers,
 } from '../../../../../src/plugins/expressions';
 import { FormatFactory, LensMultiTable } from '../types';
-import { FUNCTION_NAME, LENS_HEATMAP_RENDERER } from './constants';
-import { HeatmapExpressionArgs, HeatmapExpressionProps, HeatmapRender } from './types';
+import { FUNCTION_NAME, LEGEND_FUNCTION, LENS_HEATMAP_RENDERER } from './constants';
+import type {
+  HeatmapExpressionArgs,
+  HeatmapExpressionProps,
+  HeatmapRender,
+  LegendConfigResult,
+} from './types';
 import { ChartsPluginSetup, PaletteRegistry } from '../../../../../src/plugins/charts/public';
 import { HeatmapChartReportable } from './chart_component';
+import { LegendConfig } from './types';
+
+/**
+ * TODO check if it's possible to make a shared function
+ * based on the XY chart
+ */
+export const heatmapLegendConfig: ExpressionFunctionDefinition<
+  typeof LEGEND_FUNCTION,
+  null,
+  LegendConfig,
+  LegendConfigResult
+> = {
+  name: LEGEND_FUNCTION,
+  aliases: [],
+  type: LEGEND_FUNCTION,
+  help: `Configure the heatmap chart's legend`,
+  inputTypes: ['null'],
+  args: {
+    isVisible: {
+      types: ['boolean'],
+      help: i18n.translate('xpack.lens.heatmapChart.isVisible.help', {
+        defaultMessage: 'Specifies whether or not the legend is visible.',
+      }),
+    },
+    position: {
+      types: ['string'],
+      options: [Position.Top, Position.Right, Position.Bottom, Position.Left],
+      help: i18n.translate('xpack.lens.heatmapChart.position.help', {
+        defaultMessage: 'Specifies the legend position.',
+      }),
+    },
+  },
+  fn: function fn(input: unknown, args: LegendConfig) {
+    return {
+      type: LEGEND_FUNCTION,
+      ...args,
+    };
+  },
+};
 
 export const heatmap: ExpressionFunctionDefinition<
   typeof FUNCTION_NAME,
@@ -61,6 +106,12 @@ export const heatmap: ExpressionFunctionDefinition<
       default: `{theme "palette" default={system_palette name="default"} }`,
       help: '',
       types: ['palette'],
+    },
+    legend: {
+      types: [LEGEND_FUNCTION],
+      help: i18n.translate('xpack.lens.heatmapChart.legend.help', {
+        defaultMessage: 'Configure the chart legend.',
+      }),
     },
   },
   inputTypes: ['lens_multitable'],
