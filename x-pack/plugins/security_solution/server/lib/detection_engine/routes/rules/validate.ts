@@ -32,10 +32,10 @@ import {
 import { createBulkErrorObject, BulkError } from '../utils';
 import { transformFindAlerts, transform, transformAlertToRule } from './utils';
 import { RuleActions } from '../../rule_actions/types';
-import { RuleTypeParams } from '../../types';
+import { RuleParams } from '../../schemas/rule_schemas';
 
 export const transformValidateFindAlerts = (
-  findResults: FindResult<RuleTypeParams>,
+  findResults: FindResult<RuleParams>,
   ruleActions: Array<RuleActions | null>,
   ruleStatuses?: Array<SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes>>
 ): [
@@ -65,7 +65,7 @@ export const transformValidateFindAlerts = (
 };
 
 export const transformValidate = (
-  alert: PartialAlert<RuleTypeParams>,
+  alert: PartialAlert<RuleParams>,
   ruleActions?: RuleActions | null,
   ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
 ): [RulesSchema | null, string | null] => {
@@ -78,7 +78,7 @@ export const transformValidate = (
 };
 
 export const newTransformValidate = (
-  alert: PartialAlert<RuleTypeParams>,
+  alert: PartialAlert<RuleParams>,
   ruleActions?: RuleActions | null,
   ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
 ): [FullResponseSchema | null, string | null] => {
@@ -92,7 +92,7 @@ export const newTransformValidate = (
 
 export const transformValidateBulkError = (
   ruleId: string,
-  alert: PartialAlert<RuleTypeParams>,
+  alert: PartialAlert<RuleParams>,
   ruleActions?: RuleActions | null,
   ruleStatus?: SavedObjectsFindResponse<IRuleStatusSOAttributes>
 ): RulesSchema | BulkError => {

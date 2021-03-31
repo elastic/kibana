@@ -6,9 +6,7 @@
  */
 
 import {
-  sampleRuleAlertParams,
   sampleDocNoSortId,
-  sampleRuleGuid,
   sampleIdGuid,
   sampleDocWithAncestors,
   sampleRuleSO,
@@ -24,6 +22,7 @@ import {
 import { SignalHit, SignalSourceHit } from './types';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { SIGNALS_TEMPLATE_VERSION } from '../routes/index/get_signals_template';
+import { getQueryRuleParams, getThresholdRuleParams } from '../schemas/rule_schemas.mock';
 
 describe('buildBulkBody', () => {
   beforeEach(() => {
@@ -31,31 +30,11 @@ describe('buildBulkBody', () => {
   });
 
   test('bulk body builds well-defined body', () => {
-    const sampleParams = sampleRuleAlertParams();
+    const ruleSO = sampleRuleSO(getQueryRuleParams());
     const doc = sampleDocNoSortId();
     // @ts-expect-error @elastic/elasticsearch _source is optional
     delete doc._source.source;
-    const fakeSignalSourceHit = buildBulkBody({
-      doc,
-      ruleParams: {
-        ...sampleParams,
-        threshold: {
-          field: ['host.name'],
-          value: 100,
-        },
-      },
-      id: sampleRuleGuid,
-      name: 'rule-name',
-      actions: [],
-      createdAt: '2020-01-28T15:58:34.810Z',
-      updatedAt: '2020-01-28T15:59:14.004Z',
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
-      interval: '5m',
-      enabled: true,
-      tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: 'no_actions',
-    });
+    const fakeSignalSourceHit = buildBulkBody(ruleSO, doc);
     // Timestamp will potentially always be different so remove it for the test
     // @ts-expect-error
     delete fakeSignalSourceHit['@timestamp'];
@@ -117,17 +96,13 @@ describe('buildBulkBody', () => {
           severity_mapping: [],
           tags: ['some fake tag 1', 'some fake tag 2'],
           threat: [],
-          threshold: {
-            field: ['host.name'],
-            value: 100,
-          },
           throttle: 'no_actions',
           type: 'query',
           to: 'now',
           note: '',
           enabled: true,
-          created_by: 'elastic',
-          updated_by: 'elastic',
+          created_by: 'sample user',
+          updated_by: 'sample user',
           version: 1,
           created_at: fakeSignalSourceHit.signal.rule?.created_at,
           updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
@@ -140,7 +115,7 @@ describe('buildBulkBody', () => {
   });
 
   test('bulk body builds well-defined body with threshold results', () => {
-    const sampleParams = sampleRuleAlertParams();
+    const ruleSO = sampleRuleSO(getThresholdRuleParams());
     const baseDoc = sampleDocNoSortId();
     const doc: SignalSourceHit = {
       ...baseDoc,
@@ -159,27 +134,7 @@ describe('buildBulkBody', () => {
     };
     // @ts-expect-error @elastic/elasticsearch _source is optional
     delete doc._source.source;
-    const fakeSignalSourceHit = buildBulkBody({
-      doc,
-      ruleParams: {
-        ...sampleParams,
-        threshold: {
-          field: [],
-          value: 4,
-        },
-      },
-      id: sampleRuleGuid,
-      name: 'rule-name',
-      actions: [],
-      createdAt: '2020-01-28T15:58:34.810Z',
-      updatedAt: '2020-01-28T15:59:14.004Z',
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
-      interval: '5m',
-      enabled: true,
-      tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: 'no_actions',
-    });
+    const fakeSignalSourceHit = buildBulkBody(ruleSO, doc);
     // Timestamp will potentially always be different so remove it for the test
     // @ts-expect-error
     delete fakeSignalSourceHit['@timestamp'];
@@ -242,16 +197,16 @@ describe('buildBulkBody', () => {
           tags: ['some fake tag 1', 'some fake tag 2'],
           threat: [],
           threshold: {
-            field: [],
-            value: 4,
+            field: ['host.id'],
+            value: 5,
           },
           throttle: 'no_actions',
-          type: 'query',
+          type: 'threshold',
           to: 'now',
           note: '',
           enabled: true,
-          created_by: 'elastic',
-          updated_by: 'elastic',
+          created_by: 'sample user',
+          updated_by: 'sample user',
           version: 1,
           created_at: fakeSignalSourceHit.signal.rule?.created_at,
           updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
@@ -272,7 +227,7 @@ describe('buildBulkBody', () => {
   });
 
   test('bulk body builds original_event if it exists on the event to begin with', () => {
-    const sampleParams = sampleRuleAlertParams();
+    const ruleSO = sampleRuleSO(getQueryRuleParams());
     const doc = sampleDocNoSortId();
     // @ts-expect-error @elastic/elasticsearch _source is optional
     delete doc._source.source;
@@ -283,21 +238,7 @@ describe('buildBulkBody', () => {
       dataset: 'socket',
       kind: 'event',
     };
-    const fakeSignalSourceHit = buildBulkBody({
-      doc,
-      ruleParams: sampleParams,
-      id: sampleRuleGuid,
-      name: 'rule-name',
-      actions: [],
-      createdAt: '2020-01-28T15:58:34.810Z',
-      updatedAt: '2020-01-28T15:59:14.004Z',
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
-      interval: '5m',
-      enabled: true,
-      tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: 'no_actions',
-    });
+    const fakeSignalSourceHit = buildBulkBody(ruleSO, doc);
     // Timestamp will potentially always be different so remove it for the test
     // @ts-expect-error
     delete fakeSignalSourceHit['@timestamp'];
@@ -371,8 +312,8 @@ describe('buildBulkBody', () => {
           to: 'now',
           note: '',
           enabled: true,
-          created_by: 'elastic',
-          updated_by: 'elastic',
+          created_by: 'sample user',
+          updated_by: 'sample user',
           version: 1,
           created_at: fakeSignalSourceHit.signal.rule?.created_at,
           updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
@@ -387,7 +328,7 @@ describe('buildBulkBody', () => {
   });
 
   test('bulk body builds original_event if it exists on the event to begin with but no kind information', () => {
-    const sampleParams = sampleRuleAlertParams();
+    const ruleSO = sampleRuleSO(getQueryRuleParams());
     const doc = sampleDocNoSortId();
     // @ts-expect-error @elastic/elasticsearch _source is optional
     delete doc._source.source;
@@ -397,21 +338,7 @@ describe('buildBulkBody', () => {
       module: 'system',
       dataset: 'socket',
     };
-    const fakeSignalSourceHit = buildBulkBody({
-      doc,
-      ruleParams: sampleParams,
-      id: sampleRuleGuid,
-      name: 'rule-name',
-      actions: [],
-      createdAt: '2020-01-28T15:58:34.810Z',
-      updatedAt: '2020-01-28T15:59:14.004Z',
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
-      interval: '5m',
-      enabled: true,
-      tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: 'no_actions',
-    });
+    const fakeSignalSourceHit = buildBulkBody(ruleSO, doc);
     // Timestamp will potentially always be different so remove it for the test
     // @ts-expect-error
     delete fakeSignalSourceHit['@timestamp'];
@@ -485,8 +412,8 @@ describe('buildBulkBody', () => {
           to: 'now',
           note: '',
           enabled: true,
-          created_by: 'elastic',
-          updated_by: 'elastic',
+          created_by: 'sample user',
+          updated_by: 'sample user',
           version: 1,
           created_at: fakeSignalSourceHit.signal.rule?.created_at,
           updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
@@ -500,7 +427,7 @@ describe('buildBulkBody', () => {
   });
 
   test('bulk body builds original_event if it exists on the event to begin with with only kind information', () => {
-    const sampleParams = sampleRuleAlertParams();
+    const ruleSO = sampleRuleSO(getQueryRuleParams());
     const doc = sampleDocNoSortId();
     // @ts-expect-error @elastic/elasticsearch _source is optional
     delete doc._source.source;
@@ -508,21 +435,7 @@ describe('buildBulkBody', () => {
     doc._source.event = {
       kind: 'event',
     };
-    const fakeSignalSourceHit = buildBulkBody({
-      doc,
-      ruleParams: sampleParams,
-      id: sampleRuleGuid,
-      name: 'rule-name',
-      actions: [],
-      createdAt: '2020-01-28T15:58:34.810Z',
-      updatedAt: '2020-01-28T15:59:14.004Z',
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
-      interval: '5m',
-      enabled: true,
-      tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: 'no_actions',
-    });
+    const fakeSignalSourceHit = buildBulkBody(ruleSO, doc);
     // Timestamp will potentially always be different so remove it for the test
     // @ts-expect-error
     delete fakeSignalSourceHit['@timestamp'];
@@ -591,8 +504,8 @@ describe('buildBulkBody', () => {
           to: 'now',
           note: '',
           enabled: true,
-          created_by: 'elastic',
-          updated_by: 'elastic',
+          created_by: 'sample user',
+          updated_by: 'sample user',
           version: 1,
           updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
           created_at: fakeSignalSourceHit.signal.rule?.created_at,
@@ -606,7 +519,7 @@ describe('buildBulkBody', () => {
   });
 
   test('bulk body builds "original_signal" if it exists already as a numeric', () => {
-    const sampleParams = sampleRuleAlertParams();
+    const ruleSO = sampleRuleSO(getQueryRuleParams());
     const sampleDoc = sampleDocNoSortId();
     // @ts-expect-error @elastic/elasticsearch _source is optional
     delete sampleDoc._source.source;
@@ -617,21 +530,7 @@ describe('buildBulkBody', () => {
         signal: 123,
       },
     } as unknown) as SignalSourceHit;
-    const { '@timestamp': timestamp, ...fakeSignalSourceHit } = buildBulkBody({
-      doc,
-      ruleParams: sampleParams,
-      id: sampleRuleGuid,
-      name: 'rule-name',
-      actions: [],
-      createdAt: '2020-01-28T15:58:34.810Z',
-      updatedAt: '2020-01-28T15:59:14.004Z',
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
-      interval: '5m',
-      enabled: true,
-      tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: 'no_actions',
-    });
+    const { '@timestamp': timestamp, ...fakeSignalSourceHit } = buildBulkBody(ruleSO, doc);
     const expected: Omit<SignalHit, '@timestamp'> & { someKey: string } = {
       someKey: 'someValue',
       event: {
@@ -695,8 +594,8 @@ describe('buildBulkBody', () => {
           to: 'now',
           note: '',
           enabled: true,
-          created_by: 'elastic',
-          updated_by: 'elastic',
+          created_by: 'sample user',
+          updated_by: 'sample user',
           version: 1,
           updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
           created_at: fakeSignalSourceHit.signal.rule?.created_at,
@@ -710,7 +609,7 @@ describe('buildBulkBody', () => {
   });
 
   test('bulk body builds "original_signal" if it exists already as an object', () => {
-    const sampleParams = sampleRuleAlertParams();
+    const ruleSO = sampleRuleSO(getQueryRuleParams());
     const sampleDoc = sampleDocNoSortId();
     // @ts-expect-error @elastic/elasticsearch _source is optional
     delete sampleDoc._source.source;
@@ -721,21 +620,7 @@ describe('buildBulkBody', () => {
         signal: { child_1: { child_2: 'nested data' } },
       },
     } as unknown) as SignalSourceHit;
-    const { '@timestamp': timestamp, ...fakeSignalSourceHit } = buildBulkBody({
-      doc,
-      ruleParams: sampleParams,
-      id: sampleRuleGuid,
-      name: 'rule-name',
-      actions: [],
-      createdAt: '2020-01-28T15:58:34.810Z',
-      updatedAt: '2020-01-28T15:59:14.004Z',
-      createdBy: 'elastic',
-      updatedBy: 'elastic',
-      interval: '5m',
-      enabled: true,
-      tags: ['some fake tag 1', 'some fake tag 2'],
-      throttle: 'no_actions',
-    });
+    const { '@timestamp': timestamp, ...fakeSignalSourceHit } = buildBulkBody(ruleSO, doc);
     const expected: Omit<SignalHit, '@timestamp'> & { someKey: string } = {
       someKey: 'someValue',
       event: {
@@ -799,8 +684,8 @@ describe('buildBulkBody', () => {
           to: 'now',
           note: '',
           enabled: true,
-          created_by: 'elastic',
-          updated_by: 'elastic',
+          created_by: 'sample user',
+          updated_by: 'sample user',
           version: 1,
           updated_at: fakeSignalSourceHit.signal.rule?.updated_at,
           created_at: fakeSignalSourceHit.signal.rule?.created_at,
@@ -822,7 +707,7 @@ describe('buildSignalFromSequence', () => {
     const block2 = sampleWrappedSignalHit();
     block2._source.new_key = 'new_key_value';
     const blocks = [block1, block2];
-    const ruleSO = sampleRuleSO();
+    const ruleSO = sampleRuleSO(getQueryRuleParams());
     const signal = buildSignalFromSequence(blocks, ruleSO);
     // Timestamp will potentially always be different so remove it for the test
     // @ts-expect-error
@@ -944,7 +829,7 @@ describe('buildSignalFromSequence', () => {
     const block2 = sampleWrappedSignalHit();
     block2._source['@timestamp'] = '2021-05-20T22:28:46+0000';
     block2._source.someKey = 'someOtherValue';
-    const ruleSO = sampleRuleSO();
+    const ruleSO = sampleRuleSO(getQueryRuleParams());
     const signal = buildSignalFromSequence([block1, block2], ruleSO);
     // Timestamp will potentially always be different so remove it for the test
     // @ts-expect-error
@@ -1066,7 +951,7 @@ describe('buildSignalFromEvent', () => {
     const ancestor = sampleDocWithAncestors().hits.hits[0];
     // @ts-expect-error @elastic/elasticsearch _source is optional
     delete ancestor._source.source;
-    const ruleSO = sampleRuleSO();
+    const ruleSO = sampleRuleSO(getQueryRuleParams());
     const signal = buildSignalFromEvent(ancestor, ruleSO, true);
     // Timestamp will potentially always be different so remove it for the test
     // @ts-expect-error

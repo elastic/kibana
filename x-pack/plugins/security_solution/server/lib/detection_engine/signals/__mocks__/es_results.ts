@@ -11,68 +11,19 @@ import type {
   SignalSearchResponse,
   BulkResponse,
   BulkItem,
-  RuleAlertAttributes,
   SignalHit,
   WrappedSignalHit,
+  AlertAttributes,
 } from '../types';
 import { SavedObject, SavedObjectsFindResponse } from '../../../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../../../src/core/server/mocks';
-import { RuleTypeParams } from '../../types';
 import { IRuleStatusSOAttributes } from '../../rules/types';
 import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
+import { RuleParams } from '../../schemas/rule_schemas';
 
-export const sampleRuleAlertParams = (
-  maxSignals?: number | undefined,
-  riskScore?: number | undefined
-): RuleTypeParams => ({
-  author: ['Elastic'],
-  buildingBlockType: 'default',
-  ruleId: 'rule-1',
-  description: 'Detecting root and admin users',
-  eventCategoryOverride: undefined,
-  falsePositives: [],
-  immutable: false,
-  index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-  type: 'query',
-  from: 'now-6m',
-  to: 'now',
-  severity: 'high',
-  severityMapping: [],
-  query: 'user.name: root or user.name: admin',
-  language: 'kuery',
-  license: 'Elastic License',
-  outputIndex: '.siem-signals',
-  references: ['http://google.com'],
-  riskScore: riskScore ? riskScore : 50,
-  riskScoreMapping: [],
-  ruleNameOverride: undefined,
-  maxSignals: maxSignals ? maxSignals : 10000,
-  note: '',
-  anomalyThreshold: undefined,
-  machineLearningJobId: undefined,
-  filters: undefined,
-  savedId: undefined,
-  threshold: undefined,
-  threatFilters: undefined,
-  threatQuery: undefined,
-  threatMapping: undefined,
-  threatIndex: undefined,
-  threatIndicatorPath: undefined,
-  threatLanguage: undefined,
-  timelineId: undefined,
-  timelineTitle: undefined,
-  timestampOverride: undefined,
-  meta: undefined,
-  threat: undefined,
-  version: 1,
-  exceptionsList: getListArrayMock(),
-  concurrentSearches: undefined,
-  itemsPerSearch: undefined,
-});
-
-export const sampleRuleSO = (): SavedObject<RuleAlertAttributes> => {
+export const sampleRuleSO = <T extends RuleParams>(params: T): SavedObject<AlertAttributes<T>> => {
   return {
     id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
     type: 'alert',
@@ -90,7 +41,7 @@ export const sampleRuleSO = (): SavedObject<RuleAlertAttributes> => {
         interval: '5m',
       },
       throttle: 'no_actions',
-      params: sampleRuleAlertParams(),
+      params,
     },
     references: [],
   };

@@ -6,7 +6,6 @@
  */
 
 import {
-  sampleRuleAlertParams,
   sampleEmptyDocSearchResults,
   sampleRuleGuid,
   mockLogger,
@@ -28,6 +27,7 @@ import { getSearchListItemResponseMock } from '../../../../../lists/common/schem
 import { getRuleRangeTuples } from './utils';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 
 const buildRuleMessage = buildRuleMessageFactory({
   id: 'fake id',
@@ -41,7 +41,8 @@ describe('searchAfterAndBulkCreate', () => {
   let inputIndexPattern: string[] = [];
   let listClient = listMock.getListClient();
   const someGuids = Array.from({ length: 13 }).map(() => uuid.v4());
-  const sampleParams = sampleRuleAlertParams(30);
+  const sampleParams = getQueryRuleParams();
+  sampleParams.maxSignals = 30;
   let tuples: RuleRangeTuple[];
   beforeEach(() => {
     jest.clearAllMocks();

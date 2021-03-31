@@ -57,16 +57,16 @@ import {
   interval,
   enabled,
   updated_at,
+  updated_by,
   created_at,
+  created_by,
   job_status,
   status_date,
   last_success_at,
   last_success_message,
   last_failure_at,
   last_failure_message,
-  throttleOrNull,
-  createdByOrNull,
-  updatedByOrNull,
+  throttle,
 } from '../common/schemas';
 
 const createSchema = <
@@ -159,7 +159,7 @@ const commonParams = {
     tags,
     interval,
     enabled,
-    throttle: throttleOrNull,
+    throttle,
     actions,
     author,
     false_positives,
@@ -181,6 +181,7 @@ const {
   patch: commonPatchParams,
   response: commonResponseParams,
 } = buildAPISchemas(commonParams);
+export type CommonResponseParams = t.TypeOf<typeof commonResponseParams>;
 
 const eqlRuleParams = {
   required: {
@@ -423,9 +424,9 @@ const responseRequiredFields = {
   id,
   immutable,
   updated_at,
-  updated_by: updatedByOrNull,
+  updated_by,
   created_at,
-  created_by: createdByOrNull,
+  created_by,
 };
 const responseOptionalFields = {
   status: job_status,

@@ -7,7 +7,6 @@
 
 import { generateId } from './utils';
 import {
-  sampleRuleAlertParams,
   sampleDocSearchResultsNoSortId,
   mockLogger,
   sampleRuleGuid,
@@ -23,6 +22,7 @@ import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mo
 import { buildRuleMessageFactory } from './rule_messages';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 
 const buildRuleMessage = buildRuleMessageFactory({
   id: 'fake id',
@@ -140,7 +140,7 @@ describe('singleBulkCreate', () => {
   });
 
   test('create successful bulk create', async () => {
-    const sampleParams = sampleRuleAlertParams();
+    const sampleParams = getQueryRuleParams();
     mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
       // @ts-expect-error not compatible response interface
       elasticsearchClientMock.createSuccessTransportRequestPromise({
@@ -178,7 +178,7 @@ describe('singleBulkCreate', () => {
   });
 
   test('create successful bulk create with docs with no versioning', async () => {
-    const sampleParams = sampleRuleAlertParams();
+    const sampleParams = getQueryRuleParams();
     mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
       // @ts-expect-error not compatible response interface
       elasticsearchClientMock.createSuccessTransportRequestPromise({
@@ -216,7 +216,7 @@ describe('singleBulkCreate', () => {
   });
 
   test('create unsuccessful bulk create due to empty search results', async () => {
-    const sampleParams = sampleRuleAlertParams();
+    const sampleParams = getQueryRuleParams();
     mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValue(
       // @ts-expect-error not full response interface
       elasticsearchClientMock.createSuccessTransportRequestPromise(false)
@@ -246,7 +246,7 @@ describe('singleBulkCreate', () => {
   });
 
   test('create successful bulk create when bulk create has duplicate errors', async () => {
-    const sampleParams = sampleRuleAlertParams();
+    const sampleParams = getQueryRuleParams();
     const sampleSearchResult = sampleDocSearchResultsNoSortId;
     mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(sampleBulkCreateDuplicateResult)
@@ -278,7 +278,7 @@ describe('singleBulkCreate', () => {
   });
 
   test('create failed bulk create when bulk create has multiple error statuses', async () => {
-    const sampleParams = sampleRuleAlertParams();
+    const sampleParams = getQueryRuleParams();
     const sampleSearchResult = sampleDocSearchResultsNoSortId;
     mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(sampleBulkCreateErrorResult)
@@ -349,7 +349,7 @@ describe('singleBulkCreate', () => {
   });
 
   test('create successful and returns proper createdItemsCount', async () => {
-    const sampleParams = sampleRuleAlertParams();
+    const sampleParams = getQueryRuleParams();
     mockService.scopedClusterClient.asCurrentUser.bulk.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(sampleBulkCreateDuplicateResult)
     );

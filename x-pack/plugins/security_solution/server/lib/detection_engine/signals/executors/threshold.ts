@@ -17,6 +17,7 @@ import {
   normalizeThresholdField,
 } from '../../../../../common/detection_engine/utils';
 import { ExceptionListItemSchema } from '../../../../../common/shared_imports';
+import { ThresholdRuleParams } from '../../schemas/rule_schemas';
 import { RefreshTypes } from '../../types';
 import { getFilter } from '../get_filter';
 import { getInputIndex } from '../get_input_output_index';
@@ -28,11 +29,7 @@ import {
   getThresholdBucketFilters,
   getThresholdSignalHistory,
 } from '../threshold';
-import {
-  RuleRangeTuple,
-  SearchAfterAndBulkCreateReturnType,
-  ThresholdRuleAttributes,
-} from '../types';
+import { AlertAttributes, RuleRangeTuple, SearchAfterAndBulkCreateReturnType } from '../types';
 import {
   createSearchAfterReturnType,
   createSearchAfterReturnTypeFromResponse,
@@ -51,7 +48,7 @@ export const thresholdExecutor = async ({
   buildRuleMessage,
   startedAt,
 }: {
-  rule: SavedObject<ThresholdRuleAttributes>;
+  rule: SavedObject<AlertAttributes<ThresholdRuleParams>>;
   tuples: RuleRangeTuple[];
   exceptionItems: ExceptionListItemSchema[];
   ruleStatusService: RuleStatusService;
@@ -131,6 +128,7 @@ export const thresholdExecutor = async ({
       throttle: rule.attributes.throttle,
       someResult: thresholdResults,
       ruleParams,
+      ruleSO: rule,
       filter: esFilter,
       services,
       logger,

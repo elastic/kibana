@@ -51,12 +51,12 @@ export const getThresholdRuleParams = (): ThresholdRuleParams => {
     ...getBaseRuleParams(),
     type: 'threshold',
     language: 'kuery',
-    index: ['some-index'],
-    query: 'host.name: *',
+    index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+    query: 'user.name: root or user.name: admin',
     filters: undefined,
     savedId: undefined,
     threshold: {
-      field: 'host.id',
+      field: ['host.id'],
       value: 5,
     },
   };
@@ -88,8 +88,8 @@ export const getQueryRuleParams = (): QueryRuleParams => {
     ...getBaseRuleParams(),
     type: 'query',
     language: 'kuery',
-    query: '*:*',
-    index: ['some-index'],
+    query: 'user.name: root or user.name: admin',
+    index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
     filters: undefined,
     savedId: undefined,
   };

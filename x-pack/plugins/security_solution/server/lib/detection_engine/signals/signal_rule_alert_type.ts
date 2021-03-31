@@ -31,7 +31,7 @@ import {
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
 import { SetupPlugins } from '../../../plugin';
 import { getInputIndex } from './get_input_output_index';
-import { SignalRuleAlertTypeDefinition, RuleAlertAttributes } from './types';
+import { AlertAttributes, SignalRuleAlertTypeDefinition } from './types';
 import {
   getListsClient,
   getExceptions,
@@ -127,10 +127,8 @@ export const signalRulesAlertType = ({
         alertId,
         ruleStatusClient,
       });
-      const savedObject = await services.savedObjectsClient.get<RuleAlertAttributes>(
-        'alert',
-        alertId
-      );
+
+      const savedObject = await services.savedObjectsClient.get<AlertAttributes>('alert', alertId);
       const {
         actions,
         name,
@@ -403,7 +401,7 @@ export const signalRulesAlertType = ({
  * @param schema io-ts schema for the specific rule type the SavedObject claims to be
  */
 export const asTypeSpecificSO = <T extends t.Mixed>(
-  ruleSO: SavedObject<RuleAlertAttributes>,
+  ruleSO: SavedObject<AlertAttributes>,
   schema: T
 ) => {
   const nonNullParams = pickBy((value: unknown) => value !== null, ruleSO.attributes.params);

@@ -6,10 +6,18 @@
  */
 
 import uuid from 'uuid';
-import { InternalRuleCreate, InternalRuleResponse, TypeSpecificRuleParams } from './rule_schemas';
+import { SavedObject } from 'kibana/server';
+import {
+  InternalRuleCreate,
+  InternalRuleResponse,
+  RuleParams,
+  TypeSpecificRuleParams,
+  BaseRuleParams,
+} from './rule_schemas';
 import { normalizeThresholdField } from '../../../../common/detection_engine/utils';
 import { assertUnreachable } from '../../../../common/utility_types';
 import {
+  CommonResponseParams,
   CreateRulesSchema,
   CreateTypeSpecific,
   FullResponseSchema,
@@ -20,6 +28,9 @@ import { AppClient } from '../../../types';
 import { addTags } from '../rules/add_tags';
 import { DEFAULT_MAX_SIGNALS, SERVER_APP_ID, SIGNALS_ID } from '../../../../common/constants';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
+import { Alert } from '../../../../../alerting/common';
+import { IRuleSavedAttributesSavedObjectAttributes } from '../rules/types';
+import { transformTags } from '../routes/rules/utils';
 
 // These functions provide conversions from the request API schema to the internal rule schema and from the internal rule schema
 // to the response API schema. This provides static type-check assurances that the internal schema is in sync with the API schema for
@@ -176,6 +187,7 @@ export const typeSpecificCamelToSnake = (params: TypeSpecificRuleParams): Respon
         threat_mapping: params.threatMapping,
         threat_language: params.threatLanguage,
         threat_index: params.threatIndex,
+        threat_indicator_path: params.threatIndicatorPath,
         concurrent_searches: params.concurrentSearches,
         items_per_search: params.itemsPerSearch,
       };
@@ -227,47 +239,67 @@ export const typeSpecificCamelToSnake = (params: TypeSpecificRuleParams): Respon
   }
 };
 
+// TODO: separate out security solution defined common params from Alerting framework common params
+// so we can explicitly specify the return type of this function
+export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
+  return {
+    description: params.description,
+    risk_score: params.riskScore,
+    severity: params.severity,
+    building_block_type: params.buildingBlockType,
+    note: params.note,
+    license: params.license,
+    output_index: params.outputIndex,
+    timeline_id: params.timelineId,
+    timeline_title: params.timelineTitle,
+    meta: params.meta,
+    rule_name_override: params.ruleNameOverride,
+    timestamp_override: params.timestampOverride,
+    author: params.author ?? [],
+    false_positives: params.falsePositives,
+    from: params.from,
+    rule_id: params.ruleId,
+    max_signals: params.maxSignals,
+    risk_score_mapping: params.riskScoreMapping ?? [],
+    severity_mapping: params.severityMapping ?? [],
+    threat: params.threat,
+    to: params.to,
+    references: params.references,
+    version: params.version,
+    exceptions_list: params.exceptionsList ?? [],
+  };
+};
+
 export const internalRuleToAPIResponse = (
-  rule: InternalRuleResponse,
-  ruleActions: RuleActions
+  rule: Alert<RuleParams>,
+  ruleActions?: RuleActions | null,
+  ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
 ): FullResponseSchema => {
   return {
+    // Alerting framework params
     id: rule.id,
     immutable: rule.params.immutable,
-    updated_at: rule.updatedAt,
-    updated_by: rule.updatedBy,
-    created_at: rule.createdAt,
-    created_by: rule.createdBy,
+    updated_at: rule.updatedAt.toISOString(),
+    updated_by: rule.updatedBy ?? 'elastic',
+    created_at: rule.createdAt.toISOString(),
+    created_by: rule.createdBy ?? 'elastic',
     name: rule.name,
-    tags: rule.tags,
+    tags: transformTags(rule.tags),
     interval: rule.schedule.interval,
     enabled: rule.enabled,
-    throttle: ruleActions.ruleThrottle,
-    actions: ruleActions.actions,
-    description: rule.params.description,
-    risk_score: rule.params.riskScore,
-    severity: rule.params.severity,
-    building_block_type: rule.params.buildingBlockType,
-    note: rule.params.note,
-    license: rule.params.license,
-    output_index: rule.params.outputIndex,
-    timeline_id: rule.params.timelineId,
-    timeline_title: rule.params.timelineTitle,
-    meta: rule.params.meta,
-    rule_name_override: rule.params.ruleNameOverride,
-    timestamp_override: rule.params.timestampOverride,
-    author: rule.params.author ?? [],
-    false_positives: rule.params.falsePositives,
-    from: rule.params.from,
-    rule_id: rule.params.ruleId,
-    max_signals: rule.params.maxSignals,
-    risk_score_mapping: rule.params.riskScoreMapping ?? [],
-    severity_mapping: rule.params.severityMapping ?? [],
-    threat: rule.params.threat,
-    to: rule.params.to,
-    references: rule.params.references,
-    version: rule.params.version,
-    exceptions_list: rule.params.exceptionsList ?? [],
+    // Security solution shared rule params
+    ...commonParamsCamelToSnake(rule.params),
+    // Type specific security solution rule params
     ...typeSpecificCamelToSnake(rule.params),
+    // Actions
+    throttle: ruleActions?.ruleThrottle || 'no_actions',
+    actions: ruleActions?.actions ?? [],
+    // Rule status
+    status: ruleStatus?.attributes.status ?? undefined,
+    status_date: ruleStatus?.attributes.statusDate ?? undefined,
+    last_failure_at: ruleStatus?.attributes.lastFailureAt ?? undefined,
+    last_success_at: ruleStatus?.attributes.lastSuccessAt ?? undefined,
+    last_failure_message: ruleStatus?.attributes.lastFailureMessage ?? undefined,
+    last_success_message: ruleStatus?.attributes.lastSuccessMessage ?? undefined,
   };
 };

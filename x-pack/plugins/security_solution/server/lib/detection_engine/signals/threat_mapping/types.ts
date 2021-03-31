@@ -27,11 +27,17 @@ import {
   AlertServices,
 } from '../../../../../../alerting/server';
 import { ExceptionListItemSchema } from '../../../../../../lists/common/schemas';
-import { ElasticsearchClient, Logger } from '../../../../../../../../src/core/server';
+import { ElasticsearchClient, Logger, SavedObject } from '../../../../../../../../src/core/server';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
-import { RuleRangeTuple, SearchAfterAndBulkCreateReturnType, SignalsEnrichment } from '../types';
+import {
+  AlertAttributes,
+  RuleRangeTuple,
+  SearchAfterAndBulkCreateReturnType,
+  SignalsEnrichment,
+} from '../types';
+import { ThreatRuleParams } from '../../schemas/rule_schemas';
 
 export type SortOrderOrUndefined = 'asc' | 'desc' | undefined;
 
@@ -51,25 +57,15 @@ export interface CreateThreatSignalsOptions {
   eventsTelemetry: TelemetryEventsSender | undefined;
   alertId: string;
   outputIndex: string;
-  params: RuleTypeParams;
+  ruleSO: SavedObject<AlertAttributes<ThreatRuleParams>>;
   searchAfterSize: number;
-  actions: RuleAlertAction[];
-  createdBy: string;
-  createdAt: string;
-  updatedBy: string;
-  updatedAt: string;
-  interval: string;
-  enabled: boolean;
-  tags: string[];
   refresh: false | 'wait_for';
-  throttle: string;
   threatFilters: unknown[];
   threatQuery: ThreatQuery;
   buildRuleMessage: BuildRuleMessage;
   threatIndex: ThreatIndex;
   threatIndicatorPath: ThreatIndicatorPathOrUndefined;
   threatLanguage: ThreatLanguageOrUndefined;
-  name: string;
   concurrentSearches: ConcurrentSearches;
   itemsPerSearch: ItemsPerSearch;
 }
@@ -91,20 +87,10 @@ export interface CreateThreatSignalOptions {
   eventsTelemetry: TelemetryEventsSender | undefined;
   alertId: string;
   outputIndex: string;
-  params: RuleTypeParams;
+  ruleSO: SavedObject<AlertAttributes<ThreatRuleParams>>;
   searchAfterSize: number;
-  actions: RuleAlertAction[];
-  createdBy: string;
-  createdAt: string;
-  updatedBy: string;
-  updatedAt: string;
-  interval: string;
-  enabled: boolean;
-  tags: string[];
   refresh: false | 'wait_for';
-  throttle: string;
   buildRuleMessage: BuildRuleMessage;
-  name: string;
   currentThreatList: ThreatListItem[];
   currentResult: SearchAfterAndBulkCreateReturnType;
 }

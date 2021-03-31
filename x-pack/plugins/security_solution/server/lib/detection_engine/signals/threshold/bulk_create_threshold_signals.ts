@@ -12,7 +12,7 @@ import {
   ThresholdNormalized,
   TimestampOverrideOrUndefined,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { Logger } from '../../../../../../../../src/core/server';
+import { Logger, SavedObject } from '../../../../../../../../src/core/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -33,12 +33,14 @@ import type {
   SignalSource,
   SignalSearchResponse,
   ThresholdSignalHistory,
+  AlertAttributes,
 } from '../types';
 
 interface BulkCreateThresholdSignalsParams {
   actions: RuleAlertAction[];
   someResult: SignalSearchResponse;
   ruleParams: RuleTypeParams;
+  ruleSO: SavedObject<AlertAttributes>;
   services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   inputIndexPattern: string[];
   logger: Logger;

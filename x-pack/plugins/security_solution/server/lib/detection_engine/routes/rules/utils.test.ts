@@ -23,7 +23,7 @@ import {
 } from './utils';
 import { getResult } from '../__mocks__/request_responses';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
-import { PartialFilter, RuleTypeParams } from '../../types';
+import { PartialFilter } from '../../types';
 import { BulkError, ImportSuccessError } from '../utils';
 import { getOutputRuleAlertForRest } from '../__mocks__/utils';
 import { PartialAlert } from '../../../../../../alerting/server';
@@ -50,43 +50,12 @@ describe('utils', () => {
       expect(rule).toEqual(getOutputRuleAlertForRest());
     });
 
-    test('should work with a partial data set missing data', () => {
+    test('should omit note if note is undefined', () => {
       const fullRule = getResult(getQueryRuleParams());
-      const { from, language, ...omitParams } = fullRule.params;
-      fullRule.params = omitParams as RuleTypeParams;
+      fullRule.params.note = undefined;
       const rule = transformAlertToRule(fullRule);
-      const {
-        from: from2,
-        language: language2,
-        ...expectedWithoutFromWithoutLanguage
-      } = getOutputRuleAlertForRest();
-      expect(rule).toEqual(expectedWithoutFromWithoutLanguage);
-    });
-
-    test('should omit query if query is undefined', () => {
-      const fullRule = getResult(getQueryRuleParams());
-      fullRule.params.query = undefined;
-      const rule = transformAlertToRule(fullRule);
-      const { query, ...expectedWithoutQuery } = getOutputRuleAlertForRest();
-      expect(rule).toEqual(expectedWithoutQuery);
-    });
-
-    test('should omit a mix of undefined, null, and missing fields', () => {
-      const fullRule = getResult(getQueryRuleParams());
-      fullRule.params.query = undefined;
-      fullRule.params.language = undefined;
-      const { from, ...omitParams } = fullRule.params;
-      fullRule.params = omitParams as RuleTypeParams;
-      const { enabled, ...omitEnabled } = fullRule;
-      const rule = transformAlertToRule(omitEnabled as RuleAlertType);
-      const {
-        from: from2,
-        enabled: enabled2,
-        language,
-        query,
-        ...expectedWithoutFromEnabledLanguageQuery
-      } = getOutputRuleAlertForRest();
-      expect(rule).toEqual(expectedWithoutFromEnabledLanguageQuery);
+      const { note, ...expectedWithoutNote } = getOutputRuleAlertForRest();
+      expect(rule).toEqual(expectedWithoutNote);
     });
 
     test('should return enabled is equal to false', () => {
