@@ -57,8 +57,8 @@ export async function getAgentStatusForAgentPolicy(
 ) {
   const [all, allActive, online, error, offline, updating] = await pMap(
     [
-      undefined,
-      undefined,
+      undefined, // All agents, including inactive
+      undefined, // All active agents
       AgentStatusKueryHelper.buildKueryForOnlineAgents(),
       AgentStatusKueryHelper.buildKueryForErrorAgents(),
       AgentStatusKueryHelper.buildKueryForOfflineAgents(),
