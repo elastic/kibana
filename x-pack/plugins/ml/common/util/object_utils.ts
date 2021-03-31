@@ -10,13 +10,17 @@
  *
  * Examples:
  * - `isPopulatedObject({...})`
- *      limits type to Record<string, unknown>
+ *      Limits type to Record<string, unknown>
  *
  * - `isPopulatedObject({...}, ['attribute'])`
- *      limits type to Record<'attribute', unknown>
+ *      Limits type to Record<'attribute', unknown>
  *
  * - `isPopulatedObject<keyof MyInterface>({...})`
- *      limits type to a record with keys of the given interface
+ *      Limits type to a record with keys of the given interface.
+ *      Note that you might want to add keys from the interface to the
+ *      array of requiredAttributes to satisfy runtime requirements.
+ *      Otherwise you'd just satisfy TS requirements but might still
+ *      run into runtime issues.
  */
 export const isPopulatedObject = <U extends string = string>(
   arg: unknown,
