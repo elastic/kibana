@@ -23,6 +23,7 @@ import {
   EuiText,
   EuiCallOut,
   EuiComboBox,
+  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { hasEqlSequenceQuery, isEqlRule } from '../../../../../common/detection_engine/utils';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
@@ -56,7 +57,7 @@ import { ErrorInfo, ErrorCallout } from '../error_callout';
 import { AlertData, ExceptionsBuilderExceptionItem } from '../types';
 import { useFetchIndex } from '../../../containers/source';
 import { useGetInstalledJob } from '../../ml/hooks/use_get_jobs';
-import { OsTypeArray } from '../../../../shared_imports';
+import { OsTypeArray, OsType } from '../../../../shared_imports';
 
 export interface AddExceptionModalProps {
   ruleName: string;
@@ -160,15 +161,18 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     [addError, onCancel]
   );
 
-  const OSOptions = [
+  const OSOptions: Array<EuiComboBoxOptionOption<OsType>> = [
     {
-      label: 'windows',
+      label: 'Windows',
+      value: 'windows',
     },
     {
-      label: 'macos',
+      label: 'MacOs',
+      value: 'macos',
     },
     {
-      label: 'linux',
+      label: 'Linux',
+      value: 'linux',
     },
   ];
 
@@ -270,7 +274,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   }, [exceptionListType, ruleExceptionList, ruleName, alertData]);
 
   const handleOSSelectionChange = useCallback(
-    (selectedOptions: string[]): void => {
+    (selectedOptions): void => {
       setSelectedOS(selectedOptions);
       setExceptionItemsToAdd(initialExceptionItems);
     },
@@ -328,8 +332,8 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     return retrieveAlertOsTypes(alertData);
   }, [alertData]);
 
-  const osTypesSelection = useMemo((): OsTypesArray => {
-    return hasAlertData ? osTypesFromAlert : [selectedOS[0].label];
+  const osTypesSelection = useMemo((): OsTypeArray => {
+    return hasAlertData ? osTypesFromAlert : [selectedOS[0].value];
   }, [hasAlertData, osTypesFromAlert, selectedOS]);
 
   const enrichExceptionItems = useCallback((): Array<
