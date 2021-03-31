@@ -7,7 +7,6 @@
 
 import signalsMapping from './signals_mapping.json';
 import ecsMapping from './ecs_mapping.json';
-import indicatorMapping from './indicator_mapping.json';
 
 /**
   @constant
@@ -54,7 +53,7 @@ export const getSignalsTemplate = (index: string) => {
               ...ecsMapping.mappings.properties.threat.properties.indicator,
               properties: {
                 ...ecsMapping.mappings.properties.threat.properties.indicator.properties,
-                ...indicatorMapping,
+                event: ecsMapping.mappings.properties.event,
               },
             },
           },
