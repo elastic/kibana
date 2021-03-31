@@ -99,4 +99,99 @@ describe('#setup', () => {
     expect(setupLoggingRotateMock).toHaveBeenCalledTimes(1);
     expect(setupLoggingRotateMock).toHaveBeenCalledWith(setupDeps.http.server, loggingConfig);
   });
+
+  it('reloads the logging config when the config changes', async () => {
+    const opsConfig = {
+      interval: moment.duration(5, 'second'),
+    };
+    const opsConfig$ = new BehaviorSubject(opsConfig);
+
+    const loggingConfig = {
+      foo: 'bar',
+    };
+    const loggingConfig$ = new BehaviorSubject(loggingConfig);
+
+    configService.atPath.mockImplementation((path) => {
+      if (path === 'ops') {
+        return opsConfig$;
+      }
+      if (path === 'logging') {
+        return loggingConfig$;
+      }
+      return new BehaviorSubject({});
+    });
+
+    const legacyService = new LegacyService({
+      coreId,
+      env,
+      logger,
+      configService: configService as any,
+    });
+
+    await legacyService.setup(setupDeps);
+
+    expect(reconfigureLoggingMock).toHaveBeenCalledTimes(1);
+    expect(reconfigureLoggingMock).toHaveBeenCalledWith(
+      setupDeps.http.server,
+      loggingConfig,
+      opsConfig.interval.asMilliseconds()
+    );
+
+    loggingConfig$.next({
+      foo: 'changed',
+    });
+
+    expect(reconfigureLoggingMock).toHaveBeenCalledTimes(2);
+    expect(reconfigureLoggingMock).toHaveBeenCalledWith(
+      setupDeps.http.server,
+      { foo: 'changed' },
+      opsConfig.interval.asMilliseconds()
+    );
+  });
+
+  it('stops reloading logging config once the service is stopped', async () => {
+    const opsConfig = {
+      interval: moment.duration(5, 'second'),
+    };
+    const opsConfig$ = new BehaviorSubject(opsConfig);
+
+    const loggingConfig = {
+      foo: 'bar',
+    };
+    const loggingConfig$ = new BehaviorSubject(loggingConfig);
+
+    configService.atPath.mockImplementation((path) => {
+      if (path === 'ops') {
+        return opsConfig$;
+      }
+      if (path === 'logging') {
+        return loggingConfig$;
+      }
+      return new BehaviorSubject({});
+    });
+
+    const legacyService = new LegacyService({
+      coreId,
+      env,
+      logger,
+      configService: configService as any,
+    });
+
+    await legacyService.setup(setupDeps);
+
+    expect(reconfigureLoggingMock).toHaveBeenCalledTimes(1);
+    expect(reconfigureLoggingMock).toHaveBeenCalledWith(
+      setupDeps.http.server,
+      loggingConfig,
+      opsConfig.interval.asMilliseconds()
+    );
+
+    await legacyService.stop();
+
+    loggingConfig$.next({
+      foo: 'changed',
+    });
+
+    expect(reconfigureLoggingMock).toHaveBeenCalledTimes(1);
+  });
 });
