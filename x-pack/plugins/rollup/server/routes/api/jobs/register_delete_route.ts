@@ -12,7 +12,7 @@ import { RouteDependencies } from '../../../types';
 export const registerDeleteRoute = ({
   router,
   license,
-  lib: { isEsError, formatEsError },
+  lib: { handleEsError },
 }: RouteDependencies) => {
   router.post(
     {
@@ -24,12 +24,11 @@ export const registerDeleteRoute = ({
       },
     },
     license.guardApiRoute(async (context, request, response) => {
+      const { client: clusterClient } = context.core.elasticsearch;
       try {
         const { jobIds } = request.body;
         const data = await Promise.all(
-          jobIds.map((id: string) =>
-            context.rollup!.client.callAsCurrentUser('rollup.deleteJob', { id })
-          )
+          jobIds.map((id: string) => clusterClient.asCurrentUser.rollup.deleteJob({ id }))
         ).then(() => ({ success: true }));
         return response.ok({ body: data });
       } catch (err) {
@@ -42,10 +41,7 @@ export const registerDeleteRoute = ({
           err.displayName = 'Bad request';
           err.message = JSON.parse(err.response).task_failures[0].reason.reason;
         }
-        if (isEsError(err)) {
-          return response.customError({ statusCode: err.statusCode, body: err });
-        }
-        throw err;
+        return handleEsError({ error: err, response });
       }
     })
   );
