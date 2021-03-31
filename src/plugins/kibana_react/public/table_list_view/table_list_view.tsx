@@ -84,7 +84,6 @@ export interface TableListViewState {
 // This component does not try to tackle these problems (yet) and is just feature matching the legacy component
 // TODO support server side sorting/paging once title and description are sortable on the server.
 class TableListView extends React.Component<TableListViewProps, TableListViewState> {
-
   private pagination = {};
   private _isMounted = false;
 
