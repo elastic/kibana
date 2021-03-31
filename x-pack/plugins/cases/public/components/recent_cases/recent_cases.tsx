@@ -7,6 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useEffect, useMemo, useRef } from 'react';
+import { isEqual } from 'lodash/fp';
 import styled from 'styled-components';
 
 import { IconWithCount } from './icon_with_count';
@@ -50,7 +51,7 @@ export const RecentCasesComp = ({
   const { data, loading, setFilters } = useGetCases({ perPage });
 
   useEffect(() => {
-    if (previousFilterOptions !== undefined && previousFilterOptions !== filterOptions) {
+    if (previousFilterOptions !== undefined && !isEqual(previousFilterOptions, filterOptions)) {
       setFilters(filterOptions);
     }
   }, [previousFilterOptions, filterOptions, setFilters]);
