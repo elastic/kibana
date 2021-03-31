@@ -24,6 +24,32 @@
       },
       "type": {
         "type": "keyword"
+      },
+      "user" : {
+        "properties": {
+          "id" : {
+            "type" : "keyword"
+          },
+          "email" : {
+            "type" : "keyword"
+          },
+          "full_name" : {
+            "type" : "keyword",
+            "fields" : {
+              "text" : {
+                "type" : "text"
+              }
+            }
+          },
+          "name" : {
+            "type" : "keyword",
+            "fields" : {
+              "text" : {
+                "type" : "text"
+              }
+            }
+          }
+        }
       }
     }
   }
