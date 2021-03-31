@@ -137,8 +137,7 @@ export function MapsListView({ stateTransfer }: { stateTransfer: EmbeddableState
 
   return (
     <TableListView
-      noItemsShowEmptyList={showEmptyList}
-      noItemsFragment={<Redirect to="/map" />}
+      noItemsFragment={showEmptyList ? undefined : <Redirect to="/map" />}
       headingId="mapsListingPage"
       rowHeader="title"
       createItem={isReadOnly ? undefined : navigateToNewMap}

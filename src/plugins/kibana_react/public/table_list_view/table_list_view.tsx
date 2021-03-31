@@ -46,7 +46,6 @@ export interface TableListViewProps {
   initialFilter: string;
   initialPageSize: number;
   noItemsFragment?: JSX.Element;
-  noItemsShowEmptyList?: boolean;
   tableColumns: Array<EuiBasicTableColumn<any>>;
   tableListTitle: string;
   toastNotifications: ToastsStart;
@@ -85,9 +84,6 @@ export interface TableListViewState {
 // This component does not try to tackle these problems (yet) and is just feature matching the legacy component
 // TODO support server side sorting/paging once title and description are sortable on the server.
 class TableListView extends React.Component<TableListViewProps, TableListViewState> {
-  static defaultProps = {
-    noItemsShowEmptyList: false,
-  };
 
   private pagination = {};
   private _isMounted = false;
@@ -352,20 +348,6 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
     }
   }
 
-  renderNoItemsMessage() {
-    if (this.props.noItemsFragment) {
-      return this.props.noItemsFragment;
-    } else {
-      return (
-        <FormattedMessage
-          id="kibana-react.tableListView.listing.noAvailableItemsMessage"
-          defaultMessage="No {entityNamePlural} available."
-          values={{ entityNamePlural: this.props.entityNamePlural }}
-        />
-      );
-    }
-  }
-
   renderToolsLeft() {
     const selection = this.state.selectedIds;
 
@@ -478,10 +460,9 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
   }
 
   renderListingOrEmptyState() {
-    if (!this.props.noItemsShowEmptyList && !this.state.fetchError && this.hasNoItems()) {
-      return this.renderNoItemsMessage();
+    if (this.props.noItemsFragment && !this.state.fetchError && this.hasNoItems()) {
+      return this.props.noItemsFragment;
     }
-
     return this.renderListing();
   }
 
