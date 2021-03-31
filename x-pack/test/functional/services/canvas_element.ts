@@ -8,13 +8,13 @@
 import { rgb, nest } from 'd3';
 
 interface ColorStat {
-  key: string;
+  color: string;
   percentage: number;
   pixels?: number;
   withinTolerance?: boolean;
 }
 
-type ColorStats = ColorStat[];
+export type CanvasElementColorStats = ColorStat[];
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -76,12 +76,12 @@ export async function CanvasElementProvider({ getService }: FtrProviderContext) 
      */
     public async getColorStats(
       selector: string,
-      expectedColorStats?: ColorStats,
+      expectedColorStats?: CanvasElementColorStats,
       exclude?: string[],
       percentageThreshold = 5,
       channelTolerance = 10,
       valueTolerance = 10
-    ): Promise<ColorStats> {
+    ): Promise<CanvasElementColorStats> {
       const imageData = await this.getImageData(selector);
       // transform the array of RGBA numbers to an array of hex values
       const colors: string[] = [];
@@ -113,7 +113,7 @@ export async function CanvasElementProvider({ getService }: FtrProviderContext) 
           const percentage = getPixelPercentage(s.values.length);
           const pixels = s.values.length;
           return {
-            key: s.key,
+            color: s.key,
             percentage,
             pixels,
             ...(expectedColorStats !== undefined
@@ -127,7 +127,7 @@ export async function CanvasElementProvider({ getService }: FtrProviderContext) 
                     ) &&
                     this.isColorWithinTolerance(
                       s.key,
-                      expectedColorStats[i]?.key,
+                      expectedColorStats[i]?.color,
                       channelTolerance
                     ),
                 }
@@ -142,12 +142,12 @@ export async function CanvasElementProvider({ getService }: FtrProviderContext) 
      */
     public async getColorStatsWithColorTolerance(
       selector: string,
-      expectedColorStats: ColorStats,
+      expectedColorStats: CanvasElementColorStats,
       exclude?: string[],
       percentageThreshold = 0,
       channelTolerance = 10,
       valueTolerance = 10
-    ): Promise<ColorStats> {
+    ): Promise<CanvasElementColorStats> {
       const actualColorStats = await this.getColorStats(
         selector,
         undefined,
@@ -159,11 +159,13 @@ export async function CanvasElementProvider({ getService }: FtrProviderContext) 
 
       return expectedColorStats.map((expectedColor) => {
         const colorPercentageWithinTolerance = actualColorStats
-          .filter((d) => this.isColorWithinTolerance(d.key, expectedColor.key, channelTolerance))
+          .filter((d) =>
+            this.isColorWithinTolerance(d.color, expectedColor.color, channelTolerance)
+          )
           .reduce((sum, x) => sum + x.percentage, 0);
 
         return {
-          key: expectedColor.key,
+          color: expectedColor.color,
           percentage: colorPercentageWithinTolerance,
           withinTolerance: this.isValueWithinTolerance(
             colorPercentageWithinTolerance,

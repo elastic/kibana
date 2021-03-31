@@ -9,7 +9,8 @@ import expect from '@kbn/expect';
 import { DataFrameAnalyticsConfig } from '../../../../plugins/ml/public/application/data_frame_analytics/common';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import type { CanvasElementColorStats, MlCommonUI } from './common_ui';
+import type { CanvasElementColorStats } from '../canvas_element';
+import type { MlCommonUI } from './common_ui';
 import { MlApi } from './api';
 import {
   isRegressionAnalysis,

@@ -50,16 +50,16 @@ export default function ({ getService }: FtrProviderContext) {
         id: 'rt_airline_lower',
         legend: '19 categories',
         colorStats: [
-          { key: '#000000', value: 48 },
-          { key: '#54B399', value: 41 },
+          { color: '#000000', value: 48 },
+          { color: '#54B399', value: 41 },
         ],
       },
       {
         chartAvailable: true,
         id: 'rt_responsetime_x_2',
         colorStats: [
-          { key: '#54B399', value: 5 },
-          { key: '#000000', value: 95 },
+          { color: '#54B399', value: 5 },
+          { color: '#000000', value: 95 },
         ],
       },
     ];

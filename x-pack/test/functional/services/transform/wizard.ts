@@ -10,6 +10,8 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+import type { CanvasElementColorStats } from '../canvas_element';
+
 export function TransformWizardProvider({ getService, getPageObjects }: FtrProviderContext) {
   const aceEditor = getService('aceEditor');
   const canvasElement = getService('canvasElement');
@@ -229,7 +231,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
         chartAvailable: boolean;
         id: string;
         legend?: string;
-        colorStats?: any[];
+        colorStats?: CanvasElementColorStats;
       }>
     ) {
       // For each chart, get the content of each header cell and assert
@@ -244,7 +246,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
 
             if (expected.colorStats !== undefined) {
               const sortedExpectedColorStats = [...expected.colorStats].sort((a, b) =>
-                a.key.localeCompare(b.key)
+                a.color.localeCompare(b.color)
               );
 
               const actualColorStats = await canvasElement.getColorStats(

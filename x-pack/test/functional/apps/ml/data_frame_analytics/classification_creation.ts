@@ -43,18 +43,18 @@ export default function ({ getService }: FtrProviderContext) {
         expected: {
           rocCurveColorState: [
             // tick/grid/axis
-            { key: '#DDDDDD', percentage: 50 },
+            { color: '#DDDDDD', percentage: 50 },
             // line
-            { key: '#98A2B3', percentage: 30 },
+            { color: '#98A2B3', percentage: 30 },
           ],
           scatterplotMatrixColorStats: [
             // marker colors
-            { key: '#7FC6B3', percentage: 1 },
-            { key: '#88ADD0', percentage: 0.03 },
+            { color: '#7FC6B3', percentage: 1 },
+            { color: '#88ADD0', percentage: 0.03 },
             // tick/grid/axis
-            { key: '#DDDDDD', percentage: 8 },
-            { key: '#D3DAE6', percentage: 8 },
-            { key: '#F5F7FA', percentage: 20 },
+            { color: '#DDDDDD', percentage: 8 },
+            { color: '#D3DAE6', percentage: 8 },
+            { color: '#F5F7FA', percentage: 20 },
           ],
           row: {
             type: 'classification',
