@@ -38,6 +38,44 @@ interface RenderRuleNameProps {
   value: string | number | null | undefined;
 }
 
+interface NotDraggableProps {
+  truncate?: boolean;
+  isDraggingDisabled: boolean;
+  fieldName: string;
+  value: string | number | null | undefined;
+}
+
+export const NotDraggable: React.FC<NotDraggableProps> = ({
+  truncate,
+  isDraggingDisabled,
+  fieldName,
+  value,
+}) => {
+  return (truncate || isDraggingDisabled) && !isEmpty(value) ? (
+    <TruncatableText data-test-subj="truncatable-message">
+      <EuiToolTip
+        data-test-subj="message-tool-tip"
+        content={
+          <EuiFlexGroup direction="column" gutterSize="none">
+            <EuiFlexItem grow={false}>
+              <span>{fieldName}</span>
+            </EuiFlexItem>
+            {!isDraggingDisabled && (
+              <EuiFlexItem grow={false}>
+                <span>{value}</span>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        }
+      >
+        <>{value}</>
+      </EuiToolTip>
+    </TruncatableText>
+  ) : (
+    <>{value}</>
+  );
+};
+
 export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
   contextId,
   eventId,

@@ -187,6 +187,7 @@ const EventDetailsComponent: React.FC<Props> = ({
         tabs={tabs}
         selectedTab={selectedEventTab}
         onTabClick={handleEventTabClick}
+        key="event-summary-tabs"
       />
       {isThreatPresent && (
         <StyledEuiTabbedContent
@@ -194,6 +195,7 @@ const EventDetailsComponent: React.FC<Props> = ({
           tabs={threatTabs}
           selectedTab={selectedThreatTab}
           onTabClick={handleThreatTabClick}
+          key="threat-summary-tabs"
         />
       )}
     </>

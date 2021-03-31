@@ -83,6 +83,15 @@ describe('SummaryViewComponent', () => {
     });
   });
 
+  test('renders multiple items in a row for multiple values', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <SummaryViewComponent {...props} isDisplayingThreatSummary />
+      </TestProviders>
+    );
+    expect(wrapper.find('[data-test-subj^="threat.indicator.matched"]')).toHaveLength(2);
+  });
+
   test("render no investigation guide if it doesn't exist", async () => {
     (useRuleAsync as jest.Mock).mockReturnValue({
       rule: {

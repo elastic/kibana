@@ -48,6 +48,7 @@ interface SummaryRow {
     fieldType?: string;
     linkValue?: string;
     keySuffix?: string;
+    isDraggingDisabled?: boolean;
   };
 }
 type Summary = SummaryRow[];
@@ -88,6 +89,11 @@ const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
   .euiTableRowCell {
     border: none;
   }
+
+  .euiTableCellContent {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 `;
 
 const StyledEuiDescriptionList = styled(EuiDescriptionList)`
@@ -110,15 +116,18 @@ const getDescription = ({
   fieldType = '',
   linkValue,
   keySuffix,
+  isDraggingDisabled,
 }: SummaryRow['description']) =>
   values.map((value) => (
     <FormattedFieldValue
+      key={`alert-details-value-formatted-field-value-${contextId}-${eventId}-${fieldName}-${value}-${keySuffix}-key`}
       contextId={`alert-details-value-formatted-field-value-${contextId}-${eventId}-${fieldName}-${value}-${keySuffix}`}
       eventId={eventId}
       fieldName={fieldName}
       fieldType={fieldType}
       value={value}
       linkValue={linkValue}
+      isDraggingDisabled={isDraggingDisabled}
     />
   ));
 
@@ -163,6 +172,7 @@ const getSummary = ({
               fieldName,
               values: threatInfoItem.originalValue,
               keySuffix: isArrayIndexVisible ? threatInfoItem.field.split('.')[0] : undefined,
+              isDraggingDisabled: true,
             },
           };
         });
