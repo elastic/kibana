@@ -242,11 +242,19 @@ export const mockUseValuesList = (values?: string[]) => {
   return { spy, onRefreshTimeRange };
 };
 
-export const mockUrlStorage = ({ data, filters }: { data?: AllSeries; filters?: UrlFilter[] }) => {
+export const mockUrlStorage = ({
+  data,
+  filters,
+  breakdown,
+}: {
+  data?: AllSeries;
+  filters?: UrlFilter[];
+  breakdown?: string;
+}) => {
   const mockDataSeries = data || {
     'performance-distribution': {
       reportType: 'pld',
-      breakdown: 'user_agent.name',
+      breakdown: breakdown || 'user_agent.name',
       time: { from: 'now-15m', to: 'now' },
       ...(filters ? { filters } : {}),
     },
@@ -266,7 +274,7 @@ export const mockUrlStorage = ({ data, filters }: { data?: AllSeries; filters?: 
     setSeries,
     series,
     firstSeries: mockDataSeries[firstSeriesId],
-    allSeries: data,
+    allSeries: mockDataSeries,
   } as any);
 
   return { spy, removeSeries, setSeries };
