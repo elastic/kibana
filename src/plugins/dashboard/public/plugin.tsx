@@ -342,7 +342,7 @@ export class DashboardPlugin
   }
 
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
-    const { notifications, overlays, application } = core;
+    const { notifications, overlays } = core;
     const { uiActions, data, share, presentationUtil, embeddable } = plugins;
 
     const SavedObjectFinder = getSavedObjectFinder(core.savedObjects, core.uiSettings);
@@ -370,10 +370,7 @@ export class DashboardPlugin
     }
 
     if (this.dashboardFeatureFlagConfig?.allowByValueEmbeddables) {
-      const addToLibraryAction = new AddToLibraryAction({
-        toasts: notifications.toasts,
-        capabilities: application.capabilities,
-      });
+      const addToLibraryAction = new AddToLibraryAction({ toasts: notifications.toasts });
       uiActions.registerAction(addToLibraryAction);
       uiActions.attachAction(CONTEXT_MENU_TRIGGER, addToLibraryAction.id);
 
@@ -389,8 +386,8 @@ export class DashboardPlugin
         overlays,
         embeddable.getStateTransfer(),
         {
-          canCreateNew: Boolean(application.capabilities.dashboard.createNew),
-          canEditExisting: !Boolean(application.capabilities.dashboard.hideWriteControls),
+          canCreateNew: Boolean(core.application.capabilities.dashboard.createNew),
+          canEditExisting: !Boolean(core.application.capabilities.dashboard.hideWriteControls),
         },
         presentationUtil.ContextProvider
       );

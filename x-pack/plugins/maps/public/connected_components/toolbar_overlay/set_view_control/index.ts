@@ -5,32 +5,26 @@
  * 2.0.
  */
 
+import { AnyAction } from 'redux';
+import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { SetViewControl } from './set_view_control';
-import { setGotoWithCenter, closeSetView, openSetView } from '../../../actions';
+import { setGotoWithCenter } from '../../../actions';
 import { getMapZoom, getMapCenter, getMapSettings } from '../../../selectors/map_selectors';
-import { getIsSetViewOpen } from '../../../selectors/ui_selectors';
+import { MapStoreState } from '../../../reducers/store';
 
-function mapStateToProps(state = {}) {
+function mapStateToProps(state: MapStoreState) {
   return {
     settings: getMapSettings(state),
-    isSetViewOpen: getIsSetViewOpen(state),
     zoom: getMapZoom(state),
     center: getMapCenter(state),
   };
 }
 
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
-    onSubmit: ({ lat, lon, zoom }) => {
-      dispatch(closeSetView());
+    onSubmit: ({ lat, lon, zoom }: { lat: number; lon: number; zoom: number }) => {
       dispatch(setGotoWithCenter({ lat, lon, zoom }));
-    },
-    closeSetView: () => {
-      dispatch(closeSetView());
-    },
-    openSetView: () => {
-      dispatch(openSetView());
     },
   };
 }

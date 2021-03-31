@@ -12,5 +12,4 @@ export {
   PluginInitializerContext,
   ScopedHistory,
   NotificationsStart,
-  ApplicationStart,
 } from '../../../../core/public';

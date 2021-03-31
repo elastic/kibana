@@ -11,7 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('feature controls', function () {
     this.tags(['skipFirefox']);
     loadTestFile(require.resolve('./dashboard_security'));
-    loadTestFile(require.resolve('./time_to_visualize_security'));
     loadTestFile(require.resolve('./dashboard_spaces'));
   });
 }

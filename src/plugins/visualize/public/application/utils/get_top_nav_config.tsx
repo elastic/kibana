@@ -82,7 +82,6 @@ export const getTopNavConfig = (
     setActiveUrl,
     toastNotifications,
     visualizeCapabilities,
-    dashboardCapabilities,
     i18n: { Context: I18nContext },
     dashboard,
     savedObjectsTagging,
@@ -206,9 +205,9 @@ export const getTopNavConfig = (
     }
   };
 
-  const allowByValue = dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables;
   const saveButtonLabel =
-    embeddableId || (!savedVis.id && allowByValue && originatingApp)
+    embeddableId ||
+    (!savedVis.id && dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables && originatingApp)
       ? i18n.translate('visualize.topNavMenu.saveVisualizationToLibraryButtonLabel', {
           defaultMessage: 'Save to library',
         })
@@ -220,11 +219,9 @@ export const getTopNavConfig = (
           defaultMessage: 'Save',
         });
 
-  const showSaveAndReturn = originatingApp && (savedVis?.id || allowByValue);
-
-  const showSaveButton =
-    visualizeCapabilities.save ||
-    (allowByValue && !showSaveAndReturn && dashboardCapabilities.showWriteControls);
+  const showSaveAndReturn =
+    originatingApp &&
+    (savedVis?.id || dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables);
 
   const topNavMenu: TopNavMenuData[] = [
     {
@@ -303,7 +300,7 @@ export const getTopNavConfig = (
           },
         ]
       : []),
-    ...(showSaveButton
+    ...(visualizeCapabilities.save
       ? [
           {
             id: 'save',
@@ -442,12 +439,7 @@ export const getTopNavConfig = (
                 />
               ) : (
                 <SavedObjectSaveModalDashboard
-                  documentInfo={{
-                    id: visualizeCapabilities.save ? savedVis?.id : undefined,
-                    title: savedVis?.title || '',
-                    description: savedVis?.description || '',
-                  }}
-                  canSaveByReference={Boolean(visualizeCapabilities.save)}
+                  documentInfo={savedVis || { title: '' }}
                   onSave={onSave}
                   tagOptions={tagOptions}
                   objectType={'visualization'}
@@ -463,7 +455,7 @@ export const getTopNavConfig = (
           },
         ]
       : []),
-    ...(showSaveAndReturn
+    ...(visualizeCapabilities.save && showSaveAndReturn
       ? [
           {
             id: 'saveAndReturn',
@@ -479,7 +471,7 @@ export const getTopNavConfig = (
               }
             ),
             testId: 'visualizesaveAndReturnButton',
-            disableButton: hasUnappliedChanges || !dashboardCapabilities.showWriteControls,
+            disableButton: hasUnappliedChanges,
             tooltip() {
               if (hasUnappliedChanges) {
                 return i18n.translate(
