@@ -67,7 +67,7 @@ export class CasePlugin {
   private config?: ConfigType;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
-    this.log = this.initializerContext.logger.get();
+    this.log = this.initializerContext.logger.get('plugins', 'cases');
     this.clientFactory = new CasesClientFactory(this.log);
   }
 
@@ -98,9 +98,9 @@ export class CasePlugin {
       this.log,
       plugins.security != null ? plugins.security.authc : undefined
     );
-    this.caseConfigureService = await new CaseConfigureService(this.log).setup();
-    this.connectorMappingsService = await new ConnectorMappingsService(this.log).setup();
-    this.userActionService = await new CaseUserActionService(this.log).setup();
+    this.caseConfigureService = new CaseConfigureService(this.log);
+    this.connectorMappingsService = new ConnectorMappingsService(this.log);
+    this.userActionService = new CaseUserActionService(this.log);
     this.alertsService = new AlertService();
 
     core.http.registerRouteHandlerContext<CasesRequestHandlerContext, 'cases'>(

@@ -46,55 +46,68 @@ export interface CaseConfigureServiceSetup {
   post(args: PostCaseConfigureArgs): Promise<SavedObject<ESCasesConfigureAttributes>>;
 }
 
-export class CaseConfigureService {
+export class CaseConfigureService implements CaseConfigureServiceSetup {
   constructor(private readonly log: Logger) {}
-  public setup = async (): Promise<CaseConfigureServiceSetup> => ({
-    delete: async ({ client, caseConfigureId }: GetCaseConfigureArgs) => {
-      try {
-        this.log.debug(`Attempting to DELETE case configure ${caseConfigureId}`);
-        return await client.delete(CASE_CONFIGURE_SAVED_OBJECT, caseConfigureId);
-      } catch (error) {
-        this.log.debug(`Error on DELETE case configure ${caseConfigureId}: ${error}`);
-        throw error;
-      }
-    },
-    get: async ({ client, caseConfigureId }: GetCaseConfigureArgs) => {
-      try {
-        this.log.debug(`Attempting to GET case configuration ${caseConfigureId}`);
-        return await client.get(CASE_CONFIGURE_SAVED_OBJECT, caseConfigureId);
-      } catch (error) {
-        this.log.debug(`Error on GET case configuration ${caseConfigureId}: ${error}`);
-        throw error;
-      }
-    },
-    find: async ({ client, options }: FindCaseConfigureArgs) => {
-      try {
-        this.log.debug(`Attempting to find all case configuration`);
-        return await client.find({ ...options, type: CASE_CONFIGURE_SAVED_OBJECT });
-      } catch (error) {
-        this.log.debug(`Attempting to find all case configuration`);
-        throw error;
-      }
-    },
-    post: async ({ client, attributes }: PostCaseConfigureArgs) => {
-      try {
-        this.log.debug(`Attempting to POST a new case configuration`);
-        return await client.create(CASE_CONFIGURE_SAVED_OBJECT, { ...attributes });
-      } catch (error) {
-        this.log.debug(`Error on POST a new case configuration: ${error}`);
-        throw error;
-      }
-    },
-    patch: async ({ client, caseConfigureId, updatedAttributes }: PatchCaseConfigureArgs) => {
-      try {
-        this.log.debug(`Attempting to UPDATE case configuration ${caseConfigureId}`);
-        return await client.update(CASE_CONFIGURE_SAVED_OBJECT, caseConfigureId, {
+
+  public async delete({ client, caseConfigureId }: GetCaseConfigureArgs) {
+    try {
+      this.log.debug(`Attempting to DELETE case configure ${caseConfigureId}`);
+      return await client.delete(CASE_CONFIGURE_SAVED_OBJECT, caseConfigureId);
+    } catch (error) {
+      this.log.debug(`Error on DELETE case configure ${caseConfigureId}: ${error}`);
+      throw error;
+    }
+  }
+
+  public async get({ client, caseConfigureId }: GetCaseConfigureArgs) {
+    try {
+      this.log.debug(`Attempting to GET case configuration ${caseConfigureId}`);
+      return await client.get<ESCasesConfigureAttributes>(
+        CASE_CONFIGURE_SAVED_OBJECT,
+        caseConfigureId
+      );
+    } catch (error) {
+      this.log.debug(`Error on GET case configuration ${caseConfigureId}: ${error}`);
+      throw error;
+    }
+  }
+
+  public async find({ client, options }: FindCaseConfigureArgs) {
+    try {
+      this.log.debug(`Attempting to find all case configuration`);
+      return await client.find<ESCasesConfigureAttributes>({
+        ...options,
+        type: CASE_CONFIGURE_SAVED_OBJECT,
+      });
+    } catch (error) {
+      this.log.debug(`Attempting to find all case configuration`);
+      throw error;
+    }
+  }
+  public async post({ client, attributes }: PostCaseConfigureArgs) {
+    try {
+      this.log.debug(`Attempting to POST a new case configuration`);
+      return await client.create<ESCasesConfigureAttributes>(CASE_CONFIGURE_SAVED_OBJECT, {
+        ...attributes,
+      });
+    } catch (error) {
+      this.log.debug(`Error on POST a new case configuration: ${error}`);
+      throw error;
+    }
+  }
+  public async patch({ client, caseConfigureId, updatedAttributes }: PatchCaseConfigureArgs) {
+    try {
+      this.log.debug(`Attempting to UPDATE case configuration ${caseConfigureId}`);
+      return await client.update<ESCasesConfigureAttributes>(
+        CASE_CONFIGURE_SAVED_OBJECT,
+        caseConfigureId,
+        {
           ...updatedAttributes,
-        });
-      } catch (error) {
-        this.log.debug(`Error on UPDATE case configuration ${caseConfigureId}: ${error}`);
-        throw error;
-      }
-    },
-  });
+        }
+      );
+    } catch (error) {
+      this.log.debug(`Error on UPDATE case configuration ${caseConfigureId}: ${error}`);
+      throw error;
+    }
+  }
 }
