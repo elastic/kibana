@@ -63,8 +63,9 @@ import {
   searchSourceRequiredUiSettings,
   SearchSourceService,
   phraseFilterFunction,
+  esRawResponse,
 } from '../../common/search';
-import { getEsaggs } from './expressions';
+import { getEsaggs, getEsdsl } from './expressions';
 import {
   getShardDelayBucketAgg,
   SHARD_DELAY_AGG_NAME,
@@ -150,6 +151,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     }
 
     expressions.registerFunction(getEsaggs({ getStartServices: core.getStartServices }));
+    expressions.registerFunction(getEsdsl({ getStartServices: core.getStartServices }));
     expressions.registerFunction(kibana);
     expressions.registerFunction(luceneFunction);
     expressions.registerFunction(kqlFunction);
@@ -162,6 +164,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     expressions.registerFunction(rangeFilterFunction);
     expressions.registerFunction(phraseFilterFunction);
     expressions.registerType(kibanaContext);
+    expressions.registerType(esRawResponse);
 
     const aggs = this.aggsService.setup({ registerFunction: expressions.registerFunction });
 

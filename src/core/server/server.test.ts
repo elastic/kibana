@@ -205,19 +205,3 @@ test(`doesn't setup core services if legacy config validation fails`, async () =
   expect(mockLoggingService.setup).not.toHaveBeenCalled();
   expect(mockI18nService.setup).not.toHaveBeenCalled();
 });
-
-test(`doesn't validate config if env.isDevCliParent is true`, async () => {
-  const devParentEnv = Env.createDefault(REPO_ROOT, {
-    ...getEnvOptions(),
-    isDevCliParent: true,
-  });
-
-  const server = new Server(rawConfigService, devParentEnv, logger);
-  await server.setup();
-
-  expect(mockEnsureValidConfiguration).not.toHaveBeenCalled();
-  expect(mockContextService.setup).toHaveBeenCalled();
-  expect(mockHttpService.setup).toHaveBeenCalled();
-  expect(mockElasticsearchService.setup).toHaveBeenCalled();
-  expect(mockSavedObjectsService.setup).toHaveBeenCalled();
-});

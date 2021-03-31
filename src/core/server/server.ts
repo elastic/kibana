@@ -41,6 +41,7 @@ import { ContextService } from './context';
 import { RequestHandlerContext } from '.';
 import { InternalCoreSetup, InternalCoreStart, ServiceConfigDescriptor } from './internal_types';
 import { CoreUsageDataService } from './core_usage_data';
+import { DeprecationsService } from './deprecations';
 import { CoreRouteHandlerContext } from './core_route_handler_context';
 import { config as externalUrlConfig } from './external_url';
 
@@ -67,6 +68,7 @@ export class Server {
   private readonly coreApp: CoreApp;
   private readonly coreUsageData: CoreUsageDataService;
   private readonly i18n: I18nService;
+  private readonly deprecations: DeprecationsService;
 
   private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
   private resolveSavedObjectsStartPromise?: (value: SavedObjectsServiceStart) => void;
@@ -102,6 +104,7 @@ export class Server {
     this.logging = new LoggingService(core);
     this.coreUsageData = new CoreUsageDataService(core);
     this.i18n = new I18nService(core);
+    this.deprecations = new DeprecationsService(core);
 
     this.savedObjectsStartPromise = new Promise((resolve) => {
       this.resolveSavedObjectsStartPromise = resolve;
@@ -120,13 +123,10 @@ export class Server {
     });
     const legacyConfigSetup = await this.legacy.setupLegacyConfig();
 
-    // rely on dev server to validate config, don't validate in the parent process
-    if (!this.env.isDevCliParent) {
-      // Immediately terminate in case of invalid configuration
-      // This needs to be done after plugin discovery
-      await this.configService.validate();
-      await ensureValidConfiguration(this.configService, legacyConfigSetup);
-    }
+    // Immediately terminate in case of invalid configuration
+    // This needs to be done after plugin discovery
+    await this.configService.validate();
+    await ensureValidConfiguration(this.configService, legacyConfigSetup);
 
     const contextServiceSetup = this.context.setup({
       // We inject a fake "legacy plugin" with dependencies on every plugin so that legacy plugins:
@@ -195,6 +195,12 @@ export class Server {
       loggingSystem: this.loggingSystem,
     });
 
+    const deprecationsSetup = this.deprecations.setup({
+      http: httpSetup,
+      elasticsearch: elasticsearchServiceSetup,
+      coreUsageData: coreUsageDataSetup,
+    });
+
     const coreSetup: InternalCoreSetup = {
       capabilities: capabilitiesSetup,
       context: contextServiceSetup,
@@ -209,6 +215,7 @@ export class Server {
       httpResources: httpResourcesSetup,
       logging: loggingSetup,
       metrics: metricsSetup,
+      deprecations: deprecationsSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
@@ -288,6 +295,7 @@ export class Server {
     await this.metrics.stop();
     await this.status.stop();
     await this.logging.stop();
+    this.deprecations.stop();
   }
 
   private registerCoreContext(coreSetup: InternalCoreSetup) {
