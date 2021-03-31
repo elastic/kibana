@@ -173,7 +173,8 @@ export class CoreSystem {
       await this.integrations.start({ uiSettings });
 
       const coreUiTargetDomElement = document.createElement('div');
-      coreUiTargetDomElement.id = 'kibana-body';
+      coreUiTargetDomElement.id = 'kbnChrome';
+      coreUiTargetDomElement.dataset.testSubj = 'kibanaChrome';
       const notificationsTargetDomElement = document.createElement('div');
       const overlayTargetDomElement = document.createElement('div');
 

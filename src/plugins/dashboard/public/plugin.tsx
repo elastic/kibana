@@ -23,6 +23,7 @@ import {
   DEFAULT_APP_CATEGORIES,
   PluginInitializerContext,
   SavedObjectsClientContract,
+  APP_WRAPPER_CLASS,
 } from '../../../core/public';
 
 import { createKbnUrlTracker } from './services/kibana_utils';
@@ -280,7 +281,7 @@ export class DashboardPlugin
       category: DEFAULT_APP_CATEGORIES.kibana,
       mount: async (params: AppMountParameters) => {
         this.currentHistory = params.history;
-        params.element.classList.add('dshAppContainer');
+        params.element.classList.add(APP_WRAPPER_CLASS);
         const { mountApp } = await import('./application/dashboard_router');
         appMounted();
         return mountApp({

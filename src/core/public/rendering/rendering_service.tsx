@@ -14,7 +14,7 @@ import { pairwise, startWith } from 'rxjs/operators';
 import { InternalChromeStart } from '../chrome';
 import { InternalApplicationStart } from '../application';
 import { OverlayStart } from '../overlays';
-import { AppWrapper, AppContainer } from './app_containers';
+import { AppWrapper } from './app_containers';
 
 interface StartDeps {
   application: InternalApplicationStart;
@@ -48,15 +48,16 @@ export class RenderingService {
 
     ReactDOM.render(
       <I18nProvider>
-        <div className="content" data-test-subj="kibanaChrome">
+        <>
           {chromeHeader}
-          <AppWrapper chromeVisible$={chrome.getIsVisible$()}>
-            <div className="app-wrapper-panel">
-              <div id="globalBannerList">{bannerComponent}</div>
-              <AppContainer classes$={chrome.getApplicationClasses$()}>{appComponent}</AppContainer>
-            </div>
+          <div id="globalBannerList">{bannerComponent}</div>
+          <AppWrapper
+            chromeVisible$={chrome.getIsVisible$()}
+            classes$={chrome.getApplicationClasses$()}
+          >
+            {appComponent}
           </AppWrapper>
-        </div>
+        </>
       </I18nProvider>,
       targetDomElement
     );

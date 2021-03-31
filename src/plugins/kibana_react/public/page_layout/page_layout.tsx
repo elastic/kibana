@@ -21,6 +21,8 @@ import {
   EuiPageTemplateProps,
 } from '@elastic/eui';
 
+import './page_layout.scss';
+
 export type KibanaPageLayoutProps = EuiPageTemplateProps & {
   globals?: boolean;
   solutionNav?: ReactNode;

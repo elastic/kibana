@@ -6,29 +6,17 @@
  * by core service from new platform
  */
 // SASSTODO: Naming here is too embedded and high up that changing them could cause major breaks
-#kibana-body {
+#kbnChrome {
   overflow-x: hidden;
   min-height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
-.app-wrapper {
+.kbnAppWrapper {
   display: flex;
   flex-flow: column nowrap;
-  margin: 0 auto;
-
-  @include kibanaFullBodyMinHeight();
-}
-
-.app-wrapper-panel {
-  display: flex;
   flex-grow: 1;
-  flex-shrink: 0;
-  flex-basis: auto;
-  flex-direction: column;
-
-  > * {
-    flex-shrink: 0;
-  }
 }
 
 // adapted from euiHeaderAffordForFixed as we need to handle the top banner

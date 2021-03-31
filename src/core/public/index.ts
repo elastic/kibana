@@ -187,6 +187,7 @@ export type {
 export type { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
 
 export { URL_MAX_LENGTH } from './core_app';
+export { APP_WRAPPER_CLASS } from './rendering';
 
 /**
  * Core services exposed to the `Plugin` setup lifecycle
