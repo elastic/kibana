@@ -8,6 +8,7 @@
 import React, { useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { assertUnreachable } from '../../../../common/utility_types';
 import {
   Columns,
   Criteria,
@@ -64,7 +65,7 @@ const getSorting = (sortField: HostsFields, direction: Direction): SortingBasicT
   direction,
 });
 
-export const HostsTable: React.FC<HostsTableProps> = ({
+const HostsTableComponent: React.FC<HostsTableProps> = ({
   data,
   fakeTotalCount,
   id,
@@ -153,7 +154,7 @@ export const HostsTable: React.FC<HostsTableProps> = ({
   );
 };
 
-HostsTable.displayName = 'HostsTable';
+HostsTableComponent.displayName = 'HostsTableComponent';
 
 const getSortField = (field: string): HostsFields => {
   switch (field) {
@@ -173,4 +174,9 @@ const getNodeField = (field: HostsFields): string => {
     case HostsFields.lastSeen:
       return 'node.lastSeen';
   }
+  assertUnreachable(field);
 };
+
+export const HostsTable = React.memo(HostsTableComponent);
+
+HostsTable.displayName = 'HostsTable';
