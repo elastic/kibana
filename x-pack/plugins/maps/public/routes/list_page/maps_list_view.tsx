@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { MouseEvent, useState, useEffect } from 'react';
-import { Redirect } from 'react-router-dom';
+import React, { MouseEvent } from 'react';
 import { SavedObjectReference } from 'src/core/types';
 import { i18n } from '@kbn/i18n';
 import { EuiLink } from '@elastic/eui';
@@ -25,7 +24,6 @@ import {
 } from '../../kibana_services';
 import { getAppTitle } from '../../../common/i18n_getters';
 import { MapSavedObjectAttributes } from '../../../common/map_saved_object_type';
-import { EmbeddableStateTransfer } from '../../../../../../src/plugins/embeddable/public';
 
 interface MapItem {
   id: string;
@@ -90,7 +88,7 @@ async function findMaps(searchQuery: string) {
     tagReferences = parsed.tagReferences;
   }
 
-  const { savedObjects, total } = await getSavedObjectsClient().find<MapSavedObjectAttributes>({
+  const resp = await getSavedObjectsClient().find<MapSavedObjectAttributes>({
     type: MAP_SAVED_OBJECT_TYPE,
     search: searchTerm ? `${searchTerm}*` : undefined,
     perPage: getSavedObjects().settings.getListingLimit(),
@@ -102,8 +100,8 @@ async function findMaps(searchQuery: string) {
   });
 
   return {
-    total,
-    hits: savedObjects.map((savedObject) => {
+    total: resp.total,
+    hits: resp.savedObjects.map((savedObject) => {
       return {
         id: savedObject.id,
         title: savedObject.attributes.title,
@@ -121,15 +119,7 @@ async function deleteMaps(items: object[]) {
   await Promise.all(deletions);
 }
 
-export function MapsListView({ stateTransfer }: { stateTransfer: EmbeddableStateTransfer }) {
-  useEffect(
-    () => {
-      stateTransfer.clearEditorState(APP_ID);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
-  const [showEmptyList, setShowEmptyList] = useState(false);
+export function MapsListView() {
   const isReadOnly = !getMapsCapabilities().save;
 
   getCoreChrome().docTitle.change(getAppTitle());
@@ -137,19 +127,11 @@ export function MapsListView({ stateTransfer }: { stateTransfer: EmbeddableState
 
   return (
     <TableListView
-      noItemsFragment={showEmptyList ? undefined : <Redirect to="/map" />}
       headingId="mapsListingPage"
       rowHeader="title"
       createItem={isReadOnly ? undefined : navigateToNewMap}
       findItems={findMaps}
-      deleteItems={
-        isReadOnly
-          ? undefined
-          : (...args) => {
-              setShowEmptyList(true);
-              return deleteMaps(...args);
-            }
-      }
+      deleteItems={isReadOnly ? undefined : deleteMaps}
       tableColumns={tableColumns}
       listingLimit={getSavedObjects().settings.getListingLimit()}
       initialFilter={''}
