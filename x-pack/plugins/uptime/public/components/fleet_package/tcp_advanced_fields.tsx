@@ -12,7 +12,6 @@ import {
   EuiAccordion,
   EuiFormRow,
   EuiDescribedFormGroup,
-  EuiLink,
   EuiFieldText,
   EuiSpacer,
 } from '@elastic/eui';
