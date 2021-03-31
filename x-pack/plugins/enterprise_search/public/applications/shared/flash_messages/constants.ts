@@ -11,3 +11,7 @@ export const FLASH_MESSAGE_TYPES = {
   warning: { color: 'warning', iconType: 'alert' },
   error: { color: 'danger', iconType: 'alert' },
 };
+
+// This is the default amount of time (5 seconds) a toast will last before disappearing
+// It can be overridden per-toast by passing the `toastLifetimeMs` property - @see types.ts
+export const DEFAULT_TOAST_TIMEOUT = 5000;
