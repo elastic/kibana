@@ -14,16 +14,15 @@ const ciStats = require('./ci_stats');
 
     // TODO Will need to set MERGE_BASE
 
-    // TODO
-    // await ciStats.post(`/v1/git_info?buildId=${build.id}`, {
-    //   branch: process.env.GIT_BRANCH.replace(/^(refs\/heads\/|origin\/)/, ''),
-    //   commit: process.env.GIT_COMMIT,
-    //   targetBranch:
-    //     process.env.GITHUB_PR_TARGET_BRANCH ||
-    //     process.env.BUILDKITE_PULL_REQUEST_BASE_BRANCH ||
-    //     null,
-    //   mergeBase: process.env.GITHUB_PR_MERGE_BASE || null,
-    // });
+    await ciStats.post(`/v1/git_info?buildId=${build.id}`, {
+      branch: process.env.BUILDKITE_BRANCH.replace(/^(refs\/heads\/|origin\/)/, ''),
+      commit: process.env.BUILDKITE_COMMIT,
+      targetBranch:
+        process.env.GITHUB_PR_TARGET_BRANCH ||
+        process.env.BUILDKITE_PULL_REQUEST_BASE_BRANCH ||
+        null,
+      mergeBase: process.env.GITHUB_PR_MERGE_BASE || null, // TODO
+    });
   } catch (ex) {
     console.error(ex);
     process.exit(1);
