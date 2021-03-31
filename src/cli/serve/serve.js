@@ -220,6 +220,7 @@ export default function (program) {
       // no longer supported
       quiet: !!opts.quiet,
       silent: !!opts.silent,
+      verbose: !!opts.verbose,
       watch: !!opts.watch,
       runExamples: !!opts.runExamples,
       // We want to run without base path when the `--run-examples` flag is given so that we can use local
