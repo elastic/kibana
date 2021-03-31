@@ -12,7 +12,7 @@ import ReactDOM from 'react-dom';
 import { AppMountParameters, CoreStart, HttpStart } from 'kibana/public';
 
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
-import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
+
 import {
   KibanaContextProvider,
   RedirectAppLinks,
@@ -87,8 +87,6 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
   };
 
   const I18nContext = coreStart.i18n.Context;
-  const darkMode = coreStart.uiSettings.get<boolean>('theme:darkMode');
-
   return (
     /** RedirectAppLinks intercepts all <a> tags to use navigateToUrl
      * avoiding full page reload **/
@@ -97,9 +95,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
         <KibanaContextProvider
           services={{ ...services, mlServices: getMlGlobalServices(coreStart.http) }}
         >
-          <EuiThemeProvider darkMode={darkMode}>
-            <MlRouter pageDeps={pageDeps} />
-          </EuiThemeProvider>
+          <MlRouter pageDeps={pageDeps} />
         </KibanaContextProvider>
       </I18nContext>
     </RedirectAppLinks>

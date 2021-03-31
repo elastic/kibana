@@ -7,16 +7,16 @@
 
 import type { PartialTheme } from '@elastic/charts';
 import { useMemo } from 'react';
-import { useEuiTheme } from '../../../../../../../../src/plugins/kibana_react/common';
+import { useCurrentEuiTheme } from '../../../components/color_range_legend';
 export const useDataVizChartTheme = (): PartialTheme => {
-  const { eui } = useEuiTheme();
+  const { euiTheme } = useCurrentEuiTheme();
   const chartTheme = useMemo(() => {
-    const AREA_SERIES_COLOR = eui.euiColorVis0;
+    const AREA_SERIES_COLOR = euiTheme.euiColorVis0;
     return {
       axes: {
         tickLabel: {
-          fontSize: parseInt(eui.euiFontSizeXS, 10),
-          fontFamily: eui.euiFontFamily,
+          fontSize: parseInt(euiTheme.euiFontSizeXS, 10),
+          fontFamily: euiTheme.euiFontFamily,
           fontStyle: 'italic',
         },
       },
@@ -50,6 +50,6 @@ export const useDataVizChartTheme = (): PartialTheme => {
         area: { visible: true, opacity: 1 },
       },
     };
-  }, [eui]);
+  }, [euiTheme]);
   return chartTheme;
 };

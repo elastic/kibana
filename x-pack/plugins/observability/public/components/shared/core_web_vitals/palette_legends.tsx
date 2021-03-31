@@ -14,25 +14,30 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
+import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiDarkVars, euiLightVars } from '@kbn/ui-shared-deps/theme';
 import { getCoreVitalTooltipMessage, Thresholds } from './core_vital_item';
+import { useUiSetting$ } from '../../../../../../../src/plugins/kibana_react/public';
 import {
   LEGEND_NEEDS_IMPROVEMENT_LABEL,
   LEGEND_GOOD_LABEL,
   LEGEND_POOR_LABEL,
 } from './translations';
 
-const PaletteLegend = euiStyled(EuiHealth)`
+const PaletteLegend = styled(EuiHealth)`
   &:hover {
     cursor: pointer;
     text-decoration: underline;
   }
 `;
 
-const StyledSpan = euiStyled.span`
+const StyledSpan = styled.span<{
+  darkMode: boolean;
+}>`
   &:hover {
-    background-color: ${({ theme }) => theme.eui.euiColorLightestShade};
+    background-color: ${(props) =>
+      props.darkMode ? euiDarkVars.euiColorLightestShade : euiLightVars.euiColorLightestShade};
   }
 `;
 
@@ -45,6 +50,8 @@ interface Props {
 }
 
 export function PaletteLegends({ ranks, title, onItemHover, thresholds, isCls }: Props) {
+  const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
+
   const palette = euiPaletteForStatus(3);
   const labels = [LEGEND_GOOD_LABEL, LEGEND_NEEDS_IMPROVEMENT_LABEL, LEGEND_POOR_LABEL];
 
@@ -65,7 +72,7 @@ export function PaletteLegends({ ranks, title, onItemHover, thresholds, isCls }:
             content={getCoreVitalTooltipMessage(thresholds, ind, title, ranks[ind], isCls)}
             position="bottom"
           >
-            <StyledSpan>
+            <StyledSpan darkMode={darkMode}>
               <PaletteLegend color={color}>
                 <EuiText size="xs">
                   <FormattedMessage

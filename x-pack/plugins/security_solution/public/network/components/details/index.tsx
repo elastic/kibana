@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { useContext } from 'react';
-import { ThemeContext } from 'styled-components';
-import { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiDarkVars, euiLightVars } from '@kbn/ui-shared-deps/theme';
+import React from 'react';
+
+import { DEFAULT_DARK_MODE } from '../../../../common/constants';
 import { DescriptionList } from '../../../../common/utility_types';
+import { useUiSetting$ } from '../../../common/lib/kibana';
 import { FlowTarget, NetworkDetailsStrategyResponse } from '../../../../common/search_strategy';
 import { networkModel } from '../../store';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
@@ -65,7 +67,7 @@ export const IpOverview = React.memo<IpOverviewProps>(
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
-    const { euiPageBackgroundColor } = useContext<EuiTheme>(ThemeContext).eui;
+    const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
     const typeData = data[flowTarget]!;
     const column: DescriptionList[] = [
       {
@@ -144,7 +146,15 @@ export const IpOverview = React.memo<IpOverviewProps>(
             <OverviewDescriptionList descriptionList={descriptionList} key={index} />
           ))}
 
-          {loading && <Loader overlay overlayBackground={euiPageBackgroundColor} size="xl" />}
+          {loading && (
+            <Loader
+              overlay
+              overlayBackground={
+                darkMode ? euiDarkVars.euiPageBackgroundColor : euiLightVars.euiPageBackgroundColor
+              }
+              size="xl"
+            />
+          )}
         </OverviewWrapper>
       </InspectButtonContainer>
     );

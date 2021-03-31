@@ -6,12 +6,14 @@
  */
 
 import { EuiHorizontalRule } from '@elastic/eui';
+import { euiDarkVars, euiLightVars } from '@kbn/ui-shared-deps/theme';
 import { getOr } from 'lodash/fp';
-import React, { useCallback, useContext, useMemo } from 'react';
-import { ThemeContext } from 'styled-components';
+import React, { useCallback, useMemo } from 'react';
 
 import { DocValueFields, HostItem } from '../../../../common/search_strategy';
+import { DEFAULT_DARK_MODE } from '../../../../common/constants';
 import { DescriptionList } from '../../../../common/utility_types';
+import { useUiSetting$ } from '../../../common/lib/kibana';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import {
   DefaultFieldRenderer,
@@ -33,7 +35,6 @@ import {
 import * as i18n from './translations';
 import { EndpointOverview } from './endpoint_overview';
 import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
-import { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
 
 interface HostSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel
@@ -67,7 +68,8 @@ export const HostOverview = React.memo<HostSummaryProps>(
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
-    const { euiPageBackgroundColor } = useContext<EuiTheme>(ThemeContext).eui;
+    const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
+
     const getDefaultRenderer = useCallback(
       (fieldName: string, fieldData: HostItem) => (
         <DefaultFieldRenderer
@@ -207,7 +209,17 @@ export const HostOverview = React.memo<HostSummaryProps>(
               <OverviewDescriptionList descriptionList={descriptionList} key={index} />
             ))}
 
-            {loading && <Loader overlay overlayBackground={euiPageBackgroundColor} size="xl" />}
+            {loading && (
+              <Loader
+                overlay
+                overlayBackground={
+                  darkMode
+                    ? euiDarkVars.euiPageBackgroundColor
+                    : euiLightVars.euiPageBackgroundColor
+                }
+                size="xl"
+              />
+            )}
           </OverviewWrapper>
         </InspectButtonContainer>
         {data.endpoint != null ? (
@@ -216,7 +228,17 @@ export const HostOverview = React.memo<HostSummaryProps>(
             <OverviewWrapper direction={isInDetailsSidePanel ? 'column' : 'row'}>
               <EndpointOverview contextID={contextID} data={data.endpoint} />
 
-              {loading && <Loader overlay overlayBackground={euiPageBackgroundColor} size="xl" />}
+              {loading && (
+                <Loader
+                  overlay
+                  overlayBackground={
+                    darkMode
+                      ? euiDarkVars.euiPageBackgroundColor
+                      : euiLightVars.euiPageBackgroundColor
+                  }
+                  size="xl"
+                />
+              )}
             </OverviewWrapper>
           </>
         ) : null}

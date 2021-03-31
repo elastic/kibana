@@ -5,18 +5,24 @@
  * 2.0.
  */
 
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 import { Story, addDecorator } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import React from 'react';
+import { ThemeProvider } from 'styled-components';
 import { HttpStart } from 'kibana/public';
 
 import { OperatorEnum, OperatorTypeEnum } from '../../../../common';
 import { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
 import { fields } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
-import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
+import { getMockTheme } from '../../../common/test_utils/kibana_react.mock';
 
 import { BuilderEntryItem, EntryItemProps } from './entry_renderer';
 
+const mockTheme = getMockTheme({
+  darkMode: false,
+  eui: euiThemeVars,
+});
 const mockAutocompleteService = ({
   getValueSuggestions: () =>
     new Promise((resolve) => {
@@ -53,7 +59,7 @@ const mockAutocompleteService = ({
     }),
 } as unknown) as AutocompleteStart;
 
-addDecorator((storyFn) => <EuiThemeProvider>{storyFn()}</EuiThemeProvider>);
+addDecorator((storyFn) => <ThemeProvider theme={mockTheme}>{storyFn()}</ThemeProvider>);
 
 export default {
   argTypes: {

@@ -22,7 +22,6 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { useEuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
 import { extractErrorMessage } from '../../../../common';
 import { stringHash } from '../../../../common/util/string_utils';
 import type { SearchResponse7 } from '../../../../common/types/es_client';
@@ -31,6 +30,7 @@ import type { ResultsSearchQuery } from '../../data_frame_analytics/common/analy
 import { useMlApiContext } from '../../contexts/kibana';
 
 import { getProcessedFields } from '../data_grid';
+import { useCurrentEuiTheme } from '../color_range_legend';
 
 // Separate imports for lazy loadable VegaChart and related code
 import { VegaChart } from '../vega_chart';
@@ -152,7 +152,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
     setDynamicSize(!dynamicSize);
   };
 
-  const { eui } = useEuiTheme();
+  const { euiTheme } = useCurrentEuiTheme();
 
   useEffect(() => {
     if (fields.length === 0) {
@@ -254,7 +254,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
     return getScatterplotMatrixVegaLiteSpec(
       items,
       columns,
-      eui,
+      euiTheme,
       resultsField,
       color,
       legendType,

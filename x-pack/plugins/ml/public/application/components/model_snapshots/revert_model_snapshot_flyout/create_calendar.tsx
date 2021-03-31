@@ -23,8 +23,8 @@ import {
 
 import { EventRateChart } from '../../../jobs/new_job/pages/components/charts/event_rate_chart/event_rate_chart';
 import { Anomaly } from '../../../jobs/new_job/common/results_loader/results_loader';
+import { useCurrentEuiTheme } from '../../../components/color_range_legend';
 import { LineChartPoint } from '../../../jobs/new_job/common/chart_loader/chart_loader';
-import { useEuiTheme } from '../../../../../../../../src/plugins/kibana_react/common';
 
 export interface CalendarEvent {
   start: moment.Moment | null;
@@ -54,7 +54,7 @@ export const CreateCalendar: FC<Props> = ({
   const maxSelectableTimeMoment = moment(maxSelectableTimeStamp);
   const minSelectableTimeMoment = moment(minSelectableTimeStamp);
 
-  const { eui } = useEuiTheme();
+  const { euiTheme } = useCurrentEuiTheme();
 
   const onBrushEnd = useCallback(
     ({ x }: XYBrushArea) => {
@@ -150,7 +150,7 @@ export const CreateCalendar: FC<Props> = ({
           end: c.end!.valueOf(),
         }))}
         onBrushEnd={onBrushEnd}
-        overlayColor={eui.euiColorPrimary}
+        overlayColor={euiTheme.euiColorPrimary}
       />
       <EuiSpacer size="s" />
 
@@ -221,7 +221,7 @@ export const CreateCalendar: FC<Props> = ({
               <EuiFlexItem
                 grow={false}
                 style={{
-                  borderLeft: `1px solid ${eui.euiColorLightShade}`,
+                  borderLeft: `1px solid ${euiTheme.euiColorLightShade}`,
                   marginRight: '0px',
                 }}
               />

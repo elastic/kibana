@@ -6,11 +6,15 @@
  */
 
 import React from 'react';
+import { ThemeProvider } from 'styled-components';
 import { storiesOf, addDecorator } from '@storybook/react';
-import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
+
 import { TextFieldValue } from '.';
 
-addDecorator((storyFn) => <EuiThemeProvider darkMode={false}>{storyFn()}</EuiThemeProvider>);
+addDecorator((storyFn) => (
+  <ThemeProvider theme={() => ({ eui: euiThemeVars, darkMode: false })}>{storyFn()}</ThemeProvider>
+));
 
 const longText = [...new Array(20).keys()].map((i) => ` super long text part ${i}`).join(' ');
 

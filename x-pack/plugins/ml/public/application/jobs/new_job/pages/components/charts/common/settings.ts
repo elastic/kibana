@@ -5,24 +5,23 @@
  * 2.0.
  */
 
-import { useContext } from 'react';
-import { ThemeContext } from 'styled-components';
-import { EuiTheme } from '../../../../../../../../../../../src/plugins/kibana_react/common';
+import { euiDarkVars, euiLightVars } from '@kbn/ui-shared-deps/theme';
 import {
   JobCreatorType,
   isMultiMetricJobCreator,
   isPopulationJobCreator,
 } from '../../../../common/job_creator';
 import { getTimeBucketsFromCache, TimeBuckets } from '../../../../../../util/time_buckets';
+import { useUiSettings } from '../../../../../../contexts/kibana/use_ui_settings_context';
 
 export function useChartColors() {
-  const { eui } = useContext<EuiTheme>(ThemeContext);
-
+  const IS_DARK_THEME = useUiSettings().get('theme:darkMode');
+  const themeName = IS_DARK_THEME ? euiDarkVars : euiLightVars;
   return {
-    LINE_COLOR: eui.euiColorPrimary,
-    MODEL_COLOR: eui.euiColorPrimary,
-    EVENT_RATE_COLOR: eui.euiColorPrimary,
-    EVENT_RATE_COLOR_WITH_ANOMALIES: eui.euiColorLightShade,
+    LINE_COLOR: themeName.euiColorPrimary,
+    MODEL_COLOR: themeName.euiColorPrimary,
+    EVENT_RATE_COLOR: themeName.euiColorPrimary,
+    EVENT_RATE_COLOR_WITH_ANOMALIES: themeName.euiColorLightShade,
   };
 }
 

@@ -8,12 +8,16 @@
 import { storiesOf, addDecorator } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import React from 'react';
-import { EuiThemeProvider } from '../../../../../../../../../src/plugins/kibana_react/common';
+import { ThemeProvider } from 'styled-components';
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
+
 import { ExceptionItem } from './';
 import { getExceptionListItemSchemaMock } from '../../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { getCommentsArrayMock } from '../../../../../../../lists/common/schemas/types/comment.mock';
 
-addDecorator((storyFn) => <EuiThemeProvider darkMode={false}>{storyFn()}</EuiThemeProvider>);
+addDecorator((storyFn) => (
+  <ThemeProvider theme={() => ({ eui: euiThemeVars, darkMode: false })}>{storyFn()}</ThemeProvider>
+));
 
 storiesOf('Components/ExceptionItem', module)
   .add('with os', () => {

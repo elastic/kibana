@@ -7,13 +7,13 @@
 
 // There is still an issue with Vega Lite's typings with the strict mode Kibana is using.
 // @ts-ignore
-import type { TopLevelSpec } from 'vega-lite/build-es5/vega-lite';
+import type { TopLevelSpec } from 'vega-lite/build/vega-lite';
+
+import euiThemeLight from '@elastic/eui/dist/eui_theme_light.json';
 
 import { euiPaletteColorBlind, euiPaletteNegative, euiPalettePositive } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-
-import { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
 
 import { LegendType, LEGEND_TYPES } from '../vega_chart/common';
 
@@ -27,7 +27,7 @@ export const COLOR_RANGE_NOMINAL = euiPaletteColorBlind({ rotations: 2 });
 export const COLOR_RANGE_QUANTITATIVE = euiPalettePositive(5);
 
 export const getColorSpec = (
-  euiTheme: EuiTheme['eui'],
+  euiTheme: typeof euiThemeLight,
   escapedOutlierScoreField?: string,
   color?: string,
   legendType?: LegendType
@@ -86,7 +86,7 @@ type VegaValue = Record<string, string | number>;
 export const getScatterplotMatrixVegaLiteSpec = (
   values: VegaValue[],
   columns: string[],
-  euiTheme: EuiTheme['eui'],
+  euiTheme: typeof euiThemeLight,
   resultsField?: string,
   color?: string,
   legendType?: LegendType,

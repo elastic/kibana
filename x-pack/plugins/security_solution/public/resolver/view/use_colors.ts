@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { useContext, useMemo } from 'react';
-import { ThemeContext } from 'styled-components';
-import { EuiTheme } from '../../../../../../src/plugins/kibana_react/common';
+import { euiDarkVars, euiLightVars } from '@kbn/ui-shared-deps/theme';
+import { useMemo } from 'react';
 import { useUiSetting } from '../../../../../../src/plugins/kibana_react/public';
 
 type ResolverColorNames =
@@ -32,8 +31,7 @@ type ColorMap = Record<ResolverColorNames, string>;
  */
 export function useColors(): ColorMap {
   const isDarkMode = useUiSetting('theme:darkMode');
-  const theme = useContext<EuiTheme>(ThemeContext).eui;
-
+  const theme = isDarkMode ? euiDarkVars : euiLightVars;
   return useMemo(() => {
     return {
       copyableFieldBackground: theme.euiColorLightShade,

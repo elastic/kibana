@@ -7,15 +7,17 @@
 
 import { storiesOf } from '@storybook/react';
 import React, { ReactNode } from 'react';
+import { ThemeProvider } from 'styled-components';
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
+
 import { AndOrBadge } from '..';
 
 const sampleText =
   'Doggo ipsum i am bekom fat snoot wow such tempt waggy wags floofs, ruff heckin good boys and girls mlem.  Ruff heckin good boys and girls mlem stop it fren borkf borking doggo very hand that feed shibe, you are doing me the shock big ol heck smol borking doggo with a long snoot for pats heckin good boys. You are doing me the shock smol borking doggo with a long snoot for pats wow very biscit, length boy. Doggo ipsum i am bekom fat snoot wow such tempt waggy wags floofs, ruff heckin good boys and girls mlem.  Ruff heckin good boys and girls mlem stop it fren borkf borking doggo very hand that feed shibe, you are doing me the shock big ol heck smol borking doggo with a long snoot for pats heckin good boys.';
 
 const withTheme = (storyFn: () => ReactNode) => (
-  <EuiThemeProvider darkMode={true}>{storyFn()}</EuiThemeProvider>
+  <ThemeProvider theme={() => ({ eui: euiThemeVars, darkMode: true })}>{storyFn()}</ThemeProvider>
 );
 
 storiesOf('Components/AndOrBadge', module)

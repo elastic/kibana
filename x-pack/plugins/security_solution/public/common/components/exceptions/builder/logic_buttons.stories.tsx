@@ -8,10 +8,14 @@
 import { storiesOf, addDecorator } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import React from 'react';
-import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
+import { ThemeProvider } from 'styled-components';
+import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
+
 import { BuilderLogicButtons } from './logic_buttons';
 
-addDecorator((storyFn) => <EuiThemeProvider darkMode={false}>{storyFn()}</EuiThemeProvider>);
+addDecorator((storyFn) => (
+  <ThemeProvider theme={() => ({ eui: euiThemeVars, darkMode: false })}>{storyFn()}</ThemeProvider>
+));
 
 storiesOf('Exceptions/BuilderLogicButtons', module)
   .add('and/or buttons', () => {
