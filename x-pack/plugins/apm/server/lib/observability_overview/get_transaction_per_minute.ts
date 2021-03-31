@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import {
+  TRANSACTION_PAGE_LOAD,
+  TRANSACTION_REQUEST,
+} from '../../../common/transaction_types';
+import { TRANSACTION_TYPE } from '../../../common/elasticsearch_fieldnames';
 import { rangeQuery } from '../../../server/utils/queries';
 import { Coordinates } from '../../../../observability/typings/common';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
@@ -12,7 +17,7 @@ import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregate
 import { calculateThroughput } from '../helpers/calculate_throughput';
 import { withApmSpan } from '../../utils/with_apm_span';
 
-export function getTransactionCoordinates({
+export function getTransactionPerMinute({
   setup,
   bucketSize,
   searchAggregatedTransactions,
@@ -20,7 +25,7 @@ export function getTransactionCoordinates({
   setup: Setup & SetupTimeRange;
   bucketSize: string;
   searchAggregatedTransactions: boolean;
-}): Promise<Coordinates[]> {
+}): Promise<{ value: number | undefined; timeseries: Coordinates[] }> {
   return withApmSpan(
     'observability_overview_get_transaction_distribution',
     async () => {
@@ -42,23 +47,47 @@ export function getTransactionCoordinates({
             },
           },
           aggs: {
-            distribution: {
-              date_histogram: {
-                field: '@timestamp',
-                fixed_interval: bucketSize,
-                min_doc_count: 0,
+            transactionType: {
+              terms: {
+                field: TRANSACTION_TYPE,
+              },
+              aggs: {
+                timeseries: {
+                  date_histogram: {
+                    field: '@timestamp',
+                    fixed_interval: bucketSize,
+                    min_doc_count: 0,
+                  },
+                },
               },
             },
           },
         },
       });
 
-      return (
-        aggregations?.distribution.buckets.map((bucket) => ({
-          x: bucket.key,
-          y: calculateThroughput({ start, end, value: bucket.doc_count }),
-        })) || []
-      );
+      if (!aggregations || !aggregations.transactionType.buckets) {
+        return { value: undefined, timeseries: [] };
+      }
+
+      const topTransactionTypeBucket =
+        aggregations.transactionType.buckets.find(
+          ({ key: transactionType }) =>
+            transactionType === TRANSACTION_REQUEST ||
+            transactionType === TRANSACTION_PAGE_LOAD
+        ) || aggregations.transactionType.buckets[0];
+
+      return {
+        value: calculateThroughput({
+          start,
+          end,
+          value: topTransactionTypeBucket?.doc_count || 0,
+        }),
+        timeseries:
+          topTransactionTypeBucket?.timeseries.buckets.map((bucket) => ({
+            x: bucket.key,
+            y: calculateThroughput({ start, end, value: bucket.doc_count }),
+          })) || [],
+      };
     }
   );
 }
