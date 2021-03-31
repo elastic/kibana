@@ -73,7 +73,7 @@ export const mockEcsDataWithAlert: Ecs = {
   },
 };
 
-export const getMockDetectionAlert = (overrides: Partial<Ecs> = {}): Ecs => ({
+export const getDetectionAlertMock = (overrides: Partial<Ecs> = {}): Ecs => ({
   ...mockEcsDataWithAlert,
   ...overrides,
 });

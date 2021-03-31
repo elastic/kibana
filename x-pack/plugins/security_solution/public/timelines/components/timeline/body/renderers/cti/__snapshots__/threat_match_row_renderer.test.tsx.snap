@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`threatMatchRowRenderer #renderRow renders correctly against snapshot 1`] = `
+<span>
+  <RowRendererContainer
+    data-test-subj="threat-match-row-renderer"
+  >
+    <span />
+  </RowRendererContainer>
+</span>
+`;
