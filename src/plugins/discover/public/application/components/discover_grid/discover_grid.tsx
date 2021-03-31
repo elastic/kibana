@@ -8,7 +8,6 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import classNames from 'classnames';
 import './discover_grid.scss';
 import {
   EuiDataGridSorting,
@@ -20,11 +19,6 @@ import {
   EuiSpacer,
   EuiText,
   htmlIdGenerator,
-  EuiPopover,
-  EuiButtonEmpty,
-  EuiCopy,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
 } from '@elastic/eui';
 import { IndexPattern } from '../../../kibana_services';
 import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
@@ -44,6 +38,7 @@ import { defaultPageSize, gridStyle, pageSizeArr, toolbarVisibility } from './co
 import { DiscoverServices } from '../../../build_services';
 import { getDisplayedColumns } from '../../helpers/columns';
 import { KibanaContextProvider } from '../../../../../kibana_react/public';
+import { DiscoverGridDocumentToolbarBtn } from './discover_grid_document_selection';
 
 interface SortObj {
   id: string;
@@ -167,7 +162,6 @@ export const DiscoverGrid = ({
 }: DiscoverGridProps) => {
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
   const [isFilterActive, setIsFilterActive] = useState(false);
-  const [isSelectionPopoverOpen, setIsSelectionPopoverOpen] = useState(false);
   const displayedColumns = getDisplayedColumns(columns, indexPattern);
   const defaultColumns = displayedColumns.includes('_source');
   const displayedRows = useMemo(() => {
@@ -261,98 +255,18 @@ export const DiscoverGrid = ({
   ]);
   const lead = useMemo(() => getLeadControlColumns(), []);
 
-  const getMenuItems = useCallback(() => {
-    return [
-      isFilterActive ? (
-        <EuiContextMenuItem
-          key="showAllDocuments"
-          icon="eye"
-          onClick={() => {
-            setIsSelectionPopoverOpen(false);
-            setIsFilterActive(false);
-          }}
-        >
-          <FormattedMessage id="discover.showAllDocuments" defaultMessage="Show all documents" />
-        </EuiContextMenuItem>
-      ) : (
-        <EuiContextMenuItem
-          key="showSelectedDocuments"
-          icon="eye"
-          onClick={() => {
-            setIsSelectionPopoverOpen(false);
-            setIsFilterActive(true);
-          }}
-        >
-          <FormattedMessage
-            id="discover.showSelectedDocumentsOnly"
-            defaultMessage="Show selected documents only"
-          />
-        </EuiContextMenuItem>
-      ),
-
-      <EuiContextMenuItem
-        key="clearSelection"
-        icon="cross"
-        onClick={() => {
-          setIsSelectionPopoverOpen(false);
-          setSelectedDocs([]);
-          setIsFilterActive(false);
-        }}
-      >
-        <FormattedMessage id="discover.clearSelection" defaultMessage="Clear selection" />
-      </EuiContextMenuItem>,
-      <EuiCopy
-        key="copyJsonWrapper"
-        textToCopy={
-          !rows ? '' : JSON.stringify(rows.filter((row) => selectedDocs.includes(getDocId(row))))
-        }
-      >
-        {(copy) => (
-          <EuiContextMenuItem key="copyJSON" icon="copyClipboard" onClick={copy}>
-            <FormattedMessage
-              id="discover.copyToClipboardJSON"
-              defaultMessage="Copy documents to clipboard (JSON)"
-            />
-          </EuiContextMenuItem>
-        )}
-      </EuiCopy>,
-    ];
-  }, [isFilterActive, rows, selectedDocs]);
-
   const additionalControls = useMemo(
     () =>
       selectedDocs.length ? (
-        <EuiPopover
-          closePopover={() => setIsSelectionPopoverOpen(false)}
-          isOpen={isSelectionPopoverOpen}
-          button={
-            <EuiButtonEmpty
-              size="xs"
-              color="text"
-              iconType="documents"
-              onClick={() => setIsSelectionPopoverOpen(true)}
-              data-selected-documents={selectedDocs.length}
-              data-test-subj="dscGridSelectionBtn"
-              isSelected={isFilterActive}
-              className={classNames({
-                // eslint-disable-next-line @typescript-eslint/naming-convention
-                euiDataGrid__controlBtn: true,
-                // eslint-disable-next-line @typescript-eslint/naming-convention
-                'euiDataGrid__controlBtn--active': isFilterActive,
-              })}
-            >
-              <FormattedMessage
-                id="discover.selectedDocumentsNumber"
-                defaultMessage="{nr} documents selected"
-                values={{ nr: selectedDocs.length }}
-              />
-            </EuiButtonEmpty>
-          }
-        >
-          <EuiContextMenuPanel items={getMenuItems()} />
-        </EuiPopover>
+        <DiscoverGridDocumentToolbarBtn
+          isFilterActive={isFilterActive}
+          rows={rows!}
+          selectedDocs={selectedDocs}
+          setSelectedDocs={setSelectedDocs}
+          setIsFilterActive={setIsFilterActive}
+        />
       ) : null,
-    [selectedDocs, setIsSelectionPopoverOpen, isSelectionPopoverOpen, getMenuItems, isFilterActive]
+    [selectedDocs, isFilterActive, rows, setIsFilterActive]
   );
 
   if (!rowCount) {
