@@ -9,7 +9,7 @@ import { LensAttributes } from './lens_attributes';
 import { mockIndexPattern } from '../rtl_helpers';
 import { getDefaultConfigs } from './default_configs';
 import { sampleAttribute } from './data/sample_attribute';
-import { LCP_FIELD, SERVICE_NAME } from './performance_dist_config';
+import { LCP_FIELD, SERVICE_NAME } from './data/elasticsearch_fieldnames';
 import { USER_AGENT_NAME } from './data/elasticsearch_fieldnames';
 
 describe('Lens Attribute', () => {
