@@ -64,6 +64,8 @@ import {
   SearchSourceService,
   phraseFilterFunction,
   esRawResponse,
+  ENHANCED_ES_SEARCH_STRATEGY,
+  EQL_SEARCH_STRATEGY,
 } from '../../common/search';
 import { getEsaggs, getEsdsl } from './expressions';
 import {

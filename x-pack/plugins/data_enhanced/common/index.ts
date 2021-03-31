@@ -6,14 +6,6 @@
  */
 
 export {
-  SEARCH_SESSION_TYPE,
-  ENHANCED_ES_SEARCH_STRATEGY,
-  EQL_SEARCH_STRATEGY,
-  EqlRequestParams,
-  EqlSearchStrategyRequest,
-  EqlSearchStrategyResponse,
-  IAsyncSearchOptions,
-  pollSearch,
   SearchSessionSavedObjectAttributes,
   SearchSessionStatus,
   SearchSessionRequestInfo,
