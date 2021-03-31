@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { FLASH_MESSAGE_TYPES } from './constants';
 import { FlashMessagesLogic } from './flash_messages_logic';
+import { IToast } from './types';
 
 export const setSuccessMessage = (message: string) => {
   FlashMessagesLogic.actions.setFlashMessages({
@@ -37,4 +39,18 @@ export const setQueuedErrorMessage = (message: string) => {
 
 export const clearFlashMessages = () => {
   FlashMessagesLogic.actions.clearFlashMessages();
+};
+
+export const flashSuccessToast = (toast: IToast) => {
+  FlashMessagesLogic.actions.addToastMessage({
+    ...FLASH_MESSAGE_TYPES.success,
+    ...toast,
+  });
+};
+
+export const flashErrorToast = (toast: IToast) => {
+  FlashMessagesLogic.actions.addToastMessage({
+    ...FLASH_MESSAGE_TYPES.error,
+    ...toast,
+  });
 };

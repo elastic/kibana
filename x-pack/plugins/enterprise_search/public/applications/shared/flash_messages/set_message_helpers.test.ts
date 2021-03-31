@@ -14,6 +14,8 @@ import {
   setQueuedSuccessMessage,
   setQueuedErrorMessage,
   clearFlashMessages,
+  flashSuccessToast,
+  flashErrorToast,
 } from './set_message_helpers';
 
 describe('Flash Message Helpers', () => {
@@ -71,5 +73,47 @@ describe('Flash Message Helpers', () => {
     clearFlashMessages();
 
     expect(FlashMessagesLogic.values.messages).toEqual([]);
+  });
+
+  describe('toast helpers', () => {
+    afterEach(() => {
+      FlashMessagesLogic.actions.clearToastMessages();
+    });
+
+    it('flashSuccessToast', () => {
+      flashSuccessToast({
+        id: 'successToastMessage',
+        title: 'You did a thing!',
+        toastLifeTimeMs: 500,
+      });
+
+      expect(FlashMessagesLogic.values.toastMessages).toEqual([
+        {
+          color: 'success',
+          iconType: 'check',
+          id: 'successToastMessage',
+          title: 'You did a thing!',
+          toastLifeTimeMs: 500,
+        },
+      ]);
+    });
+
+    it('flashErrorToast', () => {
+      flashErrorToast({
+        id: 'errorToastMessage',
+        title: 'Something went wrong',
+        text: "Here's some helpful advice on what to do",
+      });
+
+      expect(FlashMessagesLogic.values.toastMessages).toEqual([
+        {
+          color: 'danger',
+          iconType: 'alert',
+          id: 'errorToastMessage',
+          title: 'Something went wrong',
+          text: "Here's some helpful advice on what to do",
+        },
+      ]);
+    });
   });
 });
