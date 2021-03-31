@@ -201,76 +201,84 @@ async function installPackageFromRegistry({
   // TODO: change epm API to /packageName/version so we don't need to do this
   const { pkgName, pkgVersion } = Registry.splitPkgKey(pkgkey);
 
-  // get the currently installed package
-  const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
-  const installType = getInstallType({ pkgVersion, installedPkg });
+  // if an error happens during getInstallType, report that we don't know
+  let installType: InstallType = 'unknown';
 
-  // get latest package version
-  const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
-
-  // let the user install if using the force flag or needing to reinstall or install a previous version due to failed update
-  const installOutOfDateVersionOk =
-    force || ['reinstall', 'reupdate', 'rollback'].includes(installType);
-
-  // if the requested version is the same as installed version, check if we allow it based on
-  // current installed package status and force flag, if we don't allow it,
-  // just return the asset references from the existing installation
-  if (
-    installedPkg?.attributes.version === pkgVersion &&
-    installedPkg?.attributes.install_status === 'installed'
-  ) {
-    if (!force) {
-      logger.debug(`${pkgkey} is already installed, skipping installation`);
-      return {
-        assets: [
-          ...installedPkg.attributes.installed_es,
-          ...installedPkg.attributes.installed_kibana,
-        ],
-        status: 'already_installed',
-        installType,
-      };
-    }
-  }
-
-  // if the requested version is out-of-date of the latest package version, check if we allow it
-  // if we don't allow it, return an error
-  if (semverLt(pkgVersion, latestPackage.version)) {
-    if (!installOutOfDateVersionOk) {
-      throw new PackageOutdatedError(`${pkgkey} is out-of-date and cannot be installed or updated`);
-    }
-    logger.debug(
-      `${pkgkey} is out-of-date, installing anyway due to ${
-        force ? 'force flag' : `install type ${installType}`
-      }`
-    );
-  }
-
-  // get package info
-  const { paths, packageInfo } = await Registry.getRegistryPackage(pkgName, pkgVersion);
-
-  // try installing the package, if there was an error, call error handler and rethrow
   try {
-    return _installPackage({
-      savedObjectsClient,
-      esClient,
-      installedPkg,
-      paths,
-      packageInfo,
-      installType,
-      installSource: 'registry',
-    }).then((assets) => {
-      return { assets, status: 'installed', installType };
-    });
+    // get the currently installed package
+    const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
+    installType = getInstallType({ pkgVersion, installedPkg });
+
+    // get latest package version
+    const latestPackage = await Registry.fetchFindLatestPackage(pkgName);
+
+    // let the user install if using the force flag or needing to reinstall or install a previous version due to failed update
+    const installOutOfDateVersionOk =
+      force || ['reinstall', 'reupdate', 'rollback'].includes(installType);
+
+    // if the requested version is the same as installed version, check if we allow it based on
+    // current installed package status and force flag, if we don't allow it,
+    // just return the asset references from the existing installation
+    if (
+      installedPkg?.attributes.version === pkgVersion &&
+      installedPkg?.attributes.install_status === 'installed'
+    ) {
+      if (!force) {
+        logger.debug(`${pkgkey} is already installed, skipping installation`);
+        return {
+          assets: [
+            ...installedPkg.attributes.installed_es,
+            ...installedPkg.attributes.installed_kibana,
+          ],
+          status: 'already_installed',
+          installType,
+        };
+      }
+    }
+
+    // if the requested version is out-of-date of the latest package version, check if we allow it
+    // if we don't allow it, return an error
+    if (semverLt(pkgVersion, latestPackage.version)) {
+      if (!installOutOfDateVersionOk) {
+        throw new PackageOutdatedError(
+          `${pkgkey} is out-of-date and cannot be installed or updated`
+        );
+      }
+      logger.debug(
+        `${pkgkey} is out-of-date, installing anyway due to ${
+          force ? 'force flag' : `install type ${installType}`
+        }`
+      );
+    }
+
+    // get package info
+    const { paths, packageInfo } = await Registry.getRegistryPackage(pkgName, pkgVersion);
+
+    // try installing the package, if there was an error, call error handler and rethrow
+    try {
+      return _installPackage({
+        savedObjectsClient,
+        esClient,
+        installedPkg,
+        paths,
+        packageInfo,
+        installType,
+        installSource: 'registry',
+      }).then((assets) => {
+        return { assets, status: 'installed', installType };
+      });
+    } catch (e) {
+      await handleInstallPackageFailure({
+        savedObjectsClient,
+        error: e,
+        pkgName,
+        pkgVersion,
+        installedPkg,
+        esClient,
+      });
+      throw e;
+    }
   } catch (e) {
-    await handleInstallPackageFailure({
-      savedObjectsClient,
-      error: e,
-      pkgName,
-      pkgVersion,
-      installedPkg,
-      esClient,
-    });
-    // throw e;
     return {
       error: e,
       installType,
@@ -357,7 +365,7 @@ export async function installPackage(args: InstallPackageParams) {
       esClient,
       force,
     }).then(async (installResult) => {
-      if (skipPostInstall) {
+      if (skipPostInstall || installResult.error) {
         return installResult;
       }
       logger.debug(`install of ${pkgkey} finished, running post-install`);
