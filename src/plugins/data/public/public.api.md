@@ -2322,8 +2322,6 @@ export interface SearchError {
 // @public (undocumented)
 export class SearchInterceptor {
     constructor(deps: SearchInterceptorDeps);
-    // @internal
-    protected abortController: AbortController;
     // @internal (undocumented)
     protected application: CoreStart['application'];
     // (undocumented)
@@ -2334,22 +2332,12 @@ export class SearchInterceptor {
     // Warning: (ae-forgotten-export) The symbol "AbortError" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
-    protected handleSearchError(e: KibanaServerError | AbortError, timeoutSignal: AbortSignal, options?: ISearchOptions): Error;
+    protected handleSearchError(e: KibanaServerError | AbortError, options?: ISearchOptions, isTimeout?: boolean): Error;
     // @internal
     protected pendingCount$: BehaviorSubject<number>;
     // @internal (undocumented)
     protected runSearch(request: IKibanaSearchRequest, options?: ISearchOptions): Promise<IKibanaSearchResponse>;
     search(request: IKibanaSearchRequest, options?: ISearchOptions): Observable<IKibanaSearchResponse>;
-    // @internal (undocumented)
-    protected setupAbortSignal({ abortSignal, timeout, }: {
-        abortSignal?: AbortSignal;
-        timeout?: number;
-    }): {
-        timeoutSignal: AbortSignal;
-        combinedSignal: AbortSignal;
-        cleanup: () => void;
-        abort: () => void;
-    };
     // (undocumented)
     showError(e: Error): void;
     }

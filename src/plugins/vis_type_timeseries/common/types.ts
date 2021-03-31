@@ -33,6 +33,32 @@ export interface FetchedIndexPattern {
   indexPatternString: string | undefined;
 }
 
+export type TimeseriesVisData = SeriesData | TableData;
+
+interface TableData {
+  type: PANEL_TYPES.TABLE;
+  uiRestrictions: TimeseriesUIRestrictions;
+  series?: PanelData[];
+  pivot_label?: string;
+}
+
+// series data is not fully typed yet
+export type SeriesData = {
+  type: Exclude<PANEL_TYPES, PANEL_TYPES.TABLE>;
+  uiRestrictions: TimeseriesUIRestrictions;
+} & {
+  [key: string]: PanelSeries;
+};
+
+interface PanelSeries {
+  annotations: {
+    [key: string]: unknown[];
+  };
+  id: string;
+  series: PanelData[];
+  error?: unknown;
+}
+
 export interface PanelData {
   id: string;
   label: string;
@@ -42,26 +68,11 @@ export interface PanelData {
   isSplitByTerms: boolean;
 }
 
-// series data is not fully typed yet
-interface SeriesData {
-  [key: string]: {
-    annotations: {
-      [key: string]: unknown[];
-    };
-    id: string;
-    series: PanelData[];
-    error?: unknown;
-  };
-}
+export const isVisTableData = (data: TimeseriesVisData): data is TableData =>
+  data.type === PANEL_TYPES.TABLE;
 
-export type TimeseriesVisData = SeriesData & {
-  type: PANEL_TYPES;
-  uiRestrictions: TimeseriesUIRestrictions;
-  /**
-   * series array is responsible only for "table" vis type
-   */
-  series?: unknown[];
-};
+export const isVisSeriesData = (data: TimeseriesVisData): data is SeriesData =>
+  data.type !== PANEL_TYPES.TABLE;
 
 export interface SanitizedFieldType {
   name: string;
