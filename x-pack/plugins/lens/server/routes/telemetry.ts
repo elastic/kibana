@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import { errors } from '@elastic/elasticsearch';
 import { CoreSetup } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
@@ -84,11 +83,9 @@ export async function initLensUsageRoute(setup: CoreSetup<PluginStartContract>) 
           if (e.output.statusCode === 404) {
             return res.notFound();
           }
-          return res.internalError(e.output.message);
+          throw new Error(e.output.message);
         } else {
-          return res.internalError({
-            body: Boom.internal(e.message || e.name),
-          });
+          throw e;
         }
       }
     }

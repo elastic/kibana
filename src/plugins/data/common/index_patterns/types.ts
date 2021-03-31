@@ -10,15 +10,16 @@ import { ToastInputFields, ErrorToastOptions } from 'src/core/public/notificatio
 // eslint-disable-next-line
 import type { SavedObject } from 'src/core/server';
 import { IFieldType } from './fields';
+import { RUNTIME_FIELD_TYPES } from './constants';
 import { SerializedFieldFormat } from '../../../expressions/common';
 import { KBN_FIELD_TYPES, IndexPatternField, FieldFormat } from '..';
 
 export type FieldFormatMap = Record<string, SerializedFieldFormat>;
-const RUNTIME_FIELD_TYPES = ['keyword', 'long', 'double', 'date', 'ip', 'boolean'] as const;
-type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
+
+export type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
 export interface RuntimeField {
   type: RuntimeType;
-  script: {
+  script?: {
     source: string;
   };
 }

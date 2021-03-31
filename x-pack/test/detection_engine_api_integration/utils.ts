@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { KbnClient } from '@kbn/dev-utils';
-import { ApiResponse, Client } from '@elastic/elasticsearch';
+import { KbnClient } from '@kbn/test';
+import type { ApiResponse } from '@elastic/elasticsearch';
+import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { SuperTest } from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
 import { Context } from '@elastic/elasticsearch/lib/Transport';
@@ -226,7 +227,8 @@ export const getQuerySignalsRuleId = (ruleIds: string[]) => ({
  * created from that rule's regular id.
  * @param ruleIds The rule_id to search for signals
  */
-export const getQuerySignalsId = (ids: string[]) => ({
+export const getQuerySignalsId = (ids: string[], size = 10) => ({
+  size,
   query: {
     terms: {
       'signal.rule.id': ids,
@@ -382,7 +384,7 @@ export const deleteAllAlerts = async (
   );
 };
 
-export const downgradeImmutableRule = async (es: Client, ruleId: string): Promise<void> => {
+export const downgradeImmutableRule = async (es: KibanaClient, ruleId: string): Promise<void> => {
   return countDownES(async () => {
     return es.updateByQuery({
       index: '.kibana',
@@ -407,9 +409,10 @@ export const downgradeImmutableRule = async (es: Client, ruleId: string): Promis
  * Remove all timelines from the .kibana index
  * @param es The ElasticSearch handle
  */
-export const deleteAllTimelines = async (es: Client): Promise<void> => {
+export const deleteAllTimelines = async (es: KibanaClient): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
+    // @ts-expect-error @elastic/elasticsearch DeleteByQueryRequest doesn't accept q parameter
     q: 'type:siem-ui-timeline',
     wait_for_completion: true,
     refresh: true,
@@ -422,10 +425,11 @@ export const deleteAllTimelines = async (es: Client): Promise<void> => {
  * This will retry 20 times before giving up and hopefully still not interfere with other tests
  * @param es The ElasticSearch handle
  */
-export const deleteAllRulesStatuses = async (es: Client): Promise<void> => {
+export const deleteAllRulesStatuses = async (es: KibanaClient): Promise<void> => {
   return countDownES(async () => {
     return es.deleteByQuery({
       index: '.kibana',
+      // @ts-expect-error @elastic/elasticsearch DeleteByQueryRequest doesn't accept q parameter
       q: 'type:siem-detection-engine-rule-status',
       wait_for_completion: true,
       refresh: true,
@@ -1009,7 +1013,7 @@ export const waitForSignalsToBePresent = async (
   signalIds: string[]
 ): Promise<void> => {
   await waitFor(async () => {
-    const signalsOpen = await getSignalsByIds(supertest, signalIds);
+    const signalsOpen = await getSignalsByIds(supertest, signalIds, numberOfSignals);
     return signalsOpen.hits.hits.length >= numberOfSignals;
   }, 'waitForSignalsToBePresent');
 };
@@ -1043,7 +1047,8 @@ export const getSignalsByRuleIds = async (
  */
 export const getSignalsByIds = async (
   supertest: SuperTest<supertestAsPromised.Test>,
-  ids: string[]
+  ids: string[],
+  size?: number
 ): Promise<
   SearchResponse<{
     signal: Signal;
@@ -1053,7 +1058,7 @@ export const getSignalsByIds = async (
   const { body: signalsOpen }: { body: SearchResponse<{ signal: Signal }> } = await supertest
     .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
     .set('kbn-xsrf', 'true')
-    .send(getQuerySignalsId(ids))
+    .send(getQuerySignalsId(ids, size))
     .expect(200);
   return signalsOpen;
 };
@@ -1174,7 +1179,7 @@ export const getIndexNameFromLoad = (loadResponse: Record<string, unknown>): str
  * @param esClient elasticsearch {@link Client}
  * @param index name of the index to query
  */
-export const waitForIndexToPopulate = async (es: Client, index: string): Promise<void> => {
+export const waitForIndexToPopulate = async (es: KibanaClient, index: string): Promise<void> => {
   await waitFor(async () => {
     const response = await es.count<{ count: number }>({ index });
     return response.body.count > 0;

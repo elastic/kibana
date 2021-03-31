@@ -7,5 +7,5 @@
 
 export { counterRateOperation, CounterRateIndexPatternColumn } from './counter_rate';
 export { cumulativeSumOperation, CumulativeSumIndexPatternColumn } from './cumulative_sum';
-export { derivativeOperation, DerivativeIndexPatternColumn } from './derivative';
+export { derivativeOperation, DerivativeIndexPatternColumn } from './differences';
 export { movingAverageOperation, MovingAverageIndexPatternColumn } from './moving_average';

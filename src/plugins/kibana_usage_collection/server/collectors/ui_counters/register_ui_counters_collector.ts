@@ -52,12 +52,27 @@ export function registerUiCountersUsageCollector(usageCollection: UsageCollectio
       dailyEvents: {
         type: 'array',
         items: {
-          appName: { type: 'keyword' },
-          eventName: { type: 'keyword' },
-          lastUpdatedAt: { type: 'date' },
-          fromTimestamp: { type: 'date' },
-          counterType: { type: 'keyword' },
-          total: { type: 'integer' },
+          appName: {
+            type: 'keyword',
+            _meta: { description: 'Name of the app reporting ui counts.' },
+          },
+          eventName: {
+            type: 'keyword',
+            _meta: { description: 'Name of the event that happened.' },
+          },
+          lastUpdatedAt: {
+            type: 'date',
+            _meta: { description: 'Time at which the metric was last updated.' },
+          },
+          fromTimestamp: {
+            type: 'date',
+            _meta: { description: 'Time at which the metric was captured.' },
+          },
+          counterType: { type: 'keyword', _meta: { description: 'The type of counter used.' } },
+          total: {
+            type: 'integer',
+            _meta: { description: 'The total number of times the event happened.' },
+          },
         },
       },
     },

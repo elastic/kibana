@@ -26,7 +26,7 @@ describe('Field', function () {
     script: 'script',
     lang: 'lang',
     count: 1,
-    esTypes: ['text'],
+    esTypes: ['text'], // note, this will get replaced by the runtime field type
     aggregatable: true,
     filterable: true,
     searchable: true,
@@ -71,7 +71,7 @@ describe('Field', function () {
   });
 
   it('sets type field when _source field', () => {
-    const field = getField({ name: '_source' });
+    const field = getField({ name: '_source', runtimeField: undefined });
     expect(field.type).toEqual('_source');
   });
 

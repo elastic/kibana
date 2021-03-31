@@ -27,7 +27,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('fleet_agents_enroll', () => {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
-      await esArchiver.loadIfNeeded('fleet/agents');
+      await esArchiver.load('fleet/agents');
 
       const { body: apiKeyBody } = await esClient.security.createApiKey<typeof apiKey>({
         body: {
@@ -38,14 +38,14 @@ export default function (providerContext: FtrProviderContext) {
       const {
         body: { _source: enrollmentApiKeyDoc },
       } = await esClient.get({
-        index: '.kibana',
-        id: 'fleet-enrollment-api-keys:ed22ca17-e178-4cfe-8b02-54ea29fbd6d0',
+        index: '.fleet-enrollment-api-keys',
+        id: 'ed22ca17-e178-4cfe-8b02-54ea29fbd6d0',
       });
       // @ts-ignore
-      enrollmentApiKeyDoc['fleet-enrollment-api-keys'].api_key_id = apiKey.id;
+      enrollmentApiKeyDoc.api_key_id = apiKey.id;
       await esClient.update({
-        index: '.kibana',
-        id: 'fleet-enrollment-api-keys:ed22ca17-e178-4cfe-8b02-54ea29fbd6d0',
+        index: '.fleet-enrollment-api-keys',
+        id: 'ed22ca17-e178-4cfe-8b02-54ea29fbd6d0',
         refresh: true,
         body: {
           doc: enrollmentApiKeyDoc,

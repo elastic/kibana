@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { HttpStart } from 'src/core/public';
-import { ApiKey, ApiKeyToInvalidate } from '../../../common/model';
+import type { HttpStart } from 'src/core/public';
+
+import type { ApiKey, ApiKeyToInvalidate } from '../../../common/model';
 
 interface CheckPrivilegesResponse {
   areApiKeysEnabled: boolean;

@@ -425,12 +425,13 @@ def buildXpackPlugins() {
   runbld('./test/scripts/jenkins_xpack_build_plugins.sh', 'Build X-Pack Plugins')
 }
 
-def withTasks(Map params = [worker: [:]], Closure closure) {
+def withTasks(Map params = [:], Closure closure) {
   catchErrors {
-    def config = [name: 'ci-worker', size: 'xxl', ramDisk: true] + (params.worker ?: [:])
+    def config = [setupWork: {}, worker: [:], parallel: 24] + params
+    def workerConfig = [name: 'ci-worker', size: 'xxl', ramDisk: true] + config.worker
 
-    workers.ci(config) {
-      withCiTaskQueue(parallel: 24) {
+    workers.ci(workerConfig) {
+      withCiTaskQueue([parallel: config.parallel]) {
         parallel([
           docker: {
             retry(2) {
@@ -442,6 +443,8 @@ def withTasks(Map params = [worker: [:]], Closure closure) {
           ossPlugins: { buildOssPlugins() },
           xpackPlugins: { buildXpackPlugins() },
         ])
+
+        config.setupWork()
 
         catchErrors {
           closure()
@@ -460,6 +463,7 @@ def allCiTasks() {
         tasks.test()
         tasks.functionalOss()
         tasks.functionalXpack()
+        tasks.storybooksCi()
       }
     },
     jest: {

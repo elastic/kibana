@@ -26,7 +26,15 @@ jest.mock('../../../containers/kpis', () => ({
 }));
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 jest.mock('../../../../common/lib/kibana');
+jest.mock('@kbn/i18n/react', () => {
+  const originalModule = jest.requireActual('@kbn/i18n/react');
+  const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');
 
+  return {
+    ...originalModule,
+    FormattedRelative,
+  };
+});
 const mockUseTimelineKpiResponse = {
   processCount: 1,
   userCount: 1,

@@ -66,7 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('with average aggregation', async () => {
         const data = await renderTableForAggregation('Average');
-        expect(data).to.eql([['2.8653795982259327']]);
+        expect(data).to.eql([['2.865']]);
       });
 
       it('with median aggregation', async () => {
@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('with sum aggregation', async () => {
         const data = await renderTableForAggregation('Sum');
-        expect(data).to.eql([['10983']]);
+        expect(data).to.eql([['10,983']]);
       });
     });
   });

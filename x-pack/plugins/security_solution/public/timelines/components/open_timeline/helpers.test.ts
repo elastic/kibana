@@ -9,11 +9,7 @@ import { cloneDeep, getOr, omit } from 'lodash/fp';
 import { Dispatch } from 'redux';
 import ApolloClient from 'apollo-client';
 
-import {
-  mockTimelineResults,
-  mockTimelineResult,
-  mockTimelineModel,
-} from '../../../common/mock/timeline_results';
+import { mockTimelineResults, mockTimelineResult, mockTimelineModel } from '../../../common/mock';
 import { timelineDefaults } from '../../store/timeline/defaults';
 import { setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker } from '../../../common/store/inputs/actions';
 import {
@@ -37,7 +33,7 @@ import {
   formatTimelineResultToModel,
 } from './helpers';
 import { OpenTimelineResult, DispatchUpdateTimeline } from './types';
-import { KueryFilterQueryKind } from '../../../common/store/model';
+import { KueryFilterQueryKind } from '../../../common/store';
 import { Note } from '../../../common/lib/note';
 import moment from 'moment';
 import sinon from 'sinon';
@@ -293,7 +289,7 @@ describe('helpers', () => {
         deletedEventIds: [],
         eqlOptions: {
           eventCategoryField: 'event.category',
-          tiebreakerField: 'event.sequence',
+          tiebreakerField: '',
           timestampField: '@timestamp',
           query: '',
           size: 100,
@@ -403,7 +399,7 @@ describe('helpers', () => {
         deletedEventIds: [],
         eqlOptions: {
           eventCategoryField: 'event.category',
-          tiebreakerField: 'event.sequence',
+          tiebreakerField: '',
           timestampField: '@timestamp',
           query: '',
           size: 100,
@@ -513,7 +509,7 @@ describe('helpers', () => {
         deletedEventIds: [],
         eqlOptions: {
           eventCategoryField: 'event.category',
-          tiebreakerField: 'event.sequence',
+          tiebreakerField: '',
           timestampField: '@timestamp',
           query: '',
           size: 100,
@@ -621,7 +617,7 @@ describe('helpers', () => {
         deletedEventIds: [],
         eqlOptions: {
           eventCategoryField: 'event.category',
-          tiebreakerField: 'event.sequence',
+          tiebreakerField: '',
           timestampField: '@timestamp',
           query: '',
           size: 100,
@@ -767,7 +763,7 @@ describe('helpers', () => {
         deletedEventIds: [],
         eqlOptions: {
           eventCategoryField: 'event.category',
-          tiebreakerField: 'event.sequence',
+          tiebreakerField: '',
           timestampField: '@timestamp',
           query: '',
           size: 100,
@@ -902,7 +898,7 @@ describe('helpers', () => {
         deletedEventIds: [],
         eqlOptions: {
           eventCategoryField: 'event.category',
-          tiebreakerField: 'event.sequence',
+          tiebreakerField: '',
           timestampField: '@timestamp',
           query: '',
           size: 100,
@@ -1053,7 +1049,7 @@ describe('helpers', () => {
         deletedEventIds: [],
         eqlOptions: {
           eventCategoryField: 'event.category',
-          tiebreakerField: 'event.sequence',
+          tiebreakerField: '',
           timestampField: '@timestamp',
           query: '',
           size: 100,
@@ -1163,7 +1159,7 @@ describe('helpers', () => {
         deletedEventIds: [],
         eqlOptions: {
           eventCategoryField: 'event.category',
-          tiebreakerField: 'event.sequence',
+          tiebreakerField: '',
           timestampField: '@timestamp',
           query: '',
           size: 100,
@@ -1275,7 +1271,7 @@ describe('helpers', () => {
 
     describe('update a timeline', () => {
       const updateIsLoading = jest.fn();
-      const updateTimeline = jest.fn();
+      const updateTimeline = jest.fn().mockImplementation(() => jest.fn());
       const selectedTimeline = { ...mockSelectedTimeline };
       const apolloClient = {
         query: (jest.fn().mockResolvedValue(selectedTimeline) as unknown) as ApolloClient<{}>,
@@ -1316,6 +1312,7 @@ describe('helpers', () => {
           args.duplicate,
           args.timelineType
         );
+
         expect(updateTimeline).toBeCalledWith({
           timeline: {
             ...timeline,

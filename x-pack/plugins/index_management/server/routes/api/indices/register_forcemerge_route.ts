@@ -45,7 +45,7 @@ export function registerForcemergeRoute({ router, license, lib }: RouteDependenc
           });
         }
         // Case: default
-        return res.internalError({ body: e });
+        throw e;
       }
     })
   );

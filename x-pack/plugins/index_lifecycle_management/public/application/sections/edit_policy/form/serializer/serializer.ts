@@ -124,7 +124,12 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
       /**
        * HOT PHASE SEARCHABLE SNAPSHOT
        */
-      if (!updatedPolicy.phases.hot!.actions?.searchable_snapshot) {
+      if (updatedPolicy.phases.hot!.actions?.searchable_snapshot) {
+        hotPhaseActions.searchable_snapshot = {
+          ...hotPhaseActions.searchable_snapshot,
+          snapshot_repository: _meta.searchableSnapshot.repository,
+        };
+      } else {
         delete hotPhaseActions.searchable_snapshot;
       }
     }
@@ -234,11 +239,38 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
       /**
        * COLD PHASE SEARCHABLE SNAPSHOT
        */
-      if (!updatedPolicy.phases.cold?.actions?.searchable_snapshot) {
+      if (updatedPolicy.phases.cold?.actions?.searchable_snapshot) {
+        coldPhase.actions.searchable_snapshot = {
+          ...coldPhase.actions.searchable_snapshot,
+          snapshot_repository: _meta.searchableSnapshot.repository,
+        };
+      } else {
         delete coldPhase.actions.searchable_snapshot;
       }
     } else {
       delete draft.phases.cold;
+    }
+
+    /**
+     * FROZEN PHASE SERIALIZATION
+     */
+    if (_meta.frozen.enabled) {
+      draft.phases.frozen!.actions = draft.phases.frozen?.actions ?? {};
+      const frozenPhase = draft.phases.frozen!;
+
+      /**
+       * FROZEN PHASE SEARCHABLE SNAPSHOT
+       */
+      if (updatedPolicy.phases.frozen?.actions?.searchable_snapshot) {
+        frozenPhase.actions.searchable_snapshot = {
+          ...frozenPhase.actions.searchable_snapshot,
+          snapshot_repository: _meta.searchableSnapshot.repository,
+        };
+      } else {
+        delete frozenPhase.actions.searchable_snapshot;
+      }
+    } else {
+      delete draft.phases.frozen;
     }
 
     /**
@@ -254,7 +286,7 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
       deletePhase.actions.delete = deletePhase.actions.delete ?? {};
 
       /**
-       * DELETE PHASE SEARCHABLE SNAPSHOT
+       * DELETE PHASE MIN AGE
        */
       if (updatedPolicy.phases.delete?.min_age) {
         deletePhase.min_age = `${updatedPolicy.phases.delete!.min_age}${_meta.delete.minAgeUnit}`;

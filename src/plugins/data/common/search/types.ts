@@ -119,3 +119,12 @@ export interface ISearchOptions {
 
   indexPattern?: IndexPattern;
 }
+
+/**
+ * Same as `ISearchOptions`, but contains only serializable fields, which can
+ * be sent over the network.
+ */
+export type ISearchOptionsSerializable = Pick<
+  ISearchOptions,
+  'strategy' | 'legacyHitsTotal' | 'sessionId' | 'isStored' | 'isRestore'
+>;

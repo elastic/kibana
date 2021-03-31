@@ -296,7 +296,7 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
     }
 
     public async sizeUpEditor() {
-      const resizerPanel = await testSubjects.find('splitPanelResizer');
+      const resizerPanel = await testSubjects.find('euiResizableButton');
       // Drag panel 100 px left
       await browser.dragAndDrop({ location: resizerPanel }, { location: { x: -100, y: 0 } });
     }

@@ -14,7 +14,12 @@ import uuid from 'uuid/v4';
 import { multiPoint } from '@turf/helpers';
 import { FeatureCollection } from 'geojson';
 import { MapStoreState } from '../reducers/store';
-import { LAYER_STYLE_TYPE, LAYER_TYPE, SOURCE_DATA_REQUEST_ID } from '../../common/constants';
+import {
+  KBN_IS_CENTROID_FEATURE,
+  LAYER_STYLE_TYPE,
+  LAYER_TYPE,
+  SOURCE_DATA_REQUEST_ID,
+} from '../../common/constants';
 import {
   getDataFilters,
   getDataRequestDescriptor,
@@ -246,7 +251,10 @@ function endDataLoad(
       const layer = getLayerById(layerId, getState());
       const resultMeta: ResultMeta = {};
       if (layer && layer.getType() === LAYER_TYPE.VECTOR) {
-        resultMeta.featuresCount = features.length;
+        const featuresWithoutCentroids = features.filter((feature) => {
+          return feature.properties ? !feature.properties[KBN_IS_CENTROID_FEATURE] : true;
+        });
+        resultMeta.featuresCount = featuresWithoutCentroids.length;
       }
 
       eventHandlers.onDataLoadEnd({
@@ -299,7 +307,6 @@ function onDataLoadError(
     dispatch(cleanTooltipStateForLayer(layerId));
     dispatch({
       type: LAYER_DATA_LOAD_ERROR,
-      data: null,
       layerId,
       dataId,
       requestToken,

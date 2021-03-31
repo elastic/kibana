@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { API_BASE_PATH } from '../../../common/constants';
 import {
   ElasticsearchServiceStart,
   kibanaResponseFactory,
@@ -66,7 +67,7 @@ const mapAnyErrorToKibanaHttpResponse = (e: any) => {
         return kibanaResponseFactory.notFound({ body: e.message });
       case CannotCreateIndex:
       case ReindexTaskCannotBeDeleted:
-        return kibanaResponseFactory.internalError({ body: e.message });
+        throw e;
       case ReindexTaskFailed:
         // Bad data
         return kibanaResponseFactory.customError({ body: e.message, statusCode: 422 });
@@ -78,14 +79,14 @@ const mapAnyErrorToKibanaHttpResponse = (e: any) => {
       // nothing matched
     }
   }
-  return kibanaResponseFactory.internalError({ body: e });
+  throw e;
 };
 
 export function registerReindexIndicesRoutes(
   { credentialStore, router, licensing, log }: RouteDependencies,
   getWorker: () => ReindexWorker
 ) {
-  const BASE_PATH = '/api/upgrade_assistant/reindex';
+  const BASE_PATH = `${API_BASE_PATH}/reindex`;
 
   // Start reindex for an index
   router.post(

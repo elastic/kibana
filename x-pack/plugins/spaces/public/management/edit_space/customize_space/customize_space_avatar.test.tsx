@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-// @ts-ignore
 import { EuiColorPicker, EuiFieldText, EuiLink } from '@elastic/eui';
 import React from 'react';
+
 import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
+
 import { CustomizeSpaceAvatar } from './customize_space_avatar';
 
 const space = {

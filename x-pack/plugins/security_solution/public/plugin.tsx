@@ -65,19 +65,25 @@ import {
 import { SecurityAppStore } from './common/store/store';
 import { getCaseConnectorUI } from './cases/components/connectors';
 import { licenseService } from './common/hooks/use_license';
+import { SecuritySolutionUiConfigType } from './common/types';
+
 import { getLazyEndpointPolicyEditExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_edit_extension';
 import { LazyEndpointPolicyCreateExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_extension';
 import { getLazyEndpointPackageCustomExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_package_custom_extension';
+import { parseExperimentalConfigValue } from '../common/experimental_features';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private kibanaVersion: string;
+  private config: SecuritySolutionUiConfigType;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.config = this.initializerContext.config.get<SecuritySolutionUiConfigType>();
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
   private detectionsUpdater$ = new Subject<AppUpdater>();
   private hostsUpdater$ = new Subject<AppUpdater>();
   private networkUpdater$ = new Subject<AppUpdater>();
+  private caseUpdater$ = new Subject<AppUpdater>();
 
   private storage = new Storage(localStorage);
   private licensingSubscription: Subscription | null = null;
@@ -279,6 +285,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       euiIconType: APP_ICON_SOLUTION,
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_CASES_PATH,
+      updater$: this.caseUpdater$,
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { cases: subPlugin } = await this.subPlugins();
@@ -300,6 +307,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       euiIconType: APP_ICON_SOLUTION,
       category: DEFAULT_APP_CATEGORIES.security,
       appRoute: APP_MANAGEMENT_PATH,
+      meta: getSearchDeepLinksAndKeywords(SecurityPageName.administration),
       mount: async (params: AppMountParameters) => {
         const [coreStart, startPlugins] = await core.getStartServices();
         const { management: managementSubPlugin } = await this.subPlugins();
@@ -380,6 +388,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             currentLicense.type
           );
           registerSearchLinks(SecurityPageName.hosts, this.hostsUpdater$, currentLicense.type);
+          registerSearchLinks(SecurityPageName.case, this.caseUpdater$, currentLicense.type);
         }
       });
     }
@@ -516,6 +525,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             kibanaIndexPatterns,
             configIndexPatterns: configIndexPatterns.indicesExist,
             signalIndexName: signal.name,
+            enableExperimental: parseExperimentalConfigValue(this.config.enableExperimental || []),
           }
         ),
         {

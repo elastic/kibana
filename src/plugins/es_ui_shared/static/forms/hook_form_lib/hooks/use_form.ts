@@ -211,11 +211,12 @@ export function useForm<T extends FormData = FormData, I extends FormData = T>(
   // ----------------------------------
   const addField: FormHook<T, I>['__addField'] = useCallback(
     (field) => {
+      const fieldExists = fieldsRefs.current[field.path] !== undefined;
       fieldsRefs.current[field.path] = field;
 
       updateFormDataAt(field.path, field.value);
 
-      if (!field.isValidated) {
+      if (!fieldExists && !field.isValidated) {
         setIsValid(undefined);
 
         // When we submit the form (and set "isSubmitted" to "true"), we validate **all fields**.

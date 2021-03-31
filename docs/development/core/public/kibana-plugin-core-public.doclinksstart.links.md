@@ -87,7 +87,9 @@ readonly links: {
             readonly sum: string;
             readonly top_hits: string;
         };
-        readonly runtimeFields: string;
+        readonly runtimeFields: {
+            readonly mapping: string;
+        };
         readonly scriptedFields: {
             readonly scriptFields: string;
             readonly scriptAggs: string;
@@ -99,8 +101,9 @@ readonly links: {
             readonly luceneExpressions: string;
         };
         readonly indexPatterns: {
-            readonly loadingData: string;
             readonly introduction: string;
+            readonly fieldFormattersNumber: string;
+            readonly fieldFormattersString: string;
         };
         readonly addData: string;
         readonly kibana: string;
@@ -117,6 +120,7 @@ readonly links: {
         };
         readonly date: {
             readonly dateMath: string;
+            readonly dateMathIndexNames: string;
         };
         readonly management: Record<string, string>;
         readonly ml: Record<string, string>;
@@ -130,6 +134,7 @@ readonly links: {
             createApiKey: string;
             createPipeline: string;
             createTransformRequest: string;
+            cronExpressions: string;
             executeWatchActionModes: string;
             indexExists: string;
             openIndex: string;
@@ -137,6 +142,7 @@ readonly links: {
             painlessExecute: string;
             painlessExecuteAPIContexts: string;
             putComponentTemplateMetadata: string;
+            putSnapshotLifecyclePolicy: string;
             putWatch: string;
             updateTransform: string;
         }>;
@@ -158,5 +164,8 @@ readonly links: {
         }>;
         readonly watcher: Record<string, string>;
         readonly ccs: Record<string, string>;
+        readonly plugins: Record<string, string>;
+        readonly snapshotRestore: Record<string, string>;
+        readonly ingest: Record<string, string>;
     };
 ```

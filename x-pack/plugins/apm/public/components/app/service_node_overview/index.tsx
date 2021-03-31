@@ -35,10 +35,11 @@ interface ServiceNodeOverviewProps {
 }
 
 function ServiceNodeOverview({ serviceName }: ServiceNodeOverviewProps) {
-  const { uiFilters, urlParams } = useUrlParams();
-  const { start, end } = urlParams;
+  const {
+    urlParams: { kuery, start, end },
+  } = useUrlParams();
 
-  const { data: items = [] } = useFetcher(
+  const { data } = useFetcher(
     (callApmApi) => {
       if (!start || !end) {
         return undefined;
@@ -50,16 +51,17 @@ function ServiceNodeOverview({ serviceName }: ServiceNodeOverviewProps) {
             serviceName,
           },
           query: {
+            kuery,
             start,
             end,
-            uiFilters: JSON.stringify(uiFilters),
           },
         },
       });
     },
-    [serviceName, start, end, uiFilters]
+    [kuery, serviceName, start, end]
   );
 
+  const items = data?.serviceNodes ?? [];
   const columns: Array<ITableColumn<typeof items[0]>> = [
     {
       name: (

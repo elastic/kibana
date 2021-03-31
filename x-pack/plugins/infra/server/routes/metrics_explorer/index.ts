@@ -37,55 +37,49 @@ export const initMetricExplorerRoute = (libs: InfraBackendLibs) => {
       },
     },
     async (requestContext, request, response) => {
-      try {
-        const options = pipe(
-          metricsExplorerRequestBodyRT.decode(request.body),
-          fold(throwErrors(Boom.badRequest), identity)
-        );
+      const options = pipe(
+        metricsExplorerRequestBodyRT.decode(request.body),
+        fold(throwErrors(Boom.badRequest), identity)
+      );
 
-        const client = createSearchClient(requestContext, framework);
-        const interval = await findIntervalForMetrics(client, options);
+      const client = createSearchClient(requestContext, framework);
+      const interval = await findIntervalForMetrics(client, options);
 
-        const optionsWithInterval = options.forceInterval
-          ? options
-          : {
-              ...options,
-              timerange: {
-                ...options.timerange,
-                interval: interval ? `>=${interval}s` : options.timerange.interval,
-              },
-            };
+      const optionsWithInterval = options.forceInterval
+        ? options
+        : {
+            ...options,
+            timerange: {
+              ...options.timerange,
+              interval: interval ? `>=${interval}s` : options.timerange.interval,
+            },
+          };
 
-        const metricsApiOptions = convertRequestToMetricsAPIOptions(optionsWithInterval);
-        const metricsApiResponse = await query(client, metricsApiOptions);
-        const totalGroupings = await queryTotalGroupings(client, metricsApiOptions);
-        const hasGroupBy =
-          Array.isArray(metricsApiOptions.groupBy) && metricsApiOptions.groupBy.length > 0;
+      const metricsApiOptions = convertRequestToMetricsAPIOptions(optionsWithInterval);
+      const metricsApiResponse = await query(client, metricsApiOptions);
+      const totalGroupings = await queryTotalGroupings(client, metricsApiOptions);
+      const hasGroupBy =
+        Array.isArray(metricsApiOptions.groupBy) && metricsApiOptions.groupBy.length > 0;
 
-        const pageInfo: MetricsExplorerPageInfo = {
-          total: totalGroupings,
-          afterKey: null,
-        };
+      const pageInfo: MetricsExplorerPageInfo = {
+        total: totalGroupings,
+        afterKey: null,
+      };
 
-        if (metricsApiResponse.info.afterKey) {
-          pageInfo.afterKey = metricsApiResponse.info.afterKey;
-        }
-
-        // If we have a groupBy but there are ZERO groupings returned then we need to
-        // return an empty array. Otherwise we transform the series to match the current schema.
-        const series =
-          hasGroupBy && totalGroupings === 0
-            ? []
-            : metricsApiResponse.series.map(transformSeries(hasGroupBy));
-
-        return response.ok({
-          body: metricsExplorerResponseRT.encode({ series, pageInfo }),
-        });
-      } catch (error) {
-        return response.internalError({
-          body: error.message,
-        });
+      if (metricsApiResponse.info.afterKey) {
+        pageInfo.afterKey = metricsApiResponse.info.afterKey;
       }
+
+      // If we have a groupBy but there are ZERO groupings returned then we need to
+      // return an empty array. Otherwise we transform the series to match the current schema.
+      const series =
+        hasGroupBy && totalGroupings === 0
+          ? []
+          : metricsApiResponse.series.map(transformSeries(hasGroupBy));
+
+      return response.ok({
+        body: metricsExplorerResponseRT.encode({ series, pageInfo }),
+      });
     }
   );
 };

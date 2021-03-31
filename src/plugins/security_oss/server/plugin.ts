@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+
 import type {
   Capabilities,
   CoreSetup,
@@ -13,11 +16,11 @@ import type {
   Logger,
   Plugin,
   PluginInitializerContext,
-} from 'kibana/server';
-import { BehaviorSubject, Observable } from 'rxjs';
+} from 'src/core/server';
+
 import { createClusterDataCheck } from './check_cluster_data';
-import { ConfigType } from './config';
-import { setupAppStateRoute, setupAnonymousAccessCapabilitiesRoute } from './routes';
+import type { ConfigType } from './config';
+import { setupAnonymousAccessCapabilitiesRoute, setupAppStateRoute } from './routes';
 
 export interface SecurityOssPluginSetup {
   /**

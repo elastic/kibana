@@ -27,7 +27,7 @@ export const SourcesTable: React.FC<SourcesTableProps> = ({
   if (onSearchableToggle) headerItems.push('Searchable');
 
   return (
-    <EuiTable className="table table--emphasized" responsive={false}>
+    <EuiTable responsive={false}>
       <TableHeader extraCell headerItems={headerItems} />
       <EuiTableBody>
         {sources.map((source) => (

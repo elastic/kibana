@@ -7,7 +7,9 @@
 
 # Local Cache Settings
 ## Avoid cache results from being corrupt when changing source during build
-common --experimental_guard_against_concurrent_changes
+build --experimental_guard_against_concurrent_changes
+run --experimental_guard_against_concurrent_changes
+test --experimental_guard_against_concurrent_changes
 
 ## Cache action outputs on disk so they persist across output_base and bazel shutdown (eg. changing branches)
 build --disk_cache=~/.bazel-cache/disk-cache

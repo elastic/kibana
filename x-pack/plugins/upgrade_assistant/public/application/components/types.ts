@@ -8,14 +8,15 @@
 import React from 'react';
 
 import { EnrichedDeprecationInfo, UpgradeAssistantStatus } from '../../../common/types';
+import { ResponseError } from '../lib/api';
 
 export interface UpgradeAssistantTabProps {
   alertBanner?: React.ReactNode;
-  checkupData?: UpgradeAssistantStatus;
+  checkupData?: UpgradeAssistantStatus | null;
   deprecations?: EnrichedDeprecationInfo[];
-  refreshCheckupData: () => Promise<void>;
-  loadingError?: Error;
-  loadingState: LoadingState;
+  refreshCheckupData: () => void;
+  loadingError: ResponseError | null;
+  isLoading: boolean;
   setSelectedTabIndex: (tabIndex: number) => void;
 }
 

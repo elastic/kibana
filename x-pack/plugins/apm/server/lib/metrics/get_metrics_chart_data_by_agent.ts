@@ -16,12 +16,14 @@ export interface MetricsChartsByAgentAPIResponse {
 
 export async function getMetricsChartDataByAgent({
   environment,
+  kuery,
   setup,
   serviceName,
   serviceNodeName,
   agentName,
 }: {
   environment?: string;
+  kuery?: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
   serviceNodeName?: string;
@@ -31,6 +33,7 @@ export async function getMetricsChartDataByAgent({
     case 'java': {
       return getJavaMetricsCharts({
         environment,
+        kuery,
         setup,
         serviceName,
         serviceNodeName,
@@ -38,7 +41,12 @@ export async function getMetricsChartDataByAgent({
     }
 
     default: {
-      return getDefaultMetricsCharts({ environment, setup, serviceName });
+      return getDefaultMetricsCharts({
+        environment,
+        kuery,
+        setup,
+        serviceName,
+      });
     }
   }
 }

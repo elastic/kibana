@@ -5,37 +5,45 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
 import {
-  EuiFlyout,
-  EuiIcon,
-  EuiFlyoutHeader,
-  EuiTitle,
-  EuiText,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiLoadingSpinner,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
   EuiButton,
   EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiHorizontalRule,
+  EuiIcon,
+  EuiLoadingSpinner,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
+import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { ToastsStart } from 'src/core/public';
+import type { ToastsStart } from 'src/core/public';
 import type {
   ShareToSpaceFlyoutProps,
   ShareToSpaceSavedObjectTarget,
 } from 'src/plugins/spaces_oss/public';
+
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../../common/constants';
-import { SpacesManager } from '../../spaces_manager';
-import { ShareToSpaceTarget } from '../../types';
-import { ShareToSpaceForm } from './share_to_space_form';
-import { ShareOptions } from '../types';
-import { CopySavedObjectsToSpaceFlyout } from '../../copy_saved_objects_to_space/components';
+import { getCopyToSpaceFlyoutComponent } from '../../copy_saved_objects_to_space';
 import { useSpaces } from '../../spaces_context';
+import type { SpacesManager } from '../../spaces_manager';
+import type { ShareToSpaceTarget } from '../../types';
+import type { ShareOptions } from '../types';
 import { DEFAULT_OBJECT_NOUN } from './constants';
+import { ShareToSpaceForm } from './share_to_space_form';
+
+// No need to wrap LazyCopyToSpaceFlyout in an error boundary, because the ShareToSpaceFlyoutInternal component itself is only ever used in
+// a lazy-loaded fashion with an error boundary.
+const LazyCopyToSpaceFlyout = lazy(() =>
+  getCopyToSpaceFlyoutComponent().then((component) => ({ default: component }))
+);
 
 const ALL_SPACES_TARGET = i18n.translate('xpack.spaces.shareToSpace.allSpacesTarget', {
   defaultMessage: 'all',
@@ -269,12 +277,9 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
 
   if (showMakeCopy) {
     return (
-      <CopySavedObjectsToSpaceFlyout
-        onClose={onClose}
-        savedObjectTarget={savedObjectTarget}
-        spacesManager={spacesManager}
-        toastNotifications={toastNotifications}
-      />
+      <Suspense fallback={<EuiLoadingSpinner />}>
+        <LazyCopyToSpaceFlyout onClose={onClose} savedObjectTarget={savedObjectTarget} />
+      </Suspense>
     );
   }
 

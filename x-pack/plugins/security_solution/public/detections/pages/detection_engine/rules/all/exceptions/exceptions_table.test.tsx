@@ -20,7 +20,15 @@ import { useAllExceptionLists } from './use_all_exception_lists';
 jest.mock('../../../../../../common/lib/kibana');
 jest.mock('./use_all_exception_lists');
 jest.mock('../../../../../../shared_imports');
+jest.mock('@kbn/i18n/react', () => {
+  const originalModule = jest.requireActual('@kbn/i18n/react');
+  const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');
 
+  return {
+    ...originalModule,
+    FormattedRelative,
+  };
+});
 describe('ExceptionListsTable', () => {
   const exceptionList1 = getExceptionListSchemaMock();
   const exceptionList2 = { ...getExceptionListSchemaMock(), list_id: 'not_endpoint_list', id: '2' };

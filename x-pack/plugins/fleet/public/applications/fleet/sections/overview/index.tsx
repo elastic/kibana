@@ -17,9 +17,11 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+
 import { WithHeaderLayout } from '../../layouts';
 import { useGetAgentPolicies, useBreadcrumbs } from '../../hooks';
 import { AgentEnrollmentFlyout } from '../agents/components';
+
 import { OverviewAgentSection } from './components/agent_section';
 import { OverviewPolicySection } from './components/agent_policy_section';
 import { OverviewIntegrationSection } from './components/integration_section';

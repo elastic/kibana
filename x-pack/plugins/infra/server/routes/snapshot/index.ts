@@ -31,29 +31,29 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
       },
     },
     async (requestContext, request, response) => {
-      try {
-        const snapshotRequest = pipe(
-          SnapshotRequestRT.decode(request.body),
-          fold(throwErrors(Boom.badRequest), identity)
-        );
+      const snapshotRequest = pipe(
+        SnapshotRequestRT.decode(request.body),
+        fold(throwErrors(Boom.badRequest), identity)
+      );
 
-        const source = await libs.sources.getSourceConfiguration(
-          requestContext.core.savedObjects.client,
-          snapshotRequest.sourceId
-        );
+      const source = await libs.sources.getSourceConfiguration(
+        requestContext.core.savedObjects.client,
+        snapshotRequest.sourceId
+      );
 
-        UsageCollector.countNode(snapshotRequest.nodeType);
-        const client = createSearchClient(requestContext, framework);
-        const snapshotResponse = await getNodes(client, snapshotRequest, source);
+      const logQueryFields = await libs.getLogQueryFields(
+        snapshotRequest.sourceId,
+        requestContext.core.savedObjects.client
+      );
 
-        return response.ok({
-          body: SnapshotNodeResponseRT.encode(snapshotResponse),
-        });
-      } catch (error) {
-        return response.internalError({
-          body: error.message,
-        });
-      }
+      UsageCollector.countNode(snapshotRequest.nodeType);
+      const client = createSearchClient(requestContext, framework);
+
+      const snapshotResponse = await getNodes(client, snapshotRequest, source, logQueryFields);
+
+      return response.ok({
+        body: SnapshotNodeResponseRT.encode(snapshotResponse),
+      });
     }
   );
 };

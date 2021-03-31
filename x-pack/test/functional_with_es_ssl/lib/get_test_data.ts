@@ -30,7 +30,7 @@ export function getTestAlertData(overwrites = {}) {
 export function getTestActionData(overwrites = {}) {
   return {
     name: `slack-${Date.now()}`,
-    actionTypeId: '.slack',
+    connector_type_id: '.slack',
     config: {},
     secrets: {
       webhookUrl: 'https://test',

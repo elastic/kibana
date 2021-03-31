@@ -18,7 +18,7 @@ import {
 } from '@kbn/dev-utils';
 import * as Rx from 'rxjs';
 import { ignoreElements } from 'rxjs/operators';
-import { runOptimizer, OptimizerConfig, logOptimizerState } from '@kbn/optimizer';
+import { runOptimizer, OptimizerConfig, logOptimizerState, OptimizerUpdate } from '@kbn/optimizer';
 
 export interface Options {
   enabled: boolean;
@@ -37,6 +37,7 @@ export interface Options {
 export class Optimizer {
   public readonly run$: Rx.Observable<void>;
   private readonly ready$ = new Rx.ReplaySubject<boolean>(1);
+  private readonly phase$ = new Rx.ReplaySubject<OptimizerUpdate['state']['phase']>(1);
 
   constructor(options: Options) {
     if (!options.enabled) {
@@ -105,10 +106,15 @@ export class Optimizer {
     this.run$ = runOptimizer(config).pipe(
       logOptimizerState(log, config),
       tap(({ state }) => {
+        this.phase$.next(state.phase);
         this.ready$.next(state.phase === 'success' || state.phase === 'issue');
       }),
       ignoreElements()
     );
+  }
+
+  getPhase$() {
+    return this.phase$.asObservable();
   }
 
   isReady$() {

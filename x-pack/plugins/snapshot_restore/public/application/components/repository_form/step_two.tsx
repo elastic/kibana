@@ -20,9 +20,10 @@ import {
 import { Repository } from '../../../../common/types';
 import { REPOSITORY_TYPES } from '../../../../common/constants';
 import { RepositoryValidation } from '../../services/validation';
-import { documentationLinksService } from '../../services/documentation';
 import { TypeSettings } from './type_settings';
 import { textService } from '../../services/text';
+import { useCore } from '../../app_context';
+import { getRepositoryTypeDocUrl } from '../../lib/type_to_doc_url';
 
 interface Props {
   repository: Repository;
@@ -47,6 +48,7 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
   saveError,
   onBack,
 }) => {
+  const { docLinks } = useCore();
   const hasValidationErrors: boolean = !validation.isValid;
   const {
     name,
@@ -76,7 +78,7 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
           <EuiButtonEmpty
             size="s"
             flush="right"
-            href={documentationLinksService.getRepositoryTypeDocUrl(typeForDocs)}
+            href={getRepositoryTypeDocUrl(docLinks, typeForDocs)}
             target="_blank"
             iconType="help"
           >

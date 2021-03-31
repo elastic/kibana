@@ -17,13 +17,21 @@
 // If the script exits with non-zero code, it's considered as a failure
 // and the output will be discarded.
 
-(async () => {
-  const execa = require('execa');
+(() => {
+  const cp = require('child_process');
   const os = require('os');
 
-  async function runCmd(cmd, args) {
+  function runCmd(cmd, args) {
     try {
-      return await execa(cmd, args);
+      const spawnResult = cp.spawnSync(cmd, args);
+      const exitCode = spawnResult.status !== null ? spawnResult.status : 1;
+      const stdoutStr = spawnResult.stdout.toString();
+      const stdout = stdoutStr ? stdoutStr.trim() : null;
+
+      return {
+        exitCode,
+        stdout,
+      };
     } catch (e) {
       return { exitCode: 1 };
     }
@@ -31,50 +39,43 @@
 
   // Git repo
   const kbnGitOriginName = process.env.KBN_GIT_ORIGIN_NAME || 'origin';
-  const repoUrlCmdResult = await runCmd('git', [
-    'config',
-    '--get',
-    `remote.${kbnGitOriginName}.url`,
-  ]);
+  const repoUrlCmdResult = runCmd('git', ['config', '--get', `remote.${kbnGitOriginName}.url`]);
   if (repoUrlCmdResult.exitCode === 0) {
     // Only output REPO_URL when found it
     console.log(`REPO_URL ${repoUrlCmdResult.stdout}`);
   }
 
   // Commit SHA
-  const commitSHACmdResult = await runCmd('git', ['rev-parse', 'HEAD']);
-  if (commitSHACmdResult.exitCode !== 0) {
-    process.exit(1);
-  }
-  console.log(`COMMIT_SHA ${commitSHACmdResult.stdout}`);
+  const commitSHACmdResult = runCmd('git', ['rev-parse', 'HEAD']);
+  if (commitSHACmdResult.exitCode === 0) {
+    console.log(`COMMIT_SHA ${commitSHACmdResult.stdout}`);
 
-  // Git branch
-  const gitBranchCmdResult = await runCmd('git', ['rev-parse', '--abbrev-ref', 'HEAD']);
-  if (gitBranchCmdResult.exitCode !== 0) {
-    process.exit(1);
-  }
-  console.log(`GIT_BRANCH ${gitBranchCmdResult.stdout}`);
+    // Branch
+    const gitBranchCmdResult = runCmd('git', ['rev-parse', '--abbrev-ref', 'HEAD']);
+    if (gitBranchCmdResult.exitCode === 0) {
+      console.log(`GIT_BRANCH ${gitBranchCmdResult.stdout}`);
+    }
 
-  // Tree status
-  const treeStatusCmdResult = await runCmd('git', ['diff-index', '--quiet', 'HEAD', '--']);
-  const treeStatusVarStr = 'GIT_TREE_STATUS';
-  if (treeStatusCmdResult.exitCode === 0) {
-    console.log(`${treeStatusVarStr} Clean`);
-  } else {
-    console.log(`${treeStatusVarStr} Modified`);
+    // Tree status
+    const treeStatusCmdResult = runCmd('git', ['diff-index', '--quiet', 'HEAD', '--']);
+    const treeStatusVarStr = 'GIT_TREE_STATUS';
+    if (treeStatusCmdResult.exitCode === 0) {
+      console.log(`${treeStatusVarStr} Clean`);
+    } else {
+      console.log(`${treeStatusVarStr} Modified`);
+    }
   }
 
   // Host
   if (process.env.CI) {
-    const hostCmdResult = await runCmd('hostname');
+    const hostCmdResult = runCmd('hostname');
     const hostStr = hostCmdResult.stdout.split('-').slice(0, -1).join('-');
     const coresStr = os.cpus().filter((cpu, index) => {
       return !cpu.model.includes('Intel') || index % 2 === 1;
     }).length;
 
-    if (hostCmdResult.exitCode !== 0) {
-      process.exit(1);
+    if (hostCmdResult.exitCode === 0) {
+      console.log(`HOST ${hostStr}-${coresStr}`);
     }
-    console.log(`HOST ${hostStr}-${coresStr}`);
   }
 })();

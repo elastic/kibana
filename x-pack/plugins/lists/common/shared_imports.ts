@@ -12,6 +12,8 @@ export {
   DefaultStringArray,
   DefaultVersionNumber,
   DefaultVersionNumberDecoded,
+  addIdToItem,
+  removeIdFromItem,
   exactCheck,
   getPaths,
   foldLeftRight,

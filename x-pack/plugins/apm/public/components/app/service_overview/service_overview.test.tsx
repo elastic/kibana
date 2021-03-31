@@ -82,9 +82,8 @@ describe('ServiceOverview', () => {
 
     /* eslint-disable @typescript-eslint/naming-convention */
     const calls = {
-      'GET /api/apm/services/{serviceName}/error_groups': {
+      'GET /api/apm/services/{serviceName}/error_groups/primary_statistics': {
         error_groups: [],
-        total_error_groups: 0,
       },
       'GET /api/apm/services/{serviceName}/transactions/groups/primary_statistics': {
         transactionGroups: [],
@@ -92,7 +91,7 @@ describe('ServiceOverview', () => {
         isAggregationAccurate: true,
       },
       'GET /api/apm/services/{serviceName}/dependencies': [],
-      'GET /api/apm/services/{serviceName}/service_overview_instances': [],
+      'GET /api/apm/services/{serviceName}/service_overview_instances/primary_statistics': [],
     };
     /* eslint-enable @typescript-eslint/naming-convention */
 

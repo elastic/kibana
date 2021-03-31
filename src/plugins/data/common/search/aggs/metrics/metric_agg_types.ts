@@ -8,6 +8,7 @@
 
 export enum METRIC_TYPES {
   AVG = 'avg',
+  FILTERED_METRIC = 'filtered_metric',
   CARDINALITY = 'cardinality',
   AVG_BUCKET = 'avg_bucket',
   MAX_BUCKET = 'max_bucket',

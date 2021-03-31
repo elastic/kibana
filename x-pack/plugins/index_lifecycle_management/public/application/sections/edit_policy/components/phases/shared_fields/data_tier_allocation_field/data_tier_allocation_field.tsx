@@ -14,9 +14,7 @@ import { useKibana, useFormData } from '../../../../../../../shared_imports';
 
 import { PhaseWithAllocation } from '../../../../../../../../common/types';
 
-import { getAvailableNodeRoleForPhase } from '../../../../../../lib/data_tiers';
-
-import { isNodeRoleFirstPreference } from '../../../../../../lib';
+import { getAvailableNodeRoleForPhase, isNodeRoleFirstPreference } from '../../../../../../lib';
 
 import { useLoadNodes } from '../../../../../../services/api';
 
@@ -25,6 +23,7 @@ import { DataTierAllocationType } from '../../../../types';
 import {
   DataTierAllocation,
   DefaultAllocationNotice,
+  DefaultAllocationWarning,
   NoNodeAttributesWarning,
   CloudDataTierCallout,
   LoadingError,
@@ -59,36 +58,40 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({ phase, descr
 
   const { nodesByRoles, nodesByAttributes, isUsingDeprecatedDataRoleConfig } = data!;
 
-  const hasDataNodeRoles = Object.keys(nodesByRoles).some((nodeRole) =>
-    // match any of the "data_" roles, including data_content.
-    nodeRole.trim().startsWith('data_')
-  );
   const hasNodeAttrs = Boolean(Object.keys(nodesByAttributes ?? {}).length);
   const isCloudEnabled = cloud?.isCloudEnabled ?? false;
+  const cloudDeploymentUrl = cloud?.cloudDeploymentUrl;
 
   const renderNotice = () => {
     switch (allocationType) {
       case 'node_roles':
-        if (isCloudEnabled && phase === 'cold') {
-          const isUsingNodeRolesAllocation = !isUsingDeprecatedDataRoleConfig && hasDataNodeRoles;
-          const hasNoNodesWithNodeRole = !nodesByRoles.data_cold?.length;
-
-          if (isUsingNodeRolesAllocation && hasNoNodesWithNodeRole) {
-            // Tell cloud users they can deploy nodes on cloud.
-            return (
-              <>
-                <EuiSpacer size="s" />
-                <CloudDataTierCallout />
-              </>
-            );
-          }
+        /**
+         * On cloud most users should be using autoscaling which will provision tiers as they are needed. We do not surface any
+         * of the notices below.
+         */
+        if (isCloudEnabled) {
+          return null;
+        }
+        /**
+         * Node role allocation moves data in a phase to a corresponding tier of the same name. To prevent policy execution from getting
+         * stuck ILM allocation will fall back to a previous tier if possible. We show the WARNING below to inform a user when even
+         * this fallback will not succeed.
+         */
+        const allocationNodeRole = getAvailableNodeRoleForPhase(phase, nodesByRoles);
+        if (allocationNodeRole === 'none') {
+          return (
+            <>
+              <EuiSpacer size="s" />
+              <DefaultAllocationWarning phase={phase} />
+            </>
+          );
         }
 
-        const allocationNodeRole = getAvailableNodeRoleForPhase(phase, nodesByRoles);
-        if (
-          allocationNodeRole === 'none' ||
-          !isNodeRoleFirstPreference(phase, allocationNodeRole)
-        ) {
+        /**
+         * If we are able to fallback to a data tier that does not map to this phase, we show a notice informing the user that their
+         * data will not be assigned to a corresponding tier.
+         */
+        if (!isNodeRoleFirstPreference(phase, allocationNodeRole)) {
           return (
             <>
               <EuiSpacer size="s" />
@@ -103,6 +106,19 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({ phase, descr
             <>
               <EuiSpacer size="s" />
               <NoNodeAttributesWarning phase={phase} />
+            </>
+          );
+        }
+        /**
+         * Special cloud case: when deprecated data role configuration is in use, it means that this deployment is not using
+         * the new node role based allocation. We drive users to the cloud console to migrate to node role based allocation
+         * in that case.
+         */
+        if (isCloudEnabled && isUsingDeprecatedDataRoleConfig) {
+          return (
+            <>
+              <EuiSpacer size="s" />
+              <CloudDataTierCallout linkToCloudDeployment={cloudDeploymentUrl} />
             </>
           );
         }
@@ -141,9 +157,7 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({ phase, descr
           hasNodeAttributes={hasNodeAttrs}
           phase={phase}
           nodes={nodesByAttributes}
-          disableDataTierOption={Boolean(
-            isCloudEnabled && !hasDataNodeRoles && isUsingDeprecatedDataRoleConfig
-          )}
+          disableDataTierOption={Boolean(isCloudEnabled && isUsingDeprecatedDataRoleConfig)}
           isLoading={isLoading}
         />
 

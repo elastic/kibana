@@ -136,8 +136,7 @@ export function createInstallRoute(
           (counts as any)[index] = count;
         } catch (err) {
           const errMsg = `sample_data install errors while loading data. Error: ${err}`;
-          logger.warn(errMsg);
-          return res.internalError({ body: errMsg });
+          throw new Error(errMsg);
         }
       }
 
@@ -157,8 +156,7 @@ export function createInstallRoute(
         );
       } catch (err) {
         const errMsg = `bulkCreate failed, error: ${err.message}`;
-        logger.warn(errMsg);
-        return res.internalError({ body: errMsg });
+        throw new Error(errMsg);
       }
       const errors = createResults.saved_objects.filter((savedObjectCreateResult) => {
         return Boolean(savedObjectCreateResult.error);

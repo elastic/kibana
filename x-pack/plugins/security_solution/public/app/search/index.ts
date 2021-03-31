@@ -123,7 +123,15 @@ const securityDeepLinks: SecurityDeepLinks = {
     base: [],
   },
   case: {
-    base: [],
+    base: [
+      {
+        id: 'create',
+        title: i18n.translate('xpack.securitySolution.search.cases.create', {
+          defaultMessage: 'Create New Case',
+        }),
+        path: '/create',
+      },
+    ],
     premium: [
       {
         id: 'configure',

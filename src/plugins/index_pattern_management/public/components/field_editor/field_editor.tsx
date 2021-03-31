@@ -487,7 +487,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
   renderFormat() {
     const { spec, fieldTypeFormats, fieldFormatId, fieldFormatParams, format } = this.state;
-    const { indexPatternManagementStart } = this.context.services;
+    const { fieldFormatEditors } = this.context.services;
     const defaultFormat = (fieldTypeFormats[0] as InitialFieldTypeFormat).defaultFieldFormat.title;
 
     const label = defaultFormat ? (
@@ -531,7 +531,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
             fieldFormat={format}
             fieldFormatId={fieldFormatId}
             fieldFormatParams={fieldFormatParams || {}}
-            fieldFormatEditors={indexPatternManagementStart.fieldFormatEditors}
+            fieldFormatEditors={fieldFormatEditors}
             onChange={this.onFormatParamsChange}
             onError={this.onFormatParamsError}
           />

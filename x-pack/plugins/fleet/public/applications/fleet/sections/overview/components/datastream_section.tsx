@@ -14,10 +14,12 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
-import { OverviewPanel } from './overview_panel';
-import { OverviewStats } from './overview_stats';
+
 import { useLink, useGetDataStreams, useStartServices } from '../../../hooks';
 import { Loading } from '../../agents/components';
+
+import { OverviewPanel } from './overview_panel';
+import { OverviewStats } from './overview_stats';
 
 export const OverviewDatastreamSection: React.FC = () => {
   const { getHref } = useLink();
@@ -45,7 +47,7 @@ export const OverviewDatastreamSection: React.FC = () => {
   }
 
   return (
-    <EuiFlexItem component="section">
+    <EuiFlexItem component="section" data-test-subj="fleet-datastream-section">
       <OverviewPanel
         title={i18n.translate('xpack.fleet.overviewPageDataStreamsPanelTitle', {
           defaultMessage: 'Data streams',

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { HttpStart } from 'src/core/public';
-import { BuiltinESPrivileges, RawKibanaPrivileges } from '../../../common/model';
+import type { HttpStart } from 'src/core/public';
+
+import type { BuiltinESPrivileges, RawKibanaPrivileges } from '../../../common/model';
 
 export class PrivilegesAPIClient {
   constructor(private readonly http: HttpStart) {}

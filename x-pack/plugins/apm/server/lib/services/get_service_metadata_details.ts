@@ -6,7 +6,6 @@
  */
 
 import { ProcessorEvent } from '../../../common/processor_event';
-import { SortOptions } from '../../../../../typings/elasticsearch';
 import {
   AGENT,
   CLOUD,
@@ -21,7 +20,7 @@ import {
   SERVICE_VERSION,
 } from '../../../common/elasticsearch_fieldnames';
 import { ContainerType } from '../../../common/service_metadata';
-import { rangeQuery } from '../../../common/utils/queries';
+import { rangeQuery } from '../../../server/utils/queries';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
@@ -96,7 +95,7 @@ export function getServiceMetadataDetails({
             terms: {
               field: SERVICE_VERSION,
               size: 10,
-              order: { _key: 'desc' } as SortOptions,
+              order: { _key: 'desc' as const },
             },
           },
           availabilityZones: {

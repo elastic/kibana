@@ -8,7 +8,8 @@
 import { sortBy, take } from 'lodash';
 import moment from 'moment';
 import { Unionize } from 'utility-types';
-import { AggregationOptionsByType } from '../../../../../typings/elasticsearch';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
+import { AggregationOptionsByType } from '../../../../../../typings/elasticsearch';
 import { PromiseReturnType } from '../../../../observability/typings/common';
 import {
   SERVICE_NAME,
@@ -28,6 +29,7 @@ import {
 
 interface TopTransactionOptions {
   environment?: string;
+  kuery?: string;
   type: 'top_transactions';
   serviceName: string;
   transactionType: string;
@@ -37,6 +39,7 @@ interface TopTransactionOptions {
 
 interface TopTraceOptions {
   environment?: string;
+  kuery?: string;
   type: 'top_traces';
   transactionName?: string;
   searchAggregatedTransactions: boolean;
@@ -130,14 +133,14 @@ export function transactionGroupsFetcher(
             ...(isTopTraces
               ? {
                   composite: {
-                    sources: [
+                    sources: asMutableArray([
                       { [SERVICE_NAME]: { terms: { field: SERVICE_NAME } } },
                       {
                         [TRANSACTION_NAME]: {
                           terms: { field: TRANSACTION_NAME },
                         },
                       },
-                    ],
+                    ] as const),
                     size,
                   },
                 }

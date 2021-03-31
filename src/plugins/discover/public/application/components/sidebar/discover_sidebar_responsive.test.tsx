@@ -137,9 +137,7 @@ describe('discover responsive sidebar', function () {
   });
   it('renders sidebar with unmapped fields config', function () {
     const unmappedFieldsConfig = {
-      onChangeUnmappedFields: jest.fn(),
       showUnmappedFields: false,
-      showUnmappedFieldsDefaultValue: false,
     };
     const componentProps = { ...props, unmappedFieldsConfig };
     const component = mountWithIntl(<DiscoverSidebarResponsive {...componentProps} />);

@@ -31,8 +31,19 @@ export function analyzeWithAxe(context, options, callback) {
               selector: '[data-test-subj="comboBoxSearchInput"] *',
             },
             {
+              // EUI bug: https://github.com/elastic/eui/issues/4474
               id: 'aria-required-parent',
-              selector: '[class=*"euiDataGridRowCell"][role="gridcell"] ',
+              selector: '[class=*"euiDataGridRowCell"][role="gridcell"]',
+            },
+            {
+              // 3rd-party library; button has aria-describedby
+              id: 'button-name',
+              selector: '[data-rbd-drag-handle-draggable-id]',
+            },
+            {
+              // EUI bug: https://github.com/elastic/eui/issues/4536
+              id: 'duplicate-id',
+              selector: '.euiSuperDatePicker *',
             },
           ],
         });

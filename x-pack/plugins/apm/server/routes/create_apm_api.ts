@@ -24,12 +24,16 @@ import {
   serviceNodeMetadataRoute,
   serviceAnnotationsRoute,
   serviceAnnotationsCreateRoute,
-  serviceErrorGroupsRoute,
+  serviceErrorGroupsPrimaryStatisticsRoute,
+  serviceErrorGroupsComparisonStatisticsRoute,
   serviceThroughputRoute,
   serviceDependenciesRoute,
   serviceMetadataDetailsRoute,
   serviceMetadataIconsRoute,
-  serviceInstancesRoute,
+  serviceInstancesPrimaryStatisticsRoute,
+  serviceInstancesComparisonStatisticsRoute,
+  serviceProfilingStatisticsRoute,
+  serviceProfilingTimelineRoute,
 } from './services';
 import {
   agentConfigurationRoute,
@@ -126,12 +130,16 @@ const createApmApi = () => {
     .add(serviceNodeMetadataRoute)
     .add(serviceAnnotationsRoute)
     .add(serviceAnnotationsCreateRoute)
-    .add(serviceErrorGroupsRoute)
+    .add(serviceErrorGroupsPrimaryStatisticsRoute)
     .add(serviceThroughputRoute)
     .add(serviceDependenciesRoute)
     .add(serviceMetadataDetailsRoute)
     .add(serviceMetadataIconsRoute)
-    .add(serviceInstancesRoute)
+    .add(serviceInstancesPrimaryStatisticsRoute)
+    .add(serviceInstancesComparisonStatisticsRoute)
+    .add(serviceErrorGroupsComparisonStatisticsRoute)
+    .add(serviceProfilingTimelineRoute)
+    .add(serviceProfilingStatisticsRoute)
 
     // Agent configuration
     .add(getSingleAgentConfigurationRoute)

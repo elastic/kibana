@@ -61,7 +61,7 @@ describe('Resilient API', () => {
       });
 
       expect(res).toEqual(incidentTypesResponse);
-      expect(http.post).toHaveBeenCalledWith('/api/actions/action/test/_execute', {
+      expect(http.post).toHaveBeenCalledWith('/api/actions/connector/test/_execute', {
         body: '{"params":{"subAction":"incidentTypes","subActionParams":{}}}',
         signal: abortCtrl.signal,
       });
@@ -79,7 +79,7 @@ describe('Resilient API', () => {
       });
 
       expect(res).toEqual(severityResponse);
-      expect(http.post).toHaveBeenCalledWith('/api/actions/action/test/_execute', {
+      expect(http.post).toHaveBeenCalledWith('/api/actions/connector/test/_execute', {
         body: '{"params":{"subAction":"severity","subActionParams":{}}}',
         signal: abortCtrl.signal,
       });

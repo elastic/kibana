@@ -43,6 +43,9 @@
     "memTotal": 0,
     "apms": {
       "total": 0
+    },
+    "config": {
+      "container": false
     }
   },
   "isPrimary": false

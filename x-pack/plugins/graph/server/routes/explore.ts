@@ -76,11 +76,7 @@ export function registerExploreRoute({
             }
           }
 
-          return response.internalError({
-            body: {
-              message: error.message,
-            },
-          });
+          throw error;
         }
       }
     )

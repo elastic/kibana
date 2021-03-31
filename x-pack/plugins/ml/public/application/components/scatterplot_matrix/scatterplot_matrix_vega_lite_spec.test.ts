@@ -22,13 +22,13 @@ import {
 
 describe('getColorSpec()', () => {
   it('should return the default color for non-outlier specs', () => {
-    const colorSpec = getColorSpec(euiThemeLight, false);
+    const colorSpec = getColorSpec(euiThemeLight);
 
     expect(colorSpec).toEqual({ value: DEFAULT_COLOR });
   });
 
   it('should return a conditional spec for outliers', () => {
-    const colorSpec = getColorSpec(euiThemeLight, true);
+    const colorSpec = getColorSpec(euiThemeLight, 'outlier_score');
 
     expect(colorSpec).toEqual({
       condition: {
@@ -42,7 +42,7 @@ describe('getColorSpec()', () => {
   it('should return a field based spec for non-outlier specs with legendType supplied', () => {
     const colorName = 'the-color-field';
 
-    const colorSpec = getColorSpec(euiThemeLight, false, colorName, LEGEND_TYPES.NOMINAL);
+    const colorSpec = getColorSpec(euiThemeLight, undefined, colorName, LEGEND_TYPES.NOMINAL);
 
     expect(colorSpec).toEqual({
       field: colorName,
@@ -67,10 +67,6 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
       column: ['x', 'y'],
       row: ['y', 'x'],
     });
-    expect(vegaLiteSpec.spec.transform).toEqual([
-      { as: 'x', calculate: "datum['x']" },
-      { as: 'y', calculate: "datum['y']" },
-    ]);
     expect(vegaLiteSpec.spec.data.values).toEqual(data);
     expect(vegaLiteSpec.spec.mark).toEqual({
       opacity: 0.75,
@@ -96,14 +92,6 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
       column: ['x', 'y'],
       row: ['y', 'x'],
     });
-    expect(vegaLiteSpec.spec.transform).toEqual([
-      { as: 'x', calculate: "datum['x']" },
-      { as: 'y', calculate: "datum['y']" },
-      {
-        as: 'outlier_score',
-        calculate: "datum['ml.outlier_score']",
-      },
-    ]);
     expect(vegaLiteSpec.spec.data.values).toEqual(data);
     expect(vegaLiteSpec.spec.mark).toEqual({
       opacity: 0.75,
@@ -112,7 +100,8 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
     });
     expect(vegaLiteSpec.spec.encoding.color).toEqual({
       condition: {
-        test: "(datum['outlier_score'] >= mlOutlierScoreThreshold.cutoff)",
+        // Note the alternative UTF-8 dot character
+        test: "(datum['ml․outlier_score'] >= mlOutlierScoreThreshold.cutoff)",
         value: COLOR_OUTLIER,
       },
       value: euiThemeLight.euiColorMediumShade,
@@ -121,7 +110,8 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
       { field: 'x', type: 'quantitative' },
       { field: 'y', type: 'quantitative' },
       {
-        field: 'outlier_score',
+        // Note the alternative UTF-8 dot character
+        field: 'ml․outlier_score',
         format: '.3f',
         type: 'quantitative',
       },
@@ -147,10 +137,6 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
       column: ['x', 'y'],
       row: ['y', 'x'],
     });
-    expect(vegaLiteSpec.spec.transform).toEqual([
-      { as: 'x', calculate: "datum['x']" },
-      { as: 'y', calculate: "datum['y']" },
-    ]);
     expect(vegaLiteSpec.spec.data.values).toEqual(data);
     expect(vegaLiteSpec.spec.mark).toEqual({
       opacity: 0.75,

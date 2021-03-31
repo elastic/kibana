@@ -20,7 +20,7 @@ export const catchErrorHandler: <P, Q, B>(
           statusCode: error.output.statusCode,
         });
       }
-      return response.internalError({ body: error });
+      throw error;
     }
   };
 };

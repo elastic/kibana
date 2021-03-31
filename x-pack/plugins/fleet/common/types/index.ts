@@ -13,8 +13,8 @@ export interface FleetConfigType {
   registryUrl?: string;
   registryProxyUrl?: string;
   agents: {
-    fleetServerEnabled: boolean;
     enabled: boolean;
+    fleetServerEnabled: boolean;
     tlsCheckDisabled: boolean;
     pollingRequestTimeout: number;
     maxConcurrentConnections: number;
@@ -25,6 +25,9 @@ export interface FleetConfigType {
     elasticsearch: {
       host?: string;
       ca_sha256?: string;
+    };
+    fleet_server?: {
+      hosts?: string[];
     };
     agentPolicyRolloutRateLimitIntervalMs: number;
     agentPolicyRolloutRateLimitRequestPerInterval: number;

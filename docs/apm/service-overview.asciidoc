@@ -38,6 +38,8 @@ image::apm/images/traffic-transactions.png[Traffic and transactions]
 === Error rate and errors
 
 The *Error rate* chart displays the average error rates relating to the service, within a specific time range.
+An HTTP response code greater than 400 does not necessarily indicate a failed transaction.
+<<transaction-error-rate,Learn more>>.
 
 The *Errors* table provides a high-level view of each error message when it first and last occurred,
 along with the total number of occurrences. This makes it very easy to quickly see which errors affect
@@ -62,8 +64,8 @@ each dependency. By default, dependencies are sorted by _Impact_ to show the mos
 If there is a particular dependency you are interested in, click *View service map* to view the related
 <<service-maps, service map>>.
 
-IMPORTANT: A known issue prevents Real User Monitoring (RUM) dependencies from being shown in the
-*Dependencies* table. We are working on a fix for this issue.
+NOTE: Displaying dependencies for services instrumented with the Real User Monitoring (RUM) agent
+requires an agent version ≥ v5.6.3.
 
 [role="screenshot"]
 image::apm/images/spans-dependencies.png[Span type duration and dependencies]

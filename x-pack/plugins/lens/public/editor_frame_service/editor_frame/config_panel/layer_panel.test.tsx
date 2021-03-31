@@ -7,27 +7,44 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { EuiFormRow } from '@elastic/eui';
+import { mountWithIntl } from '@kbn/test/jest';
+import { Visualization } from '../../../types';
+import { LayerPanel } from './layer_panel';
+import { ChildDragDropProvider, DragDrop } from '../../../drag_drop';
+import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { generateId } from '../../../id_generator';
 import {
   createMockVisualization,
   createMockFramePublicAPI,
   createMockDatasource,
   DatasourceMock,
 } from '../../mocks';
-import { ChildDragDropProvider, DragDrop } from '../../../drag_drop';
-import { EuiFormRow } from '@elastic/eui';
-import { mountWithIntl } from '@kbn/test/jest';
-import { Visualization } from '../../../types';
-import { LayerPanel } from './layer_panel';
-import { coreMock } from 'src/core/public/mocks';
-import { generateId } from '../../../id_generator';
 
 jest.mock('../../../id_generator');
+
+let container: HTMLDivElement | undefined;
+
+beforeEach(() => {
+  container = document.createElement('div');
+  container.id = 'lensContainer';
+  document.body.appendChild(container);
+});
+
+afterEach(() => {
+  if (container && container.parentNode) {
+    container.parentNode.removeChild(container);
+  }
+
+  container = undefined;
+});
 
 const defaultContext = {
   dragging: undefined,
   setDragging: jest.fn(),
   setActiveDropTarget: () => {},
   activeDropTarget: undefined,
+  dropTargetsByOrder: undefined,
   keyboardMode: false,
   setKeyboardMode: () => {},
   setA11yMessage: jest.fn(),
@@ -81,6 +98,7 @@ describe('LayerPanel', () => {
           icon: 'empty',
           id: 'testVis',
           label: 'TEST1',
+          groupLabel: 'testVisGroup',
         },
       ],
     };
@@ -93,6 +111,7 @@ describe('LayerPanel', () => {
           icon: 'empty',
           id: 'testVis2',
           label: 'TEST2',
+          groupLabel: 'testVis2Group',
         },
       ],
     };
@@ -113,6 +132,15 @@ describe('LayerPanel', () => {
       const component = mountWithIntl(<LayerPanel {...getDefaultProps()} isOnlyLayer={false} />);
       expect(component.find('[data-test-subj="lnsLayerRemove"]').first().text()).toContain(
         'Delete layer'
+      );
+    });
+
+    it('should show to reset visualization for visualizations only allowing a single layer', () => {
+      const layerPanelAttributes = getDefaultProps();
+      delete layerPanelAttributes.activeVisualization.removeLayer;
+      const component = mountWithIntl(<LayerPanel {...getDefaultProps()} />);
+      expect(component.find('[data-test-subj="lnsLayerRemove"]').first().text()).toContain(
+        'Reset visualization'
       );
     });
 
@@ -441,7 +469,7 @@ describe('LayerPanel', () => {
       });
 
       mockDatasource.getDropProps.mockReturnValue({
-        dropType: 'field_add',
+        dropTypes: ['field_add'],
         nextLabel: '',
       });
 
@@ -464,19 +492,20 @@ describe('LayerPanel', () => {
 
       expect(mockDatasource.getDropProps).toHaveBeenCalledWith(
         expect.objectContaining({
-          dragDropContext: expect.objectContaining({
-            dragging: draggingField,
-          }),
+          dragging: draggingField,
         })
       );
 
-      component.find('[data-test-subj="lnsGroup"] DragDrop .lnsDragDrop').first().simulate('drop');
+      const dragDropElement = component
+        .find('[data-test-subj="lnsGroup"] DragDrop .lnsDragDrop')
+        .first();
+
+      dragDropElement.simulate('dragOver');
+      dragDropElement.simulate('drop');
 
       expect(mockDatasource.onDrop).toHaveBeenCalledWith(
         expect.objectContaining({
-          dragDropContext: expect.objectContaining({
-            dragging: draggingField,
-          }),
+          droppedItem: draggingField,
         })
       );
     });
@@ -496,7 +525,7 @@ describe('LayerPanel', () => {
       });
 
       mockDatasource.getDropProps.mockImplementation(({ columnId }) =>
-        columnId !== 'a' ? { dropType: 'field_replace', nextLabel: '' } : undefined
+        columnId !== 'a' ? { dropTypes: ['field_replace'], nextLabel: '' } : undefined
       );
 
       const draggingField = {
@@ -524,11 +553,13 @@ describe('LayerPanel', () => {
         component.find('[data-test-subj="lnsGroup"] DragDrop').first().prop('dropType')
       ).toEqual(undefined);
 
-      component
+      const dragDropElement = component
         .find('[data-test-subj="lnsGroup"] DragDrop')
         .first()
-        .find('.lnsLayerPanel__dimension')
-        .simulate('drop');
+        .find('.lnsLayerPanel__dimension');
+
+      dragDropElement.simulate('dragOver');
+      dragDropElement.simulate('drop');
 
       expect(mockDatasource.onDrop).not.toHaveBeenCalled();
     });
@@ -558,7 +589,7 @@ describe('LayerPanel', () => {
       });
 
       mockDatasource.getDropProps.mockReturnValue({
-        dropType: 'replace_compatible',
+        dropTypes: ['replace_compatible'],
         nextLabel: '',
       });
 
@@ -582,31 +613,38 @@ describe('LayerPanel', () => {
 
       expect(mockDatasource.getDropProps).toHaveBeenCalledWith(
         expect.objectContaining({
-          dragDropContext: expect.objectContaining({
-            dragging: draggingOperation,
-          }),
+          dragging: draggingOperation,
         })
       );
 
       // Simulate drop on the pre-populated dimension
-      component.find('[data-test-subj="lnsGroupB"] DragDrop .lnsDragDrop').at(0).simulate('drop');
+
+      const dragDropElement = component
+        .find('[data-test-subj="lnsGroupB"] DragDrop .lnsDragDrop')
+        .at(0);
+      dragDropElement.simulate('dragOver');
+      dragDropElement.simulate('drop');
+
       expect(mockDatasource.onDrop).toHaveBeenCalledWith(
         expect.objectContaining({
           columnId: 'b',
-          dragDropContext: expect.objectContaining({
-            dragging: draggingOperation,
-          }),
+          droppedItem: draggingOperation,
         })
       );
 
       // Simulate drop on the empty dimension
-      component.find('[data-test-subj="lnsGroupB"] DragDrop .lnsDragDrop').at(1).simulate('drop');
+
+      const updatedDragDropElement = component
+        .find('[data-test-subj="lnsGroupB"] DragDrop .lnsDragDrop')
+        .at(2);
+
+      updatedDragDropElement.simulate('dragOver');
+      updatedDragDropElement.simulate('drop');
+
       expect(mockDatasource.onDrop).toHaveBeenCalledWith(
         expect.objectContaining({
           columnId: 'newid',
-          dragDropContext: expect.objectContaining({
-            dragging: draggingOperation,
-          }),
+          droppedItem: draggingOperation,
         })
       );
     });
@@ -640,7 +678,8 @@ describe('LayerPanel', () => {
       const component = mountWithIntl(
         <ChildDragDropProvider {...defaultContext} dragging={draggingOperation}>
           <LayerPanel {...getDefaultProps()} />
-        </ChildDragDropProvider>
+        </ChildDragDropProvider>,
+        { attachTo: container }
       );
       act(() => {
         component.find(DragDrop).at(1).prop('onDrop')!(draggingOperation, 'reorder');
@@ -693,12 +732,12 @@ describe('LayerPanel', () => {
         </ChildDragDropProvider>
       );
       act(() => {
-        component.find(DragDrop).at(2).prop('onDrop')!(draggingOperation, 'duplicate_in_group');
+        component.find(DragDrop).at(2).prop('onDrop')!(draggingOperation, 'duplicate_compatible');
       });
       expect(mockDatasource.onDrop).toHaveBeenCalledWith(
         expect.objectContaining({
           columnId: 'newid',
-          dropType: 'duplicate_in_group',
+          dropType: 'duplicate_compatible',
           droppedItem: draggingOperation,
         })
       );

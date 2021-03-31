@@ -12,6 +12,7 @@ import { AggFunctionsMapping } from 'src/plugins/data/public';
 import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
 import { OperationDefinition } from './index';
 import {
+  getFormatFromPreviousColumn,
   getInvalidFieldMessage,
   getSafeName,
   isValidNumber,
@@ -72,12 +73,11 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
   getDefaultLabel: (column, indexPattern, columns) =>
     ofName(getSafeName(column.sourceField, indexPattern), column.params.percentile),
   buildColumn: ({ field, previousColumn, indexPattern }) => {
-    const existingFormat =
-      previousColumn?.params && 'format' in previousColumn?.params
-        ? previousColumn?.params?.format
-        : undefined;
     const existingPercentileParam =
-      previousColumn?.operationType === 'percentile' && previousColumn?.params.percentile;
+      previousColumn?.operationType === 'percentile' &&
+      previousColumn.params &&
+      'percentile' in previousColumn.params &&
+      previousColumn.params.percentile;
     const newPercentileParam = existingPercentileParam || DEFAULT_PERCENTILE_VALUE;
     return {
       label: ofName(getSafeName(field.name, indexPattern), newPercentileParam),
@@ -87,8 +87,8 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
       isBucketed: false,
       scale: 'ratio',
       params: {
-        format: existingFormat,
         percentile: newPercentileParam,
+        ...getFormatFromPreviousColumn(previousColumn),
       },
     };
   },

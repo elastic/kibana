@@ -7,7 +7,6 @@
 
 import { get, keyBy, map, groupBy } from 'lodash';
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
-// @ts-expect-error untyped local
 import { getLegendConfig } from '../../common/lib/get_legend_config';
 import { getFunctionHelp } from '../../i18n';
 import {

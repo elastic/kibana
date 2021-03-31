@@ -6,10 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ApiKey } from '../../../common/model';
+
+import type { RouteDefinitionParams } from '../';
+import type { ApiKey } from '../../../common/model';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
-import { RouteDefinitionParams } from '..';
 
 export function defineGetApiKeysRoutes({ router }: RouteDefinitionParams) {
   router.get(

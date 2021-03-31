@@ -44,28 +44,24 @@ export const registerPrivilegesRoute = ({ license, router, config }: RouteDepend
         },
       } = ctx;
 
-      try {
-        const { has_all_requested: hasAllPrivileges, cluster } = await client.callAsCurrentUser(
-          'transport.request',
-          {
-            path: '/_security/user/_has_privileges',
-            method: 'POST',
-            body: {
-              cluster: APP_CLUSTER_REQUIRED_PRIVILEGES,
-            },
-          }
-        );
-
-        if (!hasAllPrivileges) {
-          privilegesResult.missingPrivileges.cluster = extractMissingPrivileges(cluster);
+      const { has_all_requested: hasAllPrivileges, cluster } = await client.callAsCurrentUser(
+        'transport.request',
+        {
+          path: '/_security/user/_has_privileges',
+          method: 'POST',
+          body: {
+            cluster: APP_CLUSTER_REQUIRED_PRIVILEGES,
+          },
         }
+      );
 
-        privilegesResult.hasAllPrivileges = hasAllPrivileges;
-
-        return res.ok({ body: privilegesResult });
-      } catch (e) {
-        return res.internalError({ body: e });
+      if (!hasAllPrivileges) {
+        privilegesResult.missingPrivileges.cluster = extractMissingPrivileges(cluster);
       }
+
+      privilegesResult.hasAllPrivileges = hasAllPrivileges;
+
+      return res.ok({ body: privilegesResult });
     })
   );
 };

@@ -10,11 +10,7 @@ import React, { Component } from 'react';
 import { EuiSpacer, EuiCallOut, EuiSwitchEvent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  indexPatterns,
-  IndexPatternAttributes,
-  UI_SETTINGS,
-} from '../../../../../../../plugins/data/public';
+import { indexPatterns, UI_SETTINGS } from '../../../../../../../plugins/data/public';
 import {
   getIndices,
   containsIllegalCharacters,
@@ -118,18 +114,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
   }
 
   fetchExistingIndexPatterns = async () => {
-    const {
-      savedObjects,
-    } = await this.context.services.savedObjects.client.find<IndexPatternAttributes>({
-      type: 'index-pattern',
-      fields: ['title'],
-      perPage: 10000,
-    });
-
-    const existingIndexPatterns = savedObjects.map((obj) =>
-      obj && obj.attributes ? obj.attributes.title : ''
-    ) as string[];
-
+    const existingIndexPatterns = await this.context.services.data.indexPatterns.getTitles();
     this.setState({ existingIndexPatterns });
   };
 

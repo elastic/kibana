@@ -9,19 +9,18 @@ import { EuiButton, EuiInMemoryTable, EuiSearchBarProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CoreStart } from 'kibana/public';
 import moment from 'moment';
-import React, { useCallback, useMemo, useRef, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import useInterval from 'react-use/lib/useInterval';
 import { TableText } from '../';
 import { IManagementSectionsPluginsSetup, SessionsConfigSchema } from '../..';
+import { SEARCH_SESSIONS_TABLE_ID } from '../../../../../common/search';
 import { SearchSessionsMgmtAPI } from '../../lib/api';
 import { getColumns } from '../../lib/get_columns';
 import { UISession } from '../../types';
 import { OnActionComplete } from '../actions';
 import { getAppFilter } from './app_filter';
 import { getStatusFilter } from './status_filter';
-
-const TABLE_ID = 'searchSessionsMgmtTable';
 
 interface Props {
   core: CoreStart;
@@ -107,8 +106,8 @@ export function SearchSessionsMgmtTable({ core, api, timezone, config, plugins, 
   return (
     <EuiInMemoryTable<UISession>
       {...props}
-      id={TABLE_ID}
-      data-test-subj={TABLE_ID}
+      id={SEARCH_SESSIONS_TABLE_ID}
+      data-test-subj={SEARCH_SESSIONS_TABLE_ID}
       rowProps={() => ({
         'data-test-subj': 'searchSessionsRow',
       })}

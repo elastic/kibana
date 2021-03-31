@@ -15,26 +15,59 @@ import { SearchSessionState } from './search_session_state';
 import { createNowProviderMock } from '../../now_provider/mocks';
 import { NowProviderInternalContract } from '../../now_provider';
 import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
+import { SearchSessionSavedObject, ISessionsClient } from './sessions_client';
+import { SearchSessionStatus } from '../../../common';
+import { CoreStart } from 'kibana/public';
+
+const mockSavedObject: SearchSessionSavedObject = {
+  id: 'd7170a35-7e2c-48d6-8dec-9a056721b489',
+  type: 'search-session',
+  attributes: {
+    name: 'my_name',
+    appId: 'my_app_id',
+    urlGeneratorId: 'my_url_generator_id',
+    idMapping: {},
+    sessionId: 'session_id',
+    touched: new Date().toISOString(),
+    created: new Date().toISOString(),
+    expires: new Date().toISOString(),
+    status: SearchSessionStatus.COMPLETE,
+    persisted: true,
+  },
+  references: [],
+};
 
 describe('Session service', () => {
   let sessionService: ISessionService;
   let state$: BehaviorSubject<SearchSessionState>;
   let nowProvider: jest.Mocked<NowProviderInternalContract>;
   let userHasAccessToSearchSessions = true;
+  let currentAppId$: BehaviorSubject<string>;
+  let toastService: jest.Mocked<CoreStart['notifications']['toasts']>;
+  let sessionsClient: jest.Mocked<ISessionsClient>;
 
   beforeEach(() => {
     const initializerContext = coreMock.createPluginInitializerContext();
     const startService = coreMock.createSetup().getStartServices;
+    const startServicesMock = coreMock.createStart();
+    toastService = startServicesMock.notifications.toasts;
     nowProvider = createNowProviderMock();
+    currentAppId$ = new BehaviorSubject('app');
+    sessionsClient = getSessionsClientMock();
+    sessionsClient.get.mockImplementation(async (id) => ({
+      ...mockSavedObject,
+      id,
+      attributes: { ...mockSavedObject.attributes, sessionId: id },
+    }));
     sessionService = new SessionService(
       initializerContext,
       () =>
         startService().then(([coreStart, ...rest]) => [
           {
-            ...coreStart,
+            ...startServicesMock,
             application: {
               ...coreStart.application,
-              currentAppId$: new BehaviorSubject('app'),
+              currentAppId$,
               capabilities: {
                 ...coreStart.application.capabilities,
                 management: {
@@ -47,7 +80,7 @@ describe('Session service', () => {
           },
           ...rest,
         ]),
-      getSessionsClientMock(),
+      sessionsClient,
       nowProvider,
       { freezeState: false } // needed to use mocks inside state container
     );
@@ -63,6 +96,23 @@ describe('Session service', () => {
       sessionService.clear();
       expect(sessionService.getSessionId()).toBeUndefined();
       expect(nowProvider.reset).toHaveBeenCalled();
+    });
+
+    it("Can't clear other apps' session", async () => {
+      sessionService.start();
+      expect(sessionService.getSessionId()).not.toBeUndefined();
+      currentAppId$.next('change');
+      sessionService.clear();
+      expect(sessionService.getSessionId()).not.toBeUndefined();
+    });
+
+    it("Can start a new session in case there is other apps' stale session", async () => {
+      const s1 = sessionService.start();
+      expect(sessionService.getSessionId()).not.toBeUndefined();
+      currentAppId$.next('change');
+      sessionService.start();
+      expect(sessionService.getSessionId()).not.toBeUndefined();
+      expect(sessionService.getSessionId()).not.toBe(s1);
     });
 
     it('Restores a session', async () => {
@@ -249,5 +299,27 @@ describe('Session service', () => {
         `"No access to search sessions"`
       );
     });
+  });
+
+  test("rename() doesn't throw in case rename failed but shows a toast instead", async () => {
+    const renameError = new Error('Haha');
+    sessionsClient.rename.mockRejectedValue(renameError);
+    sessionService.enableStorage({
+      getName: async () => 'Name',
+      getUrlGeneratorData: async () => ({
+        urlGeneratorId: 'id',
+        initialState: {},
+        restoreState: {},
+      }),
+    });
+    sessionService.start();
+    await sessionService.save();
+    await expect(sessionService.renameCurrentSession('New name')).resolves.toBeUndefined();
+    expect(toastService.addError).toHaveBeenCalledWith(
+      renameError,
+      expect.objectContaining({
+        title: expect.stringContaining('Failed to edit name of the search session'),
+      })
+    );
   });
 });

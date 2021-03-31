@@ -79,7 +79,7 @@ export function registerSearchSettingsRoutes({
           engineName: schema.string(),
         }),
         body: schema.object({
-          boosts,
+          boosts: schema.maybe(boosts),
           search_fields: searchFields,
         }),
         query: schema.object({

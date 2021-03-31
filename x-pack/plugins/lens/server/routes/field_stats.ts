@@ -4,14 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import Boom from '@hapi/boom';
-import { errors } from '@elastic/elasticsearch';
+import { errors, estypes } from '@elastic/elasticsearch';
 import DateMath from '@elastic/datemath';
 import { schema } from '@kbn/config-schema';
 import { CoreSetup } from 'src/core/server';
 import { IFieldType } from 'src/plugins/data/common';
-import { ESSearchResponse } from '../../../../typings/elasticsearch';
+import { SavedObjectNotFound } from '../../../../../src/plugins/kibana_utils/common';
+import { ESSearchResponse } from '../../../../../typings/elasticsearch';
 import { FieldStatsResponse, BASE_API_URL } from '../../common';
 import { PluginStartContract } from '../plugin';
 
@@ -21,28 +20,17 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
   const router = setup.http.createRouter();
   router.post(
     {
-      path: `${BASE_API_URL}/index_stats/{indexPatternTitle}/field`,
+      path: `${BASE_API_URL}/index_stats/{indexPatternId}/field`,
       validate: {
         params: schema.object({
-          indexPatternTitle: schema.string(),
+          indexPatternId: schema.string(),
         }),
         body: schema.object(
           {
             dslQuery: schema.object({}, { unknowns: 'allow' }),
             fromDate: schema.string(),
             toDate: schema.string(),
-            timeFieldName: schema.maybe(schema.string()),
-            field: schema.object(
-              {
-                name: schema.string(),
-                type: schema.string(),
-                esTypes: schema.maybe(schema.arrayOf(schema.string())),
-                scripted: schema.maybe(schema.boolean()),
-                lang: schema.maybe(schema.string()),
-                script: schema.maybe(schema.string()),
-              },
-              { unknowns: 'allow' }
-            ),
+            fieldName: schema.string(),
           },
           { unknowns: 'allow' }
         ),
@@ -50,9 +38,26 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
     },
     async (context, req, res) => {
       const requestClient = context.core.elasticsearch.client.asCurrentUser;
-      const { fromDate, toDate, timeFieldName, field, dslQuery } = req.body;
+      const { fromDate, toDate, fieldName, dslQuery } = req.body;
+
+      const [{ savedObjects, elasticsearch }, { data }] = await setup.getStartServices();
+      const savedObjectsClient = savedObjects.getScopedClient(req);
+      const esClient = elasticsearch.client.asScoped(req).asCurrentUser;
+      const indexPatternsService = await data.indexPatterns.indexPatternsServiceFactory(
+        savedObjectsClient,
+        esClient
+      );
 
       try {
+        const indexPattern = await indexPatternsService.get(req.params.indexPatternId);
+
+        const timeFieldName = indexPattern.timeFieldName;
+        const field = indexPattern.fields.find((f) => f.name === fieldName);
+
+        if (!field) {
+          throw new Error(`Field {fieldName} not found in index pattern ${indexPattern.title}`);
+        }
+
         const filter = timeFieldName
           ? [
               {
@@ -73,18 +78,24 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
           },
         };
 
-        const search = async (aggs: unknown) => {
+        const search = async (aggs: Record<string, estypes.AggregationContainer>) => {
           const { body: result } = await requestClient.search({
-            index: req.params.indexPatternTitle,
+            index: indexPattern.title,
             track_total_hits: true,
             body: {
               query,
               aggs,
+              // @ts-expect-error @elastic/elasticsearch StoredScript.language is required
+              runtime_mappings: field.runtimeField ? { [fieldName]: field.runtimeField } : {},
             },
             size: 0,
           });
           return result;
         };
+
+        if (field.type.includes('range')) {
+          return res.ok({ body: {} });
+        }
 
         if (field.type === 'histogram') {
           return res.ok({
@@ -104,6 +115,9 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
           body: await getStringSamples(search, field),
         });
       } catch (e) {
+        if (e instanceof SavedObjectNotFound) {
+          return res.notFound();
+        }
         if (e instanceof errors.ResponseError && e.statusCode === 404) {
           return res.notFound();
         }
@@ -111,11 +125,9 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
           if (e.output.statusCode === 404) {
             return res.notFound();
           }
-          return res.internalError(e.output.message);
+          throw new Error(e.output.message);
         } else {
-          return res.internalError({
-            body: Boom.internal(e.message || e.name),
-          });
+          throw e;
         }
       }
     }
@@ -123,7 +135,7 @@ export async function initFieldsRoute(setup: CoreSetup<PluginStartContract>) {
 }
 
 export async function getNumberHistogram(
-  aggSearchWithBody: (body: unknown) => Promise<unknown>,
+  aggSearchWithBody: (aggs: Record<string, estypes.AggregationContainer>) => Promise<unknown>,
   field: IFieldType,
   useTopHits = true
 ): Promise<FieldStatsResponse> {
@@ -167,7 +179,10 @@ export async function getNumberHistogram(
   const terms =
     'top_values' in minMaxResult.aggregations!.sample
       ? minMaxResult.aggregations!.sample.top_values
-      : { buckets: [] };
+      : {
+          buckets: [] as Array<{ doc_count: number; key: string | number }>,
+        };
+
   const topValuesBuckets = {
     buckets: terms.buckets.map((bucket) => ({
       count: bucket.doc_count,
@@ -229,7 +244,7 @@ export async function getNumberHistogram(
 }
 
 export async function getStringSamples(
-  aggSearchWithBody: (body: unknown) => unknown,
+  aggSearchWithBody: (aggs: Record<string, estypes.AggregationContainer>) => unknown,
   field: IFieldType
 ): Promise<FieldStatsResponse> {
   const fieldRef = getFieldRef(field);
@@ -268,7 +283,7 @@ export async function getStringSamples(
 
 // This one is not sampled so that it returns the full date range
 export async function getDateHistogram(
-  aggSearchWithBody: (body: unknown) => unknown,
+  aggSearchWithBody: (aggs: Record<string, estypes.AggregationContainer>) => unknown,
   field: IFieldType,
   range: { fromDate: string; toDate: string }
 ): Promise<FieldStatsResponse> {

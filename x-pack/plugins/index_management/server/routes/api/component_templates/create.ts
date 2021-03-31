@@ -71,7 +71,7 @@ export const registerCreateRoute = ({
           });
         }
 
-        return res.internalError({ body: error });
+        throw error;
       }
     })
   );

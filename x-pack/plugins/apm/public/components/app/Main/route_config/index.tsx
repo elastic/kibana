@@ -114,6 +114,12 @@ function ServiceDetailsTransactions(
   return <ServiceDetails {...props} tab="transactions" />;
 }
 
+function ServiceDetailsProfiling(
+  props: RouteComponentProps<{ serviceName: string }>
+) {
+  return <ServiceDetails {...props} tab="profiling" />;
+}
+
 function SettingsAgentConfiguration(props: RouteComponentProps<{}>) {
   return (
     <Settings {...props}>
@@ -306,6 +312,14 @@ export const routes: APMRouteDefinition[] = [
       const query = toQuery(location.search);
       return query.transactionName as string;
     },
+  },
+  {
+    exact: true,
+    path: '/services/:serviceName/profiling',
+    component: withApmServiceContext(ServiceDetailsProfiling),
+    breadcrumb: i18n.translate('xpack.apm.breadcrumb.serviceProfilingTitle', {
+      defaultMessage: 'Profiling',
+    }),
   },
   {
     exact: true,

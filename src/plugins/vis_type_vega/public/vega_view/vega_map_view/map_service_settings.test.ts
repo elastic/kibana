@@ -10,7 +10,7 @@ import { get } from 'lodash';
 import { uiSettingsServiceMock } from 'src/core/public/mocks';
 
 import { MapServiceSettings, getAttributionsForTmsService } from './map_service_settings';
-import { MapsLegacyConfig } from '../../../../maps_legacy/config';
+import type { MapsEmsConfig } from '../../../../maps_ems/public';
 import { EMSClient, TMSService } from '@elastic/ems-client';
 import { setUISettings } from '../../services';
 
@@ -20,7 +20,7 @@ const getPrivateField = <T>(mapServiceSettings: MapServiceSettings, privateField
 describe('vega_map_view/map_service_settings', () => {
   describe('MapServiceSettings', () => {
     const appVersion = '99';
-    let config: MapsLegacyConfig;
+    let config: MapsEmsConfig;
     let getUiSettingsMockedValue: any;
 
     beforeEach(() => {
@@ -29,7 +29,7 @@ describe('vega_map_view/map_service_settings', () => {
           desaturated: 'road_map_desaturated',
           dark: 'dark_map',
         },
-      } as MapsLegacyConfig;
+      } as MapsEmsConfig;
       setUISettings({
         ...uiSettingsServiceMock.createSetupContract(),
         get: () => getUiSettingsMockedValue,

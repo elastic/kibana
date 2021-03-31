@@ -66,10 +66,10 @@ import { ApplicationSetup, Capabilities, ApplicationStart } from './application'
 import { DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
 
-export { PackageInfo, EnvironmentMode, IExternalUrlPolicy } from '../server/types';
-export { CoreContext, CoreSystem } from './core_system';
+export type { PackageInfo, EnvironmentMode, IExternalUrlPolicy } from '../server/types';
+export type { CoreContext, CoreSystem } from './core_system';
 export { DEFAULT_APP_CATEGORIES } from '../utils';
-export {
+export type {
   AppCategory,
   UiSettingsParams,
   UserProvidedValues,
@@ -80,7 +80,8 @@ export {
   StringValidationRegexString,
 } from '../types';
 
-export {
+export { AppNavLinkStatus, AppStatus, ScopedHistory } from './application';
+export type {
   ApplicationSetup,
   ApplicationStart,
   App,
@@ -92,8 +93,6 @@ export {
   AppLeaveAction,
   AppLeaveDefaultAction,
   AppLeaveConfirmAction,
-  AppStatus,
-  AppNavLinkStatus,
   AppMeta,
   AppUpdatableFields,
   AppUpdater,
@@ -101,11 +100,11 @@ export {
   PublicAppInfo,
   PublicAppMetaInfo,
   PublicAppSearchDeepLinkInfo,
-  ScopedHistory,
   NavigateToAppOptions,
 } from './application';
 
-export {
+export { SimpleSavedObject } from './saved_objects';
+export type {
   SavedObjectsBatchResponse,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkCreateOptions,
@@ -126,7 +125,6 @@ export {
   SavedObjectsMigrationVersion,
   SavedObjectsClientContract,
   SavedObjectsClient,
-  SimpleSavedObject,
   SavedObjectsImportResponse,
   SavedObjectsImportSuccess,
   SavedObjectsImportConflictError,
@@ -142,10 +140,11 @@ export {
   SavedObjectsImportWarning,
 } from './saved_objects';
 
-export {
+export { HttpFetchError } from './http';
+
+export type {
   HttpHeadersInit,
   HttpRequestInit,
-  HttpFetchError,
   HttpFetchOptions,
   HttpFetchOptionsWithPath,
   HttpFetchQuery,
@@ -162,7 +161,7 @@ export {
   IHttpResponseInterceptorOverrides,
 } from './http';
 
-export {
+export type {
   OverlayStart,
   OverlayBannersStart,
   OverlayRef,
@@ -173,7 +172,7 @@ export {
   OverlayModalStart,
 } from './overlays';
 
-export {
+export type {
   Toast,
   ToastInput,
   IToasts,
@@ -185,7 +184,7 @@ export {
   ErrorToastOptions,
 } from './notifications';
 
-export { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
+export type { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
 
 export { URL_MAX_LENGTH } from './core_app';
 
@@ -280,7 +279,7 @@ export interface CoreStart {
   };
 }
 
-export {
+export type {
   Capabilities,
   ChromeBadge,
   ChromeBrand,

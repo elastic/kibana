@@ -6,10 +6,11 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Unusual Process Network Connection",
   "query": "sequence by process.entity_id\n  [process where (process.name : \"Microsoft.Workflow.Compiler.exe\" or\n                  process.name : \"bginfo.exe\" or\n                  process.name : \"cdb.exe\" or\n                  process.name : \"cmstp.exe\" or\n                  process.name : \"csi.exe\" or\n                  process.name : \"dnx.exe\" or\n                  process.name : \"fsi.exe\" or\n                  process.name : \"ieexec.exe\" or\n                  process.name : \"iexpress.exe\" or\n                  process.name : \"odbcconf.exe\" or\n                  process.name : \"rcsi.exe\" or\n                  process.name : \"xwizard.exe\") and\n     event.type == \"start\"]\n  [network where (process.name : \"Microsoft.Workflow.Compiler.exe\" or\n                  process.name : \"bginfo.exe\" or\n                  process.name : \"cdb.exe\" or\n                  process.name : \"cmstp.exe\" or\n                  process.name : \"csi.exe\" or\n                  process.name : \"dnx.exe\" or\n                  process.name : \"fsi.exe\" or\n                  process.name : \"ieexec.exe\" or\n                  process.name : \"iexpress.exe\" or\n                  process.name : \"odbcconf.exe\" or\n                  process.name : \"rcsi.exe\" or\n                  process.name : \"xwizard.exe\")]\n",
   "risk_score": 21,
@@ -20,7 +21,7 @@
     "Host",
     "Windows",
     "Threat Detection",
-    "Execution"
+    "Defense Evasion"
   ],
   "threat": [
     {
@@ -40,5 +41,5 @@
     }
   ],
   "type": "eql",
-  "version": 6
+  "version": 7
 }

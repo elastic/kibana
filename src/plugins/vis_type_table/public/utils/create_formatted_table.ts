@@ -16,10 +16,10 @@ export const createFormattedTable = (
   table: Datatable | TableContext,
   visConfig: TableVisConfig
 ) => {
-  const { buckets, metrics } = visConfig.dimensions;
+  const { buckets, metrics } = visConfig;
 
   const formattedColumns = table.columns.reduce<FormattedColumns>((acc, col, i) => {
-    const isBucket = buckets.find(({ accessor }) => accessor === i);
+    const isBucket = buckets?.find(({ accessor }) => accessor === i);
     const dimension = isBucket || metrics.find(({ accessor }) => accessor === i);
 
     if (!dimension) return acc;

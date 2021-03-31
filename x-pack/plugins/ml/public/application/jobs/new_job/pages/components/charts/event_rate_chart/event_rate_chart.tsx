@@ -78,7 +78,6 @@ export const EventRateChart: FC<Props> = ({
               <OverlayRange
                 key={i}
                 overlayKey={i}
-                eventRateChartData={eventRateChartData}
                 start={range.start}
                 end={range.end}
                 color={range.color}

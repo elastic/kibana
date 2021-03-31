@@ -87,7 +87,7 @@ export function registerRestoreRoutes({ router, license, lib: { isEsError } }: R
           });
         }
         // Case: default
-        return res.internalError({ body: e });
+        throw e;
       }
     })
   );
@@ -124,7 +124,7 @@ export function registerRestoreRoutes({ router, license, lib: { isEsError } }: R
           });
         }
         // Case: default
-        return res.internalError({ body: e });
+        throw e;
       }
     })
   );

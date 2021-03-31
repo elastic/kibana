@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RouteDefinitionParams } from '../..';
+import type { RouteDefinitionParams } from '../..';
 import { defineGetPrivilegesRoutes } from './get';
 import { defineGetBuiltinPrivilegesRoutes } from './get_builtin';
 

@@ -12,11 +12,12 @@
  */
 
 import _ from 'lodash';
+import { estypes } from '@elastic/elasticsearch';
 import { MigrationEsClient } from './migration_es_client';
 import { CountResponse, SearchResponse } from '../../../elasticsearch';
 import { IndexMapping } from '../../mappings';
 import { SavedObjectsMigrationVersion } from '../../types';
-import { AliasAction, RawDoc, ShardsInfo } from './call_cluster';
+import { AliasAction, RawDoc } from './call_cluster';
 import { SavedObjectsRawDocSource } from '../../serialization';
 
 const settings = { number_of_shards: 1, auto_expand_replicas: '0-1' };
@@ -46,6 +47,7 @@ export async function fetchInfo(client: MigrationEsClient, index: string): Promi
 
   const [indexName, indexInfo] = Object.entries(body)[0];
 
+  // @ts-expect-error @elastic/elasticsearch IndexState.alias and IndexState.mappings should be required
   return assertIsSupportedIndex({ ...indexInfo, exists: true, indexName });
 }
 
@@ -67,6 +69,20 @@ export function reader(
   const scroll = scrollDuration;
   let scrollId: string | undefined;
 
+  // When migrating from the outdated index we use a read query which excludes
+  // saved objects which are no longer used. These saved objects will still be
+  // kept in the outdated index for backup purposes, but won't be availble in
+  // the upgraded index.
+  const excludeUnusedTypes = {
+    bool: {
+      must_not: {
+        term: {
+          type: 'fleet-agent-events', // https://github.com/elastic/kibana/issues/91869
+        },
+      },
+    },
+  };
+
   const nextBatch = () =>
     scrollId !== undefined
       ? client.scroll<SearchResponse<SavedObjectsRawDocSource>>({
@@ -74,7 +90,10 @@ export function reader(
           scroll_id: scrollId,
         })
       : client.search<SearchResponse<SavedObjectsRawDocSource>>({
-          body: { size: batchSize },
+          body: {
+            size: batchSize,
+            query: excludeUnusedTypes,
+          },
           index,
           scroll,
         });
@@ -125,7 +144,7 @@ export async function write(client: MigrationEsClient, index: string, docs: RawD
     return;
   }
 
-  const exception: any = new Error(err.index.error!.reason);
+  const exception: any = new Error(err.index!.error!.reason);
   exception.detail = err;
   throw exception;
 }
@@ -305,7 +324,7 @@ function assertIsSupportedIndex(indexInfo: FullIndexInfo) {
  * Object indices should only ever have a single shard. This is more to handle
  * instances where customers manually expand the shards of an index.
  */
-function assertResponseIncludeAllShards({ _shards }: { _shards: ShardsInfo }) {
+function assertResponseIncludeAllShards({ _shards }: { _shards: estypes.ShardStatistics }) {
   if (!_.has(_shards, 'total') || !_.has(_shards, 'successful')) {
     return;
   }
@@ -358,11 +377,12 @@ async function reindex(
     await new Promise((r) => setTimeout(r, pollInterval));
 
     const { body } = await client.tasks.get({
-      task_id: task,
+      task_id: String(task),
     });
 
-    if (body.error) {
-      const e = body.error;
+    // @ts-expect-error @elastic/elasticsearch GetTaskResponse doesn't contain `error` property
+    const e = body.error;
+    if (e) {
       throw new Error(`Re-index failed [${e.type}] ${e.reason} :: ${JSON.stringify(e)}`);
     }
 

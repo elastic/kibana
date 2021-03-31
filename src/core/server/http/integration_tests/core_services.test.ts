@@ -65,7 +65,7 @@ describe('http service', () => {
         const { http } = await root.setup();
         const { registerAuth, createRouter, auth } = http;
 
-        await registerAuth((req, res, toolkit) => toolkit.authenticated());
+        registerAuth((req, res, toolkit) => toolkit.authenticated());
 
         const router = createRouter('');
         router.get({ path: '/is-auth', validate: false }, (context, req, res) =>
@@ -179,7 +179,7 @@ describe('http service', () => {
 
         const { http } = await root.setup();
         const { createRouter, registerAuth, auth } = http;
-        await registerAuth(authenticate);
+        registerAuth(authenticate);
         const router = createRouter('');
         router.get(
           { path: '/get-auth', validate: false, options: { authRequired: false } },

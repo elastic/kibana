@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { RequestHandler } from 'src/core/server';
-import { TypeOf } from '@kbn/config-schema';
+import type { RequestHandler } from 'src/core/server';
+import type { TypeOf } from '@kbn/config-schema';
 import semverCoerce from 'semver/functions/coerce';
-import { PostAgentUpgradeResponse, PostBulkAgentUpgradeResponse } from '../../../common/types';
-import { PostAgentUpgradeRequestSchema, PostBulkAgentUpgradeRequestSchema } from '../../types';
+
+import type { PostAgentUpgradeResponse, PostBulkAgentUpgradeResponse } from '../../../common/types';
+import type { PostAgentUpgradeRequestSchema, PostBulkAgentUpgradeRequestSchema } from '../../types';
 import * as AgentService from '../../services/agents';
 import { appContextService } from '../../services';
 import { defaultIngestErrorHandler } from '../../errors';
 import { isAgentUpgradeable } from '../../../common/services';
-import { getAgent } from '../../services/agents';
+import { getAgentById } from '../../services/agents';
 
 export const postAgentUpgradeHandler: RequestHandler<
   TypeOf<typeof PostAgentUpgradeRequestSchema.params>,
@@ -35,7 +36,7 @@ export const postAgentUpgradeHandler: RequestHandler<
       },
     });
   }
-  const agent = await getAgent(soClient, esClient, request.params.agentId);
+  const agent = await getAgentById(esClient, request.params.agentId);
   if (agent.unenrollment_started_at || agent.unenrolled_at) {
     return response.customError({
       statusCode: 400,
@@ -91,23 +92,22 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
   }
 
   try {
-    if (Array.isArray(agents)) {
-      await AgentService.sendUpgradeAgentsActions(soClient, esClient, {
-        agentIds: agents,
-        sourceUri,
-        version,
-        force,
-      });
-    } else {
-      await AgentService.sendUpgradeAgentsActions(soClient, esClient, {
-        kuery: agents,
-        sourceUri,
-        version,
-        force,
-      });
-    }
+    const agentOptions = Array.isArray(agents) ? { agentIds: agents } : { kuery: agents };
+    const upgradeOptions = {
+      ...agentOptions,
+      sourceUri,
+      version,
+      force,
+    };
+    const results = await AgentService.sendUpgradeAgentsActions(soClient, esClient, upgradeOptions);
+    const body = results.items.reduce<PostBulkAgentUpgradeResponse>((acc, so) => {
+      acc[so.id] = {
+        success: !so.error,
+        error: so.error?.message,
+      };
+      return acc;
+    }, {});
 
-    const body: PostBulkAgentUpgradeResponse = {};
     return response.ok({ body });
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });

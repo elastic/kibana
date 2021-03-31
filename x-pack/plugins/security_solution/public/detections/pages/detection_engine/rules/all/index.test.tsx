@@ -11,10 +11,9 @@ import { waitFor } from '@testing-library/react';
 
 import '../../../../../common/mock/match_media';
 import '../../../../../common/mock/formatted_relative';
-import { AllRules } from './index';
-import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
-import { useRulesTable, useRulesStatuses } from '../../../../containers/detection_engine/rules';
 import { TestProviders } from '../../../../../common/mock';
+
+import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
 import { createUseUiSetting$Mock } from '../../../../../common/lib/kibana/kibana_react.mock';
 import {
   DEFAULT_RULE_REFRESH_INTERVAL_ON,
@@ -22,6 +21,14 @@ import {
   DEFAULT_RULE_REFRESH_IDLE_VALUE,
   DEFAULT_RULES_TABLE_REFRESH_SETTING,
 } from '../../../../../../common/constants';
+
+import {
+  useRulesTable,
+  useRulesStatuses,
+  RulesTableState,
+} from '../../../../containers/detection_engine/rules';
+
+import { AllRules } from './index';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -64,10 +71,11 @@ describe('AllRules', () => {
     });
 
     mockUseRulesTable.mockImplementation(({ initialStateOverride }) => {
-      const initialState = {
+      const initialState: RulesTableState = {
         rules: [
           {
             actions: [],
+            author: [],
             created_at: '2020-02-14T19:49:28.178Z',
             created_by: 'elastic',
             description: 'jibber jabber',
@@ -86,8 +94,10 @@ describe('AllRules', () => {
             query: 'host.name:*',
             references: [],
             risk_score: 73,
+            risk_score_mapping: [],
             rule_id: '571afc56-5ed9-465d-a2a9-045f099f6e7e',
             severity: 'high',
+            severity_mapping: [],
             tags: ['Elastic', 'Endpoint'],
             threat: [],
             throttle: null,
@@ -117,6 +127,7 @@ describe('AllRules', () => {
         exportRuleIds: [],
         lastUpdated: 0,
         isRefreshOn: true,
+        isRefreshing: false,
         showIdleModal: false,
       };
 
@@ -132,6 +143,7 @@ describe('AllRules', () => {
         setShowIdleModal: jest.fn(),
         setLastRefreshDate: jest.fn(),
         setAutoRefreshOn: jest.fn(),
+        setIsRefreshing: jest.fn(),
       };
     });
 

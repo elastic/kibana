@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AuthenticationServiceSetup } from './authentication_service';
+import type { AuthenticationServiceSetup } from './authentication_service';
 
 export const authenticationMock = {
   createSetup: (): jest.Mocked<AuthenticationServiceSetup> => ({

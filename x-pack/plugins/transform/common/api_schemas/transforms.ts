@@ -14,7 +14,12 @@ import type { PivotAggDict } from '../types/pivot_aggs';
 import type { PivotGroupByDict } from '../types/pivot_group_by';
 import type { TransformId, TransformPivotConfig } from '../types/transform';
 
-import { transformStateSchema } from './common';
+import { transformStateSchema, runtimeMappingsSchema } from './common';
+
+// GET transform nodes
+export interface GetTransformNodesResponseSchema {
+  count: number;
+}
 
 // GET transforms
 export const getTransformsRequestSchema = schema.arrayOf(
@@ -40,6 +45,7 @@ export const destSchema = schema.object({
 export const pivotSchema = schema.object({
   group_by: schema.any(),
   aggregations: schema.any(),
+  max_page_search_size: schema.maybe(schema.number()),
 });
 
 export const latestFunctionSchema = schema.object({
@@ -63,30 +69,6 @@ export const settingsSchema = schema.object({
   // The default value is null, which disables throttling.
   docs_per_second: schema.maybe(schema.nullable(schema.number())),
 });
-
-export const runtimeMappingsSchema = schema.maybe(
-  schema.recordOf(
-    schema.string(),
-    schema.object({
-      type: schema.oneOf([
-        schema.literal('keyword'),
-        schema.literal('long'),
-        schema.literal('double'),
-        schema.literal('date'),
-        schema.literal('ip'),
-        schema.literal('boolean'),
-      ]),
-      script: schema.maybe(
-        schema.oneOf([
-          schema.string(),
-          schema.object({
-            source: schema.string(),
-          }),
-        ])
-      ),
-    })
-  )
-);
 
 export const sourceSchema = schema.object({
   runtime_mappings: runtimeMappingsSchema,

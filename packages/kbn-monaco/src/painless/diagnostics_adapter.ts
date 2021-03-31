@@ -18,7 +18,12 @@ const toDiagnostics = (error: PainlessError): monaco.editor.IMarkerData => {
   };
 };
 
+export interface SyntaxErrors {
+  [modelId: string]: PainlessError[];
+}
 export class DiagnosticsAdapter {
+  private errors: SyntaxErrors = {};
+
   constructor(private worker: WorkerAccessor) {
     const onModelAdd = (model: monaco.editor.IModel): void => {
       let handle: any;
@@ -55,8 +60,16 @@ export class DiagnosticsAdapter {
 
     if (errorMarkers) {
       const model = monaco.editor.getModel(resource);
+      this.errors = {
+        ...this.errors,
+        [model!.id]: errorMarkers,
+      };
       // Set the error markers and underline them with "Error" severity
       monaco.editor.setModelMarkers(model!, ID, errorMarkers.map(toDiagnostics));
     }
+  }
+
+  public getSyntaxErrors() {
+    return this.errors;
   }
 }

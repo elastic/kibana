@@ -45,10 +45,21 @@ export function ToastsProvider({ getService }: FtrProviderContext) {
     public async dismissAllToasts() {
       const list = await this.getGlobalToastList();
       const toasts = await list.findAllByCssSelector(`.euiToast`);
+
+      if (toasts.length === 0) return;
+
       for (const toast of toasts) {
         await toast.moveMouseTo();
-        const dismissButton = await testSubjects.findDescendant('toastCloseButton', toast);
-        await dismissButton.click();
+
+        if (await testSubjects.descendantExists('toastCloseButton', toast)) {
+          try {
+            const dismissButton = await testSubjects.findDescendant('toastCloseButton', toast);
+            await dismissButton.click();
+          } catch (err) {
+            // ignore errors
+            // toasts are finnicky because they can dismiss themselves right before you close them
+          }
+        }
       }
     }
 

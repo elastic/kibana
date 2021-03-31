@@ -705,12 +705,8 @@ describe('BasePathProxyServer', () => {
         options: { body: { output: 'stream' } },
       },
       (_, req, res) => {
-        try {
-          expect(req.body).toBeInstanceOf(Readable);
-          return res.ok({ body: req.route.options.body });
-        } catch (err) {
-          return res.internalError({ body: err.message });
-        }
+        expect(req.body).toBeInstanceOf(Readable);
+        return res.ok({ body: req.route.options.body });
       }
     );
     registerRouter(router);
@@ -740,15 +736,11 @@ describe('BasePathProxyServer', () => {
             },
           },
           (_, req, res) => {
-            try {
-              return res.ok({
-                body: {
-                  timeout: req.route.options.timeout,
-                },
-              });
-            } catch (err) {
-              return res.internalError({ body: err.message });
-            }
+            return res.ok({
+              body: {
+                timeout: req.route.options.timeout,
+              },
+            });
           }
         );
         registerRouter(router);
@@ -779,15 +771,11 @@ describe('BasePathProxyServer', () => {
             },
           },
           (context, req, res) => {
-            try {
-              return res.ok({
-                body: {
-                  timeout: req.route.options.timeout,
-                },
-              });
-            } catch (err) {
-              return res.internalError({ body: err.message });
-            }
+            return res.ok({
+              body: {
+                timeout: req.route.options.timeout,
+              },
+            });
           }
         );
         registerRouter(router);
@@ -815,15 +803,11 @@ describe('BasePathProxyServer', () => {
             },
           },
           (_, req, res) => {
-            try {
-              return res.ok({
-                body: {
-                  timeout: req.route.options.timeout,
-                },
-              });
-            } catch (err) {
-              return res.internalError({ body: err.message });
-            }
+            return res.ok({
+              body: {
+                timeout: req.route.options.timeout,
+              },
+            });
           }
         );
         registerRouter(router);
@@ -851,15 +835,11 @@ describe('BasePathProxyServer', () => {
             },
           },
           (_, req, res) => {
-            try {
-              return res.ok({
-                body: {
-                  timeout: req.route.options.timeout,
-                },
-              });
-            } catch (err) {
-              return res.internalError({ body: err.message });
-            }
+            return res.ok({
+              body: {
+                timeout: req.route.options.timeout,
+              },
+            });
           }
         );
         registerRouter(router);

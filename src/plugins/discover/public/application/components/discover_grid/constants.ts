@@ -24,3 +24,5 @@ export const toolbarVisibility = {
   },
   showStyleSelector: false,
 };
+
+export const defaultMonacoEditorWidth = 370;

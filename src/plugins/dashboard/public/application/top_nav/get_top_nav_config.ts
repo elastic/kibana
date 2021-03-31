@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { ViewMode } from '../../services/embeddable';
 import { TopNavIds } from './top_nav_ids';
 import { NavAction } from '../../types';
+import { TopNavMenuData } from '../../../../navigation/public';
 
 /**
  * @param actions - A mapping of TopNavIds to an action function that should run when the
@@ -20,7 +21,12 @@ import { NavAction } from '../../types';
 export function getTopNavConfig(
   dashboardMode: ViewMode,
   actions: { [key: string]: NavAction },
-  options: { hideWriteControls: boolean; isNewDashboard: boolean; isDirty: boolean }
+  options: {
+    hideWriteControls: boolean;
+    isNewDashboard: boolean;
+    isDirty: boolean;
+    isSaveInProgress?: boolean;
+  }
 ) {
   switch (dashboardMode) {
     case ViewMode.VIEW:
@@ -36,20 +42,24 @@ export function getTopNavConfig(
             getEditConfig(actions[TopNavIds.ENTER_EDIT_MODE]),
           ];
     case ViewMode.EDIT:
-      return options.isNewDashboard
-        ? [
-            getOptionsConfig(actions[TopNavIds.OPTIONS]),
-            getShareConfig(actions[TopNavIds.SHARE]),
-            getViewConfig(actions[TopNavIds.EXIT_EDIT_MODE]),
-            getSaveConfig(actions[TopNavIds.SAVE], options.isNewDashboard),
-          ]
-        : [
-            getOptionsConfig(actions[TopNavIds.OPTIONS]),
-            getShareConfig(actions[TopNavIds.SHARE]),
-            getViewConfig(actions[TopNavIds.EXIT_EDIT_MODE]),
-            getSaveConfig(actions[TopNavIds.SAVE]),
-            getQuickSave(actions[TopNavIds.QUICK_SAVE]),
-          ];
+      const disableButton = options.isSaveInProgress;
+      const navItems: TopNavMenuData[] = [
+        getOptionsConfig(actions[TopNavIds.OPTIONS], disableButton),
+        getShareConfig(actions[TopNavIds.SHARE], disableButton),
+      ];
+      if (!options.isNewDashboard) {
+        navItems.push(
+          getSaveConfig(actions[TopNavIds.SAVE], options.isNewDashboard, disableButton)
+        );
+        navItems.push(getViewConfig(actions[TopNavIds.EXIT_EDIT_MODE], disableButton));
+        navItems.push(getQuickSave(actions[TopNavIds.QUICK_SAVE], disableButton, options.isDirty));
+      } else {
+        navItems.push(getViewConfig(actions[TopNavIds.EXIT_EDIT_MODE], true));
+        navItems.push(
+          getSaveConfig(actions[TopNavIds.SAVE], options.isNewDashboard, disableButton)
+        );
+      }
+      return navItems;
     default:
       return [];
   }
@@ -106,9 +116,12 @@ function getEditConfig(action: NavAction) {
 /**
  * @returns {kbnTopNavConfig}
  */
-function getQuickSave(action: NavAction) {
+function getQuickSave(action: NavAction, isLoading?: boolean, isDirty?: boolean) {
   return {
+    isLoading,
+    disableButton: !isDirty,
     id: 'quick-save',
+    iconType: 'save',
     emphasize: true,
     label: getSaveButtonLabel(),
     description: i18n.translate('dashboard.topNave.saveConfigDescription', {
@@ -122,10 +135,12 @@ function getQuickSave(action: NavAction) {
 /**
  * @returns {kbnTopNavConfig}
  */
-function getSaveConfig(action: NavAction, isNewDashboard = false) {
+function getSaveConfig(action: NavAction, isNewDashboard = false, disableButton?: boolean) {
   return {
+    disableButton,
     id: 'save',
     label: isNewDashboard ? getSaveButtonLabel() : getSaveAsButtonLabel(),
+    iconType: isNewDashboard ? 'save' : undefined,
     description: i18n.translate('dashboard.topNave.saveAsConfigDescription', {
       defaultMessage: 'Save as a new dashboard',
     }),
@@ -138,11 +153,12 @@ function getSaveConfig(action: NavAction, isNewDashboard = false) {
 /**
  * @returns {kbnTopNavConfig}
  */
-function getViewConfig(action: NavAction) {
+function getViewConfig(action: NavAction, disableButton?: boolean) {
   return {
+    disableButton,
     id: 'cancel',
     label: i18n.translate('dashboard.topNave.cancelButtonAriaLabel', {
-      defaultMessage: 'cancel',
+      defaultMessage: 'Switch to view mode',
     }),
     description: i18n.translate('dashboard.topNave.viewConfigDescription', {
       defaultMessage: 'Switch to view-only mode',
@@ -172,7 +188,7 @@ function getCloneConfig(action: NavAction) {
 /**
  * @returns {kbnTopNavConfig}
  */
-function getShareConfig(action: NavAction | undefined) {
+function getShareConfig(action: NavAction | undefined, disableButton?: boolean) {
   return {
     id: 'share',
     label: i18n.translate('dashboard.topNave.shareButtonAriaLabel', {
@@ -184,15 +200,16 @@ function getShareConfig(action: NavAction | undefined) {
     testId: 'shareTopNavButton',
     run: action ?? (() => {}),
     // disable the Share button if no action specified
-    disableButton: !action,
+    disableButton: !action || disableButton,
   };
 }
 
 /**
  * @returns {kbnTopNavConfig}
  */
-function getOptionsConfig(action: NavAction) {
+function getOptionsConfig(action: NavAction, disableButton?: boolean) {
   return {
+    disableButton,
     id: 'options',
     label: i18n.translate('dashboard.topNave.optionsButtonAriaLabel', {
       defaultMessage: 'options',

@@ -62,7 +62,7 @@ export function registerSaveRoute(deps: RouteDependencies) {
         } catch (e) {
           const es404 = isEsError(e) && e.statusCode === 404;
           if (!es404) {
-            return response.internalError({ body: e });
+            throw e;
           }
           // Else continue...
         }
@@ -97,7 +97,7 @@ export function registerSaveRoute(deps: RouteDependencies) {
         }
 
         // Case: default
-        return response.internalError({ body: e });
+        throw e;
       }
     })
   );

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { PackageInfo } from '../types';
+import type { PackageInfo } from '../types';
+
 import { packageToPackagePolicy, packageToPackagePolicyInputs } from './package_to_package_policy';
 
 describe('Fleet - packageToPackagePolicy', () => {
@@ -29,6 +30,7 @@ describe('Fleet - packageToPackagePolicy', () => {
         index_pattern: [],
         map: [],
         lens: [],
+        ml_module: [],
       },
       elasticsearch: {
         ingest_pipeline: [],

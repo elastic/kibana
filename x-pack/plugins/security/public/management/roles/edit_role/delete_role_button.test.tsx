@@ -7,7 +7,9 @@
 
 import { EuiButtonEmpty, EuiConfirmModal } from '@elastic/eui';
 import React from 'react';
+
 import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
+
 import { DeleteRoleButton } from './delete_role_button';
 
 test('it renders without crashing', () => {

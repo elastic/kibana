@@ -19,7 +19,7 @@ describe('query(req, panel, series)', () => {
   };
   beforeEach(() => {
     req = {
-      payload: {
+      body: {
         timerange: {
           min: '2017-01-01T00:00:00Z',
           max: '2017-01-01T01:00:00Z',
@@ -94,7 +94,7 @@ describe('query(req, panel, series)', () => {
   });
 
   test('returns doc with global query', () => {
-    req.payload.filters = [
+    req.body.filters = [
       {
         bool: {
           must: [
@@ -186,7 +186,7 @@ describe('query(req, panel, series)', () => {
     });
   });
   test('returns doc with panel filter and global', () => {
-    req.payload.filters = [
+    req.body.filters = [
       {
         bool: {
           must: [
@@ -253,7 +253,7 @@ describe('query(req, panel, series)', () => {
   });
 
   test('returns doc with panel filter (ignoring globals)', () => {
-    req.payload.filters = [
+    req.body.filters = [
       {
         bool: {
           must: [
@@ -309,7 +309,7 @@ describe('query(req, panel, series)', () => {
   });
 
   test('returns doc with panel filter (ignoring globals from series)', () => {
-    req.payload.filters = [
+    req.body.filters = [
       {
         bool: {
           must: [

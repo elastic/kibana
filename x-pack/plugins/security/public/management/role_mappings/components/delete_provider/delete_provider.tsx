@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import React, { Fragment, useRef, useState, ReactElement } from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
+import type { ReactElement } from 'react';
+import React, { Fragment, useRef, useState } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { NotificationsStart } from 'src/core/public';
-import { RoleMapping } from '../../../../../common/model';
-import { RoleMappingsAPIClient } from '../../role_mappings_api_client';
+import type { NotificationsStart } from 'src/core/public';
+
+import type { RoleMapping } from '../../../../../common/model';
+import type { RoleMappingsAPIClient } from '../../role_mappings_api_client';
 
 interface Props {
   roleMappingsAPI: PublicMethodsOf<RoleMappingsAPIClient>;

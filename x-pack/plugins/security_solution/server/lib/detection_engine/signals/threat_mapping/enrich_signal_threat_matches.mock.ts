@@ -12,6 +12,7 @@ export const getNamedQueryMock = (
   overrides: Partial<ThreatMatchNamedQuery> = {}
 ): ThreatMatchNamedQuery => ({
   id: 'id',
+  index: 'index',
   field: 'field',
   value: 'value',
   ...overrides,

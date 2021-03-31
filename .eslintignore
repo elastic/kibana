@@ -15,6 +15,7 @@ node_modules
 target
 snapshots.js
 
+!/.ci
 !/.eslintrc.js
 !.storybook
 

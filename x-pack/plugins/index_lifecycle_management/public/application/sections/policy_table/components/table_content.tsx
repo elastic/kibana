@@ -319,7 +319,11 @@ export const TableContent: React.FunctionComponent<Props> = ({
 
   const rows = sortedPolicies.map((policy) => {
     const { name } = policy;
-    return <EuiTableRow key={`${name}-row`}>{renderRowCells(policy)}</EuiTableRow>;
+    return (
+      <EuiTableRow data-test-subj="policyTableRow" key={`${name}-row`}>
+        {renderRowCells(policy)}
+      </EuiTableRow>
+    );
   });
 
   const renderAddPolicyToTemplateConfirmModal = (policy: PolicyFromES): ReactElement => {

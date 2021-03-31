@@ -16,7 +16,10 @@ import type {
   DeleteTransformsRequestSchema,
   DeleteTransformsResponseSchema,
 } from '../../../common/api_schemas/delete_transforms';
-import type { FieldHistogramsResponseSchema } from '../../../common/api_schemas/field_histograms';
+import type {
+  FieldHistogramsRequestSchema,
+  FieldHistogramsResponseSchema,
+} from '../../../common/api_schemas/field_histograms';
 import type {
   StartTransformsRequestSchema,
   StartTransformsResponseSchema,
@@ -26,6 +29,7 @@ import type {
   StopTransformsResponseSchema,
 } from '../../../common/api_schemas/stop_transforms';
 import type {
+  GetTransformNodesResponseSchema,
   GetTransformsResponseSchema,
   PostTransformsPreviewRequestSchema,
   PostTransformsPreviewResponseSchema,
@@ -63,6 +67,13 @@ export const useApi = () => {
 
   return useMemo(
     () => ({
+      async getTransformNodes(): Promise<GetTransformNodesResponseSchema | HttpFetchError> {
+        try {
+          return await http.get(`${API_BASE_PATH}transforms/_nodes`);
+        } catch (e) {
+          return e;
+        }
+      },
       async getTransform(
         transformId: TransformId
       ): Promise<GetTransformsResponseSchema | HttpFetchError> {
@@ -194,6 +205,7 @@ export const useApi = () => {
         indexPatternTitle: string,
         fields: FieldHistogramRequestConfig[],
         query: string | SavedSearchQuery,
+        runtimeMappings?: FieldHistogramsRequestSchema['runtimeMappings'],
         samplerShardSize = DEFAULT_SAMPLER_SHARD_SIZE
       ): Promise<FieldHistogramsResponseSchema | HttpFetchError> {
         try {
@@ -202,6 +214,7 @@ export const useApi = () => {
               query,
               fields,
               samplerShardSize,
+              ...(runtimeMappings !== undefined ? { runtimeMappings } : {}),
             }),
           });
         } catch (e) {

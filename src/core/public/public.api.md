@@ -11,6 +11,7 @@ import { ConfigDeprecationProvider } from '@kbn/config';
 import { ConfigPath } from '@kbn/config';
 import { DetailedPeerCertificate } from 'tls';
 import { EnvironmentMode } from '@kbn/config';
+import { estypes } from '@elastic/elasticsearch';
 import { EuiBreadcrumb } from '@elastic/eui';
 import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
@@ -116,7 +117,7 @@ export interface AppLeaveDefaultAction {
 
 // Warning: (ae-forgotten-export) The symbol "AppLeaveActionFactory" needs to be exported by the entry point index.d.ts
 //
-// @public
+// @public @deprecated
 export type AppLeaveHandler = (factory: AppLeaveActionFactory, nextAppId?: string) => AppLeaveAction;
 
 // @public (undocumented)
@@ -153,6 +154,7 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
     appBasePath: string;
     element: HTMLElement;
     history: ScopedHistory<HistoryLocationState>;
+    // @deprecated
     onAppLeave: (handler: AppLeaveHandler) => void;
     setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
 }
@@ -557,7 +559,9 @@ export interface DocLinksStart {
             readonly sum: string;
             readonly top_hits: string;
         };
-        readonly runtimeFields: string;
+        readonly runtimeFields: {
+            readonly mapping: string;
+        };
         readonly scriptedFields: {
             readonly scriptFields: string;
             readonly scriptAggs: string;
@@ -569,8 +573,9 @@ export interface DocLinksStart {
             readonly luceneExpressions: string;
         };
         readonly indexPatterns: {
-            readonly loadingData: string;
             readonly introduction: string;
+            readonly fieldFormattersNumber: string;
+            readonly fieldFormattersString: string;
         };
         readonly addData: string;
         readonly kibana: string;
@@ -587,6 +592,7 @@ export interface DocLinksStart {
         };
         readonly date: {
             readonly dateMath: string;
+            readonly dateMathIndexNames: string;
         };
         readonly management: Record<string, string>;
         readonly ml: Record<string, string>;
@@ -600,6 +606,7 @@ export interface DocLinksStart {
             createApiKey: string;
             createPipeline: string;
             createTransformRequest: string;
+            cronExpressions: string;
             executeWatchActionModes: string;
             indexExists: string;
             openIndex: string;
@@ -607,6 +614,7 @@ export interface DocLinksStart {
             painlessExecute: string;
             painlessExecuteAPIContexts: string;
             putComponentTemplateMetadata: string;
+            putSnapshotLifecyclePolicy: string;
             putWatch: string;
             updateTransform: string;
         }>;
@@ -628,6 +636,9 @@ export interface DocLinksStart {
         }>;
         readonly watcher: Record<string, string>;
         readonly ccs: Record<string, string>;
+        readonly plugins: Record<string, string>;
+        readonly snapshotRestore: Record<string, string>;
+        readonly ingest: Record<string, string>;
     };
 }
 
@@ -1217,12 +1228,12 @@ export interface SavedObjectsFindOptions {
     preference?: string;
     rootSearchFields?: string[];
     search?: string;
-    searchAfter?: unknown[];
+    searchAfter?: estypes.Id[];
     searchFields?: string[];
     // (undocumented)
     sortField?: string;
     // (undocumented)
-    sortOrder?: string;
+    sortOrder?: estypes.SortOrder;
     // (undocumented)
     type: string | string[];
     typeToNamespacesMap?: Map<string, string[] | undefined>;

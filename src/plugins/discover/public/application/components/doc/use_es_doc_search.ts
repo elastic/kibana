@@ -39,7 +39,7 @@ export function buildSearchBody(
     },
     stored_fields: computedFields.storedFields,
     _source: !useNewFieldsApi,
-    fields: useNewFieldsApi ? ['*'] : undefined,
+    fields: useNewFieldsApi ? [{ field: '*', include_unmapped: 'true' }] : undefined,
     script_fields: computedFields.scriptFields,
     docvalue_fields: computedFields.docvalueFields,
   };

@@ -53,6 +53,22 @@ describe('kbn_url_storage', () => {
       expect(retrievedState2).toEqual(state2);
     });
 
+    it('should set expanded state to url before hash', () => {
+      let newUrl = setStateToKbnUrl('_s', state1, { useHash: false, storeInHashQuery: false }, url);
+      expect(newUrl).toMatchInlineSnapshot(
+        `"http://localhost:5601/oxf/app/kibana?_s=(testArray:!(1,2,()),testNull:!n,testNumber:0,testObj:(test:'123'),testStr:'123')#/yourApp"`
+      );
+      const retrievedState1 = getStateFromKbnUrl('_s', newUrl, { getFromHashQuery: false });
+      expect(retrievedState1).toEqual(state1);
+
+      newUrl = setStateToKbnUrl('_s', state2, { useHash: false, storeInHashQuery: false }, newUrl);
+      expect(newUrl).toMatchInlineSnapshot(
+        `"http://localhost:5601/oxf/app/kibana?_s=(test:'123')#/yourApp"`
+      );
+      const retrievedState2 = getStateFromKbnUrl('_s', newUrl, { getFromHashQuery: false });
+      expect(retrievedState2).toEqual(state2);
+    });
+
     it('should set hashed state to url', () => {
       let newUrl = setStateToKbnUrl('_s', state1, { useHash: true }, url);
       expect(newUrl).toMatchInlineSnapshot(

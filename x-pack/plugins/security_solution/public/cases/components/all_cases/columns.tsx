@@ -19,7 +19,7 @@ import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
 import { DefaultItemIconButtonAction } from '@elastic/eui/src/components/basic_table/action_types';
 
-import { CaseStatuses } from '../../../../../case/common/api';
+import { CaseStatuses, CaseType } from '../../../../../cases/common/api';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { Case, SubCase } from '../../containers/types';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
@@ -204,7 +204,7 @@ export const getCasesColumns = (
       name: i18n.STATUS,
       render: (theCase: Case) => {
         if (theCase?.subCases == null || theCase.subCases.length === 0) {
-          if (theCase.status == null) {
+          if (theCase.status == null || theCase.type === CaseType.collection) {
             return getEmptyTagValue();
           }
           return <Status type={theCase.status} />;
