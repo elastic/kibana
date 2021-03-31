@@ -19,8 +19,15 @@ node scripts/build_kibana_platform_plugins \
   --scan-dir "$XPACK_DIR/test/usage_collection/plugins" \
   --verbose
 
+export KBN_NP_PLUGINS_BUILT=true
+
 echo "--- Build Default Distribution"
 node scripts/build --debug --no-oss
+
+echo "--- Ship Default Metrics to CI Stats"
+node scripts/ship_ci_stats \
+  --metrics target/optimizer_bundle_metrics.json \
+  --metrics packages/kbn-ui-shared-deps/target/metrics.json
 
 echo "--- Archive Default Distribution"
 linuxBuild="$(find "$KIBANA_DIR/target" -name 'kibana-*-linux-x86_64.tar.gz')"
