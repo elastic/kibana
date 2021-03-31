@@ -14,8 +14,9 @@ const { SolutionToolbar: strings } = ComponentStrings;
 
 export type Props = Pick<SolutionToolbarButtonProps, 'onClick'>;
 
-export const AddFromLibraryButton = ({ onClick }: Props) => (
+export const AddFromLibraryButton = ({ onClick, ...rest }: Props) => (
   <SolutionToolbarButton
+    {...rest}
     iconType="folderOpen"
     onClick={onClick}
     label={strings.getLibraryButtonLabel()}
