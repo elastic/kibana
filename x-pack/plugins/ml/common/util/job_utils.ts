@@ -733,7 +733,7 @@ export function validateGroupNames(job: Job): ValidationResults {
  * @return {Duration} the parsed interval, or null if it does not represent a valid
  * time interval.
  */
-export function parseTimeIntervalForJob(value: string | undefined): Duration | null {
+export function parseTimeIntervalForJob(value: string | number | undefined): Duration | null {
   if (value === undefined) {
     return null;
   }
@@ -748,7 +748,7 @@ export function parseTimeIntervalForJob(value: string | undefined): Duration | n
 
 // Checks that the value for a field which represents a time interval,
 // such as a job bucket span or datafeed query delay, is valid.
-function isValidTimeInterval(value: string | undefined): boolean {
+function isValidTimeInterval(value: string | number | undefined): boolean {
   if (value === undefined) {
     return true;
   }

@@ -17,6 +17,7 @@ import { shallow } from 'enzyme';
 
 import { Loading } from '../../../shared/loading';
 import { AnalyticsRouter } from '../analytics';
+import { ApiLogs } from '../api_logs';
 import { CurationsRouter } from '../curations';
 import { EngineOverview } from '../engine_overview';
 import { RelevanceTuning } from '../relevance_tuning';
@@ -118,5 +119,12 @@ describe('EngineRouter', () => {
     const wrapper = shallow(<EngineRouter />);
 
     expect(wrapper.find(ResultSettings)).toHaveLength(1);
+  });
+
+  it('renders an API logs view', () => {
+    setMockValues({ ...values, myRole: { canViewEngineApiLogs: true } });
+    const wrapper = shallow(<EngineRouter />);
+
+    expect(wrapper.find(ApiLogs)).toHaveLength(1);
   });
 });

@@ -63,7 +63,7 @@ export class AceTokensProvider implements TokensProvider {
       return null;
     }
 
-    const tokens: TokenInfo[] = this.session.getTokens(lineNumber - 1) as any;
+    const tokens = (this.session.getTokens(lineNumber - 1) as unknown) as TokenInfo[];
     if (!tokens || !tokens.length) {
       // We are inside of the document but have no tokens for this line. Return an empty
       // array to represent this empty line.
@@ -74,7 +74,7 @@ export class AceTokensProvider implements TokensProvider {
   }
 
   getTokenAt(pos: Position): Token | null {
-    const tokens: TokenInfo[] = this.session.getTokens(pos.lineNumber - 1) as any;
+    const tokens = (this.session.getTokens(pos.lineNumber - 1) as unknown) as TokenInfo[];
     if (tokens) {
       return extractTokenFromAceTokenRow(pos.lineNumber, pos.column, tokens);
     }

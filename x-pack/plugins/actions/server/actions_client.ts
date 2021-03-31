@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { i18n } from '@kbn/i18n';
 import { omitBy, isUndefined } from 'lodash';
@@ -509,7 +510,7 @@ async function injectExtraFindData(
   scopedClusterClient: IScopedClusterClient,
   actionResults: ActionResult[]
 ): Promise<FindActionResult[]> {
-  const aggs: Record<string, unknown> = {};
+  const aggs: Record<string, estypes.AggregationContainer> = {};
   for (const actionResult of actionResults) {
     aggs[actionResult.id] = {
       filter: {
@@ -555,6 +556,7 @@ async function injectExtraFindData(
   });
   return actionResults.map((actionResult) => ({
     ...actionResult,
+    // @ts-expect-error aggegation type is not specified
     referencedByCount: aggregationResult.aggregations[actionResult.id].doc_count,
   }));
 }

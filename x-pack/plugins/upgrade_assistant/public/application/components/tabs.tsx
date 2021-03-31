@@ -19,8 +19,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { LatestMinorBanner } from './latest_minor_banner';
-import { CheckupTab } from './tabs/checkup';
-import { OverviewTab } from './tabs/overview';
+import { DeprecationTab } from './es_deprecations';
+import { OverviewTab } from './overview';
 import { TelemetryState, UpgradeAssistantTabProps } from './types';
 import { useAppContext } from '../app_context';
 
@@ -58,7 +58,7 @@ export const UpgradeAssistantTabs: React.FunctionComponent = () => {
           defaultMessage: 'Cluster',
         }),
         content: (
-          <CheckupTab
+          <DeprecationTab
             key="cluster"
             deprecations={checkupData ? checkupData.cluster : undefined}
             checkupLabel={i18n.translate('xpack.upgradeAssistant.tabs.checkupTab.clusterLabel', {
@@ -75,7 +75,7 @@ export const UpgradeAssistantTabs: React.FunctionComponent = () => {
           defaultMessage: 'Indices',
         }),
         content: (
-          <CheckupTab
+          <DeprecationTab
             key="indices"
             deprecations={checkupData ? checkupData.indices : undefined}
             checkupLabel={i18n.translate('xpack.upgradeAssistant.checkupTab.indexLabel', {

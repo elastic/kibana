@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 import { flow, omit } from 'lodash/fp';
 import set from 'set-value';
 
@@ -19,7 +19,6 @@ import { RuleTypeParams, RefreshTypes } from '../types';
 import { singleBulkCreate, SingleBulkCreateResponse } from './single_bulk_create';
 import { AnomalyResults, Anomaly } from '../../machine_learning';
 import { BuildRuleMessage } from './rule_messages';
-import { SearchResponse } from '../../types';
 
 interface BulkCreateMlSignalsParams {
   actions: RuleAlertAction[];
@@ -72,12 +71,18 @@ export const transformAnomalyFieldsToEcs = (anomaly: Anomaly): EcsAnomaly => {
   return flow(omitDottedFields, setNestedFields, setTimestamp)(anomaly);
 };
 
-const transformAnomalyResultsToEcs = (results: AnomalyResults): SearchResponse<EcsAnomaly> => {
+const transformAnomalyResultsToEcs = (
+  results: AnomalyResults
+): estypes.SearchResponse<EcsAnomaly> => {
   const transformedHits = results.hits.hits.map(({ _source, ...rest }) => ({
     ...rest,
-    _source: transformAnomalyFieldsToEcs(_source),
+    _source: transformAnomalyFieldsToEcs(
+      // @ts-expect-error @elastic/elasticsearch _source is optional
+      _source
+    ),
   }));
 
+  // @ts-expect-error Anomaly is not assignable to EcsAnomaly
   return {
     ...results,
     hits: {

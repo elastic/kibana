@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { errors } from '@elastic/elasticsearch';
+import { errors, estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { RequestHandlerContext, ElasticsearchClient } from 'src/core/server';
 import { CoreSetup, Logger } from 'src/core/server';
@@ -192,18 +192,19 @@ async function fetchIndexPatternStats({
       _source: false,
       runtime_mappings: runtimeFields.reduce((acc, field) => {
         if (!field.runtimeField) return acc;
+        // @ts-expect-error @elastic/elasticsearch StoredScript.language is required
         acc[field.name] = field.runtimeField;
         return acc;
-      }, {} as Record<string, unknown>),
+      }, {} as Record<string, estypes.RuntimeField>),
       script_fields: scriptedFields.reduce((acc, field) => {
         acc[field.name] = {
           script: {
-            lang: field.lang,
-            source: field.script,
+            lang: field.lang!,
+            source: field.script!,
           },
         };
         return acc;
-      }, {} as Record<string, unknown>),
+      }, {} as Record<string, estypes.ScriptField>),
     },
   });
   return result.hits.hits;
@@ -212,10 +213,7 @@ async function fetchIndexPatternStats({
 /**
  * Exported only for unit tests.
  */
-export function existingFields(
-  docs: Array<{ fields: Record<string, unknown[]>; [key: string]: unknown }>,
-  fields: Field[]
-): string[] {
+export function existingFields(docs: estypes.Hit[], fields: Field[]): string[] {
   const missingFields = new Set(fields);
 
   for (const doc of docs) {
@@ -224,7 +222,7 @@ export function existingFields(
     }
 
     missingFields.forEach((field) => {
-      let fieldStore: Record<string, unknown> = doc.fields;
+      let fieldStore = doc.fields!;
       if (field.isMeta) {
         fieldStore = doc;
       }

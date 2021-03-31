@@ -1647,6 +1647,21 @@
     "enums": [],
     "misc": [
       {
+        "id": "def-common.AsApiContract",
+        "type": "Type",
+        "label": "AsApiContract",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/actions/common/rewrite_request_case.ts",
+          "lineNumber": 14
+        },
+        "signature": [
+          "{ [K in keyof T as CamelToSnake<RenameActionToConnector<Extract<K, string>>>]: T[K]; }"
+        ],
+        "initialIsOpen": false
+      },
+      {
         "tags": [],
         "id": "def-common.BASE_ACTION_API_PATH",
         "type": "string",
@@ -1658,6 +1673,60 @@
         },
         "signature": [
           "\"/api/actions\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.RewriteRequestCase",
+        "type": "Type",
+        "label": "RewriteRequestCase",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/actions/common/rewrite_request_case.ts",
+          "lineNumber": 18
+        },
+        "signature": [
+          "(requested: ",
+          {
+            "pluginId": "actions",
+            "scope": "common",
+            "docId": "kibActionsPluginApi",
+            "section": "def-common.AsApiContract",
+            "text": "AsApiContract"
+          },
+          "<T>) => T"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-common.RewriteResponseCase",
+        "type": "Type",
+        "label": "RewriteResponseCase",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/actions/common/rewrite_request_case.ts",
+          "lineNumber": 19
+        },
+        "signature": [
+          "(responded: T) => T extends (infer Item)[] ? ",
+          {
+            "pluginId": "actions",
+            "scope": "common",
+            "docId": "kibActionsPluginApi",
+            "section": "def-common.AsApiContract",
+            "text": "AsApiContract"
+          },
+          "<Item>[] : ",
+          {
+            "pluginId": "actions",
+            "scope": "common",
+            "docId": "kibActionsPluginApi",
+            "section": "def-common.AsApiContract",
+            "text": "AsApiContract"
+          },
+          "<T>"
         ],
         "initialIsOpen": false
       }

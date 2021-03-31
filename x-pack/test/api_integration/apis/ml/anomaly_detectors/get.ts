@@ -52,6 +52,7 @@ export default ({ getService }: FtrProviderContext) => {
     ];
 
     for (const jobConfig of mockJobConfigs) {
+      // @ts-expect-error not full interface
       await ml.api.createAnomalyDetectionJob(jobConfig);
     }
   }
