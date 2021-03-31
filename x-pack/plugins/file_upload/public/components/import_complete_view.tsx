@@ -97,7 +97,7 @@ export class ImportCompleteView extends Component<Props, {}> {
       return (
         <EuiCallOut
           title={i18n.translate('xpack.fileUpload.uploadFailureTitle', {
-            defaultMessage: 'File upload failed',
+            defaultMessage: 'Unable to upload file',
           })}
           color="danger"
           iconType="alert"
@@ -115,7 +115,7 @@ export class ImportCompleteView extends Component<Props, {}> {
             external
           >
             {i18n.translate('xpack.fileUpload.permission.docLink', {
-              defaultMessage: 'View file import permissions.',
+              defaultMessage: 'View file import permissions',
             })}
           </EuiLink>
         </EuiCallOut>
@@ -133,7 +133,7 @@ export class ImportCompleteView extends Component<Props, {}> {
       return (
         <EuiCallOut
           title={i18n.translate('xpack.fileUpload.uploadFailureTitle', {
-            defaultMessage: 'File upload failed',
+            defaultMessage: 'Unable to upload file',
           })}
           color="danger"
           iconType="alert"
@@ -181,7 +181,7 @@ export class ImportCompleteView extends Component<Props, {}> {
         <p>
           <FormattedMessage
             id="xpack.fileUpload.jsonImport.indexModsMsg"
-            defaultMessage="Further index modifications can be made using "
+            defaultMessage="To modify the index, go to "
           />
           <a
             data-test-subj="indexManagementNewIndexLink"
@@ -190,7 +190,7 @@ export class ImportCompleteView extends Component<Props, {}> {
           >
             <FormattedMessage
               id="xpack.fileUpload.jsonImport.indexMgmtLink"
-              defaultMessage="Index Management"
+              defaultMessage="Index Management."
             />
           </a>
         </p>

@@ -17,17 +17,15 @@ spaces in the **{stack-manage-app}** in {kib}. For more information, see
 <<kibana-privileges, {kib} privileges>>, and <<xpack-kibana-role-management, {kib} role management>>.
 
 To upload GeoJSON files in {kib} with *Maps*, you must have:
-* [ ] `all` {kib}
-privilege for the `Maps` feature
-* [ ] `all` {kib}
-privilege for the `Index Pattern Management` feature
-* [ ] `create` and `create_index` index privileges for destination indices.
-To use the index in Maps, you must also have `read` and `view_index_metadata` index privileges.
+* `all` {kib} privilege for `Maps`
+* `all` {kib} privilege for `Index Pattern Management`
+* `create` and `create_index` index privileges for destination indices.
+* To use the index in Maps, you must also have `read` and `view_index_metadata` index privileges for destination indices.
 
-To upload CSV files in {kib} with the *{file-data-viz}*, in addition to upload GeoJson privileges, to you must have:
-* [ ] `manage_pipeline` cluster privilege
-* [ ] `read` {kib} privilege for the `Machine Learning` feature
-* [ ] `machine_learning_admin` or `machine_learning_user` role
+To upload CSV files in {kib} with the *{file-data-viz}*, you must have privileges to upload GeoJSON files and:
+* `manage_pipeline` cluster privilege
+* `read` {kib} privilege for `Machine Learning`
+* `machine_learning_admin` or `machine_learning_user` role
 
 
 [discrete]
