@@ -5,19 +5,22 @@
  * 2.0.
  */
 
-import { LogicMounter } from '../../../../__mocks__';
+import { LogicMounter, mockHttpValues } from '../../../../__mocks__';
+import '../../../__mocks__/engine_logic.mock';
 
 import { nextTick } from '@kbn/test/jest';
+
+import { flashAPIErrors } from '../../../../shared/flash_messages';
 
 import { SampleResponseLogic } from './sample_response_logic';
 
 describe('SampleResponseLogic', () => {
   const { mount } = new LogicMounter(SampleResponseLogic);
+  const { http } = mockHttpValues;
 
   const DEFAULT_VALUES = {
     query: '',
     response: null,
-    isLoading: false,
   };
 
   beforeEach(() => {
@@ -33,10 +36,9 @@ describe('SampleResponseLogic', () => {
 
   describe('actions', () => {
     describe('queryChanged', () => {
-      it('updates query and sets isLoading to true', () => {
+      it('updates the query', () => {
         mount({
-          query: {},
-          isLoading: false,
+          query: '',
         });
 
         SampleResponseLogic.actions.queryChanged('foo');
@@ -44,16 +46,14 @@ describe('SampleResponseLogic', () => {
         expect(SampleResponseLogic.values).toEqual({
           ...DEFAULT_VALUES,
           query: 'foo',
-          isLoading: true,
         });
       });
     });
 
     describe('getSearchResultsSuccess', () => {
-      it('sets the response from a search API request and sets isLoading to false', () => {
+      it('sets the response from a search API request', () => {
         mount({
           response: null,
-          isLoading: true,
         });
 
         SampleResponseLogic.actions.getSearchResultsSuccess({});
@@ -61,85 +61,178 @@ describe('SampleResponseLogic', () => {
         expect(SampleResponseLogic.values).toEqual({
           ...DEFAULT_VALUES,
           response: {},
-          isLoading: false,
+        });
+      });
+
+      it('sets the response to null if no response is passed', () => {
+        mount({
+          response: null,
+        });
+
+        SampleResponseLogic.actions.getSearchResultsSuccess();
+
+        expect(SampleResponseLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          response: null,
         });
       });
     });
 
     describe('getSearchResultsFailure', () => {
-      it('sets isLoading to false', () => {
+      it('sets a string response from a search API request', () => {
         mount({
-          isLoading: true,
+          response: null,
+        });
+
+        SampleResponseLogic.actions.getSearchResultsFailure('An error occured.');
+
+        expect(SampleResponseLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          response: 'An error occured.',
+        });
+      });
+
+      it('sets the response to null if no response is passed', () => {
+        mount({
+          response: null,
         });
 
         SampleResponseLogic.actions.getSearchResultsFailure();
 
         expect(SampleResponseLogic.values).toEqual({
           ...DEFAULT_VALUES,
-          isLoading: false,
+          response: null,
         });
       });
     });
   });
 
   describe('listeners', () => {
-    describe('queryChanged', () => {
-      // TODO it('makes an API request')
+    describe('getSearchResults', () => {
+      beforeAll(() => jest.useFakeTimers());
+      afterAll(() => jest.useRealTimers());
 
-      it('calls getSearchResultsSuccess with the result of the response from the search API request', async () => {
+      it('makes a search API request and calls getSearchResultsSuccess with the first result of the response', async () => {
         mount();
         jest.spyOn(SampleResponseLogic.actions, 'getSearchResultsSuccess');
 
-        SampleResponseLogic.actions.queryChanged('foo');
+        http.post.mockReturnValue(
+          Promise.resolve({
+            results: [
+              { id: { raw: 'foo' }, _meta: {} },
+              { id: { raw: 'bar' }, _meta: {} },
+              { id: { raw: 'baz' }, _meta: {} },
+            ],
+          })
+        );
+
+        SampleResponseLogic.actions.getSearchResults('foo', { foo: { raw: true } });
+        jest.runAllTimers();
         await nextTick();
 
         expect(SampleResponseLogic.actions.getSearchResultsSuccess).toHaveBeenCalledWith({
-          visitors: {
-            raw: 776218,
-          },
-          nps_image_url: {
-            raw:
-              'https://www.nps.gov/common/uploads/banner_image/imr/homepage/9E7FC0DB-1DD8-B71B-0BC3880DC2250415.jpg',
-          },
-          square_km: {
-            raw: 1366.2,
-          },
-          world_heritage_site: {
-            raw: 'false',
-          },
-          date_established: {
-            raw: '1964-09-12T05:00:00+00:00',
-          },
-          image_url: {
-            raw:
-              'https://storage.googleapis.com/public-demo-assets.swiftype.info/swiftype-dot-com-search-ui-national-parks-demo/9E7FC0DB-1DD8-B71B-0BC3880DC2250415.jpg',
-          },
-          description: {
-            raw:
-              'This landscape was eroded into a maze of canyons, buttes, and mesas by the combined efforts of the Colorado River, Green River, and their tributaries, which divide the park into three districts. The park also contains rock pinnacles and arches, as well as artifacts from Ancient Pueblo peoples.',
-          },
-          location: {
-            raw: '38.2,-109.93',
-          },
-          acres: {
-            raw: '337597.83',
-          },
-          title: {
-            raw: 'Canyonlands',
-          },
-          nps_link: {
-            raw: 'https://www.nps.gov/cany/index.htm',
-          },
-          states: {
-            raw: ['Utah'],
-          },
-          id: {
-            raw: 'park_canyonlands',
-          },
+          // Note that the _meta field was stripped from the result
+          id: { raw: 'foo' },
         });
       });
 
-      // TODO it('handles errors')
+      it('calls getSearchResultsSuccess with a "No Results." message if there are no results', async () => {
+        mount();
+        jest.spyOn(SampleResponseLogic.actions, 'getSearchResultsSuccess');
+
+        http.post.mockReturnValue(
+          Promise.resolve({
+            results: [],
+          })
+        );
+
+        SampleResponseLogic.actions.getSearchResults('foo', { foo: { raw: true } });
+        jest.runAllTimers();
+        await nextTick();
+
+        expect(SampleResponseLogic.actions.getSearchResultsSuccess).toHaveBeenCalledWith(
+          'No results.'
+        );
+      });
+
+      it('handles 500 errors by setting a generic error response and showing a flash message error', async () => {
+        mount();
+        jest.spyOn(SampleResponseLogic.actions, 'getSearchResultsFailure');
+
+        const error = {
+          response: {
+            status: 500,
+          },
+        };
+
+        http.post.mockReturnValueOnce(Promise.reject(error));
+
+        SampleResponseLogic.actions.getSearchResults('foo', { foo: { raw: true } });
+        jest.runAllTimers();
+        await nextTick();
+
+        expect(flashAPIErrors).toHaveBeenCalledWith(error);
+        expect(SampleResponseLogic.actions.getSearchResultsFailure).toHaveBeenCalledWith(
+          'An error occured.'
+        );
+      });
+
+      it('handles 400 errors by setting the response message, but does not show a flash error message', async () => {
+        mount();
+        jest.spyOn(SampleResponseLogic.actions, 'getSearchResultsFailure');
+
+        http.post.mockReturnValueOnce(
+          Promise.reject({
+            response: {
+              status: 400,
+            },
+            body: {
+              message: 'A validation error occurred.',
+            },
+          })
+        );
+
+        SampleResponseLogic.actions.getSearchResults('foo', { foo: { raw: true } });
+        jest.runAllTimers();
+        await nextTick();
+
+        expect(SampleResponseLogic.actions.getSearchResultsFailure).toHaveBeenCalledWith(
+          'A validation error occurred.'
+        );
+      });
+
+      it('sets a generic message on a 400 error if no custom message is provided in the response', async () => {
+        mount();
+        jest.spyOn(SampleResponseLogic.actions, 'getSearchResultsFailure');
+
+        http.post.mockReturnValueOnce(
+          Promise.reject({
+            response: {
+              status: 400,
+            },
+          })
+        );
+
+        SampleResponseLogic.actions.getSearchResults('foo', { foo: { raw: true } });
+        jest.runAllTimers();
+        await nextTick();
+
+        expect(SampleResponseLogic.actions.getSearchResultsFailure).toHaveBeenCalledWith(
+          'An error occured.'
+        );
+      });
+
+      it('does nothing if an empty object is passed for the resultFields parameter', async () => {
+        mount();
+        jest.spyOn(SampleResponseLogic.actions, 'getSearchResultsSuccess');
+
+        SampleResponseLogic.actions.getSearchResults('foo', {});
+
+        jest.runAllTimers();
+        await nextTick();
+
+        expect(SampleResponseLogic.actions.getSearchResultsSuccess).not.toHaveBeenCalled();
+      });
     });
   });
 });

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import '../../../../__mocks__/shallow_useeffect.mock';
 import { setMockActions, setMockValues } from '../../../../__mocks__';
 
 import React from 'react';
@@ -18,9 +19,11 @@ import { SampleResponse } from './sample_response';
 describe('SampleResponse', () => {
   const actions = {
     queryChanged: jest.fn(),
+    getSearchResults: jest.fn(),
   };
 
   const values = {
+    reducedServerResultFields: {},
     query: 'foo',
     response: {
       bar: 'baz',
@@ -44,16 +47,29 @@ describe('SampleResponse', () => {
     expect(actions.queryChanged).toHaveBeenCalledWith('bar');
   });
 
+  it('will call getSearchResults with the current value of query and reducedServerResultFields in a useEffect, which updates the displayed response', () => {
+    const wrapper = shallow(<SampleResponse />);
+    expect(wrapper.find(EuiFieldSearch).prop('value')).toEqual('foo');
+  });
+
   it('renders the response from the given user "query" in a code block', () => {
     const wrapper = shallow(<SampleResponse />);
     expect(wrapper.find(EuiCodeBlock).prop('children')).toEqual('{\n  "bar": "baz"\n}');
   });
 
-  it('renders an empty string the code block if no response exists yet', () => {
+  it('renders a plain old string in the code block if the response is a string', () => {
+    setMockValues({
+      response: 'No results.',
+    });
+    const wrapper = shallow(<SampleResponse />);
+    expect(wrapper.find(EuiCodeBlock).prop('children')).toEqual('No results.');
+  });
+
+  it('will not render a code block at all if there is no response yet', () => {
     setMockValues({
       response: null,
     });
     const wrapper = shallow(<SampleResponse />);
-    expect(wrapper.find(EuiCodeBlock).prop('children')).toEqual('');
+    expect(wrapper.find(EuiCodeBlock).exists()).toEqual(false);
   });
 });

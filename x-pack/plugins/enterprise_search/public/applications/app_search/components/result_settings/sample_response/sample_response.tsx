@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -20,11 +20,19 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { ResultSettingsLogic } from '../result_settings_logic';
+
 import { SampleResponseLogic } from './sample_response_logic';
 
 export const SampleResponse: React.FC = () => {
+  const { reducedServerResultFields } = useValues(ResultSettingsLogic);
+
   const { query, response } = useValues(SampleResponseLogic);
-  const { queryChanged } = useActions(SampleResponseLogic);
+  const { queryChanged, getSearchResults } = useActions(SampleResponseLogic);
+
+  useEffect(() => {
+    getSearchResults(query, reducedServerResultFields);
+  }, [query, reducedServerResultFields]);
 
   return (
     <EuiPanel hasShadow>
@@ -54,11 +62,11 @@ export const SampleResponse: React.FC = () => {
         data-test-subj="ResultSettingsQuerySampleResponse"
       />
       <EuiSpacer />
-      <EuiCodeBlock language="json" whiteSpace="pre-wrap">
-        {/* TODO No results messsage */}
-        {/* TODO Query on load */}
-        {response ? JSON.stringify(response, null, 2) : ''}
-      </EuiCodeBlock>
+      {!!response && (
+        <EuiCodeBlock language="json" whiteSpace="pre-wrap">
+          {typeof response === 'string' ? response : JSON.stringify(response, null, 2)}
+        </EuiCodeBlock>
+      )}
     </EuiPanel>
   );
 };

@@ -7,18 +7,38 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { SampleSearchResponse } from '../types';
+import { i18n } from '@kbn/i18n';
+
+import { flashAPIErrors } from '../../../../shared/flash_messages';
+
+import { HttpLogic } from '../../../../shared/http';
+import { EngineLogic } from '../../engine';
+
+import { SampleSearchResponse, ServerFieldResultSettingObject } from '../types';
+
+const NO_RESULTS_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.resultSettings.sampleResponse.noResultsMessage',
+  { defaultMessage: 'No results.' }
+);
+
+const ERROR_MESSAGE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engine.resultSettings.sampleResponse.errorMessage',
+  { defaultMessage: 'An error occured.' }
+);
 
 interface SampleResponseValues {
   query: string;
-  response?: SampleSearchResponse;
-  isLoading: boolean;
+  response: SampleSearchResponse | string | null;
 }
 
 interface SampleResponseActions {
   queryChanged: (query: string) => { query: string };
-  getSearchResultsSuccess: (response: SampleSearchResponse) => { response: SampleSearchResponse };
-  getSearchResultsFailure: () => void;
+  getSearchResultsSuccess: (response?: SampleSearchResponse) => { response?: SampleSearchResponse };
+  getSearchResultsFailure: (response?: string) => { response?: string };
+  getSearchResults: (
+    query: string,
+    resultFields: ServerFieldResultSettingObject
+  ) => { query: string; resultFields: ServerFieldResultSettingObject };
 }
 
 export const SampleResponseLogic = kea<MakeLogicType<SampleResponseValues, SampleResponseActions>>({
@@ -26,70 +46,52 @@ export const SampleResponseLogic = kea<MakeLogicType<SampleResponseValues, Sampl
   actions: {
     queryChanged: (query) => ({ query }),
     getSearchResultsSuccess: (response) => ({ response }),
-    getSearchResultsFailure: true,
+    getSearchResultsFailure: (response) => ({ response }),
+    getSearchResults: (query, resultFields) => ({ query, resultFields }),
   },
   reducers: {
     query: ['', { queryChanged: (_, { query }) => query }],
-    response: [null, { getSearchResultsSuccess: (_, { response }) => response }],
-    isLoading: [
-      false,
+    response: [
+      null,
       {
-        queryChanged: () => true,
-        getSearchResultsSuccess: () => false,
-        getSearchResultsFailure: () => false,
+        getSearchResultsSuccess: (_, { response }) => response || null,
+        getSearchResultsFailure: (_, { response }) => response || null,
       },
     ],
   },
   listeners: ({ actions }) => ({
-    queryChanged: async () => {
+    getSearchResults: async ({ query, resultFields }, breakpoint) => {
+      if (Object.keys(resultFields).length < 1) return;
+      await breakpoint(250);
+
+      const { http } = HttpLogic.values;
+      const { engineName } = EngineLogic.values;
+
+      const url = `/api/app_search/engines/${engineName}/sample_response_search`;
+
       try {
-        const response = await Promise.resolve({
-          visitors: {
-            raw: 776218,
-          },
-          nps_image_url: {
-            raw:
-              'https://www.nps.gov/common/uploads/banner_image/imr/homepage/9E7FC0DB-1DD8-B71B-0BC3880DC2250415.jpg',
-          },
-          square_km: {
-            raw: 1366.2,
-          },
-          world_heritage_site: {
-            raw: 'false',
-          },
-          date_established: {
-            raw: '1964-09-12T05:00:00+00:00',
-          },
-          image_url: {
-            raw:
-              'https://storage.googleapis.com/public-demo-assets.swiftype.info/swiftype-dot-com-search-ui-national-parks-demo/9E7FC0DB-1DD8-B71B-0BC3880DC2250415.jpg',
-          },
-          description: {
-            raw:
-              'This landscape was eroded into a maze of canyons, buttes, and mesas by the combined efforts of the Colorado River, Green River, and their tributaries, which divide the park into three districts. The park also contains rock pinnacles and arches, as well as artifacts from Ancient Pueblo peoples.',
-          },
-          location: {
-            raw: '38.2,-109.93',
-          },
-          acres: {
-            raw: '337597.83',
-          },
-          title: {
-            raw: 'Canyonlands',
-          },
-          nps_link: {
-            raw: 'https://www.nps.gov/cany/index.htm',
-          },
-          states: {
-            raw: ['Utah'],
-          },
-          id: {
-            raw: 'park_canyonlands',
-          },
+        const response = await http.post(url, {
+          body: JSON.stringify({
+            query,
+            result_fields: resultFields,
+          }),
         });
-        actions.getSearchResultsSuccess(response as SampleSearchResponse);
-      } catch (error) {
-        actions.getSearchResultsFailure();
+
+        const result = response.results?.[0];
+        actions.getSearchResultsSuccess(
+          result ? { ...result, _meta: undefined } : NO_RESULTS_MESSAGE
+        );
+      } catch (e) {
+        if (e.response.status >= 500) {
+          // 4XX Validation errors are expected, as a user could enter something like 2 as a size, which is out of valid range.
+          // In this case, we simply render the message from the server as the response.
+          //
+          // 5xx Server errors are unexpected, and need to be reported in a flash message.
+          flashAPIErrors(e);
+          actions.getSearchResultsFailure(ERROR_MESSAGE);
+        } else {
+          actions.getSearchResultsFailure(e.body?.message || ERROR_MESSAGE);
+        }
       }
     },
   }),

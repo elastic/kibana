@@ -16,6 +16,7 @@ import { registerEnginesRoutes } from './engines';
 import { registerOnboardingRoutes } from './onboarding';
 import { registerResultSettingsRoutes } from './result_settings';
 import { registerRoleMappingsRoutes } from './role_mappings';
+import { registerSampleResponseSearchRoute } from './sample_response_search';
 import { registerSearchSettingsRoutes } from './search_settings';
 import { registerSettingsRoutes } from './settings';
 
@@ -28,6 +29,7 @@ export const registerAppSearchRoutes = (dependencies: RouteDependencies) => {
   registerDocumentRoutes(dependencies);
   registerCurationsRoutes(dependencies);
   registerSearchSettingsRoutes(dependencies);
+  registerSampleResponseSearchRoute(dependencies);
   registerRoleMappingsRoutes(dependencies);
   registerResultSettingsRoutes(dependencies);
   registerApiLogsRoutes(dependencies);
