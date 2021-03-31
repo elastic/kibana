@@ -634,7 +634,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
             <h3>
               <FormattedMessage
                 id="xpack.snapshotRestore.restoreForm.stepLogistics.includeAliasesTitle"
-                defaultMessage="Include aliases"
+                defaultMessage="Restore aliases"
               />
             </h3>
           </EuiTitle>
