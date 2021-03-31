@@ -19,7 +19,12 @@ import type {
 } from '../../constants';
 import type { ValueOf } from '../../types';
 
-import type { PackageSpecManifest, PackageSpecScreenshot } from './package_spec';
+import type {
+  PackageSpecManifest,
+  PackageSpecIcon,
+  PackageSpecScreenshot,
+  PackageSpecCategory,
+} from './package_spec';
 
 export type InstallationStatus = typeof installationStatuses;
 
@@ -111,18 +116,18 @@ interface RegistryOverridePropertyValue {
 }
 
 export type RegistryRelease = PackageSpecManifest['release'];
-export interface RegistryImage {
-  src: string;
+export interface RegistryImage extends PackageSpecIcon {
   path: string;
-  title?: string;
-  size?: string;
-  type?: string;
 }
 
 export enum RegistryPolicyTemplateKeys {
   name = 'name',
   title = 'title',
   description = 'description',
+  icons = 'icons',
+  screenshots = 'screenshots',
+  categories = 'categories',
+  data_streams = 'data_streams',
   inputs = 'inputs',
   multiple = 'multiple',
 }
@@ -131,6 +136,10 @@ export interface RegistryPolicyTemplate {
   [RegistryPolicyTemplateKeys.name]: string;
   [RegistryPolicyTemplateKeys.title]: string;
   [RegistryPolicyTemplateKeys.description]: string;
+  [RegistryPolicyTemplateKeys.icons]?: RegistryImage[];
+  [RegistryPolicyTemplateKeys.screenshots]?: RegistryImage[];
+  [RegistryPolicyTemplateKeys.categories]?: Array<PackageSpecCategory | undefined>;
+  [RegistryPolicyTemplateKeys.data_streams]?: string[];
   [RegistryPolicyTemplateKeys.inputs]?: RegistryInput[];
   [RegistryPolicyTemplateKeys.multiple]?: boolean;
 }
@@ -141,6 +150,7 @@ export enum RegistryInputKeys {
   description = 'description',
   template_path = 'template_path',
   condition = 'condition',
+  input_group = 'input_group',
   vars = 'vars',
 }
 
@@ -150,7 +160,14 @@ export interface RegistryInput {
   [RegistryInputKeys.description]: string;
   [RegistryInputKeys.template_path]?: string;
   [RegistryInputKeys.condition]?: string;
+  [RegistryInputKeys.input_group]?: string;
   [RegistryInputKeys.vars]?: RegistryVarsEntry[];
+}
+
+export interface RegistryInputGroup {
+  name: string;
+  title: string;
+  description: string;
 }
 
 export enum RegistryStreamKeys {
