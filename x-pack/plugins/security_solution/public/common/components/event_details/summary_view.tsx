@@ -44,7 +44,7 @@ interface SummaryRow {
     contextId: string;
     eventId: string;
     fieldName: string;
-    value: string;
+    values: string[];
     fieldType?: string;
     linkValue?: string;
     keySuffix?: string;
@@ -106,20 +106,21 @@ const getDescription = ({
   contextId,
   eventId,
   fieldName,
-  value,
+  values,
   fieldType = '',
   linkValue,
   keySuffix,
-}: SummaryRow['description']) => (
-  <FormattedFieldValue
-    contextId={`alert-details-value-formatted-field-value-${contextId}-${eventId}-${fieldName}-${value}-${keySuffix}`}
-    eventId={eventId}
-    fieldName={fieldName}
-    fieldType={fieldType}
-    value={value}
-    linkValue={linkValue}
-  />
-);
+}: SummaryRow['description']) =>
+  values.map((value) => (
+    <FormattedFieldValue
+      contextId={`alert-details-value-formatted-field-value-${contextId}-${eventId}-${fieldName}-${value}-${keySuffix}`}
+      eventId={eventId}
+      fieldName={fieldName}
+      fieldType={fieldType}
+      value={value}
+      linkValue={linkValue}
+    />
+  ));
 
 const getSummary = ({
   data,
@@ -160,7 +161,7 @@ const getSummary = ({
               contextId,
               eventId,
               fieldName,
-              value: threatInfoItem.originalValue[0],
+              values: threatInfoItem.originalValue,
               keySuffix: isArrayIndexVisible ? threatInfoItem.field.split('.')[0] : undefined,
             },
           };
@@ -175,7 +176,7 @@ const getSummary = ({
           {
             title: field.substring('threat.indicator.'.length),
             description: {
-              value: Array.isArray(originalValue) ? originalValue.join(', ') : originalValue,
+              values: Array.isArray(originalValue) ? originalValue : [originalValue],
               contextId,
               eventId,
               fieldName: field,
@@ -200,7 +201,7 @@ const getSummary = ({
         contextId,
         eventId,
         fieldName: item.id,
-        value,
+        values: [value],
         fieldType: item.fieldType ?? fieldType,
         linkValue: linkValue ?? undefined,
       };
@@ -215,7 +216,7 @@ const getSummary = ({
                 title: `${entry.field} [threshold]`,
                 description: {
                   ...description,
-                  value: entry.value,
+                  values: [entry.value],
                 },
               };
             }
@@ -235,7 +236,7 @@ const getSummary = ({
               title: ALERTS_HEADERS_THRESHOLD_CARDINALITY,
               description: {
                 ...description,
-                value: `count(${parsedValue.field}) == ${parsedValue.value}`,
+                values: [`count(${parsedValue.field}) == ${parsedValue.value}`],
               },
             },
           ];
