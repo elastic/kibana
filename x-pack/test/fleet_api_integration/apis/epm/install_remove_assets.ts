@@ -546,6 +546,7 @@ const expectAssetsInstalled = ({
         { id: 'e21b59b5-eb76-5ab0-bef2-1c8e379e6197', type: 'epm-packages-assets' },
         { id: '4c758d70-ecf1-56b3-b704-6d8374841b34', type: 'epm-packages-assets' },
         { id: 'e786cbd9-0f3b-5a0b-82a6-db25145ebf58', type: 'epm-packages-assets' },
+        { id: 'd8b175c3-0d42-5ec7-90c1-d1e4b307a4c2', type: 'epm-packages-assets' },
         { id: '53c94591-aa33-591d-8200-cd524c2a0561', type: 'epm-packages-assets' },
         { id: 'b658d2d4-752e-54b8-afc2-4c76155c1466', type: 'epm-packages-assets' },
       ],
