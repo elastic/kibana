@@ -57,19 +57,21 @@ export const useUpdatePolicy = ({ defaultConfig, newPolicy, onChange, validate }
             case ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE:
             case ConfigKeys.RESPONSE_STATUS_CHECK:
             case ConfigKeys.TAGS:
+            case ConfigKeys.RESPONSE_RECEIVE_CHECK:
               configItem.value = config[key].length ? JSON.stringify(config[key]) : null;
               break;
             case ConfigKeys.RESPONSE_HEADERS_CHECK:
-            case ConfigKeys.RESPONSE_RECEIVE_CHECK:
             case ConfigKeys.REQUEST_HEADERS_CHECK:
-              configItem.value = JSON.stringify(config[key]); // convert to yaml string
+              configItem.value = Object.keys(config[key]).length
+                ? JSON.stringify(config[key])
+                : null;
               break;
             case ConfigKeys.TIMEOUT:
             case ConfigKeys.WAIT:
               configItem.value = config[key] ? `${config[key]}s` : null; // convert to cron
               break;
             case ConfigKeys.REQUEST_BODY_CHECK:
-              configItem.value = JSON.stringify(config[key].value); // only need value of REQUEST_BODY_CHECK for outputted policy
+              configItem.value = config[key].value ? JSON.stringify(config[key].value) : null; // only need value of REQUEST_BODY_CHECK for outputted policy
               break;
             default:
               configItem.value =
