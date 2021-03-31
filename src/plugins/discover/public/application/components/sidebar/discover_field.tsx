@@ -287,17 +287,18 @@ export function DiscoverField({
     );
   };
 
-  const canEditField = onEditField && field.type !== 'unknown';
+  const canEditField = onEditField && field.type !== 'unknown' && field.type !== 'unknown_selected';
   const displayNameGrow = canEditField ? 9 : 10;
   const popoverTitle = (
     <EuiPopoverTitle style={{ textTransform: 'none' }} className="eui-textBreakWord">
-      <EuiFlexGroup>
+      <EuiFlexGroup responsive={false}>
         <EuiFlexItem grow={displayNameGrow}>{field.displayName}</EuiFlexItem>
         {canEditField && (
           <EuiFlexItem grow={1} data-test-subj="discoverFieldListPanelEditItem">
             <EuiButtonIcon
               onClick={() => {
                 if (onEditField) {
+                  togglePopover();
                   onEditField(field.name);
                 }
               }}
