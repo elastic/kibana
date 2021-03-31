@@ -103,14 +103,12 @@ export async function getCorrelationsForSlowTransactions(options: Options) {
       sigTermAggs: response.aggregations,
     });
 
-    return (
-      (await getLatencyDistribution({
-        setup,
-        filters,
-        topSigTerms,
-        maxLatency,
-        distributionInterval,
-      })) || []
-    );
+    return getLatencyDistribution({
+      setup,
+      filters,
+      topSigTerms,
+      maxLatency,
+      distributionInterval,
+    });
   });
 }

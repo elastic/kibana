@@ -109,7 +109,7 @@ export function LatencyCorrelations({ onClose }: Props) {
   const maxLatency = overallData?.maxLatency;
   const distributionInterval = overallData?.distributionInterval;
 
-  const { data: significantTerms, status } = useFetcher(
+  const { data: correlationsData, status: correlationsStatus } = useFetcher(
     (callApmApi) => {
       if (start && end && hasFieldNames && maxLatency && distributionInterval) {
         return callApmApi({
@@ -180,8 +180,8 @@ export function LatencyCorrelations({ onClose }: Props) {
               <LatencyDistributionChart
                 overallData={overallData}
                 data={
-                  hasFieldNames && significantTerms
-                    ? significantTerms
+                  hasFieldNames && correlationsData
+                    ? correlationsData?.significantTerms
                     : undefined
                 }
                 status={overallStatus}
@@ -197,9 +197,11 @@ export function LatencyCorrelations({ onClose }: Props) {
               { defaultMessage: '% of slow transactions' }
             )}
             significantTerms={
-              hasFieldNames && significantTerms ? significantTerms : []
+              hasFieldNames && correlationsData
+                ? correlationsData?.significantTerms
+                : []
             }
-            status={status}
+            status={correlationsStatus}
             setSelectedSignificantTerm={setSelectedSignificantTerm}
             onFilter={onClose}
           />
@@ -228,7 +230,7 @@ function getDistributionYMax(data?: OverallLatencyApiResponse) {
 }
 
 function getSelectedDistribution(
-  significantTerms: CorrelationsApiResponse,
+  significantTerms: CorrelationsApiResponse['significantTerms'],
   selectedSignificantTerm: SelectedSignificantTerm
 ) {
   if (!significantTerms) {
@@ -250,7 +252,7 @@ function LatencyDistributionChart({
   status,
 }: {
   overallData?: OverallLatencyApiResponse;
-  data?: CorrelationsApiResponse;
+  data?: CorrelationsApiResponse['significantTerms'];
   selectedSignificantTerm: SelectedSignificantTerm | null;
   status: FETCH_STATUS;
 }) {

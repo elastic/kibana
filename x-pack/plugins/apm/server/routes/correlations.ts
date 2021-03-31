@@ -101,7 +101,7 @@ export const correlationsForSlowTransactionsRoute = createRoute({
       distributionInterval,
     } = context.params.query;
 
-    return getCorrelationsForSlowTransactions({
+    const significantTerms = await getCorrelationsForSlowTransactions({
       environment,
       kuery,
       serviceName,
@@ -113,6 +113,8 @@ export const correlationsForSlowTransactionsRoute = createRoute({
       maxLatency: parseInt(maxLatency, 10),
       distributionInterval: parseInt(distributionInterval, 10),
     });
+
+    return { significantTerms };
   },
 });
 

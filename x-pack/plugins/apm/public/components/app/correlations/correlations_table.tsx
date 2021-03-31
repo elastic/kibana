@@ -31,7 +31,7 @@ import { useUiTracker } from '../../../../../observability/public';
 //   NonNullable<CorrelationsApiResponse>['significantTerms']
 // >[0];
 type CorrelationsApiResponse = APIReturnType<'GET /api/apm/correlations/latency/slow_transactions'>;
-type SignificantTerm = CorrelationsApiResponse[0];
+type SignificantTerm = CorrelationsApiResponse['significantTerms'][0];
 
 export type SelectedSignificantTerm = Pick<
   SignificantTerm,

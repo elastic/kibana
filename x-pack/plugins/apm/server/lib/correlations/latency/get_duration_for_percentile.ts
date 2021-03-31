@@ -42,6 +42,9 @@ export async function getDurationForPercentile({
       },
     });
 
-    return Object.values(res.aggregations?.percentile.values || {})[0];
+    const duration = Object.values(
+      res.aggregations?.percentile.values || {}
+    )[0];
+    return duration || 0;
   });
 }
