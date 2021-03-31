@@ -24,13 +24,9 @@ import {
 } from './saved_object_types';
 import {
   CaseConfigureService,
-  CaseConfigureServiceSetup,
   CaseService,
-  CaseServiceSetup,
   CaseUserActionService,
-  CaseUserActionServiceSetup,
   ConnectorMappingsService,
-  ConnectorMappingsServiceSetup,
   AlertService,
 } from './services';
 import { CasesClient } from './client';
@@ -57,10 +53,10 @@ export interface PluginsStart {
 
 export class CasePlugin {
   private readonly log: Logger;
-  private caseConfigureService?: CaseConfigureServiceSetup;
-  private caseService?: CaseServiceSetup;
-  private connectorMappingsService?: ConnectorMappingsServiceSetup;
-  private userActionService?: CaseUserActionServiceSetup;
+  private caseConfigureService?: CaseConfigureService;
+  private caseService?: CaseService;
+  private connectorMappingsService?: ConnectorMappingsService;
+  private userActionService?: CaseUserActionService;
   private alertsService?: AlertService;
   private clientFactory: CasesClientFactory;
   private securityPluginSetup?: SecurityPluginSetup;

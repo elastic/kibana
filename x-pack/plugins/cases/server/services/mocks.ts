@@ -7,16 +7,16 @@
 
 import {
   AlertServiceContract,
-  CaseConfigureServiceSetup,
-  CaseServiceSetup,
-  CaseUserActionServiceSetup,
-  ConnectorMappingsServiceSetup,
+  CaseConfigureService,
+  CaseService,
+  CaseUserActionService,
+  ConnectorMappingsService,
 } from '.';
 
-export type CaseServiceMock = jest.Mocked<CaseServiceSetup>;
-export type CaseConfigureServiceMock = jest.Mocked<CaseConfigureServiceSetup>;
-export type ConnectorMappingsServiceMock = jest.Mocked<ConnectorMappingsServiceSetup>;
-export type CaseUserActionServiceMock = jest.Mocked<CaseUserActionServiceSetup>;
+export type CaseServiceMock = jest.Mocked<CaseService>;
+export type CaseConfigureServiceMock = jest.Mocked<CaseConfigureService>;
+export type ConnectorMappingsServiceMock = jest.Mocked<ConnectorMappingsService>;
+export type CaseUserActionServiceMock = jest.Mocked<CaseUserActionService>;
 export type AlertServiceMock = jest.Mocked<AlertServiceContract>;
 
 export const createCaseServiceMock = (): CaseServiceMock => ({

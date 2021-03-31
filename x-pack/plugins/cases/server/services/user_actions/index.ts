@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  SavedObjectsFindResponse,
-  Logger,
-  SavedObjectsBulkResponse,
-  SavedObjectReference,
-} from 'kibana/server';
+import { Logger, SavedObjectReference } from 'kibana/server';
 
 import { CaseUserActionAttributes } from '../../../common/api';
 import {
@@ -34,19 +29,10 @@ interface PostCaseUserActionArgs extends ClientArgs {
   actions: UserActionItem[];
 }
 
-export interface CaseUserActionServiceSetup {
-  getUserActions(
-    args: GetCaseUserActionArgs
-  ): Promise<SavedObjectsFindResponse<CaseUserActionAttributes>>;
-  postUserActions(
-    args: PostCaseUserActionArgs
-  ): Promise<SavedObjectsBulkResponse<CaseUserActionAttributes>>;
-}
-
-export class CaseUserActionService implements CaseUserActionServiceSetup {
+export class CaseUserActionService {
   constructor(private readonly log: Logger) {}
 
-  public async getUserActions({ client, caseId, subCaseId }: GetCaseUserActionArgs) {
+  public async getAll({ client, caseId, subCaseId }: GetCaseUserActionArgs) {
     try {
       const id = subCaseId ?? caseId;
       const type = subCaseId ? SUB_CASE_SAVED_OBJECT : CASE_SAVED_OBJECT;
@@ -72,10 +58,10 @@ export class CaseUserActionService implements CaseUserActionServiceSetup {
     }
   }
 
-  public async postUserActions({ client, actions }: PostCaseUserActionArgs) {
+  public async bulkCreate({ client, actions }: PostCaseUserActionArgs) {
     try {
       this.log.debug(`Attempting to POST a new case user action`);
-      return await client.bulkCreate(
+      return await client.bulkCreate<CaseUserActionAttributes>(
         actions.map((action) => ({ type: CASE_USER_ACTION_SAVED_OBJECT, ...action }))
       );
     } catch (error) {

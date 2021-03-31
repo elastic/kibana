@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  Logger,
-  SavedObject,
-  SavedObjectReference,
-  SavedObjectsClientContract,
-  SavedObjectsFindResponse,
-} from 'kibana/server';
+import { Logger, SavedObjectReference, SavedObjectsClientContract } from 'kibana/server';
 
 import { ConnectorMappings, SavedObjectFindOptions } from '../../../common/api';
 import { CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT } from '../../../common/constants';
@@ -26,11 +20,6 @@ interface FindConnectorMappingsArgs extends ClientArgs {
 interface PostConnectorMappingsArgs extends ClientArgs {
   attributes: ConnectorMappings;
   references: SavedObjectReference[];
-}
-
-export interface ConnectorMappingsServiceSetup {
-  find(args: FindConnectorMappingsArgs): Promise<SavedObjectsFindResponse<ConnectorMappings>>;
-  post(args: PostConnectorMappingsArgs): Promise<SavedObject<ConnectorMappings>>;
 }
 
 export class ConnectorMappingsService {

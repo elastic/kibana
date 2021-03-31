@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  Logger,
-  SavedObject,
-  SavedObjectsClientContract,
-  SavedObjectsFindResponse,
-  SavedObjectsUpdateResponse,
-} from 'kibana/server';
+import { Logger, SavedObjectsClientContract } from 'kibana/server';
 
 import { ESCasesConfigureAttributes, SavedObjectFindOptions } from '../../../common/api';
 import { CASE_CONFIGURE_SAVED_OBJECT } from '../../../common/constants';
@@ -36,17 +30,7 @@ interface PatchCaseConfigureArgs extends ClientArgs {
   updatedAttributes: Partial<ESCasesConfigureAttributes>;
 }
 
-export interface CaseConfigureServiceSetup {
-  delete(args: GetCaseConfigureArgs): Promise<{}>;
-  get(args: GetCaseConfigureArgs): Promise<SavedObject<ESCasesConfigureAttributes>>;
-  find(args: FindCaseConfigureArgs): Promise<SavedObjectsFindResponse<ESCasesConfigureAttributes>>;
-  patch(
-    args: PatchCaseConfigureArgs
-  ): Promise<SavedObjectsUpdateResponse<ESCasesConfigureAttributes>>;
-  post(args: PostCaseConfigureArgs): Promise<SavedObject<ESCasesConfigureAttributes>>;
-}
-
-export class CaseConfigureService implements CaseConfigureServiceSetup {
+export class CaseConfigureService {
   constructor(private readonly log: Logger) {}
 
   public async delete({ client, caseConfigureId }: GetCaseConfigureArgs) {
@@ -84,6 +68,7 @@ export class CaseConfigureService implements CaseConfigureServiceSetup {
       throw error;
     }
   }
+
   public async post({ client, attributes }: PostCaseConfigureArgs) {
     try {
       this.log.debug(`Attempting to POST a new case configuration`);
@@ -95,6 +80,7 @@ export class CaseConfigureService implements CaseConfigureServiceSetup {
       throw error;
     }
   }
+
   public async patch({ client, caseConfigureId, updatedAttributes }: PatchCaseConfigureArgs) {
     try {
       this.log.debug(`Attempting to UPDATE case configuration ${caseConfigureId}`);
