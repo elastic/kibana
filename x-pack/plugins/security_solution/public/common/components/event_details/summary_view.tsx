@@ -47,7 +47,6 @@ interface SummaryRow {
     values: string[];
     fieldType?: string;
     linkValue?: string;
-    keySuffix?: string;
     isDraggingDisabled?: boolean;
   };
 }
@@ -115,13 +114,12 @@ const getDescription = ({
   values,
   fieldType = '',
   linkValue,
-  keySuffix,
   isDraggingDisabled,
 }: SummaryRow['description']) =>
   values.map((value) => (
     <FormattedFieldValue
-      key={`alert-details-value-formatted-field-value-${contextId}-${eventId}-${fieldName}-${value}-${keySuffix}-key`}
-      contextId={`alert-details-value-formatted-field-value-${contextId}-${eventId}-${fieldName}-${value}-${keySuffix}`}
+      key={`alert-details-value-formatted-field-value-${contextId}-${eventId}-${fieldName}-${value}-key`}
+      contextId={`alert-details-value-formatted-field-value-${contextId}-${eventId}-${fieldName}-${value}`}
       eventId={eventId}
       fieldName={fieldName}
       fieldType={fieldType}
@@ -171,7 +169,6 @@ const getSummary = ({
               eventId,
               fieldName,
               values: threatInfoItem.originalValue,
-              keySuffix: isArrayIndexVisible ? threatInfoItem.field.split('.')[0] : undefined,
               isDraggingDisabled: true,
             },
           };
