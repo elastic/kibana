@@ -247,15 +247,7 @@ export function DiscoverSidebar({
       },
       fieldName,
       onSave: async () => {
-        // trigger refresh only if edited field is selected or a Document column
-        const editedFieldIsSelected =
-          selectedFields.map((field) => field.name).includes(fieldName) ||
-          (useNewFieldsApi && selectedFields.length === 0);
-        if (editedFieldIsSelected) {
-          onEditRuntimeField();
-        }
-        const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts);
-        setFields(newFields);
+        onEditRuntimeField();
       },
     });
   };

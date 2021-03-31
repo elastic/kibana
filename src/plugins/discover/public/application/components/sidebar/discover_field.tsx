@@ -287,16 +287,19 @@ export function DiscoverField({
     );
   };
 
-  const displayNameGrow = onEditField ? 9 : 10;
+  const canEditField = onEditField && field.type !== 'unknown';
+  const displayNameGrow = canEditField ? 9 : 10;
   const popoverTitle = (
     <EuiPopoverTitle style={{ textTransform: 'none' }} className="eui-textBreakWord">
       <EuiFlexGroup>
         <EuiFlexItem grow={displayNameGrow}>{field.displayName}</EuiFlexItem>
-        {onEditField && (
+        {canEditField && (
           <EuiFlexItem grow={1} data-test-subj="discoverFieldListPanelEditItem">
             <EuiButtonIcon
               onClick={() => {
-                onEditField(field.name);
+                if (onEditField) {
+                  onEditField(field.name);
+                }
               }}
               iconType="pencil"
               data-test-subj={`discoverFieldListPanelEdit-${field.name}`}
