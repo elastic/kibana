@@ -6,6 +6,7 @@
  */
 
 import { AlertingActions } from './alerting';
+import { AlertsActions } from './alerts';
 import { ApiActions } from './api';
 import { AppActions } from './app';
 import { SavedObjectActions } from './saved_object';
@@ -20,6 +21,8 @@ export class Actions {
   public readonly api = new ApiActions(this.versionNumber);
 
   public readonly app = new AppActions(this.versionNumber);
+
+  public readonly alerts = new AlertsActions(this.versionNumber);
 
   public readonly login = 'login:';
 
