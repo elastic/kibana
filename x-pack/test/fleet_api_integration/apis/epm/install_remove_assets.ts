@@ -399,6 +399,11 @@ const expectAssetsInstalled = ({
       id: 'sample_ml_module',
     });
     expect(resMlModule.id).equal('sample_ml_module');
+    const resSecurityRule = await kibanaServer.savedObjects.get({
+      type: 'security-rule',
+      id: 'sample_security_rule',
+    });
+    expect(resSecurityRule.id).equal('sample_security_rule');
     const resIndexPattern = await kibanaServer.savedObjects.get({
       type: 'index-pattern',
       id: 'test-*',
@@ -471,6 +476,10 @@ const expectAssetsInstalled = ({
         {
           id: 'sample_search',
           type: 'search',
+        },
+        {
+          id: 'sample_security_rule',
+          type: 'security-rule',
         },
         {
           id: 'sample_visualization',
