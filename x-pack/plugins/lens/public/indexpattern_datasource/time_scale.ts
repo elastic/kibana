@@ -97,8 +97,8 @@ export function getTimeScaleFunction(data: DataPublicPluginStart) {
       }
 
       const targetUnitInMs = unitInMs[targetUnit];
-      const timeInfo = await data.search.aggs.getDateMetaByDatatableColumn(dateColumnDefinition);
-      const intervalDuration = timeInfo && search.aggs.parseInterval(timeInfo.interval);
+      const timeInfo = search.aggs.getDateHistogramMetaDataByDatatableColumn(dateColumnDefinition);
+      const intervalDuration = timeInfo?.interval && search.aggs.parseInterval(timeInfo.interval);
 
       if (!timeInfo || !intervalDuration) {
         throw new Error(
