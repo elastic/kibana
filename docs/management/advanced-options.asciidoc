@@ -210,14 +210,39 @@ Turns off all unnecessary animations in the {kib} UI. Refresh the page to apply
 the changes.
 
 [float]
+[[kibana-banners-settings]]
+==== Banners
+
+[NOTE]
+====
+Banners are a https://www.elastic.co/subscriptions[subscription feature].
+====
+
+[horizontal]
+[[banners-placement]]`banners:placement`::
+Set to `Top` to display a banner above the Elastic header for this space. Defaults to the value of 
+the `xpack.banners.placement` configuration property.
+
+[[banners-textcontent]]`banners:textContent`::
+The text to display inside the banner for this space, either plain text or Markdown.
+Defaults to the value of the `xpack.banners.textContent` configuration property.
+
+[[banners-textcolor]]`banners:textColor`::
+The color for the banner text for this space. Defaults to the value of
+the `xpack.banners.textColor` configuration property.
+
+[[banners-backgroundcolor]]`banners:backgroundColor`::
+The color of the banner background for this space. Defaults to the value of
+the `xpack.banners.backgroundColor` configuration property.
+
+[float]
 [[kibana-dashboard-settings]]
 ==== Dashboard
 
 [horizontal]
 [[xpackdashboardmode-roles]]`xpackDashboardMode:roles`::
-deprecated:[7.7.0] The roles that belong to
-<<xpack-dashboard-only-mode, dashboard only mode>>. Use
-<<kibana-feature-privileges,feature privileges>> instead.
+**Deprecated. Use <<kibana-feature-privileges,feature privileges>> instead.**
+The roles that belong to <<xpack-dashboard-only-mode, dashboard only mode>>.
 
 [float]
 [[kibana-discover-settings]]
@@ -336,11 +361,11 @@ changes.
 
 [horizontal]
 [[courier-batchsearches]]`courier:batchSearches`::
-deprecated:[7.6.0]
+**Deprecated in 7.6. Starting in 8.0, this setting will be optimized internally.**
 When disabled, dashboard panels will load individually, and search requests will
 terminate when users navigate away or update the query. When enabled, dashboard
 panels will load together when all of the data is loaded, and searches will not
-terminate. Starting in 8.0, this setting will be optimized internally.
+terminate.
 
 [[courier-customrequestpreference]]`courier:customRequestPreference`::
 {ref}/search-request-body.html#request-body-search-preference[Request preference]
@@ -457,7 +482,7 @@ of buckets to try to represent.
 Enables the legacy charts library for aggregation-based area, line, and bar charts in *Visualize*.
 
 [[visualization-colormapping]]`visualization:colorMapping`::
-deprecated:[7.11.0,This setting will not be supported as of 8.0.]
+**This setting is deprecated and will not be supported as of 8.0.**
 Maps values to specific colors in charts using the *Compatibility* palette.
 
 [[visualization-dimmingopacity]]`visualization:dimmingOpacity`::
