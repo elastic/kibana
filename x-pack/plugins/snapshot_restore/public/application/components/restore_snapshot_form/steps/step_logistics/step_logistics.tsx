@@ -657,6 +657,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
             }
             checked={includeAliases === undefined ? true : includeAliases}
             onChange={(e) => updateRestoreSettings({ includeAliases: e.target.checked })}
+            data-test-subj="includeAliasesSwitch"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
