@@ -12,7 +12,7 @@ import { SolutionToolbarButton, Props as SolutionToolbarButtonProps } from './bu
 
 const { SolutionToolbar: strings } = ComponentStrings;
 
-export type Props = Pick<SolutionToolbarButtonProps, 'onClick'>;
+export type Props = Omit<SolutionToolbarButtonProps, 'iconType' | 'label'>;
 
 export const AddFromLibraryButton = ({ onClick, ...rest }: Props) => (
   <SolutionToolbarButton
