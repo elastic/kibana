@@ -31,10 +31,7 @@ export class ToolbarOverlay extends React.Component {
   }
 
   _renderFeatureEditControl() {
-    const { addFilters, geoFields, getFilterActions, getActionContext } = this.props;
-    if (!addFilters || !geoFields.length) {
-      return null;
-    }
+    const { geoFields, getFilterActions, getActionContext } = this.props;
 
     return (
       <EuiFlexItem>

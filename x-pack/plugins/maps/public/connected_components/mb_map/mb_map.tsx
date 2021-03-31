@@ -42,6 +42,7 @@ import { GeoFieldWithIndex } from '../../components/geo_field_with_index';
 import { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 import { MapExtentState } from '../../actions';
 import { TileStatusTracker } from './tile_status_tracker';
+import { DrawFeatureControl } from './draw_control/draw_feature_control';
 // @ts-expect-error
 import mbRtlPlugin from '!!file-loader!@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js';
 // @ts-expect-error
@@ -58,6 +59,7 @@ export interface Props {
   goto?: Goto | null;
   inspectorAdapters: Adapters;
   isFullScreen: boolean;
+  editModeActive: boolean;
   scrollZoom: boolean;
   extentChanged: (mapExtentState: MapExtentState) => void;
   onMapReady: (mapExtentState: MapExtentState) => void;
@@ -413,12 +415,17 @@ export class MBMap extends Component<Props, State> {
   };
 
   render() {
-    let drawControl;
+    let drawFilterControl;
+    let drawFeatureControl;
     let tooltipControl;
     let scaleControl;
     if (this.state.mbMap) {
-      drawControl = this.props.addFilters ? (
-        <DrawFilterControl mbMap={this.state.mbMap} addFilters={this.props.addFilters} />
+      drawFilterControl =
+        !this.props.editModeActive && this.props.addFilters ? (
+          <DrawFilterControl mbMap={this.state.mbMap} addFilters={this.props.addFilters} />
+        ) : null;
+      drawFeatureControl = this.props.editModeActive ? (
+        <DrawFeatureControl mbMap={this.state.mbMap} />
       ) : null;
       tooltipControl = !this.props.settings.disableTooltipControl ? (
         <TooltipControl
@@ -442,7 +449,8 @@ export class MBMap extends Component<Props, State> {
         ref={this._setContainerRef}
         data-test-subj="mapContainer"
       >
-        {drawControl}
+        {drawFilterControl}
+        {drawFeatureControl}
         {scaleControl}
         {tooltipControl}
       </div>

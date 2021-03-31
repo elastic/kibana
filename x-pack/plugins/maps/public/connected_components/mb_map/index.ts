@@ -42,6 +42,7 @@ function mapStateToProps(state: MapStoreState) {
     inspectorAdapters: getInspectorAdapters(state),
     scrollZoom: getScrollZoom(state),
     isFullScreen: getIsFullScreen(state),
+    editModeActive: true,
   };
 }
 
