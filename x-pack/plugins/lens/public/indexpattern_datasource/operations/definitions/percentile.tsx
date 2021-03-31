@@ -52,6 +52,7 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
   }),
   input: 'field',
   operationParams: [{ name: 'percentile', type: 'number', required: false }],
+  filterable: true,
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type: fieldType }) => {
     if (supportedFieldTypes.includes(fieldType) && aggregatable && !aggregationRestrictions) {
       return {
@@ -88,6 +89,7 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
       sourceField: field.name,
       isBucketed: false,
       scale: 'ratio',
+      filter: previousColumn?.filter,
       params: {
         percentile: newPercentileParam,
         ...getFormatFromPreviousColumn(previousColumn),
@@ -102,17 +104,16 @@ export const percentileOperation: OperationDefinition<PercentileIndexPatternColu
     };
   },
   toEsAggsFn: (column, columnId, _indexPattern) => {
-    return buildExpressionFunction<AggFunctionsMapping['aggPercentiles']>('aggPercentiles', {
-      id: columnId,
-      enabled: true,
-      schema: 'metric',
-      field: column.sourceField,
-      percents: [column.params.percentile],
-    }).toAst();
-  },
-  getEsAggsSuffix: (column) => {
-    const value = column.params.percentile;
-    return `.${value}`;
+    return buildExpressionFunction<AggFunctionsMapping['aggSinglePercentile']>(
+      'aggSinglePercentile',
+      {
+        id: columnId,
+        enabled: true,
+        schema: 'metric',
+        field: column.sourceField,
+        percentile: column.params.percentile,
+      }
+    ).toAst();
   },
   getErrorMessage: (layer, columnId, indexPattern) =>
     getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),

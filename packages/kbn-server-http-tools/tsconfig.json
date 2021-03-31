@@ -1,14 +1,14 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target",
+    "incremental": false,
+    "outDir": "./target",
     "declaration": true,
-    "declarationMap": true
+    "declarationMap": true,
+    "sourceMap": true,
+    "sourceRoot": "../../../../packages/kbn-server-http-tools/src"
   },
   "include": [
     "src/**/*"
-  ],
-  "dependencies": {
-    "@kbn/std": "link:../kbn-std"
-  }
+  ]
 }

@@ -338,7 +338,13 @@ describe('embeddable', () => {
     expect(expressionRenderer).toHaveBeenCalledTimes(2);
   });
 
-  it('should re-render when dashboard view/edit mode changes', async () => {
+  it('should re-render when dashboard view/edit mode changes if dynamic actions are set', async () => {
+    const sampleInput = ({
+      id: '123',
+      enhancements: {
+        dynamicActions: {},
+      },
+    } as unknown) as LensEmbeddableInput;
     const embeddable = new Embeddable(
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
@@ -368,6 +374,13 @@ describe('embeddable', () => {
     expect(expressionRenderer).toHaveBeenCalledTimes(1);
 
     embeddable.updateInput({
+      viewMode: ViewMode.VIEW,
+    });
+
+    expect(expressionRenderer).toHaveBeenCalledTimes(1);
+
+    embeddable.updateInput({
+      ...sampleInput,
       viewMode: ViewMode.VIEW,
     });
 

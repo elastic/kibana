@@ -23,7 +23,6 @@ import { operationDefinitionMap } from './operations';
 import { IndexPattern, IndexPatternPrivateState, IndexPatternLayer } from './types';
 import { OriginalColumn } from './rename_columns';
 import { dateHistogramOperation } from './operations/definitions';
-import { getEsAggsSuffix } from './operations/definitions/helpers';
 
 function getExpressionForLayer(
   layer: IndexPatternLayer,
@@ -108,10 +107,9 @@ function getExpressionForLayer(
     });
     const idMap = aggColumnEntries.reduce((currentIdMap, [colId, column], index) => {
       const esAggsId = `col-${aggColumnEntries.length === 1 ? 0 : index}-${colId}`;
-      const suffix = getEsAggsSuffix(column);
       return {
         ...currentIdMap,
-        [`${esAggsId}${suffix}`]: {
+        [esAggsId]: {
           ...column,
           id: colId,
         },
