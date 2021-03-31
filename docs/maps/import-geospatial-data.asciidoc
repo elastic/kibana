@@ -16,7 +16,7 @@ spaces in the **{stack-manage-app}** in {kib}. For more information, see
 {ref}/security-privileges.html[Security privileges],
 <<kibana-privileges, {kib} privileges>>, and <<xpack-kibana-role-management, {kib} role management>>.
 
-To upload GeoJson files in {kib} with *Maps*, you must have:
+To upload GeoJSON files in {kib} with *Maps*, you must have:
 * [ ] `all` {kib}
 privilege for the `Maps` feature
 * [ ] `all` {kib}
