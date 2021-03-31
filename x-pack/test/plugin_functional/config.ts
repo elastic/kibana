@@ -29,7 +29,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [
       resolve(__dirname, './test_suites/resolver'),
       resolve(__dirname, './test_suites/global_search'),
-      resolve(__dirname, './test_suites/timeline'),
+      resolve(__dirname, './test_suites/timelines'),
     ],
 
     services,
@@ -47,7 +47,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           KIBANA_ROOT,
           'test/plugin_functional/plugins/core_provider_plugin'
         )}`,
-        '--xpack.timeline.enabled=true',
+        '--xpack.timelines.enabled=true',
         ...plugins.map((pluginDir) => `--plugin-path=${resolve(__dirname, 'plugins', pluginDir)}`),
       ],
     },
@@ -62,7 +62,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         pathname: '/app/resolverTest',
       },
       timelineTest: {
-        pathname: '/app/timelineTest',
+        pathname: '/app/timelinesTest',
       },
     },
 

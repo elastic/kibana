@@ -8,12 +8,12 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  describe('Timeline plugin API', function () {
+  describe('Timelines plugin API', function () {
     this.tags('ciGroup7');
     const pageObjects = getPageObjects(['common']);
     const testSubjects = getService('testSubjects');
 
-    describe('timeline plugin rendering', function () {
+    describe('timelines plugin rendering', function () {
       before(async () => {
         await pageObjects.common.navigateToApp('timelineTest');
       });
