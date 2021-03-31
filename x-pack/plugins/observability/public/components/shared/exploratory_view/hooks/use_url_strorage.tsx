@@ -10,18 +10,13 @@ import { IKbnUrlStateStorage } from '../../../../../../../../src/plugins/kibana_
 import type { AppDataType, ReportViewTypeId, SeriesUrl, UrlFilter } from '../types';
 import { convertToShortUrl } from '../configurations/utils';
 import { OperationType, SeriesType } from '../../../../../../lens/public';
+import { URL_KEYS } from '../configurations/url_constants';
 
 export const UrlStorageContext = createContext<IKbnUrlStateStorage | null>(null);
 
 interface ProviderProps {
   storage: IKbnUrlStateStorage;
 }
-const METRIC_TYPE = 'mt';
-const REPORT_TYPE = 'rt';
-const SERIES_TYPE = 'st';
-const BREAK_DOWN = 'bd';
-const FILTERS = 'ft';
-const REPORT_DEFINITIONS = 'rdf';
 
 export function UrlStorageContextProvider({
   children,
@@ -45,12 +40,12 @@ function convertFromShortUrl(newValue: ShortUrlSeries): SeriesUrl {
 }
 
 interface ShortUrlSeries {
-  [METRIC_TYPE]?: OperationType;
-  [REPORT_TYPE]?: ReportViewTypeId;
-  [SERIES_TYPE]?: SeriesType;
-  [BREAK_DOWN]?: string;
-  [FILTERS]?: UrlFilter[];
-  [REPORT_DEFINITIONS]?: Record<string, string>;
+  [URL_KEYS.METRIC_TYPE]?: OperationType;
+  [URL_KEYS.REPORT_TYPE]?: ReportViewTypeId;
+  [URL_KEYS.SERIES_TYPE]?: SeriesType;
+  [URL_KEYS.BREAK_DOWN]?: string;
+  [URL_KEYS.FILTERS]?: UrlFilter[];
+  [URL_KEYS.REPORT_DEFINITIONS]?: Record<string, string>;
   time?: {
     to: string;
     from: string;

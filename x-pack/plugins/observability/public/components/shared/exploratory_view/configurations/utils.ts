@@ -9,13 +9,7 @@ import type { AllSeries, AllShortSeries } from '../hooks/use_url_strorage';
 import type { SeriesUrl } from '../types';
 import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
 import { esFilters } from '../../../../../../../../src/plugins/data/public';
-
-const METRIC_TYPE = 'mt';
-const REPORT_TYPE = 'rt';
-const SERIES_TYPE = 'st';
-const BREAK_DOWN = 'bd';
-const FILTERS = 'ft';
-const REPORT_DEFINITIONS = 'rdf';
+import { URL_KEYS } from './url_constants';
 
 export function convertToShortUrl(series: SeriesUrl) {
   const {
@@ -29,12 +23,12 @@ export function convertToShortUrl(series: SeriesUrl) {
   } = series;
 
   return {
-    [METRIC_TYPE]: metric,
-    [REPORT_TYPE]: reportType,
-    [SERIES_TYPE]: seriesType,
-    [BREAK_DOWN]: breakdown,
-    [FILTERS]: filters,
-    [REPORT_DEFINITIONS]: reportDefinitions,
+    [URL_KEYS.METRIC_TYPE]: metric,
+    [URL_KEYS.REPORT_TYPE]: reportType,
+    [URL_KEYS.SERIES_TYPE]: seriesType,
+    [URL_KEYS.BREAK_DOWN]: breakdown,
+    [URL_KEYS.FILTERS]: filters,
+    [URL_KEYS.REPORT_DEFINITIONS]: reportDefinitions,
     ...restSeries,
   };
 }
