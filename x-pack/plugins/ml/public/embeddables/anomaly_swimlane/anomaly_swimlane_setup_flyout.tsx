@@ -11,7 +11,7 @@ import { VIEW_BY_JOB_LABEL } from '../../application/explorer/explorer_constants
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import { AnomalySwimlaneInitializer } from './anomaly_swimlane_initializer';
 import { AnomalyDetectorService } from '../../application/services/anomaly_detector_service';
-import { getDefaultPanelTitle } from './anomaly_swimlane_embeddable';
+import { getDefaultSwimlanePanelTitle } from './anomaly_swimlane_embeddable';
 import { HttpService } from '../../application/services/http_service';
 import { AnomalySwimlaneEmbeddableInput } from '..';
 import { resolveJobSelection } from '../common/resolve_job_selection';
@@ -27,7 +27,7 @@ export async function resolveAnomalySwimlaneUserInput(
   return new Promise(async (resolve, reject) => {
     const { jobIds } = await resolveJobSelection(coreStart, input?.jobIds);
 
-    const title = input?.title ?? getDefaultPanelTitle(jobIds);
+    const title = input?.title ?? getDefaultSwimlanePanelTitle(jobIds);
 
     const jobs = await anomalyDetectorService.getJobs$(jobIds).toPromise();
 

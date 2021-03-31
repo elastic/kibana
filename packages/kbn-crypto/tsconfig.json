@@ -1,9 +1,12 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target",
+    "incremental": false,
+    "outDir": "./target",
     "declaration": true,
-    "declarationMap": true
+    "declarationMap": true,
+    "sourceMap": true,
+    "sourceRoot": "../../../../packages/kbn-crypto/src"
   },
   "include": [
     "src/**/*"

@@ -196,7 +196,8 @@ The maximum height that a cell occupies in a table. Set to 0 to disable
 truncation.
 
 [[xpack-defaultadminemail]]`xPack:defaultAdminEmail`::
-**Deprecated. Use <<cluster-alert-email-notifications,Email Notifications>> instead.**
+**Deprecated. Instead, use {stack-manage-app} > {alerts-ui} to review and
+modify all the available alerts.**
 Email address for {xpack} admin operations, such as cluster alert notifications
 from *{stack-monitor-app}*.
 

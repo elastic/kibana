@@ -41,6 +41,7 @@ import { IngestPipelinesPageProvider } from './ingest_pipelines_page';
 import { TagManagementPageProvider } from './tag_management_page';
 import { NavigationalSearchProvider } from './navigational_search';
 import { SearchSessionsPageProvider } from './search_sessions_management_page';
+import { DetectionsPageProvider } from '../../security_solution_ftr/page_objects/detections';
 
 // just like services, PageObjects are defined as a map of
 // names to Providers. Merge in Kibana's or pick specific ones
@@ -79,4 +80,5 @@ export const pageObjects = {
   endpoint: EndpointPageProvider,
   ingestPipelines: IngestPipelinesPageProvider,
   navigationalSearch: NavigationalSearchProvider,
+  detections: DetectionsPageProvider,
 };
