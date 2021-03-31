@@ -132,7 +132,9 @@ export function registerSnapshotsRoutes({
         });
 
         const fetchedSnapshots = response.body.snapshots;
-
+        if (!fetchedSnapshots || fetchedSnapshots.length === 0) {
+          return res.notFound({ body: 'Snapshot not found' });
+        }
         const selectedSnapshot = fetchedSnapshots.find(
           ({ snapshot: snapshotName }) => snapshot === snapshotName
         ) as SnapshotDetailsEs;
