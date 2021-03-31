@@ -12,8 +12,11 @@ import moment from 'moment';
 
 import { IRouter } from '../../../../../../src/core/server';
 import { packSavedObjectType, savedQuerySavedObjectType } from '../../../common/types';
+import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
-export const createActionRoute = (router: IRouter) => {
+import { parseAgentSelection, AgentSelection } from '../../lib/parse_agent_groups';
+
+export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.post(
     {
       path: '/internal/osquery/action',
@@ -24,7 +27,8 @@ export const createActionRoute = (router: IRouter) => {
     },
     async (context, request, response) => {
       const esClient = context.core.elasticsearch.client.asInternalUser;
-
+      const { agentSelection } = request.body as { agentSelection: AgentSelection };
+      const selectedAgents = await parseAgentSelection(esClient, osqueryContext, agentSelection);
       // @ts-expect-error update validation
       if (request.body.pack_id) {
         const savedObjectsClient = context.core.savedObjects.client;
@@ -72,8 +76,7 @@ export const createActionRoute = (router: IRouter) => {
           expiration: moment().add(2, 'days').toISOString(),
           type: 'INPUT_ACTION',
           input_type: 'osquery',
-          // @ts-expect-error update validation
-          agents: request.body.agents,
+          agents: selectedAgents,
           data: {
             id: query.id,
             // @ts-expect-error update validation
@@ -103,8 +106,7 @@ export const createActionRoute = (router: IRouter) => {
         expiration: moment().add(2, 'days').toISOString(),
         type: 'INPUT_ACTION',
         input_type: 'osquery',
-        // @ts-expect-error update validation
-        agents: request.body.agents,
+        agents: selectedAgents,
         data: {
           // @ts-expect-error update validation
           id: request.body.query.id ?? uuid.v4(),

@@ -467,6 +467,7 @@ function discoverController($route, $scope) {
   $scope.refreshAppState = async () => {
     $scope.hits = [];
     $scope.rows = [];
+    $scope.fieldCounts = {};
     await refetch$.next();
   };
 

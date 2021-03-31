@@ -47,38 +47,6 @@ describe('<EditPolicy /> cold phase validation', () => {
     ({ runTimers } = testBed);
   });
 
-  describe('timing', () => {
-    test(`doesn't allow empty timing`, async () => {
-      const { actions } = testBed;
-
-      await actions.cold.setMinAgeValue('');
-
-      runTimers();
-
-      actions.expectErrorMessages([i18nTexts.editPolicy.errors.nonNegativeNumberRequired]);
-    });
-
-    test(`allows 0 for phase timing`, async () => {
-      const { actions } = testBed;
-
-      await actions.cold.setMinAgeValue('0');
-
-      runTimers();
-
-      actions.expectErrorMessages([]);
-    });
-
-    test(`doesn't allow -1 for timing`, async () => {
-      const { actions } = testBed;
-
-      await actions.cold.setMinAgeValue('-1');
-
-      runTimers();
-
-      actions.expectErrorMessages([i18nTexts.editPolicy.errors.nonNegativeNumberRequired]);
-    });
-  });
-
   describe('replicas', () => {
     test(`doesn't allow -1 for replicas`, async () => {
       const { actions } = testBed;
