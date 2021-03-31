@@ -19,7 +19,7 @@ import { MarkdownSimple } from '../../../../../../../plugins/kibana_react/public
 import { replaceVars } from '../../lib/replace_vars';
 import { getAxisLabelString } from '../../lib/get_axis_label_string';
 import { getInterval } from '../../lib/get_interval';
-import { createXaxisFormatter } from '../../lib/create_xaxis_formatter';
+import { createIntervalBasedFormatter } from '../../lib/create_interval_based_formatter';
 import { STACKED_OPTIONS } from '../../../visualizations/constants';
 import { getCoreStart } from '../../../../services';
 
@@ -35,7 +35,11 @@ class TimeseriesVisualization extends Component {
   dateFormat = this.props.getConfig('dateFormat');
 
   xAxisFormatter = (interval) => (val) => {
-    const formatter = createXaxisFormatter(interval, this.scaledDataFormat, this.dateFormat);
+    const formatter = createIntervalBasedFormatter(
+      interval,
+      this.scaledDataFormat,
+      this.dateFormat
+    );
     return formatter(val);
   };
 

@@ -115,7 +115,7 @@ export default ({ getService }: FtrProviderContext) => {
       );
 
       expect(body.error).to.eql(errorTestData.expected.responseBody.error);
-      expect(body.message).to.eql(errorTestData.expected.responseBody.message);
+      expect(body.message).to.contain(errorTestData.expected.responseBody.message);
     });
   });
 };

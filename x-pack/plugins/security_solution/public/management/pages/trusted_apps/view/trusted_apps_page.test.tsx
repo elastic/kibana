@@ -43,8 +43,7 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
 jest.mock('../../../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
-// Failing: See https://github.com/elastic/kibana/issues/95596
-describe.skip('When on the Trusted Apps Page', () => {
+describe('When on the Trusted Apps Page', () => {
   const expectedAboutInfo =
     'Add a trusted application to improve performance or alleviate conflicts with other applications running on your hosts. Trusted applications will be applied to hosts running Endpoint Security.';
 
@@ -716,12 +715,16 @@ describe.skip('When on the Trusted Apps Page', () => {
       it('should hide agents policy if feature flag is disabled', async () => {
         useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
         const renderResult = await renderAndClickAddButton();
-        expect(renderResult).toMatchSnapshot();
+        expect(
+          renderResult.queryByTestId('addTrustedAppFlyout-createForm-policySelection')
+        ).toBeNull();
       });
       it('should display agents policy if feature flag is enabled', async () => {
         useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
         const renderResult = await renderAndClickAddButton();
-        expect(renderResult).toMatchSnapshot();
+        expect(
+          renderResult.queryByTestId('addTrustedAppFlyout-createForm-policySelection')
+        ).toBeTruthy();
       });
     });
   });
@@ -855,6 +858,37 @@ describe.skip('When on the Trusted Apps Page', () => {
       });
 
       expect(await renderResult.findByTestId('trustedAppEmptyState')).not.toBeNull();
+    });
+  });
+
+  describe('and the search is dispatched', () => {
+    const renderWithListData = async () => {
+      const result = render();
+      await act(async () => {
+        await waitForAction('trustedAppsListResourceStateChanged');
+      });
+      return result;
+    };
+
+    beforeEach(() => mockListApis(coreStart.http));
+
+    it('search bar is filled with query params', async () => {
+      reactTestingLibrary.act(() => {
+        history.push('/trusted_apps?filter=test');
+      });
+      const result = await renderWithListData();
+      expect(result.getByDisplayValue('test')).not.toBeNull();
+    });
+
+    it('search action is dispatched', async () => {
+      reactTestingLibrary.act(() => {
+        history.push('/trusted_apps?filter=test');
+      });
+      const result = await renderWithListData();
+      await act(async () => {
+        fireEvent.click(result.getByTestId('trustedAppSearchButton'));
+        await waitForAction('userChangedUrl');
+      });
     });
   });
 });

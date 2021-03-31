@@ -14,6 +14,7 @@ import {
   getSettingsTrigger as trigger,
   getPopover as popover,
   getPortal as portal,
+  getContextMenu as contextMenu,
   getContextMenuItems as menuItems,
 } from '../../../test/selectors';
 import { Settings } from './settings';
@@ -57,7 +58,7 @@ describe('<Settings />', () => {
     expect(portal(wrapper).exists()).toEqual(true);
     expect(popover(wrapper).prop('isOpen')).toEqual(true);
     expect(menuItems(wrapper).length).toEqual(2);
-    expect(portal(wrapper).text()).toEqual('SettingsAuto PlayToolbar');
+    expect(contextMenu(wrapper).text()).toEqual('SettingsAuto PlayToolbar');
     trigger(wrapper).simulate('click');
     expect(popover(wrapper).prop('isOpen')).toEqual(false);
   });

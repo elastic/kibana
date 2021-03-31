@@ -7,10 +7,10 @@
 
 import React, { useCallback } from 'react';
 import { FieldHook } from '../../shared_imports';
-import { AgentsTable } from '../../agents/agents_table';
+import { AgentsTable, AgentsSelection } from '../../agents/agents_table';
 
 interface AgentsTableFieldProps {
-  field: FieldHook<string[]>;
+  field: FieldHook<AgentsSelection>;
 }
 
 const AgentsTableFieldComponent: React.FC<AgentsTableFieldProps> = ({ field }) => {
@@ -24,7 +24,7 @@ const AgentsTableFieldComponent: React.FC<AgentsTableFieldProps> = ({ field }) =
     [value, setValue]
   );
 
-  return <AgentsTable selectedAgents={value} onChange={handleChange} />;
+  return <AgentsTable agentSelection={value} onChange={handleChange} />;
 };
 
 export const AgentsTableField = React.memo(AgentsTableFieldComponent);
