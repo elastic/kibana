@@ -6,7 +6,8 @@
  */
 
 import { get } from 'lodash';
-import { LegacyAPICaller } from 'src/core/server';
+import { ElasticsearchClient } from 'src/core/server';
+import { estypes } from '@elastic/elasticsearch';
 import { MonitoringConfig } from '../../../config';
 // @ts-ignore
 import { prefixIndexPattern } from '../../../lib/ccs_utils';
@@ -33,7 +34,7 @@ interface KeyBucket {
 
 export async function fetchStackProductUsage(
   config: MonitoringConfig,
-  callCluster: LegacyAPICaller,
+  callCluster: ElasticsearchClient,
   clusterUuid: string,
   index: string,
   type: string,
@@ -41,11 +42,11 @@ export async function fetchStackProductUsage(
   filters: any[] = []
 ): Promise<StackProductUsage> {
   const size = config.ui.max_bucket_size;
-  const params = {
+  const params: estypes.SearchRequest = {
     index,
     size: 0,
-    ignoreUnavailable: true,
-    filterPath: ['aggregations.uuids.buckets'],
+    ignore_unavailable: true,
+    filter_path: ['aggregations.uuids.buckets'],
     body: {
       query: {
         bool: {
@@ -94,7 +95,8 @@ export async function fetchStackProductUsage(
     },
   };
 
-  const response = (await callCluster('search', params)) as ESResponse;
+  const { body: responseBody } = await callCluster.search(params);
+  const response = responseBody as estypes.SearchResponse<ESResponse>;
   const uuidBuckets = get(response, 'aggregations.uuids.buckets', []) as UuidBucket[];
   const count = uuidBuckets.length;
   const metricbeatUsed = Boolean(

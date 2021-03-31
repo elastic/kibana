@@ -79,8 +79,8 @@ export async function getBeatSummary(
   const params = {
     index: beatsIndexPattern,
     size: 1,
-    ignoreUnavailable: true,
-    filterPath: [
+    ignore_unavailable: true,
+    filter_path: [
       'hits.hits._source.beats_stats.beat.host',
       'hits.hits._source.beats_stats.beat.version',
       'hits.hits._source.beats_stats.beat.name',

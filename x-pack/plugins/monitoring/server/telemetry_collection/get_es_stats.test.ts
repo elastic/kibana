@@ -48,7 +48,7 @@ describe('get_es_stats', () => {
   });
 
   describe('handleElasticsearchStats', () => {
-    // filterPath makes it easy to ignore anything unexpected because it will come back empty
+    // filter_path makes it easy to ignore anything unexpected because it will come back empty
     it('handles unexpected response', () => {
       const clusters = handleElasticsearchStats({} as any);
 

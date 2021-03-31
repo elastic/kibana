@@ -44,7 +44,7 @@ describe('get_licenses', () => {
   });
 
   describe('handleLicenses', () => {
-    // filterPath makes it easy to ignore anything unexpected because it will come back empty
+    // filter_path makes it easy to ignore anything unexpected because it will come back empty
     it('handles unexpected response', () => {
       const clusters = handleLicenses({} as any);
 

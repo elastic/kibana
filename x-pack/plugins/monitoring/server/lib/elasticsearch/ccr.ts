@@ -34,7 +34,7 @@ export async function checkCcrEnabled(req: LegacyRequest, esIndexPattern: string
   const params = {
     index: esIndexPattern,
     size: 1,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       query: createQuery({
         type: 'cluster_stats',
@@ -45,7 +45,7 @@ export async function checkCcrEnabled(req: LegacyRequest, esIndexPattern: string
       }),
       sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
     },
-    filterPath: ['hits.hits._source.stack_stats.xpack.ccr'],
+    filter_path: ['hits.hits._source.stack_stats.xpack.ccr'],
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

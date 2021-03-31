@@ -124,7 +124,7 @@ export function getNodeSummary(
   const params = {
     index: esIndexPattern,
     size: 1,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createQuery({ type: 'node_stats', start, end, clusterUuid, metric, filters }),

@@ -6,7 +6,7 @@
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { ILegacyClusterClient } from 'src/core/server';
+import { IClusterClient } from 'src/core/server';
 import { MonitoringConfig } from '../../config';
 import { fetchAvailableCcsLegacy } from '../../lib/alerts/fetch_available_ccs';
 import { getStackProductsUsage } from './lib/get_stack_products_usage';
@@ -19,7 +19,7 @@ import { fetchClustersLegacy } from '../../lib/alerts/fetch_clusters';
 export function getMonitoringUsageCollector(
   usageCollection: UsageCollectionSetup,
   config: MonitoringConfig,
-  legacyEsClient: ILegacyClusterClient
+  legacyEsClient: IClusterClient
 ) {
   return usageCollection.makeUsageCollector<MonitoringUsage, true>({
     type: 'monitoring',
@@ -103,8 +103,8 @@ export function getMonitoringUsageCollector(
     },
     fetch: async ({ kibanaRequest }) => {
       const callCluster = kibanaRequest
-        ? legacyEsClient.asScoped(kibanaRequest).callAsCurrentUser
-        : legacyEsClient.callAsInternalUser;
+        ? legacyEsClient.asScoped(kibanaRequest).asCurrentUser
+        : legacyEsClient.asInternalUser;
       const usageClusters: MonitoringClusterStackProductUsage[] = [];
       const availableCcs = config.ui.ccs.enabled ? await fetchAvailableCcsLegacy(callCluster) : [];
       const elasticsearchIndex = getCcsIndexPattern(INDEX_PATTERN_ELASTICSEARCH, availableCcs);

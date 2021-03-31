@@ -33,7 +33,7 @@ export function getNodes(req, lsIndexPattern, { clusterUuid }) {
   const params = {
     index: lsIndexPattern,
     size: config.get('monitoring.ui.max_bucket_size'), // FIXME
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       query: createQuery({
         start,

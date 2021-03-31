@@ -95,7 +95,7 @@ function buildRequest(
   return {
     index: esIndexPattern,
     size: maxBucketSize,
-    filterPath: [
+    filter_path: [
       'hits.hits.inner_hits.by_shard.hits.hits._source.ccr_stats.read_exceptions',
       'hits.hits.inner_hits.by_shard.hits.hits._source.ccr_stats.follower_index',
       'hits.hits.inner_hits.by_shard.hits.hits._source.ccr_stats.shard_id',

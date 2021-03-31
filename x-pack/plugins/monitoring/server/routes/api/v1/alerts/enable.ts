@@ -79,7 +79,7 @@ export function enableAlertsRoute(_server: unknown, npRoute: RouteDependencies) 
 
         let createdAlerts: Array<SanitizedAlert<AlertTypeParams>> = [];
         const disabledWatcherClusterAlerts = await disableWatcherClusterAlerts(
-          npRoute.cluster.asScoped(request).callAsCurrentUser,
+          npRoute.cluster.asScoped(request).asCurrentUser,
           npRoute.logger
         );
 

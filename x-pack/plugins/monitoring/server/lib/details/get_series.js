@@ -123,7 +123,7 @@ async function fetchSeries(
   const params = {
     index: indexPattern,
     size: 0,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       query: createQuery({
         start: adjustedMin,

@@ -33,9 +33,9 @@ export async function getStats(req, beatsIndexPattern, clusterUuid) {
 
   const params = {
     index: beatsIndexPattern,
-    filterPath: beatsAggFilterPath,
+    filter_path: beatsAggFilterPath,
     size: 0,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       query: createBeatsQuery({
         start,

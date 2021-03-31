@@ -65,7 +65,7 @@ export function getLastRecovery(req: LegacyRequest, esIndexPattern: string) {
   const params = {
     index: esIndexPattern,
     size: 1,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       _source: ['index_recovery.shards'],
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },

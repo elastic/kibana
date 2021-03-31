@@ -36,8 +36,8 @@ export function getMlJobs(req: LegacyRequest, esIndexPattern: string) {
   const params = {
     index: esIndexPattern,
     size: maxBucketSize,
-    ignoreUnavailable: true,
-    filterPath: [
+    ignore_unavailable: true,
+    filter_path: [
       'hits.hits._source.job_stats.job_id',
       'hits.hits._source.job_stats.state',
       'hits.hits._source.job_stats.data_counts.processed_record_count',
@@ -77,8 +77,8 @@ export function getMlJobsForCluster(
     const params = {
       index: esIndexPattern,
       size: 0,
-      ignoreUnavailable: true,
-      filterPath: 'aggregations.jobs_count.value',
+      ignore_unavailable: true,
+      filter_path: 'aggregations.jobs_count.value',
       body: {
         query: createQuery({ type: 'job_stats', start, end, clusterUuid, metric }),
         aggs: {

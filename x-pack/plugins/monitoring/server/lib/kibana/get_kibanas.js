@@ -33,7 +33,7 @@ export function getKibanas(req, kbnIndexPattern, { clusterUuid }) {
   const params = {
     index: kbnIndexPattern,
     size: config.get('monitoring.ui.max_bucket_size'),
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       query: createQuery({
         type: 'kibana_stats',

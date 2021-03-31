@@ -15,11 +15,12 @@ import {
   KibanaRequest,
   KibanaResponseFactory,
   CoreSetup,
-  ILegacyCustomClusterClient,
+  ICustomClusterClient,
   CoreStart,
   CustomHttpResponseOptions,
   ResponseError,
   Plugin,
+  SharedGlobalConfig,
 } from 'kibana/server';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import {
@@ -33,8 +34,6 @@ import { MonitoringConfig, createConfig, configSchema } from './config';
 import { requireUIRoutes } from './routes';
 import { initBulkUploader } from './kibana_monitoring';
 import { initInfraSource } from './lib/logs/init_infra_source';
-import { mbSafeQuery } from './lib/mb_safe_query';
-import { instantiateClient } from './es_client/instantiate_client';
 import { registerCollectors } from './kibana_monitoring/collectors';
 import { registerMonitoringTelemetryCollection } from './telemetry_collection';
 import { LicenseService } from './license_service';
@@ -51,7 +50,7 @@ import {
   RequestHandlerContextMonitoringPlugin,
 } from './types';
 
-import { Globals } from './static_globals';
+import { Globals, EndpointTypes } from './static_globals';
 
 // This is used to test the version of kibana
 const snapshotRegex = /-snapshot/i;
@@ -71,42 +70,73 @@ export class MonitoringPlugin
   private readonly initializerContext: PluginInitializerContext;
   private readonly log: Logger;
   private readonly getLogger: (...scopes: string[]) => Logger;
-  private cluster = {} as ILegacyCustomClusterClient;
+  private cluster = {} as ICustomClusterClient;
   private licenseService = {} as MonitoringLicenseService;
   private monitoringCore = {} as MonitoringCore;
   private legacyShimDependencies = {} as LegacyShimDependencies;
-  private bulkUploader: IBulkUploader | undefined;
+  private bulkUploader?: IBulkUploader;
+
+  private readonly config: MonitoringConfig;
+  private readonly legacyConfig: SharedGlobalConfig;
+  private coreSetup?: CoreSetup;
+  private setupPlugins?: PluginsSetup;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.initializerContext = initializerContext;
     this.log = initializerContext.logger.get(LOGGING_TAG);
     this.getLogger = (...scopes: string[]) => initializerContext.logger.get(LOGGING_TAG, ...scopes);
+    this.config = createConfig(this.initializerContext.config.get<TypeOf<typeof configSchema>>());
+    this.legacyConfig = this.initializerContext.config.legacy.get();
   }
 
   setup(core: CoreSetup, plugins: PluginsSetup) {
+    this.coreSetup = core;
+    this.setupPlugins = plugins;
+
+    const serverInfo = core.http.getServerInfo();
+    const kibanaMonitoringLog = this.getLogger(KIBANA_MONITORING_LOGGING_TAG);
+    this.bulkUploader = initBulkUploader({
+      config: this.config,
+      log: kibanaMonitoringLog,
+      opsMetrics$: core.metrics.getOpsMetrics$(),
+      statusGetter$: core.status.overall$,
+      kibanaStats: {
+        uuid: this.initializerContext.env.instanceUuid,
+        name: serverInfo.name,
+        index: this.legacyConfig.kibana.index,
+        host: serverInfo.hostname,
+        locale: i18n.getLocale(),
+        port: serverInfo.port.toString(),
+        transport_address: `${serverInfo.hostname}:${serverInfo.port}`,
+        version: this.initializerContext.env.packageInfo.version,
+        snapshot: snapshotRegex.test(this.initializerContext.env.packageInfo.version),
+      },
+    });
+
+    return {
+      // OSS stats api needs to call this in order to centralize how
+      // we fetch kibana specific stats
+      getKibanaStats: () => this.bulkUploader?.getKibanaStats() || {},
+    };
+  }
+
+  init(cluster: ICustomClusterClient, coreStart: CoreStart) {
     const config = createConfig(this.initializerContext.config.get<TypeOf<typeof configSchema>>());
     const legacyConfig = this.initializerContext.config.legacy.get();
+    const core = this.coreSetup!;
+    const plugins = this.setupPlugins!;
 
     const router = core.http.createRouter<RequestHandlerContextMonitoringPlugin>();
+    // const [{ elasticsearch }] = await core.getStartServices();
     this.legacyShimDependencies = {
       router,
       instanceUuid: this.initializerContext.env.instanceUuid,
-      esDataClient: core.elasticsearch.legacy.client,
+      esDataClient: coreStart.elasticsearch.client.asInternalUser,
       kibanaStatsCollector: plugins.usageCollection?.getCollectorByType(
         KIBANA_STATS_TYPE_MONITORING
       ),
     };
 
-    // Monitoring creates and maintains a connection to a potentially
-    // separate ES cluster - create this first
-    const cluster = (this.cluster = instantiateClient(
-      config.ui.elasticsearch,
-      this.log,
-      core.elasticsearch.legacy.createClient
-    ));
-
-    Globals.init(core, plugins.cloud, cluster, config, this.getLogger);
-    const serverInfo = core.http.getServerInfo();
     const alerts = AlertsFactory.getAll();
     for (const alert of alerts) {
       plugins.alerting?.registerType(alert.getAlertType());
@@ -135,26 +165,6 @@ export class MonitoringPlugin
       );
     }
 
-    // Always create the bulk uploader
-    const kibanaMonitoringLog = this.getLogger(KIBANA_MONITORING_LOGGING_TAG);
-    const bulkUploader = (this.bulkUploader = initBulkUploader({
-      config,
-      log: kibanaMonitoringLog,
-      opsMetrics$: core.metrics.getOpsMetrics$(),
-      statusGetter$: core.status.overall$,
-      kibanaStats: {
-        uuid: this.initializerContext.env.instanceUuid,
-        name: serverInfo.name,
-        index: get(legacyConfig, 'kibana.index'),
-        host: serverInfo.hostname,
-        locale: i18n.getLocale(),
-        port: serverInfo.port.toString(),
-        transport_address: `${serverInfo.hostname}:${serverInfo.port}`,
-        version: this.initializerContext.env.packageInfo.version,
-        snapshot: snapshotRegex.test(this.initializerContext.env.packageInfo.version),
-      },
-    }));
-
     // If the UI is enabled, then we want to register it so it shows up
     // and start any other UI-related setup tasks
     if (config.ui.enabled) {
@@ -163,7 +173,7 @@ export class MonitoringPlugin
         config,
         legacyConfig,
         core.getStartServices as () => Promise<[CoreStart, PluginsStart, {}]>,
-        this.cluster,
+        cluster,
         plugins
       );
 
@@ -177,21 +187,29 @@ export class MonitoringPlugin
       });
       initInfraSource(config, plugins.infra);
     }
-
-    return {
-      // OSS stats api needs to call this in order to centralize how
-      // we fetch kibana specific stats
-      getKibanaStats: () => bulkUploader.getKibanaStats(),
-    };
   }
 
   async start(core: CoreStart, { licensing }: PluginsStart) {
-    const config = createConfig(this.initializerContext.config.get<TypeOf<typeof configSchema>>());
+    const config = this.config!;
+
+    Globals.init({
+      initializerContext: this.initializerContext,
+      config: this.config!,
+      getLogger: this.getLogger,
+      log: this.log,
+      legacyConfig: this.legacyConfig,
+      coreSetup: this.coreSetup!,
+      setupPlugins: this.setupPlugins!,
+      coreStart: core,
+    });
+
+    this.init(this.cluster, core);
+
     // Start our license service which will ensure
     // the appropriate licenses are present
     this.licenseService = new LicenseService().setup({
       licensing,
-      monitoringClient: this.cluster,
+      monitoringClient: Globals.app.monitoringCluster,
       config,
       log: this.log,
     });
@@ -227,9 +245,7 @@ export class MonitoringPlugin
   }
 
   stop() {
-    if (this.cluster) {
-      this.cluster.close();
-    }
+    Globals.stop();
     if (this.licenseService) {
       this.licenseService.stop();
     }
@@ -276,7 +292,7 @@ export class MonitoringPlugin
     config: MonitoringConfig,
     legacyConfig: any,
     getCoreServices: () => Promise<[CoreStart, PluginsStart, {}]>,
-    cluster: ILegacyCustomClusterClient,
+    cluster: ICustomClusterClient,
     setupPlugins: PluginsSetup
   ): MonitoringCore {
     const router = this.legacyShimDependencies.router;
@@ -348,12 +364,12 @@ export class MonitoringPlugin
                 },
                 elasticsearch: {
                   getCluster: (name: string) => ({
-                    callWithRequest: async (_req: any, endpoint: string, params: any) => {
+                    callWithRequest: async (_req: any, endpoint: EndpointTypes, params: any) => {
                       const client =
-                        name === 'monitoring' ? cluster : this.legacyShimDependencies.esDataClient;
-                      return mbSafeQuery(() =>
-                        client.asScoped(req).callAsCurrentUser(endpoint, params)
-                      );
+                        name === 'monitoring'
+                          ? cluster.asScoped(req).asCurrentUser
+                          : context.core.elasticsearch.client.asCurrentUser;
+                      return await Globals.app.getLegacyClusterShim(client, endpoint, params);
                     },
                   }),
                 },

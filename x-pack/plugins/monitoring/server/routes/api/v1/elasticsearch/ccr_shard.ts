@@ -35,7 +35,7 @@ async function getCcrStat(req: LegacyRequest, esIndexPattern: string, filters: u
   const params = {
     index: esIndexPattern,
     size: 1,
-    filterPath: [
+    filter_path: [
       'hits.hits._source.ccr_stats',
       'hits.hits._source.timestamp',
       'hits.hits.inner_hits.oldest.hits.hits._source.ccr_stats.operations_written',

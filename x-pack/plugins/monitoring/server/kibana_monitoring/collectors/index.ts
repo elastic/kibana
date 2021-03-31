@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ILegacyClusterClient } from 'src/core/server';
+import { IClusterClient } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { getSettingsCollector } from './get_settings_collector';
 import { getMonitoringUsageCollector } from './get_usage_collector';
@@ -16,7 +16,7 @@ export { KibanaSettingsCollector, getKibanaSettings } from './get_settings_colle
 export function registerCollectors(
   usageCollection: UsageCollectionSetup,
   config: MonitoringConfig,
-  legacyEsClient: ILegacyClusterClient
+  legacyEsClient: IClusterClient
 ) {
   usageCollection.registerCollector(getSettingsCollector(usageCollection, config));
   usageCollection.registerCollector(

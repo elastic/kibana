@@ -251,7 +251,7 @@ describe('get_high_level_stats', () => {
   });
 
   describe('handleHighLevelStatsResponse', () => {
-    // filterPath makes it easy to ignore anything unexpected because it will come back empty
+    // filter_path makes it easy to ignore anything unexpected because it will come back empty
     it('handles unexpected response', () => {
       const clusters = handleHighLevelStatsResponse({} as any, product);
 

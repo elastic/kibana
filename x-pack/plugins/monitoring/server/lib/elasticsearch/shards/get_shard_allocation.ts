@@ -65,7 +65,7 @@ export function getShardAllocation(
   const params = {
     index: esIndexPattern,
     size: config.get('monitoring.ui.max_bucket_size'),
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       query: createQuery({ type: 'shards', clusterUuid, metric, filters }),
     },

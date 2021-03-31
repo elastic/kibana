@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ILegacyClusterClient } from 'kibana/server';
+import type { IClusterClient } from 'kibana/server';
 import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import type { UsageStatsPayload } from '../../../../../src/plugins/telemetry_collection_manager/server';
 import type { LogstashBaseStats } from './get_logstash_stats';
@@ -31,7 +31,7 @@ interface MonitoringTelemetryUsage {
 
 export function registerMonitoringTelemetryCollection(
   usageCollection: UsageCollectionSetup,
-  legacyEsClient: ILegacyClusterClient,
+  esClient: IClusterClient,
   maxBucketSize: number
 ) {
   const monitoringStatsCollector = usageCollection.makeStatsCollector<
@@ -144,8 +144,8 @@ export function registerMonitoringTelemetryCollection(
       // to avoid overloading of the system when retrieving data from the collectors (that delay is dealt with in the Kibana Stats getter inside the `getAllStats` method).
       // By 8.x, we expect to stop collecting the Kibana extended stats and keep only the monitoring-related metrics.
       const callCluster = kibanaRequest
-        ? legacyEsClient.asScoped(kibanaRequest).callAsCurrentUser
-        : legacyEsClient.callAsInternalUser;
+        ? esClient.asScoped(kibanaRequest).asCurrentUser
+        : esClient.asInternalUser;
       const clusterDetails = await getClusterUuids(callCluster, timestamp, maxBucketSize);
       const [licenses, stats] = await Promise.all([
         getLicenses(clusterDetails, callCluster, maxBucketSize),

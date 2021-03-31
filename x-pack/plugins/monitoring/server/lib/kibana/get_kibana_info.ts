@@ -33,8 +33,8 @@ export function getKibanaInfo(
   const params = {
     index: kbnIndexPattern,
     size: 1,
-    ignoreUnavailable: true,
-    filterPath: [
+    ignore_unavailable: true,
+    filter_path: [
       'hits.hits._source.kibana_stats.kibana',
       'hits.hits._source.kibana_stats.os.memory.free_in_bytes',
       'hits.hits._source.kibana_stats.process.uptime_in_millis',

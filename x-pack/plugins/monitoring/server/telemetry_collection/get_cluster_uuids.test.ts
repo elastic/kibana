@@ -39,7 +39,7 @@ describe('get_cluster_uuids', () => {
   });
 
   describe('handleClusterUuidsResponse', () => {
-    // filterPath makes it easy to ignore anything unexpected because it will come back empty
+    // filter_path makes it easy to ignore anything unexpected because it will come back empty
     it('handles unexpected response', () => {
       const clusterUuids = handleClusterUuidsResponse({});
       expect(clusterUuids.length).toStrictEqual(0);

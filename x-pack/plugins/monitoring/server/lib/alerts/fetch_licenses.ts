@@ -15,7 +15,7 @@ export async function fetchLicenses(
 ): Promise<AlertLicense[]> {
   const params = {
     index,
-    filterPath: [
+    filter_path: [
       'hits.hits._source.license.*',
       'hits.hits._source.cluster_uuid',
       'hits.hits._index',
