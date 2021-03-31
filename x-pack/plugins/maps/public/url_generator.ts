@@ -6,7 +6,7 @@
  */
 
 import rison from 'rison-node';
-import {
+import type {
   TimeRange,
   Filter,
   Query,
@@ -15,8 +15,8 @@ import {
   RefreshInterval,
 } from '../../../../src/plugins/data/public';
 import { setStateToKbnUrl } from '../../../../src/plugins/kibana_utils/public';
-import { UrlGeneratorsDefinition } from '../../../../src/plugins/share/public';
-import { LayerDescriptor } from '../common/descriptor_types';
+import type { UrlGeneratorsDefinition } from '../../../../src/plugins/share/public';
+import type { LayerDescriptor } from '../common/descriptor_types';
 import { INITIAL_LAYERS_KEY } from '../common/constants';
 import { lazyLoadMapModules } from './lazy_load_bundle';
 
