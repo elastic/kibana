@@ -18,7 +18,7 @@ export function dateHistogram(
   panel,
   annotation,
   esQueryConfig,
-  indexPatternObject,
+  indexPattern,
   capabilities,
   uiSettings
 ) {

@@ -121,8 +121,13 @@ export interface PostBulkAgentUnenrollRequest {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PostBulkAgentUnenrollResponse {}
+export type PostBulkAgentUnenrollResponse = Record<
+  Agent['id'],
+  {
+    success: boolean;
+    error?: string;
+  }
+>;
 
 export interface PostAgentUpgradeRequest {
   params: {

@@ -11,14 +11,12 @@ import Boom from '@hapi/boom';
 import supertest from 'supertest';
 import { schema } from '@kbn/config-schema';
 
-import { HttpService } from '../http_service';
-
 import { contextServiceMock } from '../../context/context_service.mock';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { createHttpServer } from '../test_utils';
+import { HttpService } from '../http_service';
 
 let server: HttpService;
-
 let logger: ReturnType<typeof loggingSystemMock.create>;
 const contextSetup = contextServiceMock.createSetupContract();
 
@@ -28,7 +26,6 @@ const setupDeps = {
 
 beforeEach(() => {
   logger = loggingSystemMock.create();
-
   server = createHttpServer({ logger });
 });
 

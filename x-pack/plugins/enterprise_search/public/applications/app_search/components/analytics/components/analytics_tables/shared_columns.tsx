@@ -9,6 +9,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
+import { EDIT_BUTTON_LABEL } from '../../../../../shared/constants';
 import { flashAPIErrors } from '../../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../../shared/http';
 import { KibanaLogic } from '../../../../../shared/kibana';
@@ -71,9 +72,7 @@ export const ACTIONS_COLUMN = {
       'data-test-subj': 'AnalyticsTableViewQueryButton',
     },
     {
-      name: i18n.translate('xpack.enterpriseSearch.appSearch.engine.analytics.table.editAction', {
-        defaultMessage: 'Edit',
-      }),
+      name: EDIT_BUTTON_LABEL,
       description: i18n.translate(
         'xpack.enterpriseSearch.appSearch.engine.analytics.table.editTooltip',
         { defaultMessage: 'Manage curation' }

@@ -79,13 +79,13 @@ describe('buildRequestBody(req)', () => {
       allowLeadingWildcards: true,
       queryStringOptions: {},
     };
-    const indexPatternObject = {};
+    const indexPattern = {};
     const doc = await buildRequestBody(
       { body },
       panel,
       series,
       config,
-      indexPatternObject,
+      indexPattern,
       capabilities,
       {
         get: async () => 50,
