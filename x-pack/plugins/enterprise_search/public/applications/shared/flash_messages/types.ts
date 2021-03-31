@@ -5,10 +5,18 @@
  * 2.0.
  */
 
-import { ReactNode } from 'react';
+import { ReactNode, ReactChild } from 'react';
 
 export interface IFlashMessage {
   type: 'success' | 'info' | 'warning' | 'error';
   message: ReactNode;
   description?: ReactNode;
+}
+
+// @see EuiGlobalToastListToast
+export interface IToast {
+  id: string;
+  title?: ReactNode;
+  text?: ReactChild;
+  toastLifeTimeMs?: number;
 }
