@@ -747,7 +747,10 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         indexPatternService: {} as IndexPatternsContract,
-        editable: true,
+        capabilities: {
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
+        },
         getTrigger,
         documentToExpression: () =>
           Promise.resolve({
@@ -816,7 +819,10 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         indexPatternService: {} as IndexPatternsContract,
-        editable: true,
+        capabilities: {
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
+        },
         getTrigger,
         documentToExpression: () =>
           Promise.resolve({
@@ -860,7 +866,10 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         indexPatternService: {} as IndexPatternsContract,
-        editable: true,
+        capabilities: {
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
+        },
         getTrigger,
         documentToExpression: () =>
           Promise.resolve({
@@ -904,7 +913,10 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         indexPatternService: {} as IndexPatternsContract,
-        editable: true,
+        capabilities: {
+          canSaveDashboards: true,
+          canSaveVisualizations: true,
+        },
         getTrigger,
         documentToExpression: () =>
           Promise.resolve({
