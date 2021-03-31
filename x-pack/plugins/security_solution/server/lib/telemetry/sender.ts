@@ -9,6 +9,7 @@ import { cloneDeep } from 'lodash';
 import axios from 'axios';
 import { LegacyAPICaller } from 'kibana/server';
 import { URL } from 'url';
+import type { TelemetrySchemaValue } from 'src/plugins/telemetry/common/schema';
 import { Logger, CoreStart } from '../../../../../../src/core/server';
 import { transformDataToNdjson } from '../../utils/read_stream/create_stream_from_ndjson';
 import {
@@ -50,6 +51,8 @@ export interface TelemetryEvent {
   license?: ESLicense;
 }
 
+const DIAGNOSTIC_ANALYTICS_CHANNEL = 'diagnostics-analytics';
+
 export class TelemetryEventsSender {
   private readonly initialCheckDelayMs = 10 * 1000;
   private readonly checkIntervalMs = 60 * 1000;
@@ -71,9 +74,32 @@ export class TelemetryEventsSender {
   public setup(telemetrySetup?: TelemetryPluginSetup, taskManager?: TaskManagerSetupContract) {
     this.telemetrySetup = telemetrySetup;
 
+    const optionalPassThrough: TelemetrySchemaValue = {
+      type: 'pass_through',
+      _meta: { description: 'To be filled', optional: true },
+    };
+
     this.telemetrySetup?.events.registerChannel({
-      name: 'diagnostics-analytics',
-      schema: {}, // TODO: Fill up schema based on allowlistEventFields
+      name: DIAGNOSTIC_ANALYTICS_CHANNEL,
+      schema: {
+        // Obtained from allowlistEventFields below in this file (we might need to set the optional fields)
+        '@timestamp': { type: 'date', _meta: { description: 'When the event was collected' } },
+        // TODO: Replace `pass_through` with more detailed info
+        agent: optionalPassThrough,
+        Endpoint: optionalPassThrough,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        Memory_protection: optionalPassThrough,
+        Ransomware: optionalPassThrough,
+        data_stream: optionalPassThrough,
+        ecs: optionalPassThrough,
+        elastic: optionalPassThrough,
+        event: optionalPassThrough,
+        rule: optionalPassThrough,
+        file: optionalPassThrough,
+        host: optionalPassThrough,
+        process: optionalPassThrough,
+        Target: optionalPassThrough,
+      },
     });
 
     if (taskManager) {
@@ -140,6 +166,12 @@ export class TelemetryEventsSender {
   }
 
   public queueTelemetryEvents(events: TelemetryEvent[]) {
+    this.telemetryStart?.events.sendToChannel(
+      DIAGNOSTIC_ANALYTICS_CHANNEL,
+      this.processEvents(events)
+    );
+    // ^ should replace everything below
+
     const qlength = this.queue.length;
 
     if (events.length === 0) {
@@ -152,8 +184,6 @@ export class TelemetryEventsSender {
       // we're full already
       return;
     }
-
-    this.telemetryStart?.events.sendToChannel('alerts-endpoint', this.processEvents(events));
 
     if (events.length > this.maxQueueSize - qlength) {
       this.queue.push(...this.processEvents(events.slice(0, this.maxQueueSize - qlength)));

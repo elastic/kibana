@@ -6,4 +6,10 @@
  * Side Public License, v 1.
  */
 
-export type { TelemetryRootSchema } from './types';
+export type {
+  TelemetryRootSchema,
+  TelemetrySchemaObject,
+  TelemetrySchemaArray,
+  TelemetrySchemaValue,
+  TelemetryMeta,
+} from './types';
