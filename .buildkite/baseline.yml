@@ -9,6 +9,8 @@ steps:
       .ci/buildkite/default_build.sh
       .ci/buildkite/default_saved_object_field_metrics.sh
     label: Default Build and Metrics
+    agents:
+      queue: bootstrap
 
   - wait: ~
     continue_on_failure: true
