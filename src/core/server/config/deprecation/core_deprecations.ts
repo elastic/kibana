@@ -118,13 +118,13 @@ const mapManifestServiceUrlDeprecation: ConfigDeprecation = (
 const serverHostZeroDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
   if (get(settings, 'server.host') === '0') {
     addDeprecation({
-      message: 'Support for setting server.host to "0" in kibana.yml is deprecated and will be removed in Kibana version 8.0.0. ' +
+      message:
+        'Support for setting server.host to "0" in kibana.yml is deprecated and will be removed in Kibana version 8.0.0. ' +
         'Instead use "0.0.0.0" to bind to all interfaces.',
     });
   }
   return settings;
 };
-
 
 const opsLoggingEventDeprecation: ConfigDeprecation = (settings, fromPath, addDeprecation) => {
   if (has(settings, 'logging.events.ops')) {
