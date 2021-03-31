@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// @ts-expect-error https://github.com/elastic/kibana/issues/95679
 import { esTestConfig, kbnTestConfig } from '@kbn/test';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { format as formatUrl } from 'url';
