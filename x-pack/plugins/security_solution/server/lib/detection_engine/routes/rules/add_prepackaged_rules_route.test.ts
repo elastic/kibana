@@ -19,7 +19,7 @@ import { listMock } from '../../../../../../lists/server/mocks';
 import { siemMock } from '../../../../mocks';
 import { FrameworkRequest } from '../../../framework';
 import { ExceptionListClient } from '../../../../../../lists/server';
-import { installPrepackagedTimelines } from '../../../timeline/routes/utils/install_prepacked_timelines';
+import { installPrepackagedTimelines } from '../../../timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
@@ -59,7 +59,7 @@ jest.mock('../../rules/get_prepackaged_rules', () => {
   };
 });
 
-jest.mock('../../../timeline/routes/utils/install_prepacked_timelines', () => {
+jest.mock('../../../timeline/routes/prepackaged_timelines/install_prepackaged_timelines', () => {
   return {
     installPrepackagedTimelines: jest.fn().mockResolvedValue({
       success: true,

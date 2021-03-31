@@ -32,7 +32,7 @@ export interface FieldChoice {
   operationType: OperationType;
 }
 
-export interface FieldSelectProps extends EuiComboBoxProps<{}> {
+export interface FieldSelectProps extends EuiComboBoxProps<EuiComboBoxOptionOption['value']> {
   currentIndexPattern: IndexPattern;
   selectedOperationType?: OperationType;
   selectedField?: string;

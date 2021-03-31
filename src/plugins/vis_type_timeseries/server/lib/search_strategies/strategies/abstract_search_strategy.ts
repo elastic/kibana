@@ -6,37 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { indexPatterns, IndexPatternsFetcher } from '../../../../../data/server';
+import { IndexPatternsService } from '../../../../../data/server';
+import { toSanitizedFieldType } from '../../../../common/fields_utils';
 
-import type { Framework } from '../../../plugin';
-import type { FieldSpec } from '../../../../../data/common';
-import type { SanitizedFieldType } from '../../../../common/types';
+import type { FetchedIndexPattern } from '../../../../common/types';
 import type {
   VisTypeTimeseriesRequest,
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesVisDataRequest,
 } from '../../../types';
-import { getIndexPatternObject } from '../lib/get_index_pattern';
-
-export const toSanitizedFieldType = (fields: FieldSpec[]) => {
-  return fields
-    .filter(
-      (field) =>
-        // Make sure to only include mapped fields, e.g. no index pattern runtime fields
-        !field.runtimeField && field.aggregatable && !indexPatterns.isNestedField(field)
-    )
-    .map(
-      (field) =>
-        ({
-          name: field.name,
-          label: field.customLabel ?? field.name,
-          type: field.type,
-        } as SanitizedFieldType)
-    );
-};
 
 export abstract class AbstractSearchStrategy {
-  constructor(private framework: Framework) {}
   async search(
     requestContext: VisTypeTimeseriesRequestHandlerContext,
     req: VisTypeTimeseriesVisDataRequest,
@@ -66,35 +46,25 @@ export abstract class AbstractSearchStrategy {
   checkForViability(
     requestContext: VisTypeTimeseriesRequestHandlerContext,
     req: VisTypeTimeseriesRequest,
-    indexPattern: string
+    fetchedIndexPattern: FetchedIndexPattern
   ): Promise<{ isViable: boolean; capabilities: any }> {
     throw new TypeError('Must override method');
   }
 
   async getFieldsForWildcard(
-    requestContext: VisTypeTimeseriesRequestHandlerContext,
-    req: VisTypeTimeseriesRequest,
-    indexPattern: string,
+    fetchedIndexPattern: FetchedIndexPattern,
+    indexPatternsService: IndexPatternsService,
     capabilities?: unknown,
     options?: Partial<{
       type: string;
       rollupIndex: string;
     }>
   ) {
-    const indexPatternsFetcher = new IndexPatternsFetcher(
-      requestContext.core.elasticsearch.client.asCurrentUser
-    );
-    const indexPatternsService = await this.framework.getIndexPatternsService(requestContext);
-    const { indexPatternObject } = await getIndexPatternObject(indexPattern, {
-      indexPatternsService,
-    });
-
     return toSanitizedFieldType(
-      indexPatternObject
-        ? indexPatternObject.getNonScriptedFields()
-        : await indexPatternsFetcher!.getFieldsForWildcard({
-            pattern: indexPattern,
-            fieldCapsOptions: { allow_no_indices: true },
+      fetchedIndexPattern.indexPattern
+        ? fetchedIndexPattern.indexPattern.getNonScriptedFields()
+        : await indexPatternsService.getFieldsForWildcard({
+            pattern: fetchedIndexPattern.indexPatternString ?? '',
             metaFields: [],
             ...options,
           })
