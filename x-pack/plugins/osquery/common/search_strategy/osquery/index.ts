@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { IEsSearchRequest } from '../../../../../../src/plugins/data/common';
 import { ESQuery } from '../../typed_json';
 import {
@@ -19,7 +20,6 @@ import { AgentsStrategyResponse, AgentsRequestOptions } from './agents';
 import { ResultsStrategyResponse, ResultsRequestOptions } from './results';
 
 import { DocValueFields, SortField, PaginationInputPaginated } from '../common';
-import type { estypes } from '@elastic/elasticsearch';
 
 export * from './actions';
 export * from './agents';

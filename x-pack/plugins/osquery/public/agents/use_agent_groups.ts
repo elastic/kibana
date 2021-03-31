@@ -46,16 +46,16 @@ export const useAgentGroups = ({ osqueryPolicies, osqueryPoliciesLoading }: UseA
                 aggs: {
                   policies: {
                     terms: {
-                      field: 'policy_id' 
-                    }
-                  }
+                      field: 'policy_id',
+                    },
+                  },
                 },
               },
               policies: {
                 terms: {
                   field: 'policy_id',
-                }
-              }
+                },
+              },
             },
             pagination: generateTablePaginationOptions(0, 9000),
             sort: {
