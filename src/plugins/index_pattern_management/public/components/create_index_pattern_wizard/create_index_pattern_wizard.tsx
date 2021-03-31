@@ -57,10 +57,11 @@ export class CreateIndexPatternWizard extends Component<
     context.services.setBreadcrumbs(getCreateBreadcrumbs());
 
     const type = new URLSearchParams(props.location.search).get('type') || undefined;
+    const indexPattern = new URLSearchParams(props.location.search).get('name') || '';
 
     this.state = {
       step: 1,
-      indexPattern: '',
+      indexPattern,
       allIndices: [],
       remoteClustersExist: false,
       isInitiallyLoadingIndices: true,

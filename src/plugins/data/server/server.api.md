@@ -203,6 +203,10 @@ export interface AggFunctionsMapping {
     //
     // (undocumented)
     aggSignificantTerms: ReturnType<typeof aggSignificantTerms>;
+    // Warning: (ae-forgotten-export) The symbol "aggSinglePercentile" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    aggSinglePercentile: ReturnType<typeof aggSinglePercentile>;
     // Warning: (ae-forgotten-export) The symbol "aggStdDeviation" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -404,7 +408,7 @@ export const ES_SEARCH_STRATEGY = "es";
 // Warning: (ae-missing-release-tag) "EsaggsExpressionFunctionDefinition" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type EsaggsExpressionFunctionDefinition = ExpressionFunctionDefinition<'esaggs', Input_35, Arguments_21, Output_35>;
+export type EsaggsExpressionFunctionDefinition = ExpressionFunctionDefinition<'esaggs', Input_36, Arguments_21, Output_36>;
 
 // Warning: (ae-missing-release-tag) "esFilters" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1162,6 +1166,8 @@ export enum METRIC_TYPES {
     // (undocumented)
     SERIAL_DIFF = "serial_diff",
     // (undocumented)
+    SINGLE_PERCENTILE = "single_percentile",
+    // (undocumented)
     STD_DEV = "std_dev",
     // (undocumented)
     SUM = "sum",
@@ -1297,7 +1303,7 @@ export const search: {
         intervalOptions: ({
             display: string;
             val: string;
-            enabled(agg: import("../common").IBucketAggConfig): boolean | "" | undefined;
+            enabled(agg: import("../common").IBucketAggConfig): boolean;
         } | {
             display: string;
             val: string;
