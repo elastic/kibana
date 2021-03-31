@@ -8,9 +8,11 @@
 import React, { FunctionComponent, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiIcon, EuiLink, EuiPopover, EuiText } from '@elastic/eui';
+import { useAppContext } from '../../../../app_context';
 
 export const CloudUrlHelp: FunctionComponent = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const { cloudBaseUrl } = useAppContext();
   return (
     <EuiPopover
       button={
@@ -35,21 +37,20 @@ export const CloudUrlHelp: FunctionComponent = () => {
         <h6>
           <FormattedMessage
             id="xpack.remoteClusters.remoteClusterForm.cloudUrlHelp.popoverTitle"
-            defaultMessage="How to find your Elasticsearch endpoint url?"
+            defaultMessage="How to find your Elasticsearch endpoint URL"
           />
         </h6>
         <ol>
           <li>
             <FormattedMessage
               id="xpack.remoteClusters.remoteClusterForm.cloudUrlHelp.stepOneText"
-              defaultMessage="Open {deploymentsLink}"
+              defaultMessage="Open the {deploymentsLink}"
               values={{
                 deploymentsLink: (
-                  // TODO Cloud deployments link
-                  <EuiLink external={true} href="test.com">
+                  <EuiLink external={true} href={`${cloudBaseUrl}/deployments`} target="_blank">
                     <FormattedMessage
                       id="xpack.remoteClusters.remoteClusterForm.cloudUrlHelpModal.deploymentsLink"
-                      defaultMessage="Deployments overview."
+                      defaultMessage="deployments page."
                     />
                   </EuiLink>
                 ),
@@ -65,7 +66,7 @@ export const CloudUrlHelp: FunctionComponent = () => {
           <li>
             <FormattedMessage
               id="xpack.remoteClusters.remoteClusterForm.cloudUrlHelp.stepThreeText"
-              defaultMessage="Copy {elasticsearch} endpoint URL under Applications."
+              defaultMessage="Under Applications, copy the {elasticsearch} endpoint URL."
               values={{
                 elasticsearch: (
                   <>

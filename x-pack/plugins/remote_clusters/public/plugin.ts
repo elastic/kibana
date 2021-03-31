@@ -49,7 +49,6 @@ export class RemoteClustersUIPlugin
             i18n: { Context: i18nContext },
             docLinks,
             fatalErrors,
-            http: { basePath },
           } = core;
 
           docTitle.change(PLUGIN.getI18nName());
@@ -61,13 +60,14 @@ export class RemoteClustersUIPlugin
           initNotification(toasts, fatalErrors);
           initHttp(http);
 
-          const isCloudEnabled = Boolean(cloud?.isCloudEnabled);
+          const isCloudEnabled: boolean = Boolean(cloud?.isCloudEnabled);
+          const cloudBaseUrl: string = cloud?.baseUrl ?? '';
 
           const { renderApp } = await import('./application');
           const unmountAppCallback = await renderApp(
             element,
             i18nContext,
-            { isCloudEnabled, basePath },
+            { isCloudEnabled, cloudBaseUrl },
             history
           );
 

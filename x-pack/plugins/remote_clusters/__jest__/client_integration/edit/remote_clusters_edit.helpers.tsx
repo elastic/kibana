@@ -11,7 +11,7 @@ import React from 'react';
 import { RemoteClusterEdit } from '../../../public/application/sections';
 import { createRemoteClustersStore } from '../../../public/application/store';
 import { AppRouter, registerRouter } from '../../../public/application/services';
-import { basePathMock, createRemoteClustersActions } from '../helpers';
+import { createRemoteClustersActions } from '../helpers';
 import { AppContextProvider } from '../../../public/application/app_context';
 
 export const REMOTE_CLUSTER_EDIT_NAME = 'new-york';
@@ -25,7 +25,7 @@ export const REMOTE_CLUSTER_EDIT = {
 const ComponentWithContext = (props: { isCloudEnabled: boolean }) => {
   const { isCloudEnabled, ...rest } = props;
   return (
-    <AppContextProvider context={{ isCloudEnabled, basePath: basePathMock }}>
+    <AppContextProvider context={{ isCloudEnabled, cloudBaseUrl: 'test.com' }}>
       <RemoteClusterEdit {...rest} />
     </AppContextProvider>
   );

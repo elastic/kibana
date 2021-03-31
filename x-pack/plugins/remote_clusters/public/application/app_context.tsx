@@ -6,11 +6,10 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { IBasePath } from 'kibana/public';
 
 export interface Context {
   isCloudEnabled: boolean;
-  basePath: IBasePath;
+  cloudBaseUrl: string;
 }
 
 export const AppContext = createContext<Context>({} as any);
