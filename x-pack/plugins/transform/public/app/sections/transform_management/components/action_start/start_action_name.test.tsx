@@ -23,6 +23,7 @@ describe('Transform: Transform List Actions <StartAction />', () => {
     const props: StartActionNameProps = {
       forceDisable: false,
       items: [item],
+      transformNodes: 1,
     };
 
     const wrapper = shallow(<StartActionName {...props} />);
