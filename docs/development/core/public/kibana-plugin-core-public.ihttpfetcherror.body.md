@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-readonly body?: ErrorBody;
+readonly body?: any;
 ```

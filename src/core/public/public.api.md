@@ -847,9 +847,9 @@ export interface IExternalUrlPolicy {
 }
 
 // @public (undocumented)
-export interface IHttpFetchError<ErrorBody = any> extends Error {
+export interface IHttpFetchError extends Error {
     // (undocumented)
-    readonly body?: ErrorBody;
+    readonly body?: any;
     // (undocumented)
     readonly name: string;
     // @deprecated (undocumented)
