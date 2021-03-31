@@ -57,7 +57,7 @@ export interface SummaryViewProps {
   browserFields?: BrowserFields;
   data: TimelineEventsDetailsItem[];
   eventId: string;
-  isDisplayingThreatInfo?: boolean;
+  isDisplayingThreatDetails?: boolean;
   isDisplayingThreatSummary?: boolean;
   timelineId: string;
 }
@@ -137,19 +137,19 @@ const getSummary = ({
   timelineId: contextId,
   eventId,
   isDisplayingThreatSummary,
-  isDisplayingThreatInfo,
+  isDisplayingThreatDetails,
 }: {
   data: TimelineEventsDetailsItem[];
   browserFields?: BrowserFields;
   timelineId: string;
   eventId: string;
   isDisplayingThreatSummary: boolean;
-  isDisplayingThreatInfo: boolean;
+  isDisplayingThreatDetails: boolean;
 }) => {
   if (!data) return [];
-  if (isDisplayingThreatSummary || isDisplayingThreatInfo) {
+  if (isDisplayingThreatSummary || isDisplayingThreatDetails) {
     return data.reduce<Summary>((acc, { category, field, originalValue }) => {
-      if (isDisplayingThreatInfo && field === 'threat.indicator' && originalValue) {
+      if (isDisplayingThreatDetails && field === 'threat.indicator' && originalValue) {
         const isOriginalValueArray = Array.isArray(originalValue);
         const isArrayIndexVisible = isOriginalValueArray && originalValue.length > 1;
         const threatData = isArrayIndexVisible
@@ -286,7 +286,7 @@ export const SummaryViewComponent: React.FC<SummaryViewProps> = ({
   browserFields,
   data,
   eventId,
-  isDisplayingThreatInfo = false,
+  isDisplayingThreatDetails = false,
   isDisplayingThreatSummary = false,
   timelineId,
 }) => {
@@ -303,11 +303,11 @@ export const SummaryViewComponent: React.FC<SummaryViewProps> = ({
         browserFields,
         data,
         eventId,
-        isDisplayingThreatInfo,
+        isDisplayingThreatDetails,
         isDisplayingThreatSummary,
         timelineId,
       }),
-    [browserFields, data, eventId, timelineId, isDisplayingThreatSummary, isDisplayingThreatInfo]
+    [browserFields, data, eventId, timelineId, isDisplayingThreatSummary, isDisplayingThreatDetails]
   );
   const isTableEmpty = isDisplayingThreatSummary && summaryList.length === 0;
   if (isTableEmpty) return null;
@@ -316,8 +316,8 @@ export const SummaryViewComponent: React.FC<SummaryViewProps> = ({
     <>
       <StyledEuiInMemoryTable
         data-test-subj={`${
-          isDisplayingThreatInfo
-            ? 'threat-info'
+          isDisplayingThreatDetails
+            ? 'threat-details'
             : isDisplayingThreatSummary
             ? 'threat-summary'
             : 'summary'

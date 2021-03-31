@@ -21,13 +21,13 @@ export type EventView =
   | EventsViewType.tableView
   | EventsViewType.jsonView
   | EventsViewType.summaryView;
-export type ThreatView = EventsViewType.threatSummaryView | EventsViewType.threatInfoView;
+export type ThreatView = EventsViewType.threatSummaryView | EventsViewType.threatDetailsView;
 export enum EventsViewType {
   tableView = 'table-view',
   jsonView = 'json-view',
   summaryView = 'summary-view',
   threatSummaryView = 'threat-summary-view',
-  threatInfoView = 'threat-info-view',
+  threatDetailsView = 'threat-details-view',
 }
 
 interface Props {
@@ -167,9 +167,9 @@ const EventDetailsComponent: React.FC<Props> = ({
             ...defaultProps,
             isDisplayingThreatSummary: true,
           }),
-          getSummaryTab(EventsViewType.threatInfoView, i18n.THREAT_DETAILS, {
+          getSummaryTab(EventsViewType.threatDetailsView, i18n.THREAT_DETAILS, {
             ...defaultProps,
-            isDisplayingThreatInfo: true,
+            isDisplayingThreatDetails: true,
           }),
         ]
       : [];

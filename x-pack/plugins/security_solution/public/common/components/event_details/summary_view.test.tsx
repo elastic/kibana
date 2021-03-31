@@ -61,14 +61,14 @@ describe('SummaryViewComponent', () => {
     });
   });
 
-  test('render threat info', async () => {
+  test('render threat details', async () => {
     const wrapper = mount(
       <TestProviders>
-        <SummaryViewComponent {...props} isDisplayingThreatInfo />
+        <SummaryViewComponent {...props} isDisplayingThreatDetails />
       </TestProviders>
     );
     await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="threat-info-view"]').exists()).toEqual(true);
+      expect(wrapper.find('[data-test-subj="threat-details-view"]').exists()).toEqual(true);
     });
   });
 
