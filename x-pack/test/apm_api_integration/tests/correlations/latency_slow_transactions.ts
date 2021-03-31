@@ -24,38 +24,46 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       end: range.end,
       durationPercentile: 95,
       fieldNames: 'user_agent.name,user_agent.os.name,url.original',
+      maxLatency: 3581640.00000003,
+      distributionInterval: 238776,
     },
   });
+  registry.when(
+    'correlations latency slow transactions without data',
+    { config: 'trial', archives: [] },
+    () => {
+      it('handles the empty state', async () => {
+        const response = await supertest.get(url);
 
-  registry.when('without data', { config: 'trial', archives: [] }, () => {
-    it('handles the empty state', async () => {
-      const response = await supertest.get(url);
+        expect(response.status).to.be(200);
+        expect(response.body.response).to.be(undefined);
+      });
+    }
+  );
 
-      expect(response.status).to.be(200);
-      expect(response.body.response).to.be(undefined);
-    });
-  });
+  registry.when(
+    'correlations latency slow transactions with data and default args',
+    { config: 'trial', archives: ['apm_8.0.0'] },
+    () => {
+      type ResponseBody = APIReturnType<'GET /api/apm/correlations/latency/slow_transactions'>;
+      let response: {
+        status: number;
+        body: NonNullable<ResponseBody>;
+      };
 
-  registry.when('with data and default args', { config: 'trial', archives: ['apm_8.0.0'] }, () => {
-    type ResponseBody = APIReturnType<'GET /api/apm/correlations/latency/slow_transactions'>;
-    let response: {
-      status: number;
-      body: NonNullable<ResponseBody>;
-    };
+      before(async () => {
+        response = await supertest.get(url);
+      });
 
-    before(async () => {
-      response = await supertest.get(url);
-    });
+      it('returns successfully', () => {
+        expect(response.status).to.eql(200);
+      });
 
-    it('returns successfully', () => {
-      expect(response.status).to.eql(200);
-    });
-
-    it('returns significant terms', () => {
-      const { significantTerms } = response.body;
-      expect(significantTerms).to.have.length(9);
-      const sortedFieldNames = significantTerms.map(({ fieldName }) => fieldName).sort();
-      expectSnapshot(sortedFieldNames).toMatchInline(`
+      it('returns significant terms', () => {
+        const { significantTerms } = response.body;
+        expect(significantTerms).to.have.length(9);
+        const sortedFieldNames = significantTerms.map(({ fieldName }) => fieldName).sort();
+        expectSnapshot(sortedFieldNames).toMatchInline(`
         Array [
           "url.original",
           "url.original",
@@ -68,11 +76,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           "user_agent.os.name",
         ]
       `);
-    });
+      });
 
-    it('returns a distribution per term', () => {
-      const { significantTerms } = response.body;
-      expectSnapshot(significantTerms.map((term) => term.distribution.length)).toMatchInline(`
+      it('returns a distribution per term', () => {
+        const { significantTerms } = response.body;
+        expectSnapshot(significantTerms.map((term) => term.distribution.length)).toMatchInline(`
         Array [
           15,
           15,
@@ -85,10 +93,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           15,
         ]
       `);
-    });
-
-    // it.skip('returns overall distribution', () => {
-    //   expectSnapshot(response.body?.overall?.distribution.length).toMatchInline(`15`);
-    // });
-  });
+      });
+    }
+  );
 }
