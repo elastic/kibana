@@ -706,3 +706,21 @@ These rough calculations give you a lower bound to the required throughput, whic
 Given these inferred attributes, it would be safe to assume that a single {kib} instance with default settings **would not** provide the required throughput. It is possible that scaling horizontally by adding a couple more {kib} instances will.
 
 For details on scaling Task Manager, see <<task-manager-scaling-guidance>>.
+
+[float]
+[[task-manager-cannot-operate-when-inline-scripts-are-disabled]]
+==== Inline scripts are disabled in {es}
+
+*Problem*:
+
+Tasks are not running, and the server logs contain the following error message:
+
+[source, txt]
+--------------------------------------------------
+[warning][plugins][taskManager] Task Manager cannot operate when inline scripts are disabled in {es}
+--------------------------------------------------
+
+*Solution*:
+
+Inline scripts are a hard requirement for Task Manager to function.
+To enable inline scripting, see the Elasticsearch documentation for {ref}/modules-scripting-security.html#allowed-script-types-setting[configuring allowed script types setting].

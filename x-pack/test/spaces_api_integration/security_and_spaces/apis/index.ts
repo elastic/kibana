@@ -6,10 +6,10 @@
  */
 
 import { createUsersAndRoles } from '../../common/lib/create_users_and_roles';
-import { TestInvoker } from '../../common/lib/types';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function ({ loadTestFile, getService }: TestInvoker) {
+export default function ({ loadTestFile, getService }: FtrProviderContext) {
   const es = getService('es');
   const supertest = getService('supertest');
 
