@@ -29,7 +29,6 @@ import { getRenderCellValueFn } from './get_render_cell_value';
 import { DiscoverGridSettings } from './types';
 import { SortPairArr } from '../../angular/doc_table/lib/get_sort';
 import {
-  getDocId,
   getEuiGridColumns,
   getLeadControlColumns,
   getVisibleColumns,
@@ -38,7 +37,7 @@ import { defaultPageSize, gridStyle, pageSizeArr, toolbarVisibility } from './co
 import { DiscoverServices } from '../../../build_services';
 import { getDisplayedColumns } from '../../helpers/columns';
 import { KibanaContextProvider } from '../../../../../kibana_react/public';
-import { DiscoverGridDocumentToolbarBtn } from './discover_grid_document_selection';
+import { DiscoverGridDocumentToolbarBtn, getDocId } from './discover_grid_document_selection';
 
 interface SortObj {
   id: string;
@@ -300,6 +299,7 @@ export const DiscoverGrid = ({
         data-shared-item=""
         data-title={searchTitle}
         data-description={searchDescription}
+        data-document-number={displayedRows.length}
       >
         <KibanaContextProvider services={{ uiSettings: services.uiSettings }}>
           <EuiDataGridMemoized

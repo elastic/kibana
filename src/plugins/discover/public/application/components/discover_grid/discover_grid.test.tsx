@@ -6,78 +6,130 @@
  * Side Public License, v 1.
  */
 import React from 'react';
+import { ReactWrapper } from 'enzyme';
+import { EuiCopy } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { esHits } from '../../../__mocks__/es_hits';
 import { indexPatternMock } from '../../../__mocks__/index_pattern';
 import { mountWithIntl } from '@kbn/test/jest';
-import { DiscoverGrid } from './discover_grid';
+import { DiscoverGrid, DiscoverGridProps } from './discover_grid';
 import { uiSettingsMock } from '../../../__mocks__/ui_settings';
 import { DiscoverServices } from '../../../build_services';
-import { getDocId } from './discover_grid_columns';
+import { ElasticSearchHit } from '../../doc_views/doc_views_types';
+import { getDocId } from './discover_grid_document_selection';
+
+function getProps() {
+  const servicesMock = {
+    uiSettings: uiSettingsMock,
+  } as DiscoverServices;
+  return {
+    ariaLabelledBy: '',
+    columns: [],
+    indexPattern: indexPatternMock,
+    isLoading: false,
+    expandedDoc: undefined,
+    onAddColumn: jest.fn(),
+    onFilter: jest.fn(),
+    onRemoveColumn: jest.fn(),
+    onResize: jest.fn(),
+    onSetColumns: jest.fn(),
+    onSort: jest.fn(),
+    rows: esHits,
+    sampleSize: 30,
+    searchDescription: '',
+    searchTitle: '',
+    services: servicesMock,
+    setExpandedDoc: jest.fn(),
+    settings: {},
+    showTimeCol: true,
+    sort: [],
+    useNewFieldsApi: true,
+  };
+}
+
+function getComponent() {
+  return mountWithIntl(<DiscoverGrid {...getProps()} />);
+}
+
+function getSelectedDocNr(component: ReactWrapper<DiscoverGridProps>) {
+  const gridSelectionBtn = findTestSubject(component, 'dscGridSelectionBtn');
+  if (!gridSelectionBtn.length) {
+    return 0;
+  }
+  const selectedNr = gridSelectionBtn.getDOMNode().getAttribute('data-selected-documents');
+  return Number(selectedNr);
+}
+
+function getDisplayedDocNr(component: ReactWrapper<DiscoverGridProps>) {
+  const gridSelectionBtn = findTestSubject(component, 'discoverDocTable');
+  if (!gridSelectionBtn.length) {
+    return 0;
+  }
+  const selectedNr = gridSelectionBtn.getDOMNode().getAttribute('data-document-number');
+  return Number(selectedNr);
+}
+
+async function toggleDocSelection(
+  component: ReactWrapper<DiscoverGridProps>,
+  document: ElasticSearchHit
+) {
+  act(() => {
+    const docId = getDocId(document);
+    findTestSubject(component, `dscGridSelectDoc-${docId}`).simulate('change');
+  });
+  component.update();
+}
 
 describe('DiscoverGrid', () => {
-  test('selecting documents', async () => {
-    const servicesMock = {
-      uiSettings: uiSettingsMock,
-    } as DiscoverServices;
-    const props = {
-      ariaLabelledBy: '',
-      columns: [],
-      indexPattern: indexPatternMock,
-      isLoading: false,
-      expandedDoc: undefined,
-      onAddColumn: jest.fn(),
-      onFilter: jest.fn(),
-      onRemoveColumn: jest.fn(),
-      onResize: jest.fn(),
-      onSetColumns: jest.fn(),
-      onSort: jest.fn(),
-      rows: esHits,
-      sampleSize: 30,
-      searchDescription: '',
-      searchTitle: '',
-      services: servicesMock,
-      setExpandedDoc: jest.fn(),
-      settings: {},
-      showTimeCol: true,
-      sort: [],
-      useNewFieldsApi: true,
-    };
-
-    const component = mountWithIntl(<DiscoverGrid {...props} />);
-    expect(findTestSubject(component, 'dscGridSelectionBtn').length).toBe(0);
-
-    act(() => {
-      const docId = getDocId(esHits[0]);
-      expect(findTestSubject(component, `dscGridSelectDoc-${docId}`).length).toBe(1);
-      findTestSubject(component, `dscGridSelectDoc-${docId}`).simulate('change');
+  describe('Document selection', () => {
+    let component: ReactWrapper<DiscoverGridProps>;
+    beforeEach(() => {
+      component = getComponent();
     });
-    component.update();
-    expect(findTestSubject(component, 'dscGridSelectionBtn').length).toBe(1);
 
-    act(() => {
-      const docId = getDocId(esHits[1]);
-      expect(findTestSubject(component, `dscGridSelectDoc-${docId}`).length).toBe(1);
-      findTestSubject(component, `dscGridSelectDoc-${docId}`).simulate('change');
+    test('no documents are selected initially', async () => {
+      expect(getSelectedDocNr(component)).toBe(0);
+      expect(getDisplayedDocNr(component)).toBe(5);
     });
-    component.update();
-    expect(findTestSubject(component, 'dscGridSelectionBtn').length).toBe(1);
-    const selectedNr = findTestSubject(component, 'dscGridSelectionBtn')
-      .getDOMNode()
-      .getAttribute('data-selected-documents');
-    expect(selectedNr).toBe('2');
 
-    act(() => {
-      const docId = getDocId(esHits[1]);
-      expect(findTestSubject(component, `dscGridSelectDoc-${docId}`).length).toBe(1);
-      findTestSubject(component, `dscGridSelectDoc-${docId}`).simulate('change');
+    test('Allows selection/deselection of multiple documents', async () => {
+      await toggleDocSelection(component, esHits[0]);
+      expect(getSelectedDocNr(component)).toBe(1);
+      await toggleDocSelection(component, esHits[1]);
+      expect(getSelectedDocNr(component)).toBe(2);
+      await toggleDocSelection(component, esHits[1]);
+      expect(getSelectedDocNr(component)).toBe(1);
     });
-    component.update();
-    expect(findTestSubject(component, 'dscGridSelectionBtn').length).toBe(1);
-    const selectedNr2 = findTestSubject(component, 'dscGridSelectionBtn')
-      .getDOMNode()
-      .getAttribute('data-selected-documents');
-    expect(selectedNr2).toBe('1');
+
+    test('deselection of all selected documents', async () => {
+      await toggleDocSelection(component, esHits[0]);
+      await toggleDocSelection(component, esHits[1]);
+      expect(getSelectedDocNr(component)).toBe(2);
+      findTestSubject(component, 'dscGridSelectionBtn').simulate('click');
+      findTestSubject(component, 'dscGridClearSelectedDocuments').simulate('click');
+      expect(getSelectedDocNr(component)).toBe(0);
+    });
+
+    test('showing only selected documents and undo this', async () => {
+      await toggleDocSelection(component, esHits[0]);
+      await toggleDocSelection(component, esHits[1]);
+      expect(getSelectedDocNr(component)).toBe(2);
+      findTestSubject(component, 'dscGridSelectionBtn').simulate('click');
+      findTestSubject(component, 'dscGridShowSelectedDocuments').simulate('click');
+      expect(getDisplayedDocNr(component)).toBe(2);
+      findTestSubject(component, 'dscGridSelectionBtn').simulate('click');
+      component.update();
+      findTestSubject(component, 'dscGridShowAllDocuments').simulate('click');
+      expect(getDisplayedDocNr(component)).toBe(5);
+    });
+
+    test('copying selected documents to clipboard', async () => {
+      await toggleDocSelection(component, esHits[0]);
+      findTestSubject(component, 'dscGridSelectionBtn').simulate('click');
+      expect(component.find(EuiCopy).prop('textToCopy')).toMatchInlineSnapshot(
+        `"[{\\"_index\\":\\"i\\",\\"_id\\":\\"1\\",\\"_score\\":1,\\"_type\\":\\"_doc\\",\\"_source\\":{\\"date\\":\\"2020-20-01T12:12:12.123\\",\\"message\\":\\"test1\\",\\"bytes\\":20}}]"`
+      );
+    });
   });
 });

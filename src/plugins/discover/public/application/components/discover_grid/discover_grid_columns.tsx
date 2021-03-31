@@ -6,45 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext, useMemo } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiDataGridColumn, EuiScreenReaderOnly, EuiCheckbox } from '@elastic/eui';
+import { EuiDataGridColumn, EuiScreenReaderOnly } from '@elastic/eui';
 import { ExpandButton } from './discover_grid_expand_button';
 import { DiscoverGridSettings } from './types';
 import { IndexPattern } from '../../../../../data/common/index_patterns/index_patterns';
 import { buildCellActions } from './discover_grid_cell_actions';
 import { getSchemaByKbnType } from './discover_grid_schema';
-import { DiscoverGridContext } from './discover_grid_context';
-import { ElasticSearchHit } from '../../doc_views/doc_views_types';
-
-export const getDocId = (doc: ElasticSearchHit & { _routing?: string }) => {
-  const routing = doc._routing ? doc._routing : '';
-  return [doc._index, doc._id, routing].join('--');
-};
-
-const SelectButton = ({ rowIndex }: { rowIndex: number }) => {
-  const ctx = useContext(DiscoverGridContext);
-  const doc = useMemo(() => ctx.rows[rowIndex], [ctx.rows, rowIndex]);
-  const id = useMemo(() => getDocId(doc), [doc]);
-  const checked = useMemo(() => ctx.selectedDocs.includes(id), [ctx.selectedDocs, id]);
-
-  return (
-    <EuiCheckbox
-      id={id}
-      label=""
-      checked={checked}
-      data-test-subj={`dscGridSelectDoc-${id}`}
-      onChange={() => {
-        if (checked) {
-          const newSelection = ctx.selectedDocs.filter((docId) => docId !== id);
-          ctx.setSelectedDocs(newSelection);
-        } else {
-          ctx.setSelectedDocs([...ctx.selectedDocs, id]);
-        }
-      }}
-    />
-  );
-};
+import { SelectButton } from './discover_grid_document_selection';
 
 export function getLeadControlColumns() {
   return [

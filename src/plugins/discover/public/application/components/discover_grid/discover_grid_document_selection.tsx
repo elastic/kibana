@@ -5,18 +5,47 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import React, { useCallback, useState, useContext, useMemo } from 'react';
 import {
-  EuiContextMenuPanel,
+  EuiButtonEmpty,
   EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiCopy,
   EuiPopover,
-  EuiButtonEmpty,
+  EuiCheckbox,
 } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import classNames from 'classnames';
-import { getDocId } from './discover_grid_columns';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
+import { DiscoverGridContext } from './discover_grid_context';
+
+export const getDocId = (doc: ElasticSearchHit & { _routing?: string }) => {
+  const routing = doc._routing ? doc._routing : '';
+  return [doc._index, doc._id, routing].join('::');
+};
+export const SelectButton = ({ rowIndex }: { rowIndex: number }) => {
+  const ctx = useContext(DiscoverGridContext);
+  const doc = useMemo(() => ctx.rows[rowIndex], [ctx.rows, rowIndex]);
+  const id = useMemo(() => getDocId(doc), [doc]);
+  const checked = useMemo(() => ctx.selectedDocs.includes(id), [ctx.selectedDocs, id]);
+
+  return (
+    <EuiCheckbox
+      id={id}
+      label=""
+      checked={checked}
+      data-test-subj={`dscGridSelectDoc-${id}`}
+      onChange={() => {
+        if (checked) {
+          const newSelection = ctx.selectedDocs.filter((docId) => docId !== id);
+          ctx.setSelectedDocs(newSelection);
+        } else {
+          ctx.setSelectedDocs([...ctx.selectedDocs, id]);
+        }
+      }}
+    />
+  );
+};
 
 export function DiscoverGridDocumentToolbarBtn({
   isFilterActive,
@@ -37,6 +66,7 @@ export function DiscoverGridDocumentToolbarBtn({
     return [
       isFilterActive ? (
         <EuiContextMenuItem
+          data-test-subj="dscGridShowAllDocuments"
           key="showAllDocuments"
           icon="eye"
           onClick={() => {
@@ -48,6 +78,7 @@ export function DiscoverGridDocumentToolbarBtn({
         </EuiContextMenuItem>
       ) : (
         <EuiContextMenuItem
+          data-test-subj="dscGridShowSelectedDocuments"
           key="showSelectedDocuments"
           icon="eye"
           onClick={() => {
@@ -63,6 +94,7 @@ export function DiscoverGridDocumentToolbarBtn({
       ),
 
       <EuiContextMenuItem
+        data-test-subj="dscGridClearSelectedDocuments"
         key="clearSelection"
         icon="cross"
         onClick={() => {
@@ -75,6 +107,7 @@ export function DiscoverGridDocumentToolbarBtn({
       </EuiContextMenuItem>,
       <EuiCopy
         key="copyJsonWrapper"
+        data-test-subj="dscGridCopySelectedDocumentsJSON"
         textToCopy={
           !rows ? '' : JSON.stringify(rows.filter((row) => selectedDocs.includes(getDocId(row))))
         }
@@ -126,7 +159,7 @@ export function DiscoverGridDocumentToolbarBtn({
         </EuiButtonEmpty>
       }
     >
-      <EuiContextMenuPanel items={getMenuItems()} />
+      {isSelectionPopoverOpen && <EuiContextMenuPanel items={getMenuItems()} />}
     </EuiPopover>
   );
 }
