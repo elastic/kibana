@@ -23,6 +23,7 @@ export declare class AggConfigs
 |  [aggs](./kibana-plugin-plugins-data-public.aggconfigs.aggs.md) |  | <code>IAggConfig[]</code> |  |
 |  [createAggConfig](./kibana-plugin-plugins-data-public.aggconfigs.createaggconfig.md) |  | <code>&lt;T extends AggConfig = AggConfig&gt;(params: CreateAggConfigParams, { addToAggConfigs }?: {</code><br/><code>        addToAggConfigs?: boolean &#124; undefined;</code><br/><code>    }) =&gt; T</code> |  |
 |  [indexPattern](./kibana-plugin-plugins-data-public.aggconfigs.indexpattern.md) |  | <code>IndexPattern</code> |  |
+|  [timeFields](./kibana-plugin-plugins-data-public.aggconfigs.timefields.md) |  | <code>string[]</code> |  |
 |  [timeRange](./kibana-plugin-plugins-data-public.aggconfigs.timerange.md) |  | <code>TimeRange</code> |  |
 
 ## Methods
@@ -43,6 +44,7 @@ export declare class AggConfigs
 |  [getResponseAggs()](./kibana-plugin-plugins-data-public.aggconfigs.getresponseaggs.md) |  | Gets the AggConfigs (and possibly ResponseAggConfigs) that represent the values that will be produced when all aggs are run.<!-- -->With multi-value metric aggs it is possible for a single agg request to result in multiple agg values, which is why the length of a vis' responseValuesAggs may be different than the vis' aggs {<!-- -->array\[AggConfig\]<!-- -->} |
 |  [jsonDataEquals(aggConfigs)](./kibana-plugin-plugins-data-public.aggconfigs.jsondataequals.md) |  | Data-by-data comparison of this Aggregation Ignores the non-array indexes |
 |  [onSearchRequestStart(searchSource, options)](./kibana-plugin-plugins-data-public.aggconfigs.onsearchrequeststart.md) |  |  |
+|  [setTimeFields(timeFields)](./kibana-plugin-plugins-data-public.aggconfigs.settimefields.md) |  |  |
 |  [setTimeRange(timeRange)](./kibana-plugin-plugins-data-public.aggconfigs.settimerange.md) |  |  |
 |  [toDsl(hierarchical)](./kibana-plugin-plugins-data-public.aggconfigs.todsl.md) |  |  |
 

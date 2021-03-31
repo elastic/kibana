@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-import { BannerPlacement } from '../common';
-
-export interface BannerClientConfig {
-  placement: BannerPlacement;
-}
+export { ResultSettingsTable } from './result_settings_table';
