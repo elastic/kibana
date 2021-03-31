@@ -34,7 +34,6 @@ interface RuleRegistryOptions<TFieldMap extends FieldMap> {
   fieldMap: TFieldMap;
   ilmPolicy: ILMPolicy;
   alertingPluginSetupContract: AlertingPluginSetupContract;
-  parent?: RuleRegistry<DefaultFieldMap>;
 }
 
 export class RuleRegistry<TFieldMap extends DefaultFieldMap> {
@@ -214,8 +213,6 @@ export class RuleRegistry<TFieldMap extends DefaultFieldMap> {
       namespace: [this.options.namespace, namespace].filter(Boolean).join('-'),
       fieldMap: mergedFieldMap,
       ...(ilmPolicy ? { ilmPolicy } : {}),
-      // @ts-expect-error Types of property 'body' are incompatible.
-      parent: this,
     });
 
     this.children.push(child);
