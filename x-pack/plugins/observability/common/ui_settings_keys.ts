@@ -6,3 +6,4 @@
  */
 
 export const enableAlertingExperience = 'observability:enableAlertingExperience';
+export const enableInspectEsQueries = 'observability:enableInspectEsQueries';

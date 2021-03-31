@@ -32,6 +32,7 @@ export {
   AgentPolicy,
   AgentPolicySOAttributes,
   NewAgentPolicy,
+  PreconfiguredAgentPolicy,
   AgentPolicyStatus,
   DataStream,
   Output,
@@ -72,6 +73,7 @@ export {
   SettingsSOAttributes,
   InstallType,
   InstallSource,
+  InstallResult,
   // Agent Request types
   PostAgentEnrollRequest,
   PostAgentCheckinRequest,
@@ -88,6 +90,12 @@ export type AgentPolicyUpdateHandler = (
   action: 'created' | 'updated' | 'deleted',
   agentPolicyId: string
 ) => Promise<void>;
+
+export interface BulkActionResult {
+  id: string;
+  success: boolean;
+  error?: Error;
+}
 
 export * from './models';
 export * from './rest_spec';

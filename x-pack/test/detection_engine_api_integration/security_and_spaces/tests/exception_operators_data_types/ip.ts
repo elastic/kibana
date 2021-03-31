@@ -626,7 +626,8 @@ export default ({ getService }: FtrProviderContext) => {
         expect(ips).to.eql(['127.0.0.1', '127.0.0.3']);
       });
 
-      it('will return 4 results if we have a list that excludes all ips', async () => {
+      // flaky https://github.com/elastic/kibana/issues/89389
+      it.skip('will return 4 results if we have a list that excludes all ips', async () => {
         await importFile(
           supertest,
           'ip',

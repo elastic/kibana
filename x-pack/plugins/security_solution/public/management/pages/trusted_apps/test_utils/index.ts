@@ -44,12 +44,16 @@ const generate = <T>(count: number, generator: (i: number) => T) =>
 export const createSampleTrustedApp = (i: number, longTexts?: boolean): TrustedApp => {
   return {
     id: String(i),
+    version: 'abc123',
     name: generate(longTexts ? 10 : 1, () => `trusted app ${i}`).join(' '),
     description: generate(longTexts ? 10 : 1, () => `Trusted App ${i}`).join(' '),
     created_at: '1 minute ago',
     created_by: 'someone',
+    updated_at: '1 minute ago',
+    updated_by: 'someone',
     os: OPERATING_SYSTEMS[i % 3],
     entries: [],
+    effectScope: { type: 'global' },
   };
 };
 
@@ -75,6 +79,7 @@ export const createTrustedAppsListData = (
     pageIndex: fullPagination.pageIndex,
     totalItemsCount: fullPagination.totalItemCount,
     timestamp,
+    filter: '',
   };
 };
 

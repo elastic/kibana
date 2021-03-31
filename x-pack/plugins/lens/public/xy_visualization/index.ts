@@ -63,7 +63,6 @@ export class XyVisualization {
           chartsThemeService: charts.theme,
           paletteService: palettes,
           timeZone: getTimeZone(core.uiSettings),
-          getIntervalByColumn: data.search.aggs.getDateMetaByDatatableColumn,
         })
       );
       return getXyVisualization({ paletteService: palettes, data });

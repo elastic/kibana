@@ -197,6 +197,9 @@ export default async function ({ readConfigFile }) {
       reporting: {
         pathname: '/app/management/insightsAndAlerting/reporting',
       },
+      securitySolution: {
+        pathname: '/app/security',
+      },
     },
 
     // choose where esArchiver should load archives from
