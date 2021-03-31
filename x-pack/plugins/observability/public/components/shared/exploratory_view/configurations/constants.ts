@@ -6,7 +6,13 @@
  */
 
 import { AppDataType, ReportViewTypeId } from '../types';
-import { CLS_FIELD, FCP_FIELD, FID_FIELD, LCP_FIELD, TBT_FIELD } from './performance_dist_config';
+import {
+  CLS_FIELD,
+  FCP_FIELD,
+  FID_FIELD,
+  LCP_FIELD,
+  TBT_FIELD,
+} from './data/elasticsearch_fieldnames';
 
 export const FieldLabels: Record<string, string> = {
   'user_agent.name': 'Browser family',
