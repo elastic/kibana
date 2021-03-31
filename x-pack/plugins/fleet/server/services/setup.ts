@@ -7,26 +7,22 @@
 
 import uuid from 'uuid';
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import { i18n } from '@kbn/i18n';
 
-import {
-  packageToPackagePolicy,
-  DEFAULT_AGENT_POLICIES_PACKAGES,
-  FLEET_SERVER_PACKAGE,
-} from '../../common';
+import { DEFAULT_AGENT_POLICIES_PACKAGES, FLEET_SERVER_PACKAGE } from '../../common';
 
-import type { PackagePolicy, AgentPolicy, Installation, Output } from '../../common';
+import type { PackagePolicy } from '../../common';
 
 import { SO_SEARCH_LIMIT } from '../constants';
 
-import { agentPolicyService } from './agent_policy';
+import { agentPolicyService, addPackageToAgentPolicy } from './agent_policy';
 import { outputService } from './output';
 import {
   ensureInstalledDefaultPackages,
   ensureInstalledPackage,
   ensurePackagesCompletedInstall,
 } from './epm/packages/install';
-import { getPackageInfo } from './epm/packages';
-import { packagePolicyService } from './package_policy';
+
 import { generateEnrollmentAPIKey } from './api_keys';
 import { settingsService } from '.';
 import { awaitIfPending } from './setup_utils';
@@ -55,7 +51,7 @@ async function createSetupSideEffects(
   const [
     installedPackages,
     defaultOutput,
-    { created: defaultAgentPolicyCreated, defaultAgentPolicy },
+    { created: defaultAgentPolicyCreated, policy: defaultAgentPolicy },
     { created: defaultFleetServerPolicyCreated, policy: defaultFleetServerPolicy },
   ] = await Promise.all([
     // packages installed by default
@@ -110,13 +106,21 @@ async function createSetupSideEffects(
       true
     );
     if (!agentPolicyWithPackagePolicies) {
-      throw new Error('Policy not found');
+      throw new Error(
+        i18n.translate('xpack.fleet.setup.policyNotFoundError', {
+          defaultMessage: 'Policy not found',
+        })
+      );
     }
     if (
       agentPolicyWithPackagePolicies.package_policies.length &&
       typeof agentPolicyWithPackagePolicies.package_policies[0] === 'string'
     ) {
-      throw new Error('Policy not found');
+      throw new Error(
+        i18n.translate('xpack.fleet.setup.policyNotFoundError', {
+          defaultMessage: 'Policy not found',
+        })
+      );
     }
 
     for (const installedPackage of installedPackages) {
@@ -216,7 +220,11 @@ export async function setupFleet(
   // save fleet admin user
   const defaultOutputId = await outputService.getDefaultOutputId(soClient);
   if (!defaultOutputId) {
-    throw new Error('Default output does not exist');
+    throw new Error(
+      i18n.translate('xpack.fleet.setup.defaultOutputError', {
+        defaultMessage: 'Default output does not exist',
+      })
+    );
   }
 
   await outputService.updateOutput(soClient, defaultOutputId, {
@@ -247,29 +255,4 @@ export async function setupFleet(
 
 function generateRandomPassword() {
   return Buffer.from(uuid.v4()).toString('base64');
-}
-
-async function addPackageToAgentPolicy(
-  soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient,
-  packageToInstall: Installation,
-  agentPolicy: AgentPolicy,
-  defaultOutput: Output
-) {
-  const packageInfo = await getPackageInfo({
-    savedObjectsClient: soClient,
-    pkgName: packageToInstall.name,
-    pkgVersion: packageToInstall.version,
-  });
-
-  const newPackagePolicy = packageToPackagePolicy(
-    packageInfo,
-    agentPolicy.id,
-    defaultOutput.id,
-    agentPolicy.namespace
-  );
-
-  await packagePolicyService.create(soClient, esClient, newPackagePolicy, {
-    bumpRevision: false,
-  });
 }
