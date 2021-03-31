@@ -40,7 +40,6 @@ import { EventEmitter } from 'events';
 import { ExecutionContext } from 'src/plugins/expressions/common';
 import { ExpressionAstExpression } from 'src/plugins/expressions/common';
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
-import { ExpressionFunctionDefinition as ExpressionFunctionDefinition_2 } from 'src/plugins/expressions/public';
 import { ExpressionsSetup } from 'src/plugins/expressions/public';
 import { ExpressionValueBoxed } from 'src/plugins/expressions/common';
 import { FormatFactory as FormatFactory_2 } from 'src/plugins/data/common/field_formats/utils';
@@ -727,7 +726,7 @@ export type EsaggsExpressionFunctionDefinition = ExpressionFunctionDefinition<'e
 // Warning: (ae-missing-release-tag) "EsdslExpressionFunctionDefinition" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type EsdslExpressionFunctionDefinition = ExpressionFunctionDefinition_2<typeof name_3, Input_36, Arguments_23, Output_36>;
+export type EsdslExpressionFunctionDefinition = ExpressionFunctionDefinition<typeof name_3, Input_36, Arguments_23, Output_36>;
 
 // Warning: (ae-missing-release-tag) "esFilters" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
