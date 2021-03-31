@@ -9,11 +9,24 @@
 
 /* eslint-disable react/display-name */
 
-import React, { useMemo } from 'react';
-import { EuiInMemoryTable, EuiCodeBlock } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
+import { EuiInMemoryTable, EuiCodeBlock, EuiButtonIcon } from '@elastic/eui';
 
 // @ts-expect-error update types
-export const ScheduledQueryQueriesTable = ({ data }) => {
+export const ScheduledQueryQueriesTable = ({ data, onEditClick }) => {
+  const renderEditAction = useCallback(
+    (item) => (
+      <EuiButtonIcon
+        color="primary"
+        // eslint-disable-next-line react/jsx-no-bind
+        onClick={() => onEditClick(item)}
+        iconType="arrowRight"
+        aria-label={`Edit ${item.vars.id.value}`}
+      />
+    ),
+    [onEditClick]
+  );
+
   const columns = useMemo(
     () => [
       {
@@ -33,8 +46,16 @@ export const ScheduledQueryQueriesTable = ({ data }) => {
           </EuiCodeBlock>
         ),
       },
+      {
+        name: 'Actions',
+        actions: [
+          {
+            render: renderEditAction,
+          },
+        ],
+      },
     ],
-    []
+    [renderEditAction]
   );
 
   const sorting = {
@@ -50,7 +71,6 @@ export const ScheduledQueryQueriesTable = ({ data }) => {
       itemId="vars.id.value"
       isExpandable={true}
       columns={columns}
-      pagination={true}
       sorting={sorting}
     />
   );

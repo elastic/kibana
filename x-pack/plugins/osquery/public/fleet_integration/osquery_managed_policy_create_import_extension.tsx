@@ -46,7 +46,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<PackagePolic
         draft.inputs[0].streams = map(queriesJSON?.queries, (queryConfig, queryName) => ({
           data_stream: {
             type: 'logs',
-            dataset: 'osquery_managed.result',
+            dataset: 'osquery_manager.result',
           },
           vars: {
             query: {

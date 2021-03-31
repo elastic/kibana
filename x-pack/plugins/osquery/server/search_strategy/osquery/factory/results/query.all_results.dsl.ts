@@ -36,7 +36,7 @@ export const buildResultsQuery = ({
 
   const dslQuery = {
     allowNoIndices: true,
-    index: 'logs-osquery_managed.result*',
+    index: 'logs-osquery_manager.result*',
     ignoreUnavailable: true,
     body: {
       aggs: {

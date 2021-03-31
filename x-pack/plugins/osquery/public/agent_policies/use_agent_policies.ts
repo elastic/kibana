@@ -8,23 +8,22 @@
 import { useQuery } from 'react-query';
 
 import { useKibana } from '../common/lib/kibana';
-import { packagePolicyRouteService } from '../../../fleet/common';
+import { agentPolicyRouteService } from '../../../fleet/common';
 
-interface UseScheduledQuery {
-  scheduledQueryId: string;
-  skip?: boolean;
-}
-
-export const useScheduledQuery = ({ scheduledQueryId, skip = false }: UseScheduledQuery) => {
+export const useAgentPolicies = () => {
   const { http } = useKibana().services;
 
   return useQuery(
-    ['scheduledQuery', { scheduledQueryId }],
-    () => http.get(packagePolicyRouteService.getInfoPath(scheduledQueryId)),
+    ['agentPolicies'],
+    () =>
+      http.get(agentPolicyRouteService.getListPath(), {
+        query: {
+          perPage: 100,
+        },
+      }),
     {
       keepPreviousData: true,
-      enabled: !skip,
-      select: (response) => response.item,
+      select: (response) => response.items,
     }
   );
 };

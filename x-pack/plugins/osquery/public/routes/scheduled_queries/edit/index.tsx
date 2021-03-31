@@ -5,35 +5,38 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiText, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingContent,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 
-import { useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
+import { useRouterNavigate } from '../../../common/lib/kibana';
+import { ScheduledQueryForm } from '../../../scheduled_queries/form';
 import { useScheduledQuery } from '../../../scheduled_queries/use_scheduled_query';
-import { ScheduledQueryQueriesTable } from '../../../fleet_integration/components/scheduled_queries_table';
 
-const ScheduledQueryDetailsPageComponent = () => {
+const EditScheduledQueryPageComponent = () => {
   const { scheduledQueryId } = useParams<{ scheduledQueryId: string }>();
-  const scheduledQueriesListProps = useRouterNavigate('scheduled_queries');
+  const scheduledQueryListProps = useRouterNavigate('scheduled_queries');
 
   const { data } = useScheduledQuery({ scheduledQueryId });
+
+  console.error('data', data);
 
   const LeftColumn = useMemo(
     () => (
       <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="m">
         <EuiFlexItem>
-          <EuiButtonEmpty
-            iconType="arrowLeft"
-            {...scheduledQueriesListProps}
-            flush="left"
-            size="xs"
-          >
+          <EuiButtonEmpty iconType="arrowLeft" {...scheduledQueryListProps} flush="left" size="xs">
             <FormattedMessage
-              id="xpack.osquery.scheduledQueryDetails.viewAllScheduledQueriesListTitle"
-              defaultMessage="View all scheduled queries"
+              id="xpack.osquery.editScheduledQuery.viewScheduledQueriesListTitle"
+              defaultMessage="View all live queries"
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
@@ -41,8 +44,8 @@ const ScheduledQueryDetailsPageComponent = () => {
           <EuiText>
             <h1>
               <FormattedMessage
-                id="xpack.osquery.scheduledQueryDetails.pageTitle"
-                defaultMessage="Scheduled query details"
+                id="xpack.osquery.editScheduledQuery.pageTitle"
+                defaultMessage="Edit Scheduled query"
               />
             </h1>
           </EuiText>
@@ -51,7 +54,7 @@ const ScheduledQueryDetailsPageComponent = () => {
           <EuiText color="subdued">
             <p>
               <FormattedMessage
-                id="xpack.osquery.liveQueryDetails.pageSubtitle"
+                id="xpack.osquery.editScheduledQuery.pageSubtitle"
                 defaultMessage="Lorem ipsum dolor sit amet, consectetur adipiscing elit."
               />
             </p>
@@ -59,18 +62,18 @@ const ScheduledQueryDetailsPageComponent = () => {
         </EuiFlexItem> */}
       </EuiFlexGroup>
     ),
-    [scheduledQueriesListProps]
+    [scheduledQueryListProps]
   );
 
   return (
     <WithHeaderLayout leftColumn={LeftColumn}>
-      {/* <EuiCodeBlock language="sql" fontSize="m" paddingSize="m">
-        {data?.actionDetails._source?.data?.query}
-      </EuiCodeBlock> */}
-      <EuiSpacer />
-      {data && <ScheduledQueryQueriesTable data={data} />}
+      {!data ? (
+        <EuiLoadingContent lines={10} />
+      ) : (
+        <ScheduledQueryForm editMode={true} defaultValue={data} />
+      )}
     </WithHeaderLayout>
   );
 };
 
-export const ScheduledQueryDetailsPage = React.memo(ScheduledQueryDetailsPageComponent);
+export const EditScheduledQueryPage = React.memo(EditScheduledQueryPageComponent);

@@ -9,7 +9,7 @@ import React from 'react';
 import { Switch, Route, useRouteMatch } from 'react-router-dom';
 
 import { ScheduledQueriesPage } from './list';
-// import { NewScheduledQueryPage } from './new';
+import { EditScheduledQueryPage } from './edit';
 import { ScheduledQueryDetailsPage } from './details';
 
 const ScheduledQueriesComponent = () => {
@@ -20,6 +20,9 @@ const ScheduledQueriesComponent = () => {
       {/* <Route path={`${match.url}/new`}>
         <NewScheduledQueryPage />
       </Route> */}
+      <Route path={`${match.url}/:scheduledQueryId/edit`}>
+        <EditScheduledQueryPage />
+      </Route>
       <Route path={`${match.url}/:scheduledQueryId`}>
         <ScheduledQueryDetailsPage />
       </Route>

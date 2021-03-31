@@ -14,7 +14,7 @@ import { initPackRoutes } from './pack';
 export const defineRoutes = (router: IRouter, context: OsqueryAppContext) => {
   const config = context.config();
 
-  initActionRoutes(router);
+  initActionRoutes(router, context);
 
   if (config.packs) {
     initPackRoutes(router);
