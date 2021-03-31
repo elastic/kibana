@@ -155,7 +155,6 @@ export interface TestElasticsearchUtils {
 
 export interface TestKibanaUtils {
   root: Root;
-  supertest: (method: HttpMethod, path: string) => supertest.Test;
   coreSetup: InternalCoreSetup;
   coreStart: InternalCoreStart;
   stop: () => Promise<void>;
@@ -282,7 +281,6 @@ export function createTestServers({
         root,
         coreSetup,
         coreStart,
-        supertest: (method: HttpMethod, path: string) => getSupertest(root, method, path),
         stop: async () => await root.shutdown(),
       };
     },

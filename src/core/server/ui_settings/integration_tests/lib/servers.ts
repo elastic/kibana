@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import supertest from 'supertest';
 import { SavedObjectsClientContract, IUiSettingsClient } from 'src/core/server';
 
 import {
@@ -13,6 +14,8 @@ import {
   TestElasticsearchUtils,
   TestKibanaUtils,
   TestUtils,
+  HttpMethod,
+  getSupertest,
 } from '../../../../test_helpers/kbn_server';
 import { LegacyAPICaller } from '../../../elasticsearch/';
 import { httpServerMock } from '../../../http/http_server.mocks';
@@ -25,7 +28,7 @@ interface AllServices {
   savedObjectsClient: SavedObjectsClientContract;
   callCluster: LegacyAPICaller;
   uiSettings: IUiSettingsClient;
-  kbn: TestKibanaUtils;
+  supertest: (method: HttpMethod, path: string) => supertest.Test;
 }
 
 let services: AllServices;
@@ -61,7 +64,7 @@ export function getServices() {
   const uiSettings = kbn.coreStart.uiSettings.asScopedToClient(savedObjectsClient);
 
   services = {
-    kbn,
+    supertest: (method: HttpMethod, path: string) => getSupertest(kbn.root, method, path),
     callCluster,
     savedObjectsClient,
     uiSettings,

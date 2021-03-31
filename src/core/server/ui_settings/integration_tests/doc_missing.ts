@@ -24,9 +24,9 @@ export const docMissingSuite = (savedObjectsIndex: string) => () => {
 
   describe('get route', () => {
     it('creates doc, returns a 200 with settings', async () => {
-      const { kbn } = getServices();
+      const { supertest } = getServices();
 
-      const { body } = await kbn.supertest('get', '/api/kibana/settings').expect(200);
+      const { body } = await supertest('get', '/api/kibana/settings').expect(200);
 
       expect(body).toMatchObject({
         settings: {
@@ -44,12 +44,11 @@ export const docMissingSuite = (savedObjectsIndex: string) => () => {
 
   describe('set route', () => {
     it('creates doc, returns a 200 with value set', async () => {
-      const { kbn } = getServices();
+      const { supertest } = getServices();
 
       const defaultIndex = chance.word();
 
-      const { body } = await kbn
-        .supertest('post', '/api/kibana/settings/defaultIndex')
+      const { body } = await supertest('post', '/api/kibana/settings/defaultIndex')
         .send({
           value: defaultIndex,
         })
@@ -74,12 +73,11 @@ export const docMissingSuite = (savedObjectsIndex: string) => () => {
 
   describe('setMany route', () => {
     it('creates doc, returns 200 with updated values', async () => {
-      const { kbn } = getServices();
+      const { supertest } = getServices();
 
       const defaultIndex = chance.word();
 
-      const { body } = await kbn
-        .supertest('post', '/api/kibana/settings')
+      const { body } = await supertest('post', '/api/kibana/settings')
         .send({
           changes: { defaultIndex },
         })
@@ -104,11 +102,9 @@ export const docMissingSuite = (savedObjectsIndex: string) => () => {
 
   describe('delete route', () => {
     it('creates doc, returns a 200 with just buildNum', async () => {
-      const { kbn } = getServices();
+      const { supertest } = getServices();
 
-      const { body } = await kbn
-        .supertest('delete', '/api/kibana/settings/defaultIndex')
-        .expect(200);
+      const { body } = await supertest('delete', '/api/kibana/settings/defaultIndex').expect(200);
 
       expect(body).toMatchObject({
         settings: {
