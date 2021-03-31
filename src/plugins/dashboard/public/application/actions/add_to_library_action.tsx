@@ -18,7 +18,7 @@ import {
   isReferenceOrValueEmbeddable,
   isErrorEmbeddable,
 } from '../../services/embeddable';
-import { ApplicationStart, NotificationsStart } from '../../services/core';
+import { NotificationsStart } from '../../services/core';
 import { dashboardAddToLibraryAction } from '../../dashboard_strings';
 import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '..';
 
@@ -33,12 +33,7 @@ export class AddToLibraryAction implements Action<AddToLibraryActionContext> {
   public readonly id = ACTION_ADD_TO_LIBRARY;
   public order = 15;
 
-  constructor(
-    private deps: {
-      toasts: NotificationsStart['toasts'];
-      capabilities: ApplicationStart['capabilities'];
-    }
-  ) {}
+  constructor(private deps: { toasts: NotificationsStart['toasts'] }) {}
 
   public getDisplayName({ embeddable }: AddToLibraryActionContext) {
     if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
@@ -55,15 +50,8 @@ export class AddToLibraryAction implements Action<AddToLibraryActionContext> {
   }
 
   public async isCompatible({ embeddable }: AddToLibraryActionContext) {
-    // TODO: Fix this, potentially by adding a 'canSave' function to embeddable interface
-    const canSave =
-      embeddable.type === 'map'
-        ? this.deps.capabilities.maps?.save
-        : this.deps.capabilities.visualize.save;
-
     return Boolean(
-      canSave &&
-        !isErrorEmbeddable(embeddable) &&
+      !isErrorEmbeddable(embeddable) &&
         embeddable.getInput()?.viewMode !== ViewMode.VIEW &&
         embeddable.getRoot() &&
         embeddable.getRoot().isContainer &&

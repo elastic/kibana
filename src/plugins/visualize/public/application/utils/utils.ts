@@ -32,7 +32,7 @@ export const addBadgeToAppChrome = (chrome: ChromeStart) => {
       defaultMessage: 'Read only',
     }),
     tooltip: i18n.translate('visualize.badge.readOnly.tooltip', {
-      defaultMessage: 'Unable to save visualizations to the library',
+      defaultMessage: 'Unable to save visualizations',
     }),
     iconType: 'glasses',
   });

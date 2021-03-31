@@ -15,5 +15,4 @@ export const capabilitiesServiceFactory: CapabilitiesServiceFactory = () => ({
   canAccessDashboards: () => true,
   canCreateNewDashboards: () => true,
   canEditDashboards: () => true,
-  canSaveVisualizations: () => true,
 });
