@@ -3,16 +3,18 @@
 set -euo pipefail
 
 export CI=true
+export HOME=/var/lib/kibana
 
-export KIBANA_DIR=$(pwd)
-export XPACK_DIR="$KIBANA_DIR/x-pack"
+export KIBANA_DIR="$HOME/workspace/kibana"
+export XPACK_DIR="$HOME/workspace/kibana/x-pack"
 
-export CACHE_DIR="$HOME/.kibana"
-export PARENT_DIR="$(cd "$KIBANA_DIR/.."; pwd)"
-export WORKSPACE="${WORKSPACE:-$PARENT_DIR}"
+export CACHE_DIR="$HOME/.cache"
+export PARENT_DIR="$HOME/workspace"
+export WORKSPACE="$HOME/workspace"
 
-export KIBANA_PKG_BRANCH="$(jq -r .branch "$KIBANA_DIR/package.json")"
-export KIBANA_BASE_BRANCH="$KIBANA_PKG_BRANCH"
+# TODO change to ARG?
+export KIBANA_PKG_BRANCH=master
+export KIBANA_BASE_BRANCH=naster
 
 export GECKODRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
 export CHROMEDRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"

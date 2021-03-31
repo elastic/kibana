@@ -4,8 +4,11 @@ steps:
 
   - wait
 
-  - command: echo test
-    label: Test
+  - command: |
+      .ci/buildkite/bootstrap.sh
+      .ci/buildkite/default_build.sh
+      .ci/buildkite/default_saved_object_field_metrics.sh
+    label: Default Build and Metrics
 
   - wait: ~
     continue_on_failure: true

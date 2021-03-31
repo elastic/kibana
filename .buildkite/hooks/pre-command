@@ -22,3 +22,8 @@ if [[ "$CI_STATS_BUILD_ID" ]]; then
   )
   export KIBANA_CI_STATS_CONFIG
 fi
+
+if [[ -d .ci/buildkite ]]; then
+  source .ci/buildkite/env.sh
+  source .ci/buildkite/setup_node.sh
+fi
