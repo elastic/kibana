@@ -28,7 +28,6 @@ interface SaveModalDocumentInfo {
 
 export interface SaveModalDashboardProps {
   documentInfo: SaveModalDocumentInfo;
-  canSaveByReference: boolean;
   objectType: string;
   onClose: () => void;
   onSave: (props: OnSaveProps & { dashboardId: string | null; addToLibrary: boolean }) => void;
@@ -36,7 +35,7 @@ export interface SaveModalDashboardProps {
 }
 
 export function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
-  const { documentInfo, tagOptions, objectType, onClose, canSaveByReference } = props;
+  const { documentInfo, tagOptions, objectType, onClose } = props;
   const { id: documentId } = documentInfo;
   const initialCopyOnSave = !Boolean(documentId);
 
@@ -50,7 +49,7 @@ export function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
     documentId || disableDashboardOptions ? null : 'existing'
   );
   const [isAddToLibrarySelected, setAddToLibrary] = useState<boolean>(
-    canSaveByReference && (!initialCopyOnSave || disableDashboardOptions)
+    !initialCopyOnSave || disableDashboardOptions
   );
   const [selectedDashboard, setSelectedDashboard] = useState<{ id: string; name: string } | null>(
     null
@@ -66,16 +65,13 @@ export function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
           onChange={(option) => {
             setDashboardOption(option);
           }}
-          canSaveByReference={canSaveByReference}
           {...{ copyOnSave, documentId, dashboardOption, setAddToLibrary, isAddToLibrarySelected }}
         />
       )
     : null;
 
   const onCopyOnSaveChange = (newCopyOnSave: boolean) => {
-    if (canSaveByReference) {
-      setAddToLibrary(true);
-    }
+    setAddToLibrary(true);
     setDashboardOption(null);
     setCopyOnSave(newCopyOnSave);
   };

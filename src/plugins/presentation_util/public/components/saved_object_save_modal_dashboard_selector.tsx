@@ -30,7 +30,6 @@ export interface SaveModalDashboardSelectorProps {
   copyOnSave: boolean;
   documentId?: string;
   onSelectDashboard: DashboardPickerProps['onChange'];
-  canSaveByReference: boolean;
   setAddToLibrary: (selected: boolean) => void;
   isAddToLibrarySelected: boolean;
   dashboardOption: 'new' | 'existing' | null;
@@ -41,7 +40,6 @@ export function SaveModalDashboardSelector(props: SaveModalDashboardSelectorProp
   const {
     documentId,
     onSelectDashboard,
-    canSaveByReference,
     setAddToLibrary,
     isAddToLibrarySelected,
     dashboardOption,
@@ -116,7 +114,7 @@ export function SaveModalDashboardSelector(props: SaveModalDashboardSelectorProp
                   setAddToLibrary(true);
                   onChange(null);
                 }}
-                disabled={isDisabled || !canSaveByReference}
+                disabled={isDisabled}
               />
             </div>
           </EuiPanel>
@@ -129,7 +127,7 @@ export function SaveModalDashboardSelector(props: SaveModalDashboardSelectorProp
                   defaultMessage: 'Add to library',
                 })}
                 checked={isAddToLibrarySelected}
-                disabled={dashboardOption === null || isDisabled || !canSaveByReference}
+                disabled={dashboardOption === null || isDisabled}
                 onChange={(event) => setAddToLibrary(event.target.checked)}
               />
             </EuiFlexItem>

@@ -312,13 +312,6 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
     uiSettings: IUiSettingsClient
   ) => ExpressionAstFunction;
   /**
-   * Optional function to return the suffix used for ES bucket paths and esaggs column id.
-   * This is relevant for multi metrics to pick the right value.
-   *
-   * @param column The current column
-   */
-  getEsAggsSuffix?: (column: C) => string;
-  /**
    * Validate that the operation has the right preconditions in the state. For example:
    *
    * - Requires a date histogram operation somewhere before it in order

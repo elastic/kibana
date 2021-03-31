@@ -50,7 +50,7 @@ export interface VisualizeEmbeddableConfiguration {
   indexPatterns?: IIndexPattern[];
   editPath: string;
   editUrl: string;
-  capabilities: { visualizeSave: boolean; dashboardSave: boolean };
+  editable: boolean;
   deps: VisualizeEmbeddableFactoryDeps;
 }
 
@@ -111,7 +111,7 @@ export class VisualizeEmbeddable
 
   constructor(
     timefilter: TimefilterContract,
-    { vis, editPath, editUrl, indexPatterns, deps, capabilities }: VisualizeEmbeddableConfiguration,
+    { vis, editPath, editUrl, indexPatterns, editable, deps }: VisualizeEmbeddableConfiguration,
     initialInput: VisualizeInput,
     attributeService?: AttributeService<
       VisualizeSavedObjectAttributes,
@@ -129,6 +129,7 @@ export class VisualizeEmbeddable
         editApp: 'visualize',
         editUrl,
         indexPatterns,
+        editable,
         visTypeName: vis.type.name,
       },
       parent
@@ -141,12 +142,6 @@ export class VisualizeEmbeddable
     this.vis.uiState.on('reload', this.reload);
     this.attributeService = attributeService;
     this.savedVisualizationsLoader = savedVisualizationsLoader;
-
-    if (this.attributeService) {
-      const isByValue = !this.inputIsRefType(initialInput);
-      const editable = capabilities.visualizeSave || (isByValue && capabilities.dashboardSave);
-      this.updateOutput({ ...this.getOutput(), editable });
-    }
 
     this.subscriptions.push(
       this.getUpdated$().subscribe(() => {
