@@ -22,6 +22,7 @@ export interface TrustedAppsListData {
   pageSize: number;
   timestamp: number;
   totalItemsCount: number;
+  filter: string;
 }
 
 export type ViewType = 'list' | 'grid';
@@ -33,6 +34,7 @@ export interface TrustedAppsListPageLocation {
   show?: 'create' | 'edit';
   /** Used for editing. The ID of the selected trusted app */
   id?: string;
+  filter: string;
 }
 
 export interface TrustedAppsListPageState {

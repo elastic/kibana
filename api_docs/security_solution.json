@@ -52,7 +52,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-                  "lineNumber": 75
+                  "lineNumber": 79
                 }
               }
             ],
@@ -60,7 +60,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-              "lineNumber": 75
+              "lineNumber": 79
             }
           },
           {
@@ -144,7 +144,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-                  "lineNumber": 98
+                  "lineNumber": 103
                 }
               },
               {
@@ -163,7 +163,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-                  "lineNumber": 98
+                  "lineNumber": 103
                 }
               }
             ],
@@ -171,7 +171,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-              "lineNumber": 98
+              "lineNumber": 103
             }
           },
           {
@@ -215,7 +215,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-                  "lineNumber": 348
+                  "lineNumber": 353
                 }
               },
               {
@@ -234,7 +234,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-                  "lineNumber": 348
+                  "lineNumber": 353
                 }
               }
             ],
@@ -242,7 +242,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-              "lineNumber": 348
+              "lineNumber": 353
             }
           },
           {
@@ -258,13 +258,13 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-              "lineNumber": 393
+              "lineNumber": 398
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/security_solution/public/plugin.tsx",
-          "lineNumber": 72
+          "lineNumber": 75
         },
         "initialIsOpen": false
       }
@@ -607,7 +607,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 338
+                  "lineNumber": 339
                 }
               },
               {
@@ -626,7 +626,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/security_solution/server/plugin.ts",
-                  "lineNumber": 338
+                  "lineNumber": 339
                 }
               }
             ],
@@ -634,7 +634,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/security_solution/server/plugin.ts",
-              "lineNumber": 338
+              "lineNumber": 339
             }
           },
           {
@@ -650,7 +650,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/security_solution/server/plugin.ts",
-              "lineNumber": 404
+              "lineNumber": 405
             }
           }
         ],
@@ -1415,9 +1415,7 @@
             "signature": [
               "Error & Partial<",
               "ResponseError",
-              "<Record<string, any>, ",
-              "Context",
-              ">>"
+              "<Record<string, any>, unknown>>"
             ],
             "description": [],
             "source": {
@@ -1429,9 +1427,7 @@
         "signature": [
           "(err: Error & Partial<",
           "ResponseError",
-          "<Record<string, any>, ",
-          "Context",
-          ">>) => ",
+          "<Record<string, any>, unknown>>) => ",
           "OutputError"
         ],
         "description": [],
