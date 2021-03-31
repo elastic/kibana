@@ -397,6 +397,7 @@ export function LayerPanel(
                 onRemoveLayer={onRemoveLayer}
                 layerIndex={layerIndex}
                 isOnlyLayer={isOnlyLayer}
+                activeVisualization={activeVisualization}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

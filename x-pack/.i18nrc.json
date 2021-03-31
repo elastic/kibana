@@ -33,6 +33,7 @@
     "xpack.lens": "plugins/lens",
     "xpack.licenseMgmt": "plugins/license_management",
     "xpack.licensing": "plugins/licensing",
+    "xpack.lists": "plugins/lists",
     "xpack.logstash": ["plugins/logstash"],
     "xpack.main": "legacy/plugins/xpack_main",
     "xpack.maps": ["plugins/maps"],

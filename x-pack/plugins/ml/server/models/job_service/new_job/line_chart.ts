@@ -12,6 +12,7 @@ import {
   EVENT_RATE_FIELD_ID,
   RuntimeMappings,
 } from '../../../../common/types/fields';
+import { IndicesOptions } from '../../../../common/types/anomaly_detection_jobs';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 
 type DtrIndex = number;
@@ -39,7 +40,8 @@ export function newJobLineChartProvider({ asCurrentUser }: IScopedClusterClient)
     aggFieldNamePairs: AggFieldNamePair[],
     splitFieldName: string | null,
     splitFieldValue: string | null,
-    runtimeMappings: RuntimeMappings | undefined
+    runtimeMappings: RuntimeMappings | undefined,
+    indicesOptions: IndicesOptions | undefined
   ) {
     const json: object = getSearchJsonFromConfig(
       indexPatternTitle,
@@ -51,7 +53,8 @@ export function newJobLineChartProvider({ asCurrentUser }: IScopedClusterClient)
       aggFieldNamePairs,
       splitFieldName,
       splitFieldValue,
-      runtimeMappings
+      runtimeMappings,
+      indicesOptions
     );
 
     const { body } = await asCurrentUser.search(json);
@@ -110,7 +113,8 @@ function getSearchJsonFromConfig(
   aggFieldNamePairs: AggFieldNamePair[],
   splitFieldName: string | null,
   splitFieldValue: string | null,
-  runtimeMappings: RuntimeMappings | undefined
+  runtimeMappings: RuntimeMappings | undefined,
+  indicesOptions: IndicesOptions | undefined
 ): object {
   const json = {
     index: indexPatternTitle,
@@ -134,6 +138,7 @@ function getSearchJsonFromConfig(
       },
       ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
     },
+    ...(indicesOptions ?? {}),
   };
 
   if (query.bool === undefined) {

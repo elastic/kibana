@@ -23,14 +23,14 @@ You can configure the following settings in the `kibana.yml` file.
 
 | `xpack.encryptedSavedObjects`
 `.encryptionKey`
-  | A string of 32 or more characters used to encrypt sensitive properties on alerts and actions before they're stored in {es}. Third party credentials &mdash; such as the username and password used to connect to an SMTP service &mdash; are an example of encrypted properties. +
+  | A string of 32 or more characters used to encrypt sensitive properties on alerting rules and actions before they're stored in {es}. Third party credentials &mdash; such as the username and password used to connect to an SMTP service &mdash; are an example of encrypted properties. +
   +
   {kib} offers a <<kibana-encryption-keys, CLI tool>> to help generate this encryption key. +
   +
-  If not set, {kib} will generate a random key on startup, but all alert and action functions will be blocked. Generated keys are not allowed for alerts and actions because when a new key is generated on restart, existing encrypted data becomes inaccessible. For the same reason, alerts and actions in high-availability deployments of {kib} will behave unexpectedly if the key isn't the same on all instances of {kib}. +
+  If not set, {kib} will generate a random key on startup, but all alerting and action functions will be blocked. Generated keys are not allowed for alerting and actions because when a new key is generated on restart, existing encrypted data becomes inaccessible. For the same reason, alerting and actions in high-availability deployments of {kib} will behave unexpectedly if the key isn't the same on all instances of {kib}. +
   +
   Although the key can be specified in clear text in `kibana.yml`, it's recommended to store this key securely in the <<secure-settings,{kib} Keystore>>.
-  Be sure to back up the encryption key value somewhere safe, as your alerts and actions will cease to function due to decryption failures should you lose it.  If you want to rotate the encryption key, be sure to follow the instructions on <<encryption-key-rotation, encryption key rotation>>.
+  Be sure to back up the encryption key value somewhere safe, as your alerting rules and actions will cease to function due to decryption failures should you lose it.  If you want to rotate the encryption key, be sure to follow the instructions on <<encryption-key-rotation, encryption key rotation>>.
 
 |===
 
@@ -75,6 +75,6 @@ a|`xpack.actions.`
 
 [float]
 [[alert-settings]]
-==== Alert settings
+==== Alerting settings
 
 You do not need to configure any additional settings to use alerting in {kib}.

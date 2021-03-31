@@ -221,7 +221,7 @@ export class Server {
     });
 
     this.registerCoreContext(coreSetup);
-    this.coreApp.setup(coreSetup);
+    this.coreApp.setup(coreSetup, uiPlugins);
 
     setupTransaction?.end();
     return coreSetup;

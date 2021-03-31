@@ -133,7 +133,7 @@ describe('Exceptions modal', () => {
     closeExceptionBuilderModal();
   });
 
-  it('Does not overwrite values of nested entry items', () => {
+  it.skip('Does not overwrite values of nested entry items', () => {
     openExceptionModalFromRuleSettings();
     cy.get(LOADING_SPINNER).should('not.exist');
 

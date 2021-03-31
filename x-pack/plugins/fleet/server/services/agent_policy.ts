@@ -43,7 +43,7 @@ import {
 } from '../errors';
 import { getFullAgentPolicyKibanaConfig } from '../../common/services/full_agent_policy_kibana_config';
 
-import { createAgentPolicyAction, listAgents } from './agents';
+import { createAgentPolicyAction, getAgentsByKuery } from './agents';
 import { packagePolicyService } from './package_policy';
 import { outputService } from './output';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
@@ -520,7 +520,7 @@ class AgentPolicyService {
       throw new Error('The default agent policy cannot be deleted');
     }
 
-    const { total } = await listAgents(esClient, {
+    const { total } = await getAgentsByKuery(esClient, {
       showInactive: false,
       perPage: 0,
       page: 1,

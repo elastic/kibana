@@ -46,6 +46,34 @@
             "signature": [
               "() => void"
             ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.IBulkUploader.start",
+            "type": "Function",
+            "label": "start",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/monitoring/server/types.ts",
+              "lineNumber": 95
+            },
+            "signature": [
+              "() => void"
+            ]
+          },
+          {
+            "tags": [],
+            "id": "def-server.IBulkUploader.handleNotEnabled",
+            "type": "Function",
+            "label": "handleNotEnabled",
+            "description": [],
+            "source": {
+              "path": "x-pack/plugins/monitoring/server/types.ts",
+              "lineNumber": 96
+            },
+            "signature": [
+              "() => void"
+            ]
           }
         ],
         "source": {
@@ -106,7 +134,7 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/monitoring/server/types.ts",
-            "lineNumber": 98
+            "lineNumber": 100
           },
           "signature": [
             "() => any"
@@ -115,7 +143,7 @@
       ],
       "source": {
         "path": "x-pack/plugins/monitoring/server/types.ts",
-        "lineNumber": 97
+        "lineNumber": 99
       },
       "lifecycle": "setup",
       "initialIsOpen": true

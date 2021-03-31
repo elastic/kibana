@@ -111,7 +111,11 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
   useEffect(() => {
     if (splitField !== null) {
       chartLoader
-        .loadFieldExampleValues(splitField, jobCreator.runtimeMappings)
+        .loadFieldExampleValues(
+          splitField,
+          jobCreator.runtimeMappings,
+          jobCreator.datafeedConfig.indices_options
+        )
         .then(setFieldValues)
         .catch((error) => {
           getToastNotificationService().displayErrorToast(error);
@@ -140,7 +144,8 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
           jobCreator.splitField,
           fieldValues.length > 0 ? fieldValues[0] : null,
           cs.intervalMs,
-          jobCreator.runtimeMappings
+          jobCreator.runtimeMappings,
+          jobCreator.datafeedConfig.indices_options
         );
         setLineChartsData(resp);
       } catch (error) {

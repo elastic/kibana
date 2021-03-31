@@ -13,7 +13,7 @@ import {
   TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
   isTooManyBucketsPreviewException,
 } from '../../../../common/alerting/metrics';
-import { ILegacyScopedClusterClient } from '../../../../../../../src/core/server';
+import { ElasticsearchClient } from '../../../../../../../src/core/server';
 import { InfraSource } from '../../../../common/http_api/source_api';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
 import { InventoryItemType } from '../../../../common/inventory_models/types';
@@ -27,7 +27,7 @@ interface InventoryMetricThresholdParams {
 }
 
 interface PreviewInventoryMetricThresholdAlertParams {
-  callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
+  esClient: ElasticsearchClient;
   params: InventoryMetricThresholdParams;
   source: InfraSource;
   lookback: Unit;
@@ -40,7 +40,7 @@ interface PreviewInventoryMetricThresholdAlertParams {
 export const previewInventoryMetricThresholdAlert: (
   params: PreviewInventoryMetricThresholdAlertParams
 ) => Promise<PreviewResult[]> = async ({
-  callCluster,
+  esClient,
   params,
   source,
   lookback,
@@ -68,7 +68,7 @@ export const previewInventoryMetricThresholdAlert: (
   try {
     const results = await Promise.all(
       criteria.map((c) =>
-        evaluateCondition(c, nodeType, source, callCluster, filterQuery, lookbackSize)
+        evaluateCondition(c, nodeType, source, esClient, filterQuery, lookbackSize)
       )
     );
 

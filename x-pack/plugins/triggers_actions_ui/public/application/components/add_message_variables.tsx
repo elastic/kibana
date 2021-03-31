@@ -55,9 +55,9 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
     ));
 
   const addVariableButtonTitle = i18n.translate(
-    'xpack.triggersActionsUI.components.addMessageVariables.addVariableTitle',
+    'xpack.triggersActionsUI.components.addMessageVariables.addRuleVariableTitle',
     {
-      defaultMessage: 'Add alert variable',
+      defaultMessage: 'Add rule variable',
     }
   );
 

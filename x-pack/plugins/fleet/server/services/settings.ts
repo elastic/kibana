@@ -82,8 +82,6 @@ export function createDefaultSettings(): BaseSettings {
   });
 
   return {
-    agent_auto_upgrade: true,
-    package_auto_upgrade: true,
     kibana_urls: [cloudUrl || flagsUrl || defaultUrl].flat(),
   };
 }

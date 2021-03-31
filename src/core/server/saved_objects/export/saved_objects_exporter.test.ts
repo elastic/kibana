@@ -877,7 +877,9 @@ describe('getSortedObjectsForExport()', () => {
           request,
           types: ['index-pattern', 'search'],
         })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Can't export more than 1 objects"`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Can't export more than 1 objects. If your server has enough memory, this limit can be increased by adjusting the \\"savedObjects.maxImportExportSize\\" setting."`
+      );
       expect(savedObjectsClient.closePointInTime).toHaveBeenCalledTimes(1);
     });
 
@@ -1112,7 +1114,7 @@ describe('getSortedObjectsForExport()', () => {
         ],
       };
       await expect(exporter.exportByObjects(exportOpts)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Can't export more than 1 objects"`
+        `"Can't export more than 1 objects. If your server has enough memory, this limit can be increased by adjusting the \\"savedObjects.maxImportExportSize\\" setting."`
       );
     });
 

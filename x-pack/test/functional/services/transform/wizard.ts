@@ -243,17 +243,25 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
             await testSubjects.existOrFail(`mlDataGridChart-${id}-histogram`);
 
             if (expected.colorStats !== undefined) {
-              const actualColorStats = await canvasElement.getColorStats(
-                `[data-test-subj="mlDataGridChart-${id}-histogram"] .echCanvasRenderer`,
-                expected.colorStats
+              const sortedExpectedColorStats = [...expected.colorStats].sort((a, b) =>
+                a.key.localeCompare(b.key)
               );
 
+              const actualColorStats = await canvasElement.getColorStats(
+                `[data-test-subj="mlDataGridChart-${id}-histogram"] .echCanvasRenderer`,
+                sortedExpectedColorStats
+              );
+
+              expect(actualColorStats.length).to.eql(
+                sortedExpectedColorStats.length,
+                `Expected and actual color stats for column '${expected.id}' should have the same amount of elements. Expected: ${sortedExpectedColorStats.length} (got ${actualColorStats.length})`
+              );
               expect(actualColorStats.every((d) => d.withinTolerance)).to.eql(
                 true,
                 `Color stats for column '${
                   expected.id
                 }' should be within tolerance. Expected: '${JSON.stringify(
-                  expected.colorStats
+                  sortedExpectedColorStats
                 )}' (got '${JSON.stringify(actualColorStats)}')`
               );
             }

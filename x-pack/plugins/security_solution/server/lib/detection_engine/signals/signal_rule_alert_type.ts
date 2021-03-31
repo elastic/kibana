@@ -12,6 +12,7 @@ import isEmpty from 'lodash/isEmpty';
 import { chain, tryCatch } from 'fp-ts/lib/TaskEither';
 import { flow } from 'fp-ts/lib/function';
 
+import { ApiResponse } from '@elastic/elasticsearch';
 import { performance } from 'perf_hooks';
 import { toError, toPromise } from '../../../../common/fp_utils';
 
@@ -198,7 +199,7 @@ export const signalRulesAlertType = ({
           const inputIndices = await getInputIndex(services, version, index);
           const [privileges, timestampFieldCaps] = await Promise.all([
             checkPrivileges(services, inputIndices),
-            services.scopedClusterClient.fieldCaps({
+            services.scopedClusterClient.asCurrentUser.fieldCaps({
               index,
               fields: hasTimestampOverride
                 ? ['@timestamp', timestampOverride as string]
@@ -583,7 +584,10 @@ export const signalRulesAlertType = ({
             wroteWarningStatus = true;
           }
           try {
-            const signalIndexVersion = await getIndexVersion(services.callCluster, outputIndex);
+            const signalIndexVersion = await getIndexVersion(
+              services.scopedClusterClient.asCurrentUser,
+              outputIndex
+            );
             if (isOutdated({ current: signalIndexVersion, target: MIN_EQL_RULE_INDEX_VERSION })) {
               throw new Error(
                 `EQL based rules require an update to version ${MIN_EQL_RULE_INDEX_VERSION} of the detection alerts index mapping`
@@ -610,10 +614,11 @@ export const signalRulesAlertType = ({
             eventCategoryOverride
           );
           const eqlSignalSearchStart = performance.now();
-          const response: EqlSignalSearchResponse = await services.callCluster(
-            'transport.request',
+          const {
+            body: response,
+          } = (await services.scopedClusterClient.asCurrentUser.transport.request(
             request
-          );
+          )) as ApiResponse<EqlSignalSearchResponse>;
           const eqlSignalSearchEnd = performance.now();
           const eqlSearchDuration = makeFloatString(eqlSignalSearchEnd - eqlSignalSearchStart);
           result.searchAfterTimes = [eqlSearchDuration];

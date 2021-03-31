@@ -17,7 +17,7 @@ import { getServices } from '../lib/services/get_services';
 import { getServiceAgentName } from '../lib/services/get_service_agent_name';
 import { getServiceDependencies } from '../lib/services/get_service_dependencies';
 import { getServiceErrorGroupPrimaryStatistics } from '../lib/services/get_service_error_groups/get_service_error_group_primary_statistics';
-import { getServiceErrorGroupComparisonStatistics } from '../lib/services/get_service_error_groups/get_service_error_group_comparison_statistics';
+import { getServiceErrorGroupPeriods } from '../lib/services/get_service_error_groups/get_service_error_group_comparison_statistics';
 import { getServiceInstances } from '../lib/services/get_service_instances';
 import { getServiceMetadataDetails } from '../lib/services/get_service_metadata_details';
 import { getServiceMetadataIcons } from '../lib/services/get_service_metadata_icons';
@@ -329,6 +329,7 @@ export const serviceErrorGroupsComparisonStatisticsRoute = createRoute({
       environmentRt,
       kueryRt,
       rangeRt,
+      comparisonRangeRt,
       t.type({
         numBuckets: toNumberRt,
         transactionType: t.string,
@@ -342,10 +343,18 @@ export const serviceErrorGroupsComparisonStatisticsRoute = createRoute({
 
     const {
       path: { serviceName },
-      query: { environment, kuery, numBuckets, transactionType, groupIds },
+      query: {
+        environment,
+        kuery,
+        numBuckets,
+        transactionType,
+        groupIds,
+        comparisonStart,
+        comparisonEnd,
+      },
     } = context.params;
 
-    return getServiceErrorGroupComparisonStatistics({
+    return getServiceErrorGroupPeriods({
       environment,
       kuery,
       serviceName,
@@ -353,6 +362,8 @@ export const serviceErrorGroupsComparisonStatisticsRoute = createRoute({
       numBuckets,
       transactionType,
       groupIds,
+      comparisonStart,
+      comparisonEnd,
     });
   },
 });

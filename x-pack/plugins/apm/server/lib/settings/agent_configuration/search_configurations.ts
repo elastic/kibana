@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ESSearchHit } from '../../../../../../typings/elasticsearch';
+import { ESSearchHit } from '../../../../../../../typings/elasticsearch';
 import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,

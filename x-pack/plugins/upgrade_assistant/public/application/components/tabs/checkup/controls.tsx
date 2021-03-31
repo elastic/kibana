@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DeprecationInfo } from '../../../../../common/types';
-import { GroupByOption, LevelFilterOption, LoadingState } from '../../types';
+import { GroupByOption, LevelFilterOption } from '../../types';
 import { FilterBar } from './filter_bar';
 import { GroupByBar } from './group_by_bar';
 
@@ -18,7 +18,7 @@ import { validateRegExpString } from '../../../utils';
 
 interface CheckupControlsProps {
   allDeprecations?: DeprecationInfo[];
-  loadingState: LoadingState;
+  isLoading: boolean;
   loadData: () => void;
   currentFilter: LevelFilterOption;
   onFilterChange: (filter: LevelFilterOption) => void;
@@ -30,7 +30,7 @@ interface CheckupControlsProps {
 
 export const CheckupControls: FunctionComponent<CheckupControlsProps> = ({
   allDeprecations,
-  loadingState,
+  isLoading,
   loadData,
   currentFilter,
   onFilterChange,
@@ -80,12 +80,7 @@ export const CheckupControls: FunctionComponent<CheckupControlsProps> = ({
           <GroupByBar {...{ availableGroupByOptions, currentGroupBy, onGroupByChange }} />
 
           <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              onClick={loadData}
-              iconType="refresh"
-              isLoading={loadingState === LoadingState.Loading}
-            >
+            <EuiButton fill onClick={loadData} iconType="refresh" isLoading={isLoading}>
               <FormattedMessage
                 id="xpack.upgradeAssistant.checkupTab.controls.refreshButtonLabel"
                 defaultMessage="Refresh"

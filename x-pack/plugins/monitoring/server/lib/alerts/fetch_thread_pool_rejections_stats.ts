@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ElasticsearchClient } from 'kibana/server';
 import { get } from 'lodash';
 import { AlertCluster, AlertThreadPoolRejectionsStats } from '../../../common/types/alerts';
 
@@ -30,7 +31,7 @@ const getTopHits = (threadType: string, order: string) => ({
 });
 
 export async function fetchThreadPoolRejectionStats(
-  callCluster: any,
+  esClient: ElasticsearchClient,
   clusters: AlertCluster[],
   index: string,
   size: number,
@@ -93,7 +94,7 @@ export async function fetchThreadPoolRejectionStats(
     },
   };
 
-  const response = await callCluster('search', params);
+  const { body: response } = await esClient.search(params);
   const stats: AlertThreadPoolRejectionsStats[] = [];
   const { buckets: clusterBuckets = [] } = response.aggregations.clusters;
 

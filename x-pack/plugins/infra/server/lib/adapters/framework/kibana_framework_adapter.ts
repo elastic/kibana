@@ -6,6 +6,13 @@
  */
 
 import {
+  IndicesExistsAlias,
+  IndicesGet,
+  MlGetBuckets,
+  Msearch,
+} from '@elastic/elasticsearch/api/requestParams';
+import { TransportRequestParams } from '@elastic/elasticsearch/lib/Transport';
+import {
   InfraRouteConfig,
   InfraTSVBResponse,
   InfraServerPluginSetupDeps,
@@ -134,10 +141,58 @@ export class KibanaFramework {
         }
       : {};
 
-    return elasticsearch.legacy.client.callAsCurrentUser(endpoint, {
-      ...params,
-      ...frozenIndicesParams,
-    });
+    let apiResult;
+    switch (endpoint) {
+      case 'search':
+        apiResult = elasticsearch.client.asCurrentUser.search({
+          ...params,
+          ...frozenIndicesParams,
+        });
+        break;
+      case 'msearch':
+        apiResult = elasticsearch.client.asCurrentUser.msearch({
+          ...params,
+          ...frozenIndicesParams,
+        } as Msearch<any>);
+        break;
+      case 'fieldCaps':
+        apiResult = elasticsearch.client.asCurrentUser.fieldCaps({
+          ...params,
+          ...frozenIndicesParams,
+        });
+        break;
+      case 'indices.existsAlias':
+        apiResult = elasticsearch.client.asCurrentUser.indices.existsAlias({
+          ...params,
+          ...frozenIndicesParams,
+        } as IndicesExistsAlias);
+        break;
+      case 'indices.getAlias':
+        apiResult = elasticsearch.client.asCurrentUser.indices.getAlias({
+          ...params,
+          ...frozenIndicesParams,
+        });
+        break;
+      case 'indices.get':
+        apiResult = elasticsearch.client.asCurrentUser.indices.get({
+          ...params,
+          ...frozenIndicesParams,
+        } as IndicesGet);
+        break;
+      case 'transport.request':
+        apiResult = elasticsearch.client.asCurrentUser.transport.request({
+          ...params,
+          ...frozenIndicesParams,
+        } as TransportRequestParams);
+        break;
+      case 'ml.getBuckets':
+        apiResult = elasticsearch.client.asCurrentUser.ml.getBuckets({
+          ...params,
+          ...frozenIndicesParams,
+        } as MlGetBuckets<any>);
+        break;
+    }
+    return apiResult ? (await apiResult).body : undefined;
   }
 
   public getIndexPatternsService(

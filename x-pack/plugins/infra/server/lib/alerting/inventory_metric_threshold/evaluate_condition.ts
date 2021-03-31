@@ -7,6 +7,7 @@
 
 import { mapValues, last, first } from 'lodash';
 import moment from 'moment';
+import { ElasticsearchClient } from 'kibana/server';
 import { SnapshotCustomMetricInput } from '../../../../common/http_api/snapshot_api';
 import {
   isTooManyBucketsPreviewException,
@@ -17,7 +18,6 @@ import {
   CallWithRequestParams,
 } from '../../adapters/framework/adapter_types';
 import { Comparator, InventoryMetricConditions } from './types';
-import { AlertServices } from '../../../../../alerting/server';
 import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
 import { InfraTimerangeInput, SnapshotRequest } from '../../../../common/http_api/snapshot_api';
 import { InfraSource } from '../../sources';
@@ -36,7 +36,7 @@ export const evaluateCondition = async (
   condition: InventoryMetricConditions,
   nodeType: InventoryItemType,
   source: InfraSource,
-  callCluster: AlertServices['callCluster'],
+  esClient: ElasticsearchClient,
   filterQuery?: string,
   lookbackSize?: number
 ): Promise<Record<string, ConditionResult>> => {
@@ -53,7 +53,7 @@ export const evaluateCondition = async (
   }
 
   const currentValues = await getData(
-    callCluster,
+    esClient,
     nodeType,
     metric,
     timerange,
@@ -96,7 +96,7 @@ const getCurrentValue: (value: any) => number = (value) => {
 
 type DataValue = number | null | Array<number | string | null | undefined>;
 const getData = async (
-  callCluster: AlertServices['callCluster'],
+  esClient: ElasticsearchClient,
   nodeType: InventoryItemType,
   metric: SnapshotMetricType,
   timerange: InfraTimerangeInput,
@@ -104,9 +104,10 @@ const getData = async (
   filterQuery?: string,
   customMetric?: SnapshotCustomMetricInput
 ) => {
-  const client = <Hit = {}, Aggregation = undefined>(
+  const client = async <Hit = {}, Aggregation = undefined>(
     options: CallWithRequestParams
-  ): Promise<InfraDatabaseSearchResponse<Hit, Aggregation>> => callCluster('search', options);
+  ): Promise<InfraDatabaseSearchResponse<Hit, Aggregation>> =>
+    (await esClient.search(options)).body as InfraDatabaseSearchResponse<Hit, Aggregation>;
 
   const metrics = [
     metric === 'custom' ? (customMetric as SnapshotCustomMetricInput) : { type: metric },

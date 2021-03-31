@@ -84,6 +84,7 @@
     "GetLookBackProgress",
     "ValidateCategoryExamples",
     "TopCategories",
+    "DatafeedPreview",
     "UpdateGroups",
     "DeletingJobTasks",
     "DeleteJobs",

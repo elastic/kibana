@@ -11,6 +11,9 @@ import { toArray, map } from 'rxjs/operators';
 import { AlertingPlugin } from '../../../../alerting/server';
 import { APMConfig } from '../..';
 import { registerTransactionErrorRateAlertType } from './register_transaction_error_rate_alert_type';
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 
 type Operator<T1, T2> = (source: Rx.Observable<T1>) => Rx.Observable<T2>;
 const pipeClosure = <T1, T2>(fn: Operator<T1, T2>): Operator<T1, T2> => {
@@ -41,16 +44,20 @@ describe('Transaction error rate alert', () => {
     expect(alertExecutor).toBeDefined();
 
     const services = {
-      callCluster: jest.fn(() => ({
+      scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
+      alertInstanceFactory: jest.fn(),
+    };
+    const params = { threshold: 1 };
+
+    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
         hits: {
           total: {
             value: 0,
           },
         },
-      })),
-      alertInstanceFactory: jest.fn(),
-    };
-    const params = { threshold: 1 };
+      })
+    );
 
     await alertExecutor!({ services, params });
     expect(services.alertInstanceFactory).not.toBeCalled();
@@ -72,7 +79,13 @@ describe('Transaction error rate alert', () => {
 
     const scheduleActions = jest.fn();
     const services = {
-      callCluster: jest.fn(() => ({
+      scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
+      alertInstanceFactory: jest.fn(() => ({ scheduleActions })),
+    };
+    const params = { threshold: 10, windowSize: 5, windowUnit: 'm' };
+
+    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
         hits: {
           total: {
             value: 4,
@@ -113,10 +126,8 @@ describe('Transaction error rate alert', () => {
             ],
           },
         },
-      })),
-      alertInstanceFactory: jest.fn(() => ({ scheduleActions })),
-    };
-    const params = { threshold: 10, windowSize: 5, windowUnit: 'm' };
+      })
+    );
 
     await alertExecutor!({ services, params });
     [
@@ -177,7 +188,13 @@ describe('Transaction error rate alert', () => {
 
     const scheduleActions = jest.fn();
     const services = {
-      callCluster: jest.fn(() => ({
+      scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
+      alertInstanceFactory: jest.fn(() => ({ scheduleActions })),
+    };
+    const params = { threshold: 10, windowSize: 5, windowUnit: 'm' };
+
+    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
         hits: {
           total: {
             value: 4,
@@ -204,10 +221,8 @@ describe('Transaction error rate alert', () => {
             ],
           },
         },
-      })),
-      alertInstanceFactory: jest.fn(() => ({ scheduleActions })),
-    };
-    const params = { threshold: 10, windowSize: 5, windowUnit: 'm' };
+      })
+    );
 
     await alertExecutor!({ services, params });
     [
@@ -251,7 +266,13 @@ describe('Transaction error rate alert', () => {
 
     const scheduleActions = jest.fn();
     const services = {
-      callCluster: jest.fn(() => ({
+      scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
+      alertInstanceFactory: jest.fn(() => ({ scheduleActions })),
+    };
+    const params = { threshold: 10, windowSize: 5, windowUnit: 'm' };
+
+    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
         hits: {
           total: {
             value: 4,
@@ -265,10 +286,8 @@ describe('Transaction error rate alert', () => {
             buckets: [{ key: 'foo' }, { key: 'bar' }],
           },
         },
-      })),
-      alertInstanceFactory: jest.fn(() => ({ scheduleActions })),
-    };
-    const params = { threshold: 10, windowSize: 5, windowUnit: 'm' };
+      })
+    );
 
     await alertExecutor!({ services, params });
     [

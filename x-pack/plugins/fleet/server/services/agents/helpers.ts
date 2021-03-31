@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import type { ESSearchHit } from '../../../../../typings/elasticsearch';
+import type { GetResponse, SearchResponse } from 'elasticsearch';
+
 import type { Agent, AgentSOAttributes, FleetServerAgent } from '../../types';
 
-export function searchHitToAgent(hit: ESSearchHit<FleetServerAgent>): Agent {
+type FleetServerAgentESResponse =
+  | GetResponse<FleetServerAgent>
+  | SearchResponse<FleetServerAgent>['hits']['hits'][0];
+
+export function searchHitToAgent(hit: FleetServerAgentESResponse): Agent {
   return {
     id: hit._id,
     ...hit._source,

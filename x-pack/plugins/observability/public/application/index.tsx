@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
+import React, { MouseEvent, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
 import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
@@ -21,12 +21,7 @@ import { useRouteParams } from '../hooks/use_route_params';
 import { ObservabilityPluginSetupDeps } from '../plugin';
 import { HasDataContextProvider } from '../context/has_data_context';
 import { Breadcrumbs, routes } from '../routes';
-
-const observabilityLabelBreadcrumb = {
-  text: i18n.translate('xpack.observability.observability.breadcrumb.', {
-    defaultMessage: 'Observability',
-  }),
-};
+import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
 function getTitleFromBreadCrumbs(breadcrumbs: Breadcrumbs) {
   return breadcrumbs.map(({ text }) => text).reverse();
@@ -42,12 +37,24 @@ function App() {
           const Wrapper = () => {
             const { core } = usePluginContext();
 
-            // eslint-disable-next-line react-hooks/exhaustive-deps
-            const breadcrumb = [observabilityLabelBreadcrumb, ...route.breadcrumb];
             useEffect(() => {
-              core.chrome.setBreadcrumbs(breadcrumb);
-              core.chrome.docTitle.change(getTitleFromBreadCrumbs(breadcrumb));
-            }, [core, breadcrumb]);
+              const href = core.http.basePath.prepend('/app/observability');
+              const breadcrumbs = [
+                {
+                  href,
+                  text: i18n.translate('xpack.observability.observability.breadcrumb.', {
+                    defaultMessage: 'Observability',
+                  }),
+                  onClick: (event: MouseEvent<HTMLAnchorElement>) => {
+                    event.preventDefault();
+                    core.application.navigateToUrl(href);
+                  },
+                },
+                ...route.breadcrumb,
+              ];
+              core.chrome.setBreadcrumbs(breadcrumbs);
+              core.chrome.docTitle.change(getTitleFromBreadCrumbs(breadcrumbs));
+            }, [core]);
 
             const params = useRouteParams(path);
             return route.handler(params);
@@ -76,7 +83,7 @@ export const renderApp = (
   });
 
   ReactDOM.render(
-    <KibanaContextProvider services={{ ...core, ...plugins }}>
+    <KibanaContextProvider services={{ ...core, ...plugins, storage: new Storage(localStorage) }}>
       <PluginContext.Provider value={{ appMountParameters, core, plugins }}>
         <Router history={history}>
           <EuiThemeProvider darkMode={isDarkMode}>

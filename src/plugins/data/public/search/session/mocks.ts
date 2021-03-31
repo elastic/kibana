@@ -19,6 +19,7 @@ export function getSessionsClientMock(): jest.Mocked<ISessionsClient> {
     update: jest.fn(),
     extend: jest.fn(),
     delete: jest.fn(),
+    rename: jest.fn(),
   };
 }
 
@@ -30,6 +31,8 @@ export function getSessionServiceMock(): jest.Mocked<ISessionService> {
     getSessionId: jest.fn(),
     getSession$: jest.fn(() => new BehaviorSubject(undefined).asObservable()),
     state$: new BehaviorSubject<SearchSessionState>(SearchSessionState.None).asObservable(),
+    searchSessionName$: new BehaviorSubject<string | undefined>(undefined).asObservable(),
+    renameCurrentSession: jest.fn(),
     trackSearch: jest.fn((searchDescriptor) => () => {}),
     destroy: jest.fn(),
     cancel: jest.fn(),

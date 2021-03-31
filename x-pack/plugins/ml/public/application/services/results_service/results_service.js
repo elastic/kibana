@@ -1052,7 +1052,15 @@ export function resultsServiceProvider(mlApiServices) {
     // Extra query object can be supplied, or pass null if no additional query.
     // Returned response contains a results property, which is an object
     // of document counts against time (epoch millis).
-    getEventRateData(index, query, timeFieldName, earliestMs, latestMs, intervalMs) {
+    getEventRateData(
+      index,
+      query,
+      timeFieldName,
+      earliestMs,
+      latestMs,
+      intervalMs,
+      indicesOptions
+    ) {
       return new Promise((resolve, reject) => {
         const obj = { success: true, results: {} };
 
@@ -1102,6 +1110,7 @@ export function resultsServiceProvider(mlApiServices) {
                 },
               },
             },
+            ...(indicesOptions ?? {}),
           })
           .then((resp) => {
             const dataByTimeBucket = get(resp, ['aggregations', 'eventRate', 'buckets'], []);

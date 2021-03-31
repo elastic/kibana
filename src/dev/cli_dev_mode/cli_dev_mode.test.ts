@@ -189,6 +189,7 @@ describe('#start()/#stop()', () => {
       optimizerReady$ = new Rx.Subject();
       return {
         isReady$: jest.fn(() => optimizerReady$),
+        getPhase$: jest.fn(() => Rx.NEVER),
         run$: optimizerRun$,
       };
     });
@@ -203,6 +204,7 @@ describe('#start()/#stop()', () => {
       devServerReady$ = new Rx.Subject();
       return {
         isReady$: jest.fn(() => devServerReady$),
+        getPhase$: jest.fn(() => Rx.NEVER),
         run$: devServerRun$,
       };
     });

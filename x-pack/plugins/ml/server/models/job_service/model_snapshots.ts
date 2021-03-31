@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
+import { IScopedClusterClient } from 'kibana/server';
 import { ModelSnapshot } from '../../../common/types/anomaly_detection_jobs';
 import { datafeedsProvider } from './datafeeds';
 import { FormCalendar, CalendarManager } from '../calendar';
@@ -20,8 +21,8 @@ export interface RevertModelSnapshotResponse {
   model: ModelSnapshot;
 }
 
-export function modelSnapshotProvider(mlClient: MlClient) {
-  const { forceStartDatafeeds, getDatafeedIdsByJobId } = datafeedsProvider(mlClient);
+export function modelSnapshotProvider(client: IScopedClusterClient, mlClient: MlClient) {
+  const { forceStartDatafeeds, getDatafeedIdsByJobId } = datafeedsProvider(client, mlClient);
 
   async function revertModelSnapshot(
     jobId: string,

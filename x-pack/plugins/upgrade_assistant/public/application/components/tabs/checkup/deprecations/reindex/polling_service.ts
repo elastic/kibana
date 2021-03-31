@@ -8,6 +8,7 @@
 import { BehaviorSubject } from 'rxjs';
 
 import { HttpSetup } from 'src/core/public';
+import { API_BASE_PATH } from '../../../../../../../common/constants';
 import {
   IndexGroup,
   ReindexOperation,
@@ -60,7 +61,7 @@ export class ReindexPollingService {
 
     try {
       const data = await this.http.get<StatusResponse>(
-        `/api/upgrade_assistant/reindex/${this.indexName}`
+        `${API_BASE_PATH}/reindex/${this.indexName}`
       );
       this.updateWithResponse(data);
 
@@ -98,7 +99,7 @@ export class ReindexPollingService {
       });
 
       const data = await this.http.post<ReindexOperation>(
-        `/api/upgrade_assistant/reindex/${this.indexName}`
+        `${API_BASE_PATH}/reindex/${this.indexName}`
       );
 
       this.updateWithResponse({ reindexOp: data });
@@ -115,7 +116,7 @@ export class ReindexPollingService {
         cancelLoadingState: LoadingState.Loading,
       });
 
-      await this.http.post(`/api/upgrade_assistant/reindex/${this.indexName}/cancel`);
+      await this.http.post(`${API_BASE_PATH}/reindex/${this.indexName}/cancel`);
     } catch (e) {
       this.status$.next({
         ...this.status$.value,

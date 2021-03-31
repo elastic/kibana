@@ -20,7 +20,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { useAppContext } from '../../../app_context';
 import { LoadingErrorBanner } from '../../error_banner';
-import { LoadingState, UpgradeAssistantTabProps } from '../../types';
+import { UpgradeAssistantTabProps } from '../../types';
 import { Steps } from './steps';
 
 export const OverviewTab: FunctionComponent<UpgradeAssistantTabProps> = (props) => {
@@ -56,9 +56,7 @@ export const OverviewTab: FunctionComponent<UpgradeAssistantTabProps> = (props) 
 
       <EuiPageContent>
         <EuiPageContentBody>
-          {props.loadingState === LoadingState.Success && <Steps {...props} />}
-
-          {props.loadingState === LoadingState.Loading && (
+          {props.isLoading && (
             <EuiFlexGroup justifyContent="center">
               <EuiFlexItem grow={false}>
                 <EuiLoadingSpinner />
@@ -66,9 +64,9 @@ export const OverviewTab: FunctionComponent<UpgradeAssistantTabProps> = (props) 
             </EuiFlexGroup>
           )}
 
-          {props.loadingState === LoadingState.Error && (
-            <LoadingErrorBanner loadingError={props.loadingError} />
-          )}
+          {props.checkupData && <Steps {...props} />}
+
+          {props.loadingError && <LoadingErrorBanner loadingError={props.loadingError} />}
         </EuiPageContentBody>
       </EuiPageContent>
     </>

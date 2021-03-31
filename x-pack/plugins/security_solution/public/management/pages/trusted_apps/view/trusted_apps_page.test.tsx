@@ -201,7 +201,7 @@ describe('When on the Trusted Apps Page', () => {
 
           fireEvent.change(
             getByTestId('addTrustedAppFlyout-createForm-conditionsBuilder-group1-entry0-value'),
-            { target: { value: 'SOME$HASH#HERE' } }
+            { target: { value: '44ed10b389dbcd1cf16cec79d16d7378' } }
           );
 
           fireEvent.change(getByTestId('addTrustedAppFlyout-createForm-descriptionField'), {
@@ -361,6 +361,29 @@ describe('When on the Trusted Apps Page', () => {
             expect(renderResult.container.querySelector('.euiForm__errors')).not.toBeNull();
           });
         });
+      });
+    });
+
+    describe('and when the form data is not valid', () => {
+      it('should not enable the Flyout Add button with an invalid hash', async () => {
+        const renderResult = await renderAndClickAddButton();
+        const { getByTestId } = renderResult;
+
+        reactTestingLibrary.act(() => {
+          fireEvent.change(getByTestId('addTrustedAppFlyout-createForm-nameTextField'), {
+            target: { value: 'trusted app A' },
+          });
+
+          fireEvent.change(
+            getByTestId('addTrustedAppFlyout-createForm-conditionsBuilder-group1-entry0-value'),
+            { target: { value: 'invalid hash' } }
+          );
+        });
+
+        const flyoutAddButton = getByTestId(
+          'addTrustedAppFlyout-createButton'
+        ) as HTMLButtonElement;
+        expect(flyoutAddButton.disabled).toBe(true);
       });
     });
   });

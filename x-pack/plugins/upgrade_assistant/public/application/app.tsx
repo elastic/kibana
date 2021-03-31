@@ -18,9 +18,7 @@ export const RootComponent = ({ i18n, ...contextValue }: AppDependencies) => {
   return (
     <i18n.Context>
       <AppContextProvider value={contextValue}>
-        <div data-test-subj="upgradeAssistantRoot">
-          <PageContent />
-        </div>
+        <PageContent />
       </AppContextProvider>
     </i18n.Context>
   );

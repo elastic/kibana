@@ -25,6 +25,9 @@ import {
   ISearchGeneric,
   SearchSourceDependencies,
   SearchSourceService,
+  kibanaTimerangeFunction,
+  luceneFunction,
+  kqlFunction,
 } from '../../common/search';
 import { getCallMsearch } from './legacy';
 import { AggsService, AggsStartDependencies } from './aggs';
@@ -102,6 +105,9 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     );
     expressions.registerFunction(kibana);
     expressions.registerFunction(kibanaContextFunction);
+    expressions.registerFunction(luceneFunction);
+    expressions.registerFunction(kqlFunction);
+    expressions.registerFunction(kibanaTimerangeFunction);
     expressions.registerType(kibanaContext);
 
     expressions.registerFunction(esdsl);

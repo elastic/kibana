@@ -99,6 +99,38 @@ export default function ({ getService }: FtrProviderContext) {
         expect(status).to.equal(SearchSessionStatus.CANCELLED);
       });
 
+      it('should rename a session', async () => {
+        const sessionId = `my-session-${Math.random()}`;
+        const oldName = 'name1';
+        const newName = 'name2';
+        const {
+          body: { attributes: originalSession },
+        } = await supertest
+          .post(`/internal/session`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            sessionId,
+            name: oldName,
+            appId: 'discover',
+            expires: '123',
+            urlGeneratorId: 'discover',
+          })
+          .expect(200);
+
+        const {
+          body: { attributes: updatedSession },
+        } = await supertest
+          .put(`/internal/session/${sessionId}`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: newName,
+          })
+          .expect(200);
+
+        expect(originalSession.name).not.to.equal(updatedSession.name);
+        expect(updatedSession.name).to.equal(newName);
+      });
+
       it('should sync search ids into persisted session', async () => {
         const sessionId = `my-session-${Math.random()}`;
 

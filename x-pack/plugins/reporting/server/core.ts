@@ -11,6 +11,7 @@ import { first, map, take } from 'rxjs/operators';
 import {
   BasePath,
   ElasticsearchServiceSetup,
+  IClusterClient,
   KibanaRequest,
   PluginInitializerContext,
   SavedObjectsClientContract,
@@ -31,6 +32,7 @@ import { screenshotsObservableFactory, ScreenshotsObservableFn } from './lib/scr
 import { ReportingStore } from './lib/store';
 import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
 import { ReportingPluginRouter } from './types';
+import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
 
 export interface ReportingInternalSetup {
   basePath: Pick<BasePath, 'set'>;
@@ -48,6 +50,8 @@ export interface ReportingInternalStart {
   store: ReportingStore;
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
+  esClient: IClusterClient;
+  data: DataPluginStart;
   taskManager: TaskManagerStartContract;
 }
 
@@ -208,6 +212,7 @@ export class ReportingCore {
     return this.pluginSetupDeps;
   }
 
+  // NOTE: Uses the Legacy API
   public getElasticsearchService() {
     return this.getPluginSetupDeps().elasticsearch;
   }
@@ -265,6 +270,16 @@ export class ReportingCore {
     }
     const savedObjectsClient = await this.getSavedObjectsClient(request);
     return await this.getUiSettingsServiceFactory(savedObjectsClient);
+  }
+
+  public async getDataService() {
+    const startDeps = await this.getPluginStartDeps();
+    return startDeps.data;
+  }
+
+  public async getEsClient() {
+    const startDeps = await this.getPluginStartDeps();
+    return startDeps.esClient;
   }
 
   public trackReport(reportId: string) {

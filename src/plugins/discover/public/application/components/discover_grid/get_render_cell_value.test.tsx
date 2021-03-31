@@ -7,9 +7,24 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { ReactWrapper, shallow } from 'enzyme';
 import { getRenderCellValueFn } from './get_render_cell_value';
 import { indexPatternMock } from '../../../__mocks__/index_pattern';
+
+jest.mock('../../../../../kibana_react/public', () => ({
+  useUiSetting: () => true,
+  withKibana: (comp: ReactWrapper) => {
+    return comp;
+  },
+}));
+
+jest.mock('../../../kibana_services', () => ({
+  getServices: () => ({
+    uiSettings: {
+      get: jest.fn(),
+    },
+  }),
+}));
 
 const rowsSource = [
   {
@@ -139,20 +154,25 @@ describe('Discover grid cell rendering', function () {
         setCellProps={jest.fn()}
       />
     );
-    expect(component.html()).toMatchInlineSnapshot(`
-      "<span>{
-        &quot;_id&quot;: &quot;1&quot;,
-        &quot;_index&quot;: &quot;test&quot;,
-        &quot;_type&quot;: &quot;test&quot;,
-        &quot;_score&quot;: 1,
-        &quot;_source&quot;: {
-          &quot;bytes&quot;: 100,
-          &quot;extension&quot;: &quot;.gz&quot;
-        },
-        &quot;highlight&quot;: {
-          &quot;extension&quot;: &quot;@kibana-highlighted-field.gz@/kibana-highlighted-field&quot;
+    expect(component).toMatchInlineSnapshot(`
+      <JsonCodeEditor
+        json={
+          Object {
+            "_id": "1",
+            "_index": "test",
+            "_score": 1,
+            "_source": Object {
+              "bytes": 100,
+              "extension": ".gz",
+            },
+            "_type": "test",
+            "highlight": Object {
+              "extension": "@kibana-highlighted-field.gz@/kibana-highlighted-field",
+            },
+          }
         }
-      }</span>"
+        width={370}
+      />
     `);
   });
 
@@ -226,24 +246,30 @@ describe('Discover grid cell rendering', function () {
         setCellProps={jest.fn()}
       />
     );
-    expect(component.html()).toMatchInlineSnapshot(`
-      "<span>{
-        &quot;_id&quot;: &quot;1&quot;,
-        &quot;_index&quot;: &quot;test&quot;,
-        &quot;_type&quot;: &quot;test&quot;,
-        &quot;_score&quot;: 1,
-        &quot;fields&quot;: {
-          &quot;bytes&quot;: [
-            100
-          ],
-          &quot;extension&quot;: [
-            &quot;.gz&quot;
-          ]
-        },
-        &quot;highlight&quot;: {
-          &quot;extension&quot;: &quot;@kibana-highlighted-field.gz@/kibana-highlighted-field&quot;
+    expect(component).toMatchInlineSnapshot(`
+      <JsonCodeEditor
+        json={
+          Object {
+            "_id": "1",
+            "_index": "test",
+            "_score": 1,
+            "_source": undefined,
+            "_type": "test",
+            "fields": Object {
+              "bytes": Array [
+                100,
+              ],
+              "extension": Array [
+                ".gz",
+              ],
+            },
+            "highlight": Object {
+              "extension": "@kibana-highlighted-field.gz@/kibana-highlighted-field",
+            },
+          }
         }
-      }</span>"
+        width={370}
+      />
     `);
   });
 

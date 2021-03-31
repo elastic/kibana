@@ -8,7 +8,7 @@
 import { UMElasticsearchQueryFn } from '../adapters';
 import { GetMonitorAvailabilityParams, Ping } from '../../../common/runtime_types';
 import { AfterKey } from './get_monitor_status';
-import { SortOptions } from '../../../../../typings/elasticsearch';
+import { SortOptions } from '../../../../../../typings/elasticsearch';
 
 export interface AvailabilityKey {
   monitorId: string;

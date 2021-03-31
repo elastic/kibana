@@ -9,8 +9,8 @@ import { get, find } from 'lodash';
 import { verifyMonitoringLicense } from './verify_monitoring_license';
 import { i18n } from '@kbn/i18n';
 
-export function alertsClustersAggregation(req, alertsIndex, clusters, checkLicense) {
-  const verification = verifyMonitoringLicense(req.server);
+export async function alertsClustersAggregation(req, alertsIndex, clusters, checkLicense) {
+  const verification = await verifyMonitoringLicense(req.server);
 
   if (!verification.enabled) {
     // return metadata detailing that alerts is disabled because of the monitoring cluster license

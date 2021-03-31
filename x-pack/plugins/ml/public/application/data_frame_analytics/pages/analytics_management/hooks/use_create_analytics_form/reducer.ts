@@ -558,8 +558,9 @@ export function reducer(state: State, action: Action): State {
     case ACTION.SWITCH_TO_FORM:
       const { jobConfig: config } = state;
       const { jobId } = state.form;
+      // Persist form state when switching back from advanced editor
       // @ts-ignore
-      const formState = getFormStateFromJobConfig(config, false);
+      const formState = { ...state.form, ...getFormStateFromJobConfig(config, false) };
 
       if (typeof jobId === 'string' && jobId.trim() !== '') {
         formState.jobId = jobId;

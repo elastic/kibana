@@ -8,6 +8,11 @@
 
 export * from './kibana';
 export * from './kibana_context';
+export * from './kql';
+export * from './lucene';
+export * from './query_to_ast';
+export * from './timerange_to_ast';
 export * from './kibana_context_type';
 export * from './esaggs';
 export * from './utils';
+export * from './timerange';

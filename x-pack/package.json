@@ -9,9 +9,7 @@
     "kbn": "node ../scripts/kbn",
     "kbn:bootstrap": "node plugins/canvas/scripts/storybook --clean",
     "start": "node ../scripts/kibana --dev",
-    "build": "../node_modules/.bin/gulp build",
-    "testonly": "echo 'Deprecated, use `yarn test`'",
-    "test": "../node_modules/.bin/gulp test",
+    "build": "node --preserve-symlinks ../node_modules/.bin/gulp build",
     "test:jest": "node ../scripts/jest"
   },
   "kibana": {

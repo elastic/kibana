@@ -119,6 +119,15 @@ describe('LayerPanel', () => {
       );
     });
 
+    it('should show to reset visualization for visualizations only allowing a single layer', () => {
+      const layerPanelAttributes = getDefaultProps();
+      delete layerPanelAttributes.activeVisualization.removeLayer;
+      const component = mountWithIntl(<LayerPanel {...getDefaultProps()} />);
+      expect(component.find('[data-test-subj="lnsLayerRemove"]').first().text()).toContain(
+        'Reset visualization'
+      );
+    });
+
     it('should call the clear callback', () => {
       const cb = jest.fn();
       const component = mountWithIntl(<LayerPanel {...getDefaultProps()} onRemoveLayer={cb} />);

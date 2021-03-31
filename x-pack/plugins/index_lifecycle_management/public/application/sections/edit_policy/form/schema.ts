@@ -9,12 +9,8 @@ import { i18n } from '@kbn/i18n';
 
 import { FormSchema, fieldValidators } from '../../../../shared_imports';
 import { defaultIndexPriority } from '../../../constants';
-import { ROLLOVER_FORM_PATHS } from '../constants';
-
-import { FormInternal } from '../types';
-
-const rolloverFormPaths = Object.values(ROLLOVER_FORM_PATHS);
-
+import { ROLLOVER_FORM_PATHS, CLOUD_DEFAULT_REPO } from '../constants';
+import { i18nTexts } from '../i18n_texts';
 import {
   ifExistsNumberGreaterThanZero,
   ifExistsNumberNonNegative,
@@ -22,7 +18,7 @@ import {
   minAgeValidator,
 } from './validations';
 
-import { i18nTexts } from '../i18n_texts';
+const rolloverFormPaths = Object.values(ROLLOVER_FORM_PATHS);
 
 const { emptyField, numberGreaterThanField } = fieldValidators;
 
@@ -54,6 +50,13 @@ export const searchableSnapshotFields = {
     validations: [
       { validator: emptyField(i18nTexts.editPolicy.errors.searchableSnapshotRepoRequired) },
     ],
+    // TODO: update text copy
+    helpText: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshot.repositoryHelpText',
+      {
+        defaultMessage: 'Each phase uses the same snapshot repository.',
+      }
+    ),
   },
   storage: {
     label: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.searchableSnapshot.storageLabel', {
@@ -114,7 +117,7 @@ const getPriorityField = (phase: 'hot' | 'warm' | 'cold' | 'frozen') => ({
   serializer: serializers.stringToNumber,
 });
 
-export const schema: FormSchema<FormInternal> = {
+export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
   _meta: {
     hot: {
       isUsingDefaultRollover: {
@@ -230,6 +233,11 @@ export const schema: FormSchema<FormInternal> = {
         defaultValue: 'd',
       },
     },
+    searchableSnapshot: {
+      repository: {
+        defaultValue: isCloudEnabled ? CLOUD_DEFAULT_REPO : '',
+      },
+    },
   },
   phases: {
     hot: {
@@ -288,6 +296,7 @@ export const schema: FormSchema<FormInternal> = {
         set_priority: {
           priority: getPriorityField('hot'),
         },
+        searchable_snapshot: searchableSnapshotFields,
       },
     },
     warm: {
@@ -375,4 +384,4 @@ export const schema: FormSchema<FormInternal> = {
       },
     },
   },
-};
+});

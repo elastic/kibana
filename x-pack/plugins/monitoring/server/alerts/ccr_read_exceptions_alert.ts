@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ElasticsearchClient } from 'kibana/server';
 import { BaseAlert } from './base_alert';
 import {
   AlertData,
@@ -70,7 +71,7 @@ export class CCRReadExceptionsAlert extends BaseAlert {
 
   protected async fetchData(
     params: CommonAlertParams,
-    callCluster: any,
+    esClient: ElasticsearchClient,
     clusters: AlertCluster[],
     availableCcs: string[]
   ): Promise<AlertData[]> {
@@ -83,7 +84,7 @@ export class CCRReadExceptionsAlert extends BaseAlert {
     const endMs = +new Date();
     const startMs = endMs - duration;
     const stats = await fetchCCRReadExceptions(
-      callCluster,
+      esClient,
       esIndexPattern,
       startMs,
       endMs,

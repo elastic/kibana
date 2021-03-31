@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ESSearchResponse } from '../../../../../../typings/elasticsearch';
+import { ESSearchResponse } from '../../../../../../../typings/elasticsearch';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
 import { rangeQuery } from '../../../../server/utils/queries';
 import { withApmSpan } from '../../../utils/with_apm_span';

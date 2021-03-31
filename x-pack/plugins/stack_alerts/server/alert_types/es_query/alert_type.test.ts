@@ -17,7 +17,9 @@ import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { getAlertType, ConditionMetAlertInstanceId, ActionGroupId } from './alert_type';
 import { EsQueryAlertParams, EsQueryAlertState } from './alert_type_params';
 import { ActionContext } from './action_context';
-import { ESSearchResponse, ESSearchRequest } from '../../../../../typings/elasticsearch';
+import { ESSearchResponse, ESSearchRequest } from '../../../../../../typings/elasticsearch';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
 
 describe('alertType', () => {
   const logger = loggingSystemMock.create().get();
@@ -132,7 +134,9 @@ describe('alertType', () => {
     const alertServices: AlertServicesMock = alertsMock.createAlertServices();
 
     const searchResult: ESSearchResponse<unknown, {}> = generateResults([]);
-    alertServices.callCluster.mockResolvedValueOnce(searchResult);
+    alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
+      elasticsearchClientMock.createSuccessTransportRequestPromise(searchResult)
+    );
 
     const result = await alertType.executor({
       alertId: uuid.v4(),
@@ -189,7 +193,9 @@ describe('alertType', () => {
         'time-field': newestDocumentTimestamp - 2000,
       },
     ]);
-    alertServices.callCluster.mockResolvedValueOnce(searchResult);
+    alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
+      elasticsearchClientMock.createSuccessTransportRequestPromise(searchResult)
+    );
 
     const result = await alertType.executor({
       alertId: uuid.v4(),
@@ -240,12 +246,14 @@ describe('alertType', () => {
     const previousTimestamp = Date.now();
     const newestDocumentTimestamp = previousTimestamp + 1000;
 
-    alertServices.callCluster.mockResolvedValueOnce(
-      generateResults([
-        {
-          'time-field': newestDocumentTimestamp,
-        },
-      ])
+    alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
+      elasticsearchClientMock.createSuccessTransportRequestPromise(
+        generateResults([
+          {
+            'time-field': newestDocumentTimestamp,
+          },
+        ])
+      )
     );
 
     const executorOptions = {
@@ -300,15 +308,17 @@ describe('alertType', () => {
 
     const oldestDocumentTimestamp = Date.now();
 
-    alertServices.callCluster.mockResolvedValueOnce(
-      generateResults([
-        {
-          'time-field': oldestDocumentTimestamp,
-        },
-        {
-          'time-field': oldestDocumentTimestamp - 1000,
-        },
-      ])
+    alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
+      elasticsearchClientMock.createSuccessTransportRequestPromise(
+        generateResults([
+          {
+            'time-field': oldestDocumentTimestamp,
+          },
+          {
+            'time-field': oldestDocumentTimestamp - 1000,
+          },
+        ])
+      )
     );
 
     const result = await alertType.executor({
@@ -359,12 +369,14 @@ describe('alertType', () => {
 
     const oldestDocumentTimestamp = Date.now();
 
-    alertServices.callCluster.mockResolvedValueOnce(
-      generateResults([
-        {
-          'time-field': oldestDocumentTimestamp,
-        },
-      ])
+    alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
+      elasticsearchClientMock.createSuccessTransportRequestPromise(
+        generateResults([
+          {
+            'time-field': oldestDocumentTimestamp,
+          },
+        ])
+      )
     );
 
     const executorOptions = {
@@ -400,15 +412,17 @@ describe('alertType', () => {
     });
 
     const newestDocumentTimestamp = oldestDocumentTimestamp + 5000;
-    alertServices.callCluster.mockResolvedValueOnce(
-      generateResults([
-        {
-          'time-field': newestDocumentTimestamp,
-        },
-        {
-          'time-field': newestDocumentTimestamp - 1000,
-        },
-      ])
+    alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
+      elasticsearchClientMock.createSuccessTransportRequestPromise(
+        generateResults([
+          {
+            'time-field': newestDocumentTimestamp,
+          },
+          {
+            'time-field': newestDocumentTimestamp - 1000,
+          },
+        ])
+      )
     );
 
     const secondResult = await alertType.executor({
@@ -443,17 +457,19 @@ describe('alertType', () => {
 
     const oldestDocumentTimestamp = Date.now();
 
-    alertServices.callCluster.mockResolvedValueOnce(
-      generateResults(
-        [
-          {
-            'time-field': oldestDocumentTimestamp,
-          },
-          {
-            'time-field': oldestDocumentTimestamp - 1000,
-          },
-        ],
-        true
+    alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
+      elasticsearchClientMock.createSuccessTransportRequestPromise(
+        generateResults(
+          [
+            {
+              'time-field': oldestDocumentTimestamp,
+            },
+            {
+              'time-field': oldestDocumentTimestamp - 1000,
+            },
+          ],
+          true
+        )
       )
     );
 
@@ -504,18 +520,20 @@ describe('alertType', () => {
 
     const oldestDocumentTimestamp = Date.now();
 
-    alertServices.callCluster.mockResolvedValueOnce(
-      generateResults(
-        [
-          {
-            'time-field': oldestDocumentTimestamp,
-          },
-          {
-            'time-field': oldestDocumentTimestamp - 1000,
-          },
-        ],
-        true,
-        true
+    alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
+      elasticsearchClientMock.createSuccessTransportRequestPromise(
+        generateResults(
+          [
+            {
+              'time-field': oldestDocumentTimestamp,
+            },
+            {
+              'time-field': oldestDocumentTimestamp - 1000,
+            },
+          ],
+          true,
+          true
+        )
       )
     );
 

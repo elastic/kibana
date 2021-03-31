@@ -99,9 +99,9 @@ export const ConfigureOauth: React.FC<ConfigureOauthProps> = ({ name, onFormCrea
   );
 
   return (
-    <div className="step-4">
+    <>
       {header}
       {sectionLoading ? <Loading /> : configfieldsForm}
-    </div>
+    </>
   );
 };

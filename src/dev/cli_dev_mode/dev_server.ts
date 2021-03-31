@@ -45,6 +45,7 @@ export class DevServer {
   private readonly sigint$: Rx.Observable<void>;
   private readonly sigterm$: Rx.Observable<void>;
   private readonly ready$ = new Rx.BehaviorSubject(false);
+  private readonly phase$ = new Rx.ReplaySubject<'starting' | 'fatal exit' | 'listening'>(1);
 
   private readonly script: string;
   private readonly argv: string[];
@@ -66,6 +67,10 @@ export class DevServer {
 
   isReady$() {
     return this.ready$.asObservable();
+  }
+
+  getPhase$() {
+    return this.phase$.asObservable();
   }
 
   /**
@@ -113,6 +118,8 @@ export class DevServer {
 
     const runServer = () =>
       usingServerProcess(this.script, this.argv, (proc) => {
+        this.phase$.next('starting');
+
         // observable which emits devServer states containing lines
         // logged to stdout/stderr, completes when stdio streams complete
         const log$ = Rx.merge(observeLines(proc.stdout!), observeLines(proc.stderr!)).pipe(
@@ -131,6 +138,7 @@ export class DevServer {
             this.ready$.next(false);
 
             if (code != null && code !== 0) {
+              this.phase$.next('fatal exit');
               if (this.watcher.enabled) {
                 this.log.bad(`server crashed`, 'with status code', code);
               } else {
@@ -160,6 +168,7 @@ export class DevServer {
             const msg = received[0];
 
             if (msg === 'SERVER_LISTENING') {
+              this.phase$.next('listening');
               this.ready$.next(true);
             }
 

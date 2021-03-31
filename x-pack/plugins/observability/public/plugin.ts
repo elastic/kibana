@@ -38,24 +38,52 @@ export class Plugin implements PluginClass<ObservabilityPluginSetup, Observabili
   constructor(context: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: ObservabilityPluginSetupDeps) {
+    const category = DEFAULT_APP_CATEGORIES.observability;
+    const euiIconType = 'logo-observability';
+    const mount = async (params: AppMountParameters<unknown>) => {
+      // Load application bundle
+      const { renderApp } = await import('./application');
+      // Get start services
+      const [coreStart] = await core.getStartServices();
+
+      return renderApp(coreStart, plugins, params);
+    };
+    const updater$ = this.appUpdater$;
+
     core.application.register({
       id: 'observability-overview',
       title: 'Overview',
-      order: 8000,
-      euiIconType: 'logoObservability',
       appRoute: '/app/observability',
-      updater$: this.appUpdater$,
-      category: DEFAULT_APP_CATEGORIES.observability,
-
-      mount: async (params: AppMountParameters<unknown>) => {
-        // Load application bundle
-        const { renderApp } = await import('./application');
-        // Get start services
-        const [coreStart] = await core.getStartServices();
-
-        return renderApp(coreStart, plugins, params);
-      },
+      order: 8000,
+      category,
+      euiIconType,
+      mount,
+      updater$,
     });
+
+    if (core.uiSettings.get('observability:enableAlertingExperience')) {
+      core.application.register({
+        id: 'observability-alerts',
+        title: 'Alerts',
+        appRoute: '/app/observability/alerts',
+        order: 8025,
+        category,
+        euiIconType,
+        mount,
+        updater$,
+      });
+
+      core.application.register({
+        id: 'observability-cases',
+        title: 'Cases',
+        appRoute: '/app/observability/cases',
+        order: 8050,
+        category,
+        euiIconType,
+        mount,
+        updater$,
+      });
+    }
 
     if (plugins.home) {
       plugins.home.featureCatalogue.registerSolution({

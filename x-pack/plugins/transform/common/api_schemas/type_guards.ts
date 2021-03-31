@@ -19,6 +19,7 @@ import type { DeleteTransformsResponseSchema } from './delete_transforms';
 import type { StartTransformsResponseSchema } from './start_transforms';
 import type { StopTransformsResponseSchema } from './stop_transforms';
 import type {
+  GetTransformNodesResponseSchema,
   GetTransformsResponseSchema,
   PostTransformsPreviewResponseSchema,
   PutTransformsResponseSchema,
@@ -32,6 +33,14 @@ const isGenericResponseSchema = <T>(arg: any): arg is T => {
     {}.hasOwnProperty.call(arg, 'count') &&
     {}.hasOwnProperty.call(arg, 'transforms') &&
     Array.isArray(arg.transforms)
+  );
+};
+
+export const isGetTransformNodesResponseSchema = (
+  arg: unknown
+): arg is GetTransformNodesResponseSchema => {
+  return (
+    isPopulatedObject(arg) && {}.hasOwnProperty.call(arg, 'count') && typeof arg.count === 'number'
   );
 };
 

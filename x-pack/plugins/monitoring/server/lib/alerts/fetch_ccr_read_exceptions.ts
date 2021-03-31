@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import { ElasticsearchClient } from 'kibana/server';
 import { get } from 'lodash';
 import { CCRReadExceptionsStats } from '../../../common/types/alerts';
 
 export async function fetchCCRReadExceptions(
-  callCluster: any,
+  esClient: ElasticsearchClient,
   index: string,
   startMs: number,
   endMs: number,
@@ -92,7 +93,7 @@ export async function fetchCCRReadExceptions(
     },
   };
 
-  const response = await callCluster('search', params);
+  const { body: response } = await esClient.search(params);
   const stats: CCRReadExceptionsStats[] = [];
   const { buckets: remoteClusterBuckets = [] } = response.aggregations.remote_clusters;
 

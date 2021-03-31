@@ -11,15 +11,17 @@ import { ElasticsearchClient } from 'src/core/server';
 export interface ESLicense {
   status: string;
   uid: string;
+  hkey: string;
   type: string;
   issue_date: string;
   issue_date_in_millis: number;
   expiry_date: string;
-  expirty_date_in_millis: number;
+  expiry_date_in_millis: number;
   max_nodes: number;
   issued_to: string;
   issuer: string;
   start_date_in_millis: number;
+  max_resource_units: number;
 }
 
 let cachedLicense: ESLicense | undefined;

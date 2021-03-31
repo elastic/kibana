@@ -16,7 +16,7 @@ import type { ElasticsearchClient } from 'kibana/server';
 
 import type { ListResult } from '../../../common';
 import { FLEET_SERVER_ARTIFACTS_INDEX } from '../../../common';
-import type { ESSearchHit, ESSearchResponse } from '../../../../../typings/elasticsearch';
+import type { ESSearchHit, ESSearchResponse } from '../../../../../../typings/elasticsearch';
 
 import { ArtifactsElasticsearchError } from '../../errors';
 
@@ -29,7 +29,7 @@ import type {
   ListArtifactsProps,
   NewArtifact,
 } from './types';
-import { esSearchHitToArtifact } from './mappings';
+import { esSearchHitToArtifact, newArtifactToElasticsearchProperties } from './mappings';
 
 const deflateAsync = promisify(deflate);
 
@@ -58,10 +58,7 @@ export const createArtifact = async (
   artifact: NewArtifact
 ): Promise<Artifact> => {
   const id = uuid.v4();
-  const newArtifactData: ArtifactElasticsearchProperties = {
-    ...artifact,
-    created: new Date().toISOString(),
-  };
+  const newArtifactData = newArtifactToElasticsearchProperties(artifact);
 
   try {
     await esClient.create({
@@ -71,10 +68,7 @@ export const createArtifact = async (
       refresh: 'wait_for',
     });
 
-    return {
-      ...newArtifactData,
-      id,
-    };
+    return esSearchHitToArtifact({ _id: id, _source: newArtifactData });
   } catch (e) {
     throw new ArtifactsElasticsearchError(e);
   }

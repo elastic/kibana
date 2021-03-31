@@ -8,7 +8,7 @@
 import { merge } from 'lodash';
 import { TRANSACTION_TYPE } from '../../../common/elasticsearch_fieldnames';
 import { arrayUnionToCallable } from '../../../common/utils/array_union_to_callable';
-import { AggregationInputMap } from '../../../../../typings/elasticsearch';
+import { AggregationInputMap } from '../../../../../../typings/elasticsearch';
 import { TransactionGroupRequestBase, TransactionGroupSetup } from './fetcher';
 import { getTransactionDurationFieldForAggregatedTransactions } from '../helpers/aggregated_transactions';
 import { withApmSpan } from '../../utils/with_apm_span';

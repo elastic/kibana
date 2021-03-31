@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { ElasticsearchClient } from 'kibana/server';
 import { AlertLicense, AlertCluster } from '../../../common/types/alerts';
 import { ElasticsearchResponse } from '../../../common/types/es';
 
 export async function fetchLicenses(
-  callCluster: any,
+  esClient: ElasticsearchClient,
   clusters: AlertCluster[],
   index: string
 ): Promise<AlertLicense[]> {
@@ -58,7 +59,7 @@ export async function fetchLicenses(
     },
   };
 
-  const response: ElasticsearchResponse = await callCluster('search', params);
+  const { body: response } = await esClient.search<ElasticsearchResponse>(params);
   return (
     response?.hits?.hits.map((hit) => {
       const rawLicense = hit._source.license ?? {};

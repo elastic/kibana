@@ -47,8 +47,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/94367
-  describe.skip('Finalizing signals migrations', () => {
+  describe('Finalizing signals migrations', () => {
     let legacySignalsIndexName: string;
     let outdatedSignalsIndexName: string;
     let createdMigrations: CreateResponse[];
@@ -245,16 +244,14 @@ export default ({ getService }: FtrProviderContext): void => {
         .auth(ROLES.t1_analyst, 'changeme')
         .expect(200);
 
-      const finalizeResponse: FinalizeResponse = body.migrations[0];
+      const finalizeResponse: FinalizeResponse & {
+        error: { message: string; status_code: number };
+      } = body.migrations[0];
 
       expect(finalizeResponse.id).to.eql(createdMigration.migration_id);
       expect(finalizeResponse.completed).not.to.eql(true);
-      expect(finalizeResponse.error).to.eql({
-        message:
-          'security_exception: action [cluster:monitor/task/get] is unauthorized for user [t1_analyst], this action is granted by the cluster privileges [monitor,manage,all]',
-        status_code: 403,
-      });
-
+      expect(finalizeResponse.error.message).to.match(/^security_exception/);
+      expect(finalizeResponse.error.status_code).to.eql(403);
       await deleteUserAndRole(getService, ROLES.t1_analyst);
     });
   });

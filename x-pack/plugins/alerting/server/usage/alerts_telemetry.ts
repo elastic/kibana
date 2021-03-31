@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { LegacyAPICaller } from 'kibana/server';
-import { SearchResponse } from 'elasticsearch';
+import { ElasticsearchClient } from 'kibana/server';
 import { AlertsUsage } from './types';
 
 const alertTypeMetric = {
@@ -36,7 +35,7 @@ const alertTypeMetric = {
 };
 
 export async function getTotalCountAggregations(
-  callCluster: LegacyAPICaller,
+  esClient: ElasticsearchClient,
   kibanaInex: string
 ): Promise<
   Pick<
@@ -223,7 +222,7 @@ export async function getTotalCountAggregations(
     },
   };
 
-  const results = await callCluster('search', {
+  const { body: results } = await esClient.search({
     index: kibanaInex,
     body: {
       query: {
@@ -256,7 +255,7 @@ export async function getTotalCountAggregations(
   return {
     count_total: totalAlertsCount,
     count_by_type: Object.keys(results.aggregations.byAlertTypeId.value.types).reduce(
-      // ES DSL aggregations are returned as `any` by callCluster
+      // ES DSL aggregations are returned as `any` by esClient.search
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (obj: any, key: string) => ({
         ...obj,
@@ -295,8 +294,8 @@ export async function getTotalCountAggregations(
   };
 }
 
-export async function getTotalCountInUse(callCluster: LegacyAPICaller, kibanaInex: string) {
-  const searchResult: SearchResponse<unknown> = await callCluster('search', {
+export async function getTotalCountInUse(esClient: ElasticsearchClient, kibanaInex: string) {
+  const { body: searchResult } = await esClient.search({
     index: kibanaInex,
     body: {
       query: {
@@ -316,7 +315,7 @@ export async function getTotalCountInUse(callCluster: LegacyAPICaller, kibanaIne
       0
     ),
     countByType: Object.keys(searchResult.aggregations.byAlertTypeId.value.types).reduce(
-      // ES DSL aggregations are returned as `any` by callCluster
+      // ES DSL aggregations are returned as `any` by esClient.search
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (obj: any, key: string) => ({
         ...obj,

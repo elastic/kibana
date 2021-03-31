@@ -15,13 +15,8 @@ import { isAgentUpgradeable } from '../../../common/services';
 import { appContextService } from '../app_context';
 
 import { bulkCreateAgentActions, createAgentAction } from './actions';
-import {
-  getAgents,
-  listAllAgents,
-  updateAgent,
-  bulkUpdateAgents,
-  getAgentPolicyForAgent,
-} from './crud';
+import type { GetAgentsOptions } from './crud';
+import { getAgents, updateAgent, bulkUpdateAgents, getAgentPolicyForAgent } from './crud';
 
 export async function sendUpgradeAgentAction({
   soClient,
@@ -82,31 +77,15 @@ export async function ackAgentUpgraded(
 export async function sendUpgradeAgentsActions(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  options:
-    | {
-        agentIds: string[];
-        sourceUri: string | undefined;
-        version: string;
-        force?: boolean;
-      }
-    | {
-        kuery: string;
-        sourceUri: string | undefined;
-        version: string;
-        force?: boolean;
-      }
+  options: GetAgentsOptions & {
+    sourceUri: string | undefined;
+    version: string;
+    force?: boolean;
+  }
 ) {
   const kibanaVersion = appContextService.getKibanaVersion();
   // Filter out agents currently unenrolling, agents unenrolled, and agents not upgradeable
-  const agents =
-    'agentIds' in options
-      ? await getAgents(esClient, options.agentIds)
-      : (
-          await listAllAgents(esClient, {
-            kuery: options.kuery,
-            showInactive: false,
-          })
-        ).agents;
+  const agents = await getAgents(esClient, options);
 
   // upgradeable if they pass the version check
   const upgradeableAgents = options.force

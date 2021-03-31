@@ -530,7 +530,7 @@ describe('embeddable', () => {
         attributeService,
         expressionRenderer,
         basePath,
-        indexPatternService: {} as IndexPatternsContract,
+        indexPatternService: ({ get: jest.fn() } as unknown) as IndexPatternsContract,
         editable: true,
         getTrigger,
         documentToExpression: () =>

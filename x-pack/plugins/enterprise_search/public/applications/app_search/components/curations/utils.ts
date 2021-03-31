@@ -14,3 +14,14 @@ export const convertToDate = (serverDateString: string): Date => {
     .replace('AM', ' AM');
   return new Date(readableDateString);
 };
+
+export const addDocument = (documentArray: string[], newDocument: string) => {
+  return [...documentArray, newDocument];
+};
+
+export const removeDocument = (documentArray: string[], deletedDocument: string) => {
+  const newArray = [...documentArray];
+  const indexToDelete = newArray.indexOf(deletedDocument);
+  newArray.splice(indexToDelete, 1);
+  return newArray;
+};

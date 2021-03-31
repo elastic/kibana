@@ -235,7 +235,7 @@ export class CoreUsageDataService implements CoreService<CoreUsageDataSetup, Cor
         savedObjects: {
           customIndex: isCustomIndex(this.kibanaConfig!.index),
           maxImportPayloadBytes: this.soConfig.maxImportPayloadBytes.getValueInBytes(),
-          maxImportExportSizeBytes: this.soConfig.maxImportExportSize.getValueInBytes(),
+          maxImportExportSize: this.soConfig.maxImportExportSize,
         },
       },
       environment: {
