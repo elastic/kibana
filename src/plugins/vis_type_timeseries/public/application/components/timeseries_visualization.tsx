@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
+import './timeseries_visualization.scss';
+
 import React, { useCallback, useEffect } from 'react';
+
+import { get } from 'lodash';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { IUiSettingsClient } from 'src/core/public';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
@@ -17,7 +22,12 @@ import { PaletteRegistry } from 'src/plugins/charts/public';
 import { ErrorComponent } from './error';
 import { TimeseriesVisTypes } from './vis_types';
 import { TimeseriesVisParams } from '../../types';
-import { TimeseriesVisData } from '../../../common/types';
+import { isVisSeriesData, TimeseriesVisData } from '../../../common/types';
+import { LastValueModeIndicator } from './last_value_mode_indicator';
+import { getInterval } from './lib/get_interval';
+import { AUTO_INTERVAL } from '../../../common/constants';
+import { TIME_RANGE_DATA_MODES } from '../../../common/timerange_data_modes';
+import { PANEL_TYPES } from '../../../common/panel_types';
 
 interface TimeseriesVisualizationProps {
   className?: string;
@@ -76,7 +86,7 @@ function TimeseriesVisualization({
   });
 
   // Show the error panel
-  const error = visData[model.id]?.error;
+  const error = isVisSeriesData(visData) && visData[model.id]?.error;
   if (error) {
     return (
       <div className={className}>
@@ -87,18 +97,40 @@ function TimeseriesVisualization({
 
   const VisComponent = TimeseriesVisTypes[model.type];
 
+  const isLastValueMode =
+    !model.time_range_mode || model.time_range_mode === TIME_RANGE_DATA_MODES.LAST_VALUE;
+  const shouldDisplayLastValueIndicator =
+    isLastValueMode && !model.hide_last_value_indicator && model.type !== PANEL_TYPES.TIMESERIES;
+
   if (VisComponent) {
     return (
-      <VisComponent
-        getConfig={getConfig}
-        model={model}
-        visData={visData}
-        uiState={uiState}
-        onBrush={onBrush}
-        onUiState={handleUiState}
-        syncColors={syncColors}
-        palettesService={palettesService}
-      />
+      <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
+        {shouldDisplayLastValueIndicator && (
+          <EuiFlexItem className="tvbLastValueIndicator" grow={false}>
+            <LastValueModeIndicator
+              seriesData={get(
+                visData,
+                `${isVisSeriesData(visData) ? model.id : 'series[0]'}.series[0].data`,
+                undefined
+              )}
+              panelInterval={getInterval(visData, model)}
+              modelInterval={model.interval ?? AUTO_INTERVAL}
+            />
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem>
+          <VisComponent
+            getConfig={getConfig}
+            model={model}
+            visData={visData}
+            uiState={uiState}
+            onBrush={onBrush}
+            onUiState={handleUiState}
+            syncColors={syncColors}
+            palettesService={palettesService}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
