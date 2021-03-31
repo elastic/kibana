@@ -73,6 +73,7 @@ export const transformRequestToMetricsAPIRequest = async (
     aggregations: {
       [META_KEY]: {
         top_metrics: {
+          size: 1,
           metrics: [{ field: inventoryFields.name }],
           sort: {
             [source.configuration.fields.timestamp]: 'desc',
