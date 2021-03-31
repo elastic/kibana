@@ -7,13 +7,13 @@
 
 import { QueryContext } from './query_context';
 import { MonitorSummary, Ping } from '../../../../common/runtime_types';
+import { getStatusFilter } from './find_potential_matches';
 
 /**
  * Determines whether the provided check groups are the latest complete check groups for their associated monitor ID's.
  * If provided check groups are not the latest complete group, they are discarded.
  * @param queryContext the data and resources needed to perform the query
  * @param potentialMatchMonitorIDs the monitor ID's of interest
- * @param potentialMatchCheckGroups the check groups to filter for the latest match per ID
  */
 // check groups for their associated monitor IDs. If not, it discards the result.
 export const refinePotentialMatches = async (
@@ -66,7 +66,10 @@ export const fullyMatchingIds = (queryResult: any, statusFilter?: string): Monit
     }
 
     const someDown = summaryPings.some((p) => (p.summary?.down ?? 0) > 0);
-    const statusFilterOk = !statusFilter ? true : statusFilter === 'up' ? !someDown : someDown;
+    let statusFilterOk = true;
+    if (statusFilter && statusFilter !== 'lastUp' && statusFilter !== 'lastDown') {
+      statusFilterOk = !statusFilter ? true : statusFilter === 'up' ? !someDown : someDown;
+    }
 
     if (matched && statusFilterOk) {
       summaries.push(summaryPingsToSummary(summaryPings));
@@ -116,6 +119,7 @@ export const query = async (
       query: {
         bool: {
           filter: [
+            ...getStatusFilter([], queryContext),
             await queryContext.dateRangeFilter(),
             { terms: { 'monitor.id': potentialMatchMonitorIDs } },
           ],

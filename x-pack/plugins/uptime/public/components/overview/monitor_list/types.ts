@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-export interface CondensedCheckStatus {
-  ip?: string | null;
-  status: string;
-  timestamp: string;
-}
-
 export interface Criteria {
   page?: {
     index: number;
@@ -34,3 +28,5 @@ export interface Pagination {
   pageSizeOptions: number[];
   totalItemCount: number;
 }
+
+export type StatusFilter = 'up' | 'lastUp' | 'down' | 'lastDown';

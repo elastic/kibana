@@ -10,9 +10,18 @@ import { i18n } from '@kbn/i18n';
 import { EuiFilterGroup } from '@elastic/eui';
 import { FilterStatusButton } from './filter_status_button';
 import { useGetUrlParams } from '../../../hooks';
-import { STATUS_DOWN_LABEL, STATUS_UP_LABEL } from '../../common/translations';
+import {
+  LAST_DOWN_LABEL,
+  LAST_UP_LABEL,
+  STATUS_DOWN_LABEL,
+  STATUS_UP_LABEL,
+} from '../../common/translations';
 
-export const StatusFilter: React.FC = () => {
+export const StatusFilter = ({
+  showLastStatusFilter = true,
+}: {
+  showLastStatusFilter?: boolean;
+}) => {
   const { statusFilter } = useGetUrlParams();
 
   // Empty string for all filter button value, since we dont store it in url, so keeping it in sync
@@ -26,7 +35,7 @@ export const StatusFilter: React.FC = () => {
         })}
         dataTestSubj="xpack.uptime.filterBar.filterStatusAll"
         value={ALL}
-        withNext={true}
+        withNext={false}
         isActive={statusFilter === ''}
       />
       <FilterStatusButton
@@ -36,13 +45,31 @@ export const StatusFilter: React.FC = () => {
         withNext={true}
         isActive={statusFilter === 'up'}
       />
+      {showLastStatusFilter && (
+        <FilterStatusButton
+          content={LAST_UP_LABEL}
+          dataTestSubj="uptimeLastUpFilter"
+          value="lastUp"
+          withNext={false}
+          isActive={statusFilter === 'lastUp'}
+        />
+      )}
       <FilterStatusButton
         content={STATUS_DOWN_LABEL}
         dataTestSubj="xpack.uptime.filterBar.filterStatusDown"
         value="down"
-        withNext={false}
+        withNext={true}
         isActive={statusFilter === 'down'}
       />
+      {showLastStatusFilter && (
+        <FilterStatusButton
+          content={LAST_DOWN_LABEL}
+          dataTestSubj="uptimeLastDownFilter"
+          value="lastDown"
+          withNext={false}
+          isActive={statusFilter === 'lastDown'}
+        />
+      )}
     </EuiFilterGroup>
   );
 };

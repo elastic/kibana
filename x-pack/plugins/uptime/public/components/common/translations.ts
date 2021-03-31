@@ -19,9 +19,19 @@ export const STATUS_UP_LABEL = i18n.translate('xpack.uptime.monitorList.statusCo
   defaultMessage: 'Up',
 });
 
+export const LAST_UP_LABEL = i18n.translate('xpack.uptime.monitorList.statusColumn.lastUpLabel', {
+  defaultMessage: 'Last Up',
+});
 export const STATUS_DOWN_LABEL = i18n.translate('xpack.uptime.monitorList.statusColumn.downLabel', {
   defaultMessage: 'Down',
 });
+
+export const LAST_DOWN_LABEL = i18n.translate(
+  'xpack.uptime.monitorList.statusColumn.lastDownLabel',
+  {
+    defaultMessage: 'Last Down',
+  }
+);
 
 export const STATUS_COMPLETE_LABEL = i18n.translate(
   'xpack.uptime.monitorList.statusColumn.completeLabel',

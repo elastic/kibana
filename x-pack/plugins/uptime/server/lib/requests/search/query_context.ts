@@ -65,7 +65,11 @@ export class QueryContext {
       range: { '@timestamp': { gte: this.dateRangeStart, lte: this.dateRangeEnd } },
     };
 
-    if (!(await this.hasTimespan())) {
+    if (
+      !(await this.hasTimespan()) ||
+      this.statusFilter === 'lastUp' ||
+      this.statusFilter === 'lastDown'
+    ) {
       return timestampClause;
     }
 

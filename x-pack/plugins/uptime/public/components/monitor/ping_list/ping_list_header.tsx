@@ -25,7 +25,7 @@ export const PingListHeader = () => {
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <StatusFilter />
+        <StatusFilter showLastStatusFilter={false} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <FilterGroup />

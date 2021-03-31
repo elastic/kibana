@@ -7,6 +7,7 @@
 
 import { set } from '@elastic/safer-lodash-set';
 import { QueryContext } from './query_context';
+import { ESFilter } from '../../../../../../../typings/elasticsearch';
 
 /**
  * This is the first phase of the query. In it, we find all monitor IDs that have ever matched the given filters.
@@ -44,12 +45,35 @@ const query = async (queryContext: QueryContext, searchAfter: any, size: number)
   return response;
 };
 
-const queryBody = async (queryContext: QueryContext, searchAfter: any, size: number) => {
-  const filters = await queryContext.dateAndCustomFilters();
-
-  if (queryContext.statusFilter) {
-    filters.push({ match: { 'monitor.status': queryContext.statusFilter } });
+export const getStatusFilter = (filters: ESFilter[], { statusFilter }: QueryContext) => {
+  if (!statusFilter) {
+    return filters;
   }
+
+  switch (statusFilter) {
+    case 'up':
+      filters.push({ match: { 'monitor.status': 'up' } });
+      break;
+    case 'lastUp':
+      filters.push({ match: { 'summary.down': 0 } });
+      break;
+    case 'down':
+      filters.push({ match: { 'monitor.status': 'down' } });
+      break;
+    case 'lastDown':
+      filters.push({ range: { 'summary.down': { gt: 0 } } });
+      break;
+    default:
+      break;
+  }
+
+  return filters;
+};
+
+const queryBody = async (queryContext: QueryContext, searchAfter: any, size: number) => {
+  let filters = await queryContext.dateAndCustomFilters();
+
+  filters = getStatusFilter(filters, queryContext);
 
   const body = {
     size: 0,

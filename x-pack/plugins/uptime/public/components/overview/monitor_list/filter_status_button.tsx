@@ -8,13 +8,14 @@
 import { EuiFilterButton } from '@elastic/eui';
 import React from 'react';
 import { useUrlParams } from '../../../hooks';
+import { StatusFilter } from './types';
 
 export interface FilterStatusButtonProps {
   content: string | JSX.Element;
   dataTestSubj: string;
   isDisabled?: boolean;
   isActive: boolean;
-  value: 'up' | 'down' | '';
+  value: StatusFilter | '';
   withNext: boolean;
 }
 
