@@ -70,7 +70,7 @@ export class CoreApp {
 
         const basePath = httpSetup.basePath.get(req);
         const querystring = query ? stringify(query) : undefined;
-        const url = `${basePath}${path.slice(0, -1)}${querystring ? `?${querystring}` : ''}`;
+        const url = `${basePath}/${path.slice(0, -1)}${querystring ? `?${querystring}` : ''}`;
 
         return res.redirected({
           headers: {
