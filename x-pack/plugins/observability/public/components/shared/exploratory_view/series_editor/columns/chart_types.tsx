@@ -7,7 +7,13 @@
 
 import React, { useState } from 'react';
 
-import { EuiButton, EuiButtonGroup, EuiButtonIcon, EuiPopover } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonGroup,
+  EuiButtonIcon,
+  EuiLoadingSpinner,
+  EuiPopover,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { useKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
@@ -68,7 +74,7 @@ export function XYChartTypes({
     services: { lens },
   } = useKibana<ObservabilityPublicPluginsStart>();
 
-  const { data = [] } = useFetcher(() => lens.getXyVisTypes(), [lens]);
+  const { data = [], loading } = useFetcher(() => lens.getXyVisTypes(), [lens]);
 
   let vizTypes = data ?? [];
 
@@ -80,7 +86,9 @@ export function XYChartTypes({
     vizTypes = vizTypes.filter(({ id }) => includeChartTypes?.includes(id));
   }
 
-  return (
+  return loading ? (
+    <EuiLoadingSpinner />
+  ) : (
     <EuiPopover
       isOpen={isOpen}
       anchorPosition="downCenter"
