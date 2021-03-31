@@ -652,7 +652,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
             label={
               <FormattedMessage
                 id="xpack.snapshotRestore.restoreForm.stepLogistics.includeAliasesLabel"
-                defaultMessage="Include aliases"
+                defaultMessage="Restore aliases"
               />
             }
             checked={includeAliases === undefined ? true : includeAliases}
