@@ -14,28 +14,11 @@ export function getLensTopNavConfig(options: {
   enableExportToCSV: boolean;
   showCancel: boolean;
   isByValueMode: boolean;
-  allowByValue: boolean;
   actions: LensTopNavActions;
-  savingToLibraryPermitted: boolean;
-  savingToDashboardPermitted: boolean;
+  savingPermitted: boolean;
 }): TopNavMenuData[] {
-  const {
-    actions,
-    showCancel,
-    allowByValue,
-    enableExportToCSV,
-    showSaveAndReturn,
-    savingToLibraryPermitted,
-    savingToDashboardPermitted,
-  } = options;
+  const { showSaveAndReturn, showCancel, actions, savingPermitted, enableExportToCSV } = options;
   const topNavMenu: TopNavMenuData[] = [];
-
-  const enableSaveButton =
-    savingToLibraryPermitted ||
-    (allowByValue &&
-      savingToDashboardPermitted &&
-      !options.isByValueMode &&
-      !options.showSaveAndReturn);
 
   const saveButtonLabel = options.isByValueMode
     ? i18n.translate('xpack.lens.app.addToLibrary', {
@@ -83,7 +66,7 @@ export function getLensTopNavConfig(options: {
     description: i18n.translate('xpack.lens.app.saveButtonAriaLabel', {
       defaultMessage: 'Save the current lens visualization',
     }),
-    disableButton: !enableSaveButton,
+    disableButton: !savingPermitted,
   });
 
   if (showSaveAndReturn) {
@@ -95,7 +78,7 @@ export function getLensTopNavConfig(options: {
       iconType: 'checkInCircleFilled',
       run: actions.saveAndReturn,
       testId: 'lnsApp_saveAndReturnButton',
-      disableButton: !savingToDashboardPermitted,
+      disableButton: !savingPermitted,
       description: i18n.translate('xpack.lens.app.saveAndReturnButtonAriaLabel', {
         defaultMessage: 'Save the current lens visualization and return to the last app',
       }),

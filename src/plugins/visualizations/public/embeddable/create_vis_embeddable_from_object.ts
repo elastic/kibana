@@ -67,10 +67,7 @@ export const createVisEmbeddableFromObject = (deps: VisualizeEmbeddableFactoryDe
       indexPatterns = [vis.data.indexPattern];
     }
 
-    const capabilities = {
-      visualizeSave: Boolean(getCapabilities().visualize.save),
-      dashboardSave: Boolean(getCapabilities().dashboard?.showWriteControls),
-    };
+    const editable = getCapabilities().visualize.save as boolean;
 
     return new VisualizeEmbeddable(
       getTimeFilter(),
@@ -79,8 +76,8 @@ export const createVisEmbeddableFromObject = (deps: VisualizeEmbeddableFactoryDe
         indexPatterns,
         editPath,
         editUrl,
+        editable,
         deps,
-        capabilities,
       },
       input,
       attributeService,

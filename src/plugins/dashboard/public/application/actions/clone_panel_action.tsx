@@ -61,8 +61,7 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
         embeddable.getInput()?.viewMode !== ViewMode.VIEW &&
         embeddable.getRoot() &&
         embeddable.getRoot().isContainer &&
-        embeddable.getRoot().type === DASHBOARD_CONTAINER_TYPE &&
-        embeddable.getOutput().editable
+        embeddable.getRoot().type === DASHBOARD_CONTAINER_TYPE
     );
   }
 

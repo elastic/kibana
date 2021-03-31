@@ -88,13 +88,13 @@ export interface LensEmbeddableDeps {
   documentToExpression: (
     doc: Document
   ) => Promise<{ ast: Ast | null; errors: ErrorMessage[] | undefined }>;
+  editable: boolean;
   indexPatternService: IndexPatternsContract;
   expressionRenderer: ReactExpressionRendererType;
   timefilter: TimefilterContract;
   basePath: IBasePath;
   getTrigger?: UiActionsStart['getTrigger'] | undefined;
   getTriggerCompatibleActions?: UiActionsStart['getTriggerCompatibleActions'];
-  capabilities: { canSaveVisualizations: boolean; canSaveDashboards: boolean };
 }
 
 export class Embeddable
@@ -129,6 +129,7 @@ export class Embeddable
       initialInput,
       {
         editApp: 'lens',
+        editable: deps.editable,
       },
       parent
     );
@@ -325,7 +326,7 @@ export class Embeddable
         hasCompatibleActions={this.hasCompatibleActions}
         className={input.className}
         style={input.style}
-        canEdit={this.getIsEditable() && input.viewMode === 'edit'}
+        canEdit={this.deps.editable && input.viewMode === 'edit'}
       />,
       domNode
     );
@@ -450,19 +451,11 @@ export class Embeddable
     this.updateOutput({
       ...this.getOutput(),
       defaultTitle: this.savedVis.title,
-      editable: this.getIsEditable(),
       title,
       editPath: getEditPath(savedObjectId),
       editUrl: this.deps.basePath.prepend(`/app/lens${getEditPath(savedObjectId)}`),
       indexPatterns,
     });
-  }
-
-  private getIsEditable() {
-    return (
-      this.deps.capabilities.canSaveVisualizations ||
-      (!this.inputIsRefType(this.getInput()) && this.deps.capabilities.canSaveDashboards)
-    );
   }
 
   public inputIsRefType = (

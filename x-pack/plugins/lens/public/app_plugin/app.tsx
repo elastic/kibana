@@ -531,13 +531,7 @@ export function App({
 
   const { TopNavMenu } = navigation.ui;
 
-  const savingToLibraryPermitted = Boolean(
-    state.isSaveable && application.capabilities.visualize.save
-  );
-  const savingToDashboardPermitted = Boolean(
-    state.isSaveable && application.capabilities.dashboard?.showWriteControls
-  );
-
+  const savingPermitted = Boolean(state.isSaveable && application.capabilities.visualize.save);
   const unsavedTitle = i18n.translate('xpack.lens.app.unsavedFilename', {
     defaultMessage: 'unsaved',
   });
@@ -551,10 +545,8 @@ export function App({
       state.isSaveable && state.activeData && Object.keys(state.activeData).length
     ),
     isByValueMode: getIsByValueMode(),
-    allowByValue: dashboardFeatureFlag.allowByValueEmbeddables,
     showCancel: Boolean(state.isLinkedToOriginatingApp),
-    savingToLibraryPermitted,
-    savingToDashboardPermitted,
+    savingPermitted,
     actions: {
       exportToCSV: () => {
         if (!state.activeData) {
@@ -585,7 +577,7 @@ export function App({
         }
       },
       saveAndReturn: () => {
-        if (savingToDashboardPermitted && lastKnownDoc) {
+        if (savingPermitted && lastKnownDoc) {
           // disabling the validation on app leave because the document has been saved.
           onAppLeave((actions) => {
             return actions.default();
@@ -605,7 +597,7 @@ export function App({
         }
       },
       showSaveModal: () => {
-        if (savingToDashboardPermitted || savingToLibraryPermitted) {
+        if (savingPermitted) {
           setState((s) => ({ ...s, isSaveModalVisible: true }));
         }
       },
@@ -705,7 +697,6 @@ export function App({
       <SaveModal
         isVisible={state.isSaveModalVisible}
         originatingApp={state.isLinkedToOriginatingApp ? incomingState?.originatingApp : undefined}
-        savingToLibraryPermitted={savingToLibraryPermitted}
         allowByValueEmbeddables={dashboardFeatureFlag.allowByValueEmbeddables}
         savedObjectsTagging={savedObjectsTagging}
         tagsIds={tagsIds}
