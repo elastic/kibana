@@ -17,7 +17,7 @@ import { IndexingStatusContent } from './indexing_status_content';
 import { IndexingStatusErrors } from './indexing_status_errors';
 import { IndexingStatusLogic } from './indexing_status_logic';
 
-export interface IIndexingStatusProps {
+export interface IIndexingStatusProps extends IIndexingStatus {
   viewLinkPath: string;
   itemId: string;
   statusPath: string;
@@ -26,12 +26,9 @@ export interface IIndexingStatusProps {
   setGlobalIndexingStatus?(activeReindexJob: IIndexingStatus): void;
 }
 
-export const IndexingStatus: React.FC<IIndexingStatusProps> = ({
-  viewLinkPath,
-  statusPath,
-  onComplete,
-}) => {
-  const { percentageComplete, numDocumentsWithErrors } = useValues(IndexingStatusLogic);
+export const IndexingStatus: React.FC<IIndexingStatusProps> = (props) => {
+  const { viewLinkPath, statusPath, onComplete } = props;
+  const { percentageComplete, numDocumentsWithErrors } = useValues(IndexingStatusLogic(props));
   const { fetchIndexingStatus } = useActions(IndexingStatusLogic);
 
   useEffect(() => {

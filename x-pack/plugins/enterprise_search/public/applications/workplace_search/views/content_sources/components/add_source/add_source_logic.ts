@@ -418,8 +418,12 @@ export const AddSourceLogic = kea<MakeLogicType<AddSourceValues, AddSourceAction
         ? `/api/workplace_search/org/sources/${sourceId}/reauth_prepare`
         : `/api/workplace_search/account/sources/${sourceId}/reauth_prepare`;
 
+      const query = {
+        kibana_host: kibanaHost,
+      } as HttpFetchQuery;
+
       try {
-        const response = await HttpLogic.values.http.get(route);
+        const response = await HttpLogic.values.http.get(route, { query });
         actions.setSourceConnectData(response);
       } catch (e) {
         flashAPIErrors(e);

@@ -22,7 +22,7 @@ const applyKibanaDeprecations = (settings: Record<string, any> = {}) => {
       deprecation,
       path: CONFIG_PATH,
     })),
-    (msg) => deprecationMessages.push(msg)
+    () => ({ message }) => deprecationMessages.push(message)
   );
   return {
     messages: deprecationMessages,
