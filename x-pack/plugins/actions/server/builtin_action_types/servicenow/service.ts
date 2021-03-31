@@ -18,13 +18,12 @@ import {
 } from './types';
 import { request, getErrorMessage, addTimeZoneToDate, patch } from '../lib/axios_utils';
 import { ActionsConfigurationUtilities } from '../../actions_config';
-import { getAccessToken } from './get_access_token';
+import { getInitialAccessToken } from './get_access_token';
 
 const API_VERSION = 'v2';
 const SYS_DICTIONARY = `api/now/${API_VERSION}/table/sys_dictionary`;
 
 export const createExternalService = (
-  actionId: string,
   table: string,
   { config, secrets }: ExternalServiceCredentials,
   logger: Logger,
@@ -36,6 +35,7 @@ export const createExternalService = (
     password,
     clientId,
     clientSecret,
+    accessToken,
   } = secrets as ServiceNowSecretConfigurationType;
 
   if (!url || !username || !password) {
@@ -56,13 +56,27 @@ export const createExternalService = (
         auth: { username, password },
       });
 
-  if (isOAuth) {
+  if (isOAuth && clientId && clientSecret) {
     axiosInstance.interceptors.request.use(
       // eslint-disable-next-line @typescript-eslint/no-shadow
-      (config: AxiosRequestConfig) => {
-        const token = getAccessToken(actionId, urlWithoutTrailingSlash);
-        if (token) {
-          config.headers.Authorization = 'Bearer ' + token;
+      async (config: AxiosRequestConfig) => {
+        let accessTokenValue: string;
+        if (!accessToken) {
+          const tokenResponse = await getInitialAccessToken(
+            logger,
+            configurationUtilities,
+            clientId,
+            clientSecret,
+            username,
+            password,
+            urlWithoutTrailingSlash
+          );
+          accessTokenValue = tokenResponse.access_token;
+        } else {
+          accessTokenValue = accessToken;
+        }
+        if (accessTokenValue) {
+          config.headers.Authorization = 'Bearer ' + accessTokenValue;
         }
         return config;
       },

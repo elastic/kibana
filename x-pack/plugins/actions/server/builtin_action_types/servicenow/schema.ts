@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 export const ExternalIncidentServiceConfiguration = {
   apiUrl: schema.string(),
   isOAuth: schema.boolean({ defaultValue: false }),
+  expirationDate: schema.maybe(schema.string()),
 };
 
 export const ExternalIncidentServiceConfigurationSchema = schema.object(
@@ -21,6 +22,8 @@ export const ExternalIncidentServiceSecretConfiguration = {
   username: schema.string(),
   clientId: schema.maybe(schema.string()),
   clientSecret: schema.maybe(schema.string()),
+  accessToken: schema.maybe(schema.string()),
+  refreshToken: schema.maybe(schema.string()),
 };
 
 export const ExternalIncidentServiceSecretConfigurationSchema = schema.object(

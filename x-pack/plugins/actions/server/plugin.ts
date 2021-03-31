@@ -68,6 +68,10 @@ import {
 } from './authorization/get_authorization_mode_by_source';
 import { ensureSufficientLicense } from './lib/ensure_sufficient_license';
 import { renderMustacheObject } from './lib/mustache_renderer';
+import {
+  initializeRefreshExpiredTokens,
+  scheduleRefreshExpiredTokensTask,
+} from './refresh_expired_tokens/task';
 
 const EVENT_LOG_PROVIDER = 'actions';
 export const EVENT_LOG_ACTIONS = {
@@ -227,6 +231,13 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       );
     }
 
+    initializeRefreshExpiredTokens(
+      this.logger,
+      core.getStartServices(),
+      plugins.taskManager,
+      this.actionsConfig
+    );
+
     // Routes
     defineRoutes(core.http.createRouter<ActionsRequestHandlerContext>(), this.licenseState);
 
@@ -354,6 +365,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     });
 
     scheduleActionsTelemetry(this.telemetryLogger, plugins.taskManager);
+    scheduleRefreshExpiredTokensTask(this.telemetryLogger, this.actionsConfig, plugins.taskManager);
 
     return {
       isActionTypeEnabled: (id, options = { notifyUsage: false }) => {
