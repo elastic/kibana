@@ -9,13 +9,15 @@
 import { LoggingConfig, config } from './logging_config';
 
 test('`schema` creates correct schema with defaults.', () => {
-  expect(config.schema.validate({})).toMatchInlineSnapshot(`
+  expect(config.schema.validate({})).toMatchInlineSnapshot(
+    { json: expect.any(Boolean) }, // default value depends on TTY
+    `
     Object {
       "appenders": Map {},
       "dest": "stdout",
       "events": Object {},
       "filter": Object {},
-      "json": false,
+      "json": Any<Boolean>,
       "loggers": Array [],
       "quiet": false,
       "root": Object {
@@ -34,7 +36,8 @@ test('`schema` creates correct schema with defaults.', () => {
       "silent": false,
       "verbose": false,
     }
-  `);
+  `
+  );
 });
 
 test('`schema` throws if `root` logger does not have appenders configured.', () => {
