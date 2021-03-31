@@ -13,7 +13,6 @@ import {
   optionalModelIdSchema,
 } from './schemas/inference_schema';
 import { modelsProvider } from '../models/data_frame_analytics';
-import { InferenceConfigResponse } from '../../common/types/trained_models';
 
 export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization) {
   /**
@@ -38,7 +37,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
       try {
         const { modelId } = request.params;
         const { with_pipelines: withPipelines, ...query } = request.query;
-        const { body } = await mlClient.getTrainedModels<InferenceConfigResponse>({
+        const { body } = await mlClient.getTrainedModels({
           size: 1000,
           ...query,
           ...(modelId ? { model_id: modelId } : {}),
@@ -85,7 +84,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         tags: ['access:ml:canGetDataFrameAnalytics'],
       },
     },
-    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { modelId } = request.params;
         const { body } = await mlClient.getTrainedModelsStats({

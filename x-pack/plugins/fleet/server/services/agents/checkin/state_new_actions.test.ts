@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import type { ElasticsearchClient } from 'kibana/server';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { take } from 'rxjs/operators';
+
+import { getNewActionsSince } from '../actions';
+import type { Agent, AgentAction, AgentPolicyAction } from '../../../types';
+import { outputType } from '../../../../common/constants';
+
 import {
   createAgentActionFromPolicyAction,
   createNewActionsSharedObservable,
 } from './state_new_actions';
-import { getNewActionsSince } from '../actions';
-import { Agent, AgentAction, AgentPolicyAction } from '../../../types';
-import { outputType } from '../../../../common/constants';
 
 jest.mock('../../app_context', () => ({
   appContextService: {
@@ -122,6 +124,7 @@ describe('test agent checkin new action services', () => {
       current_error_events: [],
       packages: [],
       enrolled_at: '2020-03-14T19:45:02.620Z',
+      default_api_key: 'MOCK_API_KEY',
     };
     const mockPolicyAction: AgentPolicyAction = {
       id: 'action1',
@@ -141,6 +144,9 @@ describe('test agent checkin new action services', () => {
               api_key: undefined,
             },
           },
+          output_permissions: {
+            default: { _fallback: { cluster: [], indices: [] } },
+          },
           inputs: [],
         },
       },
@@ -156,6 +162,7 @@ describe('test agent checkin new action services', () => {
               id: 'policy1',
               inputs: [],
               outputs: { default: { api_key: 'MOCK_API_KEY', hosts: [], type: 'elasticsearch' } },
+              output_permissions: { default: { _fallback: { cluster: [], indices: [] } } },
             },
           },
           id: 'action1',
@@ -210,7 +217,7 @@ describe('test agent checkin new action services', () => {
       ).toEqual(expectedResult);
     });
 
-    it('should return CONNFIG_CHANGE and data.config for agent version <= 7.9', async () => {
+    it('should return CONFIG_CHANGE and data.config for agent version <= 7.9', async () => {
       const expectedResult = [
         {
           agent_id: 'agent1',
@@ -220,6 +227,7 @@ describe('test agent checkin new action services', () => {
               id: 'policy1',
               inputs: [],
               outputs: { default: { api_key: 'MOCK_API_KEY', hosts: [], type: 'elasticsearch' } },
+              output_permissions: { default: { _fallback: { cluster: [], indices: [] } } },
             },
           },
           id: 'action1',

@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount } from 'enzyme';
 import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
-import { ThemeProvider } from 'styled-components';
 
 import { waitFor } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock/test_providers';
@@ -19,8 +17,6 @@ import * as i18n from '../translations';
 import { OpenTimelineModalButton } from './open_timeline_modal_button';
 
 describe('OpenTimelineModalButton', () => {
-  const theme = () => ({ eui: euiDarkVars, darkMode: true });
-
   test('it renders the expected button text', async () => {
     const wrapper = mount(
       <TestProviders>
@@ -43,13 +39,11 @@ describe('OpenTimelineModalButton', () => {
     test('it invokes onClick function provided as a prop when the button is clicked', async () => {
       const onClick = jest.fn();
       const wrapper = mount(
-        <ThemeProvider theme={theme}>
-          <TestProviders>
-            <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
-              <OpenTimelineModalButton onClick={onClick} />
-            </MockedProvider>
-          </TestProviders>
-        </ThemeProvider>
+        <TestProviders>
+          <MockedProvider mocks={mockOpenTimelineQueryResults} addTypename={false}>
+            <OpenTimelineModalButton onClick={onClick} />
+          </MockedProvider>
+        </TestProviders>
       );
 
       await waitFor(() => {

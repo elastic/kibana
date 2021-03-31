@@ -5,20 +5,16 @@
  * 2.0.
  */
 
-import {
+import type {
   SavedObject,
   SavedObjectsBulkCreateObject,
   SavedObjectsClientContract,
 } from 'src/core/server';
+
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
 import { getAsset, getPathParts } from '../../archive';
-import {
-  AssetType,
-  KibanaAssetType,
-  AssetReference,
-  AssetParts,
-  KibanaSavedObjectType,
-} from '../../../../types';
+import { KibanaAssetType, KibanaSavedObjectType } from '../../../../types';
+import type { AssetType, AssetReference, AssetParts } from '../../../../types';
 import { savedObjectTypes } from '../../packages';
 import { indexPatternTypes } from '../index_pattern/install';
 
@@ -41,6 +37,7 @@ const KibanaSavedObjectTypeMapping: Record<KibanaAssetType, KibanaSavedObjectTyp
   [KibanaAssetType.search]: KibanaSavedObjectType.search,
   [KibanaAssetType.visualization]: KibanaSavedObjectType.visualization,
   [KibanaAssetType.lens]: KibanaSavedObjectType.lens,
+  [KibanaAssetType.mlModule]: KibanaSavedObjectType.mlModule,
 };
 
 // Define how each asset type will be installed
@@ -57,6 +54,7 @@ const AssetInstallers: Record<
   [KibanaAssetType.search]: installKibanaSavedObjects,
   [KibanaAssetType.visualization]: installKibanaSavedObjects,
   [KibanaAssetType.lens]: installKibanaSavedObjects,
+  [KibanaAssetType.mlModule]: installKibanaSavedObjects,
 };
 
 export async function getKibanaAsset(key: string): Promise<ArchiveAsset> {

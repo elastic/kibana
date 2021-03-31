@@ -7,20 +7,12 @@
 
 import { cloneDeep, isPlainObject, mergeWith } from 'lodash';
 import { DeepPartial } from 'utility-types';
-import {
-  AggregationInputMap,
-  ESSearchBody,
-} from '../../../../../../typings/elasticsearch';
 import { APMEventESSearchRequest } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { Projection } from '../../typings';
 
 type PlainObject = Record<string | number | symbol, any>;
 
-type SourceProjection = Omit<DeepPartial<APMEventESSearchRequest>, 'body'> & {
-  body: Omit<DeepPartial<ESSearchBody>, 'aggs'> & {
-    aggs?: AggregationInputMap;
-  };
-};
+type SourceProjection = DeepPartial<APMEventESSearchRequest>;
 
 type DeepMerge<T, U> = U extends PlainObject
   ? T extends PlainObject

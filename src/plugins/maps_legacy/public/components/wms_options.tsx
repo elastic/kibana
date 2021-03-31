@@ -10,7 +10,7 @@ import React, { useMemo } from 'react';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { TmsLayer } from '../index';
+import { TmsLayer } from '../../../maps_ems/public';
 import { SelectOption, SwitchOption } from '../../../vis_default_editor/public';
 import { WmsInternalOptions } from './wms_internal_options';
 import { WMSOptions } from '../common/types';

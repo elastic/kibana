@@ -6,6 +6,7 @@
  */
 
 import { StartServicesAccessor } from 'kibana/public';
+import { i18n } from '@kbn/i18n';
 import {
   EmbeddableFactoryDefinition,
   IContainer,
@@ -34,6 +35,16 @@ export class LogStreamEmbeddableFactoryDefinition
   }
 
   public getDisplayName() {
-    return 'Log stream';
+    return i18n.translate('xpack.infra.logStreamEmbeddable.displayName', {
+      defaultMessage: 'Log stream',
+    });
+  }
+
+  public async getExplicitInput() {
+    return {
+      title: i18n.translate('xpack.infra.logStreamEmbeddable.title', {
+        defaultMessage: 'Log stream',
+      }),
+    };
   }
 }

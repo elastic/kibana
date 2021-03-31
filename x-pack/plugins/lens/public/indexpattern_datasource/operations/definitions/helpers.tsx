@@ -64,13 +64,6 @@ export function getInvalidFieldMessage(
     : undefined;
 }
 
-export function getEsAggsSuffix(column: IndexPatternColumn) {
-  const operationDefinition = operationDefinitionMap[column.operationType];
-  return operationDefinition.input === 'field' && operationDefinition.getEsAggsSuffix
-    ? operationDefinition.getEsAggsSuffix(column)
-    : '';
-}
-
 export function getSafeName(name: string, indexPattern: IndexPattern): string {
   const field = indexPattern.getFieldByName(name);
   return field
@@ -97,4 +90,13 @@ export function isValidNumber(
     (upperBound === undefined || inputValueAsNumber <= upperBound) &&
     (lowerBound === undefined || inputValueAsNumber >= lowerBound)
   );
+}
+
+export function getFormatFromPreviousColumn(previousColumn: IndexPatternColumn | undefined) {
+  return previousColumn?.dataType === 'number' &&
+    previousColumn.params &&
+    'format' in previousColumn.params &&
+    previousColumn.params.format
+    ? { format: previousColumn.params.format }
+    : undefined;
 }

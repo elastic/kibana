@@ -11,7 +11,6 @@ import { EndpointPolicyPageProvider } from './policy_page';
 import { TrustedAppsPageProvider } from './trusted_apps_page';
 import { EndpointPageUtils } from './page_utils';
 import { IngestManagerCreatePackagePolicy } from './ingest_manager_create_package_policy_page';
-import { SecurityHostsPageProvider } from './hosts_page';
 import { FleetIntegrations } from './fleet_integrations_page';
 
 export const pageObjects = {
@@ -21,6 +20,5 @@ export const pageObjects = {
   trustedApps: TrustedAppsPageProvider,
   endpointPageUtils: EndpointPageUtils,
   ingestManagerCreatePackagePolicy: IngestManagerCreatePackagePolicy,
-  hosts: SecurityHostsPageProvider,
   fleetIntegrations: FleetIntegrations,
 };

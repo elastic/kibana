@@ -17,13 +17,13 @@ export type Start = jest.Mocked<ReturnType<ChartsPlugin['start']>>;
 const createSetupContract = (): Setup => ({
   legacyColors: colorsServiceMock,
   theme: themeServiceMock,
-  palettes: paletteServiceMock.setup({} as any, {} as any),
+  palettes: paletteServiceMock.setup({} as any),
 });
 
 const createStartContract = (): Start => ({
   legacyColors: colorsServiceMock,
   theme: themeServiceMock,
-  palettes: paletteServiceMock.setup({} as any, {} as any),
+  palettes: paletteServiceMock.setup({} as any),
 });
 
 export { colorMapsMock } from './static/color_maps/mock';

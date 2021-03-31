@@ -9,8 +9,8 @@ import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
-import { CASES_URL } from '../../../../../plugins/case/common/constants';
-import { CommentType } from '../../../../../plugins/case/common/api';
+import { CASES_URL } from '../../../../../plugins/cases/common/constants';
+import { CommentType } from '../../../../../plugins/cases/common/api';
 import {
   postCaseReq,
   postCaseResp,
@@ -36,7 +36,20 @@ export default ({ getService }: FtrProviderContext): void => {
   describe('case_connector', () => {
     let createdActionId = '';
 
-    it('should return 200 when creating a case action successfully', async () => {
+    it('should return 400 when creating a case action', async () => {
+      await supertest
+        .post('/api/actions/action')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'A case connector',
+          actionTypeId: '.case',
+          config: {},
+        })
+        .expect(400);
+    });
+
+    // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
+    it.skip('should return 200 when creating a case action successfully', async () => {
       const { body: createdAction } = await supertest
         .post('/api/actions/action')
         .set('kbn-xsrf', 'foo')
@@ -70,7 +83,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    describe('create', () => {
+    describe.skip('create', () => {
       it('should respond with a 400 Bad Request when creating a case without title', async () => {
         const { body: createdAction } = await supertest
           .post('/api/actions/action')
@@ -500,7 +513,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    describe('update', () => {
+    describe.skip('update', () => {
       it('should respond with a 400 Bad Request when updating a case without id', async () => {
         const { body: createdAction } = await supertest
           .post('/api/actions/action')
@@ -624,7 +637,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    describe('addComment', () => {
+    describe.skip('addComment', () => {
       it('should respond with a 400 Bad Request when adding a comment to a case without caseId', async () => {
         const { body: createdAction } = await supertest
           .post('/api/actions/action')
@@ -775,9 +788,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      // TODO: Enable when the creation of comments of type alert is supported
-      // https://github.com/elastic/kibana/issues/85750
-      it.skip('should respond with a 400 Bad Request when missing attributes of type alert', async () => {
+      it('should respond with a 400 Bad Request when missing attributes of type alert', async () => {
         const { body: createdAction } = await supertest
           .post('/api/actions/action')
           .set('kbn-xsrf', 'foo')
@@ -803,7 +814,8 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         };
 
-        for (const attribute of ['alertId', 'index']) {
+        // only omitting alertId here since the type for alertId and index differ, the messages will be different
+        for (const attribute of ['alertId']) {
           const requestAttributes = omit(attribute, comment);
           const caseConnector = await supertest
             .post(`/api/actions/action/${createdActionId}/_execute`)
@@ -819,7 +831,7 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(caseConnector.body).to.eql({
             status: 'error',
             actionId: createdActionId,
-            message: `error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [create]\n- [1.subAction]: expected value to equal [update]\n- [2.subActionParams.comment]: types that failed validation:\n - [subActionParams.comment.0.type]: expected value to equal [user]\n - [subActionParams.comment.1.${attribute}]: expected value of type [string] but got [undefined]`,
+            message: `error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [create]\n- [1.subAction]: expected value to equal [update]\n- [2.subActionParams.comment]: types that failed validation:\n - [subActionParams.comment.0.type]: expected value to equal [user]\n - [subActionParams.comment.1.${attribute}]: expected at least one defined value but got [undefined]\n - [subActionParams.comment.2.type]: expected value to equal [generated_alert]`,
             retry: false,
           });
         }
@@ -868,9 +880,7 @@ export default ({ getService }: FtrProviderContext): void => {
         }
       });
 
-      // TODO: Enable when the creation of comments of type alert is supported
-      // https://github.com/elastic/kibana/issues/85750
-      it.skip('should respond with a 400 Bad Request when adding excess attributes for type alert', async () => {
+      it('should respond with a 400 Bad Request when adding excess attributes for type alert', async () => {
         const { body: createdAction } = await supertest
           .post('/api/actions/action')
           .set('kbn-xsrf', 'foo')
@@ -913,7 +923,7 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(caseConnector.body).to.eql({
             status: 'error',
             actionId: createdActionId,
-            message: `error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [create]\n- [1.subAction]: expected value to equal [update]\n- [2.subActionParams.comment]: types that failed validation:\n - [subActionParams.comment.0.type]: expected value to equal [user]\n - [subActionParams.comment.1.${attribute}]: definition for this key is missing`,
+            message: `error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [create]\n- [1.subAction]: expected value to equal [update]\n- [2.subActionParams.comment]: types that failed validation:\n - [subActionParams.comment.0.type]: expected value to equal [user]\n - [subActionParams.comment.1.${attribute}]: definition for this key is missing\n - [subActionParams.comment.2.type]: expected value to equal [generated_alert]`,
             retry: false,
           });
         }
@@ -1007,9 +1017,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      // TODO: Enable when the creation of comments of type alert is supported
-      // https://github.com/elastic/kibana/issues/85750
-      it.skip('should add a comment of type alert', async () => {
+      it('should add a comment of type alert', async () => {
         const { body: createdAction } = await supertest
           .post('/api/actions/action')
           .set('kbn-xsrf', 'foo')
@@ -1059,6 +1067,7 @@ export default ({ getService }: FtrProviderContext): void => {
           ...postCaseResp(caseRes.body.id),
           comments,
           totalComment: 1,
+          totalAlerts: 1,
           updated_by: {
             email: null,
             full_name: null,

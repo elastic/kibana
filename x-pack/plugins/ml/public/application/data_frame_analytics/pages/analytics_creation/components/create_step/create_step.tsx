@@ -31,14 +31,20 @@ export const CreateStep: FC<Props> = ({ actions, state, step }) => {
   const { jobId, jobType } = state.form;
 
   const [checked, setChecked] = useState<boolean>(true);
+  const [creationTriggered, setCreationTriggered] = useState<boolean>(false);
   const [showProgress, setShowProgress] = useState<boolean>(false);
 
   if (step !== ANALYTICS_STEPS.CREATE) return null;
 
   const handleCreation = async () => {
-    await createAnalyticsJob();
+    setCreationTriggered(true);
+    const creationSuccess = await createAnalyticsJob();
 
-    if (checked) {
+    if (creationSuccess === false) {
+      setCreationTriggered(false);
+    }
+
+    if (checked && creationSuccess === true) {
       setShowProgress(true);
       startAnalyticsJob();
     }
@@ -75,6 +81,7 @@ export const CreateStep: FC<Props> = ({ actions, state, step }) => {
               disabled={!isValid || !isAdvancedEditorValidJson}
               onClick={handleCreation}
               fill
+              isLoading={creationTriggered}
               data-test-subj="mlAnalyticsCreateJobWizardCreateButton"
             >
               {i18n.translate('xpack.ml.dataframe.analytics.create.wizardCreateButton', {

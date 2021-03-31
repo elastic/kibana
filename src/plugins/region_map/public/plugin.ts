@@ -20,7 +20,8 @@ import { VisualizationsSetup } from '../../visualizations/public';
 import { createRegionMapFn } from './region_map_fn';
 // @ts-ignore
 import { createRegionMapTypeDefinition } from './region_map_type';
-import { IServiceSettings, MapsLegacyPluginSetup } from '../../maps_legacy/public';
+import { MapsLegacyPluginSetup } from '../../maps_legacy/public';
+import { IServiceSettings, MapsEmsPluginSetup } from '../../maps_ems/public';
 import {
   setCoreService,
   setFormatService,
@@ -49,6 +50,7 @@ export interface RegionMapPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
   mapsLegacy: MapsLegacyPluginSetup;
+  mapsEms: MapsEmsPluginSetup;
 }
 
 /** @internal */
@@ -65,9 +67,8 @@ export interface RegionMapsConfig {
   layers: any[];
 }
 
-export interface RegionMapPluginSetup {
-  config: any;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface RegionMapPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface RegionMapPluginStart {}
 
@@ -81,19 +82,19 @@ export class RegionMapPlugin implements Plugin<RegionMapPluginSetup, RegionMapPl
 
   public setup(
     core: CoreSetup,
-    { expressions, visualizations, mapsLegacy }: RegionMapPluginSetupDependencies
+    { expressions, visualizations, mapsLegacy, mapsEms }: RegionMapPluginSetupDependencies
   ) {
     const config = {
       ...this._initializerContext.config.get<RegionMapsConfigType>(),
       // The maps legacy plugin updates the regionmap config directly in service_settings,
       // future work on how configurations across the different plugins are organized would
       // ideally constrain regionmap config updates to occur only from this plugin
-      ...mapsLegacy.config.regionmap,
+      ...mapsEms.config.regionmap,
     };
     const visualizationDependencies: Readonly<RegionMapVisualizationDependencies> = {
       uiSettings: core.uiSettings,
       regionmapsConfig: config as RegionMapsConfig,
-      getServiceSettings: mapsLegacy.getServiceSettings,
+      getServiceSettings: mapsEms.getServiceSettings,
       BaseMapsVisualization: mapsLegacy.getBaseMapsVis(),
     };
 
@@ -104,9 +105,7 @@ export class RegionMapPlugin implements Plugin<RegionMapPluginSetup, RegionMapPl
       createRegionMapTypeDefinition(visualizationDependencies)
     );
 
-    return {
-      config,
-    };
+    return {};
   }
 
   public start(core: CoreStart, plugins: RegionMapPluginStartDependencies) {

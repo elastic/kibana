@@ -12,6 +12,7 @@ import { useUrlParams } from '../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
 import { getLatencyChartSelector } from '../selectors/latency_chart_selectors';
 import { useTheme } from './use_theme';
+import { getTimeRangeComparison } from '../components/shared/time_comparison/get_time_range_comparison';
 
 export function useTransactionLatencyChartsFetcher() {
   const { serviceName } = useParams<{ serviceName?: string }>();
@@ -20,13 +21,20 @@ export function useTransactionLatencyChartsFetcher() {
   const {
     urlParams: {
       environment,
+      kuery,
       start,
       end,
       transactionName,
       latencyAggregationType,
+      comparisonType,
     },
-    uiFilters,
   } = useUrlParams();
+
+  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
+    start,
+    end,
+    comparisonType,
+  });
 
   const { data, error, status } = useFetcher(
     (callApmApi) => {
@@ -44,12 +52,14 @@ export function useTransactionLatencyChartsFetcher() {
             path: { serviceName },
             query: {
               environment,
+              kuery,
               start,
               end,
               transactionType,
               transactionName,
-              uiFilters: JSON.stringify(uiFilters),
               latencyAggregationType,
+              comparisonStart,
+              comparisonEnd,
             },
           },
         });
@@ -57,13 +67,15 @@ export function useTransactionLatencyChartsFetcher() {
     },
     [
       environment,
+      kuery,
       serviceName,
       start,
       end,
       transactionName,
       transactionType,
-      uiFilters,
       latencyAggregationType,
+      comparisonStart,
+      comparisonEnd,
     ]
   );
 

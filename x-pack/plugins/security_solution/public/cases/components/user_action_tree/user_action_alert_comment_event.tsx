@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useCallback } from 'react';
+import { isEmpty } from 'lodash';
 import { EuiText, EuiLoadingSpinner } from '@elastic/eui';
 
 import { APP_ID } from '../../../../common/constants';
@@ -14,14 +15,14 @@ import { getRuleDetailsUrl, useFormatUrl } from '../../../common/components/link
 import { SecurityPageName } from '../../../app/types';
 
 import * as i18n from './translations';
-import { CommentType } from '../../../../../case/common/api';
+import { CommentType } from '../../../../../cases/common/api';
 import { LinkAnchor } from '../../../common/components/links';
 
 interface Props {
   alertId: string;
   commentType: CommentType;
-  ruleId: string;
-  ruleName: string;
+  ruleId?: string | null;
+  ruleName?: string | null;
   alertsCount?: number;
   loadingAlertData?: boolean;
 }
@@ -51,16 +52,16 @@ const AlertCommentEventComponent: React.FC<Props> = ({
     <>
       {`${i18n.ALERT_COMMENT_LABEL_TITLE} `}
       {loadingAlertData && <EuiLoadingSpinner size="m" />}
-      {!loadingAlertData && ruleId !== '' && (
+      {!loadingAlertData && !isEmpty(ruleId) && (
         <LinkAnchor
           onClick={onLinkClick}
           href={formatUrl(getRuleDetailsUrl(ruleId ?? '', urlSearch))}
           data-test-subj={`alert-rule-link-${alertId ?? 'deleted'}`}
         >
-          {ruleName}
+          {ruleName ?? i18n.UNKNOWN_RULE}
         </LinkAnchor>
       )}
-      {!loadingAlertData && ruleId === '' && <EuiText>{ruleName}</EuiText>}
+      {!loadingAlertData && isEmpty(ruleId) && i18n.UNKNOWN_RULE}
     </>
   ) : (
     <>

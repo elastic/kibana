@@ -83,6 +83,10 @@ specific dashboard, application, or saved object as they enter each space.
 [[fields-popularlimit]]`fields:popularLimit`::
 The top N most popular fields to show.
 
+[[fileupload-maxfilesize]]`fileUpload:maxFileSize`::
+Sets the file size limit when importing files. The default
+value is `100MB`. The highest supported value for this setting is `1GB`.
+
 [[filtereditor-suggestvalues]]`filterEditor:suggestValues`::
 Set this property to `false` to prevent the filter editor from suggesting values
 for fields.
@@ -206,6 +210,32 @@ Turns off all unnecessary animations in the {kib} UI. Refresh the page to apply
 the changes.
 
 [float]
+[[kibana-banners-settings]]
+==== Banners
+
+[NOTE]
+====
+Banners are a https://www.elastic.co/subscriptions[subscription feature].
+====
+
+[horizontal]
+[[banners-placement]]`banners:placement`::
+Set to `Top` to display a banner above the Elastic header for this space. Defaults to the value of 
+the `xpack.banners.placement` configuration property.
+
+[[banners-textcontent]]`banners:textContent`::
+The text to display inside the banner for this space, either plain text or Markdown.
+Defaults to the value of the `xpack.banners.textContent` configuration property.
+
+[[banners-textcolor]]`banners:textColor`::
+The color for the banner text for this space. Defaults to the value of
+the `xpack.banners.textColor` configuration property.
+
+[[banners-backgroundcolor]]`banners:backgroundColor`::
+The color of the banner background for this space. Defaults to the value of
+the `xpack.banners.backgroundColor` configuration property.
+
+[float]
 [[kibana-dashboard-settings]]
 ==== Dashboard
 
@@ -236,10 +266,6 @@ in the current index pattern is used.
 The columns that appear by default on the *Discover* page. The default is
 `_source`.
 
-[[discover-aggs-terms-size]]`discover:aggs:terms:size`::
-The number terms that are visualized when clicking the *Visualize* button in the
-field drop down. The default is `20`.
-
 [[discover-samplesize]]`discover:sampleSize`::
 The number of rows to show in the *Discover* table.
 
@@ -257,7 +283,7 @@ Hides the "Time" column in *Discover* and in all saved searches on dashboards.
 Highlights results in *Discover* and saved searches on dashboards. Highlighting
 slows requests when working on big documents.
 
-[[doctable-legacy]]`doc_table:legacy`:: 
+[[doctable-legacy]]`doc_table:legacy`::
 Controls the way the document table looks and works. Set this property to `true` to revert to the legacy implementation.
 
 [[discover-searchFieldsFromSource]]`discover:searchFieldsFromSource`::
@@ -280,10 +306,6 @@ Sets the default time filter for viewing {anomaly-job} results. This setting
 must contain `from` and `to` values (see
 {ref}/common-options.html#date-math[accepted formats]). It is ignored unless
 `ml:anomalyDetection:results:enableTimeDefaults` is enabled.
-
-[[ml-filedatavisualizermaxfilesize]]`ml:fileDataVisualizerMaxFileSize`::
-Sets the file size limit when importing data in the {data-viz}. The default
-value is `100MB`. The highest supported value for this setting is `1GB`.
 
 
 [float]
@@ -461,7 +483,7 @@ Enables the legacy charts library for aggregation-based area, line, and bar char
 
 [[visualization-colormapping]]`visualization:colorMapping`::
 **This setting is deprecated and will not be supported as of 8.0.**
-Maps values to specific colors in *Visualize* charts and *TSVB*. This setting does not apply to *Lens*.
+Maps values to specific colors in charts using the *Compatibility* palette.
 
 [[visualization-dimmingopacity]]`visualization:dimmingOpacity`::
 The opacity of the chart items that are dimmed when highlighting another element

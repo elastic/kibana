@@ -1,8 +1,8 @@
 [role="xpack"]
 [[action-types]]
-== Action and connector types
+== Connectors and actions
 
-Actions are Kibana services or integrations with third-party systems that run as background tasks on the Kibana server when alert conditions are met. {kib} provides the following types of actions:
+Connectors provide a central place to store connection information for services and integrations with third party systems. Actions are instantiations of a connector that are linked to rules and run as background tasks on the {kib} server when rule conditions are met. {kib} provides the following types of connectors:
 
 [cols="2"]
 |===
@@ -50,19 +50,17 @@ a| <<webhook-action-type, Webhook>>
 
 [NOTE]
 ==============================================
-Some action types are paid commercial features, while others are free.
+Some connector types are paid commercial features, while others are free.
 For a comparison of the Elastic subscription levels,
 see https://www.elastic.co/subscriptions[the subscription page].
 ==============================================
 
 [float]
 [[create-connectors]]
-=== Preconfigured actions and connectors
+=== Preconfigured connectors
 
-For out-of-the-box and standardized connectors, you can <<preconfigured-connector-example, preconfigure the connector>>
+For out-of-the-box and standardized connectors, you can <<preconfigured-connector-example, preconfigure connectors>>
 before {kib} starts.
-
-If you preconfigure a connector, you can also <<preconfigured-action-type-example, preconfigure its action type>>.
 
 include::action-types/email.asciidoc[]
 include::action-types/resilient.asciidoc[]

@@ -9,4 +9,7 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
   roots: ['<rootDir>/x-pack/plugins/security_solution'],
+
+  // TODO: migrate to "jest-environment-jsdom" https://github.com/elastic/kibana/issues/95201
+  testEnvironment: 'jest-environment-jsdom-thirteen',
 };

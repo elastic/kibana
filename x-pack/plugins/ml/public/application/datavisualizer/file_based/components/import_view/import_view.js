@@ -20,7 +20,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
-import { importerFactory } from './importer';
+import { getFileUpload } from '../../../../util/dependency_cache';
 import { ResultsLinks } from '../results_links';
 import { FilebeatConfigFlyout } from '../filebeat_config_flyout';
 import { ImportProgress, IMPORT_STATUS } from '../import_progress';
@@ -35,7 +35,6 @@ import {
 import { ExperimentalBadge } from '../experimental_badge';
 import { getIndexPatternNames, loadIndexPatterns } from '../../../../util/index_utils';
 import { ml } from '../../../../services/ml_api_service';
-import { hasImportPermission } from '../utils';
 
 const DEFAULT_TIME_FIELD = '@timestamp';
 const DEFAULT_INDEX_SETTINGS = { number_of_shards: 1 };
@@ -124,7 +123,13 @@ export class ImportView extends Component {
         },
         async () => {
           // check to see if the user has permission to create and ingest data into the specified index
-          if ((await hasImportPermission(index)) === false) {
+          if (
+            (await getFileUpload().hasImportPermission({
+              checkCreateIndexPattern: createIndexPattern,
+              checkHasManagePipeline: true,
+              indexName: index,
+            })) === false
+          ) {
             errors.push(
               i18n.translate('xpack.ml.fileDatavisualizer.importView.importPermissionError', {
                 defaultMessage:
@@ -187,15 +192,9 @@ export class ImportView extends Component {
                   errors.push(`${parseError} ${error.message}`);
                 }
 
-                const indexCreationSettings = {
-                  settings,
-                  mappings,
-                };
-
                 try {
                   if (createPipeline) {
                     pipeline = JSON.parse(pipelineString);
-                    indexCreationSettings.pipeline = pipeline;
                   }
                 } catch (error) {
                   success = false;
@@ -222,7 +221,10 @@ export class ImportView extends Component {
                 }
 
                 if (success) {
-                  const importer = importerFactory(format, results, indexCreationSettings);
+                  const importer = await getFileUpload().importerFactory(format, {
+                    excludeLinesPattern: results.exclude_lines_pattern,
+                    multilineStartPattern: results.multiline_start_pattern,
+                  });
                   if (importer !== undefined) {
                     const readResp = importer.read(data, this.setReadProgress);
                     success = readResp.success;
@@ -237,7 +239,12 @@ export class ImportView extends Component {
                     }
 
                     if (success) {
-                      const initializeImportResp = await importer.initializeImport(index);
+                      const initializeImportResp = await importer.initializeImport(
+                        index,
+                        settings,
+                        mappings,
+                        pipeline
+                      );
 
                       const indexCreated = initializeImportResp.index !== undefined;
                       this.setState({

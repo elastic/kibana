@@ -1,4 +1,4 @@
-The Reporting APIs use HTTP response codes to give feedback. In automation,
+The reporting APIs use HTTP response codes to give feedback. In automation,
 this helps external systems track the various possible job states:
 
 - **`200` (OK)**: As expected, Kibana returns `200` status in the response for

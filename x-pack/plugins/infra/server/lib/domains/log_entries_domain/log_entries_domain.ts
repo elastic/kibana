@@ -17,7 +17,7 @@ import { LogColumn, LogEntryCursor, LogEntry } from '../../../../common/log_entr
 import {
   InfraSourceConfiguration,
   InfraSources,
-  SavedSourceConfigurationFieldColumnRuntimeType,
+  SourceConfigurationFieldColumnRuntimeType,
 } from '../../sources';
 import { getBuiltinRules } from '../../../services/log_entries/message/builtin_rules';
 import {
@@ -349,7 +349,7 @@ const getRequiredFields = (
 ): string[] => {
   const fieldsFromCustomColumns = configuration.logColumns.reduce<string[]>(
     (accumulatedFields, logColumn) => {
-      if (SavedSourceConfigurationFieldColumnRuntimeType.is(logColumn)) {
+      if (SourceConfigurationFieldColumnRuntimeType.is(logColumn)) {
         return [...accumulatedFields, logColumn.fieldColumn.field];
       }
       return accumulatedFields;

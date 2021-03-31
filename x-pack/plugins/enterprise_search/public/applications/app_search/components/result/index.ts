@@ -6,3 +6,4 @@
  */
 
 export { ResultFieldValue } from './result_field_value';
+export { Result } from './result';

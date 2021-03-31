@@ -11,7 +11,7 @@ export const formSchema: FormSchema = {
   agents: {
     type: FIELD_TYPES.MULTI_SELECT,
   },
-  command: {
+  query: {
     type: FIELD_TYPES.TEXTAREA,
     validations: [],
   },

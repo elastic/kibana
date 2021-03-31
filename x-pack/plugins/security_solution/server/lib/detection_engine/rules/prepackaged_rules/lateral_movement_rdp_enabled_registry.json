@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "RDP Enabled via Registry",
   "query": "registry where\nregistry.path : \"HKLM\\\\SYSTEM\\\\ControlSet*\\\\Control\\\\Terminal Server\\\\fDenyTSConnections\" and\nregistry.data.strings == \"0\" and not (process.name : \"svchost.exe\" and user.domain == \"NT AUTHORITY\") and\nnot process.executable : \"C:\\\\Windows\\\\System32\\\\SystemPropertiesRemote.exe\"\n",
   "risk_score": 47,

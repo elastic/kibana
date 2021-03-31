@@ -5,19 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import type { estypes } from '@elastic/elasticsearch';
 
-import { SearchResponse } from 'elasticsearch';
-import { Search } from '@elastic/elasticsearch/api/requestParams';
 import { IKibanaSearchRequest, IKibanaSearchResponse } from '../types';
 
 export const ES_SEARCH_STRATEGY = 'es';
 
-export type ISearchRequestParams<T = Record<string, any>> = {
+export type ISearchRequestParams = {
   trackTotalHits?: boolean;
-} & Search<T>;
+} & estypes.SearchRequest;
 
 export interface IEsSearchRequest extends IKibanaSearchRequest<ISearchRequestParams> {
   indexType?: string;
 }
 
-export type IEsSearchResponse<Source = any> = IKibanaSearchResponse<SearchResponse<Source>>;
+export type IEsSearchResponse<Source = any> = IKibanaSearchResponse<estypes.SearchResponse<Source>>;

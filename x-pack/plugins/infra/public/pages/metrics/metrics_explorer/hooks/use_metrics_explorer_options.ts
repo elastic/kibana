@@ -163,10 +163,7 @@ export const useMetricsExplorerOptions = () => {
     'MetricsExplorerOptions',
     DEFAULT_OPTIONS
   );
-  const [currentTimerange, setTimeRange] = useStateWithLocalStorage<MetricsExplorerTimeOptions>(
-    'MetricsExplorerTimeRange',
-    defaultTimeRange
-  );
+  const [currentTimerange, setTimeRange] = useState<MetricsExplorerTimeOptions>(defaultTimeRange);
 
   useSyncKibanaTimeFilterTime(TIME_DEFAULTS, {
     from: currentTimerange.from,

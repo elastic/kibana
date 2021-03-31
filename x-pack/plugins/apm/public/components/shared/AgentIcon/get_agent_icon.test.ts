@@ -31,6 +31,7 @@ const examples = {
   python: 'python',
   ruby: 'ruby',
   'rum-js': 'rum',
+  rust: 'rust',
   'something else': undefined,
 };
 

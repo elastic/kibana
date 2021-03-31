@@ -7,6 +7,7 @@
 
 import uuid from 'uuid';
 import { InternalRuleCreate, InternalRuleResponse, TypeSpecificRuleParams } from './rule_schemas';
+import { normalizeThresholdField } from '../../../../common/detection_engine/utils';
 import { assertUnreachable } from '../../../../common/utility_types';
 import {
   CreateRulesSchema,
@@ -207,7 +208,10 @@ export const typeSpecificCamelToSnake = (params: TypeSpecificRuleParams): Respon
         query: params.query,
         filters: params.filters,
         saved_id: params.savedId,
-        threshold: params.threshold,
+        threshold: {
+          ...params.threshold,
+          field: normalizeThresholdField(params.threshold.field),
+        },
       };
     }
     case 'machine_learning': {

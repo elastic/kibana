@@ -48,7 +48,7 @@ export const StepDetailContainer: React.FC<Props> = ({ checkGroup, stepIndex }) 
     };
   }, [stepIndex, journey]);
 
-  useMonitorBreadcrumb({ journey, activeStep });
+  useMonitorBreadcrumb({ details: journey?.details, activeStep, performanceBreakDownView: true });
 
   const handleNextStep = useCallback(() => {
     history.push(`/journey/${checkGroup}/step/${stepIndex + 1}`);

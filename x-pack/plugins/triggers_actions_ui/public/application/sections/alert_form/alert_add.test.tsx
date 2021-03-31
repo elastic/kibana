@@ -24,7 +24,7 @@ import {
 } from '../../../types';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { ReactWrapper } from 'enzyme';
-import { ALERTS_FEATURE_ID } from '../../../../../alerts/common';
+import { ALERTS_FEATURE_ID } from '../../../../../alerting/common';
 import { useKibana } from '../../../common/lib/kibana';
 
 jest.mock('../../../common/lib/kibana');
@@ -156,7 +156,7 @@ describe('alert_add', () => {
         consumer={ALERTS_FEATURE_ID}
         onClose={onClose}
         initialValues={initialValues}
-        reloadAlerts={() => {
+        onSave={() => {
           return new Promise<void>(() => {});
         }}
         actionTypeRegistry={actionTypeRegistry}

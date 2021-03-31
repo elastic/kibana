@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EncryptedSavedObjectsAuditLogger } from './audit_logger';
+import type { EncryptedSavedObjectsAuditLogger } from './audit_logger';
 
 export const encryptedSavedObjectsAuditLoggerMock = {
   create() {

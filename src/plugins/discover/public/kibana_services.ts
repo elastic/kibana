@@ -59,10 +59,17 @@ export const [getUrlTracker, setUrlTracker] = createGetterSetter<{
 export const [getDocViewsRegistry, setDocViewsRegistry] = createGetterSetter<DocViewsRegistry>(
   'DocViewsRegistry'
 );
+
 /**
  * Makes sure discover and context are using one instance of history.
  */
-export const getHistory = _.once(() => createHashHistory());
+export const getHistory = _.once(() => {
+  const history = createHashHistory();
+  history.listen(() => {
+    // keep at least one listener so that `history.location` always in sync
+  });
+  return history;
+});
 
 /**
  * Discover currently uses two `history` instances: one from Kibana Platform and

@@ -82,6 +82,7 @@ export const getTopNavConfig = (
     setActiveUrl,
     toastNotifications,
     visualizeCapabilities,
+    dashboardCapabilities,
     i18n: { Context: I18nContext },
     dashboard,
     savedObjectsTagging,
@@ -93,7 +94,7 @@ export const getTopNavConfig = (
   /**
    * Called when the user clicks "Save" button.
    */
-  async function doSave(saveOptions: SavedObjectSaveOpts) {
+  async function doSave(saveOptions: SavedObjectSaveOpts & { dashboardId?: string }) {
     const newlyCreated = !Boolean(savedVis.id) || savedVis.copyOnSave;
     // vis.title was not bound and it's needed to reflect title into visState
     stateContainer.transitions.setVis({
@@ -118,7 +119,7 @@ export const getTopNavConfig = (
           'data-test-subj': 'saveVisualizationSuccess',
         });
 
-        if (originatingApp && saveOptions.returnToOrigin) {
+        if ((originatingApp && saveOptions.returnToOrigin) || saveOptions.dashboardId) {
           if (!embeddableId) {
             const appPath = `${VisualizeConstants.EDIT_PATH}/${encodeURIComponent(id)}`;
 
@@ -127,16 +128,26 @@ export const getTopNavConfig = (
             setActiveUrl(appPath);
           }
 
+          const app = originatingApp || 'dashboards';
+
+          let path;
+          if (saveOptions.dashboardId) {
+            path =
+              saveOptions.dashboardId === 'new' ? '#/create' : `#/view/${saveOptions.dashboardId}`;
+          }
+
           if (newlyCreated && stateTransfer) {
-            stateTransfer.navigateToWithEmbeddablePackage(originatingApp, {
+            stateTransfer.navigateToWithEmbeddablePackage(app, {
               state: {
                 type: VISUALIZE_EMBEDDABLE_TYPE,
                 input: { savedObjectId: id },
                 embeddableId,
               },
+              path,
             });
           } else {
-            application.navigateToApp(originatingApp);
+            // TODO: need the same thing here?
+            application.navigateToApp(app, { path });
           }
         } else {
           if (setOriginatingApp && originatingApp && newlyCreated) {
@@ -195,9 +206,9 @@ export const getTopNavConfig = (
     }
   };
 
+  const allowByValue = dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables;
   const saveButtonLabel =
-    embeddableId ||
-    (!savedVis.id && dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables && originatingApp)
+    embeddableId || (!savedVis.id && allowByValue && originatingApp)
       ? i18n.translate('visualize.topNavMenu.saveVisualizationToLibraryButtonLabel', {
           defaultMessage: 'Save to library',
         })
@@ -209,9 +220,11 @@ export const getTopNavConfig = (
           defaultMessage: 'Save',
         });
 
-  const showSaveAndReturn =
-    originatingApp &&
-    (savedVis?.id || dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables);
+  const showSaveAndReturn = originatingApp && (savedVis?.id || allowByValue);
+
+  const showSaveButton =
+    visualizeCapabilities.save ||
+    (allowByValue && !showSaveAndReturn && dashboardCapabilities.showWriteControls);
 
   const topNavMenu: TopNavMenuData[] = [
     {
@@ -290,7 +303,7 @@ export const getTopNavConfig = (
           },
         ]
       : []),
-    ...(visualizeCapabilities.save
+    ...(showSaveButton
       ? [
           {
             id: 'save',
@@ -321,7 +334,11 @@ export const getTopNavConfig = (
                 newDescription,
                 returnToOrigin,
                 dashboardId,
-              }: OnSaveProps & { returnToOrigin?: boolean } & { dashboardId?: string | null }) => {
+                addToLibrary,
+              }: OnSaveProps & { returnToOrigin?: boolean } & {
+                dashboardId?: string | null;
+                addToLibrary?: boolean;
+              }) => {
                 const currentTitle = savedVis.title;
                 savedVis.title = newTitle;
                 embeddableHandler.updateInput({ title: newTitle });
@@ -337,9 +354,12 @@ export const getTopNavConfig = (
                   isTitleDuplicateConfirmed,
                   onTitleDuplicate,
                   returnToOrigin,
+                  dashboardId: !!dashboardId ? dashboardId : undefined,
                 };
 
-                if (dashboardId) {
+                // If we're adding to a dashboard and not saving to library,
+                // we'll want to use a by-value operation
+                if (dashboardId && !addToLibrary) {
                   const appPath = `${VisualizeConstants.LANDING_PAGE_PATH}`;
 
                   // Manually insert a new url so the back button will open the saved visualization.
@@ -369,6 +389,8 @@ export const getTopNavConfig = (
                   return { id: true };
                 }
 
+                // We're adding the viz to a library so we need to save it and then
+                // add to a dashboard if necessary
                 const response = await doSave(saveOptions);
                 // If the save wasn't successful, put the original values back.
                 if (!response.id || response.error) {
@@ -420,7 +442,12 @@ export const getTopNavConfig = (
                 />
               ) : (
                 <SavedObjectSaveModalDashboard
-                  documentInfo={savedVis || { title: '' }}
+                  documentInfo={{
+                    id: visualizeCapabilities.save ? savedVis?.id : undefined,
+                    title: savedVis?.title || '',
+                    description: savedVis?.description || '',
+                  }}
+                  canSaveByReference={Boolean(visualizeCapabilities.save)}
                   onSave={onSave}
                   tagOptions={tagOptions}
                   objectType={'visualization'}
@@ -436,7 +463,7 @@ export const getTopNavConfig = (
           },
         ]
       : []),
-    ...(visualizeCapabilities.save && showSaveAndReturn
+    ...(showSaveAndReturn
       ? [
           {
             id: 'saveAndReturn',
@@ -452,7 +479,7 @@ export const getTopNavConfig = (
               }
             ),
             testId: 'visualizesaveAndReturnButton',
-            disableButton: hasUnappliedChanges,
+            disableButton: hasUnappliedChanges || !dashboardCapabilities.showWriteControls,
             tooltip() {
               if (hasUnappliedChanges) {
                 return i18n.translate(

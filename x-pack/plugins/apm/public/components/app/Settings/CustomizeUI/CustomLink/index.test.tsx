@@ -24,20 +24,12 @@ import {
 } from '../../../../../utils/testHelpers';
 import * as saveCustomLink from './CreateEditCustomLinkFlyout/saveCustomLink';
 
-const data = [
-  {
-    id: '1',
-    label: 'label 1',
-    url: 'url 1',
-    'service.name': 'opbeans-java',
-  },
-  {
-    id: '2',
-    label: 'label 2',
-    url: 'url 2',
-    'transaction.type': 'request',
-  },
-];
+const data = {
+  customLinks: [
+    { id: '1', label: 'label 1', url: 'url 1', 'service.name': 'opbeans-java' },
+    { id: '2', label: 'label 2', url: 'url 2', 'transaction.type': 'request' },
+  ],
+};
 
 function getMockAPMContext({ canSave }: { canSave: boolean }) {
   return ({
@@ -69,7 +61,7 @@ describe('CustomLink', () => {
   describe('empty prompt', () => {
     beforeAll(() => {
       jest.spyOn(hooks, 'useFetcher').mockReturnValue({
-        data: [],
+        data: { customLinks: [] },
         status: hooks.FETCH_STATUS.SUCCESS,
         refetch: jest.fn(),
       });
@@ -290,7 +282,7 @@ describe('CustomLink', () => {
   describe('invalid license', () => {
     beforeAll(() => {
       jest.spyOn(hooks, 'useFetcher').mockReturnValue({
-        data: [],
+        data: { customLinks: [] },
         status: hooks.FETCH_STATUS.SUCCESS,
         refetch: jest.fn(),
       });

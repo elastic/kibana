@@ -85,11 +85,6 @@ Object {
               },
             },
           },
-          Object {
-            "term": Object {
-              "service.environment": "test",
-            },
-          },
         ],
       },
     },
@@ -171,11 +166,6 @@ Object {
                 "gte": 1528113600000,
                 "lte": 1528977600000,
               },
-            },
-          },
-          Object {
-            "term": Object {
-              "service.environment": "test",
             },
           },
           Object {
@@ -337,11 +327,6 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "service.environment": "test",
-            },
-          },
-          Object {
             "exists": Object {
               "field": "system.process.cgroup.memory.mem.usage.bytes",
             },
@@ -431,11 +416,6 @@ Object {
           },
           Object {
             "term": Object {
-              "service.environment": "test",
-            },
-          },
-          Object {
-            "term": Object {
               "agent.name": "java",
             },
           },
@@ -510,11 +490,6 @@ Object {
                 "gte": 1528113600000,
                 "lte": 1528977600000,
               },
-            },
-          },
-          Object {
-            "term": Object {
-              "service.environment": "test",
             },
           },
           Object {
@@ -621,11 +596,6 @@ Object {
               },
             },
           },
-          Object {
-            "term": Object {
-              "service.environment": "test",
-            },
-          },
         ],
       },
     },
@@ -713,11 +683,6 @@ Object {
                 "gte": 1528113600000,
                 "lte": 1528977600000,
               },
-            },
-          },
-          Object {
-            "term": Object {
-              "service.environment": "test",
             },
           },
           Object {
@@ -885,11 +850,6 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "service.environment": "test",
-            },
-          },
-          Object {
             "exists": Object {
               "field": "system.process.cgroup.memory.mem.usage.bytes",
             },
@@ -985,11 +945,6 @@ Object {
           },
           Object {
             "term": Object {
-              "service.environment": "test",
-            },
-          },
-          Object {
-            "term": Object {
               "agent.name": "java",
             },
           },
@@ -1070,11 +1025,6 @@ Object {
                 "gte": 1528113600000,
                 "lte": 1528977600000,
               },
-            },
-          },
-          Object {
-            "term": Object {
-              "service.environment": "test",
             },
           },
           Object {
@@ -1170,11 +1120,6 @@ Object {
               },
             },
           },
-          Object {
-            "term": Object {
-              "service.environment": "test",
-            },
-          },
         ],
       },
     },
@@ -1251,11 +1196,6 @@ Object {
                 "gte": 1528113600000,
                 "lte": 1528977600000,
               },
-            },
-          },
-          Object {
-            "term": Object {
-              "service.environment": "test",
             },
           },
           Object {
@@ -1412,11 +1352,6 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "service.environment": "test",
-            },
-          },
-          Object {
             "exists": Object {
               "field": "system.process.cgroup.memory.mem.usage.bytes",
             },
@@ -1501,11 +1436,6 @@ Object {
           },
           Object {
             "term": Object {
-              "service.environment": "test",
-            },
-          },
-          Object {
-            "term": Object {
               "agent.name": "java",
             },
           },
@@ -1575,11 +1505,6 @@ Object {
                 "gte": 1528113600000,
                 "lte": 1528977600000,
               },
-            },
-          },
-          Object {
-            "term": Object {
-              "service.environment": "test",
             },
           },
           Object {

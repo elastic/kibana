@@ -24,6 +24,17 @@ import './data_tier_allocation.scss';
 
 type SelectOptions = EuiSuperSelectOption<DataTierAllocationType>;
 
+const customTexts = {
+  inputDisplay: i18n.translate(
+    'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.customOption.input',
+    { defaultMessage: 'Custom' }
+  ),
+  helpText: i18n.translate(
+    'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.customOption.helpText',
+    { defaultMessage: 'Move data based on node attributes.' }
+  ),
+};
+
 const i18nTexts = {
   allocationOptions: {
     warm: {
@@ -47,16 +58,7 @@ const i18nTexts = {
           { defaultMessage: 'Do not move data in the warm phase.' }
         ),
       },
-      custom: {
-        inputDisplay: i18n.translate(
-          'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.warm.customOption.input',
-          { defaultMessage: 'Custom' }
-        ),
-        helpText: i18n.translate(
-          'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.warm.customOption.helpText',
-          { defaultMessage: 'Move data based on node attributes.' }
-        ),
-      },
+      custom: customTexts,
     },
     cold: {
       default: {
@@ -79,16 +81,30 @@ const i18nTexts = {
           { defaultMessage: 'Do not move data in the cold phase.' }
         ),
       },
-      custom: {
-        inputDisplay: i18n.translate(
-          'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.cold.customOption.input',
-          { defaultMessage: 'Custom' }
+      custom: customTexts,
+    },
+    frozen: {
+      default: {
+        input: i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.frozen.defaultOption.input',
+          { defaultMessage: 'Use frozen nodes (recommended)' }
         ),
         helpText: i18n.translate(
-          'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.cold.customOption.helpText',
-          { defaultMessage: 'Move data based on node attributes.' }
+          'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.frozen.defaultOption.helpText',
+          { defaultMessage: 'Move data to nodes in the frozen tier.' }
         ),
       },
+      none: {
+        inputDisplay: i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.frozen.noneOption.input',
+          { defaultMessage: 'Off' }
+        ),
+        helpText: i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.common.dataTierAllocation.frozen.noneOption.helpText',
+          { defaultMessage: 'Do not move data in the frozen phase.' }
+        ),
+      },
+      custom: customTexts,
     },
   },
 };

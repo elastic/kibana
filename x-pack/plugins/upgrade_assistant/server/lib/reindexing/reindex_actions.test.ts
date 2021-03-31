@@ -19,9 +19,10 @@ import {
   ReindexStatus,
   ReindexStep,
 } from '../../../common/types';
+import { mockKibanaVersion } from '../../../common/constants';
 import { versionService } from '../version';
 import { LOCK_WINDOW, ReindexActions, reindexActionsFactory } from './reindex_actions';
-import { MOCK_VERSION_STRING, getMockVersionInfo } from '../__fixtures__/version';
+import { getMockVersionInfo } from '../__fixtures__/version';
 
 const { currentMajor, prevMajor } = getMockVersionInfo();
 
@@ -53,7 +54,7 @@ describe('ReindexActions', () => {
 
   describe('createReindexOp', () => {
     beforeEach(() => {
-      versionService.setup(MOCK_VERSION_STRING);
+      versionService.setup(mockKibanaVersion);
       client.create.mockResolvedValue();
     });
 
@@ -78,24 +79,6 @@ describe('ReindexActions', () => {
       expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
         indexName: '.internalIndex',
         newIndexName: `.reindexed-v${currentMajor}-internalIndex`,
-        reindexOptions: undefined,
-        status: ReindexStatus.inProgress,
-        lastCompletedStep: ReindexStep.created,
-        locked: null,
-        reindexTaskId: null,
-        reindexTaskPercComplete: null,
-        errorMessage: null,
-        runningReindexCount: null,
-      });
-    });
-
-    // in v5.6, the upgrade assistant appended to the index name instead of prepending
-    it(`prepends reindexed-v${currentMajor}- and removes reindex appended in v5`, async () => {
-      const indexName = 'myIndex-reindexed-v5';
-      await actions.createReindexOp(indexName);
-      expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
-        indexName,
-        newIndexName: `reindexed-v${currentMajor}-myIndex`,
         reindexOptions: undefined,
         status: ReindexStatus.inProgress,
         lastCompletedStep: ReindexStep.created,
@@ -300,6 +283,7 @@ describe('ReindexActions', () => {
 
     it('returns flat settings', async () => {
       clusterClient.asCurrentUser.indices.get.mockResolvedValueOnce(
+        // @ts-expect-error not full interface
         asApiResponse({
           myIndex: {
             settings: { 'index.mySetting': '1' },

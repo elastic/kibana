@@ -49,7 +49,7 @@ export const ReAuthenticate: React.FC<ReAuthenticateProps> = ({ name, header }) 
   };
 
   return (
-    <div className="step-4">
+    <>
       {header}
       <EuiSpacer />
       <form onSubmit={handleFormSubmit}>
@@ -86,6 +86,6 @@ export const ReAuthenticate: React.FC<ReAuthenticateProps> = ({ name, header }) 
           </EuiButton>
         </EuiFormRow>
       </form>
-    </div>
+    </>
   );
 };

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import type { RoleMapping } from '../../../../../common/model';
 import {
+  validateRoleMappingForSave,
   validateRoleMappingName,
   validateRoleMappingRoles,
   validateRoleMappingRoleTemplates,
   validateRoleMappingRules,
-  validateRoleMappingForSave,
 } from './role_mapping_validation';
-import { RoleMapping } from '../../../../../common/model';
 
 describe('validateRoleMappingName', () => {
   it('requires a value', () => {

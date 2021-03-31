@@ -300,9 +300,31 @@ export const SOURCE_REMOVE_TITLE = i18n.translate(
 );
 
 export const SOURCE_REMOVE_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.config.description',
+  'xpack.enterpriseSearch.workplaceSearch.sources.remove.description',
   {
-    defaultMessage: 'Edit content source connector settings to change.',
+    defaultMessage: 'This action cannot be undone.',
+  }
+);
+
+export const SYNC_DIAGNOSTICS_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.syncDiagnosticsTitle',
+  {
+    defaultMessage: 'Sync Diagnostics',
+  }
+);
+
+export const SYNC_DIAGNOSTICS_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.syncDiagnosticsDescription',
+  {
+    defaultMessage:
+      'Retrieve relevant diagnostics data for troubleshooting active synchronization processes.',
+  }
+);
+
+export const SYNC_DIAGNOSTICS_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.syncDiagnosticsButton',
+  {
+    defaultMessage: 'Download diagnostics data',
   }
 );
 

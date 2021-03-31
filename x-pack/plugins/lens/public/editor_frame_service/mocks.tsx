@@ -23,12 +23,14 @@ export function createMockVisualization(): jest.Mocked<Visualization> {
   return {
     id: 'TEST_VIS',
     clearLayer: jest.fn((state, _layerId) => state),
+    removeLayer: jest.fn(),
     getLayerIds: jest.fn((_state) => ['layer1']),
     visualizationTypes: [
       {
         icon: 'empty',
         id: 'TEST_VIS',
         label: 'TEST',
+        groupLabel: 'TEST_VISGroup',
       },
     ],
     getVisualizationTypeId: jest.fn((_state) => 'empty'),
@@ -95,6 +97,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     // but can be used to validate whether specific API mock functions are called
     publicAPIMock,
     getErrorMessages: jest.fn((_state) => undefined),
+    checkIntegrity: jest.fn((_state) => []),
   };
 }
 

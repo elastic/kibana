@@ -10,7 +10,7 @@ import './app.scss';
 import _ from 'lodash';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { NotificationsStart, Toast } from 'kibana/public';
+import { Toast } from 'kibana/public';
 import { VisualizeFieldContext } from 'src/plugins/ui_actions/public';
 import { Datatable } from 'src/plugins/expressions/public';
 import { EuiBreadcrumb } from '@elastic/eui';
@@ -120,7 +120,8 @@ export function App({
   const { resolvedDateRange, from: fromDate, to: toDate } = useTimeRange(
     data,
     state.lastKnownDoc,
-    setState
+    setState,
+    state.searchSessionId
   );
 
   const onError = useCallback(
@@ -333,12 +334,11 @@ export function App({
             initialInput.savedObjectId
           );
         }
-        getAllIndexPatterns(
-          _.uniq(doc.references.filter(({ type }) => type === 'index-pattern').map(({ id }) => id)),
-          data.indexPatterns,
-          notifications
-        )
-          .then((indexPatterns) => {
+        const indexPatternIds = _.uniq(
+          doc.references.filter(({ type }) => type === 'index-pattern').map(({ id }) => id)
+        );
+        getAllIndexPatterns(indexPatternIds, data.indexPatterns)
+          .then(({ indexPatterns }) => {
             // Don't overwrite any pinned filters
             data.query.filterManager.setAppFilters(
               injectFilterReferences(doc.state.filters, doc.references)
@@ -531,7 +531,13 @@ export function App({
 
   const { TopNavMenu } = navigation.ui;
 
-  const savingPermitted = Boolean(state.isSaveable && application.capabilities.visualize.save);
+  const savingToLibraryPermitted = Boolean(
+    state.isSaveable && application.capabilities.visualize.save
+  );
+  const savingToDashboardPermitted = Boolean(
+    state.isSaveable && application.capabilities.dashboard?.showWriteControls
+  );
+
   const unsavedTitle = i18n.translate('xpack.lens.app.unsavedFilename', {
     defaultMessage: 'unsaved',
   });
@@ -545,8 +551,10 @@ export function App({
       state.isSaveable && state.activeData && Object.keys(state.activeData).length
     ),
     isByValueMode: getIsByValueMode(),
+    allowByValue: dashboardFeatureFlag.allowByValueEmbeddables,
     showCancel: Boolean(state.isLinkedToOriginatingApp),
-    savingPermitted,
+    savingToLibraryPermitted,
+    savingToDashboardPermitted,
     actions: {
       exportToCSV: () => {
         if (!state.activeData) {
@@ -577,7 +585,7 @@ export function App({
         }
       },
       saveAndReturn: () => {
-        if (savingPermitted && lastKnownDoc) {
+        if (savingToDashboardPermitted && lastKnownDoc) {
           // disabling the validation on app leave because the document has been saved.
           onAppLeave((actions) => {
             return actions.default();
@@ -597,7 +605,7 @@ export function App({
         }
       },
       showSaveModal: () => {
-        if (savingPermitted) {
+        if (savingToDashboardPermitted || savingToLibraryPermitted) {
           setState((s) => ({ ...s, isSaveModalVisible: true }));
         }
       },
@@ -682,7 +690,6 @@ export function App({
             initialContext={initialContext}
             setState={setState}
             data={data}
-            notifications={notifications}
             query={state.query}
             filters={state.filters}
             searchSessionId={state.searchSessionId}
@@ -698,6 +705,7 @@ export function App({
       <SaveModal
         isVisible={state.isSaveModalVisible}
         originatingApp={state.isLinkedToOriginatingApp ? incomingState?.originatingApp : undefined}
+        savingToLibraryPermitted={savingToLibraryPermitted}
         allowByValueEmbeddables={dashboardFeatureFlag.allowByValueEmbeddables}
         savedObjectsTagging={savedObjectsTagging}
         tagsIds={tagsIds}
@@ -735,7 +743,6 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
   initialContext,
   setState,
   data,
-  notifications,
   lastKnownDoc,
   activeData: activeDataRef,
 }: {
@@ -753,7 +760,6 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
   initialContext: VisualizeFieldContext | undefined;
   setState: React.Dispatch<React.SetStateAction<LensAppState>>;
   data: DataPublicPluginStart;
-  notifications: NotificationsStart;
   lastKnownDoc: React.MutableRefObject<Document | undefined>;
   activeData: React.MutableRefObject<Record<string, Datatable> | undefined>;
 }) {
@@ -789,8 +795,8 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
               (id) => !indexPatternsForTopNav.find((indexPattern) => indexPattern.id === id)
             )
           ) {
-            getAllIndexPatterns(filterableIndexPatterns, data.indexPatterns, notifications).then(
-              (indexPatterns) => {
+            getAllIndexPatterns(filterableIndexPatterns, data.indexPatterns).then(
+              ({ indexPatterns }) => {
                 if (indexPatterns) {
                   setState((s) => ({ ...s, indexPatternsForTopNav: indexPatterns }));
                 }
@@ -805,18 +811,16 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
 
 export async function getAllIndexPatterns(
   ids: string[],
-  indexPatternsService: IndexPatternsContract,
-  notifications: NotificationsStart
-): Promise<IndexPatternInstance[]> {
-  try {
-    return await Promise.all(ids.map((id) => indexPatternsService.get(id)));
-  } catch (e) {
-    notifications.toasts.addDanger(
-      i18n.translate('xpack.lens.app.indexPatternLoadingError', {
-        defaultMessage: 'Error loading index patterns',
-      })
-    );
-
-    throw new Error(e);
-  }
+  indexPatternsService: IndexPatternsContract
+): Promise<{ indexPatterns: IndexPatternInstance[]; rejectedIds: string[] }> {
+  const responses = await Promise.allSettled(ids.map((id) => indexPatternsService.get(id)));
+  const fullfilled = responses.filter(
+    (response): response is PromiseFulfilledResult<IndexPatternInstance> =>
+      response.status === 'fulfilled'
+  );
+  const rejectedIds = responses
+    .map((_response, i) => ids[i])
+    .filter((id, i) => responses[i].status === 'rejected');
+  // return also the rejected ids in case we want to show something later on
+  return { indexPatterns: fullfilled.map((response) => response.value), rejectedIds };
 }

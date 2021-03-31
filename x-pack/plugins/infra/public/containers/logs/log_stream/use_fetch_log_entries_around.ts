@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { combineLatest, Observable, Subject } from 'rxjs';
+import { combineLatest, Observable, ReplaySubject } from 'rxjs';
 import { last, map, startWith, switchMap } from 'rxjs/operators';
 import { LogSourceColumnConfiguration } from '../../../../common/http_api/log_sources';
 import { LogEntryCursor } from '../../../../common/log_entry';
@@ -53,7 +53,7 @@ export const useFetchLogEntriesAround = ({
   type LogEntriesAfterRequest = NonNullable<ReturnType<typeof fetchLogEntriesAfter>>;
 
   const logEntriesAroundSearchRequests$ = useObservable(
-    () => new Subject<[LogEntriesBeforeRequest, Observable<LogEntriesAfterRequest>]>(),
+    () => new ReplaySubject<[LogEntriesBeforeRequest, Observable<LogEntriesAfterRequest>]>(),
     []
   );
 

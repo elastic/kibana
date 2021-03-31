@@ -232,9 +232,6 @@ export function DiscoverFieldSearch({ onChange, value, types, useNewFieldsApi }:
   };
 
   const footer = () => {
-    if (useNewFieldsApi) {
-      return null;
-    }
     return (
       <EuiPopoverFooter>
         <EuiSwitch

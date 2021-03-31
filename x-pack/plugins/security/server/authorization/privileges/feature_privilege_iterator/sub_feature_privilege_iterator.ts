@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { LicenseType } from '../../../../../licensing/server';
-
-import { KibanaFeature, SubFeaturePrivilegeConfig } from '../../../../../features/common';
+import type { KibanaFeature, SubFeaturePrivilegeConfig } from '../../../../../features/common';
+import type { LicenseType } from '../../../../../licensing/server';
 
 export function* subFeaturePrivilegeIterator(
   feature: KibanaFeature,

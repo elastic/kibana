@@ -6,10 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { pointInTimeFinderMock } from './repository.test.mock';
+
 import { SavedObjectsRepository } from './repository';
 import * as getSearchDslNS from './search_dsl/search_dsl';
 import { SavedObjectsErrorHelpers } from './errors';
+import { PointInTimeFinder } from './point_in_time_finder';
 import { ALL_NAMESPACES_STRING } from './utils';
+import { loggerMock } from '../../../logging/logger.mock';
 import { SavedObjectsSerializer } from '../../serialization';
 import { encodeHitVersion } from '../../version';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
@@ -19,6 +23,7 @@ import { mockKibanaMigrator } from '../../migrations/kibana/kibana_migrator.mock
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import { esKuery } from '../../es_query';
 import { errors as EsErrors } from '@elastic/elasticsearch';
+
 const { nodeTypes } = esKuery;
 
 jest.mock('./search_dsl/search_dsl', () => ({ getSearchDsl: jest.fn() }));
@@ -39,6 +44,7 @@ describe('SavedObjectsRepository', () => {
   let client;
   let savedObjectsRepository;
   let migrator;
+  let logger;
 
   let serializer;
   const mockTimestamp = '2017-08-14T15:49:14.886Z';
@@ -238,11 +244,13 @@ describe('SavedObjectsRepository', () => {
   };
 
   beforeEach(() => {
+    pointInTimeFinderMock.mockClear();
     client = elasticsearchClientMock.createElasticsearchClient();
     migrator = mockKibanaMigrator.create();
     documentMigrator.prepareMigrations();
     migrator.migrateDocument = jest.fn().mockImplementation(documentMigrator.migrate);
     migrator.runMigrations = async () => ({ status: 'skipped' });
+    logger = loggerMock.create();
 
     // create a mock serializer "shim" so we can track function calls, but use the real serializer's implementation
     serializer = {
@@ -269,6 +277,7 @@ describe('SavedObjectsRepository', () => {
       typeRegistry: registry,
       serializer,
       allowedTypes,
+      logger,
     });
 
     savedObjectsRepository._getCurrentTime = jest.fn(() => mockTimestamp);
@@ -2774,18 +2783,20 @@ describe('SavedObjectsRepository', () => {
         await findSuccess({ type, fields: ['title'] });
         expect(client.search).toHaveBeenCalledWith(
           expect.objectContaining({
-            _source: [
-              `${type}.title`,
-              'namespace',
-              'namespaces',
-              'type',
-              'references',
-              'migrationVersion',
-              'coreMigrationVersion',
-              'updated_at',
-              'originId',
-              'title',
-            ],
+            body: expect.objectContaining({
+              _source: [
+                `${type}.title`,
+                'namespace',
+                'namespaces',
+                'type',
+                'references',
+                'migrationVersion',
+                'coreMigrationVersion',
+                'updated_at',
+                'originId',
+                'title',
+              ],
+            }),
           }),
           expect.anything()
         );
@@ -3644,6 +3655,33 @@ describe('SavedObjectsRepository', () => {
         );
       });
 
+      it(`uses the 'upsertAttributes' option when specified`, async () => {
+        const upsertAttributes = {
+          foo: 'bar',
+          hello: 'dolly',
+        };
+        await incrementCounterSuccess(type, id, counterFields, { namespace, upsertAttributes });
+        expect(client.update).toHaveBeenCalledWith(
+          expect.objectContaining({
+            body: expect.objectContaining({
+              upsert: expect.objectContaining({
+                [type]: {
+                  foo: 'bar',
+                  hello: 'dolly',
+                  ...counterFields.reduce((aggs, field) => {
+                    return {
+                      ...aggs,
+                      [field]: 1,
+                    };
+                  }, {}),
+                },
+              }),
+            }),
+          }),
+          expect.anything()
+        );
+      });
+
       it(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
         await incrementCounterSuccess(type, id, counterFields, { namespace });
         expect(client.update).toHaveBeenCalledWith(
@@ -3829,6 +3867,7 @@ describe('SavedObjectsRepository', () => {
           id: '6.0.0-alpha1',
           ...mockTimestampFields,
           version: mockVersion,
+          references: [],
           attributes: {
             buildNum: 8468,
             apiCallsCount: 100,
@@ -4630,6 +4669,33 @@ describe('SavedObjectsRepository', () => {
         const response = await savedObjectsRepository.closePointInTime('abc123');
         expect(response).toEqual(results);
       });
+    });
+  });
+
+  describe('#createPointInTimeFinder', () => {
+    it('returns a new PointInTimeFinder instance', async () => {
+      const result = await savedObjectsRepository.createPointInTimeFinder({}, {});
+      expect(result).toBeInstanceOf(PointInTimeFinder);
+    });
+
+    it('calls PointInTimeFinder with the provided options and dependencies', async () => {
+      const options = Symbol();
+      const dependencies = {
+        client: {
+          find: Symbol(),
+          openPointInTimeForType: Symbol(),
+          closePointInTime: Symbol(),
+        },
+      };
+
+      await savedObjectsRepository.createPointInTimeFinder(options, dependencies);
+      expect(pointInTimeFinderMock).toHaveBeenCalledWith(
+        options,
+        expect.objectContaining({
+          ...dependencies,
+          logger,
+        })
+      );
     });
   });
 });

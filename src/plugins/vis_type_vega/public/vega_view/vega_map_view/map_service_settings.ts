@@ -10,11 +10,11 @@ import { i18n } from '@kbn/i18n';
 import type { EMSClient, TMSService } from '@elastic/ems-client';
 import { getUISettings } from '../../services';
 import { userConfiguredLayerId } from './constants';
-import type { MapsLegacyConfig } from '../../../../maps_legacy/config';
+import type { MapsEmsConfig } from '../../../../maps_ems/public';
 
 type EmsClientConfig = ConstructorParameters<typeof EMSClient>[0];
 
-const hasUserConfiguredTmsService = (config: MapsLegacyConfig) => Boolean(config.tilemap?.url);
+const hasUserConfiguredTmsService = (config: MapsEmsConfig) => Boolean(config.tilemap?.url);
 
 const initEmsClientAsync = async (config: Partial<EmsClientConfig>) => {
   /**
@@ -37,7 +37,7 @@ export class MapServiceSettings {
   private emsClient?: EMSClient;
   private isDarkMode: boolean = false;
 
-  constructor(public config: MapsLegacyConfig, private appVersion: string) {}
+  constructor(public config: MapsEmsConfig, private appVersion: string) {}
 
   private isInitialized() {
     return Boolean(this.emsClient);

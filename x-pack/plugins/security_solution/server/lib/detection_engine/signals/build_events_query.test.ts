@@ -20,10 +20,10 @@ describe('create_signals', () => {
       excludeDocsWithTimestampOverride: false,
     });
     expect(query).toEqual({
-      allowNoIndices: true,
+      allow_no_indices: true,
       index: ['auditbeat-*'],
       size: 100,
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       body: {
         docvalue_fields: [
           {
@@ -66,6 +66,7 @@ describe('create_signals', () => {
           {
             '@timestamp': {
               order: 'asc',
+              unmapped_type: 'date',
             },
           },
         ],
@@ -84,10 +85,10 @@ describe('create_signals', () => {
       excludeDocsWithTimestampOverride: false,
     });
     expect(query).toEqual({
-      allowNoIndices: true,
+      allow_no_indices: true,
       index: ['auditbeat-*'],
       size: 100,
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       body: {
         docvalue_fields: [
           {
@@ -130,6 +131,7 @@ describe('create_signals', () => {
           {
             '@timestamp': {
               order: 'asc',
+              unmapped_type: 'date',
             },
           },
         ],
@@ -149,10 +151,10 @@ describe('create_signals', () => {
       excludeDocsWithTimestampOverride: false,
     });
     expect(query).toEqual({
-      allowNoIndices: true,
+      allow_no_indices: true,
       index: ['auditbeat-*'],
       size: 100,
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       body: {
         docvalue_fields: [
           {
@@ -191,14 +193,15 @@ describe('create_signals', () => {
             include_unmapped: true,
           },
         ],
+        search_after: [fakeSortId],
         sort: [
           {
             '@timestamp': {
               order: 'asc',
+              unmapped_type: 'date',
             },
           },
         ],
-        search_after: [fakeSortId],
       },
     });
   });
@@ -215,10 +218,10 @@ describe('create_signals', () => {
       excludeDocsWithTimestampOverride: false,
     });
     expect(query).toEqual({
-      allowNoIndices: true,
+      allow_no_indices: true,
       index: ['auditbeat-*'],
       size: 100,
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       body: {
         docvalue_fields: [
           {
@@ -257,14 +260,15 @@ describe('create_signals', () => {
             include_unmapped: true,
           },
         ],
+        search_after: [fakeSortIdNumber],
         sort: [
           {
             '@timestamp': {
               order: 'asc',
+              unmapped_type: 'date',
             },
           },
         ],
-        search_after: [fakeSortIdNumber],
       },
     });
   });
@@ -280,10 +284,10 @@ describe('create_signals', () => {
       excludeDocsWithTimestampOverride: false,
     });
     expect(query).toEqual({
-      allowNoIndices: true,
+      allow_no_indices: true,
       index: ['auditbeat-*'],
       size: 100,
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       body: {
         docvalue_fields: [
           {
@@ -326,6 +330,7 @@ describe('create_signals', () => {
           {
             '@timestamp': {
               order: 'asc',
+              unmapped_type: 'date',
             },
           },
         ],
@@ -352,10 +357,10 @@ describe('create_signals', () => {
       excludeDocsWithTimestampOverride: false,
     });
     expect(query).toEqual({
-      allowNoIndices: true,
+      allow_no_indices: true,
       index: ['auditbeat-*'],
       size: 100,
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       body: {
         docvalue_fields: [{ field: '@timestamp', format: 'strict_date_optional_time' }],
         query: {
@@ -400,6 +405,7 @@ describe('create_signals', () => {
           {
             '@timestamp': {
               order: 'asc',
+              unmapped_type: 'date',
             },
           },
         ],

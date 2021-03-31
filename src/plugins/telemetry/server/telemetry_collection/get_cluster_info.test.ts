@@ -11,14 +11,12 @@ import { getClusterInfo } from './get_cluster_info';
 
 export function mockGetClusterInfo(clusterInfo: any) {
   const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-  esClient.info
-    // @ts-ignore we only care about the response body
-    .mockResolvedValue(
-      // @ts-ignore we only care about the response body
-      {
-        body: { ...clusterInfo },
-      }
-    );
+  esClient.info.mockResolvedValue(
+    // @ts-expect-error we only care about the response body
+    {
+      body: { ...clusterInfo },
+    }
+  );
   return esClient;
 }
 

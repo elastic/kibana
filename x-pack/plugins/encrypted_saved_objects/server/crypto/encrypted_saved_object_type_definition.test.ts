@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EncryptedSavedObjectTypeRegistration } from './encrypted_saved_objects_service';
 import { EncryptedSavedObjectAttributesDefinition } from './encrypted_saved_object_type_definition';
+import type { EncryptedSavedObjectTypeRegistration } from './encrypted_saved_objects_service';
 
 it('correctly determines attribute properties', () => {
   const attributes = ['attr#1', 'attr#2', 'attr#3', 'attr#4'];

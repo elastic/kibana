@@ -93,7 +93,7 @@ export function getSettingsCollector(
     false,
     KibanaSettingsCollectorExtraOptions
   >({
-    type: KIBANA_SETTINGS_TYPE,
+    type: 'kibana_settings',
     isReady: () => true,
     schema: {
       xpack: {

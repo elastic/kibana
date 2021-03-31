@@ -26,7 +26,11 @@ export const waitForExceptionsTableToBeLoaded = () => {
 };
 
 export const searchForExceptionList = (searchText: string) => {
-  cy.get(EXCEPTIONS_TABLE_SEARCH).type(searchText, { force: true }).trigger('search');
+  if (Cypress.browser.name === 'firefox') {
+    cy.get(EXCEPTIONS_TABLE_SEARCH).type(`${searchText}{enter}`, { force: true });
+  } else {
+    cy.get(EXCEPTIONS_TABLE_SEARCH).type(searchText, { force: true }).trigger('search');
+  }
 };
 
 export const deleteExceptionListWithoutRuleReference = () => {

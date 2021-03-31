@@ -7,6 +7,7 @@
 
 import React, { memo } from 'react';
 import { useRouteMatch } from 'react-router-dom';
+
 import { EditPackagePolicyForm } from '../../../agent_policy/edit_package_policy_page';
 
 export const Policy = memo(() => {

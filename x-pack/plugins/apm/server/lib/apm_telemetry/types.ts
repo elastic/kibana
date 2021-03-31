@@ -35,7 +35,7 @@ export interface APMUsage {
     };
   };
   environments: {
-    services_without_environments: number;
+    services_without_environment: number;
     services_with_multiple_environments: number;
     top_environments: string[];
   };
@@ -140,7 +140,8 @@ export interface APMUsage {
     | 'integrations'
     | 'agents'
     | 'indices_stats'
-    | 'cardinality',
+    | 'cardinality'
+    | 'environments',
     { took: { ms: number } }
   >;
 }

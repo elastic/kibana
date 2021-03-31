@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RequestHandlerContext } from 'src/core/server';
+import type { RequestHandlerContext } from 'src/core/server';
 
 export const mockRouteContext = ({
   licensing: {

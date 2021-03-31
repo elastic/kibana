@@ -551,7 +551,7 @@ describe('xy_expression', () => {
       });
     });
 
-    test('it does not use date range if the x is not a time scale', () => {
+    test('it has xDomain undefined if the x is not a time scale or a histogram', () => {
       const { data, args } = sampleArgs();
 
       const component = shallow(
@@ -571,15 +571,10 @@ describe('xy_expression', () => {
         />
       );
       const xDomain = component.find(Settings).prop('xDomain');
-      expect(xDomain).toEqual(
-        expect.objectContaining({
-          min: undefined,
-          max: undefined,
-        })
-      );
+      expect(xDomain).toEqual(undefined);
     });
 
-    test('it uses min interval if passed in', () => {
+    test('it uses min interval if interval is passed in and visualization is histogram', () => {
       const { data, args } = sampleArgs();
 
       const component = shallow(
@@ -589,7 +584,9 @@ describe('xy_expression', () => {
           data={data}
           args={{
             ...args,
-            layers: [{ ...args.layers[0], seriesType: 'line', xScaleType: 'linear' }],
+            layers: [
+              { ...args.layers[0], seriesType: 'line', xScaleType: 'linear', isHistogram: true },
+            ],
           }}
         />
       );
@@ -1897,10 +1894,14 @@ describe('xy_expression', () => {
       xyProps.args.layers[0].xScaleType = 'time';
     });
     it('should use first valid layer and determine interval', async () => {
-      const result = await calculateMinInterval(
-        xyProps,
-        jest.fn().mockResolvedValue({ interval: '5m' })
-      );
+      xyProps.data.tables.first.columns[2].meta.source = 'esaggs';
+      xyProps.data.tables.first.columns[2].meta.sourceParams = {
+        type: 'date_histogram',
+        params: {
+          used_interval: '5m',
+        },
+      };
+      const result = await calculateMinInterval(xyProps);
       expect(result).toEqual(5 * 60 * 1000);
     });
 
@@ -1918,34 +1919,38 @@ describe('xy_expression', () => {
           },
         },
       };
-      const result = await calculateMinInterval(xyProps, jest.fn().mockResolvedValue(undefined));
+      const result = await calculateMinInterval(xyProps);
       expect(result).toEqual(5);
     });
 
     it('should return undefined if data table is empty', async () => {
       xyProps.data.tables.first.rows = [];
-      const result = await calculateMinInterval(
-        xyProps,
-        jest.fn().mockResolvedValue({ interval: '5m' })
-      );
+      xyProps.data.tables.first.columns[2].meta.source = 'esaggs';
+      xyProps.data.tables.first.columns[2].meta.sourceParams = {
+        type: 'date_histogram',
+        params: {
+          used_interval: '5m',
+        },
+      };
+      const result = await calculateMinInterval(xyProps);
       expect(result).toEqual(undefined);
     });
 
     it('should return undefined if interval can not be checked', async () => {
-      const result = await calculateMinInterval(xyProps, jest.fn().mockResolvedValue(undefined));
+      const result = await calculateMinInterval(xyProps);
       expect(result).toEqual(undefined);
     });
 
     it('should return undefined if date column is not found', async () => {
       xyProps.data.tables.first.columns.splice(2, 1);
-      const result = await calculateMinInterval(xyProps, jest.fn().mockResolvedValue(undefined));
+      const result = await calculateMinInterval(xyProps);
       expect(result).toEqual(undefined);
     });
 
     it('should return undefined if x axis is not a date', async () => {
       xyProps.args.layers[0].xScaleType = 'ordinal';
       xyProps.data.tables.first.columns.splice(2, 1);
-      const result = await calculateMinInterval(xyProps, jest.fn().mockResolvedValue(undefined));
+      const result = await calculateMinInterval(xyProps);
       expect(result).toEqual(undefined);
     });
   });

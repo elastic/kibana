@@ -10,6 +10,7 @@ import { ALERT_CLUSTER_HEALTH } from '../../common/constants';
 import { AlertClusterHealthType, AlertSeverity } from '../../common/enums';
 import { fetchClusterHealth } from '../lib/alerts/fetch_cluster_health';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
 
 const RealDate = Date;
 
@@ -80,7 +81,7 @@ describe('ClusterHealthAlert', () => {
     const getState = jest.fn();
     const executorOptions = {
       services: {
-        callCluster: jest.fn(),
+        scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
         alertInstanceFactory: jest.fn().mockImplementation(() => {
           return {
             replaceState,

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { AppMount, ScopedHistory } from 'src/core/public';
-import { captureURLApp } from './capture_url_app';
+import type { AppMount, ScopedHistory } from 'src/core/public';
+import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
 
-import { coreMock, scopedHistoryMock } from '../../../../../../src/core/public/mocks';
+import { captureURLApp } from './capture_url_app';
 
 describe('captureURLApp', () => {
   beforeAll(() => {

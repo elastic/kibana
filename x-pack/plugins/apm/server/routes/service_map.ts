@@ -62,7 +62,7 @@ export const serviceMapRoute = createRoute({
 });
 
 export const serviceMapServiceNodeRoute = createRoute({
-  endpoint: `GET /api/apm/service-map/service/{serviceName}`,
+  endpoint: 'GET /api/apm/service-map/service/{serviceName}',
   params: t.type({
     path: t.type({
       serviceName: t.string,

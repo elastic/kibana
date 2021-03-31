@@ -16,13 +16,13 @@ import {
   CreateExceptionListItemSchema,
 } from '../../../lists/common/schemas';
 import { ESBoolQuery } from '../typed_json';
-import { buildExceptionFilter } from './build_exceptions_filter';
+import { buildExceptionFilter } from '../shared_imports';
 import { Query, Language, Index, TimestampOverrideOrUndefined } from './schemas/common/schemas';
 
 export const getQueryFilter = (
   query: Query,
   language: Language,
-  filters: Array<Partial<Filter>>,
+  filters: unknown,
   index: Index,
   lists: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
   excludeExceptions: boolean = true
@@ -48,7 +48,7 @@ export const getQueryFilter = (
     chunkSize: 1024,
   });
   const initialQuery = { query, language };
-  const allFilters = getAllFilters((filters as unknown) as Filter[], exceptionFilter);
+  const allFilters = getAllFilters(filters as Filter[], exceptionFilter);
 
   return buildEsQuery(indexPattern, initialQuery, allFilters, config);
 };

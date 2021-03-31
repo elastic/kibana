@@ -43,7 +43,7 @@ describe('Cases connectors', () => {
   };
   beforeEach(() => {
     cleanKibana();
-    cy.intercept('POST', '/api/actions/action').as('createConnector');
+    cy.intercept('POST', '/api/actions/connector').as('createConnector');
     cy.intercept('POST', '/api/cases/configure', (req) => {
       const connector = req.body.connector;
       req.reply((res) => {

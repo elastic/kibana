@@ -6,25 +6,77 @@
  */
 import expect from '@kbn/expect';
 
-import { Client } from '@elastic/elasticsearch';
+import type { ApiResponse, estypes } from '@elastic/elasticsearch';
+import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+
 import * as st from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
-import { CASES_URL, SUB_CASES_PATCH_DEL_URL } from '../../../../plugins/case/common/constants';
+import { CASES_URL, SUB_CASES_PATCH_DEL_URL } from '../../../../plugins/cases/common/constants';
 import {
   CasesConfigureRequest,
   CasesConfigureResponse,
   CaseConnector,
   ConnectorTypes,
   CasePostRequest,
-  CollectionWithSubCaseResponse,
+  CaseResponse,
   SubCasesFindResponse,
   CaseStatuses,
   SubCasesResponse,
   CasesResponse,
-} from '../../../../plugins/case/common/api';
+} from '../../../../plugins/cases/common/api';
 import { postCollectionReq, postCommentGenAlertReq } from './mock';
-import { getSubCasesUrl } from '../../../../plugins/case/common/api/helpers';
-import { ContextTypeGeneratedAlertType } from '../../../../plugins/case/server/connectors';
+import { getSubCasesUrl } from '../../../../plugins/cases/common/api/helpers';
+import { ContextTypeGeneratedAlertType } from '../../../../plugins/cases/server/connectors';
+import { SignalHit } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
+
+function toArray<T>(input: T | T[]): T[] {
+  if (Array.isArray(input)) {
+    return input;
+  }
+  return [input];
+}
+
+/**
+ * Query Elasticsearch for a set of signals within a set of indices
+ */
+export const getSignalsWithES = async ({
+  es,
+  indices,
+  ids,
+}: {
+  es: KibanaClient;
+  indices: string | string[];
+  ids: string | string[];
+}): Promise<Map<string, Map<string, estypes.Hit<SignalHit>>>> => {
+  const signals: ApiResponse<estypes.SearchResponse<SignalHit>> = await es.search({
+    index: indices,
+    body: {
+      size: 10000,
+      query: {
+        bool: {
+          filter: [
+            {
+              ids: {
+                values: toArray(ids),
+              },
+            },
+          ],
+        },
+      },
+    },
+  });
+
+  return signals.body.hits.hits.reduce((acc, hit) => {
+    let indexMap = acc.get(hit._index);
+    if (indexMap === undefined) {
+      indexMap = new Map<string, estypes.Hit<SignalHit>>([[hit._id, hit]]);
+    } else {
+      indexMap.set(hit._id, hit);
+    }
+    acc.set(hit._index, indexMap);
+    return acc;
+  }, new Map<string, Map<string, estypes.Hit<SignalHit>>>());
+};
 
 interface SetStatusCasesParams {
   id: string;
@@ -68,7 +120,7 @@ export const defaultCreateSubPost = postCollectionReq;
  * Response structure for the createSubCase and createSubCaseComment functions.
  */
 export interface CreateSubCaseResp {
-  newSubCaseInfo: CollectionWithSubCaseResponse;
+  newSubCaseInfo: CaseResponse;
   modifiedSubCases?: SubCasesResponse;
 }
 
@@ -287,7 +339,7 @@ export const removeServerGeneratedPropertiesFromConfigure = (
   return rest;
 };
 
-export const deleteAllCaseItems = async (es: Client) => {
+export const deleteAllCaseItems = async (es: KibanaClient) => {
   await Promise.all([
     deleteCases(es),
     deleteSubCases(es),
@@ -297,9 +349,10 @@ export const deleteAllCaseItems = async (es: Client) => {
   ]);
 };
 
-export const deleteCasesUserActions = async (es: Client): Promise<void> => {
+export const deleteCasesUserActions = async (es: KibanaClient): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
+    // @ts-expect-error @elastic/elasticsearch DeleteByQueryRequest doesn't accept q parameter
     q: 'type:cases-user-actions',
     wait_for_completion: true,
     refresh: true,
@@ -307,9 +360,10 @@ export const deleteCasesUserActions = async (es: Client): Promise<void> => {
   });
 };
 
-export const deleteCases = async (es: Client): Promise<void> => {
+export const deleteCases = async (es: KibanaClient): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
+    // @ts-expect-error @elastic/elasticsearch DeleteByQueryRequest doesn't accept q parameter
     q: 'type:cases',
     wait_for_completion: true,
     refresh: true,
@@ -321,9 +375,10 @@ export const deleteCases = async (es: Client): Promise<void> => {
  * Deletes all sub cases in the .kibana index. This uses ES to perform the delete and does
  * not go through the case API.
  */
-export const deleteSubCases = async (es: Client): Promise<void> => {
+export const deleteSubCases = async (es: KibanaClient): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
+    // @ts-expect-error @elastic/elasticsearch DeleteByQueryRequest doesn't accept q parameter
     q: 'type:cases-sub-case',
     wait_for_completion: true,
     refresh: true,
@@ -331,9 +386,10 @@ export const deleteSubCases = async (es: Client): Promise<void> => {
   });
 };
 
-export const deleteComments = async (es: Client): Promise<void> => {
+export const deleteComments = async (es: KibanaClient): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
+    // @ts-expect-error @elastic/elasticsearch DeleteByQueryRequest doesn't accept q parameter
     q: 'type:cases-comments',
     wait_for_completion: true,
     refresh: true,
@@ -341,9 +397,10 @@ export const deleteComments = async (es: Client): Promise<void> => {
   });
 };
 
-export const deleteConfiguration = async (es: Client): Promise<void> => {
+export const deleteConfiguration = async (es: KibanaClient): Promise<void> => {
   await es.deleteByQuery({
     index: '.kibana',
+    // @ts-expect-error @elastic/elasticsearch DeleteByQueryRequest doesn't accept q parameter
     q: 'type:cases-configure',
     wait_for_completion: true,
     refresh: true,

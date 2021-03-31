@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertServices } from '../../../../../alerts/server';
+import { ElasticsearchClient } from 'kibana/server';
 import { buildSignalsSearchQuery } from './build_signals_query';
 
 interface GetSignalsCount {
@@ -13,11 +13,7 @@ interface GetSignalsCount {
   to?: string;
   ruleId: string;
   index: string;
-  callCluster: AlertServices['callCluster'];
-}
-
-interface CountResult {
-  count: number;
+  esClient: ElasticsearchClient;
 }
 
 export const getSignalsCount = async ({
@@ -25,7 +21,7 @@ export const getSignalsCount = async ({
   to,
   ruleId,
   index,
-  callCluster,
+  esClient,
 }: GetSignalsCount): Promise<number> => {
   if (from == null || to == null) {
     throw Error('"from" or "to" was not provided to signals count query');
@@ -38,7 +34,7 @@ export const getSignalsCount = async ({
     from,
   });
 
-  const result: CountResult = await callCluster('count', query);
+  const { body: result } = await esClient.count(query);
 
   return result.count;
 };

@@ -120,7 +120,8 @@ export const DataGrid: FC<Props> = memo(
 
     const popOverContent = useMemo(() => {
       return analysisType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
-        analysisType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION
+        analysisType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION ||
+        analysisType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION
         ? {
             featureImportance: ({ children }: { cellContentsElement: any; children: any }) => {
               const rowIndex = children?.props?.visibleRowIndex;
@@ -166,6 +167,11 @@ export const DataGrid: FC<Props> = memo(
                 />
               );
             },
+            featureInfluence: ({
+              cellContentsElement,
+            }: {
+              cellContentsElement: HTMLDivElement;
+            }) => <EuiCodeBlock isCopyable={true}>{cellContentsElement.textContent}</EuiCodeBlock>,
           }
         : undefined;
     }, [baseline, data]);
@@ -312,15 +318,16 @@ export const DataGrid: FC<Props> = memo(
                         })}
                       >
                         <EuiButtonEmpty
-                          aria-pressed={chartsVisible}
+                          aria-pressed={chartsVisible === true}
                           className={`euiDataGrid__controlBtn${
-                            chartsVisible ? ' euiDataGrid__controlBtn--active' : ''
+                            chartsVisible === true ? ' euiDataGrid__controlBtn--active' : ''
                           }`}
                           data-test-subj={`${dataTestSubj}HistogramButton`}
                           size="xs"
                           iconType="visBarVertical"
                           color="text"
                           onClick={toggleChartVisibility}
+                          disabled={chartsVisible === undefined}
                         >
                           {i18n.translate('xpack.ml.dataGrid.histogramButtonText', {
                             defaultMessage: 'Histogram charts',
