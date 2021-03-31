@@ -50,8 +50,8 @@ export const EsStatsErrors: React.FunctionComponent<Props> = ({ error }) => {
     case 'upgraded_error':
       iconContent = (
         <EuiIconTip
-          type="checkInCircleFilled"
-          color="success"
+          type="alert"
+          color="warning"
           size="l"
           content={message}
           iconProps={{
