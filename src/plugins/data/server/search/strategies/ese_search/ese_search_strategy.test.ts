@@ -7,7 +7,6 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import moment from 'moment';
 import { KbnServerError } from '../../../../../kibana_utils/server';
 import { ElasticsearchClientError, ResponseError } from '@elastic/elasticsearch/lib/errors';
 import * as indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';

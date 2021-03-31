@@ -238,6 +238,8 @@ export {
   ISearchSessionService,
   SearchRequestHandlerContext,
   DataRequestHandlerContext,
+  AsyncSearchResponse,
+  AsyncSearchStatusResponse,
 } from './search';
 
 // Search namespace
