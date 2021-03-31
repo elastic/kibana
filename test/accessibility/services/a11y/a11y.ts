@@ -21,6 +21,8 @@ interface AxeContext {
 
 interface TestOptions {
   excludeTestSubj?: string | string[];
+  returnErrorCount?: boolean;
+  reportType?: 'failures' | 'all';
 }
 
 export const normalizeResult = (report: any) => {
@@ -45,8 +47,12 @@ export function A11yProvider({ getService }: FtrProviderContext) {
   return new (class Accessibility {
     public async testAppSnapshot(options: TestOptions = {}) {
       const context = this.getAxeContext(true, options.excludeTestSubj);
-      const report = await this.captureAxeReport(context);
-      await this.testAxeReport(report);
+      const report = await this.captureAxeReport(context, options.reportType);
+      if (options.returnErrorCount) {
+        return report.violations.length;
+      } else {
+        await this.testAxeReport(report);
+      }
     }
 
     public async testGlobalSnapshot(options: TestOptions = {}) {
@@ -77,10 +83,13 @@ export function A11yProvider({ getService }: FtrProviderContext) {
       }
     }
 
-    private async captureAxeReport(context: AxeContext): Promise<AxeReport> {
+    private async captureAxeReport(
+      context: AxeContext,
+      reportType?: TestOptions['reportType']
+    ): Promise<AxeReport> {
       const axeOptions = {
         reporter: 'v2',
-        runOnly: ['wcag2a', 'wcag2aa'],
+        runOnly: reportType === 'all' ? undefined : ['wcag2a', 'wcag2aa'],
         rules: {
           'color-contrast': {
             enabled: false, // disabled because we have too many failures
