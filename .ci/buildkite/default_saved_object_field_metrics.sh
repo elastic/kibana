@@ -3,6 +3,7 @@
 set -euo pipefail
 
 echo '--- Default Saved Object Field Metrics'
+cd "$XPACK_DIR"
 node scripts/functional_tests \
     --debug --bail \
     --kibana-install-dir "$DEFAULT_BUILD_LOCATION" \
