@@ -81,5 +81,8 @@ export const setup = async (): Promise<RestoreSnapshotTestBed> => {
 export type RestoreSnapshotFormTestSubject =
   | 'snapshotRestoreStepLogistics'
   | 'includeGlobalStateSwitch'
+  | 'includeAliasesSwitch'
+  | 'nextButton'
+  | 'restoreButton'
   | 'systemIndicesInfoCallOut'
   | 'dataStreamWarningCallOut';

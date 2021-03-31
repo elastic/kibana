@@ -91,7 +91,7 @@ describe('<RestoreSnapshot />', () => {
     });
 
     test('is sent to the API', async () => {
-      const { exists, actions } = testBed;
+      const { actions } = testBed;
       actions.toggleIncludeAliases();
       actions.goToStep(3);
       await actions.clickRestore();
