@@ -10,10 +10,10 @@ import type {
   TimeRange,
   Filter,
   Query,
-  esFilters,
   QueryState,
   RefreshInterval,
 } from '../../../../src/plugins/data/public';
+import { esFilters } from '../../../../src/plugins/data/public';
 import { setStateToKbnUrl } from '../../../../src/plugins/kibana_utils/public';
 import type { UrlGeneratorsDefinition } from '../../../../src/plugins/share/public';
 import type { LayerDescriptor } from '../common/descriptor_types';
