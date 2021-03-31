@@ -178,19 +178,19 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
                 const metrics = [
                   {
                     group: 'page load bundle size',
-                    id: 'kbn-ui-shared-deps js',
+                    id: 'kbnUiSharedDeps-js',
                     value: compilation.assets['kbn-ui-shared-deps.js'].size(),
                   },
                   {
                     group: 'page load bundle size',
-                    id: 'kbn-ui-shared-deps css',
+                    id: 'kbnUiSharedDeps-css',
                     value:
                       compilation.assets['kbn-ui-shared-deps.css'].size() +
                       compilation.assets['kbn-ui-shared-deps.v7.light.css'].size(),
                   },
                   {
                     group: 'page load bundle size',
-                    id: 'kbn-ui-shared-deps @elastic',
+                    id: 'kbnUiSharedDeps-elastic',
                     value: compilation.assets['kbn-ui-shared-deps.@elastic.js'].size(),
                   },
                 ];
