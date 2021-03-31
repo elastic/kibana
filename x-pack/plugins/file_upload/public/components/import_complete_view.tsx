@@ -123,12 +123,13 @@ export class ImportCompleteView extends Component<Props, {}> {
     }
 
     if (!this.props.importResults || !this.props.importResults.success) {
-      const errorMsg = this.props.importResults.error
-        ? i18n.translate('xpack.fileUpload.uploadFailureMsgErrorBlock', {
-            defaultMessage: 'Error: {reason}',
-            values: { reason: this.props.importResults.error.error.reason },
-          })
-        : '';
+      const errorMsg =
+        this.props.importResults && this.props.importResults.error
+          ? i18n.translate('xpack.fileUpload.uploadFailureMsgErrorBlock', {
+              defaultMessage: 'Error: {reason}',
+              values: { reason: this.props.importResults.error.error.reason },
+            })
+          : '';
       return (
         <EuiCallOut
           title={i18n.translate('xpack.fileUpload.uploadFailureTitle', {
@@ -174,7 +175,7 @@ export class ImportCompleteView extends Component<Props, {}> {
     );
   }
 
-  _renderIndexManagementCallout() {
+  _renderIndexManagementMsg() {
     return this.props.importResults && this.props.importResults.success ? (
       <EuiText>
         <p>
@@ -216,7 +217,7 @@ export class ImportCompleteView extends Component<Props, {}> {
           }),
           'indexPatternRespCopyButton'
         )}
-        {this._renderIndexManagementCallout()}
+        {this._renderIndexManagementMsg()}
       </KibanaContextProvider>
     );
   }
