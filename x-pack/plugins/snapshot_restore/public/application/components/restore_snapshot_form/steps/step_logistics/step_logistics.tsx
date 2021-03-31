@@ -642,7 +642,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.restoreForm.stepLogistics.includeAliasesDescription"
-            defaultMessage="Allow aliases to be restored along with associated indices."
+            defaultMessage="Restores index aliases along with their associated indices."
           />
         }
         fullWidth
