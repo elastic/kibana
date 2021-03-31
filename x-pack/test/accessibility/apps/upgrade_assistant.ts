@@ -18,27 +18,37 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.upgradeAssistant.navigateToPage();
     });
 
-    it('Overview Tab', async () => {
-      await retry.waitFor('Upgrade Assistant overview tab to be visible', async () => {
-        return testSubjects.exists('upgradeAssistantOverviewTabDetail');
+    it('Overview page', async () => {
+      await retry.waitFor('Upgrade Assistant overview page to be visible', async () => {
+        return testSubjects.exists('comingSoonPrompt');
       });
       await a11y.testAppSnapshot();
     });
 
-    it('Cluster Tab', async () => {
-      await testSubjects.click('upgradeAssistantClusterTab');
-      await retry.waitFor('Upgrade Assistant Cluster tab to be visible', async () => {
-        return testSubjects.exists('upgradeAssistantClusterTabDetail');
+    // These tests will be skipped until the last minor of the next major release
+    describe.skip('tabs', () => {
+      it('Overview Tab', async () => {
+        await retry.waitFor('Upgrade Assistant overview tab to be visible', async () => {
+          return testSubjects.exists('upgradeAssistantOverviewTabDetail');
+        });
+        await a11y.testAppSnapshot();
       });
-      await a11y.testAppSnapshot();
-    });
 
-    it('Indices Tab', async () => {
-      await testSubjects.click('upgradeAssistantIndicesTab');
-      await retry.waitFor('Upgrade Assistant Cluster tab to be visible', async () => {
-        return testSubjects.exists('upgradeAssistantIndexTabDetail');
+      it('Cluster Tab', async () => {
+        await testSubjects.click('upgradeAssistantClusterTab');
+        await retry.waitFor('Upgrade Assistant Cluster tab to be visible', async () => {
+          return testSubjects.exists('upgradeAssistantClusterTabDetail');
+        });
+        await a11y.testAppSnapshot();
       });
-      await a11y.testAppSnapshot();
+
+      it('Indices Tab', async () => {
+        await testSubjects.click('upgradeAssistantIndicesTab');
+        await retry.waitFor('Upgrade Assistant Cluster tab to be visible', async () => {
+          return testSubjects.exists('upgradeAssistantIndexTabDetail');
+        });
+        await a11y.testAppSnapshot();
+      });
     });
   });
 }

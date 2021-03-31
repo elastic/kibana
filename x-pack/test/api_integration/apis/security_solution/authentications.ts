@@ -44,9 +44,10 @@ export default function ({ getService }: FtrProviderContext) {
             fakePossibleCount: 3,
             querySize: 1,
           },
-          defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          defaultIndex: ['auditbeat-*'],
           docValueFields: [],
           inspect: false,
+          wait_for_completion_timeout: '10s',
         })
         .expect(200);
 
@@ -72,9 +73,10 @@ export default function ({ getService }: FtrProviderContext) {
             fakePossibleCount: 5,
             querySize: 2,
           },
-          defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          defaultIndex: ['auditbeat-*'],
           docValueFields: [],
           inspect: false,
+          wait_for_completion_timeout: '10s',
         })
         .expect(200);
 

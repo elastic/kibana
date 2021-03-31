@@ -10,7 +10,8 @@ import { render } from 'react-dom';
 import { Ast } from '@kbn/interpreter/common';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import type {
+import { DatatableColumn } from 'src/plugins/expressions/public';
+import {
   SuggestionRequest,
   Visualization,
   VisualizationSuggestion,
@@ -23,6 +24,13 @@ export interface ColumnState {
   columnId: string;
   width?: number;
   hidden?: boolean;
+  isTransposed?: boolean;
+  // These flags are necessary to transpose columns and map them back later
+  // They are set automatically and are not user-editable
+  transposable?: boolean;
+  originalColumnId?: string;
+  originalName?: string;
+  bucketValues?: Array<{ originalBucketColumn: DatatableColumn; value: unknown }>;
   alignment?: 'left' | 'right' | 'center';
 }
 
@@ -37,6 +45,10 @@ export interface DatatableVisualizationState {
   sorting?: SortingState;
 }
 
+const visualizationLabel = i18n.translate('xpack.lens.datatable.label', {
+  defaultMessage: 'Table',
+});
+
 export const datatableVisualization: Visualization<DatatableVisualizationState> = {
   id: 'lnsDatatable',
 
@@ -44,8 +56,9 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
     {
       id: 'lnsDatatable',
       icon: LensIconChartDatatable,
-      label: i18n.translate('xpack.lens.datatable.label', {
-        defaultMessage: 'Data table',
+      label: visualizationLabel,
+      groupLabel: i18n.translate('xpack.lens.datatable.groupLabel', {
+        defaultMessage: 'Tabular and single value',
       }),
     },
   ],
@@ -68,9 +81,7 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
   getDescription() {
     return {
       icon: LensIconChartDatatable,
-      label: i18n.translate('xpack.lens.datatable.label', {
-        defaultMessage: 'Data table',
-      }),
+      label: visualizationLabel,
     };
   },
 
@@ -105,6 +116,11 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
         oldColumnSettings[column.columnId] = column;
       });
     }
+    const lastTransposedColumnIndex = table.columns.findIndex((c) =>
+      !oldColumnSettings[c.columnId] ? false : !oldColumnSettings[c.columnId]?.isTransposed
+    );
+    const usesTransposing = state?.columns.some((c) => c.isTransposed);
+
     const title =
       table.changeType === 'unchanged'
         ? i18n.translate('xpack.lens.datatable.suggestionLabel', {
@@ -135,8 +151,9 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
         state: {
           ...(state || {}),
           layerId: table.layerId,
-          columns: table.columns.map((col) => ({
+          columns: table.columns.map((col, columnIndex) => ({
             ...(oldColumnSettings[col.columnId] || {}),
+            isTransposed: usesTransposing && columnIndex < lastTransposedColumnIndex,
             columnId: col.columnId,
           })),
         },
@@ -163,21 +180,55 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
     return {
       groups: [
         {
-          groupId: 'columns',
-          groupLabel: i18n.translate('xpack.lens.datatable.breakdown', {
-            defaultMessage: 'Break down by',
+          groupId: 'rows',
+          groupLabel: i18n.translate('xpack.lens.datatable.breakdownRows', {
+            defaultMessage: 'Split rows',
+          }),
+          groupTooltip: i18n.translate('xpack.lens.datatable.breakdownRows.description', {
+            defaultMessage:
+              'Split table rows by field. This is recommended for high cardinality breakdowns.',
           }),
           layerId: state.layerId,
           accessors: sortedColumns
-            .filter((c) => datasource!.getOperationForColumnId(c)?.isBucketed)
+            .filter(
+              (c) =>
+                datasource!.getOperationForColumnId(c)?.isBucketed &&
+                !state.columns.find((col) => col.columnId === c)?.isTransposed
+            )
             .map((accessor) => ({
               columnId: accessor,
               triggerIcon: columnMap[accessor].hidden ? 'invisible' : undefined,
             })),
           supportsMoreColumns: true,
           filterOperations: (op) => op.isBucketed,
-          dataTestSubj: 'lnsDatatable_column',
+          dataTestSubj: 'lnsDatatable_rows',
           enableDimensionEditor: true,
+          hideGrouping: true,
+          nestingOrder: 1,
+        },
+        {
+          groupId: 'columns',
+          groupLabel: i18n.translate('xpack.lens.datatable.breakdownColumns', {
+            defaultMessage: 'Split columns',
+          }),
+          groupTooltip: i18n.translate('xpack.lens.datatable.breakdownColumns.description', {
+            defaultMessage:
+              "Split metric columns by field. It's recommended to keep the number of columns low to avoid horizontal scrolling.",
+          }),
+          layerId: state.layerId,
+          accessors: sortedColumns
+            .filter(
+              (c) =>
+                datasource!.getOperationForColumnId(c)?.isBucketed &&
+                state.columns.find((col) => col.columnId === c)?.isTransposed
+            )
+            .map((accessor) => ({ columnId: accessor })),
+          supportsMoreColumns: true,
+          filterOperations: (op) => op.isBucketed,
+          dataTestSubj: 'lnsDatatable_columns',
+          enableDimensionEditor: true,
+          hideGrouping: true,
+          nestingOrder: 0,
         },
         {
           groupId: 'metrics',
@@ -201,13 +252,26 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
     };
   },
 
-  setDimension({ prevState, columnId }) {
-    if (prevState.columns.some((column) => column.columnId === columnId)) {
-      return prevState;
+  setDimension({ prevState, columnId, groupId, previousColumn }) {
+    if (
+      prevState.columns.some(
+        (column) =>
+          column.columnId === columnId || (previousColumn && column.columnId === previousColumn)
+      )
+    ) {
+      return {
+        ...prevState,
+        columns: prevState.columns.map((column) => {
+          if (column.columnId === columnId || column.columnId === previousColumn) {
+            return { ...column, columnId, isTransposed: groupId === 'columns' };
+          }
+          return column;
+        }),
+      };
     }
     return {
       ...prevState,
-      columns: [...prevState.columns, { columnId }],
+      columns: [...prevState.columns, { columnId, isTransposed: groupId === 'columns' }],
     };
   },
   removeDimension({ prevState, columnId }) {
@@ -265,6 +329,11 @@ export const datatableVisualization: Visualization<DatatableVisualizationState> 
                     columnId: [column.columnId],
                     hidden: typeof column.hidden === 'undefined' ? [] : [column.hidden],
                     width: typeof column.width === 'undefined' ? [] : [column.width],
+                    isTransposed:
+                      typeof column.isTransposed === 'undefined' ? [] : [column.isTransposed],
+                    transposable: [
+                      !datasource!.getOperationForColumnId(column.columnId)?.isBucketed,
+                    ],
                     alignment: typeof column.alignment === 'undefined' ? [] : [column.alignment],
                   },
                 },

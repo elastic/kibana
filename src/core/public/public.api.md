@@ -11,6 +11,7 @@ import { ConfigDeprecationProvider } from '@kbn/config';
 import { ConfigPath } from '@kbn/config';
 import { DetailedPeerCertificate } from 'tls';
 import { EnvironmentMode } from '@kbn/config';
+import { estypes } from '@elastic/elasticsearch';
 import { EuiBreadcrumb } from '@elastic/eui';
 import { EuiButtonEmptyProps } from '@elastic/eui';
 import { EuiConfirmModalProps } from '@elastic/eui';
@@ -431,6 +432,8 @@ export interface CoreStart {
     // (undocumented)
     chrome: ChromeStart;
     // (undocumented)
+    deprecations: DeprecationsServiceStart;
+    // (undocumented)
     docLinks: DocLinksStart;
     // (undocumented)
     fatalErrors: FatalErrorsStart;
@@ -470,6 +473,15 @@ export class CoreSystem {
 
 // @internal (undocumented)
 export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory>;
+
+// @public
+export interface DeprecationsServiceStart {
+    // Warning: (ae-forgotten-export) The symbol "DomainDeprecationDetails" needs to be exported by the entry point index.d.ts
+    getAllDeprecations: () => Promise<DomainDeprecationDetails[]>;
+    getDeprecations: (domainId: string) => Promise<DomainDeprecationDetails[]>;
+    isDeprecationResolvable: (details: DomainDeprecationDetails) => boolean;
+    resolveDeprecation: (details: DomainDeprecationDetails) => Promise<ResolveDeprecationResponse>;
+}
 
 // @public (undocumented)
 export interface DocLinksStart {
@@ -558,7 +570,9 @@ export interface DocLinksStart {
             readonly sum: string;
             readonly top_hits: string;
         };
-        readonly runtimeFields: string;
+        readonly runtimeFields: {
+            readonly mapping: string;
+        };
         readonly scriptedFields: {
             readonly scriptFields: string;
             readonly scriptAggs: string;
@@ -570,8 +584,9 @@ export interface DocLinksStart {
             readonly luceneExpressions: string;
         };
         readonly indexPatterns: {
-            readonly loadingData: string;
             readonly introduction: string;
+            readonly fieldFormattersNumber: string;
+            readonly fieldFormattersString: string;
         };
         readonly addData: string;
         readonly kibana: string;
@@ -634,6 +649,7 @@ export interface DocLinksStart {
         readonly ccs: Record<string, string>;
         readonly plugins: Record<string, string>;
         readonly snapshotRestore: Record<string, string>;
+        readonly ingest: Record<string, string>;
     };
 }
 
@@ -1070,6 +1086,16 @@ export type PublicAppSearchDeepLinkInfo = Omit<AppSearchDeepLink, 'searchDeepLin
 // @public
 export type PublicUiSettingsParams = Omit<UiSettingsParams, 'schema'>;
 
+// Warning: (ae-missing-release-tag) "ResolveDeprecationResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export type ResolveDeprecationResponse = {
+    status: 'ok';
+} | {
+    status: 'fail';
+    reason: string;
+};
+
 // Warning: (ae-missing-release-tag) "SavedObject" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -1223,12 +1249,12 @@ export interface SavedObjectsFindOptions {
     preference?: string;
     rootSearchFields?: string[];
     search?: string;
-    searchAfter?: unknown[];
+    searchAfter?: estypes.Id[];
     searchFields?: string[];
     // (undocumented)
     sortField?: string;
     // (undocumented)
-    sortOrder?: string;
+    sortOrder?: estypes.SortOrder;
     // (undocumented)
     type: string | string[];
     typeToNamespacesMap?: Map<string, string[] | undefined>;
@@ -1581,6 +1607,6 @@ export interface UserProvidedValues<T = any> {
 
 // Warnings were encountered during analysis:
 //
-// src/core/public/core_system.ts:164:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
+// src/core/public/core_system.ts:166:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
 
 ```

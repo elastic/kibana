@@ -24,6 +24,7 @@ import {
 import { MapSavedObject, MapSavedObjectAttributes } from '../../common/map_saved_object_type';
 import { getIndexPatternsService, getInternalRepository } from '../kibana_server_services';
 import { MapsConfigType } from '../../config';
+import { injectReferences } from '././../../common/migrations/references';
 
 interface Settings {
   showMapVisualizationTypes: boolean;
@@ -310,7 +311,15 @@ export async function getMapsTelemetry(config: MapsConfigType): Promise<MapsUsag
   const layerLists: LayerDescriptor[][] = [];
   await execTransformOverMultipleSavedObjectPages<MapSavedObjectAttributes>(
     MAP_SAVED_OBJECT_TYPE,
-    (savedObjects) => layerLists.push(...getLayerLists(savedObjects))
+    (savedObjects) => {
+      const savedObjectsWithIndexPatternIds = savedObjects.map((savedObject) => {
+        return {
+          ...savedObject,
+          ...injectReferences(savedObject),
+        };
+      });
+      return layerLists.push(...getLayerLists(savedObjectsWithIndexPatternIds));
+    }
   );
   const savedObjectsTelemetry = buildMapsSavedObjectsTelemetry(layerLists);
 

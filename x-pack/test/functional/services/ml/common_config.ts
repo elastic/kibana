@@ -12,6 +12,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { Job, Datafeed } from '../../../../plugins/ml/common/types/anomaly_detection_jobs';
 import { DataFrameAnalyticsConfig } from '../../../../plugins/ml/public/application/data_frame_analytics/common';
 
+// @ts-expect-error not full interface
 const FQ_SM_JOB_CONFIG: Job = {
   job_id: ``,
   description: 'mean(responsetime) on farequote dataset with 15m bucket span',
@@ -31,6 +32,7 @@ const FQ_SM_JOB_CONFIG: Job = {
   model_plot_config: { enabled: true },
 };
 
+// @ts-expect-error not full interface
 const FQ_MM_JOB_CONFIG: Job = {
   job_id: `fq_multi_1_ae`,
   description:
@@ -50,11 +52,36 @@ const FQ_MM_JOB_CONFIG: Job = {
   model_plot_config: { enabled: true },
 };
 
+// @ts-expect-error not full interface
 const FQ_DATAFEED_CONFIG: Datafeed = {
   datafeed_id: '',
   indices: ['ft_farequote'],
   job_id: '',
   query: { bool: { must: [{ match_all: {} }] } },
+};
+
+const BM_CLASSIFICATION_CONFIG: DeepPartial<DataFrameAnalyticsConfig> = {
+  id: '',
+  description: 'Classification job based on the bank marketing dataset',
+  source: {
+    index: ['ft_bank_marketing'],
+    query: {
+      match_all: {},
+    },
+  },
+  analysis: {
+    classification: {
+      dependent_variable: 'y',
+      training_percent: 80,
+    },
+  },
+  analyzed_fields: {
+    includes: [],
+    excludes: [],
+  },
+  model_memory_limit: '80mb',
+  allow_lazy_start: false,
+  max_num_threads: 1,
 };
 
 const IHP_OUTLIER_DETECTION_CONFIG: DeepPartial<DataFrameAnalyticsConfig> = {
@@ -106,6 +133,15 @@ export function MachineLearningCommonConfigsProvider({}: FtrProviderContext) {
         ...IHP_OUTLIER_DETECTION_CONFIG,
         id: dfaId,
         dest: { ...IHP_OUTLIER_DETECTION_CONFIG.dest, index: `user-${dfaId}` },
+      };
+      return dfaConfig as DataFrameAnalyticsConfig;
+    },
+
+    getDFABmClassificationJobConfig(dfaId: string): DataFrameAnalyticsConfig {
+      const dfaConfig = {
+        ...BM_CLASSIFICATION_CONFIG,
+        id: dfaId,
+        dest: { ...BM_CLASSIFICATION_CONFIG.dest, index: `user-${dfaId}` },
       };
       return dfaConfig as DataFrameAnalyticsConfig;
     },

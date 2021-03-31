@@ -9,6 +9,7 @@ import { CoreSetup } from 'kibana/public';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
+import { IndexPatternFieldEditorStart } from '../../../../../src/plugins/index_pattern_field_editor/public';
 import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
@@ -24,6 +25,7 @@ export interface IndexPatternDatasourceSetupPlugins {
 
 export interface IndexPatternDatasourceStartPlugins {
   data: DataPublicPluginStart;
+  indexPatternFieldEditor: IndexPatternFieldEditorStart;
 }
 
 export class IndexPatternDatasource {
@@ -42,7 +44,7 @@ export class IndexPatternDatasource {
         getTimeScaleFunction,
         getSuffixFormatter,
       } = await import('../async_services');
-      return core.getStartServices().then(([coreStart, { data }]) => {
+      return core.getStartServices().then(([coreStart, { data, indexPatternFieldEditor }]) => {
         data.fieldFormats.register([getSuffixFormatter(data.fieldFormats.deserialize)]);
         expressions.registerFunction(getTimeScaleFunction(data));
         expressions.registerFunction(counterRate);
@@ -53,6 +55,7 @@ export class IndexPatternDatasource {
           storage: new Storage(localStorage),
           data,
           charts,
+          indexPatternFieldEditor,
         });
       }) as Promise<Datasource>;
     });

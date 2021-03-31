@@ -14,6 +14,7 @@ import {
   SWIM_LANE_DEFAULT_PAGE_SIZE,
 } from '../../explorer/explorer_constants';
 import { aggregationTypeTransform } from '../../../../common/util/anomaly_utils';
+import { isPopulatedObject } from '../../../../common/util/object_utils';
 
 /**
  * Service for carrying out Elasticsearch queries to obtain data for the Ml Results dashboards.
@@ -1052,7 +1053,16 @@ export function resultsServiceProvider(mlApiServices) {
     // Extra query object can be supplied, or pass null if no additional query.
     // Returned response contains a results property, which is an object
     // of document counts against time (epoch millis).
-    getEventRateData(index, query, timeFieldName, earliestMs, latestMs, intervalMs) {
+    getEventRateData(
+      index,
+      query,
+      timeFieldName,
+      earliestMs,
+      latestMs,
+      intervalMs,
+      runtimeMappings,
+      indicesOptions
+    ) {
       return new Promise((resolve, reject) => {
         const obj = { success: true, results: {} };
 
@@ -1101,7 +1111,14 @@ export function resultsServiceProvider(mlApiServices) {
                   },
                 },
               },
+              // Runtime mappings only needed to support when query includes a runtime field
+              // even though the default timeField can be a search time runtime field
+              // because currently Kibana doesn't support that
+              ...(isPopulatedObject(runtimeMappings) && query
+                ? { runtime_mappings: runtimeMappings }
+                : {}),
             },
+            ...(indicesOptions ?? {}),
           })
           .then((resp) => {
             const dataByTimeBucket = get(resp, ['aggregations', 'eventRate', 'buckets'], []);
@@ -1223,7 +1240,11 @@ export function resultsServiceProvider(mlApiServices) {
           },
         };
 
-        if (metricFieldName !== undefined && metricFieldName !== '') {
+        if (
+          metricFieldName !== undefined &&
+          metricFieldName !== '' &&
+          typeof metricFunction === 'string'
+        ) {
           body.aggs.sample.aggs.byTime.aggs.entities.aggs = {};
 
           const metricAgg = {

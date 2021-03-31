@@ -9,7 +9,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Interactive Terminal Spawned via Perl",
   "query": "event.category:process and event.type:(start or process_started) and process.name:perl and process.args:(\"exec \\\"/bin/sh\\\";\" or \"exec \\\"/bin/dash\\\";\" or \"exec \\\"/bin/bash\\\";\")",
   "risk_score": 73,
@@ -41,5 +41,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 5
+  "version": 6
 }

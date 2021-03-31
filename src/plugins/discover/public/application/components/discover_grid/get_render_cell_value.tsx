@@ -19,13 +19,16 @@ import {
 import { IndexPattern } from '../../../kibana_services';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { DiscoverGridContext } from './discover_grid_context';
+import { JsonCodeEditor } from '../json_code_editor/json_code_editor';
+import { defaultMonacoEditorWidth } from './constants';
 
 export const getRenderCellValueFn = (
   indexPattern: IndexPattern,
   rows: ElasticSearchHit[] | undefined,
-  rowsFlattened: Array<Record<string, unknown>>
+  rowsFlattened: Array<Record<string, unknown>>,
+  useNewFieldsApi: boolean
 ) => ({ rowIndex, columnId, isDetails, setCellProps }: EuiDataGridCellValueElementProps) => {
-  const row = rows ? (rows[rowIndex] as Record<string, unknown>) : undefined;
+  const row = rows ? rows[rowIndex] : undefined;
   const rowFlattened = rowsFlattened
     ? (rowsFlattened[rowIndex] as Record<string, unknown>)
     : undefined;
@@ -51,20 +54,92 @@ export const getRenderCellValueFn = (
     return <span>-</span>;
   }
 
-  if (field && field.type === '_source') {
+  if (
+    useNewFieldsApi &&
+    !field &&
+    row &&
+    row.fields &&
+    !(row.fields as Record<string, unknown[]>)[columnId]
+  ) {
+    const innerColumns = Object.fromEntries(
+      Object.entries(row.fields as Record<string, unknown[]>).filter(([key]) => {
+        return key.indexOf(`${columnId}.`) === 0;
+      })
+    );
     if (isDetails) {
       // nicely formatted JSON for the expanded view
-      return <span>{JSON.stringify(row, null, 2)}</span>;
+      return <span>{JSON.stringify(innerColumns, null, 2)}</span>;
     }
-    const formatted = indexPattern.formatHit(row);
+
+    // Put the most important fields first
+    const highlights: Record<string, unknown> = (row.highlight as Record<string, unknown>) ?? {};
+    const highlightPairs: Array<[string, string]> = [];
+    const sourcePairs: Array<[string, string]> = [];
+    Object.entries(innerColumns).forEach(([key, values]) => {
+      const subField = indexPattern.getFieldByName(key);
+      const formatter = subField
+        ? indexPattern.getFormatterForField(subField)
+        : { convert: (v: string, ...rest: unknown[]) => String(v) };
+      const formatted = (values as unknown[])
+        .map((val: unknown) =>
+          formatter.convert(val, 'html', {
+            field: subField,
+            hit: row,
+            indexPattern,
+          })
+        )
+        .join(', ');
+      const pairs = highlights[key] ? highlightPairs : sourcePairs;
+      pairs.push([key, formatted]);
+    });
 
     return (
       <EuiDescriptionList type="inline" compressed className="dscDiscoverGrid__descriptionList">
-        {Object.keys(formatted).map((key) => (
+        {[...highlightPairs, ...sourcePairs].map(([key, value]) => (
           <Fragment key={key}>
             <EuiDescriptionListTitle>{key}</EuiDescriptionListTitle>
             <EuiDescriptionListDescription
-              dangerouslySetInnerHTML={{ __html: formatted[key] }}
+              dangerouslySetInnerHTML={{ __html: value }}
+              className="dscDiscoverGrid__descriptionListDescription"
+            />
+          </Fragment>
+        ))}
+      </EuiDescriptionList>
+    );
+  }
+
+  if (typeof rowFlattened[columnId] === 'object' && isDetails) {
+    return (
+      <JsonCodeEditor
+        json={rowFlattened[columnId] as Record<string, any>}
+        width={defaultMonacoEditorWidth}
+      />
+    );
+  }
+
+  if (field && field.type === '_source') {
+    if (isDetails) {
+      return <JsonCodeEditor json={row} width={defaultMonacoEditorWidth} />;
+    }
+    const formatted = indexPattern.formatHit(row);
+
+    // Put the most important fields first
+    const highlights: Record<string, unknown> = (row.highlight as Record<string, unknown>) ?? {};
+    const highlightPairs: Array<[string, string]> = [];
+    const sourcePairs: Array<[string, string]> = [];
+
+    Object.entries(formatted).forEach(([key, val]) => {
+      const pairs = highlights[key] ? highlightPairs : sourcePairs;
+      pairs.push([key, val as string]);
+    });
+
+    return (
+      <EuiDescriptionList type="inline" compressed className="dscDiscoverGrid__descriptionList">
+        {[...highlightPairs, ...sourcePairs].map(([key, value]) => (
+          <Fragment key={key}>
+            <EuiDescriptionListTitle>{key}</EuiDescriptionListTitle>
+            <EuiDescriptionListDescription
+              dangerouslySetInnerHTML={{ __html: value }}
               className="dscDiscoverGrid__descriptionListDescription"
             />
           </Fragment>

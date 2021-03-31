@@ -15,6 +15,7 @@ import {
   hasDateField,
 } from './utils';
 import { OperationDefinition } from '..';
+import { getFormatFromPreviousColumn } from '../helpers';
 
 const ofName = (name?: string) => {
   return i18n.translate('xpack.lens.indexPattern.cumulativeSumOf', {
@@ -76,14 +77,9 @@ export const cumulativeSumOperation: OperationDefinition<
       operationType: 'cumulative_sum',
       isBucketed: false,
       scale: 'ratio',
+      filter: previousColumn?.filter,
       references: referenceIds,
-      params:
-        previousColumn?.dataType === 'number' &&
-        previousColumn.params &&
-        'format' in previousColumn.params &&
-        previousColumn.params.format
-          ? { format: previousColumn.params.format }
-          : undefined,
+      params: getFormatFromPreviousColumn(previousColumn),
     };
   },
   isTransferable: () => {
@@ -106,4 +102,5 @@ export const cumulativeSumOperation: OperationDefinition<
       })
     )?.join(', ');
   },
+  filterable: true,
 };

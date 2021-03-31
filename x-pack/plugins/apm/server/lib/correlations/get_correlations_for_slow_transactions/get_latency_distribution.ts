@@ -6,8 +6,8 @@
  */
 
 import { isEmpty, dropRightWhile } from 'lodash';
-import { AggregationOptionsByType } from '../../../../../../typings/elasticsearch/aggregations';
-import { ESFilter } from '../../../../../../typings/elasticsearch';
+import { AggregationOptionsByType } from '../../../../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../../../typings/elasticsearch';
 import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
@@ -106,7 +106,7 @@ export async function getLatencyDistribution({
     type Agg = NonNullable<typeof response.aggregations>;
 
     if (!response.aggregations) {
-      return;
+      return {};
     }
 
     function formatDistribution(distribution: Agg['distribution']) {

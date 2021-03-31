@@ -20,8 +20,15 @@ export default function (providerContext: FtrProviderContext) {
   let agentAccessAPIKey: string;
 
   describe('artifact download', () => {
+    const esArchiverSnapshots = [
+      'endpoint/artifacts/fleet_artifacts',
+      'endpoint/artifacts/api_feature',
+    ];
+
     before(async () => {
-      await esArchiver.load('endpoint/artifacts/api_feature', { useCreate: true });
+      await Promise.all(
+        esArchiverSnapshots.map((archivePath) => esArchiver.load(archivePath, { useCreate: true }))
+      );
 
       const { body: enrollmentApiKeysResponse } = await supertest
         .get(`/api/fleet/enrollment-api-keys`)
@@ -56,7 +63,9 @@ export default function (providerContext: FtrProviderContext) {
 
       agentAccessAPIKey = enrollmentResponse.item.access_api_key;
     });
-    after(() => esArchiver.unload('endpoint/artifacts/api_feature'));
+    after(() =>
+      Promise.all(esArchiverSnapshots.map((archivePath) => esArchiver.unload(archivePath)))
+    );
 
     it('should fail to find artifact with invalid hash', async () => {
       await supertestWithoutAuth

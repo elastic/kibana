@@ -41,7 +41,7 @@ const InsertTimeline = () => {
 export const Create = React.memo(() => {
   const history = useHistory();
   const onSuccess = useCallback(
-    ({ id }) => {
+    async ({ id }) => {
       history.push(getCaseDetailsUrl({ id }));
     },
     [history]

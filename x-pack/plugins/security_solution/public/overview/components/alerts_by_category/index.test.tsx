@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount, ReactWrapper } from 'enzyme';
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 
 import '../../../common/mock/match_media';
 import '../../../common/mock/react_beautiful_dnd';
@@ -24,7 +22,6 @@ jest.mock('../../../common/containers/matrix_histogram', () => ({
   useMatrixHistogram: jest.fn(),
 }));
 
-const theme = () => ({ eui: { ...euiDarkVars, euiSizeL: '24px' }, darkMode: true });
 const from = '2020-03-31T06:00:00.000Z';
 const to = '2019-03-31T06:00:00.000Z';
 
@@ -55,11 +52,9 @@ describe('Alerts by category', () => {
       ]);
 
       wrapper = mount(
-        <ThemeProvider theme={theme}>
-          <TestProviders>
-            <AlertsByCategory {...testProps} />
-          </TestProviders>
-        </ThemeProvider>
+        <TestProviders>
+          <AlertsByCategory {...testProps} />
+        </TestProviders>
       );
 
       await waitFor(() => {
@@ -123,11 +118,9 @@ describe('Alerts by category', () => {
       ]);
 
       wrapper = mount(
-        <ThemeProvider theme={theme}>
-          <TestProviders>
-            <AlertsByCategory {...testProps} />
-          </TestProviders>
-        </ThemeProvider>
+        <TestProviders>
+          <AlertsByCategory {...testProps} />
+        </TestProviders>
       );
 
       wrapper.update();

@@ -140,7 +140,7 @@ const apiFactory = () => ({
         hits: [],
         total: {
           value: 0,
-          relation: 'the-relation',
+          relation: 'eq',
         },
         max_score: 0,
       },

@@ -104,7 +104,11 @@ export const useInitSourcerer = (
           selectedPatterns: [signalIndexName],
         })
       );
-    } else if (signalIndexNameSelector != null && initialTimelineSourcerer.current) {
+    } else if (
+      scopeId === SourcererScopeName.detections &&
+      signalIndexNameSelector != null &&
+      initialTimelineSourcerer.current
+    ) {
       initialDetectionSourcerer.current = false;
       dispatch(
         sourcererActions.setSelectedIndexPatterns({

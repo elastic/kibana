@@ -26,12 +26,42 @@ export const doTemplate = template(noWhiteSpace(templateHtml));
 
 export const formatRow = (hit: Record<string, any>, indexPattern: IndexPattern) => {
   const highlights = hit?.highlight ?? {};
+  // Keys are sorted in the hits object
   const formatted = indexPattern.formatHit(hit);
   const highlightPairs: Array<[string, unknown]> = [];
   const sourcePairs: Array<[string, unknown]> = [];
   Object.entries(formatted).forEach(([key, val]) => {
     const pairs = highlights[key] ? highlightPairs : sourcePairs;
     pairs.push([key, val]);
+  });
+  return doTemplate({ defPairs: [...highlightPairs, ...sourcePairs] });
+};
+
+export const formatTopLevelObject = (
+  row: Record<string, any>,
+  fields: Record<string, any>,
+  indexPattern: IndexPattern
+) => {
+  const highlights = row.highlight ?? {};
+  const highlightPairs: Array<[string, unknown]> = [];
+  const sourcePairs: Array<[string, unknown]> = [];
+  const sorted = Object.entries(fields).sort(([keyA], [keyB]) => keyA.localeCompare(keyB));
+  sorted.forEach(([key, values]) => {
+    const field = indexPattern.getFieldByName(key);
+    const formatter = field
+      ? indexPattern.getFormatterForField(field)
+      : { convert: (v: string, ...rest: unknown[]) => String(v) };
+    const formatted = values
+      .map((val: unknown) =>
+        formatter.convert(val, 'html', {
+          field,
+          hit: row,
+          indexPattern,
+        })
+      )
+      .join(', ');
+    const pairs = highlights[key] ? highlightPairs : sourcePairs;
+    pairs.push([key, formatted]);
   });
   return doTemplate({ defPairs: [...highlightPairs, ...sourcePairs] });
 };

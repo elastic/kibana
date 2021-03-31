@@ -5,11 +5,16 @@
  * 2.0.
  */
 
+import { EngineDetails } from '../components/engine/types';
 import { generateEncodedPath } from '../utils/encode_path_params';
 
 export const mockEngineValues = {
   engineName: 'some-engine',
-  engine: {},
+  engine: {} as EngineDetails,
+};
+
+export const mockEngineActions = {
+  initializeEngine: jest.fn(),
 };
 
 export const mockGenerateEnginePath = jest.fn((path, pathParams = {}) =>
@@ -17,6 +22,9 @@ export const mockGenerateEnginePath = jest.fn((path, pathParams = {}) =>
 );
 
 jest.mock('../components/engine', () => ({
-  EngineLogic: { values: mockEngineValues },
+  EngineLogic: {
+    values: mockEngineValues,
+    actions: mockEngineActions,
+  },
   generateEnginePath: mockGenerateEnginePath,
 }));

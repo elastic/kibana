@@ -49,7 +49,7 @@ export class Chart {
       const element = this.handler.el;
 
       // Add tooltip
-      this.tooltip = new Tooltip('chart', element, tooltipFormatter, events);
+      this.tooltip = new Tooltip('chart', element, tooltipFormatter, events, uiSettings);
       this.tooltips.push(this.tooltip);
     }
 

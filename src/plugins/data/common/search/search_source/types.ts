@@ -74,6 +74,7 @@ export interface SearchSourceFields {
   sort?: EsQuerySortValue | EsQuerySortValue[];
   highlight?: any;
   highlightAll?: boolean;
+  trackTotalHits?: boolean | number;
   /**
    * {@link AggConfigs}
    */

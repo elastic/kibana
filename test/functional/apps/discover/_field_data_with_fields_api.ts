@@ -16,6 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const toasts = getService('toasts');
   const queryBar = getService('queryBar');
+  const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'header', 'discover', 'visualize', 'timePicker']);
 
   describe('discover tab with new fields API', function describeIndexTests() {
@@ -88,6 +89,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const { message } = await toasts.getErrorToast();
         expect(message).to.contain(expectedError);
         await toasts.dismissToast();
+      });
+
+      it('shows top-level object keys', async function () {
+        await queryBar.setQuery('election');
+        await queryBar.submitQuery();
+        const currentUrl = await browser.getCurrentUrl();
+        const [, hash] = currentUrl.split('#/');
+        await PageObjects.common.navigateToUrl(
+          'discover',
+          hash.replace('columns:!()', 'columns:!(relatedContent)'),
+          { useActualUrl: true }
+        );
+        await retry.try(async function tryingForTime() {
+          expect(await PageObjects.discover.getDocHeader()).to.be('Time relatedContent');
+        });
+
+        const field = await PageObjects.discover.getDocTableField(1, 1);
+        expect(field).to.include.string('relatedContent.url:');
+
+        const marks = await PageObjects.discover.getMarks();
+        expect(marks.length).to.be(172);
+        expect(marks.indexOf('election')).to.be(0);
       });
     });
   });

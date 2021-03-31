@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Execution via TSClient Mountpoint",
   "query": "process where event.type in (\"start\", \"process_started\") and process.executable : \"\\\\Device\\\\Mup\\\\tsclient\\\\*.exe\"\n",
   "references": [

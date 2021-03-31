@@ -38,7 +38,6 @@ export function saveDashboard(
       // reset state only when save() was successful
       // e.g. save() could be interrupted if title is duplicated and not confirmed
       dashboardStateManager.lastSavedDashboardFilters = dashboardStateManager.getFilterState();
-      dashboardStateManager.resetState(!saveOptions.stayInEditMode);
     }
 
     return id;

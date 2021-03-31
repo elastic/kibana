@@ -10,14 +10,12 @@ import { isActivePlatinumLicense } from '../../../common/license_check';
 import { APMConfig } from '../..';
 import { KibanaRequest } from '../../../../../../src/core/server';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
-import { ESFilter } from '../../../../../typings/elasticsearch';
 import { UIFilters } from '../../../typings/ui_filters';
 import { APMRequestHandlerContext } from '../../routes/typings';
 import {
   ApmIndicesConfig,
   getApmIndices,
 } from '../settings/apm_indices/get_apm_indices';
-import { getEsFilter } from './convert_ui_filters/get_es_filter';
 import {
   APMEventClient,
   createApmEventClient,
@@ -38,7 +36,6 @@ export interface Setup {
   config: APMConfig;
   indices: ApmIndicesConfig;
   uiFilters: UIFilters;
-  esFilter: ESFilter[];
 }
 
 export interface SetupTimeRange {
@@ -48,7 +45,7 @@ export interface SetupTimeRange {
 
 interface SetupRequestParams {
   query?: {
-    _debug?: boolean;
+    _inspect?: boolean;
 
     /**
      * Timestamp in ms since epoch
@@ -91,7 +88,7 @@ export async function setupRequest<TParams extends SetupRequestParams>(
       indices,
       apmEventClient: createApmEventClient({
         esClient: context.core.elasticsearch.client.asCurrentUser,
-        debug: context.params.query._debug,
+        debug: context.params.query._inspect,
         request,
         indices,
         options: { includeFrozen },
@@ -110,7 +107,6 @@ export async function setupRequest<TParams extends SetupRequestParams>(
           : undefined,
       config,
       uiFilters,
-      esFilter: getEsFilter(uiFilters),
     };
 
     return {

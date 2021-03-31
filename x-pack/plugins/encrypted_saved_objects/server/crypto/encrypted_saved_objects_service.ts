@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { Crypto, EncryptOutput } from '@elastic/node-crypto';
-import typeDetect from 'type-detect';
+import type { Crypto, EncryptOutput } from '@elastic/node-crypto';
 import stringify from 'json-stable-stringify';
-import { Logger } from 'src/core/server';
-import { AuthenticatedUser } from '../../../security/common/model';
-import { EncryptedSavedObjectsAuditLogger } from '../audit';
-import { EncryptionError, EncryptionErrorOperation } from './encryption_error';
+import typeDetect from 'type-detect';
+
+import type { Logger } from 'src/core/server';
+
+import type { AuthenticatedUser } from '../../../security/common/model';
+import type { EncryptedSavedObjectsAuditLogger } from '../audit';
 import { EncryptedSavedObjectAttributesDefinition } from './encrypted_saved_object_type_definition';
+import { EncryptionError, EncryptionErrorOperation } from './encryption_error';
 
 /**
  * Describes the attributes to encrypt. By default, attribute values won't be exposed to end-users

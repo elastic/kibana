@@ -73,7 +73,7 @@ function sampleArgs() {
         type: 'lens_datatable_column',
       },
     ],
-    sortingColumnId: '',
+    sortingColumnId: undefined,
     sortingDirection: 'none',
   };
 

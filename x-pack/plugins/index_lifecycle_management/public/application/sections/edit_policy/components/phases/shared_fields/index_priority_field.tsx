@@ -18,7 +18,7 @@ import { UseField } from '../../../form';
 import { LearnMoreLink, DescribedFormRow } from '../..';
 
 interface Props {
-  phase: 'hot' | 'warm' | 'cold';
+  phase: 'hot' | 'warm' | 'cold' | 'frozen';
 }
 
 export const IndexPriorityField: FunctionComponent<Props> = ({ phase }) => {

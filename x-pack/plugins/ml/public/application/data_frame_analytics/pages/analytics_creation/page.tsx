@@ -25,13 +25,20 @@ import { useMlContext } from '../../../contexts/ml';
 import { ml } from '../../../services/ml_api_service';
 import { useCreateAnalyticsForm } from '../analytics_management/hooks/use_create_analytics_form';
 import { CreateAnalyticsAdvancedEditor } from './components/create_analytics_advanced_editor';
-import { AdvancedStep, ConfigurationStep, CreateStep, DetailsStep } from './components';
+import {
+  AdvancedStep,
+  ConfigurationStep,
+  CreateStep,
+  DetailsStep,
+  ValidationStepWrapper,
+} from './components';
 import { DataFrameAnalyticsId } from '../../../../../common/types/data_frame_analytics';
 
 export enum ANALYTICS_STEPS {
   CONFIGURATION,
   ADVANCED,
   DETAILS,
+  VALIDATION,
   CREATE,
 }
 
@@ -41,7 +48,13 @@ interface Props {
 
 export const Page: FC<Props> = ({ jobId }) => {
   const [currentStep, setCurrentStep] = useState<ANALYTICS_STEPS>(ANALYTICS_STEPS.CONFIGURATION);
-  const [activatedSteps, setActivatedSteps] = useState<boolean[]>([true, false, false, false]);
+  const [activatedSteps, setActivatedSteps] = useState<boolean[]>([
+    true,
+    false,
+    false,
+    false,
+    false,
+  ]);
 
   const mlContext = useMlContext();
   const { currentIndexPattern } = mlContext;
@@ -126,6 +139,21 @@ export const Page: FC<Props> = ({ jobId }) => {
         />
       ),
       status: currentStep >= ANALYTICS_STEPS.DETAILS ? undefined : ('incomplete' as EuiStepStatus),
+    },
+    {
+      title: i18n.translate('xpack.ml.dataframe.analytics.creation.validationStepTitle', {
+        defaultMessage: 'Validation',
+      }),
+      children: (
+        <ValidationStepWrapper
+          {...createAnalyticsForm}
+          setCurrentStep={setCurrentStep}
+          step={currentStep}
+          stepActivated={activatedSteps[ANALYTICS_STEPS.VALIDATION]}
+        />
+      ),
+      status:
+        currentStep >= ANALYTICS_STEPS.VALIDATION ? undefined : ('incomplete' as EuiStepStatus),
     },
     {
       title: i18n.translate('xpack.ml.dataframe.analytics.creation.createStepTitle', {

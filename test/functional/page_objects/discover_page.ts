@@ -194,11 +194,11 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       return await row.getVisibleText();
     }
 
-    public async getDocTableField(index: number) {
-      const field = await find.byCssSelector(
-        `tr.kbnDocTable__row:nth-child(${index}) > [data-test-subj='docTableField']`
+    public async getDocTableField(index: number, cellIndex = 0) {
+      const fields = await find.allByCssSelector(
+        `tr.kbnDocTable__row:nth-child(${index}) [data-test-subj='docTableField']`
       );
-      return await field.getVisibleText();
+      return await fields[cellIndex].getVisibleText();
     }
 
     public async skipToEndOfDocTable() {
@@ -207,6 +207,15 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       // force focus on it, to make it interactable
       skipButton.focus();
       // now click it!
+      return skipButton.click();
+    }
+
+    /**
+     * When scrolling down the legacy table there's a link to scroll up
+     * So this is done by this function
+     */
+    public async backToTop() {
+      const skipButton = await testSubjects.find('discoverBackToTop');
       return skipButton.click();
     }
 
@@ -220,6 +229,10 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
 
     public async clickDocSortUp() {
       await find.clickByCssSelector('.fa-sort-up');
+    }
+
+    public async isShowingDocViewer() {
+      return await testSubjects.exists('kbnDocViewer');
     }
 
     public async getMarks() {

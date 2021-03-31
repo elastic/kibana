@@ -10,6 +10,8 @@ import d3 from 'd3';
 import _ from 'lodash';
 
 import { getHeatmapColors } from '../../../../../charts/public';
+import { UI_SETTINGS } from '../../../../../data/public';
+import { getValueForPercentageMode } from '../../percentage_mode_transform';
 
 const arcAngles = {
   angleFactor: 0.75,
@@ -47,9 +49,10 @@ const defaultConfig = {
 };
 
 export class MeterGauge {
-  constructor(gaugeChart) {
+  constructor(gaugeChart, uiSettings) {
     this.gaugeChart = gaugeChart;
     this.gaugeConfig = gaugeChart.gaugeConfig;
+    this.uiSettings = uiSettings;
     this.gaugeConfig = _.defaultsDeep(this.gaugeConfig, defaultConfig);
 
     this.gaugeChart.handler.visConfig.set('legend', {
@@ -68,12 +71,19 @@ export class MeterGauge {
 
   getLabels() {
     const isPercentageMode = this.gaugeConfig.percentageMode;
+    const percentageFormatPattern =
+      this.gaugeConfig.percentageFormatPattern ||
+      this.uiSettings.get(UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN);
     const colorsRange = this.gaugeConfig.colorsRange;
     const max = _.last(colorsRange).to;
     const labels = [];
     colorsRange.forEach((range) => {
-      const from = isPercentageMode ? Math.round((100 * range.from) / max) : range.from;
-      const to = isPercentageMode ? Math.round((100 * range.to) / max) : range.to;
+      const from = isPercentageMode
+        ? getValueForPercentageMode(range.from / max, percentageFormatPattern)
+        : range.from;
+      const to = isPercentageMode
+        ? getValueForPercentageMode(range.to / max, percentageFormatPattern)
+        : range.to;
       labels.push(`${from} - ${to}`);
     });
 

@@ -138,7 +138,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       await this.searchAlerts(name);
       await find.clickDisplayedByCssSelector(`[data-test-subj="alertsList"] [title="${name}"]`);
     },
-    async changeTabs(tab: 'alertsTab' | 'connectorsTab') {
+    async changeTabs(tab: 'rulesTab' | 'connectorsTab') {
       await testSubjects.click(tab);
     },
     async toggleSwitch(testSubject: string) {
@@ -185,6 +185,19 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       const isConfirmationModalVisible = await testSubjects.isDisplayed('confirmAlertSaveModal');
       expect(isConfirmationModalVisible).to.eql(true, 'Expect confirmation modal to be visible');
       await testSubjects.click('confirmModalConfirmButton');
+    },
+    async ensureRuleActionToggleApplied(
+      ruleName: string,
+      switchName: string,
+      shouldBeCheckedAsString: string
+    ) {
+      await retry.try(async () => {
+        await this.searchAlerts(ruleName);
+        await testSubjects.click('collapsedItemActions');
+        const switchControl = await testSubjects.find(switchName);
+        const isChecked = await switchControl.getAttribute('aria-checked');
+        expect(isChecked).to.eql(shouldBeCheckedAsString);
+      });
     },
   };
 }

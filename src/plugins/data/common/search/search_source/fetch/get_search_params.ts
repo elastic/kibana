@@ -36,10 +36,13 @@ export function getSearchParamsFromRequest(
 ): ISearchRequestParams {
   const { getConfig } = dependencies;
   const searchParams = getSearchParams(getConfig);
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const { track_total_hits, ...body } = searchRequest.body;
 
   return {
     index: searchRequest.index.title || searchRequest.index,
-    body: searchRequest.body,
+    body,
+    track_total_hits,
     ...searchParams,
   };
 }

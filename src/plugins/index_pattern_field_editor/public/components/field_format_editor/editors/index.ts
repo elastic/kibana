@@ -19,3 +19,4 @@ export { StaticLookupFormatEditor } from './static_lookup';
 export { StringFormatEditor } from './string';
 export { TruncateFormatEditor } from './truncate';
 export { UrlFormatEditor } from './url';
+export { HistogramFormatEditor } from './histogram';

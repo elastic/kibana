@@ -65,6 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const finalRows = await PageObjects.discover.getDocTableRows();
       expect(finalRows.length).to.be.above(initialRows.length);
       expect(finalRows.length).to.be(rowsHardLimit);
+      await PageObjects.discover.backToTop();
     });
 
     it('should go the end of the table when using the accessible Skip button', async function () {
@@ -74,6 +75,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const footer = await PageObjects.discover.getDocTableFooter();
       log.debug(await footer.getVisibleText());
       expect(await footer.getVisibleText()).to.have.string(rowsHardLimit);
+      await PageObjects.discover.backToTop();
     });
 
     describe('expand a document row', function () {

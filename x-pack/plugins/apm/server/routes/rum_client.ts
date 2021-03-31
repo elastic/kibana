@@ -6,10 +6,8 @@
  */
 
 import * as t from 'io-ts';
-import { omit } from 'lodash';
 import { jsonRt } from '../../common/runtime_types/json_rt';
 import { LocalUIFilterName } from '../../common/ui_filter';
-import { getEsFilter } from '../lib/helpers/convert_ui_filters/get_es_filter';
 import {
   Setup,
   setupRequest,
@@ -31,13 +29,15 @@ import { localUIFilterNames } from '../lib/rum_client/ui_filters/local_ui_filter
 import { getRumPageLoadTransactionsProjection } from '../projections/rum_page_load_transactions';
 import { Projection } from '../projections/typings';
 import { createRoute } from './create_route';
-import { rangeRt, uiFiltersRt } from './default_api_types';
+import { rangeRt } from './default_api_types';
 import { APMRequestHandlerContext } from './typings';
 
 export const percentileRangeRt = t.partial({
   minPercentile: t.string,
   maxPercentile: t.string,
 });
+
+const uiFiltersRt = t.type({ uiFilters: t.string });
 
 const uxQueryRt = t.intersection([
   uiFiltersRt,
@@ -79,12 +79,14 @@ export const rumPageLoadDistributionRoute = createRoute({
       query: { minPercentile, maxPercentile, urlQuery },
     } = context.params;
 
-    return getPageLoadDistribution({
+    const pageLoadDistribution = await getPageLoadDistribution({
       setup,
       minPercentile,
       maxPercentile,
       urlQuery,
     });
+
+    return { pageLoadDistribution };
   },
 });
 
@@ -105,13 +107,15 @@ export const rumPageLoadDistBreakdownRoute = createRoute({
       query: { minPercentile, maxPercentile, breakdown, urlQuery },
     } = context.params;
 
-    return getPageLoadDistBreakdown({
+    const pageLoadDistBreakdown = await getPageLoadDistBreakdown({
       setup,
       minPercentile: Number(minPercentile),
       maxPercentile: Number(maxPercentile),
       breakdown,
       urlQuery,
     });
+
+    return { pageLoadDistBreakdown };
   },
 });
 
@@ -145,7 +149,8 @@ export const rumServicesRoute = createRoute({
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
 
-    return getRumServices({ setup });
+    const rumServices = await getRumServices({ setup });
+    return { rumServices };
   },
 });
 
@@ -319,18 +324,17 @@ function createLocalFiltersRoute<
       const projection = await getProjection({
         query,
         context,
-        setup: {
-          ...setup,
-          esFilter: getEsFilter(omit(uiFilters, filterNames)),
-        },
+        setup,
       });
 
-      return getLocalUIFilters({
+      const localUiFilters = await getLocalUIFilters({
         projection,
         setup,
         uiFilters,
         localFilterNames: filterNames,
       });
+
+      return { localUiFilters };
     },
   });
 }

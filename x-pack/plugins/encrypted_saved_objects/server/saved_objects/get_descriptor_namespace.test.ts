@@ -6,6 +6,7 @@
  */
 
 import { savedObjectsTypeRegistryMock } from 'src/core/server/mocks';
+
 import { getDescriptorNamespace } from './get_descriptor_namespace';
 
 describe('getDescriptorNamespace', () => {

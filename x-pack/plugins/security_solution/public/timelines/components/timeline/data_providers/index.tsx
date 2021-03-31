@@ -56,7 +56,7 @@ const DropTargetDataProviders = styled.div`
   position: relative;
   border: 0.2rem dashed ${({ theme }) => theme.eui.euiColorMediumShade};
   border-radius: 5px;
-  padding: 5px 0;
+  padding: ${({ theme }) => theme.eui.euiSizeXS} 0;
   margin: 2px 0 2px 0;
   min-height: 100px;
   overflow-y: auto;

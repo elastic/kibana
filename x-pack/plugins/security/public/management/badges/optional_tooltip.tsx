@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import React, { ReactElement } from 'react';
-import { EuiToolTipProps, EuiToolTip } from '@elastic/eui';
+import type { EuiToolTipProps } from '@elastic/eui';
+import { EuiToolTip } from '@elastic/eui';
+import type { ReactElement } from 'react';
+import React from 'react';
 
 interface Props {
   children: ReactElement<any>;

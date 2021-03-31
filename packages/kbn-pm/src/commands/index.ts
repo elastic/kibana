@@ -18,6 +18,10 @@ export interface ICommandConfig {
 export interface ICommand {
   name: string;
   description: string;
+  reportTiming?: {
+    group: string;
+    id: string;
+  };
 
   run: (projects: ProjectMap, projectGraph: ProjectGraph, config: ICommandConfig) => Promise<void>;
 }

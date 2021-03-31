@@ -98,7 +98,7 @@ export const EditExceptionModal = memo(function EditExceptionModal({
   onConfirm,
   onRuleChange,
 }: EditExceptionModalProps) {
-  const { http } = useKibana().services;
+  const { http, data } = useKibana().services;
   const [comment, setComment] = useState('');
   const [errorsExist, setErrorExists] = useState(false);
   const { rule: maybeRule, loading: isRuleLoading } = useRuleAsync(ruleId);
@@ -313,6 +313,8 @@ export const EditExceptionModal = memo(function EditExceptionModal({
               <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
               <EuiSpacer />
               <ExceptionBuilderComponent
+                httpService={http}
+                autocompleteService={data.autocomplete}
                 exceptionListItems={[exceptionItem]}
                 listType={exceptionListType}
                 listId={exceptionItem.list_id}
@@ -382,7 +384,9 @@ export const EditExceptionModal = memo(function EditExceptionModal({
       )}
       {updateError == null && (
         <EuiModalFooter>
-          <EuiButtonEmpty onClick={onCancel}>{i18n.CANCEL}</EuiButtonEmpty>
+          <EuiButtonEmpty data-test-subj="cancelExceptionAddButton" onClick={onCancel}>
+            {i18n.CANCEL}
+          </EuiButtonEmpty>
 
           <EuiButton
             data-test-subj="edit-exception-confirm-button"

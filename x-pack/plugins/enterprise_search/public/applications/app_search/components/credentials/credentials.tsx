@@ -11,7 +11,6 @@ import { useActions, useValues } from 'kea';
 
 import {
   EuiPageHeader,
-  EuiPageHeaderSection,
   EuiTitle,
   EuiPageContentBody,
   EuiPanel,
@@ -35,14 +34,18 @@ import { CredentialsList } from './credentials_list';
 import { CredentialsLogic } from './credentials_logic';
 
 export const Credentials: React.FC = () => {
-  const { initializeCredentialsData, resetCredentials, showCredentialsForm } = useActions(
+  const { fetchCredentials, fetchDetails, resetCredentials, showCredentialsForm } = useActions(
     CredentialsLogic
   );
 
-  const { dataLoading, shouldShowCredentialsForm } = useValues(CredentialsLogic);
+  const { meta, dataLoading, shouldShowCredentialsForm } = useValues(CredentialsLogic);
 
   useEffect(() => {
-    initializeCredentialsData();
+    fetchCredentials();
+  }, [meta.page.current]);
+
+  useEffect(() => {
+    fetchDetails();
     return () => {
       resetCredentials();
     };
@@ -51,13 +54,7 @@ export const Credentials: React.FC = () => {
   return (
     <>
       <SetPageChrome trail={[CREDENTIALS_TITLE]} />
-      <EuiPageHeader>
-        <EuiPageHeaderSection>
-          <EuiTitle size="l">
-            <h1>{CREDENTIALS_TITLE}</h1>
-          </EuiTitle>
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
+      <EuiPageHeader pageTitle={CREDENTIALS_TITLE} />
       <EuiPageContentBody>
         {shouldShowCredentialsForm && <CredentialsFlyout />}
         <EuiPanel className="eui-textCenter">

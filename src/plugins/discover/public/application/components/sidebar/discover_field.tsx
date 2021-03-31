@@ -305,7 +305,9 @@ export function DiscoverField({
       anchorPosition="rightUp"
       panelClassName="dscSidebarItem__fieldPopoverPanel"
     >
-      <EuiPopoverTitle style={{ textTransform: 'none' }}>{field.displayName}</EuiPopoverTitle>
+      <EuiPopoverTitle style={{ textTransform: 'none' }} className="eui-textBreakWord">
+        {field.displayName}
+      </EuiPopoverTitle>
       <EuiTitle size="xxxs">
         <h5>
           {i18n.translate('discover.fieldChooser.discoverField.fieldTopValuesLabel', {

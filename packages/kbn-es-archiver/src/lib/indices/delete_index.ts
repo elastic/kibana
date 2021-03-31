@@ -6,15 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { ToolingLog } from '@kbn/dev-utils';
 import { Stats } from '../stats';
+import { ES_CLIENT_HEADERS } from '../../client_headers';
 
 // see https://github.com/elastic/elasticsearch/blob/99f88f15c5febbca2d13b5b5fda27b844153bf1a/server/src/main/java/org/elasticsearch/cluster/SnapshotsInProgress.java#L313-L319
 const PENDING_SNAPSHOT_STATUSES = ['INIT', 'STARTED', 'WAITING'];
 
 export async function deleteIndex(options: {
-  client: Client;
+  client: KibanaClient;
   stats: Stats;
   index: string | string[];
   log: ToolingLog;
@@ -30,6 +31,7 @@ export async function deleteIndex(options: {
       },
       {
         ignore: [404],
+        headers: ES_CLIENT_HEADERS,
       }
     );
 
@@ -38,7 +40,12 @@ export async function deleteIndex(options: {
 
   try {
     const indicesToDelete = await getIndicesToDelete();
-    await client.indices.delete({ index: indicesToDelete });
+    await client.indices.delete(
+      { index: indicesToDelete },
+      {
+        headers: ES_CLIENT_HEADERS,
+      }
+    );
     for (const index of indices) {
       stats.deletedIndex(index);
     }
@@ -77,7 +84,7 @@ export function isDeleteWhileSnapshotInProgressError(error: any) {
  * snapshotting this index to complete.
  */
 export async function waitForSnapshotCompletion(
-  client: Client,
+  client: KibanaClient,
   index: string | string[],
   log: ToolingLog
 ) {
@@ -86,10 +93,15 @@ export async function waitForSnapshotCompletion(
       body: {
         snapshots: [status],
       },
-    } = await client.snapshot.status({
-      repository,
-      snapshot,
-    });
+    } = await client.snapshot.status(
+      {
+        repository,
+        snapshot,
+      },
+      {
+        headers: ES_CLIENT_HEADERS,
+      }
+    );
 
     log.debug(`Snapshot ${repository}/${snapshot} is ${status.state}`);
     return PENDING_SNAPSHOT_STATUSES.includes(status.state);
@@ -98,15 +110,21 @@ export async function waitForSnapshotCompletion(
   const getInProgressSnapshots = async (repository: string) => {
     const {
       body: { snapshots: inProgressSnapshots },
-    } = await client.snapshot.get({
-      repository,
-      snapshot: '_current',
-    });
+    } = await client.snapshot.get(
+      {
+        repository,
+        snapshot: '_current',
+      },
+      {
+        headers: ES_CLIENT_HEADERS,
+      }
+    );
 
     return inProgressSnapshots;
   };
 
-  for (const repository of Object.keys(await client.snapshot.getRepository({} as any))) {
+  const { body: repositoryMap } = await client.snapshot.getRepository({} as any);
+  for (const repository of Object.keys(repositoryMap)) {
     const allInProgress = await getInProgressSnapshots(repository);
     const found = allInProgress.find((s: any) => s.indices.includes(index));
 

@@ -65,6 +65,16 @@ exports[`FieldIcon renders known field types date is rendered 1`] = `
 />
 `;
 
+exports[`FieldIcon renders known field types date_range is rendered 1`] = `
+<EuiToken
+  aria-label="date_range"
+  className="kbnFieldIcon"
+  iconType="tokenDate"
+  size="s"
+  title="date_range"
+/>
+`;
+
 exports[`FieldIcon renders known field types geo_point is rendered 1`] = `
 <EuiToken
   aria-label="geo_point"
@@ -95,6 +105,16 @@ exports[`FieldIcon renders known field types ip is rendered 1`] = `
 />
 `;
 
+exports[`FieldIcon renders known field types ip_range is rendered 1`] = `
+<EuiToken
+  aria-label="ip_range"
+  className="kbnFieldIcon"
+  iconType="tokenIP"
+  size="s"
+  title="ip_range"
+/>
+`;
+
 exports[`FieldIcon renders known field types murmur3 is rendered 1`] = `
 <EuiToken
   aria-label="murmur3"
@@ -122,6 +142,16 @@ exports[`FieldIcon renders known field types number is rendered 1`] = `
   iconType="tokenNumber"
   size="s"
   title="number"
+/>
+`;
+
+exports[`FieldIcon renders known field types number_range is rendered 1`] = `
+<EuiToken
+  aria-label="number_range"
+  className="kbnFieldIcon"
+  iconType="tokenNumber"
+  size="s"
+  title="number_range"
 />
 `;
 

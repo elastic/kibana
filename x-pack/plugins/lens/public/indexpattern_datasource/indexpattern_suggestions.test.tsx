@@ -63,6 +63,13 @@ const fieldsOne = [
     aggregatable: true,
     searchable: true,
   },
+  {
+    name: 'bytes_range',
+    displayName: 'bytes_range',
+    type: 'number_range',
+    aggregatable: true,
+    searchable: true,
+  },
   documentField,
 ];
 
@@ -728,7 +735,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   sourceField: 'bytes',
                   label: 'Avg of bytes',
                   customLabel: true,
-                  operationType: 'avg',
+                  operationType: 'average',
                 },
               },
               columnOrder: ['cola', 'colb'],
@@ -763,7 +770,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     sourceField: 'bytes',
                     label: 'Avg of bytes',
                     customLabel: true,
-                    operationType: 'avg',
+                    operationType: 'average',
                   },
                 },
               },
@@ -1053,7 +1060,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   customLabel: true,
                   dataType: 'number',
                   isBucketed: false,
-                  operationType: 'avg',
+                  operationType: 'average',
                   sourceField: 'bytes',
                 },
                 ref: {
@@ -1113,7 +1120,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   customLabel: true,
                   dataType: 'number',
                   isBucketed: false,
-                  operationType: 'avg',
+                  operationType: 'average',
                   sourceField: 'bytes',
                 },
                 ref: {
@@ -1461,7 +1468,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
-                operationType: 'avg',
+                operationType: 'average',
                 sourceField: 'bytes',
                 scale: 'ratio',
               },
@@ -1530,7 +1537,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
-                operationType: 'avg',
+                operationType: 'average',
                 sourceField: 'bytes',
                 scale: 'ratio',
               },
@@ -1594,7 +1601,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 isBucketed: false,
                 sourceField: 'dest',
                 label: 'Unique count of dest',
-                operationType: 'cardinality',
+                operationType: 'unique_count',
               },
               colb: {
                 label: 'My Op',
@@ -1640,7 +1647,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 isBucketed: false,
                 sourceField: 'dest',
                 label: 'Unique count of dest',
-                operationType: 'cardinality',
+                operationType: 'unique_count',
               },
               colb: {
                 label: 'My Custom Range',
@@ -1716,7 +1723,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
-                operationType: 'avg',
+                operationType: 'average',
                 sourceField: 'bytes',
                 scale: 'ratio',
               },
@@ -1836,7 +1843,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 dataType: 'number',
                 isBucketed: false,
 
-                operationType: 'avg',
+                operationType: 'average',
                 sourceField: 'field4',
               },
               col5: {
@@ -1944,7 +1951,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 dataType: 'number',
                 isBucketed: false,
 
-                operationType: 'avg',
+                operationType: 'average',
                 sourceField: 'field1',
               },
             },
@@ -2024,7 +2031,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 dataType: 'number',
                 isBucketed: false,
 
-                operationType: 'avg',
+                operationType: 'average',
                 sourceField: 'field1',
               },
             },
@@ -2084,7 +2091,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 dataType: 'number',
                 isBucketed: false,
 
-                operationType: 'avg',
+                operationType: 'average',
                 sourceField: 'bytes',
               },
             },

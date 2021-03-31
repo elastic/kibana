@@ -5,8 +5,20 @@
  * 2.0.
  */
 
-import { EntriesArray } from '../shared_imports';
-import { Type } from './schemas/common/schemas';
+import { isEmpty } from 'lodash';
+
+import {
+  CreateExceptionListItemSchema,
+  EntriesArray,
+  ExceptionListItemSchema,
+} from '../shared_imports';
+import { Type, JobStatus } from './schemas/common/schemas';
+
+export const hasLargeValueItem = (
+  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
+) => {
+  return exceptionItems.some((exceptionItem) => hasLargeValueList(exceptionItem.entries));
+};
 
 export const hasLargeValueList = (entries: EntriesArray): boolean => {
   const found = entries.filter(({ type }) => type === 'list');
@@ -32,3 +44,16 @@ export const isQueryRule = (ruleType: Type | undefined): boolean =>
   ruleType === 'query' || ruleType === 'saved_query';
 export const isThreatMatchRule = (ruleType: Type | undefined): boolean =>
   ruleType === 'threat_match';
+
+export const normalizeThresholdField = (
+  thresholdField: string | string[] | null | undefined
+): string[] => {
+  return Array.isArray(thresholdField)
+    ? thresholdField
+    : isEmpty(thresholdField)
+    ? []
+    : [thresholdField!];
+};
+
+export const getRuleStatusText = (value: JobStatus | null | undefined): JobStatus | null =>
+  value === 'partial failure' ? 'warning' : value != null ? value : null;

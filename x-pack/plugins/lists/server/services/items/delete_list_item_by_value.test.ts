@@ -61,8 +61,8 @@ describe('delete_list_item_by_value', () => {
         },
       },
       index: '.items',
-      refresh: 'wait_for',
+      refresh: false,
     };
-    expect(options.callCluster).toBeCalledWith('deleteByQuery', deleteByQuery);
+    expect(options.esClient.deleteByQuery).toBeCalledWith(deleteByQuery);
   });
 });

@@ -13,7 +13,11 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../common/event_outcome';
 import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
-import { environmentQuery, rangeQuery } from '../../../common/utils/queries';
+import {
+  environmentQuery,
+  rangeQuery,
+  kqlQuery,
+} from '../../../server/utils/queries';
 import { withApmSpan } from '../../utils/with_apm_span';
 import {
   getDocumentTypeFilterForAggregatedTransactions,
@@ -37,6 +41,7 @@ export type ServiceOverviewTransactionGroupSortField =
 
 export async function getServiceTransactionGroups({
   environment,
+  kuery,
   serviceName,
   setup,
   searchAggregatedTransactions,
@@ -44,6 +49,7 @@ export async function getServiceTransactionGroups({
   latencyAggregationType,
 }: {
   environment?: string;
+  kuery?: string;
   serviceName: string;
   setup: Setup & SetupTimeRange;
   searchAggregatedTransactions: boolean;
@@ -51,7 +57,7 @@ export async function getServiceTransactionGroups({
   latencyAggregationType: LatencyAggregationType;
 }) {
   return withApmSpan('get_service_transaction_groups', async () => {
-    const { apmEventClient, start, end, esFilter } = setup;
+    const { apmEventClient, start, end } = setup;
 
     const field = getTransactionDurationFieldForAggregatedTransactions(
       searchAggregatedTransactions
@@ -77,7 +83,7 @@ export async function getServiceTransactionGroups({
               ),
               ...rangeQuery(start, end),
               ...environmentQuery(environment),
-              ...esFilter,
+              ...kqlQuery(kuery),
             ],
           },
         },

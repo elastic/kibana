@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React, { Fragment, ReactNode, useState } from 'react';
+import type { ReactNode } from 'react';
+import React, { Fragment, useState } from 'react';
+import type { Query } from '@elastic/eui';
 import {
   EuiFlexGrid,
   EuiFlexGroup,
@@ -15,15 +17,16 @@ import {
   // @ts-ignore
   EuiSearchBar,
   EuiText,
-  Query,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+
 import { Loading } from '../../../components';
-import { PackageList } from '../../../types';
+import type { PackageList } from '../../../types';
 import { useLocalSearch, searchIdField } from '../hooks';
-import { PackageCard } from './package_card';
 import { pkgKeyFromPackageInfo } from '../../../services/pkg_key_from_package_info';
+
+import { PackageCard } from './package_card';
 
 interface ListProps {
   isLoading?: boolean;

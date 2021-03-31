@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectMigrationFn } from 'src/core/server';
+import type { SavedObjectMigrationFn } from 'src/core/server';
 
 export const migrateToKibana660: SavedObjectMigrationFn<any, any> = (doc) => {
   if (!doc.attributes.hasOwnProperty('disabledFeatures')) {

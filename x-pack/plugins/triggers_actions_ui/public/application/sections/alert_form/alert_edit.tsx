@@ -44,7 +44,9 @@ export interface AlertEditProps<MetaData = Record<string, any>> {
   alertTypeRegistry: AlertTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
   onClose: (reason: AlertFlyoutCloseReason) => void;
+  /** @deprecated use `onSave` as a callback after an alert is saved*/
   reloadAlerts?: () => Promise<void>;
+  onSave?: () => Promise<void>;
   metadata?: MetaData;
 }
 
@@ -52,10 +54,12 @@ export const AlertEdit = ({
   initialAlert,
   onClose,
   reloadAlerts,
+  onSave,
   alertTypeRegistry,
   actionTypeRegistry,
   metadata,
 }: AlertEditProps) => {
+  const onSaveHandler = onSave ?? reloadAlerts;
   const [{ alert }, dispatch] = useReducer(alertReducer as ConcreteAlertReducer, {
     alert: cloneDeep(initialAlert),
   });
@@ -96,9 +100,9 @@ export const AlertEdit = ({
         const newAlert = await updateAlert({ http, alert, id: alert.id });
         toasts.addSuccess(
           i18n.translate('xpack.triggersActionsUI.sections.alertEdit.saveSuccessNotificationText', {
-            defaultMessage: "Updated '{alertName}'",
+            defaultMessage: "Updated '{ruleName}'",
             values: {
-              alertName: newAlert.name,
+              ruleName: newAlert.name,
             },
           })
         );
@@ -117,7 +121,7 @@ export const AlertEdit = ({
       toasts.addDanger(
         errorRes.body?.message ??
           i18n.translate('xpack.triggersActionsUI.sections.alertEdit.saveErrorNotificationText', {
-            defaultMessage: 'Cannot update alert.',
+            defaultMessage: 'Cannot update rule.',
           })
       );
     }
@@ -135,7 +139,7 @@ export const AlertEdit = ({
           <EuiTitle size="s" data-test-subj="editAlertFlyoutTitle">
             <h3 id="flyoutTitle">
               <FormattedMessage
-                defaultMessage="Edit alert"
+                defaultMessage="Edit rule"
                 id="xpack.triggersActionsUI.sections.alertEdit.flyoutTitle"
               />
             </h3>
@@ -153,7 +157,7 @@ export const AlertEdit = ({
                     data-test-subj="hasActionsDisabled"
                     title={i18n.translate(
                       'xpack.triggersActionsUI.sections.alertEdit.disabledActionsWarningTitle',
-                      { defaultMessage: 'This alert has actions that are disabled' }
+                      { defaultMessage: 'This rule has actions that are disabled' }
                     )}
                   />
                   <EuiSpacer />
@@ -203,8 +207,8 @@ export const AlertEdit = ({
                       setIsSaving(false);
                       if (savedAlert) {
                         onClose(AlertFlyoutCloseReason.SAVED);
-                        if (reloadAlerts) {
-                          reloadAlerts();
+                        if (onSaveHandler) {
+                          onSaveHandler();
                         }
                       }
                     }}
