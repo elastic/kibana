@@ -15,7 +15,7 @@ Case management in Kibana
 
 - [Cases API](#cases-api)
 - [Cases UI](#cases-ui)
-- [Case Action Type](#case-action-type)
+- [Case Action Type](#case-action-type) _feature in development, disabled by default_
 
 
 ## Cases API
@@ -124,6 +124,8 @@ UI component:
  ![Recent Cases Component][recent-cases-img] 
 
 ## Case Action Type
+
+_***Feature in development, disabled by default**_
 
 See [Kibana Actions](https://github.com/elastic/kibana/tree/master/x-pack/plugins/actions) for more information.
 
