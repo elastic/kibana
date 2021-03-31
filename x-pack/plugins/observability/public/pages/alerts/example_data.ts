@@ -16,15 +16,15 @@ export const wireframeData = [
     reason: 'Error count is greater than 100 (current value is 135) on shippingService',
     'service.name': 'opbeans-go',
     affectedEntity: 'opbeans-go service',
-    status: 'Active',
-    expectedValue: '< 100',
+    'alert.status': 'active',
+    'evaluation.threshold': '100',
     'alert.severity.value': '135',
     severityLog: [
       { '@timestamp': 1615392661000, severity: 'critical', message: 'Load is 3.5' },
       { '@timestamp': 1615392600000, severity: 'warning', message: 'Load is 2.5' },
       { '@timestamp': 1615392552000, severity: 'critical', message: 'Load is 3.5' },
     ],
-    type: 'APM Error count',
+    'rule.name': 'APM Error count',
   },
   {
     '@timestamp': 1615392600000,

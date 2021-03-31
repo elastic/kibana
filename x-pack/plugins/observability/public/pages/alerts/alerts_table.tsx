@@ -6,18 +6,14 @@
  */
 
 import {
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiBasicTableProps,
+  EuiButtonEmpty,
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
   EuiDataGridColumn,
   EuiDataGridControlColumn,
-  DefaultItemAction,
-  EuiTableSelectionType,
   EuiLink,
-  EuiDataGridColumnActions,
 } from '@elastic/eui';
+import moment from 'moment-timezone';
 import React, { useState } from 'react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { AlertsFlyout } from './alerts_flyout';
@@ -30,68 +26,80 @@ import { AlertsFlyout } from './alerts_flyout';
  * the API response.
  */
 export interface AlertItem {
+  // These items may be included in the schema (https://github.com/elastic/kibana/issues/93728):
   '@timestamp': number;
-  reason: string;
+  'alert.duration.us'?: number;
   'alert.severity.level'?: string;
-  // These are just made up so we can make example links
+  'alert.severity.value'?: string;
+  'alert.status'?: string;
+  'evaluation.threshold'?: string;
+  'rule.name'?: string;
+
+  // These are either made up so we can make sample links, or could be included in the schema
   'service.name'?: string;
   pod?: string;
   log?: boolean;
-  // Other fields used in the flyout
-  'alert.severity.value'?: string;
+
+  // These are used in example flyouts or are not yet reflected in the schema
   affectedEntity?: string;
-  expectedValue?: string;
+  reason: string;
   severityLog?: Array<{ '@timestamp': number; severity: string; message: string }>;
-  status?: string;
-  'alert.duration.us'?: number;
-  type?: string;
 }
 
-type AlertsTableProps = Omit<
-  EuiBasicTableProps<AlertItem>,
-  'columns' | 'isSelectable' | 'pagination' | 'selection'
->;
+interface AlertsTableProps {
+  items: AlertItem[];
+}
+
+/**
+ *  This is a contrived implementation of the reason field that shows how
+ * you could link to certain types of resources based on what's contained
+ * in their alert data.
+ */
+function ReasonRenderer(item: AlertItem) {
+  const { prepend } = usePluginContext().core.http.basePath;
+  const text = item.reason;
+  const serviceName = item['service.name'];
+  const pod = item.pod;
+  const log = item.log;
+
+  if (serviceName) {
+    return <EuiLink href={prepend(`/app/apm/services/${serviceName}`)}>{text}</EuiLink>;
+  } else if (pod) {
+    return <EuiLink href={prepend(`/app/metrics/link-to/host-detail/${pod}`)}>{text}</EuiLink>;
+  } else if (log) {
+    return <EuiLink href={prepend(`/app/logs/stream`)}>{text}</EuiLink>;
+  } else {
+    return <>{text}</>;
+  }
+}
 
 export function AlertsTable({ items }: AlertsTableProps) {
   const [flyoutAlert, setFlyoutAlert] = useState<AlertItem | undefined>(undefined);
   const handleFlyoutClose = () => setFlyoutAlert(undefined);
-  const { prepend } = usePluginContext().core.http.basePath;
 
-  // This is a contrived implementation of the reason field that shows how
-  // you could link to certain types of resources based on what's contained
-  // in their alert data.
-  function ReasonRenderer(props: AlertItem) {
-    const item = props;
-    const text = props.reason;
-    const serviceName = item['service.name'];
-    const pod = item.pod;
-    const log = item.log;
+  function ActionCellRenderer({ rowIndex }: EuiDataGridCellValueElementProps) {
+    const item = items[rowIndex];
+    const handleClick = () => {
+      setFlyoutAlert(item);
+    };
 
-    if (serviceName) {
-      return <EuiLink href={prepend(`/app/apm/services/${serviceName}`)}>{text}</EuiLink>;
-    } else if (pod) {
-      return <EuiLink href={prepend(`/app/metrics/link-to/host-detail/${pod}`)}>{text}</EuiLink>;
-    } else if (log) {
-      return <EuiLink href={prepend(`/app/logs/stream`)}>{text}</EuiLink>;
-    } else {
-      return <>{text}</>;
+    return <EuiButtonEmpty onClick={handleClick}>Alert details</EuiButtonEmpty>;
+  }
+
+  function CellValueRenderer({ columnId, rowIndex }: EuiDataGridCellValueElementProps) {
+    const item = items[rowIndex];
+    const value = item[columnId as keyof AlertItem];
+    switch (columnId) {
+      case '@timestamp':
+        return <>{new Date(value as number).toISOString()}</>;
+      case 'alert.duration.us':
+        return <>{moment.duration((value as number) / 1000).humanize()}</>;
+      case 'reason':
+        return <ReasonRenderer {...item} />;
+      default:
+        return value ? <>{value}</> : null;
     }
   }
-
-  function ActionCellRenderer(props: EuiDataGridCellValueElementProps) {
-    return null;
-  }
-
-  const actions: EuiDataGridColumnActions = [
-    {
-      name: 'Alert details',
-      description: 'Alert details',
-      onClick: (item) => {
-        setFlyoutAlert(item);
-      },
-      isPrimary: true,
-    },
-  ];
 
   const columns: EuiDataGridColumn[] = [
     {
@@ -114,21 +122,8 @@ export function AlertsTable({ items }: AlertsTableProps) {
   ];
 
   const trailingControlColumns: EuiDataGridControlColumn[] = [
-    { id: 'actions', headerCellRender: () => null, rowCellRender: ActionCellRenderer, width: 40 },
+    { id: 'actions', headerCellRender: () => null, rowCellRender: ActionCellRenderer, width: 120 },
   ];
-
-  function CellValueRenderer({ columnId, rowIndex }: EuiDataGridCellValueElementProps) {
-    const item = items[rowIndex];
-    const value = item[columnId as keyof AlertItem];
-    switch (columnId) {
-      case '@timestamp':
-        return <>{new Date(value as number).toISOString()}</>;
-      case 'reason':
-        return <ReasonRenderer {...item} />;
-      default:
-        return value ? <>{value}</> : null;
-    }
-  }
 
   const [visibleColumns, setVisibleColumns] = useState(columns.map(({ id }) => id));
 
