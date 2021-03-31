@@ -6,3 +6,4 @@
  */
 
 export { ApiLogsTable } from './api_logs_table';
+export { NewApiEventsPrompt } from './new_api_events_prompt';
