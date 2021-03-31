@@ -5,72 +5,94 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { Logger } from 'src/core/server';
 import { KibanaRequest, KibanaResponseFactory, RequestHandler } from 'src/core/server';
+
+import type { LicenseType, LicenseCheckState } from '../../../licensing/common/types';
 import type { CcrRequestHandlerContext } from '../types';
 
 import { LicensingPluginSetup } from '../../../licensing/server';
-import { LicenseType } from '../../../licensing/common/types';
-
-export interface LicenseStatus {
-  isValid: boolean;
-  message?: string;
-}
+import { PLUGIN } from '../../common/constants';
 
 interface SetupSettings {
   pluginId: string;
   minimumLicenseType: LicenseType;
-  defaultErrorMessage: string;
 }
 
 export class License {
-  private licenseStatus: LicenseStatus = {
-    isValid: false,
-    message: 'Invalid License',
-  };
+  private licenseCheckState: LicenseCheckState = 'unavailable';
+  private licenseType?: LicenseType;
+  private logger?: Logger;
 
   private _isEsSecurityEnabled: boolean = false;
 
   setup(
-    { pluginId, minimumLicenseType, defaultErrorMessage }: SetupSettings,
+    { pluginId, minimumLicenseType }: SetupSettings,
     { licensing, logger }: { licensing: LicensingPluginSetup; logger: Logger }
   ) {
+    this.logger = logger;
+
     licensing.license$.subscribe((license) => {
-      const { state, message } = license.check(pluginId, minimumLicenseType);
-      const hasRequiredLicense = state === 'valid';
+      this.licenseType = license.type;
+      this.licenseCheckState = license.check(pluginId, minimumLicenseType).state;
 
       // Retrieving security checks the results of GET /_xpack as well as license state,
       // so we're also checking whether the security is disabled in elasticsearch.yml.
       this._isEsSecurityEnabled = license.getFeature('security').isEnabled;
+    });
+  }
 
-      if (hasRequiredLicense) {
-        this.licenseStatus = { isValid: true };
-      } else {
-        this.licenseStatus = {
-          isValid: false,
-          message: message || defaultErrorMessage,
-        };
-        if (message) {
-          logger.info(message);
-        }
-      }
+  getLicenseErrorMessage(licenseCheckState: LicenseCheckState): string {
+    switch (licenseCheckState) {
+      case 'invalid':
+        return i18n.translate(
+          'xpack.crossClusterReplication.licensingCheck.errorUnsupportedMessage',
+          {
+            defaultMessage:
+              'Your {licenseType} license does not support {pluginName}. Please upgrade your license.',
+            values: { licenseType: this.licenseType!, pluginName: PLUGIN.TITLE },
+          }
+        );
+
+      case 'expired':
+        return i18n.translate('xpack.crossClusterReplication.licensingCheck.errorExpiredMessage', {
+          defaultMessage:
+            'You cannot use {pluginName} because your {licenseType} license has expired.',
+          values: { licenseType: this.licenseType!, pluginName: PLUGIN.TITLE },
+        });
+
+      case 'unavailable':
+        return i18n.translate(
+          'xpack.crossClusterReplication.licensingCheck.errorUnavailableMessage',
+          {
+            defaultMessage:
+              'You cannot use {pluginName} because license information is not available at this time.',
+            values: { pluginName: PLUGIN.TITLE },
+          }
+        );
+    }
+
+    return i18n.translate('xpack.crossClusterReplication.licensingCheck.genericErrorMessage', {
+      defaultMessage: 'You cannot use {pluginName} because the license check failed.',
+      values: { pluginName: PLUGIN.TITLE },
     });
   }
 
   guardApiRoute<P, Q, B>(handler: RequestHandler<P, Q, B, CcrRequestHandlerContext>) {
-    const license = this;
-
-    return function licenseCheck(
+    const licenseCheck = (
       ctx: CcrRequestHandlerContext,
       request: KibanaRequest<P, Q, B>,
       response: KibanaResponseFactory
-    ) {
-      const licenseStatus = license.getStatus();
+    ) => {
+      // We'll only surface license errors if users attempt disallowed access to the API.
+      if (this.licenseCheckState !== 'valid') {
+        const licenseErrorMessage = this.getLicenseErrorMessage(this.licenseCheckState);
+        this.logger?.warn(licenseErrorMessage);
 
-      if (!licenseStatus.isValid) {
         return response.customError({
           body: {
-            message: licenseStatus.message || '',
+            message: licenseErrorMessage,
           },
           statusCode: 403,
         });
@@ -78,10 +100,8 @@ export class License {
 
       return handler(ctx, request, response);
     };
-  }
 
-  getStatus() {
-    return this.licenseStatus;
+    return licenseCheck;
   }
 
   // eslint-disable-next-line @typescript-eslint/explicit-member-accessibility

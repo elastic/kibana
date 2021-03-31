@@ -107,9 +107,6 @@ export class WatcherServerPlugin implements Plugin<void, void, any, any> {
           hasRequired: true,
         };
       } else {
-        if (message) {
-          this.log.info(message);
-        }
         this.licenseStatus = {
           hasRequired: false,
           message,
