@@ -293,20 +293,21 @@ export const installPackageByUploadHandler: RequestHandler<
   const esClient = context.core.elasticsearch.client.asCurrentUser;
   const contentType = request.headers['content-type'] as string; // from types it could also be string[] or undefined but this is checked later
   const archiveBuffer = Buffer.from(request.body);
-  try {
-    const res = await installPackage({
-      installSource: 'upload',
-      savedObjectsClient,
-      esClient,
-      archiveBuffer,
-      contentType,
-    });
+
+  const res = await installPackage({
+    installSource: 'upload',
+    savedObjectsClient,
+    esClient,
+    archiveBuffer,
+    contentType,
+  });
+  if (!res.error) {
     const body: InstallPackageResponse = {
       response: res.assets || [],
     };
     return response.ok({ body });
-  } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+  } else {
+    return defaultIngestErrorHandler({ error: res.error, response });
   }
 };
 

@@ -299,46 +299,52 @@ async function installPackageByUpload({
   archiveBuffer,
   contentType,
 }: InstallUploadedArchiveParams): Promise<InstallResult> {
-  const { packageInfo } = await parseAndVerifyArchiveEntries(archiveBuffer, contentType);
+  // if an error happens during getInstallType, report that we don't know
+  let installType: InstallType = 'unknown';
+  try {
+    const { packageInfo } = await parseAndVerifyArchiveEntries(archiveBuffer, contentType);
 
-  const installedPkg = await getInstallationObject({
-    savedObjectsClient,
-    pkgName: packageInfo.name,
-  });
+    const installedPkg = await getInstallationObject({
+      savedObjectsClient,
+      pkgName: packageInfo.name,
+    });
 
-  const installType = getInstallType({ pkgVersion: packageInfo.version, installedPkg });
-  if (installType !== 'install') {
-    throw new PackageOperationNotSupportedError(
-      `Package upload only supports fresh installations. Package ${packageInfo.name} is already installed, please uninstall first.`
-    );
+    installType = getInstallType({ pkgVersion: packageInfo.version, installedPkg });
+    if (installType !== 'install') {
+      throw new PackageOperationNotSupportedError(
+        `Package upload only supports fresh installations. Package ${packageInfo.name} is already installed, please uninstall first.`
+      );
+    }
+
+    const installSource = 'upload';
+    const paths = await unpackBufferToCache({
+      name: packageInfo.name,
+      version: packageInfo.version,
+      installSource,
+      archiveBuffer,
+      contentType,
+    });
+
+    setPackageInfo({
+      name: packageInfo.name,
+      version: packageInfo.version,
+      packageInfo,
+    });
+
+    return _installPackage({
+      savedObjectsClient,
+      esClient,
+      installedPkg,
+      paths,
+      packageInfo,
+      installType,
+      installSource,
+    }).then((assets) => {
+      return { assets, status: 'installed', installType };
+    });
+  } catch (e) {
+    return { error: e, installType };
   }
-
-  const installSource = 'upload';
-  const paths = await unpackBufferToCache({
-    name: packageInfo.name,
-    version: packageInfo.version,
-    installSource,
-    archiveBuffer,
-    contentType,
-  });
-
-  setPackageInfo({
-    name: packageInfo.name,
-    version: packageInfo.version,
-    packageInfo,
-  });
-
-  return _installPackage({
-    savedObjectsClient,
-    esClient,
-    installedPkg,
-    paths,
-    packageInfo,
-    installType,
-    installSource,
-  }).then((assets) => {
-    return { assets, status: 'installed', installType };
-  });
 }
 
 export type InstallPackageParams = {
@@ -387,7 +393,7 @@ export async function installPackage(args: InstallPackageParams) {
       archiveBuffer,
       contentType,
     }).then(async (installResult) => {
-      if (skipPostInstall) {
+      if (skipPostInstall || installResult.error) {
         return installResult;
       }
       logger.debug(`install of uploaded package finished, running post-install`);
