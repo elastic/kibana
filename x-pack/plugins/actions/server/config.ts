@@ -38,7 +38,7 @@ export const configSchema = schema.object({
   proxyRejectUnauthorizedCertificates: schema.boolean({ defaultValue: true }),
   rejectUnauthorized: schema.boolean({ defaultValue: true }),
   refreshExpiredTokensTask: schema.object({
-    interval: schema.string({ defaultValue: '2m' }),
+    interval: schema.string({ defaultValue: '25m' }),
   }),
 });
 
