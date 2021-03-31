@@ -23,7 +23,6 @@ describe('dateHistogram(req, panel, series)', () => {
     req = {
       body: {
         timerange: {
-          timezone: 'UTC',
           min: '2017-01-01T00:00:00Z',
           max: '2017-01-01T01:00:00Z',
         },
@@ -40,7 +39,7 @@ describe('dateHistogram(req, panel, series)', () => {
       queryStringOptions: {},
     };
     indexPattern = {};
-    capabilities = new DefaultSearchCapabilities(req);
+    capabilities = new DefaultSearchCapabilities({ timezone: 'UTC', maxBucketsLimit: 2000 });
     uiSettings = {
       get: async (key) => (key === UI_SETTINGS.HISTOGRAM_MAX_BARS ? 100 : 50),
     };
