@@ -163,6 +163,7 @@ describe('migration actions', () => {
                 Object {
                   "_tag": "Left",
                   "left": Object {
+                    "index": "no_such_index",
                     "type": "index_not_found_exception",
                   },
                 }
