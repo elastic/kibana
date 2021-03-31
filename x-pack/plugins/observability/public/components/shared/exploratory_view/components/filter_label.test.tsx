@@ -16,6 +16,7 @@ describe('FilterLabel', function () {
   jest.spyOn(useSeriesHook, 'useSeriesFilters').mockReturnValue({
     invertFilter,
   } as any);
+
   it('should render properly', async function () {
     render(
       <FilterLabel
@@ -38,7 +39,7 @@ describe('FilterLabel', function () {
     });
   });
 
-  it('should invert/delete filter', async function () {
+  it('should delete filter', async function () {
     const removeFilter = jest.fn();
     render(
       <FilterLabel
@@ -58,6 +59,24 @@ describe('FilterLabel', function () {
     fireEvent.click(screen.getByTestId('deleteFilter'));
     expect(removeFilter).toHaveBeenCalledTimes(1);
     expect(removeFilter).toHaveBeenCalledWith('service.name', 'elastic-co', false);
+  });
+
+  it('should invert filter', async function () {
+    const removeFilter = jest.fn();
+    render(
+      <FilterLabel
+        field={'service.name'}
+        value={'elastic-co'}
+        label={'Web Application'}
+        negate={false}
+        seriesId={'kpi-trends'}
+        removeFilter={removeFilter}
+      />
+    );
+
+    await waitFor(() => {
+      fireEvent.click(screen.getByLabelText('Filter actions'));
+    });
 
     fireEvent.click(screen.getByTestId('negateFilter'));
     expect(invertFilter).toHaveBeenCalledTimes(1);
