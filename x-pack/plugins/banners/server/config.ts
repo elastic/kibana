@@ -40,10 +40,12 @@ export const config: PluginConfigDescriptor<BannersConfigType> = {
   schema: configSchema,
   exposeToBrowser: {},
   deprecations: () => [
-    (rootConfig, fromPath, logger) => {
+    (rootConfig, fromPath, addDeprecation) => {
       const pluginConfig = get(rootConfig, fromPath);
       if (pluginConfig?.placement === 'header') {
-        logger('The `header` value for xpack.banners.placement has been replaced by `top`');
+        addDeprecation({
+          message: 'The `header` value for xpack.banners.placement has been replaced by `top`',
+        });
         pluginConfig.placement = 'top';
       }
 
