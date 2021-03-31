@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-protected handleSearchError(e: KibanaServerError | AbortError, timeoutSignal: AbortSignal, options?: ISearchOptions): Error;
+protected handleSearchError(e: KibanaServerError | AbortError, options?: ISearchOptions, isTimeout?: boolean): Error;
 ```
 
 ## Parameters
@@ -15,8 +15,8 @@ protected handleSearchError(e: KibanaServerError | AbortError, timeoutSignal: Ab
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  e | <code>KibanaServerError &#124; AbortError</code> |  |
-|  timeoutSignal | <code>AbortSignal</code> |  |
 |  options | <code>ISearchOptions</code> |  |
+|  isTimeout | <code>boolean</code> |  |
 
 <b>Returns:</b>
 

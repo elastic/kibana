@@ -7,6 +7,8 @@
  */
 
 import Path from 'path';
+import { EventEmitter } from 'events';
+
 import * as Rx from 'rxjs';
 import {
   map,
@@ -17,6 +19,7 @@ import {
   distinctUntilChanged,
   switchMap,
   concatMap,
+  takeUntil,
 } from 'rxjs/operators';
 import { CliArgs } from '@kbn/config';
 import { REPO_ROOT, CiStatsReporter } from '@kbn/dev-utils';
@@ -30,6 +33,16 @@ import { shouldRedirectFromOldBasePath } from './should_redirect_from_old_base_p
 import { getServerWatchPaths } from './get_server_watch_paths';
 import { CliDevConfig } from './config';
 
+// signal that emits undefined once a termination signal has been sent
+const exitSignal$ = new Rx.ReplaySubject<undefined>(1);
+Rx.merge(
+  Rx.fromEvent(process as EventEmitter, 'exit'),
+  Rx.fromEvent(process as EventEmitter, 'SIGINT'),
+  Rx.fromEvent(process as EventEmitter, 'SIGTERM')
+)
+  .pipe(mapTo(undefined), take(1))
+  .subscribe(exitSignal$);
+
 // timeout where the server is allowed to exit gracefully
 const GRACEFUL_TIMEOUT = 5000;
 
@@ -37,6 +50,7 @@ export type SomeCliArgs = Pick<
   CliArgs,
   | 'quiet'
   | 'silent'
+  | 'verbose'
   | 'disableOptimizer'
   | 'watch'
   | 'oss'
@@ -148,6 +162,7 @@ export class CliDevMode {
       dist: cliArgs.dist,
       quiet: !!cliArgs.quiet,
       silent: !!cliArgs.silent,
+      verbose: !!cliArgs.verbose,
       watch: cliArgs.watch,
     });
   }
@@ -216,9 +231,36 @@ export class CliDevMode {
       this.log.warn('no-base-path', '='.repeat(100));
     }
 
-    this.subscription.add(this.optimizer.run$.subscribe(this.observer('@kbn/optimizer')));
-    this.subscription.add(this.watcher.run$.subscribe(this.observer('watcher')));
-    this.subscription.add(this.devServer.run$.subscribe(this.observer('dev server')));
+    this.subscription.add(
+      this.optimizer.run$
+        .pipe(
+          // stop the optimizer as soon as we get an exit signal
+          takeUntil(exitSignal$)
+        )
+        .subscribe(this.observer('@kbn/optimizer'))
+    );
+
+    this.subscription.add(
+      this.watcher.run$
+        .pipe(
+          // stop the watcher as soon as we get an exit signal
+          takeUntil(exitSignal$)
+        )
+        .subscribe(this.observer('watcher'))
+    );
+
+    this.subscription.add(
+      this.devServer.run$
+        .pipe(
+          tap({
+            complete: () => {
+              // when the devServer gracefully exits because of an exit signal stop the cli dev mode to trigger full shutdown
+              this.stop();
+            },
+          })
+        )
+        .subscribe(this.observer('dev server'))
+    );
   }
 
   private reportTimings(reporter: CiStatsReporter) {
