@@ -59,6 +59,15 @@ const fieldsConfig: FieldsConfig = {
           'Replacement text for matches. A blank value will remove the matched text from the resulting text.',
       }
     ),
+    validations: [
+      {
+        validator: emptyField(
+          i18n.translate('xpack.ingestPipelines.pipelineEditor.gsubForm.replacementRequiredError', {
+            defaultMessage: 'A value is required.',
+          })
+        ),
+      },
+    ],
   },
 };
 

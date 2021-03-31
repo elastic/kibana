@@ -98,13 +98,11 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
       defaultMessage:
         'Converts digital storage units to bytes. For example, 1KB becomes 1024 bytes.',
     }),
-    getDefaultDescription: ({ field, target_field: targetField = field }) =>
+    getDefaultDescription: ({ field }) =>
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.bytes', {
-        defaultMessage:
-          'Converts circle definition from "{field}" to regular polygons on "{target_field}"',
+        defaultMessage: 'Converts "{field}" to its value in bytes',
         values: {
           field,
-          target_field: targetField,
         },
       }),
   },
@@ -117,12 +115,11 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.circle', {
       defaultMessage: 'Converts a circle definition into an approximate polygon.',
     }),
-    getDefaultDescription: ({ field, target_field: targetField = field }) =>
+    getDefaultDescription: ({ field }) =>
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.circle', {
-        defaultMessage: 'Renames the "{field}" to "{target_field}"',
+        defaultMessage: 'Converts a circle definition of "{field}" to into an approximate polygon',
         values: {
           field,
-          target_field: targetField,
         },
       }),
   },
@@ -136,13 +133,12 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
       defaultMessage:
         'Converts a field to a different data type. For example, you can convert a string to an long.',
     }),
-    getDefaultDescription: ({ field, target_field: targetField = field, type }) =>
+    getDefaultDescription: ({ field, type }) =>
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.convert', {
-        defaultMessage: 'Converts value on "{field}" to type "{type}", to field "{target_field}"',
+        defaultMessage: 'Converts "{field}" to type "{type}"',
         values: {
           field,
           type,
-          target_field: targetField,
         },
       }),
   },
@@ -157,10 +153,10 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
     getDefaultDescription: ({ field, target_fields: targetFields }) =>
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.csv', {
-        defaultMessage: 'Extract CSV values from "{field}" to {target_fields}',
+        defaultMessage: 'Extracts CSV values from "{field}" to {target_fields}',
         values: {
           field,
-          target_fields: targetFields.map((v) => `"${v}"`).join(', '),
+          target_fields: targetFields.map((v: string) => `"${v}"`).join(', '),
         },
       }),
   },
@@ -175,7 +171,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
     getDefaultDescription: ({ field, target_field: targetField = '@timestamp' }) =>
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.date', {
-        defaultMessage: 'Converts the string on "{field}" to a date type on field "{target_field}"',
+        defaultMessage: 'Parses a date from "{field}" to a date type on field "{target_field}"',
         values: {
           field,
           target_field: targetField,
@@ -207,7 +203,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
           );
       return i18n.translate('xpack.ingestPipelines.processors.defaultDescription.date_index_name', {
         defaultMessage:
-          'Sets the target index name based on timestamp value in "{field}", {prefix}',
+          'Adds documents to a time-based index based on the timestamp value in "{field}", {prefix}',
         values: {
           field,
           prefix,
@@ -226,7 +222,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
     getDefaultDescription: ({ field }) =>
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.dissect', {
-        defaultMessage: 'Dissects values from the string on field "{field}"',
+        defaultMessage: 'Extracts values from "{field}" that match a dissect pattern',
         values: {
           field,
         },
@@ -244,7 +240,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     }),
     getDefaultDescription: ({ field }) =>
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.dot_expander', {
-        defaultMessage: 'Expands dot annotated field "{field}"',
+        defaultMessage: 'Expands "{field}" into an object field',
         values: {
           field,
         },
@@ -335,7 +331,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
       const processorName = Object.keys(processor ?? {})[0];
       return processorName
         ? i18n.translate('xpack.ingestPipelines.processors.defaultDescription.foreach', {
-            defaultMessage: 'For each object in "{field}", run the "{processorName}" processor.',
+            defaultMessage: 'Runs the "{processorName}" processor for each object in "{field}"',
             values: {
               field,
               processorName,
@@ -354,13 +350,11 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
       defaultMessage:
         'Adds geo data based on an IP address. Uses geo data from a Maxmind database file.',
     }),
-    getDefaultDescription: ({ field, target_field: targetField = 'geoip' }) =>
+    getDefaultDescription: ({ field }) =>
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.geoip', {
-        defaultMessage:
-          'Enriches document with GeoIP information based on value in "{field}" to "{target_field}"',
+        defaultMessage: 'Adds geo data to documents based on the value of "{field}"',
         values: {
           field,
-          target_field: targetField,
         },
       }),
   },
@@ -387,7 +381,7 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     },
     getDefaultDescription: ({ field }) =>
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.grok', {
-        defaultMessage: 'Runs grok patterns on string value in "{field}"',
+        defaultMessage: 'Extracts values from "{field}" that match a grok pattern',
         values: {
           field,
         },
@@ -421,13 +415,11 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.htmlStrip', {
       defaultMessage: 'Removes HTML tags from a field.',
     }),
-    getDefaultDescription: ({ field, target_field: targetField = field }) =>
+    getDefaultDescription: ({ field }) =>
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.html_strip', {
-        defaultMessage:
-          'Strips HTML tags from "{field}", and stores the results in "{target_field}"',
+        defaultMessage: 'Removes HTML tags from "{field}',
         values: {
           field,
-          target_field: targetField,
         },
       }),
   },
@@ -463,12 +455,11 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
       defaultMessage:
         'Joins array elements into a string. Inserts a separator between each element.',
     }),
-    getDefaultDescription: ({ field, target_field: targetField = field }) =>
+    getDefaultDescription: ({ field }) =>
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.join', {
-        defaultMessage: 'Joins each element of the array stored in "{field}" to "{target_field}"',
+        defaultMessage: 'Joins each element of the array stored in "{field}"',
         values: {
           field,
-          target_field: targetField,
         },
       }),
   },
@@ -481,12 +472,11 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.json', {
       defaultMessage: 'Creates a JSON object from a compatible string.',
     }),
-    getDefaultDescription: ({ field, target_field: targetField = field }) =>
+    getDefaultDescription: ({ field }) =>
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.json', {
-        defaultMessage: 'Converts the string on "{field}" to JSON values under "{target_field}"',
+        defaultMessage: 'Converts the string on "{field}" to JSON',
         values: {
           field,
-          target_field: targetField,
         },
       }),
   },
@@ -634,10 +624,9 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.sort', {
       defaultMessage: "Sorts a field's array elements.",
     }),
-    getDefaultDescription: ({ field, target_field: targetField = field, order = 'asc' }) =>
+    getDefaultDescription: ({ field, order = 'asc' }) =>
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.sort', {
-        defaultMessage:
-          'Sorts elements in the array "{field}" in {order} order to "{target_field}"',
+        defaultMessage: 'Sorts elements in the array "{field}" in {order} order',
         values: {
           field,
           order:
@@ -650,7 +639,6 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
                   'xpack.ingestPipelines.processors.defaultDescription.sort.orderDescendingLabel',
                   { defaultMessage: 'descending' }
                 ),
-          target_field: targetField,
         },
       }),
   },
@@ -663,12 +651,11 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.split', {
       defaultMessage: 'Splits a field value into an array.',
     }),
-    getDefaultDescription: ({ field, target_field: targetField = field }) =>
+    getDefaultDescription: ({ field }) =>
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.split', {
-        defaultMessage: 'Splits the string stored in "{field}" to an array in "{target_field}"',
+        defaultMessage: 'Splits the string stored in "{field}" to an array',
         values: {
           field,
-          target_field: targetField,
         },
       }),
   },
@@ -715,12 +702,11 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
     typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.urldecode', {
       defaultMessage: 'Decodes a URL-encoded string.',
     }),
-    getDefaultDescription: ({ field, target_field: targetField = field }) =>
+    getDefaultDescription: ({ field }) =>
       i18n.translate('xpack.ingestPipelines.processors.defaultDescription.url_decode', {
-        defaultMessage: 'Decodes the URL string in "{field}" to "{target_field}"',
+        defaultMessage: 'Decodes the URL in "{field}"',
         values: {
           field,
-          target_field: targetField,
         },
       }),
   },
