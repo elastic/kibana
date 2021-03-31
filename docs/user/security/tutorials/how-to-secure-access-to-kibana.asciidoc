@@ -2,9 +2,11 @@
 == Tutorial: Securing access to {kib}
 
 
-{kib} is home to an ever-growing suite of powerful features, which help you get the most out of your data. We believe that all data is important, and should be protected. We not only allow you to secure access to your data, but also to control how users are able to interact with your data inside of {kib}.
+{kib} is home to an ever-growing suite of powerful features, which help you get the most out of your data. Your data is important, and should be protected. {kib} allows you to secure access to your data, and control how users are able to interact with your data.
 
 For example, some users might only need to view your stunning dashboards, while others may need to manage your fleet of Elastic agents and run machine learning jobs to detect anomalous behavior in your network.
+
+This guide introduces you to three of {kib}'s security features: spaces, users, and roles. By the end of this tutorial, you will learn how to manage these entities, and how you can leverage them to secure access to both {kib} and your data.
 
 [float]
 === Spaces
@@ -18,49 +20,57 @@ The assets you create in one space are isolated from other spaces, so when you e
 Refer to the <<xpack-spaces, Spaces documentation>> for more information.
 
 [float]
-=== Users and roles
+=== Roles
 
-The first step to securing access is to provision your users and roles. {kib}'s user management allows you to provision accounts for each of your users.
+Once your spaces are setup, the next step to securing access is to provision your roles. Roles are a collection of privileges that allow you to perform actions in {kib} and Elasticsearch. Roles are assigned to both users Elastic stack components.
 
-TIP: Want Single Sign-on? {kib} supports a wide range of SSO implementations, including SAML, OIDC, LDAP/AD, and Kerberos. <<kibana-authentication, Learn more about {kib}'s SSO features>>.
+You can create your own roles, or used any of the {ref}/built-in-roles.html[built-in roles]. Note that some of the built-in roles are intended for Elastic stack components, and should not be assigned to end users directly.
 
-Each of your users should be assigned one or more roles. Roles are a collection of privileges that allow you to perform actions in {kib} and Elasticsearch.
+One of the more useful built-in roles is `kibana_admin`. Assigning this role to your users will grant access to all if {kib}'s features. This includes the ability to manage Spaces.
 
-For example, you might create a `marketing_user` role, which you then assign to all users in your marketing department. This role would grant access to all of the necessary data and features for this team to be successful, without granting them access they don’t require.
+These built-in roles are great for getting started with the stack, and for system administrators who do not need more restrictive access. With so many features, it’s not possible for us to ship more granular roles to accommodate everyone’s needs. This is where custom roles come in. As an administrator, you have the ability to create your own roles to describe exactly the kind of access your users should have. For example, you might create a `marketing_user` role, which you then assign to all users in your marketing department. This role would grant access to all of the necessary data and features for this team to be successful, without granting them access they don’t require.
+
 
 [float]
-=== Built-in Roles
+=== Users
 
-{kib} ships with a number of {ref}/built-in-roles.html[built-in roles]. Some of these roles are designed to be used by Elastic stack components (such as {kib} itself), while others are suitable for end-users.
+Once your roles are setup, the next step to securing access is to create your users, and assign them one or more roles. {kib}'s user management allows you to provision accounts for each of your users.
 
-For example, granting the `kibana_admin` role will allow your users to access all features within {kib}. This includes the ability to manage Spaces.
-
-These roles are great for getting started with the stack, and for system administrators who do not need more restrictive access. With so many features, it’s not possible for us to ship more granular roles to accommodate everyone’s needs. This is where custom roles come in. As an administrator, you have the ability to create your own roles to describe exactly the kind of access your users should have.
-
+TIP: Want Single Sign-on? {kib} supports a wide range of SSO implementations, including SAML, OIDC, LDAP/AD, and Kerberos. <<kibana-authentication, Learn more about {kib}'s SSO features>>.
 
 
 [float]
 [[tutorial-secure-kibana-dashboards-only]]
 === Example: Create a user with access only to dashboards
 
-Let’s work through an example together. Dave is a marketing analyst who wants to monitor the effectiveness of his campaigns. Dave should be able to see his team’s dashboards, but he should not be allowed to view or manage anything else in {kib}. All of his team’s dashboards are located in the `Marketing` space.
+Let’s work through an example together. Consider a marketing analyst who wants to monitor the effectiveness of their campaigns. They should be able to see their team’s dashboards, but they should not be allowed to view or manage anything else in {kib}. All of their team’s dashboards are located in the `Marketing` space.
 
 [float]
-==== Prerequisites:
+==== Create a space
 
-* This example assumes you already created a Space named `Marketing`. Refer to the <<xpack-spaces, Spaces documentation>> for instructions on setting up Spaces.
+Create a `Marketing` space for your marketing analysts to use.
+
+. Open the main menu, and select **Stack Management**.
+. Under **{kib}**, select **Spaces**
+. Click **Create a space**.
+. Give this space a unique name. For example: `Marketing`.
+. Click **Create space**.
+
+If you’ve followed the example above, you should end up with a space that looks like this:
+
+[role="screenshot"]
+image::user/security/images/tutorial-secure-access-example-1-space.png[Create space UI]
+
 
 [float]
 ==== Create a role
 
 Create a role that describes the privileges you want to grant.
 
-To effectively use dashboards, Dave will need:
+To effectively use dashboards, the marketing analyst will need:
 
 * Access to **read** the data that powers the dashboards
 * Access to **read** the dashboards within the `Marketing` space.
-
-Let’s get started!
 
 . Open the main menu, and select **Stack Management**.
 . Under **Security**, select **Roles**.
@@ -86,7 +96,7 @@ image::user/security/images/tutorial-secure-access-example-1-role.png[Create rol
 [float]
 ==== Create a user
 
-Now that you created a  role, create a user account.
+Now that you created a role, create a user account.
 
 . Navigate to *Stack Management*, and under *Security*, select *Users*.
 . Click *Create user*.
