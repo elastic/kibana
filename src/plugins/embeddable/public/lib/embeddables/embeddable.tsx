@@ -9,7 +9,7 @@
 import { cloneDeep, isEqual } from 'lodash';
 import * as Rx from 'rxjs';
 import { merge } from 'rxjs';
-import { debounceTime, distinctUntilChanged, map, mapTo, skip } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs/operators';
 import { RenderCompleteDispatcher } from '../../../../kibana_utils/public';
 import { Adapters } from '../types';
 import { IContainer } from '../containers';
