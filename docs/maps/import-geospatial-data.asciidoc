@@ -14,7 +14,7 @@ The {stack-security-features} provide roles and privileges that control which us
 You can manage your roles, privileges, and
 spaces in the **{stack-manage-app}** app in {kib}. For more information, see
 {ref}/security-privileges.html[Security privileges],
-<<kibana-privileges, {kib} privileges]>>, and <<xpack-kibana-role-management, {kib} role management>>.
+<<kibana-privileges, {kib} privileges>>, and <<xpack-kibana-role-management, {kib} role management>>.
 
 To upload GeoJson files in {kib} with *Maps*, you must have:
 * [ ] `all` {kib}
