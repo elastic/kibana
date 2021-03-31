@@ -1,38 +1,60 @@
+load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
 
 PKG_BASE_NAME = "elastic-datemath"
 PKG_REQUIRE_NAME = "@elastic/datemath"
 
 SOURCE_FILES = [
-  "index.js",
+  "src/index.ts",
 ]
 
-TYPE_FILES = [
-  "index.d.ts",
-]
-
-SRCS = SOURCE_FILES + TYPE_FILES
+SRCS = SOURCE_FILES
 
 filegroup(
   name = "srcs",
-  srcs = glob(SRCS),
+  srcs = glob(SOURCE_FILES),
 )
 
 NPM_MODULE_EXTRA_FILES = [
   "package.json",
-  "readme",
+  "README.md",
 ]
 
-DEPS = [
+SRC_DEPS = [
   "@npm//moment",
 ]
 
+TYPES_DEPS = [
+  "@npm//@types/node",
+]
+
+DEPS = SRC_DEPS + TYPES_DEPS
+
+ts_config(
+  name = "tsconfig",
+  src = "tsconfig.json",
+  deps = [
+    "//:tsconfig.base.json",
+  ],
+)
+
+ts_project(
+  name = "tsc",
+  srcs = SRCS,
+  deps = DEPS,
+  declaration = True,
+  declaration_map = True,
+  incremental = True,
+  out_dir = "target",
+  source_map = True,
+  root_dir = "src",
+  tsconfig = ":tsconfig",
+)
+
 js_library(
   name = PKG_BASE_NAME,
-  srcs = [
-    ":srcs",
-  ],
-  deps = DEPS,
+  srcs = [],
+  deps = [":tsc"] + DEPS,
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
