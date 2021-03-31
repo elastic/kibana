@@ -135,7 +135,6 @@ export class VisualizeEmbeddable
       parent
     );
     this.deps = deps;
-    this.query = this.input.query;
     this.timefilter = timefilter;
     this.syncColors = this.input.syncColors;
     this.vis = vis;
@@ -145,9 +144,11 @@ export class VisualizeEmbeddable
     this.savedVisualizationsLoader = savedVisualizationsLoader;
 
     this.subscriptions.push(
-      this.getUpdated$().subscribe(() => {
+      this.getUpdated$().subscribe((value) => {
         const isDirty = this.handleChanges();
-        if (isDirty && this.handler) {
+        // we shouldn't try to update handler if we have error
+        // because it can lead to show error twice
+        if (isDirty && this.handler && !get(value, 'error.stack')) {
           this.updateHandler();
         }
       })

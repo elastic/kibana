@@ -111,10 +111,9 @@ export abstract class Embeddable<
    * In case corresponding state change triggered `reload` this stream is guarantied to emit later,
    * which allows to skip any state handling in case `reload` already handled it.
    */
-  public getUpdated$(): Readonly<Rx.Observable<void>> {
+  public getUpdated$(): Readonly<Rx.Observable<TEmbeddableInput | TEmbeddableOutput>> {
     return merge(this.getInput$().pipe(skip(1)), this.getOutput$().pipe(skip(1))).pipe(
-      debounceTime(0),
-      mapTo(undefined)
+      debounceTime(0)
     );
   }
 
