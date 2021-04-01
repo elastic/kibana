@@ -40,7 +40,6 @@ describe('SeriesChartTypes', function () {
       time: { from: 'now-15m', to: 'now' },
     });
     expect(setSeries).toHaveBeenCalledTimes(3);
-    screen.debug();
   });
 
   describe('XYChartTypes', function () {
