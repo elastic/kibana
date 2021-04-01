@@ -10,7 +10,7 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { MonitorTags } from './monitor_tags';
 import * as hooks from '../../hooks/use_url_params';
-import { renderWithRouter, shallowWithRouter } from '../../lib';
+import { renderWithRouter, shallowWithRouter } from '../../lib/helper/enzyme_helpers';
 
 describe('MonitorTags component', () => {
   const summaryPing = {
