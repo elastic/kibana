@@ -19,7 +19,6 @@ import {
   map,
   takeUntil,
 } from 'rxjs/operators';
-import { AbortError } from 'src/plugins/kibana_utils/public';
 import {
   TimeoutErrorMode,
   SearchInterceptor,
@@ -28,6 +27,7 @@ import {
   IKibanaSearchRequest,
   SearchSessionState,
 } from '../../../../../src/plugins/data/public';
+import { AbortError } from '../../../../../src/plugins/kibana_utils/public';
 import { ENHANCED_ES_SEARCH_STRATEGY, IAsyncSearchOptions, pollSearch } from '../../common';
 import { SearchResponseCache } from './search_response_cache';
 import { createRequestHash } from './utils';
