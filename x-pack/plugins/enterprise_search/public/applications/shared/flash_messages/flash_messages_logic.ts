@@ -63,7 +63,7 @@ export const FlashMessagesLogic = kea<MakeLogicType<FlashMessagesValues, FlashMe
       {
         addToastMessage: (toasts, { newToast }) => [...toasts, newToast],
         dismissToastMessage: (toasts, { removedToast }) =>
-          toasts.filter((toast) => toast.id !== removedToast.id),
+          toasts.filter(({ id }) => id !== removedToast.id),
         clearToastMessages: () => [],
       },
     ],
