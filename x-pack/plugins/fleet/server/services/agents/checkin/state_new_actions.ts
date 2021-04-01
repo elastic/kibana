@@ -40,6 +40,7 @@ import {
 } from '../actions';
 import { appContextService } from '../../app_context';
 import { updateAgent } from '../crud';
+import type { FullAgentPolicy, FullAgentPolicyOutputPermissions } from '../../../../common';
 
 import { toPromiseAbortable, AbortError, createRateLimiter } from './rxjs_utils';
 
@@ -113,14 +114,20 @@ async function getAgentDefaultOutputAPIKey(
 async function getOrCreateAgentDefaultOutputAPIKey(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  agent: Agent
+  agent: Agent,
+  permissions: FullAgentPolicyOutputPermissions
 ): Promise<string> {
   const defaultAPIKey = await getAgentDefaultOutputAPIKey(soClient, esClient, agent);
   if (defaultAPIKey) {
     return defaultAPIKey;
   }
 
-  const outputAPIKey = await APIKeysService.generateOutputApiKey(soClient, 'default', agent.id);
+  const outputAPIKey = await APIKeysService.generateOutputApiKey(
+    soClient,
+    'default',
+    agent.id,
+    permissions
+  );
   await updateAgent(esClient, agent.id, {
     default_api_key: outputAPIKey.key,
     default_api_key_id: outputAPIKey.id,
@@ -167,15 +174,18 @@ export async function createAgentActionFromPolicyAction(
     }
   );
 
+  // agent <= 7.9 uses `data.config` instead of `data.policy`
+  const policyProp = 'policy' in newAgentAction.data ? 'policy' : 'config';
+
+  // TODO: The null assertion `!` is strictly correct for the current use case
+  // where the only output is `elasticsearch`, but this might change in the future.
+  const permissions = (newAgentAction.data[policyProp] as FullAgentPolicy).output_permissions!
+    .default;
+
   // Mutate the policy to set the api token for this agent
-  const apiKey = await getOrCreateAgentDefaultOutputAPIKey(soClient, esClient, agent);
-  if (newAgentAction.data.policy) {
-    newAgentAction.data.policy.outputs.default.api_key = apiKey;
-  }
-  // BWC for agent <= 7.9
-  else if (newAgentAction.data.config) {
-    newAgentAction.data.config.outputs.default.api_key = apiKey;
-  }
+  const apiKey = await getOrCreateAgentDefaultOutputAPIKey(soClient, esClient, agent, permissions);
+
+  newAgentAction.data[policyProp].outputs.default.api_key = apiKey;
 
   return [newAgentAction];
 }

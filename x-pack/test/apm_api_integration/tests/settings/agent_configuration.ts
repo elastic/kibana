@@ -103,41 +103,20 @@ export default function agentConfigurationTests({ getService }: FtrProviderConte
 
       describe('as a read-only user', () => {
         const newConfig = { service: {}, settings: { transaction_sample_rate: '0.55' } };
-        it('throws when attempting to create config', async () => {
-          try {
-            await createConfiguration(newConfig, { user: 'read' });
-
-            // ensure that `createConfiguration` throws
-            expect(true).to.be(false);
-          } catch (e) {
-            expect(e.res.statusCode).to.be(403);
-          }
+        it('does not allow creating config', async () => {
+          await expectStatusCode(() => createConfiguration(newConfig, { user: 'read' }), 403);
         });
 
         describe('when a configuration already exists', () => {
           before(async () => createConfiguration(newConfig));
           after(async () => deleteConfiguration(newConfig));
 
-          it('throws when attempting to update config', async () => {
-            try {
-              await updateConfiguration(newConfig, { user: 'read' });
-
-              // ensure that `updateConfiguration` throws
-              expect(true).to.be(false);
-            } catch (e) {
-              expect(e.res.statusCode).to.be(403);
-            }
+          it('does not allow updating the config', async () => {
+            await expectStatusCode(() => updateConfiguration(newConfig, { user: 'read' }), 403);
           });
 
-          it('throws when attempting to delete config', async () => {
-            try {
-              await deleteConfiguration(newConfig, { user: 'read' });
-
-              // ensure that line above throws
-              expect(true).to.be(false);
-            } catch (e) {
-              expect(e.res.statusCode).to.be(403);
-            }
+          it('does not allow deleting the config', async () => {
+            await expectStatusCode(() => deleteConfiguration(newConfig, { user: 'read' }), 403);
           });
         });
       });

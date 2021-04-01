@@ -1837,17 +1837,35 @@
         },
         "agents": {
           "properties": {
-            "total": {
-              "type": "long"
+            "total_enrolled": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled agents, in any state"
+              }
             },
-            "online": {
-              "type": "long"
+            "healthy": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled agents in a healthy state"
+              }
             },
-            "error": {
-              "type": "long"
+            "unhealthy": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled agents in an unhealthy state"
+              }
             },
             "offline": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled agents currently offline"
+              }
+            },
+            "total_all_statuses": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of agents in any state, both enrolled and inactive"
+              }
             }
           }
         },

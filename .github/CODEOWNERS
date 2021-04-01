@@ -119,18 +119,23 @@
 
 # Machine Learning
 /x-pack/plugins/ml/  @elastic/ml-ui
-/x-pack/test/functional/apps/ml/  @elastic/ml-ui
-/x-pack/test/functional/services/ml/  @elastic/ml-ui
 /x-pack/test/accessibility/apps/ml.ts  @elastic/ml-ui
+/x-pack/test/accessibility/apps/ml_embeddables_in_dashboard.ts  @elastic/ml-ui
+/x-pack/test/api_integration/apis/ml/ @elastic/ml-ui
+/x-pack/test/api_integration_basic/apis/ml/ @elastic/ml-ui
+/x-pack/test/functional/apps/ml/  @elastic/ml-ui
+/x-pack/test/functional/es_archives/ml/  @elastic/ml-ui
+/x-pack/test/functional/services/ml/  @elastic/ml-ui
+/x-pack/test/functional_basic/apps/ml/ @elastic/ml-ui
+/x-pack/test/functional_with_es_ssl/apps/ml/ @elastic/ml-ui
+
 # ML team owns and maintains the transform plugin despite it living in the Elasticsearch management section.
 /x-pack/plugins/transform/  @elastic/ml-ui
+/x-pack/test/accessibility/apps/transform.ts  @elastic/ml-ui
+/x-pack/test/api_integration/apis/transform/ @elastic/ml-ui
+/x-pack/test/api_integration_basic/apis/transform/ @elastic/ml-ui
 /x-pack/test/functional/apps/transform/ @elastic/ml-ui
 /x-pack/test/functional/services/transform/ @elastic/ml-ui
-/x-pack/test/accessibility/apps/transform.ts  @elastic/ml-ui
-/x-pack/test/api_integration_basic/apis/ml/ @elastic/ml-ui
-/x-pack/test/functional_basic/apps/ml/ @elastic/ml-ui
-
-/x-pack/test/api_integration_basic/apis/transform/ @elastic/ml-ui
 /x-pack/test/functional_basic/apps/transform/ @elastic/ml-ui
 
 # Maps
@@ -158,6 +163,7 @@
 /packages/kbn-ui-shared-deps/ @elastic/kibana-operations
 /packages/kbn-es-archiver/ @elastic/kibana-operations
 /packages/kbn-utils/ @elastic/kibana-operations
+/packages/kbn-cli-dev-mode/ @elastic/kibana-operations
 /src/cli/keystore/ @elastic/kibana-operations
 /src/legacy/server/warnings/ @elastic/kibana-operations
 /.ci/es-snapshots/ @elastic/kibana-operations
@@ -194,6 +200,8 @@
 /packages/kbn-config/ @elastic/kibana-core
 /packages/kbn-logging/ @elastic/kibana-core
 /packages/kbn-legacy-logging/ @elastic/kibana-core
+/packages/kbn-crypto/ @elastic/kibana-core
+/packages/kbn-http-tools/ @elastic/kibana-core
 /src/legacy/server/config/ @elastic/kibana-core
 /src/legacy/server/http/ @elastic/kibana-core
 /src/legacy/server/logging/ @elastic/kibana-core
@@ -340,6 +348,7 @@
 
 # Security Solution sub teams
 /x-pack/plugins/case @elastic/security-threat-hunting
+/x-pack/plugins/timelines @elastic/security-threat-hunting
 /x-pack/test/case_api_integration @elastic/security-threat-hunting
 /x-pack/plugins/lists @elastic/security-detections-response
 

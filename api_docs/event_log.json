@@ -225,7 +225,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
-              "lineNumber": 35
+              "lineNumber": 36
             }
           },
           {
@@ -236,7 +236,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
-              "lineNumber": 36
+              "lineNumber": 37
             }
           },
           {
@@ -247,7 +247,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
-              "lineNumber": 37
+              "lineNumber": 38
             }
           },
           {
@@ -258,7 +258,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
-              "lineNumber": 38
+              "lineNumber": 39
             },
             "signature": [
               "(Readonly<{ '@timestamp'?: string | undefined; kibana?: Readonly<{ server_uuid?: string | undefined; alerting?: Readonly<{ status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; saved_objects?: Readonly<{ type?: string | undefined; id?: string | undefined; rel?: string | undefined; namespace?: string | undefined; } & {}>[] | undefined; } & {}> | undefined; user?: Readonly<{ name?: string | undefined; } & {}> | undefined; error?: Readonly<{ message?: string | undefined; } & {}> | undefined; message?: string | undefined; tags?: string[] | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; event?: Readonly<{ start?: string | undefined; end?: string | undefined; action?: string | undefined; provider?: string | undefined; duration?: number | undefined; outcome?: string | undefined; reason?: string | undefined; } & {}> | undefined; } & {}> | undefined)[]"
@@ -267,7 +267,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
-          "lineNumber": 34
+          "lineNumber": 35
         },
         "initialIsOpen": false
       }

@@ -24,6 +24,81 @@
         }
       }
     },
+    "index-patterns": {
+      "properties": {
+        "indexPatternsCount": {
+          "type": "long"
+        },
+        "indexPatternsWithScriptedFieldCount": {
+          "type": "long"
+        },
+        "indexPatternsWithRuntimeFieldCount": {
+          "type": "long"
+        },
+        "scriptedFieldCount": {
+          "type": "long"
+        },
+        "runtimeFieldCount": {
+          "type": "long"
+        },
+        "perIndexPattern": {
+          "properties": {
+            "scriptedFieldCount": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
+            "runtimeFieldCount": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
+            "scriptedFieldLineCount": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            },
+            "runtimeFieldLineCount": {
+              "properties": {
+                "min": {
+                  "type": "long"
+                },
+                "max": {
+                  "type": "long"
+                },
+                "avg": {
+                  "type": "float"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "kql": {
       "properties": {
         "optInCount": {
@@ -7478,6 +7553,12 @@
             "description": "Default value of the setting was changed."
           }
         },
+        "banners:textContent": {
+          "type": "keyword",
+          "_meta": {
+            "description": "Default value of the setting was changed."
+          }
+        },
         "visualize:enableLabs": {
           "type": "boolean",
           "_meta": {
@@ -8023,6 +8104,24 @@
         },
         "apm:enableServiceOverview": {
           "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "banners:placement": {
+          "type": "keyword",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "banners:textColor": {
+          "type": "text",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "banners:backgroundColor": {
+          "type": "text",
           "_meta": {
             "description": "Non-default value of setting."
           }
