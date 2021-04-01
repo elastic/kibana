@@ -56,6 +56,12 @@ export function getTermsFields(fields: IFieldType[]): IFieldType[] {
   });
 }
 
+export function getSortFields(fields: IFieldType[]): IFieldType[] {
+  return fields.filter((field) => {
+    return field.sortable && !indexPatterns.isNestedField(field);
+  });
+}
+
 export function getAggregatableGeoFieldTypes(): string[] {
   const aggregatableFieldTypes = [ES_GEO_FIELD_TYPE.GEO_POINT];
   if (getIsGoldPlus()) {

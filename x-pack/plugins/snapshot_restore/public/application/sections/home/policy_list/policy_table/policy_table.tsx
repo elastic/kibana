@@ -382,7 +382,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
       >
         <FormattedMessage
           id="xpack.snapshotRestore.policyList.table.addPolicyButton"
-          defaultMessage="Create a policy"
+          defaultMessage="Create policy"
         />
       </EuiButton>,
     ],
