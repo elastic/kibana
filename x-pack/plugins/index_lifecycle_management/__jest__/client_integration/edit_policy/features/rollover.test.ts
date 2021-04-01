@@ -11,7 +11,7 @@ import { getDefaultHotPhasePolicy } from '../constants';
 import { act } from 'react-dom/test-utils';
 import { licensingMock } from '../../../../../licensing/public/mocks';
 
-describe('<EditPolicy /> timeline', () => {
+describe('<EditPolicy /> rollover', () => {
   let testBed: EditPolicyTestBed;
   const { server, httpRequestsMockHelpers } = setupEnvironment();
 
@@ -92,7 +92,7 @@ describe('<EditPolicy /> timeline', () => {
     await actions.warm.enable(true);
     await actions.cold.enable(true);
     await actions.frozen.enable(true);
-    await actions.delete.enablePhase();
+    await actions.delete.enable(true);
 
     expect(actions.warm.hasRolloverTipOnMinAge()).toBeTruthy();
     expect(actions.cold.hasRolloverTipOnMinAge()).toBeTruthy();
@@ -108,7 +108,7 @@ describe('<EditPolicy /> timeline', () => {
     await actions.warm.enable(true);
     await actions.cold.enable(true);
     await actions.frozen.enable(true);
-    await actions.delete.enablePhase();
+    await actions.delete.enable(true);
 
     expect(actions.warm.hasRolloverTipOnMinAge()).toBeFalsy();
     expect(actions.cold.hasRolloverTipOnMinAge()).toBeFalsy();

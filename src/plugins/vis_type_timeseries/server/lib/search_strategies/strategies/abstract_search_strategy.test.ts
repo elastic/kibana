@@ -33,6 +33,9 @@ describe('AbstractSearchStrategy', () => {
             asCurrentUser: jest.fn(),
           },
         },
+        uiSettings: {
+          client: jest.fn(),
+        },
       },
       search: {
         search: jest.fn().mockReturnValue(from(Promise.resolve({}))),
