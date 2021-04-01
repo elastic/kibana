@@ -32,9 +32,7 @@ export const getTimeseriesAggregation = (
     min_doc_count: 0,
     extended_bounds: { min: start, max: end },
   },
-  aggs: {
-    outcomes: getOutcomeAggregation(),
-  },
+  aggs: { outcomes: getOutcomeAggregation() },
 });
 
 export function calculateTransactionErrorPercentage(
