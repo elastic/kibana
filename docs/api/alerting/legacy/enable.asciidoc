@@ -4,7 +4,7 @@
 <titleabbrev>Legacy enable alert</titleabbrev>
 ++++
 
-WARNING: Deprecated in 7.13.0. Use <<enable-rule-api>> instead.
+deprecated::[7.13.0,Use <<enable-rule-api>> instead.]
 
 Enable an alert.
 
