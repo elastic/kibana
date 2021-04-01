@@ -55,17 +55,18 @@ export async function getAgentStatusForAgentPolicy(
   agentPolicyId?: string,
   filterKuery?: string
 ) {
-  const [all, online, error, offline, updating] = await pMap(
+  const [all, allActive, online, error, offline, updating] = await pMap(
     [
-      undefined,
+      undefined, // All agents, including inactive
+      undefined, // All active agents
       AgentStatusKueryHelper.buildKueryForOnlineAgents(),
       AgentStatusKueryHelper.buildKueryForErrorAgents(),
       AgentStatusKueryHelper.buildKueryForOfflineAgents(),
       AgentStatusKueryHelper.buildKueryForUpdatingAgents(),
     ],
-    (kuery) =>
+    (kuery, index) =>
       getAgentsByKuery(esClient, {
-        showInactive: false,
+        showInactive: index === 0,
         perPage: 0,
         page: 1,
         kuery: joinKuerys(
@@ -84,7 +85,8 @@ export async function getAgentStatusForAgentPolicy(
 
   return {
     events: await getEventsCount(soClient, agentPolicyId),
-    total: all.total,
+    total: allActive.total,
+    inactive: all.total - allActive.total,
     online: online.total,
     error: error.total,
     offline: offline.total,
