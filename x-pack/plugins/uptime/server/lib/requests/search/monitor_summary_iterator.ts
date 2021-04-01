@@ -95,8 +95,8 @@ export class MonitorSummaryIterator {
 
     return {
       monitorSummaries,
-      nextPagePagination: ssAligned ? paginationAfter : paginationBefore,
-      prevPagePagination: ssAligned ? paginationBefore : paginationAfter,
+      nextPagePagination: paginationAfter,
+      prevPagePagination: paginationBefore,
     };
   }
 
@@ -133,7 +133,6 @@ export class MonitorSummaryIterator {
    *  Attempts to buffer more results fetching a single chunk.
    * If trim is set to true, which is the default, it will delete all items in the buffer prior to the current item.
    * to free up space.
-   * @param size the number of items to chunk
    */
   async attemptBufferMore(): Promise<{ gotHit: boolean }> {
     // Trim the buffer to just the current element since we'll be fetching more
@@ -167,9 +166,11 @@ export class MonitorSummaryIterator {
 
   // Get a CursorPaginator object that will resume after the current() value.
   async paginationAfterCurrent(): Promise<CursorPagination | null> {
-    const peek = await this.peek();
-    if (!peek) {
-      return null;
+    if (!this.queryContext.skipRefinePhase) {
+      const peek = await this.peek();
+      if (!peek) {
+        return null;
+      }
     }
 
     const current = this.getCurrent();
@@ -183,6 +184,9 @@ export class MonitorSummaryIterator {
 
   // Get a CursorPaginator object that will resume before the current() value.
   async paginationBeforeCurrent(): Promise<CursorPagination | null> {
+    if (this.queryContext.skipRefinePhase && !this.queryContext.pagination?.cursorKey) {
+      return null;
+    }
     const reverseFetcher = await this.reverse();
     return reverseFetcher && (await reverseFetcher.paginationAfterCurrent());
   }
