@@ -62,7 +62,7 @@ async function copyToBuild(project: Project, kibanaRoot: string, buildRoot: stri
   const buildProjectPath = resolve(buildRoot, relativeProjectPath);
 
   await copy(['**/*'], buildProjectPath, {
-    cwd: join(kibanaRoot, 'bazel', 'bin', 'packages', basename(buildProjectPath), 'npm_module'),
+    cwd: join(kibanaRoot, 'bazel-bin', 'packages', basename(buildProjectPath), 'npm_module'),
     dot: true,
     onlyFiles: true,
     parents: true,
