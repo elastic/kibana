@@ -41,6 +41,8 @@ export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
     ...AgentPolicyBaseSchema,
     namespace: schema.maybe(NamespaceSchema),
     id: schema.oneOf([schema.string(), schema.number()]),
+    is_default: schema.maybe(schema.boolean()),
+    is_default_fleet_server: schema.maybe(schema.boolean()),
     package_policies: schema.arrayOf(
       schema.object({
         name: schema.string(),
