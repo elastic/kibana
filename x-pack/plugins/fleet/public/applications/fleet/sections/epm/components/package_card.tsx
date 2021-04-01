@@ -9,15 +9,13 @@ import React from 'react';
 import styled from 'styled-components';
 import { EuiCard } from '@elastic/eui';
 
-import type { PackageInfo, PackageListItem } from '../../../types';
+import type { PackageListItem } from '../../../types';
 import { useLink } from '../../../hooks';
 import { PackageIcon } from '../../../components/package_icon';
 
 import { RELEASE_BADGE_LABEL, RELEASE_BADGE_DESCRIPTION } from './release_badge';
 
-type PackageCardProps = (PackageListItem | PackageInfo) & {
-  integration?: string;
-};
+type PackageCardProps = PackageListItem;
 
 // adding the `href` causes EuiCard to use a `a` instead of a `button`
 // `a` tags use `euiLinkColor` which results in blueish Badge text
@@ -42,7 +40,6 @@ export function PackageCard({
   if ('savedObject' in restProps) {
     urlVersion = restProps.savedObject.attributes.version || version;
   }
-  const packageOrIntegrationName = integration ? `${name}-${integration}` : name;
 
   return (
     <Card
@@ -51,7 +48,8 @@ export function PackageCard({
       icon={
         <PackageIcon
           icons={icons}
-          packageName={packageOrIntegrationName}
+          packageName={name}
+          integrationName={integration}
           version={version}
           size="xl"
         />

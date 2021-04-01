@@ -16,7 +16,8 @@ import { sendGetPackageInfoByKey } from './index';
 type Package = PackageInfo | PackageListItem;
 
 export interface UsePackageIconType {
-  packageName: Package['name'];
+  packageName: string;
+  integrationName?: string;
   version: Package['version'];
   icons?: Package['icons'];
   tryApi?: boolean; // should it call API to try to find missing icons?
@@ -26,6 +27,7 @@ const CACHED_ICONS = new Map<string, string>();
 
 export const usePackageIconType = ({
   packageName,
+  integrationName,
   version,
   icons: paramIcons,
   tryApi = false,
@@ -33,13 +35,13 @@ export const usePackageIconType = ({
   const { toPackageImage } = useLinks();
   const [iconList, setIconList] = useState<UsePackageIconType['icons']>();
   const [iconType, setIconType] = useState<string>(''); // FIXME: use `empty` icon during initialization - see: https://github.com/elastic/kibana/issues/60622
-  const pkgKey = `${packageName}-${version}`;
+  const cacheKey = `${packageName}-${version}${integrationName ? `-${integrationName}` : ''}`;
 
   // Generates an icon path or Eui Icon name based on an icon list from the package
   // or by using the package name against logo icons from Eui
   useEffect(() => {
-    if (CACHED_ICONS.has(pkgKey)) {
-      setIconType(CACHED_ICONS.get(pkgKey) || '');
+    if (CACHED_ICONS.has(cacheKey)) {
+      setIconType(CACHED_ICONS.get(cacheKey) || '');
       return;
     }
     const svgIcons = (paramIcons || iconList)?.filter(
@@ -48,29 +50,29 @@ export const usePackageIconType = ({
     const localIconSrc =
       Array.isArray(svgIcons) && toPackageImage(svgIcons[0], packageName, version);
     if (localIconSrc) {
-      CACHED_ICONS.set(pkgKey, localIconSrc);
-      setIconType(CACHED_ICONS.get(pkgKey) || '');
+      CACHED_ICONS.set(cacheKey, localIconSrc);
+      setIconType(CACHED_ICONS.get(cacheKey) || '');
       return;
     }
 
     const euiLogoIcon = ICON_TYPES.find((key) => key.toLowerCase() === `logo${packageName}`);
     if (euiLogoIcon) {
-      CACHED_ICONS.set(pkgKey, euiLogoIcon);
+      CACHED_ICONS.set(cacheKey, euiLogoIcon);
       setIconType(euiLogoIcon);
       return;
     }
 
     if (tryApi && !paramIcons && !iconList) {
-      sendGetPackageInfoByKey(pkgKey)
+      sendGetPackageInfoByKey(cacheKey)
         .catch((error) => undefined) // Ignore API errors
         .then((res) => {
-          CACHED_ICONS.delete(pkgKey);
+          CACHED_ICONS.delete(cacheKey);
           setIconList(res?.data?.response?.icons);
         });
     }
 
-    CACHED_ICONS.set(pkgKey, 'package');
+    CACHED_ICONS.set(cacheKey, 'package');
     setIconType('package');
-  }, [paramIcons, pkgKey, toPackageImage, iconList, packageName, iconType, tryApi, version]);
+  }, [paramIcons, cacheKey, toPackageImage, iconList, packageName, iconType, tryApi, version]);
   return iconType;
 };

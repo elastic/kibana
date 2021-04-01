@@ -8,7 +8,7 @@ import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import type { PackageInfo } from '../../../../../types';
+import type { PackageInfo, ScreenshotItem } from '../../../../../types';
 
 import { Screenshots } from './screenshots';
 import { Readme } from './readme';
@@ -30,7 +30,7 @@ export const OverviewPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
   const allScreenshots = useMemo(
     () =>
       (packageInfo.policy_templates || []).reduce(
-        (screenshots, policyTemplate) => {
+        (screenshots: ScreenshotItem[], policyTemplate) => {
           return [...screenshots, ...(policyTemplate.screenshots || [])];
         },
         [...(packageInfo.screenshots || [])]

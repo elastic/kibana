@@ -23,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { Loading } from '../../../components';
 import type { PackageList } from '../../../types';
-import { useLocalSearch, searchIdField } from '../hooks';
+import { useLocalSearch } from '../hooks';
 
 import { PackageCard } from './package_card';
 
@@ -35,42 +35,12 @@ interface PackageListProps {
   showIntegrations?: boolean;
 }
 
-export function PackageListGrid({
-  isLoading,
-  controls,
-  title,
-  packages,
-  showIntegrations = true,
-}: PackageListProps) {
+export function PackageListGrid({ isLoading, controls, title, packages }: PackageListProps) {
   const initialQuery = EuiSearchBar.Query.MATCH_ALL;
 
   const [query, setQuery] = useState<Query | null>(initialQuery);
   const [searchTerm, setSearchTerm] = useState('');
-  const packagesAndIntegrations = useMemo(
-    () =>
-      showIntegrations
-        ? packages.reduce((acc: PackageList, pkg) => {
-            return [
-              ...acc,
-              pkg,
-              ...(pkg.policy_templates?.length
-                ? pkg.policy_templates.map((integration) => {
-                    const { name, title: integrationTitle, description, icons } = integration;
-                    return {
-                      ...pkg,
-                      title: integrationTitle,
-                      description,
-                      integration: name,
-                      icons: icons || pkg.icons,
-                    };
-                  })
-                : []),
-            ];
-          }, [])
-        : packages,
-    [packages, showIntegrations]
-  );
-  const localSearchRef = useLocalSearch(packagesAndIntegrations);
+  const localSearchRef = useLocalSearch(packages);
 
   const onQueryChange = ({
     // eslint-disable-next-line @typescript-eslint/no-shadow
@@ -93,16 +63,17 @@ export function PackageListGrid({
     title,
   ]);
 
+  // useEffect(() => {
+  //   console.log(packages);
+  //   console.log(localSearchRef.current!.search(searchTerm));
+  // }, [localSearchRef, searchTerm]);
+
   const filteredPackages = useMemo(
     () =>
       !isLoading && searchTerm
-        ? packagesAndIntegrations.filter((pkg) =>
-            (localSearchRef.current!.search(searchTerm) as PackageList)
-              .map((match) => match[searchIdField])
-              .includes(pkg[searchIdField])
-          )
-        : packagesAndIntegrations,
-    [isLoading, localSearchRef, packagesAndIntegrations, searchTerm]
+        ? (localSearchRef.current!.search(searchTerm) as PackageList)
+        : packages,
+    [isLoading, localSearchRef, packages, searchTerm]
   );
 
   const gridContent = useMemo(() => {
@@ -161,9 +132,9 @@ function GridColumn({ packages }: GridColumnProps) {
   return (
     <EuiFlexGrid gutterSize="l" columns={3}>
       {packages.length ? (
-        packages.map((pkg, i) => {
+        packages.map((pkg) => {
           return (
-            <EuiFlexItem key={i}>
+            <EuiFlexItem key={pkg.id}>
               <PackageCard {...pkg} />
             </EuiFlexItem>
           );
