@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty, omit, merge } from 'lodash';
+import { isEmpty, omit } from 'lodash';
 import { EventOutcome } from '../../../../common/event_outcome';
 import {
   processSignificantTermAggs,
@@ -13,65 +13,25 @@ import {
 } from '../process_significant_term_aggs';
 import { AggregationOptionsByType } from '../../../../../../../typings/elasticsearch';
 import { ESFilter } from '../../../../../../../typings/elasticsearch';
-import {
-  environmentQuery,
-  rangeQuery,
-  kqlQuery,
-} from '../../../../server/utils/queries';
-import {
-  EVENT_OUTCOME,
-  SERVICE_NAME,
-  TRANSACTION_NAME,
-  TRANSACTION_TYPE,
-  PROCESSOR_EVENT,
-} from '../../../../common/elasticsearch_fieldnames';
+import { EVENT_OUTCOME } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import {
-  getOutcomeAggregation,
+  getTimeseriesAggregation,
   getTransactionErrorRateTimeSeries,
 } from '../../helpers/transaction_error_rate';
 import { withApmSpan } from '../../../utils/with_apm_span';
+import { CorrelationsOptions, getCorrelationsFilters } from '../get_filters';
 
-export async function getCorrelationsForFailedTransactions({
-  environment,
-  kuery,
-  serviceName,
-  transactionType,
-  transactionName,
-  fieldNames,
-  setup,
-}: {
-  environment?: string;
-  kuery?: string;
-  serviceName: string | undefined;
-  transactionType: string | undefined;
-  transactionName: string | undefined;
+interface Options extends CorrelationsOptions {
   fieldNames: string[];
-  setup: Setup & SetupTimeRange;
-}) {
+}
+export async function getCorrelationsForFailedTransactions(options: Options) {
   return withApmSpan('get_correlations_for_failed_transactions', async () => {
-    const { start, end, apmEventClient } = setup;
-
-    const backgroundFilters: ESFilter[] = [
-      { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
-      ...rangeQuery(start, end),
-      ...environmentQuery(environment),
-      ...kqlQuery(kuery),
-    ];
-
-    if (serviceName) {
-      backgroundFilters.push({ term: { [SERVICE_NAME]: serviceName } });
-    }
-
-    if (transactionType) {
-      backgroundFilters.push({ term: { [TRANSACTION_TYPE]: transactionType } });
-    }
-
-    if (transactionName) {
-      backgroundFilters.push({ term: { [TRANSACTION_NAME]: transactionName } });
-    }
+    const { fieldNames, setup } = options;
+    const { apmEventClient } = setup;
+    const filters = getCorrelationsFilters(options);
 
     const params = {
       apm: { events: [ProcessorEvent.transaction] },
@@ -79,7 +39,7 @@ export async function getCorrelationsForFailedTransactions({
       body: {
         size: 0,
         query: {
-          bool: { filter: backgroundFilters },
+          bool: { filter: filters },
         },
         aggs: {
           failed_transactions: {
@@ -95,7 +55,7 @@ export async function getCorrelationsForFailedTransactions({
                     field: fieldName,
                     background_filter: {
                       bool: {
-                        filter: backgroundFilters,
+                        filter: filters,
                         must_not: {
                           term: { [EVENT_OUTCOME]: EventOutcome.failure },
                         },
@@ -112,7 +72,7 @@ export async function getCorrelationsForFailedTransactions({
 
     const response = await apmEventClient.search(params);
     if (!response.aggregations) {
-      return {};
+      return { significantTerms: [] };
     }
 
     const sigTermAggs = omit(
@@ -121,17 +81,17 @@ export async function getCorrelationsForFailedTransactions({
     );
 
     const topSigTerms = processSignificantTermAggs({ sigTermAggs });
-    return getErrorRateTimeSeries({ setup, backgroundFilters, topSigTerms });
+    return getErrorRateTimeSeries({ setup, filters, topSigTerms });
   });
 }
 
 export async function getErrorRateTimeSeries({
   setup,
-  backgroundFilters,
+  filters,
   topSigTerms,
 }: {
   setup: Setup & SetupTimeRange;
-  backgroundFilters: ESFilter[];
+  filters: ESFilter[];
   topSigTerms: TopSigTerm[];
 }) {
   return withApmSpan('get_error_rate_timeseries', async () => {
@@ -139,20 +99,10 @@ export async function getErrorRateTimeSeries({
     const { intervalString } = getBucketSize({ start, end, numBuckets: 15 });
 
     if (isEmpty(topSigTerms)) {
-      return {};
+      return { significantTerms: [] };
     }
 
-    const timeseriesAgg = {
-      date_histogram: {
-        field: '@timestamp',
-        fixed_interval: intervalString,
-        min_doc_count: 0,
-        extended_bounds: { min: start, max: end },
-      },
-      aggs: {
-        outcomes: getOutcomeAggregation(),
-      },
-    };
+    const timeseriesAgg = getTimeseriesAggregation(start, end, intervalString);
 
     const perTermAggs = topSigTerms.reduce(
       (acc, term, index) => {
@@ -175,8 +125,8 @@ export async function getErrorRateTimeSeries({
       apm: { events: [ProcessorEvent.transaction] },
       body: {
         size: 0,
-        query: { bool: { filter: backgroundFilters } },
-        aggs: merge({ timeseries: timeseriesAgg }, perTermAggs),
+        query: { bool: { filter: filters } },
+        aggs: perTermAggs,
       },
     };
 
@@ -184,15 +134,10 @@ export async function getErrorRateTimeSeries({
     const { aggregations } = response;
 
     if (!aggregations) {
-      return {};
+      return { significantTerms: [] };
     }
 
     return {
-      overall: {
-        timeseries: getTransactionErrorRateTimeSeries(
-          aggregations.timeseries.buckets
-        ),
-      },
       significantTerms: topSigTerms.map((topSig, index) => {
         const agg = aggregations[`term_${index}`]!;
 

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { MonitorPage } from './monitor';
-import { shallowWithRouter } from '../lib';
+import { shallowWithRouter } from '../lib/helper/enzyme_helpers';
 
 describe('MonitorPage', () => {
   it('shallow renders expected elements for valid props', () => {
