@@ -122,6 +122,9 @@ export class DrilldownManagerState {
    */
   public readonly canUnlockMoreDrilldowns: boolean;
 
+  /**
+   * Used to show cloning success notification.
+   */
   public lastCloneRecord: null | { time: number; templateIds: string[] } = null;
 
   constructor(public readonly deps: DrilldownManagerStateDeps) {
@@ -336,12 +339,38 @@ export class DrilldownManagerState {
 
   private async cloneTemplate(template: DrilldownTemplate) {
     const { dynamicActionManager } = this.deps;
+    const name = this.pickName(template.name);
     const action: SerializedAction = {
       factoryId: template.factoryId,
-      name: template.name,
+      name,
       config: (template.config || {}) as SerializableState,
     };
     await dynamicActionManager.createEvent(action, template.triggers);
+  }
+
+  /**
+   * Checks if drilldown with such a name already exists.
+   */
+  private hasDrilldownWithName(name: string): boolean {
+    const { events } = this.deps.dynamicActionManager.state.get();
+    for (const event of events) if (event.action.name === name) return true;
+    return false;
+  }
+
+  /**
+   * Picks a unique name for the cloned drilldown.
+   */
+  private pickName(name: string): string {
+    if (this.hasDrilldownWithName(name)) {
+      const matches = name.match(/(.*) (\(copy [^\)]+\))/);
+      if (matches) name = matches[1];
+      for (let i = 1; i < 100; i++) {
+        const proposedName = `${name} (copy ${i})`;
+        const exists = this.hasDrilldownWithName(proposedName);
+        if (!exists) return proposedName;
+      }
+    }
+    return name;
   }
 
   public readonly onCreateFromTemplate = async (templateId: string) => {
