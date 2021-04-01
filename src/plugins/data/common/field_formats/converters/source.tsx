@@ -23,12 +23,8 @@ const TemplateComponent = ({ defPairs }: Props) => {
     <dl className={'source truncate-by-height'}>
       {defPairs.map((pair, idx) => (
         <Fragment key={idx}>
-          <dt
-            dangerouslySetInnerHTML={{ __html: `${pair[0]}:` }} // eslint-disable-line react/no-danger
-          />
-          <dd
-            dangerouslySetInnerHTML={{ __html: `${pair[1]}` }} // eslint-disable-line react/no-danger
-          />{' '}
+          <dt>{pair[0]}:</dt>
+          <dd>{pair[1]}</dd>{' '}
         </Fragment>
       ))}
     </dl>
