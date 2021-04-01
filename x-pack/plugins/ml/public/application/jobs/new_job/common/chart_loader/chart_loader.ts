@@ -128,6 +128,7 @@ export class ChartLoader {
     start: number,
     end: number,
     intervalMs: number,
+    runtimeMappings?: RuntimeMappings,
     indicesOptions?: IndicesOptions
   ): Promise<LineChartPoint[]> {
     if (this._timeFieldName !== '') {
@@ -138,6 +139,7 @@ export class ChartLoader {
         start,
         end,
         intervalMs * 3,
+        runtimeMappings,
         indicesOptions
       );
       if (resp.error !== undefined) {

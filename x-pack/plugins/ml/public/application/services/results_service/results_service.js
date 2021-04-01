@@ -14,6 +14,7 @@ import {
   SWIM_LANE_DEFAULT_PAGE_SIZE,
 } from '../../explorer/explorer_constants';
 import { aggregationTypeTransform } from '../../../../common/util/anomaly_utils';
+import { isPopulatedObject } from '../../../../common/util/object_utils';
 
 /**
  * Service for carrying out Elasticsearch queries to obtain data for the Ml Results dashboards.
@@ -1059,6 +1060,7 @@ export function resultsServiceProvider(mlApiServices) {
       earliestMs,
       latestMs,
       intervalMs,
+      runtimeMappings,
       indicesOptions
     ) {
       return new Promise((resolve, reject) => {
@@ -1109,6 +1111,12 @@ export function resultsServiceProvider(mlApiServices) {
                   },
                 },
               },
+              // Runtime mappings only needed to support when query includes a runtime field
+              // even though the default timeField can be a search time runtime field
+              // because currently Kibana doesn't support that
+              ...(isPopulatedObject(runtimeMappings) && query
+                ? { runtime_mappings: runtimeMappings }
+                : {}),
             },
             ...(indicesOptions ?? {}),
           })
