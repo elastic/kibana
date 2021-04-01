@@ -15,7 +15,7 @@ import {
 export const ArtifactConstants = {
   GLOBAL_ALLOWLIST_NAME: 'endpoint-exceptionlist',
   /**
-   * Saved objects no longer used for storing artifacts. Value
+   * Saved objects no longer used for storing artifacts
    * @deprecated
    */
   SAVED_OBJECT_TYPE: 'endpoint:user-artifact',
