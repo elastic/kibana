@@ -540,5 +540,50 @@ describe('http service', () => {
 
       expect(header['www-authenticate']).toEqual('Basic realm="Authorization Required"');
     });
+
+    it('provides error reason for Elasticsearch Response Errors', async () => {
+      const { http } = await root.setup();
+      const { createRouter } = http;
+      // eslint-disable-next-line prefer-const
+      let elasticsearch: InternalElasticsearchServiceStart;
+
+      esClient.ping.mockImplementation(() =>
+        elasticsearchClientMock.createErrorTransportRequestPromise(
+          new ResponseError({
+            statusCode: 404,
+            body: {
+              error: {
+                type: 'error_type',
+                reason: 'error_reason',
+              },
+            },
+            warnings: [],
+            headers: {},
+            meta: {} as any,
+          })
+        )
+      );
+
+      const router = createRouter('/new-platform');
+      router.get({ path: '/', validate: false }, async (context, req, res) => {
+        try {
+          const result = await elasticsearch.client.asScoped(req).asInternalUser.ping();
+          return res.ok({
+            body: result,
+          });
+        } catch (e) {
+          return res.badRequest({
+            body: e,
+          });
+        }
+      });
+
+      const coreStart = await root.start();
+      elasticsearch = coreStart.elasticsearch;
+
+      const { body } = await kbnTestServer.request.get(root, '/new-platform/').expect(400);
+
+      expect(body.message).toEqual('[error_type]: error_reason');
+    });
   });
 });

@@ -18,6 +18,7 @@ export interface UsageStats {
   'timelion:graphite.url': string;
   'xpackDashboardMode:roles': string;
   'securitySolution:ipReputationLinks': string;
+  'banners:textContent': string;
   /**
    * non-sensitive settings
    */
@@ -31,6 +32,7 @@ export interface UsageStats {
   'apm:enableSignificantTerms': boolean;
   'apm:enableServiceOverview': boolean;
   'observability:enableAlertingExperience': boolean;
+  'observability:enableInspectEsQueries': boolean;
   'visualize:enableLabs': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:colorMapping': string;
@@ -113,4 +115,7 @@ export interface UsageStats {
   'csv:quoteValues': boolean;
   'dateFormat:dow': string;
   dateFormat: string;
+  'banners:placement': string;
+  'banners:textColor': string;
+  'banners:backgroundColor': string;
 }

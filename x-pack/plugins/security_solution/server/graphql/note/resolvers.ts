@@ -7,7 +7,7 @@
 
 import { AppResolverWithFields, AppResolverOf } from '../../lib/framework';
 import { MutationResolvers, QueryResolvers } from '../types';
-import { Note } from '../../lib/note/saved_object';
+import { Notes } from '../../lib/timeline/saved_object/notes';
 
 export type QueryNoteResolver = AppResolverOf<QueryResolvers.GetNoteResolver>;
 
@@ -29,7 +29,7 @@ export type MutationDeleteNoteResolver = AppResolverOf<MutationResolvers.DeleteN
 export type MutationDeleteNoteByTimelineIdResolver = AppResolverOf<MutationResolvers.DeleteNoteByTimelineIdResolver>;
 
 interface NoteResolversDeps {
-  note: Note;
+  note: Notes;
 }
 
 export const createNoteResolvers = (
