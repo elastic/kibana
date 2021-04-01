@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export { MapsStartApi } from './start_api';
-export { createLayerDescriptors } from './create_layer_descriptors';
-export { registerLayerWizard, registerSource } from './register';
-export { suggestEMSTermJoinConfig } from './ems';
+export * from './ems_autosuggest';
