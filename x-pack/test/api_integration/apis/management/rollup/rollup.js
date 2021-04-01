@@ -24,7 +24,8 @@ export default function ({ getService }) {
     cleanUp,
   } = registerHelpers(getService);
 
-  describe('jobs', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/96002
+  describe.skip('jobs', () => {
     after(() => cleanUp());
 
     describe('indices', () => {

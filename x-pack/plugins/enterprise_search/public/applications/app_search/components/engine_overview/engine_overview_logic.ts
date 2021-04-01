@@ -14,7 +14,6 @@ import { EngineLogic } from '../engine';
 const POLLING_DURATION = 5000;
 
 interface EngineOverviewApiData {
-  apiLogsUnavailable: boolean;
   documentCount: number;
   startDate: string;
   operationsPerDay: number[];
@@ -47,12 +46,6 @@ export const EngineOverviewLogic = kea<MakeLogicType<EngineOverviewValues, Engin
       true,
       {
         setPolledData: () => false,
-      },
-    ],
-    apiLogsUnavailable: [
-      false,
-      {
-        setPolledData: (_, { apiLogsUnavailable }) => apiLogsUnavailable,
       },
     ],
     startDate: [
