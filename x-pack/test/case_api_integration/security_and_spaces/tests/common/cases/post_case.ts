@@ -106,17 +106,17 @@ export default ({ getService }: FtrProviderContext): void => {
           supertestWithoutAuth,
           user: secOnly,
           space: 'space1',
-          scope: 'securitySolutionFixture',
+          owner: 'securitySolutionFixture',
         });
-        expect(theCase.scope).to.eql('securitySolutionFixture');
+        expect(theCase.owner).to.eql('securitySolutionFixture');
       });
 
-      it('User: security solution only - should NOT create a case of different scope', async () => {
+      it('User: security solution only - should NOT create a case of different owner', async () => {
         await createCaseAsUser({
           supertestWithoutAuth,
           user: secOnly,
           space: 'space1',
-          scope: 'observabilityFixture',
+          owner: 'observabilityFixture',
           expectedHttpCode: 403,
         });
       });
@@ -129,7 +129,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertestWithoutAuth,
             user,
             space: 'space1',
-            scope: 'securitySolutionFixture',
+            owner: 'securitySolutionFixture',
             expectedHttpCode: 403,
           });
         });
@@ -140,7 +140,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertestWithoutAuth,
           user: secOnly,
           space: 'space2',
-          scope: 'securitySolutionFixture',
+          owner: 'securitySolutionFixture',
           expectedHttpCode: 403,
         });
       });

@@ -23,7 +23,7 @@ import {
   createCaseAction,
   deleteCaseAction,
   createCaseAsUser,
-  expectCasesToBeValidScoped,
+  expectCasesToBeValidOwner,
   findCasesAsUser,
 } from '../../../../common/lib/utils';
 import {
@@ -698,7 +698,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertestWithoutAuth,
           user: secOnly,
           space: 'space1',
-          scope: 'securitySolutionFixture',
+          owner: 'securitySolutionFixture',
         });
 
         // Create case owned by the observability user
@@ -706,26 +706,26 @@ export default ({ getService }: FtrProviderContext): void => {
           supertestWithoutAuth,
           user: obsOnly,
           space: 'space1',
-          scope: 'observabilityFixture',
+          owner: 'observabilityFixture',
         });
 
         for (const scenario of [
           {
             user: globalRead,
             numberOfExpectedCases: 2,
-            scopes: ['securitySolutionFixture', 'observabilityFixture'],
+            owners: ['securitySolutionFixture', 'observabilityFixture'],
           },
           {
             user: superUser,
             numberOfExpectedCases: 2,
-            scopes: ['securitySolutionFixture', 'observabilityFixture'],
+            owners: ['securitySolutionFixture', 'observabilityFixture'],
           },
-          { user: secOnlyRead, numberOfExpectedCases: 1, scopes: ['securitySolutionFixture'] },
-          { user: obsOnlyRead, numberOfExpectedCases: 1, scopes: ['observabilityFixture'] },
+          { user: secOnlyRead, numberOfExpectedCases: 1, owners: ['securitySolutionFixture'] },
+          { user: obsOnlyRead, numberOfExpectedCases: 1, owners: ['observabilityFixture'] },
           {
             user: obsSecRead,
             numberOfExpectedCases: 2,
-            scopes: ['securitySolutionFixture', 'observabilityFixture'],
+            owners: ['securitySolutionFixture', 'observabilityFixture'],
           },
         ]) {
           const res = await findCasesAsUser({
@@ -734,7 +734,7 @@ export default ({ getService }: FtrProviderContext): void => {
             space: 'space1',
           });
 
-          expectCasesToBeValidScoped(res.cases, scenario.numberOfExpectedCases, scenario.scopes);
+          expectCasesToBeValidOwner(res.cases, scenario.numberOfExpectedCases, scenario.owners);
         }
       });
 
@@ -750,7 +750,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertestWithoutAuth,
             user: superUser,
             space: scenario.space,
-            scope: 'securitySolutionFixture',
+            owner: 'securitySolutionFixture',
           });
 
           // user should not be able to read cases at the appropriate space
@@ -764,28 +764,34 @@ export default ({ getService }: FtrProviderContext): void => {
       }
 
       it('should return the correct cases when trying to exploit RBAC through the search field', async () => {
-        // super user creates a case with scope securitySolutionFixture
+        // super user creates a case with owner securitySolutionFixture
         await createCaseAsUser({
           supertestWithoutAuth,
           user: superUser,
           space: 'space1',
-          scope: 'securitySolutionFixture',
+          owner: 'securitySolutionFixture',
         });
 
-        // super user creates a case with scope observabilityFixture
+        // super user creates a case with owner observabilityFixture
         await createCaseAsUser({
           supertestWithoutAuth,
           user: superUser,
           space: 'space1',
-          scope: 'observabilityFixture',
+          owner: 'observabilityFixture',
         });
 
         const res = await findCasesAsUser({
           supertestWithoutAuth,
           user: secOnly,
           space: 'space1',
-          appendToUrl: 'search=securitySolutionFixture+observabilityFixture&searchFields[0]=scope',
+          appendToUrl: 'search=securitySolutionFixture+observabilityFixture&searchFields[0]=owner',
         });
+
+        expectCasesToBeValidOwner(res.cases, 1, ['securitySolutionFixture']);
+      });
+
+          appendToUrl: 'search=securitySolutionFixture+observabilityFixture&searchFields[0]=scope',
+      });
 
         expectCasesToBeValidScoped(res.cases, 1, ['securitySolutionFixture']);
       });

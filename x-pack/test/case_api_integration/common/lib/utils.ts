@@ -418,20 +418,20 @@ export const createCaseAsUser = async ({
   supertestWithoutAuth,
   user,
   space,
-  scope,
+  owner,
   expectedHttpCode = 200,
 }: {
   supertestWithoutAuth: st.SuperTest<supertestAsPromised.Test>;
   user: User;
   space: string;
-  scope?: string;
+  owner?: string;
   expectedHttpCode?: number;
 }): Promise<CaseResponse> => {
   const { body: theCase } = await supertestWithoutAuth
     .post(`${getSpaceUrlPrefix(space)}${CASES_URL}`)
     .auth(user.username, user.password)
     .set('kbn-xsrf', 'true')
-    .send(getPostCaseRequest({ scope }))
+    .send(getPostCaseRequest({ owner }))
     .expect(expectedHttpCode);
 
   return theCase;
@@ -460,11 +460,11 @@ export const findCasesAsUser = async ({
   return res;
 };
 
-export const expectCasesToBeValidScoped = (
+export const expectCasesToBeValidOwner = (
   cases: CaseResponse[],
   numberOfExpectedCases: number,
-  scopes: string[]
+  owners: string[]
 ) => {
   expect(cases.length).to.eql(numberOfExpectedCases);
-  cases.forEach((theCase) => expect(scopes.includes(theCase.scope)).to.be(true));
+  cases.forEach((theCase) => expect(owners.includes(theCase.owner)).to.be(true));
 };
