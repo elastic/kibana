@@ -784,7 +784,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertestWithoutAuth,
           user: secOnly,
           space: 'space1',
-          appendToUrl: 'search=securitySolutionFixture+observabilityFixture&searchFields[0]=owner',
+          appendToUrl: 'search=securitySolutionFixture+observabilityFixture&searchFields=owner',
         });
 
         expectCasesToBeValidOwner(res.cases, 1, ['securitySolutionFixture']);

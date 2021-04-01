@@ -112,10 +112,10 @@ export const CasesFindRequestRt = rt.partial({
   page: NumberFromString,
   perPage: NumberFromString,
   search: rt.string,
-  searchFields: rt.array(rt.string),
+  searchFields: rt.union([rt.array(rt.string), rt.string]),
   sortField: rt.string,
   sortOrder: rt.union([rt.literal('desc'), rt.literal('asc')]),
-  class: rt.string,
+  owner: rt.string,
 });
 
 export const CaseResponseRt = rt.intersection([

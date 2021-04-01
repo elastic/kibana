@@ -74,6 +74,12 @@ export const find = async ({
       caseOptions: {
         ...queryParams,
         ...caseQueries.case,
+        searchFields:
+          queryParams.searchFields != null
+            ? Array.isArray(queryParams.searchFields)
+              ? queryParams.searchFields
+              : [queryParams.searchFields]
+            : queryParams.searchFields,
         fields: queryParams.fields
           ? includeFieldsRequiredForAuthentication(queryParams.fields)
           : queryParams.fields,
