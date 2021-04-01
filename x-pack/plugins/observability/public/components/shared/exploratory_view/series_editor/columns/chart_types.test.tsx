@@ -10,7 +10,7 @@ import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { SeriesChartTypes, XYChartTypes } from './chart_types';
 import { mockUrlStorage, render } from '../../rtl_helpers';
 
-describe('SeriesChartTypes', function () {
+describe.skip('SeriesChartTypes', function () {
   it('should render properly', async function () {
     mockUrlStorage({});
 

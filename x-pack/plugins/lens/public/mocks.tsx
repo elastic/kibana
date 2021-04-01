@@ -18,7 +18,7 @@ const createStartContract = (): Start => {
     }),
     canUseEditor: jest.fn(() => true),
     navigateToPrefilledEditor: jest.fn(),
-    getXyVisTypes: jest.fn().mockReturnValue(visualizationTypes),
+    getXyVisTypes: jest.fn().mockReturnValue(new Promise(() => visualizationTypes)),
   };
   return startContract;
 };
