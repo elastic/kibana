@@ -52,6 +52,8 @@ export { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_serv
 export { i18nServiceMock } from './i18n/i18n_service.mock';
 export { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
 
+type MockedPluginInitializerConfig<T> = jest.Mocked<PluginInitializerContext<T>['config']>;
+
 export function pluginInitializerContextConfigMock<T>(config: T) {
   const globalConfig: SharedGlobalConfig = {
     kibana: {
@@ -70,7 +72,7 @@ export function pluginInitializerContextConfigMock<T>(config: T) {
     },
   };
 
-  const mock: jest.Mocked<PluginInitializerContext<T>['config']> = {
+  const mock: MockedPluginInitializerConfig<T> = {
     legacy: {
       globalConfig$: of(globalConfig),
       get: () => globalConfig,
@@ -82,8 +84,12 @@ export function pluginInitializerContextConfigMock<T>(config: T) {
   return mock;
 }
 
+type PluginInitializerContextMock<T> = Omit<PluginInitializerContext<T>, 'config'> & {
+  config: MockedPluginInitializerConfig<T>;
+};
+
 function pluginInitializerContextMock<T>(config: T = {} as T) {
-  const mock: PluginInitializerContext<T> = {
+  const mock: PluginInitializerContextMock<T> = {
     opaqueId: Symbol(),
     logger: loggingSystemMock.create(),
     env: {

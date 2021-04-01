@@ -4,7 +4,7 @@
 <titleabbrev>Legacy update alert</titleabbrev>
 ++++
 
-WARNING: Deprecated in 7.13.0. Use <<update-rule-api>> instead.
+deprecated::[7.13.0,Use <<update-rule-api>> instead.]
 
 Update the attributes for an existing alert.
 
