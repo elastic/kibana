@@ -141,12 +141,7 @@ export class ImportCompleteView extends Component<Props, {}> {
           color="danger"
           iconType="alert"
         >
-          <p>
-            {i18n.translate('xpack.fileUpload.importComplete.uploadFailureMsg', {
-              defaultMessage: 'Unable to upload file. {errorMsg}',
-              values: { errorMsg },
-            })}
-          </p>
+          <p>{errorMsg}</p>
         </EuiCallOut>
       );
     }
