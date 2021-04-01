@@ -7,6 +7,13 @@
 
 import { setMockValues, setMockActions, mountWithIntl } from '../../../../__mocks__';
 
+// NOTE: We're mocking FormattedRelative here because it (currently) has
+// console warn issues, and it allows us to skip mocking dates
+jest.mock('@kbn/i18n/react', () => ({
+  ...jest.requireActual('@kbn/i18n/react'),
+  FormattedRelative: jest.fn(() => '20 hours ago'),
+}));
+
 import React from 'react';
 
 import { shallow } from 'enzyme';
@@ -18,32 +25,21 @@ import { DEFAULT_META } from '../../../../shared/constants';
 import { ApiLogsTable } from './';
 
 describe('ApiLogsTable', () => {
-  // Mock static dates so our relative timestamps stay constant
-  let dateMock: jest.SpyInstance;
-  beforeAll(() => {
-    dateMock = jest
-      .spyOn(global.Date, 'now')
-      .mockImplementation(() => new Date('1970-01-02T00:00:00.000Z').valueOf());
-  });
-  afterAll(() => {
-    dateMock.mockRestore();
-  });
-
   const apiLogs = [
     {
-      timestamp: '1970-01-01T06:00:00.000Z',
+      timestamp: '1970-01-01T00:00:00.000Z',
       status: 404,
       http_method: 'GET',
       full_request_path: '/api/as/v1/test',
     },
     {
-      timestamp: '1970-01-01T12:00:00.000Z',
+      timestamp: '1970-01-01T00:00:00.000Z',
       status: 500,
       http_method: 'DELETE',
       full_request_path: '/api/as/v1/test',
     },
     {
-      timestamp: '1970-01-01T18:00:00.000Z',
+      timestamp: '1970-01-01T00:00:00.000Z',
       status: 200,
       http_method: 'POST',
       full_request_path: '/api/as/v1/engines/some-engine/search',
@@ -76,9 +72,7 @@ describe('ApiLogsTable', () => {
     expect(wrapper.find(EuiBadge)).toHaveLength(3);
 
     expect(tableContent).toContain('Time');
-    expect(tableContent).toContain('18 hours ago');
-    expect(tableContent).toContain('12 hours ago');
-    expect(tableContent).toContain('6 hours ago');
+    expect(tableContent).toContain('20 hours ago');
 
     expect(tableContent).toContain('Endpoint');
     expect(tableContent).toContain('/api/as/v1/test');
