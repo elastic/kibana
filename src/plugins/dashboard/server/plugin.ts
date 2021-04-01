@@ -18,24 +18,29 @@ import { createDashboardSavedObjectType } from './saved_objects';
 import { capabilitiesProvider } from './capabilities_provider';
 
 import { DashboardPluginSetup, DashboardPluginStart } from './types';
-import { EmbeddableSetup } from '../../embeddable/server';
+import { EmbeddableSetup, EmbeddableStart } from '../../embeddable/server';
 import { UsageCollectionSetup } from '../../usage_collection/server';
 import { registerDashboardUsageCollector } from './usage/register_collector';
+import { dashboardPersistableStateServiceFactory } from './embeddable/dashboard_container_embeddable_factory';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
   usageCollection: UsageCollectionSetup;
 }
 
+interface StartDeps {
+  embeddable: EmbeddableStart;
+}
+
 export class DashboardPlugin
-  implements Plugin<DashboardPluginSetup, DashboardPluginStart, SetupDeps> {
+  implements Plugin<DashboardPluginSetup, DashboardPluginStart, SetupDeps, StartDeps> {
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup, plugins: SetupDeps) {
+  public setup(core: CoreSetup<StartDeps>, plugins: SetupDeps) {
     this.logger.debug('dashboard: Setup');
 
     core.savedObjects.registerType(
@@ -48,6 +53,15 @@ export class DashboardPlugin
     core.capabilities.registerProvider(capabilitiesProvider);
 
     registerDashboardUsageCollector(plugins.usageCollection, plugins.embeddable);
+
+    (async () => {
+      const [_, startPlugins] = await core.getStartServices();
+
+      plugins.embeddable.registerEmbeddableFactory(
+        dashboardPersistableStateServiceFactory(startPlugins.embeddable)
+      );
+    })();
+
     return {};
   }
 

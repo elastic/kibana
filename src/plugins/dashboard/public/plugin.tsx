@@ -260,9 +260,20 @@ export class DashboardPlugin
       },
     });
 
+    getStartServices().then((coreStart) => {
+      const dashboardContainerFactory = new DashboardContainerFactoryDefinition(
+        getStartServices,
+        coreStart.embeddable
+      );
+      embeddable.registerEmbeddableFactory(
+        dashboardContainerFactory.type,
+        dashboardContainerFactory
+      );
+    });
+    /*
     const dashboardContainerFactory = new DashboardContainerFactoryDefinition(getStartServices);
     embeddable.registerEmbeddableFactory(dashboardContainerFactory.type, dashboardContainerFactory);
-
+    */
     const placeholderFactory = new PlaceholderEmbeddableFactory();
     embeddable.registerEmbeddableFactory(placeholderFactory.type, placeholderFactory);
 
