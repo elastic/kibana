@@ -137,13 +137,13 @@ export class CsvGenerator {
 
   // use fields/fieldsFromSource from the searchSource to get the ordering of columns
   // otherwise use the table columns as they are
-  private getFields(searchSource: ISearchSource, table: Datatable): string[] {
+  private getColumnsFromSearchSource(searchSource: ISearchSource, table: Datatable): string[] {
     const fieldValues: Record<string, string | boolean | SearchFieldValue[] | undefined> = {
       fields: searchSource.getField('fields'),
       fieldsFromSource: searchSource.getField('fieldsFromSource'),
     };
     const fieldSource = fieldValues.fieldsFromSource ? 'fieldsFromSource' : 'fields';
-    this.logger.debug(`Getting search source fields from: '${fieldSource}'`);
+    this.logger.debug(`Getting columns from '${fieldSource}' in search source.`);
 
     const fields = fieldValues[fieldSource];
     // Check if field name values are string[] and if the fields are user-defined
@@ -202,16 +202,16 @@ export class CsvGenerator {
   }
 
   /*
-   * Use the list of fields to generate the header row
+   * Use the list of columns to generate the header row
    */
   private generateHeader(
-    fields: string[],
+    columns: string[],
     table: Datatable,
     builder: MaxSizeStringBuilder,
     settings: CsvExportSettings
   ) {
     this.logger.debug(`Building CSV header row...`);
-    const header = fields.map(this.escapeValues(settings)).join(settings.separator) + '\n';
+    const header = columns.map(this.escapeValues(settings)).join(settings.separator) + '\n';
 
     if (!builder.tryAppend(header)) {
       return {
@@ -227,7 +227,7 @@ export class CsvGenerator {
    * Format a Datatable into rows of CSV content
    */
   private generateRows(
-    fields: string[],
+    columns: string[],
     table: Datatable,
     builder: MaxSizeStringBuilder,
     formatters: Record<string, FieldFormat>,
@@ -240,7 +240,7 @@ export class CsvGenerator {
       }
 
       const row =
-        fields
+        columns
           .map((f) => ({ column: f, data: dataTableRow[f] }))
           .map(this.formatCellValues(formatters))
           .map(this.escapeValues(settings))
@@ -338,11 +338,16 @@ export class CsvGenerator {
           break;
         }
 
-        const fields = this.getFields(searchSource, table);
+        // If columns exists in the job params, use it to order the CSV columns
+        // otherwise, get the ordering from the searchSource's fields / fieldsFromSource
+        const jobColumns = this.job.columns && this.job.columns.length > 0 && this.job.columns;
+        const columns = jobColumns
+          ? jobColumns
+          : this.getColumnsFromSearchSource(searchSource, table);
 
         if (first) {
           first = false;
-          this.generateHeader(fields, table, builder, settings);
+          this.generateHeader(columns, table, builder, settings);
         }
 
         if (table.rows.length < 1) {
@@ -350,7 +355,7 @@ export class CsvGenerator {
         }
 
         const formatters = this.getFormatters(table);
-        this.generateRows(fields, table, builder, formatters, settings);
+        this.generateRows(columns, table, builder, formatters, settings);
 
         // update iterator
         currentRecord += table.rows.length;

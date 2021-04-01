@@ -64,14 +64,11 @@ export class GetCsvReportPanelAction implements ActionDefinition<ActionContext> 
 
   public async getSearchSource(savedSearch: SavedSearch, embeddable: ISearchEmbeddable) {
     const { getSharingData } = await loadSharingDataHelpers();
-    const searchSource = savedSearch.searchSource.createCopy();
-    const { searchSource: serializedSearchSource } = await getSharingData(
-      searchSource,
+    return await getSharingData(
+      savedSearch.searchSource,
       savedSearch, // TODO: get unsaved state (using embeddale.searchScope): https://github.com/elastic/kibana/issues/43977
       this.core.uiSettings
     );
-
-    return serializedSearchSource;
   }
 
   public isCompatible = async (context: ActionContext) => {
@@ -96,12 +93,13 @@ export class GetCsvReportPanelAction implements ActionDefinition<ActionContext> 
     }
 
     const savedSearch = embeddable.getSavedSearch();
-    const searchSource = await this.getSearchSource(savedSearch, embeddable);
+    const { columns, searchSource } = await this.getSearchSource(savedSearch, embeddable);
 
     const kibanaTimezone = this.core.uiSettings.get('dateFormat:tz');
     const browserTimezone = kibanaTimezone === 'Browser' ? moment.tz.guess() : kibanaTimezone;
     const immediateJobParams: JobParamsDownloadCSV = {
       searchSource,
+      columns,
       browserTimezone,
       title: savedSearch.title,
     };

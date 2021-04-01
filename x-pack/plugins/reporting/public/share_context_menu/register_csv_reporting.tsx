@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 import React from 'react';
 import { IUiSettingsClient, ToastsSetup } from 'src/core/public';
+import { SearchSourceFields } from 'src/plugins/data/common';
 import { ShareContext } from '../../../../../src/plugins/share/public';
 import { LicensingPluginSetup } from '../../../licensing/public';
 import { CSV_JOB_TYPE } from '../../common/constants';
@@ -65,7 +66,8 @@ export const csvReportingProvider = ({
       browserTimezone,
       title: sharingData.title as string,
       objectType,
-      searchSource: sharingData.searchSource,
+      searchSource: sharingData.searchSource as SearchSourceFields,
+      columns: sharingData.columns as string[] | undefined,
     };
 
     const getJobParams = () => jobParams;
