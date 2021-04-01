@@ -49,7 +49,7 @@ export const ExperimentsList = (props: Props) => {
     .filter((item) => item !== null);
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none">
+    <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
       {items.length > 0 ? items : <EmptyList />}
     </EuiFlexGroup>
   );

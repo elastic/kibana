@@ -89,7 +89,7 @@ export const ExperimentsFlyout = (props: Props) => {
         reset();
         setExperiments(getExperiments());
       }}
-      isDisabled={!overrideCount || !isChanged}
+      isDisabled={!overrideCount}
     >
       {strings.getResetToDefaultLabel()}
     </EuiButtonEmpty>
@@ -102,7 +102,7 @@ export const ExperimentsFlyout = (props: Props) => {
       onClick={() => {
         window.location.reload();
       }}
-      isDisabled={overrideCount || !isChanged ? true : false}
+      isDisabled={!isChanged}
     >
       {strings.getRefreshLabel()}
     </EuiButton>
@@ -110,7 +110,7 @@ export const ExperimentsFlyout = (props: Props) => {
 
   footer = (
     <EuiFlyoutFooter>
-      <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+      <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>{resetButton}</EuiFlexItem>
         <EuiFlexItem grow={false}>{refreshButton}</EuiFlexItem>
       </EuiFlexGroup>
@@ -122,7 +122,7 @@ export const ExperimentsFlyout = (props: Props) => {
       <EuiFlyoutHeader>
         <EuiTitle size="m">
           <h2>
-            <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiIcon type="beaker" size="l" />
               </EuiFlexItem>

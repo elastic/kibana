@@ -4,8 +4,7 @@
   padding: $euiSizeL;
   min-width: 500px;
 
-  &--isOverridden {
-    &:before {
+  &--isOverridden:before {
       position: absolute;
       top: $euiSizeL;
       left: 4px;
@@ -13,7 +12,6 @@
       width: 4px;
       background: $euiColorPrimary;
       content: '';
-    }
   }
 
   .euiSwitch__label {
@@ -21,14 +19,22 @@
   }
 }
 
-.experimentListItem + .experimentListItem {
-  &:after {
-    position: absolute;
+.experimentListItem + .experimentListItem:after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 1px;
+  background: $euiColorLightShade;
+  content: '';
+}
+
+.euiFlyout .experimentListItem {
+  &:first-child {
+    padding-top: 0;
+  }
+
+  &--isOverridden:first-child:before {
     top: 0;
-    right: 0;
-    left: 0;
-    height: 1px;
-    background: $euiColorLightShade;
-    content: '';
   }
 }

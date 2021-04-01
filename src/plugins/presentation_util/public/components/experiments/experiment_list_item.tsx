@@ -47,9 +47,9 @@ export const ExperimentListItem = ({ experiment, onStatusChange }: Props) => {
         'experimentListItem--isOverriddenEnabled': isOverride && isEnabled,
       })}
     >
-      <EuiFlexGroup gutterSize="m">
+      <EuiFlexGroup gutterSize="m" responsive={false}>
         <EuiFlexItem>
-          <EuiFlexGroup direction="column" gutterSize="xs">
+          <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiTitle className="experimentListItem__title" size="s">
                 <h2>{name}</h2>

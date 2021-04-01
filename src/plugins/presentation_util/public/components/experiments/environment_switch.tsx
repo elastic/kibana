@@ -32,7 +32,7 @@ export const EnvironmentSwitch = ({ env, isChecked, onChange }: Props) => (
       checked={isChecked}
       style={{ marginTop: 1 }}
       label={
-        <EuiFlexGroup gutterSize="xs" alignItems="flexEnd">
+        <EuiFlexGroup gutterSize="xs" alignItems="flexEnd" responsive={false}>
           <EuiFlexItem grow={false}>{switchText[env].name}</EuiFlexItem>
           <EuiFlexItem style={{ textAlign: 'right' }}>
             <EuiIconTip content={switchText[env].help} position="left" />
