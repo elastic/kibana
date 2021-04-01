@@ -20,7 +20,8 @@ export const getColumns = (visParams: PieVisParams, visData: Datatable) => {
     const matchingIndex = visData.columns.findIndex((col) => col.id === lastBucketId);
     metricColumn = visData.columns[matchingIndex + 1];
   } else {
-    metricColumn = visData.columns[0];
+    const metricAccessor = visParams?.dimensions?.metric.accessor;
+    metricColumn = visData.columns[metricAccessor];
     bucketColumns.push({
       name: metricColumn.name,
     });

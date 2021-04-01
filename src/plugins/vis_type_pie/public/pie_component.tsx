@@ -39,7 +39,9 @@ import {
   getFilterEventData,
   getConfig,
   getColumns,
+  getComplexAccessor,
 } from './utils';
+import { ChartSplit, SMALL_MULTIPLES_ID } from './components/chart_split';
 
 import './chart.scss';
 
@@ -87,9 +89,10 @@ const PieComponent = (props: PieComponentProps) => {
     (
       clickedLayers: LayerValue[],
       bucketColumns: Array<Partial<BucketColumns>>,
-      visData: Datatable
+      visData: Datatable,
+      splitChartDimension?: DatatableColumn | undefined
     ): void => {
-      const data = getFilterClickData(clickedLayers, bucketColumns, visData);
+      const data = getFilterClickData(clickedLayers, bucketColumns, visData, splitChartDimension);
       const event = {
         name: 'filterBucket',
         data: { data },
@@ -176,11 +179,24 @@ const PieComponent = (props: PieComponentProps) => {
     visParams,
   ]);
 
+  const parentSeries = useMemo(() => {
+    const parentBucketId = bucketColumns[0].id;
+    const series: string[] = [];
+    visData.rows.forEach((row) => {
+      if (!parentBucketId) return [];
+      if (!series.includes(row[parentBucketId])) {
+        series.push(row[parentBucketId]);
+      }
+    });
+    return series;
+  }, [bucketColumns, visData.rows]);
+
   const layers = useMemo(
     () =>
       getLayers(
         bucketColumns,
         visParams,
+        parentSeries,
         props.uiState?.get('vis.colors', {}),
         visData.rows.length,
         palettesRegistry,
@@ -189,11 +205,12 @@ const PieComponent = (props: PieComponentProps) => {
       ),
     [
       bucketColumns,
-      palettesRegistry,
-      props.uiState,
-      services.fieldFormats,
-      visData.rows.length,
       visParams,
+      parentSeries,
+      props.uiState,
+      visData.rows.length,
+      palettesRegistry,
+      services.fieldFormats,
       syncColors,
     ]
   );
@@ -218,6 +235,22 @@ const PieComponent = (props: PieComponentProps) => {
     [bucketColumns, legendPosition, setColor, visData.rows, visParams.palette.name, props.uiState]
   );
 
+  const splitChartColumnAccessor = visParams.dimensions.splitColumn
+    ? getComplexAccessor(
+        services.fieldFormats,
+        visData.columns
+      )(visParams.dimensions.splitColumn[0])
+    : undefined;
+  const splitChartRowAccessor = visParams.dimensions.splitRow
+    ? getComplexAccessor(services.fieldFormats, visData.columns)(visParams.dimensions.splitRow[0])
+    : undefined;
+
+  const splitChartDimension = visParams.dimensions.splitColumn
+    ? visData.columns[visParams.dimensions.splitColumn[0].accessor]
+    : visParams.dimensions.splitRow
+    ? visData.columns[visParams.dimensions.splitRow[0].accessor]
+    : undefined;
+
   return (
     <div className="pieChart__container" data-test-subj="visTypePieChart">
       <div className="pieChart__wrapper">
@@ -227,14 +260,25 @@ const PieComponent = (props: PieComponentProps) => {
           legendPosition={legendPosition}
         />
         <Chart size="100%">
+          <ChartSplit
+            splitColumnAccessor={splitChartColumnAccessor}
+            splitRowAccessor={splitChartRowAccessor}
+            splitColumn={splitChartDimension}
+          />
           <Settings
             showLegend={showLegend}
             legendPosition={legendPosition}
             legendMaxDepth={visParams.nestedLegend ? undefined : 1}
             legendColorPicker={legendColorPicker}
+            flatLegend={visParams.flatLegend}
             tooltip={tooltip}
             onElementClick={(args) => {
-              handleSliceClick(args[0][0] as LayerValue[], bucketColumns, visData);
+              handleSliceClick(
+                args[0][0] as LayerValue[],
+                bucketColumns,
+                visData,
+                splitChartDimension
+              );
             }}
             legendAction={getLegendActions(
               canFilter,
@@ -250,6 +294,7 @@ const PieComponent = (props: PieComponentProps) => {
           />
           <Partition
             id="pie"
+            smallMultiples={SMALL_MULTIPLES_ID}
             data={visData.rows}
             valueAccessor={(d: Datum) => getSliceValue(d, metricColumn)}
             percentFormatter={(d: number) => percentFormatter.convert(d / 100)}

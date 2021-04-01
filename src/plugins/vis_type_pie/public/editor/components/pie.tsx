@@ -66,20 +66,36 @@ const PieOptions = (props: PieOptionsProps) => {
         />
         <BasicOptions {...props} legendPositions={getLegendPositions} />
         {props.showElasticChartsOptions && (
-          <SwitchOption
-            label={i18n.translate('visTypePie.editors.pie.nestedLegendLabel', {
-              defaultMessage: 'Nested legend',
-            })}
-            paramName="nestedLegend"
-            value={stateParams.nestedLegend}
-            setValue={(paramName, value) => {
-              if (props.trackUiMetric) {
-                props.trackUiMetric(METRIC_TYPE.CLICK, 'nested_legend_switched');
-              }
-              setValue(paramName, value);
-            }}
-            data-test-subj="visTypePieNestedLegendSwitch"
-          />
+          <>
+            <SwitchOption
+              label={i18n.translate('visTypePie.editors.pie.nestedLegendLabel', {
+                defaultMessage: 'Nested legend',
+              })}
+              paramName="nestedLegend"
+              value={stateParams.nestedLegend}
+              setValue={(paramName, value) => {
+                if (props.trackUiMetric) {
+                  props.trackUiMetric(METRIC_TYPE.CLICK, 'nested_legend_switched');
+                }
+                setValue(paramName, value);
+              }}
+              data-test-subj="visTypePieNestedLegendSwitch"
+            />
+            <SwitchOption
+              label={i18n.translate('visTypePie.editors.pie.flatLegendLabel', {
+                defaultMessage: 'Flat legend',
+              })}
+              paramName="flatLegend"
+              value={stateParams.flatLegend}
+              setValue={(paramName, value) => {
+                if (props.trackUiMetric) {
+                  props.trackUiMetric(METRIC_TYPE.CLICK, 'flat_legend_switched');
+                }
+                setValue(paramName, value);
+              }}
+              data-test-subj="visTypePieFlatLegendSwitch"
+            />
+          </>
         )}
         {props.showElasticChartsOptions && palettesRegistry && (
           <PalettePicker

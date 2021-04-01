@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Position } from '@elastic/charts';
 import { AggGroupNames } from '../../../data/public';
@@ -14,7 +13,6 @@ import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '../../../visualizations
 import { PieVisParams, LabelPositions, ValueFormats, PieTypeProps } from '../types';
 import { toExpressionAst } from '../to_ast';
 import { getPieOptions } from '../editor/components';
-import { SplitTooltip } from './split_tooltip';
 
 export const getPieVisTypeDefinition = ({
   showElasticChartsOptions = false,
@@ -36,6 +34,7 @@ export const getPieVisTypeDefinition = ({
       addLegend: true,
       legendPosition: Position.Right,
       nestedLegend: false,
+      flatLegend: true,
       isDonut: true,
       palette: {
         type: 'palette',
@@ -89,11 +88,6 @@ export const getPieVisTypeDefinition = ({
         min: 0,
         max: 1,
         aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
-        // TODO: Remove when split chart aggs are supported
-        ...(showElasticChartsOptions && {
-          disabled: true,
-          tooltip: <SplitTooltip />,
-        }),
       },
     ],
   },

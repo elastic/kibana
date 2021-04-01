@@ -22,6 +22,7 @@ Object {
           "params": Object {},
         },
       },
+      "flatLegend": true,
       "isDonut": true,
       "labels": Object {
         "last_level": true,

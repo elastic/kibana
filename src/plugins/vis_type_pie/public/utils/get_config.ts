@@ -15,6 +15,7 @@ export const getConfig = (
 ): RecursivePartial<PartitionConfig> => {
   const config: RecursivePartial<PartitionConfig> = {
     partitionLayout: PartitionLayout.sunburst,
+    // clockwiseSectors: false,
     fontFamily: chartTheme.barSeriesStyle?.displayValue?.fontFamily,
     outerSizeRatio: 1,
     specialFirstInnermostSector: true,

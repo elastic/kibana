@@ -64,7 +64,7 @@ export const getColorPicker = (
 }) => {
   const seriesName = seriesIdentifier.key;
   const overwriteColors: Record<string, string> = uiState?.get('vis.colors', {});
-  const colorIsOverwritten = Object.keys(overwriteColors).includes(seriesName as string);
+  const colorIsOverwritten = Object.keys(overwriteColors).includes(seriesName.toString());
   let keyDownEventOn = false;
   const handleChange = (newColor: string | null) => {
     if (newColor) {
@@ -90,7 +90,7 @@ export const getColorPicker = (
 
   // For the EuiPalette we want the user to be able to change only the colors of the inner layer
   if (palette !== 'kibana_palette') {
-    const enablePicker = isOnInnerLayer(bucketColumns[0], data, seriesName);
+    const enablePicker = isOnInnerLayer(bucketColumns[0], data, seriesName) || !bucketColumns[0].id;
     if (!enablePicker) return null;
   }
   const hexColor = new Color(color).hex();

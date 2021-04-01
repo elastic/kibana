@@ -32,6 +32,7 @@ export interface PieVisParams {
   addLegend: boolean;
   legendPosition: Position;
   nestedLegend: boolean;
+  flatLegend: boolean;
   dimensions: Dimensions;
   isDonut: boolean;
   palette: PaletteOutput;

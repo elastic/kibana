@@ -17,6 +17,7 @@ const EMPTY_SLICE = Symbol('empty_slice');
 export const getLayers = (
   columns: Array<Partial<BucketColumns>>,
   visParams: PieVisParams,
+  parentSeries: string[],
   overwriteColors: { [key: string]: string },
   totalSeries: number,
   palettes: PaletteRegistry | null,
@@ -33,6 +34,7 @@ export const getLayers = (
   if (!visParams.labels.values) {
     fillLabel.valueFormatter = () => '';
   }
+  const isSplitChart = Boolean(visParams.dimensions.splitColumn || visParams.dimensions.splitRow);
   return columns.map((col) => {
     return {
       groupByRollup: (d: Datum) => {
@@ -59,9 +61,13 @@ export const getLayers = (
           // This has to be done recursively until we get to the slice index
           let tempParent: typeof d | typeof d['parent'] = d;
           while (tempParent.parent && tempParent.depth > 0) {
+            const seriesName = String(tempParent.parent.children[tempParent.sortIndex][0]);
             seriesLayers.unshift({
-              name: String(tempParent.parent.children[tempParent.sortIndex][0]),
-              rankAtDepth: tempParent.sortIndex,
+              name: seriesName,
+              rankAtDepth:
+                isSplitChart && parentSeries.includes(seriesName)
+                  ? parentSeries.findIndex((name) => name === seriesName)
+                  : tempParent.sortIndex,
               totalSeriesAtDepth: tempParent.parent.children.length,
             });
             tempParent = tempParent.parent;

@@ -7,7 +7,7 @@
  */
 
 import { LayerValue, SeriesIdentifier } from '@elastic/charts';
-import { Datatable } from '../../../expressions/public';
+import { Datatable, DatatableColumn } from '../../../expressions/public';
 import { DataPublicPluginStart } from '../../../data/public';
 import { ClickTriggerEvent } from '../../../charts/public';
 import { ValueClickContext } from '../../../embeddable/public';
@@ -27,7 +27,8 @@ export const canFilter = async (
 export const getFilterClickData = (
   clickedLayers: LayerValue[],
   bucketColumns: Array<Partial<BucketColumns>>,
-  visData: Datatable
+  visData: Datatable,
+  splitChartDimension?: DatatableColumn
 ): ValueClickContext['data']['data'] => {
   const data: ValueClickContext['data']['data'] = [];
   const matchingIndex = visData.rows.findIndex((row) =>
@@ -46,6 +47,16 @@ export const getFilterClickData = (
       table: visData,
     }))
   );
+
+  // console.dir(data);
+  // if (splitChartDimension) {
+  //   data.push({
+  //     column: visData.columns.findIndex((col) => col.id === splitChartDimension.id),
+  //     row: matchingIndex
+  //     table: visData,
+  //     value:
+  //   });
+  // }
 
   return data;
 };
