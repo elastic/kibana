@@ -21,7 +21,7 @@ import type {
 import {
   LogSourceColumnConfiguration,
   logSourceFieldColumnConfigurationRT,
-} from '../../../common/http_api/log_sources';
+} from '../../../common/log_sources';
 import {
   getLogEntryCursorFromHit,
   LogColumn,
@@ -56,6 +56,8 @@ import {
   getSortDirection,
   LogEntryHit,
 } from './queries/log_entries';
+import { resolveLogSourceConfiguration } from '../../../common/log_sources';
+import { KibanaFramework } from '../../lib/adapters/framework/kibana_framework_adapter';
 
 type LogEntriesSearchRequest = IKibanaSearchRequest<LogEntriesSearchRequestParams>;
 type LogEntriesSearchResponse = IKibanaSearchResponse<LogEntriesSearchResponsePayload>;
@@ -63,9 +65,11 @@ type LogEntriesSearchResponse = IKibanaSearchResponse<LogEntriesSearchResponsePa
 export const logEntriesSearchStrategyProvider = ({
   data,
   sources,
+  framework,
 }: {
   data: DataPluginStart;
   sources: IInfraSources;
+  framework: KibanaFramework;
 }): ISearchStrategy<LogEntriesSearchRequest, LogEntriesSearchResponse> => {
   const esSearchStrategy = data.search.getSearchStrategy('ese');
 
@@ -78,11 +82,24 @@ export const logEntriesSearchStrategyProvider = ({
           sources.getSourceConfiguration(dependencies.savedObjectsClient, request.params.sourceId)
         ).pipe(take(1), shareReplay(1));
 
-        const messageFormattingRules$ = defer(() =>
-          sourceConfiguration$.pipe(
-            map(({ configuration }) =>
-              compileFormattingRules(getBuiltinRules(configuration.fields.message))
+        const indexPatternsService$ = defer(() =>
+          framework.getIndexPatternsService(
+            dependencies.savedObjectsClient,
+            dependencies.esClient.asCurrentUser
+          )
+        ).pipe(take(1), shareReplay(1));
+
+        const resolvedSourceConfiguration$ = defer(() =>
+          forkJoin([sourceConfiguration$, indexPatternsService$]).pipe(
+            concatMap(([sourceConfiguration, indexPatternsService]) =>
+              resolveLogSourceConfiguration(sourceConfiguration.configuration, indexPatternsService)
             )
+          )
+        ).pipe(take(1), shareReplay(1));
+
+        const messageFormattingRules$ = defer(() =>
+          resolvedSourceConfiguration$.pipe(
+            map(({ messageField }) => compileFormattingRules(getBuiltinRules(messageField)))
           )
         ).pipe(take(1), shareReplay(1));
 
@@ -94,23 +111,23 @@ export const logEntriesSearchStrategyProvider = ({
         const initialRequest$ = of(request).pipe(
           filter(asyncInitialRequestRT.is),
           concatMap(({ params }) =>
-            forkJoin([sourceConfiguration$, messageFormattingRules$]).pipe(
+            forkJoin([resolvedSourceConfiguration$, messageFormattingRules$]).pipe(
               map(
-                ([{ configuration }, messageFormattingRules]): IEsSearchRequest => {
+                ([
+                  { indexPattern, timestampField, tiebreakerField, columns },
+                  messageFormattingRules,
+                ]): IEsSearchRequest => {
                   return {
                     // @ts-expect-error @elastic/elasticsearch declares indices_boost as Record<string, number>
                     params: createGetLogEntriesQuery(
-                      configuration.logAlias,
+                      indexPattern,
                       params.startTimestamp,
                       params.endTimestamp,
                       pickRequestCursor(params),
                       params.size + 1,
-                      configuration.fields.timestamp,
-                      configuration.fields.tiebreaker,
-                      getRequiredFields(
-                        params.columns ?? configuration.logColumns,
-                        messageFormattingRules
-                      ),
+                      timestampField,
+                      tiebreakerField,
+                      getRequiredFields(params.columns ?? columns, messageFormattingRules),
                       params.query,
                       params.highlightPhrase
                     ),
@@ -126,18 +143,17 @@ export const logEntriesSearchStrategyProvider = ({
           concatMap((esRequest) => esSearchStrategy.search(esRequest, options, dependencies))
         );
 
-        return combineLatest([searchResponse$, sourceConfiguration$, messageFormattingRules$]).pipe(
-          map(([esResponse, { configuration }, messageFormattingRules]) => {
+        return combineLatest([
+          searchResponse$,
+          resolvedSourceConfiguration$,
+          messageFormattingRules$,
+        ]).pipe(
+          map(([esResponse, { columns }, messageFormattingRules]) => {
             const rawResponse = decodeOrThrow(getLogEntriesResponseRT)(esResponse.rawResponse);
 
             const entries = rawResponse.hits.hits
               .slice(0, request.params.size)
-              .map(
-                getLogEntryFromHit(
-                  request.params.columns ?? configuration.logColumns,
-                  messageFormattingRules
-                )
-              );
+              .map(getLogEntryFromHit(request.params.columns ?? columns, messageFormattingRules));
 
             const sortDirection = getSortDirection(pickRequestCursor(request.params));
 

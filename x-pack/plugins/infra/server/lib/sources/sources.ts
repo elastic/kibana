@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import * as runtimeTypes from 'io-ts';
 import { failure } from 'io-ts/lib/PathReporter';
 import { identity, constant } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -21,8 +20,9 @@ import {
   InfraStaticSourceConfiguration,
   pickSavedSourceConfiguration,
   SourceConfigurationSavedObjectRuntimeType,
-  StaticSourceConfigurationRuntimeType,
   InfraSource,
+  sourceConfigurationConfigFilePropertiesRT,
+  SourceConfigurationConfigFileProperties,
 } from '../../../common/source_configuration/source_configuration';
 import { InfraConfig } from '../../../server';
 
@@ -199,19 +199,32 @@ export class InfraSources {
   }
 
   private async getStaticDefaultSourceConfiguration() {
-    const staticSourceConfiguration = pipe(
-      runtimeTypes
-        .type({
-          sources: runtimeTypes.type({
-            default: StaticSourceConfigurationRuntimeType,
-          }),
-        })
-        .decode(this.libs.config),
+    const staticSourceConfiguration: SourceConfigurationConfigFileProperties['sources']['default'] = pipe(
+      sourceConfigurationConfigFilePropertiesRT.decode(this.libs.config),
       map(({ sources: { default: defaultConfiguration } }) => defaultConfiguration),
       fold(constant({}), identity)
     );
 
-    return mergeSourceConfiguration(defaultSourceConfiguration, staticSourceConfiguration);
+    // NOTE: Legacy logAlias needs converting to a logIndices reference until we can remove
+    // config file sources in 8.0.0.
+    if (staticSourceConfiguration && staticSourceConfiguration.logAlias) {
+      const convertedStaticSourceConfiguration: InfraStaticSourceConfiguration & {
+        logAlias?: string;
+      } = {
+        ...staticSourceConfiguration,
+        logIndices: {
+          type: 'indexName',
+          indexName: staticSourceConfiguration.logAlias,
+        },
+      };
+      delete convertedStaticSourceConfiguration.logAlias;
+      return mergeSourceConfiguration(
+        defaultSourceConfiguration,
+        convertedStaticSourceConfiguration
+      );
+    } else {
+      return mergeSourceConfiguration(defaultSourceConfiguration, staticSourceConfiguration);
+    }
   }
 
   private async getSavedSourceConfiguration(

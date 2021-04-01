@@ -18,12 +18,15 @@ import {
   ISearchStrategy,
   SearchStrategyDependencies,
 } from 'src/plugins/data/server';
+import { getFrameworkMock } from './mocks';
 import { createInfraSourcesMock } from '../../lib/sources/mocks';
 import {
   logEntrySearchRequestStateRT,
   logEntrySearchStrategyProvider,
 } from './log_entry_search_strategy';
 import { createSearchSessionsClientMock } from '../../../../../../src/plugins/data/server/search/mocks';
+import { InfraSource } from '../../../common/source_configuration/source_configuration';
+import { KibanaFramework } from '../../lib/adapters/framework/kibana_framework_adapter';
 
 describe('LogEntry search strategy', () => {
   it('handles initial search requests', async () => {
@@ -42,10 +45,12 @@ describe('LogEntry search strategy', () => {
     const sourcesMock = createInfraSourcesMock();
     sourcesMock.getSourceConfiguration.mockResolvedValue(createSourceConfigurationMock());
     const mockDependencies = createSearchStrategyDependenciesMock();
+    const frameworkMock = getFrameworkMock() as KibanaFramework;
 
     const logEntrySearchStrategy = logEntrySearchStrategyProvider({
       data: dataMock,
       sources: sourcesMock,
+      framework: frameworkMock,
     });
 
     const response = await logEntrySearchStrategy
@@ -96,10 +101,12 @@ describe('LogEntry search strategy', () => {
     const sourcesMock = createInfraSourcesMock();
     sourcesMock.getSourceConfiguration.mockResolvedValue(createSourceConfigurationMock());
     const mockDependencies = createSearchStrategyDependenciesMock();
+    const frameworkMock = getFrameworkMock() as KibanaFramework;
 
     const logEntrySearchStrategy = logEntrySearchStrategyProvider({
       data: dataMock,
       sources: sourcesMock,
+      framework: frameworkMock,
     });
     const requestId = logEntrySearchRequestStateRT.encode({
       esRequestId: 'ASYNC_REQUEST_ID',
@@ -149,10 +156,12 @@ describe('LogEntry search strategy', () => {
     const sourcesMock = createInfraSourcesMock();
     sourcesMock.getSourceConfiguration.mockResolvedValue(createSourceConfigurationMock());
     const mockDependencies = createSearchStrategyDependenciesMock();
+    const frameworkMock = getFrameworkMock() as KibanaFramework;
 
     const logEntrySearchStrategy = logEntrySearchStrategyProvider({
       data: dataMock,
       sources: sourcesMock,
+      framework: frameworkMock,
     });
 
     const response = logEntrySearchStrategy.search(
@@ -182,10 +191,12 @@ describe('LogEntry search strategy', () => {
     const sourcesMock = createInfraSourcesMock();
     sourcesMock.getSourceConfiguration.mockResolvedValue(createSourceConfigurationMock());
     const mockDependencies = createSearchStrategyDependenciesMock();
+    const frameworkMock = getFrameworkMock() as KibanaFramework;
 
     const logEntrySearchStrategy = logEntrySearchStrategyProvider({
       data: dataMock,
       sources: sourcesMock,
+      framework: frameworkMock,
     });
     const requestId = logEntrySearchRequestStateRT.encode({
       esRequestId: 'ASYNC_REQUEST_ID',
@@ -197,13 +208,16 @@ describe('LogEntry search strategy', () => {
   });
 });
 
-const createSourceConfigurationMock = () => ({
+const createSourceConfigurationMock = (): InfraSource => ({
   id: 'SOURCE_ID',
   origin: 'stored' as const,
   configuration: {
     name: 'SOURCE_NAME',
     description: 'SOURCE_DESCRIPTION',
-    logAlias: 'log-indices-*',
+    logIndices: {
+      type: 'indexPattern',
+      indexPatternId: 'some-test-id',
+    },
     metricAlias: 'metric-indices-*',
     inventoryDefaultView: 'DEFAULT_VIEW',
     metricsExplorerDefaultView: 'DEFAULT_VIEW',

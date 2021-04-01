@@ -10,7 +10,7 @@ import { routeTimingMetadataRT } from '../shared';
 import {
   getLogSourceConfigurationPath,
   LOG_SOURCE_CONFIGURATION_PATH,
-} from './log_source_configuration';
+} from './get_log_source_configuration';
 
 export const LOG_SOURCE_STATUS_PATH_SUFFIX = 'status';
 export const LOG_SOURCE_STATUS_PATH = `${LOG_SOURCE_CONFIGURATION_PATH}/${LOG_SOURCE_STATUS_PATH_SUFFIX}`;
@@ -50,7 +50,6 @@ const logIndexStatusRT = rt.keyof({
 export type LogIndexStatus = rt.TypeOf<typeof logIndexStatusRT>;
 
 const logSourceStatusRT = rt.strict({
-  logIndexFields: rt.array(logIndexFieldRT),
   logIndexStatus: logIndexStatusRT,
 });
 

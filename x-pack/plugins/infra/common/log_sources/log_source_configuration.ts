@@ -7,11 +7,6 @@
 
 import * as rt from 'io-ts';
 
-export const LOG_SOURCE_CONFIGURATION_PATH_PREFIX = '/api/infra/log_source_configurations';
-export const LOG_SOURCE_CONFIGURATION_PATH = `${LOG_SOURCE_CONFIGURATION_PATH_PREFIX}/{sourceId}`;
-export const getLogSourceConfigurationPath = (sourceId: string) =>
-  `${LOG_SOURCE_CONFIGURATION_PATH_PREFIX}/${sourceId}`;
-
 export const logSourceConfigurationOriginRT = rt.keyof({
   fallback: null,
   internal: null,
@@ -26,6 +21,7 @@ const logSourceFieldsConfigurationRT = rt.strict({
   pod: rt.string,
   timestamp: rt.string,
   tiebreaker: rt.string,
+  message: rt.array(rt.string),
 });
 
 const logSourceCommonColumnConfigurationRT = rt.strict({
@@ -56,10 +52,29 @@ export const logSourceColumnConfigurationRT = rt.union([
 ]);
 export type LogSourceColumnConfiguration = rt.TypeOf<typeof logSourceColumnConfigurationRT>;
 
+// const LogIndexPatternReferenceTypes = rt.keyof({
+//   indexPattern: null, // Kibana index pattern
+//   indexName: null // Legacy support
+// });
+
+// Kibana index pattern
+const logIndexPatternReferenceRT = rt.type({
+  type: rt.literal('indexPattern'),
+  indexPatternId: rt.string,
+});
+
+// Legacy support
+const logIndexNameReferenceRT = rt.type({
+  type: rt.literal('indexName'),
+  indexName: rt.string,
+});
+
+export const logIndexReferenceRT = rt.union([logIndexPatternReferenceRT, logIndexNameReferenceRT]);
+
 export const logSourceConfigurationPropertiesRT = rt.strict({
   name: rt.string,
   description: rt.string,
-  logAlias: rt.string,
+  logIndices: logIndexReferenceRT,
   fields: logSourceFieldsConfigurationRT,
   logColumns: rt.array(logSourceColumnConfigurationRT),
 });

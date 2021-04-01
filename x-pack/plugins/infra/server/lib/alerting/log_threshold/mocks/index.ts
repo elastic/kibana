@@ -13,7 +13,10 @@ export const libsMock = {
       return Promise.resolve({
         id: sourceId,
         configuration: {
-          logAlias: 'filebeat-*',
+          logIndices: {
+            type: 'indexPattern',
+            indexPatternId: 'some-id',
+          },
           fields: { timestamp: '@timestamp' },
         },
       });

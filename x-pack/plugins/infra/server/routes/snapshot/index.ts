@@ -43,7 +43,8 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
 
       const logQueryFields = await libs.getLogQueryFields(
         snapshotRequest.sourceId,
-        requestContext.core.savedObjects.client
+        requestContext.core.savedObjects.client,
+        requestContext.core.elasticsearch.client.asCurrentUser
       );
 
       UsageCollector.countNode(snapshotRequest.nodeType);

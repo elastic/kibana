@@ -40,6 +40,7 @@ import { InfraBackendLibs } from '../../infra_types';
 import { getIntervalInSeconds } from '../../../utils/get_interval_in_seconds';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import { UNGROUPED_FACTORY_KEY } from '../common/utils';
+import { resolveLogSourceConfiguration } from '../../../../common/log_sources';
 
 type LogThresholdActionGroups = ActionGroupIdsOf<typeof FIRED_ACTIONS>;
 type LogThresholdAlertServices = AlertServices<
@@ -72,8 +73,15 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
     const { sources } = libs;
 
     const sourceConfiguration = await sources.getSourceConfiguration(savedObjectsClient, 'default');
-    const indexPattern = sourceConfiguration.configuration.logAlias;
-    const timestampField = sourceConfiguration.configuration.fields.timestamp;
+    const resolvedLogSourceConfiguration = await resolveLogSourceConfiguration(
+      sourceConfiguration.configuration,
+      await libs.framework.getIndexPatternsService(
+        savedObjectsClient,
+        scopedClusterClient.asCurrentUser
+      )
+    );
+    const indexPattern = resolvedLogSourceConfiguration.indexPattern;
+    const timestampField = resolvedLogSourceConfiguration.timestampField;
 
     try {
       const validatedParams = decodeOrThrow(alertParamsRT)(params);

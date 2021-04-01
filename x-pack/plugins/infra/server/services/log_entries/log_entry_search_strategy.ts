@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { concat, defer, of } from 'rxjs';
+import { concat, defer, of, forkJoin } from 'rxjs';
 import { concatMap, filter, map, shareReplay, take } from 'rxjs/operators';
 import type {
   IEsSearchRequest,
@@ -32,6 +32,8 @@ import {
   jsonFromBase64StringRT,
 } from '../../utils/typed_search_strategy';
 import { createGetLogEntryQuery, getLogEntryResponseRT, LogEntryHit } from './queries/log_entry';
+import { KibanaFramework } from '../../lib/adapters/framework/kibana_framework_adapter';
+import { resolveLogSourceConfiguration } from '../../../common/log_sources';
 
 type LogEntrySearchRequest = IKibanaSearchRequest<LogEntrySearchRequestParams>;
 type LogEntrySearchResponse = IKibanaSearchResponse<LogEntrySearchResponsePayload>;
@@ -39,9 +41,11 @@ type LogEntrySearchResponse = IKibanaSearchResponse<LogEntrySearchResponsePayloa
 export const logEntrySearchStrategyProvider = ({
   data,
   sources,
+  framework,
 }: {
   data: DataPluginStart;
   sources: IInfraSources;
+  framework: KibanaFramework;
 }): ISearchStrategy<LogEntrySearchRequest, LogEntrySearchResponse> => {
   const esSearchStrategy = data.search.getSearchStrategy('ese');
 
@@ -54,6 +58,21 @@ export const logEntrySearchStrategyProvider = ({
           sources.getSourceConfiguration(dependencies.savedObjectsClient, request.params.sourceId)
         ).pipe(shareReplay(1));
 
+        const indexPatternsService$ = defer(() =>
+          framework.getIndexPatternsService(
+            dependencies.savedObjectsClient,
+            dependencies.esClient.asCurrentUser
+          )
+        ).pipe(take(1), shareReplay(1));
+
+        const resolvedSourceConfiguration$ = defer(() =>
+          forkJoin([sourceConfiguration$, indexPatternsService$]).pipe(
+            concatMap(([sourceConfiguration, indexPatternsService]) =>
+              resolveLogSourceConfiguration(sourceConfiguration.configuration, indexPatternsService)
+            )
+          )
+        ).pipe(take(1), shareReplay(1));
+
         const recoveredRequest$ = of(request).pipe(
           filter(asyncRecoveredRequestRT.is),
           map(({ id: { esRequestId } }) => ({ id: esRequestId }))
@@ -62,15 +81,15 @@ export const logEntrySearchStrategyProvider = ({
         const initialRequest$ = of(request).pipe(
           filter(asyncInitialRequestRT.is),
           concatMap(({ params }) =>
-            sourceConfiguration$.pipe(
+            resolvedSourceConfiguration$.pipe(
               map(
-                ({ configuration }): IEsSearchRequest => ({
+                ({ indexPattern, timestampField, tiebreakerField }): IEsSearchRequest => ({
                   // @ts-expect-error @elastic/elasticsearch declares indices_boost as Record<string, number>
                   params: createGetLogEntryQuery(
-                    configuration.logAlias,
+                    indexPattern,
                     params.logEntryId,
-                    configuration.fields.timestamp,
-                    configuration.fields.tiebreaker
+                    timestampField,
+                    tiebreakerField
                   ),
                 })
               )

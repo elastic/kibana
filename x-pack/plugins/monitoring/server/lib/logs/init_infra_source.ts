@@ -16,7 +16,10 @@ export const initInfraSource = (config: MonitoringConfig, infraPlugin: InfraPlug
     const filebeatIndexPattern = prefixIndexPattern(config, config.ui.logs.index, '*');
     infraPlugin.defineInternalSourceConfiguration(INFRA_SOURCE_ID, {
       name: 'Elastic Stack Logs',
-      logAlias: filebeatIndexPattern,
+      logIndices: {
+        type: 'indexName',
+        indexName: filebeatIndexPattern,
+      },
     });
   }
 };

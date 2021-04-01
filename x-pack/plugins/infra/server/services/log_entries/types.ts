@@ -10,10 +10,12 @@ import {
   PluginStart as DataPluginStart,
 } from '../../../../../../src/plugins/data/server';
 import { InfraSources } from '../../lib/sources';
+import { KibanaFramework } from '../../lib/adapters/framework/kibana_framework_adapter';
 
 export interface LogEntriesServiceSetupDeps {
   data: DataPluginSetup;
   sources: InfraSources;
+  framework: KibanaFramework;
 }
 
 export interface LogEntriesServiceStartDeps {
