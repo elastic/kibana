@@ -61,14 +61,13 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
   const [advancedEditorRuntimeMappings, setAdvancedEditorRuntimeMappings] = useState<string>();
 
   const { setFormState } = actions;
-  const { cloneJob } = state;
   const { jobType, previousRuntimeMapping, runtimeMappings } = state.form;
 
   const {
     convertToJson,
     setXJson: setAdvancedRuntimeMappingsConfig,
     xJson: advancedRuntimeMappingsConfig,
-  } = useXJsonMode('');
+  } = useXJsonMode(runtimeMappings || '');
 
   const mlContext = useMlContext();
   const { currentIndexPattern } = mlContext;
@@ -108,24 +107,19 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
     setIsRuntimeMappingsEditorApplyButtonEnabled(false);
   };
 
-  useEffect(
-    function getInitialRuntimeMappings() {
-      const clonedRuntimeMappings = cloneJob?.source.runtime_mappings;
-      const combinedRuntimeMappings = getCombinedRuntimeMappings(
-        currentIndexPattern,
-        clonedRuntimeMappings
-      );
+  useEffect(function getInitialRuntimeMappings() {
+    const combinedRuntimeMappings = getCombinedRuntimeMappings(
+      currentIndexPattern,
+      runtimeMappings
+    );
 
-      if (combinedRuntimeMappings) {
-        setAdvancedRuntimeMappingsConfig(JSON.stringify(combinedRuntimeMappings, null, 2));
-        setFormState({
-          runtimeMappings: combinedRuntimeMappings,
-          runtimeMappingsUpdated: true,
-        });
-      }
-    },
-    [cloneJob?.id]
-  );
+    if (combinedRuntimeMappings) {
+      setAdvancedRuntimeMappingsConfig(JSON.stringify(combinedRuntimeMappings, null, 2));
+      setFormState({
+        runtimeMappings: combinedRuntimeMappings,
+      });
+    }
+  }, []);
 
   return (
     <>

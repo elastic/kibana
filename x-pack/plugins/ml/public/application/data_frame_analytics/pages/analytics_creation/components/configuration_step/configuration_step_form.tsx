@@ -63,6 +63,7 @@ import { RuntimeMappings } from '../runtime_mappings';
 import { ConfigurationStepProps } from './configuration_step';
 
 const runtimeMappingKey = 'runtime_mapping';
+const notIncludedReason = 'field not in includes list';
 const requiredFieldsErrorText = i18n.translate(
   'xpack.ml.dataframe.analytics.createWizard.requiredFieldsErrorMessage',
   {
@@ -120,7 +121,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
   >();
 
   const { setEstimatedModelMemoryLimit, setFormState } = actions;
-  const { estimatedModelMemoryLimit, form, isJobCreated, requestMessages } = state;
+  const { cloneJob, estimatedModelMemoryLimit, form, isJobCreated, requestMessages } = state;
   const firstUpdate = useRef<boolean>(true);
   const {
     dependentVariable,
@@ -211,7 +212,6 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
         }
 
         if (
-          isClone &&
           isRuntimeMappings(formState.runtimeMappings) &&
           Object.keys(formState.runtimeMappings).includes(form.dependentVariable)
         ) {
@@ -253,19 +253,21 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
       setLoadingFieldOptions(true);
     }
     // Ensure runtime field is in 'includes' table if it is set as dependent variable
-    const formCopy = cloneDeep(form);
     const depVarIsRuntimeField =
       isJobTypeWithDepVar &&
       runtimeMappings &&
       Object.keys(runtimeMappings).includes(dependentVariable) &&
-      includes.length > 0;
-    const unique = depVarIsRuntimeField
-      ? Array.from(new Set([...includes, dependentVariable]))
-      : undefined;
-    formCopy.includes = unique ? unique : formCopy.includes;
+      includes.length > 0 &&
+      includes.includes(dependentVariable) === false;
+    let formToUse = form;
+
+    if (depVarIsRuntimeField) {
+      formToUse = cloneDeep(form);
+      formToUse.includes = [...includes, dependentVariable];
+    }
 
     const { success, expectedMemory, fieldSelection, errorMessage } = await fetchExplainData(
-      formCopy
+      formToUse
     );
 
     if (success) {
@@ -282,16 +284,17 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
         setFieldOptionsFetchFail(false);
         setMaxDistinctValuesError(undefined);
         setUnsupportedFieldsError(undefined);
-        setIncludesTableItems(fieldSelection ? fieldSelection : []);
         setFormState({
           ...(shouldUpdateModelMemoryLimit ? { modelMemoryLimit: expectedMemory } : {}),
           requiredFieldsError: !hasRequiredFields ? requiredFieldsErrorText : undefined,
-          includes: unique ? unique : formCopy.includes,
+          includes: formToUse.includes,
         });
+        setIncludesTableItems(fieldSelection ? fieldSelection : []);
       } else {
         setFormState({
           ...(shouldUpdateModelMemoryLimit ? { modelMemoryLimit: expectedMemory } : {}),
           requiredFieldsError: !hasRequiredFields ? requiredFieldsErrorText : undefined,
+          includes: formToUse.includes,
         });
       }
       setFetchingExplainData(false);
@@ -352,50 +355,84 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
 
   const handleRuntimeUpdate = useCallback(async () => {
     if (runtimeMappingsUpdated) {
+      // Update dependent variable options
       let resetDepVar = false;
-      const filteredOptions = dependentVariableOptions.filter((option) => {
-        if (option.label === dependentVariable && option.key?.includes(runtimeMappingKey)) {
-          resetDepVar = true;
+      if (isJobTypeWithDepVar) {
+        const filteredOptions = dependentVariableOptions.filter((option) => {
+          if (option.label === dependentVariable && option.key?.includes(runtimeMappingKey)) {
+            resetDepVar = true;
+          }
+          return !option.key?.includes(runtimeMappingKey);
+        });
+        // Runtime mappings have been removed
+        if (runtimeMappings === undefined && runtimeMappingsUpdated === true) {
+          setDependentVariableOptions(filteredOptions);
+        } else if (runtimeMappings) {
+          // add to filteredOptions if it's the type supported
+          const runtimeOptions = getRuntimeDepVarOptions(jobType, runtimeMappings);
+          setDependentVariableOptions([...filteredOptions, ...runtimeOptions]);
         }
-        return !option.key?.includes(runtimeMappingKey);
-      });
-      // Runtime mappings have been removed
-      if (runtimeMappings === undefined && runtimeMappingsUpdated === true) {
-        setDependentVariableOptions(filteredOptions);
-      } else if (runtimeMappings) {
-        // add to filteredOptions if it's the type supported
-        const runtimeOptions = getRuntimeDepVarOptions(jobType, runtimeMappings);
-        setDependentVariableOptions([...filteredOptions, ...runtimeOptions]);
       }
 
+      // Update includes - remove previous runtime mappings then add supported runtime fields to includes
+      const updatedIncludes = includes.filter((field) => {
+        const isRemovedRuntimeField = previousRuntimeMapping && previousRuntimeMapping[field];
+        return !isRemovedRuntimeField;
+      });
+
       if (resetDepVar) {
-        setIncludesTableItems([]);
         setFormState({
           dependentVariable: '',
-          includes: includes.filter((field) => {
-            const isRemovedRuntimeField = previousRuntimeMapping && previousRuntimeMapping[field];
-            return field !== dependentVariable && !isRemovedRuntimeField;
-          }),
+          includes: updatedIncludes,
         });
-      } else if (hasBasicRequiredFields && hasRequiredAnalysisFields) {
+        setIncludesTableItems(
+          includesTableItems.filter(({ name }) => {
+            const isRemovedRuntimeField = previousRuntimeMapping && previousRuntimeMapping[name];
+            return !isRemovedRuntimeField;
+          })
+        );
+      }
+
+      if (!resetDepVar && hasBasicRequiredFields && hasRequiredAnalysisFields) {
         const formCopy = cloneDeep(form);
-        // Remove old runtime fields from 'includes' table before sending to _explain
-        const filteredIncludes = includes.filter((field) => {
-          const isRemovedRuntimeField = previousRuntimeMapping && previousRuntimeMapping[field];
-          return !isRemovedRuntimeField;
-        });
-        formCopy.includes = filteredIncludes;
+        // When switching back to step ensure runtime field is in 'includes' table if it is set as dependent variable
+        const depVarIsRuntimeField =
+          isJobTypeWithDepVar &&
+          runtimeMappings &&
+          Object.keys(runtimeMappings).includes(dependentVariable) &&
+          formCopy.includes.length > 0 &&
+          formCopy.includes.includes(dependentVariable) === false;
+
+        formCopy.includes = depVarIsRuntimeField
+          ? [...updatedIncludes, dependentVariable]
+          : updatedIncludes;
+
         const { success, fieldSelection, errorMessage } = await fetchExplainData(formCopy);
         if (success) {
           // update the field selection table
           const hasRequiredFields = fieldSelection.some(
             (field) => field.is_included === true && field.is_required === false
           );
-          setIncludesTableItems(fieldSelection);
+          let updatedFieldSelection;
+          // Update field selection to select supported runtime fields by default. Add those fields to 'includes'.
+          if (isRuntimeMappings(runtimeMappings)) {
+            updatedFieldSelection = fieldSelection.map((field) => {
+              if (
+                runtimeMappings[field.name] !== undefined &&
+                field.is_included === false &&
+                field.reason?.includes(notIncludedReason)
+              ) {
+                updatedIncludes.push(field.name);
+                field.is_included = true;
+              }
+              return field;
+            });
+          }
+          setIncludesTableItems(updatedFieldSelection ? updatedFieldSelection : fieldSelection);
           setMaxDistinctValuesError(undefined);
           setUnsupportedFieldsError(undefined);
           setFormState({
-            includes: filteredIncludes,
+            includes: updatedIncludes,
             requiredFieldsError: !hasRequiredFields ? requiredFieldsErrorText : undefined,
           });
         } else {
@@ -491,7 +528,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
           />
         </EuiFormRow>
       )}
-      <RuntimeMappings actions={actions} state={state} />
+      {((isClone && cloneJob) || !isClone) && <RuntimeMappings actions={actions} state={state} />}
       <EuiFormRow
         label={
           <Fragment>
