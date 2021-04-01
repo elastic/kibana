@@ -46,5 +46,5 @@
         "version": 7
     },
     "id": "sample_security_rule",
-    "type": "security_rule"
+    "type": "security-rule"
 }
