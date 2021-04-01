@@ -231,7 +231,7 @@ export const showView: (state: EndpointState) => 'policy_response' | 'details' =
 export const hostStatusInfo: (state: Immutable<EndpointState>) => HostStatus = createSelector(
   (state) => state.hostStatus,
   (hostStatus) => {
-    return hostStatus ? hostStatus : HostStatus.ERROR;
+    return hostStatus ? hostStatus : HostStatus.UNHEALTHY;
   }
 );
 

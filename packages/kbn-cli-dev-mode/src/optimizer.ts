@@ -107,14 +107,26 @@ export class Optimizer {
       },
     ]);
 
-    this.run$ = runOptimizer(config).pipe(
-      logOptimizerState(log, config),
-      tap(({ state }) => {
-        this.phase$.next(state.phase);
-        this.ready$.next(state.phase === 'success' || state.phase === 'issue');
-      }),
-      ignoreElements()
-    );
+    this.run$ = new Rx.Observable<void>((subscriber) => {
+      subscriber.add(
+        runOptimizer(config)
+          .pipe(
+            logOptimizerState(log, config),
+            tap(({ state }) => {
+              this.phase$.next(state.phase);
+              this.ready$.next(state.phase === 'success' || state.phase === 'issue');
+            }),
+            ignoreElements()
+          )
+          .subscribe(subscriber)
+      );
+
+      // complete state subjects when run$ completes
+      subscriber.add(() => {
+        this.phase$.complete();
+        this.ready$.complete();
+      });
+    });
   }
 
   getPhase$() {
