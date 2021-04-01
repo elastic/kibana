@@ -29,6 +29,7 @@ import type {
   ISearchStrategy,
   SearchEnhancements,
   SearchStrategyDependencies,
+  DataRequestHandlerContext,
 } from './types';
 
 import { AggsService } from './aggs';
@@ -52,7 +53,6 @@ import {
   ISearchOptions,
   kibana,
   kibanaContext,
-  kibanaContextFunction,
   kibanaTimerangeFunction,
   kibanaFilterFunction,
   kqlFunction,
@@ -63,8 +63,9 @@ import {
   searchSourceRequiredUiSettings,
   SearchSourceService,
   phraseFilterFunction,
+  esRawResponse,
 } from '../../common/search';
-import { getEsaggs } from './expressions';
+import { getEsaggs, getEsdsl } from './expressions';
 import {
   getShardDelayBucketAgg,
   SHARD_DELAY_AGG_NAME,
@@ -74,7 +75,7 @@ import { ConfigSchema } from '../../config';
 import { ISearchSessionService, SearchSessionService } from './session';
 import { KbnServerError } from '../../../kibana_utils/server';
 import { registerBsearchRoute } from './routes/bsearch';
-import { DataRequestHandlerContext } from '../types';
+import { getKibanaContext } from './expressions/kibana_context';
 
 type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 
@@ -150,11 +151,12 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     }
 
     expressions.registerFunction(getEsaggs({ getStartServices: core.getStartServices }));
+    expressions.registerFunction(getEsdsl({ getStartServices: core.getStartServices }));
     expressions.registerFunction(kibana);
     expressions.registerFunction(luceneFunction);
     expressions.registerFunction(kqlFunction);
     expressions.registerFunction(kibanaTimerangeFunction);
-    expressions.registerFunction(kibanaContextFunction);
+    expressions.registerFunction(getKibanaContext({ getStartServices: core.getStartServices }));
     expressions.registerFunction(fieldFunction);
     expressions.registerFunction(rangeFunction);
     expressions.registerFunction(kibanaFilterFunction);
@@ -162,6 +164,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     expressions.registerFunction(rangeFilterFunction);
     expressions.registerFunction(phraseFilterFunction);
     expressions.registerType(kibanaContext);
+    expressions.registerType(esRawResponse);
 
     const aggs = this.aggsService.setup({ registerFunction: expressions.registerFunction });
 

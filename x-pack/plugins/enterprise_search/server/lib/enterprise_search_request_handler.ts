@@ -113,22 +113,32 @@ export class EnterpriseSearchRequestHandler {
         }
 
         // Check returned data
-        const json = await apiResponse.json();
-        if (!hasValidData(json)) {
-          return this.handleInvalidDataError(response, url, json);
-        }
+        let responseBody;
 
-        // Intercept data that is meant for the server side session
-        const { _sessionData, ...responseJson } = json;
-        if (_sessionData) {
-          this.setSessionData(_sessionData);
+        try {
+          const json = await apiResponse.json();
+
+          if (!hasValidData(json)) {
+            return this.handleInvalidDataError(response, url, json);
+          }
+
+          // Intercept data that is meant for the server side session
+          const { _sessionData, ...responseJson } = json;
+          if (_sessionData) {
+            this.setSessionData(_sessionData);
+            responseBody = responseJson;
+          } else {
+            responseBody = json;
+          }
+        } catch (e) {
+          responseBody = undefined;
         }
 
         // Pass successful responses back to the front-end
         return response.custom({
           statusCode: status,
           headers: this.headers,
-          body: _sessionData ? responseJson : json,
+          body: responseBody,
         });
       } catch (e) {
         // Catch connection/auth errors

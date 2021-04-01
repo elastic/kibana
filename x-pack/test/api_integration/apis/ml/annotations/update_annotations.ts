@@ -38,6 +38,7 @@ export default ({ getService }: FtrProviderContext) => {
       for (let i = 0; i < testSetupJobConfigs.length; i++) {
         const job = testSetupJobConfigs[i];
         const annotationToIndex = testSetupAnnotations[i];
+        // @ts-expect-error not full interface
         await ml.api.createAnomalyDetectionJob(job);
         await ml.api.indexAnnotation(annotationToIndex);
       }
@@ -54,7 +55,7 @@ export default ({ getService }: FtrProviderContext) => {
       const originalAnnotation = annotationsForJob[0];
       const annotationUpdateRequestBody = {
         ...commonAnnotationUpdateRequestBody,
-        job_id: originalAnnotation._source.job_id,
+        job_id: originalAnnotation._source?.job_id,
         _id: originalAnnotation._id,
       };
 
@@ -85,7 +86,7 @@ export default ({ getService }: FtrProviderContext) => {
       const originalAnnotation = annotationsForJob[0];
       const annotationUpdateRequestBody = {
         ...commonAnnotationUpdateRequestBody,
-        job_id: originalAnnotation._source.job_id,
+        job_id: originalAnnotation._source?.job_id,
         _id: originalAnnotation._id,
       };
 
@@ -116,7 +117,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       const annotationUpdateRequestBody = {
         ...commonAnnotationUpdateRequestBody,
-        job_id: originalAnnotation._source.job_id,
+        job_id: originalAnnotation._source?.job_id,
         _id: originalAnnotation._id,
       };
 
@@ -143,7 +144,7 @@ export default ({ getService }: FtrProviderContext) => {
         timestamp: Date.now(),
         end_timestamp: Date.now(),
         annotation: 'Updated annotation',
-        job_id: originalAnnotation._source.job_id,
+        job_id: originalAnnotation._source?.job_id,
         type: ANNOTATION_TYPE.ANNOTATION,
         event: 'model_change',
         detector_index: 2,

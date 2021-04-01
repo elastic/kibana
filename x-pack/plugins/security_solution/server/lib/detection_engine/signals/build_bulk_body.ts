@@ -73,6 +73,7 @@ export const buildBulkBody = ({
     ...buildSignal([doc], rule),
     ...additionalSignalFields(doc),
   };
+  // @ts-expect-error @elastic/elasticsearch _source is optional
   delete doc._source.threshold_result;
   const event = buildEventTypeSignal(doc);
   const signalHit: SignalHit = {
@@ -163,7 +164,8 @@ export const buildSignalFromEvent = (
   applyOverrides: boolean
 ): SignalHit => {
   const rule = applyOverrides
-    ? buildRuleWithOverrides(ruleSO, event._source)
+    ? // @ts-expect-error @elastic/elasticsearch _source is optional
+      buildRuleWithOverrides(ruleSO, event._source)
     : buildRuleWithoutOverrides(ruleSO);
   const signal: Signal = {
     ...buildSignal([event], rule),

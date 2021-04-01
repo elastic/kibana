@@ -8,7 +8,7 @@ module.exports = {
      */
     {
       files: ['**/*.js'],
-      parser: require.resolve('babel-eslint'),
+      parser: require.resolve('@babel/eslint-parser'),
 
       plugins: [
         'mocha',

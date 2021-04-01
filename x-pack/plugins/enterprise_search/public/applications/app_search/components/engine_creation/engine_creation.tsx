@@ -18,9 +18,7 @@ import {
   EuiSelect,
   EuiPageBody,
   EuiPageHeader,
-  EuiPageHeaderSection,
   EuiSpacer,
-  EuiText,
   EuiTitle,
   EuiButton,
   EuiPanel,
@@ -49,13 +47,7 @@ export const EngineCreation: React.FC = () => {
   return (
     <div data-test-subj="EngineCreation">
       <SetPageChrome trail={[ENGINE_CREATION_TITLE]} />
-      <EuiPageHeader>
-        <EuiPageHeaderSection>
-          <EuiTitle size="l">
-            <h1>{ENGINE_CREATION_TITLE}</h1>
-          </EuiTitle>
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
+      <EuiPageHeader pageTitle={ENGINE_CREATION_TITLE} />
       <EuiPageBody>
         <FlashMessages />
         <EuiPanel>
@@ -68,7 +60,7 @@ export const EngineCreation: React.FC = () => {
               }}
             >
               <EuiTitle>
-                <EuiText>{ENGINE_CREATION_FORM_TITLE}</EuiText>
+                <h2>{ENGINE_CREATION_FORM_TITLE}</h2>
               </EuiTitle>
               <EuiSpacer />
               <EuiFlexGroup>

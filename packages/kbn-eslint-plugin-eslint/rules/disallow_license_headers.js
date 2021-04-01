@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const babelEslint = require('babel-eslint');
+const babelEslint = require('@babel/eslint-parser');
 
 const { assert, normalizeWhitespace, init } = require('../lib');
 

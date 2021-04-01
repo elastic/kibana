@@ -22,6 +22,14 @@ export function MachineLearningAnomaliesTableProvider({ getService }: FtrProvide
       return await testSubjects.findAll('mlAnomaliesTable > ~mlAnomaliesListRow');
     },
 
+    async assertTableRowsCount(expectedCount: number) {
+      const actualCount = (await this.getTableRows()).length;
+      expect(actualCount).to.eql(
+        expectedCount,
+        `Expect anomaly table rows count to be ${expectedCount}, got ${actualCount}`
+      );
+    },
+
     async getRowSubjByRowIndex(rowIndex: number) {
       const tableRows = await this.getTableRows();
       expect(tableRows.length).to.be.greaterThan(
