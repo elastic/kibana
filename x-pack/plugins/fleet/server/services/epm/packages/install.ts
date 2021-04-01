@@ -255,29 +255,31 @@ async function installPackageFromRegistry({
     const { paths, packageInfo } = await Registry.getRegistryPackage(pkgName, pkgVersion);
 
     // try installing the package, if there was an error, call error handler and rethrow
-    try {
-      return _installPackage({
-        savedObjectsClient,
-        esClient,
-        installedPkg,
-        paths,
-        packageInfo,
-        installType,
-        installSource: 'registry',
-      }).then((assets) => {
+    // TODO: without the ts-ignore, TS complains about the type of the value of the returned InstallResult.status
+    // @ts-ignore
+    return _installPackage({
+      savedObjectsClient,
+      esClient,
+      installedPkg,
+      paths,
+      packageInfo,
+      installType,
+      installSource: 'registry',
+    })
+      .then((assets) => {
         return { assets, status: 'installed', installType };
+      })
+      .catch(async (err: Error) => {
+        await handleInstallPackageFailure({
+          savedObjectsClient,
+          error: err,
+          pkgName,
+          pkgVersion,
+          installedPkg,
+          esClient,
+        });
+        return { error: err, installType };
       });
-    } catch (e) {
-      await handleInstallPackageFailure({
-        savedObjectsClient,
-        error: e,
-        pkgName,
-        pkgVersion,
-        installedPkg,
-        esClient,
-      });
-      throw e;
-    }
   } catch (e) {
     return {
       error: e,
@@ -330,7 +332,8 @@ async function installPackageByUpload({
       version: packageInfo.version,
       packageInfo,
     });
-
+    // TODO: without the ts-ignore, TS complains about the type of the value of the returned InstallResult.status
+    // @ts-ignore
     return _installPackage({
       savedObjectsClient,
       esClient,
@@ -339,9 +342,13 @@ async function installPackageByUpload({
       packageInfo,
       installType,
       installSource,
-    }).then((assets) => {
-      return { assets, status: 'installed', installType };
-    });
+    })
+      .then((assets) => {
+        return { assets, status: 'installed', installType };
+      })
+      .catch(async (err: Error) => {
+        return { error: err, installType };
+      });
   } catch (e) {
     return { error: e, installType };
   }
