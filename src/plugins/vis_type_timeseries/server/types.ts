@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { Observable } from 'rxjs';
+import { SharedGlobalConfig } from 'kibana/server';
 import type { IRouter, IUiSettingsClient, KibanaRequest } from 'src/core/server';
 import type {
   DataRequestHandlerContext,
@@ -16,10 +18,12 @@ import type { VisPayload } from '../common/types';
 import type { SearchStrategyRegistry } from './lib/search_strategies';
 import type { CachedIndexPatternFetcher } from './lib/search_strategies/lib/cached_index_pattern_fetcher';
 
+export type ConfigObservable = Observable<SharedGlobalConfig>;
+
 export type VisTypeTimeseriesRequestHandlerContext = DataRequestHandlerContext;
 export type VisTypeTimeseriesRouter = IRouter<VisTypeTimeseriesRequestHandlerContext>;
 export type VisTypeTimeseriesVisDataRequest = KibanaRequest<{}, {}, VisPayload>;
-export type VisTypeTimeseriesFieldsRequest = KibanaRequest<{}, { index: string }, {}>;
+export type VisTypeTimeseriesFieldsRequest = KibanaRequest<{}, { index: string }, any>;
 export type VisTypeTimeseriesRequest =
   | VisTypeTimeseriesFieldsRequest
   | VisTypeTimeseriesVisDataRequest;
