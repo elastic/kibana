@@ -17,6 +17,7 @@ export { pickWithPatterns } from './rule_registry/field_map/pick_with_patterns';
 export const config = {
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
+    writeEnabled: schema.boolean({ defaultValue: false }),
   }),
 };
 

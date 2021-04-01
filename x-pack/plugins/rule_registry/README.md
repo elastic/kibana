@@ -56,13 +56,13 @@ The following fields are available in the root rule registry:
 - `rule.uuid`: the saved objects id of the rule.
 - `rule.name`: the name of the rule (as specified by the user).
 - `rule.category`: the name of the rule type (as defined by the rule type producer)
-- `alert.id`: the id of the alert, that is unique within the context of the rule execution it was created in. E.g., for a rule that monitors latency for all services in all environments, this might be `opbeans-java:production`.
-- `alert.uuid`: the unique identifier for the alert during its lifespan. If an alert recovers (or closes), this identifier is re-generated when it is opened again.
-- `alert.status`: the status of the alert. Can be `open` or `closed`.
-- `alert.start`: the ISO timestamp of the time at which the alert started.
-- `alert.end`: the ISO timestamp of the time at which the alert recovered. 
-- `alert.duration.us`: the duration of the alert, in microseconds. This is always the difference between either the current time, or the time when the alert recovered. 
-- `alert.severity.level`: the severity of the alert, as a keyword (e.g. critical).
-- `alert.severity.value`: the severity of the alert, as a numerical value, which allows sorting.
+- `kibana.rac.alert.id`: the id of the alert, that is unique within the context of the rule execution it was created in. E.g., for a rule that monitors latency for all services in all environments, this might be `opbeans-java:production`.
+- `kibana.rac.alert.uuid`: the unique identifier for the alert during its lifespan. If an alert recovers (or closes), this identifier is re-generated when it is opened again.
+- `kibana.rac.alert.status`: the status of the alert. Can be `open` or `closed`.
+- `kibana.rac.alert.start`: the ISO timestamp of the time at which the alert started.
+- `kibana.rac.alert.end`: the ISO timestamp of the time at which the alert recovered. 
+- `kibana.rac.alert.duration.us`: the duration of the alert, in microseconds. This is always the difference between either the current time, or the time when the alert recovered. 
+- `kibana.rac.alert.severity.level`: the severity of the alert, as a keyword (e.g. critical).
+- `kibana.rac.alert.severity.value`: the severity of the alert, as a numerical value, which allows sorting.
 
 This list is not final - just a start. Field names might change or moved to a scoped registry. If we implement log and sequence based rule types the list of fields will grow. If a rule type needs additional fields, the recommendation would be to have the field in its own registry first (or in its producer’s registry), and if usage is more broadly adopted, it can be moved to the root registry.

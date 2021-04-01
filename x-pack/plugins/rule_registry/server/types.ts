@@ -32,7 +32,7 @@ type RuleExecutorServices<
   string
 >['services'] & {
   logger: Logger;
-  scopedRuleRegistryClient: ScopedRuleRegistryClient<TFieldMap>;
+  scopedRuleRegistryClient?: ScopedRuleRegistryClient<TFieldMap>;
 };
 
 type PassthroughAlertExecutorOptions = Pick<

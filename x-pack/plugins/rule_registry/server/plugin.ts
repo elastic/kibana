@@ -10,6 +10,7 @@ import { PluginSetupContract as AlertingPluginSetupContract } from '../../alerti
 import { RuleRegistry } from './rule_registry';
 import { defaultIlmPolicy } from './rule_registry/defaults/ilm_policy';
 import { defaultFieldMap } from './rule_registry/defaults/field_map';
+import { RuleRegistryConfig } from '.';
 
 export type RuleRegistryPluginSetupContract = RuleRegistry<typeof defaultFieldMap>;
 
@@ -23,6 +24,7 @@ export class RuleRegistryPlugin implements Plugin<RuleRegistryPluginSetupContrac
     plugins: { alerting: AlertingPluginSetupContract }
   ): RuleRegistryPluginSetupContract {
     const globalConfig = this.initContext.config.legacy.get();
+    const config = this.initContext.config.get<RuleRegistryConfig>();
 
     const logger = this.initContext.logger.get();
 
@@ -35,6 +37,7 @@ export class RuleRegistryPlugin implements Plugin<RuleRegistryPluginSetupContrac
       kibanaVersion: this.initContext.env.packageInfo.version,
       logger: logger.get('root'),
       alertingPluginSetupContract: plugins.alerting,
+      writeEnabled: config.writeEnabled,
     });
 
     return rootRegistry;

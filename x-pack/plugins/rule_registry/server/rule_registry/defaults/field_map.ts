@@ -20,18 +20,15 @@ export const defaultFieldMap = {
     'rule.category',
     'tags'
   ),
-  producer: { type: 'keyword' },
-  'alert.uuid': { type: 'keyword' },
-  'alert.id': { type: 'keyword' },
-  'alert.start': { type: 'date' },
-  'alert.end': { type: 'date' },
-  'alert.duration.us': { type: 'long' },
-  'alert.severity.level': { type: 'keyword' },
-  'alert.severity.value': { type: 'long' },
-  'alert.status': { type: 'keyword' },
-  'evaluation.value': { type: 'scaled_float', scaling_factor: 100 },
-  'evaluation.threshold': { type: 'scaled_float', scaling_factor: 100 },
-  'evaluation.status': { type: 'keyword' },
+  'kibana.rac.producer': { type: 'keyword' },
+  'kibana.rac.alert.uuid': { type: 'keyword' },
+  'kibana.rac.alert.id': { type: 'keyword' },
+  'kibana.rac.alert.start': { type: 'date' },
+  'kibana.rac.alert.end': { type: 'date' },
+  'kibana.rac.alert.duration.us': { type: 'long' },
+  'kibana.rac.alert.severity.level': { type: 'keyword' },
+  'kibana.rac.alert.severity.value': { type: 'long' },
+  'kibana.rac.alert.status': { type: 'keyword' },
 } as const;
 
 export type DefaultFieldMap = typeof defaultFieldMap;

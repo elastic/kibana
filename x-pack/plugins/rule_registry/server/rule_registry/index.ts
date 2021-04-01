@@ -34,6 +34,7 @@ interface RuleRegistryOptions<TFieldMap extends FieldMap> {
   fieldMap: TFieldMap;
   ilmPolicy: ILMPolicy;
   alertingPluginSetupContract: AlertingPluginSetupContract;
+  writeEnabled: boolean;
 }
 
 export class RuleRegistry<TFieldMap extends DefaultFieldMap> {
@@ -59,15 +60,19 @@ export class RuleRegistry<TFieldMap extends DefaultFieldMap> {
       logger: logger.get('esAdapter'),
     });
 
-    this.initialize()
-      .then(() => {
-        this.options.logger.debug('Bootstrapped alerts index');
-        signal(true);
-      })
-      .catch((err) => {
-        logger.error(inspect(err, { depth: null }));
-        signal(false);
-      });
+    if (!this.options.writeEnabled) {
+      this.initialize()
+        .then(() => {
+          this.options.logger.debug('Bootstrapped alerts index');
+          signal(true);
+        })
+        .catch((err) => {
+          logger.error(inspect(err, { depth: null }));
+          signal(false);
+        });
+    } else {
+      logger.debug('Write disabled, indices are not being bootstrapped');
+    }
   }
 
   private getEsNames() {
@@ -126,7 +131,11 @@ export class RuleRegistry<TFieldMap extends DefaultFieldMap> {
   createScopedRuleRegistryClient(
     request: KibanaRequest,
     context: RequestHandlerContext
-  ): ScopedRuleRegistryClient<TFieldMap> {
+  ): ScopedRuleRegistryClient<TFieldMap> | undefined {
+    if (!this.options.writeEnabled) {
+      return undefined;
+    }
+
     const { spaceId: namespace } = getSpaceIdFromPath(request.url.pathname);
 
     return createScopedRuleRegistryClient({
@@ -165,21 +174,6 @@ export class RuleRegistry<TFieldMap extends DefaultFieldMap> {
 
         const producer = type.producer;
 
-        const scopedRuleRegistryClient = createScopedRuleRegistryClient({
-          savedObjectsClient: services.savedObjectsClient,
-          scopedClusterClient: services.scopedClusterClient,
-          clusterClientAdapter: this.esAdapter,
-          fieldMap: this.options.fieldMap,
-          index: this.getEsNames().indexAliasName,
-          namespace,
-          ruleData: {
-            producer,
-            rule,
-            tags,
-          },
-          logger: this.options.logger,
-        });
-
         return type.executor({
           ...executorOptions,
           rule,
@@ -187,7 +181,24 @@ export class RuleRegistry<TFieldMap extends DefaultFieldMap> {
           services: {
             ...services,
             logger,
-            scopedRuleRegistryClient,
+            ...(this.options.writeEnabled
+              ? {
+                  scopedRuleRegistryClient: createScopedRuleRegistryClient({
+                    savedObjectsClient: services.savedObjectsClient,
+                    scopedClusterClient: services.scopedClusterClient,
+                    clusterClientAdapter: this.esAdapter,
+                    fieldMap: this.options.fieldMap,
+                    index: this.getEsNames().indexAliasName,
+                    namespace,
+                    ruleData: {
+                      producer,
+                      rule,
+                      tags,
+                    },
+                    logger: this.options.logger,
+                  }),
+                }
+              : {}),
           },
         });
       },

@@ -79,7 +79,7 @@ export function createLifecycleRuleTypeFactory(): CreateLifecycleRuleType<Defaul
 
         const currentAlerts: Record<
           string,
-          UserDefinedAlertFields<DefaultFieldMap> & { 'alert.id': string }
+          UserDefinedAlertFields<DefaultFieldMap> & { 'kibana.rac.alert.id': string }
         > = {};
 
         const timestamp = options.startedAt.toISOString();
@@ -92,7 +92,7 @@ export function createLifecycleRuleTypeFactory(): CreateLifecycleRuleType<Defaul
             alertWithLifecycle: ({ id, fields }) => {
               currentAlerts[id] = {
                 ...fields,
-                'alert.id': id,
+                'kibana.rac.alert.id': id,
               };
               return alertInstanceFactory(id);
             },
@@ -117,7 +117,7 @@ export function createLifecycleRuleTypeFactory(): CreateLifecycleRuleType<Defaul
           ...currentAlerts,
         };
 
-        if (trackedAlertStatesOfRecovered.length) {
+        if (scopedRuleRegistryClient && trackedAlertStatesOfRecovered.length) {
           const { events } = await scopedRuleRegistryClient.search({
             body: {
               query: {
@@ -130,7 +130,7 @@ export function createLifecycleRuleTypeFactory(): CreateLifecycleRuleType<Defaul
                     },
                     {
                       terms: {
-                        'alert.uuid': trackedAlertStatesOfRecovered.map(
+                        'kibana.rac.alert.uuid': trackedAlertStatesOfRecovered.map(
                           (trackedAlertState) => trackedAlertState.alertUuid
                         ),
                       },
@@ -140,7 +140,7 @@ export function createLifecycleRuleTypeFactory(): CreateLifecycleRuleType<Defaul
               },
               size: trackedAlertStatesOfRecovered.length,
               collapse: {
-                field: 'alert.uuid',
+                field: 'kibana.rac.alert.uuid',
               },
               _source: false,
               fields: ['*'],
@@ -151,7 +151,7 @@ export function createLifecycleRuleTypeFactory(): CreateLifecycleRuleType<Defaul
           });
 
           events.forEach((event) => {
-            const alertId = event['alert.id']!;
+            const alertId = event['kibana.rac.alert.id']!;
             alertsDataMap[alertId] = event;
           });
         }
@@ -168,7 +168,7 @@ export function createLifecycleRuleTypeFactory(): CreateLifecycleRuleType<Defaul
               ...alertData,
               '@timestamp': timestamp,
               'event.kind': 'state',
-              'alert.id': alertId,
+              'kibana.rac.alert.id': alertId,
             };
 
             const isNew = !state.trackedAlerts[alertId];
@@ -181,17 +181,17 @@ export function createLifecycleRuleTypeFactory(): CreateLifecycleRuleType<Defaul
               started: timestamp,
             };
 
-            event['alert.start'] = started;
-            event['alert.uuid'] = alertUuid;
+            event['kibana.rac.alert.start'] = started;
+            event['kibana.rac.alert.uuid'] = alertUuid;
 
             if (isNew) {
               event['event.action'] = 'open';
             }
 
             if (isRecovered) {
-              event['alert.end'] = timestamp;
+              event['kibana.rac.alert.end'] = timestamp;
               event['event.action'] = 'close';
-              event['alert.status'] = 'closed';
+              event['kibana.rac.alert.status'] = 'closed';
             }
 
             if (isActiveButNotNew) {
@@ -199,27 +199,28 @@ export function createLifecycleRuleTypeFactory(): CreateLifecycleRuleType<Defaul
             }
 
             if (isActive) {
-              event['alert.status'] = 'open';
+              event['kibana.rac.alert.status'] = 'open';
             }
 
-            event['alert.duration.us'] =
-              (options.startedAt.getTime() - new Date(event['alert.start']!).getTime()) * 1000;
+            event['kibana.rac.alert.duration.us'] =
+              (options.startedAt.getTime() - new Date(event['kibana.rac.alert.start']!).getTime()) *
+              1000;
 
             return event;
           }
         );
 
-        if (eventsToIndex.length) {
+        if (eventsToIndex.length && scopedRuleRegistryClient) {
           await scopedRuleRegistryClient.bulkIndex(eventsToIndex);
         }
 
         const nextTrackedAlerts = Object.fromEntries(
           eventsToIndex
-            .filter((event) => event['alert.status'] !== 'closed')
+            .filter((event) => event['kibana.rac.alert.status'] !== 'closed')
             .map((event) => {
-              const alertId = event['alert.id']!;
-              const alertUuid = event['alert.uuid']!;
-              const started = new Date(event['alert.start']!).toISOString();
+              const alertId = event['kibana.rac.alert.id']!;
+              const alertUuid = event['kibana.rac.alert.uuid']!;
+              const started = new Date(event['kibana.rac.alert.start']!).toISOString();
               return [alertId, { alertId, alertUuid, started }];
             })
         );
