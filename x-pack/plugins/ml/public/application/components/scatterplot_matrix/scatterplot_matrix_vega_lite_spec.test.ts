@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+jest.mock('../../../../../../../src/plugins/vis_type_vega/public/default_spec', () => ({
+  getDefaultSpec: () => ({}),
+}));
+
 // import { compile } from 'vega-lite';
 import { mlDraftExport } from '../../../../../../../src/plugins/vis_type_vega/public';
 const { compile } = mlDraftExport;
