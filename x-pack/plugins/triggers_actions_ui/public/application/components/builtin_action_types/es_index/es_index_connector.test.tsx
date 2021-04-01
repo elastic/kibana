@@ -38,7 +38,7 @@ getIndexPatterns.mockResolvedValueOnce([
 
 const { getFields } = jest.requireMock('../../../../common/index_controls');
 
-async function setup(props) {
+async function setup(props: any) {
   const wrapper = mountWithIntl(<IndexActionConnectorFields {...props} />);
   await act(async () => {
     await nextTick();
@@ -47,7 +47,7 @@ async function setup(props) {
   return wrapper;
 }
 
-function setupGetFieldsResponse(getFieldsWithDateMapping) {
+function setupGetFieldsResponse(getFieldsWithDateMapping: boolean) {
   getFields.mockResolvedValueOnce([
     {
       type: getFieldsWithDateMapping ? 'date' : 'keyword',
