@@ -11,7 +11,7 @@ import { EuiPanel } from '@elastic/eui';
 import { SCALING_TYPES } from '../../../../../common/constants';
 import { GeoFieldSelect } from '../../../../components/geo_field_select';
 import { GeoIndexPatternSelect } from '../../../../components/geo_index_pattern_select';
-import { getGeoFields, getTermsFields } from '../../../../index_pattern_util';
+import { getGeoFields, getTermsFields, getSortFields } from '../../../../index_pattern_util';
 import { ESSearchSourceDescriptor } from '../../../../../common/descriptor_types';
 import {
   IndexPattern,
@@ -29,6 +29,9 @@ interface State {
   indexPattern: IndexPattern | null;
   geoFields: IFieldType[];
   geoFieldName: string | null;
+  sortField: string | null;
+  sortFields: IFieldType[];
+  sortOrder: SortDirection;
   termFields: IFieldType[];
   topHitsSplitField: string | null;
   topHitsSize: number;
@@ -39,6 +42,9 @@ export class CreateSourceEditor extends Component<Props, State> {
     indexPattern: null,
     geoFields: [],
     geoFieldName: null,
+    sortField: null,
+    sortFields: [],
+    sortOrder: SortDirection.desc,
     termFields: [],
     topHitsSplitField: null,
     topHitsSize: 1,
@@ -51,15 +57,13 @@ export class CreateSourceEditor extends Component<Props, State> {
       {
         indexPattern,
         geoFields,
-        geoFieldName: null,
+        geoFieldName: geoFields.length ? geoFields[0].name : null,
+        sortField: indexPattern.timeFieldName ? indexPattern.timeFieldName : null,
+        sortFields: getSortFields(indexPattern.fields),
         termFields: getTermsFields(indexPattern.fields),
         topHitsSplitField: null,
       },
-      () => {
-        if (geoFields.length) {
-          this._onGeoFieldSelect(geoFields[0].name);
-        }
-      }
+      this._previewLayer
     );
   };
 
@@ -76,7 +80,14 @@ export class CreateSourceEditor extends Component<Props, State> {
   };
 
   _previewLayer = () => {
-    const { indexPattern, geoFieldName, topHitsSplitField, topHitsSize } = this.state;
+    const {
+      indexPattern,
+      geoFieldName,
+      sortField,
+      sortOrder,
+      topHitsSplitField,
+      topHitsSize,
+    } = this.state;
 
     const tooltipProperties: string[] = [];
     if (topHitsSplitField) {
@@ -87,13 +98,13 @@ export class CreateSourceEditor extends Component<Props, State> {
     }
 
     const sourceConfig =
-      indexPattern && geoFieldName && topHitsSplitField
+      indexPattern && geoFieldName && sortField && topHitsSplitField
         ? {
             indexPatternId: indexPattern.id,
             geoField: geoFieldName,
             scalingType: SCALING_TYPES.TOP_HITS,
-            sortField: indexPattern.timeFieldName ? indexPattern.timeFieldName : '',
-            sortOrder: SortDirection.desc,
+            sortField,
+            sortOrder,
             tooltipProperties,
             topHitsSplitField,
             topHitsSize,
@@ -122,6 +133,9 @@ export class CreateSourceEditor extends Component<Props, State> {
         indexPatternId={this.state.indexPattern.id}
         isColumnCompressed={false}
         onChange={this._onTopHitsPropChange}
+        sortField={this.state.sortField ? this.state.sortField : ''}
+        sortFields={this.state.sortFields}
+        sortOrder={this.state.sortOrder}
         termFields={this.state.termFields}
         topHitsSplitField={this.state.topHitsSplitField}
         topHitsSize={this.state.topHitsSize}

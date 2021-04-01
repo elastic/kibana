@@ -5,29 +5,16 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, Component, Fragment } from 'react';
-import {
-  EuiFormRow,
-  EuiSelect,
-  EuiTitle,
-  EuiPanel,
-  EuiSpacer,
-  EuiSwitch,
-  EuiSwitchEvent,
-} from '@elastic/eui';
+import React, { Component, Fragment } from 'react';
+import { EuiFormRow, EuiTitle, EuiPanel, EuiSpacer, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { FIELD_ORIGIN } from '../../../../../common/constants';
-import { SingleFieldSelect } from '../../../../components/single_field_select';
 import { TooltipSelector } from '../../../../components/tooltip_selector';
 
 import { getIndexPatternService } from '../../../../kibana_services';
-import { getTermsFields, getSourceFields } from '../../../../index_pattern_util';
-import {
-  SortDirection,
-  indexPatterns,
-  IFieldType,
-} from '../../../../../../../../src/plugins/data/public';
+import { getTermsFields, getSortFields, getSourceFields } from '../../../../index_pattern_util';
+import { SortDirection, IFieldType } from '../../../../../../../../src/plugins/data/public';
 import { ESDocField } from '../../../fields/es_doc_field';
 import { OnSourceChangeArgs } from '../../../../connected_components/layer_panel/view';
 import { TopHitsForm } from './top_hits_form';
@@ -105,21 +92,11 @@ export class TopHitsUpdateSourceEditor extends Component<Props, State> {
     this.setState({
       sourceFields,
       termFields: getTermsFields(indexPattern.fields),
-      sortFields: indexPattern.fields.filter(
-        (field) => field.sortable && !indexPatterns.isNestedField(field)
-      ),
+      sortFields: getSortFields(indexPattern.fields),
     });
   }
   _onTooltipPropertiesChange = (propertyNames: string[]) => {
     this.props.onChange({ propName: 'tooltipProperties', value: propertyNames });
-  };
-
-  _onSortFieldChange = (sortField?: string) => {
-    this.props.onChange({ propName: 'sortField', value: sortField });
-  };
-
-  _onSortOrderChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    this.props.onChange({ propName: 'sortOrder', value: event.target.value });
   };
 
   _onFilterByMapBoundsChange = (event: EuiSwitchEvent) => {
@@ -165,55 +142,13 @@ export class TopHitsUpdateSourceEditor extends Component<Props, State> {
             indexPatternId={this.props.indexPatternId}
             isColumnCompressed={true}
             onChange={this.props.onChange}
+            sortField={this.props.sortField}
+            sortFields={this.state.sortFields}
+            sortOrder={this.props.sortOrder}
             termFields={this.state.termFields}
             topHitsSplitField={this.props.topHitsSplitField}
             topHitsSize={this.props.topHitsSize}
           />
-
-          <EuiFormRow
-            label={i18n.translate('xpack.maps.source.esTopHitsSearch.sortFieldLabel', {
-              defaultMessage: 'Sort field',
-            })}
-            display="columnCompressed"
-          >
-            <SingleFieldSelect
-              placeholder={i18n.translate('xpack.maps.source.esSearch.sortFieldSelectPlaceholder', {
-                defaultMessage: 'Select sort field',
-              })}
-              value={this.props.sortField}
-              onChange={this._onSortFieldChange}
-              fields={this.state.sortFields}
-              compressed
-            />
-          </EuiFormRow>
-
-          <EuiFormRow
-            label={i18n.translate('xpack.maps.source.esTopHitsSearch.sortOrderLabel', {
-              defaultMessage: 'Sort order',
-            })}
-            display="columnCompressed"
-          >
-            <EuiSelect
-              disabled={!this.props.sortField}
-              options={[
-                {
-                  text: i18n.translate('xpack.maps.source.esSearch.ascendingLabel', {
-                    defaultMessage: 'ascending',
-                  }),
-                  value: SortDirection.asc,
-                },
-                {
-                  text: i18n.translate('xpack.maps.source.esSearch.descendingLabel', {
-                    defaultMessage: 'descending',
-                  }),
-                  value: SortDirection.desc,
-                },
-              ]}
-              value={this.props.sortOrder}
-              onChange={this._onSortOrderChange}
-              compressed
-            />
-          </EuiFormRow>
 
           <EuiFormRow>
             <EuiSwitch

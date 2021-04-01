@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { Component, Fragment } from 'react';
-import { EuiFormRow } from '@elastic/eui';
+import React, { ChangeEvent, Component, Fragment } from 'react';
+import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SingleFieldSelect } from '../../../../components/single_field_select';
 import { getIndexPatternService } from '../../../../kibana_services';
@@ -15,12 +15,15 @@ import { ValidatedRange } from '../../../../components/validated_range';
 import { DEFAULT_MAX_INNER_RESULT_WINDOW } from '../../../../../common/constants';
 import { loadIndexSettings } from '../load_index_settings';
 import { OnSourceChangeArgs } from '../../../../connected_components/layer_panel/view';
-import { IFieldType } from '../../../../../../../../src/plugins/data/public';
+import { IFieldType, SortDirection } from '../../../../../../../../src/plugins/data/public';
 
 interface Props {
   indexPatternId: string;
   isColumnCompressed?: boolean;
   onChange: (args: OnSourceChangeArgs) => void;
+  sortField: string;
+  sortFields: IFieldType[];
+  sortOrder: SortDirection;
   termFields: IFieldType[];
   topHitsSplitField: string | null;
   topHitsSize: number;
@@ -56,6 +59,14 @@ export class TopHitsForm extends Component<Props, State> {
     this.props.onChange({ propName: 'topHitsSize', value: size });
   };
 
+  _onSortFieldChange = (sortField?: string) => {
+    this.props.onChange({ propName: 'sortField', value: sortField });
+  };
+
+  _onSortOrderChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    this.props.onChange({ propName: 'sortOrder', value: event.target.value });
+  };
+
   async loadIndexSettings() {
     try {
       const indexPattern = await getIndexPatternService().get(this.props.indexPatternId);
@@ -70,6 +81,8 @@ export class TopHitsForm extends Component<Props, State> {
 
   render() {
     let sizeSlider;
+    let sortField;
+    let sortOrder;
     if (this.props.topHitsSplitField) {
       sizeSlider = (
         <EuiFormRow
@@ -88,6 +101,55 @@ export class TopHitsForm extends Component<Props, State> {
             showInput
             showRange
             data-test-subj="layerPanelTopHitsSize"
+            compressed
+          />
+        </EuiFormRow>
+      );
+
+      sortField = (
+        <EuiFormRow
+          label={i18n.translate('xpack.maps.source.esTopHitsSearch.sortFieldLabel', {
+            defaultMessage: 'Sort field',
+          })}
+          display={this.props.isColumnCompressed ? 'columnCompressed' : 'row'}
+        >
+          <SingleFieldSelect
+            placeholder={i18n.translate('xpack.maps.source.esSearch.sortFieldSelectPlaceholder', {
+              defaultMessage: 'Select sort field',
+            })}
+            value={this.props.sortField}
+            onChange={this._onSortFieldChange}
+            fields={this.props.sortFields}
+            compressed
+          />
+        </EuiFormRow>
+      );
+
+      sortOrder = (
+        <EuiFormRow
+          label={i18n.translate('xpack.maps.source.esTopHitsSearch.sortOrderLabel', {
+            defaultMessage: 'Sort order',
+          })}
+          display={this.props.isColumnCompressed ? 'columnCompressed' : 'row'}
+        >
+          <EuiSelect
+            disabled={!this.props.sortField}
+            options={[
+              {
+                text: i18n.translate('xpack.maps.source.esSearch.ascendingLabel', {
+                  defaultMessage: 'ascending',
+                }),
+                value: SortDirection.asc,
+              },
+              {
+                text: i18n.translate('xpack.maps.source.esSearch.descendingLabel', {
+                  defaultMessage: 'descending',
+                }),
+                value: SortDirection.desc,
+              },
+            ]}
+            value={this.props.sortOrder}
+            onChange={this._onSortOrderChange}
             compressed
           />
         </EuiFormRow>
@@ -118,6 +180,10 @@ export class TopHitsForm extends Component<Props, State> {
         </EuiFormRow>
 
         {sizeSlider}
+
+        {sortField}
+
+        {sortOrder}
       </Fragment>
     );
   }
