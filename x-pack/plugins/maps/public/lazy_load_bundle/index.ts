@@ -14,7 +14,7 @@ import { MapEmbeddableConfig, MapEmbeddableInput, MapEmbeddableOutput } from '..
 import { SourceRegistryEntry } from '../classes/sources/source_registry';
 import { LayerWizard } from '../classes/layers/layer_wizard_registry';
 import type { CreateLayerDescriptorParams } from '../classes/sources/es_search_source';
-import type { IEMSTermJoinConfig, ISampleValuesConfig } from '../ems_autosuggest';
+import type { EMSTermJoinConfig, SampleValuesConfig } from '../ems_autosuggest';
 
 let loadModulesPromise: Promise<LazyLoadedMapModules>;
 
@@ -75,7 +75,7 @@ interface LazyLoadedMapModules {
   }) => LayerDescriptor | null;
   createBasemapLayerDescriptor: () => LayerDescriptor | null;
   createESSearchSourceLayerDescriptor: (params: CreateLayerDescriptorParams) => LayerDescriptor;
-  suggestEMSTermJoinConfig: (config: ISampleValuesConfig) => Promise<IEMSTermJoinConfig | null>;
+  suggestEMSTermJoinConfig: (config: SampleValuesConfig) => Promise<EMSTermJoinConfig | null>;
 }
 
 export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {

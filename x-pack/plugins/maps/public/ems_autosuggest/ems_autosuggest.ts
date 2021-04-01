@@ -7,21 +7,18 @@
 
 import type { FileLayer } from '@elastic/ems-client';
 import { getEmsFileLayers, fetchGeoJson } from '../util';
-import { FORMAT_TYPE } from '../../common';
+import { FORMAT_TYPE, emsWorldLayerId, emsRegionLayerId, emsUsaZipLayerId } from '../../common';
 
-export interface ISampleValuesConfig {
+export interface SampleValuesConfig {
   emsLayerIds?: string[];
   sampleValues?: Array<string | number>;
   sampleValuesColumnName?: string;
 }
 
-export interface IEMSTermJoinConfig {
+export interface EMSTermJoinConfig {
   layerId: string;
   field: string;
 }
-
-const emsWorldLayerId = 'world_countries';
-const emsRegionLayerId = 'administrative_regions_lvl2';
 
 const wellKnownColumnNames = [
   {
@@ -51,7 +48,7 @@ const wellKnownColumnFormats = [
   {
     regex: /(^\d{5}$)/i, // 5-digit zipcode
     emsConfig: {
-      layerId: 'usa_zip_codes',
+      layerId: emsUsaZipLayerId,
       field: 'zip',
     },
   },
@@ -63,9 +60,9 @@ interface UniqueMatch {
 }
 
 export async function suggestEMSTermJoinConfig(
-  sampleValuesConfig: ISampleValuesConfig
-): Promise<IEMSTermJoinConfig | null> {
-  const matches: Array<{ layerId: string; field: string }> = [];
+  sampleValuesConfig: SampleValuesConfig
+): Promise<EMSTermJoinConfig | null> {
+  const matches: EMSTermJoinConfig[] = [];
 
   if (sampleValuesConfig.sampleValuesColumnName) {
     matches.push(...suggestByName(sampleValuesConfig.sampleValuesColumnName));
@@ -108,7 +105,7 @@ export async function suggestEMSTermJoinConfig(
   return uniqMatches.length ? uniqMatches[0].config : null;
 }
 
-function suggestByName(columnName: string): IEMSTermJoinConfig[] {
+function suggestByName(columnName: string): EMSTermJoinConfig[] {
   const matches = wellKnownColumnNames.filter((wellknown) => {
     return columnName.match(wellknown.regex);
   });
@@ -118,7 +115,7 @@ function suggestByName(columnName: string): IEMSTermJoinConfig[] {
   });
 }
 
-function suggestByValues(values: Array<string | number>): IEMSTermJoinConfig[] {
+function suggestByValues(values: Array<string | number>): EMSTermJoinConfig[] {
   const matches = wellKnownColumnFormats.filter((wellknown) => {
     for (let i = 0; i < values.length; i++) {
       const value = values[i].toString();
@@ -157,7 +154,7 @@ function matchesEmsField(emsJson: any, emsFieldId: string, sampleValues: Array<s
 async function getMatchesForEMSLayer(
   emsLayerId: string,
   sampleValues: Array<string | number>
-): Promise<IEMSTermJoinConfig[]> {
+): Promise<EMSTermJoinConfig[]> {
   const fileLayers: FileLayer[] = await getEmsFileLayers();
   const emsFileLayer: FileLayer | undefined = fileLayers.find((fl: FileLayer) =>
     fl.hasId(emsLayerId)
@@ -176,7 +173,7 @@ async function getMatchesForEMSLayer(
       emsFileLayer.getDefaultFormatType() as FORMAT_TYPE,
       'data'
     );
-    const matches: IEMSTermJoinConfig[] = [];
+    const matches: EMSTermJoinConfig[] = [];
     for (let f = 0; f < emsFields.length; f++) {
       if (matchesEmsField(emsJson, emsFields[f].id, sampleValues)) {
         matches.push({
@@ -194,7 +191,7 @@ async function getMatchesForEMSLayer(
 async function suggestByEMSLayerIds(
   emsLayerIds: string[],
   values: Array<string | number>
-): Promise<IEMSTermJoinConfig[]> {
+): Promise<EMSTermJoinConfig[]> {
   const matches = [];
   for (const emsLayerId of emsLayerIds) {
     const layerIdMathes = await getMatchesForEMSLayer(emsLayerId, values);
