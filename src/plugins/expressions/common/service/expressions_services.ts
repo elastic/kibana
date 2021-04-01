@@ -228,7 +228,7 @@ export class ExpressionsService implements PersistableStateService<ExpressionAst
   ): void => this.renderers.register(definition);
 
   public readonly run: ExpressionsServiceStart['run'] = (ast, input, params) =>
-    this.executor.run(ast, input, params);
+    this.executor.run(ast, input, params).toPromise<any>();
 
   public readonly getFunction: ExpressionsServiceStart['getFunction'] = (name) =>
     this.executor.getFunction(name);

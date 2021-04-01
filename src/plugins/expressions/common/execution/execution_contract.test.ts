@@ -108,7 +108,7 @@ describe('ExecutionContract', () => {
       const contract = new ExecutionContract(execution);
 
       execution.start();
-      await execution.result;
+      await execution.result.toPromise();
 
       expect(contract.isPending).toBe(false);
       expect(execution.state.get().state).toBe('result');
@@ -119,7 +119,7 @@ describe('ExecutionContract', () => {
       const contract = new ExecutionContract(execution);
 
       execution.start();
-      await execution.result;
+      await execution.result.toPromise();
       execution.state.get().state = 'error';
 
       expect(contract.isPending).toBe(false);

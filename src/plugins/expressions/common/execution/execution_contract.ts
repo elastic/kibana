@@ -39,7 +39,7 @@ export class ExecutionContract<Input = unknown, Output = unknown, InspectorAdapt
    */
   getData = async (): Promise<Output | ExpressionValueError> => {
     try {
-      return await this.execution.result;
+      return await this.execution.result.toPromise();
     } catch (e) {
       return {
         type: 'error',

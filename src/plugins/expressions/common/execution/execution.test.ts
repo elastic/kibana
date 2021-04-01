@@ -42,7 +42,7 @@ const run = async (
 ) => {
   const execution = createExecution(expression, context);
   execution.start(input);
-  return await execution.result;
+  return await execution.result.toPromise();
 };
 
 describe('Execution', () => {
@@ -73,7 +73,7 @@ describe('Execution', () => {
     /* eslint-enable no-console */
 
     execution.start(123);
-    const result = await execution.result;
+    const result = await execution.result.toPromise();
 
     expect(result).toBe(123);
     expect(spy).toHaveBeenCalledTimes(1);
@@ -91,7 +91,7 @@ describe('Execution', () => {
       value: -1,
     });
 
-    const result = await execution.result;
+    const result = await execution.result.toPromise();
 
     expect(result).toEqual({
       type: 'num',
@@ -106,7 +106,7 @@ describe('Execution', () => {
       value: 0,
     });
 
-    const result = await execution.result;
+    const result = await execution.result.toPromise();
 
     expect(result).toEqual({
       type: 'num',
@@ -119,7 +119,7 @@ describe('Execution', () => {
 
     // Below 1 is cast to { type: 'num', value: 1 }.
     execution.start(1);
-    const result = await execution.result;
+    const result = await execution.result.toPromise();
 
     expect(result).toEqual({
       type: 'num',
@@ -251,7 +251,7 @@ describe('Execution', () => {
         value: 0,
       });
 
-      const result = await execution.result;
+      const result = await execution.result.toPromise();
 
       expect(result).toEqual({
         type: 'num',
@@ -267,7 +267,7 @@ describe('Execution', () => {
     test('result is undefined until execution completes', async () => {
       const execution = createExecution('sleep 10');
       expect(execution.state.get().result).toBe(undefined);
-      execution.start(null);
+      execution.start(null).subscribe(jest.fn());
       expect(execution.state.get().result).toBe(undefined);
       await new Promise((r) => setTimeout(r, 1));
       expect(execution.state.get().result).toBe(undefined);
@@ -309,7 +309,7 @@ describe('Execution', () => {
       const execution = await createExecution('error "foo"');
       execution.start(null);
 
-      const result = await execution.result;
+      const result = await execution.result.toPromise();
 
       expect(result).toMatchObject({
         type: 'error',
@@ -330,7 +330,7 @@ describe('Execution', () => {
       const executor = createUnitTestExecutor();
       executor.registerFunction(spy);
 
-      await executor.run('error "..." | spy', null);
+      await executor.run('error "..." | spy', null).toPromise();
 
       expect(spy.fn).toHaveBeenCalledTimes(0);
     });
@@ -360,14 +360,14 @@ describe('Execution', () => {
     test('execution state is "result" when execution successfully completes', async () => {
       const execution = createExecution('sleep 1');
       execution.start(null);
-      await execution.result;
+      await execution.result.toPromise();
       expect(execution.state.get().state).toBe('result');
     });
 
     test('execution state is "result" when execution successfully completes - 2', async () => {
       const execution = createExecution('var foo');
       execution.start(null);
-      await execution.result;
+      await execution.result.toPromise();
       expect(execution.state.get().state).toBe('result');
     });
   });
@@ -416,7 +416,7 @@ describe('Execution', () => {
   });
 
   describe('when arguments are missing', () => {
-    test('when required argument is missing and has not alias, returns error', async () => {
+    it('when required argument is missing and has not alias, returns error', async () => {
       const requiredArg: ExpressionFunctionDefinition<'requiredArg', any, { arg: any }, any> = {
         name: 'requiredArg',
         args: {
@@ -430,7 +430,7 @@ describe('Execution', () => {
       };
       const executor = createUnitTestExecutor();
       executor.registerFunction(requiredArg);
-      const result = await executor.run('requiredArg', null, {});
+      const result = await executor.run('requiredArg', null, {}).toPromise();
 
       expect(result).toMatchObject({
         type: 'error',
@@ -456,7 +456,7 @@ describe('Execution', () => {
     test('can execute expression in debug mode', async () => {
       const execution = createExecution('add val=1 | add val=2 | add val=3', {}, true);
       execution.start(-1);
-      const result = await execution.result;
+      const result = await execution.result.toPromise();
 
       expect(result).toEqual({
         type: 'num',
@@ -471,7 +471,7 @@ describe('Execution', () => {
         true
       );
       execution.start(0);
-      const result = await execution.result;
+      const result = await execution.result.toPromise();
 
       expect(result).toEqual({
         type: 'num',
@@ -483,7 +483,7 @@ describe('Execution', () => {
       test('sets "success" flag on all functions to true', async () => {
         const execution = createExecution('add val=1 | add val=2 | add val=3', {}, true);
         execution.start(-1);
-        await execution.result;
+        await execution.result.toPromise();
 
         for (const node of execution.state.get().ast.chain) {
           expect(node.debug?.success).toBe(true);
@@ -493,7 +493,7 @@ describe('Execution', () => {
       test('stores "fn" reference to the function', async () => {
         const execution = createExecution('add val=1 | add val=2 | add val=3', {}, true);
         execution.start(-1);
-        await execution.result;
+        await execution.result.toPromise();
 
         for (const node of execution.state.get().ast.chain) {
           expect(node.debug?.fn).toBe('add');
@@ -503,7 +503,7 @@ describe('Execution', () => {
       test('saves duration it took to execute each function', async () => {
         const execution = createExecution('add val=1 | add val=2 | add val=3', {}, true);
         execution.start(-1);
-        await execution.result;
+        await execution.result.toPromise();
 
         for (const node of execution.state.get().ast.chain) {
           expect(typeof node.debug?.duration).toBe('number');
@@ -515,7 +515,7 @@ describe('Execution', () => {
       test('adds .debug field in expression AST on each executed function', async () => {
         const execution = createExecution('add val=1 | add val=2 | add val=3', {}, true);
         execution.start(-1);
-        await execution.result;
+        await execution.result.toPromise();
 
         for (const node of execution.state.get().ast.chain) {
           expect(typeof node.debug).toBe('object');
@@ -526,7 +526,7 @@ describe('Execution', () => {
       test('stores input of each function', async () => {
         const execution = createExecution('add val=1 | add val=2 | add val=3', {}, true);
         execution.start(-1);
-        await execution.result;
+        await execution.result.toPromise();
 
         const { chain } = execution.state.get().ast;
 
@@ -544,7 +544,7 @@ describe('Execution', () => {
       test('stores output of each function', async () => {
         const execution = createExecution('add val=1 | add val=2 | add val=3', {}, true);
         execution.start(-1);
-        await execution.result;
+        await execution.result.toPromise();
 
         const { chain } = execution.state.get().ast;
 
@@ -569,7 +569,7 @@ describe('Execution', () => {
           true
         );
         execution.start(-1);
-        await execution.result;
+        await execution.result.toPromise();
 
         const { chain } = execution.state.get().ast;
 
@@ -592,7 +592,7 @@ describe('Execution', () => {
           true
         );
         execution.start(0);
-        await execution.result;
+        await execution.result.toPromise();
 
         const { chain } = execution.state.get().ast.chain[0].arguments
           .val[0] as ExpressionAstExpression;
@@ -627,7 +627,7 @@ describe('Execution', () => {
           params: { debug: true },
         });
         execution.start(0);
-        await execution.result;
+        await execution.result.toPromise();
 
         const node1 = execution.state.get().ast.chain[0];
         const node2 = execution.state.get().ast.chain[1];
@@ -645,7 +645,7 @@ describe('Execution', () => {
           params: { debug: true },
         });
         execution.start(0);
-        await execution.result;
+        await execution.result.toPromise();
 
         const node2 = execution.state.get().ast.chain[1];
 
@@ -666,7 +666,7 @@ describe('Execution', () => {
           params: { debug: true },
         });
         execution.start(0);
-        await execution.result;
+        await execution.result.toPromise();
 
         const node2 = execution.state.get().ast.chain[1];
 
