@@ -43,7 +43,7 @@ export const ProxyConnection: FunctionComponent<Props> = (props) => {
             helpText={
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.fieldCloudUrlHelpText"
-                defaultMessage="The URL can contain protocol (https://) and port"
+                defaultMessage="The protocol (https://) and port values are optional."
               />
             }
           >
