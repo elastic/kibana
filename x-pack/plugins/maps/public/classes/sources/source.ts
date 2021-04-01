@@ -84,7 +84,7 @@ export class AbstractSource implements ISource {
   }
 
   async supportsFitToBounds(): Promise<boolean> {
-    return true;
+    return false;
   }
 
   /**

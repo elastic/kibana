@@ -6,7 +6,7 @@
  */
 
 // @ts-ignore
-import { compile } from 'vega-lite/build-es5/vega-lite';
+import { compile } from 'vega-lite/build/vega-lite';
 
 import { euiThemeVars } from '@kbn/ui-shared-deps/theme';
 
