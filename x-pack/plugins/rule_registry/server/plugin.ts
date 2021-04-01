@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, Plugin, CoreSetup } from 'src/core/server';
-import { PluginSetupContract as AlertingPluginSetupContract } from '../../alerting/server';
+import { PluginInitializerContext, Plugin, CoreSetup, CoreStart } from 'src/core/server';
+import {
+  PluginSetupContract as AlertingPluginSetupContract,
+  PluginStartContract as AlertPluginStartContract,
+} from '../../alerting/server';
 import { RuleRegistry } from './rule_registry';
 import { defaultIlmPolicy } from './rule_registry/defaults/ilm_policy';
 import { BaseRuleFieldMap, baseRuleFieldMap } from '../common';
@@ -43,7 +46,12 @@ export class RuleRegistryPlugin implements Plugin<RuleRegistryPluginSetupContrac
     return rootRegistry;
   }
 
-  public start() {}
+  // Temporarily exposing alerting client as passthrough
+  public start(core: CoreStart, plugins: { alerting: AlertPluginStartContract }) {
+    return {
+      alerting: plugins.alerting,
+    };
+  }
 
   public stop() {}
 }

@@ -149,6 +149,11 @@ export const DEFAULT_TRANSFORMS_SETTING = JSON.stringify(defaultTransformsSettin
 export const SIGNALS_ID = `siem.signals`;
 
 /**
+ * Id's for reference rule types
+ */
+export const REFERENCE_RULE_ALERT_TYPE_ID = `siem.referenceRule`;
+
+/**
  * Id for the notifications alerting type
  */
 export const NOTIFICATIONS_ID = `siem.notifications`;
