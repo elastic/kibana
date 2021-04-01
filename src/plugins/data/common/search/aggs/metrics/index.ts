@@ -36,6 +36,8 @@ export * from './max_fn';
 export * from './max';
 export * from './median_fn';
 export * from './median';
+export * from './single_percentile_fn';
+export * from './single_percentile';
 export * from './metric_agg_type';
 export * from './metric_agg_types';
 export * from './min_fn';
