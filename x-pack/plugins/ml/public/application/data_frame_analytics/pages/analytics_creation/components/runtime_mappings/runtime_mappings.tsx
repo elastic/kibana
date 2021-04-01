@@ -133,13 +133,9 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem grow={true}>
             {isPopulatedObject(runtimeMappings) ? (
-              <FormattedMessage
-                id="xpack.ml.dataframe.analytics.createWizard.runtimeMappingsListLabel"
-                defaultMessage="{runtimeFields}"
-                values={{
-                  runtimeFields: Object.keys(runtimeMappings).join(','),
-                }}
-              />
+              <EuiText size="s" grow={false}>
+                {Object.keys(runtimeMappings).join(',')}
+              </EuiText>
             ) : (
               <FormattedMessage
                 id="xpack.ml.dataframe.analytics.createWizard.noRuntimeMappingsLabel"
@@ -185,7 +181,10 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
                     />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiCopy beforeMessage={COPY_TO_CLIPBOARD_RUNTIME_MAPPINGS} textToCopy={''}>
+                    <EuiCopy
+                      beforeMessage={COPY_TO_CLIPBOARD_RUNTIME_MAPPINGS}
+                      textToCopy={advancedRuntimeMappingsConfig ?? ''}
+                    >
                       {(copy: () => void) => (
                         <EuiButtonIcon
                           onClick={copy}

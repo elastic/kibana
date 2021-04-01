@@ -50,7 +50,6 @@ import { mlFieldFormatService } from '../../services/field_format_service';
 
 import { DataGridItem, IndexPagination, RenderCellValue } from './types';
 import { RuntimeMappings, RuntimeField } from '../../../../common/types/fields';
-import { isPopulatedObject } from '../../../../common/util/object_utils';
 import { isRuntimeMappings } from '../../../../common/util/runtime_field_utils';
 
 export const INIT_MAX_COLUMNS = 10;
@@ -94,35 +93,9 @@ export const getFieldsFromKibanaIndexPattern = (indexPattern: IndexPattern): str
 /**
  * Return a map of runtime_mappings for each of the index pattern field provided
  * to provide in ES search queries
- * @param indexPatternFields
  * @param indexPattern
- * @param clonedRuntimeMappings
+ * @param RuntimeMappings
  */
-export const getRuntimeFieldsMapping = (
-  indexPatternFields: string[] | undefined,
-  indexPattern: IndexPattern | undefined,
-  runtimeMappings?: RuntimeMappings
-) => {
-  if (!Array.isArray(indexPatternFields) || indexPattern === undefined) return {};
-  const ipRuntimeMappings = indexPattern.getComputedFields().runtimeFields;
-  let combinedRuntimeMappings: RuntimeMappings = {};
-
-  if (isPopulatedObject(ipRuntimeMappings)) {
-    indexPatternFields.forEach((ipField) => {
-      if (ipRuntimeMappings.hasOwnProperty(ipField)) {
-        // @ts-expect-error
-        combinedRuntimeMappings[ipField] = ipRuntimeMappings[ipField];
-      }
-    });
-  }
-  if (isPopulatedObject(runtimeMappings)) {
-    combinedRuntimeMappings = { ...combinedRuntimeMappings, ...runtimeMappings };
-  }
-  return Object.keys(combinedRuntimeMappings).length > 0
-    ? { runtime_mappings: combinedRuntimeMappings }
-    : {};
-};
-
 export function getCombinedRuntimeMappings(
   indexPattern: IndexPattern | undefined,
   runtimeMappings?: RuntimeMappings

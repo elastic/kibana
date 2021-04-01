@@ -12,14 +12,16 @@ import { EuiDataGridColumn } from '@elastic/eui';
 import { CoreSetup } from 'src/core/public';
 
 import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
-import { RuntimeMappings } from '../../../../../../common/types/fields';
-import { isPopulatedObject } from '../../../../../../common/util/object_utils';
+import { isRuntimeMappings } from '../../../../../../common/util/runtime_field_utils';
+import { RuntimeMappings, RuntimeField } from '../../../../../../common/types/fields';
+import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../../../common/constants/field_histograms';
 
 import { DataLoader } from '../../../../datavisualizer/index_based/data_loader';
 
 import {
   getFieldType,
   getDataGridSchemaFromKibanaFieldType,
+  getDataGridSchemaFromESFieldType,
   getFieldsFromKibanaIndexPattern,
   showDataGridColumnChartErrorMessageToast,
   useDataGrid,
@@ -42,7 +44,7 @@ interface MLEuiDataGridColumn extends EuiDataGridColumn {
 function getRuntimeFieldColumns(runtimeMappings: Record<string, any>) {
   return Object.keys(runtimeMappings).map((id) => {
     const field = runtimeMappings[id];
-    const schema = getDataGridSchemaFromKibanaFieldType(field);
+    const schema = getDataGridSchemaFromESFieldType(field.type);
     return { id, schema, isExpandable: schema !== 'boolean', isRuntimeFieldColumn: true };
   });
 }
@@ -60,12 +62,15 @@ export const useIndexData = (
   const [columns, setColumns] = useState<MLEuiDataGridColumn[]>([
     ...indexPatternFields.map((id) => {
       const field = indexPattern.fields.getByName(id);
-      const schema = getDataGridSchemaFromKibanaFieldType(field);
+      const isRuntimeFieldColumn = field?.runtimeField !== undefined;
+      const schema = isRuntimeFieldColumn
+        ? getDataGridSchemaFromESFieldType(field?.type as RuntimeField['type'])
+        : getDataGridSchemaFromKibanaFieldType(field);
       return {
         id,
         schema,
         isExpandable: schema !== 'boolean',
-        isRuntimeFieldColumn: field?.runtimeField !== undefined,
+        isRuntimeFieldColumn,
       };
     }),
   ]);
@@ -108,7 +113,7 @@ export const useIndexData = (
         fields: ['*'],
         _source: false,
         ...(Object.keys(sort).length > 0 ? { sort } : {}),
-        ...(isPopulatedObject(combinedRuntimeMappings)
+        ...(isRuntimeMappings(combinedRuntimeMappings)
           ? { runtime_mappings: combinedRuntimeMappings }
           : {}),
       },
@@ -118,7 +123,7 @@ export const useIndexData = (
       const resp: IndexSearchResponse = await ml.esSearch(esSearchRequest);
       const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
 
-      if (runtimeMappings !== undefined) {
+      if (isRuntimeMappings(runtimeMappings)) {
         // remove old runtime field from columns
         const updatedColumns = columns.filter((col) => col.isRuntimeFieldColumn === false);
         setColumns([
@@ -169,6 +174,7 @@ export const useIndexData = (
   ]);
 
   const fetchColumnChartsData = async function (fieldHistogramsQuery: Record<string, any>) {
+    const combinedRuntimeMappings = getCombinedRuntimeMappings(indexPattern, runtimeMappings);
     try {
       const columnChartsData = await dataLoader.loadFieldHistograms(
         columns
@@ -177,7 +183,9 @@ export const useIndexData = (
             fieldName: cT.id,
             type: getFieldType(cT.schema),
           })),
-        fieldHistogramsQuery
+        fieldHistogramsQuery,
+        DEFAULT_SAMPLER_SHARD_SIZE,
+        combinedRuntimeMappings
       );
       dataGrid.setColumnCharts(columnChartsData);
     } catch (e) {
@@ -193,7 +201,7 @@ export const useIndexData = (
   }, [
     dataGrid.chartsVisible,
     indexPattern.title,
-    JSON.stringify([query, dataGrid.visibleColumns]),
+    JSON.stringify([query, dataGrid.visibleColumns, runtimeMappings]),
   ]);
 
   const renderCellValue = useRenderCellValue(indexPattern, pagination, tableItems);

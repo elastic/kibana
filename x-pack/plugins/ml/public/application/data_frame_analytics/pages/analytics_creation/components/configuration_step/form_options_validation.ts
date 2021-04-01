@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
-import { RuntimeType } from '../../../../../../../../../../src/plugins/data/common/index_patterns';
+import { RuntimeType } from '../../../../../../../../../../src/plugins/data/common';
 import { EVENT_RATE_FIELD_ID } from '../../../../../../../common/types/fields';
 import { ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
 import { AnalyticsJobType } from '../../../analytics_management/hooks/use_create_analytics_form/state';
