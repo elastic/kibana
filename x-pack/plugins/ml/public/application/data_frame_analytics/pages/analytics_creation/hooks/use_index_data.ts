@@ -41,10 +41,10 @@ interface MLEuiDataGridColumn extends EuiDataGridColumn {
   isRuntimeFieldColumn?: boolean;
 }
 
-function getRuntimeFieldColumns(runtimeMappings: Record<string, any>) {
+function getRuntimeFieldColumns(runtimeMappings: RuntimeMappings) {
   return Object.keys(runtimeMappings).map((id) => {
     const field = runtimeMappings[id];
-    const schema = getDataGridSchemaFromESFieldType(field.type);
+    const schema = getDataGridSchemaFromESFieldType(field.type as RuntimeField['type']);
     return { id, schema, isExpandable: schema !== 'boolean', isRuntimeFieldColumn: true };
   });
 }
