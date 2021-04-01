@@ -485,6 +485,26 @@ export const mockCaseMappings: Array<SavedObject<ConnectorMappings>> = [
   },
 ];
 
+export const mockCaseMappingsResilient: Array<SavedObject<ConnectorMappings>> = [
+  {
+    type: CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,
+    id: 'mock-mappings-1',
+    attributes: {
+      mappings: mappings[ConnectorTypes.resilient],
+    },
+    references: [],
+  },
+];
+
+export const mockCaseMappingsBad: Array<SavedObject<Partial<ConnectorMappings>>> = [
+  {
+    type: CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,
+    id: 'mock-mappings-bad',
+    attributes: {},
+    references: [],
+  },
+];
+
 export const mockUserActions: Array<SavedObject<CaseUserActionAttributes>> = [
   {
     type: CASE_USER_ACTION_SAVED_OBJECT,

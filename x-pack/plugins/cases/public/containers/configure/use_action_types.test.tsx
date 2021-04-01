@@ -11,6 +11,7 @@ import { actionTypesMock } from './mock';
 import * as api from './api';
 
 jest.mock('./api');
+jest.mock('../../common/lib/kibana');
 
 describe('useActionTypes', () => {
   beforeEach(() => {

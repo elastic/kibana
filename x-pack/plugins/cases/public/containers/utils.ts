@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
 import { set } from '@elastic/safer-lodash-set';
 import { camelCase, isArray, isObject } from 'lodash';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
+import { ToastInputFields } from 'kibana/public';
 import {
   CasesFindResponse,
   CasesFindResponseRt,
@@ -29,7 +29,6 @@ import {
   CommentType,
   CasePatchRequest,
 } from '../../common';
-import { AppToast, ToasterError } from '../components/toasters';
 import { AllCases, Case, UpdateByKey } from './types';
 import * as i18n from './translations';
 
@@ -115,20 +114,26 @@ export const valueToUpdateIsStatus = (
   value: UpdateByKey['updateValue']
 ): value is CasePatchRequest['status'] => key === 'status';
 
+export class ToasterError extends Error {
+  public readonly messages: string[];
+
+  constructor(messages: string[]) {
+    super(messages[0]);
+    this.name = 'ToasterError';
+    this.messages = messages;
+  }
+}
 export const createUpdateSuccessToaster = (
   caseBeforeUpdate: Case,
   caseAfterUpdate: Case,
   key: UpdateByKey['updateKey'],
   value: UpdateByKey['updateValue']
-): AppToast => {
+): ToastInputFields => {
   const caseHasAlerts = caseBeforeUpdate.comments.some(
     (comment) => comment.type === CommentType.alert
   );
 
-  const toast: AppToast = {
-    id: uuid.v4(),
-    color: 'success',
-    iconType: 'check',
+  const toast: ToastInputFields = {
     title: i18n.UPDATED_CASE(caseAfterUpdate.title),
   };
 

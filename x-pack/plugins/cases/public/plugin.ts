@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import { CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 import { CasesUiStart, SetupPlugins, StartPlugins } from './types';
-import { getCreateCaseLazy } from './methods/get_create_case';
-import { getAllCasesLazy } from './methods/get_all_cases';
-import { getConfigureCasesLazy } from './methods/get_configure_cases';
-import { getCaseViewLazy } from './methods/get_case_view';
 import { KibanaServices } from './common/lib/kibana';
+import { getCaseConnectorUi } from './components/connectors';
+import { getAllCasesLazy } from './methods/get_all_cases';
+import { getCaseViewLazy } from './methods/get_case_view';
+import { getConfigureCasesLazy } from './methods/get_configure_cases';
+import { getCreateCaseLazy } from './methods/get_create_case';
+import { getRecentCasesLazy } from './methods/get_recent_cases';
+import { ENABLE_CASE_CONNECTOR } from '../common';
 
 /**
  * @public
@@ -23,7 +26,11 @@ export class CasesUiPlugin implements Plugin<void, CasesUiStart, SetupPlugins, S
   constructor(initializerContext: PluginInitializerContext) {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
-  public setup() {}
+  public setup(core: CoreSetup, plugins: SetupPlugins) {
+    if (ENABLE_CASE_CONNECTOR) {
+      plugins.triggersActionsUi.actionTypeRegistry.register(getCaseConnectorUi());
+    }
+  }
 
   public start(core: CoreStart, plugins: StartPlugins): CasesUiStart {
     KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion });
@@ -45,6 +52,14 @@ export class CasesUiPlugin implements Plugin<void, CasesUiStart, SetupPlugins, S
         return getCaseViewLazy(props);
       },
       /**
+       * Get the configure case component
+       * @param props ConfigureCasesProps
+       * @return {ReactElement<ConfigureCasesProps>}
+       */
+      getConfigureCases: (props) => {
+        return getConfigureCasesLazy(props);
+      },
+      /**
        * Get the create case form
        * @param props CreateCaseProps
        * @return {ReactElement<CreateCaseProps>}
@@ -53,12 +68,12 @@ export class CasesUiPlugin implements Plugin<void, CasesUiStart, SetupPlugins, S
         return getCreateCaseLazy(props);
       },
       /**
-       * Get the configure case component
-       * @param props ConfigureCasesProps
-       * @return {ReactElement<ConfigureCasesProps>}
+       * Get the recent cases component
+       * @param props RecentCasesProps
+       * @return {ReactElement<RecentCasesProps>}
        */
-      getConfigureCases: (props) => {
-        return getConfigureCasesLazy(props);
+      getRecentCases: (props) => {
+        return getRecentCasesLazy(props);
       },
     };
   }

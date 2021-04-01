@@ -7,10 +7,10 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 
-import { useStateToaster, errorToToaster } from '../../components/toasters';
 import * as i18n from '../translations';
 import { fetchActionTypes } from './api';
 import { ActionTypeConnector } from './types';
+import { useToasts } from '../../common/lib/kibana';
 
 export interface UseActionTypesResponse {
   loading: boolean;
@@ -19,7 +19,7 @@ export interface UseActionTypesResponse {
 }
 
 export const useActionTypes = (): UseActionTypesResponse => {
-  const [, dispatchToaster] = useStateToaster();
+  const toasts = useToasts();
   const [loading, setLoading] = useState(true);
   const [actionTypes, setActionTypes] = useState<ActionTypeConnector[]>([]);
   const isCancelledRef = useRef(false);
@@ -43,14 +43,12 @@ export const useActionTypes = (): UseActionTypesResponse => {
       if (!isCancelledRef.current) {
         setLoading(false);
         setActionTypes([]);
-        errorToToaster({
+        toasts.addError(error.body && error.body.message ? new Error(error.body.message) : error, {
           title: i18n.ERROR_TITLE,
-          error: error.body && error.body.message ? new Error(error.body.message) : error,
-          dispatchToaster,
         });
       }
     }
-  }, [dispatchToaster]);
+  }, [toasts]);
 
   useEffect(() => {
     if (queryFirstTime.current) {

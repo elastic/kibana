@@ -13,7 +13,7 @@ import { UseField, useFormData, FieldHook, useFormContext } from '../../common/s
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { ConnectorSelector } from '../connector_selector/form';
 import { ConnectorFieldsForm } from '../connectors/fields_form';
-import { ActionConnector } from '../../containers/types';
+import { ActionConnector } from '../../../common';
 import { getConnectorById } from '../configure_cases/utils';
 import { FormProps } from './schema';
 

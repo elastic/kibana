@@ -12,6 +12,7 @@ import { useDeleteCases, UseDeleteCase } from './use_delete_cases';
 import * as api from './api';
 
 jest.mock('./api');
+jest.mock('../common/lib/kibana');
 
 describe('useDeleteCases', () => {
   const abortCtrl = new AbortController();

@@ -39,6 +39,11 @@ jest.mock('../../../common/lib/kibana', () => {
 const onCloseCaseModal = jest.fn();
 const onRowClick = jest.fn();
 const defaultProps = {
+  alertData: {
+    alertId: '123',
+    index: '123',
+    rule: { id: '123', name: '123' },
+  },
   isModalOpen: true,
   onCloseCaseModal,
   onRowClick,
@@ -89,9 +94,12 @@ describe('AllCasesModal', () => {
 
     const props = wrapper.find('AllCases').props();
     expect(props).toEqual({
+      alertData: defaultProps.alertData,
       userCanCrud: false,
       onRowClick,
       isModal: true,
+      disabledStatuses: undefined,
+      updateCase: undefined,
     });
   });
 

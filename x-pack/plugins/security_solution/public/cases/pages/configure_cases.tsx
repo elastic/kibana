@@ -17,10 +17,8 @@ import { useGetUserSavedObjectPermissions, useKibana } from '../../common/lib/ki
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { navTabs } from '../../app/home/home_navigations';
 import { CaseHeaderPage } from '../components/case_header_page';
-import { ConfigureCases } from '../components/configure_cases';
 import { WhitePageWrapper, SectionWrapper } from '../components/wrappers';
 import * as i18n from './translations';
-import { USE_RAC_CASES_UI } from '../../../common/constants';
 
 const ConfigureCasesPageComponent: React.FC = () => {
   const { cases } = useKibana().services;
@@ -55,13 +53,9 @@ const ConfigureCasesPageComponent: React.FC = () => {
           </HeaderWrapper>
         </SectionWrapper>
         <WhitePageWrapper>
-          {USE_RAC_CASES_UI ? (
-            cases.getConfigureCases({
-              userCanCrud: userPermissions?.crud ?? false,
-            })
-          ) : (
-            <ConfigureCases userCanCrud={userPermissions?.crud ?? false} />
-          )}
+          {cases.getConfigureCases({
+            userCanCrud: userPermissions?.crud ?? false,
+          })}
         </WhitePageWrapper>
       </WrapperPage>
       <SpyRoute pageName={SecurityPageName.case} />

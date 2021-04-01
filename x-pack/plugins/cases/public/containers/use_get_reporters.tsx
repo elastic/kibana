@@ -9,9 +9,9 @@ import { useCallback, useEffect, useState, useRef } from 'react';
 import { isEmpty } from 'lodash/fp';
 
 import { User } from '../../common';
-import { errorToToaster, useStateToaster } from '../components/toasters';
 import { getReporters } from './api';
 import * as i18n from './translations';
+import { useToasts } from '../common/lib/kibana';
 
 interface ReportersState {
   reporters: string[];
@@ -34,7 +34,7 @@ export interface UseGetReporters extends ReportersState {
 export const useGetReporters = (): UseGetReporters => {
   const [reportersState, setReporterState] = useState<ReportersState>(initialData);
 
-  const [, dispatchToaster] = useStateToaster();
+  const toasts = useToasts();
   const isCancelledRef = useRef(false);
   const abortCtrlRef = useRef(new AbortController());
 
@@ -64,11 +64,10 @@ export const useGetReporters = (): UseGetReporters => {
     } catch (error) {
       if (!isCancelledRef.current) {
         if (error.name !== 'AbortError') {
-          errorToToaster({
-            title: i18n.ERROR_TITLE,
-            error: error.body && error.body.message ? new Error(error.body.message) : error,
-            dispatchToaster,
-          });
+          toasts.addError(
+            error.body && error.body.message ? new Error(error.body.message) : error,
+            { title: i18n.ERROR_TITLE }
+          );
         }
 
         setReporterState({
@@ -79,8 +78,7 @@ export const useGetReporters = (): UseGetReporters => {
         });
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reportersState]);
+  }, [reportersState, toasts]);
 
   useEffect(() => {
     fetchReporters();

@@ -13,9 +13,10 @@ import {
   TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
 } from '../../triggers_actions_ui/public';
 import { AllCasesProps } from './components/all_cases';
-import { CreateCaseProps } from './components/create';
-import { ConfigureCasesProps } from './components/configure_cases';
 import { CaseViewProps } from './components/case_view';
+import { ConfigureCasesProps } from './components/configure_cases';
+import { CreateCaseProps } from './components/create';
+import { RecentCasesProps } from './components/recent_cases';
 
 export interface SetupPlugins {
   security: SecurityPluginSetup;
@@ -40,6 +41,7 @@ export type StartServices = CoreStart &
 export interface CasesUiStart {
   getAllCases: (props: AllCasesProps) => ReactElement<AllCasesProps>;
   getCaseView: (props: CaseViewProps) => ReactElement<CaseViewProps>;
-  getCreateCase: (props: CreateCaseProps) => ReactElement<CreateCaseProps>;
   getConfigureCases: (props: ConfigureCasesProps) => ReactElement<ConfigureCasesProps>;
+  getCreateCase: (props: CreateCaseProps) => ReactElement<CreateCaseProps>;
+  getRecentCases: (props: RecentCasesProps) => ReactElement<RecentCasesProps>;
 }

@@ -92,6 +92,13 @@ export const createStartServicesMock = (): StartServices => {
 
   return ({
     ...core,
+    cases: {
+      getAllCases: jest.fn(),
+      getCaseView: jest.fn(),
+      getConfigureCases: jest.fn(),
+      getCreateCase: jest.fn(),
+      getRecentCases: jest.fn(),
+    },
     data: {
       ...data,
       query: {

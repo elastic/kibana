@@ -17,8 +17,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 
-import { CaseStatuses, CaseAttributes, CaseType } from '../../../common';
-import { Case, CaseConnector } from '../../containers/types';
+import { CaseStatuses, CaseAttributes, CaseType, Case, CaseConnector } from '../../../common';
 import { HeaderPage } from '../header_page';
 import { EditableTitle } from '../header_page/editable_title';
 import { TagList } from '../tag_list';

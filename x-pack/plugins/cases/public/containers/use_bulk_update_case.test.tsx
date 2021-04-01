@@ -12,6 +12,7 @@ import { basicCase } from './mock';
 import * as api from './api';
 
 jest.mock('./api');
+jest.mock('../common/lib/kibana');
 
 describe('useUpdateCases', () => {
   const abortCtrl = new AbortController();

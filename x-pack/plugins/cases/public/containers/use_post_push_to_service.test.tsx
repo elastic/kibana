@@ -12,6 +12,7 @@ import * as api from './api';
 import { CaseConnector, ConnectorTypes } from '../../common';
 
 jest.mock('./api');
+jest.mock('../common/lib/kibana');
 
 describe('usePostPushToService', () => {
   const abortCtrl = new AbortController();

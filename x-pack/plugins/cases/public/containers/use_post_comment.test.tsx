@@ -13,6 +13,7 @@ import { basicCaseId, basicSubCaseId } from './mock';
 import * as api from './api';
 
 jest.mock('./api');
+jest.mock('../common/lib/kibana');
 
 describe('usePostComment', () => {
   const abortCtrl = new AbortController();

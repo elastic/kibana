@@ -7,7 +7,8 @@
 
 import React, { memo } from 'react';
 import { EuiSuperSelect, EuiSuperSelectOption, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { Status, statuses, StatusAll, CaseStatusWithAllStatus } from '../status';
+import { Status, statuses } from '../status';
+import { CaseStatusWithAllStatus, StatusAll } from '../../../common';
 
 interface Props {
   stats: Record<CaseStatusWithAllStatus, number | null>;

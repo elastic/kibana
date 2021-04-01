@@ -7,19 +7,16 @@
 
 import { isEmpty } from 'lodash/fp';
 import {
+  ACTION_TYPES_URL,
   ActionConnector,
   ActionTypeConnector,
-  CasesConfigurePatch,
-  CasesConfigureResponse,
-  CasesConfigureRequest,
-} from '../../../common';
-import { KibanaServices } from '../../common/lib/kibana';
-
-import {
   CASE_CONFIGURE_CONNECTORS_URL,
   CASE_CONFIGURE_URL,
-  ACTION_TYPES_URL,
+  CasesConfigurePatch,
+  CasesConfigureRequest,
+  CasesConfigureResponse,
 } from '../../../common';
+import { KibanaServices } from '../../common/lib/kibana';
 
 import { ApiProps } from '../types';
 import { convertToCamelCase, decodeCaseConfigureResponse } from '../utils';

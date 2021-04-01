@@ -15,6 +15,7 @@ import { CreateCaseForm } from './form';
 import { FormContext } from './form_context';
 import { SubmitCaseButton } from './submit_button';
 import { Case } from '../../containers/types';
+import { CaseType } from '../../../common/api/cases';
 
 export const CommonUseField = getUseField({ component: Field });
 
@@ -26,21 +27,36 @@ const Container = styled.div`
 
 export interface CreateCaseProps {
   afterCaseCreated?: (theCase: Case) => Promise<void>;
+  caseType?: CaseType;
+  hideConnectorServiceNowSir?: boolean;
   onCancel: () => void;
   onSuccess: (theCase: Case) => Promise<void>;
+  withSteps?: boolean;
 }
 
-export const CreateCase = ({ afterCaseCreated, onCancel, onSuccess }: CreateCaseProps) => (
-  <FormContext afterCaseCreated={afterCaseCreated} onSuccess={onSuccess}>
-    <CreateCaseForm />
+export const CreateCase = ({
+  afterCaseCreated,
+  caseType,
+  hideConnectorServiceNowSir,
+  onCancel,
+  onSuccess,
+  withSteps,
+}: CreateCaseProps) => (
+  <FormContext
+    afterCaseCreated={afterCaseCreated}
+    caseType={caseType}
+    hideConnectorServiceNowSir={hideConnectorServiceNowSir}
+    onSuccess={onSuccess}
+  >
+    <CreateCaseForm hideConnectorServiceNowSir={hideConnectorServiceNowSir} withSteps={withSteps} />
     <Container>
       <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="xs" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             data-test-subj="create-case-cancel"
-            size="s"
-            onClick={onCancel}
             iconType="cross"
+            onClick={onCancel}
+            size="s"
           >
             {i18n.CANCEL}
           </EuiButtonEmpty>

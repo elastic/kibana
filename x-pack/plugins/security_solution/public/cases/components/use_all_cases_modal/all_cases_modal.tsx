@@ -10,16 +10,17 @@ import styled from 'styled-components';
 import { EuiModal, EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
 
 import { useGetUserSavedObjectPermissions } from '../../../common/lib/kibana';
-import { CaseStatuses } from '../../../../../cases/common';
-import { Case, SubCase } from '../../containers/types';
+import { Case, CaseStatuses, CommentRequestAlertType, SubCase } from '../../../../../cases/common';
 import { AllCases } from '../all_cases';
 import * as i18n from './translations';
 
 export interface AllCasesModalProps {
+  alertData?: Omit<CommentRequestAlertType, 'type'>;
+  disabledStatuses?: CaseStatuses[];
   isModalOpen: boolean;
   onCloseCaseModal: () => void;
-  onRowClick: (theCase?: Case | SubCase) => void;
-  disabledStatuses?: CaseStatuses[];
+  onRowClick?: (theCase?: Case | SubCase) => void;
+  updateCase?: (newCase: Case) => void;
 }
 
 const Modal = styled(EuiModal)`
@@ -30,10 +31,12 @@ const Modal = styled(EuiModal)`
 `;
 
 const AllCasesModalComponent: React.FC<AllCasesModalProps> = ({
+  alertData,
+  disabledStatuses,
   isModalOpen,
   onCloseCaseModal,
   onRowClick,
-  disabledStatuses,
+  updateCase,
 }) => {
   const userPermissions = useGetUserSavedObjectPermissions();
   const userCanCrud = userPermissions?.crud ?? false;
@@ -45,10 +48,12 @@ const AllCasesModalComponent: React.FC<AllCasesModalProps> = ({
       </EuiModalHeader>
       <EuiModalBody>
         <AllCases
-          onRowClick={onRowClick}
-          userCanCrud={userCanCrud}
-          isModal
+          alertData={alertData}
           disabledStatuses={disabledStatuses}
+          isModal
+          onRowClick={onRowClick}
+          updateCase={updateCase}
+          userCanCrud={userCanCrud}
         />
       </EuiModalBody>
     </Modal>

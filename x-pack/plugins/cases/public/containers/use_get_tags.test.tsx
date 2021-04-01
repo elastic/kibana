@@ -11,6 +11,7 @@ import { tags } from './mock';
 import * as api from './api';
 
 jest.mock('./api');
+jest.mock('../common/lib/kibana');
 
 describe('useGetTags', () => {
   const abortCtrl = new AbortController();

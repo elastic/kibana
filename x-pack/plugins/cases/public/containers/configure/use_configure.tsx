@@ -8,10 +8,10 @@
 import { useEffect, useCallback, useReducer, useRef } from 'react';
 import { getCaseConfigure, patchCaseConfigure, postCaseConfigure } from './api';
 
-import { useStateToaster, errorToToaster, displaySuccessToast } from '../../components/toasters';
 import * as i18n from './translations';
 import { ClosureType, CaseConfigure, CaseConnector, CaseConnectorMapping } from './types';
 import { ConnectorTypes } from '../../../common';
+import { useToasts } from '../../common/lib/kibana';
 
 export type ConnectorConfiguration = { connector: CaseConnector } & {
   closureType: CaseConfigure['closureType'];
@@ -145,7 +145,7 @@ export const initialState: State = {
 
 export const useCaseConfigure = (): ReturnUseCaseConfigure => {
   const [state, dispatch] = useReducer(configureCasesReducer, initialState);
-
+  const toasts = useToasts();
   const setCurrentConfiguration = useCallback((configuration: ConnectorConfiguration) => {
     dispatch({
       currentConfiguration: configuration,
@@ -202,7 +202,6 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
     });
   }, []);
 
-  const [, dispatchToaster] = useStateToaster();
   const isCancelledRefetchRef = useRef(false);
   const abortCtrlRefetchRef = useRef(new AbortController());
 
@@ -239,9 +238,7 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
             }
           }
           if (res.error != null) {
-            errorToToaster({
-              dispatchToaster,
-              error: new Error(res.error),
+            toasts.addError(new Error(res.error), {
               title: i18n.ERROR_TITLE,
             });
           }
@@ -251,11 +248,10 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
     } catch (error) {
       if (!isCancelledRefetchRef.current) {
         if (error.name !== 'AbortError') {
-          errorToToaster({
-            dispatchToaster,
-            error: error.body && error.body.message ? new Error(error.body.message) : error,
-            title: i18n.ERROR_TITLE,
-          });
+          toasts.addError(
+            error.body && error.body.message ? new Error(error.body.message) : error,
+            { title: i18n.ERROR_TITLE }
+          );
         }
         setLoading(false);
       }
@@ -286,7 +282,6 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
                 },
                 abortCtrlPersistRef.current.signal
               );
-
         if (!isCancelledPersistRef.current) {
           setConnector(res.connector);
           if (setClosureType) {
@@ -303,23 +298,22 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
             });
           }
           if (res.error != null) {
-            errorToToaster({
-              dispatchToaster,
-              error: new Error(res.error),
+            toasts.addError(new Error(res.error), {
               title: i18n.ERROR_TITLE,
             });
           }
-          displaySuccessToast(i18n.SUCCESS_CONFIGURE, dispatchToaster);
+          toasts.addSuccess(i18n.SUCCESS_CONFIGURE);
           setPersistLoading(false);
         }
       } catch (error) {
         if (!isCancelledPersistRef.current) {
           if (error.name !== 'AbortError') {
-            errorToToaster({
-              title: i18n.ERROR_TITLE,
-              error: error.body && error.body.message ? new Error(error.body.message) : error,
-              dispatchToaster,
-            });
+            toasts.addError(
+              error.body && error.body.message ? new Error(error.body.message) : error,
+              {
+                title: i18n.ERROR_TITLE,
+              }
+            );
           }
           setConnector(state.currentConfiguration.connector);
           setPersistLoading(false);
@@ -327,14 +321,15 @@ export const useCaseConfigure = (): ReturnUseCaseConfigure => {
       }
     },
     [
-      dispatchToaster,
       setClosureType,
       setConnector,
       setCurrentConfiguration,
       setMappings,
       setPersistLoading,
       setVersion,
-      state,
+      state.currentConfiguration.connector,
+      state.version,
+      toasts,
     ]
   );
 

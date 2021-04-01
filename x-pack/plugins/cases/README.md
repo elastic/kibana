@@ -15,7 +15,7 @@ Case management in Kibana
 
 - [Cases API](#cases-api)
 - [Cases UI](#cases-ui)
-- [Case Action Type](#case-action-type)
+- [Case Action Type](#case-action-type) _feature in development, disabled by default_
 
 
 ## Cases API
@@ -52,14 +52,39 @@ Arguments:
 |disabledStatuses?|`CaseStatuses[];` array of disabled statuses
 |getCaseDetailsHref|`(caseDetails: CaseDetailsHrefSchema) => string;` callback to generate the case details url from the case id
 |isModal?|`boolean;` is All Cases table a modal
-|onCaseDetailsNavClick|`(caseDetails: CaseDetailsHrefSchema) => void;` callback for nav click
-|onConfigureCasesNavClick?|`(ev: React.MouseEvent) => void;` callback for nav click
-|onCreateCaseNavClick?|`(ev: React.MouseEvent) => void;` callback for nav click
+|onCaseDetailsNavClick|`(caseDetails: CaseDetailsHrefSchema) => void;` callback for case details nav click
+|onConfigureCasesNavClick?|`(ev: React.MouseEvent) => void;` callback for configure case nav click
+|onCreateCaseNavClick?|`(ev: React.MouseEvent) => void;` callback for create case nav click
 |onRowClick?|`(theCase?: Case ! SubCase) => void;` callback for row click, passing case in row
-|userCanCrud|boolean; user permissions to crud
+|userCanCrud|`boolean;` user permissions to crud
 
 UI component:
  ![All Cases Component][all-cases-img] 
+ 
+### `getCaseView`
+Arguments: 
+
+|Property|Description|
+|---|---|
+|allCasesHref|`string;` route for all cases page
+|backToAllCasesOnClick|`(ev: MouseEvent) => void;` handler for back to all cases click
+|caseDetailsHref|`string;` route for configure cases page
+|caseId|`string;` ID of the case
+|configureCasesHref|`string;` route for configure cases page
+|getCaseDetailHrefWithCommentId|`(commentId: string) => string;` callback to generate the case details url with a comment id reference from the case id and comment id
+|getRuleDetailsHref|`(ruleId: string, null, undefined) => string;` callback to generate the rule details url from the rule id
+|onComponentInitialized?|`() => void;` callback when component has initialized
+|onConfigureCasesNavClick|`(ev: React.MouseEvent) => void;` callback for configure case nav click
+|onRuleDetailsClick|`(ruleId: string, null, undefined) => void;` callback for rule details nav click
+|renderInvestigateInTimelineActionComponent?|: `(alertIds: string[]) => JSX.Element;` space to render `InvestigateInTimelineActionComponent`
+|renderTimelineDetailsPanel?|: `() => JSX.Element;` space to render `TimelineDetailsPanel`
+|showAlertDetails|: `(alertId: string, index: string) => void;` callback to show alert details
+|subCaseId?|: `string;` subcase id
+|useFetchAlertData|: `(alertIds: string[]) => [boolean, Record<string, Ecs>];` fetch alerts
+|userCanCrud|: `boolean;` user permissions to crud
+
+UI component:
+ ![Case View Component][case-view-img] 
 
 ### `getCreateCase`
 Arguments: 
@@ -83,7 +108,24 @@ UI component:
  UI component:
   ![Configure Component][configure-img] 
 
+### `getRecentCases`
+Arguments: 
+
+|Property|Description|
+|---|---|
+|allCasesHref|`string;` href of all cases page
+|createCaseHref|`string;` 
+|getCaseDetailsHref|`(caseDetails: CaseDetailsHrefSchema) => string;` 
+|goToAllCases|`(ev: React.MouseEvent) => void;` callback for all cases link click
+|onCaseDetailsNavClick|`(caseDetails: CaseDetailsHrefSchema) => void;` callback for case details nav click
+|perPage|`number;` number of cases to show in widget
+  
+UI component:
+ ![Recent Cases Component][recent-cases-img] 
+
 ## Case Action Type
+
+_***Feature in development, disabled by default**_
 
 See [Kibana Actions](https://github.com/elastic/kibana/tree/master/x-pack/plugins/actions) for more information.
 
@@ -192,4 +234,6 @@ For IBM Resilient connectors:
 [configure-img]: images/configure.png
 [create-img]: images/create.png
 [all-cases-img]: images/all_cases.png
+[recent-cases-img]: images/recent_cases.png
+[case-view-img]: images/case_view.png
 

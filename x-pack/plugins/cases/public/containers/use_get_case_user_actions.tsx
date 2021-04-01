@@ -9,12 +9,17 @@ import { isEmpty, uniqBy } from 'lodash/fp';
 import { useCallback, useEffect, useState, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 
-import { errorToToaster, useStateToaster } from '../components/toasters';
-import { CaseFullExternalService } from '../../common/api/cases';
+import {
+  CaseFullExternalService,
+  CaseConnector,
+  CaseExternalService,
+  CaseUserActions,
+  ElasticUser,
+} from '../../common';
 import { getCaseUserActions, getSubCaseUserActions } from './api';
 import * as i18n from './translations';
-import { CaseConnector, CaseExternalService, CaseUserActions, ElasticUser } from './types';
 import { convertToCamelCase, parseString } from './utils';
+import { useToasts } from '../common/lib/kibana';
 
 export interface CaseService extends CaseExternalService {
   firstPushIndex: number;
@@ -246,7 +251,7 @@ export const useGetCaseUserActions = (
   );
   const abortCtrlRef = useRef(new AbortController());
   const isCancelledRef = useRef(false);
-  const [, dispatchToaster] = useStateToaster();
+  const toasts = useToasts();
 
   const fetchCaseUserActions = useCallback(
     async (thisCaseId: string, thisCaseConnectorId: string, thisSubCaseId?: string) => {
@@ -288,11 +293,10 @@ export const useGetCaseUserActions = (
       } catch (error) {
         if (!isCancelledRef.current) {
           if (error.name !== 'AbortError') {
-            errorToToaster({
-              title: i18n.ERROR_TITLE,
-              error: error.body && error.body.message ? new Error(error.body.message) : error,
-              dispatchToaster,
-            });
+            toasts.addError(
+              error.body && error.body.message ? new Error(error.body.message) : error,
+              { title: i18n.ERROR_TITLE }
+            );
           }
 
           setCaseUserActionsState({

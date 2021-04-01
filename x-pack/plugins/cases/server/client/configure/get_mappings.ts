@@ -48,7 +48,11 @@ export const getMappings = async ({
     });
     let theMapping;
     // Create connector mappings if there are none
-    if (myConnectorMappings.total === 0) {
+    if (
+      myConnectorMappings.total === 0 ||
+      (myConnectorMappings.total > 0 &&
+        !myConnectorMappings.saved_objects[0].attributes.hasOwnProperty('mappings'))
+    ) {
       const res = await casesClient.getFields({
         actionsClient,
         connectorId,

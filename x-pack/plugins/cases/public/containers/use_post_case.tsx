@@ -7,10 +7,10 @@
 
 import { useReducer, useCallback, useRef, useEffect } from 'react';
 import { CasePostRequest } from '../../common';
-import { errorToToaster, useStateToaster } from '../components/toasters';
 import { postCase } from './api';
 import * as i18n from './translations';
 import { Case } from './types';
+import { useToasts } from '../common/lib/kibana';
 interface NewCaseState {
   isLoading: boolean;
   isError: boolean;
@@ -49,7 +49,7 @@ export const usePostCase = (): UsePostCase => {
     isLoading: false,
     isError: false,
   });
-  const [, dispatchToaster] = useStateToaster();
+  const toasts = useToasts();
   const isCancelledRef = useRef(false);
   const abortCtrlRef = useRef(new AbortController());
 
@@ -69,11 +69,10 @@ export const usePostCase = (): UsePostCase => {
     } catch (error) {
       if (!isCancelledRef.current) {
         if (error.name !== 'AbortError') {
-          errorToToaster({
-            title: i18n.ERROR_TITLE,
-            error: error.body && error.body.message ? new Error(error.body.message) : error,
-            dispatchToaster,
-          });
+          toasts.addError(
+            error.body && error.body.message ? new Error(error.body.message) : error,
+            { title: i18n.ERROR_TITLE }
+          );
         }
         dispatch({ type: 'FETCH_FAILURE' });
       }

@@ -50,25 +50,18 @@ describe('utils', () => {
   describe('createUpdateSuccessToaster', () => {
     it('creates the correct toast when sync alerts is turned on and case has alerts', () => {
       // We remove the id as is randomly generated
-      const { id, ...toast } = createUpdateSuccessToaster(
-        caseBeforeUpdate,
-        caseAfterUpdate,
-        'settings',
-        {
-          syncAlerts: true,
-        }
-      );
+      const toast = createUpdateSuccessToaster(caseBeforeUpdate, caseAfterUpdate, 'settings', {
+        syncAlerts: true,
+      });
 
       expect(toast).toEqual({
-        color: 'success',
-        iconType: 'check',
         title: 'Alerts in "My case" have been synced',
       });
     });
 
     it('creates the correct toast when sync alerts is turned on and case does NOT have alerts', () => {
       // We remove the id as is randomly generated
-      const { id, ...toast } = createUpdateSuccessToaster(
+      const toast = createUpdateSuccessToaster(
         { ...caseBeforeUpdate, comments: [] },
         caseAfterUpdate,
         'settings',
@@ -78,33 +71,24 @@ describe('utils', () => {
       );
 
       expect(toast).toEqual({
-        color: 'success',
-        iconType: 'check',
         title: 'Updated "My case"',
       });
     });
 
     it('creates the correct toast when sync alerts is turned off and case has alerts', () => {
       // We remove the id as is randomly generated
-      const { id, ...toast } = createUpdateSuccessToaster(
-        caseBeforeUpdate,
-        caseAfterUpdate,
-        'settings',
-        {
-          syncAlerts: false,
-        }
-      );
+      const toast = createUpdateSuccessToaster(caseBeforeUpdate, caseAfterUpdate, 'settings', {
+        syncAlerts: false,
+      });
 
       expect(toast).toEqual({
-        color: 'success',
-        iconType: 'check',
         title: 'Updated "My case"',
       });
     });
 
     it('creates the correct toast when the status change, case has alerts, and sync alerts is on', () => {
       // We remove the id as is randomly generated
-      const { id, ...toast } = createUpdateSuccessToaster(
+      const toast = createUpdateSuccessToaster(
         caseBeforeUpdate,
         caseAfterUpdate,
         'status',
@@ -112,8 +96,6 @@ describe('utils', () => {
       );
 
       expect(toast).toEqual({
-        color: 'success',
-        iconType: 'check',
         title: 'Updated "My case"',
         text: 'Alerts in this case have been also had their status updated',
       });
@@ -121,7 +103,7 @@ describe('utils', () => {
 
     it('creates the correct toast when the status change, case has alerts, and sync alerts is off', () => {
       // We remove the id as is randomly generated
-      const { id, ...toast } = createUpdateSuccessToaster(
+      const toast = createUpdateSuccessToaster(
         { ...caseBeforeUpdate, settings: { syncAlerts: false } },
         caseAfterUpdate,
         'status',
@@ -129,15 +111,13 @@ describe('utils', () => {
       );
 
       expect(toast).toEqual({
-        color: 'success',
-        iconType: 'check',
         title: 'Updated "My case"',
       });
     });
 
     it('creates the correct toast when the status change, case does NOT have alerts, and sync alerts is on', () => {
       // We remove the id as is randomly generated
-      const { id, ...toast } = createUpdateSuccessToaster(
+      const toast = createUpdateSuccessToaster(
         { ...caseBeforeUpdate, comments: [] },
         caseAfterUpdate,
         'status',
@@ -145,15 +125,13 @@ describe('utils', () => {
       );
 
       expect(toast).toEqual({
-        color: 'success',
-        iconType: 'check',
         title: 'Updated "My case"',
       });
     });
 
     it('creates the correct toast if not a status or a setting', () => {
       // We remove the id as is randomly generated
-      const { id, ...toast } = createUpdateSuccessToaster(
+      const toast = createUpdateSuccessToaster(
         caseBeforeUpdate,
         caseAfterUpdate,
         'title',
@@ -161,8 +139,6 @@ describe('utils', () => {
       );
 
       expect(toast).toEqual({
-        color: 'success',
-        iconType: 'check',
         title: 'Updated "My case"',
       });
     });

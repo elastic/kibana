@@ -12,6 +12,7 @@ import * as api from './api';
 import { UpdateKey } from './types';
 
 jest.mock('./api');
+jest.mock('../common/lib/kibana');
 
 describe('useUpdateCase', () => {
   const abortCtrl = new AbortController();

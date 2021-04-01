@@ -7,11 +7,18 @@
 
 import { useCallback, useEffect, useReducer, useRef } from 'react';
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from './constants';
-import { AllCases, SortFieldCase, FilterOptions, QueryParams, Case, UpdateByKey } from './types';
-import { errorToToaster, useStateToaster } from '../components/toasters';
+import {
+  AllCases,
+  Case,
+  FilterOptions,
+  QueryParams,
+  SortFieldCase,
+  StatusAll,
+  UpdateByKey,
+} from './types';
+import { useToasts } from '../common/lib/kibana';
 import * as i18n from './translations';
 import { getCases, patchCase } from './api';
-import { StatusAll } from '../components/status';
 
 export interface UseGetCasesState {
   data: AllCases;
@@ -131,18 +138,18 @@ export interface UseGetCases extends UseGetCasesState {
 }
 
 export const useGetCases = (
-  initialQueryParams?: QueryParams,
-  initialFilterOptions?: FilterOptions
+  initialQueryParams: Partial<QueryParams> = {},
+  initialFilterOptions: Partial<FilterOptions> = {}
 ): UseGetCases => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     data: initialData,
-    filterOptions: initialFilterOptions ?? DEFAULT_FILTER_OPTIONS,
+    filterOptions: { ...DEFAULT_FILTER_OPTIONS, ...initialFilterOptions },
     isError: false,
     loading: [],
-    queryParams: initialQueryParams ?? DEFAULT_QUERY_PARAMS,
+    queryParams: { ...DEFAULT_QUERY_PARAMS, ...initialQueryParams },
     selectedCases: [],
   });
-  const [, dispatchToaster] = useStateToaster();
+  const toasts = useToasts();
   const didCancelFetchCases = useRef(false);
   const didCancelUpdateCases = useRef(false);
   const abortCtrlFetchCases = useRef(new AbortController());
@@ -160,39 +167,40 @@ export const useGetCases = (
     dispatch({ type: 'UPDATE_FILTER_OPTIONS', payload: newFilters });
   }, []);
 
-  const fetchCases = useCallback(async (filterOptions: FilterOptions, queryParams: QueryParams) => {
-    try {
-      didCancelFetchCases.current = false;
-      abortCtrlFetchCases.current.abort();
-      abortCtrlFetchCases.current = new AbortController();
-      dispatch({ type: 'FETCH_INIT', payload: 'cases' });
+  const fetchCases = useCallback(
+    async (filterOptions: FilterOptions, queryParams: QueryParams) => {
+      try {
+        didCancelFetchCases.current = false;
+        abortCtrlFetchCases.current.abort();
+        abortCtrlFetchCases.current = new AbortController();
+        dispatch({ type: 'FETCH_INIT', payload: 'cases' });
 
-      const response = await getCases({
-        filterOptions,
-        queryParams,
-        signal: abortCtrlFetchCases.current.signal,
-      });
-
-      if (!didCancelFetchCases.current) {
-        dispatch({
-          type: 'FETCH_CASES_SUCCESS',
-          payload: response,
+        const response = await getCases({
+          filterOptions,
+          queryParams,
+          signal: abortCtrlFetchCases.current.signal,
         });
-      }
-    } catch (error) {
-      if (!didCancelFetchCases.current) {
-        if (error.name !== 'AbortError') {
-          errorToToaster({
-            title: i18n.ERROR_TITLE,
-            error: error.body && error.body.message ? new Error(error.body.message) : error,
-            dispatchToaster,
+
+        if (!didCancelFetchCases.current) {
+          dispatch({
+            type: 'FETCH_CASES_SUCCESS',
+            payload: response,
           });
         }
-        dispatch({ type: 'FETCH_FAILURE', payload: 'cases' });
+      } catch (error) {
+        if (!didCancelFetchCases.current) {
+          if (error.name !== 'AbortError') {
+            toasts.addError(
+              error.body && error.body.message ? new Error(error.body.message) : error,
+              { title: i18n.ERROR_TITLE }
+            );
+          }
+          dispatch({ type: 'FETCH_FAILURE', payload: 'cases' });
+        }
       }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    },
+    [toasts]
+  );
 
   const dispatchUpdateCaseProperty = useCallback(
     async ({ updateKey, updateValue, caseId, refetchCasesStatus, version }: UpdateCase) => {
@@ -218,7 +226,7 @@ export const useGetCases = (
       } catch (error) {
         if (!didCancelUpdateCases.current) {
           if (error.name !== 'AbortError') {
-            errorToToaster({ title: i18n.ERROR_TITLE, error, dispatchToaster });
+            toasts.addError(error, { title: i18n.ERROR_TITLE });
           }
           dispatch({ type: 'FETCH_FAILURE', payload: 'caseUpdate' });
         }

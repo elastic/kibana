@@ -34,11 +34,11 @@ import {
 import { KibanaServices } from '../../common/lib/kibana';
 import { ExportSelectedData } from '../../common/components/generic_downloader';
 
-import { createToasterPlainError } from '../../cases/containers/utils';
 import {
   ImportDataProps,
   ImportDataResponse,
 } from '../../detections/containers/detection_engine/rules';
+import { ToasterError } from '../../common/components/toasters';
 
 interface RequestPostTimeline {
   timeline: TimelineInput;
@@ -51,7 +51,7 @@ interface RequestPatchTimeline<T = string> extends RequestPostTimeline {
 }
 
 type RequestPersistTimeline = RequestPostTimeline & Partial<RequestPatchTimeline<null | string>>;
-
+const createToasterPlainError = (message: string) => new ToasterError([message]);
 const decodeTimelineResponse = (respTimeline?: TimelineResponse) =>
   pipe(
     TimelineResponseType.decode(respTimeline),

@@ -12,6 +12,7 @@ import { ConnectorTypes } from '../../common';
 import { basicCasePost } from './mock';
 
 jest.mock('./api');
+jest.mock('../common/lib/kibana');
 
 describe('usePostCase', () => {
   const abortCtrl = new AbortController();

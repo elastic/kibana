@@ -11,6 +11,7 @@ import { basicCase } from './mock';
 import * as api from './api';
 
 jest.mock('./api');
+jest.mock('../common/lib/kibana');
 
 describe('useGetCase', () => {
   const abortCtrl = new AbortController();

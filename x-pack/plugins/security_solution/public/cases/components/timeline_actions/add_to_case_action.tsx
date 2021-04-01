@@ -16,21 +16,19 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import { CommentType, CaseStatuses } from '../../../../../cases/common';
-import { Ecs } from '../../../../common/ecs';
-import { ActionIconItem } from '../../../timelines/components/timeline/body/actions/action_icon_item';
-import { usePostComment } from '../../containers/use_post_comment';
-import { Case } from '../../containers/types';
-import { useStateToaster } from '../../../common/components/toasters';
+import { Case, CaseStatuses } from '../../../../../cases/common';
 import { APP_ID } from '../../../../common/constants';
-import { useGetUserSavedObjectPermissions, useKibana } from '../../../common/lib/kibana';
-import { getCaseDetailsUrl } from '../../../common/components/link_to';
+import { Ecs } from '../../../../common/ecs';
 import { SecurityPageName } from '../../../app/types';
+import { getCaseDetailsUrl } from '../../../common/components/link_to';
+import { useStateToaster } from '../../../common/components/toasters';
+import { useControl } from '../../../common/hooks/use_control';
+import { useGetUserSavedObjectPermissions, useKibana } from '../../../common/lib/kibana';
+import { ActionIconItem } from '../../../timelines/components/timeline/body/actions/action_icon_item';
+import { CreateCaseFlyout } from '../create/flyout';
 import { useAllCasesModal } from '../use_all_cases_modal';
 import { createUpdateSuccessToaster } from './helpers';
 import * as i18n from './translations';
-import { useControl } from '../../../common/hooks/use_control';
-import { CreateCaseFlyout } from '../create/flyout';
 
 interface AddToCaseActionProps {
   ariaLabel?: string;
@@ -61,8 +59,6 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
       : i18n.UNSUPPORTED_EVENTS_MSG
     : i18n.PERMISSIONS_MSG;
 
-  const { postComment } = usePostComment();
-
   const onViewCaseClick = useCallback(
     (id) => {
       navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
@@ -78,33 +74,15 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
     closeControl: closeCaseFlyoutOpen,
   } = useControl();
 
-  const attachAlertToCase = useCallback(
-    async (theCase: Case, updateCase?: (newCase: Case) => void) => {
-      closeCaseFlyoutOpen();
-      await postComment({
-        caseId: theCase.id,
-        data: {
-          type: CommentType.alert,
-          alertId: eventId,
-          index: eventIndex ?? '',
-          rule: {
-            id: rule?.id != null ? rule.id[0] : null,
-            name: rule?.name != null ? rule.name[0] : null,
-          },
-        },
-        updateCase,
-      });
-    },
-    [closeCaseFlyoutOpen, postComment, eventId, eventIndex, rule]
-  );
-
   const onCaseSuccess = useCallback(
-    async (theCase: Case) =>
-      dispatchToaster({
+    async (theCase: Case) => {
+      closeCaseFlyoutOpen();
+      return dispatchToaster({
         type: 'addToaster',
         toast: createUpdateSuccessToaster(theCase, onViewCaseClick),
-      }),
-    [dispatchToaster, onViewCaseClick]
+      });
+    },
+    [closeCaseFlyoutOpen, dispatchToaster, onViewCaseClick]
   );
 
   const onCaseClicked = useCallback(
@@ -116,17 +94,23 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
        */
       if (theCase == null) {
         openCaseFlyoutOpen();
-        return;
       }
-
-      attachAlertToCase(theCase, onCaseSuccess);
     },
-    [attachAlertToCase, onCaseSuccess, openCaseFlyoutOpen]
+    [openCaseFlyoutOpen]
   );
 
   const { modal: allCasesModal, openModal: openAllCaseModal } = useAllCasesModal({
+    alertData: {
+      alertId: eventId,
+      index: eventIndex ?? '',
+      rule: {
+        id: rule?.id != null ? rule.id[0] : null,
+        name: rule?.name != null ? rule.name[0] : null,
+      },
+    },
     disabledStatuses: [CaseStatuses.closed],
     onRowClick: onCaseClicked,
+    updateCase: onCaseSuccess,
   });
 
   const addNewCaseClick = useCallback(() => {
@@ -195,11 +179,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
         </EuiPopover>
       </ActionIconItem>
       {isCreateCaseFlyoutOpen && (
-        <CreateCaseFlyout
-          onCloseFlyout={closeCaseFlyoutOpen}
-          afterCaseCreated={attachAlertToCase}
-          onSuccess={onCaseSuccess}
-        />
+        <CreateCaseFlyout onCloseFlyout={closeCaseFlyoutOpen} onSuccess={onCaseSuccess} />
       )}
       {allCasesModal}
     </>

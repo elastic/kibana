@@ -36,8 +36,6 @@ const CaseParamsFields: React.FunctionComponent<ActionParamsProps<CaseActionPara
   actionParams,
   editAction,
   index,
-  errors,
-  messageVariables,
   actionConnector,
 }) => {
   const { caseId = null, comment = defaultAlertComment } = actionParams.subActionParams ?? {};
