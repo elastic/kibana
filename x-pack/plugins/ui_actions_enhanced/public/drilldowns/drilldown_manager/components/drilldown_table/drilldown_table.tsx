@@ -10,15 +10,13 @@ import {
   EuiBasicTableColumn,
   EuiButton,
   EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiIcon,
   EuiSpacer,
-  EuiTextColor,
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { TextWithIcon } from '../text_with_icon';
+import { TriggerLineItem } from '../trigger_line_item';
 import {
   txtCreateDrilldown,
   txtDeleteDrilldowns,
@@ -100,21 +98,14 @@ export const DrilldownTable: React.FC<DrilldownTableProps> = ({
       render: (drilldown: DrilldownTableItem) => {
         if (!drilldown.triggers) return null;
         const trigger = drilldown.triggers[0];
-        let result = trigger.description ? (
-          <EuiToolTip content={trigger.description}>
-            <EuiTextColor color="subdued">{trigger.title ?? 'unknown'}</EuiTextColor>
-          </EuiToolTip>
-        ) : (
-          <EuiTextColor color="subdued">{trigger.title ?? 'unknown'}</EuiTextColor>
+        return (
+          <TriggerLineItem
+            incompatible={drilldown.triggerIncompatible}
+            tooltip={trigger.description}
+          >
+            {trigger.title ?? 'unknown'}
+          </TriggerLineItem>
         );
-        if (drilldown.triggerIncompatible) {
-          result = (
-            <TextWithIcon icon={'alert'} iconColor={'danger'} color={'subdued'}>
-              {result}
-            </TextWithIcon>
-          );
-        }
-        return result;
       },
     },
     {

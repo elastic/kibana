@@ -13,7 +13,6 @@ import {
   EuiSpacer,
   EuiButton,
   EuiText,
-  EuiTextColor,
   EuiSearchBarProps,
 } from '@elastic/eui';
 import {
@@ -25,6 +24,7 @@ import {
   txtTriggerColumnTitle,
 } from './i18n';
 import { TextWithIcon } from '../text_with_icon';
+import { TriggerLineItem } from '../trigger_line_item';
 
 export interface DrilldownTemplateTableItem {
   id: string;
@@ -72,14 +72,9 @@ export const DrilldownTemplateTable: React.FC<DrilldownTemplateTableProps> = ({
     },
     {
       name: txtTriggerColumnTitle,
-      render: (item: DrilldownTemplateTableItem) =>
-        item.triggerIncompatible ? (
-          <TextWithIcon icon={'alert'} iconColor={'danger'} color={'subdued'}>
-            {item.trigger}
-          </TextWithIcon>
-        ) : (
-          <EuiTextColor color={'subdued'}>{item.trigger}</EuiTextColor>
-        ),
+      render: (item: DrilldownTemplateTableItem) => (
+        <TriggerLineItem incompatible={item.triggerIncompatible}>{item.trigger}</TriggerLineItem>
+      ),
     },
     {
       align: 'right',
