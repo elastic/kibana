@@ -33,6 +33,7 @@ export const PreconfiguredPackagesSchema = schema.arrayOf(
         }
       },
     }),
+    force: schema.maybe(schema.boolean()),
   })
 );
 

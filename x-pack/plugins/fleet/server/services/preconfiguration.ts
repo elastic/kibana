@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { groupBy, omit } from 'lodash';
 
 import type {
-  PackagePolicyPackage,
   NewPackagePolicy,
   AgentPolicy,
   Installation,
@@ -18,6 +17,7 @@ import type {
   NewPackagePolicyInput,
   NewPackagePolicyInputStream,
   PreconfiguredAgentPolicy,
+  PreconfiguredPackage,
 } from '../../common';
 
 import { getInstallation } from './epm/packages';
@@ -32,7 +32,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   policies: PreconfiguredAgentPolicy[] = [],
-  packages: Array<Omit<PackagePolicyPackage, 'title'>> = [],
+  packages: PreconfiguredPackage[] = [],
   defaultOutput: Output
 ) {
   // Validate configured packages to ensure there are no version conflicts
@@ -60,8 +60,8 @@ export async function ensurePreconfiguredPackagesAndPolicies(
 
   // Preinstall packages specified in Kibana config
   const preconfiguredPackages = await Promise.all(
-    packages.map(({ name, version }) =>
-      ensureInstalledPreconfiguredPackage(soClient, esClient, name, version)
+    packages.map(({ name, version, force }) =>
+      ensureInstalledPreconfiguredPackage(soClient, esClient, name, version, force)
     )
   );
 
@@ -174,13 +174,15 @@ async function ensureInstalledPreconfiguredPackage(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   pkgName: string,
-  pkgVersion: string
+  pkgVersion: string,
+  force?: boolean
 ) {
   return ensureInstalledPackage({
     savedObjectsClient: soClient,
     pkgName,
     esClient,
     pkgVersion,
+    force,
   });
 }
 
