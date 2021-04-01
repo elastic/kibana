@@ -22,8 +22,7 @@ import { AppState } from '../../../../../state';
 import { monitorLocationsSelector } from '../../../../../state/selectors';
 import { useMonitorId } from '../../../../../hooks';
 import { MonitorLocation } from '../../../../../../common/runtime_types/monitor';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { RenderTooltipContentParams } from '../../../../../../../maps/public/classes/tooltips/tooltip_property';
+import type { RenderTooltipContentParams } from '../../../../../../../maps/public';
 import { formatAvailabilityValue } from '../../availability_reporting/availability_reporting';
 import { LastCheckLabel } from '../../translations';
 
