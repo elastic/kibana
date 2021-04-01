@@ -8,7 +8,6 @@
 
 import { EmbeddablePersistableStateService } from 'src/plugins/embeddable/common';
 import { EmbeddableRegistryDefinition } from '../../../embeddable/server';
-import { DashboardContainerStateWithType } from '../../common';
 import {
   createExtract,
   createInject,

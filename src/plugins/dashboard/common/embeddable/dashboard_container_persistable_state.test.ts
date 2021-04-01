@@ -9,7 +9,6 @@
 import { createExtract, createInject } from './dashboard_container_persistable_state';
 import { createEmbeddablePersistableStateServiceMock } from '../../../embeddable/common/mocks';
 import { DashboardContainerStateWithType } from '../types';
-import { extractReferences } from '../saved_dashboard_references';
 
 const persistableStateService = createEmbeddablePersistableStateServiceMock();
 

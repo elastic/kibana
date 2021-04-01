@@ -55,7 +55,7 @@ export class DashboardPlugin
     registerDashboardUsageCollector(plugins.usageCollection, plugins.embeddable);
 
     (async () => {
-      const [_, startPlugins] = await core.getStartServices();
+      const [, startPlugins] = await core.getStartServices();
 
       plugins.embeddable.registerEmbeddableFactory(
         dashboardPersistableStateServiceFactory(startPlugins.embeddable)
