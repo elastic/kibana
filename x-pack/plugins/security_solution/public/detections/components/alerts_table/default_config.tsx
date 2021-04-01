@@ -39,25 +39,38 @@ export const buildAlertStatusFilter = (status: Status): Filter[] => [
   },
 ];
 
-export const buildAlertsRuleIdFilter = (ruleId: string): Filter[] => [
-  {
-    meta: {
-      alias: null,
-      negate: false,
-      disabled: false,
-      type: 'phrase',
-      key: 'signal.rule.id',
-      params: {
-        query: ruleId,
-      },
+export const buildAlertsRuleIdFilter = (
+  ruleId: string,
+  showThreatMatchesOnly: boolean
+): Filter[] => {
+  const sharedMeta = { alias: null, negate: false, disabled: false };
+  const matchPhraseQuery = {
+    match_phrase: {
+      'signal.rule.id': ruleId,
     },
-    query: {
-      match_phrase: {
-        'signal.rule.id': ruleId,
-      },
-    },
-  },
-];
+  };
+  const filter = showThreatMatchesOnly
+    ? {
+        meta: sharedMeta,
+        query: {
+          bool: {
+            must: [matchPhraseQuery, { exists: { field: 'signal.rule.threat_mapping' } }],
+          },
+        },
+      }
+    : {
+        meta: {
+          ...sharedMeta,
+          type: 'phrase',
+          key: 'signal.rule.id',
+          params: {
+            query: ruleId,
+          },
+        },
+        query: matchPhraseQuery,
+      };
+  return [filter];
+};
 
 export const buildShowBuildingBlockFilter = (showBuildingBlockAlerts: boolean): Filter[] => [
   ...(showBuildingBlockAlerts
@@ -70,13 +83,27 @@ export const buildShowBuildingBlockFilter = (showBuildingBlockAlerts: boolean): 
             disabled: false,
             type: 'exists',
             key: 'signal.rule.building_block_type',
-            value: 'exists',
           },
           // @ts-expect-error TODO: Rework parent typings to support ExistsFilter[]
           exists: { field: 'signal.rule.building_block_type' },
         },
       ]),
 ];
+
+export const buildThreatMatchFilter = (showThreatMatchesOnly: boolean): Filter[] =>
+  showThreatMatchesOnly
+    ? [
+        {
+          meta: {
+            alias: null,
+            negate: true,
+            disabled: false,
+          },
+          // @ts-expect-error TODO: Rework parent typings to support BoolFilter[]
+          bool: { must_not: [{ exists: { field: 'signal.rule.threat_mapping' } }] },
+        },
+      ]
+    : [];
 
 export const alertsHeaders: ColumnHeaderOptions[] = [
   {

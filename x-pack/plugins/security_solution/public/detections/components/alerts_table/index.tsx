@@ -50,22 +50,23 @@ import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { buildTimeRangeFilter } from './helpers';
 
 interface OwnProps {
-  timelineId: TimelineIdLiteral;
   defaultFilters?: Filter[];
-  hasIndexWrite: boolean;
-  hasIndexMaintenance: boolean;
   from: string;
+  hasIndexMaintenance: boolean;
+  hasIndexWrite: boolean;
   loading: boolean;
   onRuleChange?: () => void;
-  showBuildingBlockAlerts: boolean;
   onShowBuildingBlockAlertsChanged: (showBuildingBlockAlerts: boolean) => void;
+  onShowThreatMatchesOnlyChanged: (showBuildingBlockAlerts: boolean) => void;
+  showBuildingBlockAlerts: boolean;
+  showThreatMatchesOnly: boolean;
+  timelineId: TimelineIdLiteral;
   to: string;
 }
 
 type AlertsTableComponentProps = OwnProps & PropsFromRedux;
 
 export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
-  timelineId,
   clearEventsDeleted,
   clearEventsLoading,
   clearSelected,
@@ -73,17 +74,20 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   from,
   globalFilters,
   globalQuery,
-  hasIndexWrite,
   hasIndexMaintenance,
+  hasIndexWrite,
   isSelectAllChecked,
   loading,
   loadingEventIds,
   onRuleChange,
+  onShowBuildingBlockAlertsChanged,
+  onShowThreatMatchesOnlyChanged,
   selectedEventIds,
   setEventsDeleted,
   setEventsLoading,
   showBuildingBlockAlerts,
-  onShowBuildingBlockAlertsChanged,
+  showThreatMatchesOnly,
+  timelineId,
   to,
 }) => {
   const [showClearSelectionAction, setShowClearSelectionAction] = useState(false);
@@ -262,30 +266,34 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
         <AlertsUtilityBar
           areEventsLoading={loadingEventIds.length > 0}
           clearSelection={clearSelectionCallback}
-          hasIndexWrite={hasIndexWrite}
-          hasIndexMaintenance={hasIndexMaintenance}
           currentFilter={filterGroup}
+          hasIndexMaintenance={hasIndexMaintenance}
+          hasIndexWrite={hasIndexWrite}
+          onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChanged}
+          onShowThreatMatchesOnlyChanged={onShowThreatMatchesOnlyChanged}
           selectAll={selectAllOnAllPagesCallback}
           selectedEventIds={selectedEventIds}
           showBuildingBlockAlerts={showBuildingBlockAlerts}
-          onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChanged}
           showClearSelection={showClearSelectionAction}
+          showThreatMatchesOnly={showThreatMatchesOnly}
           totalCount={totalCount}
           updateAlertsStatus={updateAlertsStatusCallback.bind(null, refetchQuery)}
         />
       );
     },
     [
-      hasIndexWrite,
-      hasIndexMaintenance,
       clearSelectionCallback,
       filterGroup,
-      showBuildingBlockAlerts,
-      onShowBuildingBlockAlertsChanged,
+      hasIndexMaintenance,
+      hasIndexWrite,
       loadingEventIds.length,
+      onShowBuildingBlockAlertsChanged,
+      onShowThreatMatchesOnlyChanged,
       selectAllOnAllPagesCallback,
       selectedEventIds,
+      showBuildingBlockAlerts,
       showClearSelectionAction,
+      showThreatMatchesOnly,
       updateAlertsStatusCallback,
     ]
   );

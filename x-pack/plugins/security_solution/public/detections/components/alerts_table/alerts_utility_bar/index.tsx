@@ -30,16 +30,18 @@ import { UpdateAlertsStatus } from '../types';
 import { FILTER_CLOSED, FILTER_IN_PROGRESS, FILTER_OPEN } from '../alerts_filter_group';
 
 export interface AlertsUtilityBarProps {
-  hasIndexWrite: boolean;
-  hasIndexMaintenance: boolean;
   areEventsLoading: boolean;
   clearSelection: () => void;
   currentFilter: Status;
+  hasIndexMaintenance: boolean;
+  hasIndexWrite: boolean;
+  onShowBuildingBlockAlertsChanged: (showBuildingBlockAlerts: boolean) => void;
+  onShowThreatMatchesOnlyChanged: (showThreatMatchesOnly: boolean) => void;
   selectAll: () => void;
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   showBuildingBlockAlerts: boolean;
-  onShowBuildingBlockAlertsChanged: (showBuildingBlockAlerts: boolean) => void;
   showClearSelection: boolean;
+  showThreatMatchesOnly: boolean;
   totalCount: number;
   updateAlertsStatus: UpdateAlertsStatus;
 }
@@ -59,18 +61,24 @@ const BuildingBlockContainer = styled(EuiFlexItem)`
   padding: ${({ theme }) => `${theme.eui.paddingSizes.xs}`};
 `;
 
+const ThreatMatchContainer = styled(EuiFlexItem)`
+  padding: ${({ theme }) => `${theme.eui.paddingSizes.xs}`};
+`;
+
 const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
-  hasIndexWrite,
-  hasIndexMaintenance,
   areEventsLoading,
   clearSelection,
-  totalCount,
-  selectedEventIds,
   currentFilter,
-  selectAll,
-  showBuildingBlockAlerts,
+  hasIndexMaintenance,
+  hasIndexWrite,
   onShowBuildingBlockAlertsChanged,
+  onShowThreatMatchesOnlyChanged,
+  selectAll,
+  selectedEventIds,
+  showBuildingBlockAlerts,
   showClearSelection,
+  showThreatMatchesOnly,
+  totalCount,
   updateAlertsStatus,
 }) => {
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
@@ -159,6 +167,20 @@ const AlertsUtilityBarComponent: React.FC<AlertsUtilityBarProps> = ({
           label={i18n.ADDITIONAL_FILTERS_ACTIONS_SHOW_BUILDING_BLOCK}
         />
       </BuildingBlockContainer>
+      <ThreatMatchContainer>
+        <EuiCheckbox
+          id="showThreatMatchesOnlyCheckbox"
+          aria-label="showThreatMatchesOnly"
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            closePopover();
+            onShowThreatMatchesOnlyChanged(e.target.checked);
+          }}
+          checked={showThreatMatchesOnly}
+          color="text"
+          data-test-subj="showThreatMatchesOnlyCheckbox"
+          label={i18n.ADDITIONAL_FILTERS_ACTIONS_SHOW_THREAT_MATCHES_ONLY}
+        />
+      </ThreatMatchContainer>
     </UtilityBarFlexGroup>
   );
 
@@ -240,5 +262,6 @@ export const AlertsUtilityBar = React.memo(
     prevProps.selectedEventIds === nextProps.selectedEventIds &&
     prevProps.totalCount === nextProps.totalCount &&
     prevProps.showClearSelection === nextProps.showClearSelection &&
-    prevProps.showBuildingBlockAlerts === nextProps.showBuildingBlockAlerts
+    prevProps.showBuildingBlockAlerts === nextProps.showBuildingBlockAlerts &&
+    prevProps.showThreatMatchesOnly === nextProps.showThreatMatchesOnly
 );

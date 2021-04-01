@@ -12,8 +12,8 @@ jest.mock('./actions');
 
 describe('alerts default_config', () => {
   describe('buildAlertsRuleIdFilter', () => {
-    test('given a rule id this will return an array with a single filter', () => {
-      const filters: Filter[] = buildAlertsRuleIdFilter('rule-id-1');
+    test('given a rule id with showThreatMatchesOnly=false this will return an array with a single filter', () => {
+      const filters: Filter[] = buildAlertsRuleIdFilter('rule-id-1', false);
       const expectedFilter: Filter = {
         meta: {
           alias: null,
@@ -28,6 +28,31 @@ describe('alerts default_config', () => {
         query: {
           match_phrase: {
             'signal.rule.id': 'rule-id-1',
+          },
+        },
+      };
+      expect(filters).toHaveLength(1);
+      expect(filters[0]).toEqual(expectedFilter);
+    });
+
+    test('given a rule id with showThreatMatchesOnly=true this will return an array with a single filter', () => {
+      const filters: Filter[] = buildAlertsRuleIdFilter('rule-id-1', true);
+      const expectedFilter: Filter = {
+        meta: {
+          alias: null,
+          negate: false,
+          disabled: false,
+        },
+        query: {
+          bool: {
+            must: [
+              {
+                match_phrase: {
+                  'signal.rule.id': 'rule-id-1',
+                },
+              },
+              { exists: { field: 'signal.rule.threat_mapping' } },
+            ],
           },
         },
       };

@@ -208,6 +208,7 @@ const RuleDetailsPageComponent = () => {
         };
   const [lastAlerts] = useAlertInfo({ ruleId });
   const [showBuildingBlockAlerts, setShowBuildingBlockAlerts] = useState(false);
+  const [showThreatMatchesOnly, setShowThreatMatchesOnly] = useState(false);
   const mlCapabilities = useMlCapabilities();
   const history = useHistory();
   const { formatUrl } = useFormatUrl(SecurityPageName.detections);
@@ -286,10 +287,10 @@ const RuleDetailsPageComponent = () => {
 
   const alertDefaultFilters = useMemo(
     () => [
-      ...(ruleId != null ? buildAlertsRuleIdFilter(ruleId) : []),
+      ...(ruleId != null ? buildAlertsRuleIdFilter(ruleId, showThreatMatchesOnly) : []),
       ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
     ],
-    [ruleId, showBuildingBlockAlerts]
+    [ruleId, showBuildingBlockAlerts, showThreatMatchesOnly]
   );
 
   const alertMergedFilters = useMemo(() => [...alertDefaultFilters, ...filters], [
@@ -444,6 +445,13 @@ const RuleDetailsPageComponent = () => {
       setShowBuildingBlockAlerts(newShowBuildingBlockAlerts);
     },
     [setShowBuildingBlockAlerts]
+  );
+
+  const onShowThreatMatchesOnlyChangedCallback = useCallback(
+    (newShowThreatMatchesOnly: boolean) => {
+      setShowThreatMatchesOnly(newShowThreatMatchesOnly);
+    },
+    [setShowThreatMatchesOnly]
   );
 
   const { indicesExist, indexPattern } = useSourcererScope(SourcererScopeName.detections);
@@ -670,7 +678,9 @@ const RuleDetailsPageComponent = () => {
                     from={from}
                     loading={loading}
                     showBuildingBlockAlerts={showBuildingBlockAlerts}
+                    showThreatMatchesOnly={showThreatMatchesOnly}
                     onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChangedCallback}
+                    onShowThreatMatchesOnlyChanged={onShowThreatMatchesOnlyChangedCallback}
                     onRuleChange={refreshRule}
                     to={to}
                   />
