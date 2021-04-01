@@ -5,4 +5,5 @@
  * 2.0.
  */
 
+export { ApiLogFlyout } from './api_log_flyout';
 export { ApiLogLogic } from './api_log_logic';
