@@ -461,6 +461,7 @@ describe('<EditPolicy /> node allocation', () => {
         // Do not show the call-to-action for users to migrate their cluster to use node roles
         expect(find('cloudDataTierCallout').exists()).toBeFalsy();
       });
+
       test('do not show node allocation specific warnings on cloud', async () => {
         httpRequestsMockHelpers.setListNodes({
           nodesByAttributes: { test: ['123'] },

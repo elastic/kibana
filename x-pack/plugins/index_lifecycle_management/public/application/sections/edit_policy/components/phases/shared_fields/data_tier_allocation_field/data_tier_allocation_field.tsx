@@ -157,7 +157,7 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({ phase, descr
           }
 
           /**
-           * If using node roles, default allocation behavior will be to the preferred and fallback nodes, depending on the phase.
+           * If using node roles, default allocation behavior will be to the preferred nodes, depending on the phase.
            */
           return (
             <>
@@ -216,7 +216,7 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({ phase, descr
           phase={phase}
           nodes={nodesByAttributes}
           isCloudEnabled={isCloudEnabled}
-          disableDataTierOption={Boolean(isCloudEnabled && isUsingDeprecatedDataRoleConfig)}
+          isUsingDeprecatedDataRoleConfig={isUsingDeprecatedDataRoleConfig}
           isLoading={isLoading}
         />
 
