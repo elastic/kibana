@@ -22,9 +22,9 @@ export const txtEditDrilldown = i18n.translate(
 );
 
 export const txtCloneDrilldown = i18n.translate(
-  'xpack.uiActionsEnhanced.components.DrilldownTable.cloneDrilldownButtonLabel',
+  'xpack.uiActionsEnhanced.components.DrilldownTable.copyDrilldownButtonLabel',
   {
-    defaultMessage: 'Clone',
+    defaultMessage: 'Copy',
   }
 );
 

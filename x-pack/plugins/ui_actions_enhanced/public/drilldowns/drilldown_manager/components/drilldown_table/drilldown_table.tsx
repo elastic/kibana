@@ -50,7 +50,7 @@ export interface DrilldownTableProps {
   onCreate?: () => void;
   onDelete?: (ids: string[]) => void;
   onEdit?: (id: string) => void;
-  onClone?: (id: string) => void;
+  onCopy?: (id: string) => void;
 }
 
 export const DrilldownTable: React.FC<DrilldownTableProps> = ({
@@ -58,7 +58,7 @@ export const DrilldownTable: React.FC<DrilldownTableProps> = ({
   onCreate,
   onDelete,
   onEdit,
-  onClone,
+  onCopy,
 }) => {
   const [selectedDrilldowns, setSelectedDrilldowns] = useState<string[]>([]);
 
@@ -128,11 +128,11 @@ export const DrilldownTable: React.FC<DrilldownTableProps> = ({
               {txtEditDrilldown}
             </EuiButtonEmpty>
           )}
-          {!!onClone && (
+          {!!onCopy && (
             <EuiButtonEmpty
               size="xs"
               disabled={!!selectedDrilldowns.length}
-              onClick={() => onClone(drilldown.id)}
+              onClick={() => onCopy(drilldown.id)}
             >
               {txtCloneDrilldown}
             </EuiButtonEmpty>
