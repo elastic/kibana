@@ -19,3 +19,11 @@ export const getStatusColor = (status: number) => {
   if (status >= 500) color = 'danger';
   return color;
 };
+
+export const safeJsonParseAndStringify = (json: string) => {
+  try {
+    return JSON.stringify(JSON.parse(json), null, 2);
+  } catch (e) {
+    return json;
+  }
+};
