@@ -305,6 +305,19 @@ function FormulaEditor({
     [text]
   );
 
+  /**
+   * The way that Monaco requests autocompletion is not intuitive, but the way we use it
+   * we fetch new suggestions in these scenarios:
+   *
+   * - If the user types one of the trigger characters, suggestions are always fetched
+   * - When the user selects the kql= suggestion, we tell Monaco to trigger new suggestions after
+   * - When the user types the first character into an empty text box, Monaco requests suggestions
+   *
+   * Monaco also triggers suggestions automatically when there are no suggestions being displayed
+   * and the user types a non-whitespace character.
+   *
+   * While suggestions are being displayed, Monaco uses an in-memory cache of the last known suggestions.
+   */
   const provideCompletionItems = useCallback(
     async (
       model: monaco.editor.ITextModel,
@@ -348,20 +361,12 @@ function FormulaEditor({
           });
         }
       } else {
-        const wordUntil = model.getWordUntilPosition(position);
-        wordRange = new monaco.Range(
-          position.lineNumber,
-          wordUntil.startColumn,
-          position.lineNumber,
-          wordUntil.endColumn
-        );
         aSuggestions = await suggest({
           expression: innerText,
           position: innerText.length - lengthAfterPosition,
           context,
           indexPattern,
           operationDefinitionMap,
-          word: wordUntil,
           data,
         });
       }
@@ -446,7 +451,7 @@ function FormulaEditor({
   useEffect(() => {
     // Because the monaco model is owned by Lens, we need to manually attach and remove handlers
     const { dispose: dispose1 } = monaco.languages.registerCompletionItemProvider(LANGUAGE_ID, {
-      triggerCharacters: ['.', ',', '(', '=', ' ', ':'],
+      triggerCharacters: ['.', ',', '(', '=', ' ', ':', `'`],
       provideCompletionItems,
     });
     const { dispose: dispose2 } = monaco.languages.registerSignatureHelpProvider(LANGUAGE_ID, {

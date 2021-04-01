@@ -44,11 +44,6 @@ function inLocation(cursorPosition: number, location: TinymathLocation) {
   return cursorPosition >= location.min && cursorPosition < location.max;
 }
 
-const filterableOperationParams = [
-  { name: 'kql', type: 'string', required: false },
-  { name: 'lucene', type: 'string', required: false },
-];
-
 const MARKER = 'LENS_MATH_MARKER';
 
 function getInfoAtPosition(
@@ -89,17 +84,6 @@ export function offsetToRowColumn(expression: string, offset: number): monaco.Po
   throw new Error('Algorithm failure');
 }
 
-// export function monacoPositionToOffset(expression: string, position: monaco.Position): number {
-//   const lines = expression.split(/\n/);
-//   return lines
-//     .slice(0, position.lineNumber - 1)
-//     .reduce(
-//       (prev, current, index) =>
-//         prev + index === position.lineNumber - 1 ? position.column - 1 : current.length,
-//       0
-//     );
-// }
-
 export async function suggest({
   expression,
   position,
@@ -107,7 +91,6 @@ export async function suggest({
   indexPattern,
   operationDefinitionMap,
   data,
-  word,
 }: {
   expression: string;
   position: number;
@@ -115,38 +98,44 @@ export async function suggest({
   indexPattern: IndexPattern;
   operationDefinitionMap: Record<string, GenericOperationDefinition>;
   data: DataPublicPluginStart;
-  word?: monaco.editor.IWordAtPosition;
 }): Promise<{ list: LensMathSuggestion[]; type: SUGGESTION_TYPE }> {
   const text = expression.substr(0, position) + MARKER + expression.substr(position);
   try {
     const ast = parse(text);
 
     const tokenInfo = getInfoAtPosition(ast, position);
+    const tokenAst = tokenInfo?.ast;
 
     const isNamedArgument =
       tokenInfo?.parent &&
-      typeof tokenInfo?.ast !== 'number' &&
-      'type' in tokenInfo.ast &&
-      tokenInfo.ast.type === 'namedArgument';
+      typeof tokenAst !== 'number' &&
+      tokenAst &&
+      'type' in tokenAst &&
+      tokenAst.type === 'namedArgument';
     if (tokenInfo?.parent && (context.triggerCharacter === '=' || isNamedArgument)) {
       return await getNamedArgumentSuggestions({
-        expression: text,
-        ast: tokenInfo.ast as TinymathNamedArgument,
-        position,
+        ast: tokenAst as TinymathNamedArgument,
         data,
         indexPattern,
-        operationDefinitionMap,
       });
     } else if (tokenInfo?.parent) {
       return getArgumentSuggestions(
         tokenInfo.parent,
-        tokenInfo.parent.args.findIndex((a) => a === tokenInfo.ast),
+        tokenInfo.parent.args.findIndex((a) => a === tokenAst),
         indexPattern,
         operationDefinitionMap
       );
     }
-    if (tokenInfo && word) {
-      return getFunctionSuggestions(word, indexPattern, operationDefinitionMap);
+    if (
+      typeof tokenAst === 'object' &&
+      Boolean(tokenAst.type === 'variable' || tokenAst.type === 'function')
+    ) {
+      const nameWithMarker = tokenAst.type === 'function' ? tokenAst.name : tokenAst.value;
+      return getFunctionSuggestions(
+        nameWithMarker.split(MARKER)[0],
+        indexPattern,
+        operationDefinitionMap
+      );
     }
   } catch (e) {
     // Fail silently
@@ -172,14 +161,14 @@ export function getPossibleFunctions(
 }
 
 function getFunctionSuggestions(
-  word: monaco.editor.IWordAtPosition,
+  prefix: string,
   indexPattern: IndexPattern,
   operationDefinitionMap: Record<string, GenericOperationDefinition>
 ) {
   return {
     list: uniq(
       getPossibleFunctions(indexPattern, operationDefinitionMap).filter((func) =>
-        startsWith(func, word.word)
+        startsWith(func, prefix)
       )
     ).map((func) => ({ label: func, type: 'operation' as const })),
     type: SUGGESTION_TYPE.FUNCTIONS,
@@ -291,17 +280,11 @@ function getArgumentSuggestions(
 
 export async function getNamedArgumentSuggestions({
   ast,
-  expression,
-  position,
   data,
   indexPattern,
-  operationDefinitionMap,
 }: {
   ast: TinymathNamedArgument;
-  expression: string;
-  position: number;
   indexPattern: IndexPattern;
-  operationDefinitionMap: Record<string, GenericOperationDefinition>;
   data: DataPublicPluginStart;
 }) {
   if (ast.name !== 'kql' && ast.name !== 'lucene') {
@@ -342,24 +325,17 @@ export function getSuggestion(
   let detail: string = '';
   let command: monaco.languages.CompletionItem['command'];
   let sortText: string = '';
+  const filterText: string = label;
 
   switch (type) {
     case SUGGESTION_TYPE.FIELD:
-      command = {
-        title: 'Trigger Suggestion Dialog',
-        id: 'editor.action.triggerSuggest',
-      };
       kind = monaco.languages.CompletionItemKind.Value;
       break;
     case SUGGESTION_TYPE.FUNCTIONS:
-      command = {
-        title: 'Trigger Suggestion Dialog',
-        id: 'editor.action.triggerSuggest',
-      };
-      insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
       if (typeof suggestion !== 'string') {
+        if ('text' in suggestion) break;
         const tinymathFunction = tinymathFunctions[suggestion.label];
-        insertText = `${label}($0)`;
+        insertText = `${label}()`;
         if (tinymathFunction) {
           label = `${label}(${tinymathFunction.positionalArguments
             .map(({ name }) => name)
@@ -387,24 +363,17 @@ export function getSuggestion(
       }
       break;
     case SUGGESTION_TYPE.NAMED_ARGUMENT:
-      command = {
-        title: 'Trigger Suggestion Dialog',
-        id: 'editor.action.triggerSuggest',
-      };
       kind = monaco.languages.CompletionItemKind.Keyword;
       if (label === 'kql' || label === 'lucene') {
+        command = {
+          title: 'Trigger Suggestion Dialog',
+          id: 'editor.action.triggerSuggest',
+        };
         insertText = `${label}='$0'`;
         insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
       }
       label = `${label}=`;
       detail = '';
-      break;
-    case SUGGESTION_TYPE.NAMED_ARGUMENT:
-      command = {
-        title: 'Trigger Suggestion Dialog',
-        id: 'editor.action.triggerSuggest',
-      };
-      kind = monaco.languages.CompletionItemKind.Field;
       break;
   }
 
@@ -415,8 +384,10 @@ export function getSuggestion(
     insertText: insertText ?? label,
     insertTextRules,
     command,
+    additionalTextEdits: [],
     range,
     sortText,
+    filterText,
   };
 }
 

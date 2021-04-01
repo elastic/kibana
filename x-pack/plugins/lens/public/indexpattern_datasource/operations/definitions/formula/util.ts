@@ -100,6 +100,9 @@ export function getOperationParams(
     if (formalArgs[name]) {
       args[name] = value;
     }
+    if (operation.filterable && (name === 'kql' || name === 'lucene')) {
+      args[name] = value;
+    }
     return args;
   }, {});
 }

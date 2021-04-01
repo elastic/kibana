@@ -9,12 +9,7 @@ import { isObject } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { parse, TinymathLocation } from '@kbn/tinymath';
 import type { TinymathAST, TinymathFunction, TinymathNamedArgument } from '@kbn/tinymath';
-import {
-  AggFunctionsMapping,
-  Query,
-  esKuery,
-  esQuery,
-} from '../../../../../../../../src/plugins/data/public';
+import { esKuery, esQuery } from '../../../../../../../../src/plugins/data/public';
 import {
   findMathNodes,
   findVariables,
@@ -492,7 +487,12 @@ function runFullASTValidation(
             })
           );
         } else {
-          const argumentsErrors = validateNameArguments(node, nodeOperation, namedArguments);
+          const argumentsErrors = validateNameArguments(
+            node,
+            nodeOperation,
+            namedArguments,
+            indexPattern
+          );
           if (argumentsErrors.length) {
             errors.push(...argumentsErrors);
           }
@@ -567,7 +567,7 @@ export function validateParams(
   params: TinymathNamedArgument[] = []
 ) {
   const paramsObj = getOperationParams(operation, params);
-  const formalArgs = operation.operationParams || [];
+  const formalArgs = [...(operation.operationParams ?? [])];
   if (operation.filterable) {
     formalArgs.push(
       { name: 'kql', type: 'string', required: false },
