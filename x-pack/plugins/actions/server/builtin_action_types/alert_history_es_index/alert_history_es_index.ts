@@ -13,7 +13,7 @@ import { AlertHistoryEsIndexConnectorId, AlertHistoryDefaultIndexName } from '..
 export function getAlertHistoryEsIndex(): Readonly<PreConfiguredAction> {
   return Object.freeze({
     name: i18n.translate('xpack.actions.alertHistoryEsIndexConnector.name', {
-      defaultMessage: 'Alert History ES Index',
+      defaultMessage: 'Alert history ES index',
     }),
     actionTypeId: EsIndexActionTypeId,
     id: AlertHistoryEsIndexConnectorId,

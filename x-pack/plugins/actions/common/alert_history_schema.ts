@@ -43,7 +43,7 @@ export const buildAlertHistoryDocument = (variables: Record<string, unknown>) =>
     return null;
   }
 
-  const ruleType = type.replace('.', '__');
+  const ruleType = type.replace(/\./g, '__');
 
   const rule = {
     ...(ruleId ? { id: ruleId } : {}),

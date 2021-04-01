@@ -38,7 +38,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
       await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connectors`).expect(200, [
         {
           id: 'preconfigured-alert-history-es-index',
-          name: 'Alert History ES Index',
+          name: 'Alert history ES index',
           connector_type_id: '.index',
           is_preconfigured: true,
           referenced_by_count: 0,
@@ -104,7 +104,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
       await supertest.get(`${getUrlPrefix(Spaces.other.id)}/api/actions/connectors`).expect(200, [
         {
           id: 'preconfigured-alert-history-es-index',
-          name: 'Alert History ES Index',
+          name: 'Alert history ES index',
           connector_type_id: '.index',
           is_preconfigured: true,
           referenced_by_count: 0,
@@ -161,7 +161,7 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
         await supertest.get(`${getUrlPrefix(Spaces.space1.id)}/api/actions`).expect(200, [
           {
             id: 'preconfigured-alert-history-es-index',
-            name: 'Alert History ES Index',
+            name: 'Alert history ES index',
             actionTypeId: '.index',
             isPreconfigured: true,
             referencedByCount: 0,

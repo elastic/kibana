@@ -31,7 +31,7 @@ const preconfiguredActionConnector = {
   },
   id: AlertHistoryEsIndexConnectorId,
   isPreconfigured: true,
-  name: 'Alert History ES Index',
+  name: 'Alert history ES index',
   secrets: {},
 };
 
