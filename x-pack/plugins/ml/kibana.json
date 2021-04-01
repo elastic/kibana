@@ -40,7 +40,7 @@
     "savedObjects",
     "home",
     "maps",
-    "vis_type_vega"
+    "visTypeVega"
   ],
   "extraPublicDirs": [
     "common"
