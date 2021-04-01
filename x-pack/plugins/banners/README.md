@@ -12,7 +12,7 @@ The options are
 
 The placement of the banner. The allowed values are: 
   - `disabled` -  The banner will be disabled
-  - `header` - The banner will be displayed in the header
+  - `top` - The banner will be displayed in the header
 
 - `textContent`
 
@@ -31,7 +31,7 @@ The color for the banner's background. Must be a valid hex color
 `kibana.yml`
 ```yaml
 xpack.banners:
-  placement: 'header'
+  placement: 'top'
   textContent: 'Production environment - Proceed with **special levels** of caution'
   textColor: '#FF0000'
   backgroundColor: '#CC2211'

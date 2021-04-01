@@ -135,6 +135,7 @@ it('passes correct args to sub-classes', () => {
           "repoRoot": <absolute path>,
           "runExamples": false,
           "silent": false,
+          "verbose": false,
           "watch": true,
         },
       ],
