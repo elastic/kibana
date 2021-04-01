@@ -9,7 +9,7 @@ import {
   experimentIDs,
   Experiment,
   ExperimentID,
-} from '../../../../../src/plugins/presentation_util/common';
+} from '../../../../../src/plugins/presentation_util/public';
 
 import { CanvasServiceFactory } from '.';
 

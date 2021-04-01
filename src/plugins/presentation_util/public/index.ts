@@ -10,6 +10,7 @@ import { PresentationUtilPlugin } from './plugin';
 import { pluginServices } from './services';
 
 export { PresentationUtilPluginSetup, PresentationUtilPluginStart } from './types';
+export * from '../common/experiments';
 
 export {
   DashboardPicker,
