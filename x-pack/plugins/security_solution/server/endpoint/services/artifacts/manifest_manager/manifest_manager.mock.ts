@@ -20,8 +20,7 @@ import {
   getMockArtifactsWithDiff,
   getEmptyMockArtifacts,
 } from '../../../lib/artifacts/mocks';
-import { ArtifactClient } from '../artifact_client';
-import { getManifestClientMock } from '../mocks';
+import { createEndpointArtifactClientMock, getManifestClientMock } from '../mocks';
 import { ManifestManager, ManifestManagerContext } from './manifest_manager';
 
 export const createExceptionListResponse = (data: ExceptionListItemSchema[], total?: number) => ({
@@ -84,7 +83,7 @@ export const buildManifestManagerContextMock = (
 
   return {
     ...fullOpts,
-    artifactClient: new ArtifactClient(fullOpts.savedObjectsClient),
+    artifactClient: createEndpointArtifactClientMock(),
     logger: loggingSystemMock.create().get() as jest.Mocked<Logger>,
   };
 };
