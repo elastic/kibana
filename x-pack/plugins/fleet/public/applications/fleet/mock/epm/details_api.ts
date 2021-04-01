@@ -18,244 +18,263 @@ import type {
 import {
   agentPolicyRouteService,
   epmRouteService,
+  InstallStatus,
   packagePolicyRouteService,
 } from '../../../../../common';
 import type { AgentsSetupResponseProvidersMock, FleetSetupResponseProvidersMock } from '../setup';
 import { agentsSetupApiMock, fleetSetupApiMock } from '../setup';
 
-export const epmPackageResponse = (): GetInfoResponse =>
-  // @ts-ignore
-  ({
-    response: {
-      name: 'nginx',
-      title: 'Nginx',
-      version: '0.3.7',
-      release: 'experimental',
-      description: 'Nginx Integration',
-      type: 'integration',
-      download: '/epr/nginx/nginx-0.3.7.zip',
-      path: '/package/nginx/0.3.7',
-      icons: [
-        {
-          src: '/img/logo_nginx.svg',
-          path: '/package/nginx/0.3.7/img/logo_nginx.svg',
-          title: 'logo nginx',
-          size: '32x32',
-          type: 'image/svg+xml',
-        },
-      ],
-      format_version: '1.0.0',
-      readme: '/package/nginx/0.3.7/docs/README.md',
-      license: 'basic',
-      categories: ['web', 'security'],
-      conditions: { 'kibana.version': '^7.9.0' },
-      screenshots: [
-        {
-          src: '/img/kibana-nginx.png',
-          path: '/package/nginx/0.3.7/img/kibana-nginx.png',
-          title: 'kibana nginx',
-          size: '1218x1266',
-          type: 'image/png',
-        },
-        {
-          src: '/img/metricbeat-nginx.png',
-          path: '/package/nginx/0.3.7/img/metricbeat-nginx.png',
-          title: 'metricbeat nginx',
-          size: '2560x2100',
-          type: 'image/png',
-        },
-      ],
-      assets: {
-        kibana: {
-          dashboard: [
-            {
-              pkgkey: 'nginx-0.3.7',
-              service: 'kibana',
-              type: 'dashboard' as KibanaAssetType,
-              file: 'nginx-023d2930-f1a5-11e7-a9ef-93c69af7b129.json',
-            },
-          ],
-          search: [
-            {
-              pkgkey: 'nginx-0.3.7',
-              service: 'kibana',
-              type: 'search' as KibanaAssetType,
-              file: 'nginx-6d9e66d0-a1f0-11e7-928f-5dbe6f6f5519.json',
-            },
-          ],
-          visualization: [
-            {
-              pkgkey: 'nginx-0.3.7',
-              service: 'kibana',
-              type: 'visualization' as KibanaAssetType,
-              file: 'nginx-0dd6f320-a29f-11e7-928f-5dbe6f6f5519.json',
-            },
-          ],
-        },
+export const epmPackageResponse = (): GetInfoResponse => ({
+  // Unclear why this is happening, but the following TS error is shown:
+  //    Types of property 'status' are incompatible.
+  //      'InstallStatus.installed' is not assignable to type '"not_installed"
+  // setting to expected error
+  // @ts-expect-error
+  response: {
+    name: 'nginx',
+    title: 'Nginx',
+    version: '0.3.7',
+    release: 'experimental',
+    description: 'Nginx Integration',
+    type: 'integration',
+    download: '/epr/nginx/nginx-0.3.7.zip',
+    path: '/package/nginx/0.3.7',
+    icons: [
+      {
+        src: '/img/logo_nginx.svg',
+        path: '/package/nginx/0.3.7/img/logo_nginx.svg',
+        title: 'logo nginx',
+        size: '32x32',
+        type: 'image/svg+xml',
       },
-      policy_templates: [
-        {
-          name: 'nginx',
-          title: 'Nginx logs and metrics',
-          description: 'Collect logs and metrics from Nginx instances',
-          inputs: [
-            {
-              type: 'logfile',
-              title: 'Collect logs from Nginx instances',
-              description: 'Collecting Nginx access, error and ingress controller logs',
-            },
-            {
-              type: 'nginx/metrics',
-              vars: [
-                {
-                  name: 'hosts',
-                  type: 'text',
-                  title: 'Hosts',
-                  multi: true,
-                  required: true,
-                  show_user: true,
-                  default: ['http://127.0.0.1:80'],
-                },
-              ],
-              title: 'Collect metrics from Nginx instances',
-              description: 'Collecting Nginx stub status metrics',
-            },
-          ],
-          multiple: true,
-        },
-      ],
-      data_streams: [
-        {
-          type: 'logs',
-          dataset: 'nginx.access',
-          title: 'Nginx access logs',
-          release: 'experimental',
-          ingest_pipeline: 'default',
-          streams: [
-            {
-              input: 'logfile',
-              vars: [
-                {
-                  name: 'paths',
-                  type: 'text',
-                  title: 'Paths',
-                  multi: true,
-                  required: true,
-                  show_user: true,
-                  default: ['/var/log/nginx/access.log*'],
-                },
-              ],
-              template_path: 'stream.yml.hbs',
-              title: 'Nginx access logs',
-              description: 'Collect Nginx access logs',
-              enabled: true,
-            },
-          ],
-          package: 'nginx',
-          path: 'access',
-        },
-        {
-          type: 'logs',
-          dataset: 'nginx.error',
-          title: 'Nginx error logs',
-          release: 'experimental',
-          ingest_pipeline: 'default',
-          streams: [
-            {
-              input: 'logfile',
-              vars: [
-                {
-                  name: 'paths',
-                  type: 'text',
-                  title: 'Paths',
-                  multi: true,
-                  required: true,
-                  show_user: true,
-                  default: ['/var/log/nginx/error.log*'],
-                },
-              ],
-              template_path: 'stream.yml.hbs',
-              title: 'Nginx error logs',
-              description: 'Collect Nginx error logs',
-              enabled: true,
-            },
-          ],
-          package: 'nginx',
-          path: 'error',
-        },
-        {
-          type: 'logs',
-          dataset: 'nginx.ingress_controller',
-          title: 'Nginx ingress_controller logs',
-          release: 'experimental',
-          ingest_pipeline: 'default',
-          streams: [
-            {
-              input: 'logfile',
-              vars: [
-                {
-                  name: 'paths',
-                  type: 'text',
-                  title: 'Paths',
-                  multi: true,
-                  required: true,
-                  show_user: true,
-                  default: ['/var/log/nginx/ingress.log*'],
-                },
-              ],
-              template_path: 'stream.yml.hbs',
-              title: 'Nginx ingress controller logs',
-              description: 'Collect Nginx ingress controller logs',
-              enabled: false,
-            },
-          ],
-          package: 'nginx',
-          path: 'ingress_controller',
-        },
-        {
-          type: 'metrics',
-          dataset: 'nginx.stubstatus',
-          title: 'Nginx stubstatus metrics',
-          release: 'experimental',
-          streams: [
-            {
-              input: 'nginx/metrics',
-              vars: [
-                {
-                  name: 'period',
-                  type: 'text',
-                  title: 'Period',
-                  multi: false,
-                  required: true,
-                  show_user: true,
-                  default: '10s',
-                },
-                {
-                  name: 'server_status_path',
-                  type: 'text',
-                  title: 'Server Status Path',
-                  multi: false,
-                  required: true,
-                  show_user: false,
-                  default: '/nginx_status',
-                },
-              ],
-              template_path: 'stream.yml.hbs',
-              title: 'Nginx stub status metrics',
-              description: 'Collect Nginx stub status metrics',
-              enabled: true,
-            },
-          ],
-          package: 'nginx',
-          path: 'stubstatus',
-        },
-      ],
-      owner: { github: 'elastic/integrations-services' },
-      latestVersion: '0.3.7',
-      removable: true,
-      status: 'installed',
+    ],
+    format_version: '1.0.0',
+    readme: '/package/nginx/0.3.7/docs/README.md',
+    license: 'basic',
+    categories: ['web', 'security'],
+    conditions: { kibana: { version: '^7.9.0' } },
+    screenshots: [
+      {
+        src: '/img/kibana-nginx.png',
+        path: '/package/nginx/0.3.7/img/kibana-nginx.png',
+        title: 'kibana nginx',
+        size: '1218x1266',
+        type: 'image/png',
+      },
+      {
+        src: '/img/metricbeat-nginx.png',
+        path: '/package/nginx/0.3.7/img/metricbeat-nginx.png',
+        title: 'metricbeat nginx',
+        size: '2560x2100',
+        type: 'image/png',
+      },
+    ],
+    assets: {
+      kibana: {
+        dashboard: [
+          {
+            pkgkey: 'nginx-0.3.7',
+            service: 'kibana',
+            type: 'dashboard' as KibanaAssetType,
+            file: 'nginx-023d2930-f1a5-11e7-a9ef-93c69af7b129.json',
+          },
+        ],
+        search: [
+          {
+            pkgkey: 'nginx-0.3.7',
+            service: 'kibana',
+            type: 'search' as KibanaAssetType,
+            file: 'nginx-6d9e66d0-a1f0-11e7-928f-5dbe6f6f5519.json',
+          },
+        ],
+        visualization: [
+          {
+            pkgkey: 'nginx-0.3.7',
+            service: 'kibana',
+            type: 'visualization' as KibanaAssetType,
+            file: 'nginx-0dd6f320-a29f-11e7-928f-5dbe6f6f5519.json',
+          },
+        ],
+        index_pattern: [],
+        lens: [],
+        map: [],
+        ml_module: [],
+      },
+      elasticsearch: {
+        component_template: [],
+        ingest_pipeline: [],
+        index_template: [],
+        ilm_policy: [],
+        transform: [],
+        data_stream_ilm_policy: [],
+      },
     },
-  } as GetInfoResponse);
+    policy_templates: [
+      {
+        name: 'nginx',
+        title: 'Nginx logs and metrics',
+        description: 'Collect logs and metrics from Nginx instances',
+        inputs: [
+          {
+            type: 'logfile',
+            title: 'Collect logs from Nginx instances',
+            description: 'Collecting Nginx access, error and ingress controller logs',
+          },
+          {
+            type: 'nginx/metrics',
+            vars: [
+              {
+                name: 'hosts',
+                type: 'text',
+                title: 'Hosts',
+                multi: true,
+                required: true,
+                show_user: true,
+                default: ['http://127.0.0.1:80'],
+              },
+            ],
+            title: 'Collect metrics from Nginx instances',
+            description: 'Collecting Nginx stub status metrics',
+          },
+        ],
+        multiple: true,
+      },
+    ],
+    data_streams: [
+      {
+        type: 'logs',
+        dataset: 'nginx.access',
+        title: 'Nginx access logs',
+        release: 'experimental',
+        ingest_pipeline: 'default',
+        streams: [
+          {
+            input: 'logfile',
+            vars: [
+              {
+                name: 'paths',
+                type: 'text',
+                title: 'Paths',
+                multi: true,
+                required: true,
+                show_user: true,
+                default: ['/var/log/nginx/access.log*'],
+              },
+            ],
+            template_path: 'stream.yml.hbs',
+            title: 'Nginx access logs',
+            description: 'Collect Nginx access logs',
+            enabled: true,
+          },
+        ],
+        package: 'nginx',
+        path: 'access',
+      },
+      {
+        type: 'logs',
+        dataset: 'nginx.error',
+        title: 'Nginx error logs',
+        release: 'experimental',
+        ingest_pipeline: 'default',
+        streams: [
+          {
+            input: 'logfile',
+            vars: [
+              {
+                name: 'paths',
+                type: 'text',
+                title: 'Paths',
+                multi: true,
+                required: true,
+                show_user: true,
+                default: ['/var/log/nginx/error.log*'],
+              },
+            ],
+            template_path: 'stream.yml.hbs',
+            title: 'Nginx error logs',
+            description: 'Collect Nginx error logs',
+            enabled: true,
+          },
+        ],
+        package: 'nginx',
+        path: 'error',
+      },
+      {
+        type: 'logs',
+        dataset: 'nginx.ingress_controller',
+        title: 'Nginx ingress_controller logs',
+        release: 'experimental',
+        ingest_pipeline: 'default',
+        streams: [
+          {
+            input: 'logfile',
+            vars: [
+              {
+                name: 'paths',
+                type: 'text',
+                title: 'Paths',
+                multi: true,
+                required: true,
+                show_user: true,
+                default: ['/var/log/nginx/ingress.log*'],
+              },
+            ],
+            template_path: 'stream.yml.hbs',
+            title: 'Nginx ingress controller logs',
+            description: 'Collect Nginx ingress controller logs',
+            enabled: false,
+          },
+        ],
+        package: 'nginx',
+        path: 'ingress_controller',
+      },
+      {
+        type: 'metrics',
+        dataset: 'nginx.stubstatus',
+        title: 'Nginx stubstatus metrics',
+        release: 'experimental',
+        ilm_policy: 'ilm_policy',
+        hidden: false,
+        ingest_pipeline: 'ingest_pipeline',
+        package: 'nginx',
+        path: 'stubstatus',
+        streams: [
+          {
+            input: 'nginx/metrics',
+            vars: [
+              {
+                name: 'period',
+                type: 'text',
+                title: 'Period',
+                multi: false,
+                required: true,
+                show_user: true,
+                default: '10s',
+              },
+              {
+                name: 'server_status_path',
+                type: 'text',
+                title: 'Server Status Path',
+                multi: false,
+                required: true,
+                show_user: false,
+                default: '/nginx_status',
+              },
+            ],
+            template_path: 'stream.yml.hbs',
+            title: 'Nginx stub status metrics',
+            description: 'Collect Nginx stub status metrics',
+            enabled: true,
+          },
+        ],
+      },
+    ],
+    owner: { github: 'elastic/integrations-services' },
+    latestVersion: '0.3.7',
+    removable: true,
+    status: InstallStatus.installed,
+  },
+});
 
 export const packageReadMeResponse = () => `
 # Nginx Integration
