@@ -20,7 +20,7 @@ import { InfraSource } from '../../../lib/sources';
 export const isIPv4 = (subject: string) => /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(subject);
 
 type RowWithMetadata = MetricsAPIRow & {
-  [META_KEY]: Array<Record<string, string | string[] | number[]>>;
+  [META_KEY]: Array<Record<string, string | number | string[]>>;
 };
 
 export const applyMetadataToLastPath = (
