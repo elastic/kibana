@@ -11,6 +11,19 @@ import { Errors, identity } from 'io-ts';
 import { AlertTaskState } from '../../../types';
 import { BASE_ALERTING_API_PATH } from '../../constants';
 import { alertStateSchema } from '../../../../../alerting/common';
+import { AsApiContract, RewriteRequestCase } from '../../../../../actions/common';
+
+const rewriteBodyRes: RewriteRequestCase<AlertTaskState> = ({
+  rule_type_state: alertTypeState,
+  alerts: alertInstances,
+  previous_started_at: previousStartedAt,
+  ...rest
+}: any) => ({
+  ...rest,
+  alertTypeState,
+  alertInstances,
+  previousStartedAt,
+});
 
 type EmptyHttpResponse = '';
 export async function loadAlertState({
@@ -22,7 +35,9 @@ export async function loadAlertState({
 }): Promise<AlertTaskState> {
   return await http
     .get(`${BASE_ALERTING_API_PATH}/rule/${alertId}/state`)
-    .then((state: AlertTaskState | EmptyHttpResponse) => (state ? state : {}))
+    .then((state: AsApiContract<AlertTaskState> | EmptyHttpResponse) =>
+      state ? rewriteBodyRes(state) : {}
+    )
     .then((state: AlertTaskState) => {
       return pipe(
         alertStateSchema.decode(state),

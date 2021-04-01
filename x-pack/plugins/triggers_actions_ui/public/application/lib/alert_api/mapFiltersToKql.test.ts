@@ -8,6 +8,8 @@
 import { mapFiltersToKql } from './mapFiltersToKql';
 
 describe('mapFiltersToKql', () => {
+  beforeEach(() => jest.resetAllMocks());
+
   test('should handle no filters', () => {
     expect(mapFiltersToKql({})).toEqual([]);
   });

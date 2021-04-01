@@ -9,20 +9,25 @@ import { loadAlerts } from './rules';
 
 const http = httpServiceMock.createStartContract();
 
-beforeEach(() => jest.resetAllMocks());
-
 describe('loadAlerts', () => {
+  beforeEach(() => jest.resetAllMocks());
+
   test('should call find API with base parameters', async () => {
     const resolvedValue = {
       page: 1,
-      perPage: 10,
+      per_page: 10,
       total: 0,
       data: [],
     };
     http.get.mockResolvedValueOnce(resolvedValue);
 
     const result = await loadAlerts({ http, page: { index: 0, size: 10 } });
-    expect(result).toEqual(resolvedValue);
+    expect(result).toEqual({
+      page: 1,
+      perPage: 10,
+      total: 0,
+      data: [],
+    });
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "/api/alerting/rules/_find",
@@ -45,14 +50,19 @@ describe('loadAlerts', () => {
   test('should call find API with searchText', async () => {
     const resolvedValue = {
       page: 1,
-      perPage: 10,
+      per_page: 10,
       total: 0,
       data: [],
     };
     http.get.mockResolvedValueOnce(resolvedValue);
 
     const result = await loadAlerts({ http, searchText: 'apples', page: { index: 0, size: 10 } });
-    expect(result).toEqual(resolvedValue);
+    expect(result).toEqual({
+      page: 1,
+      perPage: 10,
+      total: 0,
+      data: [],
+    });
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "/api/alerting/rules/_find",
@@ -75,7 +85,7 @@ describe('loadAlerts', () => {
   test('should call find API with actionTypesFilter', async () => {
     const resolvedValue = {
       page: 1,
-      perPage: 10,
+      per_page: 10,
       total: 0,
       data: [],
     };
@@ -86,7 +96,12 @@ describe('loadAlerts', () => {
       searchText: 'foo',
       page: { index: 0, size: 10 },
     });
-    expect(result).toEqual(resolvedValue);
+    expect(result).toEqual({
+      page: 1,
+      perPage: 10,
+      total: 0,
+      data: [],
+    });
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "/api/alerting/rules/_find",
@@ -109,7 +124,7 @@ describe('loadAlerts', () => {
   test('should call find API with typesFilter', async () => {
     const resolvedValue = {
       page: 1,
-      perPage: 10,
+      per_page: 10,
       total: 0,
       data: [],
     };
@@ -120,7 +135,12 @@ describe('loadAlerts', () => {
       typesFilter: ['foo', 'bar'],
       page: { index: 0, size: 10 },
     });
-    expect(result).toEqual(resolvedValue);
+    expect(result).toEqual({
+      page: 1,
+      perPage: 10,
+      total: 0,
+      data: [],
+    });
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "/api/alerting/rules/_find",
@@ -143,7 +163,7 @@ describe('loadAlerts', () => {
   test('should call find API with actionTypesFilter and typesFilter', async () => {
     const resolvedValue = {
       page: 1,
-      perPage: 10,
+      per_page: 10,
       total: 0,
       data: [],
     };
@@ -155,7 +175,12 @@ describe('loadAlerts', () => {
       typesFilter: ['foo', 'bar'],
       page: { index: 0, size: 10 },
     });
-    expect(result).toEqual(resolvedValue);
+    expect(result).toEqual({
+      page: 1,
+      perPage: 10,
+      total: 0,
+      data: [],
+    });
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "/api/alerting/rules/_find",
@@ -178,7 +203,7 @@ describe('loadAlerts', () => {
   test('should call find API with searchText and tagsFilter and typesFilter', async () => {
     const resolvedValue = {
       page: 1,
-      perPage: 10,
+      per_page: 10,
       total: 0,
       data: [],
     };
@@ -190,7 +215,12 @@ describe('loadAlerts', () => {
       typesFilter: ['foo', 'bar'],
       page: { index: 0, size: 10 },
     });
-    expect(result).toEqual(resolvedValue);
+    expect(result).toEqual({
+      page: 1,
+      perPage: 10,
+      total: 0,
+      data: [],
+    });
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "/api/alerting/rules/_find",

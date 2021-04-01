@@ -61,6 +61,7 @@ describe('updateRuleRoute', () => {
         group: mockedAlert.actions[0].group,
         id: mockedAlert.actions[0].id,
         params: mockedAlert.actions[0].params,
+        connector_type_id: mockedAlert.actions[0].actionTypeId,
       },
     ],
   };
@@ -109,6 +110,7 @@ describe('updateRuleRoute', () => {
           "data": Object {
             "actions": Array [
               Object {
+                "actionTypeId": "test",
                 "group": "default",
                 "id": "2",
                 "params": Object {
@@ -203,10 +205,11 @@ describe('updateRuleRoute', () => {
 
     alertsClient.update.mockRejectedValue(new AlertTypeDisabledError('Fail', 'license_invalid'));
 
-    const [context, req, res] = mockHandlerArguments({ alertsClient }, { params: {}, body: {} }, [
-      'ok',
-      'forbidden',
-    ]);
+    const [context, req, res] = mockHandlerArguments(
+      { alertsClient },
+      { params: {}, body: updateRequest },
+      ['ok', 'forbidden']
+    );
 
     await handler(context, req, res);
 

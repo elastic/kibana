@@ -150,7 +150,7 @@ export interface CreateOptions<Params extends AlertTypeParams> {
     | 'mutedInstanceIds'
     | 'actions'
     | 'executionStatus'
-  > & { actions: NormalizedAlertAction[] };
+  > & { actions: AlertAction[] };
   options?: {
     id?: string;
     migrationVersion?: Record<string, string>;
@@ -163,7 +163,7 @@ export interface UpdateOptions<Params extends AlertTypeParams> {
     name: string;
     tags: string[];
     schedule: IntervalSchedule;
-    actions: NormalizedAlertAction[];
+    actions: AlertAction[];
     params: Params;
     throttle: string | null;
     notifyWhen: AlertNotifyWhenType | null;

@@ -22,6 +22,7 @@ import {
   AlertingRequestHandlerContext,
   BASE_ALERTING_API_PATH,
   AlertNotifyWhenType,
+  AlertAction,
 } from '../types';
 
 export const bodySchema = schema.object({
@@ -40,10 +41,19 @@ export const bodySchema = schema.object({
       group: schema.string(),
       id: schema.string(),
       params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+      connector_type_id: schema.string(),
     }),
     { defaultValue: [] }
   ),
   notify_when: schema.string({ validate: validateNotifyWhenType }),
+});
+
+const rewriteBodyReqActions: RewriteRequestCase<AlertAction> = ({
+  connector_type_id: actionTypeId,
+  ...rest
+}) => ({
+  actionTypeId,
+  ...rest,
 });
 
 const rewriteBodyReq: RewriteRequestCase<CreateOptions<AlertTypeParams>['data']> = ({
@@ -121,6 +131,7 @@ export const createRuleRoute = (
                 data: rewriteBodyReq({
                   ...rule,
                   notify_when: rule.notify_when as AlertNotifyWhenType,
+                  actions: rule.actions.map((action) => rewriteBodyReqActions(action)),
                 }),
                 options: { id: params?.id },
               }

@@ -5,31 +5,15 @@
  * 2.0.
  */
 import { HttpSetup } from 'kibana/public';
-import { AlertExecutionStatus } from '../../../../../alerting/common';
 import { BASE_ALERTING_API_PATH } from '../../constants';
-import { Alert, AlertAction, Pagination, Sorting } from '../../../types';
-import { AsApiContract, RewriteRequestCase } from '../../../../../actions/common';
+import { Alert, Pagination, Sorting } from '../../../types';
+import { AsApiContract } from '../../../../../actions/common';
 import { mapFiltersToKql } from './mapFiltersToKql';
-
-const transformAction: RewriteRequestCase<AlertAction> = ({
-  group,
-  id,
-  connector_type_id: actionTypeId,
-  params,
-}) => ({
-  group,
-  id,
-  params,
-  actionTypeId,
-});
-
-const transformExecutionStatus: RewriteRequestCase<AlertExecutionStatus> = ({
-  last_execution_date: lastExecutionDate,
-  ...rest
-}) => ({
-  lastExecutionDate,
-  ...rest,
-});
+import {
+  transformAction,
+  transformExecutionStatus,
+  transformAlert,
+} from './common_transformations';
 
 const rewriteResponseRes = (results: Array<AsApiContract<Alert>>): Alert[] => {
   return results.map((item) => {
@@ -38,36 +22,6 @@ const rewriteResponseRes = (results: Array<AsApiContract<Alert>>): Alert[] => {
     return transformAlert({ ...item, actions, execution_status: executionStatus });
   });
 };
-
-const transformAlert: RewriteRequestCase<Alert> = ({
-  rule_type_id: alertTypeId,
-  created_by: createdBy,
-  updated_by: updatedBy,
-  created_at: createdAt,
-  updated_at: updatedAt,
-  api_key_owner: apiKeyOwner,
-  notify_when: notifyWhen,
-  mute_all: muteAll,
-  muted_alert_ids: mutedInstanceIds,
-  scheduled_task_id: scheduledTaskId,
-  execution_status: executionStatus,
-  actions: actions,
-  ...rest
-}: any) => ({
-  alertTypeId,
-  createdBy,
-  updatedBy,
-  createdAt,
-  updatedAt,
-  apiKeyOwner,
-  notifyWhen,
-  muteAll,
-  mutedInstanceIds,
-  executionStatus,
-  actions,
-  scheduledTaskId,
-  ...rest,
-});
 
 export async function loadAlerts({
   http,
