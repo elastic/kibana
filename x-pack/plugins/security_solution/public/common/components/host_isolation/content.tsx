@@ -5,48 +5,51 @@
  * 2.0.
  */
 
-import React from 'react';
-import {
-  EuiTitle,
-  EuiText,
-  EuiTextArea,
-  EuiCard,
-  EuiButton,
-  EuiIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiContextMenu,
-} from '@elastic/eui';
+import React, { useState } from 'react';
+import { EuiTitle, EuiText, EuiTextArea, EuiSpacer, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import styled from 'styled-components';
 
 export const HostIsolationContent = React.memo(() => {
+  const [comment, setComment] = useState('');
   return (
     <>
-      <EuiTitle>
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.hostIsolation.isolateHost"
-          defaultMessage="Isolate host"
-        />
+      <EuiTitle size="s">
+        <h3>
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.hostIsolation.isolateHost"
+            defaultMessage="Isolate host"
+          />
+        </h3>
       </EuiTitle>
-      <EuiText>
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.hostIsolation.isolateThisHost"
-          defaultMessage="Endpoint Name is currently not isolated. Are you sure you want to isolate this host?"
-        />
+      <EuiSpacer size="s" />
+      <EuiText size="s">
+        <p>
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.hostIsolation.isolateThisHost"
+            defaultMessage="Endpoint-name is currently not isolated. Are you sure you want to isolate this host?"
+          />
+        </p>
       </EuiText>
-      <EuiTitle>
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.hostIsolation.comment"
-          defaultMessage="Comment"
-        />
+      <EuiSpacer size="m" />
+      <EuiTitle size="xs">
+        <h4>
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.hostIsolation.comment"
+            defaultMessage="Comment"
+          />
+        </h4>
       </EuiTitle>
       <EuiTextArea
         data-test-subj="host_isolation_comment"
-        resize="none"
-        placeholder="You may leave an optional note here"
-        value="nani"
-        onChange={console.log('replace this')}
+        fullWidth={true}
+        placeholder={i18n.translate(
+          'xpack.securitySolution.endpoint.hostIsolation.comment.placeholder',
+          { defaultMessage: 'You may leave an optional note here.' }
+        )}
+        value={comment}
+        onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) => setComment(event.target.value)}
       />
     </>
   );
@@ -54,104 +57,76 @@ export const HostIsolationContent = React.memo(() => {
 
 HostIsolationContent.displayName = 'HostIsolationContent';
 
-export const ChooseCaseContent = React.memo(() => {
+const SelectTitle = styled(EuiTitle)`
+  color: ${(props) => props.theme.eui.euiColorPrimary};
+`;
+
+export const SelectCaseContent = React.memo(() => {
+  const [comment, setComment] = useState('');
+  const options = [{ value: 'isolate_host', text: 'Isolate host' }];
+
+  const [selectValue, setSelectValue] = useState(options[0].value);
+
+  const onChange = (e) => {
+    setSelectValue(e.target.value);
+  };
+
   return (
     <>
-      <EuiTitle>
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.hostIsolation.alertResponseActions"
-          defaultMessage="Alert response actions"
-        />
+      <EuiTitle size="s">
+        <h3>
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.hostIsolation.alertResponseActions"
+            defaultMessage="Alert response actions"
+          />
+        </h3>
       </EuiTitle>
-      <EuiText>
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.hostIsolation.alertResponseActions.description"
-          defaultMessage="This action will be added to the # cases associated with someAlert.exe."
-        />
+      <EuiSpacer size="s" />
+      <EuiText size="s">
+        <p>
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.hostIsolation.alertResponseActions.description"
+            defaultMessage="This action will be added to the # cases associated with someAlert.exe."
+          />
+        </p>
       </EuiText>
-      <EuiContextMenu
-        initialPanelId={0}
-        panels={[
-          {
-            id: 0,
-            items: [
-              {
-                name: 'Isolate host',
-                onClick: () => {
-                  console.log('isolate host clicked from context menu');
-                },
-              },
-            ],
-          },
-        ]}
+      <EuiSpacer size="s" />
+      <SelectTitle size="xs">
+        <h4>
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.hostIsolation.alertResponseActions.selectTitle"
+            defaultMessage="Select a response action"
+          />
+        </h4>
+      </SelectTitle>
+      <EuiSelect
+        id="hostIsolationSelectCase"
+        fullWidth
+        options={options}
+        value={selectValue}
+        onChange={(e) => onChange(e)}
       />
-      <EuiTitle>
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.hostIsolation.comment"
-          defaultMessage="Comment"
-        />
+      <EuiSpacer size="l" />
+      <EuiTitle size="xs">
+        <h4>
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.hostIsolation.comment"
+            defaultMessage="Comment"
+          />
+        </h4>
       </EuiTitle>
       <EuiTextArea
         data-test-subj="host_isolation_comment"
-        resize="none"
-        placeholder="You may leave an optional note here"
-        value="nani"
-        onChange={console.log('replace this')}
+        fullWidth={true}
+        placeholder={i18n.translate(
+          'xpack.securitySolution.endpoint.hostIsolation.comment.placeholder',
+          { defaultMessage: 'You may leave an optional note here.' }
+        )}
+        value={comment}
+        onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) => setComment(event.target.value)}
       />
     </>
   );
-  /* return (
-    <>
-      <EuiTitle>
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.hostIsolation.isolateHost"
-          defaultMessage="Isolate host"
-        />
-      </EuiTitle>
-      <EuiText>
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.hostIsolation.relatedCases"
-          defaultMessage="There are no existing cases associated with this alert."
-        />
-      </EuiText>
-      <EuiFlexGroup direction="row">
-        <EuiFlexItem>
-          <EuiCard
-            title={i18n.translate('xpack.securitySolution.endpoint.hostIsolation.newCase', {
-              defaultMessage: 'Create new case',
-            })}
-            description={null}
-            icon={<EuiIcon type="faceSad" size="xl" />}
-            footer={
-              <EuiButton fill={true} onClick={console.log('new')}>
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.hostIsolation.selectButton"
-                  defaultMessage="Select"
-                />
-              </EuiButton>
-            }
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiCard
-            title={i18n.translate('xpack.securitySolution.endpoint.hostIsolation.existingCase', {
-              defaultMessage: 'Add to existing case',
-            })}
-            description={null}
-            icon={<EuiIcon type="folderOpen" size="xl" />}
-            footer={
-              <EuiButton fill={true} onClick={console.log('existing')}>
-                <FormattedMessage
-                  id="xpack.securitySolution.endpoint.hostIsolation.selectButton"
-                  defaultMessage="Select"
-                />
-              </EuiButton>
-            }
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
-    );*/
 });
 
-ChooseCaseContent.displayName = 'ChooseCaseContent';
+SelectCaseContent.displayName = 'SelectCaseContent';

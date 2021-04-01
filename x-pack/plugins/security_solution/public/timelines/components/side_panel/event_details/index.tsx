@@ -81,26 +81,15 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
         <ExpandableEventTitle isAlert={isAlert} loading={loading} />
       </EuiFlyoutHeader>
       <StyledEuiFlyoutBody>
-        <EuiFlexGroup>
-          {!isEndpointAlert && (
-            <EuiFlexItem>
-              <EuiButton onClick={console.log('wow')}>
-                <FormattedMessage id="tempHi" defaultMessage="Hi" />
-              </EuiButton>
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem>
-            <ExpandableEvent
-              browserFields={browserFields}
-              detailsData={detailsData}
-              event={expandedEvent}
-              isAlert={isAlert}
-              loading={loading}
-              timelineId={timelineId}
-              timelineTabType="flyout"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <ExpandableEvent
+          browserFields={browserFields}
+          detailsData={detailsData}
+          event={expandedEvent}
+          isAlert={isAlert}
+          loading={loading}
+          timelineId={timelineId}
+          timelineTabType="flyout"
+        />
       </StyledEuiFlyoutBody>
     </>
   ) : (

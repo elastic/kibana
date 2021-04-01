@@ -32,7 +32,7 @@ import {
 import { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import { LineClamp } from '../../../../common/components/line_clamp';
 import * as i18n from './translations';
-import { HostIsolationContent } from '../../../../common/components/host_isolation/content';
+import { SelectCaseContent } from '../../../../common/components/host_isolation/content';
 
 export type HandleOnEventClosed = () => void;
 interface Props {
@@ -128,20 +128,21 @@ export const ExpandableEvent = React.memo<Props>(
           </EuiFlexItem>
         )}
         <StyledEuiFlexItem grow={true}>
-          <EventDetails
-            browserFields={browserFields}
-            data={detailsData!}
-            id={event.eventId!}
-            isAlert={isAlert}
-            onViewSelected={setView}
-            timelineTabType={timelineTabType}
-            timelineId={timelineId}
-            view={view}
-          />
+          {false ? (
+            <EventDetails
+              browserFields={browserFields}
+              data={detailsData!}
+              id={event.eventId!}
+              isAlert={isAlert}
+              onViewSelected={setView}
+              timelineTabType={timelineTabType}
+              timelineId={timelineId}
+              view={view}
+            />
+          ) : (
+            <SelectCaseContent />
+          )}
         </StyledEuiFlexItem>
-        <EuiFlexItem>
-          <HostIsolationContent />
-        </EuiFlexItem>
       </StyledFlexGroup>
     );
   }
