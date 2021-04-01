@@ -111,7 +111,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
             series={currentPeriod.latency.timeseries}
             valueLabel={asMillisecondDuration(currentPeriod.latency.value)}
             comparisonSeries={
-              comparisonEnabled ? previousPeriod.latency.timeseries : undefined
+              comparisonEnabled ? previousPeriod.latency : undefined
             }
           />
         );
@@ -133,9 +133,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
             series={currentPeriod.throughput.timeseries}
             valueLabel={asTransactionRate(currentPeriod.throughput.value)}
             comparisonSeries={
-              comparisonEnabled
-                ? previousPeriod.throughput.timeseries
-                : undefined
+              comparisonEnabled ? previousPeriod.throughput : undefined
             }
           />
         );
@@ -159,9 +157,7 @@ export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
             series={currentPeriod.errorRate.timeseries}
             valueLabel={asPercent(currentPeriod.errorRate.value, 1)}
             comparisonSeries={
-              comparisonEnabled
-                ? previousPeriod.errorRate.timeseries
-                : undefined
+              comparisonEnabled ? previousPeriod.errorRate : undefined
             }
           />
         );
