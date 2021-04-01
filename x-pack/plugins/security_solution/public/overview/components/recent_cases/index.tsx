@@ -9,6 +9,7 @@ import React, { useCallback } from 'react';
 
 import {
   getCaseDetailsUrl,
+  getCaseUrl,
   getCreateCaseUrl,
 } from '../../../common/components/link_to/redirect_to_case';
 import { useFormatUrl } from '../../../common/components/link_to';
@@ -34,7 +35,7 @@ const RecentCasesComponent = () => {
   );
 
   return casesUi.getRecentCases({
-    allCasesHref: formatUrl(''),
+    allCasesHref: formatUrl(getCaseUrl()),
     createCaseHref: formatUrl(getCreateCaseUrl()),
     getCaseDetailsHref: ({ detailName, subCaseId }: AllCasesNavProps) => {
       return formatUrl(getCaseDetailsUrl({ id: detailName, subCaseId }));
@@ -45,7 +46,7 @@ const RecentCasesComponent = () => {
         path: getCaseDetailsUrl({ id: detailName, search, subCaseId }),
       });
     },
-    perPage: MAX_CASES_TO_SHOW,
+    maxCasesToShow: MAX_CASES_TO_SHOW,
   });
 };
 

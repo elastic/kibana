@@ -16,22 +16,26 @@ const Icon = styled(EuiIcon)`
 const FlexGroup = styled(EuiFlexGroup)`
   margin-right: 16px;
 `;
-
+const OuterContainer = styled.span`
+  width: fit-content;
+`;
 export const IconWithCount = React.memo<{ count: number; icon: string; tooltip: string }>(
   ({ count, icon, tooltip }) => (
-    <EuiToolTip content={tooltip}>
-      <FlexGroup alignItems="center" gutterSize="none">
-        <EuiFlexItem grow={false}>
-          <Icon color="subdued" size="s" type={icon} />
-        </EuiFlexItem>
+    <OuterContainer>
+      <EuiToolTip content={tooltip}>
+        <FlexGroup alignItems="center" gutterSize="none">
+          <EuiFlexItem grow={false}>
+            <Icon color="subdued" size="s" type={icon} />
+          </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <EuiText color="subdued" size="xs">
-            {count}
-          </EuiText>
-        </EuiFlexItem>
-      </FlexGroup>
-    </EuiToolTip>
+          <EuiFlexItem grow={false}>
+            <EuiText color="subdued" size="xs">
+              {count}
+            </EuiText>
+          </EuiFlexItem>
+        </FlexGroup>
+      </EuiToolTip>
+    </OuterContainer>
   )
 );
 

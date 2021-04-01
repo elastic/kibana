@@ -12,7 +12,7 @@ import { TestProviders } from '../../../common/mock';
 import { NoCases } from '.';
 
 describe('RecentCases', () => {
-  it('if no cases, you should be able to create a case by clicking on the link "start a new case"', () => {
+  it('if no cases, a link to create cases will exist', () => {
     const createCaseHref = '/create';
     const wrapper = mount(
       <TestProviders>

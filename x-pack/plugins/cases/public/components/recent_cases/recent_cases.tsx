@@ -31,7 +31,7 @@ export interface RecentCasesProps {
   filterOptions: Partial<FilterOptions>;
   getCaseDetailsHref: (caseDetails: CaseDetailsHrefSchema) => string;
   onCaseDetailsNavClick: (caseDetails: CaseDetailsHrefSchema) => void;
-  perPage: number;
+  maxCasesToShow: number;
 }
 const usePrevious = (value: Partial<FilterOptions>) => {
   const ref = useRef();
@@ -45,10 +45,10 @@ export const RecentCasesComp = ({
   filterOptions,
   getCaseDetailsHref,
   onCaseDetailsNavClick,
-  perPage,
+  maxCasesToShow,
 }: RecentCasesProps) => {
   const previousFilterOptions = usePrevious(filterOptions);
-  const { data, loading, setFilters } = useGetCases({ perPage });
+  const { data, loading, setFilters } = useGetCases({ perPage: maxCasesToShow });
 
   useEffect(() => {
     if (previousFilterOptions !== undefined && !isEqual(previousFilterOptions, filterOptions)) {

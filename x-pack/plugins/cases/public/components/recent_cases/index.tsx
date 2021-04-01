@@ -21,7 +21,7 @@ export interface RecentCasesProps {
   getCaseDetailsHref: (caseDetails: CaseDetailsHrefSchema) => string;
   goToAllCases: (ev: React.MouseEvent) => void;
   onCaseDetailsNavClick: (caseDetails: CaseDetailsHrefSchema) => void;
-  perPage: number;
+  maxCasesToShow: number;
 }
 
 const RecentCases = ({
@@ -30,7 +30,7 @@ const RecentCases = ({
   getCaseDetailsHref,
   goToAllCases,
   onCaseDetailsNavClick,
-  perPage,
+  maxCasesToShow,
 }: RecentCasesProps) => {
   const currentUser = useCurrentUser();
   const [recentCasesFilterBy, setRecentCasesFilterBy] = useState<RecentCasesFilterMode>(
@@ -78,7 +78,7 @@ const RecentCases = ({
           filterOptions={recentCasesFilterOptions}
           getCaseDetailsHref={getCaseDetailsHref}
           onCaseDetailsNavClick={onCaseDetailsNavClick}
-          perPage={perPage}
+          maxCasesToShow={maxCasesToShow}
         />
         <EuiHorizontalRule margin="s" />
         <EuiText size="xs">
