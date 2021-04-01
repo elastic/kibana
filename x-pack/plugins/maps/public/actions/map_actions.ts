@@ -10,8 +10,8 @@ import { AnyAction, Dispatch } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import turfBboxPolygon from '@turf/bbox-polygon';
 import turfBooleanContains from '@turf/boolean-contains';
-
 import { Filter, Query, TimeRange } from 'src/plugins/data/public';
+import { DRAW_TYPE } from '../../common/constants';
 import { MapStoreState } from '../reducers/store';
 import {
   getDataFilters,
@@ -43,6 +43,7 @@ import {
   TRACK_MAP_SETTINGS,
   TRIGGER_REFRESH_TIMER,
   UPDATE_DRAW_STATE,
+  UPDATE_DRAW_FEATURE_STATE,
   UPDATE_MAP_SETTING,
 } from './map_action_constants';
 import { autoFitToBounds, syncDataForAllLayers } from './data_request_actions';
@@ -320,6 +321,16 @@ export function updateDrawState(drawState: DrawState | null) {
     dispatch({
       type: UPDATE_DRAW_STATE,
       drawState,
+    });
+  };
+}
+
+export function updateDrawFeatureState(drawFeatureState: DRAW_TYPE) {
+  return (dispatch: Dispatch) => {
+    dispatch({ type: SET_OPEN_TOOLTIPS, openTooltips: [] });
+    dispatch({
+      type: UPDATE_DRAW_FEATURE_STATE,
+      drawFeatureState,
     });
   };
 }

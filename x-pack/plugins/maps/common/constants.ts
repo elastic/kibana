@@ -156,6 +156,7 @@ export enum DRAW_TYPE {
   BOUNDS = 'BOUNDS',
   DISTANCE = 'DISTANCE',
   POLYGON = 'POLYGON',
+  POINT = 'POINT',
 }
 
 export const AGG_DELIMITER = '_of_';

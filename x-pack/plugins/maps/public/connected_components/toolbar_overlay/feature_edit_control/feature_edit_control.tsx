@@ -8,21 +8,17 @@
 import React, { Component } from 'react';
 import {
   EuiButtonIcon,
-  EuiPopover,
+  EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
-  EuiContextMenuItem,
+  EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
-import { DRAW_TYPE, ES_GEO_FIELD_TYPE, ES_SPATIAL_RELATIONS } from '../../../../common/constants';
+import { DRAW_TYPE } from '../../../../common/constants';
 // @ts-expect-error
 import { GeometryFilterForm } from '../../../components/geometry_filter_form';
 import { GeoFieldWithIndex } from '../../../components/geo_field_with_index';
-import { DrawState } from '../../../../common/descriptor_types';
 
 const DRAW_SHAPE = i18n.translate('xpack.maps.toolbarOverlay.drawShapeLabelShort', {
   defaultMessage: 'Draw shape',
@@ -39,10 +35,7 @@ const DRAW_DISTANCE = i18n.translate('xpack.maps.toolbarOverlay.drawDistanceLabe
 export interface Props {
   cancelDraw: () => void;
   geoFields: GeoFieldWithIndex[];
-  initiateDraw: (drawState: DrawState) => void;
-  isDrawingFilter: boolean;
-  getFilterActions?: () => Promise<Action[]>;
-  getActionContext?: () => ActionExecutionContext;
+  initiateDraw: (drawFeatureState: DRAW_TYPE) => void;
 }
 
 interface State {
@@ -94,16 +87,16 @@ export class FeatureEditControl extends Component<Props, State> {
       >
         <EuiContextMenuPanel
           items={[
-            <EuiContextMenuItem key="" onClick={() => console.log('Polygon!')}>
+            <EuiContextMenuItem key="1" onClick={() => this.props.initiateDraw(DRAW_TYPE.POLYGON)}>
               Polygon
             </EuiContextMenuItem>,
-            <EuiContextMenuItem key="" onClick={() => console.log('Rectangle')}>
+            <EuiContextMenuItem key="2" onClick={() => this.props.initiateDraw(DRAW_TYPE.BOUNDS)}>
               Rectangle
             </EuiContextMenuItem>,
-            <EuiContextMenuItem key="" onClick={() => console.log('Polyline')}>
+            <EuiContextMenuItem key="3" onClick={() => this.props.initiateDraw(DRAW_TYPE.DISTANCE)}>
               Polyline
             </EuiContextMenuItem>,
-            <EuiContextMenuItem key="" onClick={() => console.log('Point')}>
+            <EuiContextMenuItem key="4" onClick={() => this.props.initiateDraw(DRAW_TYPE.POINT)}>
               Point
             </EuiContextMenuItem>,
           ]}
@@ -114,14 +107,14 @@ export class FeatureEditControl extends Component<Props, State> {
     return (
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>{featureEditControlPopoverButton}</EuiFlexItem>
-        {/*<EuiFlexItem>*/}
+        {/* <EuiFlexItem>*/}
         {/*  <EuiButton size="s" fill onClick={this.props.cancelDraw}>*/}
         {/*    <FormattedMessage*/}
         {/*      id="xpack.maps.tooltip.FeatureEditControl.cancelDrawButtonLabel"*/}
         {/*      defaultMessage="Cancel"*/}
         {/*    />*/}
         {/*  </EuiButton>*/}
-        {/*</EuiFlexItem>*/}
+        {/* </EuiFlexItem>*/}
       </EuiFlexGroup>
     );
   }
