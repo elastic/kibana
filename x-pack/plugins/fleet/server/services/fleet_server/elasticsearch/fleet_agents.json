@@ -80,6 +80,9 @@
                         "ignore_above": 16
                       }
                     }
+                  },
+                  "packages": {
+                    "type": "keyword"
                   }
                 }
               }
