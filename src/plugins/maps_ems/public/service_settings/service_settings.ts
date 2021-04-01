@@ -45,6 +45,9 @@ export class ServiceSettings implements IServiceSettings {
         return fetch(...args);
       },
     });
+    // any kibana user, regardless of distribution, should get all zoom levels
+    // use `sspl` license to indicate this
+    this._emsClient.addQueryParams({ license: 'sspl' });
 
     const markdownIt = new MarkdownIt({
       html: false,
