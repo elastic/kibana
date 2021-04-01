@@ -8,63 +8,46 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { getDetectionAlertMock } from '../../../../../../common/mock';
+import { Ecs } from '../../../../../../../common/ecs';
+import { getDetectionAlertFieldsMock } from '../../../../../../common/mock';
 
 import { threatMatchRowRenderer } from './threat_match_row_renderer';
 
 describe('threatMatchRowRenderer', () => {
-  let alertMock: ReturnType<typeof getDetectionAlertMock>;
+  let threatMatchFields: ReturnType<typeof getDetectionAlertFieldsMock>;
+  let ecs: Ecs;
 
   beforeEach(() => {
-    alertMock = getDetectionAlertMock({
-      threat: {
-        indicator: [
-          {
-            matched: {
-              type: 'url',
-            },
-          },
-        ],
-      },
-    });
+    ecs = {
+      _id: 'abcd',
+      timestamp: '2018-11-12T19:03:25.936Z',
+    };
+    threatMatchFields = getDetectionAlertFieldsMock([
+      { field: 'threat.indicator.matched.type', value: ['url'] },
+    ]);
   });
 
   describe('#isInstance', () => {
-    it('is false for a minimal event', () => {
-      const minimalEvent = {
-        _id: 'abcd',
-        timestamp: '2018-11-12T19:03:25.936Z',
-      };
-      expect(threatMatchRowRenderer.isInstance(minimalEvent)).toBe(false);
+    it('is false for an empty event', () => {
+      expect(threatMatchRowRenderer.isInstance(ecs, [])).toBe(false);
     });
 
     it('is false for an alert with indicator data but no match', () => {
-      const indicatorEvent = getDetectionAlertMock({
-        threat: {
-          indicator: {
-            type: 'url',
-          },
-        },
-      });
-      expect(threatMatchRowRenderer.isInstance(indicatorEvent)).toBe(false);
+      const indicatorTypeFields = getDetectionAlertFieldsMock([
+        { field: 'threat.indicator.type', value: ['url'] },
+      ]);
+      expect(threatMatchRowRenderer.isInstance(ecs, indicatorTypeFields)).toBe(false);
     });
 
-    it('is true for any event with indicator match fields', () => {
-      const indicatorMatchEvent = {
-        _id: 'abc',
-        threat: {
-          indicator: {
-            matched: {
-              type: 'ip',
-            },
-          },
-        },
-      };
-      expect(threatMatchRowRenderer.isInstance(indicatorMatchEvent)).toBe(true);
+    it('is false for an alert with threat match fields but no data', () => {
+      const emptyThreatMatchFields = getDetectionAlertFieldsMock([
+        { field: 'threat.indicator.matched.type', value: [] },
+      ]);
+      expect(threatMatchRowRenderer.isInstance(ecs, emptyThreatMatchFields)).toBe(false);
     });
 
-    it('is true for an alert enriched by an indicator match', () => {
-      expect(threatMatchRowRenderer.isInstance(alertMock)).toBe(true);
+    it('is true for an alert event with present indicator match fields', () => {
+      expect(threatMatchRowRenderer.isInstance(ecs, threatMatchFields)).toBe(true);
     });
   });
 
@@ -72,7 +55,8 @@ describe('threatMatchRowRenderer', () => {
     it('renders correctly against snapshot', () => {
       const children = threatMatchRowRenderer.renderRow({
         browserFields: {},
-        data: alertMock,
+        data: ecs,
+        flattenedData: threatMatchFields,
         timelineId: 'test',
       });
       const wrapper = shallow(<span>{children}</span>);

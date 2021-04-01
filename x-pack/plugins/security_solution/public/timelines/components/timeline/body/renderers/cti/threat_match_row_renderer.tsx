@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import { get } from 'lodash/fp';
+import { isEmpty } from 'lodash/fp';
 
 import { Ecs } from '../../../../../../../common/ecs';
+import { TimelineNonEcsData } from '../../../../../../../common/search_strategy';
 import { RowRendererId } from '../../../../../../../common/types/timeline';
-import { asArrayIfExists } from '../../../../../../common/lib/helpers';
 import { RowRenderer } from '../row_renderer';
 import { ThreatMatchRow } from './threat_match_row';
 
-const THREAT_INDICATOR_FIELD = 'threat.indicator';
-const isThreatMatch = (ecs: Ecs): boolean => {
-  const [threatIndicator] = asArrayIfExists(get(THREAT_INDICATOR_FIELD, ecs)) ?? [];
-  return !!threatIndicator?.matched;
-};
+const THREAT_MATCH_FIELD = 'threat.indicator.matched.type';
+const isThreatMatch = (ecs: Ecs, fields: TimelineNonEcsData[] = []): boolean =>
+  fields.some((field) => field.field === THREAT_MATCH_FIELD && !isEmpty(field.value));
 
 export const requiredFields = [
   'threat.indicator.event.dataset',

@@ -6,6 +6,7 @@
  */
 
 import { Ecs } from '../../../common/ecs';
+import { TimelineNonEcsData } from '../../../common/search_strategy';
 
 export const mockEcsDataWithAlert: Ecs = {
   _id: '1',
@@ -77,3 +78,11 @@ export const getDetectionAlertMock = (overrides: Partial<Ecs> = {}): Ecs => ({
   ...mockEcsDataWithAlert,
   ...overrides,
 });
+
+export const getDetectionAlertFieldsMock = (
+  fields: TimelineNonEcsData[] = []
+): TimelineNonEcsData[] => [
+  { field: '@timestamp', value: ['2021-03-27T06:28:47.292Z'] },
+  { field: 'signal.rule.type', value: ['threat_match'] },
+  ...fields,
+];
