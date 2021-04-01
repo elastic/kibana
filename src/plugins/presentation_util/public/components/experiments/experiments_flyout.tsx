@@ -14,6 +14,7 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiButton,
+  EuiButtonEmpty,
   EuiFlexItem,
   EuiFlexGroup,
   EuiIcon,
@@ -82,48 +83,43 @@ export const ExperimentsFlyout = (props: Props) => {
 
   let footer: ReactNode = null;
 
-  if (overrideCount || isChanged) {
-    const resetButton = (
-      <EuiButton
-        color="danger"
-        onClick={() => {
-          reset();
-          setExperiments(getExperiments());
-        }}
-      >
-        {strings.getResetToDefaultLabel()}
-      </EuiButton>
-    );
+  const resetButton = (
+    <EuiButtonEmpty
+      onClick={() => {
+        reset();
+        setExperiments(getExperiments());
+      }}
+      isDisabled={!overrideCount || !isChanged}
+    >
+      {strings.getResetToDefaultLabel()}
+    </EuiButtonEmpty>
+  );
 
-    const refreshButton = (
-      <EuiButton
-        color="primary"
-        fill={true}
-        onClick={() => {
-          window.location.reload();
-        }}
-      >
-        {strings.getRefreshLabel()}
-      </EuiButton>
-    );
+  const refreshButton = (
+    <EuiButton
+      color="primary"
+      fill={true}
+      onClick={() => {
+        window.location.reload();
+      }}
+      isDisabled={overrideCount || !isChanged ? true : false}
+    >
+      {strings.getRefreshLabel()}
+    </EuiButton>
+  );
 
-    footer = (
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween" style={{ margin: '0 8px' }}>
-          <EuiFlexItem style={{ textAlign: 'left' }} grow={false}>
-            {overrideCount > 0 ? resetButton : null}
-          </EuiFlexItem>
-          <EuiFlexItem style={{ textAlign: 'right' }} grow={false}>
-            {isChanged ? refreshButton : null}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
-    );
-  }
+  footer = (
+    <EuiFlyoutFooter>
+      <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+        <EuiFlexItem grow={false}>{resetButton}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{refreshButton}</EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlyoutFooter>
+  );
 
   return (
-    <EuiFlyout onClose={onClose} paddingSize="none">
-      <EuiFlyoutHeader style={{ padding: '12px 12px 0 12px' }}>
+    <EuiFlyout onClose={onClose}>
+      <EuiFlyoutHeader>
         <EuiTitle size="m">
           <h2>
             <EuiFlexGroup gutterSize="s" alignItems="center">
