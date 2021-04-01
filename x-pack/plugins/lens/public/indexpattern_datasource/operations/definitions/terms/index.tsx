@@ -23,7 +23,7 @@ import { DataType } from '../../../../types';
 import { OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
 import { ValuesInput } from './values_input';
-import { getEsAggsSuffix, getInvalidFieldMessage } from '../helpers';
+import { getInvalidFieldMessage } from '../helpers';
 import type { IndexPatternLayer } from '../../../types';
 
 function ofName(name?: string) {
@@ -137,11 +137,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       schema: 'segment',
       field: column.sourceField,
       orderBy:
-        column.params.orderBy.type === 'alphabetical'
-          ? '_key'
-          : `${column.params.orderBy.columnId}${getEsAggsSuffix(
-              layer.columns[column.params.orderBy.columnId]
-            )}`,
+        column.params.orderBy.type === 'alphabetical' ? '_key' : column.params.orderBy.columnId,
       order: column.params.orderDirection,
       size: column.params.size,
       otherBucket: Boolean(column.params.otherBucket),
