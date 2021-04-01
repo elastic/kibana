@@ -43,6 +43,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
   },
+  'banners:textContent': {
+    type: 'keyword',
+    _meta: { description: 'Default value of the setting was changed.' },
+  },
   // non-sensitive
   'visualize:enableLabs': {
     type: 'boolean',
@@ -406,6 +410,18 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'apm:enableServiceOverview': {
     type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'banners:placement': {
+    type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'banners:textColor': {
+    type: 'text',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'banners:backgroundColor': {
+    type: 'text',
     _meta: { description: 'Non-default value of setting.' },
   },
   'observability:enableAlertingExperience': {

@@ -50,7 +50,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await testSubjects.existOrFail('csvDownloadStarted'); // validate toast panel
   };
 
-  describe('Download CSV', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/96000
+  describe.skip('Download CSV', () => {
     before('initialize tests', async () => {
       log.debug('ReportingPage:initTests');
       await browser.setWindowSize(1600, 850);
