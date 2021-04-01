@@ -5,19 +5,21 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import * as React from 'react';
 import { DrilldownTable } from '../../components/drilldown_table';
 import { useDrilldownManager } from '../context';
+import { CloningNotification } from './cloning_notification';
 
 const FIVE_SECONDS = 5e3;
 
 export const DrilldownList: React.FC = ({}) => {
   const drilldowns = useDrilldownManager();
   const events = drilldowns.useEvents();
-  const showCloningNotification = React.useMemo(
+  const cloningNotificationCount = React.useMemo<number>(
     () =>
-      !!drilldowns.lastCloneRecord && drilldowns.lastCloneRecord.time > Date.now() - FIVE_SECONDS,
+      !!drilldowns.lastCloneRecord && drilldowns.lastCloneRecord.time > Date.now() - FIVE_SECONDS
+        ? drilldowns.lastCloneRecord.templateIds.length
+        : 0,
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
@@ -25,13 +27,8 @@ export const DrilldownList: React.FC = ({}) => {
     drilldowns.lastCloneRecord = null;
   });
 
-  const notification = showCloningNotification && (
-    <>
-      <EuiCallOut title="Cloned" color="success" iconType="check">
-        <p>You successfully, cloned 2 drilldowns.</p>
-      </EuiCallOut>
-      <EuiSpacer />
-    </>
+  const notification = !!cloningNotificationCount && (
+    <CloningNotification count={cloningNotificationCount} />
   );
 
   return (
