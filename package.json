@@ -76,6 +76,7 @@
     "**/cross-fetch/node-fetch": "^2.6.1",
     "**/deepmerge": "^4.2.2",
     "**/fast-deep-equal": "^3.1.1",
+    "globby/fast-glob": "3.2.5",
     "**/graphql-toolkit/lodash": "^4.17.21",
     "**/hoist-non-react-statics": "^3.3.2",
     "**/isomorphic-fetch/node-fetch": "^2.6.1",
