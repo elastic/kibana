@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
@@ -26,6 +26,18 @@ const LeftColumn = styled(EuiFlexItem)`
 `;
 
 export const OverviewPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
+  // Collect all package-level and integration-level screenshots
+  const allScreenshots = useMemo(
+    () =>
+      (packageInfo.policy_templates || []).reduce(
+        (screenshots, policyTemplate) => {
+          return [...screenshots, ...(policyTemplate.screenshots || [])];
+        },
+        [...(packageInfo.screenshots || [])]
+      ),
+    [packageInfo.policy_templates, packageInfo.screenshots]
+  );
+
   return (
     <EuiFlexGroup alignItems="flexStart">
       <LeftColumn grow={2} />
@@ -40,10 +52,10 @@ export const OverviewPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
       </EuiFlexItem>
       <EuiFlexItem grow={3}>
         <EuiFlexGroup direction="column" gutterSize="l" alignItems="flexStart">
-          {packageInfo.screenshots && packageInfo.screenshots.length ? (
+          {allScreenshots.length ? (
             <EuiFlexItem>
               <Screenshots
-                images={packageInfo.screenshots}
+                images={allScreenshots}
                 packageName={packageInfo.name}
                 version={packageInfo.version}
               />

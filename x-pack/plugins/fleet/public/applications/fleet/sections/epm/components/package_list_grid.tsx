@@ -6,7 +6,7 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useState, useMemo } from 'react';
 import type { Query } from '@elastic/eui';
 import {
   EuiFlexGrid,
@@ -24,23 +24,53 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { Loading } from '../../../components';
 import type { PackageList } from '../../../types';
 import { useLocalSearch, searchIdField } from '../hooks';
-import { pkgKeyFromPackageInfo } from '../../../services/pkg_key_from_package_info';
 
 import { PackageCard } from './package_card';
 
-interface ListProps {
+interface PackageListProps {
   isLoading?: boolean;
   controls?: ReactNode;
   title: string;
-  list: PackageList;
+  packages: PackageList;
+  showIntegrations?: boolean;
 }
 
-export function PackageListGrid({ isLoading, controls, title, list }: ListProps) {
+export function PackageListGrid({
+  isLoading,
+  controls,
+  title,
+  packages,
+  showIntegrations = true,
+}: PackageListProps) {
   const initialQuery = EuiSearchBar.Query.MATCH_ALL;
 
   const [query, setQuery] = useState<Query | null>(initialQuery);
   const [searchTerm, setSearchTerm] = useState('');
-  const localSearchRef = useLocalSearch(list);
+  const packagesAndIntegrations = useMemo(
+    () =>
+      showIntegrations
+        ? packages.reduce((acc: PackageList, pkg) => {
+            return [
+              ...acc,
+              pkg,
+              ...(pkg.policy_templates?.length
+                ? pkg.policy_templates.map((integration) => {
+                    const { name, title: integrationTitle, description, icons } = integration;
+                    return {
+                      ...pkg,
+                      title: integrationTitle,
+                      description,
+                      integration: name,
+                      icons: icons || pkg.icons,
+                    };
+                  })
+                : []),
+            ];
+          }, [])
+        : packages,
+    [packages, showIntegrations]
+  );
+  const localSearchRef = useLocalSearch(packagesAndIntegrations);
 
   const onQueryChange = ({
     // eslint-disable-next-line @typescript-eslint/no-shadow
@@ -58,21 +88,29 @@ export function PackageListGrid({ isLoading, controls, title, list }: ListProps)
     }
   };
 
-  const controlsContent = <ControlsColumn title={title} controls={controls} />;
-  let gridContent: JSX.Element;
+  const controlsContent = useMemo(() => <ControlsColumn title={title} controls={controls} />, [
+    controls,
+    title,
+  ]);
 
-  if (isLoading || !localSearchRef.current) {
-    gridContent = <Loading />;
-  } else {
-    const filteredList = searchTerm
-      ? list.filter((item) =>
-          (localSearchRef.current!.search(searchTerm) as PackageList)
-            .map((match) => match[searchIdField])
-            .includes(item[searchIdField])
-        )
-      : list;
-    gridContent = <GridColumn list={filteredList} />;
-  }
+  const filteredPackages = useMemo(
+    () =>
+      !isLoading && searchTerm
+        ? packagesAndIntegrations.filter((pkg) =>
+            (localSearchRef.current!.search(searchTerm) as PackageList)
+              .map((match) => match[searchIdField])
+              .includes(pkg[searchIdField])
+          )
+        : packagesAndIntegrations,
+    [isLoading, localSearchRef, packagesAndIntegrations, searchTerm]
+  );
+
+  const gridContent = useMemo(() => {
+    if (isLoading || !localSearchRef.current) {
+      return <Loading />;
+    }
+    return <GridColumn packages={filteredPackages} />;
+  }, [filteredPackages, isLoading, localSearchRef]);
 
   return (
     <EuiFlexGroup alignItems="flexStart">
@@ -116,18 +154,20 @@ function ControlsColumn({ controls, title }: ControlsColumnProps) {
 }
 
 interface GridColumnProps {
-  list: PackageList;
+  packages: PackageList;
 }
 
-function GridColumn({ list }: GridColumnProps) {
+function GridColumn({ packages }: GridColumnProps) {
   return (
     <EuiFlexGrid gutterSize="l" columns={3}>
-      {list.length ? (
-        list.map((item) => (
-          <EuiFlexItem key={pkgKeyFromPackageInfo(item)}>
-            <PackageCard {...item} />
-          </EuiFlexItem>
-        ))
+      {packages.length ? (
+        packages.map((pkg, i) => {
+          return (
+            <EuiFlexItem key={i}>
+              <PackageCard {...pkg} />
+            </EuiFlexItem>
+          );
+        })
       ) : (
         <EuiFlexItem>
           <EuiText>

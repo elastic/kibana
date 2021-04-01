@@ -113,7 +113,8 @@ function InstalledPackages() {
       isLoading={isLoadingPackages}
       controls={controls}
       title={title}
-      list={selectedCategory === 'updates_available' ? updatablePackages : allInstalledPackages}
+      packages={selectedCategory === 'updates_available' ? updatablePackages : allInstalledPackages}
+      showIntegrations={false}
     />
   );
 }
@@ -166,7 +167,7 @@ function AvailablePackages() {
       isLoading={isLoadingCategoryPackages}
       title={title}
       controls={controls}
-      list={packages}
+      packages={packages}
     />
   );
 }
