@@ -23,6 +23,9 @@ if [[ "$CI_STATS_BUILD_ID" ]]; then
   export KIBANA_CI_STATS_CONFIG
 fi
 
+GITHUB_TOKEN=$(vault read -field=github_token secret/kibana-issues/dev/kibanamachine)
+export GITHUB_TOKEN
+
 if [[ -d .ci/buildkite ]]; then
   source .ci/buildkite/setup.sh
 fi

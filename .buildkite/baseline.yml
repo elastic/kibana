@@ -1,3 +1,6 @@
+env:
+  GITHUB_COMMIT_STATUS_ENABLE: 'true'
+  GITHUB_COMMIT_STATUS_CONTEXT: 'buildkite/kibana-ci-baseline'
 steps:
   - command: .buildkite/scripts/build-setup.sh
     label: Pre-Build

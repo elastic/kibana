@@ -23,7 +23,15 @@ apt-get install --yes \
 
 # TODO
 curl -fsSL https://deb.nodesource.com/setup_14.x | sudo -E bash -
-sudo apt-get install -y nodejs
+apt-get install -y nodejs
+
+# Install GitHub cli (gh)
+{
+  apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
+  apt-add-repository https://cli.github.com/packages
+  apt update
+  apt install gh
+}
 
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
 add-apt-repository \
@@ -101,7 +109,7 @@ token="$BUILDKITE_TOKEN"
 build-path="/var/lib/buildkite-agent/builds"
 hooks-path="/etc/buildkite-agent/hooks"
 plugins-path="/etc/buildkite-agent/plugins"
-experiment="git-mirrors"
+experiment="git-mirrors output-redactor"
 git-mirrors-path="/var/lib/gitmirrors"
 #git-clone-flags="--dissociate"
 git-clone-mirror-flags="-v --bare"
