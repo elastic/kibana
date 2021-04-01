@@ -72,6 +72,12 @@ export const getThemeSettings = (
       }),
       requiresPageReload: true,
       schema: schema.oneOf(availableVersions.map((v) => schema.literal(v)) as [Type<string>]),
+      optionLabels:
+        !options?.isDist && availableVersions.length === 1
+          ? {
+              [availableVersions[0]]: `${availableVersions[0]} - set "KBN_OPTIMIZER_THEMES=v7light,v7dark,v8light,v8dark" to get other options`,
+            }
+          : undefined,
     },
   };
 };
