@@ -114,6 +114,52 @@ describe('KibanaRequest', () => {
     });
   });
 
+  describe('query', () => {
+    it('is correctly retrieved from the request', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const router = createRouter('/');
+      router.get(
+        {
+          path: '/query',
+          validate: {
+            query: schema.maybe(
+              schema.object({
+                foo: schema.string(),
+              })
+            ),
+          },
+        },
+        (context, req, res) => res.ok({ body: { query: req.query } })
+      );
+      await server.start();
+
+      const { body } = await supertest(innerServer.listener).get('/query?foo=bar').expect(200);
+      expect(body.query).toEqual({ foo: 'bar' });
+    });
+
+    it('is undefined when query is empty', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const router = createRouter('/');
+      router.get(
+        {
+          path: '/query',
+          validate: {
+            query: schema.maybe(
+              schema.object({
+                foo: schema.string(),
+              })
+            ),
+          },
+        },
+        (context, req, res) => res.ok({ body: { query: req.query } })
+      );
+      await server.start();
+
+      const { body } = await supertest(innerServer.listener).get('/query').expect(200);
+      expect(body.query).toBeUndefined();
+    });
+  });
+
   describe('route options', () => {
     describe('authRequired', () => {
       it('returns false if a route configured with "authRequired": false', async () => {
@@ -350,6 +396,7 @@ describe('KibanaRequest', () => {
       expect(resp3.body).toEqual({ requestId: 'gamma' });
     });
   });
+
   describe('request uuid', () => {
     it('generates a UUID', async () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
