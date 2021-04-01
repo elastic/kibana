@@ -50,13 +50,18 @@ function getNormalizedValueByRange(
   { stops, range, rangeMin, rangeMax }: CustomPaletteState,
   minMax: { min: number; max: number }
 ) {
+  let result = value;
   if (stops.length && range !== 'percent') {
-    return (100 * (value - minMax.min)) / ((rangeMax ?? minMax.max) - (rangeMin ?? minMax.min));
+    result = (100 * (value - minMax.min)) / ((rangeMax ?? minMax.max) - (rangeMin ?? minMax.min));
   }
   if (range === 'percent') {
-    return (100 * (value - minMax.min)) / (minMax.max - minMax.min);
+    result = (100 * (value - minMax.min)) / (minMax.max - minMax.min);
   }
-  return value;
+  // for a range of 1 value the formulas above will divide by 0, so here's a safety guard
+  if (Number.isNaN(result)) {
+    return 1;
+  }
+  return result;
 }
 
 function workoutColorForCell(
