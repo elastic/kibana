@@ -22981,7 +22981,7 @@ class Project {
 
   ensureValidProjectDependency(project) {
     const relativePathToProject = normalizePath(path__WEBPACK_IMPORTED_MODULE_1___default.a.relative(this.path, project.path));
-    const relativePathToProjectIfBazelPkg = normalizePath(path__WEBPACK_IMPORTED_MODULE_1___default.a.relative(this.path, `bazel/bin/packages/${path__WEBPACK_IMPORTED_MODULE_1___default.a.basename(project.path)}`));
+    const relativePathToProjectIfBazelPkg = normalizePath(path__WEBPACK_IMPORTED_MODULE_1___default.a.relative(this.path, `bazel-bin/packages/${path__WEBPACK_IMPORTED_MODULE_1___default.a.basename(project.path)}`));
     const versionInPackageJson = this.allDependencies[project.name];
     const expectedVersionInPackageJson = `link:${relativePathToProject}`;
     const expectedVersionInPackageJsonIfBazelPkg = `link:${relativePathToProjectIfBazelPkg}`; // TODO: after introduce bazel to build all the packages and completely remove the support for kbn packages
@@ -23143,7 +23143,7 @@ const createProductionPackageJson = pkgJson => _objectSpread(_objectSpread({}, p
   dependencies: transformDependencies(pkgJson.dependencies)
 });
 const isLinkDependency = depVersion => depVersion.startsWith('link:');
-const isBazelPackageDependency = depVersion => depVersion.startsWith('link:bazel/bin/');
+const isBazelPackageDependency = depVersion => depVersion.startsWith('link:bazel-bin/');
 /**
  * Replaces `link:` dependencies with `file:` dependencies. When installing
  * dependencies, these `file:` dependencies will be copied into `node_modules`
@@ -23153,7 +23153,7 @@ const isBazelPackageDependency = depVersion => depVersion.startsWith('link:bazel
  * will then _copy_ the `file:` dependencies into `node_modules` instead of
  * symlinking like we do in development.
  *
- * Additionally it also taken care of replacing `link:bazel/bin/` with
+ * Additionally it also taken care of replacing `link:bazel-bin/` with
  * `file:` so we can also support the copy of the Bazel packages dist already into
  * build/packages to be copied into the node_modules
  */
@@ -23170,7 +23170,7 @@ function transformDependencies(dependencies = {}) {
     }
 
     if (isBazelPackageDependency(depVersion)) {
-      newDeps[name] = depVersion.replace('link:bazel/bin/', 'file:');
+      newDeps[name] = depVersion.replace('link:bazel-bin/', 'file:');
       continue;
     }
 
