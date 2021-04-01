@@ -439,10 +439,14 @@ export class AggConfig {
   }
 
   fieldIsTimeField() {
-    const indexPattern = this.getIndexPattern();
-    if (!indexPattern) return false;
-    const timeFieldName = indexPattern.timeFieldName;
-    return timeFieldName && this.fieldName() === timeFieldName;
+    const defaultTimeField = this.getIndexPattern()?.getTimeField?.()?.name;
+    const defaultTimeFields = defaultTimeField ? [defaultTimeField] : [];
+    const allTimeFields =
+      this.aggConfigs.timeFields && this.aggConfigs.timeFields.length > 0
+        ? this.aggConfigs.timeFields
+        : defaultTimeFields;
+    const currentFieldName = this.fieldName();
+    return allTimeFields.includes(currentFieldName);
   }
 
   public get type() {
