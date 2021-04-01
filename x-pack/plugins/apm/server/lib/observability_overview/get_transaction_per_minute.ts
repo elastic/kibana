@@ -11,7 +11,6 @@ import {
 } from '../../../common/transaction_types';
 import { TRANSACTION_TYPE } from '../../../common/elasticsearch_fieldnames';
 import { rangeQuery } from '../../../server/utils/queries';
-import { Coordinates } from '../../../../observability/typings/common';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
 import { calculateThroughput } from '../helpers/calculate_throughput';
@@ -25,7 +24,7 @@ export function getTransactionPerMinute({
   setup: Setup & SetupTimeRange;
   bucketSize: string;
   searchAggregatedTransactions: boolean;
-}): Promise<{ value: number | undefined; timeseries: Coordinates[] }> {
+}) {
   return withApmSpan(
     'observability_overview_get_transaction_distribution',
     async () => {
@@ -58,6 +57,9 @@ export function getTransactionPerMinute({
                     fixed_interval: bucketSize,
                     min_doc_count: 0,
                   },
+                  aggs: {
+                    throughput: { rate: { unit: 'minute' as const } },
+                  },
                 },
               },
             },
@@ -85,7 +87,7 @@ export function getTransactionPerMinute({
         timeseries:
           topTransactionTypeBucket?.timeseries.buckets.map((bucket) => ({
             x: bucket.key,
-            y: calculateThroughput({ start, end, value: bucket.doc_count }),
+            y: bucket.throughput.value,
           })) || [],
       };
     }

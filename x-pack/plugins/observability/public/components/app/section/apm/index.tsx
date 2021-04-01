@@ -38,6 +38,9 @@ function formatTpmStat(value?: number) {
   if (value <= 0.1) {
     return '< 0.1';
   }
+  if (value > 1000) {
+    return numeral(value).format('0.00a');
+  }
   return numeral(value).format('0,0.0');
 }
 
