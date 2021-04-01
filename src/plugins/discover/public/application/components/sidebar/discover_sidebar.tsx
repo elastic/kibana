@@ -53,6 +53,17 @@ export interface DiscoverSidebarProps extends DiscoverSidebarResponsiveProps {
    * Change current state of fieldFilter
    */
   setFieldFilter: (next: FieldFilterState) => void;
+
+  /**
+   * Callback to close the flyout sidebar rendered in a flyout, close flyout
+   */
+  closeFlyout?: () => void;
+
+  /**
+   * Pass the reference to field editor component to the parent, so it can be properly unmounted
+   * @param ref reference to the field editor component
+   */
+  setFieldEditorRef?: (ref: () => void | undefined) => void;
 }
 
 export function DiscoverSidebar({
@@ -77,6 +88,8 @@ export function DiscoverSidebar({
   useFlyout = false,
   unmappedFieldsConfig,
   onEditRuntimeField,
+  setFieldEditorRef,
+  closeFlyout,
 }: DiscoverSidebarProps) {
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
   const [isAddIndexPatternFieldPopoverOpen, setIsAddIndexPatternFieldPopoverOpen] = useState(false);
@@ -94,19 +107,6 @@ export function DiscoverSidebar({
   }, [selectedIndexPattern, fieldCounts, hits]);
 
   const scrollDimensions = useResizeObserver(scrollContainer);
-
-  const closeFieldEditor = useRef<() => void | undefined>();
-  useEffect(() => {
-    const cleanup = () => {
-      if (closeFieldEditor.current) {
-        closeFieldEditor.current();
-      }
-    };
-    return () => {
-      // Make sure to close the editor when unmounting
-      cleanup();
-    };
-  }, []);
 
   const onChangeFieldSearch = useCallback(
     (field: string, value: string | boolean | undefined) => {
@@ -246,7 +246,7 @@ export function DiscoverSidebar({
     if (!canEditIndexPatternField) {
       return;
     }
-    closeFieldEditor.current = indexPatternFieldEditor.openEditor({
+    const ref = indexPatternFieldEditor.openEditor({
       ctx: {
         indexPattern: selectedIndexPattern,
       },
@@ -255,6 +255,12 @@ export function DiscoverSidebar({
         onEditRuntimeField();
       },
     });
+    if (setFieldEditorRef) {
+      setFieldEditorRef(ref);
+    }
+    if (closeFlyout) {
+      closeFlyout();
+    }
   };
 
   const addField = () => {

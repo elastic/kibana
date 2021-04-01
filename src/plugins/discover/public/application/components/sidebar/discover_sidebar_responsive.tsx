@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { sortBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -134,15 +134,42 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
+  const closeFieldEditor = useRef<() => void | undefined>();
+
+  useEffect(() => {
+    const cleanup = () => {
+      if (closeFieldEditor?.current) {
+        closeFieldEditor?.current();
+      }
+    };
+    return () => {
+      // Make sure to close the editor when unmounting
+      cleanup();
+    };
+  }, []);
+
   if (!props.selectedIndexPattern) {
     return null;
   }
+
+  const setFieldEditorRef = (ref: () => void | undefined) => {
+    closeFieldEditor.current = ref;
+  };
+
+  const closeFlyout = () => {
+    setIsFlyoutVisible(false);
+  };
 
   return (
     <>
       {props.isClosed ? null : (
         <EuiHideFor sizes={['xs', 's']}>
-          <DiscoverSidebar {...props} fieldFilter={fieldFilter} setFieldFilter={setFieldFilter} />
+          <DiscoverSidebar
+            {...props}
+            fieldFilter={fieldFilter}
+            setFieldFilter={setFieldFilter}
+            setFieldEditorRef={setFieldEditorRef}
+          />
         </EuiHideFor>
       )}
       <EuiShowFor sizes={['xs', 's']}>
@@ -217,6 +244,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
                   fieldFilter={fieldFilter}
                   setFieldFilter={setFieldFilter}
                   alwaysShowActionButtons={true}
+                  setFieldEditorRef={setFieldEditorRef}
+                  closeFlyout={closeFlyout}
                 />
               </div>
             </EuiFlyout>
