@@ -10,6 +10,7 @@ import { flatten } from 'lodash';
 import type { FeatureKibanaPrivileges, KibanaFeature } from '../../../../../features/server';
 import type { Actions } from '../../actions';
 import { FeaturePrivilegeAlertingBuilder } from './alerting';
+import { FeaturePrivilegeAlertsBuilder } from './alerts';
 import { FeaturePrivilegeApiBuilder } from './api';
 import { FeaturePrivilegeAppBuilder } from './app';
 import { FeaturePrivilegeCatalogueBuilder } from './catalogue';
