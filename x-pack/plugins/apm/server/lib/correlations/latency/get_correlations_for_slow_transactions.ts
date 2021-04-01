@@ -6,75 +6,39 @@
  */
 
 import { AggregationOptionsByType } from '../../../../../../../typings/elasticsearch';
-import { ESFilter } from '../../../../../../../typings/elasticsearch';
-import {
-  environmentQuery,
-  rangeQuery,
-  kqlQuery,
-} from '../../../../server/utils/queries';
-import {
-  SERVICE_NAME,
-  TRANSACTION_DURATION,
-  TRANSACTION_NAME,
-  TRANSACTION_TYPE,
-  PROCESSOR_EVENT,
-} from '../../../../common/elasticsearch_fieldnames';
+import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
-import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { getDurationForPercentile } from './get_duration_for_percentile';
 import { processSignificantTermAggs } from '../process_significant_term_aggs';
 import { getLatencyDistribution } from './get_latency_distribution';
 import { withApmSpan } from '../../../utils/with_apm_span';
+import { CorrelationsOptions, getCorrelationsFilters } from '../get_filters';
 
-export async function getCorrelationsForSlowTransactions({
-  environment,
-  kuery,
-  serviceName,
-  transactionType,
-  transactionName,
-  durationPercentile,
-  fieldNames,
-  setup,
-}: {
-  environment?: string;
-  kuery?: string;
-  serviceName: string | undefined;
-  transactionType: string | undefined;
-  transactionName: string | undefined;
+interface Options extends CorrelationsOptions {
   durationPercentile: number;
   fieldNames: string[];
-  setup: Setup & SetupTimeRange;
-}) {
+  maxLatency: number;
+  distributionInterval: number;
+}
+export async function getCorrelationsForSlowTransactions(options: Options) {
   return withApmSpan('get_correlations_for_slow_transactions', async () => {
-    const { start, end, apmEventClient } = setup;
-
-    const backgroundFilters: ESFilter[] = [
-      { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
-      ...rangeQuery(start, end),
-      ...environmentQuery(environment),
-      ...kqlQuery(kuery),
-    ];
-
-    if (serviceName) {
-      backgroundFilters.push({ term: { [SERVICE_NAME]: serviceName } });
-    }
-
-    if (transactionType) {
-      backgroundFilters.push({ term: { [TRANSACTION_TYPE]: transactionType } });
-    }
-
-    if (transactionName) {
-      backgroundFilters.push({ term: { [TRANSACTION_NAME]: transactionName } });
-    }
-
+    const {
+      durationPercentile,
+      fieldNames,
+      setup,
+      maxLatency,
+      distributionInterval,
+    } = options;
+    const { apmEventClient } = setup;
+    const filters = getCorrelationsFilters(options);
     const durationForPercentile = await getDurationForPercentile({
       durationPercentile,
-      backgroundFilters,
+      filters,
       setup,
     });
 
     if (!durationForPercentile) {
-      return {};
+      return { significantTerms: [] };
     }
 
     const response = await withApmSpan('get_significant_terms', () => {
@@ -85,7 +49,7 @@ export async function getCorrelationsForSlowTransactions({
           query: {
             bool: {
               // foreground filters
-              filter: backgroundFilters,
+              filter: filters,
               must: {
                 function_score: {
                   query: {
@@ -112,7 +76,7 @@ export async function getCorrelationsForSlowTransactions({
                   background_filter: {
                     bool: {
                       filter: [
-                        ...backgroundFilters,
+                        ...filters,
                         {
                           range: {
                             [TRANSACTION_DURATION]: {
@@ -132,17 +96,21 @@ export async function getCorrelationsForSlowTransactions({
       return apmEventClient.search(params);
     });
     if (!response.aggregations) {
-      return {};
+      return { significantTerms: [] };
     }
 
     const topSigTerms = processSignificantTermAggs({
       sigTermAggs: response.aggregations,
     });
 
-    return getLatencyDistribution({
+    const significantTerms = await getLatencyDistribution({
       setup,
-      backgroundFilters,
+      filters,
       topSigTerms,
+      maxLatency,
+      distributionInterval,
     });
+
+    return { significantTerms };
   });
 }

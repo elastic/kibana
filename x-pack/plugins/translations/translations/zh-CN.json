@@ -12964,8 +12964,6 @@
     "xpack.maps.source.pewPewDescription": "源和目标之间的聚合数据路径",
     "xpack.maps.source.pewPewTitle": "源-目标连接",
     "xpack.maps.source.urlLabel": "URL",
-    "xpack.maps.source.vetorSource.formatErrorMessage": "无法从以下 URL 获取矢量形状：{format}",
-    "xpack.maps.source.vetorSource.requestFailedErrorMessage": "无法从以下 URL 获取矢量形状：{fetchUrl}",
     "xpack.maps.source.wms.attributionLink": "属性文本必须附带链接",
     "xpack.maps.source.wms.attributionText": "属性 url 必须附带文本",
     "xpack.maps.source.wms.getCapabilitiesButtonText": "加载功能",
