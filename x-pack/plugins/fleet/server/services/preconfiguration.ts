@@ -45,7 +45,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
     // If there are multiple packages with duplicate versions, separate them with semicolons, e.g
     // package-a:1.0.0, package-a:2.0.0; package-b:1.0.0, package-b:2.0.0
     const duplicateList = duplicatePackages
-      .map(([, versions]) => versions.map((v) => `${v.name}:${v.version}`).join(', '))
+      .map(([, versions]) => versions.map((v) => `${v.name}-${v.version}`).join(', '))
       .join('; ');
 
     throw new Error(
@@ -137,7 +137,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
       id: p.policy.id,
       updated_at: p.policy.updated_at,
     })),
-    packages: preconfiguredPackages.map((pkg) => `${pkg.name}:${pkg.version}`),
+    packages: preconfiguredPackages.map((pkg) => `${pkg.name}-${pkg.version}`),
   };
 }
 
