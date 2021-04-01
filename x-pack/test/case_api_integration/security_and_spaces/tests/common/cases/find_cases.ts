@@ -790,10 +790,34 @@ export default ({ getService }: FtrProviderContext): void => {
         expectCasesToBeValidOwner(res.cases, 1, ['securitySolutionFixture']);
       });
 
-          appendToUrl: 'search=securitySolutionFixture+observabilityFixture&searchFields[0]=scope',
+      // This test is to prevent a future developer to add the filter attribute without taking into consideration
+      // the authorizationFilter produced by the cases authorization class
+      it('should NOT allow to pass a filter query parameter', async () => {
+        await supertest
+          .get(
+            `${CASES_URL}/_find?sortOrder=asc&filter=cases.attributes.owner=observabilityFixture`
+          )
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(400);
       });
 
-        expectCasesToBeValidScoped(res.cases, 1, ['securitySolutionFixture']);
+      // This test ensures that the user is not allowed to define the namespaces query param
+      // so she cannot search across spaces
+      it('should NOT allow to pass a namespaces query parameter', async () => {
+        await supertest
+          .get(`${CASES_URL}/_find?sortOrder=asc&namespaces[0]=*`)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(400);
+      });
+
+      it('should NOT allow to pass a non supported query parameter', async () => {
+        await supertest
+          .get(`${CASES_URL}/_find?notExists=papa`)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(400);
       });
     });
   });

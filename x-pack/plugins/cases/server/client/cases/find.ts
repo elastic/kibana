@@ -19,6 +19,7 @@ import {
   throwErrors,
   caseStatuses,
   CasesFindResponseRt,
+  excess,
 } from '../../../common/api';
 
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
@@ -49,7 +50,7 @@ export const find = async ({
 }: FindParams): Promise<CasesFindResponse> => {
   try {
     const queryParams = pipe(
-      CasesFindRequestRt.decode(options),
+      excess(CasesFindRequestRt).decode(options),
       fold(throwErrors(Boom.badRequest), identity)
     );
 
