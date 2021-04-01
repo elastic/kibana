@@ -21,7 +21,8 @@ const txtBody = (count: number) =>
   i18n.translate(
     'xpack.uiActionsEnhanced.drilldowns.containers.drilldownList.cloningNotification.body',
     {
-      defaultMessage: 'You have successfully, cloned {count} drilldowns.',
+      defaultMessage:
+        'You have successfully, cloned {count, number} {count, plural, one {drilldown} other {drilldowns}}.',
       description: 'Title of notification show when one or more drilldowns were cloned.',
       values: {
         count,
