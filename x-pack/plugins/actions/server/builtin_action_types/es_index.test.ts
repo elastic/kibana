@@ -520,7 +520,7 @@ describe('execute()', () => {
     `);
   });
 
-  test('renders parameter templates as expected for preconfigured alert history index when no variables are available', async () => {
+  test('throws error for preconfigured alert history index when no variables are available', async () => {
     expect(actionType.renderParameterTemplates).toBeTruthy();
     const paramsWithTemplates = {
       documents: [{ hello: '{{who}}' }],

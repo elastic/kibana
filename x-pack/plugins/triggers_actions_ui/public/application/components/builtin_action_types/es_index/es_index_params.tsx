@@ -20,7 +20,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   ActionParamsProps,
   AlertHistoryEsIndexConnectorId,
-  AlertHistoryDocumentSchema,
+  AlertHistoryDocumentTemplate,
   AlertHistoryDefaultIndexName,
   ALERT_HISTORY_PREFIX,
 } from '../../../../types';
@@ -62,8 +62,8 @@ export const IndexParamsFields = ({
   useEffect(() => {
     if (actionConnector?.id === AlertHistoryEsIndexConnectorId) {
       setUsePreconfiguredSchema(true);
-      editAction('documents', [JSON.stringify(AlertHistoryDocumentSchema)], index);
-      setDocumentToIndex(JSON.stringify(AlertHistoryDocumentSchema));
+      editAction('documents', [JSON.stringify(AlertHistoryDocumentTemplate)], index);
+      setDocumentToIndex(JSON.stringify(AlertHistoryDocumentTemplate));
     } else {
       setUsePreconfiguredSchema(false);
       editAction('documents', undefined, index);
@@ -163,7 +163,7 @@ export const IndexParamsFields = ({
           paddingSize="s"
           data-test-subj="preconfiguredDocumentToIndex"
         >
-          {JSON.stringify(AlertHistoryDocumentSchema, null, 2)}
+          {JSON.stringify(AlertHistoryDocumentTemplate, null, 2)}
         </EuiCodeBlock>
       </EuiFormRow>
     </>

@@ -70,7 +70,7 @@ export const buildAlertHistoryDocument = (variables: Record<string, unknown>) =>
   return !isEmpty(alertHistoryDoc) ? { ...alertHistoryDoc, event: { kind: 'alert' } } : null;
 };
 
-export const AlertHistoryDocumentSchema = Object.freeze(
+export const AlertHistoryDocumentTemplate = Object.freeze(
   buildAlertHistoryDocument({
     rule: {
       id: '{{rule.id}}',

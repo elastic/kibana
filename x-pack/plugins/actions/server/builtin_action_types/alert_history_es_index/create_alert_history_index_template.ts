@@ -12,11 +12,16 @@ import mappings from './mappings.json';
 export function getAlertHistoryIndexTemplate() {
   return {
     index_patterns: [`${ALERT_HISTORY_PREFIX}*`],
-    settings: {
-      number_of_shards: 1,
-      auto_expand_replicas: '0-1',
+    _meta: {
+      description: 'System generated mapping for preconfigured alert history ES index connector.',
     },
-    mappings,
+    template: {
+      settings: {
+        number_of_shards: 1,
+        auto_expand_replicas: '0-1',
+      },
+      mappings,
+    },
   };
 }
 
@@ -47,7 +52,7 @@ async function createIndexTemplate({
   templateName: string;
 }) {
   try {
-    await client.indices.putTemplate({
+    await client.indices.putIndexTemplate({
       name: templateName,
       body: template,
       create: true,

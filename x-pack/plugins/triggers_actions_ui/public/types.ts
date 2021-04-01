@@ -13,7 +13,7 @@ import { DataPublicPluginStart } from 'src/plugins/data/public';
 import {
   ActionType,
   AlertHistoryEsIndexConnectorId,
-  AlertHistoryDocumentSchema,
+  AlertHistoryDocumentTemplate,
   ALERT_HISTORY_PREFIX,
   AlertHistoryDefaultIndexName,
 } from '../../actions/common';
@@ -54,7 +54,7 @@ export {
 export {
   ActionType,
   AlertHistoryEsIndexConnectorId,
-  AlertHistoryDocumentSchema,
+  AlertHistoryDocumentTemplate,
   AlertHistoryDefaultIndexName,
   ALERT_HISTORY_PREFIX,
 };
