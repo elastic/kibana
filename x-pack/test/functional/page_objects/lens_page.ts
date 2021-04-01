@@ -196,7 +196,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async searchField(name: string) {
-      await testSubjects.setValue('lnsIndexPatternFieldSearch', name);
+      await testSubjects.setValue('lnsIndexPatternFieldSearch', name, {
+        clearWithKeyboard: true,
+        typeCharByChar: true,
+      });
     },
 
     async waitForField(field: string) {
