@@ -4,7 +4,7 @@
 <titleabbrev>Legacy delete alert</titleabbrev>
 ++++
 
-WARNING: Deprecated in 7.13.0. Use <<delete-rule-api>> instead.
+deprecated::[7.13.0,Use <<delete-rule-api>> instead.]
 
 Permanently remove an alert.
 

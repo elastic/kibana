@@ -14,12 +14,12 @@ import { TopSigTerm } from '../process_significant_term_aggs';
 
 export async function getMaxLatency({
   setup,
-  backgroundFilters,
-  topSigTerms,
+  filters,
+  topSigTerms = [],
 }: {
   setup: Setup & SetupTimeRange;
-  backgroundFilters: ESFilter[];
-  topSigTerms: TopSigTerm[];
+  filters: ESFilter[];
+  topSigTerms?: TopSigTerm[];
 }) {
   return withApmSpan('get_max_latency', async () => {
     const { apmEventClient } = setup;
@@ -31,13 +31,17 @@ export async function getMaxLatency({
         size: 0,
         query: {
           bool: {
-            filter: backgroundFilters,
+            filter: filters,
 
-            // only include docs containing the significant terms
-            should: topSigTerms.map((term) => ({
-              term: { [term.fieldName]: term.fieldValue },
-            })),
-            minimum_should_match: 1,
+            ...(topSigTerms.length
+              ? {
+                  // only include docs containing the significant terms
+                  should: topSigTerms.map((term) => ({
+                    term: { [term.fieldName]: term.fieldValue },
+                  })),
+                  minimum_should_match: 1,
+                }
+              : null),
           },
         },
         aggs: {
