@@ -1,31 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import {
-  composeHttpHandlerMocks,
-  httpHandlerMockFactory,
-  ResponseProvidersInterface,
-} from '../http_handler_mock_factory';
-import {
-  agentPolicyRouteService,
-  epmRouteService,
+import type { ResponseProvidersInterface } from '../http_handler_mock_factory';
+import { composeHttpHandlerMocks, httpHandlerMockFactory } from '../http_handler_mock_factory';
+import type {
   GetAgentPoliciesResponse,
   GetFleetStatusResponse,
   GetInfoResponse,
   GetPackagePoliciesResponse,
   GetStatsResponse,
   KibanaAssetType,
-  packagePolicyRouteService,
 } from '../../../../../common';
 import {
-  agentsSetupApiMock,
-  AgentsSetupResponseProvidersMock,
-  fleetSetupApiMock,
-  FleetSetupResponseProvidersMock,
-} from '../setup';
+  agentPolicyRouteService,
+  epmRouteService,
+  packagePolicyRouteService,
+} from '../../../../../common';
+import type { AgentsSetupResponseProvidersMock, FleetSetupResponseProvidersMock } from '../setup';
+import { agentsSetupApiMock, fleetSetupApiMock } from '../setup';
 
 export const epmPackageResponse = (): GetInfoResponse =>
   // @ts-ignore
@@ -459,6 +455,7 @@ export const agentPoliciesResponse = (): GetAgentPoliciesResponse => ({
         'e8a37031-2907-44f6-89d2-98bd493f60dc',
       ],
       is_default: true,
+      is_managed: false,
       monitoring_enabled: ['logs', 'metrics'],
       revision: 6,
       updated_at: '2020-12-09T13:46:31.840Z',
@@ -473,6 +470,7 @@ export const agentPoliciesResponse = (): GetAgentPoliciesResponse => ({
       status: 'active',
       package_policies: ['e8a37031-2907-44f6-89d2-98bd493f60cd'],
       is_default: false,
+      is_managed: false,
       monitoring_enabled: ['logs', 'metrics'],
       revision: 2,
       updated_at: '2020-12-09T13:46:31.840Z',
