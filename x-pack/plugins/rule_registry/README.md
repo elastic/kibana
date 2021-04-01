@@ -12,7 +12,7 @@ To create a rule registry, producers should add the `ruleRegistry` plugin to the
 
 ```ts
 const observabilityRegistry = plugins.ruleRegistry.create({
-  namespace: 'observability',
+  name: 'observability',
   fieldMap: {
     ...pickWithPatterns(ecsFieldMap, 'host.name', 'service.name'),
   },

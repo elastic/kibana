@@ -33,7 +33,7 @@ export class RuleRegistryPlugin implements Plugin<RuleRegistryPluginSetupContrac
       ilmPolicy: defaultIlmPolicy,
       fieldMap: defaultFieldMap,
       kibanaIndex: globalConfig.kibana.index,
-      namespace: 'alert-history',
+      name: 'alert-history',
       kibanaVersion: this.initContext.env.packageInfo.version,
       logger: logger.get('root'),
       alertingPluginSetupContract: plugins.alerting,

@@ -144,7 +144,7 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
       });
 
     const apmRuleRegistry = plugins.observability.ruleRegistry.create({
-      namespace: 'apm',
+      name: 'apm',
       fieldMap: {
         'service.environment': {
           type: 'keyword',

@@ -28,7 +28,7 @@ import { ScopedRuleRegistryClient } from './create_scoped_rule_registry_client/t
 interface RuleRegistryOptions<TFieldMap extends FieldMap> {
   kibanaIndex: string;
   kibanaVersion: string;
-  namespace: string;
+  name: string;
   logger: Logger;
   core: CoreSetup;
   fieldMap: TFieldMap;
@@ -76,7 +76,7 @@ export class RuleRegistry<TFieldMap extends DefaultFieldMap> {
   }
 
   private getEsNames() {
-    const base = [this.options.kibanaIndex, this.options.namespace];
+    const base = [this.options.kibanaIndex, this.options.name];
     const indexAliasName = [...base, this.options.kibanaVersion].join('-');
     const policyName = [...base, 'policy'].join('-');
 
@@ -206,11 +206,11 @@ export class RuleRegistry<TFieldMap extends DefaultFieldMap> {
   }
 
   create<TNextFieldMap extends FieldMap>({
-    namespace,
+    name,
     fieldMap,
     ilmPolicy,
   }: {
-    namespace: string;
+    name: string;
     fieldMap: TNextFieldMap;
     ilmPolicy?: ILMPolicy;
   }): RuleRegistry<TFieldMap & TNextFieldMap> {
@@ -220,8 +220,8 @@ export class RuleRegistry<TFieldMap extends DefaultFieldMap> {
 
     const child = new RuleRegistry({
       ...this.options,
-      logger: this.options.logger.get(namespace),
-      namespace: [this.options.namespace, namespace].filter(Boolean).join('-'),
+      logger: this.options.logger.get(name),
+      name: [this.options.name, name].filter(Boolean).join('-'),
       fieldMap: mergedFieldMap,
       ...(ilmPolicy ? { ilmPolicy } : {}),
     });

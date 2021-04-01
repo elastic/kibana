@@ -54,7 +54,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
         return api?.getScopedAnnotationsClient(...args);
       },
       ruleRegistry: plugins.ruleRegistry.create({
-        namespace: 'observability',
+        name: 'observability',
         fieldMap: {
           ...pickWithPatterns(ecsFieldMap, 'host.name', 'service.name'),
         },
