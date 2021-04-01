@@ -13,6 +13,7 @@
     "observability"
   ],
   "optionalPlugins": [
+    "spaces",
     "cloud",
     "usageCollection",
     "taskManager",

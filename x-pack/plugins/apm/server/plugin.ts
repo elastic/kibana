@@ -16,6 +16,7 @@ import {
   Plugin,
   PluginInitializerContext,
 } from 'src/core/server';
+import { SpacesPluginSetup } from '../../spaces/server';
 import { APMConfig, APMXPackConfig } from '.';
 import { mergeConfigs } from './index';
 import { APMOSSPluginSetup } from '../../../../src/plugins/apm_oss/server';
@@ -58,6 +59,7 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
   public setup(
     core: CoreSetup,
     plugins: {
+      spaces?: SpacesPluginSetup;
       apmOss: APMOSSPluginSetup;
       home: HomeServerPluginSetup;
       licensing: LicensingPluginSetup;
@@ -132,11 +134,7 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
     createApmApi().init(core, {
       config$: mergedConfig$,
       logger: this.logger!,
-      plugins: {
-        observability: plugins.observability,
-        security: plugins.security,
-        ml: plugins.ml,
-      },
+      plugins,
     });
 
     const boundGetApmIndices = async () =>

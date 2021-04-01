@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { BannerPlacement } from '../common';
+export const registerRoutesMock = jest.fn();
+jest.doMock('./routes', () => ({
+  registerRoutes: registerRoutesMock,
+}));
 
-export interface BannerClientConfig {
-  placement: BannerPlacement;
-}
+export const registerSettingsMock = jest.fn();
+jest.doMock('./ui_settings', () => ({
+  registerSettings: registerSettingsMock,
+}));
