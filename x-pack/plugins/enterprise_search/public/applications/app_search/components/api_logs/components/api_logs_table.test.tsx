@@ -10,7 +10,7 @@ import { setMockValues, setMockActions, mountWithIntl } from '../../../../__mock
 // NOTE: We're mocking FormattedRelative here because it (currently) has
 // console warn issues, and it allows us to skip mocking dates
 jest.mock('@kbn/i18n/react', () => ({
-  ...jest.requireActual('@kbn/i18n/react'),
+  ...(jest.requireActual('@kbn/i18n/react') as object),
   FormattedRelative: jest.fn(() => '20 hours ago'),
 }));
 
