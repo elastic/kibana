@@ -41,14 +41,22 @@ export interface ReportDefinition {
   required?: boolean;
   custom?: boolean;
   defaultValue?: string;
-  options?: Array<{ field: string; label: string; description?: string }>;
+  options?: Array<{
+    field: string;
+    label: string;
+    description?: string;
+    columnType?: 'range' | 'operation';
+  }>;
 }
 
 export interface DataSeries {
   reportType: ReportViewType;
   id: string;
   xAxisColumn: Partial<LastValueIndexPatternColumn> | Partial<DateHistogramIndexPatternColumn>;
-  yAxisColumn: Partial<IndexPatternColumn>;
+  yAxisColumn:
+    | Partial<IndexPatternColumn>
+    | Partial<LastValueIndexPatternColumn>
+    | Partial<DateHistogramIndexPatternColumn>;
 
   breakdowns: string[];
   defaultSeriesType: SeriesType;
@@ -87,3 +95,18 @@ export interface ConfigProps {
 }
 
 export type AppDataType = 'synthetics' | 'rum' | 'logs' | 'metrics' | 'apm';
+
+type FormatType = 'duration' | 'number';
+type InputFormat = 'microseconds' | 'milliseconds' | 'seconds';
+type OutputFormat = 'asSeconds' | 'asMilliseconds' | 'humanize';
+
+export interface FieldFormat {
+  field: string;
+  format: {
+    id: FormatType;
+    params: {
+      inputFormat: InputFormat;
+      outputFormat: OutputFormat;
+    };
+  };
+}

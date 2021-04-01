@@ -43,14 +43,17 @@ describe('Lens Attribute', () => {
   it('should return expected field type', function () {
     expect(JSON.stringify(lnsAttr.getFieldMeta('transaction.type'))).toEqual(
       JSON.stringify({
-        count: 0,
-        name: 'transaction.type',
-        type: 'string',
-        esTypes: ['keyword'],
-        scripted: false,
-        searchable: true,
-        aggregatable: true,
-        readFromDocValues: true,
+        fieldMeta: {
+          count: 0,
+          name: 'transaction.type',
+          type: 'string',
+          esTypes: ['keyword'],
+          scripted: false,
+          searchable: true,
+          aggregatable: true,
+          readFromDocValues: true,
+        },
+        columnType: null,
       })
     );
   });
@@ -58,14 +61,17 @@ describe('Lens Attribute', () => {
   it('should return expected field type for custom field with default value', function () {
     expect(JSON.stringify(lnsAttr.getFieldMeta('performance.metric'))).toEqual(
       JSON.stringify({
-        count: 0,
-        name: 'transaction.duration.us',
-        type: 'number',
-        esTypes: ['long'],
-        scripted: false,
-        searchable: true,
-        aggregatable: true,
-        readFromDocValues: true,
+        fieldMeta: {
+          count: 0,
+          name: 'transaction.duration.us',
+          type: 'number',
+          esTypes: ['long'],
+          scripted: false,
+          searchable: true,
+          aggregatable: true,
+          readFromDocValues: true,
+        },
+        columnType: null,
       })
     );
   });
@@ -77,20 +83,44 @@ describe('Lens Attribute', () => {
 
     expect(JSON.stringify(lnsAttr.getFieldMeta('performance.metric'))).toEqual(
       JSON.stringify({
-        count: 0,
-        name: LCP_FIELD,
-        type: 'number',
-        esTypes: ['scaled_float'],
-        scripted: false,
-        searchable: true,
-        aggregatable: true,
-        readFromDocValues: true,
+        fieldMeta: {
+          count: 0,
+          name: LCP_FIELD,
+          type: 'number',
+          esTypes: ['scaled_float'],
+          scripted: false,
+          searchable: true,
+          aggregatable: true,
+          readFromDocValues: true,
+        },
       })
     );
   });
 
-  it('should return expected number column', function () {
-    expect(lnsAttr.getNumberColumn('transaction.duration.us')).toEqual({
+  it('should return expected number range column', function () {
+    expect(lnsAttr.getNumberRangeColumn('transaction.duration.us')).toEqual({
+      dataType: 'number',
+      isBucketed: true,
+      label: 'Page load time',
+      operationType: 'range',
+      params: {
+        maxBars: 'auto',
+        ranges: [
+          {
+            from: 0,
+            label: '',
+            to: 1000,
+          },
+        ],
+        type: 'histogram',
+      },
+      scale: 'interval',
+      sourceField: 'transaction.duration.us',
+    });
+  });
+
+  it('should return expected number operation column', function () {
+    expect(lnsAttr.getNumberRangeColumn('transaction.duration.us')).toEqual({
       dataType: 'number',
       isBucketed: true,
       label: 'Page load time',

@@ -10,10 +10,7 @@ import { useKibana } from '../../../../../../../../src/plugins/kibana_react/publ
 import { ObservabilityPublicPluginsStart } from '../../../../plugin';
 import { AllShortSeries } from './use_url_strorage';
 import { ReportToDataTypeMap } from '../configurations/constants';
-import {
-  DataType,
-  ObservabilityIndexPatterns,
-} from '../../../../utils/observability_index_patterns';
+import { DataType, ObservabilityIndexPatterns } from '../utils/observability_index_patterns';
 
 export const useInitExploratoryView = (storage: IKbnUrlStateStorage) => {
   const {
@@ -30,7 +27,7 @@ export const useInitExploratoryView = (storage: IKbnUrlStateStorage) => {
 
   const firstSeries = allSeries[firstSeriesId];
 
-  const { data: indexPattern } = useFetcher(() => {
+  const { data: indexPattern, error } = useFetcher(() => {
     const obsvIndexP = new ObservabilityIndexPatterns(data);
     let reportType: DataType = 'apm';
     if (firstSeries?.rt) {
@@ -39,6 +36,10 @@ export const useInitExploratoryView = (storage: IKbnUrlStateStorage) => {
 
     return obsvIndexP.getIndexPattern(reportType);
   }, [firstSeries?.rt, data]);
+
+  if (error) {
+    throw error;
+  }
 
   return indexPattern;
 };

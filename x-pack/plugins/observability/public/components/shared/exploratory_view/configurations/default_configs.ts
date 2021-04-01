@@ -6,12 +6,12 @@
  */
 
 import { ReportViewTypes } from '../types';
-import { getPerformanceDistLensConfig } from './performance_dist_config';
+import { getPerformanceDistLensConfig } from './rum/performance_dist_config';
 import { getMonitorDurationConfig } from './monitor_duration_config';
 import { getServiceLatencyLensConfig } from './service_latency_config';
 import { getMonitorPingsConfig } from './monitor_pings_config';
 import { getServiceThroughputLensConfig } from './service_throughput_config';
-import { getKPITrendsLensConfig } from './kpi_trends_config';
+import { getKPITrendsLensConfig } from './rum/kpi_trends_config';
 import { getCPUUsageLensConfig } from './cpu_usage_config';
 import { getMemoryUsageLensConfig } from './memory_usage_config';
 import { getNetworkActivityLensConfig } from './network_activity_config';

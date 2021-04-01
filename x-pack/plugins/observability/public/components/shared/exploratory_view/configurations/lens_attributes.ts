@@ -9,6 +9,9 @@ import {
   CountIndexPatternColumn,
   DateHistogramIndexPatternColumn,
   LastValueIndexPatternColumn,
+  AvgIndexPatternColumn,
+  MedianIndexPatternColumn,
+  PercentileIndexPatternColumn,
   OperationType,
   PersistedIndexPatternLayer,
   RangeIndexPatternColumn,
@@ -17,6 +20,7 @@ import {
   XYState,
   XYCurveType,
   DataType,
+  OperationMetadata,
 } from '../../../../../../lens/public';
 import {
   buildPhraseFilter,
@@ -28,6 +32,15 @@ import { DataSeries, UrlFilter } from '../types';
 
 function getLayerReferenceName(layerId: string) {
   return `indexpattern-datasource-layer-${layerId}`;
+}
+
+function buildNumberColumn(sourceField: string) {
+  return {
+    sourceField,
+    dataType: 'number' as DataType,
+    isBucketed: false,
+    scale: 'ratio' as OperationMetadata['scale'],
+  };
 }
 
 export class LensAttributes {
@@ -93,7 +106,7 @@ export class LensAttributes {
     this.visualization.layers[0].splitAccessor = undefined;
   }
 
-  getNumberColumn(sourceField: string): RangeIndexPatternColumn {
+  getNumberRangeColumn(sourceField: string): RangeIndexPatternColumn {
     return {
       sourceField,
       label: this.reportViewConfig.labels[sourceField],
@@ -106,6 +119,26 @@ export class LensAttributes {
         ranges: [{ from: 0, to: 1000, label: '' }],
         maxBars: 'auto',
       },
+    };
+  }
+
+  getNumberOperationColumn(
+    sourceField: string,
+    operationType?: 'median' | 'average'
+  ): AvgIndexPatternColumn | MedianIndexPatternColumn {
+    return {
+      ...buildNumberColumn(sourceField),
+      label: 'Median of transaction.marks.agent.firstContentfulPaint',
+      operationType: operationType || 'median',
+    };
+  }
+
+  getPercentileNumberColumn(sourceField: string): PercentileIndexPatternColumn {
+    return {
+      ...buildNumberColumn(sourceField),
+      label: '95th percentile of transaction.marks.agent.firstContentfulPaint',
+      operationType: 'percentile',
+      params: { percentile: 95 },
     };
   }
 
@@ -127,42 +160,74 @@ export class LensAttributes {
     | RangeIndexPatternColumn {
     const { xAxisColumn } = this.reportViewConfig;
 
-    const { type: fieldType, name: fieldName } = this.getFieldMeta(xAxisColumn.sourceField)!;
+    return this.getColumnBasedOnType(xAxisColumn.sourceField!);
+  }
+
+  getColumnBasedOnType(sourceField: string) {
+    const { fieldMeta, columnType, fieldName } = this.getFieldMeta(sourceField);
+    const { type: fieldType } = fieldMeta ?? {};
+
+    if (fieldName === 'Records') {
+      return this.getRecordsColumn();
+    }
 
     if (fieldType === 'date') {
       return this.getDateHistogramColumn(fieldName);
     }
     if (fieldType === 'number') {
-      return this.getNumberColumn(fieldName);
+      if (columnType === 'operation') {
+        return this.getNumberOperationColumn(fieldName);
+      }
+      return this.getNumberRangeColumn(fieldName);
     }
 
     // FIXME review my approach again
     return this.getDateHistogramColumn(fieldName);
   }
 
-  getFieldMeta(sourceField?: string) {
-    let xAxisField = sourceField;
+  getCustomFieldName(sourceField: string) {
+    let fieldName = sourceField;
+    let columnType = null;
 
-    if (xAxisField) {
-      const rdf = this.reportViewConfig.reportDefinitions ?? [];
+    const rdf = this.reportViewConfig.reportDefinitions ?? [];
 
-      const customField = rdf.find(({ field }) => field === xAxisField);
+    const customField = rdf.find(({ field }) => field === fieldName);
 
-      if (customField) {
-        if (this.reportDefinitions[xAxisField]) {
-          xAxisField = this.reportDefinitions[xAxisField];
-        } else if (customField.defaultValue) {
-          xAxisField = customField.defaultValue;
-        } else if (customField.options?.[0].field) {
-          xAxisField = customField.options?.[0].field;
-        }
+    if (customField) {
+      if (this.reportDefinitions[fieldName]) {
+        fieldName = this.reportDefinitions[fieldName];
+        if (customField?.options)
+          columnType = customField?.options?.find(({ field }) => field === fieldName)?.columnType;
+      } else if (customField.defaultValue) {
+        fieldName = customField.defaultValue;
+      } else if (customField.options?.[0].field) {
+        fieldName = customField.options?.[0].field;
+        columnType = customField.options?.[0].columnType;
       }
-
-      return this.indexPattern.getFieldByName(xAxisField);
     }
+
+    return { fieldName, columnType };
+  }
+
+  getFieldMeta(sourceField: string) {
+    const { fieldName, columnType } = this.getCustomFieldName(sourceField);
+
+    const fieldMeta = this.indexPattern.getFieldByName(fieldName);
+
+    return { fieldMeta, fieldName, columnType };
   }
 
   getMainYAxis() {
+    const { sourceField } = this.reportViewConfig.yAxisColumn;
+
+    if (sourceField === 'Records' || !sourceField) {
+      return this.getRecordsColumn();
+    }
+
+    return this.getColumnBasedOnType(sourceField!);
+  }
+
+  getRecordsColumn(): CountIndexPatternColumn {
     return {
       dataType: 'number',
       isBucketed: false,
@@ -170,7 +235,6 @@ export class LensAttributes {
       operationType: 'count',
       scale: 'ratio',
       sourceField: 'Records',
-      ...this.reportViewConfig.yAxisColumn,
     } as CountIndexPatternColumn;
   }
 

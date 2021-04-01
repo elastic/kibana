@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ConfigProps, DataSeries } from '../types';
-import { FieldLabels } from './constants';
-import { buildPhraseFilter } from './utils';
+import { ConfigProps, DataSeries } from '../../types';
+import { FieldLabels } from '../constants';
+import { buildPhraseFilter } from '../utils';
 import {
   CLIENT_GEO_COUNTRY_NAME,
   CLS_FIELD,
@@ -24,7 +24,8 @@ import {
   USER_AGENT_NAME,
   USER_AGENT_OS,
   USER_AGENT_VERSION,
-} from './data/elasticsearch_fieldnames';
+  TRANSACTION_TIME_TO_FIRST_BYTE,
+} from '../data/elasticsearch_fieldnames';
 
 export function getPerformanceDistLensConfig({ seriesId, indexPattern }: ConfigProps): DataSeries {
   return {
@@ -64,6 +65,7 @@ export function getPerformanceDistLensConfig({ seriesId, indexPattern }: ConfigP
         defaultValue: TRANSACTION_DURATION,
         options: [
           { label: 'Page load time', field: TRANSACTION_DURATION },
+          { label: 'Backend time', field: TRANSACTION_TIME_TO_FIRST_BYTE },
           { label: 'First contentful paint', field: FCP_FIELD },
           { label: 'Total blocking time', field: TBT_FIELD },
           // FIXME, review if we need these descriptions
