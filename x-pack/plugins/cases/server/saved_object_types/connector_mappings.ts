@@ -28,7 +28,7 @@ export const caseConnectorMappingsSavedObjectType: SavedObjectsType = {
           },
         },
       },
-      scope: {
+      owner: {
         type: 'keyword',
       },
     },

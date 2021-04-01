@@ -57,7 +57,7 @@ export const caseConfigureSavedObjectType: SavedObjectsType = {
       closure_type: {
         type: 'keyword',
       },
-      scope: {
+      owner: {
         type: 'keyword',
       },
       updated_at: {
