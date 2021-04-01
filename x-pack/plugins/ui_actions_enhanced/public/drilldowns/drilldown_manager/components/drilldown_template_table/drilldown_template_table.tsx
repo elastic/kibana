@@ -14,9 +14,6 @@ import {
   EuiButton,
   EuiText,
   EuiTextColor,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
   EuiSearchBarProps,
 } from '@elastic/eui';
 import {
@@ -27,6 +24,7 @@ import {
   txtActionColumnTitle,
   txtTriggerColumnTitle,
 } from './i18n';
+import { TextWithIcon } from '../text_with_icon';
 
 export interface DrilldownTemplateTableItem {
   id: string;
@@ -64,41 +62,21 @@ export const DrilldownTemplateTable: React.FC<DrilldownTemplateTableProps> = ({
         </div>
       ),
     },
-    // {
-    //   name: txtSourceColumnTitle,
-    //   render: (item: DrilldownTemplateTableItem) => (
-    //     <EuiTextColor color={'subdued'}>{item.description}</EuiTextColor>
-    //   ),
-    // },
     {
       name: txtActionColumnTitle,
       render: (item: DrilldownTemplateTableItem) => (
-        <EuiFlexGroup responsive={false} alignItems="center" gutterSize={'s'}>
-          <EuiFlexItem grow={false}>
-            <EuiIcon type={item.actionIcon || 'empty'} />
-          </EuiFlexItem>
-          {!!item.actionName && (
-            <EuiFlexItem grow={false} style={{ flexWrap: 'wrap' }}>
-              <EuiTextColor color={'subdued'}>{item.actionName}</EuiTextColor>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
+        <TextWithIcon icon={item.actionIcon || 'empty'} color={'subdued'}>
+          {item.actionName}
+        </TextWithIcon>
       ),
     },
     {
       name: txtTriggerColumnTitle,
       render: (item: DrilldownTemplateTableItem) =>
         item.triggerIncompatible ? (
-          <EuiFlexGroup responsive={false} alignItems="center" gutterSize={'s'}>
-            <EuiFlexItem grow={false}>
-              <EuiIcon color={'danger'} type={'alert'} />
-            </EuiFlexItem>
-            {!!item.actionName && (
-              <EuiFlexItem grow={false} style={{ flexWrap: 'wrap' }}>
-                <EuiTextColor color={'subdued'}>{item.trigger}</EuiTextColor>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
+          <TextWithIcon icon={'alert'} iconColor={'danger'} color={'subdued'}>
+            {item.trigger}
+          </TextWithIcon>
         ) : (
           <EuiTextColor color={'subdued'}>{item.trigger}</EuiTextColor>
         ),
