@@ -36,6 +36,7 @@ export interface DrilldownTemplateTableItem {
   actionName?: string;
   actionIcon?: string;
   trigger?: string;
+  triggerIncompatible?: boolean;
 }
 
 export interface DrilldownTemplateTableProps {
@@ -86,9 +87,21 @@ export const DrilldownTemplateTable: React.FC<DrilldownTemplateTableProps> = ({
     },
     {
       name: txtTriggerColumnTitle,
-      render: (item: DrilldownTemplateTableItem) => (
-        <EuiTextColor color={'subdued'}>{item.trigger}</EuiTextColor>
-      ),
+      render: (item: DrilldownTemplateTableItem) =>
+        item.triggerIncompatible ? (
+          <EuiFlexGroup responsive={false} alignItems="center" gutterSize={'s'}>
+            <EuiFlexItem grow={false}>
+              <EuiIcon color={'danger'} type={'alert'} />
+            </EuiFlexItem>
+            {!!item.actionName && (
+              <EuiFlexItem grow={false} style={{ flexWrap: 'wrap' }}>
+                <EuiTextColor color={'subdued'}>{item.trigger}</EuiTextColor>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        ) : (
+          <EuiTextColor color={'subdued'}>{item.trigger}</EuiTextColor>
+        ),
     },
     {
       align: 'right',
