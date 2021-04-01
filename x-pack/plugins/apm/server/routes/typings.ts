@@ -14,6 +14,7 @@ import {
 } from 'src/core/server';
 import { Observable } from 'rxjs';
 import { RequiredKeys, DeepPartial } from 'utility-types';
+import { SpacesPluginStart } from '../../../spaces/server';
 import { ObservabilityPluginSetup } from '../../../observability/server';
 import { LicensingApiRequestHandlerContext } from '../../../licensing/server';
 import { SecurityPluginSetup } from '../../../security/server';
@@ -93,6 +94,7 @@ export type APMRequestHandlerContext<
   config: APMConfig;
   logger: Logger;
   plugins: {
+    spaces?: SpacesPluginStart;
     observability?: ObservabilityPluginSetup;
     security?: SecurityPluginSetup;
     ml?: MlPluginSetup;

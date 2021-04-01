@@ -249,5 +249,11 @@ export class DevServer {
         )
         .subscribe(subscriber)
     );
+
+    // complete state subjects when run$ completes
+    subscriber.add(() => {
+      this.phase$.complete();
+      this.ready$.complete();
+    });
   });
 }
