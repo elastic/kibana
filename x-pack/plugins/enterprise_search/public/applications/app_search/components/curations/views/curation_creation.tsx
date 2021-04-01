@@ -25,7 +25,7 @@ export const CurationCreation: React.FC = () => {
     <>
       <EuiPageHeader pageTitle={CREATE_NEW_CURATION_TITLE} />
       <FlashMessages />
-      <EuiPageContent>
+      <EuiPageContent hasBorder>
         <EuiTitle>
           <h2>
             {i18n.translate(
