@@ -10,6 +10,7 @@ import type { SavedObjectMigrationFn } from 'kibana/server';
 import type { PackagePolicy } from '../../../../common';
 import { relativeDownloadUrlFromArtifact } from '../../../services/artifacts/mappings';
 import type { ArtifactElasticsearchProperties } from '../../../services';
+import { appContextService } from '../../../services';
 
 type ArtifactManifestList = Record<
   string,
@@ -21,16 +22,19 @@ export const migrateEndpointPackagePolicyToV7130: SavedObjectMigrationFn<
   PackagePolicy
 > = (packagePolicyDoc) => {
   if (packagePolicyDoc.attributes.package?.name === 'endpoint') {
-    // Adjust all artifact URLs so that they point at fleet-server
-    const artifactList: ArtifactManifestList =
-      packagePolicyDoc.attributes?.inputs[0]?.config?.artifact_manifest.value.artifacts;
+    // Feature condition check here is temporary until v7.13 ships
+    if (appContextService.fleetServerEnabled) {
+      // Adjust all artifact URLs so that they point at fleet-server
+      const artifactList: ArtifactManifestList =
+        packagePolicyDoc.attributes?.inputs[0]?.config?.artifact_manifest.value.artifacts;
 
-    if (artifactList) {
-      for (const [identifier, artifactManifest] of Object.entries(artifactList)) {
-        artifactManifest.relative_url = relativeDownloadUrlFromArtifact({
-          identifier,
-          decodedSha256: artifactManifest.decoded_sha256,
-        });
+      if (artifactList) {
+        for (const [identifier, artifactManifest] of Object.entries(artifactList)) {
+          artifactManifest.relative_url = relativeDownloadUrlFromArtifact({
+            identifier,
+            decodedSha256: artifactManifest.decoded_sha256,
+          });
+        }
       }
     }
   }

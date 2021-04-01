@@ -7,6 +7,7 @@
 
 import type { IUiSettingsClient } from 'kibana/public';
 import {
+  AggFunctionsMapping,
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,
 } from '../../../../../src/plugins/data/public';
@@ -22,17 +23,37 @@ import { operationDefinitionMap } from './operations';
 import { IndexPattern, IndexPatternPrivateState, IndexPatternLayer } from './types';
 import { OriginalColumn } from './rename_columns';
 import { dateHistogramOperation } from './operations/definitions';
-import { getEsAggsSuffix } from './operations/definitions/helpers';
 
 function getExpressionForLayer(
   layer: IndexPatternLayer,
   indexPattern: IndexPattern,
   uiSettings: IUiSettingsClient
 ): ExpressionAstExpression | null {
-  const { columns, columnOrder } = layer;
+  const { columnOrder } = layer;
   if (columnOrder.length === 0 || !indexPattern) {
     return null;
   }
+
+  const columns = { ...layer.columns };
+  Object.keys(columns).forEach((columnId) => {
+    const column = columns[columnId];
+    const rootDef = operationDefinitionMap[column.operationType];
+    if (
+      'references' in column &&
+      rootDef.filterable &&
+      rootDef.input === 'fullReference' &&
+      column.filter
+    ) {
+      // inherit filter to all referenced operations
+      column.references.forEach((referenceColumnId) => {
+        const referencedColumn = columns[referenceColumnId];
+        const referenceDef = operationDefinitionMap[column.operationType];
+        if (referenceDef.filterable) {
+          columns[referenceColumnId] = { ...referencedColumn, filter: column.filter };
+        }
+      });
+    }
+  });
 
   const columnEntries = columnOrder.map((colId) => [colId, columns[colId]] as const);
 
@@ -44,10 +65,37 @@ function getExpressionForLayer(
       if (def.input === 'fullReference') {
         expressions.push(...def.toExpression(layer, colId, indexPattern));
       } else {
+        const wrapInFilter = Boolean(def.filterable && col.filter);
+        let aggAst = def.toEsAggsFn(
+          col,
+          wrapInFilter ? `${colId}-metric` : colId,
+          indexPattern,
+          layer,
+          uiSettings
+        );
+        if (wrapInFilter) {
+          aggAst = buildExpressionFunction<AggFunctionsMapping['aggFilteredMetric']>(
+            'aggFilteredMetric',
+            {
+              id: colId,
+              enabled: true,
+              schema: 'metric',
+              customBucket: buildExpression([
+                buildExpressionFunction<AggFunctionsMapping['aggFilter']>('aggFilter', {
+                  id: `${colId}-filter`,
+                  enabled: true,
+                  schema: 'bucket',
+                  filter: JSON.stringify(col.filter),
+                }),
+              ]),
+              customMetric: buildExpression({ type: 'expression', chain: [aggAst] }),
+            }
+          ).toAst();
+        }
         aggs.push(
           buildExpression({
             type: 'expression',
-            chain: [def.toEsAggsFn(col, colId, indexPattern, layer, uiSettings)],
+            chain: [aggAst],
           })
         );
       }
@@ -55,10 +103,9 @@ function getExpressionForLayer(
 
     const idMap = columnEntries.reduce((currentIdMap, [colId, column], index) => {
       const esAggsId = `col-${columnEntries.length === 1 ? 0 : index}-${colId}`;
-      const suffix = getEsAggsSuffix(column);
       return {
         ...currentIdMap,
-        [`${esAggsId}${suffix}`]: {
+        [esAggsId]: {
           ...column,
           id: colId,
         },

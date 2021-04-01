@@ -25,7 +25,7 @@ const supportedTypes = new Set([
 ]);
 
 const SCALE = 'ratio';
-const OPERATION_TYPE = 'cardinality';
+const OPERATION_TYPE = 'unique_count';
 const IS_BUCKETED = false;
 
 function ofName(name: string) {
@@ -40,7 +40,7 @@ function ofName(name: string) {
 export interface CardinalityIndexPatternColumn
   extends FormattedIndexPatternColumn,
     FieldBasedIndexPatternColumn {
-  operationType: 'cardinality';
+  operationType: typeof OPERATION_TYPE;
 }
 
 export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternColumn, 'field'> = {
@@ -70,6 +70,7 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
         (!newField.aggregationRestrictions || newField.aggregationRestrictions.cardinality)
     );
   },
+  filterable: true,
   getDefaultLabel: (column, indexPattern) => ofName(getSafeName(column.sourceField, indexPattern)),
   buildColumn({ field, previousColumn }) {
     return {
@@ -79,6 +80,7 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
       scale: SCALE,
       sourceField: field.name,
       isBucketed: IS_BUCKETED,
+      filter: previousColumn?.filter,
       params: getFormatFromPreviousColumn(previousColumn),
     };
   },

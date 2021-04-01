@@ -1352,7 +1352,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\">) => Promise<",
+              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">) => Promise<",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -1377,7 +1377,7 @@
                     "section": "def-server.SavedObjectsClient",
                     "text": "SavedObjectsClient"
                   },
-                  ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\">"
+                  ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
                 ],
                 "description": [],
                 "source": {
@@ -1823,7 +1823,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/plugin.ts",
-                  "lineNumber": 30
+                  "lineNumber": 31
                 }
               }
             ],
@@ -1831,7 +1831,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/plugin.ts",
-              "lineNumber": 30
+              "lineNumber": 31
             }
           },
           {
@@ -1876,7 +1876,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/plugin.ts",
-                  "lineNumber": 36
+                  "lineNumber": 37
                 }
               },
               {
@@ -1895,7 +1895,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/plugin.ts",
-                  "lineNumber": 36
+                  "lineNumber": 37
                 }
               }
             ],
@@ -1903,7 +1903,7 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/plugin.ts",
-              "lineNumber": 36
+              "lineNumber": 37
             }
           },
           {
@@ -1947,7 +1947,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/plugin.ts",
-                  "lineNumber": 106
+                  "lineNumber": 86
                 }
               },
               {
@@ -1966,7 +1966,7 @@
                 "description": [],
                 "source": {
                   "path": "x-pack/plugins/reporting/server/plugin.ts",
-                  "lineNumber": 106
+                  "lineNumber": 86
                 }
               }
             ],
@@ -1974,13 +1974,13 @@
             "returnComment": [],
             "source": {
               "path": "x-pack/plugins/reporting/server/plugin.ts",
-              "lineNumber": 106
+              "lineNumber": 86
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/reporting/server/plugin.ts",
-          "lineNumber": 24
+          "lineNumber": 25
         },
         "initialIsOpen": false
       }

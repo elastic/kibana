@@ -359,7 +359,7 @@ export async function getLatestConfigChangeAction(
     search: policyId,
     searchFields: ['policy_id'],
     sortField: 'created_at',
-    sortOrder: 'DESC',
+    sortOrder: 'desc',
   });
 
   if (res.saved_objects[0]) {

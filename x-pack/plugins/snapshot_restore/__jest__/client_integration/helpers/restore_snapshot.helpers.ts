@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { act } from 'react-dom/test-utils';
 
 import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
 import { RestoreSnapshot } from '../../../public/application/sections/restore_snapshot';
@@ -23,10 +24,41 @@ const initTestBed = registerTestBed<RestoreSnapshotFormTestSubject>(
 );
 
 const setupActions = (testBed: TestBed<RestoreSnapshotFormTestSubject>) => {
-  const { find } = testBed;
+  const { find, component, form } = testBed;
+
   return {
     findDataStreamCallout() {
       return find('dataStreamWarningCallOut');
+    },
+
+    toggleGlobalState() {
+      act(() => {
+        form.toggleEuiSwitch('includeGlobalStateSwitch');
+      });
+
+      component.update();
+    },
+
+    toggleIncludeAliases() {
+      act(() => {
+        form.toggleEuiSwitch('includeAliasesSwitch');
+      });
+
+      component.update();
+    },
+
+    goToStep(step: number) {
+      while (--step > 0) {
+        find('nextButton').simulate('click');
+      }
+      component.update();
+    },
+
+    async clickRestore() {
+      await act(async () => {
+        find('restoreButton').simulate('click');
+      });
+      component.update();
     },
   };
 };
@@ -48,4 +80,9 @@ export const setup = async (): Promise<RestoreSnapshotTestBed> => {
 
 export type RestoreSnapshotFormTestSubject =
   | 'snapshotRestoreStepLogistics'
+  | 'includeGlobalStateSwitch'
+  | 'includeAliasesSwitch'
+  | 'nextButton'
+  | 'restoreButton'
+  | 'systemIndicesInfoCallOut'
   | 'dataStreamWarningCallOut';

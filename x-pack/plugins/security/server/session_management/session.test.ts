@@ -103,7 +103,7 @@ describe('Session', () => {
 
       await expect(session.get(httpServerMock.createKibanaRequest())).resolves.toBeNull();
       expect(mockSessionCookie.clear).toHaveBeenCalledTimes(1);
-      expect(mockSessionIndex.clear).toHaveBeenCalledTimes(1);
+      expect(mockSessionIndex.invalidate).toHaveBeenCalledTimes(1);
     });
 
     it('clears session value if session is expired because of lifespan', async () => {
@@ -122,7 +122,7 @@ describe('Session', () => {
 
       await expect(session.get(httpServerMock.createKibanaRequest())).resolves.toBeNull();
       expect(mockSessionCookie.clear).toHaveBeenCalledTimes(1);
-      expect(mockSessionIndex.clear).toHaveBeenCalledTimes(1);
+      expect(mockSessionIndex.invalidate).toHaveBeenCalledTimes(1);
     });
 
     it('clears session value if session cookie does not have corresponding session index value', async () => {
@@ -151,7 +151,7 @@ describe('Session', () => {
 
       await expect(session.get(httpServerMock.createKibanaRequest())).resolves.toBeNull();
       expect(mockSessionCookie.clear).toHaveBeenCalledTimes(1);
-      expect(mockSessionIndex.clear).toHaveBeenCalledTimes(1);
+      expect(mockSessionIndex.invalidate).toHaveBeenCalledTimes(1);
     });
 
     it('clears session value if session index value content cannot be decrypted because of wrong AAD', async () => {
@@ -170,7 +170,7 @@ describe('Session', () => {
 
       await expect(session.get(httpServerMock.createKibanaRequest())).resolves.toBeNull();
       expect(mockSessionCookie.clear).toHaveBeenCalledTimes(1);
-      expect(mockSessionIndex.clear).toHaveBeenCalledTimes(1);
+      expect(mockSessionIndex.invalidate).toHaveBeenCalledTimes(1);
     });
 
     it('returns session value with decrypted content', async () => {
@@ -199,7 +199,7 @@ describe('Session', () => {
         username: 'some-user',
       });
       expect(mockSessionCookie.clear).not.toHaveBeenCalled();
-      expect(mockSessionIndex.clear).not.toHaveBeenCalled();
+      expect(mockSessionIndex.invalidate).not.toHaveBeenCalled();
     });
   });
 
@@ -279,7 +279,7 @@ describe('Session', () => {
       const mockRequest = httpServerMock.createKibanaRequest();
       await expect(session.update(mockRequest, sessionMock.createValue())).resolves.toBeNull();
 
-      expect(mockSessionIndex.clear).not.toHaveBeenCalled();
+      expect(mockSessionIndex.invalidate).not.toHaveBeenCalled();
       expect(mockSessionCookie.clear).toHaveBeenCalledTimes(1);
       expect(mockSessionCookie.clear).toHaveBeenCalledWith(mockRequest);
     });
@@ -432,7 +432,7 @@ describe('Session', () => {
           })
         );
 
-        expect(mockSessionIndex.clear).not.toHaveBeenCalled();
+        expect(mockSessionIndex.invalidate).not.toHaveBeenCalled();
         expect(mockSessionCookie.clear).not.toHaveBeenCalled();
       }
 
@@ -485,7 +485,7 @@ describe('Session', () => {
       );
       expect(mockSessionIndex.update).not.toHaveBeenCalled();
       expect(mockSessionCookie.set).not.toHaveBeenCalled();
-      expect(mockSessionIndex.clear).not.toHaveBeenCalled();
+      expect(mockSessionIndex.invalidate).not.toHaveBeenCalled();
       expect(mockSessionCookie.clear).not.toHaveBeenCalled();
     });
 
@@ -563,7 +563,7 @@ describe('Session', () => {
           mockRequest,
           expect.objectContaining({ idleTimeoutExpiration: expectedNewExpiration })
         );
-        expect(mockSessionIndex.clear).not.toHaveBeenCalled();
+        expect(mockSessionIndex.invalidate).not.toHaveBeenCalled();
         expect(mockSessionCookie.clear).not.toHaveBeenCalled();
       });
 
@@ -582,7 +582,7 @@ describe('Session', () => {
           )
         ).resolves.toBeNull();
 
-        expect(mockSessionIndex.clear).not.toHaveBeenCalled();
+        expect(mockSessionIndex.invalidate).not.toHaveBeenCalled();
         expect(mockSessionCookie.clear).toHaveBeenCalledTimes(1);
         expect(mockSessionCookie.clear).toHaveBeenCalledWith(mockRequest);
       });
@@ -625,7 +625,7 @@ describe('Session', () => {
           mockRequest,
           expect.objectContaining({ idleTimeoutExpiration: expectedNewExpiration })
         );
-        expect(mockSessionIndex.clear).not.toHaveBeenCalled();
+        expect(mockSessionIndex.invalidate).not.toHaveBeenCalled();
         expect(mockSessionCookie.clear).not.toHaveBeenCalled();
       });
 
@@ -653,7 +653,7 @@ describe('Session', () => {
           mockRequest,
           expect.objectContaining({ idleTimeoutExpiration: expectedNewExpiration })
         );
-        expect(mockSessionIndex.clear).not.toHaveBeenCalled();
+        expect(mockSessionIndex.invalidate).not.toHaveBeenCalled();
         expect(mockSessionCookie.clear).not.toHaveBeenCalled();
       });
 
@@ -696,7 +696,7 @@ describe('Session', () => {
           mockRequest,
           expect.objectContaining({ idleTimeoutExpiration: expectedNewExpiration })
         );
-        expect(mockSessionIndex.clear).not.toHaveBeenCalled();
+        expect(mockSessionIndex.invalidate).not.toHaveBeenCalled();
         expect(mockSessionCookie.clear).not.toHaveBeenCalled();
       });
     });
@@ -764,7 +764,7 @@ describe('Session', () => {
           );
         }
 
-        expect(mockSessionIndex.clear).not.toHaveBeenCalled();
+        expect(mockSessionIndex.invalidate).not.toHaveBeenCalled();
         expect(mockSessionCookie.clear).not.toHaveBeenCalled();
       }
 
@@ -786,27 +786,98 @@ describe('Session', () => {
     });
   });
 
-  describe('#clear', () => {
-    it('does not clear anything if session does not exist', async () => {
+  describe('#invalidate', () => {
+    beforeEach(() => {
+      mockSessionCookie.get.mockResolvedValue(sessionCookieMock.createValue());
+      mockSessionIndex.invalidate.mockResolvedValue(10);
+    });
+
+    it('[match=current] does not clear anything if session does not exist', async () => {
       mockSessionCookie.get.mockResolvedValue(null);
 
-      await session.clear(httpServerMock.createKibanaRequest());
+      await session.invalidate(httpServerMock.createKibanaRequest(), { match: 'current' });
 
-      expect(mockSessionIndex.clear).not.toHaveBeenCalled();
+      expect(mockSessionIndex.invalidate).not.toHaveBeenCalled();
       expect(mockSessionCookie.clear).not.toHaveBeenCalled();
     });
 
-    it('clears both session cookie and session index', async () => {
+    it('[match=current] clears both session cookie and session index', async () => {
       mockSessionCookie.get.mockResolvedValue(sessionCookieMock.createValue());
 
       const mockRequest = httpServerMock.createKibanaRequest();
-      await session.clear(mockRequest);
+      await session.invalidate(mockRequest, { match: 'current' });
 
-      expect(mockSessionIndex.clear).toHaveBeenCalledTimes(1);
-      expect(mockSessionIndex.clear).toHaveBeenCalledWith('some-long-sid');
+      expect(mockSessionIndex.invalidate).toHaveBeenCalledTimes(1);
+      expect(mockSessionIndex.invalidate).toHaveBeenCalledWith({
+        match: 'sid',
+        sid: 'some-long-sid',
+      });
 
       expect(mockSessionCookie.clear).toHaveBeenCalledTimes(1);
       expect(mockSessionCookie.clear).toHaveBeenCalledWith(mockRequest);
+    });
+
+    it('[match=all] clears all sessions even if current initiator request does not have a session', async () => {
+      mockSessionCookie.get.mockResolvedValue(null);
+
+      await expect(
+        session.invalidate(httpServerMock.createKibanaRequest(), { match: 'all' })
+      ).resolves.toBe(10);
+
+      expect(mockSessionCookie.clear).not.toHaveBeenCalled();
+      expect(mockSessionIndex.invalidate).toHaveBeenCalledTimes(1);
+      expect(mockSessionIndex.invalidate).toHaveBeenCalledWith({ match: 'all' });
+    });
+
+    it('[match=query] properly forwards filter with the provider type to the session index', async () => {
+      await expect(
+        session.invalidate(httpServerMock.createKibanaRequest(), {
+          match: 'query',
+          query: { provider: { type: 'basic' } },
+        })
+      ).resolves.toBe(10);
+
+      expect(mockSessionCookie.clear).not.toHaveBeenCalled();
+      expect(mockSessionIndex.invalidate).toHaveBeenCalledTimes(1);
+      expect(mockSessionIndex.invalidate).toHaveBeenCalledWith({
+        match: 'query',
+        query: { provider: { type: 'basic' } },
+      });
+    });
+
+    it('[match=query] properly forwards filter with the provider type and provider name to the session index', async () => {
+      await expect(
+        session.invalidate(httpServerMock.createKibanaRequest(), {
+          match: 'query',
+          query: { provider: { type: 'basic', name: 'basic1' } },
+        })
+      ).resolves.toBe(10);
+
+      expect(mockSessionCookie.clear).not.toHaveBeenCalled();
+      expect(mockSessionIndex.invalidate).toHaveBeenCalledTimes(1);
+      expect(mockSessionIndex.invalidate).toHaveBeenCalledWith({
+        match: 'query',
+        query: { provider: { type: 'basic', name: 'basic1' } },
+      });
+    });
+
+    it('[match=query] properly forwards filter with the provider type, provider name, and username hash to the session index', async () => {
+      await expect(
+        session.invalidate(httpServerMock.createKibanaRequest(), {
+          match: 'query',
+          query: { provider: { type: 'basic', name: 'basic1' }, username: 'elastic' },
+        })
+      ).resolves.toBe(10);
+
+      expect(mockSessionCookie.clear).not.toHaveBeenCalled();
+      expect(mockSessionIndex.invalidate).toHaveBeenCalledTimes(1);
+      expect(mockSessionIndex.invalidate).toHaveBeenCalledWith({
+        match: 'query',
+        query: {
+          provider: { type: 'basic', name: 'basic1' },
+          usernameHash: 'eb28536c8ead72bf81a0a9226e38fc9bad81f5e07c2081bb801b2a5c8842924e',
+        },
+      });
     });
   });
 });

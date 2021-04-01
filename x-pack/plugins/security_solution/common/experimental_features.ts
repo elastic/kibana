@@ -13,6 +13,7 @@ export type ExperimentalFeatures = typeof allowedExperimentalValues;
  */
 const allowedExperimentalValues = Object.freeze({
   fleetServerEnabled: false,
+  trustedAppsByPolicyEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

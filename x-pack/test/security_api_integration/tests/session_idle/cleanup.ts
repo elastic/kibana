@@ -8,6 +8,7 @@
 import request, { Cookie } from 'request';
 import { delay } from 'bluebird';
 import expect from '@kbn/expect';
+// @ts-expect-error https://github.com/elastic/kibana/issues/95679
 import { adminTestUser } from '@kbn/test';
 import type { AuthenticationProvider } from '../../../../plugins/security/common/model';
 import { getSAMLRequestId, getSAMLResponse } from '../../fixtures/saml/saml_tools';
@@ -43,8 +44,10 @@ export default function ({ getService }: FtrProviderContext) {
   }
 
   async function getNumberOfSessionDocuments() {
-    return (await es.search({ index: '.kibana_security_session*' })).body.hits.total
-      .value as number;
+    return (
+      // @ts-expect-error doesn't handle total as number
+      (await es.search({ index: '.kibana_security_session*' })).body.hits.total.value as number
+    );
   }
 
   async function loginWithSAML(providerName: string) {

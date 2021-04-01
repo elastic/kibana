@@ -28,6 +28,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
     async clickLinkText(text: string) {
       await find.clickByDisplayedLinkText(text);
     }
+
     async clickKibanaSettings() {
       await testSubjects.click('settings');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -85,6 +86,22 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       const input = await testSubjects.find(`advancedSetting-editField-${propertyName}`);
       await input.clearValue();
       await input.type(propertyValue);
+      await testSubjects.click(`advancedSetting-saveButton`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async setAdvancedSettingsTextArea(propertyName: string, propertyValue: string) {
+      const wrapper = await testSubjects.find(`advancedSetting-editField-${propertyName}`);
+      const textarea = await wrapper.findByTagName('textarea');
+      await textarea.focus();
+      // only way to properly replace the value of the ace editor is via the JS api
+      await browser.execute(
+        (editor: string, value: string) => {
+          return (window as any).ace.edit(editor).setValue(value);
+        },
+        `advancedSetting-editField-${propertyName}-editor`,
+        propertyValue
+      );
       await testSubjects.click(`advancedSetting-saveButton`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
@@ -162,6 +179,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async sortBy(columnName: string) {
       const chartTypes = await find.allByCssSelector('table.euiTable thead tr th button');
+
       async function getChartType(chart: Record<string, any>) {
         const chartString = await chart.getVisibleText();
         if (chartString === columnName) {
@@ -169,6 +187,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
           await PageObjects.header.waitUntilLoadingHasFinished();
         }
       }
+
       const getChartTypesPromises = chartTypes.map(getChartType);
       return Promise.all(getChartTypesPromises);
     }
@@ -502,6 +521,16 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       await this.closeIndexPatternFieldEditor();
     }
 
+    public async confirmSave() {
+      await testSubjects.setValue('saveModalConfirmText', 'change');
+      await testSubjects.click('confirmModalConfirmButton');
+    }
+
+    public async confirmDelete() {
+      await testSubjects.setValue('deleteModalConfirmText', 'remove');
+      await testSubjects.click('confirmModalConfirmButton');
+    }
+
     async closeIndexPatternFieldEditor() {
       await retry.waitFor('field editor flyout to close', async () => {
         return !(await testSubjects.exists('euiFlyoutCloseButton'));
@@ -540,6 +569,17 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       retry.waitFor('monaco editor is ready', async () => !!(await getMonacoTextArea()));
       const monacoTextArea = await getMonacoTextArea();
       await monacoTextArea.focus();
+      browser.pressKeys(script);
+    }
+
+    async changeFieldScript(script: string) {
+      log.debug('set script = ' + script);
+      const formatRow = await testSubjects.find('valueRow');
+      const getMonacoTextArea = async () => (await formatRow.findAllByCssSelector('textarea'))[0];
+      retry.waitFor('monaco editor is ready', async () => !!(await getMonacoTextArea()));
+      const monacoTextArea = await getMonacoTextArea();
+      await monacoTextArea.focus();
+      browser.pressKeys(browser.keys.DELETE.repeat(30));
       browser.pressKeys(script);
     }
 

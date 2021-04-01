@@ -6,9 +6,8 @@
  */
 
 import _ from 'lodash';
-import { RequestHandler, SearchResponse } from 'kibana/server';
+import { RequestHandler } from 'kibana/server';
 import { TypeOf } from '@kbn/config-schema';
-import { ApiResponse } from '@elastic/elasticsearch';
 import { validateEntities } from '../../../../common/endpoint/schema/resolver';
 import { ResolverEntityIndex, ResolverSchema } from '../../../../common/endpoint/types';
 
@@ -88,9 +87,7 @@ export function handleEntities(): RequestHandler<unknown, TypeOf<typeof validate
       query: { _id, indices },
     } = request;
 
-    const queryResponse: ApiResponse<
-      SearchResponse<unknown>
-    > = await context.core.elasticsearch.client.asCurrentUser.search({
+    const queryResponse = await context.core.elasticsearch.client.asCurrentUser.search({
       ignore_unavailable: true,
       index: indices,
       body: {
@@ -102,6 +99,7 @@ export function handleEntities(): RequestHandler<unknown, TypeOf<typeof validate
               {
                 // only return documents with the matching _id
                 ids: {
+                  // @ts-expect-error expected string[]
                   values: _id,
                 },
               },
