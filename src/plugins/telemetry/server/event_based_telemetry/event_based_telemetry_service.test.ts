@@ -123,7 +123,7 @@ describe('EventBasedTelemetryService', () => {
             test: { type: 'keyword', _meta: { description: 'Always OK because tests never fail' } },
           },
         })
-      ).toThrowError('Channels can only be lifecycle step.');
+      ).toThrowError('Channels can only be registered during the setup lifecycle step.');
 
       // Checking the validator is registered for the channel
       expect(

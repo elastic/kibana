@@ -76,14 +76,20 @@ export class LeakyBucket {
 
   private async sendIfFull(sender: HTTPSender) {
     if (this.isFullQueue()) {
-      // To don't go over our "threshold bytes per second", we need to wait 1s before consuming from queues again.
-      // Doing a Promise.all because we don't want to add the sending time to the max_frequency_of_requests wait.
-      await Promise.all([
+      // To don't go over our "threshold bytes per second", we need to wait
+      // {max_frequency_of_requests} before consuming from queues again.
+      // Using Promise.allSettled because we don't want to add the sending
+      // time to the {max_frequency_of_requests} wait, but we still want to wait if we fail to send.
+      const [sendResults] = await Promise.allSettled([
         this.send(sender),
         new Promise((resolve) =>
           setTimeout(resolve, this.config.max_frequency_of_requests.asMilliseconds())
         ),
       ]);
+
+      if (sendResults.status === 'rejected') {
+        throw sendResults.reason;
+      }
     }
   }
 

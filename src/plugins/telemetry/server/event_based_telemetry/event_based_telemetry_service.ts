@@ -59,7 +59,7 @@ export class EventBasedTelemetryService {
 
   public registerChannel(pluginName: string, channelOptions: EventChannelOptions) {
     if (this.started) {
-      throw new Error(`Channels can only be lifecycle step.`);
+      throw new Error(`Channels can only be registered during the setup lifecycle step.`);
     }
     const { name: channelName, schema, quotaPercentage } = channelOptions;
     this.logger.debug(`Registering channel "${channelName}" from plugin "${pluginName}"`);
