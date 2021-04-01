@@ -6,7 +6,7 @@
  */
 
 import {
-  EuiBasicTable,
+  EuiInMemoryTable,
   EuiBasicTableColumn,
   EuiButton,
   EuiButtonEmpty,
@@ -64,11 +64,13 @@ export const DrilldownTable: React.FC<DrilldownTableProps> = ({
 
   const columns: Array<EuiBasicTableColumn<DrilldownTableItem>> = [
     {
+      field: 'drilldownName',
       name: txtName,
+      sortable: true,
       'data-test-subj': 'drilldownListItemName',
-      render: (drilldown: DrilldownTableItem) => (
+      render: (drilldownName: string, drilldown: DrilldownTableItem) => (
         <div>
-          {drilldown.drilldownName}{' '}
+          {drilldownName}{' '}
           {drilldown.error && (
             <EuiToolTip id={`drilldownError-${drilldown.id}`} content={drilldown.error}>
               <EuiIcon
@@ -93,9 +95,12 @@ export const DrilldownTable: React.FC<DrilldownTableProps> = ({
       ),
     },
     {
+      field: 'triggers',
       name: txtTrigger,
       textOnly: true,
-      render: (drilldown: DrilldownTableItem) => {
+      sortable: (drilldown: DrilldownTableItem) =>
+        drilldown.triggers ? drilldown.triggers[0].title : '',
+      render: (triggers: unknown, drilldown: DrilldownTableItem) => {
         if (!drilldown.triggers) return null;
         const trigger = drilldown.triggers[0];
         return (
@@ -137,7 +142,7 @@ export const DrilldownTable: React.FC<DrilldownTableProps> = ({
 
   return (
     <>
-      <EuiBasicTable
+      <EuiInMemoryTable
         items={drilldowns}
         itemId="id"
         columns={columns}
@@ -153,6 +158,12 @@ export const DrilldownTable: React.FC<DrilldownTableProps> = ({
           'data-test-subj': TEST_SUBJ_DRILLDOWN_ITEM,
         }}
         hasActions={true}
+        sorting={{
+          sort: {
+            field: 'drilldownName',
+            direction: 'asc',
+          },
+        }}
       />
       <EuiSpacer />
       {!!onCreate && !selectedDrilldowns.length && (

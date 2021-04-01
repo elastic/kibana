@@ -52,8 +52,10 @@ export const DrilldownTemplateTable: React.FC<DrilldownTemplateTableProps> = ({
 
   const columns: Array<EuiBasicTableColumn<DrilldownTemplateTableItem>> = [
     {
+      field: 'name',
       name: txtNameColumnTitle,
-      render: (item: DrilldownTemplateTableItem) => (
+      sortable: true,
+      render: (omit, item: DrilldownTemplateTableItem) => (
         <div style={{ display: 'block' }}>
           <div style={{ display: 'block' }}>{item.name}</div>
           <EuiText size={'xs'} color={'subdued'}>
@@ -71,8 +73,10 @@ export const DrilldownTemplateTable: React.FC<DrilldownTemplateTableProps> = ({
       ),
     },
     {
+      field: 'trigger',
       name: txtTriggerColumnTitle,
-      render: (item: DrilldownTemplateTableItem) => (
+      sortable: true,
+      render: (omit, item: DrilldownTemplateTableItem) => (
         <TriggerLineItem incompatible={item.triggerIncompatible}>{item.trigger}</TriggerLineItem>
       ),
     },
@@ -109,8 +113,8 @@ export const DrilldownTemplateTable: React.FC<DrilldownTemplateTableProps> = ({
         search={search}
         sorting={{
           sort: {
+            field: 'nameCol',
             direction: 'asc',
-            field: 'name',
           },
         }}
         selection={{
