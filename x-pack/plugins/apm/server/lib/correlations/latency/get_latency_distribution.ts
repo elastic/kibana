@@ -5,38 +5,16 @@
  * 2.0.
  */
 
-import { dropRightWhile } from 'lodash';
 import { AggregationOptionsByType } from '../../../../../../../typings/elasticsearch';
 import { ESFilter } from '../../../../../../../typings/elasticsearch';
-import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { TopSigTerm } from '../process_significant_term_aggs';
 import { withApmSpan } from '../../../utils/with_apm_span';
-import { INTERVAL_BUCKETS } from './get_overall_latency_distribution';
-
-export function getDistributionAggregation(
-  maxLatency: number,
-  distributionInterval: number
-) {
-  return {
-    filter: { range: { [TRANSACTION_DURATION]: { lte: maxLatency } } },
-    aggs: {
-      dist_filtered_by_latency: {
-        histogram: {
-          // TODO: add support for metrics
-          field: TRANSACTION_DURATION,
-          interval: distributionInterval,
-          min_doc_count: 0,
-          extended_bounds: {
-            min: 0,
-            max: maxLatency,
-          },
-        },
-      },
-    },
-  };
-}
+import {
+  getDistributionAggregation,
+  trimBuckets,
+} from './get_overall_latency_distribution';
 
 export async function getLatencyDistribution({
   setup,
@@ -99,29 +77,21 @@ export async function getLatencyDistribution({
       return [];
     }
 
-    function formatDistribution(distribution: Agg[string]['distribution']) {
-      const total = distribution.doc_count;
-
-      // remove trailing buckets that are empty and out of bounds of the desired number of buckets
-      const buckets = dropRightWhile(
-        distribution.dist_filtered_by_latency.buckets,
-        (bucket, index) =>
-          bucket.doc_count === 0 && index > INTERVAL_BUCKETS - 1
-      );
-
-      return buckets.map((bucket) => ({
-        x: bucket.key,
-        y: (bucket.doc_count / total) * 100,
-      }));
-    }
-
     return topSigTerms.map((topSig, index) => {
+      // ignore the typescript error since existence of response.aggregations is already checked:
       // @ts-expect-error
       const agg = response.aggregations[`term_${index}`] as Agg[string];
+      const total = agg.distribution.doc_count;
+      const buckets = trimBuckets(
+        agg.distribution.dist_filtered_by_latency.buckets
+      );
 
       return {
         ...topSig,
-        distribution: formatDistribution(agg.distribution),
+        distribution: buckets.map((bucket) => ({
+          x: bucket.key,
+          y: (bucket.doc_count / total) * 100,
+        })),
       };
     });
   });

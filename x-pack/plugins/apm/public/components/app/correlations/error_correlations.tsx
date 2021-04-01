@@ -173,7 +173,7 @@ export function ErrorCorrelations({ onClose }: Props) {
             )}
             significantTerms={
               hasFieldNames && correlationsData?.significantTerms
-                ? correlationsData?.significantTerms
+                ? correlationsData.significantTerms
                 : []
             }
             status={correlationsStatus}

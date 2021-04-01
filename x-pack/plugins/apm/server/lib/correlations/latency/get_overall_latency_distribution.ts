@@ -6,13 +6,36 @@
  */
 
 import { dropRightWhile } from 'lodash';
+import { TRANSACTION_DURATION } from '../../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { getMaxLatency } from './get_max_latency';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { CorrelationsOptions, getCorrelationsFilters } from '../get_filters';
-import { getDistributionAggregation } from './get_latency_distribution';
 
 export const INTERVAL_BUCKETS = 15;
+
+export function getDistributionAggregation(
+  maxLatency: number,
+  distributionInterval: number
+) {
+  return {
+    filter: { range: { [TRANSACTION_DURATION]: { lte: maxLatency } } },
+    aggs: {
+      dist_filtered_by_latency: {
+        histogram: {
+          // TODO: add support for metrics
+          field: TRANSACTION_DURATION,
+          interval: distributionInterval,
+          min_doc_count: 0,
+          extended_bounds: {
+            min: 0,
+            max: maxLatency,
+          },
+        },
+      },
+    },
+  };
+}
 
 export async function getOverallLatencyDistribution(
   options: CorrelationsOptions
@@ -51,7 +74,6 @@ export async function getOverallLatencyDistribution(
     const response = await withApmSpan('get_terms_distribution', () =>
       apmEventClient.search(params)
     );
-    type Agg = NonNullable<typeof response.aggregations>;
 
     if (!response.aggregations) {
       return {
@@ -61,28 +83,25 @@ export async function getOverallLatencyDistribution(
       };
     }
 
-    function formatDistribution(distribution: Agg['distribution']) {
-      const total = distribution.doc_count;
-
-      // remove trailing buckets that are empty and out of bounds of the desired number of buckets
-      const buckets = dropRightWhile(
-        distribution.dist_filtered_by_latency.buckets,
-        (bucket, index) =>
-          bucket.doc_count === 0 && index > INTERVAL_BUCKETS - 1
-      );
-
-      return buckets.map((bucket) => ({
-        x: bucket.key,
-        y: (bucket.doc_count / total) * 100,
-      }));
-    }
+    const { distribution } = response.aggregations;
+    const total = distribution.doc_count;
+    const buckets = trimBuckets(distribution.dist_filtered_by_latency.buckets);
 
     return {
       maxLatency,
       distributionInterval,
-      overallDistribution: formatDistribution(
-        response.aggregations.distribution
-      ),
+      overallDistribution: buckets.map((bucket) => ({
+        x: bucket.key,
+        y: (bucket.doc_count / total) * 100,
+      })),
     };
   });
+}
+
+// remove trailing buckets that are empty and out of bounds of the desired number of buckets
+export function trimBuckets<T extends { doc_count: number }>(buckets: T[]) {
+  return dropRightWhile(
+    buckets,
+    (bucket, index) => bucket.doc_count === 0 && index > INTERVAL_BUCKETS - 1
+  );
 }

@@ -77,7 +77,7 @@ export function LatencyCorrelations({ onClose }: Props) {
 
   const { data: overallData, status: overallStatus } = useFetcher(
     (callApmApi) => {
-      if (start && end && hasFieldNames) {
+      if (start && end) {
         return callApmApi({
           endpoint: 'GET /api/apm/correlations/latency/overall_distribution',
           params: {
@@ -94,7 +94,6 @@ export function LatencyCorrelations({ onClose }: Props) {
         });
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       environment,
       kuery,
@@ -108,6 +107,7 @@ export function LatencyCorrelations({ onClose }: Props) {
 
   const maxLatency = overallData?.maxLatency;
   const distributionInterval = overallData?.distributionInterval;
+  const fieldNamesCommaSeparated = fieldNames.join(',');
 
   const { data: correlationsData, status: correlationsStatus } = useFetcher(
     (callApmApi) => {
@@ -124,7 +124,7 @@ export function LatencyCorrelations({ onClose }: Props) {
               start,
               end,
               durationPercentile: durationPercentile.toString(10),
-              fieldNames: fieldNames.join(','),
+              fieldNames: fieldNamesCommaSeparated,
               maxLatency: maxLatency.toString(10),
               distributionInterval: distributionInterval.toString(10),
             },
@@ -132,7 +132,6 @@ export function LatencyCorrelations({ onClose }: Props) {
         });
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       environment,
       kuery,
@@ -142,8 +141,7 @@ export function LatencyCorrelations({ onClose }: Props) {
       transactionName,
       transactionType,
       durationPercentile,
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      fieldNames.join(','),
+      fieldNamesCommaSeparated,
       hasFieldNames,
       maxLatency,
       distributionInterval,
@@ -220,13 +218,17 @@ export function LatencyCorrelations({ onClose }: Props) {
   );
 }
 
-function getDistributionYMax(data?: OverallLatencyApiResponse) {
+function getAxisMaxes(data?: OverallLatencyApiResponse) {
   if (!data?.overallDistribution) {
-    return 0;
+    return { xMax: 0, yMax: 0 };
   }
-
-  const yValues = data.overallDistribution.map((p) => p.y ?? 0);
-  return Math.max(...yValues);
+  const { overallDistribution } = data;
+  const xValues = overallDistribution.map((p) => p.x ?? 0);
+  const yValues = overallDistribution.map((p) => p.y ?? 0);
+  return {
+    xMax: Math.max(...xValues),
+    yMax: Math.max(...yValues),
+  };
 }
 
 function getSelectedDistribution(
@@ -257,11 +259,8 @@ function LatencyDistributionChart({
   status: FETCH_STATUS;
 }) {
   const theme = useTheme();
-  const xMax = overallData?.overallDistribution
-    ? Math.max(...(overallData?.overallDistribution.map((p) => p.x ?? 0) ?? []))
-    : 0;
+  const { xMax, yMax } = getAxisMaxes(overallData);
   const durationFormatter = getDurationFormatter(xMax);
-  const yMax = getDistributionYMax(overallData);
 
   return (
     <ChartContainer height={200} hasData={!!overallData} status={status}>
