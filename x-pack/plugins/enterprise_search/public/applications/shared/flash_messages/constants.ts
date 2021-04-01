@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { FlashMessageColors } from './types';
+
 export const FLASH_MESSAGE_TYPES = {
-  success: { color: 'success', iconType: 'check' },
-  info: { color: 'primary', iconType: 'iInCircle' },
-  warning: { color: 'warning', iconType: 'alert' },
-  error: { color: 'danger', iconType: 'alert' },
+  success: { color: 'success' as FlashMessageColors, iconType: 'check' },
+  info: { color: 'primary' as FlashMessageColors, iconType: 'iInCircle' },
+  warning: { color: 'warning' as FlashMessageColors, iconType: 'alert' },
+  error: { color: 'danger' as FlashMessageColors, iconType: 'alert' },
 };
 
 // This is the default amount of time (5 seconds) a toast will last before disappearing

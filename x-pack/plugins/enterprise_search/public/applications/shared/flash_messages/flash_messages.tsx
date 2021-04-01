@@ -9,7 +9,7 @@ import React, { Fragment } from 'react';
 
 import { useValues, useActions } from 'kea';
 
-import { EuiCallOut, EuiCallOutProps, EuiSpacer, EuiGlobalToastList } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiGlobalToastList } from '@elastic/eui';
 
 import { FLASH_MESSAGE_TYPES, DEFAULT_TOAST_TIMEOUT } from './constants';
 import { FlashMessagesLogic } from './flash_messages_logic';
@@ -29,7 +29,7 @@ export const Callouts: React.FC = ({ children }) => {
       {messages.map(({ type, message, description }, index) => (
         <Fragment key={index}>
           <EuiCallOut
-            color={FLASH_MESSAGE_TYPES[type].color as EuiCallOutProps['color']}
+            color={FLASH_MESSAGE_TYPES[type].color}
             iconType={FLASH_MESSAGE_TYPES[type].iconType}
             title={message}
           >

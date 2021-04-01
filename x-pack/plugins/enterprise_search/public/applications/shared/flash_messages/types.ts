@@ -7,8 +7,11 @@
 
 import { ReactNode, ReactChild } from 'react';
 
+export type FlashMessageTypes = 'success' | 'info' | 'warning' | 'error';
+export type FlashMessageColors = 'success' | 'primary' | 'warning' | 'danger';
+
 export interface IFlashMessage {
-  type: 'success' | 'info' | 'warning' | 'error';
+  type: FlashMessageTypes;
   message: ReactNode;
   description?: ReactNode;
 }

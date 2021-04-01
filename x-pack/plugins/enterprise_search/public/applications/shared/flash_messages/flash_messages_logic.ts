@@ -7,9 +7,11 @@
 
 import { kea, MakeLogicType } from 'kea';
 
+import { EuiGlobalToastListToast as IToast } from '@elastic/eui';
+
 import { KibanaLogic } from '../kibana';
 
-import { IFlashMessage, IToast } from './types';
+import { IFlashMessage } from './types';
 
 interface FlashMessagesValues {
   messages: IFlashMessage[];
