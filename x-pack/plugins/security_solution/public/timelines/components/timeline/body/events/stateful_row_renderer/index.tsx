@@ -61,8 +61,9 @@ export const StatefulRowRenderer = ({
     rowindexAttribute: ARIA_ROWINDEX_ATTRIBUTE,
   });
 
-  const rowRenderer = useMemo(() => getRowRenderer(event.ecs, rowRenderers), [
+  const rowRenderer = useMemo(() => getRowRenderer(rowRenderers, event.ecs, event.data), [
     event.ecs,
+    event.data,
     rowRenderers,
   ]);
 
@@ -80,6 +81,7 @@ export const StatefulRowRenderer = ({
                 {rowRenderer.renderRow({
                   browserFields,
                   data: event.ecs,
+                  flattenedData: event.data,
                   timelineId,
                 })}
               </div>
@@ -91,6 +93,7 @@ export const StatefulRowRenderer = ({
       ariaRowindex,
       browserFields,
       event.ecs,
+      event.data,
       focusOwnership,
       onFocus,
       onKeyDown,

@@ -19,6 +19,15 @@ const isThreatMatch = (ecs: Ecs): boolean => {
   return !!threatIndicator?.matched;
 };
 
+export const requiredFields = [
+  'threat.indicator.event.dataset',
+  'threat.indicator.event.reference',
+  'threat.indicator.provider',
+  'threat.indicator.matched.atomic',
+  'threat.indicator.matched.field',
+  'threat.indicator.matched.type',
+];
+
 export const threatMatchRowRenderer: RowRenderer = {
   id: RowRendererId.threat_match,
   isInstance: isThreatMatch,
