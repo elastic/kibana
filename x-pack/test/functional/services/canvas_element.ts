@@ -173,6 +173,7 @@ export async function CanvasElementProvider({ getService }: FtrProviderContext) 
         return {
           color: expectedColor.color,
           percentage: colorPercentageWithinTolerance,
+          pixels: pixelsWithinTolerance,
           withinTolerance: this.isValueWithinTolerance(
             colorPercentageWithinTolerance,
             pixelsWithinTolerance,
