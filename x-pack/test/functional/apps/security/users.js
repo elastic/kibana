@@ -12,7 +12,6 @@ export default function ({ getService, getPageObjects }) {
   const config = getService('config');
   const log = getService('log');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/96001
   describe('users', function () {
     before(async () => {
       log.debug('users');
