@@ -4,7 +4,7 @@
 <titleabbrev>Legacy mute alert instance</titleabbrev>
 ++++
 
-WARNING: Deprecated in 7.13.0. Use <<mute-alert-api>> instead.
+deprecated::[7.13.0,Use <<mute-alert-api>> instead.]
 
 Mute an alert instance.
 

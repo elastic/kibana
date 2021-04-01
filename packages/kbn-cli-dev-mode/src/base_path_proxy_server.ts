@@ -63,8 +63,6 @@ export class BasePathProxyServer {
   }
 
   public async start(options: BasePathProxyServerOptions) {
-    this.log.write('starting basepath proxy server');
-
     const serverOptions = getServerOptions(this.httpConfig);
     const listenerOptions = getListenerOptions(this.httpConfig);
     this.server = createServer(serverOptions, listenerOptions);
@@ -101,7 +99,6 @@ export class BasePathProxyServer {
       return;
     }
 
-    this.log.write('stopping basepath proxy server');
     await this.server.stop();
     this.server = undefined;
 

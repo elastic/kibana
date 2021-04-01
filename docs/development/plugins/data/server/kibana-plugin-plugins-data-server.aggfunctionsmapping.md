@@ -45,6 +45,7 @@ export interface AggFunctionsMapping
 |  [aggRange](./kibana-plugin-plugins-data-server.aggfunctionsmapping.aggrange.md) | <code>ReturnType&lt;typeof aggRange&gt;</code> |  |
 |  [aggSerialDiff](./kibana-plugin-plugins-data-server.aggfunctionsmapping.aggserialdiff.md) | <code>ReturnType&lt;typeof aggSerialDiff&gt;</code> |  |
 |  [aggSignificantTerms](./kibana-plugin-plugins-data-server.aggfunctionsmapping.aggsignificantterms.md) | <code>ReturnType&lt;typeof aggSignificantTerms&gt;</code> |  |
+|  [aggSinglePercentile](./kibana-plugin-plugins-data-server.aggfunctionsmapping.aggsinglepercentile.md) | <code>ReturnType&lt;typeof aggSinglePercentile&gt;</code> |  |
 |  [aggStdDeviation](./kibana-plugin-plugins-data-server.aggfunctionsmapping.aggstddeviation.md) | <code>ReturnType&lt;typeof aggStdDeviation&gt;</code> |  |
 |  [aggSum](./kibana-plugin-plugins-data-server.aggfunctionsmapping.aggsum.md) | <code>ReturnType&lt;typeof aggSum&gt;</code> |  |
 |  [aggTerms](./kibana-plugin-plugins-data-server.aggfunctionsmapping.aggterms.md) | <code>ReturnType&lt;typeof aggTerms&gt;</code> |  |

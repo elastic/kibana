@@ -46,6 +46,7 @@ const defaultOptions: Options = {
   pluginScanDirs: ['/some-scan-path'],
   quiet: true,
   silent: true,
+  verbose: false,
   repoRoot: '/app',
   runExamples: true,
   watch: true,
@@ -179,6 +180,7 @@ it('is ready when optimizer phase is success or issue and logs in familiar forma
       "ready: false",
       "<issue>",
       "ready: true",
+      "complete",
     ]
   `);
 
