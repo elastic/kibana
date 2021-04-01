@@ -22,7 +22,7 @@ import { AutocompleteFieldMatchAnyComponent } from '../autocomplete/field_value_
 import { AutocompleteFieldListsComponent } from '../autocomplete/field_value_lists';
 import { ExceptionListType, ListSchema, OperatorTypeEnum } from '../../../../common';
 import { getEmptyValue } from '../../../common/empty_value';
-import { OsTypeArray } from '../../../../shared_imports';
+import { OsTypeArray } from '../../../../common/schemas/common';
 
 import {
   getEntryOnFieldChange,
@@ -53,7 +53,6 @@ export interface EntryItemProps {
   onChange: (arg: BuilderEntry, i: number) => void;
   onlyShowListOperators?: boolean;
   setErrorsExist: (arg: boolean) => void;
-  showLabel: boolean;
 }
 
 export const BuilderEntryItem: React.FC<EntryItemProps> = ({
