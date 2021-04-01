@@ -18,17 +18,16 @@ build --disk_cache=~/.bazel-cache/disk-cache
 build --repository_cache=~/.bazel-cache/repository-cache
 
 # Bazel will create symlinks from the workspace directory to output artifacts.
-# Build results will be placed in a directory called "bazel/bin"
+# Build results will be placed in a directory called "bazel-bin"
 # This will still create a bazel-out symlink in
 # the project directory, which must be excluded from the
 # editor's search path.
-build --symlink_prefix=bazel/
 # To disable the symlinks altogether (including bazel-out) we can use
 # build --symlink_prefix=/
 # however this makes it harder to find outputs.
 
 # Prevents the creation of bazel-out dir
-build --experimental_no_product_name_out_symlink
+# build --experimental_no_product_name_out_symlink
 
 # Make direct file system calls to create symlink trees
 build --experimental_inprocess_symlink_creation
