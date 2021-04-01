@@ -380,7 +380,7 @@ export function copyAllowlistedFields(
 ): TelemetryEvent {
   return Object.entries(allowlist).reduce<TelemetryEvent>((newEvent, [allowKey, allowValue]) => {
     const eventValue = event[allowKey];
-    if (null != eventValue) {
+    if (eventValue !== null && eventValue !== undefined) {
       if (allowValue === true) {
         return { ...newEvent, [allowKey]: eventValue };
       } else if (typeof allowValue === 'object' && typeof eventValue === 'object') {
