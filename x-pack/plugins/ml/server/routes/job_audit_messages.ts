@@ -43,7 +43,7 @@ export function jobAuditMessagesRoutes({ router, routeGuard }: RouteInitializati
         try {
           const { getJobAuditMessages } = jobAuditMessagesProvider(client, mlClient);
           const { jobId } = request.params;
-          const { from } = request.query;
+          const from = request.query?.from;
           const resp = await getJobAuditMessages(jobSavedObjectService, jobId, from);
 
           return response.ok({
@@ -79,7 +79,7 @@ export function jobAuditMessagesRoutes({ router, routeGuard }: RouteInitializati
       async ({ client, mlClient, request, response, jobSavedObjectService }) => {
         try {
           const { getJobAuditMessages } = jobAuditMessagesProvider(client, mlClient);
-          const { from } = request.query;
+          const from = request.query?.from;
           const resp = await getJobAuditMessages(jobSavedObjectService, undefined, from);
 
           return response.ok({
