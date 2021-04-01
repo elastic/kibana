@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { render } from 'react-dom';
 import * as Rx from 'rxjs';
 import { first, tap } from 'rxjs/operators';
+import { EuiLoadingSpinner } from '@elastic/eui';
 
 import { I18nStart } from '../i18n';
 import { InjectedMetadataSetup } from '../injected_metadata';
-import { FatalErrorsScreen } from './fatal_errors_screen';
 import { FatalErrorInfo, getErrorInfo } from './get_error_info';
 
 interface Deps {
@@ -50,6 +50,10 @@ export interface FatalErrorsSetup {
  * @public
  */
 export type FatalErrorsStart = FatalErrorsSetup;
+
+const LazyFatalErrorsScreen = lazy(() =>
+  import('./fatal_errors_screen').then(({ FatalErrorsScreen }) => ({ default: FatalErrorsScreen }))
+);
 
 /** @interal */
 export class FatalErrorsService {
@@ -99,9 +103,9 @@ export class FatalErrorsService {
       },
     };
 
-    this.setupGlobalErrorHandlers(this.fatalErrors!);
+    this.setupGlobalErrorHandlers();
 
-    return this.fatalErrors!;
+    return this.fatalErrors;
   }
 
   public start() {
@@ -122,19 +126,21 @@ export class FatalErrorsService {
 
     render(
       <i18n.Context>
-        <FatalErrorsScreen
-          buildNumber={injectedMetadata.getKibanaBuildNumber()}
-          kibanaVersion={injectedMetadata.getKibanaVersion()}
-          errorInfo$={this.errorInfo$}
-        />
+        <Suspense fallback={<EuiLoadingSpinner />}>
+          <LazyFatalErrorsScreen
+            buildNumber={injectedMetadata.getKibanaBuildNumber()}
+            kibanaVersion={injectedMetadata.getKibanaVersion()}
+            errorInfo$={this.errorInfo$}
+          />
+        </Suspense>
       </i18n.Context>,
       container
     );
   }
 
-  private setupGlobalErrorHandlers(fatalErrorsSetup: FatalErrorsSetup) {
+  private setupGlobalErrorHandlers() {
     if (window.addEventListener) {
-      window.addEventListener('unhandledrejection', function (e) {
+      window.addEventListener('unhandledrejection', (e) => {
         console.log(`Detected an unhandled Promise rejection.\n${e.reason}`); // eslint-disable-line no-console
       });
     }
