@@ -47,23 +47,22 @@ export const getNetworkEvents: UMElasticsearchQueryFn<
       const requestSentTime = secondsToMillis(event._source.synthetics.payload.request_sent_time);
       const loadEndTime = secondsToMillis(event._source.synthetics.payload.load_end_time);
       const requestStartTime =
-        event._source.synthetics.payload.response &&
-        event._source.synthetics.payload.response.timing
-          ? secondsToMillis(event._source.synthetics.payload.response.timing.request_time)
+        event._source.http && event._source.http.timing
+          ? secondsToMillis(event._source.http.timing?.request_time)
           : undefined;
-      const securityDetails = event._source.synthetics.payload.response?.security_details;
+      const securityDetails = event._source.http.security_details;
 
       return {
         timestamp: event._source['@timestamp'],
-        method: event._source.synthetics.payload?.method,
-        url: event._source.synthetics.payload?.url,
-        status: event._source.synthetics.payload?.status,
-        mimeType: event._source.synthetics.payload?.response?.mime_type,
+        method: event._source.http.method,
+        url: event._source.url.full,
+        status: event._source.http.status,
+        mimeType: event._source.http.response?.mime_type,
         requestSentTime,
         requestStartTime,
         loadEndTime,
         timings: event._source.synthetics.payload.timings,
-        bytesDownloadedCompressed: event._source.synthetics.payload.response?.encoded_data_length,
+        bytesDownloadedCompressed: event._source.http.response?.encoded_data_length,
         certificates: securityDetails
           ? {
               issuer: securityDetails.issuer,
@@ -76,9 +75,9 @@ export const getNetworkEvents: UMElasticsearchQueryFn<
                 : undefined,
             }
           : undefined,
-        requestHeaders: event._source.synthetics.payload.request?.headers,
-        responseHeaders: event._source.synthetics.payload.response?.headers,
-        ip: event._source.synthetics.payload.response?.remote_i_p_address,
+        requestHeaders: event._source.http.request?.headers,
+        responseHeaders: event._source.http.response?.headers,
+        ip: event._source.http.response?.remote_i_p_address,
       };
     }),
   };
