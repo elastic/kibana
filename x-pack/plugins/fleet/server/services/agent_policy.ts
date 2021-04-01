@@ -38,6 +38,7 @@ import {
   AGENT_POLICY_INDEX,
   DEFAULT_FLEET_SERVER_AGENT_POLICY,
 } from '../../common';
+import type { PackagePermissions } from '../../common';
 import type {
   DeleteAgentPolicyResponse,
   Settings,
@@ -61,8 +62,19 @@ import { getSettings } from './settings';
 import { normalizeKuery, escapeSearchQueryPhrase } from './saved_object';
 import { isAgentsSetup } from './agents/setup';
 import { appContextService } from './app_context';
+import { getPackagePermissions } from './epm/packages/get';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
+
+const DEFAULT_PERMISSIONS: PackagePermissions = {
+  cluster: ['monitor'],
+  indices: [
+    {
+      names: ['logs-*', 'metrics-*', 'traces-*', '.logs-endpoint.diagnostic.collection-*'],
+      privileges: ['auto_configure', 'create_doc'],
+    },
+  ],
+};
 
 class AgentPolicyService {
   private triggerAgentPolicyUpdatedEvent = async (
@@ -737,24 +749,41 @@ class AgentPolicyService {
           }),
     };
 
+    const permissions = Object.fromEntries(
+      await Promise.all(
+        // Original type is `string[] | PackagePolicy[]`, but TS doesn't allow to `map()` over that.
+        (agentPolicy.package_policies as Array<string | PackagePolicy>).map(
+          async (packagePolicy): Promise<[string, PackagePermissions]> => {
+            if (typeof packagePolicy === 'string' || !packagePolicy.package) {
+              return ['_fallback', DEFAULT_PERMISSIONS];
+            }
+
+            const { name, version } = packagePolicy.package;
+
+            const packagePermissions = await getPackagePermissions(
+              soClient,
+              name,
+              version,
+              packagePolicy.namespace
+            );
+
+            return packagePermissions
+              ? [packagePolicy.name, packagePermissions]
+              : ['_fallback', DEFAULT_PERMISSIONS];
+          }
+        )
+      )
+    );
+
     // Only add permissions if output.type is "elasticsearch"
     fullAgentPolicy.output_permissions = Object.keys(fullAgentPolicy.outputs).reduce<
       NonNullable<FullAgentPolicy['output_permissions']>
-    >((permissions, outputName) => {
+    >((p, outputName) => {
       const output = fullAgentPolicy.outputs[outputName];
       if (output && output.type === 'elasticsearch') {
-        permissions[outputName] = {};
-        permissions[outputName]._fallback = {
-          cluster: ['monitor'],
-          indices: [
-            {
-              names: ['logs-*', 'metrics-*', 'traces-*', '.logs-endpoint.diagnostic.collection-*'],
-              privileges: ['auto_configure', 'create_doc'],
-            },
-          ],
-        };
+        p[outputName] = permissions;
       }
-      return permissions;
+      return p;
     }, {});
 
     // only add settings if not in standalone

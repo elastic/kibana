@@ -10,6 +10,7 @@ import type { DataType, ValueOf } from '../../types';
 
 import type { PackagePolicy, PackagePolicyPackage } from './package_policy';
 import type { Output } from './output';
+import type { PackagePermissions } from './epm';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
 
@@ -61,13 +62,7 @@ export interface FullAgentPolicyInput {
 }
 
 export interface FullAgentPolicyOutputPermissions {
-  [role: string]: {
-    cluster: string[];
-    indices: Array<{
-      names: string[];
-      privileges: string[];
-    }>;
-  };
+  [role: string]: PackagePermissions;
 }
 
 export interface FullAgentPolicy {
