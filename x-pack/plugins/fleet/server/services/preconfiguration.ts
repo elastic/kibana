@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
-import { groupBy } from 'lodash';
+import { groupBy, omit } from 'lodash';
 
 import type {
   PackagePolicyPackage,
@@ -71,7 +71,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
       const { created, policy } = await agentPolicyService.ensurePreconfiguredAgentPolicy(
         soClient,
         esClient,
-        preconfiguredAgentPolicy
+        omit(preconfiguredAgentPolicy, 'is_managed') // Don't add `is_managed` until the policy has been fully configured
       );
 
       if (!created) return { created, policy };
@@ -101,12 +101,22 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         })
       );
 
-      return { created, policy, installedPackagePolicies };
+      return {
+        created,
+        policy,
+        installedPackagePolicies,
+        shouldAddIsManagedFlag: preconfiguredAgentPolicy.is_managed,
+      };
     })
   );
 
   for (const preconfiguredPolicy of preconfiguredPolicies) {
-    const { created, policy, installedPackagePolicies } = preconfiguredPolicy;
+    const {
+      created,
+      policy,
+      installedPackagePolicies,
+      shouldAddIsManagedFlag,
+    } = preconfiguredPolicy;
     if (created) {
       await addPreconfiguredPolicyPackages(
         soClient,
@@ -115,6 +125,10 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         installedPackagePolicies!,
         defaultOutput
       );
+      // Add the is_managed flag after configuring package policies to avoid errors
+      if (shouldAddIsManagedFlag) {
+        agentPolicyService.update(soClient, esClient, policy.id, { is_managed: true });
+      }
     }
   }
 
