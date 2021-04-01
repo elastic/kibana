@@ -24,10 +24,10 @@ const TemplateComponent = ({ defPairs }: Props) => {
       {defPairs.map((pair, idx) => (
         <Fragment key={idx}>
           <dt
-            dangerouslySetInnerHTML={{ __html: `${pair[0]}:` }} // eslint-disable-line react/no-danger
+            dangerouslySetInnerHTML={{ __html: `${escape(pair[0])}:` }} // eslint-disable-line react/no-danger
           />
           <dd
-            dangerouslySetInnerHTML={{ __html: `${pair[1]}` }} // eslint-disable-line react/no-danger
+            dangerouslySetInnerHTML={{ __html: `${escape(pair[1])}` }} // eslint-disable-line react/no-danger
           />{' '}
         </Fragment>
       ))}
