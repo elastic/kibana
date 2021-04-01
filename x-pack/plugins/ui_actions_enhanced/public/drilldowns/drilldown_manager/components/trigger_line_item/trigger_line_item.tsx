@@ -6,7 +6,6 @@
  */
 
 import * as React from 'react';
-import { EuiTextColor, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TextWithIcon } from '../text_with_icon';
 
@@ -27,28 +26,15 @@ export const TriggerLineItem: React.FC<TriggerLineItemProps> = ({
   incompatible,
   children,
 }) => {
-  let content: React.ReactNode = children;
-
-  if (tooltip) {
-    content = (
-      <EuiToolTip content={tooltip}>
-        <>{content}</>
-      </EuiToolTip>
-    );
-  }
-
-  if (incompatible) {
-    return (
-      <TextWithIcon
-        color={'subdued'}
-        icon={'alert'}
-        iconColor={'danger'}
-        iconTooltip={txtIncompatibleTooltip}
-      >
-        {content}
-      </TextWithIcon>
-    );
-  }
-
-  return <EuiTextColor color={'subdued'}>{content}</EuiTextColor>;
+  return (
+    <TextWithIcon
+      color={'subdued'}
+      tooltip={tooltip}
+      icon={incompatible ? 'alert' : undefined}
+      iconColor={incompatible ? 'danger' : undefined}
+      iconTooltip={incompatible ? txtIncompatibleTooltip : undefined}
+    >
+      {children}
+    </TextWithIcon>
+  );
 };

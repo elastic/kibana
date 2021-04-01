@@ -17,6 +17,7 @@ import {
 
 export interface TextWithIconProps {
   color?: EuiTextColorProps['color'];
+  tooltip?: React.ReactNode;
   icon?: string;
   iconColor?: string;
   iconTooltip?: React.ReactNode;
@@ -24,6 +25,7 @@ export interface TextWithIconProps {
 
 export const TextWithIcon: React.FC<TextWithIconProps> = ({
   color,
+  tooltip,
   icon,
   iconColor,
   iconTooltip,
@@ -44,7 +46,13 @@ export const TextWithIcon: React.FC<TextWithIconProps> = ({
       )}
       {!!children && (
         <EuiFlexItem grow={false} style={{ flexWrap: 'wrap' }}>
-          <EuiTextColor color={color}>{children}</EuiTextColor>
+          {tooltip ? (
+            <EuiToolTip content={tooltip}>
+              <EuiTextColor color={color}>{children}</EuiTextColor>
+            </EuiToolTip>
+          ) : (
+            <EuiTextColor color={color}>{children}</EuiTextColor>
+          )}
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
