@@ -16,7 +16,7 @@ interface BottomBarProps {
 }
 
 const DEFAULT_DRAGGING_MESSAGE = i18n.translate('xpack.lens.dragDrop.bottomBar.dragging', {
-  defaultMessage: `Drop a configuration to replace an existing one or add to a different dimension. (This copy doesn't say anything about reordering)`,
+  defaultMessage: `Drop a configuration to replace an existing one or add to a different dimension.`,
 });
 
 const REPLACE_INCOMPATIBLE_MESSAGE = i18n.translate(
@@ -44,9 +44,12 @@ const REPLACE_COMPATIBLE_MESSAGE = i18n.translate(
 const REORDER_MESSAGE = i18n.translate('xpack.lens.dragDrop.bottomBar.reorder', {
   defaultMessage: `Drop to reorder.`,
 });
-const DUPLICATE_INGROUP_MESSAGE = i18n.translate('xpack.lens.dragDrop.bottomBar.duplicateInGroup', {
-  defaultMessage: `Drop to duplicate.`,
-});
+const DUPLICATE_INGROUP_MESSAGE = i18n.translate(
+  'xpack.lens.dragDrop.bottomBar.duplicateCompatible',
+  {
+    defaultMessage: `Drop to duplicate.`,
+  }
+);
 
 const getMessage = ({ activeDropTarget }: BottomBarProps) => {
   if (activeDropTarget) {
@@ -61,8 +64,16 @@ const getMessage = ({ activeDropTarget }: BottomBarProps) => {
         return REPLACE_COMPATIBLE_MESSAGE;
       case 'reorder':
         return REORDER_MESSAGE;
-      case 'duplicate_in_group':
+      case 'duplicate_compatible':
         return DUPLICATE_INGROUP_MESSAGE;
+      case 'duplicate_incompatible':
+        return `Duplicate the operation and convert to [nextoperation]`;
+      case 'replace_duplicate_incompatible':
+        return `Duplicate the operation, convert to [nextoperation] and replace the [existing]`;
+      case 'field_add':
+        return `Drop a field to add to the chart.`;
+      case 'field_replace':
+        return `Drop a field to replace the dimension.`;
     }
   }
   return DEFAULT_DRAGGING_MESSAGE;
