@@ -31,10 +31,9 @@ export const getPieVisTypeDefinition = ({
     defaults: {
       type: 'pie',
       addTooltip: true,
-      addLegend: true,
+      addLegend: false,
       legendPosition: Position.Right,
       nestedLegend: false,
-      flatLegend: true,
       isDonut: true,
       palette: {
         type: 'palette',

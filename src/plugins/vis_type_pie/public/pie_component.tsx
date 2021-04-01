@@ -62,7 +62,7 @@ const PieComponent = (props: PieComponentProps) => {
   const chartBaseTheme = props.chartsThemeService.useChartsBaseTheme();
   const [showLegend, setShowLegend] = useState<boolean>(() => {
     const bwcLegendStateDefault =
-      props.visParams.addLegend == null ? true : props.visParams.addLegend;
+      props.visParams.addLegend == null ? false : props.visParams.addLegend;
     return props.uiState?.get('vis.legendOpen', bwcLegendStateDefault) as boolean;
   });
   const [palettesRegistry, setPalettesRegistry] = useState<PaletteRegistry | null>(null);
@@ -270,7 +270,7 @@ const PieComponent = (props: PieComponentProps) => {
             legendPosition={legendPosition}
             legendMaxDepth={visParams.nestedLegend ? undefined : 1}
             legendColorPicker={legendColorPicker}
-            flatLegend={visParams.flatLegend}
+            flatLegend={Boolean(splitChartDimension)}
             tooltip={tooltip}
             onElementClick={(args) => {
               handleSliceClick(

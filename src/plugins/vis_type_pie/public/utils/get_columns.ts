@@ -21,7 +21,7 @@ export const getColumns = (visParams: PieVisParams, visData: Datatable) => {
     metricColumn = visData.columns[matchingIndex + 1];
   } else {
     const metricAccessor = visParams?.dimensions?.metric.accessor;
-    metricColumn = visData.columns[metricAccessor];
+    metricColumn = visData.columns[metricAccessor ?? 0];
     bucketColumns.push({
       name: metricColumn.name,
     });

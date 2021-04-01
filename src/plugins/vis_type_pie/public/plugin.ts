@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, DocLinksStart } from 'src/core/public';
+import { CoreSetup, DocLinksStart } from 'src/core/public';
 import { VisualizationsSetup } from '../../visualizations/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
 import { ChartsPluginSetup } from '../../charts/public';
@@ -67,5 +67,5 @@ export class VisTypePiePlugin {
     return {};
   }
 
-  start(core: CoreStart, { data }: VisTypePiePluginStartDependencies) {}
+  start() {}
 }

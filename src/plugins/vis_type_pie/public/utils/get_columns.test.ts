@@ -143,7 +143,6 @@ describe('getColumns', () => {
       },
       legendPosition: 'right',
       nestedLegend: false,
-      flatLegend: true,
       palette: {
         name: 'default',
         type: 'palette',
@@ -168,7 +167,6 @@ describe('getColumns', () => {
       },
       legendPosition: 'right',
       nestedLegend: false,
-      flatLegend: true,
       palette: {
         name: 'default',
         type: 'palette',

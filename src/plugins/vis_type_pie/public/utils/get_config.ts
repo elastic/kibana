@@ -36,7 +36,8 @@ export const getConfig = (
     // Force all labels to be linked, then prevent links from showing
     config.linkLabel = { maxCount: 0, maximumSection: Number.POSITIVE_INFINITY };
   }
-  if (visParams.labels.position === LabelPositions.INSIDE) {
+  const isSplitChart = Boolean(visParams.dimensions.splitColumn || visParams.dimensions.splitRow);
+  if (visParams.labels.position === LabelPositions.INSIDE || isSplitChart) {
     config.linkLabel = { maxCount: 0 };
   }
   return config;

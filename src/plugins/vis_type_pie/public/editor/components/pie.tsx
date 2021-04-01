@@ -28,13 +28,14 @@ import { getLegendPositions } from '../positions';
 export interface PieOptionsProps extends VisEditorOptionsProps<PieVisParams>, PieTypeProps {}
 
 const PieOptions = (props: PieOptionsProps) => {
-  const { stateParams, setValue } = props;
+  const { stateParams, setValue, aggs } = props;
   const setLabels = <T extends keyof PieVisParams['labels']>(
     paramName: T,
     value: PieVisParams['labels'][T]
   ) => setValue('labels', { ...stateParams.labels, [paramName]: value });
 
   const [palettesRegistry, setPalettesRegistry] = useState<PaletteRegistry | undefined>(undefined);
+  const hasSplitChart = aggs?.aggs?.find((agg) => agg.schema === 'split' && agg.enabled);
 
   useEffect(() => {
     const fetchPalettes = async () => {
@@ -81,20 +82,6 @@ const PieOptions = (props: PieOptionsProps) => {
               }}
               data-test-subj="visTypePieNestedLegendSwitch"
             />
-            <SwitchOption
-              label={i18n.translate('visTypePie.editors.pie.flatLegendLabel', {
-                defaultMessage: 'Flat legend',
-              })}
-              paramName="flatLegend"
-              value={stateParams.flatLegend}
-              setValue={(paramName, value) => {
-                if (props.trackUiMetric) {
-                  props.trackUiMetric(METRIC_TYPE.CLICK, 'flat_legend_switched');
-                }
-                setValue(paramName, value);
-              }}
-              data-test-subj="visTypePieFlatLegendSwitch"
-            />
           </>
         )}
         {props.showElasticChartsOptions && palettesRegistry && (
@@ -137,10 +124,14 @@ const PieOptions = (props: PieOptionsProps) => {
             label={i18n.translate('visTypePie.editors.pie.labelPositionLabel', {
               defaultMessage: 'Label position',
             })}
-            disabled={!stateParams.labels.show}
+            disabled={!stateParams.labels.show || Boolean(hasSplitChart)}
             options={getLabelPositions}
             paramName="position"
-            value={stateParams.labels.position || LabelPositions.DEFAULT}
+            value={
+              Boolean(hasSplitChart)
+                ? LabelPositions.INSIDE
+                : stateParams.labels.position || LabelPositions.DEFAULT
+            }
             setValue={(paramName, value) => {
               if (props.trackUiMetric) {
                 props.trackUiMetric(METRIC_TYPE.CLICK, 'label_position_selected');

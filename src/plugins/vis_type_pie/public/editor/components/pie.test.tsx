@@ -72,20 +72,6 @@ describe('PalettePicker', function () {
     });
   });
 
-  it('renders the flat legend switch for the elastic charts implementation', async () => {
-    component = mountWithIntl(<PieOptions {...props} />);
-    await act(async () => {
-      expect(findTestSubject(component, 'visTypePieFlatLegendSwitch').length).toBe(1);
-    });
-  });
-
-  it('not renders the flat legend switch for the vislib implementation', async () => {
-    component = mountWithIntl(<PieOptions {...props} showElasticChartsOptions={false} />);
-    await act(async () => {
-      expect(findTestSubject(component, 'visTypePieFlatLegendSwitch').length).toBe(0);
-    });
-  });
-
   it('renders the label position dropdown for the elastic charts implementation', async () => {
     component = mountWithIntl(<PieOptions {...props} />);
     await act(async () => {
