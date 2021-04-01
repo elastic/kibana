@@ -30,6 +30,7 @@ class OutputService {
     const outputs = await this.getDefaultOutput(soClient);
     const cloud = appContextService.getCloud();
     const cloudId = cloud?.isCloudEnabled && cloud.cloudId;
+
     const cloudUrl = cloudId && decodeCloudId(cloudId)?.elasticsearchUrl;
     const flagsUrl = appContextService.getConfig()!.agents.elasticsearch.host;
     const defaultUrl = 'http://localhost:9200';

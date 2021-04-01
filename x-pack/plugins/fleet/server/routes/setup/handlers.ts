@@ -8,38 +8,31 @@
 import type { RequestHandler } from 'src/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
-import { outputService, appContextService } from '../../services';
+import { appContextService } from '../../services';
 import type { GetFleetStatusResponse, PostIngestSetupResponse } from '../../../common';
 import { setupIngestManager, setupFleet } from '../../services/setup';
+import { hasFleetServers } from '../../services/fleet_server';
 import type { PostFleetSetupRequestSchema } from '../../types';
 import { defaultIngestErrorHandler } from '../../errors';
 
 export const getFleetStatusHandler: RequestHandler = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
   try {
-    const isAdminUserSetup = (await outputService.getAdminUser(soClient)) !== null;
     const isApiKeysEnabled = await appContextService
       .getSecurity()
       .authc.apiKeys.areAPIKeysEnabled();
-    const isTLSEnabled = appContextService.getHttpSetup().getServerInfo().protocol === 'https';
-    const isProductionMode = appContextService.getIsProductionMode();
-    const isCloud = appContextService.getCloud()?.isCloudEnabled ?? false;
-    const isTLSCheckDisabled = appContextService.getConfig()?.agents?.tlsCheckDisabled ?? false;
+    const isFleetServerSetup = await hasFleetServers(appContextService.getInternalUserESClient());
     const canEncrypt = appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt === true;
 
     const missingRequirements: GetFleetStatusResponse['missing_requirements'] = [];
-    if (!isAdminUserSetup) {
-      missingRequirements.push('fleet_admin_user');
-    }
     if (!isApiKeysEnabled) {
       missingRequirements.push('api_keys');
     }
-    if (!isTLSCheckDisabled && !isCloud && isProductionMode && !isTLSEnabled) {
-      missingRequirements.push('tls_required');
-    }
-
     if (!canEncrypt) {
       missingRequirements.push('encrypted_saved_object_encryption_key_required');
+    }
+    // const hasFleetServers = false;
+    if (!isFleetServerSetup) {
+      missingRequirements.push('fleet_server');
     }
 
     const body: GetFleetStatusResponse = {

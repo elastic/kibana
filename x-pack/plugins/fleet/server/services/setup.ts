@@ -59,7 +59,6 @@ async function createSetupSideEffects(
     outputService.ensureDefaultOutput(soClient),
     agentPolicyService.ensureDefaultAgentPolicy(soClient, esClient),
     agentPolicyService.ensureDefaultFleetServerAgentPolicy(soClient, esClient),
-    updateFleetRoleIfExists(esClient),
     settingsService.getSettings(soClient).catch((e: any) => {
       if (e.isBoom && e.output.statusCode === 404) {
         const defaultSettings = createDefaultSettings();
@@ -154,78 +153,11 @@ async function createSetupSideEffects(
   return { isIntialized: true };
 }
 
-async function updateFleetRoleIfExists(esClient: ElasticsearchClient) {
-  try {
-    await esClient.security.getRole({ name: FLEET_ENROLL_ROLE });
-  } catch (e) {
-    if (e.statusCode === 404) {
-      return;
-    }
-
-    throw e;
-  }
-
-  return putFleetRole(esClient);
-}
-
-async function putFleetRole(esClient: ElasticsearchClient) {
-  return await esClient.security.putRole({
-    name: FLEET_ENROLL_ROLE,
-    body: {
-      cluster: ['monitor', 'manage_api_key'],
-      indices: [
-        {
-          names: ['logs-*', 'metrics-*', 'traces-*', '.logs-endpoint.diagnostic.collection-*'],
-          privileges: ['auto_configure', 'create_doc'],
-        },
-      ],
-    },
-  });
-}
-
 export async function setupFleet(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   options?: { forceRecreate?: boolean }
 ) {
-  // Create fleet_enroll role
-  // This should be done directly in ES at some point
-  const { body: res } = await putFleetRole(esClient);
-
-  // If the role is already created skip the rest unless you have forceRecreate set to true
-  if (options?.forceRecreate !== true && res.role.created === false) {
-    return;
-  }
-  const password = generateRandomPassword();
-  // Create fleet enroll user
-  await esClient.security.putUser({
-    username: FLEET_ENROLL_USERNAME,
-    body: {
-      password,
-      roles: [FLEET_ENROLL_ROLE],
-      metadata: {
-        updated_at: new Date().toISOString(),
-      },
-    },
-  });
-
-  outputService.invalidateCache();
-
-  // save fleet admin user
-  const defaultOutputId = await outputService.getDefaultOutputId(soClient);
-  if (!defaultOutputId) {
-    throw new Error(
-      i18n.translate('xpack.fleet.setup.defaultOutputError', {
-        defaultMessage: 'Default output does not exist',
-      })
-    );
-  }
-
-  await outputService.updateOutput(soClient, defaultOutputId, {
-    fleet_enroll_username: FLEET_ENROLL_USERNAME,
-    fleet_enroll_password: password,
-  });
-
   const { items: agentPolicies } = await agentPolicyService.list(soClient, {
     perPage: SO_SEARCH_LIMIT,
   });

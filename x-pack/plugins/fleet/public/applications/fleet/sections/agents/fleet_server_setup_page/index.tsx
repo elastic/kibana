@@ -1,0 +1,158 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiForm,
+  EuiLoadingSpinner,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  EuiLink,
+} from '@elastic/eui';
+import styled from 'styled-components';
+
+import { FormattedMessage } from 'react-intl';
+import { useStartServices } from '../../../hooks';
+
+export const ContentWrapper = styled(EuiFlexGroup)`
+  height: 80%;
+`;
+
+function renderOnPremInstructions() {
+  return (
+    <>
+      <EuiPanel grow={false} className="eui-textCenter" paddingSize="l">
+        <EuiTitle size="m">
+          <h2>
+            <FormattedMessage
+              id="xpack.fleet.fleetServerSetup.setupTitle"
+              defaultMessage="Add a Fleet Server"
+            />
+          </h2>
+        </EuiTitle>
+        <EuiSpacer size="m" />
+        <EuiText color="subdued" style={{ maxWidth: '420px' }}>
+          <FormattedMessage
+            id="xpack.fleet.fleetServerSetup.setupText"
+            defaultMessage="A Fleet Server is required before you can enroll agents with Fleet. See the Fleet User Guide for instructions on how to add a Fleet Server."
+          />
+        </EuiText>
+        <EuiSpacer size="l" />
+        <EuiForm>
+          <EuiButton
+            iconSide="right"
+            iconType="popout"
+            fill
+            isLoading={false}
+            type="submit"
+            href="https://www.elastic.co/guide/en/fleet/current/index.html"
+            target="_blank"
+          >
+            <FormattedMessage
+              id="xpack.fleet.fleetServerSetup.setupGuideLink"
+              defaultMessage="Fleet User Guide"
+            />
+          </EuiButton>
+        </EuiForm>
+        <EuiSpacer size="m" />
+      </EuiPanel>
+    </>
+  );
+}
+
+function renderCloudInstructions(deploymentUrl: string) {
+  return (
+    <>
+      <EuiPanel grow={false} className="eui-textCenter" paddingSize="l">
+        <EuiTitle size="m">
+          <h2>
+            <FormattedMessage
+              id="xpack.fleet.fleetServerSetup.cloudSetupTitle"
+              defaultMessage="Enable Fleet"
+            />
+          </h2>
+        </EuiTitle>
+        <EuiSpacer size="m" />
+        <EuiText color="subdued" style={{ maxWidth: '420px' }}>
+          <FormattedMessage
+            id="xpack.fleet.fleetServerSetup.cloudSetupText"
+            defaultMessage="A Fleet Server is required before you can enroll agents with Fleet. You can add one to your deployment by enabling Fleet."
+          />
+        </EuiText>
+        <EuiSpacer size="m" />
+        <EuiButton
+          iconSide="right"
+          iconType="popout"
+          fill
+          isLoading={false}
+          type="submit"
+          href={deploymentUrl}
+          target="_blank"
+        >
+          <FormattedMessage
+            id="xpack.fleet.fleetServerSetup.cloudDeploymentLink"
+            defaultMessage="Edit deployment"
+          />
+        </EuiButton>
+        <EuiSpacer size="m" />
+        <EuiText size="s" color="subdued">
+          <FormattedMessage
+            id="xpack.fleet.settings.cloudFleetUserGuideText"
+            defaultMessage="For more information, see the {link}."
+            values={{
+              link: (
+                <EuiLink
+                  href="https://www.elastic.co/guide/en/fleet/current/index.html"
+                  target="_blank"
+                  external
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.settings.userGuideLink"
+                    defaultMessage="Fleet User Guide"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        </EuiText>
+      </EuiPanel>
+    </>
+  );
+}
+
+export const FleetServerSetupPage = () => {
+  const startService = useStartServices();
+  const deploymentUrl = startService.cloud?.deploymentUrl;
+
+  return (
+    <ContentWrapper justifyContent="center" alignItems="center">
+      <EuiFlexItem grow={false}>
+        {deploymentUrl ? renderCloudInstructions(deploymentUrl) : renderOnPremInstructions()}
+        <EuiSpacer size="m" />
+        <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="m" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" color="subdued">
+              <FormattedMessage
+                id="xpack.fleet.fleetServerSetup.waitingText"
+                defaultMessage="Waiting for a Fleet Server to connect..."
+              />
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="xxl" />
+      </EuiFlexItem>
+    </ContentWrapper>
+  );
+};
