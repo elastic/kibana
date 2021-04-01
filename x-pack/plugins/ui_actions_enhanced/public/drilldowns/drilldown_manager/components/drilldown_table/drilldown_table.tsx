@@ -89,16 +89,9 @@ export const DrilldownTable: React.FC<DrilldownTableProps> = ({
     {
       name: txtAction,
       render: (drilldown: DrilldownTableItem) => (
-        <EuiFlexGroup responsive={false} alignItems="center" gutterSize={'s'}>
-          {drilldown.icon && (
-            <EuiFlexItem grow={false}>
-              <EuiIcon type={drilldown.icon} />
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem grow={false} style={{ flexWrap: 'wrap' }}>
-            <EuiTextColor color="subdued">{drilldown.actionName}</EuiTextColor>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <TextWithIcon icon={drilldown.icon} color={'subdued'}>
+          {drilldown.actionName}
+        </TextWithIcon>
       ),
     },
     {
