@@ -243,42 +243,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(opbeansNode !== undefined).to.be(true);
 
-        const values = {
-          currentPeriod: {
-            latency: roundNumber(opbeansNode?.currentPeriod.latency.value),
-            throughput: roundNumber(opbeansNode?.currentPeriod.throughput.value),
-            errorRate: roundNumber(opbeansNode?.currentPeriod.errorRate.value),
-            impact: opbeansNode?.currentPeriod.impact,
-          },
-          previousPeriod: {
-            latency: roundNumber(opbeansNode?.previousPeriod.latency.value),
-            throughput: roundNumber(opbeansNode?.previousPeriod.throughput.value),
-            errorRate: roundNumber(opbeansNode?.previousPeriod.errorRate.value),
-            impact: opbeansNode?.previousPeriod.impact,
-          },
-          ...pick(opbeansNode, 'serviceName', 'type', 'agentName', 'environment'),
-        };
-
-        expectSnapshot(values).toMatchInline(`
-          Object {
-            "agentName": "nodejs",
-            "currentPeriod": Object {
-              "errorRate": "0.2500",
-              "impact": 100,
-              "latency": "5.250",
-              "throughput": "0.2667",
-            },
-            "environment": "",
-            "previousPeriod": Object {
-              "errorRate": "0.3333",
-              "impact": 100,
-              "latency": "6.667",
-              "throughput": "0.2000",
-            },
-            "serviceName": "opbeans-node",
-            "type": "service",
-          }
-        `);
+        expectSnapshot(opbeansNode).toMatch();
 
         const currentPeriodFirstValue = roundNumber(
           opbeansNode?.currentPeriod.latency.timeseries[0].y
@@ -290,12 +255,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expectSnapshot(currentPeriodFirstValue).toMatchInline(`"6.667"`);
         expectSnapshot(currentPeriodLastValue).toMatchInline(`"1.000"`);
 
-        const previousPeriodFirstValue = roundNumber(
-          opbeansNode?.previousPeriod.latency.timeseries[0].y
-        );
-        const previousPeriodLastValue = roundNumber(
-          last(opbeansNode?.previousPeriod.latency.timeseries)?.y
-        );
+        const previousPeriodFirstValue = roundNumber(opbeansNode?.previousPeriod.latency[0].y);
+        const previousPeriodLastValue = roundNumber(last(opbeansNode?.previousPeriod.latency)?.y);
 
         expectSnapshot(previousPeriodFirstValue).toMatchInline(`""`);
         expectSnapshot(previousPeriodLastValue).toMatchInline(`"6.667"`);
@@ -316,9 +277,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             impact: postgres?.currentPeriod.impact,
           },
           previousPeriod: {
-            latency: roundNumber(postgres?.previousPeriod.latency.value),
-            throughput: roundNumber(postgres?.previousPeriod.throughput.value),
-            errorRate: roundNumber(postgres?.previousPeriod.errorRate.value),
             impact: postgres?.previousPeriod.impact,
           },
           ...pick(postgres, 'spanType', 'spanSubtype', 'name', 'type'),
@@ -334,10 +292,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
             "name": "postgres",
             "previousPeriod": Object {
-              "errorRate": "0.000",
               "impact": 0,
-              "latency": "3.000",
-              "throughput": "0.06667",
             },
             "spanSubtype": "http",
             "spanType": "external",
@@ -381,47 +336,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns at least one item', () => {
         expect(response.body.serviceDependencies.length).to.be.greaterThan(0);
 
-        expectSnapshot(
-          omit(response.body.serviceDependencies[0], [
-            'currentPeriod.errorRate.timeseries',
-            'currentPeriod.throughput.timeseries',
-            'currentPeriod.latency.timeseries',
-            'previousPeriod.errorRate.timeseries',
-            'previousPeriod.throughput.timeseries',
-            'previousPeriod.latency.timeseries',
-          ])
-        ).toMatchInline(`
-          Object {
-            "currentPeriod": Object {
-              "errorRate": Object {
-                "value": 0,
-              },
-              "impact": 2.37724265214801,
-              "latency": Object {
-                "value": 1135.15508885299,
-              },
-              "throughput": Object {
-                "value": 41.2666666666667,
-              },
-            },
-            "name": "redis",
-            "previousPeriod": Object {
-              "errorRate": Object {
-                "value": 0,
-              },
-              "impact": 1.59711836133489,
-              "latency": Object {
-                "value": 949.938333333333,
-              },
-              "throughput": Object {
-                "value": 40,
-              },
-            },
-            "spanSubtype": "redis",
-            "spanType": "db",
-            "type": "external",
-          }
-        `);
+        expectSnapshot(response.body.serviceDependencies[0]).toMatch();
       });
 
       it('returns the right names', () => {
@@ -453,7 +368,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           response.body.serviceDependencies.map((item) => ({
             name: item.name,
             currentPeriodLatency: item.currentPeriod.latency.value,
-            previousPeriodLatency: item.previousPeriod.latency.value,
           })),
           'name'
         );
@@ -463,22 +377,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             Object {
               "currentPeriodLatency": 2628.905,
               "name": "elasticsearch",
-              "previousPeriodLatency": 2505.390625,
             },
             Object {
               "currentPeriodLatency": 27859.2857142857,
               "name": "opbeans-java",
-              "previousPeriodLatency": 23831.8888888889,
             },
             Object {
               "currentPeriodLatency": 28580.1312997347,
               "name": "postgresql",
-              "previousPeriodLatency": 29184.1857142857,
             },
             Object {
               "currentPeriodLatency": 1135.15508885299,
               "name": "redis",
-              "previousPeriodLatency": 949.938333333333,
             },
           ]
         `);
@@ -489,7 +399,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           response.body.serviceDependencies.map((item) => ({
             name: item.name,
             currentPeriodThroughput: item.currentPeriod.throughput.value,
-            previousPeriodThroughput: item.previousPeriod.throughput.value,
           })),
           'name'
         );
@@ -499,22 +408,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             Object {
               "currentPeriodThroughput": 13.3333333333333,
               "name": "elasticsearch",
-              "previousPeriodThroughput": 12.8,
             },
             Object {
               "currentPeriodThroughput": 0.466666666666667,
               "name": "opbeans-java",
-              "previousPeriodThroughput": 0.6,
             },
             Object {
               "currentPeriodThroughput": 50.2666666666667,
               "name": "postgresql",
-              "previousPeriodThroughput": 51.3333333333333,
             },
             Object {
               "currentPeriodThroughput": 41.2666666666667,
               "name": "redis",
-              "previousPeriodThroughput": 40,
             },
           ]
         `);
@@ -531,8 +436,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             },
             previousPeriod: {
               impact: item.previousPeriod.impact,
-              latency: item.previousPeriod.latency.value,
-              throughput: item.previousPeriod.throughput.value,
             },
           })),
           'name'
@@ -549,8 +452,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               "name": "elasticsearch",
               "previousPeriod": Object {
                 "impact": 1.19757368986118,
-                "latency": 2505.390625,
-                "throughput": 12.8,
               },
             },
             Object {
@@ -562,8 +463,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               "name": "opbeans-java",
               "previousPeriod": Object {
                 "impact": 0,
-                "latency": 23831.8888888889,
-                "throughput": 0.6,
               },
             },
             Object {
@@ -575,8 +474,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               "name": "postgresql",
               "previousPeriod": Object {
                 "impact": 100,
-                "latency": 29184.1857142857,
-                "throughput": 51.3333333333333,
               },
             },
             Object {
@@ -588,8 +485,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               "name": "redis",
               "previousPeriod": Object {
                 "impact": 1.59711836133489,
-                "latency": 949.938333333333,
-                "throughput": 40,
               },
             },
           ]
