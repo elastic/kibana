@@ -185,6 +185,7 @@ export const DataTierAllocation: FunctionComponent<SharedProps> = (props) => {
           if (disableDataTierOption && field.value === 'node_roles') {
             field.setValue('node_attrs');
           }
+
           return (
             <SuperSelectField
               field={field}

@@ -11,11 +11,13 @@ export { NodeAttrsDetails } from './node_attrs_details';
 
 export { DataTierAllocation } from './data_tier_allocation';
 
-export { DefaultAllocationNotice } from './default_allocation_notice';
+export { WillUseFallbackTierNotice } from './will_use_fallback_tier_notice';
 
-export { DefaultAllocationWarning } from './default_allocation_warning';
+export { NoTiersAvailableNotice } from './no_tiers_available_notice';
 
-export { NoNodeAttributesWarning } from './no_node_attributes_warning';
+export { DefaultToDataTiersNotice } from './default_to_data_tiers_notice';
+
+export { DefaultToDataNodesNotice } from './default_to_data_nodes_notice';
 
 export { CloudDataTierCallout } from './cloud_data_tier_callout';
 

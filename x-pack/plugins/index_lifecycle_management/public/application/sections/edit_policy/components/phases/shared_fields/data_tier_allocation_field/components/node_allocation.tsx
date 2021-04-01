@@ -34,13 +34,19 @@ const learnMoreLink = (
 );
 
 const i18nTexts = {
-  doNotModifyAllocationOption: i18n.translate(
-    'xpack.indexLifecycleMgmt.editPolicy.nodeAllocation.doNotModifyAllocationOption',
-    { defaultMessage: 'Do not modify allocation configuration' }
+  allocateToDataNodesOption: i18n.translate(
+    'xpack.indexLifecycleMgmt.editPolicy.nodeAllocation.allocateToDataNodesOption',
+    { defaultMessage: 'Allocate to available data nodes' }
   ),
 };
 
-export const NodeAllocation: FunctionComponent<SharedProps> = ({ phase, nodes, isLoading }) => {
+export const NodeAllocation: FunctionComponent<SharedProps> = ({
+  phase,
+  nodes,
+  isLoading,
+  isCloudEnabled,
+  disableDataTierOption,
+}) => {
   const allocationNodeAttributePath = `_meta.${phase}.allocationNodeAttribute`;
 
   const [formData] = useFormData({
@@ -59,6 +65,17 @@ export const NodeAllocation: FunctionComponent<SharedProps> = ({ phase, nodes, i
   }));
 
   nodeOptions.sort((a, b) => a.value.localeCompare(b.value));
+
+  let nodeAllocationOptions = [];
+
+  // The options to allocate to data tiers or data nodes should be mutually exclusive, but only on
+  // Cloud. For on-prem deployments, users might still be using both.
+  if (!isCloudEnabled || disableDataTierOption) {
+    const allocateToDataNodesOption = { text: i18nTexts.allocateToDataNodesOption, value: '' };
+    nodeAllocationOptions.push(allocateToDataNodesOption);
+  }
+
+  nodeAllocationOptions = nodeAllocationOptions.concat(nodeOptions);
 
   return (
     <>
@@ -97,9 +114,7 @@ export const NodeAllocation: FunctionComponent<SharedProps> = ({ phase, nodes, i
           ) : undefined,
           euiFieldProps: {
             'data-test-subj': `${phase}-selectedNodeAttrs`,
-            options: [{ text: i18nTexts.doNotModifyAllocationOption, value: '' }].concat(
-              nodeOptions
-            ),
+            options: nodeAllocationOptions,
             hasNoInitialSelection: false,
             isLoading,
           },

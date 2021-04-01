@@ -269,6 +269,13 @@ export const setup = async (arg?: {
       component.update();
     };
 
+    const hasDefaultToDataNodesNotice = () => exists(`${phase}-phase.defaultToDataNodesNotice`);
+    const hasDefaultToDataTiersNotice = () => exists(`${phase}-phase.defaultToDataTiersNotice`);
+    const hasDefaultAllocationBehaviorNotice = () =>
+      hasDefaultToDataNodesNotice() && hasDefaultToDataTiersNotice();
+    const hasNoTiersAvailableNotice = () => exists(`${phase}-phase.noTiersAvailableNotice`);
+    const hasWillUseFallbackTierNotice = () => exists(`${phase}-phase.willUseFallbackTierNotice`);
+
     return {
       hasDataTierAllocationControls: () => exists(controlsSelector),
       openNodeAttributesSection,
@@ -292,9 +299,11 @@ export const setup = async (arg?: {
         component.update();
       },
       setSelectedNodeAttribute: createFormSetValueAction(nodeAttrsSelector),
-      hasNoNodeAttrsWarning: () => exists('noNodeAttributesWarning'),
-      hasDefaultAllocationWarning: () => exists('defaultAllocationWarning'),
-      hasDefaultAllocationNotice: () => exists('defaultAllocationNotice'),
+      hasDefaultToDataNodesNotice,
+      hasDefaultToDataTiersNotice,
+      hasDefaultAllocationBehaviorNotice,
+      hasNoTiersAvailableNotice,
+      hasWillUseFallbackTierNotice,
       hasNodeDetailsFlyout: () => exists(`${phase}-viewNodeDetailsFlyoutButton`),
       openNodeDetailsFlyout: async () => {
         await act(async () => {
