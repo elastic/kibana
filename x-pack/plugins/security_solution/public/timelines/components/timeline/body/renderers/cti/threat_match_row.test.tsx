@@ -9,37 +9,28 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
-import { mockBrowserFields } from '../../../../../../common/containers/source/mock';
 import { getMockTheme } from '../../../../../../common/lib/kibana/kibana_react.mock';
-import { getDetectionAlertMock } from '../../../../../../common/mock';
+import { getDetectionAlertFieldsMock } from '../../../../../../common/mock';
 import { ThreatMatchRow } from './threat_match_row';
 
 describe('threatMatchRow', () => {
-  let alertMock: ReturnType<typeof getDetectionAlertMock>;
+  let threatMatchFields: ReturnType<typeof getDetectionAlertFieldsMock>;
   let mockTheme: ReturnType<typeof getMockTheme>;
 
   beforeEach(() => {
     mockTheme = getMockTheme({ eui: { paddingSizes: {} } });
-    alertMock = getDetectionAlertMock({
-      threat: {
-        indicator: [
-          {
-            matched: {
-              type: 'url',
-            },
-          },
-        ],
-      },
-    });
+    threatMatchFields = getDetectionAlertFieldsMock([
+      { field: 'threat.indicator.matched.type', value: ['url'] },
+    ]);
   });
 
   it('renders an indicator match alert', () => {
     const wrapper = mount(
       <ThemeProvider theme={mockTheme}>
-        <ThreatMatchRow browserFields={mockBrowserFields} data={alertMock} timelineId={'test'} />
+        <ThreatMatchRow fields={threatMatchFields} />
       </ThemeProvider>
     );
 
-    expect(wrapper.find('[data-test-subj="threat-match-row-renderer"]').exists()).toEqual(true);
+    expect(wrapper.find('[data-test-subj="threat-match-row"]').exists()).toEqual(true);
   });
 });

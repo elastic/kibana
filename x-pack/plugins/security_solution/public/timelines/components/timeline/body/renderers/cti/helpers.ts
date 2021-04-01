@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import { TimelineNonEcsData } from '../../../../../../../common/search_strategy';
+import { requiredFields, threatMatchFields } from './fields';
 
-export const ThreatMatchRow = ({ fields }: { fields: TimelineNonEcsData[] }) => (
-  <div data-test-subj="threat-match-row">{JSON.stringify(fields, null, 2)}</div>
-);
+export const isThreatMatchField = (field: TimelineNonEcsData): boolean =>
+  threatMatchFields.includes(field.field);
+
+export const isRequiredField = (field: TimelineNonEcsData): boolean =>
+  requiredFields.includes(field.field);
