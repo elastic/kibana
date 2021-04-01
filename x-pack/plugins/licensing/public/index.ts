@@ -8,6 +8,18 @@
 import { PluginInitializerContext } from 'src/core/public';
 import { LicensingPlugin } from './plugin';
 
-export * from '../common/types';
-export { LicensingPluginSetup, LicensingPluginStart } from './types';
+export { LICENSE_TYPE } from '../common/types';
+export type {
+  ILicense,
+  LicenseCheck,
+  LicenseCheckState,
+  LicenseFeature,
+  LicenseStatus,
+  LicenseType,
+  PublicFeatures,
+  PublicLicense,
+  PublicLicenseJSON,
+} from '../common/types';
+export type { LicensingPluginSetup, LicensingPluginStart } from './types';
+
 export const plugin = (context: PluginInitializerContext) => new LicensingPlugin(context);

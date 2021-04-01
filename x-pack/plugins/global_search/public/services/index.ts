@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { SearchService, SearchServiceSetup, SearchServiceStart } from './search_service';
-export { GlobalSearchFindOptions } from './types';
+export type { SearchService, SearchServiceSetup, SearchServiceStart } from './search_service';
+export type { GlobalSearchFindOptions } from './types';

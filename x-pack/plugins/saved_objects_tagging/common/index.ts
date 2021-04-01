@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-export { TagsCapabilities, getTagsCapabilities } from './capabilities';
+export { getTagsCapabilities } from './capabilities';
+export type { TagsCapabilities } from './capabilities';
 export { tagFeatureId, tagSavedObjectTypeName, tagManagementSectionId } from './constants';
-export { TagWithRelations, TagAttributes, Tag, ITagsClient, TagSavedObject } from './types';
+export type { TagWithRelations, TagAttributes, Tag, ITagsClient, TagSavedObject } from './types';
 export {
-  TagValidation,
   validateTagColor,
   validateTagName,
   validateTagDescription,
@@ -17,3 +17,4 @@ export {
   tagNameMaxLength,
   tagDescriptionMaxLength,
 } from './validation';
+export type { TagValidation } from './validation';
