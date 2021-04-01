@@ -212,13 +212,14 @@ export type Tags = t.TypeOf<typeof tags>;
 export const tagsOrUndefined = t.union([tags, t.undefined]);
 export type TagsOrUndefined = t.TypeOf<typeof tagsOrUndefined>;
 
-export const exceptionListType = t.keyof({ detection: null, endpoint: null });
+export const exceptionListType = t.keyof({ detection: null, endpoint: null, events: null });
 export const exceptionListTypeOrUndefined = t.union([exceptionListType, t.undefined]);
 export type ExceptionListType = t.TypeOf<typeof exceptionListType>;
 export type ExceptionListTypeOrUndefined = t.TypeOf<typeof exceptionListTypeOrUndefined>;
 export enum ExceptionListTypeEnum {
   DETECTION = 'detection',
   ENDPOINT = 'endpoint',
+  EVENTS = 'events',
 }
 
 export const exceptionListItemType = t.keyof({ simple: null });
