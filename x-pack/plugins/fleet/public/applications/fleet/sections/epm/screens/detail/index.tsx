@@ -294,6 +294,7 @@ export function Detail() {
       getHref,
       handleAddIntegrationPolicyClick,
       hasWriteCapabilites,
+      integration,
       packageInfo,
       packageInstallStatus,
       pkgkey,
