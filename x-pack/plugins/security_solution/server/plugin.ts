@@ -59,7 +59,7 @@ import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerLimitedConcurrencyRoutes } from './endpoint/routes/limited_concurrency';
 import { registerResolverRoutes } from './endpoint/routes/resolver';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
-import { ArtifactClient, EndpointArtifactClient, ManifestManager } from './endpoint/services';
+import { EndpointArtifactClient, ManifestManager } from './endpoint/services';
 import { EndpointAppContextService } from './endpoint/endpoint_app_context_services';
 import { EndpointAppContext } from './endpoint/types';
 import { registerDownloadArtifactRoute } from './endpoint/routes/artifacts';
@@ -352,9 +352,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const fleetServerEnabled = parseExperimentalConfigValue(this.config.enableExperimental)
         .fleetServerEnabled;
       const exceptionListClient = this.lists.getExceptionListClient(savedObjectsClient, 'kibana');
-      const artifactClient = (new EndpointArtifactClient(
+      const artifactClient = new EndpointArtifactClient(
         plugins.fleet.createArtifactsClient('endpoint')
-      ) as unknown) as ArtifactClient;
+      );
 
       manifestManager = new ManifestManager(
         {
