@@ -92,6 +92,7 @@ export class DrilldownManagerState {
       ...this.deps.placeContext,
       triggers: event.triggers as string[],
     };
+    const firstTrigger = event.triggers[0];
     return {
       id: event.eventId,
       drilldownName: event.action.name,
@@ -103,6 +104,7 @@ export class DrilldownManagerState {
         ? insufficientLicenseLevel
         : undefined,
       triggers: event.triggers.map((trigger) => this.deps.getTrigger(trigger as string)),
+      triggerIncompatible: !this.deps.triggers.find((t) => t === firstTrigger),
     };
   };
   public readonly events$ = new BehaviorSubject<DrilldownTableItem[]>(

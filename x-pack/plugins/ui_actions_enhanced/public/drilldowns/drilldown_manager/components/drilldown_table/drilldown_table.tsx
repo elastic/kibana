@@ -18,6 +18,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useState } from 'react';
+import { TextWithIcon } from '../text_with_icon';
 import {
   txtCreateDrilldown,
   txtDeleteDrilldowns,
@@ -36,6 +37,7 @@ export interface DrilldownTableItem {
   icon?: string;
   error?: string;
   triggers?: Trigger[];
+  triggerIncompatible?: boolean;
 }
 
 interface Trigger {
@@ -102,18 +104,25 @@ export const DrilldownTable: React.FC<DrilldownTableProps> = ({
     {
       name: txtTrigger,
       textOnly: true,
-      render: (drilldown: DrilldownTableItem) =>
-        drilldown.triggers?.map((trigger, idx) =>
-          trigger.description ? (
-            <EuiToolTip content={trigger.description} key={idx}>
-              <EuiTextColor color="subdued">{trigger.title ?? 'unknown'}</EuiTextColor>
-            </EuiToolTip>
-          ) : (
-            <EuiTextColor color="subdued" key={idx}>
-              {trigger.title ?? 'unknown'}
-            </EuiTextColor>
-          )
-        ),
+      render: (drilldown: DrilldownTableItem) => {
+        if (!drilldown.triggers) return null;
+        const trigger = drilldown.triggers[0];
+        let result = trigger.description ? (
+          <EuiToolTip content={trigger.description}>
+            <EuiTextColor color="subdued">{trigger.title ?? 'unknown'}</EuiTextColor>
+          </EuiToolTip>
+        ) : (
+          <EuiTextColor color="subdued">{trigger.title ?? 'unknown'}</EuiTextColor>
+        );
+        if (drilldown.triggerIncompatible) {
+          result = (
+            <TextWithIcon icon={'alert'} iconColor={'danger'} color={'subdued'}>
+              {result}
+            </TextWithIcon>
+          );
+        }
+        return result;
+      },
     },
     {
       align: 'right',
