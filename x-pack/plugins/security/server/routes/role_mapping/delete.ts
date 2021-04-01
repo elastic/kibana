@@ -6,9 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { createLicensedRouteHandler } from '../licensed_route_handler';
+
+import type { RouteDefinitionParams } from '../';
 import { wrapError } from '../../errors';
-import { RouteDefinitionParams } from '..';
+import { createLicensedRouteHandler } from '../licensed_route_handler';
 
 export function defineRoleMappingDeleteRoutes({ router }: RouteDefinitionParams) {
   router.delete(

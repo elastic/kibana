@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await savedQueryManagementComponent.openSavedQueryManagementComponent();
         const descriptionText = await testSubjects.getVisibleText('saved-query-management-popover');
         expect(descriptionText).to.eql(
-          'SAVED QUERIES\nThere are no saved queries. Save query text and filters that you want to use again.\nSave current query'
+          'Saved Queries\nThere are no saved queries. Save query text and filters that you want to use again.\nSave current query'
         );
       });
 

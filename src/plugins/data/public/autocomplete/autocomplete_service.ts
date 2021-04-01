@@ -18,6 +18,11 @@ import {
 import { ConfigSchema } from '../../config';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
 import { createUsageCollector } from './collectors';
+import {
+  KUERY_LANGUAGE_NAME,
+  setupKqlQuerySuggestionProvider,
+} from './providers/kql_query_suggestion';
+import { DataPublicPluginStart, DataStartDependencies } from '../types';
 
 export class AutocompleteService {
   autocompleteConfig: ConfigSchema['autocomplete'];
@@ -30,12 +35,6 @@ export class AutocompleteService {
 
   private readonly querySuggestionProviders: Map<string, QuerySuggestionGetFn> = new Map();
   private getValueSuggestions?: ValueSuggestionsGetFn;
-
-  private addQuerySuggestionProvider = (language: string, provider: QuerySuggestionGetFn): void => {
-    if (language && provider && this.autocompleteConfig.querySuggestions.enabled) {
-      this.querySuggestionProviders.set(language, provider);
-    }
-  };
 
   private getQuerySuggestions: QuerySuggestionGetFn = (args) => {
     const { language } = args;
@@ -50,7 +49,7 @@ export class AutocompleteService {
 
   /** @public **/
   public setup(
-    core: CoreSetup,
+    core: CoreSetup<DataStartDependencies, DataPublicPluginStart>,
     {
       timefilter,
       usageCollection,
@@ -62,11 +61,15 @@ export class AutocompleteService {
       ? setupValueSuggestionProvider(core, { timefilter, usageCollector })
       : getEmptyValueSuggestions;
 
-    return {
-      addQuerySuggestionProvider: this.addQuerySuggestionProvider,
+    if (this.autocompleteConfig.querySuggestions.enabled) {
+      this.querySuggestionProviders.set(KUERY_LANGUAGE_NAME, setupKqlQuerySuggestionProvider(core));
+    }
 
-      /** @obsolete **/
-      /** please use "getProvider" only from the start contract **/
+    return {
+      /**
+       * @deprecated
+       * please use "getQuerySuggestions" from the start contract
+       */
       getQuerySuggestions: this.getQuerySuggestions,
     };
   }

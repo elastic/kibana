@@ -82,6 +82,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     embeddable: deps.embeddable,
     maps: deps.maps,
     triggersActionsUi: deps.triggersActionsUi,
+    fileUpload: deps.fileUpload,
     ...coreStart,
   };
 

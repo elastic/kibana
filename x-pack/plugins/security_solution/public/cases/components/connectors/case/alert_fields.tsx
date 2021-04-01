@@ -9,10 +9,10 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 import { ActionParamsProps } from '../../../../../../triggers_actions_ui/public/types';
-import { CommentType } from '../../../../../../case/common/api';
+import { CommentType } from '../../../../../../cases/common/api';
 
 import { CaseActionParams } from './types';
 import { ExistingCase } from './existing_case';
@@ -21,13 +21,15 @@ import * as i18n from './translations';
 
 const Container = styled.div`
   ${({ theme }) => `
-    margin-top: ${theme.eui?.euiSize ?? '16px'};
+    padding:  ${theme.eui?.euiSizeS ?? '8px'} ${theme.eui?.euiSizeL ?? '24px'} ${
+    theme.eui?.euiSizeL ?? '24px'
+  } ${theme.eui?.euiSizeL ?? '24px'};
   `}
 `;
 
 const defaultAlertComment = {
   type: CommentType.generatedAlert,
-  alerts: `[{{#context.alerts}}{"_id": "{{_id}}", "_index": "{{_index}}", "ruleId": "{{rule.id}}", "ruleName": "{{rule.name}}"}__SEPARATOR__{{/context.alerts}}]`,
+  alerts: `[{{#context.alerts}}{"_id": "{{_id}}", "_index": "{{_index}}", "ruleId": "{{signal.rule.id}}", "ruleName": "{{signal.rule.name}}"}__SEPARATOR__{{/context.alerts}}]`,
 };
 
 const CaseParamsFields: React.FunctionComponent<ActionParamsProps<CaseActionParams>> = ({
@@ -47,7 +49,9 @@ const CaseParamsFields: React.FunctionComponent<ActionParamsProps<CaseActionPara
       const newProps = { ...actionParams.subActionParams, [key]: value };
       editAction('subActionParams', newProps, index);
     },
-    [actionParams.subActionParams, editAction, index]
+    // edit action causes re-renders
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [actionParams.subActionParams, index]
   );
 
   const onCaseChanged = useCallback(
@@ -88,12 +92,13 @@ const CaseParamsFields: React.FunctionComponent<ActionParamsProps<CaseActionPara
   ]);
 
   return (
-    <>
-      <EuiCallOut size="s" title={i18n.CASE_CONNECTOR_CALL_OUT_INFO} iconType="iInCircle" />
-      <Container>
-        <ExistingCase onCaseChanged={onCaseChanged} selectedCase={selectedCase} />
-      </Container>
-    </>
+    <Container>
+      <ExistingCase onCaseChanged={onCaseChanged} selectedCase={selectedCase} />
+      <EuiSpacer size="m" />
+      <EuiCallOut size="s" title={i18n.CASE_CONNECTOR_CALL_OUT_TITLE} iconType="iInCircle">
+        <p>{i18n.CASE_CONNECTOR_CALL_OUT_MSG}</p>
+      </EuiCallOut>
+    </Container>
   );
 };
 

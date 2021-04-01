@@ -11,10 +11,9 @@ import { createQueryFilterClauses } from '../../../../../../common/utils/build_q
 
 export const buildActionResultsQuery = ({
   actionId,
-  docValueFields,
   filterQuery,
-  pagination: { activePage, querySize },
   sort,
+  pagination: { activePage, querySize },
 }: ActionResultsRequestOptions): ISearchRequestParams => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
@@ -27,14 +26,31 @@ export const buildActionResultsQuery = ({
 
   const dslQuery = {
     allowNoIndices: true,
-    index: '.fleet-actions-results',
+    index: '.fleet-actions-results*',
     ignoreUnavailable: true,
     body: {
+      aggs: {
+        responses: {
+          terms: {
+            script: {
+              lang: 'painless',
+              source: "if (doc['error'].size()==0) { return 'success' } else { return 'error' }",
+            },
+          },
+        },
+      },
       query: { bool: { filter } },
       from: activePage * querySize,
       size: querySize,
       track_total_hits: true,
       fields: ['*'],
+      sort: [
+        {
+          [sort.field]: {
+            order: sort.direction,
+          },
+        },
+      ],
     },
   };
 

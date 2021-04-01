@@ -210,6 +210,15 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
       return skipButton.click();
     }
 
+    /**
+     * When scrolling down the legacy table there's a link to scroll up
+     * So this is done by this function
+     */
+    public async backToTop() {
+      const skipButton = await testSubjects.find('discoverBackToTop');
+      return skipButton.click();
+    }
+
     public async getDocTableFooter() {
       return await testSubjects.find('discoverDocTableFooter');
     }
@@ -220,6 +229,10 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
 
     public async clickDocSortUp() {
       await find.clickByCssSelector('.fa-sort-up');
+    }
+
+    public async isShowingDocViewer() {
+      return await testSubjects.exists('kbnDocViewer');
     }
 
     public async getMarks() {

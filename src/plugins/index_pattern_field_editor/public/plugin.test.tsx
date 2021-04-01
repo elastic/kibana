@@ -25,6 +25,8 @@ import { registerTestBed } from './test_utils';
 
 import { FieldEditorFlyoutContentContainer } from './components/field_editor_flyout_content_container';
 import { IndexPatternFieldEditorPlugin } from './plugin';
+import { DeleteFieldModal } from './components/delete_field_modal';
+import { IndexPattern } from './shared_imports';
 
 const noop = () => {};
 
@@ -80,6 +82,70 @@ describe('IndexPatternFieldEditorPlugin', () => {
 
     const closeEditorHandler = openEditor({ onSave: noop, ctx: { indexPattern: {} as any } });
     expect(typeof closeEditorHandler).toBe('function');
+  });
+
+  test('should expose a handler to open field deletion modal', async () => {
+    const startApi = await plugin.start(coreStart, pluginStart);
+    expect(startApi.openDeleteModal).toBeDefined();
+  });
+
+  test('should call correct services when opening the deletion modal', async () => {
+    const openModal = jest.fn();
+    const onDeleteSpy = jest.fn();
+    const removeFieldSpy = jest.fn();
+
+    const coreStartMocked = {
+      ...coreStart,
+      overlays: {
+        ...coreStart.overlays,
+        openModal,
+      },
+    };
+    const pluginStartMocked = {
+      ...pluginStart,
+      data: {
+        ...pluginStart.data,
+        indexPatterns: {
+          ...pluginStart.data.indexPatterns,
+          updateSavedObject: jest.fn(),
+        },
+      },
+    };
+    const { openDeleteModal } = await plugin.start(coreStartMocked, pluginStartMocked);
+
+    const indexPatternMock = ({ removeRuntimeField: removeFieldSpy } as unknown) as IndexPattern;
+
+    openDeleteModal({
+      onDelete: onDeleteSpy,
+      ctx: { indexPattern: indexPatternMock },
+      fieldName: ['a', 'b', 'c'],
+    });
+
+    expect(openModal).toHaveBeenCalled();
+
+    const [[arg]] = openModal.mock.calls;
+    expect(arg.type).toBe(DeleteFieldModal);
+
+    // simulate user confirming deletion
+    await arg.props.confirmDelete();
+
+    // consumer should be notified
+    expect(onDeleteSpy).toHaveBeenCalled();
+
+    // fields should be removed on index pattern and changes persisted
+    expect(removeFieldSpy).toHaveBeenCalledWith('a');
+    expect(removeFieldSpy).toHaveBeenCalledWith('b');
+    expect(removeFieldSpy).toHaveBeenCalledWith('c');
+    expect(pluginStartMocked.data.indexPatterns.updateSavedObject).toHaveBeenLastCalledWith(
+      indexPatternMock
+    );
+  });
+
+  test('should return a handler to close the modal', async () => {
+    const { openDeleteModal } = await plugin.start(coreStart, pluginStart);
+
+    const closeModal = openDeleteModal({ fieldName: ['a'], ctx: { indexPattern: {} as any } });
+    expect(typeof closeModal).toBe('function');
   });
 
   test('should expose a render props component to delete runtime fields', async () => {

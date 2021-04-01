@@ -56,11 +56,11 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
         before(async () => {
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',
-              actionTypeId: 'test.index-record',
+              connector_type_id: 'test.index-record',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
               },
@@ -78,7 +78,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             objectRemover,
           });
         });
-        after(() => objectRemover.add(space.id, indexRecordActionId, 'action', 'actions'));
+        after(() => objectRemover.add(space.id, indexRecordActionId, 'connector', 'actions'));
 
         it('should schedule task, run alert and schedule actions when appropriate', async () => {
           const testStart = new Date();
@@ -365,24 +365,24 @@ instanceStateValue: true
           const retryDate = new Date(Date.now() + 60000);
 
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'Test rate limit',
-              actionTypeId: 'test.rate-limit',
+              connector_type_id: 'test.rate-limit',
               config: {},
             })
             .expect(200);
-          objectRemover.add(space.id, createdAction.id, 'action', 'actions');
+          objectRemover.add(space.id, createdAction.id, 'connector', 'actions');
 
           const reference = alertUtils.generateReference();
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send(
               getTestAlertData({
-                alertTypeId: 'test.always-firing',
+                rule_type_id: 'test.always-firing',
                 params: {
                   index: ES_TEST_INDEX_NAME,
                   reference: 'create-test-2',
@@ -428,7 +428,7 @@ instanceStateValue: true
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
-              objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
+              objectRemover.add(space.id, response.body.id, 'rule', 'alerting');
 
               // Wait for the task to be attempted once and idle
               const scheduledActionTask = await retry.try(async () => {
@@ -482,12 +482,12 @@ instanceStateValue: true
           const testStart = new Date();
           const reference = alertUtils.generateReference();
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send(
               getTestAlertData({
-                alertTypeId: 'test.authorization',
+                rule_type_id: 'test.authorization',
                 params: {
                   callClusterAuthorizationIndex: authorizationIndex,
                   savedObjectsClientType: 'dashboard',
@@ -517,7 +517,7 @@ instanceStateValue: true
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
-              objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
+              objectRemover.add(space.id, response.body.id, 'rule', 'alerting');
 
               // Wait for test.authorization to index a document before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('alert:test.authorization', reference);
@@ -533,11 +533,9 @@ instanceStateValue: true
                 savedObjectsClientSuccess: false,
                 callClusterError: {
                   ...searchResult.hits.hits[0]._source.state.callClusterError,
-                  statusCode: 403,
                 },
                 callScopedClusterError: {
                   ...searchResult.hits.hits[0]._source.state.callScopedClusterError,
-                  statusCode: 403,
                 },
                 savedObjectsClientError: {
                   ...searchResult.hits.hits[0]._source.state.savedObjectsClientError,
@@ -550,7 +548,7 @@ instanceStateValue: true
               break;
             case 'superuser at space1':
               expect(response.statusCode).to.eql(200);
-              objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
+              objectRemover.add(space.id, response.body.id, 'rule', 'alerting');
 
               // Wait for test.authorization to index a document before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('alert:test.authorization', reference);
@@ -583,21 +581,21 @@ instanceStateValue: true
           const testStart = new Date();
           const reference = alertUtils.generateReference();
           const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/actions/action`)
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
             .send({
               name: 'My action',
-              actionTypeId: 'test.authorization',
+              connector_type_id: 'test.authorization',
             })
             .expect(200);
-          objectRemover.add(space.id, createdAction.id, 'action', 'actions');
+          objectRemover.add(space.id, createdAction.id, 'connector', 'actions');
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send(
               getTestAlertData({
-                alertTypeId: 'test.always-firing',
+                rule_type_id: 'test.always-firing',
                 params: {
                   index: ES_TEST_INDEX_NAME,
                   reference,
@@ -636,7 +634,7 @@ instanceStateValue: true
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
-              objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
+              objectRemover.add(space.id, response.body.id, 'rule', 'alerting');
 
               // Ensure test.authorization indexed 1 document before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('action:test.authorization', reference);
@@ -652,11 +650,9 @@ instanceStateValue: true
                 savedObjectsClientSuccess: false,
                 callClusterError: {
                   ...searchResult.hits.hits[0]._source.state.callClusterError,
-                  statusCode: 403,
                 },
                 callScopedClusterError: {
                   ...searchResult.hits.hits[0]._source.state.callScopedClusterError,
-                  statusCode: 403,
                 },
                 savedObjectsClientError: {
                   ...searchResult.hits.hits[0]._source.state.savedObjectsClientError,
@@ -677,7 +673,7 @@ instanceStateValue: true
               break;
             case 'superuser at space1':
               expect(response.statusCode).to.eql(200);
-              objectRemover.add(space.id, response.body.id, 'alert', 'alerts');
+              objectRemover.add(space.id, response.body.id, 'rule', 'alerting');
 
               // Ensure test.authorization indexed 1 document before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('action:test.authorization', reference);

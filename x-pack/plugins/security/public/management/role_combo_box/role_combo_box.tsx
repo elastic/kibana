@@ -5,24 +5,15 @@
  * 2.0.
  */
 
+import type { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
+import { EuiBadge, EuiComboBox, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiBadge,
-  EuiComboBox,
-  EuiComboBoxProps,
-  EuiComboBoxOptionOption,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
-import {
-  Role,
-  isRoleSystem,
-  isRoleAdmin,
-  isRoleReserved,
-  isRoleDeprecated,
-} from '../../../common/model';
+
+import type { Role } from '../../../common/model';
+import { isRoleAdmin, isRoleDeprecated, isRoleReserved, isRoleSystem } from '../../../common/model';
 
 interface Props
   extends Omit<

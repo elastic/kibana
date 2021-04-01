@@ -123,7 +123,7 @@ describe('useAllCasesModal', () => {
     });
 
     const modal = result.current.modal;
-    render(<>{modal}</>);
+    render(<TestProviders>{modal}</TestProviders>);
 
     act(() => {
       userEvent.click(screen.getByText('case-row'));

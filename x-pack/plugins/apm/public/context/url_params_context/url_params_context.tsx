@@ -35,7 +35,10 @@ function useUiFilters(params: IUrlParams): UIFilters {
     (val) => (val ? val.split(',') : [])
   ) as Partial<Record<LocalUIFilterName, string[]>>;
 
-  return useDeepObjectIdentity(localUiFilters);
+  return useDeepObjectIdentity({
+    environment: params.environment,
+    ...localUiFilters,
+  });
 }
 
 const defaultRefresh = (_time: TimeRange) => {};

@@ -23,7 +23,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const log = getService('log');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/89478
   describe('import objects', function describeIndexTests() {
     describe('.ndjson file', () => {
       beforeEach(async function () {
@@ -292,7 +291,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(isSuccessful).to.be(true);
       });
 
-      it('should allow the user to confirm overriding multiple duplicate saved objects', async function () {
+      // https://github.com/elastic/kibana/issues/95660
+      it.skip('should allow the user to confirm overriding multiple duplicate saved objects', async function () {
         // This data has already been loaded by the "visualize" esArchive. We'll load it again
         // so that we can override the existing visualization.
         await PageObjects.savedObjects.importFile(

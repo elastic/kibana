@@ -39,7 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: TO,
               from: FROM,
             },
-            defaultIndex: ['auditbeat-*'],
+            defaultIndex: ['auditbeat-users'],
             docValueFields: [],
             ip: IP,
             flowTarget: FlowTarget.destination,

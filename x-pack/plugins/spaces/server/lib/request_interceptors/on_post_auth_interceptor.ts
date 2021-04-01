@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { Logger, CoreSetup } from 'src/core/server';
-import { Space } from '../../../../../../src/plugins/spaces_oss/common';
-import { wrapError } from '../errors';
-import { SpacesServiceStart } from '../../spaces_service/spaces_service';
-import { PluginsSetup } from '../../plugin';
-import { getSpaceSelectorUrl } from '../get_space_selector_url';
-import { DEFAULT_SPACE_ID, ENTER_SPACE_PATH } from '../../../common/constants';
+import type { CoreSetup, Logger } from 'src/core/server';
+import type { Space } from 'src/plugins/spaces_oss/common';
+
 import { addSpaceIdToPath } from '../../../common';
+import { DEFAULT_SPACE_ID, ENTER_SPACE_PATH } from '../../../common/constants';
+import type { PluginsSetup } from '../../plugin';
+import type { SpacesServiceStart } from '../../spaces_service/spaces_service';
+import { wrapError } from '../errors';
+import { getSpaceSelectorUrl } from '../get_space_selector_url';
 
 export interface OnPostAuthInterceptorDeps {
   http: CoreSetup['http'];

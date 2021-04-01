@@ -1,6 +1,7 @@
 # Kibana task manager
 
 The task manager is a generic system for running background tasks.
+Documentation: https://www.elastic.co/guide/en/kibana/master/task-manager-production-considerations.html
 
 It supports:
 - Single-run and recurring tasks
@@ -495,11 +496,9 @@ Our current model, then, is this:
 
 ## Limitations in v1.0
 
-In v1, the system only understands 1 minute increments (e.g. '1m', '7m'). Tasks which need something more robust will need to specify their own "runAt" in their run method's return value.
-
 There is only a rudimentary mechanism for coordinating tasks and handling expired tasks. Tasks are considered expired if their runAt has arrived, and their status is still 'running'.
 
-There is no task history. Each run overwrites the previous run's state. One-time tasks are removed from the index upon completion regardless of success / failure.
+There is no task history. Each run overwrites the previous run's state. One-time tasks are removed from the index upon completion.
 
 The task manager's public API is create / delete / list. Updates aren't directly supported, and listing should be scoped so that users only see their own tasks.
 
@@ -522,4 +521,5 @@ The task manager's public API is create / delete / list. Updates aren't directly
 
 Task Manager exposes runtime statistics which enable basic observability into its inner workings and makes it possible to monitor the system from external services.
 
-Learn More: [./MONITORING](./MONITORING.MD)
+Public Documentation: https://www.elastic.co/guide/en/kibana/master/task-manager-health-monitoring.html
+Developer Documentation: [./MONITORING](./MONITORING.MD)

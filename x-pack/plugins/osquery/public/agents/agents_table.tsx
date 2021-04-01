@@ -5,145 +5,222 @@
  * 2.0.
  */
 
-import { find } from 'lodash/fp';
-import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import {
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiBasicTableProps,
-  EuiTableSelectionType,
-  EuiHealth,
-} from '@elastic/eui';
+import React, { useCallback, useEffect, useState } from 'react';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiHealth, EuiHighlight } from '@elastic/eui';
 
 import { useAllAgents } from './use_all_agents';
-import { Direction } from '../../common/search_strategy';
+import { useAgentGroups } from './use_agent_groups';
+import { useOsqueryPolicies } from './use_osquery_policies';
 import { Agent } from '../../common/shared_imports';
+import {
+  getNumAgentsInGrouping,
+  generateAgentCheck,
+  getNumOverlapped,
+  generateColorPicker,
+} from './helpers';
 
-interface AgentsTableProps {
-  selectedAgents: string[];
-  onChange: (payload: string[]) => void;
+import {
+  ALL_AGENTS_LABEL,
+  AGENT_PLATFORMS_LABEL,
+  AGENT_POLICY_LABEL,
+  SELECT_AGENT_LABEL,
+  AGENT_SELECTION_LABEL,
+  generateSelectedAgentsMessage,
+} from './translations';
+
+import { AGENT_GROUP_KEY, SelectedGroups, AgentOptionValue, GroupOptionValue } from './types';
+
+export interface AgentsSelection {
+  agents: string[];
+  allAgentsSelected: boolean;
+  platformsSelected: string[];
+  policiesSelected: string[];
 }
 
-const AgentsTableComponent: React.FC<AgentsTableProps> = ({ selectedAgents, onChange }) => {
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(5);
-  const [sortField, setSortField] = useState<keyof Agent>('id');
-  const [sortDirection, setSortDirection] = useState<Direction>(Direction.asc);
-  const [selectedItems, setSelectedItems] = useState([]);
-  const tableRef = useRef<EuiBasicTable<Agent>>(null);
+interface AgentsTableProps {
+  agentSelection: AgentsSelection;
+  onChange: (payload: AgentsSelection) => void;
+}
 
-  const onTableChange: EuiBasicTableProps<Agent>['onChange'] = useCallback(
-    ({ page = {}, sort = {} }) => {
-      const { index: newPageIndex, size: newPageSize } = page;
+type GroupOption = EuiComboBoxOptionOption<AgentOptionValue | GroupOptionValue>;
 
-      const { field: newSortField, direction: newSortDirection } = sort;
+const getColor = generateColorPicker();
 
-      setPageIndex(newPageIndex);
-      setPageSize(newPageSize);
-      setSortField(newSortField);
-      setSortDirection(newSortDirection);
-    },
-    []
+const AgentsTableComponent: React.FC<AgentsTableProps> = ({ onChange }) => {
+  const osqueryPolicyData = useOsqueryPolicies();
+  const { loading: groupsLoading, totalCount: totalNumAgents, groups } = useAgentGroups(
+    osqueryPolicyData
   );
-
-  const onSelectionChange: EuiTableSelectionType<{}>['onSelectionChange'] = useCallback(
-    (newSelectedItems) => {
-      setSelectedItems(newSelectedItems);
-      // @ts-expect-error
-      onChange(newSelectedItems.map((item) => item._id));
-    },
-    [onChange]
-  );
-
-  const renderStatus = (online: string) => {
-    const color = online ? 'success' : 'danger';
-    const label = online ? 'Online' : 'Offline';
-    return <EuiHealth color={color}>{label}</EuiHealth>;
-  };
-
-  const [, { agents, totalCount }] = useAllAgents({
-    activePage: pageIndex,
-    limit: pageSize,
-    direction: sortDirection,
-    sortField,
-  });
-
-  const columns: Array<EuiBasicTableColumn<{}>> = useMemo(
-    () => [
-      {
-        field: 'local_metadata.elastic.agent.id',
-        name: 'id',
-        sortable: true,
-        truncateText: true,
-      },
-      {
-        field: 'local_metadata.host.name',
-        name: 'hostname',
-        truncateText: true,
-      },
-
-      {
-        field: 'active',
-        name: 'Online',
-        dataType: 'boolean',
-        render: (active: string) => renderStatus(active),
-      },
-    ],
-    []
-  );
-
-  const pagination = useMemo(
-    () => ({
-      pageIndex,
-      pageSize,
-      totalItemCount: totalCount,
-      pageSizeOptions: [3, 5, 8],
-    }),
-    [pageIndex, pageSize, totalCount]
-  );
-
-  const sorting = useMemo(
-    () => ({
-      sort: {
-        field: sortField,
-        direction: sortDirection,
-      },
-    }),
-    [sortDirection, sortField]
-  );
-
-  const selection: EuiBasicTableProps<Agent>['selection'] = useMemo(
-    () => ({
-      selectable: (agent: Agent) => agent.active,
-      selectableMessage: (selectable: boolean) => (!selectable ? 'User is currently offline' : ''),
-      onSelectionChange,
-      initialSelected: selectedItems,
-    }),
-    [onSelectionChange, selectedItems]
-  );
+  const { agents } = useAllAgents(osqueryPolicyData);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [options, setOptions] = useState<GroupOption[]>([]);
+  const [selectedOptions, setSelectedOptions] = useState<GroupOption[]>([]);
+  const [numAgentsSelected, setNumAgentsSelected] = useState<number>(0);
 
   useEffect(() => {
-    if (selectedAgents?.length && agents.length && selectedItems.length !== selectedAgents.length) {
-      tableRef?.current?.setSelection(
-        // @ts-expect-error
-        selectedAgents.map((agentId) => find({ _id: agentId }, agents))
-      );
-    }
-  }, [selectedAgents, agents, selectedItems.length]);
+    const allAgentsLabel = ALL_AGENTS_LABEL;
+    const opts: GroupOption[] = [
+      {
+        label: allAgentsLabel,
+        options: [
+          {
+            label: allAgentsLabel,
+            value: { groupType: AGENT_GROUP_KEY.All, size: totalNumAgents },
+            color: getColor(AGENT_GROUP_KEY.All),
+          },
+        ],
+      },
+    ];
 
+    if (groups.platforms.length > 0) {
+      const groupType = AGENT_GROUP_KEY.Platform;
+      opts.push({
+        label: AGENT_PLATFORMS_LABEL,
+        options: groups.platforms.map(({ name, size }) => ({
+          label: name,
+          color: getColor(groupType),
+          value: { groupType, size },
+        })),
+      });
+    }
+
+    if (groups.policies.length > 0) {
+      const groupType = AGENT_GROUP_KEY.Policy;
+      opts.push({
+        label: AGENT_POLICY_LABEL,
+        options: groups.policies.map(({ name, size }) => ({
+          label: name,
+          color: getColor(groupType),
+          value: { groupType, size },
+        })),
+      });
+    }
+
+    if (agents && agents.length > 0) {
+      const groupType = AGENT_GROUP_KEY.Agent;
+      opts.push({
+        label: AGENT_SELECTION_LABEL,
+        options: (agents as Agent[]).map((agent: Agent) => ({
+          label: agent.local_metadata.host.hostname,
+          color: getColor(groupType),
+          value: {
+            groupType,
+            groups: { policy: agent.policy_id ?? '', platform: agent.local_metadata.os.platform },
+            id: agent.local_metadata.elastic.agent.id,
+            online: agent.active,
+          },
+        })),
+      });
+    }
+    setLoading(false);
+    setOptions(opts);
+  }, [groups.platforms, groups.policies, totalNumAgents, groupsLoading, agents]);
+
+  const onSelection = useCallback(
+    (selection: GroupOption[]) => {
+      // TODO?: optimize this by making it incremental
+      const newAgentSelection: AgentsSelection = {
+        agents: [],
+        allAgentsSelected: false,
+        platformsSelected: [],
+        policiesSelected: [],
+      };
+      // parse through the selections to be able to determine how many are actually selected
+      const selectedAgents = [];
+      const selectedGroups: SelectedGroups = {
+        policy: {},
+        platform: {},
+      };
+
+      // TODO: clean this up, make it less awkward
+      for (const opt of selection) {
+        const groupType = opt.value?.groupType;
+        let value;
+        switch (groupType) {
+          case AGENT_GROUP_KEY.All:
+            newAgentSelection.allAgentsSelected = true;
+            break;
+          case AGENT_GROUP_KEY.Platform:
+            value = opt.value as GroupOptionValue;
+            if (!newAgentSelection.allAgentsSelected) {
+              // we don't need to calculate diffs when all agents are selected
+              selectedGroups.platform[opt.label] = value.size;
+            }
+            newAgentSelection.platformsSelected.push(opt.label);
+            break;
+          case AGENT_GROUP_KEY.Policy:
+            value = opt.value as GroupOptionValue;
+            if (!newAgentSelection.allAgentsSelected) {
+              // we don't need to calculate diffs when all agents are selected
+              selectedGroups.policy[opt.label] = value.size ?? 0;
+            }
+            newAgentSelection.policiesSelected.push(opt.label);
+            break;
+          case AGENT_GROUP_KEY.Agent:
+            value = opt.value as AgentOptionValue;
+            if (!newAgentSelection.allAgentsSelected) {
+              // we don't need to count how many agents are selected if they are all selected
+              selectedAgents.push(opt.value);
+            }
+            // TODO: fix this casting by updating the opt type to be a union
+            newAgentSelection.agents.push(value.id as string);
+            break;
+          default:
+            // this should never happen!
+            // eslint-disable-next-line no-console
+            console.error(`unknown group type ${groupType}`);
+        }
+      }
+      if (newAgentSelection.allAgentsSelected) {
+        setNumAgentsSelected(totalNumAgents);
+      } else {
+        const checkAgent = generateAgentCheck(selectedGroups);
+        setNumAgentsSelected(
+          // filter out all the agents counted by selected policies and platforms
+          selectedAgents.filter((a) => checkAgent(a as AgentOptionValue)).length +
+            // add the number of agents added via policy and platform groups
+            getNumAgentsInGrouping(selectedGroups) -
+            // subtract the number of agents double counted by policy/platform selections
+            getNumOverlapped(selectedGroups, groups.overlap)
+        );
+      }
+      onChange(newAgentSelection);
+      setSelectedOptions(selection);
+    },
+    [groups, onChange, totalNumAgents]
+  );
+
+  const renderOption = useCallback((option, searchValue, contentClassName) => {
+    const { label, value } = option;
+    return value?.groupType === AGENT_GROUP_KEY.Agent ? (
+      <EuiHealth color={value?.online ? 'success' : 'danger'}>
+        <span className={contentClassName}>
+          <EuiHighlight search={searchValue}>{label}</EuiHighlight>
+        </span>
+      </EuiHealth>
+    ) : (
+      <span className={contentClassName}>
+        <EuiHighlight search={searchValue}>{label}</EuiHighlight>
+        &nbsp;
+        <span>({value?.size})</span>
+      </span>
+    );
+  }, []);
   return (
-    <EuiBasicTable<Agent>
-      ref={tableRef}
-      items={agents}
-      itemId="_id"
-      columns={columns}
-      pagination={pagination}
-      sorting={sorting}
-      isSelectable={true}
-      selection={selection}
-      onChange={onTableChange}
-      rowHeader="firstName"
-    />
+    <div>
+      <h2>{SELECT_AGENT_LABEL}</h2>
+      {numAgentsSelected > 0 ? <span>{generateSelectedAgentsMessage(numAgentsSelected)}</span> : ''}
+      &nbsp;
+      <EuiComboBox
+        placeholder="Select or create options"
+        isLoading={loading}
+        options={options}
+        fullWidth={true}
+        selectedOptions={selectedOptions}
+        onChange={onSelection}
+        renderOption={renderOption}
+      />
+    </div>
   );
 };
 

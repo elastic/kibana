@@ -8,7 +8,8 @@ import React, { useState, useMemo, memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiText, EuiPagination } from '@elastic/eui';
-import { ScreenshotItem } from '../../../../../types';
+
+import type { ScreenshotItem } from '../../../../../types';
 import { useLinks } from '../../../hooks';
 
 interface ScreenshotProps {

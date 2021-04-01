@@ -9,6 +9,4 @@
 // @ts-expect-error
 export { KibanaMap } from '../../map/kibana_map';
 // @ts-expect-error
-export { ServiceSettings } from '../../map/service_settings';
-// @ts-expect-error
 export { L } from '../../leaflet';

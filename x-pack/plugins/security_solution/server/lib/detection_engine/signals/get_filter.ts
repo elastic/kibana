@@ -20,14 +20,14 @@ import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
-} from '../../../../../alerts/server';
+} from '../../../../../alerting/server';
 import { PartialFilter } from '../types';
 import { BadRequestError } from '../errors/bad_request_error';
 import { QueryFilter } from './types';
 
 interface GetFilterArgs {
   type: Type;
-  filters: PartialFilter[] | undefined;
+  filters: unknown | undefined;
   language: LanguageOrUndefined;
   query: QueryOrUndefined;
   savedId: SavedIdOrUndefined;

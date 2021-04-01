@@ -40,8 +40,10 @@ export const timelineEventsAll: SecuritySolutionTimelineFactory<TimelineEventsQu
     const { activePage, querySize } = options.pagination;
     const totalCount = response.rawResponse.hits.total || 0;
     const hits = response.rawResponse.hits.hits;
-    const edges: TimelineEdges[] = hits.map((hit) =>
-      formatTimelineData(options.fieldRequested, TIMELINE_EVENTS_FIELDS, hit as EventHit)
+    const edges: TimelineEdges[] = await Promise.all(
+      hits.map((hit) =>
+        formatTimelineData(options.fieldRequested, TIMELINE_EVENTS_FIELDS, hit as EventHit)
+      )
     );
     const inspect = {
       dsl: [inspectStringifyObject(buildTimelineEventsAllQuery(queryOptions))],
@@ -51,6 +53,7 @@ export const timelineEventsAll: SecuritySolutionTimelineFactory<TimelineEventsQu
       ...response,
       inspect,
       edges,
+      // @ts-expect-error code doesn't handle TotalHits
       totalCount,
       pageInfo: {
         activePage: activePage ?? 0,

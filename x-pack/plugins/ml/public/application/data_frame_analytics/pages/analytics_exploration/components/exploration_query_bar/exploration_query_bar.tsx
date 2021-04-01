@@ -60,7 +60,7 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
 
   const searchChangeHandler = (q: Query) => setSearchInput(q);
 
-  const regex = useMemo(() => new RegExp(`${filters?.columnId}\s?:\s?(true|false)`, 'g'), [
+  const regex = useMemo(() => new RegExp(`${filters?.columnId}\\s*:\\s*(true|false)`, 'g'), [
     filters?.columnId,
   ]);
 

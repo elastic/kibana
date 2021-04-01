@@ -1,5 +1,5 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "../../../tsconfig.project.json",
   "compilerOptions": {
     "composite": true,
     "outDir": "./target/types",
@@ -31,7 +31,7 @@
     { "path": "../lens/tsconfig.json" },
     { "path": "../security/tsconfig.json" },
     { "path": "../spaces/tsconfig.json" },
-    { "path": "../alerts/tsconfig.json" },
+    { "path": "../alerting/tsconfig.json" },
     { "path": "../triggers_actions_ui/tsconfig.json" }
   ]
 }

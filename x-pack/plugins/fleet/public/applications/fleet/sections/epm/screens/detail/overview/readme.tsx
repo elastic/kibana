@@ -8,8 +8,10 @@
 import { EuiLoadingContent, EuiText } from '@elastic/eui';
 import React, { Fragment, useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+
 import { useLinks } from '../../../hooks';
 import { sendGetFileByPath } from '../../../../../hooks';
+
 import { markdownRenderers } from './markdown_renderers';
 
 export function Readme({

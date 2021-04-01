@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEqual } from 'lodash';
 import expect from '@kbn/expect';
 
 import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
@@ -26,6 +27,18 @@ import {
 
 import { getCreateThreatMatchRulesSchemaMock } from '../../../../plugins/security_solution/common/detection_engine/schemas/request/rule_schemas.mock';
 import { getThreatMatchingSchemaPartialMock } from '../../../../plugins/security_solution/common/detection_engine/schemas/response/rules_schema.mocks';
+
+const format = (value: unknown): string => JSON.stringify(value, null, 2);
+
+// Asserts that each expected value is included in the subject, independent of
+// ordering. Uses _.isEqual for value comparison.
+const assertContains = (subject: unknown[], expected: unknown[]) =>
+  expected.forEach((expectedValue) =>
+    expect(subject.some((value) => isEqual(value, expectedValue))).to.eql(
+      true,
+      `expected ${format(subject)} to contain ${format(expectedValue)}`
+    )
+  );
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -273,6 +286,7 @@ export default ({ getService }: FtrProviderContext) => {
             rule_id: 'rule-1',
             from: '1900-01-01T00:00:00.000Z',
             query: '*:*',
+            threat_indicator_path: 'threat.indicator',
             threat_query: 'threat.indicator.domain: *', // narrow things down to indicators with a domain
             threat_index: ['filebeat-*'], // Mimics indicators from the filebeat MISP module
             threat_mapping: [
@@ -303,9 +317,21 @@ export default ({ getService }: FtrProviderContext) => {
                 {
                   description: "domain should match the auditbeat hosts' data's source.ip",
                   domain: '159.89.119.67',
+                  event: {
+                    category: 'threat',
+                    created: '2021-01-26T11:09:05.529Z',
+                    dataset: 'threatintel.abuseurl',
+                    ingested: '2021-01-26T11:09:06.595350Z',
+                    kind: 'enrichment',
+                    module: 'threatintel',
+                    reference: 'https://urlhaus.abuse.ch/url/978783/',
+                    type: 'indicator',
+                  },
                   first_seen: '2021-01-26T11:09:04.000Z',
                   matched: {
                     atomic: '159.89.119.67',
+                    id: '978783',
+                    index: 'filebeat-8.0.0-2021.01.26-000001',
                     field: 'destination.ip',
                     type: 'url',
                   },
@@ -323,9 +349,21 @@ export default ({ getService }: FtrProviderContext) => {
                 {
                   description: "domain should match the auditbeat hosts' data's source.ip",
                   domain: '159.89.119.67',
+                  event: {
+                    category: 'threat',
+                    created: '2021-01-26T11:09:05.529Z',
+                    dataset: 'threatintel.abuseurl',
+                    ingested: '2021-01-26T11:09:06.595350Z',
+                    kind: 'enrichment',
+                    module: 'threatintel',
+                    reference: 'https://urlhaus.abuse.ch/url/978783/',
+                    type: 'indicator',
+                  },
                   first_seen: '2021-01-26T11:09:04.000Z',
                   matched: {
                     atomic: '159.89.119.67',
+                    id: '978783',
+                    index: 'filebeat-8.0.0-2021.01.26-000001',
                     field: 'destination.ip',
                     type: 'url',
                   },
@@ -353,6 +391,7 @@ export default ({ getService }: FtrProviderContext) => {
             rule_id: 'rule-1',
             from: '1900-01-01T00:00:00.000Z',
             query: 'source.port: 57324', // narrow our query to a single record that matches two indicators
+            threat_indicator_path: 'threat.indicator',
             threat_query: 'threat.indicator.ip: *',
             threat_index: ['filebeat-*'], // Mimics indicators from the filebeat MISP module
             threat_mapping: [
@@ -376,36 +415,57 @@ export default ({ getService }: FtrProviderContext) => {
           expect(signalsOpen.hits.hits.length).equal(1);
 
           const { hits } = signalsOpen.hits;
-          const threats = hits.map((hit) => hit._source.threat);
-          expect(threats).to.eql([
+          const [threat] = hits.map((hit) => hit._source.threat) as Array<{ indicator: unknown[] }>;
+
+          assertContains(threat.indicator, [
             {
-              indicator: [
-                {
-                  description: 'this should match auditbeat/hosts on both port and ip',
-                  first_seen: '2021-01-26T11:06:03.000Z',
-                  ip: '45.115.45.3',
-                  matched: {
-                    atomic: '45.115.45.3',
-                    field: 'source.ip',
-                    type: 'url',
-                  },
-                  port: 57324,
-                  provider: 'geenensp',
-                  type: 'url',
-                },
-                {
-                  description: 'this should match auditbeat/hosts on ip',
-                  first_seen: '2021-01-26T11:06:03.000Z',
-                  ip: '45.115.45.3',
-                  matched: {
-                    atomic: '45.115.45.3',
-                    field: 'source.ip',
-                    type: 'ip',
-                  },
-                  provider: 'other_provider',
-                  type: 'ip',
-                },
-              ],
+              description: 'this should match auditbeat/hosts on both port and ip',
+              first_seen: '2021-01-26T11:06:03.000Z',
+              ip: '45.115.45.3',
+              matched: {
+                atomic: '45.115.45.3',
+                id: '978785',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'source.ip',
+                type: 'url',
+              },
+              port: 57324,
+              provider: 'geenensp',
+              type: 'url',
+              event: {
+                category: 'threat',
+                created: '2021-01-26T11:09:05.529Z',
+                dataset: 'threatintel.abuseurl',
+                ingested: '2021-01-26T11:09:06.616763Z',
+                kind: 'enrichment',
+                module: 'threatintel',
+                reference: 'https://urlhaus.abuse.ch/url/978782/',
+                type: 'indicator',
+              },
+            },
+            {
+              description: 'this should match auditbeat/hosts on ip',
+              first_seen: '2021-01-26T11:06:03.000Z',
+              ip: '45.115.45.3',
+              matched: {
+                atomic: '45.115.45.3',
+                id: '978787',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'source.ip',
+                type: 'ip',
+              },
+              provider: 'other_provider',
+              type: 'ip',
+              event: {
+                category: 'threat',
+                created: '2021-01-26T11:09:05.529Z',
+                dataset: 'threatintel.abuseurl',
+                ingested: '2021-01-26T11:09:06.616763Z',
+                kind: 'enrichment',
+                module: 'threatintel',
+                reference: 'https://urlhaus.abuse.ch/url/978782/',
+                type: 'indicator',
+              },
             },
           ]);
         });
@@ -422,6 +482,7 @@ export default ({ getService }: FtrProviderContext) => {
             rule_id: 'rule-1',
             from: '1900-01-01T00:00:00.000Z',
             query: 'source.port: 57324', // narrow our query to a single record that matches two indicators
+            threat_indicator_path: 'threat.indicator',
             threat_query: 'threat.indicator.ip: *',
             threat_index: ['filebeat-*'], // Mimics indicators from the filebeat MISP module
             threat_mapping: [
@@ -454,55 +515,87 @@ export default ({ getService }: FtrProviderContext) => {
           expect(signalsOpen.hits.hits.length).equal(1);
 
           const { hits } = signalsOpen.hits;
-          const threats = hits.map((hit) => hit._source.threat);
+          const [threat] = hits.map((hit) => hit._source.threat) as Array<{ indicator: unknown[] }>;
 
-          expect(threats).to.eql([
+          assertContains(threat.indicator, [
             {
-              indicator: [
-                {
-                  description: 'this should match auditbeat/hosts on both port and ip',
-                  first_seen: '2021-01-26T11:06:03.000Z',
-                  ip: '45.115.45.3',
-                  matched: {
-                    atomic: '45.115.45.3',
-                    field: 'source.ip',
-                    type: 'url',
-                  },
-                  port: 57324,
-                  provider: 'geenensp',
-                  type: 'url',
-                },
-                {
-                  description: 'this should match auditbeat/hosts on ip',
-                  first_seen: '2021-01-26T11:06:03.000Z',
-                  ip: '45.115.45.3',
-                  matched: {
-                    atomic: '45.115.45.3',
-                    field: 'source.ip',
-                    type: 'ip',
-                  },
-                  provider: 'other_provider',
-                  type: 'ip',
-                },
-                // We do not merge matched indicators during enrichment, so in
-                // certain circumstances a given indicator document could appear
-                // multiple times in an enriched alert (albeit with different
-                // threat.indicator.matched data). That's the case with the
-                // first and third indicators matched, here.
-                {
-                  description: 'this should match auditbeat/hosts on both port and ip',
-                  first_seen: '2021-01-26T11:06:03.000Z',
-                  ip: '45.115.45.3',
-                  matched: {
-                    atomic: 57324,
-                    field: 'source.port',
-                    type: 'url',
-                  },
-                  port: 57324,
-                  provider: 'geenensp',
-                  type: 'url',
-                },
-              ],
+              description: 'this should match auditbeat/hosts on both port and ip',
+              first_seen: '2021-01-26T11:06:03.000Z',
+              ip: '45.115.45.3',
+              matched: {
+                atomic: '45.115.45.3',
+                id: '978785',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'source.ip',
+                type: 'url',
+              },
+              port: 57324,
+              provider: 'geenensp',
+              type: 'url',
+              event: {
+                category: 'threat',
+                created: '2021-01-26T11:09:05.529Z',
+                dataset: 'threatintel.abuseurl',
+                ingested: '2021-01-26T11:09:06.616763Z',
+                kind: 'enrichment',
+                module: 'threatintel',
+                reference: 'https://urlhaus.abuse.ch/url/978782/',
+                type: 'indicator',
+              },
+            },
+            // We do not merge matched indicators during enrichment, so in
+            // certain circumstances a given indicator document could appear
+            // multiple times in an enriched alert (albeit with different
+            // threat.indicator.matched data). That's the case with the
+            // first and third indicators matched, here.
+            {
+              description: 'this should match auditbeat/hosts on both port and ip',
+              first_seen: '2021-01-26T11:06:03.000Z',
+              ip: '45.115.45.3',
+              matched: {
+                atomic: 57324,
+                id: '978785',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'source.port',
+                type: 'url',
+              },
+              port: 57324,
+              provider: 'geenensp',
+              type: 'url',
+              event: {
+                category: 'threat',
+                created: '2021-01-26T11:09:05.529Z',
+                dataset: 'threatintel.abuseurl',
+                ingested: '2021-01-26T11:09:06.616763Z',
+                kind: 'enrichment',
+                module: 'threatintel',
+                reference: 'https://urlhaus.abuse.ch/url/978782/',
+                type: 'indicator',
+              },
+            },
+            {
+              description: 'this should match auditbeat/hosts on ip',
+              first_seen: '2021-01-26T11:06:03.000Z',
+              ip: '45.115.45.3',
+              matched: {
+                atomic: '45.115.45.3',
+                id: '978787',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'source.ip',
+                type: 'ip',
+              },
+              provider: 'other_provider',
+              type: 'ip',
+              event: {
+                category: 'threat',
+                created: '2021-01-26T11:09:05.529Z',
+                dataset: 'threatintel.abuseurl',
+                ingested: '2021-01-26T11:09:06.616763Z',
+                kind: 'enrichment',
+                module: 'threatintel',
+                reference: 'https://urlhaus.abuse.ch/url/978782/',
+                type: 'indicator',
+              },
             },
           ]);
         });
@@ -519,6 +612,7 @@ export default ({ getService }: FtrProviderContext) => {
             rule_id: 'rule-1',
             from: '1900-01-01T00:00:00.000Z',
             query: '*:*', // narrow our query to a single record that matches two indicators
+            threat_indicator_path: 'threat.indicator',
             threat_query: '',
             threat_index: ['filebeat-*'], // Mimics indicators from the filebeat MISP module
             threat_mapping: [
@@ -556,73 +650,117 @@ export default ({ getService }: FtrProviderContext) => {
           expect(signalsOpen.hits.hits.length).equal(2);
 
           const { hits } = signalsOpen.hits;
-          const threats = hits.map((hit) => hit._source.threat);
-          expect(threats).to.eql([
+          const threats = hits.map((hit) => hit._source.threat) as Array<{ indicator: unknown[] }>;
+
+          assertContains(threats[0].indicator, [
             {
-              indicator: [
-                {
-                  description: "domain should match the auditbeat hosts' data's source.ip",
-                  domain: '159.89.119.67',
-                  first_seen: '2021-01-26T11:09:04.000Z',
-                  matched: {
-                    atomic: '159.89.119.67',
-                    field: 'destination.ip',
-                    type: 'url',
-                  },
-                  provider: 'geenensp',
-                  type: 'url',
-                  url: {
-                    full: 'http://159.89.119.67:59600/bin.sh',
-                    scheme: 'http',
-                  },
-                },
-              ],
+              description: "domain should match the auditbeat hosts' data's source.ip",
+              domain: '159.89.119.67',
+              first_seen: '2021-01-26T11:09:04.000Z',
+              matched: {
+                atomic: '159.89.119.67',
+                id: '978783',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'destination.ip',
+                type: 'url',
+              },
+              provider: 'geenensp',
+              type: 'url',
+              url: {
+                full: 'http://159.89.119.67:59600/bin.sh',
+                scheme: 'http',
+              },
+              event: {
+                category: 'threat',
+                created: '2021-01-26T11:09:05.529Z',
+                dataset: 'threatintel.abuseurl',
+                ingested: '2021-01-26T11:09:06.595350Z',
+                kind: 'enrichment',
+                module: 'threatintel',
+                reference: 'https://urlhaus.abuse.ch/url/978783/',
+                type: 'indicator',
+              },
+            },
+          ]);
+
+          assertContains(threats[1].indicator, [
+            {
+              description: "domain should match the auditbeat hosts' data's source.ip",
+              domain: '159.89.119.67',
+              first_seen: '2021-01-26T11:09:04.000Z',
+              matched: {
+                atomic: '159.89.119.67',
+                id: '978783',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'destination.ip',
+                type: 'url',
+              },
+              provider: 'geenensp',
+              type: 'url',
+              url: {
+                full: 'http://159.89.119.67:59600/bin.sh',
+                scheme: 'http',
+              },
+              event: {
+                category: 'threat',
+                created: '2021-01-26T11:09:05.529Z',
+                dataset: 'threatintel.abuseurl',
+                ingested: '2021-01-26T11:09:06.595350Z',
+                kind: 'enrichment',
+                module: 'threatintel',
+                reference: 'https://urlhaus.abuse.ch/url/978783/',
+                type: 'indicator',
+              },
             },
             {
-              indicator: [
-                {
-                  description: "domain should match the auditbeat hosts' data's source.ip",
-                  domain: '159.89.119.67',
-                  first_seen: '2021-01-26T11:09:04.000Z',
-                  matched: {
-                    atomic: '159.89.119.67',
-                    field: 'destination.ip',
-                    type: 'url',
-                  },
-                  provider: 'geenensp',
-                  type: 'url',
-                  url: {
-                    full: 'http://159.89.119.67:59600/bin.sh',
-                    scheme: 'http',
-                  },
-                },
-                {
-                  description: 'this should match auditbeat/hosts on both port and ip',
-                  first_seen: '2021-01-26T11:06:03.000Z',
-                  ip: '45.115.45.3',
-                  matched: {
-                    atomic: '45.115.45.3',
-                    field: 'source.ip',
-                    type: 'url',
-                  },
-                  port: 57324,
-                  provider: 'geenensp',
-                  type: 'url',
-                },
-                {
-                  description: 'this should match auditbeat/hosts on both port and ip',
-                  first_seen: '2021-01-26T11:06:03.000Z',
-                  ip: '45.115.45.3',
-                  matched: {
-                    atomic: 57324,
-                    field: 'source.port',
-                    type: 'url',
-                  },
-                  port: 57324,
-                  provider: 'geenensp',
-                  type: 'url',
-                },
-              ],
+              description: 'this should match auditbeat/hosts on both port and ip',
+              first_seen: '2021-01-26T11:06:03.000Z',
+              ip: '45.115.45.3',
+              matched: {
+                atomic: '45.115.45.3',
+                id: '978785',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'source.ip',
+                type: 'url',
+              },
+              port: 57324,
+              provider: 'geenensp',
+              type: 'url',
+              event: {
+                category: 'threat',
+                created: '2021-01-26T11:09:05.529Z',
+                dataset: 'threatintel.abuseurl',
+                ingested: '2021-01-26T11:09:06.616763Z',
+                kind: 'enrichment',
+                module: 'threatintel',
+                reference: 'https://urlhaus.abuse.ch/url/978782/',
+                type: 'indicator',
+              },
+            },
+            {
+              description: 'this should match auditbeat/hosts on both port and ip',
+              first_seen: '2021-01-26T11:06:03.000Z',
+              ip: '45.115.45.3',
+              matched: {
+                atomic: 57324,
+                id: '978785',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'source.port',
+                type: 'url',
+              },
+              port: 57324,
+              provider: 'geenensp',
+              type: 'url',
+              event: {
+                category: 'threat',
+                created: '2021-01-26T11:09:05.529Z',
+                dataset: 'threatintel.abuseurl',
+                ingested: '2021-01-26T11:09:06.616763Z',
+                kind: 'enrichment',
+                module: 'threatintel',
+                reference: 'https://urlhaus.abuse.ch/url/978782/',
+                type: 'indicator',
+              },
             },
           ]);
         });

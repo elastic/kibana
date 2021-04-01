@@ -217,6 +217,20 @@ describe('group_fields', function () {
     ]);
   });
 
+  it('should filter fields by a given name', function () {
+    const fieldFilterState = { ...getDefaultFieldFilter(), ...{ name: 'curr' } };
+
+    const actual1 = groupFields(
+      fields as IndexPatternField[],
+      ['customer_birth_date', 'currency', 'unknown'],
+      5,
+      fieldCounts,
+      fieldFilterState,
+      false
+    );
+    expect(actual1.selected.map((field) => field.name)).toEqual(['currency']);
+  });
+
   it('excludes unmapped fields if showUnmappedFields set to false', function () {
     const fieldFilterState = getDefaultFieldFilter();
     const fieldsWithUnmappedField = [...fields];

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import '../../../../__mocks__/kea.mock';
 import '../../../../__mocks__/enterprise_search_url.mock';
 import { mockTelemetryActions } from '../../../../__mocks__';
 
@@ -16,13 +15,16 @@ import { shallow } from 'enzyme';
 import { EnginesOverviewHeader } from './';
 
 describe('EnginesOverviewHeader', () => {
+  const wrapper = shallow(<EnginesOverviewHeader />)
+    .dive()
+    .children()
+    .dive();
+
   it('renders', () => {
-    const wrapper = shallow(<EnginesOverviewHeader />);
-    expect(wrapper.find('h1')).toHaveLength(1);
+    expect(wrapper.find('h1').text()).toEqual('Engines overview');
   });
 
   it('renders a launch app search button that sends telemetry on click', () => {
-    const wrapper = shallow(<EnginesOverviewHeader />);
     const button = wrapper.find('[data-test-subj="launchButton"]');
 
     expect(button.prop('href')).toBe('http://localhost:3002/as');

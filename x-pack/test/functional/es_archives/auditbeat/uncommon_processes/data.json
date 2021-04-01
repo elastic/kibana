@@ -3,7 +3,7 @@
   "type": "doc",
   "value": {
     "id": "HCFxB2kBR346wHgnL4ik",
-    "index": "auditbeat-8.0.0-2019.02.19-000001",
+    "index": "auditbeat-uncommon-processes",
     "source": {
       "@timestamp": "2019-02-19T20:27:31.074Z",
       "agent": {
@@ -88,7 +88,7 @@
   "type": "doc",
   "value": {
     "id": "AyJ8B2kBR346wHgnJDDU",
-    "index": "auditbeat-8.0.0-2019.02.19-000001",
+    "index": "auditbeat-uncommon-processes",
     "source": {
       "@timestamp": "2019-02-19T20:39:29.051Z",
       "agent": {
@@ -173,7 +173,7 @@
   "type": "doc",
   "value": {
     "id": "dSJ-B2kBR346wHgnV1E4",
-    "index": "auditbeat-8.0.0-2019.02.19-000001",
+    "index": "auditbeat-uncommon-processes",
     "source": {
       "@timestamp": "2019-02-19T20:41:53.180Z",
       "agent": {

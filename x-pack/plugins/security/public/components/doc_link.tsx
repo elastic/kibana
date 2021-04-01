@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, FunctionComponent } from 'react';
 import { EuiLink } from '@elastic/eui';
+import type { FunctionComponent } from 'react';
+import React, { useCallback } from 'react';
+
+import type { CoreStart } from 'src/core/public';
+
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import { CoreStart } from '../../../../../src/core/public';
 
 export type DocLinks = CoreStart['docLinks']['links'];
 export type GetDocLinkFunction = (app: string, doc: string) => string;

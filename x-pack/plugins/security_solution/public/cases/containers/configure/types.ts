@@ -15,7 +15,7 @@ import {
   CasesConfigure,
   ClosureType,
   ThirdPartyField,
-} from '../../../../../case/common/api';
+} from '../../../../../cases/common/api';
 
 export {
   ActionConnector,

@@ -1,5 +1,5 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "../../../tsconfig.project.json",
   "compilerOptions": {
     "composite": true,
     "outDir": "./target/types",
@@ -16,7 +16,7 @@
   ],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../alerts/tsconfig.json" },
+    { "path": "../alerting/tsconfig.json" },
     { "path": "../features/tsconfig.json" },
     { "path": "../../../src/plugins/data/tsconfig.json" },
     { "path": "../../../src/plugins/saved_objects/tsconfig.json" },

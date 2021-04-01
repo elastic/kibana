@@ -5,25 +5,27 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonEmpty,
+  EuiCallOut,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiFieldText,
-  EuiCallOut,
-  EuiText,
-  EuiSwitch,
   EuiSpacer,
+  EuiSwitch,
+  EuiText,
 } from '@elastic/eui';
+import React, { Fragment } from 'react';
+
 import { i18n } from '@kbn/i18n';
-import { RoleTemplate } from '../../../../../common/model';
+import { FormattedMessage } from '@kbn/i18n/react';
+
+import type { RoleTemplate } from '../../../../../common/model';
 import {
   isInlineRoleTemplate,
-  isStoredRoleTemplate,
   isInvalidRoleTemplate,
+  isStoredRoleTemplate,
 } from '../services/role_template_type';
 import { RoleTemplateTypeSelect } from './role_template_type_select';
 

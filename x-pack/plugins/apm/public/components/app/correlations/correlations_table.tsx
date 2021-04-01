@@ -24,12 +24,10 @@ import { ImpactBar } from '../../shared/ImpactBar';
 import { useUiTracker } from '../../../../../observability/public';
 
 type CorrelationsApiResponse =
-  | APIReturnType<'GET /api/apm/correlations/failed_transactions'>
-  | APIReturnType<'GET /api/apm/correlations/slow_transactions'>;
+  | APIReturnType<'GET /api/apm/correlations/errors/failed_transactions'>
+  | APIReturnType<'GET /api/apm/correlations/latency/slow_transactions'>;
 
-type SignificantTerm = NonNullable<
-  NonNullable<CorrelationsApiResponse>['significantTerms']
->[0];
+type SignificantTerm = CorrelationsApiResponse['significantTerms'][0];
 
 export type SelectedSignificantTerm = Pick<
   SignificantTerm,
@@ -63,14 +61,14 @@ export function CorrelationsTable<T extends SignificantTerm>({
   const history = useHistory();
   const columns: Array<EuiBasicTableColumn<T>> = [
     {
-      width: '100px',
+      width: '116px',
       field: 'impact',
       name: i18n.translate(
         'xpack.apm.correlations.correlationsTable.impactLabel',
         { defaultMessage: 'Impact' }
       ),
       render: (_: any, term: T) => {
-        return <ImpactBar value={term.impact * 100} />;
+        return <ImpactBar size="m" value={term.impact * 100} />;
       },
     },
     {
@@ -116,7 +114,7 @@ export function CorrelationsTable<T extends SignificantTerm>({
             'xpack.apm.correlations.correlationsTable.filterDescription',
             { defaultMessage: 'Filter by value' }
           ),
-          icon: 'magnifyWithPlus',
+          icon: 'plusInCircle',
           type: 'icon',
           onClick: (term: T) => {
             push(history, {
@@ -139,7 +137,7 @@ export function CorrelationsTable<T extends SignificantTerm>({
             'xpack.apm.correlations.correlationsTable.excludeDescription',
             { defaultMessage: 'Filter out value' }
           ),
-          icon: 'magnifyWithMinus',
+          icon: 'minusInCircle',
           type: 'icon',
           onClick: (term: T) => {
             push(history, {
@@ -156,7 +154,7 @@ export function CorrelationsTable<T extends SignificantTerm>({
       ],
       name: i18n.translate(
         'xpack.apm.correlations.correlationsTable.actionsLabel',
-        { defaultMessage: 'Actions' }
+        { defaultMessage: 'Filter' }
       ),
       render: (_: any, term: T) => {
         return (

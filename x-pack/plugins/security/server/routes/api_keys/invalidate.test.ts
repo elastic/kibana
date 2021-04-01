@@ -6,13 +6,14 @@
  */
 
 import Boom from '@hapi/boom';
-import { Type } from '@kbn/config-schema';
-import { kibanaResponseFactory } from '../../../../../../src/core/server';
-import { LicenseCheck } from '../../../../licensing/server';
-import { defineInvalidateApiKeysRoutes } from './invalidate';
 
-import { coreMock, httpServerMock } from '../../../../../../src/core/server/mocks';
+import type { Type } from '@kbn/config-schema';
+import { kibanaResponseFactory } from 'src/core/server';
+import { coreMock, httpServerMock } from 'src/core/server/mocks';
+
+import type { LicenseCheck } from '../../../../licensing/server';
 import { routeDefinitionParamsMock } from '../index.mock';
+import { defineInvalidateApiKeysRoutes } from './invalidate';
 
 interface TestOptions {
   licenseCheckResult?: LicenseCheck;

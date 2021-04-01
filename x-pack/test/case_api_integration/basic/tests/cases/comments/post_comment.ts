@@ -9,9 +9,9 @@ import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { CASES_URL } from '../../../../../../plugins/case/common/constants';
+import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../../plugins/security_solution/common/constants';
-import { CommentsResponse, CommentType } from '../../../../../../plugins/case/common/api';
+import { CommentsResponse, CommentType } from '../../../../../../plugins/cases/common/api';
 import {
   defaultUser,
   postCaseReq,
@@ -227,7 +227,8 @@ export default ({ getService }: FtrProviderContext): void => {
         .expect(400);
     });
 
-    it('400s when adding an alert to a collection case', async () => {
+    // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
+    it.skip('400s when adding an alert to a collection case', async () => {
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
@@ -376,7 +377,17 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    describe('sub case comments', () => {
+    it('should return a 400 when passing the subCaseId', async () => {
+      const { body } = await supertest
+        .post(`${CASES_URL}/case-id/comments?subCaseId=value`)
+        .set('kbn-xsrf', 'true')
+        .send(postCommentUserReq)
+        .expect(400);
+      expect(body.message).to.contain('subCaseId');
+    });
+
+    // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
+    describe.skip('sub case comments', () => {
       let actionID: string;
       before(async () => {
         actionID = await createCaseAction(supertest);
@@ -393,13 +404,13 @@ export default ({ getService }: FtrProviderContext): void => {
         // create another sub case just to make sure we get the right comments
         await createSubCase({ supertest, actionID });
         await supertest
-          .post(`${CASES_URL}/${caseInfo.id}/comments?subCaseID=${caseInfo.subCase!.id}`)
+          .post(`${CASES_URL}/${caseInfo.id}/comments?subCaseId=${caseInfo.subCases![0].id}`)
           .set('kbn-xsrf', 'true')
           .send(postCommentUserReq)
           .expect(200);
 
         const { body: subCaseComments }: { body: CommentsResponse } = await supertest
-          .get(`${CASES_URL}/${caseInfo.id}/comments/_find?subCaseID=${caseInfo.subCase!.id}`)
+          .get(`${CASES_URL}/${caseInfo.id}/comments/_find?subCaseId=${caseInfo.subCases![0].id}`)
           .send()
           .expect(200);
         expect(subCaseComments.total).to.be(2);

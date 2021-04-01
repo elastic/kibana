@@ -15,3 +15,10 @@ export const UNIVERSAL_LANGUAGE = i18n.translate(
     defaultMessage: 'Universal',
   }
 );
+
+export const RESTORE_DEFAULTS_BUTTON_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.actions.restoreDefaultsButonLabel',
+  {
+    defaultMessage: 'Restore defaults',
+  }
+);

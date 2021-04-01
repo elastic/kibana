@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { isPopulatedObject } from '../shared_imports';
+
 export interface ErrorResponse {
   body: {
     statusCode: number;
@@ -15,16 +17,20 @@ export interface ErrorResponse {
   name: string;
 }
 
-export function isErrorResponse(arg: any): arg is ErrorResponse {
-  return arg?.body?.error !== undefined && arg?.body?.message !== undefined;
+export function isErrorResponse(arg: unknown): arg is ErrorResponse {
+  return (
+    isPopulatedObject(arg, ['body']) &&
+    isPopulatedObject(arg.body, ['message']) &&
+    arg.body.message !== undefined
+  );
 }
 
-export function getErrorMessage(error: any) {
+export function getErrorMessage(error: unknown) {
   if (isErrorResponse(error)) {
     return `${error.body.error}: ${error.body.message}`;
   }
 
-  if (typeof error === 'object' && typeof error.message === 'string') {
+  if (isPopulatedObject(error, ['message']) && typeof error.message === 'string') {
     return error.message;
   }
 

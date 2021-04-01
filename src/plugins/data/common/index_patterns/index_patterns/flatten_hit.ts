@@ -75,7 +75,26 @@ function decorateFlattenedWrapper(hit: Record<string, any>, metaFields: Record<s
       }
     });
 
-    return flattened;
+    // Force all usage of Object.keys to use a predefined sort order,
+    // instead of using insertion order
+    return new Proxy(flattened, {
+      ownKeys: (target) => {
+        return Reflect.ownKeys(target).sort((a, b) => {
+          const aIsMeta = _.includes(metaFields, a);
+          const bIsMeta = _.includes(metaFields, b);
+          if (aIsMeta && bIsMeta) {
+            return String(a).localeCompare(String(b));
+          }
+          if (aIsMeta) {
+            return 1;
+          }
+          if (bIsMeta) {
+            return -1;
+          }
+          return String(a).localeCompare(String(b));
+        });
+      },
+    });
   };
 }
 

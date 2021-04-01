@@ -12,11 +12,12 @@
     "infra"
   ],
   "optionalPlugins": [
+    "spaces",
     "cloud",
     "usageCollection",
     "taskManager",
     "actions",
-    "alerts",
+    "alerting",
     "observability",
     "security",
     "ml",

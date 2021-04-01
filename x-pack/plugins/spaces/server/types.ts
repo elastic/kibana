@@ -6,6 +6,7 @@
  */
 
 import type { IRouter, RequestHandlerContext } from 'src/core/server';
+
 import type { LicensingApiRequestHandlerContext } from '../../licensing/server';
 
 /**

@@ -16,6 +16,7 @@ import {
   Plugin,
   PluginInitializerContext,
 } from 'src/core/server';
+import { SpacesPluginSetup } from '../../spaces/server';
 import { APMConfig, APMXPackConfig } from '.';
 import { mergeConfigs } from './index';
 import { APMOSSPluginSetup } from '../../../../src/plugins/apm_oss/server';
@@ -23,7 +24,7 @@ import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { UI_SETTINGS } from '../../../../src/plugins/data/common';
 import { ActionsPlugin } from '../../actions/server';
-import { AlertingPlugin } from '../../alerts/server';
+import { AlertingPlugin } from '../../alerting/server';
 import { CloudSetup } from '../../cloud/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
@@ -65,13 +66,14 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
   public setup(
     core: CoreSetup,
     plugins: {
+      spaces?: SpacesPluginSetup;
       apmOss: APMOSSPluginSetup;
       home: HomeServerPluginSetup;
       licensing: LicensingPluginSetup;
       cloud?: CloudSetup;
       usageCollection?: UsageCollectionSetup;
       taskManager?: TaskManagerSetupContract;
-      alerts?: AlertingPlugin['setup'];
+      alerting?: AlertingPlugin['setup'];
       actions?: ActionsPlugin['setup'];
       observability?: ObservabilityPluginSetup;
       features: FeaturesPluginSetup;
@@ -90,9 +92,9 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
 
     core.uiSettings.register(uiSettings);
 
-    if (plugins.actions && plugins.alerts) {
+    if (plugins.actions && plugins.alerting) {
       registerApmAlerts({
-        alerts: plugins.alerts,
+        alerting: plugins.alerting,
         actions: plugins.actions,
         ml: plugins.ml,
         config$: mergedConfig$,
@@ -148,11 +150,7 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
     createApmApi().init(core, {
       config$: mergedConfig$,
       logger: this.logger!,
-      plugins: {
-        observability: plugins.observability,
-        security: plugins.security,
-        ml: plugins.ml,
-      },
+      plugins,
     });
 
     const boundGetApmIndices = async () =>

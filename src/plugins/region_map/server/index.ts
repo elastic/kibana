@@ -6,21 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor } from 'kibana/server';
 import { CoreSetup } from 'src/core/server';
-import { regionmapConfigSchema } from '../../maps_legacy/config';
 import { getUiSettings } from './ui_settings';
-
-export type RegionmapConfig = TypeOf<typeof regionmapConfigSchema>;
-
-export const config: PluginConfigDescriptor<RegionmapConfig> = {
-  exposeToBrowser: {
-    includeElasticMapsService: true,
-    layers: true,
-  },
-  schema: regionmapConfigSchema,
-};
 
 export const plugin = () => ({
   setup(core: CoreSetup) {

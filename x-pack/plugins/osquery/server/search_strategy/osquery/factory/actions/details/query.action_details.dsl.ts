@@ -11,7 +11,6 @@ import { createQueryFilterClauses } from '../../../../../../common/utils/build_q
 
 export const buildActionDetailsQuery = ({
   actionId,
-  docValueFields,
   filterQuery,
 }: ActionDetailsRequestOptions): ISearchRequestParams => {
   const filter = [

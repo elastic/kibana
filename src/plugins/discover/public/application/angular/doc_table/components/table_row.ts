@@ -105,7 +105,16 @@ export function createTableRowDirective($compile: ng.ICompileService) {
           $scope.row._id,
           $scope.indexPattern.id,
           $scope.columns,
-          getServices().filterManager
+          getServices().filterManager,
+          getServices().addBasePath
+        );
+      };
+
+      $scope.getSingleDocHref = () => {
+        return getServices().addBasePath(
+          `/app/discover#/doc/${$scope.indexPattern.id}/${
+            $scope.row._index
+          }?id=${encodeURIComponent($scope.row._id)}`
         );
       };
 

@@ -6,15 +6,17 @@
  */
 
 import { pick, transform, uniq } from 'lodash';
-import { IClusterClient, KibanaRequest } from '../../../../../src/core/server';
+
+import type { IClusterClient, KibanaRequest } from 'src/core/server';
+
 import { GLOBAL_RESOURCE } from '../../common/constants';
 import { ResourceSerializer } from './resource_serializer';
-import {
+import type {
+  CheckPrivileges,
+  CheckPrivilegesPayload,
+  CheckPrivilegesResponse,
   HasPrivilegesResponse,
   HasPrivilegesResponseApplication,
-  CheckPrivilegesPayload,
-  CheckPrivileges,
-  CheckPrivilegesResponse,
 } from './types';
 import { validateEsPrivilegeResponse } from './validate_es_response';
 
@@ -49,22 +51,22 @@ export function checkPrivilegesWithRequestFactory(
       const allApplicationPrivileges = uniq([actions.version, actions.login, ...kibanaPrivileges]);
 
       const clusterClient = await getClusterClient();
-      const { body: hasPrivilegesResponse } = await clusterClient
-        .asScoped(request)
-        .asCurrentUser.security.hasPrivileges<HasPrivilegesResponse>({
-          body: {
-            cluster: privileges.elasticsearch?.cluster,
-            index: Object.entries(privileges.elasticsearch?.index ?? {}).map(
-              ([names, indexPrivileges]) => ({
-                names,
-                privileges: indexPrivileges,
-              })
-            ),
-            applications: [
-              { application: applicationName, resources, privileges: allApplicationPrivileges },
-            ],
-          },
-        });
+      const { body } = await clusterClient.asScoped(request).asCurrentUser.security.hasPrivileges({
+        body: {
+          cluster: privileges.elasticsearch?.cluster,
+          index: Object.entries(privileges.elasticsearch?.index ?? {}).map(
+            ([name, indexPrivileges]) => ({
+              names: [name],
+              privileges: indexPrivileges,
+            })
+          ),
+          application: [
+            { application: applicationName, resources, privileges: allApplicationPrivileges },
+          ],
+        },
+      });
+
+      const hasPrivilegesResponse: HasPrivilegesResponse = body;
 
       validateEsPrivilegeResponse(
         hasPrivilegesResponse,

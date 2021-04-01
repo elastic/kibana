@@ -19,7 +19,7 @@ import {
   UsageCollectionStart,
 } from './shared_imports';
 
-import { InternalFieldType } from './types';
+import { InternalFieldType, CloseEditor } from './types';
 import { FieldEditorFlyoutContentContainer } from './components/field_editor_flyout_content_container';
 
 import { PluginStart } from './types';
@@ -32,7 +32,6 @@ export interface OpenFieldEditorOptions {
   fieldName?: string;
 }
 
-type CloseEditor = () => void;
 interface Dependencies {
   core: CoreStart;
   /** The search service from the data plugin */

@@ -7,14 +7,19 @@
 
 import { Dispatch, SetStateAction } from 'react';
 
-import { EuiDataGridPaginationProps, EuiDataGridSorting, EuiDataGridColumn } from '@elastic/eui';
+import { estypes } from '@elastic/elasticsearch';
+import {
+  EuiDataGridCellValueElementProps,
+  EuiDataGridPaginationProps,
+  EuiDataGridSorting,
+  EuiDataGridColumn,
+} from '@elastic/eui';
 
 import { Dictionary } from '../../../../common/types/common';
-import { HitsTotalRelation } from '../../../../common/types/es_client';
+import { ChartData } from '../../../../common/types/field_histograms';
 
 import { INDEX_STATUS } from '../../data_frame_analytics/common/analytics';
 
-import { ChartData } from './use_column_chart';
 import { FeatureImportanceBaseline } from '../../../../common/types/feature_importance';
 
 export type ColumnId = string;
@@ -22,7 +27,7 @@ export type DataGridItem = Record<string, any>;
 
 // `undefined` is used to indicate a non-initialized state.
 export type ChartsVisible = boolean | undefined;
-export type RowCountRelation = HitsTotalRelation | undefined;
+export type RowCountRelation = estypes.TotalHitsRelation | undefined;
 
 export type IndexPagination = Pick<EuiDataGridPaginationProps, 'pageIndex' | 'pageSize'>;
 
@@ -42,7 +47,7 @@ export type RenderCellValue = ({
 }: {
   rowIndex: number;
   columnId: string;
-  setCellProps: any;
+  setCellProps: EuiDataGridCellValueElementProps['setCellProps'];
 }) => any;
 
 export type EsSorting = Dictionary<{

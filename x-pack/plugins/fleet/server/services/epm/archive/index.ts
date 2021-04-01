@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { AssetParts, InstallSource } from '../../../../common/types';
+import type { AssetParts, InstallSource } from '../../../../common/types';
 import { PackageInvalidArchiveError, PackageUnsupportedMediaTypeError } from '../../../errors';
+
 import {
-  SharedKey,
   getArchiveEntry,
   setArchiveEntry,
   deleteArchiveEntry,
@@ -17,6 +17,7 @@ import {
   deleteArchiveFilelist,
   deletePackageInfo,
 } from './cache';
+import type { SharedKey } from './cache';
 import { getBufferExtractor } from './extract';
 
 export * from './cache';

@@ -173,6 +173,16 @@ export const createConnectedSearchSessionIndicator = ({
       }
     }, [state]);
 
+    const {
+      name: searchSessionName,
+      startTime,
+      completedTime,
+      canceledTime,
+    } = useObservable(sessionService.sessionMeta$, { state });
+    const saveSearchSessionNameFn = useCallback(async (newName: string) => {
+      await sessionService.renameCurrentSession(newName);
+    }, []);
+
     if (!sessionService.isSessionStorageReady()) return null;
     return (
       <RedirectAppLinks application={application}>
@@ -189,6 +199,11 @@ export const createConnectedSearchSessionIndicator = ({
           onOpened={onOpened}
           onViewSearchSessions={onViewSearchSessions}
           viewSearchSessionsLink={searchSessionsManagementUrl}
+          searchSessionName={searchSessionName}
+          saveSearchSessionNameFn={saveSearchSessionNameFn}
+          startedTime={startTime}
+          completedTime={completedTime}
+          canceledTime={canceledTime}
         />
       </RedirectAppLinks>
     );

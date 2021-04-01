@@ -121,17 +121,8 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it('should not apply query to source and apply query to join', async () => {
-        await PageObjects.maps.openInspectorRequest('meta_for_geo_shapes*.shape_name');
-        const requestStats = await inspector.getTableData();
-        const totalHits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
-        expect(totalHits).to.equal('3');
-        const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
-        expect(hits).to.equal('0'); // aggregation requests do not return any documents
-        const indexPatternName = PageObjects.maps.getInspectorStatRowHit(
-          requestStats,
-          'Index pattern'
-        );
-        expect(indexPatternName).to.equal('meta_for_geo_shapes*');
+        const joinResponse = await PageObjects.maps.getResponse('meta_for_geo_shapes*.shape_name');
+        expect(joinResponse.aggregations.join.buckets.length).to.equal(2);
       });
     });
 
@@ -145,13 +136,8 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it('should apply query to join request', async () => {
-        await PageObjects.maps.openInspectorRequest('meta_for_geo_shapes*.shape_name');
-        const requestStats = await inspector.getTableData();
-        const totalHits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
-        expect(totalHits).to.equal('2');
-        const hits = PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
-        expect(hits).to.equal('0'); // aggregation requests do not return any documents
-        await inspector.close();
+        const joinResponse = await PageObjects.maps.getResponse('meta_for_geo_shapes*.shape_name');
+        expect(joinResponse.aggregations.join.buckets.length).to.equal(1);
       });
 
       it('should update dynamic data range in legend with new results', async () => {

@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
   const PageObjects = getPageObjects(['common', 'header']);
 
   describe('bfetch explorer', function () {
+    this.tags('ciGroup2');
     before(async () => {
       await browser.setWindowSize(1300, 900);
       await PageObjects.common.navigateToApp('bfetch-explorer', { insertTimestamp: false });

@@ -18,14 +18,22 @@ const ECS_VERSION = '1.7.0';
 const FORBIDDEN_HEADERS = ['authorization', 'cookie', 'set-cookie'];
 const REDACTED_HEADER_TEXT = '[REDACTED]';
 
+type HapiHeaders = Record<string, string | string[]>;
+
 // We are excluding sensitive headers by default, until we have a log filtering mechanism.
-function redactSensitiveHeaders(
-  headers?: Record<string, string | string[]>
-): Record<string, string | string[]> {
-  const result = {} as Record<string, string | string[]>;
+function redactSensitiveHeaders(key: string, value: string | string[]): string | string[] {
+  return FORBIDDEN_HEADERS.includes(key) ? REDACTED_HEADER_TEXT : value;
+}
+
+// Shallow clone the headers so they are not mutated if filtered by a RewriteAppender.
+function cloneAndFilterHeaders(headers?: HapiHeaders) {
+  const result = {} as HapiHeaders;
   if (headers) {
     for (const key of Object.keys(headers)) {
-      result[key] = FORBIDDEN_HEADERS.includes(key) ? REDACTED_HEADER_TEXT : headers[key];
+      result[key] = redactSensitiveHeaders(
+        key,
+        Array.isArray(headers[key]) ? [...headers[key]] : headers[key]
+      );
     }
   }
   return result;
@@ -45,7 +53,11 @@ export function getEcsResponseLog(request: Request, log: Logger): LogMeta {
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const status_code = isBoom(response) ? response.output.statusCode : response.statusCode;
-  const responseHeaders = isBoom(response) ? response.output.headers : response.headers;
+
+  const requestHeaders = cloneAndFilterHeaders(request.headers);
+  const responseHeaders = cloneAndFilterHeaders(
+    isBoom(response) ? (response.output.headers as HapiHeaders) : response.headers
+  );
 
   // borrowed from the hapi/good implementation
   const responseTime = (request.info.completed || request.info.responded) - request.info.received;
@@ -66,7 +78,7 @@ export function getEcsResponseLog(request: Request, log: Logger): LogMeta {
         mime_type: request.mime,
         referrer: request.info.referrer,
         // @ts-expect-error Headers are not yet part of ECS: https://github.com/elastic/ecs/issues/232.
-        headers: redactSensitiveHeaders(request.headers),
+        headers: requestHeaders,
       },
       response: {
         body: {
@@ -74,7 +86,7 @@ export function getEcsResponseLog(request: Request, log: Logger): LogMeta {
         },
         status_code,
         // @ts-expect-error Headers are not yet part of ECS: https://github.com/elastic/ecs/issues/232.
-        headers: redactSensitiveHeaders(responseHeaders),
+        headers: responseHeaders,
         // responseTime is a custom non-ECS field
         responseTime: !isNaN(responseTime) ? responseTime : undefined,
       },

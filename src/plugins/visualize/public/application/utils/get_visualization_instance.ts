@@ -68,6 +68,10 @@ export const getVisualizationInstanceFromInput = async (
    * state of the visualization, into a new saved object.
    */
   const savedVis: VisSavedObject = await savedVisualizations.get();
+  if (visState.uiState && Object.keys(visState.uiState).length !== 0) {
+    savedVis.uiStateJSON = JSON.stringify(visState.uiState);
+  }
+
   let vis = await visualizations.createVis(visState.type, cloneDeep(visState));
   if (vis.type.setup) {
     try {

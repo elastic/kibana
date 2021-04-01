@@ -7,8 +7,8 @@
 
 import semverParse from 'semver/functions/parse';
 import semverLt from 'semver/functions/lt';
-
-import { timer, from, Observable, TimeoutError, of, EMPTY } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { timer, from, TimeoutError, of, EMPTY } from 'rxjs';
 import { omit } from 'lodash';
 import {
   shareReplay,
@@ -22,17 +22,12 @@ import {
   timeout,
   take,
 } from 'rxjs/operators';
-import { ElasticsearchClient, SavedObjectsClientContract, KibanaRequest } from 'src/core/server';
-import {
-  Agent,
-  AgentAction,
-  AgentPolicyAction,
-  AgentPolicyActionV7_9,
-  AgentSOAttributes,
-} from '../../../types';
+import type { KibanaRequest } from 'src/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+
+import type { Agent, AgentAction, AgentPolicyAction, AgentPolicyActionV7_9 } from '../../../types';
 import * as APIKeysService from '../../api_keys';
 import {
-  AGENT_SAVED_OBJECT_TYPE,
   AGENT_UPDATE_ACTIONS_INTERVAL_MS,
   AGENT_POLLING_REQUEST_TIMEOUT_MARGIN_MS,
   AGENT_POLICY_ROLLOUT_RATE_LIMIT_INTERVAL_MS,
@@ -44,8 +39,10 @@ import {
   getAgentPolicyActionByIds,
 } from '../actions';
 import { appContextService } from '../../app_context';
+import { updateAgent } from '../crud';
+import type { FullAgentPolicy, FullAgentPolicyOutputPermissions } from '../../../../common';
+
 import { toPromiseAbortable, AbortError, createRateLimiter } from './rxjs_utils';
-import { getAgent, updateAgent } from '../crud';
 
 function getInternalUserSOClient() {
   const fakeRequest = ({
@@ -111,31 +108,27 @@ async function getAgentDefaultOutputAPIKey(
   esClient: ElasticsearchClient,
   agent: Agent
 ) {
-  if (appContextService.getConfig()?.agents?.fleetServerEnabled) {
-    return agent.default_api_key;
-  } else {
-    const {
-      attributes: { default_api_key: defaultApiKey },
-    } = await appContextService
-      .getEncryptedSavedObjects()
-      .getDecryptedAsInternalUser<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agent.id);
-
-    return defaultApiKey;
-  }
+  return agent.default_api_key;
 }
 
 async function getOrCreateAgentDefaultOutputAPIKey(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  agent: Agent
+  agent: Agent,
+  permissions: FullAgentPolicyOutputPermissions
 ): Promise<string> {
   const defaultAPIKey = await getAgentDefaultOutputAPIKey(soClient, esClient, agent);
   if (defaultAPIKey) {
     return defaultAPIKey;
   }
 
-  const outputAPIKey = await APIKeysService.generateOutputApiKey(soClient, 'default', agent.id);
-  await updateAgent(soClient, esClient, agent.id, {
+  const outputAPIKey = await APIKeysService.generateOutputApiKey(
+    soClient,
+    'default',
+    agent.id,
+    permissions
+  );
+  await updateAgent(esClient, agent.id, {
     default_api_key: outputAPIKey.key,
     default_api_key_id: outputAPIKey.id,
   });
@@ -181,15 +174,18 @@ export async function createAgentActionFromPolicyAction(
     }
   );
 
+  // agent <= 7.9 uses `data.config` instead of `data.policy`
+  const policyProp = 'policy' in newAgentAction.data ? 'policy' : 'config';
+
+  // TODO: The null assertion `!` is strictly correct for the current use case
+  // where the only output is `elasticsearch`, but this might change in the future.
+  const permissions = (newAgentAction.data[policyProp] as FullAgentPolicy).output_permissions!
+    .default;
+
   // Mutate the policy to set the api token for this agent
-  const apiKey = await getOrCreateAgentDefaultOutputAPIKey(soClient, esClient, agent);
-  if (newAgentAction.data.policy) {
-    newAgentAction.data.policy.outputs.default.api_key = apiKey;
-  }
-  // BWC for agent <= 7.9
-  else if (newAgentAction.data.config) {
-    newAgentAction.data.config.outputs.default.api_key = apiKey;
-  }
+  const apiKey = await getOrCreateAgentDefaultOutputAPIKey(soClient, esClient, agent, permissions);
+
+  newAgentAction.data[policyProp].outputs.default.api_key = apiKey;
 
   return [newAgentAction];
 }
@@ -274,25 +270,6 @@ export function agentCheckinStateNewActionsFactory() {
         const newActions = data.filter((action) => action.agent_id === agent.id);
         if (newActions.length === 0) {
           return EMPTY;
-        }
-
-        const hasConfigReassign = newActions.some(
-          (action) => action.type === 'INTERNAL_POLICY_REASSIGN'
-        );
-        if (hasConfigReassign) {
-          return from(getAgent(soClient, esClient, agent.id)).pipe(
-            concatMap((refreshedAgent) => {
-              if (!refreshedAgent.policy_id) {
-                throw new Error('Agent does not have a policy assigned');
-              }
-              const newAgentPolicy$ = getOrCreateAgentPolicyObservable(refreshedAgent.policy_id);
-              return newAgentPolicy$;
-            }),
-            rateLimiter(),
-            concatMap((policyAction) =>
-              createAgentActionFromPolicyAction(soClient, esClient, agent, policyAction)
-            )
-          );
         }
 
         return of(newActions);

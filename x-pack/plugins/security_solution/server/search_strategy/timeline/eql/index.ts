@@ -38,7 +38,7 @@ export const securitySolutionTimelineEqlSearchStrategyProvider = (
             },
           };
         }),
-        mergeMap((esSearchRes) =>
+        mergeMap(async (esSearchRes) =>
           parseEqlResponse(
             request,
             (esSearchRes as unknown) as EqlSearchStrategyResponse<EqlSearchResponse<unknown>>

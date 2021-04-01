@@ -34,6 +34,7 @@ const getDefaultConfig = (isDistributable: boolean): ApmAgentConfig => {
     globalLabels: {},
     centralConfig: false,
     metricsInterval: isDistributable ? '120s' : '30s',
+    captureSpanStackTraces: false,
     transactionSampleRate: process.env.ELASTIC_APM_TRANSACTION_SAMPLE_RATE
       ? parseFloat(process.env.ELASTIC_APM_TRANSACTION_SAMPLE_RATE)
       : 1.0,

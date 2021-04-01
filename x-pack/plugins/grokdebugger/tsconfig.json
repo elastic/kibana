@@ -1,5 +1,5 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "../../../tsconfig.project.json",
   "compilerOptions": {
     "composite": true,
     "outDir": "./target/types",
@@ -11,7 +11,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "../../typings/**/*",
+    "../../../typings/**/*",
   ],
   "references": [
     { "path": "../../../src/core/tsconfig.json" },

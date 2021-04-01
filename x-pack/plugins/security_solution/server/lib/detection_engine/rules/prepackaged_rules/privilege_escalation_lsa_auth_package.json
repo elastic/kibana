@@ -10,7 +10,7 @@
     "logs-windows.*"
   ],
   "language": "eql",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Potential LSA Authentication Package Abuse",
   "query": "registry where event.type == \"change\" and\n  registry.path : \"HKLM\\\\SYSTEM\\\\*ControlSet*\\\\Control\\\\Lsa\\\\Authentication Packages\" and\n  /* exclude SYSTEM SID - look for changes by non-SYSTEM user */\n  not user.id : \"S-1-5-18\"\n",
   "risk_score": 47,
