@@ -270,10 +270,7 @@ export class DashboardPlugin
         dashboardContainerFactory
       );
     });
-    /*
-    const dashboardContainerFactory = new DashboardContainerFactoryDefinition(getStartServices);
-    embeddable.registerEmbeddableFactory(dashboardContainerFactory.type, dashboardContainerFactory);
-    */
+
     const placeholderFactory = new PlaceholderEmbeddableFactory();
     embeddable.registerEmbeddableFactory(placeholderFactory.type, placeholderFactory);
 
