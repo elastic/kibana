@@ -26,7 +26,7 @@ import {
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../../../../maps/public';
 import { MapToolTipComponent } from './map_tool_tip';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { RenderTooltipContentParams } from '../../../../../../../maps/public/classes/tooltips/tooltip_property';
+import type { RenderTooltipContentParams } from '../../../../../../../maps/public/classes/tooltips/tooltip_property';
 
 export interface EmbeddedMapProps {
   upPoints: LocationPoint[];

@@ -37,7 +37,7 @@ export function dateHistogram(
 
     const getDateHistogramForLastBucketMode = () => {
       const { from, to } = offsetTime(req, series.offset_time);
-      const timezone = capabilities.searchTimezone;
+      const { timezone } = capabilities;
 
       overwrite(doc, `aggs.${series.id}.aggs.timeseries.date_histogram`, {
         field: timeField,

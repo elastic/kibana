@@ -74,7 +74,6 @@ export class AggsService {
 
         const {
           calculateAutoTimeExpression,
-          getDateMetaByDatatableColumn,
           datatableUtilities,
           types,
         } = this.aggsCommonService.start({
@@ -119,7 +118,6 @@ export class AggsService {
 
         return {
           calculateAutoTimeExpression,
-          getDateMetaByDatatableColumn,
           datatableUtilities,
           createAggConfigs: (indexPattern, configStates = []) => {
             return new AggConfigs(indexPattern, configStates, { typesRegistry });
