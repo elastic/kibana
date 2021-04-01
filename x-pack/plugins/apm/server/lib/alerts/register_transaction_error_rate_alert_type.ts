@@ -22,7 +22,7 @@ import { environmentQuery } from '../../../server/utils/queries';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
-import { createAPMLifecyleRuleType } from './create_apm_lifecycle_rule_type';
+import { createAPMLifecycleRuleType } from './create_apm_lifecycle_rule_type';
 import { RegisterRuleDependencies } from './register_apm_alerts';
 
 const paramsSchema = schema.object({
@@ -41,7 +41,7 @@ export function registerTransactionErrorRateAlertType({
   config$,
 }: RegisterRuleDependencies) {
   registry.registerType(
-    createAPMLifecyleRuleType({
+    createAPMLifecycleRuleType({
       id: AlertType.TransactionErrorRate,
       name: alertTypeConfig.name,
       actionGroups: alertTypeConfig.actionGroups,

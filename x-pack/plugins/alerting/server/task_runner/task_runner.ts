@@ -539,16 +539,11 @@ export class TaskRunner<
           };
         },
         (err: Error) => {
-          const error = new Error(
-            `Executing Alert "${alertId}" has resulted in Error: ${err.message}`
-          );
-
-          Object.assign(error, { wrapped: err });
-
+          const message = `Executing Alert "${alertId}" has resulted in Error: ${err.message}`;
           if (isAlertSavedObjectNotFoundError(err, alertId)) {
-            this.logger.debug(error.message);
+            this.logger.debug(message);
           } else {
-            this.logger.error(error);
+            this.logger.error(message);
           }
           return originalState;
         }

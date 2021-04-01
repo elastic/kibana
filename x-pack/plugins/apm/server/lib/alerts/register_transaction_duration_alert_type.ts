@@ -24,7 +24,7 @@ import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
 import { RegisterRuleDependencies } from './register_apm_alerts';
-import { createAPMLifecyleRuleType } from './create_apm_lifecycle_rule_type';
+import { createAPMLifecycleRuleType } from './create_apm_lifecycle_rule_type';
 
 const paramsSchema = schema.object({
   serviceName: schema.string(),
@@ -47,7 +47,7 @@ export function registerTransactionDurationAlertType({
   config$,
 }: RegisterRuleDependencies) {
   registry.registerType(
-    createAPMLifecyleRuleType({
+    createAPMLifecycleRuleType({
       id: AlertType.TransactionDuration,
       name: alertTypeConfig.name,
       actionGroups: alertTypeConfig.actionGroups,
@@ -97,7 +97,7 @@ export function registerTransactionDurationAlertType({
               },
             },
             aggs: {
-              metric:
+              latency:
                 alertParams.aggregationType === 'avg'
                   ? { avg: { field: TRANSACTION_DURATION } }
                   : {
@@ -121,10 +121,12 @@ export function registerTransactionDurationAlertType({
           return {};
         }
 
-        const { metric } = response.aggregations;
+        const { latency } = response.aggregations;
 
         const transactionDuration =
-          'values' in metric ? Object.values(metric.values)[0] : metric?.value;
+          'values' in latency
+            ? Object.values(latency.values)[0]
+            : latency?.value;
 
         const threshold = alertParams.threshold * 1000;
 

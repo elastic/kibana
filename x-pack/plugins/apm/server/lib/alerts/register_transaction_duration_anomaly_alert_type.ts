@@ -27,7 +27,7 @@ import { getMLJobs } from '../service_map/get_service_anomalies';
 import { apmActionVariables } from './action_variables';
 import { RegisterRuleDependencies } from './register_apm_alerts';
 import { parseEnvironmentUrlParam } from '../../../common/environment_filter_values';
-import { createAPMLifecyleRuleType } from './create_apm_lifecycle_rule_type';
+import { createAPMLifecycleRuleType } from './create_apm_lifecycle_rule_type';
 
 const paramsSchema = schema.object({
   serviceName: schema.maybe(schema.string()),
@@ -52,7 +52,7 @@ export function registerTransactionDurationAnomalyAlertType({
   logger,
 }: RegisterRuleDependencies) {
   registry.registerType(
-    createAPMLifecyleRuleType({
+    createAPMLifecycleRuleType({
       id: AlertType.TransactionDurationAnomaly,
       name: alertTypeConfig.name,
       actionGroups: alertTypeConfig.actionGroups,

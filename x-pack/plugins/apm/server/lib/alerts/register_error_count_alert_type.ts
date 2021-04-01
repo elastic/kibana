@@ -21,7 +21,7 @@ import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
 import { RegisterRuleDependencies } from './register_apm_alerts';
-import { createAPMLifecyleRuleType } from './create_apm_lifecycle_rule_type';
+import { createAPMLifecycleRuleType } from './create_apm_lifecycle_rule_type';
 
 const paramsSchema = schema.object({
   windowSize: schema.number(),
@@ -38,7 +38,7 @@ export function registerErrorCountAlertType({
   config$,
 }: RegisterRuleDependencies) {
   registry.registerType(
-    createAPMLifecyleRuleType({
+    createAPMLifecycleRuleType({
       id: AlertType.ErrorCount,
       name: alertTypeConfig.name,
       actionGroups: alertTypeConfig.actionGroups,

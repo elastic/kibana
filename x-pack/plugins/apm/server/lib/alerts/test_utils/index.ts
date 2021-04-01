@@ -6,7 +6,7 @@
  */
 
 import { Logger } from 'kibana/server';
-import { Observable, of } from 'rxjs';
+import { of } from 'rxjs';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import { APMConfig } from '../../..';
 import { APMRuleRegistry } from '../../../plugin';
@@ -19,7 +19,7 @@ export const createRuleTypeMocks = () => {
     'apm_oss.errorIndices': 'apm-*',
     'apm_oss.transactionIndices': 'apm-*',
     /* eslint-enable @typescript-eslint/naming-convention */
-  }) as Observable<APMConfig>;
+  } as APMConfig);
 
   const loggerMock = ({
     debug: jest.fn(),

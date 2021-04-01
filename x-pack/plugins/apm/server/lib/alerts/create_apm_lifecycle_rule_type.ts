@@ -8,4 +8,4 @@
 import { createLifecycleRuleTypeFactory } from '../../../../rule_registry/server';
 import { APMRuleRegistry } from '../../plugin';
 
-export const createAPMLifecyleRuleType = createLifecycleRuleTypeFactory<APMRuleRegistry>();
+export const createAPMLifecycleRuleType = createLifecycleRuleTypeFactory<APMRuleRegistry>();

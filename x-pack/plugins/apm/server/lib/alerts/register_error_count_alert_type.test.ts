@@ -14,9 +14,7 @@ describe('Error count alert', () => {
   it("doesn't send an alert when error count is less than threshold", async () => {
     const { services, dependencies, executor } = createRuleTypeMocks();
 
-    registerErrorCountAlertType({
-      ...dependencies,
-    });
+    registerErrorCountAlertType(dependencies);
 
     const params = { threshold: 1 };
 
@@ -52,9 +50,7 @@ describe('Error count alert', () => {
       scheduleActions,
     } = createRuleTypeMocks();
 
-    registerErrorCountAlertType({
-      ...dependencies,
-    });
+    registerErrorCountAlertType(dependencies);
 
     const params = { threshold: 2, windowSize: 5, windowUnit: 'm' };
 
