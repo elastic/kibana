@@ -9,13 +9,13 @@ import React, { Component } from 'react';
 import { Map as MbMap } from 'mapbox-gl';
 import { i18n } from '@kbn/i18n';
 import { Feature } from 'geojson';
-import { DrawState } from '../../../../../common/descriptor_types';
 import { getToasts } from '../../../../kibana_services';
 import { DrawControl } from '../draw_control';
+import { DRAW_TYPE } from "../../../../../common";
 
 export interface Props {
   disableDrawState: () => void;
-  drawState?: DrawState;
+  drawType: DRAW_TYPE;
   mbMap: MbMap;
 }
 
@@ -40,7 +40,7 @@ export class DrawFeatureControl extends Component<Props, {}> {
   render() {
     return (
       <DrawControl
-        drawType={this.props.drawState ? this.props.drawState.drawType : undefined}
+        drawType={this.props.drawType}
         onDraw={this._onDraw}
         mbMap={this.props.mbMap}
       />

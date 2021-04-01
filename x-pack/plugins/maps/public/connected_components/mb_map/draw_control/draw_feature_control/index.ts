@@ -16,7 +16,7 @@ import { MapStoreState } from '../../../../reducers/store';
 function mapStateToProps(state: MapStoreState) {
   return {
     isDrawingFilter: isDrawingFilter(state),
-    drawState: getDrawState(state),
+    drawType: state.map.mapState.drawFeatureState,
   };
 }
 
