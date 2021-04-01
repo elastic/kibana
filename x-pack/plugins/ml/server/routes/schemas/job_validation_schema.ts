@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { analysisConfigSchema, anomalyDetectionJobSchema } from './anomaly_detectors_schema';
 import { datafeedConfigSchema, indicesOptionsSchema } from './datafeeds_schema';
+import { runtimeMappingsSchema } from './runtime_mappings_schema';
 
 export const estimateBucketSpanSchema = schema.object({
   aggTypes: schema.arrayOf(schema.nullable(schema.string())),
@@ -18,7 +19,7 @@ export const estimateBucketSpanSchema = schema.object({
   query: schema.any(),
   splitField: schema.maybe(schema.string()),
   timeField: schema.maybe(schema.string()),
-  runtimeMappings: schema.maybe(schema.any()),
+  runtimeMappings: runtimeMappingsSchema,
   indicesOptions: indicesOptionsSchema,
 });
 
