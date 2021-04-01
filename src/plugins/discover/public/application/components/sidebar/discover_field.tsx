@@ -255,7 +255,6 @@ export function DiscoverField({
   };
 
   const fieldInfoIcon = getFieldInfoIcon();
-
   const shouldRenderMultiFields = !!multiFields;
   const renderMultiFields = () => {
     if (!multiFields) {
@@ -287,7 +286,9 @@ export function DiscoverField({
     );
   };
 
-  const canEditField = onEditField && field.type !== 'unknown' && field.type !== 'unknown_selected';
+  const isRuntimeField = Boolean(indexPattern.getFieldByName(field.name)?.runtimeField);
+  const isUnknownField = field.type === 'unknown' || field.type === 'unknown_selected';
+  const canEditField = onEditField && (!isUnknownField || isRuntimeField);
   const displayNameGrow = canEditField ? 9 : 10;
   const popoverTitle = (
     <EuiPopoverTitle style={{ textTransform: 'none' }} className="eui-textBreakWord">
