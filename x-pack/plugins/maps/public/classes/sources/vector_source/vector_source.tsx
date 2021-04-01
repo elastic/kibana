@@ -101,6 +101,10 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     return false;
   }
 
+  async supportsFitToBounds(): Promise<boolean> {
+    return true;
+  }
+
   async getBoundsForFilters(
     boundsFilters: BoundsFilters,
     registerCancelCallback: (callback: () => void) => void
