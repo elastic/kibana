@@ -15,7 +15,7 @@ describe('create_signals', () => {
       to: 'today',
       filter: {},
       size: 100,
-      searchAfterSortId: undefined,
+      searchAfterSortIds: undefined,
       timestampOverride: undefined,
       excludeDocsWithTimestampOverride: false,
     });
@@ -88,7 +88,7 @@ describe('create_signals', () => {
       to: 'today',
       filter: {},
       size: 100,
-      searchAfterSortId: undefined,
+      searchAfterSortIds: undefined,
       timestampOverride: 'event.ingested',
       excludeDocsWithTimestampOverride: false,
     });
@@ -188,14 +188,14 @@ describe('create_signals', () => {
     });
   });
 
-  test('if searchAfterSortId is an empty string it should not be included', () => {
+  test('if searchAfterSortIds is an empty string it should not be included', () => {
     const query = buildEventsSearchQuery({
       index: ['auditbeat-*'],
       from: 'now-5m',
       to: 'today',
       filter: {},
       size: 100,
-      searchAfterSortId: '',
+      searchAfterSortIds: [''],
       timestampOverride: undefined,
       excludeDocsWithTimestampOverride: false,
     });
@@ -260,7 +260,7 @@ describe('create_signals', () => {
       },
     });
   });
-  test('if searchAfterSortId is a valid sortId string', () => {
+  test('if searchAfterSortIds is a valid sortId string', () => {
     const fakeSortId = '123456789012';
     const query = buildEventsSearchQuery({
       index: ['auditbeat-*'],
@@ -268,7 +268,7 @@ describe('create_signals', () => {
       to: 'today',
       filter: {},
       size: 100,
-      searchAfterSortId: fakeSortId,
+      searchAfterSortIds: [fakeSortId],
       timestampOverride: undefined,
       excludeDocsWithTimestampOverride: false,
     });
@@ -334,7 +334,7 @@ describe('create_signals', () => {
       },
     });
   });
-  test('if searchAfterSortId is a valid sortId number', () => {
+  test('if searchAfterSortIds is a valid sortId number', () => {
     const fakeSortIdNumber = 123456789012;
     const query = buildEventsSearchQuery({
       index: ['auditbeat-*'],
@@ -342,7 +342,7 @@ describe('create_signals', () => {
       to: 'today',
       filter: {},
       size: 100,
-      searchAfterSortId: fakeSortIdNumber,
+      searchAfterSortIds: [fakeSortIdNumber],
       timestampOverride: undefined,
       excludeDocsWithTimestampOverride: false,
     });
@@ -415,7 +415,7 @@ describe('create_signals', () => {
       to: 'today',
       filter: {},
       size: 100,
-      searchAfterSortId: undefined,
+      searchAfterSortIds: undefined,
       timestampOverride: undefined,
       excludeDocsWithTimestampOverride: false,
     });
@@ -495,7 +495,7 @@ describe('create_signals', () => {
       to: 'today',
       filter: {},
       size: 100,
-      searchAfterSortId: undefined,
+      searchAfterSortIds: undefined,
       timestampOverride: undefined,
       excludeDocsWithTimestampOverride: false,
     });

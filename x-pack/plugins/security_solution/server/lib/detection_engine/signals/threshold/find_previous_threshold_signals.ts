@@ -71,7 +71,7 @@ export const findPreviousThresholdSignals = async ({
   };
 
   return singleSearchAfter({
-    searchAfterSortId: undefined,
+    searchAfterSortIds: undefined,
     timestampOverride,
     index: indexPattern,
     from,
