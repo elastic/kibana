@@ -18,7 +18,8 @@ import { ESSearchSource } from '../es_search_source';
 export const esTopHitsLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
   description: i18n.translate('xpack.maps.source.topHitsDescription', {
-    defaultMessage: 'Display the most relevant documents per entity',
+    defaultMessage:
+      'Display the most relevant documents per entity, e.g. the most recent GPS hits per vehicle.',
   }),
   icon: TopHitsLayerIcon,
   renderWizard: ({ previewLayers, mapColors }: RenderWizardArguments) => {
