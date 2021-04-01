@@ -7,7 +7,7 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import { isPopulatedObject } from './object_utils';
-import { RUNTIME_FIELD_TYPES } from '../../../../../src/plugins/data/common';
+import { RUNTIME_FIELD_TYPES, RuntimeType } from '../../../../../src/plugins/data/common';
 import type { RuntimeMappings } from '../types/fields';
 
 export function isRuntimeField(arg: unknown): arg is estypes.RuntimeField {
@@ -22,7 +22,9 @@ export function isRuntimeField(arg: unknown): arg is estypes.RuntimeField {
             Object.keys(arg.script).length === 1 &&
             arg.script.hasOwnProperty('source') &&
             typeof arg.script.source === 'string')))) &&
-    RUNTIME_FIELD_TYPES.includes(arg.type)
+    // replace this with estypes.RuntimeType once fixed
+    // https://github.com/elastic/elastic-client-generator/issues/258
+    RUNTIME_FIELD_TYPES.includes(arg.type as RuntimeType)
   );
 }
 
