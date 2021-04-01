@@ -39,12 +39,19 @@ describe('create_signals', () => {
                 bool: {
                   filter: [
                     {
-                      range: {
-                        '@timestamp': {
-                          gte: 'now-5m',
-                          lte: 'today',
-                          format: 'strict_date_optional_time',
-                        },
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            range: {
+                              '@timestamp': {
+                                gte: 'now-5m',
+                                lte: 'today',
+                                format: 'strict_date_optional_time',
+                              },
+                            },
+                          },
+                        ],
                       },
                     },
                   ],
@@ -73,6 +80,114 @@ describe('create_signals', () => {
       },
     });
   });
+
+  test('it builds a now-5m up to today filter with timestsampOverride', () => {
+    const query = buildEventsSearchQuery({
+      index: ['auditbeat-*'],
+      from: 'now-5m',
+      to: 'today',
+      filter: {},
+      size: 100,
+      searchAfterSortId: undefined,
+      timestampOverride: 'event.ingested',
+      excludeDocsWithTimestampOverride: false,
+    });
+    expect(query).toEqual({
+      allow_no_indices: true,
+      index: ['auditbeat-*'],
+      size: 100,
+      ignore_unavailable: true,
+      body: {
+        docvalue_fields: [
+          {
+            field: 'event.ingested',
+            format: 'strict_date_optional_time',
+          },
+          {
+            field: '@timestamp',
+            format: 'strict_date_optional_time',
+          },
+        ],
+        query: {
+          bool: {
+            filter: [
+              {},
+              {
+                bool: {
+                  filter: [
+                    {
+                      bool: {
+                        should: [
+                          {
+                            range: {
+                              'event.ingested': {
+                                gte: 'now-5m',
+                                lte: 'today',
+                                format: 'strict_date_optional_time',
+                              },
+                            },
+                          },
+                          {
+                            bool: {
+                              filter: [
+                                {
+                                  range: {
+                                    '@timestamp': {
+                                      gte: 'now-5m',
+                                      lte: 'today',
+                                      format: 'strict_date_optional_time',
+                                    },
+                                  },
+                                },
+                                {
+                                  bool: {
+                                    must_not: {
+                                      exists: {
+                                        field: 'event.ingested',
+                                      },
+                                    },
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                match_all: {},
+              },
+            ],
+          },
+        },
+        fields: [
+          {
+            field: '*',
+            include_unmapped: true,
+          },
+        ],
+        sort: [
+          {
+            'event.ingested': {
+              order: 'asc',
+              unmapped_type: 'date',
+            },
+          },
+          {
+            '@timestamp': {
+              order: 'asc',
+              unmapped_type: 'date',
+            },
+          },
+        ],
+      },
+    });
+  });
+
   test('if searchAfterSortId is an empty string it should not be included', () => {
     const query = buildEventsSearchQuery({
       index: ['auditbeat-*'],
@@ -104,12 +219,19 @@ describe('create_signals', () => {
                 bool: {
                   filter: [
                     {
-                      range: {
-                        '@timestamp': {
-                          gte: 'now-5m',
-                          lte: 'today',
-                          format: 'strict_date_optional_time',
-                        },
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            range: {
+                              '@timestamp': {
+                                gte: 'now-5m',
+                                lte: 'today',
+                                format: 'strict_date_optional_time',
+                              },
+                            },
+                          },
+                        ],
                       },
                     },
                   ],
@@ -170,12 +292,19 @@ describe('create_signals', () => {
                 bool: {
                   filter: [
                     {
-                      range: {
-                        '@timestamp': {
-                          gte: 'now-5m',
-                          lte: 'today',
-                          format: 'strict_date_optional_time',
-                        },
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            range: {
+                              '@timestamp': {
+                                gte: 'now-5m',
+                                lte: 'today',
+                                format: 'strict_date_optional_time',
+                              },
+                            },
+                          },
+                        ],
                       },
                     },
                   ],
@@ -237,12 +366,19 @@ describe('create_signals', () => {
                 bool: {
                   filter: [
                     {
-                      range: {
-                        '@timestamp': {
-                          gte: 'now-5m',
-                          lte: 'today',
-                          format: 'strict_date_optional_time',
-                        },
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            range: {
+                              '@timestamp': {
+                                gte: 'now-5m',
+                                lte: 'today',
+                                format: 'strict_date_optional_time',
+                              },
+                            },
+                          },
+                        ],
                       },
                     },
                   ],
@@ -303,12 +439,19 @@ describe('create_signals', () => {
                 bool: {
                   filter: [
                     {
-                      range: {
-                        '@timestamp': {
-                          gte: 'now-5m',
-                          lte: 'today',
-                          format: 'strict_date_optional_time',
-                        },
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            range: {
+                              '@timestamp': {
+                                gte: 'now-5m',
+                                lte: 'today',
+                                format: 'strict_date_optional_time',
+                              },
+                            },
+                          },
+                        ],
                       },
                     },
                   ],
@@ -371,12 +514,19 @@ describe('create_signals', () => {
                 bool: {
                   filter: [
                     {
-                      range: {
-                        '@timestamp': {
-                          gte: 'now-5m',
-                          lte: 'today',
-                          format: 'strict_date_optional_time',
-                        },
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            range: {
+                              '@timestamp': {
+                                gte: 'now-5m',
+                                lte: 'today',
+                                format: 'strict_date_optional_time',
+                              },
+                            },
+                          },
+                        ],
                       },
                     },
                   ],

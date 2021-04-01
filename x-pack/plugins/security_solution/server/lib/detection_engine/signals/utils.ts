@@ -13,6 +13,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import { isEmpty, partition } from 'lodash';
 import { ApiResponse, Context } from '@elastic/elasticsearch/lib/Transport';
 
+import { SortResults } from '@elastic/elasticsearch/api/types';
 import {
   TimestampOverrideOrUndefined,
   Privilege,
@@ -846,3 +847,7 @@ export const isThreatParams = (params: RuleParams): params is ThreatRuleParams =
   params.type === 'threat_match';
 export const isMachineLearningParams = (params: RuleParams): params is MachineLearningRuleParams =>
   params.type === 'machine_learning';
+
+export const hasSafeSortIds = (sortIds: SortResults) => {
+  return sortIds?.every((sortId) => sortId != null && sortId < Number.MAX_SAFE_INTEGER);
+};
