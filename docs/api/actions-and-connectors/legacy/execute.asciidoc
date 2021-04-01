@@ -4,7 +4,7 @@
 <titleabbrev>Legacy Execute connector</titleabbrev>
 ++++
 
-WARNING: Deprecated in 7.13.0. Use <<execute-connector-api>> instead.
+deprecated::[7.13.0,Use <<execute-connector-api>> instead.]
 
 Executes a connector by ID.
 

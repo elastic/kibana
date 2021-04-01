@@ -56,6 +56,7 @@ import {
   AggParamsIpRange,
   AggParamsMax,
   AggParamsMedian,
+  AggParamsSinglePercentile,
   AggParamsMin,
   AggParamsMovingAvg,
   AggParamsPercentileRanks,
@@ -85,6 +86,7 @@ import {
   METRIC_TYPES,
   AggConfig,
   aggFilteredMetric,
+  aggSinglePercentile,
 } from './';
 
 export { IAggConfig, AggConfigSerialized } from './agg_config';
@@ -169,6 +171,7 @@ export interface AggParamsMapping {
   [METRIC_TYPES.GEO_CENTROID]: AggParamsGeoCentroid;
   [METRIC_TYPES.MAX]: AggParamsMax;
   [METRIC_TYPES.MEDIAN]: AggParamsMedian;
+  [METRIC_TYPES.SINGLE_PERCENTILE]: AggParamsSinglePercentile;
   [METRIC_TYPES.MIN]: AggParamsMin;
   [METRIC_TYPES.STD_DEV]: AggParamsStdDeviation;
   [METRIC_TYPES.SUM]: AggParamsSum;
@@ -215,6 +218,7 @@ export interface AggFunctionsMapping {
   aggGeoCentroid: ReturnType<typeof aggGeoCentroid>;
   aggMax: ReturnType<typeof aggMax>;
   aggMedian: ReturnType<typeof aggMedian>;
+  aggSinglePercentile: ReturnType<typeof aggSinglePercentile>;
   aggMin: ReturnType<typeof aggMin>;
   aggMovingAvg: ReturnType<typeof aggMovingAvg>;
   aggPercentileRanks: ReturnType<typeof aggPercentileRanks>;

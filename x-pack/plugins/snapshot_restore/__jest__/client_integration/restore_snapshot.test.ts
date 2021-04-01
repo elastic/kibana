@@ -33,7 +33,7 @@ describe('<RestoreSnapshot />', () => {
       testBed.component.update();
     });
 
-    it('shows the data streams warning when the snapshot has data streams', () => {
+    test('shows the data streams warning when the snapshot has data streams', () => {
       const { exists } = testBed;
       expect(exists('dataStreamWarningCallOut')).toBe(true);
     });
@@ -49,7 +49,7 @@ describe('<RestoreSnapshot />', () => {
       testBed.component.update();
     });
 
-    it('hides the data streams warning when the snapshot has data streams', () => {
+    test('hides the data streams warning when the snapshot has data streams', () => {
       const { exists } = testBed;
       expect(exists('dataStreamWarningCallOut')).toBe(false);
     });
@@ -65,7 +65,7 @@ describe('<RestoreSnapshot />', () => {
       testBed.component.update();
     });
 
-    it('shows an info callout when include_global_state is enabled', () => {
+    test('shows an info callout when include_global_state is enabled', () => {
       const { exists, actions } = testBed;
 
       expect(exists('systemIndicesInfoCallOut')).toBe(false);
@@ -73,6 +73,32 @@ describe('<RestoreSnapshot />', () => {
       actions.toggleGlobalState();
 
       expect(exists('systemIndicesInfoCallOut')).toBe(true);
+    });
+  });
+
+  // NOTE: This suite can be expanded to simulate the user setting non-default values for all of
+  // the form controls and asserting that the correct payload is sent to the API.
+  describe('include aliases', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setGetSnapshotResponse(fixtures.getSnapshot());
+      httpRequestsMockHelpers.setRestoreSnapshotResponse({});
+
+      await act(async () => {
+        testBed = await setup();
+      });
+
+      testBed.component.update();
+    });
+
+    test('is sent to the API', async () => {
+      const { actions } = testBed;
+      actions.toggleIncludeAliases();
+      actions.goToStep(3);
+      await actions.clickRestore();
+
+      const expectedPayload = { includeAliases: false };
+      const latestRequest = server.requests[server.requests.length - 1];
+      expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expectedPayload);
     });
   });
 });

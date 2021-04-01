@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import React, { ChangeEvent, Component } from 'react';
 import {
   EuiForm,
   EuiFormRow,
@@ -19,57 +18,86 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { MapCenter } from '../../../../common/descriptor_types';
+import { MapSettings } from '../../../reducers/map';
 
-function getViewString(lat, lon, zoom) {
-  return `${lat},${lon},${zoom}`;
+export interface Props {
+  settings: MapSettings;
+  zoom: number;
+  center: MapCenter;
+  onSubmit: ({ lat, lon, zoom }: { lat: number; lon: number; zoom: number }) => void;
 }
 
-export class SetViewControl extends Component {
-  state = {};
+interface State {
+  isPopoverOpen: boolean;
+  lat: number | string;
+  lon: number | string;
+  zoom: number | string;
+}
 
-  static getDerivedStateFromProps(nextProps, prevState) {
-    const nextView = getViewString(nextProps.center.lat, nextProps.center.lon, nextProps.zoom);
-    if (nextView !== prevState.prevView) {
-      return {
-        lat: nextProps.center.lat,
-        lon: nextProps.center.lon,
-        zoom: nextProps.zoom,
-        prevView: nextView,
-      };
-    }
-
-    return null;
-  }
+export class SetViewControl extends Component<Props, State> {
+  state: State = {
+    isPopoverOpen: false,
+    lat: 0,
+    lon: 0,
+    zoom: 0,
+  };
 
   _togglePopover = () => {
-    if (this.props.isSetViewOpen) {
-      this.props.closeSetView();
+    if (this.state.isPopoverOpen) {
+      this._closePopover();
       return;
     }
 
-    this.props.openSetView();
+    this.setState({
+      lat: this.props.center.lat,
+      lon: this.props.center.lon,
+      zoom: this.props.zoom,
+      isPopoverOpen: true,
+    });
   };
 
-  _onLatChange = (evt) => {
+  _closePopover = () => {
+    this.setState({
+      isPopoverOpen: false,
+    });
+  };
+
+  _onLatChange = (evt: ChangeEvent<HTMLInputElement>) => {
     this._onChange('lat', evt);
   };
 
-  _onLonChange = (evt) => {
+  _onLonChange = (evt: ChangeEvent<HTMLInputElement>) => {
     this._onChange('lon', evt);
   };
 
-  _onZoomChange = (evt) => {
+  _onZoomChange = (evt: ChangeEvent<HTMLInputElement>) => {
     this._onChange('zoom', evt);
   };
 
-  _onChange = (name, evt) => {
+  _onChange = (name: 'lat' | 'lon' | 'zoom', evt: ChangeEvent<HTMLInputElement>) => {
     const sanitizedValue = parseFloat(evt.target.value);
+    // @ts-expect-error
     this.setState({
       [name]: isNaN(sanitizedValue) ? '' : sanitizedValue,
     });
   };
 
-  _renderNumberFormRow = ({ value, min, max, onChange, label, dataTestSubj }) => {
+  _renderNumberFormRow = ({
+    value,
+    min,
+    max,
+    onChange,
+    label,
+    dataTestSubj,
+  }: {
+    value: string | number;
+    min: number;
+    max: number;
+    onChange: (evt: ChangeEvent<HTMLInputElement>) => void;
+    label: string;
+    dataTestSubj: string;
+  }) => {
     const isInvalid = value === '' || value > max || value < min;
     const error = isInvalid ? `Must be between ${min} and ${max}` : null;
     return {
@@ -90,7 +118,8 @@ export class SetViewControl extends Component {
 
   _onSubmit = () => {
     const { lat, lon, zoom } = this.state;
-    this.props.onSubmit({ lat, lon, zoom });
+    this._closePopover();
+    this.props.onSubmit({ lat: lat as number, lon: lon as number, zoom: zoom as number });
   };
 
   _renderSetViewForm() {
@@ -175,23 +204,11 @@ export class SetViewControl extends Component {
             })}
           />
         }
-        isOpen={this.props.isSetViewOpen}
-        closePopover={this.props.closeSetView}
+        isOpen={this.state.isPopoverOpen}
+        closePopover={this._closePopover}
       >
         {this._renderSetViewForm()}
       </EuiPopover>
     );
   }
 }
-
-SetViewControl.propTypes = {
-  isSetViewOpen: PropTypes.bool.isRequired,
-  zoom: PropTypes.number.isRequired,
-  center: PropTypes.shape({
-    lat: PropTypes.number.isRequired,
-    lon: PropTypes.number.isRequired,
-  }),
-  onSubmit: PropTypes.func.isRequired,
-  closeSetView: PropTypes.func.isRequired,
-  openSetView: PropTypes.func.isRequired,
-};
