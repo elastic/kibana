@@ -34,12 +34,12 @@ async function doesIndexTemplateExist({
 }) {
   let result;
   try {
-    result = (await client.indices.existsTemplate({ name: templateName })).body;
+    result = (await client.indices.existsIndexTemplate({ name: templateName })).body;
   } catch (err) {
     throw new Error(`error checking existence of index template: ${err.message}`);
   }
 
-  return result as boolean;
+  return result;
 }
 
 async function createIndexTemplate({

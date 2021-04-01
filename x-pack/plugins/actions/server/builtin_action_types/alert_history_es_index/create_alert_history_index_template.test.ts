@@ -6,7 +6,6 @@
  */
 
 import { ElasticsearchClient } from 'src/core/server';
-import { RequestEvent } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 import { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import {
@@ -26,12 +25,14 @@ describe('createAlertHistoryIndexTemplate', () => {
   });
 
   test(`should create index template if it doesn't exist`, async () => {
-    clusterClient.indices.existsTemplate.mockResolvedValue({
+    // Response type for existsIndexTemplate is still TODO
+    clusterClient.indices.existsIndexTemplate.mockResolvedValue({
       body: false,
-    } as RequestEvent<boolean>);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any);
 
     await createAlertHistoryIndexTemplate({ client: clusterClient, logger });
-    expect(clusterClient.indices.putTemplate).toHaveBeenCalledWith({
+    expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith({
       name: `alert-history-template`,
       body: getAlertHistoryIndexTemplate(),
       create: true,
@@ -39,11 +40,13 @@ describe('createAlertHistoryIndexTemplate', () => {
   });
 
   test(`shouldn't create index template if it already exists`, async () => {
-    clusterClient.indices.existsTemplate.mockResolvedValue({
+    // Response type for existsIndexTemplate is still TODO
+    clusterClient.indices.existsIndexTemplate.mockResolvedValue({
       body: true,
-    } as RequestEvent<boolean>);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any);
 
     await createAlertHistoryIndexTemplate({ client: clusterClient, logger });
-    expect(clusterClient.indices.putTemplate).not.toHaveBeenCalled();
+    expect(clusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
   });
 });

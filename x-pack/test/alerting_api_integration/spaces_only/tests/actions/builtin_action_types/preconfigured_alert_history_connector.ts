@@ -29,14 +29,13 @@ export default function preconfiguredAlertHistoryConnectorTests({
 
     function getTestData(params = {}) {
       return getTestAlertData({
-        alertTypeId: ruleTypeId,
+        rule_type_id: ruleTypeId,
         schedule: { interval: '1s' },
         params: {
           pattern: { [alertId]: new Array(100).fill(true) },
         },
         actions: [
           {
-            actionTypeId: '.index',
             group: 'default',
             id: 'preconfigured-alert-history-es-index',
             params,
@@ -57,11 +56,11 @@ export default function preconfiguredAlertHistoryConnectorTests({
         documents: [{}],
       });
       const response = await supertest
-        .post(`/api/alerts/alert`)
+        .post(`/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(testRuleData);
       expect(response.status).to.eql(200);
-      objectRemover.add(spaceId, response.body.id, 'alert', 'alerts');
+      objectRemover.add(spaceId, response.body.id, 'rule', 'alerting');
 
       // Wait for alert to be active
       await waitForStatus(response.body.id, new Set(['active']));
@@ -95,11 +94,11 @@ export default function preconfiguredAlertHistoryConnectorTests({
         indexOverride: ALERT_HISTORY_OVERRIDE_INDEX,
       });
       const response = await supertest
-        .post(`/api/alerts/alert`)
+        .post(`/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(testRuleData);
       expect(response.status).to.eql(200);
-      objectRemover.add(spaceId, response.body.id, 'alert', 'alerts');
+      objectRemover.add(spaceId, response.body.id, 'rule', 'alerting');
 
       // Wait for alert to be active
       await waitForStatus(response.body.id, new Set(['active']));
