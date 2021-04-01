@@ -14,9 +14,7 @@ import {
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { CorrelationsOptions, getCorrelationsFilters } from '../get_filters';
 
-export async function getOverallErrorDistribution(
-  options: CorrelationsOptions
-) {
+export async function getOverallErrorTimeseries(options: CorrelationsOptions) {
   return withApmSpan('get_error_rate_timeseries', async () => {
     const { setup } = options;
     const filters = getCorrelationsFilters(options);

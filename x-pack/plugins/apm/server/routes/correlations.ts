@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import * as t from 'io-ts';
 import { isActivePlatinumLicense } from '../../common/license_check';
 import { getCorrelationsForFailedTransactions } from '../lib/correlations/errors/get_correlations_for_failed_transactions';
-import { getOverallErrorDistribution } from '../lib/correlations/errors/get_overall_error_distribution';
+import { getOverallErrorTimeseries } from '../lib/correlations/errors/get_overall_error_timeseries';
 import { getCorrelationsForSlowTransactions } from '../lib/correlations/latency/get_correlations_for_slow_transactions';
 import { getOverallLatencyDistribution } from '../lib/correlations/latency/get_overall_latency_distribution';
 import { setupRequest } from '../lib/helpers/setup_request';
@@ -118,7 +118,7 @@ export const correlationsForSlowTransactionsRoute = createRoute({
 });
 
 export const correlationsErrorDistributionRoute = createRoute({
-  endpoint: 'GET /api/apm/correlations/errors/overall_distribution',
+  endpoint: 'GET /api/apm/correlations/errors/overall_timeseries',
   params: t.type({
     query: t.intersection([
       t.partial({
@@ -145,7 +145,7 @@ export const correlationsErrorDistributionRoute = createRoute({
       transactionName,
     } = context.params.query;
 
-    return getOverallErrorDistribution({
+    return getOverallErrorTimeseries({
       environment,
       kuery,
       serviceName,

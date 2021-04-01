@@ -18,7 +18,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const range = archives_metadata[archiveName];
 
   const url = format({
-    pathname: `/api/apm/correlations/errors/overall_distribution`,
+    pathname: `/api/apm/correlations/errors/overall_timeseries`,
     query: {
       start: range.start,
       end: range.end,
@@ -42,7 +42,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'correlations errors overall with data and default args',
     { config: 'trial', archives: ['apm_8.0.0'] },
     () => {
-      type ResponseBody = APIReturnType<'GET /api/apm/correlations/errors/overall_distribution'>;
+      type ResponseBody = APIReturnType<'GET /api/apm/correlations/errors/overall_timeseries'>;
       let response: {
         status: number;
         body: NonNullable<ResponseBody>;

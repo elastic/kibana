@@ -35,7 +35,7 @@ import { useLocalStorage } from '../../../hooks/useLocalStorage';
 import { useUiTracker } from '../../../../../observability/public';
 
 type OverallErrorsApiResponse = NonNullable<
-  APIReturnType<'GET /api/apm/correlations/errors/overall_distribution'>
+  APIReturnType<'GET /api/apm/correlations/errors/overall_timeseries'>
 >;
 
 type CorrelationsApiResponse = NonNullable<
@@ -73,7 +73,7 @@ export function ErrorCorrelations({ onClose }: Props) {
     (callApmApi) => {
       if (start && end) {
         return callApmApi({
-          endpoint: 'GET /api/apm/correlations/errors/overall_distribution',
+          endpoint: 'GET /api/apm/correlations/errors/overall_timeseries',
           params: {
             query: {
               environment,
