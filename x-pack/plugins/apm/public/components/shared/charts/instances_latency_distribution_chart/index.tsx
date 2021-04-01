@@ -9,6 +9,8 @@ import {
   Axis,
   BubbleSeries,
   Chart,
+  ElementClickListener,
+  GeometryValue,
   Position,
   ScaleType,
   Settings,
@@ -19,7 +21,9 @@ import {
 import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { useHistory } from 'react-router-dom';
 import { useChartTheme } from '../../../../../../observability/public';
+import { SERVICE_NODE_NAME } from '../../../../../common/elasticsearch_fieldnames';
 import {
   asTransactionRate,
   getDurationFormatter,
@@ -27,6 +31,7 @@ import {
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
 import { PrimaryStatsServiceInstanceItem } from '../../../app/service_overview/service_overview_instances_chart_and_table';
+import * as urlHelpers from '../../Links/url_helpers';
 import { ChartContainer } from '../chart_container';
 import { getResponseTimeTickFormatter } from '../transaction_charts/helper';
 import { CustomTooltip } from './custom_tooltip';
@@ -42,6 +47,7 @@ export function InstancesLatencyDistributionChart({
   items = [],
   status,
 }: InstancesLatencyDistributionChartProps) {
+  const history = useHistory();
   const hasData = items.length > 0;
 
   const theme = useTheme();
@@ -50,9 +56,6 @@ export function InstancesLatencyDistributionChart({
     bubbleSeriesStyle: {
       point: { strokeWidth: 0, fill: theme.eui.euiColorVis1, radius: 4 },
     },
-    // This additional padding makes it so items with small values don't look like
-    // zeroes right up against the origin.
-    chartPaddings: { top: 0, left: 10, right: 10, bottom: 10 },
   };
 
   const maxLatency = Math.max(...items.map((item) => item.latency ?? 0));
@@ -66,10 +69,34 @@ export function InstancesLatencyDistributionChart({
     ),
   };
 
-  // When we only have a single point, we want to use an ordinal scale instead
-  // of linear because an ordinal scale will place the point in the middle, while
-  // linear will place it at the origin.
-  const xScaleType = items.length === 1 ? ScaleType.Ordinal : ScaleType.Linear;
+  /**
+   * Handle click events on the items.
+   *
+   * Due to how we handle filtering by using the kuery bar, it's difficult to
+   * modify existing queries. If you have an existing query in the bar, this will
+   * wipe it out. This is ok for now, since we probably will be replacing this
+   * interaction with something nicer in a future release.
+   *
+   * The event object has an array two items for each point, one of which has
+   * the serviceNodeName, so we flatten the list and get the items we need to
+   * form a query.
+   */
+  const handleElementClick: ElementClickListener = (event) => {
+    const serviceNodeNamesQuery = event
+      .flat()
+      .flatMap((value) => (value as GeometryValue).datum?.serviceNodeName)
+      .filter((serviceNodeName) => !!serviceNodeName)
+      .map((serviceNodeName) => `${SERVICE_NODE_NAME}:"${serviceNodeName}"`)
+      .join(' OR ');
+
+    urlHelpers.push(history, { query: { kuery: serviceNodeNamesQuery } });
+  };
+
+  // With a linear scale, if all the instances have similar throughput (or if
+  // there's just a single instance) they'll show along the origin. Make sure
+  // the x-axis domain always starts at 0 and goes to double the max of the items
+  const maxThroughput = Math.max(...items.map((item) => item.throughput ?? 0));
+  const xDomain = { min: 0, max: maxThroughput };
 
   return (
     <EuiPanel>
@@ -84,9 +111,11 @@ export function InstancesLatencyDistributionChart({
         <Chart id="instances-latency-distribution">
           <Settings
             legendPosition={Position.Bottom}
+            onElementClick={handleElementClick}
             tooltip={tooltip}
             showLegend
             theme={chartTheme}
+            xDomain={xDomain}
           />
           <BubbleSeries
             color={theme.eui.euiColorVis1}
@@ -96,7 +125,7 @@ export function InstancesLatencyDistributionChart({
               { defaultMessage: 'Instances' }
             )}
             xAccessor={(item) => item.throughput}
-            xScaleType={xScaleType}
+            xScaleType={ScaleType.Linear}
             yAccessors={[(item) => item.latency]}
             yScaleType={ScaleType.Linear}
           />

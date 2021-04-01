@@ -113,7 +113,7 @@ function MultipleInstanceCustomTooltip({
         const datum = (value.datum as unknown) as PrimaryStatsServiceInstanceItem;
         const { latency, serviceNodeName, throughput } = datum;
         return (
-          <div className="echTooltip__list">
+          <div className="echTooltip__list" key={serviceNodeName}>
             <div className="echTooltip__item">
               <div
                 className="echTooltip__item--backgroundColor"

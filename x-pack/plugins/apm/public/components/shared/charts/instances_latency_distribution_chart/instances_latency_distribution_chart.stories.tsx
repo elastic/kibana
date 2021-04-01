@@ -74,7 +74,7 @@ Example.args = {
   ],
 } as InstancesLatencyDistributionChartProps;
 
-export function SingleInstance({
+export function SimilarThroughputInstances({
   items,
 }: InstancesLatencyDistributionChartProps) {
   return (
@@ -85,13 +85,24 @@ export function SingleInstance({
     />
   );
 }
-SingleInstance.args = {
+SimilarThroughputInstances.args = {
   items: [
     {
       serviceNodeName:
-        '2f3221afa3f00d3bc07069d69efd5bd4c1607be6155a204551c8fe2e2b5dd750',
-      latency: 1130156.5424836602,
-      throughput: 9.71285705065604,
+        '21e1c648bd73434a8a1bf6e849817930e8b43eacf73a5c39c30520ee3b79d8c0',
+      latency: 40713854.354498595,
+      throughput: 0.3261219384041683,
+    },
+    {
+      serviceNodeName:
+        'a1c99c8675372af4c74bb01cc48e75989faa6f010a4ccb027df1c410dde0c72c',
+      latency: 18565471.348388012,
+      throughput: 0.3261219384041683,
+    },
+    {
+      serviceNodeName: '_service_node_name_missing_',
+      latency: 20065471.348388012,
+      throughput: 0.3261219384041683,
     },
   ],
 } as InstancesLatencyDistributionChartProps;
