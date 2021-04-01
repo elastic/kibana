@@ -27,7 +27,7 @@ const TemplateComponent = ({ defPairs }: Props) => {
             dangerouslySetInnerHTML={{ __html: `${escape(pair[0])}:` }} // eslint-disable-line react/no-danger
           />
           <dd
-            dangerouslySetInnerHTML={{ __html: `${escape(pair[1])}` }} // eslint-disable-line react/no-danger
+            dangerouslySetInnerHTML={{ __html: `${pair[1]}` }} // eslint-disable-line react/no-danger
           />{' '}
         </Fragment>
       ))}
