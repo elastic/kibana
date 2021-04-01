@@ -7,6 +7,8 @@
 
 import React, { useMemo, useEffect, useState, FC } from 'react';
 
+import { estypes } from '@elastic/elasticsearch';
+
 import {
   EuiCallOut,
   EuiComboBox,
@@ -24,7 +26,6 @@ import { i18n } from '@kbn/i18n';
 
 import { extractErrorMessage } from '../../../../common';
 import { stringHash } from '../../../../common/util/string_utils';
-import type { SearchResponse7 } from '../../../../common/types/es_client';
 import type { ResultsSearchQuery } from '../../data_frame_analytics/common/analytics';
 
 import { useMlApiContext } from '../../contexts/kibana';
@@ -184,7 +185,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
             }
           : searchQuery;
 
-        const resp: SearchResponse7 = await esSearch({
+        const resp: estypes.SearchResponse = await esSearch({
           index,
           body: {
             fields: queryFields,
@@ -198,7 +199,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
         if (!options.didCancel) {
           const items = resp.hits.hits
             .map((d) =>
-              getProcessedFields(d.fields, (key: string) =>
+              getProcessedFields(d.fields ?? {}, (key: string) =>
                 key.startsWith(`${resultsField}.feature_importance`)
               )
             )

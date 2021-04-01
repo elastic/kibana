@@ -177,21 +177,21 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
               compiler.hooks.emit.tap('MetricsPlugin', (compilation) => {
                 const metrics = [
                   {
-                    group: '@kbn/ui-shared-deps asset size',
-                    id: 'kbn-ui-shared-deps.js',
+                    group: 'page load bundle size',
+                    id: 'kbnUiSharedDeps-js',
                     value: compilation.assets['kbn-ui-shared-deps.js'].size(),
                   },
                   {
-                    group: '@kbn/ui-shared-deps asset size',
-                    id: 'kbn-ui-shared-deps.@elastic.js',
-                    value: compilation.assets['kbn-ui-shared-deps.@elastic.js'].size(),
-                  },
-                  {
-                    group: '@kbn/ui-shared-deps asset size',
-                    id: 'css',
+                    group: 'page load bundle size',
+                    id: 'kbnUiSharedDeps-css',
                     value:
                       compilation.assets['kbn-ui-shared-deps.css'].size() +
                       compilation.assets['kbn-ui-shared-deps.v7.light.css'].size(),
+                  },
+                  {
+                    group: 'page load bundle size',
+                    id: 'kbnUiSharedDeps-elastic',
+                    value: compilation.assets['kbn-ui-shared-deps.@elastic.js'].size(),
                   },
                 ];
 

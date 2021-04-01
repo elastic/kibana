@@ -83,6 +83,7 @@ describe('buildMatchedIndicator', () => {
       getThreatListItemMock({
         _id: '123',
         _source: {
+          event: { dataset: 'abuse.ch', reference: 'https://test.com' },
           threat: { indicator: { domain: 'domain_1', other: 'other_1', type: 'type_1' } },
         },
       }),
@@ -115,6 +116,16 @@ describe('buildMatchedIndicator', () => {
     });
 
     expect(get(indicator, 'matched.atomic')).toEqual('domain_1');
+  });
+
+  it('returns event values as a part of threat', () => {
+    const [indicator] = buildMatchedIndicator({
+      queries,
+      threats,
+      indicatorPath,
+    });
+    const expectedEvent = threats[0]._source!.event;
+    expect(get(indicator, 'event')).toEqual(expectedEvent);
   });
 
   it('returns the _id of the matched indicator as matched.id', () => {
@@ -162,12 +173,16 @@ describe('buildMatchedIndicator', () => {
       getThreatListItemMock({
         _id: '123',
         _source: {
-          threat: { indicator: { domain: 'domain_1', other: 'other_1', type: 'type_1' } },
+          event: { reference: 'https://test.com' },
+          threat: {
+            indicator: { domain: 'domain_1', other: 'other_1', type: 'type_1' },
+          },
         },
       }),
       getThreatListItemMock({
         _id: '456',
         _source: {
+          event: { reference: 'https://test2.com' },
           threat: { indicator: { domain: 'domain_1', other: 'other_1', type: 'type_1' } },
         },
       }),
@@ -205,6 +220,10 @@ describe('buildMatchedIndicator', () => {
         },
         other: 'other_1',
         type: 'type_1',
+        event: {
+          reference: 'https://test.com',
+          dataset: 'abuse.ch',
+        },
       },
     ]);
   });
@@ -214,6 +233,9 @@ describe('buildMatchedIndicator', () => {
       getThreatListItemMock({
         _id: '123',
         _source: {
+          event: {
+            reference: 'https://test3.com',
+          },
           'threat.indicator.domain': 'domain_1',
           custom: {
             indicator: {
@@ -244,6 +266,9 @@ describe('buildMatchedIndicator', () => {
           type: 'indicator_type',
         },
         type: 'indicator_type',
+        event: {
+          reference: 'https://test3.com',
+        },
       },
     ]);
   });
@@ -307,6 +332,9 @@ describe('buildMatchedIndicator', () => {
       getThreatListItemMock({
         _id: '123',
         _source: {
+          event: {
+            reference: 'https://test4.com',
+          },
           threat: {
             indicator: [
               { domain: 'foo', type: 'first' },
@@ -334,6 +362,9 @@ describe('buildMatchedIndicator', () => {
           type: 'first',
         },
         type: 'first',
+        event: {
+          reference: 'https://test4.com',
+        },
       },
     ]);
   });
@@ -392,6 +423,9 @@ describe('enrichSignalThreatMatches', () => {
       getThreatListItemMock({
         _id: '123',
         _source: {
+          event: {
+            category: 'malware',
+          },
           threat: { indicator: { domain: 'domain_1', other: 'other_1', type: 'type_1' } },
         },
       }),
@@ -419,7 +453,11 @@ describe('enrichSignalThreatMatches', () => {
 
   it('preserves existing threat.indicator objects on signals', async () => {
     const signalHit = getSignalHitMock({
-      _source: { '@timestamp': 'mocked', threat: { indicator: [{ existing: 'indicator' }] } },
+      _source: {
+        '@timestamp': 'mocked',
+        event: { category: 'malware' },
+        threat: { indicator: [{ existing: 'indicator' }] },
+      },
       matched_queries: [matchedQuery],
     });
     const signals = getSignalsResponseMock([signalHit]);
@@ -444,6 +482,9 @@ describe('enrichSignalThreatMatches', () => {
         },
         other: 'other_1',
         type: 'type_1',
+        event: {
+          category: 'malware',
+        },
       },
     ]);
   });
@@ -477,7 +518,11 @@ describe('enrichSignalThreatMatches', () => {
 
   it('preserves an existing threat.indicator object on signals', async () => {
     const signalHit = getSignalHitMock({
-      _source: { '@timestamp': 'mocked', threat: { indicator: { existing: 'indicator' } } },
+      _source: {
+        '@timestamp': 'mocked',
+        event: { category: 'virus' },
+        threat: { indicator: { existing: 'indicator' } },
+      },
       matched_queries: [matchedQuery],
     });
     const signals = getSignalsResponseMock([signalHit]);
@@ -502,6 +547,9 @@ describe('enrichSignalThreatMatches', () => {
         },
         other: 'other_1',
         type: 'type_1',
+        event: {
+          category: 'malware',
+        },
       },
     ]);
   });
@@ -573,12 +621,14 @@ describe('enrichSignalThreatMatches', () => {
       getThreatListItemMock({
         _id: '123',
         _source: {
+          event: { category: 'threat' },
           threat: { indicator: { domain: 'domain_1', other: 'other_1', type: 'type_1' } },
         },
       }),
       getThreatListItemMock({
         _id: '456',
         _source: {
+          event: { category: 'bad' },
           threat: { indicator: { domain: 'domain_2', other: 'other_2', type: 'type_2' } },
         },
       }),
@@ -622,6 +672,9 @@ describe('enrichSignalThreatMatches', () => {
           field: 'event.field',
           type: 'type_1',
         },
+        event: {
+          category: 'threat',
+        },
         other: 'other_1',
         type: 'type_1',
       },
@@ -633,6 +686,9 @@ describe('enrichSignalThreatMatches', () => {
           index: 'other_custom_index',
           field: 'event.other',
           type: 'type_2',
+        },
+        event: {
+          category: 'bad',
         },
         other: 'other_2',
         type: 'type_2',
