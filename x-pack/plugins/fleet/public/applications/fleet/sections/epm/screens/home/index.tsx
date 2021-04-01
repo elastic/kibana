@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { installationStatuses } from '../../../../../../../common/constants';
 import { PAGE_ROUTING_PATHS } from '../../../../constants';
 import { useLink, useGetCategories, useGetPackages, useBreadcrumbs } from '../../../../hooks';
+import { doesPackageHaveIntegrations } from '../../../../services';
 import { WithHeaderLayout } from '../../../../layouts';
 import type { CategorySummaryItem, PackageList } from '../../../../types';
 import { PackageListGrid } from '../../components/package_list_grid';
@@ -73,7 +74,7 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
     const { policy_templates: policyTemplates = [], ...restOfPackage } = pkg;
     return [
       ...acc,
-      ...(policyTemplates.length > 1
+      ...(doesPackageHaveIntegrations(pkg)
         ? policyTemplates.map((integration) => {
             const { name, title, description, icons } = integration;
             return {

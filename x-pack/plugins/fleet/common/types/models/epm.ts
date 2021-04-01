@@ -339,11 +339,11 @@ type Merge<FirstType, SecondType> = Omit<FirstType, Extract<keyof FirstType, key
 
 // Managers public HTTP response types
 export type PackageList = PackageListItem[];
-
 export type PackageListItem = Installable<RegistrySearchResult> & {
   integration?: string;
   id: string;
 };
+
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
 export type PackageInfo =
   | Installable<Merge<RegistryPackage, EpmPackageAdditions>>

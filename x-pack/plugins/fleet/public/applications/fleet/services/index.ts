@@ -28,4 +28,5 @@ export {
   isValidNamespace,
   LicenseService,
   isAgentUpgradeable,
+  doesPackageHaveIntegrations,
 } from '../../../../common';
