@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiIconTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiIconTip, EuiSpacer } from '@elastic/eui';
 
 import { ExperimentEnvironment } from '../../../common/experiments';
 import { ExperimentsStrings } from '../../i18n';
@@ -27,7 +27,7 @@ export interface Props {
 }
 
 export const EnvironmentSwitch = ({ env, isChecked, onChange }: Props) => (
-  <EuiFlexItem grow={false}>
+  <EuiFlexItem grow={false} style={{ marginBottom: '.25rem' }}>
     <EuiSwitch
       checked={isChecked}
       style={{ marginTop: 1 }}
@@ -42,5 +42,6 @@ export const EnvironmentSwitch = ({ env, isChecked, onChange }: Props) => (
       onChange={(e) => onChange(e.target.checked)}
       compressed
     />
+    <EuiSpacer size="xs" />
   </EuiFlexItem>
 );

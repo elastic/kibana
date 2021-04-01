@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const ExperimentsStrings = {
   Components: {
@@ -38,30 +40,48 @@ export const ExperimentsStrings = {
         }),
       }),
     },
-    Badge: {
-      getEnabledLabel: () =>
-        i18n.translate('presentationUtil.experiments.components.enabledBadgeLabel', {
-          defaultMessage: 'enabled',
-        }),
-      getDisabledLabel: () =>
-        i18n.translate('presentationUtil.experiments.components.disabledBadgeLabel', {
-          defaultMessage: 'disabled',
-        }),
-      getActiveLabel: () =>
-        i18n.translate('presentationUtil.experiments.components.activeBadgeLabel', {
-          defaultMessage: 'active',
-        }),
-      getInactiveLabel: () =>
-        i18n.translate('presentationUtil.experiments.components.inactiveBadgeLabel', {
-          defaultMessage: 'inactive',
+    List: {
+      getNoExperimentsMessage: () =>
+        i18n.translate('presentationUtil.experiments.components.noExperimentsMessage', {
+          defaultMessage: 'No available experiments',
         }),
     },
-    Popover: {
-      getResetButtonLabel: () =>
-        i18n.translate('presentationUtil.experiments.components.resetButtonLabel', {
-          defaultMessage: 'Reset',
+    ListItem: {
+      getEnabledStatusMessage: () => (
+        <FormattedMessage
+          id="presentationUtil.experiments.components.defaultStatusMessage"
+          defaultMessage="{status} by default"
+          values={{
+            status: <strong>Enabled</strong>,
+          }}
+          description="Displays the current status of an experiment"
+        />
+      ),
+      getDisabledStatusMessage: () => (
+        <FormattedMessage
+          id="presentationUtil.experiments.components.defaultStatusMessage"
+          defaultMessage="{status} by default"
+          values={{
+            status: <strong>Disabled</strong>,
+          }}
+          description="Displays the current status of an experiment"
+        />
+      ),
+    },
+    Flyout: {
+      getTitleLabel: () =>
+        i18n.translate('presentationUtil.experiments.components.titleLabel', {
+          defaultMessage: 'Available experiments',
         }),
-      getCalloutHelp: () =>
+      getResetToDefaultLabel: () =>
+        i18n.translate('presentationUtil.experiments.components.resetToDefaultLabel', {
+          defaultMessage: 'Reset to defaults',
+        }),
+      getExperimentFlagsLabel: () =>
+        i18n.translate('presentationUtil.experiments.components.experimentFlagsLabel', {
+          defaultMessage: 'Experiment flags',
+        }),
+      getRefreshLabel: () =>
         i18n.translate('presentationUtil.experiments.components.calloutHelp', {
           defaultMessage: 'Refresh to apply changes',
         }),

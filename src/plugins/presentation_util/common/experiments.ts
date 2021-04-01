@@ -83,7 +83,7 @@ export const experiments: { [ID in ExperimentID]: ExperimentConfig & { id: ID } 
       'presentationUtil.experiments.enableTimeToPresentExperimentDescription',
       {
         defaultMessage:
-          'A set of features that shifts Canvas more toward Presentations and less toward Dashboards',
+          'A set of features and functions that shift Canvas more toward Presentations and Reports',
       }
     ),
     solutions: ['canvas'],

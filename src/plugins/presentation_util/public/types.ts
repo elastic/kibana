@@ -6,11 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { PresentationExperimentsService } from './services/experiments';
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PresentationUtilPluginSetup {}
 
 export interface PresentationUtilPluginStart {
   ContextProvider: React.FC;
+  experimentsService: PresentationExperimentsService;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

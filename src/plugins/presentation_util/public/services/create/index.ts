@@ -81,4 +81,16 @@ export class PluginServices<Services> {
       return acc;
     }, {} as ServiceHooks<Services>);
   }
+
+  getServices(): Services {
+    const registry = this.getRegistry();
+    const providers = registry.getServiceProviders();
+
+    const providerNames = Object.keys(providers) as Array<keyof typeof providers>;
+
+    return providerNames.reduce((acc, providerName) => {
+      acc[providerName] = providers[providerName].getService();
+      return acc;
+    }, {} as Services);
+  }
 }

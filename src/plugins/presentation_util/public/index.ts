@@ -14,8 +14,9 @@ export { PresentationUtilPluginSetup, PresentationUtilPluginStart } from './type
 export {
   DashboardPicker,
   ExperimentsButton,
-  ExperimentsPopover,
+  ExperimentsFlyout,
   SavedObjectSaveModalDashboard,
+  SaveModalDashboardProps,
 } from './components';
 
 export function plugin() {

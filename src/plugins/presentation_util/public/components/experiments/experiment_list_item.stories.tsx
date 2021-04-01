@@ -7,6 +7,9 @@
  */
 
 import React from 'react';
+import { action } from '@storybook/addon-actions';
+import { mapValues } from 'lodash';
+
 import {
   EnvironmentStatus,
   ExperimentConfig,
@@ -14,23 +17,34 @@ import {
   ExperimentStatus,
 } from '../../../common';
 import { applyExperimentStatus } from '../../services/experiments';
-import { ExperimentPanel, Props } from './experiment_panel';
+import { ExperimentListItem, Props } from './experiment_list_item';
+
+import { experiments as experimentConfigs } from '../../../common';
+import { ExperimentsList } from './experiments_list';
 
 export default {
-  component: ExperimentPanel,
-  title: 'Experiment Panel',
-  description: '',
-  argTypes: {
-    environments: {
-      control: {
-        type: 'check',
-        options: ['kibana', 'browser', 'session'],
-      },
-    },
-  },
+  title: 'Experiments/List',
+  description: 'A set of controls for displaying and manipulating experiments.',
 };
 
-export const Component = (
+const experiments = mapValues(experimentConfigs, (experiment) =>
+  applyExperimentStatus(experiment, { kibana: false, session: false, browser: false })
+);
+export function List() {
+  return <ExperimentsList {...{ experiments }} onStatusChange={action('onStatusChange')} />;
+}
+
+export function EmptyList() {
+  return (
+    <ExperimentsList
+      {...{ experiments }}
+      solutions={[]}
+      onStatusChange={action('onStatusChange')}
+    />
+  );
+}
+
+export const ListItem = (
   props: Pick<
     Props['experiment'],
     'description' | 'isActive' | 'name' | 'solutions' | 'environments'
@@ -45,14 +59,16 @@ export const Component = (
   };
 
   return (
-    <ExperimentPanel
-      experiment={applyExperimentStatus(experimentConfig, status)}
-      onStatusChange={(_id, env, enabled) => ({ ...status, [env]: enabled })}
-    />
+    <div style={{ maxWidth: 800 }}>
+      <ExperimentListItem
+        experiment={applyExperimentStatus(experimentConfig, status)}
+        onStatusChange={(_id, env, enabled) => ({ ...status, [env]: enabled })}
+      />
+    </div>
   );
 };
 
-Component.args = {
+ListItem.args = {
   isActive: false,
   name: 'Demo Experiment',
   description: 'This is a demo experiment, and this is the description of the demo experiment.',
@@ -61,4 +77,13 @@ Component.args = {
   session: false,
   solutions: ['dashboard', 'canvas'],
   environments: ['kibana', 'browser', 'session'],
+};
+
+ListItem.argTypes = {
+  environments: {
+    control: {
+      type: 'check',
+      options: ['kibana', 'browser', 'session'],
+    },
+  },
 };

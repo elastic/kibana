@@ -7,7 +7,14 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiPanel, EuiFlexItem, EuiBadge, EuiTitle, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiBadge,
+  EuiTitle,
+  EuiText,
+  EuiFormFieldset,
+} from '@elastic/eui';
 import classnames from 'classnames';
 
 import {
@@ -17,21 +24,23 @@ import {
   environmentNames,
 } from '../../../common/experiments';
 import { EnvironmentSwitch } from './environment_switch';
-import { ExperimentBadge } from './experiment_badge';
 
-import './experiment_panel.scss';
+import { ExperimentsStrings } from '../../i18n';
+const { ListItem: strings } = ExperimentsStrings.Components;
+
+import './experiment_list_item.scss';
 
 export interface Props {
   experiment: Experiment;
   onStatusChange: (id: ExperimentID, env: ExperimentEnvironment, enabled: boolean) => void;
 }
 
-export const ExperimentPanel = ({ experiment, onStatusChange }: Props) => {
+export const ExperimentListItem = ({ experiment, onStatusChange }: Props) => {
   const { id, status, isActive, name, description, solutions } = experiment;
   const { isEnabled, isOverride } = status;
 
   return (
-    <EuiPanel
+    <EuiFlexItem
       className={classnames({
         experimentListItem: true,
         'experimentListItem--isOverridden': isOverride,
@@ -39,11 +48,6 @@ export const ExperimentPanel = ({ experiment, onStatusChange }: Props) => {
       })}
     >
       <EuiFlexGroup gutterSize="m">
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="xs" direction="column">
-            <ExperimentBadge {...{ isEnabled, isActive }} />
-          </EuiFlexGroup>
-        </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="xs">
             <EuiFlexItem grow={false}>
@@ -52,7 +56,7 @@ export const ExperimentPanel = ({ experiment, onStatusChange }: Props) => {
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <div style={{ marginTop: -2 }}>
+              <div className="experimentListItem__solutions">
                 {solutions.map((solution) => (
                   <EuiBadge key={solution}>{solution}</EuiBadge>
                 ))}
@@ -61,10 +65,15 @@ export const ExperimentPanel = ({ experiment, onStatusChange }: Props) => {
             <EuiFlexItem>
               <EuiText size="s">{description}</EuiText>
             </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText size="s" color="subdued">
+                {isActive ? strings.getEnabledStatusMessage() : strings.getDisabledStatusMessage()}
+              </EuiText>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiFormFieldset legend={{ children: 'Override flags' }}>
             {environmentNames.map((env) => {
               const envStatus = status[env];
               if (envStatus !== undefined) {
@@ -78,9 +87,9 @@ export const ExperimentPanel = ({ experiment, onStatusChange }: Props) => {
                 );
               }
             })}
-          </EuiFlexGroup>
+          </EuiFormFieldset>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPanel>
+    </EuiFlexItem>
   );
 };
