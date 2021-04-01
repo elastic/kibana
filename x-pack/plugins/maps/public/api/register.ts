@@ -7,7 +7,6 @@
 
 import type { SourceRegistryEntry } from '../classes/sources/source_registry';
 import type { LayerWizard } from '../classes/layers/layer_wizard_registry';
-import type { EMSTermJoinConfig, SampleValuesConfig } from '../ems_autosuggest';
 import { lazyLoadMapModules } from '../lazy_load_bundle';
 
 export async function registerLayerWizard(layerWizard: LayerWizard): Promise<void> {
