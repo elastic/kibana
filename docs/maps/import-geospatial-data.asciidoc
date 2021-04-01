@@ -12,7 +12,7 @@ Choose an import tool based on the format of your geospatial data.
 
 The {stack-security-features} provide roles and privileges that control which users can upload files.
 You can manage your roles, privileges, and
-spaces in the **{stack-manage-app}** in {kib}. For more information, see
+spaces in **{stack-manage-app}** in {kib}. For more information, see
 {ref}/security-privileges.html[Security privileges],
 <<kibana-privileges, {kib} privileges>>, and <<xpack-kibana-role-management, {kib} role management>>.
 
