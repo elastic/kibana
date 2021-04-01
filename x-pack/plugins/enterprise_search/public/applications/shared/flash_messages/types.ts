@@ -16,10 +16,9 @@ export interface IFlashMessage {
   description?: ReactNode;
 }
 
-// @see EuiGlobalToastListToast
-export interface IToast {
-  id: string;
-  title?: ReactNode;
-  text?: ReactChild;
-  toastLifeTimeMs?: number;
+// @see EuiGlobalToastListToast for more props
+export interface ToastOptions {
+  text?: ReactChild; // Additional text below the message/title, same as IFlashMessage['description']
+  toastLifeTimeMs?: number; // Allows customing per-toast timeout
+  id?: string;
 }

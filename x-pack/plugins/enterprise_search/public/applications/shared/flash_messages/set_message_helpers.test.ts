@@ -80,40 +80,76 @@ describe('Flash Message Helpers', () => {
       FlashMessagesLogic.actions.clearToastMessages();
     });
 
-    it('flashSuccessToast', () => {
-      flashSuccessToast({
-        id: 'successToastMessage',
-        title: 'You did a thing!',
-        toastLifeTimeMs: 500,
+    describe('without optional args', () => {
+      beforeEach(() => {
+        jest.spyOn(global.Date, 'now').mockReturnValueOnce(1234567890);
       });
 
-      expect(FlashMessagesLogic.values.toastMessages).toEqual([
-        {
-          color: 'success',
-          iconType: 'check',
-          id: 'successToastMessage',
-          title: 'You did a thing!',
-          toastLifeTimeMs: 500,
-        },
-      ]);
+      it('flashSuccessToast', () => {
+        flashSuccessToast('You did a thing!');
+
+        expect(FlashMessagesLogic.values.toastMessages).toEqual([
+          {
+            color: 'success',
+            iconType: 'check',
+            title: 'You did a thing!',
+            id: 'successToast-1234567890',
+          },
+        ]);
+      });
+
+      it('flashErrorToast', () => {
+        flashErrorToast('Something went wrong');
+
+        expect(FlashMessagesLogic.values.toastMessages).toEqual([
+          {
+            color: 'danger',
+            iconType: 'alert',
+            title: 'Something went wrong',
+            id: 'errorToast-1234567890',
+          },
+        ]);
+      });
     });
 
-    it('flashErrorToast', () => {
-      flashErrorToast({
-        id: 'errorToastMessage',
-        title: 'Something went wrong',
-        text: "Here's some helpful advice on what to do",
+    describe('with optional args', () => {
+      it('flashSuccessToast', () => {
+        flashSuccessToast('You did a thing!', {
+          text: '<button>View new thing</button>',
+          toastLifeTimeMs: 50,
+          id: 'customId',
+        });
+
+        expect(FlashMessagesLogic.values.toastMessages).toEqual([
+          {
+            color: 'success',
+            iconType: 'check',
+            title: 'You did a thing!',
+            text: '<button>View new thing</button>',
+            toastLifeTimeMs: 50,
+            id: 'customId',
+          },
+        ]);
       });
 
-      expect(FlashMessagesLogic.values.toastMessages).toEqual([
-        {
-          color: 'danger',
-          iconType: 'alert',
-          id: 'errorToastMessage',
-          title: 'Something went wrong',
+      it('flashErrorToast', () => {
+        flashErrorToast('Something went wrong', {
           text: "Here's some helpful advice on what to do",
-        },
-      ]);
+          toastLifeTimeMs: 50000,
+          id: 'specificErrorId',
+        });
+
+        expect(FlashMessagesLogic.values.toastMessages).toEqual([
+          {
+            color: 'danger',
+            iconType: 'alert',
+            title: 'Something went wrong',
+            text: "Here's some helpful advice on what to do",
+            toastLifeTimeMs: 50000,
+            id: 'specificErrorId',
+          },
+        ]);
+      });
     });
   });
 });

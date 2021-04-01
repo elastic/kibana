@@ -211,9 +211,7 @@ describe('ApiLogsLogic', () => {
           ApiLogsLogic.actions.fetchApiLogs({ isPoll: true });
           await nextTick();
 
-          expect(flashErrorToast).toHaveBeenCalledWith({
-            id: 'apiLogsPollError',
-            title: 'Could not refresh API log data',
+          expect(flashErrorToast).toHaveBeenCalledWith('Could not refresh API log data', {
             text: expect.stringContaining('Please check your connection'),
             toastLifeTimeMs: 3750,
           });

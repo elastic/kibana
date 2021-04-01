@@ -7,7 +7,7 @@
 
 import { FLASH_MESSAGE_TYPES } from './constants';
 import { FlashMessagesLogic } from './flash_messages_logic';
-import { IToast } from './types';
+import { ToastOptions } from './types';
 
 export const setSuccessMessage = (message: string) => {
   FlashMessagesLogic.actions.setFlashMessages({
@@ -41,16 +41,20 @@ export const clearFlashMessages = () => {
   FlashMessagesLogic.actions.clearFlashMessages();
 };
 
-export const flashSuccessToast = (toast: IToast) => {
+export const flashSuccessToast = (message: string, toastOptions: ToastOptions = {}) => {
   FlashMessagesLogic.actions.addToastMessage({
     ...FLASH_MESSAGE_TYPES.success,
-    ...toast,
+    ...toastOptions,
+    title: message,
+    id: toastOptions?.id || `successToast-${Date.now()}`,
   });
 };
 
-export const flashErrorToast = (toast: IToast) => {
+export const flashErrorToast = (message: string, toastOptions: ToastOptions = {}) => {
   FlashMessagesLogic.actions.addToastMessage({
     ...FLASH_MESSAGE_TYPES.error,
-    ...toast,
+    ...toastOptions,
+    title: message,
+    id: toastOptions?.id || `errorToast-${Date.now()}`,
   });
 };

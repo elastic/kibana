@@ -117,6 +117,10 @@ export const ApiLogsLogic = kea<MakeLogicType<ApiLogsValues, ApiLogsActions>>({
         // while polls are stored in-state until the user manually triggers the 'Refresh' action
         if (isPoll) {
           actions.onPollInterval(response);
+          flashErrorToast(POLLING_ERROR_TITLE, {
+            text: POLLING_ERROR_TEXT,
+            toastLifeTimeMs: POLLING_DURATION * 0.75,
+          });
         } else {
           actions.updateView(response);
         }
@@ -124,9 +128,7 @@ export const ApiLogsLogic = kea<MakeLogicType<ApiLogsValues, ApiLogsActions>>({
         if (isPoll) {
           // If polling fails, it will typically be due to http connection -
           // we should send a more human-readable message if so
-          flashErrorToast({
-            id: 'apiLogsPollError',
-            title: POLLING_ERROR_TITLE,
+          flashErrorToast(POLLING_ERROR_TITLE, {
             text: POLLING_ERROR_TEXT,
             toastLifeTimeMs: POLLING_DURATION * 0.75,
           });
