@@ -54,7 +54,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await testSubjects.click('rulesTab');
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/95590
+  // FLAKY: https://github.com/elastic/kibana/issues/95591
   describe.skip('alerts list', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
@@ -129,13 +129,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.triggersActionsUI.toggleSwitch('disableSwitch');
 
-      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-
-      await testSubjects.click('collapsedItemActions');
-
-      const disableSwitchAfterDisable = await testSubjects.find('disableSwitch');
-      const isChecked = await disableSwitchAfterDisable.getAttribute('aria-checked');
-      expect(isChecked).to.eql('true');
+      await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
+        createdAlert.name,
+        'disableSwitch',
+        'true'
+      );
     });
 
     it('should re-enable single alert', async () => {
@@ -147,19 +145,23 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.triggersActionsUI.toggleSwitch('disableSwitch');
 
+      await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
+        createdAlert.name,
+        'disableSwitch',
+        'true'
+      );
+
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       await testSubjects.click('collapsedItemActions');
 
       await pageObjects.triggersActionsUI.toggleSwitch('disableSwitch');
 
-      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-
-      await testSubjects.click('collapsedItemActions');
-
-      const disableSwitchAfterReEnable = await testSubjects.find('disableSwitch');
-      const isChecked = await disableSwitchAfterReEnable.getAttribute('aria-checked');
-      expect(isChecked).to.eql('false');
+      await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
+        createdAlert.name,
+        'disableSwitch',
+        'false'
+      );
     });
 
     it('should mute single alert', async () => {
@@ -171,13 +173,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.triggersActionsUI.toggleSwitch('muteSwitch');
 
-      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-
-      await testSubjects.click('collapsedItemActions');
-
-      const muteSwitchAfterMute = await testSubjects.find('muteSwitch');
-      const isChecked = await muteSwitchAfterMute.getAttribute('aria-checked');
-      expect(isChecked).to.eql('true');
+      await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
+        createdAlert.name,
+        'muteSwitch',
+        'true'
+      );
     });
 
     it('should unmute single alert', async () => {
@@ -189,19 +189,23 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await pageObjects.triggersActionsUI.toggleSwitch('muteSwitch');
 
+      await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
+        createdAlert.name,
+        'muteSwitch',
+        'true'
+      );
+
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       await testSubjects.click('collapsedItemActions');
 
       await pageObjects.triggersActionsUI.toggleSwitch('muteSwitch');
 
-      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
-
-      await testSubjects.click('collapsedItemActions');
-
-      const muteSwitchAfterUnmute = await testSubjects.find('muteSwitch');
-      const isChecked = await muteSwitchAfterUnmute.getAttribute('aria-checked');
-      expect(isChecked).to.eql('false');
+      await pageObjects.triggersActionsUI.ensureRuleActionToggleApplied(
+        createdAlert.name,
+        'muteSwitch',
+        'false'
+      );
     });
 
     it('should delete single alert', async () => {
