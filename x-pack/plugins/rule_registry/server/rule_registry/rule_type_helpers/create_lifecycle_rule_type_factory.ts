@@ -17,7 +17,7 @@ import { RuleRegistry } from '..';
 
 type UserDefinedAlertFields<TFieldMap extends DefaultFieldMap> = Omit<
   OutputOfFieldMap<TFieldMap>,
-  PrepopulatedRuleEventFields | 'alert.id' | 'alert.uuid' | '@timestamp'
+  PrepopulatedRuleEventFields | 'kibana.rac.alert.id' | 'kibana.rac.alert.uuid' | '@timestamp'
 >;
 
 type LifecycleAlertService<
