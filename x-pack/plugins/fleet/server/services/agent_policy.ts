@@ -397,7 +397,7 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     options?: { user?: AuthenticatedUser }
-  ): Promise<Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>>> {
+  ): Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>> {
     const currentPolicies = await soClient.find<AgentPolicySOAttributes>({
       type: SAVED_OBJECT_TYPE,
       fields: ['revision'],
