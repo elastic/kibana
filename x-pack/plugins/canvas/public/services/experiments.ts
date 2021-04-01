@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { experimentIDs, Experiment, ExperimentID } from 'src/plugins/presentation_util/common';
+import {
+  experimentIDs,
+  Experiment,
+  ExperimentID,
+} from '../../../../../src/plugins/presentation_util/common';
 
 import { CanvasServiceFactory } from '.';
 
