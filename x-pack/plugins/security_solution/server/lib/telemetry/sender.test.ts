@@ -70,6 +70,7 @@ describe('TelemetryEventsSender', () => {
           process: {
             name: 'foo.exe',
             nope: 'nope',
+            executable: null, // null fields are never allowlisted
           },
           Target: {
             process: {
