@@ -9,7 +9,6 @@ import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { SerializableState } from 'src/plugins/kibana_utils/common';
-import { reactRouterNavigate } from 'src/plugins/kibana_react/public';
 import {
   PublicDrilldownManagerProps,
   DrilldownManagerDependencies,
@@ -122,6 +121,8 @@ export class DrilldownManagerState {
    * license tier.
    */
   public readonly canUnlockMoreDrilldowns: boolean;
+
+  public lastCloneRecord: null | { time: number; templateIds: string[] } = null;
 
   constructor(public readonly deps: DrilldownManagerStateDeps) {
     const hideWelcomeMessage = deps.storage.get(helloMessageStorageKey);
@@ -326,6 +327,10 @@ export class DrilldownManagerState {
       await this.cloneTemplate(template);
     }
 
+    this.lastCloneRecord = {
+      time: Date.now(),
+      templateIds,
+    };
     this.setRoute(['manage']);
   };
 
