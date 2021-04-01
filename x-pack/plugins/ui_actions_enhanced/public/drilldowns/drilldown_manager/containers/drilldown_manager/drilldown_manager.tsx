@@ -18,7 +18,9 @@ export const DrilldownManager: React.FC = ({}) => {
   const route = drilldowns.useRoute();
 
   const handleBack =
-    route.length < 2 ? undefined : () => drilldowns.setRoute(route.slice(0, route.length - 1));
+    route.length < 2
+      ? () => drilldowns.deps.onClose()
+      : () => drilldowns.setRoute(route.slice(0, route.length - 1));
 
   return (
     <FlyoutFrame
