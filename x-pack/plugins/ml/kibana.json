@@ -39,7 +39,8 @@
     "dashboard",
     "savedObjects",
     "home",
-    "maps"
+    "maps",
+    "vis_type_vega"
   ],
   "extraPublicDirs": [
     "common"

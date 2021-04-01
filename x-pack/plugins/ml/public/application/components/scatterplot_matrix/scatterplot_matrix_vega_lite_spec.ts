@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import type { TopLevelSpec } from 'vega-lite';
+// import type { TopLevelSpec } from 'vega-lite';
 
 import euiThemeLight from '@elastic/eui/dist/eui_theme_light.json';
 
 import { euiPaletteColorBlind, euiPaletteNegative, euiPalettePositive } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+
+import type { TopLevelSpec } from '../../../../../../../src/plugins/vis_type_vega/public';
 
 import { LegendType, LEGEND_TYPES } from '../vega_chart/common';
 

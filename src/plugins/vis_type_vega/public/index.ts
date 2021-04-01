@@ -6,6 +6,12 @@
  * Side Public License, v 1.
  */
 
+// DRAFT PR bundle size experiment
+export type { TopLevelSpec } from 'vega-lite';
+import { compile } from 'vega-lite';
+import { parse, View, Warn } from 'vega';
+import { Handler } from 'vega-tooltip';
+
 import { PluginInitializerContext } from 'kibana/public';
 import { ConfigSchema } from '../config';
 import { VegaPlugin as Plugin } from './plugin';
@@ -13,3 +19,12 @@ import { VegaPlugin as Plugin } from './plugin';
 export function plugin(initializerContext: PluginInitializerContext<ConfigSchema>) {
   return new Plugin(initializerContext);
 }
+
+// DRAFT PR bundle size experiment
+export const mlDraftExport = {
+  compile,
+  parse,
+  View,
+  Warn,
+  Handler,
+};

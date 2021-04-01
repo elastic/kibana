@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { compile } from 'vega-lite';
+// import { compile } from 'vega-lite';
+import { mlDraftExport } from '../../../../../../../src/plugins/vis_type_vega/public';
+const { compile } = mlDraftExport;
 
 import euiThemeLight from '@elastic/eui/dist/eui_theme_light.json';
 

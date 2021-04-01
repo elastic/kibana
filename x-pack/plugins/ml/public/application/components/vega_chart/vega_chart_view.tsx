@@ -7,12 +7,16 @@
 
 import React, { useMemo, useEffect, FC } from 'react';
 
-import type { TopLevelSpec } from 'vega-lite';
-import { compile } from 'vega-lite';
-import { parse, View, Warn } from 'vega';
-import { Handler } from 'vega-tooltip';
+// import type { TopLevelSpec } from 'vega-lite';
+// import { compile } from 'vega-lite';
+// import { parse, View, Warn } from 'vega';
+// import { Handler } from 'vega-tooltip';
 
 import { htmlIdGenerator } from '@elastic/eui';
+
+import type { TopLevelSpec } from '../../../../../../../src/plugins/vis_type_vega/public';
+import { mlDraftExport } from '../../../../../../../src/plugins/vis_type_vega/public';
+const { compile, parse, View, Warn, Handler } = mlDraftExport;
 
 export interface VegaChartViewProps {
   vegaSpec: TopLevelSpec;
