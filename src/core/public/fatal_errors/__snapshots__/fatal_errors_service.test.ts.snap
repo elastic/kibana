@@ -4,10 +4,15 @@ exports[`#add() deletes all children of rootDomElement and renders <FatalErrorSc
 Array [
   Array [
     <I18nContext>
-      <FatalErrorsScreen
-        errorInfo$={Rx.Observable}
-        kibanaVersion="kibanaVersion"
-      />
+      <React.Suspense
+        fallback={<EuiLoadingSpinner />}
+      >
+        <UNDEFINED
+          buildNumber={42}
+          errorInfo$={Rx.Observable}
+          kibanaVersion="kibanaVersion"
+        />
+      </React.Suspense>
     </I18nContext>,
     <div />,
   ],

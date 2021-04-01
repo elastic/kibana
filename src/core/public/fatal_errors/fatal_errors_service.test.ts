@@ -41,8 +41,15 @@ function setupService() {
   };
 }
 
+let consoleErrorSpy: jest.SpyInstance;
+
+beforeEach(() => {
+  consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+});
+
 afterEach(() => {
   jest.resetAllMocks();
+  jest.restoreAllMocks();
 });
 
 describe('#add()', () => {
@@ -72,6 +79,18 @@ describe('#add()', () => {
     }).toThrowError();
     expect(rootDomElement).toMatchSnapshot('fatal error screen container');
     expect(mockRender.mock.calls).toMatchSnapshot('fatal error screen component');
+  });
+
+  it('logs the error in the console', () => {
+    const { fatalErrors } = setupService();
+
+    const error = new Error('foo');
+
+    expect(() => {
+      fatalErrors.add(error);
+    }).toThrowError();
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(error);
   });
 });
 

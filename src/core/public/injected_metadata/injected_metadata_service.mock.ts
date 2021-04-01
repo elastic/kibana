@@ -29,6 +29,7 @@ const createSetupContractMock = () => {
   setupContract.getExternalUrlConfig.mockReturnValue({ policy: [] });
   setupContract.getKibanaVersion.mockReturnValue('kibanaVersion');
   setupContract.getAnonymousStatusPage.mockReturnValue(false);
+  setupContract.getKibanaBuildNumber.mockReturnValue(42);
   setupContract.getLegacyMetadata.mockReturnValue({
     app: {
       id: 'foo',
