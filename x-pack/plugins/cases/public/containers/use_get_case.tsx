@@ -9,7 +9,7 @@ import { useEffect, useReducer, useCallback, useRef } from 'react';
 
 import { Case } from './types';
 import * as i18n from './translations';
-import { errorToToaster, useStateToaster } from '../components/toasters';
+import { useToasts } from '../common/lib/kibana';
 import { getCase, getSubCase } from './api';
 
 interface CaseState {
@@ -66,7 +66,7 @@ export const useGetCase = (caseId: string, subCaseId?: string): UseGetCase => {
     isError: false,
     data: null,
   });
-  const [, dispatchToaster] = useStateToaster();
+  const toasts = useToasts();
   const isCancelledRef = useRef(false);
   const abortCtrlRef = useRef(new AbortController());
 
@@ -91,11 +91,10 @@ export const useGetCase = (caseId: string, subCaseId?: string): UseGetCase => {
     } catch (error) {
       if (!isCancelledRef.current) {
         if (error.name !== 'AbortError') {
-          errorToToaster({
-            title: i18n.ERROR_TITLE,
-            error: error.body && error.body.message ? new Error(error.body.message) : error,
-            dispatchToaster,
-          });
+          toasts.addError(
+            error.body && error.body.message ? new Error(error.body.message) : error,
+            { title: i18n.ERROR_TITLE }
+          );
         }
         dispatch({ type: 'FETCH_FAILURE' });
       }

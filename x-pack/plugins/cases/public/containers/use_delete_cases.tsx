@@ -6,10 +6,10 @@
  */
 
 import { useCallback, useReducer, useRef, useEffect } from 'react';
-import { displaySuccessToast, errorToToaster, useStateToaster } from '../components/toasters';
 import * as i18n from './translations';
 import { deleteCases, deleteSubCases } from './api';
 import { DeleteCase } from './types';
+import { useToasts } from '../common/lib/kibana';
 
 interface DeleteState {
   isDisplayConfirmDeleteModal: boolean;
@@ -73,7 +73,7 @@ export const useDeleteCases = (): UseDeleteCase => {
     isError: false,
     isDeleted: false,
   });
-  const [, dispatchToaster] = useStateToaster();
+  const toasts = useToasts();
   const isCancelledRef = useRef(false);
   const abortCtrlRef = useRef(new AbortController());
 
@@ -94,19 +94,17 @@ export const useDeleteCases = (): UseDeleteCase => {
 
       if (!isCancelledRef.current) {
         dispatch({ type: 'FETCH_SUCCESS', payload: true });
-        displaySuccessToast(
-          i18n.DELETED_CASES(cases.length, cases.length === 1 ? cases[0].title : ''),
-          dispatchToaster
+        toasts.addSuccess(
+          i18n.DELETED_CASES(cases.length, cases.length === 1 ? cases[0].title : '')
         );
       }
     } catch (error) {
       if (!isCancelledRef.current) {
         if (error.name !== 'AbortError') {
-          errorToToaster({
-            title: i18n.ERROR_DELETING,
-            error: error.body && error.body.message ? new Error(error.body.message) : error,
-            dispatchToaster,
-          });
+          toasts.addError(
+            error.body && error.body.message ? new Error(error.body.message) : error,
+            { title: i18n.ERROR_DELETING }
+          );
         }
         dispatch({ type: 'FETCH_FAILURE' });
       }

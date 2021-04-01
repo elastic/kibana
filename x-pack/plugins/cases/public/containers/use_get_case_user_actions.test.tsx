@@ -23,6 +23,7 @@ import {
 import * as api from './api';
 
 jest.mock('./api');
+jest.mock('../common/lib/kibana');
 
 describe('useGetCaseUserActions', () => {
   const abortCtrl = new AbortController();

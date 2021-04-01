@@ -11,7 +11,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../../../../common/constants';
-import { errorToToaster, useStateToaster } from '../../../components/toasters';
 import { AuthenticatedUser } from '../../../../../security/common/model';
 import { convertToCamelCase } from '../../../containers/utils';
 import { StartServices } from '../../../types';
@@ -53,7 +52,7 @@ export interface AuthenticatedElasticUser {
 export const useCurrentUser = (): AuthenticatedElasticUser | null => {
   const [user, setUser] = useState<AuthenticatedElasticUser | null>(null);
 
-  const [, dispatchToaster] = useStateToaster();
+  const toasts = useToasts();
 
   const { security } = useKibana().services;
 
@@ -82,13 +81,14 @@ export const useCurrentUser = (): AuthenticatedElasticUser | null => {
         }
       } catch (error) {
         if (!didCancel) {
-          errorToToaster({
-            title: i18n.translate('xpack.cases.getCurrentUser.Error', {
-              defaultMessage: 'Error getting user',
-            }),
-            error: error.body && error.body.message ? new Error(error.body.message) : error,
-            dispatchToaster,
-          });
+          toasts.addError(
+            error.body && error.body.message ? new Error(error.body.message) : error,
+            {
+              title: i18n.translate('xpack.cases.getCurrentUser.Error', {
+                defaultMessage: 'Error getting user',
+              }),
+            }
+          );
           setUser(null);
         }
       }
@@ -97,7 +97,7 @@ export const useCurrentUser = (): AuthenticatedElasticUser | null => {
     return () => {
       didCancel = true;
     };
-  }, [dispatchToaster, security]);
+  }, [security, toasts]);
 
   useEffect(() => {
     fetchUser();

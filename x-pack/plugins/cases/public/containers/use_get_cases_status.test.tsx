@@ -11,6 +11,7 @@ import { casesStatus } from './mock';
 import * as api from './api';
 
 jest.mock('./api');
+jest.mock('../common/lib/kibana');
 
 describe('useGetCasesStatus', () => {
   const abortCtrl = new AbortController();

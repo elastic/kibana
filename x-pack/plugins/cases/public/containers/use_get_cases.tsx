@@ -16,7 +16,7 @@ import {
   StatusAll,
   UpdateByKey,
 } from './types';
-import { errorToToaster, useStateToaster } from '../components/toasters';
+import { useToasts } from '../common/lib/kibana';
 import * as i18n from './translations';
 import { getCases, patchCase } from './api';
 
@@ -149,7 +149,7 @@ export const useGetCases = (
     queryParams: { ...DEFAULT_QUERY_PARAMS, ...initialQueryParams },
     selectedCases: [],
   });
-  const [, dispatchToaster] = useStateToaster();
+  const toasts = useToasts();
   const didCancelFetchCases = useRef(false);
   const didCancelUpdateCases = useRef(false);
   const abortCtrlFetchCases = useRef(new AbortController());
@@ -190,17 +190,16 @@ export const useGetCases = (
       } catch (error) {
         if (!didCancelFetchCases.current) {
           if (error.name !== 'AbortError') {
-            errorToToaster({
-              title: i18n.ERROR_TITLE,
-              error: error.body && error.body.message ? new Error(error.body.message) : error,
-              dispatchToaster,
-            });
+            toasts.addError(
+              error.body && error.body.message ? new Error(error.body.message) : error,
+              { title: i18n.ERROR_TITLE }
+            );
           }
           dispatch({ type: 'FETCH_FAILURE', payload: 'cases' });
         }
       }
     },
-    [dispatchToaster]
+    [toasts]
   );
 
   const dispatchUpdateCaseProperty = useCallback(
@@ -227,7 +226,7 @@ export const useGetCases = (
       } catch (error) {
         if (!didCancelUpdateCases.current) {
           if (error.name !== 'AbortError') {
-            errorToToaster({ title: i18n.ERROR_TITLE, error, dispatchToaster });
+            toasts.addError(error, { title: i18n.ERROR_TITLE });
           }
           dispatch({ type: 'FETCH_FAILURE', payload: 'caseUpdate' });
         }

@@ -11,6 +11,7 @@ import { basicCase, basicCaseCommentPatch, basicSubCaseId } from './mock';
 import * as api from './api';
 
 jest.mock('./api');
+jest.mock('../common/lib/kibana');
 
 describe('useUpdateComment', () => {
   const abortCtrl = new AbortController();

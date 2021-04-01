@@ -11,6 +11,7 @@ import { reporters, respReporters } from './mock';
 import * as api from './api';
 
 jest.mock('./api');
+jest.mock('../common/lib/kibana');
 
 describe('useGetReporters', () => {
   const abortCtrl = new AbortController();

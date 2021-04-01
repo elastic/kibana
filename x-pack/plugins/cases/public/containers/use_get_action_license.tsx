@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useState, useRef } from 'react';
 
-import { errorToToaster, useStateToaster } from '../components/toasters';
+import { useToasts } from '../common/lib/kibana';
 import { getActionLicense } from './api';
 import * as i18n from './translations';
 import { ActionLicense } from './types';
@@ -28,7 +28,7 @@ const MINIMUM_LICENSE_REQUIRED_CONNECTOR = '.jira';
 
 export const useGetActionLicense = (): ActionLicenseState => {
   const [actionLicenseState, setActionLicensesState] = useState<ActionLicenseState>(initialData);
-  const [, dispatchToaster] = useStateToaster();
+  const toasts = useToasts();
   const isCancelledRef = useRef(false);
   const abortCtrlRef = useRef(new AbortController());
 
@@ -54,11 +54,10 @@ export const useGetActionLicense = (): ActionLicenseState => {
     } catch (error) {
       if (!isCancelledRef.current) {
         if (error.name !== 'AbortError') {
-          errorToToaster({
-            title: i18n.ERROR_TITLE,
-            error: error.body && error.body.message ? new Error(error.body.message) : error,
-            dispatchToaster,
-          });
+          toasts.addError(
+            error.body && error.body.message ? new Error(error.body.message) : error,
+            { title: i18n.ERROR_TITLE }
+          );
         }
 
         setActionLicensesState({

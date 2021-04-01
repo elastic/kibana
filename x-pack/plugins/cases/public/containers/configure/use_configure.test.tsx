@@ -16,13 +16,19 @@ import { mappings, caseConfigurationCamelCaseResponseMock } from './mock';
 import * as api from './api';
 import { ConnectorTypes } from '../../../common';
 
+const mockErrorToast = jest.fn();
+const mockSuccessToast = jest.fn();
 jest.mock('./api');
-const mockErrorToToaster = jest.fn();
-jest.mock('../../components/toasters', () => {
-  const original = jest.requireActual('../../components/toasters');
+jest.mock('../../common/lib/kibana', () => {
+  const originalModule = jest.requireActual('../../common/lib/kibana');
   return {
-    ...original,
-    errorToToaster: () => mockErrorToToaster(),
+    ...originalModule,
+    useToasts: () => {
+      return {
+        addError: mockErrorToast,
+        addSuccess: mockSuccessToast,
+      };
+    },
   };
 });
 const configuration: ConnectorConfiguration = {
@@ -164,7 +170,7 @@ describe('useConfigure', () => {
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
-      expect(mockErrorToToaster).not.toHaveBeenCalled();
+      expect(mockErrorToast).not.toHaveBeenCalled();
 
       result.current.persistCaseConfigure(configuration);
 
@@ -190,7 +196,7 @@ describe('useConfigure', () => {
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
-      expect(mockErrorToToaster).toHaveBeenCalled();
+      expect(mockErrorToast).toHaveBeenCalled();
     });
   });
 
@@ -219,12 +225,12 @@ describe('useConfigure', () => {
       );
       await waitForNextUpdate();
       await waitForNextUpdate();
-      expect(mockErrorToToaster).not.toHaveBeenCalled();
+      expect(mockErrorToast).not.toHaveBeenCalled();
 
       result.current.persistCaseConfigure(configuration);
-      expect(mockErrorToToaster).not.toHaveBeenCalled();
+      expect(mockErrorToast).not.toHaveBeenCalled();
       await waitForNextUpdate();
-      expect(mockErrorToToaster).toHaveBeenCalled();
+      expect(mockErrorToast).toHaveBeenCalled();
     });
   });
 

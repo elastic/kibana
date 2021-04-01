@@ -19,6 +19,7 @@ import { allCases, basicCase } from './mock';
 import * as api from './api';
 
 jest.mock('./api');
+jest.mock('../common/lib/kibana');
 
 describe('useGetCases', () => {
   const abortCtrl = new AbortController();

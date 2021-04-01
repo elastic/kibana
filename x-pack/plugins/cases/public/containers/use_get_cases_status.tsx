@@ -7,10 +7,10 @@
 
 import { useCallback, useEffect, useState, useRef } from 'react';
 
-import { errorToToaster, useStateToaster } from '../components/toasters';
 import { getCasesStatus } from './api';
 import * as i18n from './translations';
 import { CasesStatus } from './types';
+import { useToasts } from '../common/lib/kibana';
 
 interface CasesStatusState extends CasesStatus {
   isLoading: boolean;
@@ -31,7 +31,7 @@ export interface UseGetCasesStatus extends CasesStatusState {
 
 export const useGetCasesStatus = (): UseGetCasesStatus => {
   const [casesStatusState, setCasesStatusState] = useState<CasesStatusState>(initialData);
-  const [, dispatchToaster] = useStateToaster();
+  const toasts = useToasts();
   const isCancelledRef = useRef(false);
   const abortCtrlRef = useRef(new AbortController());
 
@@ -57,11 +57,10 @@ export const useGetCasesStatus = (): UseGetCasesStatus => {
     } catch (error) {
       if (!isCancelledRef.current) {
         if (error.name !== 'AbortError') {
-          errorToToaster({
-            title: i18n.ERROR_TITLE,
-            error: error.body && error.body.message ? new Error(error.body.message) : error,
-            dispatchToaster,
-          });
+          toasts.addError(
+            error.body && error.body.message ? new Error(error.body.message) : error,
+            { title: i18n.ERROR_TITLE }
+          );
         }
         setCasesStatusState({
           countClosedCases: 0,

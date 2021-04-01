@@ -7,11 +7,11 @@
 
 import { useReducer, useCallback, useRef, useEffect } from 'react';
 import { CaseConnector } from '../../common';
-import { errorToToaster, useStateToaster, displaySuccessToast } from '../components/toasters';
 
 import { pushCase } from './api';
 import * as i18n from './translations';
 import { Case } from './types';
+import { useToasts } from '../common/lib/kibana';
 
 interface PushToServiceState {
   isLoading: boolean;
@@ -61,7 +61,7 @@ export const usePostPushToService = (): UsePostPushToService => {
     isLoading: false,
     isError: false,
   });
-  const [, dispatchToaster] = useStateToaster();
+  const toasts = useToasts();
   const cancel = useRef(false);
   const abortCtrlRef = useRef(new AbortController());
 
@@ -77,21 +77,17 @@ export const usePostPushToService = (): UsePostPushToService => {
 
         if (!cancel.current) {
           dispatch({ type: 'FETCH_SUCCESS' });
-          displaySuccessToast(
-            i18n.SUCCESS_SEND_TO_EXTERNAL_SERVICE(connector.name),
-            dispatchToaster
-          );
+          toasts.addSuccess(i18n.SUCCESS_SEND_TO_EXTERNAL_SERVICE(connector.name));
         }
 
         return response;
       } catch (error) {
         if (!cancel.current) {
           if (error.name !== 'AbortError') {
-            errorToToaster({
-              title: i18n.ERROR_TITLE,
-              error: error.body && error.body.message ? new Error(error.body.message) : error,
-              dispatchToaster,
-            });
+            toasts.addError(
+              error.body && error.body.message ? new Error(error.body.message) : error,
+              { title: i18n.ERROR_TITLE }
+            );
           }
           dispatch({ type: 'FETCH_FAILURE' });
         }

@@ -7,7 +7,7 @@
 
 import { useReducer, useCallback, useRef, useEffect } from 'react';
 
-import { errorToToaster, useStateToaster } from '../components/toasters';
+import { useToasts } from '../common/lib/kibana';
 import { patchCase, patchSubCase } from './api';
 import { UpdateKey, UpdateByKey, CaseStatuses } from '../../common';
 import * as i18n from './translations';
@@ -68,7 +68,7 @@ export const useUpdateCase = ({
     isError: false,
     updateKey: null,
   });
-  const [, dispatchToaster] = useStateToaster();
+  const toasts = useToasts();
   const isCancelledRef = useRef(false);
   const abortCtrlRef = useRef(new AbortController());
 
@@ -111,10 +111,9 @@ export const useUpdateCase = ({
             updateCase(response[0]);
           }
           dispatch({ type: 'FETCH_SUCCESS' });
-          dispatchToaster({
-            type: 'addToaster',
-            toast: createUpdateSuccessToaster(caseData, response[0], updateKey, updateValue),
-          });
+          toasts.addSuccess(
+            createUpdateSuccessToaster(caseData, response[0], updateKey, updateValue)
+          );
 
           if (onSuccess) {
             onSuccess();
@@ -123,11 +122,10 @@ export const useUpdateCase = ({
       } catch (error) {
         if (!isCancelledRef.current) {
           if (error.name !== 'AbortError') {
-            errorToToaster({
-              title: i18n.ERROR_TITLE,
-              error: error.body && error.body.message ? new Error(error.body.message) : error,
-              dispatchToaster,
-            });
+            toasts.addError(
+              error.body && error.body.message ? new Error(error.body.message) : error,
+              { title: i18n.ERROR_TITLE }
+            );
           }
           dispatch({ type: 'FETCH_FAILURE' });
           if (onError) {

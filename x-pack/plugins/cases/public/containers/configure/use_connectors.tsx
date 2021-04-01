@@ -7,10 +7,10 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 
-import { useStateToaster, errorToToaster } from '../../components/toasters';
 import * as i18n from '../translations';
 import { fetchConnectors } from './api';
 import { ActionConnector } from './types';
+import { useToasts } from '../../common/lib/kibana';
 
 export interface UseConnectorsResponse {
   loading: boolean;
@@ -19,7 +19,7 @@ export interface UseConnectorsResponse {
 }
 
 export const useConnectors = (): UseConnectorsResponse => {
-  const [, dispatchToaster] = useStateToaster();
+  const toasts = useToasts();
   const [loading, setLoading] = useState(true);
   const [connectors, setConnectors] = useState<ActionConnector[]>([]);
   const isCancelledRef = useRef(false);
@@ -41,11 +41,10 @@ export const useConnectors = (): UseConnectorsResponse => {
     } catch (error) {
       if (!isCancelledRef.current) {
         if (error.name !== 'AbortError') {
-          errorToToaster({
-            title: i18n.ERROR_TITLE,
-            error: error.body && error.body.message ? new Error(error.body.message) : error,
-            dispatchToaster,
-          });
+          toasts.addError(
+            error.body && error.body.message ? new Error(error.body.message) : error,
+            { title: i18n.ERROR_TITLE }
+          );
         }
 
         setLoading(false);
