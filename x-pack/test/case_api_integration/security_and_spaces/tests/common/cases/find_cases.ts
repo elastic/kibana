@@ -810,6 +810,12 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .send()
           .expect(400);
+
+        await supertest
+          .get(`${CASES_URL}/_find?sortOrder=asc&namespaces=*`)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(400);
       });
 
       it('should NOT allow to pass a non supported query parameter', async () => {

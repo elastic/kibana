@@ -454,7 +454,7 @@ export const findCasesAsUser = async ({
     .get(`${getSpaceUrlPrefix(space)}${CASES_URL}/_find?sortOrder=asc&${appendToUrl}`)
     .auth(user.username, user.password)
     .set('kbn-xsrf', 'true')
-    .send({})
+    .send()
     .expect(expectedHttpCode);
 
   return res;
