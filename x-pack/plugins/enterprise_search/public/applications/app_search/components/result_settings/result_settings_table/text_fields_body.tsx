@@ -16,6 +16,7 @@ import {
   EuiTableRowCellCheckbox,
   EuiCheckbox,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { ResultSettingsLogic } from '../result_settings_logic';
 import { FieldResultSetting } from '../types';
@@ -49,6 +50,10 @@ export const TextFieldsBody: React.FC = () => {
           </EuiTableRowCell>
           <EuiTableRowCellCheckbox>
             <EuiCheckbox
+              aria-label={i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engine.resultSettings.table.rawArialLabel',
+                { defaultMessage: 'Toggle raw enabled' }
+              )}
               data-test-subj="ResultSettingRawCheckBox"
               id={`${fieldName}-raw}`}
               checked={!!fieldSettings.raw}
@@ -69,6 +74,10 @@ export const TextFieldsBody: React.FC = () => {
           </EuiTableRowCell>
           <EuiTableRowCellCheckbox>
             <EuiCheckbox
+              aria-label={i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engine.resultSettings.table.snippetArialLabel',
+                { defaultMessage: 'Toggle snippet enabled' }
+              )}
               data-test-subj="ResultSettingSnippetTextBox"
               id={`${fieldName}-snippet}`}
               checked={!!fieldSettings.snippet}
@@ -79,6 +88,10 @@ export const TextFieldsBody: React.FC = () => {
           </EuiTableRowCellCheckbox>
           <EuiTableRowCellCheckbox>
             <EuiCheckbox
+              aria-label={i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engine.resultSettings.table.snippetFallbackArialLabel',
+                { defaultMessage: 'Toggle snippet fallback enabled' }
+              )}
               data-test-subj="ResultSettingFallbackTextBox"
               id={`${fieldName}-snippetFallback}`}
               checked={fieldSettings.snippetFallback}

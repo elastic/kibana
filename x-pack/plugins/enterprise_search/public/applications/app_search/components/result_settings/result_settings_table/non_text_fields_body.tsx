@@ -16,6 +16,7 @@ import {
   EuiCheckbox,
   EuiTableRowCellCheckbox,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { ResultSettingsLogic } from '..';
 import { FieldResultSetting } from '../types';
@@ -39,6 +40,10 @@ export const NonTextFieldsBody: React.FC = () => {
           </EuiTableRowCell>
           <EuiTableRowCellCheckbox>
             <EuiCheckbox
+              aria-label={i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engine.resultSettings.table.rawArialLabel',
+                { defaultMessage: 'Toggle raw enabled' }
+              )}
               data-test-subj="ResultSettingRawCheckBox"
               id={`${fieldName}-raw}`}
               checked={!!fieldSettings.raw}
