@@ -170,7 +170,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
       // instances at the same time.
       const existsNow = await this.doesIndexTemplateExist(name);
       if (!existsNow) {
-        const error = new Error(`Could not create index template: ${err.message}`);
+        const error = new Error(`error creating index template: ${err.message}`);
         Object.assign(error, { wrapped: err });
         throw error;
       }
