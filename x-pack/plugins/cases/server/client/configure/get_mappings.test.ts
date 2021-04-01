@@ -9,7 +9,7 @@ import { ConnectorTypes } from '../../../common';
 
 import {
   createMockSavedObjectsRepository,
-  mockCaseMappings,
+  mockCaseMappingsResilient,
   mockCaseMappingsBad,
 } from '../../routes/api/__fixtures__';
 import { createCasesClientWithMockSavedObjectsClient } from '../mocks';
@@ -30,7 +30,7 @@ describe('get_mappings', () => {
   describe('happy path', () => {
     test('it gets existing mappings', async () => {
       const savedObjectsClient = createMockSavedObjectsRepository({
-        caseMappingsSavedObject: mockCaseMappings,
+        caseMappingsSavedObject: mockCaseMappingsResilient,
       });
       const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
       const res = await casesClient.client.getMappings({

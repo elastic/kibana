@@ -479,6 +479,17 @@ export const mockCaseMappings: Array<SavedObject<ConnectorMappings>> = [
     type: CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,
     id: 'mock-mappings-1',
     attributes: {
+      mappings: mappings[ConnectorTypes.jira],
+    },
+    references: [],
+  },
+];
+
+export const mockCaseMappingsResilient: Array<SavedObject<ConnectorMappings>> = [
+  {
+    type: CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,
+    id: 'mock-mappings-1',
+    attributes: {
       mappings: mappings[ConnectorTypes.resilient],
     },
     references: [],
