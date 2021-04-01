@@ -124,11 +124,10 @@ const TabComponent = (props: TabProps) => {
     region,
     false,
     {
-      interval: '>=1m',
+      interval: '1m',
       to: currentTime,
       from: currentTime - time,
       ignoreLookback: true,
-      forceInterval: true,
     }
   );
 
