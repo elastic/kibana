@@ -923,6 +923,34 @@ const migrateVislibAreaLineBarTypes: SavedObjectMigrationFn<any, any> = (doc) =>
   return doc;
 };
 
+/**
+ * [TSVB] Hide Last value indicator by default for all TSVB types except timeseries
+ */
+const hideTSVBLastValueIndicator: SavedObjectMigrationFn<any, any> = (doc) => {
+  try {
+    const visState = JSON.parse(doc.attributes.visState);
+
+    if (visState && visState.type === 'metrics' && visState.params.type !== 'timeseries')
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          visState: JSON.stringify({
+            ...visState,
+            params: {
+              ...visState.params,
+              hide_last_value_indicator: true,
+            },
+          }),
+        },
+      };
+  } catch (e) {
+    // Let it go, the data is invalid and we'll leave it as is
+  }
+
+  return doc;
+};
+
 export const visualizationSavedObjectTypeMigrations = {
   /**
    * We need to have this migration twice, once with a version prior to 7.0.0 once with a version
@@ -958,5 +986,5 @@ export const visualizationSavedObjectTypeMigrations = {
   '7.10.0': flow(migrateFilterRatioQuery, removeTSVBSearchSource),
   '7.11.0': flow(enableDataTableVisToolbar),
   '7.12.0': flow(migrateVislibAreaLineBarTypes, migrateSchema),
-  '7.13.0': flow(addSupportOfDualIndexSelectionModeInTSVB),
+  '7.13.0': flow(addSupportOfDualIndexSelectionModeInTSVB, hideTSVBLastValueIndicator),
 };

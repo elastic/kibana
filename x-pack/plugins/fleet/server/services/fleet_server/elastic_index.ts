@@ -116,6 +116,11 @@ async function createIndex(esClient: ElasticsearchClient, indexName: string, ind
       index: indexName,
       body: {
         ...indexData,
+        settings: {
+          ...(indexData.settings || {}),
+          auto_expand_replicas: '0-1',
+        },
+
         mappings: Object.assign({
           ...indexData.mappings,
           _meta: { ...(indexData.mappings._meta || {}), migrationHash },

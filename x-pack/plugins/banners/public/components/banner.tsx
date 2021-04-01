@@ -26,7 +26,7 @@ export const Banner: FC<BannerProps> = ({ bannerConfig }) => {
       }}
     >
       <div data-test-subj="bannerInnerWrapper">
-        <Markdown markdown={textContent} />
+        <Markdown markdown={textContent} openLinksInNewTab={true} />
       </div>
     </div>
   );
