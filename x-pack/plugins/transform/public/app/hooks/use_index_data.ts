@@ -23,7 +23,7 @@ import { useApi } from './use_api';
 
 import { useAppDependencies, useToastNotifications } from '../app_dependencies';
 import type { StepDefineExposedState } from '../sections/create_transform/components/step_define/common';
-import { isRuntimeMappings } from '../sections/create_transform/components/step_define/common/types';
+import { isRuntimeMappings } from '../../../common/shared_imports';
 
 export const useIndexData = (
   indexPattern: SearchItems['indexPattern'],
