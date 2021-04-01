@@ -1,20 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 import {
   SortOrderOrUndefined,
   TimestampOverrideOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 
 interface BuildEventsSearchQuery {
-  aggregations?: unknown;
+  aggregations?: Record<string, estypes.AggregationContainer>;
   index: string[];
   from: string;
   to: string;
-  filter: unknown;
+  filter?: estypes.QueryContainer;
   size: number;
   sortOrder?: SortOrderOrUndefined;
   searchAfterSortId: string | number | undefined;
@@ -47,7 +48,7 @@ export const buildEventsSearchQuery = ({
       ? timestampOverride
       : '@timestamp';
 
-  const rangeFilter: unknown[] = [
+  const rangeFilter: estypes.QueryContainer[] = [
     {
       range: {
         [sortField]: {
@@ -69,13 +70,15 @@ export const buildEventsSearchQuery = ({
       },
     });
   }
-  const filterWithTime = [filter, { bool: { filter: rangeFilter } }];
+  // @ts-expect-error undefined in not assignable to QueryContainer
+  // but tests contain undefined, so I suppose it's desired behaviour
+  const filterWithTime: estypes.QueryContainer[] = [filter, { bool: { filter: rangeFilter } }];
 
   const searchQuery = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index,
     size,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       docvalue_fields: docFields,
       query: {
@@ -88,11 +91,18 @@ export const buildEventsSearchQuery = ({
           ],
         },
       },
+      fields: [
+        {
+          field: '*',
+          include_unmapped: true,
+        },
+      ],
       ...(aggregations ? { aggregations } : {}),
       sort: [
         {
           [sortField]: {
             order: sortOrder ?? 'asc',
+            unmapped_type: 'date',
           },
         },
       ],

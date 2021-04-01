@@ -9,10 +9,11 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Microsoft Build Engine Started by a Script Process",
   "query": "event.category:process and event.type: start and process.name:MSBuild.exe and process.parent.name:(cmd.exe or powershell.exe or cscript.exe or wscript.exe)",
   "risk_score": 21,
@@ -51,6 +52,7 @@
       "technique": []
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 5
+  "version": 7
 }

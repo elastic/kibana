@@ -6,10 +6,11 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "max_signals": 33,
   "name": "IIS HTTP Logging Disabled",
   "query": "event.category:process and event.type:(start or process_started) and (process.name:appcmd.exe or process.pe.original_file_name:appcmd.exe) and process.args:/dontLog\\:\\\"True\\\" and not process.parent.name:iissetup.exe",
@@ -40,6 +41,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 2
+  "version": 4
 }

@@ -6,10 +6,11 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Conhost Spawned By Suspicious Parent Process",
   "query": "event.category:process and event.type:(start or process_started) and process.name:conhost.exe and process.parent.name:(svchost.exe or lsass.exe or services.exe or smss.exe or winlogon.exe or explorer.exe or dllhost.exe or rundll32.exe or regsvr32.exe or userinit.exe or wininit.exe or spoolsv.exe or wermgr.exe or csrss.exe or ctfmon.exe)",
   "references": [
@@ -42,6 +43,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 3
 }

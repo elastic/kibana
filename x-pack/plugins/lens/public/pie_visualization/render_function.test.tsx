@@ -1,16 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { Partition, SeriesIdentifier, Settings } from '@elastic/charts';
 import {
+  Partition,
+  SeriesIdentifier,
+  Settings,
   NodeColorAccessor,
   ShapeTreeNode,
-} from '@elastic/charts/dist/chart_types/partition_chart/layout/types/viewmodel_types';
-import { HierarchyOfArrays } from '@elastic/charts/dist/chart_types/partition_chart/layout/utils/group_by_rollup';
+  HierarchyOfArrays,
+} from '@elastic/charts';
 import { shallow } from 'enzyme';
 import { LensMultiTable } from '../types';
 import { PieComponent } from './render_function';
@@ -213,7 +216,10 @@ describe('PieVisualization component', () => {
       const defaultArgs = getDefaultArgs();
       const component = shallow(<PieComponent args={{ ...args }} {...defaultArgs} />);
       component.find(Settings).first().prop('onElementClick')!([
-        [[{ groupByRollup: 6, value: 6 }], {} as SeriesIdentifier],
+        [
+          [{ groupByRollup: 6, value: 6, depth: 1, path: [], sortIndex: 1 }],
+          {} as SeriesIdentifier,
+        ],
       ]);
 
       expect(defaultArgs.onClickValue.mock.calls[0][0]).toMatchInlineSnapshot(`

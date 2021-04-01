@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiSuperDatePicker } from '@elastic/eui';
@@ -11,10 +12,7 @@ import { createMemoryHistory } from 'history';
 import React, { ReactNode } from 'react';
 import { Router } from 'react-router-dom';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
-import {
-  UrlParamsContext,
-  useUiFilters,
-} from '../../../context/url_params_context/url_params_context';
+import { UrlParamsContext } from '../../../context/url_params_context/url_params_context';
 import { IUrlParams } from '../../../context/url_params_context/types';
 import { DatePicker } from './';
 
@@ -31,9 +29,10 @@ function MockUrlParamsProvider({
   return (
     <UrlParamsContext.Provider
       value={{
-        urlParams,
+        rangeId: 0,
         refreshTimeRange: mockRefreshTimeRange,
-        uiFilters: useUiFilters(urlParams),
+        urlParams,
+        uiFilters: {},
       }}
       children={children}
     />

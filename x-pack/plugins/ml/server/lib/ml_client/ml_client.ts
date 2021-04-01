@@ -1,21 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IScopedClusterClient } from 'kibana/server';
-
 import { JobSavedObjectService } from '../../saved_objects';
 import { JobType } from '../../../common/types/saved_objects';
 
-import {
-  Job,
-  JobStats,
-  Datafeed,
-  DatafeedStats,
-} from '../../../common/types/anomaly_detection_jobs';
-import { Calendar } from '../../../common/types/calendars';
+import { Job, Datafeed } from '../../../common/types/anomaly_detection_jobs';
 import { searchProvider } from './search';
 
 import { DataFrameAnalyticsConfig } from '../../../common/types/data_frame_analytics';
@@ -108,7 +102,7 @@ export function getMlClient(
     // similar to groupIdsCheck above, however we need to load the jobs first to get the groups information
     const ids = getADJobIdsFromRequest(p);
     if (ids.length) {
-      const { body } = await mlClient.getJobs<{ jobs: Job[] }>(...p);
+      const { body } = await mlClient.getJobs(...p);
       await groupIdsCheck(p, body.jobs, filteredJobIds);
     }
   }
@@ -130,6 +124,7 @@ export function getMlClient(
     }
   }
 
+  // @ts-expect-error promise and TransportRequestPromise are incompatible. missing abort
   return {
     async closeJob(...p: Parameters<MlClient['closeJob']>) {
       await jobIdsCheck('anomaly-detector', p);
@@ -151,7 +146,7 @@ export function getMlClient(
       // deleted initially and could still fail.
       return resp;
     },
-    async deleteDatafeed(...p: any) {
+    async deleteDatafeed(...p: Parameters<MlClient['deleteDatafeed']>) {
       await datafeedIdsCheck(p);
       const resp = await mlClient.deleteDatafeed(...p);
       const [datafeedId] = getDatafeedIdsFromRequest(p);
@@ -195,9 +190,6 @@ export function getMlClient(
       await jobIdsCheck('data-frame-analytics', p);
       return mlClient.explainDataFrameAnalytics(...p);
     },
-    async findFileStructure(...p: Parameters<MlClient['findFileStructure']>) {
-      return mlClient.findFileStructure(...p);
-    },
     async flushJob(...p: Parameters<MlClient['flushJob']>) {
       await jobIdsCheck('anomaly-detector', p);
       return mlClient.flushJob(...p);
@@ -215,7 +207,7 @@ export function getMlClient(
       return mlClient.getCalendarEvents(...p);
     },
     async getCalendars(...p: Parameters<MlClient['getCalendars']>) {
-      const { body } = await mlClient.getCalendars<{ calendars: Calendar[] }, any>(...p);
+      const { body } = await mlClient.getCalendars(...p);
       const {
         body: { jobs: allJobs },
       } = await mlClient.getJobs<{ jobs: Job[] }>();
@@ -265,9 +257,9 @@ export function getMlClient(
       // this should use DataFrameAnalyticsStats, but needs a refactor to move DataFrameAnalyticsStats to common
       await jobIdsCheck('data-frame-analytics', p, true);
       try {
-        const { body } = await mlClient.getDataFrameAnalyticsStats<{
-          data_frame_analytics: DataFrameAnalyticsConfig[];
-        }>(...p);
+        const { body } = ((await mlClient.getDataFrameAnalyticsStats(...p)) as unknown) as {
+          body: { data_frame_analytics: DataFrameAnalyticsConfig[] };
+        };
         const jobs = await jobSavedObjectService.filterJobsForSpace<DataFrameAnalyticsConfig>(
           'data-frame-analytics',
           body.data_frame_analytics,
@@ -284,8 +276,8 @@ export function getMlClient(
     async getDatafeedStats(...p: Parameters<MlClient['getDatafeedStats']>) {
       await datafeedIdsCheck(p, true);
       try {
-        const { body } = await mlClient.getDatafeedStats<{ datafeeds: DatafeedStats[] }>(...p);
-        const datafeeds = await jobSavedObjectService.filterDatafeedsForSpace<DatafeedStats>(
+        const { body } = await mlClient.getDatafeedStats(...p);
+        const datafeeds = await jobSavedObjectService.filterDatafeedsForSpace(
           'anomaly-detector',
           body.datafeeds,
           'datafeed_id'
@@ -301,7 +293,7 @@ export function getMlClient(
     async getDatafeeds(...p: Parameters<MlClient['getDatafeeds']>) {
       await datafeedIdsCheck(p, true);
       try {
-        const { body } = await mlClient.getDatafeeds<{ datafeeds: Datafeed[] }>(...p);
+        const { body } = await mlClient.getDatafeeds(...p);
         const datafeeds = await jobSavedObjectService.filterDatafeedsForSpace<Datafeed>(
           'anomaly-detector',
           body.datafeeds,
@@ -324,8 +316,8 @@ export function getMlClient(
     },
     async getJobStats(...p: Parameters<MlClient['getJobStats']>) {
       try {
-        const { body } = await mlClient.getJobStats<{ jobs: JobStats[] }>(...p);
-        const jobs = await jobSavedObjectService.filterJobsForSpace<JobStats>(
+        const { body } = await mlClient.getJobStats(...p);
+        const jobs = await jobSavedObjectService.filterJobsForSpace(
           'anomaly-detector',
           body.jobs,
           'job_id'

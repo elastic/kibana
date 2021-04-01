@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import fetch, { Response } from 'node-fetch';
 import querystring from 'querystring';
+
 import {
   RequestHandler,
   RequestHandlerContext,
@@ -13,17 +15,23 @@ import {
   KibanaResponseFactory,
   Logger,
 } from 'src/core/server';
+
+import {
+  ENTERPRISE_SEARCH_KIBANA_COOKIE,
+  JSON_HEADER,
+  READ_ONLY_MODE_HEADER,
+} from '../../common/constants';
+
 import { ConfigType } from '../index';
-import { JSON_HEADER, READ_ONLY_MODE_HEADER } from '../../common/constants';
 
 interface ConstructorDependencies {
   config: ConfigType;
   log: Logger;
 }
-interface RequestParams<ResponseBody> {
+interface RequestParams {
   path: string;
   params?: object;
-  hasValidData?: (body?: ResponseBody) => boolean;
+  hasValidData?: Function;
 }
 interface ErrorResponse {
   message: string;
@@ -32,7 +40,7 @@ interface ErrorResponse {
   };
 }
 export interface IEnterpriseSearchRequestHandler {
-  createRequest(requestParams?: object): RequestHandler<unknown, unknown, unknown>;
+  createRequest(requestParams?: RequestParams): RequestHandler<unknown, unknown, unknown>;
 }
 
 /**
@@ -53,11 +61,7 @@ export class EnterpriseSearchRequestHandler {
     this.enterpriseSearchUrl = config.host as string;
   }
 
-  createRequest<ResponseBody>({
-    path,
-    params = {},
-    hasValidData = () => true,
-  }: RequestParams<ResponseBody>) {
+  createRequest({ path, params = {}, hasValidData = () => true }: RequestParams) {
     return async (
       _context: RequestHandlerContext,
       request: KibanaRequest<unknown, unknown, unknown>,
@@ -65,11 +69,12 @@ export class EnterpriseSearchRequestHandler {
     ) => {
       try {
         // Set up API URL
+        const encodedPath = this.encodePathParams(path, request.params as Record<string, string>);
         const queryParams = { ...(request.query as object), ...params };
         const queryString = !this.isEmptyObj(queryParams)
           ? `?${querystring.stringify(queryParams)}`
           : '';
-        const url = encodeURI(this.enterpriseSearchUrl + path) + queryString;
+        const url = encodeURI(this.enterpriseSearchUrl) + encodedPath + queryString;
 
         // Set up API options
         const { method } = request.route;
@@ -108,22 +113,68 @@ export class EnterpriseSearchRequestHandler {
         }
 
         // Check returned data
-        const json = await apiResponse.json();
-        if (!hasValidData(json)) {
-          return this.handleInvalidDataError(response, url, json);
+        let responseBody;
+
+        try {
+          const json = await apiResponse.json();
+
+          if (!hasValidData(json)) {
+            return this.handleInvalidDataError(response, url, json);
+          }
+
+          // Intercept data that is meant for the server side session
+          const { _sessionData, ...responseJson } = json;
+          if (_sessionData) {
+            this.setSessionData(_sessionData);
+            responseBody = responseJson;
+          } else {
+            responseBody = json;
+          }
+        } catch (e) {
+          responseBody = undefined;
         }
 
         // Pass successful responses back to the front-end
         return response.custom({
           statusCode: status,
           headers: this.headers,
-          body: json,
+          body: responseBody,
         });
       } catch (e) {
         // Catch connection/auth errors
         return this.handleConnectionError(response, e);
       }
     };
+  }
+
+  /**
+   * This path helper is similar to React Router's generatePath, but much simpler &
+   * does not use regexes. It enables us to pass a static '/foo/:bar/baz' string to
+   * createRequest({ path }) and have :bar be automatically replaced by the value of
+   * request.params.bar.
+   * It also (very importantly) wraps all URL request params with encodeURIComponent(),
+   * which is an extra layer of encoding required by the Enterprise Search server in
+   * order to correctly & safely parse user-generated IDs with special characters in
+   * their names - just encodeURI alone won't work.
+   */
+  encodePathParams(path: string, params: Record<string, string>) {
+    const hasParams = path.includes(':');
+    if (!hasParams) {
+      return path;
+    } else {
+      return path
+        .split('/')
+        .map((pathPart) => {
+          const isParam = pathPart.startsWith(':');
+          if (!isParam) {
+            return pathPart;
+          } else {
+            const pathParam = pathPart.replace(':', '');
+            return encodeURIComponent(params[pathParam]);
+          }
+        })
+        .join('/');
+    }
   }
 
   /**
@@ -238,6 +289,27 @@ export class EnterpriseSearchRequestHandler {
   setResponseHeaders(apiResponse: Response) {
     const readOnlyMode = apiResponse.headers.get(READ_ONLY_MODE_HEADER);
     this.headers[READ_ONLY_MODE_HEADER] = readOnlyMode as 'true' | 'false';
+  }
+
+  /**
+   * Extract Session Data
+   *
+   * In the future, this will set the keys passed back from Enterprise Search
+   * into the Kibana login session.
+   * For now we'll explicity look for the Workplace Search OAuth token package
+   * and stuff it into a cookie so it can be picked up later when we proxy the
+   * OAuth callback.
+   */
+  setSessionData(sessionData: { [key: string]: string }) {
+    if (sessionData.wsOAuthTokenPackage) {
+      const anHourFromNow = new Date(Date.now());
+      anHourFromNow.setHours(anHourFromNow.getHours() + 1);
+
+      const cookiePayload = `${ENTERPRISE_SEARCH_KIBANA_COOKIE}=${sessionData.wsOAuthTokenPackage};`;
+      const cookieRestrictions = `Path=/; Expires=${anHourFromNow.toUTCString()}; SameSite=Lax; HttpOnly`;
+
+      this.headers['set-cookie'] = `${cookiePayload} ${cookieRestrictions}`;
+    }
   }
 
   /**

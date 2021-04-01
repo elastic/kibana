@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -55,6 +56,7 @@ import {
   removeColumn,
   removeProvider,
   updateColumns,
+  updateEqlOptions,
   updateEventType,
   updateDataProviderEnabled,
   updateDataProviderExcluded,
@@ -104,6 +106,7 @@ const timelineActionsType = [
   updateDataProviderExcluded.type,
   updateDataProviderKqlQuery.type,
   updateDataProviderType.type,
+  updateEqlOptions.type,
   updateEventType.type,
   updateKqlMode.type,
   updateIndexNames.type,
@@ -336,6 +339,7 @@ const timelineInput: TimelineInput = {
   columns: null,
   dataProviders: null,
   description: null,
+  eqlOptions: null,
   eventType: null,
   excludedRowRendererIds: null,
   filters: null,

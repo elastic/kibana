@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useState, Fragment, memo, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
@@ -16,12 +18,15 @@ import {
   EuiSpacer,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { NewPackagePolicyInputStream, RegistryStream, RegistryVarsEntry } from '../../../../types';
-import {
-  isAdvancedVar,
-  PackagePolicyConfigValidationResults,
-  validationHasErrors,
-} from '../services';
+
+import type {
+  NewPackagePolicyInputStream,
+  RegistryStream,
+  RegistryVarsEntry,
+} from '../../../../types';
+import type { PackagePolicyConfigValidationResults } from '../services';
+import { isAdvancedVar, validationHasErrors } from '../services';
+
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
 
 const FlexItemWithMaxWidth = styled(EuiFlexItem)`

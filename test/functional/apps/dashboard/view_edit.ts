@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import expect from '@kbn/expect';
@@ -26,6 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['dashboard', 'header', 'common', 'visualize', 'timePicker']);
   const dashboardName = 'dashboard with filter';
   const filterBar = getService('filterBar');
@@ -78,15 +68,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             storeTimeWithDashboard: true,
           });
 
-          await PageObjects.dashboard.switchToEditMode();
           await PageObjects.timePicker.setAbsoluteRange(
             'Sep 19, 2013 @ 06:31:44.000',
             'Sep 19, 2013 @ 06:31:44.000'
           );
-          await PageObjects.dashboard.clickCancelOutOfEditMode();
-
-          // confirm lose changes
-          await PageObjects.common.clickConfirmOnModal();
+          await PageObjects.dashboard.clickDiscardChanges();
 
           const newTime = await PageObjects.timePicker.getTimeConfig();
 
@@ -99,10 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await queryBar.setQuery(`${originalQuery}and extra stuff`);
           await queryBar.submitQuery();
 
-          await PageObjects.dashboard.clickCancelOutOfEditMode();
-
-          // confirm lose changes
-          await PageObjects.common.clickConfirmOnModal();
+          await PageObjects.dashboard.clickDiscardChanges();
 
           const query = await queryBar.getQueryString();
           expect(query).to.equal(originalQuery);
@@ -122,10 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           hasFilter = await filterBar.hasFilter('animal', 'dog');
           expect(hasFilter).to.be(false);
 
-          await PageObjects.dashboard.clickCancelOutOfEditMode();
-
-          // confirm lose changes
-          await PageObjects.common.clickConfirmOnModal();
+          await PageObjects.dashboard.clickDiscardChanges();
 
           hasFilter = await filterBar.hasFilter('animal', 'dog');
           expect(hasFilter).to.be(true);
@@ -144,12 +124,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             redirectToOrigin: true,
           });
 
-          await PageObjects.dashboard.clickCancelOutOfEditMode();
+          await PageObjects.dashboard.clickDiscardChanges(false);
           // for this sleep see https://github.com/elastic/kibana/issues/22299
           await PageObjects.common.sleep(500);
 
           // confirm lose changes
-          await PageObjects.common.clickConfirmOnModal();
+          await testSubjects.exists('dashboardDiscardConfirmDiscard');
+          await testSubjects.click('dashboardDiscardConfirmDiscard');
 
           const panelCount = await PageObjects.dashboard.getPanelCount();
           expect(panelCount).to.eql(originalPanelCount);
@@ -159,10 +140,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const originalPanelCount = await PageObjects.dashboard.getPanelCount();
 
           await dashboardAddPanel.addVisualization('new viz panel');
-          await PageObjects.dashboard.clickCancelOutOfEditMode();
-
-          // confirm lose changes
-          await PageObjects.common.clickConfirmOnModal();
+          await PageObjects.dashboard.clickDiscardChanges();
 
           const panelCount = await PageObjects.dashboard.getPanelCount();
           expect(panelCount).to.eql(originalPanelCount);
@@ -182,9 +160,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'Sep 19, 2015 @ 06:31:44.000',
             'Sep 19, 2015 @ 06:31:44.000'
           );
-          await PageObjects.dashboard.clickCancelOutOfEditMode();
+          await PageObjects.dashboard.clickDiscardChanges(false);
 
-          await PageObjects.common.clickCancelOnModal();
+          await testSubjects.exists('dashboardDiscardConfirmCancel');
+          await testSubjects.click('dashboardDiscardConfirmCancel');
           await PageObjects.dashboard.saveDashboard(dashboardName, {
             storeTimeWithDashboard: true,
           });
@@ -211,9 +190,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
         const newTime = await PageObjects.timePicker.getTimeConfig();
 
-        await PageObjects.dashboard.clickCancelOutOfEditMode();
+        await PageObjects.dashboard.clickDiscardChanges(false);
 
-        await PageObjects.common.clickCancelOnModal();
+        await testSubjects.exists('dashboardDiscardConfirmCancel');
+        await testSubjects.click('dashboardDiscardConfirmCancel');
         await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
 
         await PageObjects.dashboard.loadSavedDashboard(dashboardName);
@@ -229,12 +209,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('when time changed is not stored with dashboard', async function () {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
         await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: false });
-        await PageObjects.dashboard.switchToEditMode();
         await PageObjects.timePicker.setAbsoluteRange(
           'Oct 19, 2014 @ 06:31:44.000',
           'Dec 19, 2014 @ 06:31:44.000'
         );
-        await PageObjects.dashboard.clickCancelOutOfEditMode();
+        await PageObjects.dashboard.clickCancelOutOfEditMode(false);
 
         await PageObjects.common.expectConfirmModalOpenState(false);
       });
@@ -246,7 +225,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const originalQuery = await queryBar.getQueryString();
         await queryBar.setQuery(`${originalQuery}extra stuff`);
 
-        await PageObjects.dashboard.clickCancelOutOfEditMode();
+        await PageObjects.dashboard.clickCancelOutOfEditMode(false);
 
         await PageObjects.common.expectConfirmModalOpenState(false);
 

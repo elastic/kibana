@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import { forOwn } from 'lodash';
-import { JOB_PARAMS_RISON } from '../fixtures';
+import { JOB_PARAMS_RISON_CSV_DEPRECATED } from '../fixtures';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -34,7 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
       const { status: resStatus, text: resText } = await supertestNoAuth
         .post(`/api/reporting/generate/csv`)
         .set('kbn-xsrf', 'xxx')
-        .send({ jobParams: JOB_PARAMS_RISON });
+        .send({ jobParams: JOB_PARAMS_RISON_CSV_DEPRECATED });
 
       expect(resStatus).to.be(200);
 
@@ -43,11 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
         attempts: 0,
         created_by: false,
         jobtype: 'csv',
-        max_attempts: 1,
-        priority: 10,
         status: 'pending',
-        timeout: 120000,
-        browser_type: 'chromium', // TODO: remove this field from the API response
         // TODO: remove the payload field from the api respones
       };
       forOwn(expectedResJob, (value: any, key: string) => {
@@ -67,7 +64,7 @@ export default function ({ getService }: FtrProviderContext) {
       const { status: resStatus, text: resText } = await supertestNoAuth
         .post(`/api/reporting/generate/csv`)
         .set('kbn-xsrf', 'xxx')
-        .send({ jobParams: JOB_PARAMS_RISON });
+        .send({ jobParams: JOB_PARAMS_RISON_CSV_DEPRECATED });
 
       expect(resStatus).to.be(200);
 
@@ -78,12 +75,11 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx');
 
       const listingJobs = JSON.parse(listText);
+
       const expectedListJob: Record<string, any> = {
         attempts: 0,
         created_by: false,
         jobtype: 'csv',
-        timeout: 120000,
-        browser_type: 'chromium',
       };
       forOwn(expectedListJob, (value: any, key: string) => {
         expect(listingJobs[0]._source[key]).to.eql(value, key);
@@ -97,7 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
       const { status: resStatus, text: resText } = await supertestNoAuth
         .post(`/api/reporting/generate/csv`)
         .set('kbn-xsrf', 'xxx')
-        .send({ jobParams: JOB_PARAMS_RISON });
+        .send({ jobParams: JOB_PARAMS_RISON_CSV_DEPRECATED });
 
       expect(resStatus).to.be(200);
 
@@ -112,8 +108,6 @@ export default function ({ getService }: FtrProviderContext) {
         attempts: 0,
         created_by: false,
         jobtype: 'csv',
-        timeout: 120000,
-        browser_type: 'chromium',
       };
       forOwn(expectedListJob, (value: any, key: string) => {
         expect(listingJobs[0]._source[key]).to.eql(value, key);

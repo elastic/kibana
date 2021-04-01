@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -12,6 +14,7 @@ export function MachineLearningNavigationProvider({
   getPageObjects,
 }: FtrProviderContext) {
   const retry = getService('retry');
+  const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common']);
 
@@ -32,6 +35,12 @@ export function MachineLearningNavigationProvider({
           await testSubjects.missingOrFail('jobsListLink', { timeout: 2000 });
         }
       });
+    },
+
+    async navigateToAlertsAndAction() {
+      await PageObjects.common.navigateToApp('triggersActions');
+      await testSubjects.click('rulesTab');
+      await testSubjects.existOrFail('alertsList');
     },
 
     async assertTabsExist(tabTypeSubject: string, areaSubjects: string[]) {
@@ -148,7 +157,7 @@ export function MachineLearningNavigationProvider({
     },
 
     async navigateToSingleMetricViewerViaAnomalyExplorer() {
-      // clicks the `Single Metric Viewere` icon on the button group to switch result views
+      // clicks the `Single Metric Viewer` icon on the button group to switch result views
       await testSubjects.click('mlAnomalyResultsViewSelectorSingleMetricViewer');
       await retry.tryForTime(60 * 1000, async () => {
         // verify that the single metric viewer page is visible
@@ -184,6 +193,26 @@ export function MachineLearningNavigationProvider({
         await PageObjects.common.navigateToApp('home');
         await testSubjects.existOrFail('homeApp', { timeout: 2000 });
       });
+    },
+
+    /**
+     * Assert the active URL.
+     * @param expectedUrlPart - URL component excluding host
+     */
+    async assertCurrentURLContains(expectedUrlPart: string) {
+      const currentUrl = await browser.getCurrentUrl();
+      expect(currentUrl).to.include.string(
+        expectedUrlPart,
+        `Expected the current URL "${currentUrl}" to include ${expectedUrlPart}`
+      );
+    },
+
+    async assertCurrentURLNotContain(expectedUrlPart: string) {
+      const currentUrl = await browser.getCurrentUrl();
+      expect(currentUrl).to.not.include.string(
+        expectedUrlPart,
+        `Expected the current URL "${currentUrl}" to not include ${expectedUrlPart}`
+      );
     },
   };
 }

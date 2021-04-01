@@ -1,22 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-
-import '../../../../__mocks__/kea.mock';
 
 import { contentSources } from '../../../__mocks__/content_sources.mock';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
 
-import { GroupSources } from './group_sources';
-import { GroupRowSourcesDropdown } from './group_row_sources_dropdown';
-
 import { SourceIcon } from '../../../components/shared/source_icon';
-
 import { ContentSourceDetails } from '../../../types';
+
+import { GroupRowSourcesDropdown } from './group_row_sources_dropdown';
+import { GroupSources } from './group_sources';
 
 describe('GroupSources', () => {
   it('renders', () => {

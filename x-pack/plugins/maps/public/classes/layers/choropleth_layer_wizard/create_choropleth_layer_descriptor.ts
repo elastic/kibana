@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import uuid from 'uuid/v4';
@@ -22,7 +23,7 @@ import {
   ESSearchSourceDescriptor,
 } from '../../../../common/descriptor_types';
 import { VectorStyle } from '../../styles/vector/vector_style';
-import { VectorLayer } from '../vector_layer/vector_layer';
+import { VectorLayer } from '../vector_layer';
 import { EMSFileSource } from '../../sources/ems_file_source';
 // @ts-ignore
 import { ESSearchSource } from '../../sources/es_search_source';

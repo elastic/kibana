@@ -1,49 +1,72 @@
 [role="xpack"]
 [[pagerduty-action-type]]
-=== PagerDuty action
+=== PagerDuty connector and action
+++++
+<titleabbrev>PagerDuty</titleabbrev>
+++++
 
-The PagerDuty action type uses the https://v2.developer.pagerduty.com/docs/events-api-v2[v2 Events API] to trigger, acknowledge, and resolve PagerDuty alerts.
+The PagerDuty connector uses the https://v2.developer.pagerduty.com/docs/events-api-v2[v2 Events API] to trigger, acknowledge, and resolve PagerDuty alerts.
 
-* <<pagerduty-benefits, PagerDuty and Elastic integration benefits>>
-* <<pagerduty-connector-configuration, Connector configuration>>
-* <<pagerduty-action-configuration, Action configuration>>
+[float]
+[[pagerduty-connector-configuration]]
+==== Connector configuration
+
+PagerDuty connectors have the following configuration properties.
+
+Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
+API URL::   An optional PagerDuty event URL. Defaults to `https://events.pagerduty.com/v2/enqueue`. If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
+Integration Key::   A 32 character PagerDuty Integration Key for an integration on a service, also referred to as the routing key.
+
+[float]
+[[Preconfigured-pagerduty-configuration]]
+==== Preconfigured connector type
+
+[source,text]
+--
+ my-pagerduty:
+   name: preconfigured-pagerduty-connector-type
+   actionTypeId: .pagerduty
+   config:
+     apiUrl: https://test.host
+   secrets:
+     routingKey: testroutingkey
+--
+
+Config defines information for the connector type.
+
+`apiURL`:: A URL string that corresponds to *API URL*.
+
+Secrets defines sensitive information for the connector type.
+
+`routingKey`:: A string that corresponds to *Integration Key*.
+
+[float]
+[[pagerduty-action-configuration]]
+==== Action configuration
+
+PagerDuty actions have the following properties.
+
+Severity::      The perceived severity of on the affected system. This can be one of `Critical`, `Error`, `Warning` or `Info`(default).
+Event action::  One of `Trigger` (default), `Resolve`, or `Acknowledge`. See https://v2.developer.pagerduty.com/docs/events-api-v2#event-action[event action] for more details.
+Dedup Key::     All actions sharing this key will be associated with the same PagerDuty alert. This value is used to correlate trigger and resolution. This value is *optional*, and if not set, defaults to `<alert ID>:<alert instance ID>`. The maximum length is *255* characters. See https://v2.developer.pagerduty.com/docs/events-api-v2#alert-de-duplication[alert deduplication] for details. 
+Timestamp::     An *optional* https://v2.developer.pagerduty.com/v2/docs/types#datetime[ISO-8601 format date-time], indicating the time the event was detected or generated.
+Component::     An *optional* value indicating the component of the source machine that is responsible for the event, for example `mysql` or `eth0`.
+Group::         An *optional* value indicating the logical grouping of components of a service, for example `app-stack`.
+Source::        An *optional* value indicating the affected system, preferably a hostname or fully qualified domain name. Defaults to the {kib} saved object id of the action.
+Summary::       An *optional* text summary of the event, defaults to `No summary provided`. The maximum length is 1024 characters.
+Class::         An *optional* value indicating the class/type of the event, for example `ping failure` or `cpu load`.
+
+For more details on these properties, see https://v2.developer.pagerduty.com/v2/docs/send-an-event-events-api-v2[PagerDuty v2 event parameters].
 
 [float]
 [[pagerduty-benefits]]
-==== PagerDuty + Elastic integration benefits
+==== Configure PagerDuty
 
-By integrating PagerDuty with alerts, you can:
+By integrating PagerDuty with rules, you can:
 
-* Route your alerts to the right PagerDuty responder within your team, based on your structure, escalation policies, and workflows.
-* Automatically generate incidents of different types and severity based on each alert’s context.
-* Tailor the incident data to match your needs by easily passing the alerting context from Kibana to PagerDuty.
-
-[float]
-[[pagerduty-how-it-works]]
-===== How it works
-
-{kib} allows you to create alerts to notify you of a significant move
-in your dataset.
-You can create alerts for all your Observability, Security, and Elastic Stack use cases.
-Alerts will trigger a new incident on the corresponding PagerDuty service.
-
-[float]
-===== Requirements
-
-In the `kibana.yml` configuration file, you must add the <<general-alert-action-settings, saved objects encryption setting>>.
-This is required to encrypt parameters that must be secured, for example PagerDuty’s integration key.
-
-If you have security enabled:
-
-* You must have
-application privileges to access Metrics, APM, Uptime, or Security.
-* If you are using a self-managed deployment with security, you must have
-Transport Security Layer (TLS) enabled for communication <<configuring-tls-kib-es, between Elasticsearch and Kibana>>.
-Alerts uses API keys to secure background alert checks and actions,
-and API keys require {ref}/configuring-tls.html#tls-http[TLS on the HTTP interface].
-
-Although not a requirement, to harden the integrations security you might want to
-review the <<action-settings, Actions settings>> that are available to you.
+* Route your rules to the right PagerDuty responder within your team, based on your structure, escalation policies, and workflows.
+* Automatically generate incidents of different types and severity based on each rule’s context.
+* Tailor the incident data to match your needs by easily passing the rule context from Kibana to PagerDuty.
 
 [float]
 [[pagerduty-support]]
@@ -87,10 +110,9 @@ image::user/alerting/images/pagerduty-integration.png[PagerDuty Integrations tab
 
 . Create a PagerDuty Connector in Kibana.  You can:
 +
-* Create a connector as part of creating an alert by selecting PagerDuty in the *Actions*
-section of the alert configuration and selecting *Add new*.
-* Alternatively, create a connector. To create a connector, open the main menu, click *Stack Management* >
-Alerts and Actions*, select *Connectors*, click *Create connector*, then select the PagerDuty option.
+* Create a connector as part of creating an rule by selecting PagerDuty in the *Actions*
+section of the rule configuration and selecting *Add new*.
+* Alternatively, create a connector. To create a connector, open the main menu, click *Stack Management > Rules and Connectors*, select *Connectors*, click *Create connector*, then select the PagerDuty option.
 
 . Configure the connector by giving it a name and entering the Integration Key, optionally entering a custom API URL.
 +
@@ -99,80 +121,15 @@ See <<pagerduty-in-pagerduty, In PagerDuty>> for how to obtain the endpoint and 
 
 . Save the Connector.
 
-. To create an alert, open the main menu, then click *Stack Management > Alerts and Actions* or the application of your choice.
+. To create a rule, open the main menu, then click *Stack Management > Rules and Connectors* or the application of your choice.
 
 . Set up an action using your PagerDuty connector, by determining:
 +
 * The action’s type: Trigger, Resolve, or Acknowledge.
 * The event’s severity: Info, warning, error, or critical.
-* An array of different fields, including the timestamp, group, class, component, and your dedup key.
-Depending on your custom needs, assign them variables from the alerting context.
-To see the available context variables, click on the *Add alert variable* icon next
+* An array of different fields, including the timestamp, group, class, component, and your dedup key. By default, the dedup is configured to create a new PagerDuty incident for each alert and reuse the incident when a recovered alert reactivates.
+Depending on your custom needs, assign them variables from the rule context.
+To see the available context variables, click on the *Add variable* icon next
 to each corresponding field. For more details on these parameters, see the
 <<pagerduty-action-configuration, Actions Configuration>> and the PagerDuty
 https://v2.developer.pagerduty.com/v2/docs/send-an-event-events-api-v2[API v2 documentation].
-
-
-[float]
-[[pagerduty-uninstall]]
-===== How to uninstall
-To remove a PagerDuty connector from an alert, simply remove it
-from the *Actions* section of that alert, using the remove (x) icon.
-This will disable the integration for the particular alert.
-
-To delete the connector entirely, open the main menu, then click *Stack Management > Alerts and Actions*.
-Select the *Connectors* tab, and then click on the delete icon.
-This is an irreversible action and impacts all alerts that use this connector.
-
-
-[float]
-[[pagerduty-connector-configuration]]
-==== Connector configuration
-
-PagerDuty connectors have the following configuration properties:
-
-Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
-API URL::   An optional PagerDuty event URL. Defaults to `https://events.pagerduty.com/v2/enqueue`. If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
-Integration Key::   A 32 character PagerDuty Integration Key for an integration on a service, also referred to as the routing key.
-
-[float]
-[[Preconfigured-pagerduty-configuration]]
-==== Preconfigured action type
-
-[source,text]
---
- my-pagerduty:
-   name: preconfigured-pagerduty-action-type
-   actionTypeId: .pagerduty
-   config:
-     apiUrl: https://test.host
-   secrets:
-     routingKey: testroutingkey
---
-
-`config` defines the action type specific to the configuration.
-`config` contains
-`apiURL`, a string that corresponds to *API URL*.
-
-`secrets` defines sensitive information for the action type.
-`secrets` contains
-`routingKey`, a string that corresponds to *Integration Key*.
-
-
-[float]
-[[pagerduty-action-configuration]]
-==== Action configuration
-
-PagerDuty actions have the following properties:
-
-Severity::      The perceived severity of on the affected system. This can be one of `Critical`, `Error`, `Warning` or `Info`(default).
-Event action::  One of `Trigger` (default), `Resolve`, or `Acknowledge`. See https://v2.developer.pagerduty.com/docs/events-api-v2#event-action[event action] for more details.
-Dedup Key::     All actions sharing this key will be associated with the same PagerDuty alert. This value is used to correlate trigger and resolution. This value is *optional*, and if unset defaults to `action:<action saved object id>`. The maximum length is *255* characters. See https://v2.developer.pagerduty.com/docs/events-api-v2#alert-de-duplication[alert deduplication] for details.
-Timestamp::     An *optional* https://v2.developer.pagerduty.com/v2/docs/types#datetime[ISO-8601 format date-time], indicating the time the event was detected or generated.
-Component::     An *optional* value indicating the component of the source machine that is responsible for the event, for example `mysql` or `eth0`.
-Group::         An *optional* value indicating the logical grouping of components of a service, for example `app-stack`.
-Source::        An *optional* value indicating the affected system, preferably a hostname or fully qualified domain name. Defaults to the {kib} saved object id of the action.
-Summary::       An *optional* text summary of the event, defaults to `No summary provided`. The maximum length is 1024 characters.
-Class::         An *optional* value indicating the class/type of the event, for example `ping failure` or `cpu load`.
-
-For more details on these properties, see https://v2.developer.pagerduty.com/v2/docs/send-an-event-events-api-v2[PagerDuty v2 event parameters].

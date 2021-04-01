@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { ISavedObjectsRepository, Headers } from 'src/core/server';
-import { SPACES_USAGE_STATS_TYPE, SPACES_USAGE_STATS_ID } from './constants';
-import { CopyOptions, ResolveConflictsOptions } from '../lib/copy_to_spaces/types';
-import { UsageStats } from './types';
+import type { Headers, ISavedObjectsRepository } from 'src/core/server';
+
+import type { CopyOptions, ResolveConflictsOptions } from '../lib/copy_to_spaces/types';
+import { SPACES_USAGE_STATS_ID, SPACES_USAGE_STATS_TYPE } from './constants';
+import type { UsageStats } from './types';
 
 interface BaseIncrementOptions {
   headers?: Headers;

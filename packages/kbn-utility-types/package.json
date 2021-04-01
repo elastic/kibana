@@ -2,11 +2,11 @@
   "name": "@kbn/utility-types",
   "version": "1.0.0",
   "private": true,
-  "license": "Apache-2.0",
-  "main": "target",
+  "license": "SSPL-1.0 OR Elastic License 2.0",
+  "main": "target/index.js",
   "types": "target/index.d.ts",
   "kibana": {
-    "devOnly": true
+    "devOnly": false
   },
   "scripts": {
     "build": "../../node_modules/.bin/tsc",

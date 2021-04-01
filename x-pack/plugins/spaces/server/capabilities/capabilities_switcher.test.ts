@@ -1,17 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Space } from '../../../../../src/plugins/spaces_oss/common';
-import { KibanaFeature } from '../../../../plugins/features/server';
-import { setupCapabilitiesSwitcher } from './capabilities_switcher';
-import { Capabilities, CoreSetup } from 'src/core/server';
+import type { Capabilities, CoreSetup } from 'src/core/server';
 import { coreMock, httpServerMock, loggingSystemMock } from 'src/core/server/mocks';
+import type { Space } from 'src/plugins/spaces_oss/common';
+
+import type { KibanaFeature } from '../../../features/server';
 import { featuresPluginMock } from '../../../features/server/mocks';
+import type { PluginsStart } from '../plugin';
 import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
-import { PluginsStart } from '../plugin';
+import { setupCapabilitiesSwitcher } from './capabilities_switcher';
 
 const features = ([
   {

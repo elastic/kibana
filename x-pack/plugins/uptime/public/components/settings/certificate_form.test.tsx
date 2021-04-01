@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { CertificateExpirationForm } from './certificate_form';
-import { shallowWithRouter, mountWithRouter } from '../../lib';
+import { shallowWithRouter, mountWithRouter } from '../../lib/helper/enzyme_helpers';
 
 describe('CertificateForm', () => {
   it('shallow renders expected elements for valid props', () => {

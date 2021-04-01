@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { MLIntegrationComponent } from './ml_integeration';
-import { renderWithRouter, shallowWithRouter } from '../../../lib';
+import { renderWithRouter, shallowWithRouter } from '../../../lib/helper/enzyme_helpers';
 import * as redux from 'react-redux';
 import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
 import { coreMock } from 'src/core/public/mocks';

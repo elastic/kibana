@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -9,7 +10,7 @@ import {
   transformValidateFindAlerts,
   transformValidateBulkError,
 } from './validate';
-import { FindResult } from '../../../../../../alerts/server';
+import { FindResult } from '../../../../../../alerting/server';
 import { BulkError } from '../utils';
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
 import { getResult, getFindResultStatus } from '../__mocks__/request_responses';

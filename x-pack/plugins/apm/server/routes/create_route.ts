@@ -1,24 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CoreSetup } from 'src/core/server';
-import { Route, RouteParamsRT } from './typings';
+import { HandlerReturn, Route, RouteParamsRT } from './typings';
 
 export function createRoute<
   TEndpoint extends string,
-  TRouteParamsRT extends RouteParamsRT | undefined = undefined,
-  TReturn = unknown
+  TReturn extends HandlerReturn,
+  TRouteParamsRT extends RouteParamsRT | undefined = undefined
 >(
   route: Route<TEndpoint, TRouteParamsRT, TReturn>
 ): Route<TEndpoint, TRouteParamsRT, TReturn>;
 
 export function createRoute<
   TEndpoint extends string,
-  TRouteParamsRT extends RouteParamsRT | undefined = undefined,
-  TReturn = unknown
+  TReturn extends HandlerReturn,
+  TRouteParamsRT extends RouteParamsRT | undefined = undefined
 >(
   route: (core: CoreSetup) => Route<TEndpoint, TRouteParamsRT, TReturn>
 ): (core: CoreSetup) => Route<TEndpoint, TRouteParamsRT, TReturn>;

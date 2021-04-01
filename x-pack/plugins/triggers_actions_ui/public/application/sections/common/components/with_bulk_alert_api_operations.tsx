@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -29,7 +30,7 @@ import {
   loadAlertState,
   loadAlertInstanceSummary,
   loadAlertTypes,
-  health,
+  alertingFrameworkHealth,
 } from '../../../lib/alert_api';
 import { useKibana } from '../../../../common/lib/kibana';
 
@@ -96,12 +97,12 @@ export function withBulkAlertOperations<T>(
         }
         muteAlert={async (alert: Alert) => {
           if (!isAlertMuted(alert)) {
-            return muteAlert({ http, id: alert.id });
+            return await muteAlert({ http, id: alert.id });
           }
         }}
         unmuteAlert={async (alert: Alert) => {
           if (isAlertMuted(alert)) {
-            return unmuteAlert({ http, id: alert.id });
+            return await unmuteAlert({ http, id: alert.id });
           }
         }}
         muteAlertInstance={async (alert: Alert, instanceId: string) => {
@@ -116,12 +117,12 @@ export function withBulkAlertOperations<T>(
         }}
         enableAlert={async (alert: Alert) => {
           if (isAlertDisabled(alert)) {
-            return enableAlert({ http, id: alert.id });
+            return await enableAlert({ http, id: alert.id });
           }
         }}
         disableAlert={async (alert: Alert) => {
           if (!isAlertDisabled(alert)) {
-            return disableAlert({ http, id: alert.id });
+            return await disableAlert({ http, id: alert.id });
           }
         }}
         deleteAlert={async (alert: Alert) => deleteAlerts({ http, ids: [alert.id] })}
@@ -131,7 +132,7 @@ export function withBulkAlertOperations<T>(
           loadAlertInstanceSummary({ http, alertId })
         }
         loadAlertTypes={async () => loadAlertTypes({ http })}
-        getHealth={async () => health({ http })}
+        getHealth={async () => alertingFrameworkHealth({ http })}
       />
     );
   };

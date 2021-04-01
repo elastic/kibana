@@ -1,20 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { ACTION_GROUP_DEFINITIONS, CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
+import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
 import { apiService } from './utils';
 import { ActionConnector } from '../alerts/alerts';
 
 import { AlertsResult, MonitorIdParam } from '../actions/types';
-import { AlertAction } from '../../../../triggers_actions_ui/public';
+import { ActionType, AlertAction } from '../../../../triggers_actions_ui/public';
 import { API_URLS } from '../../../common/constants';
-import { MonitorStatusTranslations } from '../../../common/translations';
-import { Alert, AlertTypeParams } from '../../../../alerts/common';
+import { Alert, AlertTypeParams } from '../../../../alerting/common';
+import { AtomicStatusCheckParams } from '../../../common/runtime_types/alerts';
 
-const { MONITOR_STATUS } = ACTION_GROUP_DEFINITIONS;
+import { populateAlertActions } from './alert_actions';
 
 const UPTIME_AUTO_ALERT = 'UPTIME_AUTO';
 
@@ -28,24 +29,28 @@ export interface NewAlertParams extends AlertTypeParams {
   defaultActions: ActionConnector[];
 }
 
+type NewMonitorStatusAlert = Omit<
+  Alert<AtomicStatusCheckParams>,
+  | 'id'
+  | 'createdBy'
+  | 'updatedBy'
+  | 'createdAt'
+  | 'updatedAt'
+  | 'apiKey'
+  | 'apiKeyOwner'
+  | 'muteAll'
+  | 'mutedInstanceIds'
+  | 'executionStatus'
+>;
+
 export const createAlert = async ({
   defaultActions,
   monitorId,
   monitorName,
 }: NewAlertParams): Promise<Alert> => {
-  const actions: AlertAction[] = [];
-  defaultActions.forEach((aId) => {
-    actions.push({
-      id: aId.id,
-      actionTypeId: aId.actionTypeId,
-      group: MONITOR_STATUS.id,
-      params: {
-        message: MonitorStatusTranslations.defaultActionMessage,
-      },
-    });
-  });
+  const actions: AlertAction[] = populateAlertActions({ defaultActions, monitorId, monitorName });
 
-  const data = {
+  const data: NewMonitorStatusAlert = {
     actions,
     params: {
       numTimes: 1,
@@ -60,8 +65,11 @@ export const createAlert = async ({
     consumer: 'uptime',
     alertTypeId: CLIENT_ALERT_TYPES.MONITOR_STATUS,
     schedule: { interval: '1m' },
+    notifyWhen: 'onActionGroupChange',
     tags: [UPTIME_AUTO_ALERT],
     name: `${monitorName} (Simple status alert)`,
+    enabled: true,
+    throttle: null,
   };
 
   return await apiService.post(API_URLS.CREATE_ALERT, data);
@@ -98,4 +106,8 @@ export const fetchAlertRecords = async ({
 
 export const disableAlertById = async ({ alertId }: { alertId: string }) => {
   return await apiService.delete(API_URLS.ALERT + alertId);
+};
+
+export const fetchActionTypes = async (): Promise<ActionType[]> => {
+  return await apiService.get(API_URLS.ACTION_TYPES);
 };

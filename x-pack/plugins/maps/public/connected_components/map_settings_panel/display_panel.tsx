@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
-import { EuiFormRow, EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiFormRow, EuiPanel, EuiSwitch, EuiSwitchEvent, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { MapSettings } from '../../reducers/map';
@@ -19,6 +20,10 @@ interface Props {
 export function DisplayPanel({ settings, updateMapSetting }: Props) {
   const onBackgroundColorChange = (color: string) => {
     updateMapSetting('backgroundColor', color);
+  };
+
+  const onShowScale = (event: EuiSwitchEvent) => {
+    updateMapSetting('showScaleControl', event.target.checked);
   };
 
   return (
@@ -41,6 +46,17 @@ export function DisplayPanel({ settings, updateMapSetting }: Props) {
         <MbValidatedColorPicker
           color={settings.backgroundColor}
           onChange={onBackgroundColorChange}
+        />
+      </EuiFormRow>
+
+      <EuiFormRow>
+        <EuiSwitch
+          label={i18n.translate('xpack.maps.mapSettingsPanel.showScaleLabel', {
+            defaultMessage: 'Show scale',
+          })}
+          checked={settings.showScaleControl}
+          onChange={onShowScale}
+          compressed
         />
       </EuiFormRow>
     </EuiPanel>

@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { checkSavedObjectsPrivilegesWithRequestFactory } from './check_saved_objects_privileges';
+import { httpServerMock } from 'src/core/server/mocks';
 
-import { httpServerMock } from '../../../../../src/core/server/mocks';
-import { CheckPrivileges, CheckPrivilegesWithRequest } from './types';
-import { SpacesService } from '../plugin';
+import type { SpacesService } from '../plugin';
+import { checkSavedObjectsPrivilegesWithRequestFactory } from './check_saved_objects_privileges';
+import type { CheckPrivileges, CheckPrivilegesWithRequest } from './types';
 
 let mockCheckPrivileges: jest.Mocked<CheckPrivileges>;
 let mockCheckPrivilegesWithRequest: jest.Mocked<CheckPrivilegesWithRequest>;

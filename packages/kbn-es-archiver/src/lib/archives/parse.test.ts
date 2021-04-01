@@ -1,26 +1,20 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import Stream, { PassThrough, Readable, Writable, Transform } from 'stream';
 import { createGzip } from 'zlib';
 
-import { createConcatStream, createListStream, createPromiseFromStreams } from '@kbn/utils';
+import {
+  createConcatStream,
+  createListStream,
+  createPromiseFromStreams,
+  kibanaPackageJson,
+} from '@kbn/utils';
 
 import { createParseArchiveStreams } from './parse';
 
@@ -65,6 +59,17 @@ describe('esArchiver createParseArchiveStreams', () => {
         expect(output).toEqual([{ a: 1 }, 1]);
       });
 
+      it('replaces $KIBANA_PACKAGE_VERSION with the current kibana version', async () => {
+        const output = await createPromiseFromStreams([
+          createListStream([
+            Buffer.from('{"$KIBANA'),
+            Buffer.from('_PACKAGE_VERSION": "enabled"}'),
+          ]),
+          ...createParseArchiveStreams({ gzip: false }),
+        ]);
+        return expect(output).toEqual({ [kibanaPackageJson.version]: 'enabled' });
+      });
+
       it('provides each JSON object as soon as it is parsed', async () => {
         let onReceived: (resolved: any) => void;
         const receivedPromise = new Promise((resolve) => (onReceived = resolve));
@@ -85,11 +90,13 @@ describe('esArchiver createParseArchiveStreams', () => {
           createConcatStream([]),
         ] as [Readable, ...Writable[]]);
 
-        input.write(Buffer.from('{"a": 1}\n\n{"a":'));
+        // before emitting a result, the buffer waits until it at least receives toReplace.length bytes
+        // so we need a long second object to ensure that the first gets emitted.
+        input.write(Buffer.from('{"a": 1}\n\n{"propertyNameLongerThanToReplace":'));
         expect(await receivedPromise).toEqual({ a: 1 });
         input.write(Buffer.from('2}'));
         input.end();
-        expect(await finalPromise).toEqual([{ a: 1 }, { a: 2 }]);
+        expect(await finalPromise).toEqual([{ a: 1 }, { propertyNameLongerThanToReplace: 2 }]);
       });
     });
 
@@ -146,6 +153,18 @@ describe('esArchiver createParseArchiveStreams', () => {
         ] as [Readable, ...Writable[]]);
 
         expect(output).toEqual([{ a: 1 }, { a: 2 }]);
+      });
+
+      it('replaces $KIBANA_PACKAGE_VERSION with the current kibana version', async () => {
+        const output = await createPromiseFromStreams([
+          createListStream([
+            Buffer.from('{"$KIBANA_PACKAGE'),
+            Buffer.from('_VERSION": "enabled"}'),
+          ]),
+          createGzip(),
+          ...createParseArchiveStreams({ gzip: true }),
+        ]);
+        return expect(output).toEqual({ [kibanaPackageJson.version]: 'enabled' });
       });
     });
 

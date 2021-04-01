@@ -1,15 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './app.scss';
 
 import _ from 'lodash';
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { NotificationsStart } from 'kibana/public';
+import { Toast } from 'kibana/public';
+import { VisualizeFieldContext } from 'src/plugins/ui_actions/public';
+import { Datatable } from 'src/plugins/expressions/public';
 import { EuiBreadcrumb } from '@elastic/eui';
 import { downloadMultipleAs } from '../../../../../src/plugins/share/public';
 import {
@@ -25,20 +28,27 @@ import { injectFilterReferences } from '../persistence';
 import { NativeRenderer } from '../native_renderer';
 import { trackUiEvent } from '../lens_ui_telemetry';
 import {
+  DataPublicPluginStart,
   esFilters,
   exporters,
+  Filter,
   IndexPattern as IndexPatternInstance,
   IndexPatternsContract,
+  Query,
+  SavedQuery,
   syncQueryStateWithUrl,
 } from '../../../../../src/plugins/data/public';
-import { LENS_EMBEDDABLE_TYPE, getFullPath } from '../../common';
+import { LENS_EMBEDDABLE_TYPE, getFullPath, APP_ID } from '../../common';
 import { LensAppProps, LensAppServices, LensAppState } from './types';
 import { getLensTopNavConfig } from './lens_top_nav';
+import { Document } from '../persistence';
 import { SaveModal } from './save_modal';
 import {
   LensByReferenceInput,
   LensEmbeddableInput,
 } from '../editor_frame_service/embeddable/embeddable';
+import { useTimeRange } from './time_range';
+import { EditorFrameInstance } from '../types';
 
 export function App({
   history,
@@ -107,9 +117,12 @@ export function App({
     state.searchSessionId,
   ]);
 
-  // Need a stable reference for the frame component of the dateRange
-  const { from: fromDate, to: toDate } = data.query.timefilter.timefilter.getTime();
-  const currentDateRange = useMemo(() => ({ fromDate, toDate }), [fromDate, toDate]);
+  const { resolvedDateRange, from: fromDate, to: toDate } = useTimeRange(
+    data,
+    state.lastKnownDoc,
+    setState,
+    state.searchSessionId
+  );
 
   const onError = useCallback(
     (e: { message: string }) =>
@@ -266,7 +279,7 @@ export function App({
           e.preventDefault();
         },
         text: i18n.translate('xpack.lens.breadcrumbsTitle', {
-          defaultMessage: 'Visualize',
+          defaultMessage: 'Visualize Library',
         }),
       });
     }
@@ -321,12 +334,11 @@ export function App({
             initialInput.savedObjectId
           );
         }
-        getAllIndexPatterns(
-          _.uniq(doc.references.filter(({ type }) => type === 'index-pattern').map(({ id }) => id)),
-          data.indexPatterns,
-          notifications
-        )
-          .then((indexPatterns) => {
+        const indexPatternIds = _.uniq(
+          doc.references.filter(({ type }) => type === 'index-pattern').map(({ id }) => id)
+        );
+        getAllIndexPatterns(indexPatternIds, data.indexPatterns)
+          .then(({ indexPatterns }) => {
             // Don't overwrite any pinned filters
             data.query.filterManager.setAppFilters(
               injectFilterReferences(doc.state.filters, doc.references)
@@ -367,6 +379,11 @@ export function App({
     state.persistedDoc?.state,
   ]);
 
+  const tagsIds =
+    state.persistedDoc && savedObjectsTagging
+      ? savedObjectsTagging.ui.getTagIdsFromReferences(state.persistedDoc.references)
+      : [];
+
   const runSave = async (
     saveProps: Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
       returnToOrigin: boolean;
@@ -382,8 +399,11 @@ export function App({
     }
 
     let references = lastKnownDoc.references;
-    if (savedObjectsTagging && saveProps.newTags) {
-      references = savedObjectsTagging.ui.updateTagsReferences(references, saveProps.newTags);
+    if (savedObjectsTagging) {
+      references = savedObjectsTagging.ui.updateTagsReferences(
+        references,
+        saveProps.newTags || tagsIds
+      );
     }
 
     const docToSave = {
@@ -478,7 +498,7 @@ export function App({
           isLinkedToOriginatingApp: false,
         }));
         // remove editor state so the connection is still broken after reload
-        stateTransfer.clearEditorState();
+        stateTransfer.clearEditorState(APP_ID);
 
         redirectTo(newInput.savedObjectId);
         return;
@@ -503,9 +523,21 @@ export function App({
     }
   };
 
+  const lastKnownDocRef = useRef(state.lastKnownDoc);
+  lastKnownDocRef.current = state.lastKnownDoc;
+
+  const activeDataRef = useRef(state.activeData);
+  activeDataRef.current = state.activeData;
+
   const { TopNavMenu } = navigation.ui;
 
-  const savingPermitted = Boolean(state.isSaveable && application.capabilities.visualize.save);
+  const savingToLibraryPermitted = Boolean(
+    state.isSaveable && application.capabilities.visualize.save
+  );
+  const savingToDashboardPermitted = Boolean(
+    state.isSaveable && application.capabilities.dashboard?.showWriteControls
+  );
+
   const unsavedTitle = i18n.translate('xpack.lens.app.unsavedFilename', {
     defaultMessage: 'unsaved',
   });
@@ -519,8 +551,10 @@ export function App({
       state.isSaveable && state.activeData && Object.keys(state.activeData).length
     ),
     isByValueMode: getIsByValueMode(),
+    allowByValue: dashboardFeatureFlag.allowByValueEmbeddables,
     showCancel: Boolean(state.isLinkedToOriginatingApp),
-    savingPermitted,
+    savingToLibraryPermitted,
+    savingToDashboardPermitted,
     actions: {
       exportToCSV: () => {
         if (!state.activeData) {
@@ -551,7 +585,7 @@ export function App({
         }
       },
       saveAndReturn: () => {
-        if (savingPermitted && lastKnownDoc) {
+        if (savingToDashboardPermitted && lastKnownDoc) {
           // disabling the validation on app leave because the document has been saved.
           onAppLeave((actions) => {
             return actions.default();
@@ -571,7 +605,7 @@ export function App({
         }
       },
       showSaveModal: () => {
-        if (savingPermitted) {
+        if (savingToDashboardPermitted || savingToLibraryPermitted) {
           setState((s) => ({ ...s, isSaveModalVisible: true }));
         }
       },
@@ -582,11 +616,6 @@ export function App({
       },
     },
   });
-
-  const tagsIds =
-    state.persistedDoc && savedObjectsTagging
-      ? savedObjectsTagging.ui.getTagIdsFromReferences(state.persistedDoc.references)
-      : [];
 
   return (
     <>
@@ -653,58 +682,31 @@ export function App({
           />
         </div>
         {(!state.isLoading || state.persistedDoc) && (
-          <NativeRenderer
-            className="lnsApp__frame"
-            render={editorFrame.mount}
-            nativeProps={{
-              searchSessionId: state.searchSessionId,
-              dateRange: currentDateRange,
-              query: state.query,
-              filters: state.filters,
-              savedQuery: state.savedQuery,
-              doc: state.persistedDoc,
-              onError,
-              showNoDataPopover,
-              initialContext,
-              onChange: ({ filterableIndexPatterns, doc, isSaveable, activeData }) => {
-                if (isSaveable !== state.isSaveable) {
-                  setState((s) => ({ ...s, isSaveable }));
-                }
-                if (!_.isEqual(state.persistedDoc, doc)) {
-                  setState((s) => ({ ...s, lastKnownDoc: doc }));
-                }
-                if (!_.isEqual(state.activeData, activeData)) {
-                  setState((s) => ({ ...s, activeData }));
-                }
-
-                // Update the cached index patterns if the user made a change to any of them
-                if (
-                  state.indexPatternsForTopNav.length !== filterableIndexPatterns.length ||
-                  filterableIndexPatterns.some(
-                    (id) =>
-                      !state.indexPatternsForTopNav.find((indexPattern) => indexPattern.id === id)
-                  )
-                ) {
-                  getAllIndexPatterns(
-                    filterableIndexPatterns,
-                    data.indexPatterns,
-                    notifications
-                  ).then((indexPatterns) => {
-                    if (indexPatterns) {
-                      setState((s) => ({ ...s, indexPatternsForTopNav: indexPatterns }));
-                    }
-                  });
-                }
-              },
-            }}
+          <MemoizedEditorFrameWrapper
+            editorFrame={editorFrame}
+            resolvedDateRange={resolvedDateRange}
+            onError={onError}
+            showNoDataPopover={showNoDataPopover}
+            initialContext={initialContext}
+            setState={setState}
+            data={data}
+            query={state.query}
+            filters={state.filters}
+            searchSessionId={state.searchSessionId}
+            isSaveable={state.isSaveable}
+            savedQuery={state.savedQuery}
+            persistedDoc={state.persistedDoc}
+            indexPatterns={state.indexPatternsForTopNav}
+            activeData={activeDataRef}
+            lastKnownDoc={lastKnownDocRef}
           />
         )}
       </div>
       <SaveModal
         isVisible={state.isSaveModalVisible}
         originatingApp={state.isLinkedToOriginatingApp ? incomingState?.originatingApp : undefined}
+        savingToLibraryPermitted={savingToLibraryPermitted}
         allowByValueEmbeddables={dashboardFeatureFlag.allowByValueEmbeddables}
-        savedObjectsClient={savedObjectsClient}
         savedObjectsTagging={savedObjectsTagging}
         tagsIds={tagsIds}
         onSave={runSave}
@@ -726,20 +728,99 @@ export function App({
   );
 }
 
+const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
+  editorFrame,
+  query,
+  filters,
+  searchSessionId,
+  isSaveable: oldIsSaveable,
+  savedQuery,
+  persistedDoc,
+  indexPatterns: indexPatternsForTopNav,
+  resolvedDateRange,
+  onError,
+  showNoDataPopover,
+  initialContext,
+  setState,
+  data,
+  lastKnownDoc,
+  activeData: activeDataRef,
+}: {
+  editorFrame: EditorFrameInstance;
+  searchSessionId: string;
+  query: Query;
+  filters: Filter[];
+  isSaveable: boolean;
+  savedQuery?: SavedQuery;
+  persistedDoc?: Document | undefined;
+  indexPatterns: IndexPatternInstance[];
+  resolvedDateRange: { fromDate: string; toDate: string };
+  onError: (e: { message: string }) => Toast;
+  showNoDataPopover: () => void;
+  initialContext: VisualizeFieldContext | undefined;
+  setState: React.Dispatch<React.SetStateAction<LensAppState>>;
+  data: DataPublicPluginStart;
+  lastKnownDoc: React.MutableRefObject<Document | undefined>;
+  activeData: React.MutableRefObject<Record<string, Datatable> | undefined>;
+}) {
+  return (
+    <NativeRenderer
+      className="lnsApp__frame"
+      render={editorFrame.mount}
+      nativeProps={{
+        searchSessionId,
+        dateRange: resolvedDateRange,
+        query,
+        filters,
+        savedQuery,
+        doc: persistedDoc,
+        onError,
+        showNoDataPopover,
+        initialContext,
+        onChange: ({ filterableIndexPatterns, doc, isSaveable, activeData }) => {
+          if (isSaveable !== oldIsSaveable) {
+            setState((s) => ({ ...s, isSaveable }));
+          }
+          if (!_.isEqual(persistedDoc, doc) && !_.isEqual(lastKnownDoc.current, doc)) {
+            setState((s) => ({ ...s, lastKnownDoc: doc }));
+          }
+          if (!_.isEqual(activeDataRef.current, activeData)) {
+            setState((s) => ({ ...s, activeData }));
+          }
+
+          // Update the cached index patterns if the user made a change to any of them
+          if (
+            indexPatternsForTopNav.length !== filterableIndexPatterns.length ||
+            filterableIndexPatterns.some(
+              (id) => !indexPatternsForTopNav.find((indexPattern) => indexPattern.id === id)
+            )
+          ) {
+            getAllIndexPatterns(filterableIndexPatterns, data.indexPatterns).then(
+              ({ indexPatterns }) => {
+                if (indexPatterns) {
+                  setState((s) => ({ ...s, indexPatternsForTopNav: indexPatterns }));
+                }
+              }
+            );
+          }
+        },
+      }}
+    />
+  );
+});
+
 export async function getAllIndexPatterns(
   ids: string[],
-  indexPatternsService: IndexPatternsContract,
-  notifications: NotificationsStart
-): Promise<IndexPatternInstance[]> {
-  try {
-    return await Promise.all(ids.map((id) => indexPatternsService.get(id)));
-  } catch (e) {
-    notifications.toasts.addDanger(
-      i18n.translate('xpack.lens.app.indexPatternLoadingError', {
-        defaultMessage: 'Error loading index patterns',
-      })
-    );
-
-    throw new Error(e);
-  }
+  indexPatternsService: IndexPatternsContract
+): Promise<{ indexPatterns: IndexPatternInstance[]; rejectedIds: string[] }> {
+  const responses = await Promise.allSettled(ids.map((id) => indexPatternsService.get(id)));
+  const fullfilled = responses.filter(
+    (response): response is PromiseFulfilledResult<IndexPatternInstance> =>
+      response.status === 'fulfilled'
+  );
+  const rejectedIds = responses
+    .map((_response, i) => ids[i])
+    .filter((id, i) => responses[i].status === 'rejected');
+  // return also the rejected ids in case we want to show something later on
+  return { indexPatterns: fullfilled.map((response) => response.value), rejectedIds };
 }

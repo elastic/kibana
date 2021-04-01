@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { get } from 'lodash/fp';
@@ -95,10 +96,11 @@ import {
   ThreatLanguageOrUndefined,
   ConcurrentSearchesOrUndefined,
   ItemsPerSearchOrUndefined,
+  ThreatIndicatorPathOrUndefined,
 } from '../../../../common/detection_engine/schemas/types/threat_mapping';
 
-import { AlertsClient, PartialAlert } from '../../../../../alerts/server';
-import { Alert, SanitizedAlert } from '../../../../../alerts/common';
+import { AlertsClient, PartialAlert } from '../../../../../alerting/server';
+import { Alert, SanitizedAlert } from '../../../../../alerting/common';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { RuleTypeParams, PartialFilter } from '../types';
 import { ListArrayOrUndefined, ListArray } from '../../../../common/detection_engine/schemas/types';
@@ -237,6 +239,7 @@ export interface CreateRulesOptions {
   threshold: ThresholdOrUndefined;
   threatFilters: ThreatFiltersOrUndefined;
   threatIndex: ThreatIndexOrUndefined;
+  threatIndicatorPath: ThreatIndicatorPathOrUndefined;
   threatQuery: ThreatQueryOrUndefined;
   threatMapping: ThreatMappingOrUndefined;
   concurrentSearches: ConcurrentSearchesOrUndefined;

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -10,7 +11,11 @@ import { EuiIcon } from '@elastic/eui';
 import { Tls } from '../../../../common/runtime_types';
 import { MonitorSSLCertificate } from './status_bar';
 import * as redux from 'react-redux';
-import { mountWithRouter, renderWithRouter, shallowWithRouter } from '../../../lib';
+import {
+  mountWithRouter,
+  renderWithRouter,
+  shallowWithRouter,
+} from '../../../lib/helper/enzyme_helpers';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
 
 describe('SSL Certificate component', () => {

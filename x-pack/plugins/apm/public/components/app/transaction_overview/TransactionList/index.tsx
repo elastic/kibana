@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiToolTip, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import styled from 'styled-components';
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
 import {
@@ -25,7 +26,7 @@ type TransactionGroup = APIReturnType<'GET /api/apm/services/{serviceName}/trans
 
 // Truncate both the link and the child span (the tooltip anchor.) The link so
 // it doesn't overflow, and the anchor so we get the ellipsis.
-const TransactionNameLink = styled(TransactionDetailLink)`
+const TransactionNameLink = euiStyled(TransactionDetailLink)`
   font-family: ${fontFamilyCode};
   white-space: nowrap;
   ${truncate('100%')};
@@ -101,10 +102,8 @@ export function TransactionList({ items, isLoading }: Props) {
       {
         field: 'transactionsPerMinute',
         name: i18n.translate(
-          'xpack.apm.transactionsTable.transactionsPerMinuteColumnLabel',
-          {
-            defaultMessage: 'Trans. per minute',
-          }
+          'xpack.apm.transactionsTable.throughputColumnLabel',
+          { defaultMessage: 'Throughput' }
         ),
         sortable: true,
         dataType: 'number',
@@ -128,7 +127,7 @@ export function TransactionList({ items, isLoading }: Props) {
                 'xpack.apm.transactionsTable.impactColumnDescription',
                 {
                   defaultMessage:
-                    "The most used and slowest endpoints in your service. It's calculated by taking the relative average duration times the number of transactions per minute.",
+                    'The most used and slowest endpoints in your service. It is the result of multiplying latency and throughput',
                 }
               )}
             />

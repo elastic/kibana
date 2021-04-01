@@ -1,4 +1,6 @@
-@mixin flex-parent($grow: 1, $shrink: 1, $basis: auto, $direction: column) {
+@import '../../variables';
+
+@mixin flexParent($grow: 1, $shrink: 1, $basis: auto, $direction: column) {
   flex: $grow $shrink $basis;
   display: flex;
   flex-direction: $direction;
@@ -40,7 +42,7 @@
     height: $size;
     width: 100%;
   } @else {
-    @warn("Direction unknown for kbnResizer");
+    @warn('Direction unknown for kbnResizer');
   }
 
   &:hover {
@@ -54,7 +56,7 @@
   }
 
   &::after {
-    content: "";
+    content: '';
     position: absolute;
     top: 0;
     left: 0;
@@ -81,6 +83,12 @@
   opacity: 0;
   overflow: auto;
   animation: kibanaFullScreenGraphics_FadeIn $euiAnimSpeedExtraSlow $euiAnimSlightResistance 0s forwards;
+
+  @at-root {
+    .kbnBody--hasHeaderBanner & {
+      top: $kbnHeaderBannerHeight;
+    }
+  }
 
   &::before {
     position: absolute;
@@ -110,5 +118,33 @@
     to {
       opacity: 1;
     }
+  }
+}
+
+@mixin kbnThemeStyle($theme, $mode: 'both') {
+  $themes:  'v7', 'v8';
+  @if (index($themes, $theme)) {
+    @if ($mode == 'both') {
+      $themeLight: $theme + 'light';
+      $themeDark: $theme + 'dark';
+      // $kbnThemeVersion comes from the active theme's globals file (e.g. _globals_v8light.scss)
+      @if ($kbnThemeVersion == $themeLight or $kbnThemeVersion == $themeDark) {
+        @content;
+      }
+    } @else if ($mode == 'light') {
+      $themeLight: $theme + 'light';
+      @if ($kbnThemeVersion == $themeLight) {
+        @content;
+      }
+    } @else if ($mode == 'dark') {
+      $themeDark: $theme + 'dark';
+      @if ($kbnThemeVersion == $themeDark) {
+        @content;
+      }
+    } @else {
+      @warn 'The second parameter must be a valid mode (light, dark, or both) -- got #{$mode}';
+    }
+  } @else {
+    @warn 'Invalid $theme. Valid options are: #{$themes}. Got #{$theme} instead';
   }
 }

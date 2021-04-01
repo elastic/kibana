@@ -1,14 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { Observable, BehaviorSubject } from 'rxjs';
+
+import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { skipWhile } from 'rxjs/operators';
-import { HttpSetup } from 'src/core/public';
-import { Space } from '../../../../../src/plugins/spaces_oss/common';
-import { GetAllSpacesOptions, GetSpaceResult } from '../../common';
-import { CopySavedObjectsToSpaceResponse } from '../copy_saved_objects_to_space/types';
+
+import type { HttpSetup } from 'src/core/public';
+import type { Space } from 'src/plugins/spaces_oss/common';
+
+import type { GetAllSpacesOptions, GetSpaceResult } from '../../common';
+import type { CopySavedObjectsToSpaceResponse } from '../copy_saved_objects_to_space/types';
 
 interface SavedObjectTarget {
   type: string;

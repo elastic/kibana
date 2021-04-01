@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -32,13 +21,14 @@ import { render } from '@testing-library/react';
 import { EuiTextArea, EuiIcon } from '@elastic/eui';
 
 import { QueryLanguageSwitcher } from './language_switcher';
-import { QueryStringInput } from './';
-import type QueryStringInputUI from './query_string_input';
+import QueryStringInputUI from './query_string_input';
 
 import { coreMock } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../mocks';
 import { stubIndexPatternWithFields } from '../../stubs';
-import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
+import { KibanaContextProvider, withKibana } from 'src/plugins/kibana_react/public';
+
+jest.useFakeTimers();
 
 const startMock = coreMock.createStart();
 
@@ -73,17 +63,19 @@ const createMockStorage = () => ({
   clear: jest.fn(),
 });
 
-function wrapQueryStringInputInContext(testProps: any, storage?: any) {
-  const defaultOptions = {
-    screenTitle: 'Another Screen',
-    intl: null as any,
-  };
+const QueryStringInput = withKibana(QueryStringInputUI);
 
+function wrapQueryStringInputInContext(testProps: any, storage?: any) {
   const services = {
     ...startMock,
     data: dataPluginMock.createStartContract(),
     appName: testProps.appName || 'test',
     storage: storage || createMockStorage(),
+  };
+
+  const defaultOptions = {
+    screenTitle: 'Another Screen',
+    intl: null as any,
   };
 
   return (
@@ -236,7 +228,7 @@ describe('QueryStringInput', () => {
     expect(mockCallback).toHaveBeenCalledWith();
   });
 
-  it('Should fire onChangeQueryInputFocus callback on input blur', () => {
+  it('Should fire onChangeQueryInputFocus after a delay', () => {
     const mockCallback = jest.fn();
 
     const component = mount(
@@ -251,8 +243,91 @@ describe('QueryStringInput', () => {
     const inputWrapper = component.find(EuiTextArea).find('textarea');
     inputWrapper.simulate('blur');
 
+    jest.advanceTimersByTime(10);
+
+    expect(mockCallback).toHaveBeenCalledTimes(0);
+
+    jest.advanceTimersByTime(100);
+
     expect(mockCallback).toHaveBeenCalledTimes(1);
     expect(mockCallback).toHaveBeenCalledWith(false);
+  });
+
+  it('Should not fire onChangeQueryInputFocus if input is focused back', () => {
+    const mockCallback = jest.fn();
+
+    const component = mount(
+      wrapQueryStringInputInContext({
+        query: kqlQuery,
+        onChangeQueryInputFocus: mockCallback,
+        indexPatterns: [stubIndexPatternWithFields],
+        disableAutoFocus: true,
+      })
+    );
+
+    const inputWrapper = component.find(EuiTextArea).find('textarea');
+    inputWrapper.simulate('blur');
+
+    jest.advanceTimersByTime(5);
+    expect(mockCallback).toHaveBeenCalledTimes(0);
+
+    inputWrapper.simulate('focus');
+
+    expect(mockCallback).toHaveBeenCalledTimes(1);
+    expect(mockCallback).toHaveBeenCalledWith(true);
+
+    jest.advanceTimersByTime(100);
+    expect(mockCallback).toHaveBeenCalledTimes(1);
+  });
+
+  it('Should call onSubmit after a delay when submitOnBlur is on and blurs input', () => {
+    const mockCallback = jest.fn();
+
+    const component = mount(
+      wrapQueryStringInputInContext({
+        query: kqlQuery,
+        onSubmit: mockCallback,
+        indexPatterns: [stubIndexPatternWithFields],
+        disableAutoFocus: true,
+        submitOnBlur: true,
+      })
+    );
+
+    const inputWrapper = component.find(EuiTextArea).find('textarea');
+    inputWrapper.simulate('blur');
+
+    jest.advanceTimersByTime(10);
+
+    expect(mockCallback).toHaveBeenCalledTimes(0);
+
+    jest.advanceTimersByTime(100);
+
+    expect(mockCallback).toHaveBeenCalledTimes(1);
+    expect(mockCallback).toHaveBeenCalledWith(kqlQuery);
+  });
+
+  it("Shouldn't call onSubmit on blur by default", () => {
+    const mockCallback = jest.fn();
+
+    const component = mount(
+      wrapQueryStringInputInContext({
+        query: kqlQuery,
+        onSubmit: mockCallback,
+        indexPatterns: [stubIndexPatternWithFields],
+        disableAutoFocus: true,
+      })
+    );
+
+    const inputWrapper = component.find(EuiTextArea).find('textarea');
+    inputWrapper.simulate('blur');
+
+    jest.advanceTimersByTime(10);
+
+    expect(mockCallback).toHaveBeenCalledTimes(0);
+
+    jest.advanceTimersByTime(100);
+
+    expect(mockCallback).toHaveBeenCalledTimes(0);
   });
 
   it('Should use PersistedLog for recent search suggestions', async () => {
@@ -290,5 +365,27 @@ describe('QueryStringInput', () => {
       })
     );
     expect(mockFetchIndexPatterns.mock.calls[0][1]).toStrictEqual(patternStrings);
+  });
+
+  it('Should convert non-breaking spaces into regular spaces', () => {
+    const mockCallback = jest.fn();
+
+    const component = mount(
+      wrapQueryStringInputInContext({
+        query: kqlQuery,
+        onChange: mockCallback,
+        indexPatterns: [stubIndexPatternWithFields],
+        disableAutoFocus: true,
+      })
+    );
+
+    const instance = component.find('QueryStringInputUI').instance() as QueryStringInputUI;
+    const input = instance.inputRef;
+    const inputWrapper = component.find(EuiTextArea).find('textarea');
+    input!.value = 'foo\u00A0bar';
+    inputWrapper.simulate('change');
+
+    expect(mockCallback).toHaveBeenCalledTimes(1);
+    expect(mockCallback).toHaveBeenCalledWith({ query: 'foo bar', language: 'kuery' });
   });
 });

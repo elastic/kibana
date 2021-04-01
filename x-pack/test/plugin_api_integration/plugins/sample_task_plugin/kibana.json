@@ -1,5 +1,5 @@
 {
-  "id": "sample_task_plugin",
+  "id": "sampleTaskPlugin",
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["xpack"],

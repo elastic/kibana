@@ -26,18 +26,18 @@
   padding-top: $euiSizeS + 3px;
   box-shadow: 0 0 0 1px $euiFormBorderColor;
 
-  &:not(:focus):not(:invalid) {
+  &:not(.kbnQueryBar__textarea--autoHeight):not(:invalid) {
     @include euiYScrollWithShadows;
   }
 
-  &:not(:focus) {
+  &:not(.kbnQueryBar__textarea--autoHeight) {
     white-space: nowrap;
     overflow-y: hidden;
     overflow-x: hidden;
   }
 
   // When focused, let it scroll
-  &:focus {
+  &.kbnQueryBar__textarea--autoHeight {
     overflow-x: auto;
     overflow-y: auto;
     white-space: normal;
@@ -52,6 +52,20 @@
     z-index: $euiZContentMenu + 1;
     top: $euiSizeS + 3px;
     bottom: unset;
+  }
+}
+
+.kbnQueryBar__datePickerWrapper {
+  .euiDatePopoverButton-isInvalid {
+    background-image: euiFormControlGradient($euiColorDanger);
+
+    // @todo Remove when EUI issue is resolved.
+    // @see https://github.com/elastic/eui/issues/4612
+    &:focus {
+      color: $euiTextColor;
+      background-color: $euiFormBackgroundColor;
+      background-image: euiFormControlGradient($euiColorPrimary);
+    }
   }
 }
 
@@ -73,9 +87,10 @@
     // sass-lint:disable-block no-important
     flex-grow: 0 !important;
     flex-basis: auto !important;
-    margin-right: -$euiSizeXS !important;
 
     &.kbnQueryBar__datePickerWrapper-isHidden {
+      // sass-lint:disable-block no-important
+      margin-right: -$euiSizeXS !important;
       width: 0;
       overflow: hidden;
       max-width: 0;

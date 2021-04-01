@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Component, Fragment } from 'react';
@@ -9,7 +10,6 @@ import { PropTypes } from 'prop-types';
 
 import {
   EuiConfirmModal,
-  EuiOverlayMask,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
@@ -110,37 +110,35 @@ export class CalendarsListUI extends Component {
 
     if (this.state.isDestroyModalVisible) {
       destroyModal = (
-        <EuiOverlayMask>
-          <EuiConfirmModal
-            data-test-subj={'mlCalendarDeleteConfirmation'}
-            title={
-              <FormattedMessage
-                id="xpack.ml.calendarsList.deleteCalendarsModal.deleteMultipleCalendarsTitle"
-                defaultMessage="Delete {calendarsCount, plural, one {{calendarsList}} other {# calendars}}?"
-                values={{
-                  calendarsCount: selectedForDeletion.length,
-                  calendarsList: selectedForDeletion.map((c) => c.calendar_id).join(', '),
-                }}
-              />
-            }
-            onCancel={this.closeDestroyModal}
-            onConfirm={this.deleteCalendars}
-            cancelButtonText={
-              <FormattedMessage
-                id="xpack.ml.calendarsList.deleteCalendarsModal.cancelButtonLabel"
-                defaultMessage="Cancel"
-              />
-            }
-            confirmButtonText={
-              <FormattedMessage
-                id="xpack.ml.calendarsList.deleteCalendarsModal.deleteButtonLabel"
-                defaultMessage="Delete"
-              />
-            }
-            buttonColor="danger"
-            defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
-          />
-        </EuiOverlayMask>
+        <EuiConfirmModal
+          data-test-subj={'mlCalendarDeleteConfirmation'}
+          title={
+            <FormattedMessage
+              id="xpack.ml.calendarsList.deleteCalendarsModal.deleteMultipleCalendarsTitle"
+              defaultMessage="Delete {calendarsCount, plural, one {{calendarsList}} other {# calendars}}?"
+              values={{
+                calendarsCount: selectedForDeletion.length,
+                calendarsList: selectedForDeletion.map((c) => c.calendar_id).join(', '),
+              }}
+            />
+          }
+          onCancel={this.closeDestroyModal}
+          onConfirm={this.deleteCalendars}
+          cancelButtonText={
+            <FormattedMessage
+              id="xpack.ml.calendarsList.deleteCalendarsModal.cancelButtonLabel"
+              defaultMessage="Cancel"
+            />
+          }
+          confirmButtonText={
+            <FormattedMessage
+              id="xpack.ml.calendarsList.deleteCalendarsModal.deleteButtonLabel"
+              defaultMessage="Delete"
+            />
+          }
+          buttonColor="danger"
+          defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
+        />
       );
     }
 

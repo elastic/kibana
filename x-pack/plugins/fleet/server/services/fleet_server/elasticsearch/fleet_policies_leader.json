@@ -1,0 +1,21 @@
+{
+  "settings": {},
+  "mappings": {
+    "dynamic": false,
+    "properties": {
+      "server": {
+        "properties": {
+          "id": {
+            "type": "keyword"
+          },
+          "version": {
+            "type": "keyword"
+          }
+        }
+      },
+      "@timestamp": {
+        "type": "date"
+      }
+    }
+  }
+}

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { Fragment, Suspense } from 'react';
 import {
   EuiForm,
@@ -138,9 +140,9 @@ export const ActionConnectorForm = ({
       <Fragment>
         <EuiCallOut
           title={i18n.translate(
-            'xpack.triggersActionsUI.sections.actionConnectorForm.actions.actionTypeConfigurationWarningTitleText',
+            'xpack.triggersActionsUI.sections.actionConnectorForm.actions.connectorTypeConfigurationWarningTitleText',
             {
-              defaultMessage: 'Action type not registered',
+              defaultMessage: 'Connector type not registered',
             }
           )}
           color="warning"
@@ -149,15 +151,12 @@ export const ActionConnectorForm = ({
           <EuiText>
             <p>
               <FormattedMessage
-                id="xpack.triggersActionsUI.sections.actionConnectorForm.actions.actionConfigurationWarningDescriptionText"
-                defaultMessage="To create this connector, you must configure at least one {actionType} account. {docLink}"
+                id="xpack.triggersActionsUI.sections.actionConnectorForm.actions.connectorTypeConfigurationWarningDescriptionText"
+                defaultMessage="To create this connector, you must configure at least one {connectorType} account. {docLink}"
                 values={{
-                  actionType: actionTypeName ?? connector.actionTypeId,
+                  connectorType: actionTypeName ?? connector.actionTypeId,
                   docLink: (
-                    <EuiLink
-                      href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/action-types.html`}
-                      target="_blank"
-                    >
+                    <EuiLink href={docLinks.links.alerting.actionTypes} target="_blank">
                       <FormattedMessage
                         id="xpack.triggersActionsUI.sections.actionConnectorForm.actions.actionConfigurationWarningHelpLinkText"
                         defaultMessage="Learn more."

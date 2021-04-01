@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlyout } from '@elastic/eui';
@@ -10,12 +11,13 @@ import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
 import { StatefulTimeline } from '../../timeline';
+import { TimelineId } from '../../../../../common/types/timeline';
 import * as i18n from './translations';
 import { timelineActions } from '../../../store/timeline';
 import { focusActiveTimelineButton } from '../../timeline/helpers';
 
 interface FlyoutPaneComponentProps {
-  timelineId: string;
+  timelineId: TimelineId;
 }
 
 const EuiFlyoutContainer = styled.div`

@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import { EuiConfirmModal } from '@elastic/eui';
 import PropTypes from 'prop-types';
 import React, { FunctionComponent } from 'react';
 
-interface Props {
+export interface Props {
   isOpen: boolean;
   title?: string;
   message: string;
@@ -38,21 +39,20 @@ export const ConfirmModal: FunctionComponent<Props> = (props) => {
   }
 
   return (
-    <EuiOverlayMask>
-      <EuiConfirmModal
-        {...rest}
-        className={`canvasConfirmModal ${className || ''}`}
-        title={title}
-        onCancel={onCancel}
-        onConfirm={onConfirm}
-        confirmButtonText={confirmButtonText}
-        cancelButtonText={cancelButtonText}
-        defaultFocusedButton="confirm"
-        buttonColor="danger"
-      >
-        {message}
-      </EuiConfirmModal>
-    </EuiOverlayMask>
+    <EuiConfirmModal
+      {...rest}
+      className={`canvasConfirmModal ${className || ''}`}
+      title={title}
+      onCancel={onCancel}
+      onConfirm={onConfirm}
+      confirmButtonText={confirmButtonText}
+      cancelButtonText={cancelButtonText}
+      defaultFocusedButton="confirm"
+      buttonColor="danger"
+      data-test-subj="canvasConfirmModal"
+    >
+      {message}
+    </EuiConfirmModal>
   );
 };
 

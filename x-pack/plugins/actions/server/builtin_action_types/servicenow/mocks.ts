@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { ExternalService, PushToServiceApiParams, ExecutorSubActionPushParams } from './types';
+import { ExternalService, ExecutorSubActionPushParams } from './types';
 
 export const serviceNowCommonFields = [
   {
@@ -33,8 +34,43 @@ export const serviceNowCommonFields = [
     element: 'sys_updated_by',
   },
 ];
+
+export const serviceNowChoices = [
+  {
+    dependent_value: '',
+    label: '1 - Critical',
+    value: '1',
+    element: 'priority',
+  },
+  {
+    dependent_value: '',
+    label: '2 - High',
+    value: '2',
+    element: 'priority',
+  },
+  {
+    dependent_value: '',
+    label: '3 - Moderate',
+    value: '3',
+    element: 'priority',
+  },
+  {
+    dependent_value: '',
+    label: '4 - Low',
+    value: '4',
+    element: 'priority',
+  },
+  {
+    dependent_value: '',
+    label: '5 - Planning',
+    value: '5',
+    element: 'priority',
+  },
+];
+
 const createMock = (): jest.Mocked<ExternalService> => {
   const service = {
+    getChoices: jest.fn().mockImplementation(() => Promise.resolve(serviceNowChoices)),
     getFields: jest.fn().mockImplementation(() => Promise.resolve(serviceNowCommonFields)),
     getIncident: jest.fn().mockImplementation(() =>
       Promise.resolve({
@@ -76,6 +112,8 @@ const executorParams: ExecutorSubActionPushParams = {
     severity: '1',
     urgency: '2',
     impact: '3',
+    category: 'software',
+    subcategory: 'os',
   },
   comments: [
     {
@@ -89,8 +127,6 @@ const executorParams: ExecutorSubActionPushParams = {
   ],
 };
 
-const apiParams: PushToServiceApiParams = {
-  ...executorParams,
-};
+const apiParams = executorParams;
 
 export { externalServiceMock, executorParams, apiParams };

@@ -1,28 +1,21 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 const Path = require('path');
 
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
+
 const CompressionPlugin = require('compression-webpack-plugin');
 const { REPO_ROOT } = require('@kbn/utils');
 const webpack = require('webpack');
+const { RawSource } = require('webpack-sources');
 
 const UiSharedDeps = require('./index');
 
@@ -96,6 +89,13 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
           },
         ],
       },
+      {
+        test: /\.(ttf)(\?|$)/,
+        loader: 'url-loader',
+        options: {
+          limit: 8192,
+        },
+      },
     ],
   },
 
@@ -104,9 +104,32 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
       moment: MOMENT_SRC,
     },
     extensions: ['.js', '.ts'],
+    symlinks: false,
   },
 
   optimization: {
+    minimizer: [
+      new CssMinimizerPlugin({
+        minimizerOptions: {
+          preset: [
+            'default',
+            {
+              discardComments: false,
+            },
+          ],
+        },
+      }),
+      new TerserPlugin({
+        cache: false,
+        sourceMap: false,
+        extractComments: false,
+        parallel: false,
+        terserOptions: {
+          compress: true,
+          mangle: true,
+        },
+      }),
+    ],
     noEmitOnErrors: true,
     splitChunks: {
       cacheGroups: {
@@ -149,6 +172,36 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
             test: /\.(js|css)$/,
             cache: false,
           }),
+          new (class MetricsPlugin {
+            apply(compiler) {
+              compiler.hooks.emit.tap('MetricsPlugin', (compilation) => {
+                const metrics = [
+                  {
+                    group: 'page load bundle size',
+                    id: 'kbnUiSharedDeps-js',
+                    value: compilation.assets['kbn-ui-shared-deps.js'].size(),
+                  },
+                  {
+                    group: 'page load bundle size',
+                    id: 'kbnUiSharedDeps-css',
+                    value:
+                      compilation.assets['kbn-ui-shared-deps.css'].size() +
+                      compilation.assets['kbn-ui-shared-deps.v7.light.css'].size(),
+                  },
+                  {
+                    group: 'page load bundle size',
+                    id: 'kbnUiSharedDeps-elastic',
+                    value: compilation.assets['kbn-ui-shared-deps.@elastic.js'].size(),
+                  },
+                ];
+
+                compilation.emitAsset(
+                  'metrics.json',
+                  new RawSource(JSON.stringify(metrics, null, 2))
+                );
+              });
+            }
+          })(),
         ]),
   ],
 });

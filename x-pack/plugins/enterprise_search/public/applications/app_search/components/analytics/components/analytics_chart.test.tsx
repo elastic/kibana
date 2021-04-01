@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mockKibanaValues } from '../../../../__mocks__';
 
 import React from 'react';
+
 import { shallow } from 'enzyme';
+
 import { Chart, Settings, LineSeries, Axis } from '@elastic/charts';
 
 import { AnalyticsChart } from './';
@@ -52,6 +55,14 @@ describe('AnalyticsChart', () => {
     );
 
     expect(wrapper.find(LineSeries)).toHaveLength(3);
+  });
+
+  it('renders dashed lines', () => {
+    const wrapper = shallow(
+      <AnalyticsChart lines={[{ id: 'dashed 1', data: MOCK_DATA, isDashed: true }]} />
+    );
+
+    expect(wrapper.find(LineSeries).prop('lineSeriesStyle')?.line?.dash).toBeTruthy();
   });
 
   it('formats x-axis dates correctly', () => {

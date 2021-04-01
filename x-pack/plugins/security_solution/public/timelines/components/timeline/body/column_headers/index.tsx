@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -319,13 +320,15 @@ export const ColumnHeadersComponent = ({
               </EuiToolTip>
             </EventsThContent>
           </EventsTh>
-          <EventsTh role="button">
-            <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
-              <EuiToolTip content={i18n.SORT_FIELDS}>
-                <SortingColumnsContainer>{ColumnSorting}</SortingColumnsContainer>
-              </EuiToolTip>
-            </EventsThContent>
-          </EventsTh>
+          {tabType !== TimelineTabs.eql && (
+            <EventsTh role="button" data-test-subj="timeline-sorting-fields">
+              <EventsThContent textAlign="center" width={DEFAULT_ICON_BUTTON_WIDTH}>
+                <EuiToolTip content={i18n.SORT_FIELDS}>
+                  <SortingColumnsContainer>{ColumnSorting}</SortingColumnsContainer>
+                </EuiToolTip>
+              </EventsThContent>
+            </EventsTh>
+          )}
 
           {showEventsSelect && (
             <EventsTh role="button">
@@ -362,5 +365,6 @@ export const ColumnHeaders = React.memo(
     deepEqual(prevProps.sort, nextProps.sort) &&
     prevProps.timelineId === nextProps.timelineId &&
     deepEqual(prevProps.columnHeaders, nextProps.columnHeaders) &&
+    prevProps.tabType === nextProps.tabType &&
     deepEqual(prevProps.browserFields, nextProps.browserFields)
 );

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEmpty } from 'lodash/fp';
@@ -107,6 +108,8 @@ const normalizeTrustedAppsPageLocation = (
         : {}),
       ...(!isDefaultOrMissing(location.view_type, 'grid') ? { view_type: location.view_type } : {}),
       ...(!isDefaultOrMissing(location.show, undefined) ? { show: location.show } : {}),
+      ...(!isDefaultOrMissing(location.id, undefined) ? { id: location.id } : {}),
+      ...(!isDefaultOrMissing(location.filter, '') ? { filter: location.filter } : ''),
     };
   } else {
     return {};
@@ -139,18 +142,32 @@ const extractPageSize = (query: querystring.ParsedUrlQuery): number => {
   return MANAGEMENT_PAGE_SIZE_OPTIONS.includes(pageSize) ? pageSize : MANAGEMENT_DEFAULT_PAGE_SIZE;
 };
 
+const extractFilter = (query: querystring.ParsedUrlQuery): string => {
+  return extractFirstParamValue(query, 'filter') || '';
+};
+
 export const extractListPaginationParams = (query: querystring.ParsedUrlQuery) => ({
   page_index: extractPageIndex(query),
   page_size: extractPageSize(query),
+  filter: extractFilter(query),
 });
 
 export const extractTrustedAppsListPageLocation = (
   query: querystring.ParsedUrlQuery
-): TrustedAppsListPageLocation => ({
-  ...extractListPaginationParams(query),
-  view_type: extractFirstParamValue(query, 'view_type') === 'list' ? 'list' : 'grid',
-  show: extractFirstParamValue(query, 'show') === 'create' ? 'create' : undefined,
-});
+): TrustedAppsListPageLocation => {
+  const showParamValue = extractFirstParamValue(
+    query,
+    'show'
+  ) as TrustedAppsListPageLocation['show'];
+
+  return {
+    ...extractListPaginationParams(query),
+    view_type: extractFirstParamValue(query, 'view_type') === 'list' ? 'list' : 'grid',
+    show:
+      showParamValue && ['edit', 'create'].includes(showParamValue) ? showParamValue : undefined,
+    id: extractFirstParamValue(query, 'id'),
+  };
+};
 
 export const getTrustedAppsListPath = (location?: Partial<TrustedAppsListPageLocation>): string => {
   const path = generatePath(MANAGEMENT_ROUTING_TRUSTED_APPS_PATH, {

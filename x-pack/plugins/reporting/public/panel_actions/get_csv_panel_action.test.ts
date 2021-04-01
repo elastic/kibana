@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { of } from 'rxjs';
@@ -51,7 +52,20 @@ describe('GetCsvReportPanelAction', () => {
     context = {
       embeddable: {
         type: 'search',
-        getSavedSearch: () => ({ id: 'lebowski' }),
+        getSavedSearch: () => {
+          const searchSource = {
+            createCopy: () => searchSource,
+            removeField: jest.fn(),
+            setField: jest.fn(),
+            getField: jest.fn().mockImplementation((key: string) => {
+              if (key === 'index') {
+                return 'my-test-index-*';
+              }
+            }),
+            getSerializedFields: jest.fn().mockImplementation(() => ({})),
+          };
+          return { searchSource };
+        },
         getTitle: () => `The Dude`,
         getInspectorAdapters: () => null,
         getInput: () => ({

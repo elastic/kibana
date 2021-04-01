@@ -1,23 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React from 'react';
 // @ts-expect-error no definitions in component folder
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui/lib/components/button';
 // @ts-expect-error no definitions in component folder
-import { EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui/lib/components/page';
-// @ts-expect-error no definitions in component folder
 import { EuiEmptyPrompt } from '@elastic/eui/lib/components/empty_prompt';
+// @ts-expect-error no definitions in component folder
+import { icon as EuiIconAlert } from '@elastic/eui/lib/components/icon/assets/alert';
 // @ts-expect-error no definitions in component folder
 import { appendIconComponentCache } from '@elastic/eui/lib/components/icon/icon';
 // @ts-expect-error no definitions in component folder
-import { icon as EuiIconAlert } from '@elastic/eui/lib/components/icon/assets/alert';
+import { EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui/lib/components/page';
+import React from 'react';
 
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Fonts } from '../../../../../src/core/server/rendering/views/fonts';

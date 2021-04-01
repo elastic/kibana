@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObject } from 'src/core/types';
@@ -46,26 +47,34 @@ export const buildRule = ({
   throttle,
 }: BuildRuleParams): RulesSchema => {
   const { riskScore, riskScoreMeta } = buildRiskScoreFromMapping({
+    // @ts-expect-error @elastic/elasticsearch _source is optional
     eventSource: doc._source,
     riskScore: ruleParams.riskScore,
     riskScoreMapping: ruleParams.riskScoreMapping,
   });
 
   const { severity, severityMeta } = buildSeverityFromMapping({
+    // @ts-expect-error @elastic/elasticsearch _source is optional
     eventSource: doc._source,
     severity: ruleParams.severity,
     severityMapping: ruleParams.severityMapping,
   });
 
   const { ruleName, ruleNameMeta } = buildRuleNameFromMapping({
+    // @ts-expect-error @elastic/elasticsearch _source is optional
     eventSource: doc._source,
     ruleName: name,
     ruleNameMapping: ruleParams.ruleNameOverride,
   });
 
-  const meta = { ...ruleParams.meta, ...riskScoreMeta, ...severityMeta, ...ruleNameMeta };
+  const meta: RulesSchema['meta'] = {
+    ...ruleParams.meta,
+    ...riskScoreMeta,
+    ...severityMeta,
+    ...ruleNameMeta,
+  };
 
-  const rule = {
+  const rule: RulesSchema = {
     id,
     rule_id: ruleParams.ruleId ?? '(unknown rule_id)',
     actions,
@@ -102,6 +111,12 @@ export const buildRule = ({
     created_by: createdBy,
     updated_by: updatedBy,
     threat: ruleParams.threat ?? [],
+    threat_mapping: ruleParams.threatMapping,
+    threat_filters: ruleParams.threatFilters,
+    threat_indicator_path: ruleParams.threatIndicatorPath,
+    threat_query: ruleParams.threatQuery,
+    threat_index: ruleParams.threatIndex,
+    threat_language: ruleParams.threatLanguage,
     timestamp_override: ruleParams.timestampOverride,
     throttle,
     version: ruleParams.version,
@@ -169,6 +184,7 @@ export const buildRuleWithoutOverrides = (
     threat_query: ruleParams.threatQuery,
     threat_mapping: ruleParams.threatMapping,
     threat_language: ruleParams.threatLanguage,
+    threat_indicator_path: ruleParams.threatIndicatorPath,
   };
   return removeInternalTagsFromRule(rule);
 };

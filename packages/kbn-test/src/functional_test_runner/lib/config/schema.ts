@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { dirname, resolve } from 'path';
@@ -24,8 +13,8 @@ import Joi from 'joi';
 // valid pattern for ID
 // enforced camel-case identifiers for consistency
 const ID_PATTERN = /^[a-zA-Z0-9_]+$/;
-const INSPECTING =
-  process.execArgv.includes('--inspect') || process.execArgv.includes('--inspect-brk');
+// it will search both --inspect and --inspect-brk
+const INSPECTING = !!process.execArgv.find((arg) => arg.includes('--inspect'));
 
 const urlPartsSchema = () =>
   Joi.object()
@@ -180,7 +169,7 @@ export const schema = Joi.object()
 
     esTestCluster: Joi.object()
       .keys({
-        license: Joi.string().default('oss'),
+        license: Joi.string().default('basic'),
         from: Joi.string().default('snapshot'),
         serverArgs: Joi.array(),
         serverEnvVars: Joi.object(),
@@ -221,6 +210,13 @@ export const schema = Joi.object()
     esArchiver: Joi.object()
       .keys({
         directory: Joi.string().default(defaultRelativeToConfigPath('fixtures/es_archiver')),
+      })
+      .default(),
+
+    // settings for the saved objects svc
+    kbnArchiver: Joi.object()
+      .keys({
+        directory: Joi.string().default(defaultRelativeToConfigPath('fixtures/kbn_archiver')),
       })
       .default(),
 

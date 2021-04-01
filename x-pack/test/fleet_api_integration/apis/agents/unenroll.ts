@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -22,7 +23,7 @@ export default function (providerContext: FtrProviderContext) {
     let accessAPIKeyId: string;
     let outputAPIKeyId: string;
     before(async () => {
-      await esArchiver.loadIfNeeded('fleet/agents');
+      await esArchiver.load('fleet/agents');
     });
     setupFleetAndAgents(providerContext);
     beforeEach(async () => {
@@ -41,19 +42,21 @@ export default function (providerContext: FtrProviderContext) {
       const {
         body: { _source: agentDoc },
       } = await esClient.get({
-        index: '.kibana',
-        id: 'fleet-agents:agent1',
+        index: '.fleet-agents',
+        id: 'agent1',
       });
-      // @ts-ignore
-      agentDoc['fleet-agents'].access_api_key_id = accessAPIKeyId;
-      agentDoc['fleet-agents'].default_api_key_id = outputAPIKeyBody.id;
-      agentDoc['fleet-agents'].default_api_key = Buffer.from(
+      // @ts-expect-error agentDoc has unknown type
+      agentDoc.access_api_key_id = accessAPIKeyId;
+      // @ts-expect-error agentDoc has unknown type
+      agentDoc.default_api_key_id = outputAPIKeyBody.id;
+      // @ts-expect-error agentDoc has unknown type
+      agentDoc.default_api_key = Buffer.from(
         `${outputAPIKeyBody.id}:${outputAPIKeyBody.api_key}`
       ).toString('base64');
 
       await esClient.update({
-        index: '.kibana',
-        id: 'fleet-agents:agent1',
+        index: '.fleet-agents',
+        id: 'agent1',
         refresh: true,
         body: {
           doc: agentDoc,
@@ -64,17 +67,28 @@ export default function (providerContext: FtrProviderContext) {
       await esArchiver.unload('fleet/agents');
     });
 
-    it('should allow to unenroll single agent', async () => {
+    it('/agents/{agent_id}/unenroll should fail for managed policy', async () => {
+      // set policy to managed
       await supertest
-        .post(`/api/fleet/agents/agent1/unenroll`)
+        .put(`/api/fleet/agent_policies/policy1`)
         .set('kbn-xsrf', 'xxx')
-        .send({
-          force: true,
-        })
+        .send({ name: 'Test policy', namespace: 'default', is_managed: true })
         .expect(200);
+
+      await supertest.post(`/api/fleet/agents/agent1/unenroll`).set('kbn-xsrf', 'xxx').expect(400);
     });
 
-    it('should invalidate related API keys', async () => {
+    it('/agents/{agent_id}/unenroll should allow from unmanaged policy', async () => {
+      // set policy to unmanaged
+      await supertest
+        .put(`/api/fleet/agent_policies/policy1`)
+        .set('kbn-xsrf', 'xxx')
+        .send({ name: 'Test policy', namespace: 'default', is_managed: false })
+        .expect(200);
+      await supertest.post(`/api/fleet/agents/agent1/unenroll`).set('kbn-xsrf', 'xxx').expect(200);
+    });
+
+    it('/agents/{agent_id}/unenroll { force: true } should invalidate related API keys', async () => {
       await supertest
         .post(`/api/fleet/agents/agent1/unenroll`)
         .set('kbn-xsrf', 'xxx')
@@ -96,25 +110,78 @@ export default function (providerContext: FtrProviderContext) {
       expect(outputAPIKeys[0].invalidated).eql(true);
     });
 
-    it('should allow to unenroll multiple agents by id', async () => {
+    it('/agents/{agent_id}/bulk_unenroll should not allow unenroll from managed policy', async () => {
+      // set policy to managed
       await supertest
+        .put(`/api/fleet/agent_policies/policy1`)
+        .set('kbn-xsrf', 'xxx')
+        .send({ name: 'Test policy', namespace: 'default', is_managed: true })
+        .expect(200);
+
+      // try to unenroll
+      const { body: unenrolledBody } = await supertest
         .post(`/api/fleet/agents/bulk_unenroll`)
         .set('kbn-xsrf', 'xxx')
         .send({
           agents: ['agent2', 'agent3'],
         })
+        // http request succeeds
         .expect(200);
+
+      expect(unenrolledBody).to.eql({
+        agent2: {
+          success: false,
+          error: 'Cannot unenroll agent2 from a managed agent policy policy1',
+        },
+        agent3: {
+          success: false,
+          error: 'Cannot unenroll agent3 from a managed agent policy policy1',
+        },
+      });
+      // but agents are still enrolled
       const [agent2data, agent3data] = await Promise.all([
-        supertest.get(`/api/fleet/agents/agent2`).set('kbn-xsrf', 'xxx'),
-        supertest.get(`/api/fleet/agents/agent3`).set('kbn-xsrf', 'xxx'),
+        supertest.get(`/api/fleet/agents/agent2`),
+        supertest.get(`/api/fleet/agents/agent3`),
       ]);
+      expect(typeof agent2data.body.item.unenrollment_started_at).to.eql('undefined');
+      expect(typeof agent2data.body.item.unenrolled_at).to.eql('undefined');
+      expect(agent2data.body.item.active).to.eql(true);
+      expect(typeof agent3data.body.item.unenrollment_started_at).to.be('undefined');
+      expect(typeof agent3data.body.item.unenrolled_at).to.be('undefined');
+      expect(agent2data.body.item.active).to.eql(true);
+    });
+
+    it('/agents/{agent_id}/bulk_unenroll should allow to unenroll multiple agents by id from an unmanaged policy', async () => {
+      // set policy to unmanaged
+      await supertest
+        .put(`/api/fleet/agent_policies/policy1`)
+        .set('kbn-xsrf', 'xxx')
+        .send({ name: 'Test policy', namespace: 'default', is_managed: false })
+        .expect(200);
+      const { body: unenrolledBody } = await supertest
+        .post(`/api/fleet/agents/bulk_unenroll`)
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          agents: ['agent2', 'agent3'],
+        });
+
+      expect(unenrolledBody).to.eql({
+        agent2: { success: true },
+        agent3: { success: true },
+      });
+
+      const [agent2data, agent3data] = await Promise.all([
+        supertest.get(`/api/fleet/agents/agent2`),
+        supertest.get(`/api/fleet/agents/agent3`),
+      ]);
+
       expect(typeof agent2data.body.item.unenrollment_started_at).to.eql('string');
       expect(agent2data.body.item.active).to.eql(true);
       expect(typeof agent3data.body.item.unenrollment_started_at).to.be('string');
       expect(agent2data.body.item.active).to.eql(true);
     });
 
-    it('should allow to unenroll multiple agents by kuery', async () => {
+    it('/agents/{agent_id}/bulk_unenroll should allow to unenroll multiple agents by kuery', async () => {
       await supertest
         .post(`/api/fleet/agents/bulk_unenroll`)
         .set('kbn-xsrf', 'xxx')
@@ -124,7 +191,7 @@ export default function (providerContext: FtrProviderContext) {
         })
         .expect(200);
 
-      const { body } = await supertest.get(`/api/fleet/agents`).set('kbn-xsrf', 'xxx');
+      const { body } = await supertest.get(`/api/fleet/agents`);
       expect(body.total).to.eql(0);
     });
   });

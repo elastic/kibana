@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../tsconfig.base.json",
+  "extends": "../../../../tsconfig.project.json",
   "exclude": [],
   "include": [
     "./**/*"
@@ -8,6 +8,7 @@
     "tsBuildInfoFile": "../../../../build/tsbuildinfo/security_solution/cypress",
     "types": [
       "cypress",
+      "cypress-pipe",
       "node"
     ],
     "resolveJsonModule": true,

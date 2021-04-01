@@ -1,26 +1,18 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { SavedObjectsFindOptionsReference } from '../types';
+import { KibanaRequest } from '../../http';
+import { SavedObject, SavedObjectsFindOptionsReference } from '../types';
 
 /** @public */
 export interface SavedObjectExportBaseOptions {
+  /** The http request initiating the export. */
+  request: KibanaRequest;
   /** flag to also include all related saved objects in the export stream. */
   includeReferencesDeep?: boolean;
   /** flag to not append {@link SavedObjectsExportResultDetails | export details} to the end of the export stream. */
@@ -75,3 +67,92 @@ export interface SavedObjectsExportResultDetails {
     type: string;
   }>;
 }
+
+/**
+ * Context passed down to a {@link SavedObjectsExportTransform | export transform function}
+ *
+ * @public
+ */
+export interface SavedObjectsExportTransformContext {
+  /**
+   * The request that initiated the export request. Can be used to create scoped
+   * services or client inside the {@link SavedObjectsExportTransform | transformation}
+   */
+  request: KibanaRequest;
+}
+
+/**
+ * Transformation function used to mutate the exported objects of the associated type.
+ *
+ * A type's export transform function will be executed once per user-initiated export,
+ * for all objects of that type.
+ *
+ * @example
+ * Registering a transform function changing the object's attributes during the export
+ * ```ts
+ * // src/plugins/my_plugin/server/plugin.ts
+ * import { myType } from './saved_objects';
+ *
+ * export class Plugin() {
+ *   setup: (core: CoreSetup) => {
+ *     core.savedObjects.registerType({
+ *        ...myType,
+ *        management: {
+ *          ...myType.management,
+ *          onExport: (ctx, objects) => {
+ *            return objects.map((obj) => ({
+ *              ...obj,
+ *              attributes: {
+ *                ...obj.attributes,
+ *                enabled: false,
+ *              }
+ *            })
+ *          }
+ *        },
+ *     });
+ *   }
+ * }
+ * ```
+ *
+ * @example
+ * Registering a transform function adding additional objects to the export
+ * ```ts
+ * // src/plugins/my_plugin/server/plugin.ts
+ * import { myType } from './saved_objects';
+ *
+ * export class Plugin() {
+ *   setup: (core: CoreSetup) => {
+ *     const savedObjectStartContractPromise = getStartServices().then(
+ *       ([{ savedObjects: savedObjectsStart }]) => savedObjectsStart
+ *     );
+ *
+ *     core.savedObjects.registerType({
+ *        ...myType,
+ *        management: {
+ *          ...myType.management,
+ *          onExport: async (ctx, objects) => {
+ *            const { getScopedClient } = await savedObjectStartContractPromise;
+ *            const client = getScopedClient(ctx.request);
+ *
+ *            const depResponse = await client.find({
+ *              type: 'my-nested-object',
+ *              hasReference: objs.map(({ id, type }) => ({ id, type })),
+ *            });
+ *
+ *            return [...objs, ...depResponse.saved_objects];
+ *          }
+ *        },
+ *     });
+ *   }
+ * }
+ * ```
+ *
+ * @remarks Trying to change an object's id or type during the transform will result in
+ *          a runtime error during the export process.
+ *
+ * @public
+ */
+export type SavedObjectsExportTransform = <T = unknown>(
+  context: SavedObjectsExportTransformContext,
+  objects: Array<SavedObject<T>>
+) => SavedObject[] | Promise<SavedObject[]>;

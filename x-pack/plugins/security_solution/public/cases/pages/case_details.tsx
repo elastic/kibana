@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -20,7 +21,10 @@ import { savedObjectReadOnlyErrorMessage, CaseCallOut } from '../components/call
 export const CaseDetailsPage = React.memo(() => {
   const history = useHistory();
   const userPermissions = useGetUserSavedObjectPermissions();
-  const { detailName: caseId } = useParams<{ detailName?: string }>();
+  const { detailName: caseId, subCaseId } = useParams<{
+    detailName?: string;
+    subCaseId?: string;
+  }>();
   const search = useGetUrlSearch(navTabs.case);
 
   if (userPermissions != null && !userPermissions.read) {
@@ -37,7 +41,11 @@ export const CaseDetailsPage = React.memo(() => {
             messages={[{ ...savedObjectReadOnlyErrorMessage }]}
           />
         )}
-        <CaseView caseId={caseId} userCanCrud={userPermissions?.crud ?? false} />
+        <CaseView
+          caseId={caseId}
+          subCaseId={subCaseId}
+          userCanCrud={userPermissions?.crud ?? false}
+        />
       </WrapperPage>
       <SpyRoute pageName={SecurityPageName.case} />
     </>

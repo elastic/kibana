@@ -1,10 +1,14 @@
 {
   "include": [
-    "./plugins/apm/**/*",
-    "./plugins/observability/**/*",
+    "./x-pack/plugins/apm/**/*",
+    "./x-pack/plugins/observability/**/*",
     "./typings/**/*"
   ],
-  "exclude": ["**/__fixtures__/**/*", "./plugins/apm/e2e/cypress/**/*"],
+  "exclude": [
+    "**/__fixtures__/**/*",
+    "./x-pack/plugins/apm/e2e",
+    "./x-pack/plugins/apm/ftr_e2e"
+  ],
   "compilerOptions": {
     "noErrorTruncation": true
   }

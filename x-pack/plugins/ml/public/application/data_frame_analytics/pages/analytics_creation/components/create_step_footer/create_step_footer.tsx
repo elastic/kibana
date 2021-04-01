@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useEffect, useState } from 'react';
@@ -19,6 +20,7 @@ import { BackToListPanel } from '../back_to_list_panel';
 import { ViewResultsPanel } from '../view_results_panel';
 import { ProgressStats } from './progress_stats';
 import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
+import { NewJobAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning';
 
 export const PROGRESS_REFRESH_INTERVAL_MS = 1000;
 
@@ -41,6 +43,7 @@ export const CreateStepFooter: FC<Props> = ({ jobId, jobType, showProgress }) =>
   const [currentProgress, setCurrentProgress] = useState<AnalyticsProgressStats | undefined>(
     undefined
   );
+  const [showJobAssignWarning, setShowJobAssignWarning] = useState(false);
 
   const {
     services: { notifications },
@@ -57,6 +60,10 @@ export const CreateStepFooter: FC<Props> = ({ jobId, jobType, showProgress }) =>
         const jobStats = isGetDataFrameAnalyticsStatsResponseOk(analyticsStats)
           ? analyticsStats.data_frame_analytics[0]
           : undefined;
+
+        setShowJobAssignWarning(
+          jobStats?.state === DATA_FRAME_TASK_STATE.STARTING && jobStats?.node === undefined
+        );
 
         if (jobStats !== undefined) {
           const progressStats = getDataFrameAnalyticsProgressPhase(jobStats);
@@ -106,25 +113,28 @@ export const CreateStepFooter: FC<Props> = ({ jobId, jobType, showProgress }) =>
   }, [initialized]);
 
   return (
-    <EuiFlexGroup direction="column">
-      <EuiFlexItem grow={false}>
-        {showProgress && (
-          <ProgressStats currentProgress={currentProgress} failedJobMessage={failedJobMessage} />
-        )}
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiHorizontalRule />
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <BackToListPanel />
-          </EuiFlexItem>
-          {jobFinished === true && (
-            <EuiFlexItem grow={false}>
-              <ViewResultsPanel jobId={jobId} analysisType={jobType} />
-            </EuiFlexItem>
+    <>
+      {showJobAssignWarning && <NewJobAwaitingNodeWarning jobType="data-frame-analytics" />}
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem grow={false}>
+          {showProgress && (
+            <ProgressStats currentProgress={currentProgress} failedJobMessage={failedJobMessage} />
           )}
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiHorizontalRule />
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <BackToListPanel />
+            </EuiFlexItem>
+            {jobFinished === true && (
+              <EuiFlexItem grow={false}>
+                <ViewResultsPanel jobId={jobId} analysisType={jobType} />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 };

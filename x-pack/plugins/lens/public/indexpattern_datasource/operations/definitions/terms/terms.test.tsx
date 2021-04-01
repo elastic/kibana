@@ -1,25 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { shallow, mount } from 'enzyme';
-import { EuiRange, EuiSelect, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
+import { EuiFieldNumber, EuiSelect, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import type { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
 import { createMockedIndexPattern } from '../../../mocks';
-import { ValuesRangeInput } from './values_range_input';
+import { ValuesInput } from './values_input';
 import type { TermsIndexPatternColumn } from '.';
 import { termsOperation } from '../index';
 import { IndexPattern, IndexPatternLayer } from '../../../types';
 
+const uiSettingsMock = {} as IUiSettingsClient;
+
 const defaultProps = {
   storage: {} as IStorageWrapper,
-  uiSettings: {} as IUiSettingsClient,
+  uiSettings: uiSettingsMock,
   savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
   data: dataPluginMock.createStartContract(),
@@ -66,7 +69,8 @@ describe('terms', () => {
         { ...termsColumn, params: { ...termsColumn.params, otherBucket: true } },
         'col1',
         {} as IndexPattern,
-        layer
+        layer,
+        uiSettingsMock
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({
@@ -89,52 +93,14 @@ describe('terms', () => {
         },
         'col1',
         {} as IndexPattern,
-        layer
+        layer,
+        uiSettingsMock
       );
       expect(esAggsFn).toEqual(
         expect.objectContaining({
           arguments: expect.objectContaining({
             otherBucket: [false],
             missingBucket: [false],
-          }),
-        })
-      );
-    });
-
-    it('should include esaggs suffix from other columns in orderby argument', () => {
-      const termsColumn = layer.columns.col1 as TermsIndexPatternColumn;
-      const esAggsFn = termsOperation.toEsAggsFn(
-        {
-          ...termsColumn,
-          params: {
-            ...termsColumn.params,
-            otherBucket: true,
-            orderBy: { type: 'column', columnId: 'abcde' },
-          },
-        },
-        'col1',
-        {} as IndexPattern,
-        {
-          ...layer,
-          columns: {
-            ...layer.columns,
-            abcde: {
-              dataType: 'number',
-              isBucketed: false,
-              operationType: 'percentile',
-              sourceField: 'abc',
-              label: '',
-              params: {
-                percentile: 12,
-              },
-            },
-          },
-        }
-      );
-      expect(esAggsFn).toEqual(
-        expect.objectContaining({
-          arguments: expect.objectContaining({
-            orderBy: ['abcde.12'],
           }),
         })
       );
@@ -882,7 +848,7 @@ describe('terms', () => {
         />
       );
 
-      expect(instance.find(EuiRange).prop('value')).toEqual('3');
+      expect(instance.find(EuiFieldNumber).prop('value')).toEqual('3');
     });
 
     it('should update state with the size value', () => {
@@ -898,7 +864,7 @@ describe('terms', () => {
       );
 
       act(() => {
-        instance.find(ValuesRangeInput).prop('onChange')!(7);
+        instance.find(ValuesInput).prop('onChange')!(7);
       });
 
       expect(updateLayerSpy).toHaveBeenCalledWith({

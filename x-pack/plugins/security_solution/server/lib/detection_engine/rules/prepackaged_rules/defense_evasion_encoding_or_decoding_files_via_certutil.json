@@ -6,10 +6,11 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Encoding or Decoding Files via CertUtil",
   "query": "event.category:process and event.type:(start or process_started) and process.name:certutil.exe and process.args:(-decode or -encode or /decode or /encode)",
   "risk_score": 47,
@@ -39,6 +40,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 5
+  "version": 7
 }

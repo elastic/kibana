@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 export {
   AGENT_TYPE_PERMANENT,
   AGENT_TYPE_EPHEMERAL,
@@ -31,6 +33,7 @@ export {
   SETUP_API_ROUTE,
   SETTINGS_API_ROUTES,
   APP_API_ROUTES,
+  PRECONFIGURATION_API_ROUTES,
   // Saved object types
   SO_SEARCH_LIMIT,
   AGENT_SAVED_OBJECT_TYPE,
@@ -41,10 +44,12 @@ export {
   OUTPUT_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   ASSETS_SAVED_OBJECT_TYPE,
-  INDEX_PATTERN_SAVED_OBJECT_TYPE,
   ENROLLMENT_API_KEYS_SAVED_OBJECT_TYPE,
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
   // Defaults
   DEFAULT_AGENT_POLICY,
   DEFAULT_OUTPUT,
+  // Fleet Server index
+  ENROLLMENT_API_KEYS_INDEX,
+  AGENTS_INDEX,
 } from '../../common';

@@ -1,27 +1,15 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import Color from 'color';
 import { calculateLabel } from '../../../../common/calculate_label';
 import _ from 'lodash';
 import { getLastMetric } from './get_last_metric';
-import { getSplitColors } from './get_split_colors';
 import { formatKey } from './format_key';
 
 const getTimeSeries = (resp, series) =>
@@ -41,14 +29,12 @@ export async function getSplits(resp, panel, series, meta, extractFields) {
 
   if (buckets) {
     if (Array.isArray(buckets)) {
-      const size = buckets.length;
-      const colors = getSplitColors(series.color, size, series.split_color_mode);
       return buckets.map((bucket) => {
         bucket.id = `${series.id}:${bucket.key}`;
         bucket.splitByLabel = splitByLabel;
         bucket.label = formatKey(bucket.key, series);
         bucket.labelFormatted = bucket.key_as_string ? formatKey(bucket.key_as_string, series) : '';
-        bucket.color = panel.type === 'top_n' ? color.string() : colors.shift();
+        bucket.color = color.string();
         bucket.meta = meta;
         return bucket;
       });

@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { CASES_URL } from '../../../../../../plugins/case/common/constants';
+import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 
 // eslint-disable-next-line import/no-default-export
 export default function createGetTests({ getService }: FtrProviderContext) {
@@ -15,11 +16,11 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
   describe('migrations', () => {
     before(async () => {
-      await esArchiver.load('cases');
+      await esArchiver.load('cases/migrations/7.10.0');
     });
 
     after(async () => {
-      await esArchiver.unload('cases');
+      await esArchiver.unload('cases/migrations/7.10.0');
     });
 
     it('7.11.0 migrates cases comments', async () => {

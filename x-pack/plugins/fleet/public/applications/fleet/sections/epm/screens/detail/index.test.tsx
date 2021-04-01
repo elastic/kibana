@@ -1,20 +1,40 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { createTestRendererMock, epmDetailsApiMock, TestRenderer } from '../../../../mock';
-import { Detail } from './index';
 import React, { lazy, memo } from 'react';
-import { PAGE_ROUTING_PATHS, pagePathGetters } from '../../../../constants';
 import { Route } from 'react-router-dom';
-import { DetailViewPanelName } from '../../../../../../../common/types/models';
 import { act, cleanup } from '@testing-library/react';
+
+import { PAGE_ROUTING_PATHS, pagePathGetters } from '../../../../constants';
+import type {
+  GetAgentPoliciesResponse,
+  GetFleetStatusResponse,
+  GetInfoResponse,
+  GetPackagePoliciesResponse,
+  GetStatsResponse,
+} from '../../../../../../../common/types/rest_spec';
+import type {
+  DetailViewPanelName,
+  KibanaAssetType,
+} from '../../../../../../../common/types/models';
+import {
+  agentPolicyRouteService,
+  epmRouteService,
+  fleetSetupRouteService,
+  packagePolicyRouteService,
+} from '../../../../../../../common/services';
+import type { MockedFleetStartServices, TestRenderer } from '../../../../mock';
+import { createTestRendererMock, epmDetailsApiMock } from '../../../../mock';
+
+import { Detail } from './index';
 
 describe('when on integration detail', () => {
   const pkgkey = 'nginx-0.3.7';
-  const detailPageUrlPath = pagePathGetters.integration_details({ pkgkey });
+  const detailPageUrlPath = pagePathGetters.integration_details_overview({ pkgkey });
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
   let mockedHttp: ReturnType<typeof epmDetailsApiMock>;
@@ -86,7 +106,7 @@ describe('when on integration detail', () => {
     it('should redirect if custom url is accessed', () => {
       act(() => {
         testRenderer.history.push(
-          pagePathGetters.integration_details({ pkgkey: 'nginx-0.3.7', panel: 'custom' })
+          pagePathGetters.integration_details_custom({ pkgkey: 'nginx-0.3.7' })
         );
       });
       expect(testRenderer.history.location.pathname).toEqual(detailPageUrlPath);
@@ -134,7 +154,7 @@ describe('when on integration detail', () => {
     it('should display custom content when tab is clicked', async () => {
       act(() => {
         testRenderer.history.push(
-          pagePathGetters.integration_details({ pkgkey: 'nginx-0.3.7', panel: 'custom' })
+          pagePathGetters.integration_details_custom({ pkgkey: 'nginx-0.3.7' })
         );
       });
       await lazyComponentWasRendered;
@@ -159,14 +179,14 @@ describe('when on integration detail', () => {
         onCancelNavigateTo: [
           'fleet',
           {
-            path: '#/integrations/detail/nginx-0.3.7',
+            path: '#/integrations/detail/nginx-0.3.7/overview',
           },
         ],
-        onCancelUrl: '#/integrations/detail/nginx-0.3.7',
+        onCancelUrl: '#/integrations/detail/nginx-0.3.7/overview',
         onSaveNavigateTo: [
           'fleet',
           {
-            path: '#/integrations/detail/nginx-0.3.7',
+            path: '#/integrations/detail/nginx-0.3.7/overview',
           },
         ],
       });
@@ -174,7 +194,7 @@ describe('when on integration detail', () => {
   });
 
   describe('and on the Policies Tab', () => {
-    const policiesTabURLPath = pagePathGetters.integration_details({ pkgkey, panel: 'policies' });
+    const policiesTabURLPath = pagePathGetters.integration_details_policies({ pkgkey });
     beforeEach(() => {
       testRenderer.history.push(policiesTabURLPath);
       render();

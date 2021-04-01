@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -12,7 +13,7 @@ import { noop } from 'lodash/fp';
 import { TestProviders } from '../../../common/mock';
 import { Router, routeData, mockHistory, mockLocation } from '../__mock__/router';
 
-import { CommentRequest, CommentType } from '../../../../../case/common/api';
+import { CommentRequest, CommentType } from '../../../../../cases/common/api';
 import { useInsertTimeline } from '../use_insert_timeline';
 import { usePostComment } from '../../containers/use_post_comment';
 import { AddComment, AddCommentRefObject } from '.';
@@ -78,7 +79,12 @@ describe('AddComment ', () => {
 
     await waitFor(() => {
       expect(onCommentSaving).toBeCalled();
-      expect(postComment).toBeCalledWith(addCommentProps.caseId, sampleData, onCommentPosted);
+      expect(postComment).toBeCalledWith({
+        caseId: addCommentProps.caseId,
+        data: sampleData,
+        subCaseId: undefined,
+        updateCase: onCommentPosted,
+      });
       expect(wrapper.find(`[data-test-subj="add-comment"] textarea`).text()).toBe('');
     });
   });

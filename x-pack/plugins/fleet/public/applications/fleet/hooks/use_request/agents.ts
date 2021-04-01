@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { useRequest, UseRequestConfig, sendRequest } from './use_request';
 import { agentRouteService } from '../../services';
-import {
+
+import type {
   GetOneAgentResponse,
   GetOneAgentEventsResponse,
   GetOneAgentEventsRequest,
@@ -29,6 +30,9 @@ import {
   PostNewAgentActionRequest,
   PostNewAgentActionResponse,
 } from '../../types';
+
+import { useRequest, sendRequest } from './use_request';
+import type { UseRequestConfig } from './use_request';
 
 type RequestOptions = Pick<Partial<UseRequestConfig>, 'pollIntervalMs'>;
 

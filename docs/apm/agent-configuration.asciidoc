@@ -46,6 +46,7 @@ Go Agent:: {apm-go-ref}/configuration.html[Configuration reference]
 Java Agent:: {apm-java-ref}/configuration.html[Configuration reference]
 .NET Agent:: {apm-dotnet-ref}/configuration.html[Configuration reference]
 Node.js Agent:: {apm-node-ref}/configuration.html[Configuration reference]
+PHP Agent:: _Not yet supported_
 Python Agent:: {apm-py-ref}/configuration.html[Configuration reference]
 Ruby Agent:: {apm-ruby-ref}/configuration.html[Configuration reference]
 Real User Monitoring (RUM) Agent:: {apm-rum-ref}/configuration.html[Configuration reference]

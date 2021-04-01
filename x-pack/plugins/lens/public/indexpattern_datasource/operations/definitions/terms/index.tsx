@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFormRow,
@@ -12,9 +13,8 @@ import {
   EuiSwitch,
   EuiSwitchEvent,
   EuiSpacer,
-  EuiPopover,
-  EuiButtonEmpty,
-  EuiText,
+  EuiAccordion,
+  EuiIconTip,
 } from '@elastic/eui';
 import { AggFunctionsMapping } from '../../../../../../../../src/plugins/data/public';
 import { buildExpressionFunction } from '../../../../../../../../src/plugins/expressions/public';
@@ -22,8 +22,8 @@ import { updateColumnParam, isReferenced } from '../../layer_helpers';
 import { DataType } from '../../../../types';
 import { OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
-import { ValuesRangeInput } from './values_range_input';
-import { getEsAggsSuffix, getInvalidFieldMessage } from '../helpers';
+import { ValuesInput } from './values_input';
+import { getInvalidFieldMessage } from '../helpers';
 import type { IndexPatternLayer } from '../../../types';
 
 function ofName(name?: string) {
@@ -137,11 +137,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       schema: 'segment',
       field: column.sourceField,
       orderBy:
-        column.params.orderBy.type === 'alphabetical'
-          ? '_key'
-          : `${column.params.orderBy.columnId}${getEsAggsSuffix(
-              layer.columns[column.params.orderBy.columnId]
-            )}`,
+        column.params.orderBy.type === 'alphabetical' ? '_key' : column.params.orderBy.columnId,
       order: column.params.orderDirection,
       size: column.params.size,
       otherBucket: Boolean(column.params.otherBucket),
@@ -191,8 +187,6 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
   paramEditor: function ParamEditor({ layer, updateLayer, currentColumn, columnId, indexPattern }) {
     const hasRestrictions = indexPattern.hasRestrictions;
 
-    const [popoverOpen, setPopoverOpen] = useState(false);
-
     const SEPARATOR = '$$$';
     function toValue(orderBy: TermsIndexPatternColumn['params']['orderBy']) {
       if (orderBy.type === 'alphabetical') {
@@ -235,7 +229,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
           display="columnCompressed"
           fullWidth
         >
-          <ValuesRangeInput
+          <ValuesInput
             value={currentColumn.params.size}
             onChange={(value) => {
               updateLayer(
@@ -249,29 +243,115 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
             }}
           />
         </EuiFormRow>
+        <EuiFormRow
+          label={
+            <>
+              {i18n.translate('xpack.lens.indexPattern.terms.orderBy', {
+                defaultMessage: 'Rank by',
+              })}{' '}
+              <EuiIconTip
+                color="subdued"
+                content={i18n.translate('xpack.lens.indexPattern.terms.orderByHelp', {
+                  defaultMessage: `Specifies the dimension the top values are ranked by.`,
+                })}
+                iconProps={{
+                  className: 'eui-alignTop',
+                }}
+                position="top"
+                size="s"
+                type="questionInCircle"
+              />
+            </>
+          }
+          display="columnCompressed"
+          fullWidth
+        >
+          <EuiSelect
+            compressed
+            data-test-subj="indexPattern-terms-orderBy"
+            options={orderOptions}
+            value={toValue(currentColumn.params.orderBy)}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+              updateLayer(
+                updateColumnParam({
+                  layer,
+                  columnId,
+                  paramName: 'orderBy',
+                  value: fromValue(e.target.value),
+                })
+              )
+            }
+            aria-label={i18n.translate('xpack.lens.indexPattern.terms.orderBy', {
+              defaultMessage: 'Rank by',
+            })}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={
+            <>
+              {i18n.translate('xpack.lens.indexPattern.terms.orderDirection', {
+                defaultMessage: 'Rank direction',
+              })}{' '}
+              <EuiIconTip
+                color="subdued"
+                content={i18n.translate('xpack.lens.indexPattern.terms.orderDirectionHelp', {
+                  defaultMessage: `Specifies the ranking order of the top values.`,
+                })}
+                iconProps={{
+                  className: 'eui-alignTop',
+                }}
+                position="top"
+                size="s"
+                type="questionInCircle"
+              />
+            </>
+          }
+          display="columnCompressed"
+          fullWidth
+        >
+          <EuiSelect
+            compressed
+            data-test-subj="indexPattern-terms-orderDirection"
+            options={[
+              {
+                value: 'asc',
+                text: i18n.translate('xpack.lens.indexPattern.terms.orderAscending', {
+                  defaultMessage: 'Ascending',
+                }),
+              },
+              {
+                value: 'desc',
+                text: i18n.translate('xpack.lens.indexPattern.terms.orderDescending', {
+                  defaultMessage: 'Descending',
+                }),
+              },
+            ]}
+            value={currentColumn.params.orderDirection}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+              updateLayer(
+                updateColumnParam({
+                  layer,
+                  columnId,
+                  paramName: 'orderDirection',
+                  value: e.target.value as 'asc' | 'desc',
+                })
+              )
+            }
+            aria-label={i18n.translate('xpack.lens.indexPattern.terms.orderBy', {
+              defaultMessage: 'Rank by',
+            })}
+          />
+        </EuiFormRow>
         {!hasRestrictions && (
-          <EuiText textAlign="right">
-            <EuiPopover
-              ownFocus
-              button={
-                <EuiButtonEmpty
-                  size="xs"
-                  iconType="arrowDown"
-                  iconSide="right"
-                  onClick={() => {
-                    setPopoverOpen(!popoverOpen);
-                  }}
-                >
-                  {i18n.translate('xpack.lens.indexPattern.terms.advancedSettings', {
-                    defaultMessage: 'Advanced',
-                  })}
-                </EuiButtonEmpty>
-              }
-              isOpen={popoverOpen}
-              closePopover={() => {
-                setPopoverOpen(false);
-              }}
+          <>
+            <EuiSpacer size="s" />
+            <EuiAccordion
+              id="lnsTermsAdvanced"
+              buttonContent={i18n.translate('xpack.lens.indexPattern.terms.advancedSettings', {
+                defaultMessage: 'Advanced',
+              })}
             >
+              <EuiSpacer size="m" />
               <EuiSwitch
                 label={i18n.translate('xpack.lens.indexPattern.terms.otherBucketDescription', {
                   defaultMessage: 'Group other values as "Other"',
@@ -310,77 +390,9 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                   )
                 }
               />
-            </EuiPopover>
-            <EuiSpacer size="s" />
-          </EuiText>
+            </EuiAccordion>
+          </>
         )}
-        <EuiFormRow
-          label={i18n.translate('xpack.lens.indexPattern.terms.orderBy', {
-            defaultMessage: 'Order by',
-          })}
-          display="columnCompressed"
-          fullWidth
-        >
-          <EuiSelect
-            compressed
-            data-test-subj="indexPattern-terms-orderBy"
-            options={orderOptions}
-            value={toValue(currentColumn.params.orderBy)}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-              updateLayer(
-                updateColumnParam({
-                  layer,
-                  columnId,
-                  paramName: 'orderBy',
-                  value: fromValue(e.target.value),
-                })
-              )
-            }
-            aria-label={i18n.translate('xpack.lens.indexPattern.terms.orderBy', {
-              defaultMessage: 'Order by',
-            })}
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('xpack.lens.indexPattern.terms.orderDirection', {
-            defaultMessage: 'Order direction',
-          })}
-          display="columnCompressed"
-          fullWidth
-        >
-          <EuiSelect
-            compressed
-            data-test-subj="indexPattern-terms-orderDirection"
-            options={[
-              {
-                value: 'asc',
-                text: i18n.translate('xpack.lens.indexPattern.terms.orderAscending', {
-                  defaultMessage: 'Ascending',
-                }),
-              },
-              {
-                value: 'desc',
-                text: i18n.translate('xpack.lens.indexPattern.terms.orderDescending', {
-                  defaultMessage: 'Descending',
-                }),
-              },
-            ]}
-            value={currentColumn.params.orderDirection}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-              updateLayer(
-                updateColumnParam({
-                  layer,
-                  columnId,
-                  paramName: 'orderDirection',
-                  value: e.target.value as 'asc' | 'desc',
-                })
-              )
-            }
-            aria-label={i18n.translate('xpack.lens.indexPattern.terms.orderBy', {
-              defaultMessage: 'Order by',
-            })}
-          />
-        </EuiFormRow>
       </>
     );
   },

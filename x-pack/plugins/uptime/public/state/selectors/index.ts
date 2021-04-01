@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { createSelector } from 'reselect';
@@ -36,22 +37,22 @@ export const selectPingList = ({ pingList }: AppState) => pingList;
 
 export const snapshotDataSelector = ({ snapshot }: AppState) => snapshot;
 
-const mlCapabilitiesSelector = (state: AppState) => state.ml.mlCapabilities.data;
+export const mlCapabilitiesSelector = (state: AppState) => state.ml.mlCapabilities;
 
 export const hasMLFeatureSelector = createSelector(
   mlCapabilitiesSelector,
   (mlCapabilities) =>
-    mlCapabilities?.isPlatinumOrTrialLicense && mlCapabilities?.mlFeatureEnabledInSpace
+    mlCapabilities?.data?.isPlatinumOrTrialLicense && mlCapabilities?.data?.mlFeatureEnabledInSpace
 );
 
 export const canCreateMLJobSelector = createSelector(
   mlCapabilitiesSelector,
-  (mlCapabilities) => mlCapabilities?.capabilities.canCreateJob
+  (mlCapabilities) => mlCapabilities?.data?.capabilities?.canCreateJob
 );
 
 export const canDeleteMLJobSelector = createSelector(
   mlCapabilitiesSelector,
-  (mlCapabilities) => mlCapabilities?.capabilities.canDeleteJob
+  (mlCapabilities) => mlCapabilities?.data?.capabilities?.canDeleteJob
 );
 
 export const hasMLJobSelector = ({ ml }: AppState) => ml.mlJob;

@@ -14,6 +14,7 @@ exports[`Header renders correctly against snapshot 1`] = `
     isLoading={false}
     isResizing={false}
     onClick={[Function]}
+    showSortingCapability={true}
     sort={
       Array [
         Object {

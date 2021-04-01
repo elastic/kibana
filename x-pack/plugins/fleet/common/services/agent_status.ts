@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { AGENT_POLLING_THRESHOLD_MS, AGENT_SAVED_OBJECT_TYPE } from '../constants';
-import { Agent, AgentStatus } from '../types';
+import { AGENT_POLLING_THRESHOLD_MS } from '../constants';
+import type { Agent, AgentStatus } from '../types';
 
 export function getAgentStatus(agent: Agent, now: number = Date.now()): AgentStatus {
   const { last_checkin: lastCheckIn } = agent;
@@ -41,29 +42,29 @@ export function getAgentStatus(agent: Agent, now: number = Date.now()): AgentSta
 }
 
 export function buildKueryForEnrollingAgents() {
-  return `not ${AGENT_SAVED_OBJECT_TYPE}.last_checkin:*`;
+  return 'not (last_checkin:*)';
 }
 
 export function buildKueryForUnenrollingAgents() {
-  return `${AGENT_SAVED_OBJECT_TYPE}.unenrollment_started_at:*`;
+  return 'unenrollment_started_at:*';
 }
 
 export function buildKueryForOnlineAgents() {
-  return `not (${buildKueryForOfflineAgents()}) AND not (${buildKueryForErrorAgents()}) AND not (${buildKueryForEnrollingAgents()}) AND not (${buildKueryForUnenrollingAgents()})`;
+  return `not (${buildKueryForOfflineAgents()}) AND not (${buildKueryForErrorAgents()}) AND not (${buildKueryForUpdatingAgents()})`;
 }
 
 export function buildKueryForErrorAgents() {
-  return `( ${AGENT_SAVED_OBJECT_TYPE}.last_checkin_status:error or ${AGENT_SAVED_OBJECT_TYPE}.last_checkin_status:degraded )`;
+  return 'last_checkin_status:error or .last_checkin_status:degraded';
 }
 
 export function buildKueryForOfflineAgents() {
-  return `${AGENT_SAVED_OBJECT_TYPE}.last_checkin < now-${
+  return `last_checkin < now-${
     (4 * AGENT_POLLING_THRESHOLD_MS) / 1000
-  }s AND not (${buildKueryForErrorAgents()})`;
+  }s AND not (${buildKueryForErrorAgents()}) AND not ( ${buildKueryForUpdatingAgents()} )`;
 }
 
 export function buildKueryForUpgradingAgents() {
-  return `${AGENT_SAVED_OBJECT_TYPE}.upgrade_started_at:*`;
+  return '(upgrade_started_at:*) and not (upgraded_at:*)';
 }
 
 export function buildKueryForUpdatingAgents() {
@@ -71,5 +72,5 @@ export function buildKueryForUpdatingAgents() {
 }
 
 export function buildKueryForInactiveAgents() {
-  return `${AGENT_SAVED_OBJECT_TYPE}.active:false`;
+  return `active:false`;
 }

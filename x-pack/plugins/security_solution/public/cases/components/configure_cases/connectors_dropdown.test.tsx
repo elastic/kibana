@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -33,22 +34,122 @@ describe('ConnectorsDropdown', () => {
   test('it formats the connectors correctly', () => {
     const selectProps = wrapper.find(EuiSuperSelect).props();
 
-    expect(selectProps.options).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          value: 'none',
-          'data-test-subj': 'dropdown-connector-no-connector',
-        }),
-        expect.objectContaining({
-          value: 'servicenow-1',
-          'data-test-subj': 'dropdown-connector-servicenow-1',
-        }),
-        expect.objectContaining({
-          value: 'resilient-2',
-          'data-test-subj': 'dropdown-connector-resilient-2',
-        }),
-      ])
-    );
+    expect(selectProps.options).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "data-test-subj": "dropdown-connector-no-connector",
+          "inputDisplay": <EuiFlexGroup
+            alignItems="center"
+            gutterSize="none"
+          >
+            <EuiFlexItem
+              grow={false}
+            >
+              <Styled(EuiIcon)
+                size="m"
+                type="minusInCircle"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <span
+                data-test-subj="dropdown-connector-no-connector"
+              >
+                No connector selected
+              </span>
+            </EuiFlexItem>
+          </EuiFlexGroup>,
+          "value": "none",
+        },
+        Object {
+          "data-test-subj": "dropdown-connector-servicenow-1",
+          "inputDisplay": <EuiFlexGroup
+            alignItems="center"
+            gutterSize="none"
+          >
+            <EuiFlexItem
+              grow={false}
+            >
+              <Styled(EuiIcon)
+                size="m"
+                type="test-file-stub"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <span>
+                My Connector
+              </span>
+            </EuiFlexItem>
+          </EuiFlexGroup>,
+          "value": "servicenow-1",
+        },
+        Object {
+          "data-test-subj": "dropdown-connector-resilient-2",
+          "inputDisplay": <EuiFlexGroup
+            alignItems="center"
+            gutterSize="none"
+          >
+            <EuiFlexItem
+              grow={false}
+            >
+              <Styled(EuiIcon)
+                size="m"
+                type="test-file-stub"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <span>
+                My Connector 2
+              </span>
+            </EuiFlexItem>
+          </EuiFlexGroup>,
+          "value": "resilient-2",
+        },
+        Object {
+          "data-test-subj": "dropdown-connector-jira-1",
+          "inputDisplay": <EuiFlexGroup
+            alignItems="center"
+            gutterSize="none"
+          >
+            <EuiFlexItem
+              grow={false}
+            >
+              <Styled(EuiIcon)
+                size="m"
+                type="test-file-stub"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <span>
+                Jira
+              </span>
+            </EuiFlexItem>
+          </EuiFlexGroup>,
+          "value": "jira-1",
+        },
+        Object {
+          "data-test-subj": "dropdown-connector-servicenow-sir",
+          "inputDisplay": <EuiFlexGroup
+            alignItems="center"
+            gutterSize="none"
+          >
+            <EuiFlexItem
+              grow={false}
+            >
+              <Styled(EuiIcon)
+                size="m"
+                type="test-file-stub"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <span>
+                My Connector SIR
+              </span>
+            </EuiFlexItem>
+          </EuiFlexGroup>,
+          "value": "servicenow-sir",
+        },
+      ]
+    `);
   });
 
   test('it disables the dropdown', () => {
@@ -77,5 +178,26 @@ describe('ConnectorsDropdown', () => {
     });
 
     expect(newWrapper.find('button span:not([data-euiicon-type])').text()).toEqual('My Connector');
+  });
+
+  test('if the props hideConnectorServiceNowSir is true, the connector should not be part of the list of options  ', () => {
+    const newWrapper = mount(
+      <ConnectorsDropdown
+        {...props}
+        selectedConnector={'servicenow-1'}
+        hideConnectorServiceNowSir={true}
+      />,
+      {
+        wrappingComponent: TestProviders,
+      }
+    );
+    const selectProps = newWrapper.find(EuiSuperSelect).props();
+    const options = selectProps.options as Array<{ 'data-test-subj': string }>;
+    expect(
+      options.some((o) => o['data-test-subj'] === 'dropdown-connector-servicenow-1')
+    ).toBeTruthy();
+    expect(
+      options.some((o) => o['data-test-subj'] === 'dropdown-connector-servicenow-sir')
+    ).toBeFalsy();
   });
 });

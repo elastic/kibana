@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { Fragment, useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -32,7 +34,7 @@ const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>> = [
     inputDisplay: i18n.translate(
       'xpack.triggersActionsUI.sections.alertForm.alertNotifyWhen.onActionGroupChange.display',
       {
-        defaultMessage: 'Only on status change.',
+        defaultMessage: 'Only on status change',
       }
     ),
     'data-test-subj': 'onActionGroupChange',
@@ -47,7 +49,7 @@ const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>> = [
         <EuiText size="s" color="subdued">
           <p>
             <FormattedMessage
-              defaultMessage="Actions run when the alert status changes."
+              defaultMessage="Actions run when the rule status changes."
               id="xpack.triggersActionsUI.sections.alertForm.alertNotifyWhen.onActionGroupChange.description"
             />
           </p>
@@ -60,7 +62,7 @@ const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>> = [
     inputDisplay: i18n.translate(
       'xpack.triggersActionsUI.sections.alertForm.alertNotifyWhen.onActiveAlert.display',
       {
-        defaultMessage: 'Every time alert is active',
+        defaultMessage: 'Every time rule is active',
       }
     ),
     'data-test-subj': 'onActiveAlert',
@@ -68,14 +70,14 @@ const NOTIFY_WHEN_OPTIONS: Array<EuiSuperSelectOption<AlertNotifyWhenType>> = [
       <Fragment>
         <strong>
           <FormattedMessage
-            defaultMessage="Every time alert is active"
+            defaultMessage="Every time rule is active"
             id="xpack.triggersActionsUI.sections.alertForm.alertNotifyWhen.onActiveAlert.label"
           />
         </strong>
         <EuiText size="s" color="subdued">
           <p>
             <FormattedMessage
-              defaultMessage="Actions run with every active alert interval."
+              defaultMessage="Actions run with every active rule interval."
               id="xpack.triggersActionsUI.sections.alertForm.alertNotifyWhen.onActiveAlert.description"
             />
           </p>
@@ -164,7 +166,7 @@ export const AlertNotifyWhen = ({
         position="right"
         type="questionInCircle"
         content={i18n.translate('xpack.triggersActionsUI.sections.alertForm.renotifyWithTooltip', {
-          defaultMessage: 'Define how often to repeat the action while the alert is active.',
+          defaultMessage: 'Define how often to repeat the action while the rule is active.',
         })}
       />
     </>

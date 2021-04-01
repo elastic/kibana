@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable dot-notation */
@@ -33,6 +34,11 @@ describe('TelemetryEventsSender', () => {
           agent: {
             name: 'test',
           },
+          rule: {
+            id: 'X',
+            name: 'Y',
+            ruleset: 'Z',
+          },
           file: {
             size: 3,
             path: 'X',
@@ -46,6 +52,11 @@ describe('TelemetryEventsSender', () => {
               malware_classification: {
                 key1: 'X',
               },
+              malware_signature: {
+                key1: 'X',
+              },
+              quarantine_result: true,
+              quarantine_message: 'this file is bad',
               something_else: 'nope',
             },
           },
@@ -67,6 +78,11 @@ describe('TelemetryEventsSender', () => {
           agent: {
             name: 'test',
           },
+          rule: {
+            id: 'X',
+            name: 'Y',
+            ruleset: 'Z',
+          },
           file: {
             size: 3,
             path: 'X',
@@ -78,6 +94,11 @@ describe('TelemetryEventsSender', () => {
               malware_classification: {
                 key1: 'X',
               },
+              malware_signature: {
+                key1: 'X',
+              },
+              quarantine_result: true,
+              quarantine_message: 'this file is bad',
             },
           },
           host: {

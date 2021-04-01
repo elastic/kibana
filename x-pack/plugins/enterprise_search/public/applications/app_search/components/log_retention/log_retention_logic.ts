@@ -1,21 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { kea, MakeLogicType } from 'kea';
 
-import { HttpLogic } from '../../../shared/http';
 import { flashAPIErrors } from '../../../shared/flash_messages';
+import { HttpLogic } from '../../../shared/http';
 
 import { LogRetentionOptions, LogRetention, LogRetentionServer } from './types';
 import { convertLogRetentionFromServerToClient } from './utils/convert_log_retention';
 
 interface LogRetentionActions {
-  clearLogRetentionUpdating(): { value: boolean };
-  closeModals(): { value: boolean };
-  fetchLogRetention(): { value: boolean };
+  clearLogRetentionUpdating(): void;
+  closeModals(): void;
+  fetchLogRetention(): void;
   saveLogRetention(
     option: LogRetentionOptions,
     enabled: boolean
@@ -68,10 +69,13 @@ export const LogRetentionLogic = kea<MakeLogicType<LogRetentionValues, LogRetent
     ],
   }),
   listeners: ({ actions, values }) => ({
-    fetchLogRetention: async () => {
+    fetchLogRetention: async (_, breakpoint) => {
+      await breakpoint(100); // Prevents duplicate calls to the API (e.g., when a tooltip & callout are on the same page)
+
       try {
         const { http } = HttpLogic.values;
         const response = await http.get('/api/app_search/log_settings');
+
         actions.updateLogRetention(
           convertLogRetentionFromServerToClient(response as LogRetentionServer)
         );

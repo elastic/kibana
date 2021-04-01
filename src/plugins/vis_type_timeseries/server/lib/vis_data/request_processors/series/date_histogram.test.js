@@ -1,23 +1,12 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { DefaultSearchCapabilities } from '../../../search_strategies/default_search_capabilities';
+import { DefaultSearchCapabilities } from '../../../search_strategies/capabilities/default_search_capabilities';
 import { dateHistogram } from './date_histogram';
 import { UI_SETTINGS } from '../../../../../../data/common';
 
@@ -27,14 +16,13 @@ describe('dateHistogram(req, panel, series)', () => {
   let req;
   let capabilities;
   let config;
-  let indexPatternObject;
+  let indexPattern;
   let uiSettings;
 
   beforeEach(() => {
     req = {
-      payload: {
+      body: {
         timerange: {
-          timezone: 'UTC',
           min: '2017-01-01T00:00:00Z',
           max: '2017-01-01T01:00:00Z',
         },
@@ -50,8 +38,8 @@ describe('dateHistogram(req, panel, series)', () => {
       allowLeadingWildcards: true,
       queryStringOptions: {},
     };
-    indexPatternObject = {};
-    capabilities = new DefaultSearchCapabilities(req);
+    indexPattern = {};
+    capabilities = new DefaultSearchCapabilities({ timezone: 'UTC', maxBucketsLimit: 2000 });
     uiSettings = {
       get: async (key) => (key === UI_SETTINGS.HISTOGRAM_MAX_BARS ? 100 : 50),
     };
@@ -60,15 +48,9 @@ describe('dateHistogram(req, panel, series)', () => {
   test('calls next when finished', async () => {
     const next = jest.fn();
 
-    await dateHistogram(
-      req,
-      panel,
-      series,
-      config,
-      indexPatternObject,
-      capabilities,
-      uiSettings
-    )(next)({});
+    await dateHistogram(req, panel, series, config, indexPattern, capabilities, uiSettings)(next)(
+      {}
+    );
 
     expect(next.mock.calls.length).toEqual(1);
   });
@@ -80,7 +62,7 @@ describe('dateHistogram(req, panel, series)', () => {
       panel,
       series,
       config,
-      indexPatternObject,
+      indexPattern,
       capabilities,
       uiSettings
     )(next)({});
@@ -121,7 +103,7 @@ describe('dateHistogram(req, panel, series)', () => {
       panel,
       series,
       config,
-      indexPatternObject,
+      indexPattern,
       capabilities,
       uiSettings
     )(next)({});
@@ -165,7 +147,7 @@ describe('dateHistogram(req, panel, series)', () => {
       panel,
       series,
       config,
-      indexPatternObject,
+      indexPattern,
       capabilities,
       uiSettings
     )(next)({});
@@ -209,7 +191,7 @@ describe('dateHistogram(req, panel, series)', () => {
         panel,
         series,
         config,
-        indexPatternObject,
+        indexPattern,
         capabilities,
         uiSettings
       )(next)({});
@@ -227,7 +209,7 @@ describe('dateHistogram(req, panel, series)', () => {
         panel,
         series,
         config,
-        indexPatternObject,
+        indexPattern,
         capabilities,
         uiSettings
       )(next)({});

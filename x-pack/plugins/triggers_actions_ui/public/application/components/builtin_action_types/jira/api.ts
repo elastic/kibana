@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { HttpSetup } from 'kibana/public';
@@ -16,7 +17,7 @@ export async function getIssueTypes({
   signal: AbortSignal;
   connectorId: string;
 }): Promise<Record<string, any>> {
-  return await http.post(`${BASE_ACTION_API_PATH}/action/${connectorId}/_execute`, {
+  return await http.post(`${BASE_ACTION_API_PATH}/connector/${connectorId}/_execute`, {
     body: JSON.stringify({
       params: { subAction: 'issueTypes', subActionParams: {} },
     }),
@@ -35,7 +36,7 @@ export async function getFieldsByIssueType({
   connectorId: string;
   id: string;
 }): Promise<Record<string, any>> {
-  return await http.post(`${BASE_ACTION_API_PATH}/action/${connectorId}/_execute`, {
+  return await http.post(`${BASE_ACTION_API_PATH}/connector/${connectorId}/_execute`, {
     body: JSON.stringify({
       params: { subAction: 'fieldsByIssueType', subActionParams: { id } },
     }),
@@ -54,7 +55,7 @@ export async function getIssues({
   connectorId: string;
   title: string;
 }): Promise<Record<string, any>> {
-  return await http.post(`${BASE_ACTION_API_PATH}/action/${connectorId}/_execute`, {
+  return await http.post(`${BASE_ACTION_API_PATH}/connector/${connectorId}/_execute`, {
     body: JSON.stringify({
       params: { subAction: 'issues', subActionParams: { title } },
     }),
@@ -73,7 +74,7 @@ export async function getIssue({
   connectorId: string;
   id: string;
 }): Promise<Record<string, any>> {
-  return await http.post(`${BASE_ACTION_API_PATH}/action/${connectorId}/_execute`, {
+  return await http.post(`${BASE_ACTION_API_PATH}/connector/${connectorId}/_execute`, {
     body: JSON.stringify({
       params: { subAction: 'issue', subActionParams: { id } },
     }),

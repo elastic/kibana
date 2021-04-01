@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
+import { ElasticsearchClient } from 'kibana/server';
 import { BaseAlert } from './base_alert';
 import {
   AlertData,
@@ -19,7 +21,7 @@ import {
   CommonAlertFilter,
   CCRReadExceptionsStats,
 } from '../../common/types/alerts';
-import { AlertInstance } from '../../../alerts/server';
+import { AlertInstance } from '../../../alerting/server';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
   ALERT_CCR_READ_EXCEPTIONS,
@@ -28,8 +30,8 @@ import {
 import { fetchCCRReadExceptions } from '../lib/alerts/fetch_ccr_read_exceptions';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { parseDuration } from '../../../alerts/common/parse_duration';
-import { SanitizedAlert, RawAlertInstance } from '../../../alerts/common';
+import { parseDuration } from '../../../alerting/common/parse_duration';
+import { SanitizedAlert, RawAlertInstance } from '../../../alerting/common';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { Globals } from '../static_globals';
@@ -69,7 +71,7 @@ export class CCRReadExceptionsAlert extends BaseAlert {
 
   protected async fetchData(
     params: CommonAlertParams,
-    callCluster: any,
+    esClient: ElasticsearchClient,
     clusters: AlertCluster[],
     availableCcs: string[]
   ): Promise<AlertData[]> {
@@ -82,7 +84,7 @@ export class CCRReadExceptionsAlert extends BaseAlert {
     const endMs = +new Date();
     const startMs = endMs - duration;
     const stats = await fetchCCRReadExceptions(
-      callCluster,
+      esClient,
       esIndexPattern,
       startMs,
       endMs,

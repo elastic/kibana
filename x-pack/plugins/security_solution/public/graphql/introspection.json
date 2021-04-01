@@ -1637,7 +1637,18 @@
             "isDeprecated": false,
             "deprecationReason": null
           },
-          { "name": "warning", "description": "", "isDeprecated": false, "deprecationReason": null }
+          {
+            "name": "warning",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "unsupported",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
         ],
         "possibleTypes": null
       },
@@ -2036,6 +2047,14 @@
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "eqlOptions",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "EqlOptionsResult", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -2611,6 +2630,57 @@
         "possibleTypes": null
       },
       {
+        "kind": "OBJECT",
+        "name": "EqlOptionsResult",
+        "description": "",
+        "fields": [
+          {
+            "name": "eventCategoryField",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "tiebreakerField",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "timestampField",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "query",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "size",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "ToAny", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
         "kind": "ENUM",
         "name": "RowRendererId",
         "description": "",
@@ -2618,9 +2688,16 @@
         "inputFields": null,
         "interfaces": null,
         "enumValues": [
+          { "name": "alerts", "description": "", "isDeprecated": false, "deprecationReason": null },
           { "name": "auditd", "description": "", "isDeprecated": false, "deprecationReason": null },
           {
             "name": "auditd_file",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "library",
             "description": "",
             "isDeprecated": false,
             "deprecationReason": null
@@ -2632,6 +2709,12 @@
             "deprecationReason": null
           },
           { "name": "plain", "description": "", "isDeprecated": false, "deprecationReason": null },
+          {
+            "name": "registry",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "suricata",
             "description": "",
@@ -3365,6 +3448,24 @@
                 "description": "",
                 "type": { "kind": "SCALAR", "name": "ID", "ofType": null },
                 "defaultValue": null
+              },
+              {
+                "name": "templateTimelineId",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+                "defaultValue": null
+              },
+              {
+                "name": "templateTimelineVersion",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
+                "defaultValue": null
+              },
+              {
+                "name": "timelineType",
+                "description": "",
+                "type": { "kind": "ENUM", "name": "TimelineType", "ofType": null },
+                "defaultValue": null
               }
             ],
             "type": {
@@ -3518,6 +3619,12 @@
             "name": "description",
             "description": "",
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "defaultValue": null
+          },
+          {
+            "name": "eqlOptions",
+            "description": "",
+            "type": { "kind": "INPUT_OBJECT", "name": "EqlOptionsInput", "ofType": null },
             "defaultValue": null
           },
           {
@@ -3840,6 +3947,47 @@
       },
       {
         "kind": "INPUT_OBJECT",
+        "name": "EqlOptionsInput",
+        "description": "",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "eventCategoryField",
+            "description": "",
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "defaultValue": null
+          },
+          {
+            "name": "tiebreakerField",
+            "description": "",
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "defaultValue": null
+          },
+          {
+            "name": "timestampField",
+            "description": "",
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "defaultValue": null
+          },
+          {
+            "name": "query",
+            "description": "",
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "defaultValue": null
+          },
+          {
+            "name": "size",
+            "description": "",
+            "type": { "kind": "SCALAR", "name": "ToAny", "ofType": null },
+            "defaultValue": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
         "name": "FilterTimelineInput",
         "description": "",
         "fields": null,
@@ -4146,6 +4294,30 @@
               "name": null,
               "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
             },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "templateTimelineId",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "templateTimelineVersion",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "timelineType",
+            "description": "",
+            "args": [],
+            "type": { "kind": "ENUM", "name": "TimelineType", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },

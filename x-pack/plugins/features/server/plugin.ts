@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { deepFreeze } from '@kbn/std';
 import {
@@ -10,6 +12,7 @@ import {
   CoreStart,
   SavedObjectsServiceStart,
   Logger,
+  Plugin,
   PluginInitializerContext,
 } from '../../../../src/core/server';
 import { Capabilities as UICapabilities } from '../../../../src/core/server';
@@ -57,7 +60,9 @@ interface TimelionSetupContract {
 /**
  * Represents Features Plugin instance that will be managed by the Kibana plugin system.
  */
-export class Plugin {
+export class FeaturesPlugin
+  implements
+    Plugin<RecursiveReadonly<PluginSetupContract>, RecursiveReadonly<PluginStartContract>> {
   private readonly logger: Logger;
   private readonly featureRegistry: FeatureRegistry = new FeatureRegistry();
   private isTimelionEnabled: boolean = false;
@@ -66,10 +71,10 @@ export class Plugin {
     this.logger = this.initializerContext.logger.get();
   }
 
-  public async setup(
+  public setup(
     core: CoreSetup,
     { visTypeTimelion }: { visTypeTimelion?: TimelionSetupContract }
-  ): Promise<RecursiveReadonly<PluginSetupContract>> {
+  ): RecursiveReadonly<PluginSetupContract> {
     this.isTimelionEnabled = visTypeTimelion !== undefined && visTypeTimelion.uiEnabled;
 
     defineRoutes({

@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+export { LargeShardSizeAlert } from './large_shard_size_alert';
 export { CCRReadExceptionsAlert } from './ccr_read_exceptions_alert';
 export { BaseAlert } from './base_alert';
 export { CpuUsageAlert } from './cpu_usage_alert';

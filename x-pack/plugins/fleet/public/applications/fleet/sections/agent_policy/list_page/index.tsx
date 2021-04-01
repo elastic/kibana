@@ -1,9 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useCallback, useMemo, useState } from 'react';
+import type { EuiTableActionsColumnType, EuiTableFieldDataColumnType } from '@elastic/eui';
 import {
   EuiSpacer,
   EuiText,
@@ -13,15 +16,14 @@ import {
   EuiEmptyPrompt,
   EuiBasicTable,
   EuiLink,
-  EuiTableActionsColumnType,
-  EuiTableFieldDataColumnType,
   EuiTextColor,
 } from '@elastic/eui';
-import { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
+import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
 import { useHistory } from 'react-router-dom';
-import { AgentPolicy } from '../../../types';
+
+import type { AgentPolicy } from '../../../types';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../constants';
 import { WithHeaderLayout } from '../../../layouts';
 import {
@@ -36,6 +38,7 @@ import {
 } from '../../../hooks';
 import { LinkAndRevision, SearchBar } from '../../../components';
 import { LinkedAgentCount, AgentPolicyActionMenu } from '../components';
+
 import { CreateAgentPolicyFlyout } from './components';
 
 const AgentPolicyListPageLayout: React.FunctionComponent = ({ children }) => (

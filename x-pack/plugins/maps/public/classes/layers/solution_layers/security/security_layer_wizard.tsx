@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -13,10 +14,14 @@ import { SecurityLayerTemplate } from './security_layer_template';
 
 export const SecurityLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH, LAYER_WIZARD_CATEGORY.SOLUTIONS],
-  checkVisibility: async () => {
+  getIsDisabled: async () => {
     const indexPatterns = await getSecurityIndexPatterns();
-    return indexPatterns.length > 0;
+    return indexPatterns.length === 0;
   },
+  disabledReason: i18n.translate('xpack.maps.security.disabledDesc', {
+    defaultMessage:
+      'Cannot find security index pattern. To get started with Security, go to Security > Overview.',
+  }),
   description: i18n.translate('xpack.maps.security.desc', {
     defaultMessage: 'Security layers',
   }),

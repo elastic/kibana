@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { DatasourceSuggestion } from '../types';
@@ -59,6 +60,13 @@ const fieldsOne = [
     name: 'dest',
     displayName: 'dest',
     type: 'string',
+    aggregatable: true,
+    searchable: true,
+  },
+  {
+    name: 'bytes_range',
+    displayName: 'bytes_range',
+    type: 'number_range',
     aggregatable: true,
     searchable: true,
   },
@@ -318,7 +326,7 @@ describe('IndexPattern Data Source suggestions', () => {
                       sourceField: 'timestamp',
                     }),
                     id2: expect.objectContaining({
-                      operationType: 'avg',
+                      operationType: 'median',
                       sourceField: 'bytes',
                     }),
                   },
@@ -399,7 +407,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   columnOrder: ['id1'],
                   columns: {
                     id1: expect.objectContaining({
-                      operationType: 'avg',
+                      operationType: 'median',
                       sourceField: 'bytes',
                     }),
                   },
@@ -541,7 +549,7 @@ describe('IndexPattern Data Source suggestions', () => {
                       sourceField: 'timestamp',
                     }),
                     id1: expect.objectContaining({
-                      operationType: 'avg',
+                      operationType: 'median',
                       sourceField: 'bytes',
                     }),
                   },
@@ -623,7 +631,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   columnOrder: ['id1'],
                   columns: {
                     id1: expect.objectContaining({
-                      operationType: 'avg',
+                      operationType: 'median',
                       sourceField: 'bytes',
                     }),
                   },
@@ -727,7 +735,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   sourceField: 'bytes',
                   label: 'Avg of bytes',
                   customLabel: true,
-                  operationType: 'avg',
+                  operationType: 'average',
                 },
               },
               columnOrder: ['cola', 'colb'],
@@ -762,7 +770,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     sourceField: 'bytes',
                     label: 'Avg of bytes',
                     customLabel: true,
-                    operationType: 'avg',
+                    operationType: 'average',
                   },
                 },
               },
@@ -913,7 +921,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   columns: {
                     cola: initialState.layers.currentLayer.columns.cola,
                     colb: expect.objectContaining({
-                      operationType: 'avg',
+                      operationType: 'median',
                       sourceField: 'memory',
                     }),
                   },
@@ -933,7 +941,7 @@ describe('IndexPattern Data Source suggestions', () => {
                     cola: initialState.layers.currentLayer.columns.cola,
                     colb: initialState.layers.currentLayer.columns.colb,
                     newid: expect.objectContaining({
-                      operationType: 'avg',
+                      operationType: 'median',
                       sourceField: 'memory',
                     }),
                   },
@@ -978,7 +986,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   columns: {
                     ...modifiedState.layers.currentLayer.columns,
                     newid: expect.objectContaining({
-                      operationType: 'avg',
+                      operationType: 'median',
                       sourceField: 'memory',
                     }),
                   },
@@ -1052,7 +1060,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   customLabel: true,
                   dataType: 'number',
                   isBucketed: false,
-                  operationType: 'avg',
+                  operationType: 'average',
                   sourceField: 'bytes',
                 },
                 ref: {
@@ -1112,7 +1120,7 @@ describe('IndexPattern Data Source suggestions', () => {
                   customLabel: true,
                   dataType: 'number',
                   isBucketed: false,
-                  operationType: 'avg',
+                  operationType: 'average',
                   sourceField: 'bytes',
                 },
                 ref: {
@@ -1460,7 +1468,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
-                operationType: 'avg',
+                operationType: 'average',
                 sourceField: 'bytes',
                 scale: 'ratio',
               },
@@ -1529,7 +1537,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
-                operationType: 'avg',
+                operationType: 'average',
                 sourceField: 'bytes',
                 scale: 'ratio',
               },
@@ -1593,7 +1601,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 isBucketed: false,
                 sourceField: 'dest',
                 label: 'Unique count of dest',
-                operationType: 'cardinality',
+                operationType: 'unique_count',
               },
               colb: {
                 label: 'My Op',
@@ -1639,7 +1647,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 isBucketed: false,
                 sourceField: 'dest',
                 label: 'Unique count of dest',
-                operationType: 'cardinality',
+                operationType: 'unique_count',
               },
               colb: {
                 label: 'My Custom Range',
@@ -1715,7 +1723,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 customLabel: true,
                 dataType: 'number',
                 isBucketed: false,
-                operationType: 'avg',
+                operationType: 'average',
                 sourceField: 'bytes',
                 scale: 'ratio',
               },
@@ -1835,7 +1843,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 dataType: 'number',
                 isBucketed: false,
 
-                operationType: 'avg',
+                operationType: 'average',
                 sourceField: 'field4',
               },
               col5: {
@@ -1943,7 +1951,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 dataType: 'number',
                 isBucketed: false,
 
-                operationType: 'avg',
+                operationType: 'average',
                 sourceField: 'field1',
               },
             },
@@ -2023,7 +2031,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 dataType: 'number',
                 isBucketed: false,
 
-                operationType: 'avg',
+                operationType: 'average',
                 sourceField: 'field1',
               },
             },
@@ -2038,7 +2046,7 @@ describe('IndexPattern Data Source suggestions', () => {
           table: expect.objectContaining({
             columns: [
               expect.objectContaining({
-                operation: expect.objectContaining({ label: 'Sum of field1' }),
+                operation: expect.objectContaining({ label: 'Median of field1' }),
               }),
             ],
           }),
@@ -2083,7 +2091,7 @@ describe('IndexPattern Data Source suggestions', () => {
                 dataType: 'number',
                 isBucketed: false,
 
-                operationType: 'avg',
+                operationType: 'average',
                 sourceField: 'bytes',
               },
             },

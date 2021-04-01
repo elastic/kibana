@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
@@ -41,6 +42,7 @@ export const formattedAlertsSearchStrategyResponse: MatrixHistogramStrategyRespo
           ],
           allowNoIndices: true,
           ignoreUnavailable: true,
+          track_total_hits: true,
           body: {
             aggregations: {
               alertsGroup: {
@@ -112,7 +114,6 @@ export const formattedAlertsSearchStrategyResponse: MatrixHistogramStrategyRespo
               },
             },
             size: 0,
-            track_total_hits: true,
           },
         },
         null,
@@ -126,6 +127,7 @@ export const formattedAlertsSearchStrategyResponse: MatrixHistogramStrategyRespo
 
 export const expectedDsl = {
   allowNoIndices: true,
+  track_total_hits: false,
   body: {
     aggregations: {
       host_count: { cardinality: { field: 'host.name' } },
@@ -160,7 +162,6 @@ export const expectedDsl = {
       },
     },
     size: 0,
-    track_total_hits: false,
   },
   ignoreUnavailable: true,
   index: [
@@ -207,6 +208,7 @@ export const formattedAnomaliesSearchStrategyResponse: MatrixHistogramStrategyRe
           ],
           allowNoIndices: true,
           ignoreUnavailable: true,
+          track_total_hits: true,
           body: {
             aggs: {
               anomalyActionGroup: {
@@ -257,7 +259,6 @@ export const formattedAnomaliesSearchStrategyResponse: MatrixHistogramStrategyRe
               },
             },
             size: 0,
-            track_total_hits: true,
           },
         },
         null,
@@ -389,6 +390,7 @@ export const formattedAuthenticationsSearchStrategyResponse: MatrixHistogramStra
           ],
           allowNoIndices: true,
           ignoreUnavailable: true,
+          track_total_hits: true,
           body: {
             aggregations: {
               eventActionGroup: {
@@ -428,7 +430,6 @@ export const formattedAuthenticationsSearchStrategyResponse: MatrixHistogramStra
               },
             },
             size: 0,
-            track_total_hits: true,
           },
         },
         null,
@@ -955,6 +956,7 @@ export const formattedEventsSearchStrategyResponse: MatrixHistogramStrategyRespo
           ],
           allowNoIndices: true,
           ignoreUnavailable: true,
+          track_total_hits: true,
           body: {
             aggregations: {
               eventActionGroup: {
@@ -993,7 +995,6 @@ export const formattedEventsSearchStrategyResponse: MatrixHistogramStrategyRespo
               },
             },
             size: 0,
-            track_total_hits: true,
           },
         },
         null,

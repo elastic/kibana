@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { EmptyStateComponent } from './empty_state';
 import { StatesIndexStatus } from '../../../../common/runtime_types';
 import { HttpFetchError, IHttpFetchError } from 'src/core/public';
-import { mountWithRouter, shallowWithRouter } from '../../../lib';
+import { mountWithRouter, shallowWithRouter } from '../../../lib/helper/enzyme_helpers';
 
 describe('EmptyState component', () => {
   let statesIndexStatus: StatesIndexStatus;

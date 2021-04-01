@@ -4,18 +4,19 @@
 
 ## EmbeddableStateTransfer.getIncomingEmbeddablePackage() method
 
-Fetches an [embeddable package](./kibana-plugin-plugins-embeddable-public.embeddablepackagestate.md) argument from the sessionStorage
+Fetches an [embeddable package](./kibana-plugin-plugins-embeddable-public.embeddablepackagestate.md) from the sessionStorage for the given AppId
 
 <b>Signature:</b>
 
 ```typescript
-getIncomingEmbeddablePackage(removeAfterFetch?: boolean): EmbeddablePackageState | undefined;
+getIncomingEmbeddablePackage(appId: string, removeAfterFetch?: boolean): EmbeddablePackageState | undefined;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
+|  appId | <code>string</code> | The app to fetch EmbeddablePackageState for |
 |  removeAfterFetch | <code>boolean</code> | Whether to remove the package state after fetch to prevent duplicates. |
 
 <b>Returns:</b>

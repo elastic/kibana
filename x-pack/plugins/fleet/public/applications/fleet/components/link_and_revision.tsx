@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { CSSProperties, memo } from 'react';
-import { EuiLinkProps } from '@elastic/eui/src/components/link/link';
+import type { CSSProperties } from 'react';
+import React, { memo } from 'react';
+import type { EuiLinkProps } from '@elastic/eui/src/components/link/link';
 
 const MIN_WIDTH: CSSProperties = { minWidth: 0 };
 const NO_WRAP_WHITE_SPACE: CSSProperties = { whiteSpace: 'nowrap' };

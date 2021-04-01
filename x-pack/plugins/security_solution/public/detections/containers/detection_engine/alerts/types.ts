@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
@@ -57,6 +58,7 @@ export interface Privilege {
     monitor_watcher: boolean;
     monitor_transform: boolean;
     read_ilm: boolean;
+    manage_api_key: boolean;
     manage_security: boolean;
     manage_own_api_key: boolean;
     manage_saml: boolean;
@@ -97,6 +99,7 @@ export interface Privilege {
       write: boolean;
     };
   };
+  application: {};
   is_authenticated: boolean;
   has_encryption_key: boolean;
 }

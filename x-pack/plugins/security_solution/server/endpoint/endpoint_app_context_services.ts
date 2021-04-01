@@ -1,14 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import {
   KibanaRequest,
   Logger,
   SavedObjectsServiceStart,
   SavedObjectsClientContract,
 } from 'src/core/server';
+import { ExceptionListClient } from '../../../lists/server';
 import { SecurityPluginSetup } from '../../../security/server';
 import {
   AgentService,
@@ -17,11 +20,11 @@ import {
   AgentPolicyServiceInterface,
   PackagePolicyServiceInterface,
 } from '../../../fleet/server';
-import { PluginStartContract as AlertsPluginStartContract } from '../../../alerts/server';
+import { PluginStartContract as AlertsPluginStartContract } from '../../../alerting/server';
 import {
   getPackagePolicyCreateCallback,
   getPackagePolicyUpdateCallback,
-} from './ingest_integration';
+} from '../fleet_integration/fleet_integration';
 import { ManifestManager } from './services/artifacts';
 import { MetadataQueryStrategy } from './types';
 import { MetadataQueryStrategyVersions } from '../../common/endpoint/types';
@@ -85,11 +88,12 @@ export type EndpointAppContextServiceStartContract = Partial<
   manifestManager?: ManifestManager;
   appClientFactory: AppClientFactory;
   security: SecurityPluginSetup;
-  alerts: AlertsPluginStartContract;
+  alerting: AlertsPluginStartContract;
   config: ConfigType;
   registerIngestCallback?: FleetStartContract['registerExternalCallback'];
   savedObjectsStart: SavedObjectsServiceStart;
   licenseService: LicenseService;
+  exceptionListsClient: ExceptionListClient | undefined;
 };
 
 /**
@@ -121,7 +125,9 @@ export class EndpointAppContextService {
           dependencies.appClientFactory,
           dependencies.config.maxTimelineImportExportSize,
           dependencies.security,
-          dependencies.alerts
+          dependencies.alerting,
+          dependencies.licenseService,
+          dependencies.exceptionListsClient
         )
       );
 

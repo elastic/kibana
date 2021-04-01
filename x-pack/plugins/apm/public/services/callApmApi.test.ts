@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as callApiExports from './rest/callApi';
 import { createCallApmApi, callApmApi } from './rest/createCallApmApi';
-import { HttpSetup } from 'kibana/public';
+import { CoreStart } from 'kibana/public';
 
 const callApi = jest
   .spyOn(callApiExports, 'callApi')
@@ -14,7 +15,7 @@ const callApi = jest
 
 describe('callApmApi', () => {
   beforeEach(() => {
-    createCallApmApi({} as HttpSetup);
+    createCallApmApi({} as CoreStart);
   });
 
   afterEach(() => {
@@ -78,7 +79,7 @@ describe('callApmApi', () => {
       {},
       expect.objectContaining({
         pathname: '/api/apm',
-        method: 'POST',
+        method: 'post',
         body: {
           foo: 'bar',
           bar: 'foo',

@@ -1,46 +1,47 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import _ from 'lodash';
-import React, { Component } from 'react';
+import type { EuiBasicTableColumn, EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiButton,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
   EuiPageContent,
   EuiPageContentBody,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
+  EuiSwitch,
   EuiText,
   EuiTitle,
-  EuiButtonIcon,
-  EuiBasicTableColumn,
-  EuiSwitchEvent,
-  EuiSwitch,
-  EuiFlexGroup,
-  EuiFlexItem,
 } from '@elastic/eui';
+import _ from 'lodash';
+import React, { Component } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { NotificationsStart } from 'src/core/public';
-import { ScopedHistory } from 'kibana/public';
+import type { NotificationsStart, ScopedHistory } from 'src/core/public';
+
+import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
+import type { Role } from '../../../../common/model';
 import {
-  Role,
+  getExtendedRoleDeprecationNotice,
+  isRoleDeprecated,
   isRoleEnabled,
   isRoleReadOnly,
   isRoleReserved,
-  isRoleDeprecated,
-  getExtendedRoleDeprecationNotice,
 } from '../../../../common/model';
-import { RolesAPIClient } from '../roles_api_client';
+import { DeprecatedBadge, DisabledBadge, ReservedBadge } from '../../badges';
+import type { RolesAPIClient } from '../roles_api_client';
 import { ConfirmDelete } from './confirm_delete';
 import { PermissionDenied } from './permission_denied';
-import { DisabledBadge, DeprecatedBadge, ReservedBadge } from '../../badges';
-import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   notifications: NotificationsStart;

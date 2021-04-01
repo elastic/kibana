@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { BehaviorSubject } from 'rxjs';
@@ -11,12 +12,14 @@ import { JobCreator } from '../job_creator';
 import { DatafeedId, JobId } from '../../../../../../common/types/anomaly_detection_jobs';
 import { DATAFEED_STATE } from '../../../../../../common/constants/states';
 
-const REFRESH_INTERVAL_MS = 100;
+const REFRESH_INTERVAL_MS = 250;
+const NODE_ASSIGNMENT_CHECK_REFRESH_INTERVAL_MS = 2000;
 const TARGET_PROGRESS_DELTA = 2;
 const REFRESH_RATE_ADJUSTMENT_DELAY_MS = 2000;
 
 type Progress = number;
 export type ProgressSubscriber = (progress: number) => void;
+export type JobAssignmentSubscriber = (assigned: boolean) => void;
 
 export class JobRunner {
   private _jobId: JobId;
@@ -35,6 +38,8 @@ export class JobRunner {
 
   private _datafeedStartTime: number = 0;
   private _performRefreshRateAdjustment: boolean = false;
+  private _jobAssignedToNode: boolean = false;
+  private _jobAssignedToNode$: BehaviorSubject<boolean>;
 
   constructor(jobCreator: JobCreator) {
     this._jobId = jobCreator.jobId;
@@ -45,6 +50,7 @@ export class JobRunner {
     this._stopRefreshPoll = jobCreator.stopAllRefreshPolls;
 
     this._progress$ = new BehaviorSubject(this._percentageComplete);
+    this._jobAssignedToNode$ = new BehaviorSubject(this._jobAssignedToNode);
     this._subscribers = jobCreator.subscribers;
   }
 
@@ -62,7 +68,9 @@ export class JobRunner {
 
   private async openJob(): Promise<void> {
     try {
-      await mlJobService.openJob(this._jobId);
+      const { node }: { node?: string } = await mlJobService.openJob(this._jobId);
+      this._jobAssignedToNode = node !== undefined && node.length > 0;
+      this._jobAssignedToNode$.next(this._jobAssignedToNode);
     } catch (error) {
       throw error;
     }
@@ -94,7 +102,7 @@ export class JobRunner {
       this._datafeedState = DATAFEED_STATE.STARTED;
       this._percentageComplete = 0;
 
-      const check = async () => {
+      const checkProgress = async () => {
         const { isRunning, progress: prog, isJobClosed } = await this.getProgress();
 
         // if the progress has reached 100% but the job is still running,
@@ -109,7 +117,9 @@ export class JobRunner {
 
         if ((isRunning === true || isJobClosed === false) && this._stopRefreshPoll.stop === false) {
           setTimeout(async () => {
-            await check();
+            if (this._stopRefreshPoll.stop === false) {
+              await checkProgress();
+            }
           }, this._refreshInterval);
         } else {
           // job has finished running, set progress to 100%
@@ -121,11 +131,30 @@ export class JobRunner {
           subscriptions.forEach((s) => s.unsubscribe());
         }
       };
+
+      const checkJobIsAssigned = async () => {
+        this._jobAssignedToNode = await this._isJobAssigned();
+        this._jobAssignedToNode$.next(this._jobAssignedToNode);
+        if (this._jobAssignedToNode === true) {
+          await checkProgress();
+        } else {
+          setTimeout(async () => {
+            if (this._stopRefreshPoll.stop === false) {
+              await checkJobIsAssigned();
+            }
+          }, NODE_ASSIGNMENT_CHECK_REFRESH_INTERVAL_MS);
+        }
+      };
       // wait for the first check to run and then return success.
       // all subsequent checks will update the observable
       if (pollProgress === true) {
-        await check();
+        if (this._jobAssignedToNode === true) {
+          await checkProgress();
+        } else {
+          await checkJobIsAssigned();
+        }
       }
+
       return started;
     } catch (error) {
       throw error;
@@ -159,6 +188,11 @@ export class JobRunner {
     }
   }
 
+  private async _isJobAssigned(): Promise<boolean> {
+    const { jobs } = await ml.getJobStats({ jobId: this._jobId });
+    return jobs.length > 0 && jobs[0].node !== undefined;
+  }
+
   public async startDatafeed() {
     return await this._startDatafeed(this._start, this._end, true);
   }
@@ -184,5 +218,13 @@ export class JobRunner {
   public async isRunning(): Promise<boolean> {
     const { isRunning } = await this.getProgress();
     return isRunning;
+  }
+
+  public isJobAssignedToNode() {
+    return this._jobAssignedToNode;
+  }
+
+  public subscribeToJobAssignment(func: JobAssignmentSubscriber) {
+    return this._jobAssignedToNode$.subscribe(func);
   }
 }

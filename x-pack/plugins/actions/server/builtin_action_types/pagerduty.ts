@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { curry, isUndefined, pick, omitBy } from 'lodash';
@@ -139,7 +140,7 @@ export function getActionType({
       secrets: SecretsSchema,
       params: ParamsSchema,
     },
-    executor: curry(executor)({ logger }),
+    executor: curry(executor)({ logger, configurationUtilities }),
   };
 }
 
@@ -166,7 +167,10 @@ function getPagerDutyApiUrl(config: ActionTypeConfigType): string {
 // action executor
 
 async function executor(
-  { logger }: { logger: Logger },
+  {
+    logger,
+    configurationUtilities,
+  }: { logger: Logger; configurationUtilities: ActionsConfigurationUtilities },
   execOptions: PagerDutyActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<unknown>> {
   const actionId = execOptions.actionId;
@@ -174,7 +178,6 @@ async function executor(
   const secrets = execOptions.secrets;
   const params = execOptions.params;
   const services = execOptions.services;
-  const proxySettings = execOptions.proxySettings;
 
   const apiUrl = getPagerDutyApiUrl(config);
   const headers = {
@@ -185,7 +188,11 @@ async function executor(
 
   let response;
   try {
-    response = await postPagerduty({ apiUrl, data, headers, services, proxySettings }, logger);
+    response = await postPagerduty(
+      { apiUrl, data, headers, services },
+      logger,
+      configurationUtilities
+    );
   } catch (err) {
     const message = i18n.translate('xpack.actions.builtin.pagerduty.postingErrorMessage', {
       defaultMessage: 'error posting pagerduty event',

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import * as t from 'io-ts';
 import { createApi } from './index';
 import { CoreSetup, Logger } from 'src/core/server';
@@ -46,6 +48,49 @@ const getCoreMock = () => {
   };
 };
 
+const initApi = (params?: RouteParamsRT) => {
+  const { mock, context, createRouter, get, post } = getCoreMock();
+  const handlerMock = jest.fn();
+  createApi()
+    .add(() => ({
+      endpoint: 'GET /foo',
+      params,
+      options: { tags: ['access:apm'] },
+      handler: handlerMock,
+    }))
+    .init(mock, context);
+
+  const routeHandler = get.mock.calls[0][1];
+
+  const responseMock = {
+    ok: jest.fn(),
+    custom: jest.fn(),
+  };
+
+  const simulateRequest = (requestMock: any) => {
+    return routeHandler(
+      {},
+      {
+        // stub default values
+        params: {},
+        query: {},
+        body: null,
+        ...requestMock,
+      },
+      responseMock
+    );
+  };
+
+  return {
+    simulateRequest,
+    handlerMock,
+    createRouter,
+    get,
+    post,
+    responseMock,
+  };
+};
+
 describe('createApi', () => {
   it('registers a route with the server', () => {
     const { mock, context, createRouter, post, get, put } = getCoreMock();
@@ -54,7 +99,7 @@ describe('createApi', () => {
       .add(() => ({
         endpoint: 'GET /foo',
         options: { tags: ['access:apm'] },
-        handler: async () => null,
+        handler: async () => ({}),
       }))
       .add(() => ({
         endpoint: 'POST /bar',
@@ -62,21 +107,21 @@ describe('createApi', () => {
           body: t.string,
         }),
         options: { tags: ['access:apm'] },
-        handler: async () => null,
+        handler: async () => ({}),
       }))
       .add(() => ({
         endpoint: 'PUT /baz',
         options: {
           tags: ['access:apm', 'access:apm_write'],
         },
-        handler: async () => null,
+        handler: async () => ({}),
       }))
       .add({
         endpoint: 'GET /qux',
         options: {
           tags: ['access:apm', 'access:apm_write'],
         },
-        handler: async () => null,
+        handler: async () => ({}),
       })
       .init(mock, context);
 
@@ -120,102 +165,78 @@ describe('createApi', () => {
   });
 
   describe('when validating', () => {
-    const initApi = (params?: RouteParamsRT) => {
-      const { mock, context, createRouter, get, post } = getCoreMock();
-      const handlerMock = jest.fn();
-      createApi()
-        .add(() => ({
-          endpoint: 'GET /foo',
-          params,
-          options: { tags: ['access:apm'] },
-          handler: handlerMock,
-        }))
-        .init(mock, context);
+    describe('_inspect', () => {
+      it('allows _inspect=true', async () => {
+        const { simulateRequest, handlerMock, responseMock } = initApi();
+        await simulateRequest({ query: { _inspect: 'true' } });
 
-      const routeHandler = get.mock.calls[0][1];
+        const params = handlerMock.mock.calls[0][0].context.params;
+        expect(params).toEqual({ query: { _inspect: true } });
+        expect(handlerMock).toHaveBeenCalledTimes(1);
 
-      const responseMock = {
-        ok: jest.fn(),
-        internalError: jest.fn(),
-        notFound: jest.fn(),
-        forbidden: jest.fn(),
-        badRequest: jest.fn(),
-      };
+        // responds with ok
+        expect(responseMock.custom).not.toHaveBeenCalled();
+        expect(responseMock.ok).toHaveBeenCalledWith({
+          body: { _inspect: [] },
+        });
+      });
 
-      const simulate = (requestMock: any) => {
-        return routeHandler(
-          {},
-          {
-            // stub default values
-            params: {},
-            query: {},
-            body: null,
-            ...requestMock,
+      it('rejects _inspect=1', async () => {
+        const { simulateRequest, responseMock } = initApi();
+        await simulateRequest({ query: { _inspect: 1 } });
+
+        // responds with error handler
+        expect(responseMock.ok).not.toHaveBeenCalled();
+        expect(responseMock.custom).toHaveBeenCalledWith({
+          body: {
+            attributes: { _inspect: [] },
+            message:
+              'Invalid value 1 supplied to : strict_keys/query: Partial<{| _inspect: pipe(JSON, boolean) |}>/_inspect: pipe(JSON, boolean)',
           },
-          responseMock
-        );
-      };
-
-      return { simulate, handlerMock, createRouter, get, post, responseMock };
-    };
-
-    it('adds a _debug query parameter by default', async () => {
-      const { simulate, handlerMock, responseMock } = initApi();
-
-      await simulate({ query: { _debug: 'true' } });
-
-      expect(responseMock.badRequest).not.toHaveBeenCalled();
-
-      expect(handlerMock).toHaveBeenCalledTimes(1);
-
-      expect(responseMock.ok).toHaveBeenCalled();
-
-      const params = handlerMock.mock.calls[0][0].context.params;
-
-      expect(params).toEqual({
-        query: {
-          _debug: true,
-        },
+          statusCode: 400,
+        });
       });
 
-      await simulate({
-        query: {
-          _debug: 1,
-        },
-      });
+      it('allows omitting _inspect', async () => {
+        const { simulateRequest, handlerMock, responseMock } = initApi();
+        await simulateRequest({ query: {} });
 
-      expect(responseMock.badRequest).toHaveBeenCalled();
+        const params = handlerMock.mock.calls[0][0].context.params;
+        expect(params).toEqual({ query: { _inspect: false } });
+        expect(handlerMock).toHaveBeenCalledTimes(1);
+
+        // responds with ok
+        expect(responseMock.custom).not.toHaveBeenCalled();
+        expect(responseMock.ok).toHaveBeenCalledWith({ body: {} });
+      });
     });
 
-    it('throws if any parameters are used but no types are defined', async () => {
-      const { simulate, responseMock } = initApi();
+    it('throws if unknown parameters are provided', async () => {
+      const { simulateRequest, responseMock } = initApi();
 
-      await simulate({
-        query: {
-          _debug: true,
-          extra: '',
-        },
+      await simulateRequest({
+        query: { _inspect: true, extra: '' },
       });
 
-      expect(responseMock.badRequest).toHaveBeenCalledTimes(1);
+      expect(responseMock.custom).toHaveBeenCalledTimes(1);
 
-      await simulate({
+      await simulateRequest({
         body: { foo: 'bar' },
       });
 
-      expect(responseMock.badRequest).toHaveBeenCalledTimes(2);
+      expect(responseMock.custom).toHaveBeenCalledTimes(2);
 
-      await simulate({
+      await simulateRequest({
         params: {
           foo: 'bar',
         },
       });
 
-      expect(responseMock.badRequest).toHaveBeenCalledTimes(3);
+      expect(responseMock.custom).toHaveBeenCalledTimes(3);
     });
 
     it('validates path parameters', async () => {
-      const { simulate, handlerMock, responseMock } = initApi(
+      const { simulateRequest, handlerMock, responseMock } = initApi(
         t.type({
           path: t.type({
             foo: t.string,
@@ -223,7 +244,7 @@ describe('createApi', () => {
         })
       );
 
-      await simulate({
+      await simulateRequest({
         params: {
           foo: 'bar',
         },
@@ -232,7 +253,7 @@ describe('createApi', () => {
       expect(handlerMock).toHaveBeenCalledTimes(1);
 
       expect(responseMock.ok).toHaveBeenCalledTimes(1);
-      expect(responseMock.badRequest).not.toHaveBeenCalled();
+      expect(responseMock.custom).not.toHaveBeenCalled();
 
       const params = handlerMock.mock.calls[0][0].context.params;
 
@@ -241,48 +262,48 @@ describe('createApi', () => {
           foo: 'bar',
         },
         query: {
-          _debug: false,
+          _inspect: false,
         },
       });
 
-      await simulate({
+      await simulateRequest({
         params: {
           bar: 'foo',
         },
       });
 
-      expect(responseMock.badRequest).toHaveBeenCalledTimes(1);
+      expect(responseMock.custom).toHaveBeenCalledTimes(1);
 
-      await simulate({
+      await simulateRequest({
         params: {
           foo: 9,
         },
       });
 
-      expect(responseMock.badRequest).toHaveBeenCalledTimes(2);
+      expect(responseMock.custom).toHaveBeenCalledTimes(2);
 
-      await simulate({
+      await simulateRequest({
         params: {
           foo: 'bar',
           extra: '',
         },
       });
 
-      expect(responseMock.badRequest).toHaveBeenCalledTimes(3);
+      expect(responseMock.custom).toHaveBeenCalledTimes(3);
     });
 
     it('validates body parameters', async () => {
-      const { simulate, handlerMock, responseMock } = initApi(
+      const { simulateRequest, handlerMock, responseMock } = initApi(
         t.type({
           body: t.string,
         })
       );
 
-      await simulate({
+      await simulateRequest({
         body: '',
       });
 
-      expect(responseMock.badRequest).not.toHaveBeenCalled();
+      expect(responseMock.custom).not.toHaveBeenCalled();
       expect(handlerMock).toHaveBeenCalledTimes(1);
       expect(responseMock.ok).toHaveBeenCalledTimes(1);
 
@@ -291,19 +312,19 @@ describe('createApi', () => {
       expect(params).toEqual({
         body: '',
         query: {
-          _debug: false,
+          _inspect: false,
         },
       });
 
-      await simulate({
+      await simulateRequest({
         body: null,
       });
 
-      expect(responseMock.badRequest).toHaveBeenCalledTimes(1);
+      expect(responseMock.custom).toHaveBeenCalledTimes(1);
     });
 
     it('validates query parameters', async () => {
-      const { simulate, handlerMock, responseMock } = initApi(
+      const { simulateRequest, handlerMock, responseMock } = initApi(
         t.type({
           query: t.type({
             bar: t.string,
@@ -312,15 +333,15 @@ describe('createApi', () => {
         })
       );
 
-      await simulate({
+      await simulateRequest({
         query: {
           bar: '',
-          _debug: 'true',
+          _inspect: 'true',
           filterNames: JSON.stringify(['hostName', 'agentName']),
         },
       });
 
-      expect(responseMock.badRequest).not.toHaveBeenCalled();
+      expect(responseMock.custom).not.toHaveBeenCalled();
       expect(handlerMock).toHaveBeenCalledTimes(1);
       expect(responseMock.ok).toHaveBeenCalledTimes(1);
 
@@ -329,19 +350,19 @@ describe('createApi', () => {
       expect(params).toEqual({
         query: {
           bar: '',
-          _debug: true,
+          _inspect: true,
           filterNames: ['hostName', 'agentName'],
         },
       });
 
-      await simulate({
+      await simulateRequest({
         query: {
           bar: '',
           foo: '',
         },
       });
 
-      expect(responseMock.badRequest).toHaveBeenCalledTimes(1);
+      expect(responseMock.custom).toHaveBeenCalledTimes(1);
     });
   });
 });

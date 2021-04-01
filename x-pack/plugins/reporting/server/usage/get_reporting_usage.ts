@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-
+import type { estypes } from '@elastic/elasticsearch';
 import { get } from 'lodash';
-import { ElasticsearchClient, SearchResponse } from 'kibana/server';
+import { ElasticsearchClient } from 'kibana/server';
 import { ReportingConfig } from '../';
 import { ExportTypesRegistry } from '../lib/export_types_registry';
 import { GetLicense } from './';
@@ -18,7 +19,7 @@ import {
   KeyCountBucket,
   RangeStats,
   ReportingUsageType,
-  ReportingUsageSearchResponse,
+  // ReportingUsageSearchResponse,
   StatusByAppBucket,
 } from './types';
 
@@ -99,7 +100,8 @@ type RangeStatSets = Partial<RangeStats> & {
   last7Days: Partial<RangeStats>;
 };
 
-type ESResponse = Partial<SearchResponse<ReportingUsageSearchResponse>>;
+// & ReportingUsageSearchResponse
+type ESResponse = Partial<estypes.SearchResponse>;
 
 async function handleResponse(response: ESResponse): Promise<Partial<RangeStatSets>> {
   const buckets = get(response, 'aggregations.ranges.buckets');

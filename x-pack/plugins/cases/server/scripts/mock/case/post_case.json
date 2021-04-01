@@ -1,0 +1,16 @@
+{
+  "description": "This looks not so good",
+  "title": "Bad meanie defacing data",
+  "tags": [
+    "defacement"
+  ],
+  "connector": {
+    "id": "none",
+    "name": "none",
+    "type": ".none",
+    "fields": null
+  },
+  "settings": {
+    "syncAlerts": true
+  }
+}

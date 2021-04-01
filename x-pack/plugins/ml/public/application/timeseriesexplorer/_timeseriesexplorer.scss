@@ -1,28 +1,6 @@
+// stylelint-disable selector-no-qualifying-type
 .ml-time-series-explorer {
   color: $euiColorDarkShade;
-
-  .no-results-container {
-    text-align: center;
-    font-size: $euiFontSizeL;
-    padding-top: 60px; // SASSTODO: variabalize
-
-    .no-results {
-      background-color: $euiFocusBackgroundColor;
-      padding: $euiSize;
-      border-radius: $euiBorderRadius;
-      display: inline-block;
-
-      i {
-        color: $euiColorPrimary;
-        margin-right: $euiSizeXS;
-      }
-
-      div:nth-child(2) {
-        margin-top: $euiSizeS;
-        font-size: $euiFontSizeXS;
-      }
-    }
-  }
 
   .results-container {
     .panel-title {
@@ -64,7 +42,7 @@
     }
 
     .axis .tick line {
-      stroke: rgba(0, 0, 0, 0.1);
+      stroke: $euiColorLightShade;
     }
 
     .chart-border {
@@ -88,25 +66,20 @@
     }
 
     .area.bounds {
-      fill: rgba(50, 167, 194, 0.25); // Needs variable
+      fill: transparentize($euiColorPrimary, .8);
       pointer-events: none;
     }
 
     .values-line {
       fill: none;
-      stroke: #32a7c2; // Needs variable
+      stroke: $euiColorPrimary;
       stroke-width: 2;
       pointer-events: none;
     }
 
     .values-line.forecast {
-      stroke: #cca300; // Needs variable
+      stroke: $euiColorVis5;
       pointer-events: none;
-    }
-
-    .values-dots circle {
-      fill: #32a7c2; // Needs variable
-      stroke-width: 0;
     }
 
     .hidden {
@@ -114,20 +87,20 @@
     }
 
     .area.forecast {
-      fill: rgba(204, 163, 0, 0.25); // Needs variable
+      fill: transparentize($euiColorVis5, .7);
       pointer-events: none;
     }
 
     .metric-value {
       opacity: 1;
       fill: transparent;
-      stroke: #32a7c2;
-      stroke-width: 0px;
+      stroke: $euiColorPrimary;
+      stroke-width: 0;
     }
 
     .anomaly-marker {
       stroke-width: 1px;
-      stroke: #aaaaaa; // Needs variable
+      stroke: $euiColorMediumShade;
     }
 
     .anomaly-marker.critical {
@@ -147,15 +120,15 @@
     }
 
     .anomaly-marker.low {
-      fill: #d2e9f7; // Needs variable
+      fill: $mlColorLowWarning;
     }
 
     .metric-value:hover,
     .anomaly-marker:hover,
     .anomaly-marker.highlighted {
       stroke-width: 6px;
-      stroke-opacity: 0.65;
-      stroke: #32a7c2;
+      stroke-opacity: .65;
+      stroke: $euiColorPrimary;
     }
 
     rect.scheduled-event-marker {
@@ -168,7 +141,7 @@
     .forecast {
       .metric-value,
       .metric-value:hover {
-        stroke: #cca300;
+        stroke: $euiColorVis5;
       }
     }
 
@@ -213,35 +186,22 @@
         fill: $euiTextColor;
       }
 
-      .area.context {
-        fill: rgba(50, 167, 194, 0.25); // Needs variable
-      }
-
       .values-line {
         stroke-width: 1;
       }
 
-      .area.context.forecast {
-        fill: rgba(204, 163, 0, 0.25); // Needs variable
-      }
-
       .mask {
         polygon {
-          fill-opacity: 0.1;
+          fill-opacity: .1;
         }
 
         .area.bounds {
-          fill: #d6d6d6;
+          fill: $euiColorLightShade;
         }
 
         .values-line {
           stroke-width: 1;
-          stroke: #b8b8b8;
-        }
-
-        .values-dots circle {
-          fill: #b8b8b8;
-          stroke-width: 0;
+          stroke: $euiColorMediumShade;
         }
       }
     }
@@ -255,12 +215,8 @@
     }
 
     .brush .extent {
-      stroke: #aaaaaa;
       fill-opacity: 0;
       shape-rendering: crispEdges;
-    }
-
-    .brush .extent {
       stroke: $euiColorDarkShade;
       stroke-width: 2;
       cursor: move;
@@ -292,11 +248,11 @@
     }
 
     div.brush-handle-inner-left {
-      border-radius: $euiBorderRadius 0px 0px $euiBorderRadius;
+      border-radius: $euiBorderRadius 0 0 $euiBorderRadius;
     }
 
     div.brush-handle-inner-right {
-      border-radius: 0px $euiBorderRadius $euiBorderRadius 0px;
+      border-radius: 0 $euiBorderRadius $euiBorderRadius 0;
     }
 
     rect.brush-handle {

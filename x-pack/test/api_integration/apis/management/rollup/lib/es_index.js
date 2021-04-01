@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { getRandomString } from './random';
 
 /**
@@ -10,7 +12,10 @@ import { getRandomString } from './random';
  * during our tests.
  * @param {ElasticsearchClient} es The Elasticsearch client instance
  */
-export const initElasticsearchIndicesHelpers = (es) => {
+export const initElasticsearchIndicesHelpers = (getService) => {
+  const es = getService('legacyEs');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
+
   let indicesCreated = [];
 
   const createIndex = (index = getRandomString(), body = {}) => {
@@ -25,10 +30,8 @@ export const initElasticsearchIndicesHelpers = (es) => {
 
   const deleteIndex = (index) => {
     const indices = Array.isArray(index) ? index : [index];
-    indices.forEach((_index) => {
-      indicesCreated = indicesCreated.filter((i) => i !== _index);
-    });
-    return es.indices.delete({ index: indices }, { ignoreUnavailable: true });
+    indicesCreated = indicesCreated.filter((i) => !indices.includes(i));
+    return esDeleteAllIndices(indices);
   };
 
   const deleteAllIndicesCreated = () =>

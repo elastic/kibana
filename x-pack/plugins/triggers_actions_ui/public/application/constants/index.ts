@@ -1,20 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
 
-export { BASE_ALERT_API_PATH } from '../../../../alerts/common';
+export { LEGACY_BASE_ALERT_API_PATH } from '../../../../alerting/common';
 export { BASE_ACTION_API_PATH } from '../../../../actions/common';
 
-export type Section = 'connectors' | 'alerts';
+export type Section = 'connectors' | 'rules';
 
 export const routeToHome = `/`;
 export const routeToConnectors = `/connectors`;
-export const routeToAlerts = `/alerts`;
-export const routeToAlertDetails = `/alert/:alertId`;
+export const routeToRules = `/rules`;
+export const routeToRuleDetails = `/rule/:ruleId`;
+export const legacyRouteToRules = `/alerts`;
+export const legacyRouteToRuleDetails = `/alert/:alertId`;
 
 export const recoveredActionGroupMessage = i18n.translate(
   'xpack.triggersActionsUI.sections.actionForm.RecoveredMessage',

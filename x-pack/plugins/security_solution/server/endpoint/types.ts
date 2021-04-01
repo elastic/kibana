@@ -1,18 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { LoggerFactory } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { ConfigType } from '../config';
 import { EndpointAppContextService } from './endpoint_app_context_services';
-import { JsonObject } from '../../../infra/common/typed_json';
-import {
-  HostMetadata,
-  HostMetadataDetails,
-  MetadataQueryStrategyVersions,
-} from '../../common/endpoint/types';
+import { JsonObject } from '../../../../../src/plugins/kibana_utils/common';
+import { HostMetadata, MetadataQueryStrategyVersions } from '../../common/endpoint/types';
+import { ExperimentalFeatures } from '../../common/experimental_features';
 
 /**
  * The context for Endpoint apps.
@@ -20,6 +19,7 @@ import {
 export interface EndpointAppContext {
   logFactory: LoggerFactory;
   config(): Promise<ConfigType>;
+  experimentalFeatures: ExperimentalFeatures;
 
   /**
    * Object readiness is tied to plugin start method
@@ -41,14 +41,9 @@ export interface HostQueryResult {
 
 export interface MetadataQueryStrategy {
   index: string;
-  elasticAgentIdProperty: string;
-  hostIdProperty: string;
-  sortProperty: JsonObject[];
   extraBodyProperties?: JsonObject;
   queryResponseToHostListResult: (
-    searchResponse: SearchResponse<HostMetadata | HostMetadataDetails>
+    searchResponse: SearchResponse<HostMetadata>
   ) => HostListQueryResult;
-  queryResponseToHostResult: (
-    searchResponse: SearchResponse<HostMetadata | HostMetadataDetails>
-  ) => HostQueryResult;
+  queryResponseToHostResult: (searchResponse: SearchResponse<HostMetadata>) => HostQueryResult;
 }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -14,14 +15,18 @@ import { getIndexPatternService } from '../../../../kibana_services';
 
 export const ObservabilityLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH, LAYER_WIZARD_CATEGORY.SOLUTIONS],
-  checkVisibility: async () => {
+  getIsDisabled: async () => {
     try {
       await getIndexPatternService().get(APM_INDEX_PATTERN_ID);
-      return true;
-    } catch (e) {
       return false;
+    } catch (e) {
+      return true;
     }
   },
+  disabledReason: i18n.translate('xpack.maps.observability.disabledDesc', {
+    defaultMessage:
+      'Cannot find APM index pattern. To get started with Observably, go to Observability > Overview.',
+  }),
   description: i18n.translate('xpack.maps.observability.desc', {
     defaultMessage: 'APM layers',
   }),

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -59,10 +61,7 @@ export const IndexParamsFields = ({
       errors={errors.documents as string[]}
       onDocumentsChange={onDocumentsChange}
       helpText={
-        <EuiLink
-          href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/index-action-type.html#index-action-configuration`}
-          target="_blank"
-        >
+        <EuiLink href={docLinks.links.alerting.indexAction} target="_blank">
           <FormattedMessage
             id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.indexDocumentHelpLabel"
             defaultMessage="Index document example."

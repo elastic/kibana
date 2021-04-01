@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -9,9 +10,9 @@ import { UptimeDatePicker } from './uptime_date_picker';
 import {
   renderWithRouter,
   shallowWithRouter,
-  MountWithReduxProvider,
   mountWithRouterRedux,
-} from '../../lib';
+} from '../../lib/helper/enzyme_helpers';
+import { MountWithReduxProvider } from '../../lib/helper/helper_with_redux';
 import { UptimeStartupPluginsContextProvider } from '../../contexts';
 import { startPlugins } from '../../lib/__mocks__/uptime_plugin_start_mock';
 import { ClientPluginsStart } from '../../apps/plugin';

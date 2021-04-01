@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObject } from 'src/core/types';
@@ -72,10 +73,12 @@ export const buildBulkBody = ({
     ...buildSignal([doc], rule),
     ...additionalSignalFields(doc),
   };
-  delete doc._source.threshold_result;
   const event = buildEventTypeSignal(doc);
+  const { threshold_result: thresholdResult, ...filteredSource } = doc._source || {
+    threshold_result: null,
+  };
   const signalHit: SignalHit = {
-    ...doc._source,
+    ...filteredSource,
     '@timestamp': new Date().toISOString(),
     event,
     signal,
@@ -162,7 +165,8 @@ export const buildSignalFromEvent = (
   applyOverrides: boolean
 ): SignalHit => {
   const rule = applyOverrides
-    ? buildRuleWithOverrides(ruleSO, event._source)
+    ? // @ts-expect-error @elastic/elasticsearch _source is optional
+      buildRuleWithOverrides(ruleSO, event._source)
     : buildRuleWithoutOverrides(ruleSO);
   const signal: Signal = {
     ...buildSignal([event], rule),

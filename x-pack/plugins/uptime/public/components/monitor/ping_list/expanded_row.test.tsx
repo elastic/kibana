@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { mountWithIntl, renderWithIntl, shallowWithIntl } from '@kbn/test/jest';
@@ -97,14 +98,35 @@ describe('PingListExpandedRow', () => {
       >
         <EuiFlexItem>
           <EuiCallOut
-            iconType="beaker"
-            title="Experimental feature"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <BrowserExpandedRow
-            checkGroup="check_group_id"
-          />
+            color="primary"
+          >
+            <EuiDescriptionList
+              listItems={
+                Array [
+                  Object {
+                    "description": <React.Fragment>
+                      <BodyDescription
+                        body={
+                          Object {
+                            "bytes": 1200000,
+                            "content": "<http><head><title>The Title</title></head><body></body></http>",
+                            "hash": "testhash",
+                          }
+                        }
+                      />
+                      <EuiSpacer
+                        size="s"
+                      />
+                      <BodyExcerpt
+                        content="<http><head><title>The Title</title></head><body></body></http>"
+                      />
+                    </React.Fragment>,
+                    "title": "Response Body",
+                  },
+                ]
+              }
+            />
+          </EuiCallOut>
         </EuiFlexItem>
       </EuiFlexGroup>
     `);

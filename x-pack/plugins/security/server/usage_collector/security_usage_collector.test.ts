@@ -1,19 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { createConfig, ConfigSchema } from '../config';
+import type { TypeOf } from '@kbn/config-schema';
 import { loggingSystemMock } from 'src/core/server/mocks';
-import { TypeOf } from '@kbn/config-schema';
 import {
-  usageCollectionPluginMock,
   createCollectorFetchContextMock,
+  usageCollectionPluginMock,
 } from 'src/plugins/usage_collection/server/mocks';
-import { registerSecurityUsageCollector } from './security_usage_collector';
+
+import type { SecurityLicenseFeatures } from '../../common/licensing';
 import { licenseMock } from '../../common/licensing/index.mock';
-import { SecurityLicenseFeatures } from '../../common/licensing';
+import { ConfigSchema, createConfig } from '../config';
+import { registerSecurityUsageCollector } from './security_usage_collector';
 
 describe('Security UsageCollector', () => {
   const createSecurityConfig = (config: TypeOf<typeof ConfigSchema>) => {

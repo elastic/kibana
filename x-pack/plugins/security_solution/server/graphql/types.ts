@@ -2,8 +2,9 @@
 /* eslint-disable */
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SiemContext } from '../lib/types';
@@ -80,6 +81,8 @@ export interface TimelineInput {
   dataProviders?: Maybe<DataProviderInput[]>;
 
   description?: Maybe<string>;
+
+  eqlOptions?: Maybe<EqlOptionsInput>;
 
   eventType?: Maybe<string>;
 
@@ -162,6 +165,18 @@ export interface QueryMatchInput {
   displayValue?: Maybe<string>;
 
   operator?: Maybe<string>;
+}
+
+export interface EqlOptionsInput {
+  eventCategoryField?: Maybe<string>;
+
+  tiebreakerField?: Maybe<string>;
+
+  timestampField?: Maybe<string>;
+
+  query?: Maybe<string>;
+
+  size?: Maybe<ToAny>;
 }
 
 export interface FilterTimelineInput {
@@ -274,6 +289,7 @@ export enum HostPolicyResponseActionStatus {
   success = 'success',
   failure = 'failure',
   warning = 'warning',
+  unsupported = 'unsupported',
 }
 
 export enum TimelineType {
@@ -287,10 +303,13 @@ export enum DataProviderType {
 }
 
 export enum RowRendererId {
+  alerts = 'alerts',
   auditd = 'auditd',
   auditd_file = 'auditd_file',
+  library = 'library',
   netflow = 'netflow',
   plain = 'plain',
+  registry = 'registry',
   suricata = 'suricata',
   system = 'system',
   system_dns = 'system_dns',
@@ -606,6 +625,8 @@ export interface TimelineResult {
 
   description?: Maybe<string>;
 
+  eqlOptions?: Maybe<EqlOptionsResult>;
+
   eventIdToNoteIds?: Maybe<NoteResult[]>;
 
   eventType?: Maybe<string>;
@@ -711,6 +732,18 @@ export interface DateRangePickerResult {
   start?: Maybe<ToAny>;
 
   end?: Maybe<ToAny>;
+}
+
+export interface EqlOptionsResult {
+  eventCategoryField?: Maybe<string>;
+
+  tiebreakerField?: Maybe<string>;
+
+  timestampField?: Maybe<string>;
+
+  query?: Maybe<string>;
+
+  size?: Maybe<ToAny>;
 }
 
 export interface FavoriteTimelineResult {
@@ -836,6 +869,12 @@ export interface ResponseFavoriteTimeline {
   message?: Maybe<string>;
 
   savedObjectId: string;
+
+  templateTimelineId?: Maybe<string>;
+
+  templateTimelineVersion?: Maybe<number>;
+
+  timelineType?: Maybe<TimelineType>;
 
   version: string;
 
@@ -1693,6 +1732,12 @@ export interface PersistTimelineMutationArgs {
 }
 export interface PersistFavoriteMutationArgs {
   timelineId?: Maybe<string>;
+
+  templateTimelineId?: Maybe<string>;
+
+  templateTimelineVersion?: Maybe<number>;
+
+  timelineType?: Maybe<TimelineType>;
 }
 export interface DeleteTimelineMutationArgs {
   id: string[];
@@ -2622,6 +2667,8 @@ export namespace TimelineResultResolvers {
 
     description?: DescriptionResolver<Maybe<string>, TypeParent, TContext>;
 
+    eqlOptions?: EqlOptionsResolver<Maybe<EqlOptionsResult>, TypeParent, TContext>;
+
     eventIdToNoteIds?: EventIdToNoteIdsResolver<Maybe<NoteResult[]>, TypeParent, TContext>;
 
     eventType?: EventTypeResolver<Maybe<string>, TypeParent, TContext>;
@@ -2704,6 +2751,11 @@ export namespace TimelineResultResolvers {
   > = Resolver<R, Parent, TContext>;
   export type DescriptionResolver<
     R = Maybe<string>,
+    Parent = TimelineResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type EqlOptionsResolver<
+    R = Maybe<EqlOptionsResult>,
     Parent = TimelineResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -3022,6 +3074,46 @@ export namespace DateRangePickerResultResolvers {
   export type EndResolver<
     R = Maybe<ToAny>,
     Parent = DateRangePickerResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+}
+
+export namespace EqlOptionsResultResolvers {
+  export interface Resolvers<TContext = SiemContext, TypeParent = EqlOptionsResult> {
+    eventCategoryField?: EventCategoryFieldResolver<Maybe<string>, TypeParent, TContext>;
+
+    tiebreakerField?: TiebreakerFieldResolver<Maybe<string>, TypeParent, TContext>;
+
+    timestampField?: TimestampFieldResolver<Maybe<string>, TypeParent, TContext>;
+
+    query?: QueryResolver<Maybe<string>, TypeParent, TContext>;
+
+    size?: SizeResolver<Maybe<ToAny>, TypeParent, TContext>;
+  }
+
+  export type EventCategoryFieldResolver<
+    R = Maybe<string>,
+    Parent = EqlOptionsResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TiebreakerFieldResolver<
+    R = Maybe<string>,
+    Parent = EqlOptionsResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TimestampFieldResolver<
+    R = Maybe<string>,
+    Parent = EqlOptionsResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type QueryResolver<
+    R = Maybe<string>,
+    Parent = EqlOptionsResult,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type SizeResolver<
+    R = Maybe<ToAny>,
+    Parent = EqlOptionsResult,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
 }
@@ -3419,6 +3511,12 @@ export namespace MutationResolvers {
   > = Resolver<R, Parent, TContext, PersistFavoriteArgs>;
   export interface PersistFavoriteArgs {
     timelineId?: Maybe<string>;
+
+    templateTimelineId?: Maybe<string>;
+
+    templateTimelineVersion?: Maybe<number>;
+
+    timelineType?: Maybe<TimelineType>;
   }
 
   export type DeleteTimelineResolver<R = boolean, Parent = {}, TContext = SiemContext> = Resolver<
@@ -3492,6 +3590,12 @@ export namespace ResponseFavoriteTimelineResolvers {
 
     savedObjectId?: SavedObjectIdResolver<string, TypeParent, TContext>;
 
+    templateTimelineId?: TemplateTimelineIdResolver<Maybe<string>, TypeParent, TContext>;
+
+    templateTimelineVersion?: TemplateTimelineVersionResolver<Maybe<number>, TypeParent, TContext>;
+
+    timelineType?: TimelineTypeResolver<Maybe<TimelineType>, TypeParent, TContext>;
+
     version?: VersionResolver<string, TypeParent, TContext>;
 
     favorite?: FavoriteResolver<Maybe<FavoriteTimelineResult[]>, TypeParent, TContext>;
@@ -3509,6 +3613,21 @@ export namespace ResponseFavoriteTimelineResolvers {
   > = Resolver<R, Parent, TContext>;
   export type SavedObjectIdResolver<
     R = string,
+    Parent = ResponseFavoriteTimeline,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TemplateTimelineIdResolver<
+    R = Maybe<string>,
+    Parent = ResponseFavoriteTimeline,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TemplateTimelineVersionResolver<
+    R = Maybe<number>,
+    Parent = ResponseFavoriteTimeline,
+    TContext = SiemContext
+  > = Resolver<R, Parent, TContext>;
+  export type TimelineTypeResolver<
+    R = Maybe<TimelineType>,
     Parent = ResponseFavoriteTimeline,
     TContext = SiemContext
   > = Resolver<R, Parent, TContext>;
@@ -6059,6 +6178,7 @@ export type IResolvers<TContext = SiemContext> = {
   DataProviderResult?: DataProviderResultResolvers.Resolvers<TContext>;
   QueryMatchResult?: QueryMatchResultResolvers.Resolvers<TContext>;
   DateRangePickerResult?: DateRangePickerResultResolvers.Resolvers<TContext>;
+  EqlOptionsResult?: EqlOptionsResultResolvers.Resolvers<TContext>;
   FavoriteTimelineResult?: FavoriteTimelineResultResolvers.Resolvers<TContext>;
   FilterTimelineResult?: FilterTimelineResultResolvers.Resolvers<TContext>;
   FilterMetaTimelineResult?: FilterMetaTimelineResultResolvers.Resolvers<TContext>;

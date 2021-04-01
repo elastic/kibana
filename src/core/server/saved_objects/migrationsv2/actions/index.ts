@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import * as Either from 'fp-ts/lib/Either';
@@ -24,14 +13,15 @@ import { ElasticsearchClientError } from '@elastic/elasticsearch/lib/errors';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { flow } from 'fp-ts/lib/function';
+import type { estypes } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from '../../../elasticsearch';
 import { IndexMapping } from '../../mappings';
-import { SavedObjectsRawDoc } from '../../serialization';
+import { SavedObjectsRawDoc, SavedObjectsRawDocSource } from '../../serialization';
 import {
   catchRetryableEsClientErrors,
   RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
-export { RetryableEsClientError };
+export type { RetryableEsClientError };
 
 export const isRetryableEsClientResponse = (
   res: Either.Either<any, unknown>
@@ -67,20 +57,22 @@ export type FetchIndexResponse = Record<
 export const fetchIndices = (
   client: ElasticsearchClient,
   indicesToFetch: string[]
-): TaskEither.TaskEither<RetryableEsClientError, FetchIndexResponse> => () => {
-  return client.indices
-    .get(
-      {
-        index: indicesToFetch,
-        ignore_unavailable: true, // Don't return an error for missing indices. Note this *will* include closed indices, the docs are misleading https://github.com/elastic/elasticsearch/issues/63607
-      },
-      { ignore: [404], maxRetries: 0 }
-    )
-    .then(({ body }) => {
-      return Either.right(body);
-    })
-    .catch(catchRetryableEsClientErrors);
-};
+): TaskEither.TaskEither<RetryableEsClientError, FetchIndexResponse> =>
+  // @ts-expect-error @elastic/elasticsearch IndexState.alias and IndexState.mappings should be required
+  () => {
+    return client.indices
+      .get(
+        {
+          index: indicesToFetch,
+          ignore_unavailable: true, // Don't return an error for missing indices. Note this *will* include closed indices, the docs are misleading https://github.com/elastic/elasticsearch/issues/63607
+        },
+        { ignore: [404], maxRetries: 0 }
+      )
+      .then(({ body }) => {
+        return Either.right(body);
+      })
+      .catch(catchRetryableEsClientErrors);
+  };
 
 /**
  * Sets a write block in place for the given index. If the response includes
@@ -109,7 +101,7 @@ export const setWriteBlock = (
       },
       { maxRetries: 0 /** handle retry ourselves for now */ }
     )
-    .then((res) => {
+    .then((res: any) => {
       return res.body.acknowledged === true
         ? Either.right('set_write_block_succeeded' as const)
         : Either.left({
@@ -145,7 +137,11 @@ export const removeWriteBlock = (
         // Don't change any existing settings
         preserve_existing: true,
         body: {
-          'index.blocks.write': false,
+          index: {
+            blocks: {
+              write: false,
+            },
+          },
         },
       },
       { maxRetries: 0 /** handle retry ourselves for now */ }
@@ -161,12 +157,23 @@ export const removeWriteBlock = (
     .catch(catchRetryableEsClientErrors);
 };
 
-const waitForIndexStatusGreen = (
+/**
+ * A yellow index status means the index's primary shard is allocated and the
+ * index is ready for searching/indexing documents, but ES wasn't able to
+ * allocate the replicas. When migrations proceed with a yellow index it means
+ * we don't have as much data-redundancy as we could have, but waiting for
+ * replicas would mean that v2 migrations fail where v1 migrations would have
+ * succeeded. It doesn't feel like it's Kibana's job to force users to keep
+ * their clusters green and even if it's green when we migrate it can turn
+ * yellow at any point in the future. So ultimately data-redundancy is up to
+ * users to maintain.
+ */
+const waitForIndexStatusYellow = (
   client: ElasticsearchClient,
   index: string
 ): TaskEither.TaskEither<RetryableEsClientError, {}> => () => {
   return client.cluster
-    .health({ index, wait_for_status: 'green', timeout: '30s' })
+    .health({ index, wait_for_status: 'yellow', timeout: '30s' })
     .then(() => {
       return Either.right({});
     })
@@ -270,7 +277,7 @@ export const cloneIndex = (
       } else {
         // Otherwise, wait until the target index has a 'green' status.
         return pipe(
-          waitForIndexStatusGreen(client, target),
+          waitForIndexStatusYellow(client, target),
           TaskEither.map((value) => {
             /** When the index status is 'green' we know that all shards were started */
             return { acknowledged: true, shardsAcknowledged: true };
@@ -285,7 +292,7 @@ interface WaitForTaskResponse {
   error: Option.Option<{ type: string; reason: string; index: string }>;
   completed: boolean;
   failures: Option.Option<any[]>;
-  description: string;
+  description?: string;
 }
 
 /**
@@ -299,12 +306,7 @@ const waitForTask = (
   timeout: string
 ): TaskEither.TaskEither<RetryableEsClientError, WaitForTaskResponse> => () => {
   return client.tasks
-    .get<{
-      completed: boolean;
-      response: { failures: any[] };
-      task: { description: string };
-      error: { type: string; reason: string; index: string };
-    }>({
+    .get({
       task_id: taskId,
       wait_for_completion: true,
       timeout,
@@ -314,6 +316,7 @@ const waitForTask = (
       const failures = body.response?.failures ?? [];
       return Either.right({
         completed: body.completed,
+        // @ts-expect-error @elastic/elasticsearch GetTaskResponse doesn't declare `error` property
         error: Option.fromNullable(body.error),
         failures: failures.length > 0 ? Option.some(failures) : Option.none,
         description: body.task.description,
@@ -359,7 +362,7 @@ export const pickupUpdatedMappings = (
       wait_for_completion: false,
     })
     .then(({ body: { task: taskId } }) => {
-      return Either.right({ taskId });
+      return Either.right({ taskId: String(taskId!) });
     })
     .catch(catchRetryableEsClientErrors);
 };
@@ -387,7 +390,6 @@ export const reindex = (
     .reindex({
       // Require targetIndex to be an alias. Prevents a new index from being
       // created if targetIndex doesn't exist.
-      // @ts-expect-error This API isn't documented
       require_alias: requireAlias,
       body: {
         // Ignore version conflicts from existing documents
@@ -416,7 +418,7 @@ export const reindex = (
       wait_for_completion: false,
     })
     .then(({ body: { task: taskId } }) => {
-      return Either.right({ taskId });
+      return Either.right({ taskId: String(taskId) });
     })
     .catch(catchRetryableEsClientErrors);
 };
@@ -624,7 +626,7 @@ export const createIndex = (
     const aliasesObject = (aliases ?? []).reduce((acc, alias) => {
       acc[alias] = {};
       return acc;
-    }, {} as Record<string, {}>);
+    }, {} as Record<string, estypes.Alias>);
 
     return client.indices
       .create(
@@ -698,7 +700,7 @@ export const createIndex = (
       } else {
         // Otherwise, wait until the target index has a 'green' status.
         return pipe(
-          waitForIndexStatusGreen(client, indexName),
+          waitForIndexStatusYellow(client, indexName),
           TaskEither.map(() => {
             /** When the index status is 'green' we know that all shards were started */
             return 'create_index_succeeded';
@@ -727,7 +729,7 @@ export const updateAndPickupMappings = (
     'update_mappings_succeeded'
   > = () => {
     return client.indices
-      .putMapping<Record<string, any>, IndexMapping>({
+      .putMapping({
         index,
         timeout: DEFAULT_TIMEOUT,
         body: mappings,
@@ -774,22 +776,16 @@ export const searchForOutdatedDocuments = (
   query: Record<string, unknown>
 ): TaskEither.TaskEither<RetryableEsClientError, SearchResponse> => () => {
   return client
-    .search<{
-      // when `filter_path` is specified, ES doesn't return empty arrays, so if
-      // there are no search results res.body.hits will be undefined.
-      hits?: {
-        hits?: SavedObjectsRawDoc[];
-      };
-    }>({
+    .search<SavedObjectsRawDocSource>({
       index,
-      // Optimize search performance by sorting by the "natural" index order
-      sort: ['_doc'],
       // Return the _seq_no and _primary_term so we can use optimistic
       // concurrency control for updates
       seq_no_primary_term: true,
       size: BATCH_SIZE,
       body: {
         query,
+        // Optimize search performance by sorting by the "natural" index order
+        sort: ['_doc'],
       },
       // Return an error when targeting missing or closed indices
       allow_no_indices: false,
@@ -811,7 +807,9 @@ export const searchForOutdatedDocuments = (
         'hits.hits._primary_term',
       ],
     })
-    .then((res) => Either.right({ outdatedDocuments: res.body.hits?.hits ?? [] }))
+    .then((res) =>
+      Either.right({ outdatedDocuments: (res.body.hits?.hits as SavedObjectsRawDoc[]) ?? [] })
+    )
     .catch(catchRetryableEsClientErrors);
 };
 
@@ -825,20 +823,7 @@ export const bulkOverwriteTransformedDocuments = (
   transformedDocs: SavedObjectsRawDoc[]
 ): TaskEither.TaskEither<RetryableEsClientError, 'bulk_index_succeeded'> => () => {
   return client
-    .bulk<{
-      took: number;
-      errors: boolean;
-      items: [
-        {
-          index: {
-            _id: string;
-            status: number;
-            // the filter_path ensures that only items with errors are returned
-            error: { type: string; reason: string };
-          };
-        }
-      ];
-    }>({
+    .bulk({
       // Because we only add aliases in the MARK_VERSION_INDEX_READY step we
       // can't bulkIndex to an alias with require_alias=true. This means if
       // users tamper during this operation (delete indices or restore a
@@ -880,7 +865,7 @@ export const bulkOverwriteTransformedDocuments = (
       // Filter out version_conflict_engine_exception since these just mean
       // that another instance already updated these documents
       const errors = (res.body.items ?? []).filter(
-        (item) => item.index.error.type !== 'version_conflict_engine_exception'
+        (item) => item.index?.error?.type !== 'version_conflict_engine_exception'
       );
       if (errors.length === 0) {
         return Either.right('bulk_index_succeeded' as const);

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -14,7 +15,9 @@ import { ConfigureCasesPage } from './configure_cases';
 
 const casesPagePath = '';
 const caseDetailsPagePath = `${casesPagePath}/:detailName`;
-const caseDetailsPagePathWithCommentId = `${casesPagePath}/:detailName/:commentId`;
+const subCaseDetailsPagePath = `${caseDetailsPagePath}/sub-cases/:subCaseId`;
+const caseDetailsPagePathWithCommentId = `${caseDetailsPagePath}/:commentId`;
+const subCaseDetailsPagePathWithCommentId = `${subCaseDetailsPagePath}/:commentId`;
 const createCasePagePath = `${casesPagePath}/create`;
 const configureCasesPagePath = `${casesPagePath}/configure`;
 
@@ -26,7 +29,13 @@ const CaseContainerComponent: React.FC = () => (
     <Route path={configureCasesPagePath}>
       <ConfigureCasesPage />
     </Route>
-    <Route path={caseDetailsPagePathWithCommentId}>
+    <Route exact path={subCaseDetailsPagePathWithCommentId}>
+      <CaseDetailsPage />
+    </Route>
+    <Route exact path={caseDetailsPagePathWithCommentId}>
+      <CaseDetailsPage />
+    </Route>
+    <Route exact path={subCaseDetailsPagePath}>
       <CaseDetailsPage />
     </Route>
     <Route path={caseDetailsPagePath}>

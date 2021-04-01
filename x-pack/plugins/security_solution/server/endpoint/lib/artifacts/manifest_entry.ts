@@ -1,18 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { InternalArtifactSchema } from '../../schemas/artifacts';
 import { CompressionAlgorithm } from '../../../../common/endpoint/schema/common';
 import { ManifestEntrySchema } from '../../../../common/endpoint/schema/manifest';
 import { getArtifactId } from './common';
+import { relativeDownloadUrlFromArtifact } from '../../../../../fleet/server';
 
 export class ManifestEntry {
   private artifact: InternalArtifactSchema;
 
-  constructor(artifact: InternalArtifactSchema) {
+  constructor(artifact: InternalArtifactSchema, private isFleetServerEnabled: boolean = false) {
     this.artifact = artifact;
   }
 
@@ -45,6 +47,13 @@ export class ManifestEntry {
   }
 
   public getUrl(): string {
+    if (this.isFleetServerEnabled) {
+      return relativeDownloadUrlFromArtifact({
+        identifier: this.getIdentifier(),
+        decodedSha256: this.getDecodedSha256(),
+      });
+    }
+
     return `/api/endpoint/artifacts/download/${this.getIdentifier()}/${this.getDecodedSha256()}`;
   }
 

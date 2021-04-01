@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useEffect, Fragment } from 'react';
@@ -19,7 +20,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { Wizard } from './wizard';
 import { WIZARD_STEPS } from '../components/step_types';
 import { getJobCreatorTitle } from '../../common/job_creator/util/general';
-import { useMlKibana } from '../../../../contexts/kibana';
 import {
   jobCreatorFactory,
   isAdvancedJobCreator,
@@ -37,10 +37,10 @@ import { useMlContext } from '../../../../contexts/ml';
 import { getTimeFilterRange } from '../../../../components/full_time_range_selector';
 import { getTimeBucketsFromCache } from '../../../../util/time_buckets';
 import { ExistingJobsAndGroups, mlJobService } from '../../../../services/job_service';
-import { expandCombinedJobConfig } from '../../../../../../common/types/anomaly_detection_jobs';
 import { newJobCapsService } from '../../../../services/new_job_capabilities_service';
 import { EVENT_RATE_FIELD_ID } from '../../../../../../common/types/fields';
 import { getNewJobDefaults } from '../../../../services/ml_server_info';
+import { useToastNotificationService } from '../../../../services/toast_notification_service';
 
 const PAGE_WIDTH = 1200; // document.querySelector('.single-metric-job-container').width();
 const BAR_TARGET = PAGE_WIDTH > 2000 ? 1000 : PAGE_WIDTH / 2;
@@ -52,15 +52,13 @@ export interface PageProps {
 }
 
 export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
-  const {
-    services: { notifications },
-  } = useMlKibana();
   const mlContext = useMlContext();
   const jobCreator = jobCreatorFactory(jobType)(
     mlContext.currentIndexPattern,
     mlContext.currentSavedSearch,
     mlContext.combinedQuery
   );
+  const { displayErrorToast } = useToastNotificationService();
 
   const { from, to } = getTimeFilterRange();
   jobCreator.setTimeRange(from, to);
@@ -72,12 +70,16 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
 
   let autoSetTimeRange = false;
 
-  if (mlJobService.tempJobCloningObjects.job !== undefined) {
+  if (
+    mlJobService.tempJobCloningObjects.job !== undefined &&
+    mlJobService.tempJobCloningObjects.datafeed !== undefined
+  ) {
     // cloning a job
-    const clonedJob = mlJobService.cloneJob(mlJobService.tempJobCloningObjects.job);
-    const { job, datafeed } = expandCombinedJobConfig(clonedJob);
+    const clonedJob = mlJobService.tempJobCloningObjects.job;
+    const clonedDatafeed = mlJobService.cloneDatafeed(mlJobService.tempJobCloningObjects.datafeed);
+
     initCategorizationSettings();
-    jobCreator.cloneFromExistingJob(job, datafeed);
+    jobCreator.cloneFromExistingJob(clonedJob, clonedDatafeed);
 
     // if we're not skipping the time range, this is a standard job clone, so wipe the jobId
     if (mlJobService.tempJobCloningObjects.skipTimeRangeStep === false) {
@@ -88,6 +90,8 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
 
     mlJobService.tempJobCloningObjects.skipTimeRangeStep = false;
     mlJobService.tempJobCloningObjects.job = undefined;
+    mlJobService.tempJobCloningObjects.datafeed = undefined;
+    mlJobService.tempJobCloningObjects.createdBy = undefined;
 
     if (
       mlJobService.tempJobCloningObjects.start !== undefined &&
@@ -148,17 +152,12 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   if (autoSetTimeRange && isAdvancedJobCreator(jobCreator)) {
     // for advanced jobs, load the full time range start and end times
     // so they can be used for job validation and bucket span estimation
-    try {
-      jobCreator.autoSetTimeRange();
-    } catch (error) {
-      const { toasts } = notifications;
-      toasts.addDanger({
-        title: i18n.translate('xpack.ml.newJob.wizard.autoSetJobCreatorTimeRange.error', {
-          defaultMessage: `Error retrieving beginning and end times of index`,
-        }),
-        text: error,
+    jobCreator.autoSetTimeRange().catch((error) => {
+      const title = i18n.translate('xpack.ml.newJob.wizard.autoSetJobCreatorTimeRange.error', {
+        defaultMessage: `Error retrieving beginning and end times of index`,
       });
-    }
+      displayErrorToast(error, title);
+    });
   }
 
   function initCategorizationSettings() {
@@ -182,7 +181,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
 
   const chartLoader = new ChartLoader(mlContext.currentIndexPattern, mlContext.combinedQuery);
 
-  const jobValidator = new JobValidator(jobCreator, existingJobsAndGroups);
+  const jobValidator = new JobValidator(jobCreator);
 
   const resultsLoader = new ResultsLoader(jobCreator, chartInterval, chartLoader);
 

@@ -1,15 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import {
-  fireEvent,
-  render,
-  RenderResult,
-  waitFor,
-} from '@testing-library/react';
+import { fireEvent, render, RenderResult } from '@testing-library/react';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { CustomLinkOverview } from '.';
@@ -28,20 +24,12 @@ import {
 } from '../../../../../utils/testHelpers';
 import * as saveCustomLink from './CreateEditCustomLinkFlyout/saveCustomLink';
 
-const data = [
-  {
-    id: '1',
-    label: 'label 1',
-    url: 'url 1',
-    'service.name': 'opbeans-java',
-  },
-  {
-    id: '2',
-    label: 'label 2',
-    url: 'url 2',
-    'transaction.type': 'request',
-  },
-];
+const data = {
+  customLinks: [
+    { id: '1', label: 'label 1', url: 'url 1', 'service.name': 'opbeans-java' },
+    { id: '2', label: 'label 2', url: 'url 2', 'transaction.type': 'request' },
+  ],
+};
 
 function getMockAPMContext({ canSave }: { canSave: boolean }) {
   return ({
@@ -73,7 +61,7 @@ describe('CustomLink', () => {
   describe('empty prompt', () => {
     beforeAll(() => {
       jest.spyOn(hooks, 'useFetcher').mockReturnValue({
-        data: [],
+        data: { customLinks: [] },
         status: hooks.FETCH_STATUS.SUCCESS,
         refetch: jest.fn(),
       });
@@ -219,31 +207,6 @@ describe('CustomLink', () => {
       expect(saveCustomLinkSpy).toHaveBeenCalledTimes(1);
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/75106
-    it.skip('deletes a custom link', async () => {
-      const mockContext = getMockAPMContext({ canSave: true });
-      const component = render(
-        <LicenseContext.Provider value={goldLicense}>
-          <MockApmPluginContextWrapper value={mockContext}>
-            <CustomLinkOverview />
-          </MockApmPluginContextWrapper>
-        </LicenseContext.Provider>
-      );
-      expect(component.queryByText('Create link')).not.toBeInTheDocument();
-      const editButtons = component.getAllByLabelText('Edit');
-      expect(editButtons.length).toEqual(2);
-      act(() => {
-        fireEvent.click(editButtons[0]);
-      });
-      await waitFor(() =>
-        expect(component.queryByText('Create link')).toBeInTheDocument()
-      );
-      await act(async () => {
-        fireEvent.click(component.getByText('Delete'));
-      });
-      expect(refetch).toHaveBeenCalled();
-    });
-
     describe('Filters', () => {
       const addFilterField = (component: RenderResult, amount: number) => {
         for (let i = 1; i <= amount; i++) {
@@ -319,7 +282,7 @@ describe('CustomLink', () => {
   describe('invalid license', () => {
     beforeAll(() => {
       jest.spyOn(hooks, 'useFetcher').mockReturnValue({
-        data: [],
+        data: { customLinks: [] },
         status: hooks.FETCH_STATUS.SUCCESS,
         refetch: jest.fn(),
       });

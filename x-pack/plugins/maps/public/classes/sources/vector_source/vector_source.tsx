@@ -1,16 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-// @ts-expect-error
-import * as topojson from 'topojson-client';
-import _ from 'lodash';
-import { i18n } from '@kbn/i18n';
 import { FeatureCollection, GeoJsonProperties } from 'geojson';
 import { Filter, TimeRange } from 'src/plugins/data/public';
-import { FORMAT_TYPE, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
+import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { TooltipProperty, ITooltipProperty } from '../../tooltips/tooltip_property';
 import { AbstractSource, ISource } from '../source';
 import { IField } from '../../fields/field';
@@ -84,48 +81,6 @@ export interface ITiledSingleLayerVectorSource extends IVectorSource {
 }
 
 export class AbstractVectorSource extends AbstractSource implements IVectorSource {
-  static async getGeoJson({
-    format,
-    featureCollectionPath,
-    fetchUrl,
-  }: {
-    format: FORMAT_TYPE;
-    featureCollectionPath: string;
-    fetchUrl: string;
-  }) {
-    let fetchedJson;
-    try {
-      const response = await fetch(fetchUrl);
-      if (!response.ok) {
-        throw new Error('Request failed');
-      }
-      fetchedJson = await response.json();
-    } catch (e) {
-      throw new Error(
-        i18n.translate('xpack.maps.source.vetorSource.requestFailedErrorMessage', {
-          defaultMessage: `Unable to fetch vector shapes from url: {fetchUrl}`,
-          values: { fetchUrl },
-        })
-      );
-    }
-
-    if (format === FORMAT_TYPE.GEOJSON) {
-      return fetchedJson;
-    }
-
-    if (format === FORMAT_TYPE.TOPOJSON) {
-      const features = _.get(fetchedJson, `objects.${featureCollectionPath}`);
-      return topojson.feature(fetchedJson, features);
-    }
-
-    throw new Error(
-      i18n.translate('xpack.maps.source.vetorSource.formatErrorMessage', {
-        defaultMessage: `Unable to fetch vector shapes from url: {format}`,
-        values: { format },
-      })
-    );
-  }
-
   getFieldNames(): string[] {
     return [];
   }
@@ -144,6 +99,10 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
 
   isBoundsAware(): boolean {
     return false;
+  }
+
+  async supportsFitToBounds(): Promise<boolean> {
+    return true;
   }
 
   async getBoundsForFilters(

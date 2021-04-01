@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -40,12 +41,50 @@ function getTransformConfig(): TransformPivotConfig {
   };
 }
 
+function getTransformConfigWithRuntimeMappings(): TransformPivotConfig {
+  const date = Date.now();
+
+  return {
+    id: `ec_cloning_runtime_${date}`,
+    source: {
+      index: ['ft_ecommerce'],
+      runtime_mappings: {
+        rt_gender_lower: {
+          type: 'keyword',
+          script: "emit(doc['customer_gender'].value.toLowerCase())",
+        },
+        rt_total_charge: {
+          type: 'double',
+          script: {
+            source: "emit(doc['taxful_total_price'].value + 4.00)",
+          },
+        },
+      },
+    },
+    pivot: {
+      group_by: { rt_gender_lower: { terms: { field: 'rt_gender_lower' } } },
+      aggregations: {
+        'rt_total_charge.avg': { avg: { field: 'rt_total_charge' } },
+        'rt_total_charge.min': { min: { field: 'rt_total_charge' } },
+        'rt_total_charge.max': { max: { field: 'rt_total_charge' } },
+      },
+    },
+    description: 'ecommerce batch transform grouped by terms(rt_gender_lower)',
+    frequency: '3s',
+    settings: {
+      max_page_search_size: 250,
+    },
+    dest: { index: `user-ec_2_${date}` },
+  };
+}
+
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
   describe('cloning', function () {
     const transformConfigWithPivot = getTransformConfig();
+    const transformConfigWithRuntimeMapping = getTransformConfigWithRuntimeMappings();
     // const transformConfigWithLatest = getLatestTransformConfig();
 
     before(async () => {
@@ -55,6 +94,11 @@ export default function ({ getService }: FtrProviderContext) {
         transformConfigWithPivot.id,
         transformConfigWithPivot
       );
+      await transform.api.createAndRunTransform(
+        transformConfigWithRuntimeMapping.id,
+        transformConfigWithRuntimeMapping
+      );
+
       // await transform.api.createAndRunTransform(
       //   transformConfigWithLatest.id,
       //   transformConfigWithLatest
@@ -66,8 +110,13 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await transform.testResources.deleteIndexPatternByTitle(transformConfigWithPivot.dest.index);
+      await transform.testResources.deleteIndexPatternByTitle(
+        transformConfigWithRuntimeMapping.dest.index
+      );
+
       // await transform.testResources.deleteIndexPatternByTitle(transformConfigWithLatest.dest.index);
       await transform.api.deleteIndices(transformConfigWithPivot.dest.index);
+      await transform.api.deleteIndices(transformConfigWithRuntimeMapping.dest.index);
       // await transform.api.deleteIndices(transformConfigWithLatest.dest.index);
       await transform.api.cleanTransformIndices();
     });
@@ -83,6 +132,7 @@ export default function ({ getService }: FtrProviderContext) {
           return `user-${this.transformId}`;
         },
         expected: {
+          runtimeMappingsEditorValueArr: [''],
           aggs: {
             index: 0,
             label: 'products.base_price.avg',
@@ -104,6 +154,35 @@ export default function ({ getService }: FtrProviderContext) {
               `Women's Accessories`,
               `Women's Clothing`,
             ],
+          },
+        },
+      },
+      {
+        type: 'pivot' as const,
+        suiteTitle: 'clone transform with runtime mappings',
+        originalConfig: transformConfigWithRuntimeMapping,
+        transformId: `clone_${transformConfigWithRuntimeMapping.id}`,
+        transformDescription: `a cloned transform with runtime mappings`,
+        get destinationIndex(): string {
+          return `user-${this.transformId}`;
+        },
+        expected: {
+          runtimeMappingsEditorValueArr: ['{', '  "rt_gender_lower": {', '    "type": "keyword",'],
+          aggs: {
+            index: 0,
+            label: 'rt_total_charge.avg',
+          },
+          indexPreview: {
+            columns: 10,
+            rows: 5,
+          },
+          groupBy: {
+            index: 0,
+            label: 'rt_gender_lower',
+          },
+          transformPreview: {
+            column: 0,
+            values: [`female`, `male`],
           },
         },
       },
@@ -158,7 +237,7 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.table.filterWithSearchString(testData.originalConfig.id, 1);
 
           await transform.testExecution.logTestStep('should show the actions popover');
-          await transform.table.assertTransformRowActions(false);
+          await transform.table.assertTransformRowActions(testData.originalConfig.id, false);
 
           await transform.testExecution.logTestStep('should display the define pivot step');
           await transform.table.clickTransformRowAction('Clone');
@@ -167,6 +246,18 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('navigates through the wizard, checks and sets all needed fields', async () => {
+          await transform.testExecution.logTestStep('should have runtime mapping editor');
+          await transform.wizard.assertRuntimeMappingsEditorSwitchExists();
+          await transform.wizard.assertRuntimeMappingsEditorSwitchCheckState(false);
+
+          if (testData.expected.runtimeMappingsEditorValueArr) {
+            await transform.wizard.toggleRuntimeMappingsEditorSwitch(true);
+            await transform.wizard.assertRuntimeMappingsEditorExists();
+            await transform.wizard.assertRuntimeMappingsEditorContent(
+              testData.expected.runtimeMappingsEditorValueArr
+            );
+          }
+
           await transform.testExecution.logTestStep('should load the index preview');
           await transform.wizard.assertIndexPreviewLoaded();
 

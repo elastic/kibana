@@ -1,11 +1,12 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../tsconfig.project.json",
   "compilerOptions": {
     "composite": true,
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true
+    "declarationMap": true,
+    "isolatedModules": true,
   },
   "include": [
     "public/**/*",

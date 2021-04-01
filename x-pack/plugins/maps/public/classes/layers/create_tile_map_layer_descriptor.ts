@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -22,11 +23,9 @@ import {
   VECTOR_STYLES,
 } from '../../../common/constants';
 import { VectorStyle } from '../styles/vector/vector_style';
-// @ts-ignore
 import { ESGeoGridSource } from '../sources/es_geo_grid_source';
-import { VectorLayer } from './vector_layer/vector_layer';
-// @ts-ignore
-import { HeatmapLayer } from './heatmap_layer/heatmap_layer';
+import { VectorLayer } from './vector_layer';
+import { HeatmapLayer } from './heatmap_layer';
 import { getDefaultDynamicProperties } from '../styles/vector/vector_style_defaults';
 import { NUMERICAL_COLOR_PALETTES } from '../styles/color_palettes';
 import { getSourceAggKey } from '../../../common/get_agg_key';

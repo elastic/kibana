@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -9,9 +10,12 @@ import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrap
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export function MachineLearningDataFrameAnalyticsResultsProvider({
-  getService,
-}: FtrProviderContext) {
+import type { CanvasElementColorStats, MlCommonUI } from './common_ui';
+
+export function MachineLearningDataFrameAnalyticsResultsProvider(
+  { getService }: FtrProviderContext,
+  mlCommonUI: MlCommonUI
+) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
@@ -31,6 +35,7 @@ export function MachineLearningDataFrameAnalyticsResultsProvider({
     async assertClassificationEvaluatePanelElementsExists() {
       await testSubjects.existOrFail('mlDFExpandableSection-ClassificationEvaluation');
       await testSubjects.existOrFail('mlDFAnalyticsClassificationExplorationConfusionMatrix');
+      await testSubjects.existOrFail('mlDFAnalyticsClassificationExplorationRocCurveChart');
     },
 
     async assertClassificationTablePanelExists() {
@@ -52,7 +57,9 @@ export function MachineLearningDataFrameAnalyticsResultsProvider({
     },
 
     async getResultTableRows() {
-      return await testSubjects.findAll('mlExplorationDataGrid loaded > dataGridRow');
+      return (await testSubjects.find('mlExplorationDataGrid loaded')).findAllByTestSubject(
+        'dataGridRowCell'
+      );
     },
 
     async assertResultsTableNotEmpty() {
@@ -77,6 +84,16 @@ export function MachineLearningDataFrameAnalyticsResultsProvider({
       });
     },
 
+    async assertScatterplotMatrix(expectedValue: CanvasElementColorStats) {
+      await testSubjects.existOrFail('mlDFExpandableSection-splom > mlScatterplotMatrix loaded', {
+        timeout: 5000,
+      });
+      await testSubjects.scrollIntoView('mlDFExpandableSection-splom > mlScatterplotMatrix loaded');
+      await mlCommonUI.assertColorsInCanvasElement('mlDFExpandableSection-splom', expectedValue, [
+        '#000000',
+      ]);
+    },
+
     async assertFeatureImportanceDecisionPathChartElementsExists() {
       await testSubjects.existOrFail('mlDFADecisionPathChart', {
         timeout: 5000,
@@ -87,6 +104,7 @@ export function MachineLearningDataFrameAnalyticsResultsProvider({
       this.assertResultsTableNotEmpty();
 
       const featureImportanceCell = await this.getFirstFeatureImportanceCell();
+      await featureImportanceCell.focus();
       const interactionButton = await featureImportanceCell.findByTagName('button');
 
       // simulate hover and wait for button to appear
@@ -100,14 +118,27 @@ export function MachineLearningDataFrameAnalyticsResultsProvider({
 
     async getFirstFeatureImportanceCell(): Promise<WebElementWrapper> {
       // get first row of the data grid
-      const firstDataGridRow = await testSubjects.find(
-        'mlExplorationDataGrid loaded > dataGridRow'
-      );
+      const dataGrid = await testSubjects.find('mlExplorationDataGrid loaded');
       // find the feature importance cell in that row
-      const featureImportanceCell = await firstDataGridRow.findByCssSelector(
+      const featureImportanceCell = await dataGrid.findByCssSelector(
         '[data-test-subj="dataGridRowCell"][class*="featureImportance"]'
       );
       return featureImportanceCell;
+    },
+
+    async assertFeatureInfluenceCellNotEmpty() {
+      // get first row of the data grid
+      const dataGrid = await testSubjects.find('mlExplorationDataGrid loaded');
+      // find the feature influence cell in that row
+      const featureInfluenceCell = await dataGrid.findByCssSelector(
+        '[data-test-subj="dataGridRowCell"][class*="featureInfluence"]'
+      );
+      const contentString = await featureInfluenceCell.getVisibleText();
+
+      expect(contentString.length).to.be.greaterThan(
+        0,
+        'Expected feature influence cell to have content but it is empty.'
+      );
     },
 
     async waitForInteractionButtonToDisplay(interactionButton: WebElementWrapper) {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -14,7 +15,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const a11y = getService('a11y');
   const flyout = getService('flyout');
 
-  describe('Accessibility Search Profiler Editor', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/91939
+  describe.skip('Accessibility Search Profiler Editor', () => {
     before(async () => {
       await PageObjects.common.navigateToApp('searchProfiler');
       await a11y.testAppSnapshot();

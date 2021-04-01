@@ -1,12 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { SavedObjectsClientContract, SavedObjectsFindResult } from 'kibana/server';
+import type { SavedObjectsClientContract, SavedObjectsFindResult } from 'kibana/server';
+
 import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, PackagePolicySOAttributes } from '../../../../common';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../common';
+import type { PackagePolicySOAttributes } from '../../../../common';
+
 import { getPackageUsageStats } from './get';
 
 describe('When using EPM `get` services', () => {

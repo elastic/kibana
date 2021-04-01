@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import * as t from 'io-ts';
 import { getTransactionDurationChartPreview } from '../../lib/alerts/chart_preview/get_transaction_duration';
 import { getTransactionErrorCountChartPreview } from '../../lib/alerts/chart_preview/get_transaction_error_count';
@@ -33,12 +35,14 @@ export const transactionErrorRateChartPreview = createRoute({
   options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
-    const { _debug, ...alertParams } = context.params.query;
+    const { _inspect, ...alertParams } = context.params.query;
 
-    return getTransactionErrorRateChartPreview({
+    const errorRateChartPreview = await getTransactionErrorRateChartPreview({
       setup,
       alertParams,
     });
+
+    return { errorRateChartPreview };
   },
 });
 
@@ -48,11 +52,13 @@ export const transactionErrorCountChartPreview = createRoute({
   options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
-    const { _debug, ...alertParams } = context.params.query;
-    return getTransactionErrorCountChartPreview({
+    const { _inspect, ...alertParams } = context.params.query;
+    const errorCountChartPreview = await getTransactionErrorCountChartPreview({
       setup,
       alertParams,
     });
+
+    return { errorCountChartPreview };
   },
 });
 
@@ -62,11 +68,13 @@ export const transactionDurationChartPreview = createRoute({
   options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
-    const { _debug, ...alertParams } = context.params.query;
+    const { _inspect, ...alertParams } = context.params.query;
 
-    return getTransactionDurationChartPreview({
+    const latencyChartPreview = await getTransactionDurationChartPreview({
       alertParams,
       setup,
     });
+
+    return { latencyChartPreview };
   },
 });

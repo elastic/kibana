@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { memo, useMemo } from 'react';
 import { noop } from 'lodash/fp';
 import { EuiBadge } from '@elastic/eui';
 
-import { CaseStatuses } from '../../../../../case/common/api';
-import { statuses } from './config';
+import { allCaseStatus, statuses } from './config';
+import { CaseStatusWithAllStatus, StatusAll } from './types';
 import * as i18n from './translations';
 
 interface Props {
-  type: CaseStatuses;
+  type: CaseStatusWithAllStatus;
   withArrow?: boolean;
   onClick?: () => void;
 }
@@ -21,7 +22,7 @@ interface Props {
 const StatusComponent: React.FC<Props> = ({ type, withArrow = false, onClick = noop }) => {
   const props = useMemo(
     () => ({
-      color: statuses[type].color,
+      color: type === StatusAll ? allCaseStatus[StatusAll].color : statuses[type].color,
       ...(withArrow ? { iconType: 'arrowDown', iconSide: 'right' as const } : {}),
     }),
     [withArrow, type]
@@ -34,7 +35,7 @@ const StatusComponent: React.FC<Props> = ({ type, withArrow = false, onClick = n
       iconOnClickAriaLabel={i18n.STATUS_ICON_ARIA}
       data-test-subj={`status-badge-${type}`}
     >
-      {statuses[type].label}
+      {type === StatusAll ? allCaseStatus[StatusAll].label : statuses[type].label}
     </EuiBadge>
   );
 };

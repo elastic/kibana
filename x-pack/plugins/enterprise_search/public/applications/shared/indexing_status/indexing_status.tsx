@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect } from 'react';
@@ -10,13 +11,13 @@ import { useValues, useActions } from 'kea';
 
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 
+import { IIndexingStatus } from '../types';
+
 import { IndexingStatusContent } from './indexing_status_content';
 import { IndexingStatusErrors } from './indexing_status_errors';
 import { IndexingStatusLogic } from './indexing_status_logic';
 
-import { IIndexingStatus } from '../types';
-
-export interface IIndexingStatusProps {
+export interface IIndexingStatusProps extends IIndexingStatus {
   viewLinkPath: string;
   itemId: string;
   statusPath: string;
@@ -25,12 +26,9 @@ export interface IIndexingStatusProps {
   setGlobalIndexingStatus?(activeReindexJob: IIndexingStatus): void;
 }
 
-export const IndexingStatus: React.FC<IIndexingStatusProps> = ({
-  viewLinkPath,
-  statusPath,
-  onComplete,
-}) => {
-  const { percentageComplete, numDocumentsWithErrors } = useValues(IndexingStatusLogic);
+export const IndexingStatus: React.FC<IIndexingStatusProps> = (props) => {
+  const { viewLinkPath, statusPath, onComplete } = props;
+  const { percentageComplete, numDocumentsWithErrors } = useValues(IndexingStatusLogic(props));
   const { fetchIndexingStatus } = useActions(IndexingStatusLogic);
 
   useEffect(() => {
@@ -40,7 +38,7 @@ export const IndexingStatus: React.FC<IIndexingStatusProps> = ({
   return (
     <>
       {percentageComplete < 100 && (
-        <EuiPanel paddingSize="l" hasShadow={true}>
+        <EuiPanel paddingSize="l" hasShadow>
           <IndexingStatusContent percentageComplete={percentageComplete} />
         </EuiPanel>
       )}

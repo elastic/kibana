@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* global jest */
@@ -14,12 +15,11 @@ import moment from 'moment';
 import { Moment } from 'moment-timezone';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
 import {
-  ESFilter,
   ESSearchRequest,
   ESSearchResponse,
-} from '../../../../typings/elasticsearch';
-import { EuiThemeProvider } from '../../../observability/public';
+} from '../../../../../typings/elasticsearch';
 import { PromiseReturnType } from '../../../observability/typings/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { APMConfig } from '../../server';
@@ -120,7 +120,6 @@ interface MockSetup {
   internalClient: any;
   config: APMConfig;
   uiFilters: UIFilters;
-  esFilter: ESFilter[];
   indices: {
     /* eslint-disable @typescript-eslint/naming-convention */
     'apm_oss.sourcemapIndices': string;
@@ -181,8 +180,7 @@ export async function inspectSearchParams(
         },
       }
     ) as APMConfig,
-    uiFilters: { environment: 'test' },
-    esFilter: [{ term: { 'service.environment': 'test' } }],
+    uiFilters: {},
     indices: {
       /* eslint-disable @typescript-eslint/naming-convention */
       'apm_oss.sourcemapIndices': 'myIndex',

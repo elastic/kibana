@@ -1,11 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { LegacyAPICaller } from 'kibana/server';
-import { SearchResponse } from 'elasticsearch';
+import { ElasticsearchClient } from 'kibana/server';
 
 import {
   Filter,
@@ -33,12 +33,12 @@ interface FindListOptions {
   page: Page;
   sortField: SortFieldOrUndefined;
   sortOrder: SortOrderOrUndefined;
-  callCluster: LegacyAPICaller;
+  esClient: ElasticsearchClient;
   listIndex: string;
 }
 
 export const findList = async ({
-  callCluster,
+  esClient,
   currentIndexPosition,
   filter,
   page,
@@ -51,8 +51,8 @@ export const findList = async ({
   const query = getQueryFilter({ filter });
 
   const scroll = await scrollToStartPage({
-    callCluster,
     currentIndexPosition,
+    esClient,
     filter,
     hopSize: 100,
     index: listIndex,
@@ -63,25 +63,27 @@ export const findList = async ({
     sortOrder,
   });
 
-  const { count } = await callCluster('count', {
+  const { body: totalCount } = await esClient.count({
     body: {
+      // @ts-expect-error GetQueryFilterReturn is not compatible with QueryContainer
       query,
     },
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     index: listIndex,
   });
 
   if (scroll.validSearchAfterFound) {
-    // Note: This typing of response = await callCluster<SearchResponse<SearchEsListSchema>>
+    // Note: This typing of response = await esClient<SearchResponse<SearchEsListSchema>>
     // is because when you pass in seq_no_primary_term: true it does a "fall through" type and you have
     // to explicitly define the type <T>.
-    const response = await callCluster<SearchResponse<SearchEsListSchema>>('search', {
+    const { body: response } = await esClient.search<SearchEsListSchema>({
       body: {
+        // @ts-expect-error GetQueryFilterReturn is not compatible with QueryContainer
         query,
         search_after: scroll.searchAfter,
         sort: getSortWithTieBreaker({ sortField, sortOrder }),
       },
-      ignoreUnavailable: true,
+      ignore_unavailable: true,
       index: listIndex,
       seq_no_primary_term: true,
       size: perPage,
@@ -95,7 +97,7 @@ export const findList = async ({
       data: transformElasticToList({ response }),
       page,
       per_page: perPage,
-      total: count,
+      total: totalCount.count,
     };
   } else {
     return {
@@ -103,7 +105,7 @@ export const findList = async ({
       data: [],
       page,
       per_page: perPage,
-      total: count,
+      total: totalCount.count,
     };
   }
 };

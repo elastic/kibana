@@ -1,21 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { EuiInMemoryTableProps } from '@elastic/eui';
 import {
   EuiInMemoryTable,
-  EuiInMemoryTableProps,
   EuiBadge,
   EuiContextMenuItem,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiText,
 } from '@elastic/eui';
-import { AgentPolicy, PackagePolicy } from '../../../../../types';
+
+import type { AgentPolicy, PackagePolicy } from '../../../../../types';
 import { PackageIcon, ContextMenuActions } from '../../../../../components';
 import { PackagePolicyDeleteProvider, DangerEuiContextMenuItem } from '../../../components';
 import { useCapabilities, useLink } from '../../../../../hooks';
@@ -130,6 +134,17 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                 </EuiFlexItem>
               )}
               <EuiFlexItem grow={false}>{packageTitle}</EuiFlexItem>
+              {packagePolicy.package && (
+                <EuiFlexItem grow={false}>
+                  <EuiText color="subdued" size="xs" className="eui-textNoWrap">
+                    <FormattedMessage
+                      id="xpack.fleet.policyDetails.packagePoliciesTable.packageVersion"
+                      defaultMessage="v{version}"
+                      values={{ version: packagePolicy.package.version }}
+                    />
+                  </EuiText>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           );
         },

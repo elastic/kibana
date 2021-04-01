@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isArray } from 'lodash';
@@ -22,6 +23,23 @@ export const queryTotalGroupings = async (
     return Promise.resolve(0);
   }
 
+  let filters: Array<Record<string, any>> = [
+    {
+      range: {
+        [options.timerange.field]: {
+          gte: options.timerange.from,
+          lte: options.timerange.to,
+          format: 'epoch_millis',
+        },
+      },
+    },
+    ...options.groupBy.map((field) => ({ exists: { field } })),
+  ];
+
+  if (options.filters) {
+    filters = [...filters, ...options.filters];
+  }
+
   const params = {
     allowNoIndices: true,
     ignoreUnavailable: true,
@@ -30,18 +48,7 @@ export const queryTotalGroupings = async (
       size: 0,
       query: {
         bool: {
-          filter: [
-            {
-              range: {
-                [options.timerange.field]: {
-                  gte: options.timerange.from,
-                  lte: options.timerange.to,
-                  format: 'epoch_millis',
-                },
-              },
-            },
-            ...options.groupBy.map((field) => ({ exists: { field } })),
-          ],
+          filter: filters,
         },
       },
       aggs: {

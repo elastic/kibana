@@ -1,12 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React from 'react';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
-import { Agent } from '../../../types';
+
+import type { Agent } from '../../../types';
 
 interface Props {
   agent: Agent;

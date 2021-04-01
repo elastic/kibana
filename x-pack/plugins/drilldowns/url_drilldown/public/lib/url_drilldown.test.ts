@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { IExternalUrl } from 'src/core/public';
+import { uiSettingsServiceMock } from 'src/core/public/mocks';
 import { UrlDrilldown, ActionContext, Config } from './url_drilldown';
 import { IEmbeddable, VALUE_CLICK_TRIGGER } from '../../../../../../src/plugins/embeddable/public';
 import { DatatableColumnType } from '../../../../../../src/plugins/expressions/common';
@@ -73,6 +75,7 @@ const createDrilldown = (isExternalUrlValid: boolean = true) => {
     getSyntaxHelpDocsLink: () => 'http://localhost:5601/docs',
     getVariablesHelpDocsLink: () => 'http://localhost:5601/docs',
     navigateToUrl: mockNavigateToUrl,
+    uiSettings: uiSettingsServiceMock.createSetupContract(),
   });
   return drilldown;
 };
@@ -407,7 +410,7 @@ describe('UrlDrilldown', () => {
         ];
 
         for (const expectedItem of expectedList) {
-          expect(list.includes(expectedItem)).toBe(true);
+          expect(!!list.find(({ label }) => label === expectedItem)).toBe(true);
         }
       });
 
@@ -437,7 +440,7 @@ describe('UrlDrilldown', () => {
         ];
 
         for (const expectedItem of expectedList) {
-          expect(list.includes(expectedItem)).toBe(true);
+          expect(!!list.find(({ label }) => label === expectedItem)).toBe(true);
         }
       });
     });

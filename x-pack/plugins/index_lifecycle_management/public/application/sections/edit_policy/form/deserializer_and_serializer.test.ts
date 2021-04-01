@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { setAutoFreeze } from 'immer';
 import { cloneDeep } from 'lodash';
 import { SerializedPolicy } from '../../../../../common/types';
 import { defaultRolloverAction } from '../../../constants';
-import { deserializer } from './deserializer';
+import { createDeserializer } from './deserializer';
 import { createSerializer } from './serializer';
 import { FormInternal } from '../types';
 
@@ -16,6 +17,8 @@ const isObject = (v: unknown): v is { [key: string]: any } =>
   Object.prototype.toString.call(v) === '[object Object]';
 
 const unknownValue = { some: 'value' };
+
+const deserializer = createDeserializer(false);
 
 const populateWithUnknownEntries = (v: unknown) => {
   if (isObject(v)) {
@@ -258,15 +261,6 @@ describe('deserializer and serializer', () => {
     expect(result.phases.hot!.actions.rollover).toBeUndefined();
     expect(result.phases.hot!.actions.forcemerge).toBeUndefined();
     expect(result.phases.hot!.actions.readonly).toBeUndefined();
-  });
-
-  it('removes min_age from warm when rollover is enabled', () => {
-    formInternal._meta.hot.customRollover.enabled = true;
-    formInternal._meta.warm.warmPhaseOnRollover = true;
-
-    const result = serializer(formInternal);
-
-    expect(result.phases.warm!.min_age).toBeUndefined();
   });
 
   it('adds default rollover configuration when enabled, but previously not configured', () => {

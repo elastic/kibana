@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -16,11 +18,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { AgentPolicy, PackageInfo, PackagePolicy, NewPackagePolicy } from '../../../types';
+
+import type { AgentPolicy, PackageInfo, PackagePolicy, NewPackagePolicy } from '../../../types';
 import { packageToPackagePolicyInputs } from '../../../services';
 import { Loading } from '../../../components';
-import { PackagePolicyValidationResults } from './services';
 import { pkgKeyFromPackageInfo } from '../../../services/pkg_key_from_package_info';
+
+import type { PackagePolicyValidationResults } from './services';
 
 export const StepDefinePackagePolicy: React.FunctionComponent<{
   agentPolicy: AgentPolicy;
@@ -45,7 +49,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
       const pkgPoliciesWithMatchingNames = (agentPolicy.package_policies as PackagePolicy[])
         .filter((ds) => Boolean(ds.name.match(pkgPoliciesNamePattern)))
         .map((ds) => parseInt(ds.name.match(pkgPoliciesNamePattern)![1], 10))
-        .sort();
+        .sort((a, b) => a - b);
 
       updatePackagePolicy({
         // FIXME: Improve package policies name uniqueness - https://github.com/elastic/kibana/issues/72948

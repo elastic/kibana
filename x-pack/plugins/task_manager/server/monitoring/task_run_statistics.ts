@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { combineLatest, merge, Observable, of } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 import { filter, startWith, map } from 'rxjs/operators';
 import { JsonObject } from 'src/plugins/kibana_utils/common';
 import { isNumber, mapValues } from 'lodash';
@@ -18,6 +19,7 @@ import {
   RanTask,
   TaskTiming,
   isTaskManagerStatEvent,
+  TaskManagerStat,
 } from '../task_events';
 import { isOk, Ok, unwrap } from '../lib/result_type';
 import { ConcreteTaskInstance } from '../task';
@@ -38,6 +40,7 @@ interface FillPoolStat extends JsonObject {
   last_successful_poll: string;
   last_polling_delay: string;
   duration: number[];
+  claim_duration: number[];
   claim_conflicts: number[];
   claim_mismatches: number[];
   result_frequency_percent_as_number: FillPoolResult[];
@@ -50,6 +53,7 @@ interface ExecutionStat extends JsonObject {
 
 export interface TaskRunStat extends JsonObject {
   drift: number[];
+  drift_by_type: Record<string, number[]>;
   load: number[];
   execution: ExecutionStat;
   polling: Omit<FillPoolStat, 'last_successful_poll' | 'last_polling_delay'> &
@@ -124,6 +128,7 @@ export function createTaskRunAggregator(
 
   const resultFrequencyQueue = createRunningAveragedStat<FillPoolResult>(runningAverageWindowSize);
   const pollingDurationQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
+  const claimDurationQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
   const claimConflictsQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
   const claimMismatchesQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
   const taskPollingEvents$: Observable<Pick<TaskRunStat, 'polling'>> = combineLatest([
@@ -160,24 +165,33 @@ export function createTaskRunAggregator(
       })
     ),
     // get DateTime of latest polling delay refresh
-    merge(
-      /**
-       * as `combineLatest` hangs until it has its first value and we're not likely to reconfigure the delay in normal deployments, we needed some initial value.
-        I've used _now_ (`new Date().toISOString()`) as it made the most sense (it would be the time Kibana started), but it _could_ be confusing in the future.
-       */
-      of(new Date().toISOString()),
-      taskPollingLifecycle.events.pipe(
-        filter(
-          (taskEvent: TaskLifecycleEvent) =>
-            isTaskManagerStatEvent(taskEvent) && taskEvent.id === 'pollingDelay'
-        ),
-        map(() => new Date().toISOString())
-      )
+    taskPollingLifecycle.events.pipe(
+      filter(
+        (taskEvent: TaskLifecycleEvent) =>
+          isTaskManagerStatEvent(taskEvent) && taskEvent.id === 'pollingDelay'
+      ),
+      map(() => new Date().toISOString())
+    ),
+    // get duration of task claim stage in polling
+    taskPollingLifecycle.events.pipe(
+      filter(
+        (taskEvent: TaskLifecycleEvent) =>
+          isTaskManagerStatEvent(taskEvent) &&
+          taskEvent.id === 'claimDuration' &&
+          isOk(taskEvent.event)
+      ),
+      map((claimDurationEvent) => {
+        const duration = ((claimDurationEvent as TaskManagerStat).event as Ok<number>).value;
+        return {
+          claimDuration: duration ? claimDurationQueue(duration) : claimDurationQueue(),
+        };
+      })
     ),
   ]).pipe(
-    map(([{ polling }, pollingDelay]) => ({
+    map(([{ polling }, pollingDelay, { claimDuration }]) => ({
       polling: {
         last_polling_delay: pollingDelay,
+        claim_duration: claimDuration,
         ...polling,
       },
     }))
@@ -185,13 +199,18 @@ export function createTaskRunAggregator(
 
   return combineLatest([
     taskRunEvents$.pipe(
-      startWith({ drift: [], execution: { duration: {}, result_frequency_percent_as_number: {} } })
+      startWith({
+        drift: [],
+        drift_by_type: {},
+        execution: { duration: {}, result_frequency_percent_as_number: {} },
+      })
     ),
     taskManagerLoadStatEvents$.pipe(startWith({ load: [] })),
     taskPollingEvents$.pipe(
       startWith({
         polling: {
           duration: [],
+          claim_duration: [],
           claim_conflicts: [],
           claim_mismatches: [],
           result_frequency_percent_as_number: [],
@@ -224,6 +243,7 @@ function hasTiming(taskEvent: TaskLifecycleEvent) {
 
 function createTaskRunEventToStat(runningAverageWindowSize: number) {
   const driftQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
+  const driftByTaskQueue = createMapOfRunningAveragedStats<number>(runningAverageWindowSize);
   const taskRunDurationQueue = createMapOfRunningAveragedStats<number>(runningAverageWindowSize);
   const resultFrequencyQueue = createMapOfRunningAveragedStats<TaskRunResult>(
     runningAverageWindowSize
@@ -232,13 +252,17 @@ function createTaskRunEventToStat(runningAverageWindowSize: number) {
     task: ConcreteTaskInstance,
     timing: TaskTiming,
     result: TaskRunResult
-  ): Omit<TaskRunStat, 'polling'> => ({
-    drift: driftQueue(timing!.start - task.runAt.getTime()),
-    execution: {
-      duration: taskRunDurationQueue(task.taskType, timing!.stop - timing!.start),
-      result_frequency_percent_as_number: resultFrequencyQueue(task.taskType, result),
-    },
-  });
+  ): Omit<TaskRunStat, 'polling'> => {
+    const drift = timing!.start - task.runAt.getTime();
+    return {
+      drift: driftQueue(drift),
+      drift_by_type: driftByTaskQueue(task.taskType, drift),
+      execution: {
+        duration: taskRunDurationQueue(task.taskType, timing!.stop - timing!.start),
+        result_frequency_percent_as_number: resultFrequencyQueue(task.taskType, result),
+      },
+    };
+  };
 }
 
 const DEFAULT_TASK_RUN_FREQUENCIES = {
@@ -264,11 +288,15 @@ export function summarizeTaskRunStat(
       // eslint-disable-next-line @typescript-eslint/naming-convention
       last_polling_delay,
       duration: pollingDuration,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      claim_duration,
       result_frequency_percent_as_number: pollingResultFrequency,
       claim_conflicts: claimConflicts,
       claim_mismatches: claimMismatches,
     },
     drift,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    drift_by_type,
     load,
     execution: { duration, result_frequency_percent_as_number: executionResultFrequency },
   }: TaskRunStat,
@@ -279,6 +307,9 @@ export function summarizeTaskRunStat(
       polling: {
         ...(last_successful_poll ? { last_successful_poll } : {}),
         ...(last_polling_delay ? { last_polling_delay } : {}),
+        ...(claim_duration
+          ? { claim_duration: calculateRunningAverage(claim_duration as number[]) }
+          : {}),
         duration: calculateRunningAverage(pollingDuration as number[]),
         claim_conflicts: calculateRunningAverage(claimConflicts as number[]),
         claim_mismatches: calculateRunningAverage(claimMismatches as number[]),
@@ -288,6 +319,7 @@ export function summarizeTaskRunStat(
         },
       },
       drift: calculateRunningAverage(drift),
+      drift_by_type: mapValues(drift_by_type, (typedDrift) => calculateRunningAverage(typedDrift)),
       load: calculateRunningAverage(load),
       execution: {
         duration: mapValues(duration, (typedDurations) => calculateRunningAverage(typedDurations)),

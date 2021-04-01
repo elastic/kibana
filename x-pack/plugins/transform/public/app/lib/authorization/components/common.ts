@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
 
 import { Privileges } from '../../../../../common/types/privileges';
+import { isPopulatedObject } from '../../../../../common/shared_imports';
 
 export interface Capabilities {
   canGetTransform: boolean;
@@ -18,13 +20,10 @@ export interface Capabilities {
 
 export type Privilege = [string, string];
 
-function isPrivileges(arg: any): arg is Privileges {
+function isPrivileges(arg: unknown): arg is Privileges {
   return (
-    typeof arg === 'object' &&
-    arg !== null &&
-    arg.hasOwnProperty('hasAllPrivileges') &&
+    isPopulatedObject(arg, ['hasAllPrivileges', 'missingPrivileges']) &&
     typeof arg.hasAllPrivileges === 'boolean' &&
-    arg.hasOwnProperty('missingPrivileges') &&
     typeof arg.missingPrivileges === 'object' &&
     arg.missingPrivileges !== null
   );
@@ -57,7 +56,9 @@ export const hasPrivilegeFactory = (privileges: Privileges | undefined | null) =
 
 // create the text for button's tooltips if the user
 // doesn't have the permission to press that button
-export function createCapabilityFailureMessage(capability: keyof Capabilities) {
+export function createCapabilityFailureMessage(
+  capability: keyof Capabilities | 'noTransformNodes'
+) {
   let message = '';
 
   switch (capability) {
@@ -77,6 +78,12 @@ export function createCapabilityFailureMessage(capability: keyof Capabilities) {
     case 'canDeleteTransform':
       message = i18n.translate('xpack.transform.capability.noPermission.deleteTransformTooltip', {
         defaultMessage: 'You do not have permission to delete transforms.',
+      });
+      break;
+
+    case 'noTransformNodes':
+      message = i18n.translate('xpack.transform.capability.noPermission.noTransformNodesTooltip', {
+        defaultMessage: 'There are no transform nodes available.',
       });
       break;
   }

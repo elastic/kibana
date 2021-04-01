@@ -1,29 +1,17 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { readFileSync } from 'fs';
 import { basename, dirname, relative, resolve } from 'path';
-
+import { memoize } from 'lodash';
 import { IMinimatch, Minimatch } from 'minimatch';
-import { parseConfigFileTextToJson } from 'typescript';
-
 import { REPO_ROOT } from '@kbn/utils';
+
+import { parseTsConfig } from './ts_configfile';
 
 function makeMatchers(directory: string, patterns: string[]) {
   return patterns.map(
@@ -34,19 +22,13 @@ function makeMatchers(directory: string, patterns: string[]) {
   );
 }
 
-function parseTsConfig(path: string) {
-  const { error, config } = parseConfigFileTextToJson(path, readFileSync(path, 'utf8'));
-
-  if (error) {
-    throw error;
-  }
-
-  return config;
-}
-
 function testMatchers(matchers: IMinimatch[], path: string) {
   return matchers.some((matcher) => matcher.match(path));
 }
+
+const parentProjectFactory = memoize(function (parentConfigPath: string) {
+  return new Project(parentConfigPath);
+});
 
 export class Project {
   public directory: string;
@@ -56,6 +38,7 @@ export class Project {
 
   private readonly include: IMinimatch[];
   private readonly exclude: IMinimatch[];
+  private readonly parent?: Project;
 
   constructor(
     public tsConfigPath: string,
@@ -63,15 +46,16 @@ export class Project {
   ) {
     this.config = parseTsConfig(tsConfigPath);
 
-    const { files, include, exclude = [] } = this.config as {
+    const { files, include, exclude = [], extends: extendsPath } = this.config as {
       files?: string[];
       include?: string[];
       exclude?: string[];
+      extends?: string;
     };
 
     if (files || !include) {
       throw new Error(
-        'tsconfig.json files in the Kibana repo must use "include" keys and not "files"'
+        `[${tsConfigPath}]: tsconfig.json files in the Kibana repo must use "include" keys and not "files"`
       );
     }
 
@@ -80,9 +64,30 @@ export class Project {
     this.name = options.name || relative(REPO_ROOT, this.directory) || basename(this.directory);
     this.include = makeMatchers(this.directory, include);
     this.exclude = makeMatchers(this.directory, exclude);
+
+    if (extendsPath !== undefined) {
+      const parentConfigPath = resolve(this.directory, extendsPath);
+      this.parent = parentProjectFactory(parentConfigPath);
+    }
   }
 
-  public isAbsolutePathSelected(path: string) {
-    return testMatchers(this.exclude, path) ? false : testMatchers(this.include, path);
+  public isAbsolutePathSelected(path: string): boolean {
+    return this.isExcluded(path) ? false : this.isIncluded(path);
+  }
+
+  public isExcluded(path: string): boolean {
+    if (testMatchers(this.exclude, path)) return true;
+    if (this.parent) {
+      return this.parent.isExcluded(path);
+    }
+    return false;
+  }
+
+  public isIncluded(path: string): boolean {
+    if (testMatchers(this.include, path)) return true;
+    if (this.parent) {
+      return this.parent.isIncluded(path);
+    }
+    return false;
   }
 }

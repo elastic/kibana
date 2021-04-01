@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
 import {
   fetchObservabilityOverviewPageData,
-  hasData,
+  getHasData,
 } from './apm_observability_overview_fetchers';
 import * as createCallApmApi from './createCallApmApi';
 
@@ -30,12 +31,12 @@ describe('Observability dashboard data', () => {
   describe('hasData', () => {
     it('returns false when no data is available', async () => {
       callApmApiMock.mockImplementation(() => Promise.resolve(false));
-      const response = await hasData();
+      const response = await getHasData();
       expect(response).toBeFalsy();
     });
     it('returns true when data is available', async () => {
-      callApmApiMock.mockImplementation(() => Promise.resolve(true));
-      const response = await hasData();
+      callApmApiMock.mockResolvedValue({ hasData: true });
+      const response = await getHasData();
       expect(response).toBeTruthy();
     });
   });

@@ -1,17 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
-import { Type } from '@kbn/config-schema';
-import { kibanaResponseFactory } from '../../../../../../src/core/server';
-import { LicenseCheck } from '../../../../licensing/server';
-import { defineInvalidateApiKeysRoutes } from './invalidate';
 
-import { coreMock, httpServerMock } from '../../../../../../src/core/server/mocks';
+import type { Type } from '@kbn/config-schema';
+import { kibanaResponseFactory } from 'src/core/server';
+import { coreMock, httpServerMock } from 'src/core/server/mocks';
+
+import type { LicenseCheck } from '../../../../licensing/server';
 import { routeDefinitionParamsMock } from '../index.mock';
+import { defineInvalidateApiKeysRoutes } from './invalidate';
 
 interface TestOptions {
   licenseCheckResult?: LicenseCheck;

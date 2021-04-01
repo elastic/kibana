@@ -6,10 +6,11 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Clearing Windows Event Logs",
   "query": "event.category:process and event.type:(process_started or start) and (process.name:\"wevtutil.exe\" or process.pe.original_file_name:\"wevtutil.exe\") and process.args:(\"/e:false\" or cl or \"clear-log\") or process.name:\"powershell.exe\" and process.args:\"Clear-EventLog\"",
   "risk_score": 21,
@@ -39,6 +40,7 @@
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 6
+  "version": 8
 }

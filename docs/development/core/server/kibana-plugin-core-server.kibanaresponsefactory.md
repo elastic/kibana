@@ -10,20 +10,19 @@ Set of helpers used to create `KibanaResponse` to form HTTP response on an incom
 
 ```typescript
 kibanaResponseFactory: {
-    custom: <T extends string | Error | Buffer | Stream | Record<string, any> | {
+    custom: <T extends string | Record<string, any> | Error | Buffer | {
         message: string | Error;
         attributes?: Record<string, any> | undefined;
-    } | undefined>(options: CustomHttpResponseOptions<T>) => KibanaResponse<T>;
+    } | Stream | undefined>(options: CustomHttpResponseOptions<T>) => KibanaResponse<T>;
     badRequest: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
     unauthorized: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
     forbidden: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
     notFound: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
     conflict: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
-    internalError: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
     customError: (options: CustomHttpResponseOptions<ResponseError>) => KibanaResponse<ResponseError>;
-    redirected: (options: RedirectResponseOptions) => KibanaResponse<string | Buffer | Stream | Record<string, any>>;
-    ok: (options?: HttpResponseOptions) => KibanaResponse<string | Buffer | Stream | Record<string, any>>;
-    accepted: (options?: HttpResponseOptions) => KibanaResponse<string | Buffer | Stream | Record<string, any>>;
+    redirected: (options: RedirectResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
+    ok: (options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
+    accepted: (options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
     noContent: (options?: HttpResponseOptions) => KibanaResponse<undefined>;
 }
 ```

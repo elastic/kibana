@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable react/display-name */
@@ -19,14 +20,16 @@ jest.mock('../create/form_context', () => {
       onSuccess,
     }: {
       children: ReactNode;
-      onSuccess: ({ id }: { id: string }) => void;
+      onSuccess: ({ id }: { id: string }) => Promise<void>;
     }) => {
       return (
         <>
           <button
             type="button"
             data-test-subj="form-context-on-success"
-            onClick={() => onSuccess({ id: 'case-id' })}
+            onClick={async () => {
+              await onSuccess({ id: 'case-id' });
+            }}
           >
             {'submit'}
           </button>

@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { memo, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
@@ -37,6 +39,7 @@ import { TrustedAppsListPageRouteState } from '../../../../../common/endpoint/ty
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { ABOUT_TRUSTED_APPS } from './translations';
 import { EmptyState } from './components/empty_state';
+import { SearchBar } from './components/search_bar';
 
 export const TrustedAppsPage = memo(() => {
   const { state: routeState } = useLocation<TrustedAppsListPageRouteState | undefined>();
@@ -44,13 +47,20 @@ export const TrustedAppsPage = memo(() => {
   const totalItemsCount = useTrustedAppsSelector(getListTotalItemsCount);
   const isCheckingIfEntriesExists = useTrustedAppsSelector(checkingIfEntriesExist);
   const doEntriesExist = useTrustedAppsSelector(entriesExist) === true;
-  const handleAddButtonClick = useTrustedAppsNavigateCallback(() => ({ show: 'create' }));
-  const handleAddFlyoutClose = useTrustedAppsNavigateCallback(() => ({ show: undefined }));
+  const handleAddButtonClick = useTrustedAppsNavigateCallback(() => ({
+    show: 'create',
+    id: undefined,
+  }));
+  const handleAddFlyoutClose = useTrustedAppsNavigateCallback(() => ({
+    show: undefined,
+    id: undefined,
+  }));
   const handleViewTypeChange = useTrustedAppsNavigateCallback((viewType: ViewType) => ({
     view_type: viewType,
   }));
+  const handleOnSearch = useTrustedAppsNavigateCallback((query: string) => ({ filter: query }));
 
-  const showCreateFlyout = location.show === 'create';
+  const showCreateFlyout = !!location.show;
 
   const backButton = useMemo(() => {
     if (routeState && routeState.onBackButtonNavigateTo) {
@@ -86,12 +96,14 @@ export const TrustedAppsPage = memo(() => {
         />
       )}
 
+      <SearchBar defaultValue={location.filter} onSearch={handleOnSearch} />
       {doEntriesExist ? (
         <EuiFlexGroup
           direction="column"
           gutterSize="none"
           data-test-subj="trustedAppsListPageContent"
         >
+          <EuiSpacer size="m" />
           <EuiFlexItem grow={false}>
             <ControlPanel
               totalItemCount={totalItemsCount}

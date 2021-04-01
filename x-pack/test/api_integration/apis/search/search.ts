@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { verifyErrorResponse } from '../../../../../test/api_integration/apis/search/verify_error';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -90,6 +92,23 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resp2.body.isRunning).to.be(false);
       });
 
+      it('should fail without kbn-xref header', async () => {
+        const resp = await supertest
+          .post(`/internal/search/ese`)
+          .send({
+            params: {
+              body: {
+                query: {
+                  match_all: {},
+                },
+              },
+            },
+          })
+          .expect(400);
+
+        verifyErrorResponse(resp.body, 400, 'Request must contain a kbn-xsrf header.');
+      });
+
       it('should return 400 when unknown index type is provided', async () => {
         const resp = await supertest
           .post(`/internal/search/ese`)
@@ -106,7 +125,7 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(400);
 
-        expect(resp.body.message).to.contain('Unknown indexType');
+        verifyErrorResponse(resp.body, 400, 'Unknown indexType');
       });
 
       it('should return 400 if invalid id is provided', async () => {
@@ -124,7 +143,7 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(400);
 
-        expect(resp.body.message).to.contain('illegal_argument_exception');
+        verifyErrorResponse(resp.body, 400, 'illegal_argument_exception', true);
       });
 
       it('should return 404 if unkown id is provided', async () => {
@@ -143,12 +162,11 @@ export default function ({ getService }: FtrProviderContext) {
             },
           })
           .expect(404);
-
-        expect(resp.body.message).to.contain('resource_not_found_exception');
+        verifyErrorResponse(resp.body, 404, 'resource_not_found_exception', true);
       });
 
       it('should return 400 with a bad body', async () => {
-        await supertest
+        const resp = await supertest
           .post(`/internal/search/ese`)
           .set('kbn-xsrf', 'foo')
           .send({
@@ -160,6 +178,8 @@ export default function ({ getService }: FtrProviderContext) {
             },
           })
           .expect(400);
+
+        verifyErrorResponse(resp.body, 400, 'parsing_exception', true);
       });
     });
 
@@ -186,8 +206,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           })
           .expect(400);
-
-        expect(resp.body.message).to.contain('illegal_argument_exception');
+        verifyErrorResponse(resp.body, 400, 'illegal_argument_exception', true);
       });
 
       it('should return 400 if rollup search is without non-existent index', async () => {
@@ -207,7 +226,7 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(400);
 
-        expect(resp.body.message).to.contain('illegal_argument_exception');
+        verifyErrorResponse(resp.body, 400, 'illegal_argument_exception', true);
       });
 
       it('should rollup search', async () => {
@@ -241,7 +260,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .send()
           .expect(400);
-        expect(resp.body.message).to.contain('illegal_argument_exception');
+        verifyErrorResponse(resp.body, 400, 'illegal_argument_exception', true);
       });
 
       it('should delete a search', async () => {

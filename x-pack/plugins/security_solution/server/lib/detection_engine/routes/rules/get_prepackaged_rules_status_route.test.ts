@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { getPrepackagedRulesStatusRoute } from './get_prepackaged_rules_status_route';
@@ -14,11 +15,11 @@ import {
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, createMockConfig } from '../__mocks__';
 import { SecurityPluginSetup } from '../../../../../../security/server';
-import { checkTimelinesStatus } from '../../../timeline/routes/utils/check_timelines_status';
+import { checkTimelinesStatus } from '../../../timeline/utils/check_timelines_status';
 import {
   mockCheckTimelinesStatusBeforeInstallResult,
   mockCheckTimelinesStatusAfterInstallResult,
-} from '../../../timeline/routes/__mocks__/import_timelines';
+} from '../../../timeline/__mocks__/import_timelines';
 
 jest.mock('../../rules/get_prepackaged_rules', () => {
   return {
@@ -43,8 +44,10 @@ jest.mock('../../rules/get_prepackaged_rules', () => {
   };
 });
 
-jest.mock('../../../timeline/routes/utils/check_timelines_status', () => {
+jest.mock('../../../timeline/utils/check_timelines_status', () => {
+  const actual = jest.requireActual('../../../timeline/utils/check_timelines_status');
   return {
+    ...actual,
     checkTimelinesStatus: jest.fn(),
   };
 });

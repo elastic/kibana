@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { checkPermission } from '../../../../capabilities/check_capabilities';
@@ -16,7 +17,8 @@ export function actionsMenuContent(
   showEditJobFlyout,
   showDeleteJobModal,
   showStartDatafeedModal,
-  refreshJobs
+  refreshJobs,
+  showCreateAlertFlyout
 ) {
   const canCreateJob = checkPermission('canCreateJob') && mlNodesAvailable();
   const canUpdateJob = checkPermission('canUpdateJob');
@@ -24,6 +26,7 @@ export function actionsMenuContent(
   const canUpdateDatafeed = checkPermission('canUpdateDatafeed');
   const canStartStopDatafeed = checkPermission('canStartStopDatafeed') && mlNodesAvailable();
   const canCloseJob = checkPermission('canCloseJob') && mlNodesAvailable();
+  const canCreateMlAlerts = checkPermission('canCreateMlAlerts');
 
   return [
     {
@@ -57,6 +60,22 @@ export function actionsMenuContent(
         closeMenu(true);
       },
       'data-test-subj': 'mlActionButtonStopDatafeed',
+    },
+    {
+      name: i18n.translate('xpack.ml.jobsList.managementActions.createAlertLabel', {
+        defaultMessage: 'Create alert',
+      }),
+      description: i18n.translate('xpack.ml.jobsList.managementActions.createAlertLabel', {
+        defaultMessage: 'Create alert',
+      }),
+      icon: 'bell',
+      enabled: (item) => item.deleting !== true,
+      available: () => canCreateMlAlerts,
+      onClick: (item) => {
+        showCreateAlertFlyout([item.id]);
+        closeMenu(true);
+      },
+      'data-test-subj': 'mlActionButtonCreateAlert',
     },
     {
       name: i18n.translate('xpack.ml.jobsList.managementActions.closeJobLabel', {

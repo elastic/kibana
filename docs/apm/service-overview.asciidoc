@@ -17,10 +17,10 @@ Response times for the service. You can filter the *Latency* chart to display th
 image::apm/images/latency.png[Service latency]
 
 [discrete]
-[[service-traffic-transactions]]
-=== Traffic and transactions
+[[service-throughput-transactions]]
+=== Throughput and transactions
 
-The *Traffic* chart visualizes the average number of transactions per minute for the selected service.
+The *Throughput* chart visualizes the average number of transactions per minute for the selected service.
 
 The *Transactions* table displays a list of _transaction groups_ for the
 selected service and includes the latency, traffic, error rate, and the impact for each transaction.
@@ -38,6 +38,8 @@ image::apm/images/traffic-transactions.png[Traffic and transactions]
 === Error rate and errors
 
 The *Error rate* chart displays the average error rates relating to the service, within a specific time range.
+An HTTP response code greater than 400 does not necessarily indicate a failed transaction.
+<<transaction-error-rate,Learn more>>.
 
 The *Errors* table provides a high-level view of each error message when it first and last occurred,
 along with the total number of occurrences. This makes it very easy to quickly see which errors affect
@@ -62,6 +64,9 @@ each dependency. By default, dependencies are sorted by _Impact_ to show the mos
 If there is a particular dependency you are interested in, click *View service map* to view the related
 <<service-maps, service map>>.
 
+NOTE: Displaying dependencies for services instrumented with the Real User Monitoring (RUM) agent
+requires an agent version ≥ v5.6.3.
+
 [role="screenshot"]
 image::apm/images/spans-dependencies.png[Span type duration and dependencies]
 
@@ -71,7 +76,7 @@ image::apm/images/spans-dependencies.png[Span type duration and dependencies]
 
 The *All instances* table displays a list of all the available service instances within the selected time range.
 Depending on how the service runs, the instance could be a host or a container. The table displays latency, traffic,
-errors, CPU usage, and memory usage for each instance. By default, instances are sorted by _Traffic_.
+errors, CPU usage, and memory usage for each instance. By default, instances are sorted by _Throughput_.
 
 [role="screenshot"]
 image::apm/images/all-instances.png[All instances]

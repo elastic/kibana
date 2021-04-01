@@ -68,10 +68,10 @@ exports[`#get correctly handles silent logging config. 1`] = `
 Object {
   "appenders": Object {
     "default": Object {
-      "kind": "legacy-appender",
       "legacyLoggingConfig": Object {
         "silent": true,
       },
+      "type": "legacy-appender",
     },
   },
   "loggers": undefined,
@@ -85,12 +85,12 @@ exports[`#get correctly handles verbose file logging config with json format. 1`
 Object {
   "appenders": Object {
     "default": Object {
-      "kind": "legacy-appender",
       "legacyLoggingConfig": Object {
         "dest": "/some/path.log",
         "json": true,
         "verbose": true,
       },
+      "type": "legacy-appender",
     },
   },
   "loggers": undefined,

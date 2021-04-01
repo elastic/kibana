@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import type { RequestParams } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import * as rt from 'io-ts';
 import { jsonArrayRT } from '../../../../common/typed_json';
 import {
@@ -17,7 +18,7 @@ export const createGetLogEntryQuery = (
   logEntryId: string,
   timestampField: string,
   tiebreakerField: string
-): RequestParams.AsyncSearchSubmit<Record<string, any>> => ({
+): estypes.AsyncSearchSubmitRequest => ({
   index: logEntryIndex,
   terminate_after: 1,
   track_scores: false,
@@ -29,6 +30,7 @@ export const createGetLogEntryQuery = (
         values: [logEntryId],
       },
     },
+    // @ts-expect-error @elastic/elasticsearch doesn't declare body.fields on AsyncSearchSubmitRequest
     fields: ['*'],
     sort: [{ [timestampField]: 'desc' }, { [tiebreakerField]: 'desc' }],
     _source: false,
@@ -38,8 +40,10 @@ export const createGetLogEntryQuery = (
 export const logEntryHitRT = rt.intersection([
   commonHitFieldsRT,
   rt.type({
-    fields: rt.record(rt.string, jsonArrayRT),
     sort: rt.tuple([rt.number, rt.number]),
+  }),
+  rt.partial({
+    fields: rt.record(rt.string, jsonArrayRT),
   }),
 ]);
 

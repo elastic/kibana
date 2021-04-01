@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { buildThreatMappingFilter } from './build_threat_mapping_filter';
@@ -12,7 +13,9 @@ import { CreateThreatSignalOptions } from './types';
 import { SearchAfterAndBulkCreateReturnType } from '../types';
 
 export const createThreatSignal = async ({
+  tuples,
   threatMapping,
+  threatEnrichment,
   query,
   inputIndex,
   type,
@@ -21,8 +24,6 @@ export const createThreatSignal = async ({
   savedId,
   services,
   exceptionItems,
-  gap,
-  previousStartedAt,
   listClient,
   logger,
   eventsTelemetry,
@@ -76,9 +77,9 @@ export const createThreatSignal = async ({
         `${threatFilter.query.bool.should.length} indicator items are being checked for existence of matches`
       )
     );
+
     const result = await searchAfterAndBulkCreate({
-      gap,
-      previousStartedAt,
+      tuples,
       listClient,
       exceptionsList: exceptionItems,
       ruleParams: params,
@@ -102,6 +103,7 @@ export const createThreatSignal = async ({
       tags,
       throttle,
       buildRuleMessage,
+      enrichment: threatEnrichment,
     });
     logger.debug(
       buildRuleMessage(

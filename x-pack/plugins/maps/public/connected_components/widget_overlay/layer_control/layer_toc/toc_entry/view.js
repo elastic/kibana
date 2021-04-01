@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import classNames from 'classnames';
 
-import { EuiIcon, EuiOverlayMask, EuiButtonIcon, EuiConfirmModal } from '@elastic/eui';
+import { EuiIcon, EuiButtonIcon, EuiConfirmModal } from '@elastic/eui';
 import { TOCEntryActionsPopover } from './toc_entry_actions_popover';
 import { i18n } from '@kbn/i18n';
 
@@ -99,20 +100,18 @@ export class TOCEntry extends React.Component {
     };
 
     return (
-      <EuiOverlayMask>
-        <EuiConfirmModal
-          title="Discard changes"
-          onCancel={closeModal}
-          onConfirm={openPanel}
-          cancelButtonText="Do not proceed"
-          confirmButtonText="Proceed and discard changes"
-          buttonColor="danger"
-          defaultFocusedButton="cancel"
-        >
-          <p>There are unsaved changes to your layer.</p>
-          <p>Are you sure you want to proceed?</p>
-        </EuiConfirmModal>
-      </EuiOverlayMask>
+      <EuiConfirmModal
+        title="Discard changes"
+        onCancel={closeModal}
+        onConfirm={openPanel}
+        cancelButtonText="Do not proceed"
+        confirmButtonText="Proceed and discard changes"
+        buttonColor="danger"
+        defaultFocusedButton="cancel"
+      >
+        <p>There are unsaved changes to your layer.</p>
+        <p>Are you sure you want to proceed?</p>
+      </EuiConfirmModal>
     );
   }
 

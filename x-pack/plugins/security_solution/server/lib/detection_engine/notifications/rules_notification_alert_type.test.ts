@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { loggingSystemMock } from 'src/core/server/mocks';
 import { getResult } from '../routes/__mocks__/request_responses';
 import { rulesNotificationAlertType } from './rules_notification_alert_type';
 import { buildSignalsSearchQuery } from './build_signals_query';
-import { alertsMock, AlertServicesMock } from '../../../../../alerts/server/mocks';
+import { alertsMock, AlertServicesMock } from '../../../../../alerting/server/mocks';
 import { NotificationExecutorOptions } from './types';
 import {
   sampleDocSearchResultsNoSortIdNoVersion,
@@ -16,6 +17,8 @@ import {
   sampleEmptyDocSearchResults,
 } from '../signals/__mocks__/es_results';
 import { DEFAULT_RULE_NOTIFICATION_QUERY_SIZE } from '../../../../common/constants';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 jest.mock('./build_signals_query');
 
 describe('rules_notification_alert_type', () => {
@@ -69,7 +72,11 @@ describe('rules_notification_alert_type', () => {
         references: [],
         attributes: ruleAlert,
       });
-      alertServices.callCluster.mockResolvedValue(sampleDocSearchResultsWithSortId());
+      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(
+          sampleDocSearchResultsWithSortId()
+        )
+      );
 
       await alert.executor(payload);
 
@@ -93,7 +100,11 @@ describe('rules_notification_alert_type', () => {
         references: [],
         attributes: ruleAlert,
       });
-      alertServices.callCluster.mockResolvedValue(sampleDocSearchResultsWithSortId());
+      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(
+          sampleDocSearchResultsWithSortId()
+        )
+      );
 
       await alert.executor(payload);
       expect(alertServices.alertInstanceFactory).toHaveBeenCalled();
@@ -117,7 +128,11 @@ describe('rules_notification_alert_type', () => {
         references: [],
         attributes: ruleAlert,
       });
-      alertServices.callCluster.mockResolvedValue(sampleDocSearchResultsWithSortId());
+      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(
+          sampleDocSearchResultsWithSortId()
+        )
+      );
       await alert.executor(payload);
       expect(alertServices.alertInstanceFactory).toHaveBeenCalled();
 
@@ -142,7 +157,11 @@ describe('rules_notification_alert_type', () => {
         references: [],
         attributes: ruleAlert,
       });
-      alertServices.callCluster.mockResolvedValue(sampleDocSearchResultsWithSortId());
+      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(
+          sampleDocSearchResultsWithSortId()
+        )
+      );
       await alert.executor(payload);
       expect(alertServices.alertInstanceFactory).toHaveBeenCalled();
 
@@ -164,7 +183,9 @@ describe('rules_notification_alert_type', () => {
         references: [],
         attributes: ruleAlert,
       });
-      alertServices.callCluster.mockResolvedValue(sampleEmptyDocSearchResults());
+      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(sampleEmptyDocSearchResults())
+      );
 
       await alert.executor(payload);
 
@@ -179,7 +200,11 @@ describe('rules_notification_alert_type', () => {
         references: [],
         attributes: ruleAlert,
       });
-      alertServices.callCluster.mockResolvedValue(sampleDocSearchResultsNoSortIdNoVersion());
+      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValue(
+        elasticsearchClientMock.createSuccessTransportRequestPromise(
+          sampleDocSearchResultsNoSortIdNoVersion()
+        )
+      );
 
       await alert.executor(payload);
 

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -58,11 +59,21 @@ export const extractErrorProperties = (error: ErrorType): MLErrorObject => {
       typeof error.body.attributes === 'object' &&
       typeof error.body.attributes.body?.error?.reason === 'string'
     ) {
-      return {
+      const errObj: MLErrorObject = {
         message: error.body.attributes.body.error.reason,
         statusCode: error.body.statusCode,
         fullError: error.body.attributes.body,
       };
+      if (
+        typeof error.body.attributes.body.error.caused_by === 'object' &&
+        (typeof error.body.attributes.body.error.caused_by?.reason === 'string' ||
+          typeof error.body.attributes.body.error.caused_by?.caused_by?.reason === 'string')
+      ) {
+        errObj.causedBy =
+          error.body.attributes.body.error.caused_by?.caused_by?.reason ||
+          error.body.attributes.body.error.caused_by?.reason;
+      }
+      return errObj;
     } else {
       return {
         message: error.body.message,

@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { LicensingPluginSetup, ILicense } from '../../licensing/public';
+import { IServiceSettings, MapsEmsPluginSetup } from '../../../../src/plugins/maps_ems/public';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -15,7 +17,7 @@ import { LicensingPluginSetup, ILicense } from '../../licensing/public';
 
 export interface MapsLegacyLicensingSetupDependencies {
   licensing: LicensingPluginSetup;
-  mapsLegacy: any;
+  mapsEms: MapsEmsPluginSetup;
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MapsLegacyLicensingStartDependencies {}
@@ -26,16 +28,16 @@ export type MapsLegacyLicensingStart = ReturnType<MapsLegacyLicensing['start']>;
 export class MapsLegacyLicensing
   implements Plugin<MapsLegacyLicensingSetup, MapsLegacyLicensingStart> {
   public setup(core: CoreSetup, plugins: MapsLegacyLicensingSetupDependencies) {
-    const { licensing, mapsLegacy } = plugins;
+    const { licensing, mapsEms } = plugins;
     if (licensing) {
       licensing.license$.subscribe(async (license: ILicense) => {
-        const serviceSettings = await mapsLegacy.getServiceSettings();
+        const serviceSettings: IServiceSettings = await mapsEms.getServiceSettings();
         const { uid, isActive } = license;
         if (isActive && license.hasAtLeast('basic')) {
-          serviceSettings.setQueryParams({ license: uid });
+          serviceSettings.setQueryParams({ license: uid || '' });
           serviceSettings.disableZoomMessage();
         } else {
-          serviceSettings.setQueryParams({ license: undefined });
+          serviceSettings.setQueryParams({ license: '' });
           serviceSettings.enableZoomMessage();
         }
       });

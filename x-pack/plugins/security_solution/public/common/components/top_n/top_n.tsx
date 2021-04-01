@@ -1,11 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButtonIcon, EuiSuperSelect } from '@elastic/eui';
+import deepEqual from 'fast-deep-equal';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { GlobalTimeArgs } from '../../containers/use_global_time';
@@ -17,6 +20,8 @@ import { TimelineEventsType } from '../../../../common/types/timeline';
 
 import { TopNOption } from './helpers';
 import * as i18n from './translations';
+import { getIndicesSelector, IndicesSelector } from './selectors';
+import { State } from '../../store';
 
 const TopNContainer = styled.div`
   width: 600px;
@@ -48,7 +53,6 @@ export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery
   field: string;
   filters: Filter[];
   indexPattern: IIndexPattern;
-  indexNames: string[];
   options: TopNOption[];
   query: Query;
   setAbsoluteRangeDatePickerTarget: InputsModelId;
@@ -66,7 +70,6 @@ const TopNComponent: React.FC<Props> = ({
   field,
   from,
   indexPattern,
-  indexNames,
   options,
   query,
   setAbsoluteRangeDatePickerTarget,
@@ -79,6 +82,11 @@ const TopNComponent: React.FC<Props> = ({
   const onViewSelected = useCallback((value: string) => setView(value as TimelineEventsType), [
     setView,
   ]);
+  const indicesSelector = useMemo(getIndicesSelector, []);
+  const { all: allIndices, raw: rawIndices } = useSelector<State, IndicesSelector>(
+    (state) => indicesSelector(state),
+    deepEqual
+  );
 
   useEffect(() => {
     setView(defaultView);
@@ -115,7 +123,7 @@ const TopNComponent: React.FC<Props> = ({
             from={from}
             headerChildren={headerChildren}
             indexPattern={indexPattern}
-            indexNames={indexNames}
+            indexNames={view === 'raw' ? rawIndices : allIndices}
             onlyField={field}
             query={query}
             setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
@@ -126,6 +134,7 @@ const TopNComponent: React.FC<Props> = ({
           />
         ) : (
           <SignalsByCategory
+            combinedQueries={combinedQueries}
             filters={filters}
             from={from}
             headerChildren={headerChildren}

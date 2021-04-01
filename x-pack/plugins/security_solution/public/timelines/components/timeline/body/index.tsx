@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { noop } from 'lodash/fp';
@@ -59,6 +60,10 @@ const EXTRA_WIDTH = 4; // px
 
 export type StatefulBodyProps = OwnProps & PropsFromRedux;
 
+/**
+ * The Body component is used everywhere timeline is used within the security application. It is the highest level component
+ * that is shared across all implementations of the timeline.
+ */
 export const BodyComponent = React.memo<StatefulBodyProps>(
   ({
     activePage,

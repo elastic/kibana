@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiContextMenu, EuiContextMenuPanelDescriptor, EuiIcon, EuiPopover } from '@elastic/eui';
@@ -167,28 +168,40 @@ const ColumnHeaderComponent: React.FC<ColumneHeaderProps> = ({
               handleClosePopOverTrigger();
             },
           },
-          {
-            disabled: !header.aggregatable,
-            icon: <EuiIcon type="sortUp" size="s" />,
-            name: i18n.SORT_AZ,
-            onClick: () => {
-              onColumnSort(Direction.asc);
-              handleClosePopOverTrigger();
-            },
-          },
-          {
-            disabled: !header.aggregatable,
-            icon: <EuiIcon type="sortDown" size="s" />,
-            name: i18n.SORT_ZA,
-            onClick: () => {
-              onColumnSort(Direction.desc);
-              handleClosePopOverTrigger();
-            },
-          },
+          ...(tabType !== TimelineTabs.eql
+            ? [
+                {
+                  disabled: !header.aggregatable,
+                  icon: <EuiIcon type="sortUp" size="s" />,
+                  name: i18n.SORT_AZ,
+                  onClick: () => {
+                    onColumnSort(Direction.asc);
+                    handleClosePopOverTrigger();
+                  },
+                },
+                {
+                  disabled: !header.aggregatable,
+                  icon: <EuiIcon type="sortDown" size="s" />,
+                  name: i18n.SORT_ZA,
+                  onClick: () => {
+                    onColumnSort(Direction.desc);
+                    handleClosePopOverTrigger();
+                  },
+                },
+              ]
+            : []),
         ],
       },
     ],
-    [dispatch, handleClosePopOverTrigger, header.aggregatable, header.id, onColumnSort, timelineId]
+    [
+      dispatch,
+      handleClosePopOverTrigger,
+      header.aggregatable,
+      header.id,
+      onColumnSort,
+      tabType,
+      timelineId,
+    ]
   );
 
   const headerButton = useMemo(

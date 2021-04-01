@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
@@ -94,13 +95,13 @@ export function PageLoadDistribution() {
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <PageLoadDistChart
-        data={data}
+        data={data?.pageLoadDistribution}
         onPercentileChange={onPercentileChange}
         loading={status !== 'success'}
         breakdown={breakdown}
         percentileRange={{
-          max: percentileRange.max || data?.maxDuration,
-          min: percentileRange.min || data?.minDuration,
+          max: percentileRange.max || data?.pageLoadDistribution?.maxDuration,
+          min: percentileRange.min || data?.pageLoadDistribution?.minDuration,
         }}
       />
     </div>

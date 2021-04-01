@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { setupRequest } from './setup_request';
 import { APMConfig } from '../..';
 import { APMRequestHandlerContext } from '../../routes/typings';
@@ -31,6 +33,15 @@ jest.mock('../index_pattern/get_dynamic_index_pattern', () => ({
 }));
 
 function getMockRequest() {
+  const esClientMock = {
+    asCurrentUser: {
+      search: jest.fn().mockResolvedValue({ body: {} }),
+    },
+    asInternalUser: {
+      search: jest.fn().mockResolvedValue({ body: {} }),
+    },
+  };
+
   const mockContext = ({
     config: new Proxy(
       {},
@@ -40,17 +51,12 @@ function getMockRequest() {
     ) as APMConfig,
     params: {
       query: {
-        _debug: false,
+        _inspect: false,
       },
     },
     core: {
       elasticsearch: {
-        legacy: {
-          client: {
-            callAsCurrentUser: jest.fn(),
-            callAsInternalUser: jest.fn(),
-          },
-        },
+        client: esClientMock,
       },
       uiSettings: {
         client: {
@@ -69,12 +75,7 @@ function getMockRequest() {
   } as unknown) as APMRequestHandlerContext & {
     core: {
       elasticsearch: {
-        legacy: {
-          client: {
-            callAsCurrentUser: jest.Mock<any, any>;
-            callAsInternalUser: jest.Mock<any, any>;
-          };
-        };
+        client: typeof esClientMock;
       };
       uiSettings: {
         client: {
@@ -91,6 +92,11 @@ function getMockRequest() {
 
   const mockRequest = ({
     url: '',
+    events: {
+      aborted$: {
+        subscribe: jest.fn().mockReturnValue({ unsubscribe: jest.fn() }),
+      },
+    },
   } as unknown) as KibanaRequest;
 
   return { mockContext, mockRequest };
@@ -106,8 +112,8 @@ describe('setupRequest', () => {
         body: { foo: 'bar' },
       });
       expect(
-        mockContext.core.elasticsearch.legacy.client.callAsCurrentUser
-      ).toHaveBeenCalledWith('search', {
+        mockContext.core.elasticsearch.client.asCurrentUser.search
+      ).toHaveBeenCalledWith({
         index: ['apm-*'],
         body: {
           foo: 'bar',
@@ -133,8 +139,8 @@ describe('setupRequest', () => {
         body: { foo: 'bar' },
       } as any);
       expect(
-        mockContext.core.elasticsearch.legacy.client.callAsInternalUser
-      ).toHaveBeenCalledWith('search', {
+        mockContext.core.elasticsearch.client.asInternalUser.search
+      ).toHaveBeenCalledWith({
         index: ['apm-*'],
         body: {
           foo: 'bar',
@@ -151,16 +157,18 @@ describe('setupRequest', () => {
         apm: {
           events: [ProcessorEvent.transaction],
         },
-        body: { query: { bool: { filter: [{ term: 'someTerm' }] } } },
+        body: {
+          query: { bool: { filter: [{ term: { field: 'someTerm' } }] } },
+        },
       });
       const params =
-        mockContext.core.elasticsearch.legacy.client.callAsCurrentUser.mock
-          .calls[0][1];
+        mockContext.core.elasticsearch.client.asCurrentUser.search.mock
+          .calls[0][0];
       expect(params.body).toEqual({
         query: {
           bool: {
             filter: [
-              { term: 'someTerm' },
+              { term: { field: 'someTerm' } },
               { terms: { [PROCESSOR_EVENT]: ['transaction'] } },
               { range: { 'observer.version_major': { gte: 7 } } },
             ],
@@ -177,20 +185,22 @@ describe('setupRequest', () => {
           apm: {
             events: [ProcessorEvent.error],
           },
-          body: { query: { bool: { filter: [{ term: 'someTerm' }] } } },
+          body: {
+            query: { bool: { filter: [{ term: { field: 'someTerm' } }] } },
+          },
         },
         {
           includeLegacyData: true,
         }
       );
       const params =
-        mockContext.core.elasticsearch.legacy.client.callAsCurrentUser.mock
-          .calls[0][1];
+        mockContext.core.elasticsearch.client.asCurrentUser.search.mock
+          .calls[0][0];
       expect(params.body).toEqual({
         query: {
           bool: {
             filter: [
-              { term: 'someTerm' },
+              { term: { field: 'someTerm' } },
               {
                 terms: {
                   [PROCESSOR_EVENT]: ['error'],
@@ -214,8 +224,8 @@ describe('without a bool filter', () => {
       },
     });
     const params =
-      mockContext.core.elasticsearch.legacy.client.callAsCurrentUser.mock
-        .calls[0][1];
+      mockContext.core.elasticsearch.client.asCurrentUser.search.mock
+        .calls[0][0];
     expect(params.body).toEqual({
       query: {
         bool: {
@@ -245,8 +255,8 @@ describe('with includeFrozen=false', () => {
     });
 
     const params =
-      mockContext.core.elasticsearch.legacy.client.callAsCurrentUser.mock
-        .calls[0][1];
+      mockContext.core.elasticsearch.client.asCurrentUser.search.mock
+        .calls[0][0];
     expect(params.ignore_throttled).toBe(true);
   });
 });
@@ -265,8 +275,8 @@ describe('with includeFrozen=true', () => {
     });
 
     const params =
-      mockContext.core.elasticsearch.legacy.client.callAsCurrentUser.mock
-        .calls[0][1];
+      mockContext.core.elasticsearch.client.asCurrentUser.search.mock
+        .calls[0][0];
     expect(params.ignore_throttled).toBe(false);
   });
 });

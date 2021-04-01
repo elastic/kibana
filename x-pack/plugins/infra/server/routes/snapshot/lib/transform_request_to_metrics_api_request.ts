@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { findInventoryFields, findInventoryModel } from '../../../../common/inventory_models';
@@ -11,13 +12,14 @@ import { InfraSource } from '../../../lib/sources';
 import { createTimeRangeWithInterval } from './create_timerange_with_interval';
 import { parseFilterQuery } from '../../../utils/serialized_query';
 import { transformSnapshotMetricsToMetricsAPIMetrics } from './transform_snapshot_metrics_to_metrics_api_metrics';
-import { calculateIndexPatterBasedOnMetrics } from './calculate_index_pattern_based_on_metrics';
 import { META_KEY } from './constants';
+import { SourceOverrides } from './get_nodes';
 
 export const transformRequestToMetricsAPIRequest = async (
   client: ESSearchClient,
   source: InfraSource,
-  snapshotRequest: SnapshotRequest
+  snapshotRequest: SnapshotRequest,
+  sourceOverrides?: SourceOverrides
 ): Promise<MetricsAPIRequest> => {
   const timeRangeWithIntervalApplied = await createTimeRangeWithInterval(client, {
     ...snapshotRequest,
@@ -26,9 +28,9 @@ export const transformRequestToMetricsAPIRequest = async (
   });
 
   const metricsApiRequest: MetricsAPIRequest = {
-    indexPattern: calculateIndexPatterBasedOnMetrics(snapshotRequest, source),
+    indexPattern: sourceOverrides?.indexPattern ?? source.configuration.metricAlias,
     timerange: {
-      field: source.configuration.fields.timestamp,
+      field: sourceOverrides?.timestamp ?? source.configuration.fields.timestamp,
       from: timeRangeWithIntervalApplied.from,
       to: timeRangeWithIntervalApplied.to,
       interval: timeRangeWithIntervalApplied.interval,
@@ -73,7 +75,7 @@ export const transformRequestToMetricsAPIRequest = async (
         top_hits: {
           size: 1,
           _source: [inventoryFields.name],
-          sort: [{ [source.configuration.fields.timestamp]: 'desc' }],
+          sort: [{ [sourceOverrides?.timestamp ?? source.configuration.fields.timestamp]: 'desc' }],
         },
       },
     },

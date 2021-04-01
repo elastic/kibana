@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import React, { useCallback } from 'react';
+
+import React, { FC, useCallback } from 'react';
 
 import { AppMountParameters, CoreSetup } from 'kibana/public';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
@@ -21,7 +23,7 @@ import { App } from './app';
 import { EditorFrameStart } from '../types';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
 import { LensPluginStartDependencies } from '../plugin';
-import { LENS_EMBEDDABLE_TYPE, LENS_EDIT_BY_VALUE } from '../../common';
+import { LENS_EMBEDDABLE_TYPE, LENS_EDIT_BY_VALUE, APP_ID } from '../../common';
 import {
   LensEmbeddableInput,
   LensByReferenceInput,
@@ -39,9 +41,15 @@ export async function mountApp(
     createEditorFrame: EditorFrameStart['createInstance'];
     getByValueFeatureFlag: () => Promise<DashboardFeatureFlagConfig>;
     attributeService: () => Promise<LensAttributeService>;
+    getPresentationUtilContext: () => Promise<FC>;
   }
 ) {
-  const { createEditorFrame, getByValueFeatureFlag, attributeService } = mountProps;
+  const {
+    createEditorFrame,
+    getByValueFeatureFlag,
+    attributeService,
+    getPresentationUtilContext,
+  } = mountProps;
   const [coreStart, startDependencies] = await core.getStartServices();
   const { data, navigation, embeddable, savedObjectsTagging } = startDependencies;
 
@@ -49,7 +57,7 @@ export async function mountApp(
   const storage = new Storage(localStorage);
   const stateTransfer = embeddable?.getStateTransfer();
   const historyLocationState = params.history.location.state as HistoryLocationState;
-  const embeddableEditorIncomingState = stateTransfer?.getIncomingEditorState();
+  const embeddableEditorIncomingState = stateTransfer?.getIncomingEditorState(APP_ID);
 
   const lensServices: LensAppServices = {
     data,
@@ -196,21 +204,26 @@ export async function mountApp(
   });
 
   params.element.classList.add('lnsAppWrapper');
+
+  const PresentationUtilContext = await getPresentationUtilContext();
+
   render(
     <I18nProvider>
       <KibanaContextProvider services={lensServices}>
-        <HashRouter>
-          <Switch>
-            <Route exact path="/edit/:id" component={EditorRoute} />
-            <Route
-              exact
-              path={`/${LENS_EDIT_BY_VALUE}`}
-              render={(routeProps) => <EditorRoute {...routeProps} editByValue />}
-            />
-            <Route exact path="/" component={EditorRoute} />
-            <Route path="/" component={NotFound} />
-          </Switch>
-        </HashRouter>
+        <PresentationUtilContext>
+          <HashRouter>
+            <Switch>
+              <Route exact path="/edit/:id" component={EditorRoute} />
+              <Route
+                exact
+                path={`/${LENS_EDIT_BY_VALUE}`}
+                render={(routeProps) => <EditorRoute {...routeProps} editByValue />}
+              />
+              <Route exact path="/" component={EditorRoute} />
+              <Route path="/" component={NotFound} />
+            </Switch>
+          </HashRouter>
+        </PresentationUtilContext>
       </KibanaContextProvider>
     </I18nProvider>,
     params.element

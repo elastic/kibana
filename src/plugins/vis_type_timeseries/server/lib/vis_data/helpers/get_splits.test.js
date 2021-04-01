@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { getSplits } from './get_splits';
@@ -232,118 +221,6 @@ describe('getSplits(resp, panel, series)', () => {
         SIBAGG: { value: 2 },
       },
     ]);
-  });
-
-  describe('terms group bys', () => {
-    const resp = {
-      aggregations: {
-        SERIES: {
-          buckets: [
-            {
-              key: 'example-01',
-              timeseries: { buckets: [] },
-              SIBAGG: { value: 1 },
-            },
-            {
-              key: 'example-02',
-              timeseries: { buckets: [] },
-              SIBAGG: { value: 2 },
-            },
-          ],
-          meta: { bucketSize: 10 },
-        },
-      },
-    };
-
-    test('should return a splits with no color', async () => {
-      const series = {
-        id: 'SERIES',
-        color: '#F00',
-        split_mode: 'terms',
-        terms_field: 'beat.hostname',
-        terms_size: 10,
-        metrics: [
-          { id: 'AVG', type: 'avg', field: 'cpu' },
-          { id: 'SIBAGG', type: 'avg_bucket', field: 'AVG' },
-        ],
-      };
-      const panel = { type: 'timeseries' };
-
-      expect(await getSplits(resp, panel, series)).toEqual([
-        {
-          id: 'SERIES:example-01',
-          key: 'example-01',
-          label: 'example-01',
-          labelFormatted: '',
-          meta: { bucketSize: 10 },
-          color: undefined,
-          splitByLabel: 'Overall Average of Average of cpu',
-          timeseries: { buckets: [] },
-          SIBAGG: { value: 1 },
-        },
-        {
-          id: 'SERIES:example-02',
-          key: 'example-02',
-          label: 'example-02',
-          labelFormatted: '',
-          meta: { bucketSize: 10 },
-          color: undefined,
-          splitByLabel: 'Overall Average of Average of cpu',
-          timeseries: { buckets: [] },
-          SIBAGG: { value: 2 },
-        },
-      ]);
-    });
-
-    test('should return gradient color', async () => {
-      const series = {
-        id: 'SERIES',
-        color: '#F00',
-        split_mode: 'terms',
-        split_color_mode: 'gradient',
-        terms_field: 'beat.hostname',
-        terms_size: 10,
-        metrics: [
-          { id: 'AVG', type: 'avg', field: 'cpu' },
-          { id: 'SIBAGG', type: 'avg_bucket', field: 'AVG' },
-        ],
-      };
-      const panel = { type: 'timeseries' };
-
-      expect(await getSplits(resp, panel, series)).toEqual([
-        expect.objectContaining({
-          color: 'rgb(255, 0, 0)',
-        }),
-        expect.objectContaining({
-          color: 'rgb(147, 0, 0)',
-        }),
-      ]);
-    });
-
-    test('should return rainbow color', async () => {
-      const series = {
-        id: 'SERIES',
-        color: '#F00',
-        split_mode: 'terms',
-        split_color_mode: 'rainbow',
-        terms_field: 'beat.hostname',
-        terms_size: 10,
-        metrics: [
-          { id: 'AVG', type: 'avg', field: 'cpu' },
-          { id: 'SIBAGG', type: 'avg_bucket', field: 'AVG' },
-        ],
-      };
-      const panel = { type: 'timeseries' };
-
-      expect(await getSplits(resp, panel, series)).toEqual([
-        expect.objectContaining({
-          color: '#68BC00',
-        }),
-        expect.objectContaining({
-          color: '#009CE0',
-        }),
-      ]);
-    });
   });
 
   test('should return a splits for filters group bys', async () => {

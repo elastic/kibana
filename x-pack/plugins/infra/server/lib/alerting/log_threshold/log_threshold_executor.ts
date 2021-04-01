@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
+import { ElasticsearchClient } from 'kibana/server';
 import {
   AlertExecutorOptions,
   AlertServices,
@@ -15,7 +17,7 @@ import {
   AlertInstanceState,
   ActionGroup,
   ActionGroupIdsOf,
-} from '../../../../../alerts/server';
+} from '../../../../../alerting/server';
 import {
   AlertStates,
   Comparator,
@@ -66,7 +68,7 @@ const checkValueAgainstComparatorMap: {
 
 export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
   async function ({ services, params }: LogThresholdAlertExecutorOptions) {
-    const { alertInstanceFactory, savedObjectsClient, callCluster } = services;
+    const { alertInstanceFactory, savedObjectsClient, scopedClusterClient } = services;
     const { sources } = libs;
 
     const sourceConfiguration = await sources.getSourceConfiguration(savedObjectsClient, 'default');
@@ -81,7 +83,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
           validatedParams,
           timestampField,
           indexPattern,
-          callCluster,
+          scopedClusterClient.asCurrentUser,
           alertInstanceFactory
         );
       } else {
@@ -89,7 +91,7 @@ export const createLogThresholdExecutor = (libs: InfraBackendLibs) =>
           validatedParams,
           timestampField,
           indexPattern,
-          callCluster,
+          scopedClusterClient.asCurrentUser,
           alertInstanceFactory
         );
       }
@@ -102,7 +104,7 @@ async function executeAlert(
   alertParams: CountAlertParams,
   timestampField: string,
   indexPattern: string,
-  callCluster: LogThresholdAlertServices['callCluster'],
+  esClient: ElasticsearchClient,
   alertInstanceFactory: LogThresholdAlertServices['alertInstanceFactory']
 ) {
   const query = getESQuery(alertParams, timestampField, indexPattern);
@@ -113,14 +115,14 @@ async function executeAlert(
 
   if (hasGroupBy(alertParams)) {
     processGroupByResults(
-      await getGroupedResults(query, callCluster),
+      await getGroupedResults(query, esClient),
       alertParams,
       alertInstanceFactory,
       updateAlertInstance
     );
   } else {
     processUngroupedResults(
-      await getUngroupedResults(query, callCluster),
+      await getUngroupedResults(query, esClient),
       alertParams,
       alertInstanceFactory,
       updateAlertInstance
@@ -132,7 +134,7 @@ async function executeRatioAlert(
   alertParams: RatioAlertParams,
   timestampField: string,
   indexPattern: string,
-  callCluster: LogThresholdAlertServices['callCluster'],
+  esClient: ElasticsearchClient,
   alertInstanceFactory: LogThresholdAlertServices['alertInstanceFactory']
 ) {
   // Ratio alert params are separated out into two standard sets of alert params
@@ -154,8 +156,8 @@ async function executeRatioAlert(
   }
 
   if (hasGroupBy(alertParams)) {
-    const numeratorGroupedResults = await getGroupedResults(numeratorQuery, callCluster);
-    const denominatorGroupedResults = await getGroupedResults(denominatorQuery, callCluster);
+    const numeratorGroupedResults = await getGroupedResults(numeratorQuery, esClient);
+    const denominatorGroupedResults = await getGroupedResults(denominatorQuery, esClient);
     processGroupByRatioResults(
       numeratorGroupedResults,
       denominatorGroupedResults,
@@ -164,8 +166,8 @@ async function executeRatioAlert(
       updateAlertInstance
     );
   } else {
-    const numeratorUngroupedResults = await getUngroupedResults(numeratorQuery, callCluster);
-    const denominatorUngroupedResults = await getUngroupedResults(denominatorQuery, callCluster);
+    const numeratorUngroupedResults = await getUngroupedResults(numeratorQuery, esClient);
+    const denominatorUngroupedResults = await getUngroupedResults(denominatorQuery, esClient);
     processUngroupedRatioResults(
       numeratorUngroupedResults,
       denominatorUngroupedResults,
@@ -604,17 +606,11 @@ const getQueryMappingForComparator = (comparator: Comparator) => {
   return queryMappings[comparator];
 };
 
-const getUngroupedResults = async (
-  query: object,
-  callCluster: LogThresholdAlertServices['callCluster']
-) => {
-  return decodeOrThrow(UngroupedSearchQueryResponseRT)(await callCluster('search', query));
+const getUngroupedResults = async (query: object, esClient: ElasticsearchClient) => {
+  return decodeOrThrow(UngroupedSearchQueryResponseRT)((await esClient.search(query)).body);
 };
 
-const getGroupedResults = async (
-  query: object,
-  callCluster: LogThresholdAlertServices['callCluster']
-) => {
+const getGroupedResults = async (query: object, esClient: ElasticsearchClient) => {
   let compositeGroupBuckets: GroupedSearchQueryResponse['aggregations']['groups']['buckets'] = [];
   let lastAfterKey: GroupedSearchQueryResponse['aggregations']['groups']['after_key'] | undefined;
 
@@ -622,7 +618,7 @@ const getGroupedResults = async (
     const queryWithAfterKey: any = { ...query };
     queryWithAfterKey.body.aggregations.groups.composite.after = lastAfterKey;
     const groupResponse: GroupedSearchQueryResponse = decodeOrThrow(GroupedSearchQueryResponseRT)(
-      await callCluster('search', queryWithAfterKey)
+      (await esClient.search(queryWithAfterKey)).body
     );
     compositeGroupBuckets = [
       ...compositeGroupBuckets,

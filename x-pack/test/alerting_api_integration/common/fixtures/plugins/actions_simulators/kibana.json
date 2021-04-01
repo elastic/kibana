@@ -1,5 +1,5 @@
 {
-  "id": "actions_simulators",
+  "id": "actionsSimulators",
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["xpack"],

@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { FilterStatusButton, FilterStatusButtonProps } from './filter_status_button';
-import { renderWithRouter, shallowWithRouter, MountWithReduxProvider } from '../../../lib';
+import { renderWithRouter, shallowWithRouter } from '../../../lib/helper/enzyme_helpers';
+import { MountWithReduxProvider } from '../../../lib/helper/helper_with_redux';
 
 describe('FilterStatusButton', () => {
   let props: FilterStatusButtonProps;

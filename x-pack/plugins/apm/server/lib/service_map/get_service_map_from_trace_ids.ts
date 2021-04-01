@@ -1,10 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { find, uniqBy } from 'lodash';
-import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
+import {
+  ENVIRONMENT_ALL,
+  ENVIRONMENT_NOT_DEFINED,
+} from '../../../common/environment_filter_values';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
@@ -39,7 +44,7 @@ export function getConnections({
               return false;
             }
 
-            if (!environment) {
+            if (!environment || environment === ENVIRONMENT_ALL.value) {
               return true;
             }
 

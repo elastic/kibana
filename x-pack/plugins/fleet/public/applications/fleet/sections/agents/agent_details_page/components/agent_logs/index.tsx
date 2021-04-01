@@ -1,19 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { memo, useEffect, useState, useMemo } from 'react';
+
+import type {
+  INullableBaseStateContainer,
+  PureTransition,
+} from '../../../../../../../../../../../src/plugins/kibana_utils/public';
 import {
   createStateContainer,
   syncState,
   createKbnUrlStateStorage,
-  INullableBaseStateContainer,
-  PureTransition,
   getStateFromKbnUrl,
 } from '../../../../../../../../../../../src/plugins/kibana_utils/public';
+
 import { DEFAULT_LOGS_STATE, STATE_STORAGE_KEY } from './constants';
-import { AgentLogsUI, AgentLogsProps, AgentLogsState, AgentLogsUrlStateHelper } from './agent_logs';
+import type { AgentLogsProps, AgentLogsState } from './agent_logs';
+import { AgentLogsUI, AgentLogsUrlStateHelper } from './agent_logs';
 
 export const AgentLogs: React.FunctionComponent<Pick<AgentLogsProps, 'agent'>> = memo(
   ({ agent }) => {

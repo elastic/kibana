@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
+import { withApmSpan } from '../../../../../utils/with_apm_span';
 import {
   METRIC_SYSTEM_CPU_PERCENT,
   METRIC_PROCESS_CPU_PERCENT,
@@ -51,27 +53,33 @@ const chartBase: ChartBase = {
   series,
 };
 
-export async function getCPUChartData({
+export function getCPUChartData({
+  environment,
+  kuery,
   setup,
   serviceName,
   serviceNodeName,
 }: {
+  environment?: string;
+  kuery?: string;
   setup: Setup & SetupTimeRange;
   serviceName: string;
   serviceNodeName?: string;
 }) {
-  const metricsChart = await fetchAndTransformMetrics({
-    setup,
-    serviceName,
-    serviceNodeName,
-    chartBase,
-    aggs: {
-      systemCPUAverage: { avg: { field: METRIC_SYSTEM_CPU_PERCENT } },
-      systemCPUMax: { max: { field: METRIC_SYSTEM_CPU_PERCENT } },
-      processCPUAverage: { avg: { field: METRIC_PROCESS_CPU_PERCENT } },
-      processCPUMax: { max: { field: METRIC_PROCESS_CPU_PERCENT } },
-    },
-  });
-
-  return metricsChart;
+  return withApmSpan('get_cpu_metric_charts', () =>
+    fetchAndTransformMetrics({
+      environment,
+      kuery,
+      setup,
+      serviceName,
+      serviceNodeName,
+      chartBase,
+      aggs: {
+        systemCPUAverage: { avg: { field: METRIC_SYSTEM_CPU_PERCENT } },
+        systemCPUMax: { max: { field: METRIC_SYSTEM_CPU_PERCENT } },
+        processCPUAverage: { avg: { field: METRIC_PROCESS_CPU_PERCENT } },
+        processCPUMax: { max: { field: METRIC_PROCESS_CPU_PERCENT } },
+      },
+    })
+  );
 }
