@@ -72,111 +72,100 @@ describe('suggestEMSTermJoinConfig', () => {
   });
 
   describe('validate common column names', () => {
-    [
-      {
-        name: 'ecs region',
-        columnName: 'destination.geo.region_iso_code',
-        config: {
-          layerId: 'administrative_regions_lvl2',
-          field: 'region_iso_code',
-        },
-      },
-      {
-        name: 'ecs country',
-        columnName: 'country_iso_code',
-        config: {
-          layerId: 'world_countries',
-          field: 'iso2',
-        },
-      },
-      {
-        name: 'country',
-        columnName: 'Country_name',
-        config: {
-          layerId: 'world_countries',
-          field: 'name',
-        },
-      },
-      {
-        name: 'unknown name',
-        columnName: 'cntry',
-        config: null,
-      },
-    ].forEach((testStub) => {
-      test(testStub.name, async () => {
-        const termJoinConfig = await suggestEMSTermJoinConfig({
-          sampleValuesColumnName: testStub.columnName,
-        });
-        expect(termJoinConfig).toEqual(testStub.config);
+    test('ecs region', async () => {
+      const termJoinConfig = await suggestEMSTermJoinConfig({
+        sampleValuesColumnName: 'destination.geo.region_iso_code',
       });
+      expect(termJoinConfig).toEqual({
+        layerId: 'administrative_regions_lvl2',
+        field: 'region_iso_code',
+      });
+    });
+
+    test('ecs country', async () => {
+      const termJoinConfig = await suggestEMSTermJoinConfig({
+        sampleValuesColumnName: 'country_iso_code',
+      });
+      expect(termJoinConfig).toEqual({
+        layerId: 'world_countries',
+        field: 'iso2',
+      });
+    });
+
+    test('country', async () => {
+      const termJoinConfig = await suggestEMSTermJoinConfig({
+        sampleValuesColumnName: 'Country_name',
+      });
+      expect(termJoinConfig).toEqual({
+        layerId: 'world_countries',
+        field: 'name',
+      });
+    });
+
+    test('unknown name', async () => {
+      const termJoinConfig = await suggestEMSTermJoinConfig({
+        sampleValuesColumnName: 'cntry',
+      });
+      expect(termJoinConfig).toEqual(null);
     });
   });
 
   describe('validate well known formats', () => {
-    [
-      {
-        name: '5-digit zip code',
-        values: ['90201', 40204],
-        config: {
-          layerId: 'usa_zip_codes',
-          field: 'zip',
-        },
-      },
-      {
-        name: 'mismatch',
-        values: ['90201', 'foobar'],
-        config: null,
-      },
-    ].forEach((testStub) => {
-      test(testStub.name, async () => {
-        const termJoinConfig = await suggestEMSTermJoinConfig({
-          sampleValues: testStub.values,
-        });
-        expect(termJoinConfig).toEqual(testStub.config);
+    test('5-digit zip code', async () => {
+      const termJoinConfig = await suggestEMSTermJoinConfig({
+        sampleValues: ['90201', 40204],
       });
+      expect(termJoinConfig).toEqual({
+        layerId: 'usa_zip_codes',
+        field: 'zip',
+      });
+    });
+
+    test('mismatch', async () => {
+      const termJoinConfig = await suggestEMSTermJoinConfig({
+        sampleValues: ['90201', 'foobar'],
+      });
+      expect(termJoinConfig).toEqual(null);
     });
   });
 
   describe('validate based on EMS data', () => {
-    [
-      {
-        name: 'Should validate with zip codes layer',
-        values: ['40204', 40205],
-        layerIds: ['world_countries', 'zips'],
-        config: {
-          layerId: 'zips',
-          field: 'zip',
-        },
-      },
-      {
-        name: 'Should not validate with faulty zip codes',
-        values: ['40204', '00000'],
-        layerIds: ['world_countries', 'zips'],
-        config: null,
-      },
-      {
-        name: 'Should validate against countries',
-        values: ['USA', 'USA', 'CAN'],
-        layerIds: ['world_countries', 'zips'],
-        config: {
-          layerId: 'world_countries',
-          field: 'iso3',
-        },
-      },
-      {
-        name: 'Should not validate against countries',
-        values: ['USA', 'BEL', 'CAN'],
-        layerIds: ['world_countries', 'zips'],
-        config: null,
-      },
-    ].forEach((testStub) => {
-      test(testStub.name, async () => {
-        const termJoinConfig = await suggestEMSTermJoinConfig({
-          sampleValues: testStub.values,
-          emsLayerIds: testStub.layerIds,
-        });
-        expect(termJoinConfig).toEqual(testStub.config);
+    test('Should validate with zip codes layer', async () => {
+      const termJoinConfig = await suggestEMSTermJoinConfig({
+        sampleValues: ['40204', 40205],
+        emsLayerIds: ['world_countries', 'zips'],
       });
+      expect(termJoinConfig).toEqual({
+        layerId: 'zips',
+        field: 'zip',
+      });
+    });
+
+    test('Should not validate with faulty zip codes', async () => {
+      const termJoinConfig = await suggestEMSTermJoinConfig({
+        sampleValues: ['40204', '00000'],
+        emsLayerIds: ['world_countries', 'zips'],
+      });
+      expect(termJoinConfig).toEqual(null);
+    });
+
+    test('Should validate against countries', async () => {
+      const termJoinConfig = await suggestEMSTermJoinConfig({
+        sampleValues: ['USA', 'USA', 'CAN'],
+        emsLayerIds: ['world_countries', 'zips'],
+      });
+      expect(termJoinConfig).toEqual({
+        layerId: 'world_countries',
+        field: 'iso3',
+      });
+    });
+
+    test('Should not validate against missing countries', async () => {
+      const termJoinConfig = await suggestEMSTermJoinConfig({
+        sampleValues: ['USA', 'BEL', 'CAN'],
+        emsLayerIds: ['world_countries', 'zips'],
+      });
+      expect(termJoinConfig).toEqual(null);
     });
   });
 });
