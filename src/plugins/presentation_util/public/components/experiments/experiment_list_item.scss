@@ -5,13 +5,13 @@
   min-width: 500px;
 
   &--isOverridden:before {
-      position: absolute;
-      top: $euiSizeL;
-      left: 4px;
-      bottom: $euiSizeL;
-      width: 4px;
-      background: $euiColorPrimary;
-      content: '';
+    position: absolute;
+    top: $euiSizeL;
+    left: 4px;
+    bottom: $euiSizeL;
+    width: 4px;
+    background: $euiColorPrimary;
+    content: '';
   }
 
   .euiSwitch__label {
