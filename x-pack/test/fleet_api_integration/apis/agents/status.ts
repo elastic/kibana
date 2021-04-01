@@ -79,6 +79,7 @@ export default function ({ getService }: FtrProviderContext) {
           offline: 1,
           updating: 1,
           other: 1,
+          inactive: 0,
         },
       });
     });
