@@ -80,7 +80,7 @@ export const find = async ({
     });
 
     for (const theCase of cases.casesMap.values()) {
-      ensureSavedObjectIsAuthorized(theCase.scope);
+      ensureSavedObjectIsAuthorized(theCase.owner);
     }
 
     // TODO: Make sure we do not leak information when authorization is on
