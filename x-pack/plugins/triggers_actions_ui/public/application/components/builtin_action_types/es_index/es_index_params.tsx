@@ -104,7 +104,7 @@ export const IndexParamsFields = ({
           <EuiIcon type="refresh" />
           <FormattedMessage
             id="xpack.triggersActionsUI.sections.alertsList.resetDefaultIndexLabel"
-            defaultMessage="Reset Default Index"
+            defaultMessage="Reset default index"
           />
         </EuiLink>
       </EuiText>
@@ -121,7 +121,7 @@ export const IndexParamsFields = ({
         label={i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.preconfiguredIndex',
           {
-            defaultMessage: 'ES Index',
+            defaultMessage: 'ES index',
           }
         )}
         labelAppend={resetDefaultIndex}
@@ -129,7 +129,7 @@ export const IndexParamsFields = ({
           <>
             <FormattedMessage
               id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.preconfiguredIndexHelpText"
-              defaultMessage="Documents will be indexed into the {alertHistoryIndex} index. "
+              defaultMessage="Documents are indexed into the {alertHistoryIndex} index. "
               values={{ alertHistoryIndex: `${ALERT_HISTORY_PREFIX}${alertHistoryIndexSuffix}` }}
             />
             <EuiLink
@@ -138,7 +138,7 @@ export const IndexParamsFields = ({
             >
               <FormattedMessage
                 id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.preconfiguredIndexDocLink"
-                defaultMessage="View documentation."
+                defaultMessage="View docs."
               />
             </EuiLink>
           </>

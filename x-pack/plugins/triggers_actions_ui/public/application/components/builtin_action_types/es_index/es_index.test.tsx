@@ -134,7 +134,7 @@ describe('action params validation', () => {
     ).toEqual({
       errors: {
         documents: ['Document is required and should be a valid JSON object.'],
-        indexOverride: ['Alert history index must contain valid suffix'],
+        indexOverride: ['Alert history index must contain valid suffix.'],
       },
     });
 

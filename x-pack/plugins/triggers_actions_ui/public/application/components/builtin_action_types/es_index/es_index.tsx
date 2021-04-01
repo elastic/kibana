@@ -89,7 +89,7 @@ export function getActionType(): ActionTypeModel<EsIndexConfig, unknown, IndexAc
             i18n.translate(
               'xpack.triggersActionsUI.components.builtinActionTypes.error.badIndexOverrideSuffix',
               {
-                defaultMessage: 'Alert history index must contain valid suffix',
+                defaultMessage: 'Alert history index must contain valid suffix.',
               }
             )
           );
