@@ -60,9 +60,12 @@ export class ImportCompleteView extends Component<Props, {}> {
                   iconType="copy"
                   color="text"
                   data-test-subj={copyButtonDataTestSubj}
-                  aria-label={i18n.translate('xpack.fileUpload.copyButtonAriaLabel', {
-                    defaultMessage: 'Copy to clipboard',
-                  })}
+                  aria-label={i18n.translate(
+                    'xpack.fileUpload.importComplete.copyButtonAriaLabel',
+                    {
+                      defaultMessage: 'Copy to clipboard',
+                    }
+                  )}
                 />
               )}
             </EuiCopy>
@@ -96,14 +99,14 @@ export class ImportCompleteView extends Component<Props, {}> {
     if (this.props.failedPermissionCheck) {
       return (
         <EuiCallOut
-          title={i18n.translate('xpack.fileUpload.uploadFailureTitle', {
+          title={i18n.translate('xpack.fileUpload.importComplete.uploadFailureTitle', {
             defaultMessage: 'Unable to upload file',
           })}
           color="danger"
           iconType="alert"
         >
           <p>
-            {i18n.translate('xpack.fileUpload.permissionFailureMsg', {
+            {i18n.translate('xpack.fileUpload.importComplete.permissionFailureMsg', {
               defaultMessage:
                 'You do not have permission to create or import data into index "{indexName}".',
               values: { indexName: this.props.indexName },
@@ -114,7 +117,7 @@ export class ImportCompleteView extends Component<Props, {}> {
             target="_blank"
             external
           >
-            {i18n.translate('xpack.fileUpload.permission.docLink', {
+            {i18n.translate('xpack.fileUpload.importComplete.permission.docLink', {
               defaultMessage: 'View file import permissions',
             })}
           </EuiLink>
@@ -125,21 +128,21 @@ export class ImportCompleteView extends Component<Props, {}> {
     if (!this.props.importResults || !this.props.importResults.success) {
       const errorMsg =
         this.props.importResults && this.props.importResults.error
-          ? i18n.translate('xpack.fileUpload.uploadFailureMsgErrorBlock', {
+          ? i18n.translate('xpack.fileUpload.importComplete.uploadFailureMsgErrorBlock', {
               defaultMessage: 'Error: {reason}',
               values: { reason: this.props.importResults.error.error.reason },
             })
           : '';
       return (
         <EuiCallOut
-          title={i18n.translate('xpack.fileUpload.uploadFailureTitle', {
+          title={i18n.translate('xpack.fileUpload.importComplete.uploadFailureTitle', {
             defaultMessage: 'Unable to upload file',
           })}
           color="danger"
           iconType="alert"
         >
           <p>
-            {i18n.translate('xpack.fileUpload.uploadFailureMsg', {
+            {i18n.translate('xpack.fileUpload.importComplete.uploadFailureMsg', {
               defaultMessage: 'Unable to upload file. {errorMsg}',
               values: { errorMsg },
             })}
@@ -148,7 +151,7 @@ export class ImportCompleteView extends Component<Props, {}> {
       );
     }
 
-    const successMsg = i18n.translate('xpack.fileUpload.uploadSuccessMsg', {
+    const successMsg = i18n.translate('xpack.fileUpload.importComplete.uploadSuccessMsg', {
       defaultMessage: 'Indexed {numFeatures} features.',
       values: {
         numFeatures: this.props.importResults.docCount,
@@ -156,7 +159,7 @@ export class ImportCompleteView extends Component<Props, {}> {
     });
 
     const failedFeaturesMsg = this.props.importResults.failures?.length
-      ? i18n.translate('xpack.fileUpload.failedFeaturesMsg', {
+      ? i18n.translate('xpack.fileUpload.importComplete.failedFeaturesMsg', {
           defaultMessage: 'Unable to index {numFailures} features.',
           values: {
             numFailures: this.props.importResults.failures.length,
@@ -166,7 +169,7 @@ export class ImportCompleteView extends Component<Props, {}> {
 
     return (
       <EuiCallOut
-        title={i18n.translate('xpack.fileUpload.uploadSuccessTitle', {
+        title={i18n.translate('xpack.fileUpload.importComplete.uploadSuccessTitle', {
           defaultMessage: 'File upload complete',
         })}
       >
@@ -180,7 +183,7 @@ export class ImportCompleteView extends Component<Props, {}> {
       <EuiText>
         <p>
           <FormattedMessage
-            id="xpack.fileUpload.jsonImport.indexModsMsg"
+            id="xpack.fileUpload.importComplete.indexModsMsg"
             defaultMessage="To modify the index, go to "
           />
           <a
@@ -189,7 +192,7 @@ export class ImportCompleteView extends Component<Props, {}> {
             href={getHttp().basePath.prepend('/app/management/kibana/indexPatterns')}
           >
             <FormattedMessage
-              id="xpack.fileUpload.jsonImport.indexMgmtLink"
+              id="xpack.fileUpload.importComplete.indexMgmtLink"
               defaultMessage="Index Management."
             />
           </a>
@@ -205,14 +208,14 @@ export class ImportCompleteView extends Component<Props, {}> {
 
         {this._renderCodeEditor(
           this.props.importResults,
-          i18n.translate('xpack.fileUpload.jsonImport.indexingResponse', {
+          i18n.translate('xpack.fileUpload.importComplete.indexingResponse', {
             defaultMessage: 'Import response',
           }),
           'indexRespCopyButton'
         )}
         {this._renderCodeEditor(
           this.props.indexPatternResp,
-          i18n.translate('xpack.fileUpload.jsonImport.indexPatternResponse', {
+          i18n.translate('xpack.fileUpload.importComplete.indexPatternResponse', {
             defaultMessage: 'Index pattern response',
           }),
           'indexPatternRespCopyButton'
