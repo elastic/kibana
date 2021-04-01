@@ -108,6 +108,12 @@ export const getMetrics = async ({
   return withApmSpan('get_service_destination_metrics', async () => {
     const { start, end, apmEventClient } = setup;
 
+    const previousPeriodRangeQuery = rangeQuery(start, end)[0];
+    const comparisonPeriodRangeQuery = rangeQuery(
+      comparisonStart,
+      comparisonEnd
+    )[0];
+
     const response = await apmEventClient.search({
       apm: { events: [ProcessorEvent.metric] },
       body: {
@@ -122,10 +128,7 @@ export const getMetrics = async ({
               },
               ...environmentQuery(environment),
             ],
-            should: [
-              ...rangeQuery(start, end),
-              ...rangeQuery(comparisonStart, comparisonEnd),
-            ],
+            should: [previousPeriodRangeQuery, comparisonPeriodRangeQuery],
           },
         },
         aggs: {
@@ -136,11 +139,11 @@ export const getMetrics = async ({
             },
             aggs: {
               current_period: {
-                filter: rangeQuery(start, end)[0],
+                filter: previousPeriodRangeQuery,
                 aggs: getPeriodAggregation(start, end, numBuckets),
               },
               previous_period: {
-                filter: rangeQuery(comparisonStart, comparisonEnd)[0],
+                filter: comparisonPeriodRangeQuery,
                 aggs: getPeriodAggregation(
                   comparisonStart,
                   comparisonEnd,

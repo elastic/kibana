@@ -286,6 +286,7 @@ export function getServiceDependencies({
 
     const previousPeriodMinLatencySum = Math.min(...previousPeriodLatencySums);
     const previousPeriodMaxLatencySum = Math.max(...previousPeriodLatencySums);
+    const metricKeys = ['latency', 'throughput', 'errorRate'] as const;
 
     return metricsByResolvedAddress.map((metric) => {
       const { currentPeriod, previousPeriod, ...rest } = metric;
@@ -303,32 +304,25 @@ export function getServiceDependencies({
         minLatency: previousPeriodMinLatencySum,
         maxLatency: previousPeriodMaxLatencySum,
       });
+      const offSetPreviousPeriod = metricKeys.reduce(
+        (acc, key) => ({
+          ...acc,
+          [key]: {
+            ...previousPeriod[key],
+            timeseries: offsetPreviousPeriodCoordinates({
+              currentPeriodTimeseries: currentPeriod[key].timeseries,
+              previousPeriodTimeseries: previousPeriod[key].timeseries,
+            }),
+          },
+        }),
+        {} as Metrics
+      );
 
       return {
         ...rest,
         currentPeriod: { ...currentPeriod, impact: currentPeriodImpact },
         previousPeriod: {
-          latency: {
-            ...previousPeriod.latency,
-            timeseries: offsetPreviousPeriodCoordinates({
-              currentPeriodTimeseries: currentPeriod.latency.timeseries,
-              previousPeriodTimeseries: previousPeriod.latency.timeseries,
-            }),
-          },
-          throughput: {
-            ...previousPeriod.throughput,
-            timeseries: offsetPreviousPeriodCoordinates({
-              currentPeriodTimeseries: currentPeriod.throughput.timeseries,
-              previousPeriodTimeseries: previousPeriod.throughput.timeseries,
-            }),
-          },
-          errorRate: {
-            ...previousPeriod.errorRate,
-            timeseries: offsetPreviousPeriodCoordinates({
-              currentPeriodTimeseries: currentPeriod.errorRate.timeseries,
-              previousPeriodTimeseries: previousPeriod.errorRate.timeseries,
-            }),
-          },
+          ...offSetPreviousPeriod,
           impact: previousPeriodImpact,
         },
       };
