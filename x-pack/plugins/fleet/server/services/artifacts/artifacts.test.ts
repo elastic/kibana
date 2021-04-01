@@ -9,6 +9,8 @@ import { elasticsearchServiceMock } from 'src/core/server/mocks';
 
 import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 
+import type { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
+
 import { FLEET_SERVER_ARTIFACTS_INDEX } from '../../../common';
 
 import { ArtifactsElasticsearchError } from '../../errors';
@@ -98,6 +100,14 @@ describe('When using the artifacts services', () => {
         id: expect.any(String),
         created: expect.any(String),
       });
+    });
+
+    it('should ignore 409 errors from elasticsearch', async () => {
+      const error = new ResponseError({ statusCode: 409 } as ApiResponse);
+      // Unclear why `mockRejectedValue()` has the params value type set to `never`
+      // @ts-expect-error
+      esClientMock.create.mockRejectedValue(error);
+      await expect(() => createArtifact(esClientMock, newArtifact)).not.toThrow();
     });
 
     it('should throw an ArtifactElasticsearchError if one is encountered', async () => {

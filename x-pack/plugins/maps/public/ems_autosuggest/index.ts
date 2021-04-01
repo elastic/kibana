@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { MountWithReduxProvider } from './helper';
-export * from './helper/enzyme_helpers';
+export * from './ems_autosuggest';

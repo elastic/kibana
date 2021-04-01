@@ -90,11 +90,7 @@ export interface SeriesConfigWithMetadata extends SeriesConfig {
 }
 
 export const isSeriesConfigWithMetadata = (arg: unknown): arg is SeriesConfigWithMetadata => {
-  return (
-    isPopulatedObject(arg) &&
-    {}.hasOwnProperty.call(arg, 'bucketSpanSeconds') &&
-    {}.hasOwnProperty.call(arg, 'detectorLabel')
-  );
+  return isPopulatedObject(arg, ['bucketSpanSeconds', 'detectorLabel']);
 };
 
 interface ChartRange {
