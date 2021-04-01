@@ -60,15 +60,15 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
     onBrushEnd: (e: HeatmapBrushEvent) => {},
     grid: {
       stroke: {
-        width: 1,
-        color: '#D3DAE6',
+        width: args.gridConfig.strokeWidth ?? 1,
+        color: args.gridConfig.strokeColor ?? '#D3DAE6',
       },
     },
     cell: {
       maxWidth: 'fill',
       maxHeight: 'fill',
       label: {
-        visible: false,
+        visible: args.gridConfig.isCellLabelVisible ?? false,
       },
       border: {
         stroke: '#D3DAE6',
@@ -76,14 +76,14 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = ({
       },
     },
     yAxisLabel: {
-      visible: true,
+      visible: args.gridConfig.isYAxisLabelVisible,
       // eui color subdued
       fill: `#6a717d`,
       padding: 8,
       name: yAxisDef.name,
     },
     xAxisLabel: {
-      visible: true,
+      visible: args.gridConfig.isXAxisLabelVisible,
       // eui color subdued
       fill: `#98A2B3`,
       formatter: (v: number | string) => xValuesFormatter.convert(v),

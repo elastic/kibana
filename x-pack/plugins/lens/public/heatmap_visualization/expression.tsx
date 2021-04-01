@@ -15,16 +15,108 @@ import {
   IInterpreterRenderHandlers,
 } from '../../../../../src/plugins/expressions';
 import { FormatFactory, LensMultiTable } from '../types';
-import { FUNCTION_NAME, LEGEND_FUNCTION, LENS_HEATMAP_RENDERER } from './constants';
+import {
+  FUNCTION_NAME,
+  HEATMAP_GRID_FUNCTION,
+  LEGEND_FUNCTION,
+  LENS_HEATMAP_RENDERER,
+} from './constants';
 import type {
   HeatmapExpressionArgs,
   HeatmapExpressionProps,
+  HeatmapGridConfig,
+  HeatmapGridConfigResult,
   HeatmapRender,
   LegendConfigResult,
 } from './types';
+import { LegendConfig } from './types';
 import { ChartsPluginSetup, PaletteRegistry } from '../../../../../src/plugins/charts/public';
 import { HeatmapChartReportable } from './chart_component';
-import { LegendConfig } from './types';
+
+export const heatmapGridConfig: ExpressionFunctionDefinition<
+  typeof HEATMAP_GRID_FUNCTION,
+  null,
+  HeatmapGridConfig,
+  HeatmapGridConfigResult
+> = {
+  name: HEATMAP_GRID_FUNCTION,
+  aliases: [],
+  type: HEATMAP_GRID_FUNCTION,
+  help: `Configure the heatmap layout `,
+  inputTypes: ['null'],
+  args: {
+    // grid
+    strokeWidth: {
+      types: ['number'],
+      help: i18n.translate('xpack.lens.heatmapChart.config.strokeWidth.help', {
+        defaultMessage: 'Specifies the grid stroke width',
+      }),
+      required: false,
+    },
+    strokeColor: {
+      types: ['string'],
+      help: i18n.translate('xpack.lens.heatmapChart.config.strokeColor.help', {
+        defaultMessage: 'Specifies the grid stroke color',
+      }),
+      required: false,
+    },
+    cellHeight: {
+      types: ['number'],
+      help: i18n.translate('xpack.lens.heatmapChart.config.cellHeight.help', {
+        defaultMessage: 'Specifies the grid cell height',
+      }),
+      required: false,
+    },
+    cellWidth: {
+      types: ['number'],
+      help: i18n.translate('xpack.lens.heatmapChart.config.cellWidth.help', {
+        defaultMessage: 'Specifies the grid cell width',
+      }),
+      required: false,
+    },
+    // cells
+    isCellLabelVisible: {
+      types: ['boolean'],
+      help: i18n.translate('xpack.lens.heatmapChart.config.isCellLabelVisible.help', {
+        defaultMessage: 'Specifies whether or not the cell label is visible.',
+      }),
+    },
+    // Y-axis
+    isYAxisLabelVisible: {
+      types: ['boolean'],
+      help: i18n.translate('xpack.lens.heatmapChart.config.isYAxisLabelVisible.help', {
+        defaultMessage: 'Specifies whether or not the Y-axis labels are visible.',
+      }),
+    },
+    yAxisLabelWidth: {
+      types: ['number'],
+      help: i18n.translate('xpack.lens.heatmapChart.config.yAxisLabelWidth.help', {
+        defaultMessage: 'Specifies the width of the Y-axis labels.',
+      }),
+      required: false,
+    },
+    yAxisLabelColor: {
+      types: ['string'],
+      help: i18n.translate('xpack.lens.heatmapChart.config.yAxisLabelColor.help', {
+        defaultMessage: 'Specifies the color of the Y-axis labels.',
+      }),
+      required: false,
+    },
+    // X-axis
+    isXAxisLabelVisible: {
+      types: ['boolean'],
+      help: i18n.translate('xpack.lens.heatmapChart.config.isXAxisLabelVisible.help', {
+        defaultMessage: 'Specifies whether or not the X-axis labels are visible.',
+      }),
+    },
+  },
+  fn(input, args) {
+    return {
+      type: HEATMAP_GRID_FUNCTION,
+      ...args,
+    };
+  },
+};
 
 /**
  * TODO check if it's possible to make a shared function
@@ -44,19 +136,19 @@ export const heatmapLegendConfig: ExpressionFunctionDefinition<
   args: {
     isVisible: {
       types: ['boolean'],
-      help: i18n.translate('xpack.lens.heatmapChart.isVisible.help', {
+      help: i18n.translate('xpack.lens.heatmapChart.legend.isVisible.help', {
         defaultMessage: 'Specifies whether or not the legend is visible.',
       }),
     },
     position: {
       types: ['string'],
       options: [Position.Top, Position.Right, Position.Bottom, Position.Left],
-      help: i18n.translate('xpack.lens.heatmapChart.position.help', {
+      help: i18n.translate('xpack.lens.heatmapChart.legend.position.help', {
         defaultMessage: 'Specifies the legend position.',
       }),
     },
   },
-  fn: function fn(input: unknown, args: LegendConfig) {
+  fn(input, args) {
     return {
       type: LEGEND_FUNCTION,
       ...args,
@@ -111,6 +203,12 @@ export const heatmap: ExpressionFunctionDefinition<
       types: [LEGEND_FUNCTION],
       help: i18n.translate('xpack.lens.heatmapChart.legend.help', {
         defaultMessage: 'Configure the chart legend.',
+      }),
+    },
+    gridConfig: {
+      types: [HEATMAP_GRID_FUNCTION],
+      help: i18n.translate('xpack.lens.heatmapChart.gridConfig.help', {
+        defaultMessage: 'Configure the heatmap layout.',
       }),
     },
   },

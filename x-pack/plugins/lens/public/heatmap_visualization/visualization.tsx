@@ -21,6 +21,7 @@ import {
   CHART_SHAPES,
   FUNCTION_NAME,
   GROUP_ID,
+  HEATMAP_GRID_FUNCTION,
   LEGEND_FUNCTION,
   LENS_HEATMAP_ID,
 } from './constants';
@@ -98,6 +99,13 @@ export const getHeatmapVisualization = ({
           isVisible: true,
           position: Position.Top,
           type: LEGEND_FUNCTION,
+          ...(state?.legend ?? {}),
+        },
+        gridConfig: {
+          type: HEATMAP_GRID_FUNCTION,
+          isCellLabelVisible: false,
+          isYAxisLabelVisible: true,
+          isXAxisLabelVisible: true,
         },
       },
       ...state,
@@ -230,6 +238,110 @@ export const getHeatmapVisualization = ({
                     arguments: {
                       isVisible: [state.legend.isVisible],
                       position: [state.legend.position],
+                    },
+                  },
+                ],
+              },
+            ],
+            gridConfig: [
+              {
+                type: 'expression',
+                chain: [
+                  {
+                    type: 'function',
+                    function: HEATMAP_GRID_FUNCTION,
+                    arguments: {
+                      // grid
+                      strokeWidth: state.gridConfig.strokeWidth
+                        ? [state.gridConfig.strokeWidth]
+                        : [],
+                      strokeColor: state.gridConfig.strokeColor
+                        ? [state.gridConfig.strokeColor]
+                        : [],
+                      cellHeight: state.gridConfig.cellHeight ? [state.gridConfig.cellHeight] : [],
+                      cellWidth: state.gridConfig.cellWidth ? [state.gridConfig.cellWidth] : [],
+                      // cells
+                      isCellLabelVisible: [state.gridConfig.isCellLabelVisible],
+                      // Y-axis
+                      isYAxisLabelVisible: [state.gridConfig.isYAxisLabelVisible],
+                      yAxisLabelWidth: state.gridConfig.yAxisLabelWidth
+                        ? [state.gridConfig.yAxisLabelWidth]
+                        : [],
+                      yAxisLabelColor: state.gridConfig.yAxisLabelColor
+                        ? [state.gridConfig.yAxisLabelColor]
+                        : [],
+                      // X-axis
+                      isXAxisLabelVisible: [state.gridConfig.isXAxisLabelVisible],
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      ],
+    };
+  },
+
+  toPreviewExpression(state, datasourceLayers): Ast | null {
+    const datasource = datasourceLayers[state.layerId];
+
+    const originalOrder = datasource.getTableSpec().map(({ columnId }) => columnId);
+    // When we add a column it could be empty, and therefore have no order
+
+    if (!originalOrder) {
+      return null;
+    }
+
+    return {
+      type: 'expression',
+      chain: [
+        {
+          type: 'function',
+          function: FUNCTION_NAME,
+          arguments: {
+            title: [''],
+            description: [''],
+            xAccessor: [state.xAccessor ?? ''],
+            yAccessor: [state.yAccessor ?? ''],
+            valueAccessor: [state.valueAccessor ?? ''],
+            legend: [
+              {
+                type: 'expression',
+                chain: [
+                  {
+                    type: 'function',
+                    function: LEGEND_FUNCTION,
+                    arguments: {
+                      isVisible: [false],
+                      position: [state.legend.position],
+                    },
+                  },
+                ],
+              },
+            ],
+            gridConfig: [
+              {
+                type: 'expression',
+                chain: [
+                  {
+                    type: 'function',
+                    function: HEATMAP_GRID_FUNCTION,
+                    arguments: {
+                      // grid
+                      strokeWidth: [0],
+                      // cells
+                      isCellLabelVisible: [false],
+                      // Y-axis
+                      isYAxisLabelVisible: [false],
+                      yAxisLabelWidth: state.gridConfig.yAxisLabelWidth
+                        ? [state.gridConfig.yAxisLabelWidth]
+                        : [],
+                      yAxisLabelColor: state.gridConfig.yAxisLabelColor
+                        ? [state.gridConfig.yAxisLabelColor]
+                        : [],
+                      // X-axis
+                      isXAxisLabelVisible: [false],
                     },
                   },
                 ],

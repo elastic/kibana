@@ -31,12 +31,14 @@ export class HeatmapVisualization {
         getHeatmapVisualization,
         heatmap,
         heatmapLegendConfig,
+        heatmapGridConfig,
         getHeatmapRenderer,
       } = await import('../async_services');
       const palettes = await charts.palettes.getPalettes();
 
       expressions.registerFunction(() => heatmap);
       expressions.registerFunction(() => heatmapLegendConfig);
+      expressions.registerFunction(() => heatmapGridConfig);
 
       expressions.registerRenderer(
         getHeatmapRenderer({

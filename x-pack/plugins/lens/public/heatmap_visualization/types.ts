@@ -8,7 +8,12 @@
 import { Position } from '@elastic/charts';
 import { PaletteOutput } from '../../../../../src/plugins/charts/common';
 import { FormatFactory, LensMultiTable } from '../types';
-import { CHART_SHAPES, LEGEND_FUNCTION, LENS_HEATMAP_RENDERER } from './constants';
+import {
+  CHART_SHAPES,
+  HEATMAP_GRID_FUNCTION,
+  LEGEND_FUNCTION,
+  LENS_HEATMAP_RENDERER,
+} from './constants';
 
 export type ChartShapes = typeof CHART_SHAPES[keyof typeof CHART_SHAPES];
 
@@ -18,6 +23,7 @@ export interface SharedHeatmapLayerState {
   yAccessor?: string;
   valueAccessor?: string;
   legend: LegendConfigResult;
+  gridConfig: HeatmapGridConfigResult;
 }
 
 export type HeatmapLayerState = SharedHeatmapLayerState & {
@@ -62,3 +68,21 @@ export interface LegendConfig {
 }
 
 export type LegendConfigResult = LegendConfig & { type: typeof LEGEND_FUNCTION };
+
+export interface HeatmapGridConfig {
+  // grid
+  strokeWidth?: number;
+  strokeColor?: string;
+  cellHeight?: number;
+  cellWidth?: number;
+  // cells
+  isCellLabelVisible: boolean;
+  // Y-axis
+  isYAxisLabelVisible: boolean;
+  yAxisLabelWidth?: number;
+  yAxisLabelColor?: string;
+  // X-axis
+  isXAxisLabelVisible: boolean;
+}
+
+export type HeatmapGridConfigResult = HeatmapGridConfig & { type: typeof HEATMAP_GRID_FUNCTION };
