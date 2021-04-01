@@ -60,7 +60,7 @@ export class RuleRegistry<TFieldMap extends DefaultFieldMap> {
       logger: logger.get('esAdapter'),
     });
 
-    if (!this.options.writeEnabled) {
+    if (this.options.writeEnabled) {
       this.initialize()
         .then(() => {
           this.options.logger.debug('Bootstrapped alerts index');

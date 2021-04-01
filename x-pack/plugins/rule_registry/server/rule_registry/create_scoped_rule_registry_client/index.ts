@@ -80,14 +80,14 @@ export function createScopedRuleRegistryClient<TFieldMap extends DefaultFieldMap
 }): ScopedRuleRegistryClient<TFieldMap> {
   const docRt = runtimeTypeFromFieldMap(fieldMap);
 
-  const defaults = ruleData
+  const defaults: Partial<OutputOfFieldMap<DefaultFieldMap>> = ruleData
     ? {
         'rule.uuid': ruleData.rule.uuid,
         'rule.id': ruleData.rule.id,
         'rule.name': ruleData.rule.name,
         'rule.category': ruleData.rule.category,
-        producer: ruleData.producer,
-        tags: ruleData?.tags,
+        'kibana.rac.producer': ruleData.producer,
+        tags: ruleData.tags,
       }
     : {};
 
