@@ -158,17 +158,24 @@ export async function CanvasElementProvider({ getService }: FtrProviderContext) 
       );
 
       return expectedColorStats.map((expectedColor) => {
-        const colorPercentageWithinTolerance = actualColorStats
-          .filter((d) =>
-            this.isColorWithinTolerance(d.color, expectedColor.color, channelTolerance)
-          )
-          .reduce((sum, x) => sum + x.percentage, 0);
+        const colorsWithinTolerance = actualColorStats.filter((d) =>
+          this.isColorWithinTolerance(d.color, expectedColor.color, channelTolerance)
+        );
+        const colorPercentageWithinTolerance = colorsWithinTolerance.reduce(
+          (sum, x) => sum + x.percentage,
+          0
+        );
+        const pixelsWithinTolerance = colorsWithinTolerance.reduce(
+          (sum, x) => sum + (x.pixels || 0),
+          0
+        );
 
         return {
           color: expectedColor.color,
           percentage: colorPercentageWithinTolerance,
           withinTolerance: this.isValueWithinTolerance(
             colorPercentageWithinTolerance,
+            pixelsWithinTolerance,
             expectedColor.percentage,
             valueTolerance
           ),
