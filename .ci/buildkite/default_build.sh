@@ -37,4 +37,7 @@ tar -xzf "$linuxBuild" -C "$installDir" --strip=1
 mkdir -p "$DEFAULT_BUILD_LOCATION"
 cp -pR install/kibana/. "$DEFAULT_BUILD_LOCATION/"
 
-buildkite-agent artifact upload "$linuxBuild"
+# Moving to `target/` first will keep `buildkite-agent` from including directories in the artifact name
+cd "$KIBANA_DIR/target"
+buildkite-agent artifact upload 'kibana-*-linux-x86_64.tar.gz'
+cd -
