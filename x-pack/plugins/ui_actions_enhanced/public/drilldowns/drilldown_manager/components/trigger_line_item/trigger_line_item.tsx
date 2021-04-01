@@ -7,7 +7,15 @@
 
 import * as React from 'react';
 import { EuiTextColor, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { TextWithIcon } from '../text_with_icon';
+
+export const txtIncompatibleTooltip = i18n.translate(
+  'xpack.uiActionsEnhanced.components.TriggerLineItem.incompatibleTooltip',
+  {
+    defaultMessage: 'This trigger type not supported by this panel',
+  }
+);
 
 export interface TriggerLineItemProps {
   tooltip?: React.ReactNode;
@@ -31,7 +39,12 @@ export const TriggerLineItem: React.FC<TriggerLineItemProps> = ({
 
   if (incompatible) {
     return (
-      <TextWithIcon color={'subdued'} icon={'alert'} iconColor={'danger'}>
+      <TextWithIcon
+        color={'subdued'}
+        icon={'alert'}
+        iconColor={'danger'}
+        iconTooltip={txtIncompatibleTooltip}
+      >
         {content}
       </TextWithIcon>
     );

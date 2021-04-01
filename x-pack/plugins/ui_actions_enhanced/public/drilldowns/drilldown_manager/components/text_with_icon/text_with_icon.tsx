@@ -6,20 +6,40 @@
  */
 
 import * as React from 'react';
-import { EuiTextColor, EuiTextColorProps, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import {
+  EuiTextColor,
+  EuiTextColorProps,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiToolTip,
+} from '@elastic/eui';
 
 export interface TextWithIconProps {
+  color?: EuiTextColorProps['color'];
   icon?: string;
   iconColor?: string;
-  color?: EuiTextColorProps['color'];
+  iconTooltip?: React.ReactNode;
 }
 
-export const TextWithIcon: React.FC<TextWithIconProps> = ({ icon, iconColor, color, children }) => {
+export const TextWithIcon: React.FC<TextWithIconProps> = ({
+  color,
+  icon,
+  iconColor,
+  iconTooltip,
+  children,
+}) => {
   return (
     <EuiFlexGroup responsive={false} alignItems="center" gutterSize={'s'}>
       {!!icon && (
         <EuiFlexItem grow={false}>
-          <EuiIcon color={iconColor} type={icon} />
+          {!!iconTooltip ? (
+            <EuiToolTip content={iconTooltip}>
+              <EuiIcon color={iconColor} type={icon} />
+            </EuiToolTip>
+          ) : (
+            <EuiIcon color={iconColor} type={icon} />
+          )}
         </EuiFlexItem>
       )}
       {!!children && (
