@@ -14,14 +14,12 @@ import { EuiCallOut, EuiCallOutProps, EuiSpacer, EuiGlobalToastList } from '@ela
 import { FLASH_MESSAGE_TYPES, DEFAULT_TOAST_TIMEOUT } from './constants';
 import { FlashMessagesLogic } from './flash_messages_logic';
 
-export const FlashMessages: React.FC = ({ children }) => {
-  return (
-    <>
-      <Callouts>{children}</Callouts>
-      <Toasts />
-    </>
-  );
-};
+export const FlashMessages: React.FC = ({ children }) => (
+  <>
+    <Callouts>{children}</Callouts>
+    <Toasts />
+  </>
+);
 
 export const Callouts: React.FC = ({ children }) => {
   const { messages } = useValues(FlashMessagesLogic);
