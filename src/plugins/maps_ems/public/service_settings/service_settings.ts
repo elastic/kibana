@@ -61,10 +61,6 @@ export class ServiceSettings implements IServiceSettings {
     });
   }
 
-  shouldShowZoomMessage({ origin }: { origin: string }): boolean {
-    return origin === ORIGIN.EMS && this._showZoomMessage;
-  }
-
   enableZoomMessage(): void {
     this._showZoomMessage = true;
   }
