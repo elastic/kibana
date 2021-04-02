@@ -480,7 +480,7 @@ describe('getSearchStatus', () => {
     });
 
     test('updates to complete if the search is done', async () => {
-      savedObjectsClient.update = jest.fn();
+      savedObjectsClient.bulkUpdate = jest.fn();
       const so = {
         attributes: {
           status: SearchSessionStatus.IN_PROGRESS,
@@ -517,8 +517,8 @@ describe('getSearchStatus', () => {
       );
 
       expect(mockClient.asyncSearch.status).toBeCalledWith({ id: 'search-id' });
-      const [, , updateAttributes] = savedObjectsClient.update.mock.calls[0];
-      const updatedAttributes = updateAttributes as SearchSessionSavedObjectAttributes;
+      const [updateInput] = savedObjectsClient.bulkUpdate.mock.calls[0];
+      const updatedAttributes = updateInput[0].attributes as SearchSessionSavedObjectAttributes;
       expect(updatedAttributes.status).toBe(SearchSessionStatus.COMPLETE);
       expect(updatedAttributes.touched).not.toBe('123');
       expect(updatedAttributes.completed).not.toBeUndefined();
@@ -529,7 +529,7 @@ describe('getSearchStatus', () => {
     });
 
     test('updates to error if the search is errored', async () => {
-      savedObjectsClient.update = jest.fn();
+      savedObjectsClient.bulkUpdate = jest.fn();
       const so = {
         attributes: {
           idMapping: {
@@ -562,8 +562,8 @@ describe('getSearchStatus', () => {
         },
         config
       );
-      const [, , updateAttributes] = savedObjectsClient.update.mock.calls[0];
-      const updatedAttributes = updateAttributes as SearchSessionSavedObjectAttributes;
+      const [updateInput] = savedObjectsClient.bulkUpdate.mock.calls[0];
+      const updatedAttributes = updateInput[0].attributes as SearchSessionSavedObjectAttributes;
       expect(updatedAttributes.status).toBe(SearchSessionStatus.ERROR);
       expect(updatedAttributes.idMapping['search-hash'].status).toBe(SearchStatus.ERROR);
       expect(updatedAttributes.idMapping['search-hash'].error).toBe(

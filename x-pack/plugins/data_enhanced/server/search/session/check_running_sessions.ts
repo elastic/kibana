@@ -10,6 +10,7 @@ import {
   Logger,
   SavedObjectsClientContract,
   SavedObjectsFindResult,
+  SavedObjectsUpdateResponse,
 } from 'kibana/server';
 import moment from 'moment';
 import { EMPTY, from } from 'rxjs';
@@ -158,6 +159,10 @@ export async function checkRunningSessions(
 
           logger.debug(`Found ${runningSearchSessionsResponse.total} running sessions`);
 
+          const updatedSessions = new Array<
+            SavedObjectsFindResult<SearchSessionSavedObjectAttributes>
+          >();
+
           await Promise.all(
             runningSearchSessionsResponse.saved_objects.map(async (session) => {
               const updated = await updateSessionStatus(session, client, logger);
@@ -197,22 +202,41 @@ export async function checkRunningSessions(
               }
 
               if (updated && !deleted) {
-                try {
-                  // TODO: consider using bulkUpdate grouped by `session.namespaces?.[0]`
-                  await savedObjectsClient.update(
-                    SEARCH_SESSION_TYPE,
-                    session.id,
-                    session.attributes,
-                    {
-                      namespace: session.namespaces?.[0],
-                    }
-                  );
-                } catch (e) {
-                  logger.error(`Error while updating search session ${session.id}: ${e.message}`);
-                }
+                updatedSessions.push(session);
               }
             })
           );
+
+          // Do a bulk update
+          if (updatedSessions.length) {
+            // If there's an error, we'll try again in the next iteration, so there's no need to check the output.
+            const updatedResponse = await savedObjectsClient.bulkUpdate<SearchSessionSavedObjectAttributes>(
+              updatedSessions.map((session) => ({
+                ...session,
+                namespace: session.namespaces?.[0],
+              }))
+            );
+
+            const success: Array<
+              SavedObjectsUpdateResponse<SearchSessionSavedObjectAttributes>
+            > = [];
+            const fail: Array<SavedObjectsUpdateResponse<SearchSessionSavedObjectAttributes>> = [];
+
+            updatedResponse.saved_objects.forEach((savedObjectResponse) => {
+              if ('error' in savedObjectResponse) {
+                fail.push(savedObjectResponse);
+                logger.error(
+                  `Error while updating search session ${savedObjectResponse?.id}: ${savedObjectResponse.error?.message}`
+                );
+              } else {
+                success.push(savedObjectResponse);
+              }
+            });
+
+            logger.debug(
+              `Updating search sessions: success: ${success.length}, fail: ${fail.length}`
+            );
+          }
         })
       )
       .toPromise();
