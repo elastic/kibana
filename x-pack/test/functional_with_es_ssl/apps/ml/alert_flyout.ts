@@ -80,8 +80,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       testJobId = job.job_id;
 
       // Set up jobs
+      // @ts-expect-error not full interface
       await ml.api.createAnomalyDetectionJob(job);
       await ml.api.openAnomalyDetectionJob(job.job_id);
+      // @ts-expect-error not full interface
       await ml.api.createDatafeed(datafeed);
       await ml.api.startDatafeed(datafeed.datafeed_id);
       await ml.api.waitForDatafeedState(datafeed.datafeed_id, DATAFEED_STATE.STARTED);

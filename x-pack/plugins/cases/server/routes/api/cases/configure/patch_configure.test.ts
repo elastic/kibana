@@ -17,7 +17,8 @@ import {
 
 import { mockCaseConfigure } from '../../__fixtures__/mock_saved_objects';
 import { initPatchCaseConfigure } from './patch_configure';
-import { CASE_CONFIGURE_URL, ConnectorTypes } from '../../../../../common';
+import { CASE_CONFIGURE_URL } from '../../../../../common/constants';
+import { ConnectorTypes } from '../../../../../common/api/connectors';
 import { CasesClient } from '../../../../client';
 
 describe('PATCH configuration', () => {

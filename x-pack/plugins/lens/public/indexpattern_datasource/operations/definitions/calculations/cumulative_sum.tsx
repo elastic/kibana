@@ -77,6 +77,7 @@ export const cumulativeSumOperation: OperationDefinition<
       operationType: 'cumulative_sum',
       isBucketed: false,
       scale: 'ratio',
+      filter: previousColumn?.filter,
       references: referenceIds,
       params: getFormatFromPreviousColumn(previousColumn),
     };
@@ -101,4 +102,5 @@ export const cumulativeSumOperation: OperationDefinition<
       })
     )?.join(', ');
   },
+  filterable: true,
 };

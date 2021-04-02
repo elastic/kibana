@@ -28,13 +28,9 @@ export const getArchiveFilelist = (keyArgs: SharedKey) =>
   archiveFilelistCache.get(sharedKey(keyArgs));
 
 export const setArchiveFilelist = (keyArgs: SharedKey, paths: string[]) => {
-  appContextService
-    .getLogger()
-    .debug(
-      `setting file list to the cache for ${keyArgs.name}-${keyArgs.version}:\n${JSON.stringify(
-        paths
-      )}`
-    );
+  const logger = appContextService.getLogger();
+  logger.debug(`setting file list to the cache for ${keyArgs.name}-${keyArgs.version}`);
+  logger.trace(JSON.stringify(paths));
   return archiveFilelistCache.set(sharedKey(keyArgs), paths);
 };
 
@@ -63,12 +59,10 @@ export const setPackageInfo = ({
   version,
   packageInfo,
 }: SharedKey & { packageInfo: ArchivePackage | RegistryPackage }) => {
+  const logger = appContextService.getLogger();
   const key = sharedKey({ name, version });
-  appContextService
-    .getLogger()
-    .debug(
-      `setting package info to the cache for ${name}-${version}:\n${JSON.stringify(packageInfo)}`
-    );
+  logger.debug(`setting package info to the cache for ${name}-${version}`);
+  logger.trace(JSON.stringify(packageInfo));
   return packageInfoCache.set(key, packageInfo);
 };
 

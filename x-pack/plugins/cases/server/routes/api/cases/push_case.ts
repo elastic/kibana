@@ -12,9 +12,9 @@ import { identity } from 'fp-ts/lib/function';
 
 import { wrapError, escapeHatch } from '../utils';
 
-import { throwErrors, CasePushRequestParamsRt } from '../../../../common';
+import { throwErrors, CasePushRequestParamsRt } from '../../../../common/api';
 import { RouteDeps } from '../types';
-import { CASE_PUSH_URL } from '../../../../common';
+import { CASE_PUSH_URL } from '../../../../common/constants';
 
 export function initPushCaseApi({ router, logger }: RouteDeps) {
   router.post(

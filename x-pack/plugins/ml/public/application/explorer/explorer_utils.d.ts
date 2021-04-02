@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { Moment } from 'moment';
-
 import { AnnotationsTable } from '../../../common/types/annotations';
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import { SwimlaneType } from './explorer_constants';
+import { TimeRangeBounds } from '../util/time_buckets';
+import { RecordForInfluencer } from '../services/results_service/results_service';
+import { InfluencersFilterQuery } from '../../../common/types/es_client';
+import { MlResultsService } from '../services/results_service';
 
 interface ClearedSelectedAnomaliesState {
   selectedCells: undefined;
@@ -29,6 +31,10 @@ export declare interface SwimlaneData {
   laneLabels: string[];
   points: SwimlanePoint[];
   interval: number;
+}
+
+interface ChartRecord extends RecordForInfluencer {
+  function: string;
 }
 
 export declare interface OverallSwimlaneData extends SwimlaneData {
@@ -98,11 +104,6 @@ export declare interface ExplorerJob {
 
 export declare const createJobs: (jobs: CombinedJob[]) => ExplorerJob[];
 
-export declare interface TimeRangeBounds {
-  min: Moment | undefined;
-  max: Moment | undefined;
-}
-
 declare interface SwimlaneBounds {
   earliest: number;
   latest: number;
@@ -132,17 +133,20 @@ export declare const loadAnomaliesTableData: (
   fieldName: string,
   tableInterval: string,
   tableSeverity: number,
-  influencersFilterQuery: any
+  influencersFilterQuery: InfluencersFilterQuery
 ) => Promise<AnomaliesTableData>;
 
 export declare const loadDataForCharts: (
+  mlResultsService: MlResultsService,
   jobIds: string[],
   earliestMs: number,
   latestMs: number,
   influencers: any[],
   selectedCells: AppStateSelectedCells | undefined,
-  influencersFilterQuery: any
-) => Promise<any[] | undefined>;
+  influencersFilterQuery: InfluencersFilterQuery,
+  // choose whether or not to keep track of the request that could be out of date
+  takeLatestOnly: boolean
+) => Promise<ChartRecord[] | undefined>;
 
 export declare const loadFilteredTopInfluencers: (
   jobIds: string[],
@@ -151,10 +155,11 @@ export declare const loadFilteredTopInfluencers: (
   records: any[],
   influencers: any[],
   noInfluencersConfigured: boolean,
-  influencersFilterQuery: any
+  influencersFilterQuery: InfluencersFilterQuery
 ) => Promise<any[]>;
 
 export declare const loadTopInfluencers: (
+  mlResultsService: MlResultsService,
   selectedJobIds: string[],
   earliestMs: number,
   latestMs: number,
@@ -178,7 +183,7 @@ export declare const loadViewByTopFieldValuesForSelectedTime: (
 ) => Promise<any>;
 
 export declare interface FilterData {
-  influencersFilterQuery: any;
+  influencersFilterQuery: InfluencersFilterQuery;
   filterActive: boolean;
   filteredFields: string[];
   queryString: string;

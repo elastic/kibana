@@ -16,26 +16,30 @@ import { HttpSetup } from '../../../../../src/core/public';
 import { mockKibanaSemverVersion, UA_READONLY_MODE } from '../../common/constants';
 import { AppContextProvider } from '../../public/application/app_context';
 import { init as initHttpRequests } from './http_requests';
+import { apiService } from '../../public/application/lib/api';
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
-
-const contextValue = {
-  http: (mockHttpClient as unknown) as HttpSetup,
-  isCloudEnabled: false,
-  docLinks: docLinksServiceMock.createStartContract(),
-  kibanaVersionInfo: {
-    currentMajor: mockKibanaSemverVersion.major,
-    prevMajor: mockKibanaSemverVersion.major - 1,
-    nextMajor: mockKibanaSemverVersion.major + 1,
-  },
-  isReadOnlyMode: UA_READONLY_MODE,
-  notifications: notificationServiceMock.createStartContract(),
-};
 
 export const WithAppDependencies = (
   Comp: React.FunctionComponent<Record<string, unknown>>,
   overrides: Record<string, unknown> = {}
 ) => (props: Record<string, unknown>) => {
+  apiService.setup((mockHttpClient as unknown) as HttpSetup);
+
+  const contextValue = {
+    http: (mockHttpClient as unknown) as HttpSetup,
+    isCloudEnabled: false,
+    docLinks: docLinksServiceMock.createStartContract(),
+    kibanaVersionInfo: {
+      currentMajor: mockKibanaSemverVersion.major,
+      prevMajor: mockKibanaSemverVersion.major - 1,
+      nextMajor: mockKibanaSemverVersion.major + 1,
+    },
+    isReadOnlyMode: UA_READONLY_MODE,
+    notifications: notificationServiceMock.createStartContract(),
+    api: apiService,
+  };
+
   return (
     <AppContextProvider value={{ ...contextValue, ...overrides }}>
       <Comp {...props} />

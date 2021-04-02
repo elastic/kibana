@@ -97,6 +97,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     // but can be used to validate whether specific API mock functions are called
     publicAPIMock,
     getErrorMessages: jest.fn((_state) => undefined),
+    checkIntegrity: jest.fn((_state) => []),
   };
 }
 

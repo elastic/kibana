@@ -232,7 +232,9 @@ export class AggConfig {
     const output = this.write(aggConfigs) as any;
 
     const configDsl = {} as any;
-    configDsl[this.type.dslName || this.type.name] = output.params;
+    if (!this.type.hasNoDslParams) {
+      configDsl[this.type.dslName || this.type.name] = output.params;
+    }
 
     // if the config requires subAggs, write them to the dsl as well
     if (this.subAggs.length) {
@@ -437,10 +439,14 @@ export class AggConfig {
   }
 
   fieldIsTimeField() {
-    const indexPattern = this.getIndexPattern();
-    if (!indexPattern) return false;
-    const timeFieldName = indexPattern.timeFieldName;
-    return timeFieldName && this.fieldName() === timeFieldName;
+    const defaultTimeField = this.getIndexPattern()?.getTimeField?.()?.name;
+    const defaultTimeFields = defaultTimeField ? [defaultTimeField] : [];
+    const allTimeFields =
+      this.aggConfigs.timeFields && this.aggConfigs.timeFields.length > 0
+        ? this.aggConfigs.timeFields
+        : defaultTimeFields;
+    const currentFieldName = this.fieldName();
+    return allTimeFields.includes(currentFieldName);
   }
 
   public get type() {

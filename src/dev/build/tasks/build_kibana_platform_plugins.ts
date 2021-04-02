@@ -11,7 +11,12 @@ import Path from 'path';
 import { REPO_ROOT } from '@kbn/utils';
 import { lastValueFrom } from '@kbn/std';
 import { CiStatsMetric } from '@kbn/dev-utils';
-import { runOptimizer, OptimizerConfig, logOptimizerState } from '@kbn/optimizer';
+import {
+  runOptimizer,
+  OptimizerConfig,
+  logOptimizerState,
+  reportOptimizerTimings,
+} from '@kbn/optimizer';
 
 import { Task, deleteAll, write, read } from '../lib';
 
@@ -30,7 +35,9 @@ export const BuildKibanaPlatformPlugins: Task = {
       limitsPath: Path.resolve(REPO_ROOT, 'packages/kbn-optimizer/limits.yml'),
     });
 
-    await lastValueFrom(runOptimizer(config).pipe(logOptimizerState(log, config)));
+    await lastValueFrom(
+      runOptimizer(config).pipe(logOptimizerState(log, config), reportOptimizerTimings(log, config))
+    );
 
     const combinedMetrics: CiStatsMetric[] = [];
     const metricFilePaths: string[] = [];

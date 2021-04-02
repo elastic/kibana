@@ -5,4 +5,8 @@
  * 2.0.
  */
 
+export { AddResultLogic } from './add_result_logic';
+export { AddResultFlyout } from './add_result_flyout';
+export { AddResultButton } from './add_result_button';
 export { CurationResult } from './curation_result';
+export { convertToResultFormat } from './utils';

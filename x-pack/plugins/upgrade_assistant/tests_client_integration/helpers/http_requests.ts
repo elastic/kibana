@@ -6,18 +6,45 @@
  */
 
 import sinon, { SinonFakeServer } from 'sinon';
+import { API_BASE_PATH } from '../../common/constants';
 import { UpgradeAssistantStatus } from '../../common/types';
+import { ResponseError } from '../../public/application/lib/api';
 
 // Register helpers to mock HTTP Requests
 const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
-  const setLoadStatusResponse = (
-    response?: UpgradeAssistantStatus,
-    error?: { body?: Error; status: number }
-  ) => {
-    const status = error ? error.status || 400 : 200;
-    const body = error ? error.body : response;
+  const setLoadStatusResponse = (response?: UpgradeAssistantStatus, error?: ResponseError) => {
+    const status = error ? error.statusCode || 400 : 200;
+    const body = error ? error : response;
 
-    server.respondWith('GET', '/api/upgrade_assistant/status', [
+    server.respondWith('GET', `${API_BASE_PATH}/status`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(body),
+    ]);
+  };
+
+  const setLoadDeprecationLoggingResponse = (
+    response?: { isEnabled: boolean },
+    error?: ResponseError
+  ) => {
+    const status = error ? error.statusCode || 400 : 200;
+    const body = error ? error : response;
+
+    server.respondWith('GET', `${API_BASE_PATH}/deprecation_logging`, [
+      status,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(body),
+    ]);
+  };
+
+  const setUpdateDeprecationLoggingResponse = (
+    response?: { isEnabled: boolean },
+    error?: ResponseError
+  ) => {
+    const status = error ? error.statusCode || 400 : 200;
+    const body = error ? error : response;
+
+    server.respondWith('PUT', `${API_BASE_PATH}/deprecation_logging`, [
       status,
       { 'Content-Type': 'application/json' },
       JSON.stringify(body),
@@ -25,7 +52,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
   };
 
   const setUpdateIndexSettingsResponse = (response?: object) => {
-    server.respondWith('POST', `/api/upgrade_assistant/:indexName/index_settings`, [
+    server.respondWith('POST', `${API_BASE_PATH}/:indexName/index_settings`, [
       200,
       { 'Content-Type': 'application/json' },
       JSON.stringify(response),
@@ -34,6 +61,8 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
 
   return {
     setLoadStatusResponse,
+    setLoadDeprecationLoggingResponse,
+    setUpdateDeprecationLoggingResponse,
     setUpdateIndexSettingsResponse,
   };
 };

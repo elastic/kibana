@@ -87,7 +87,9 @@ readonly links: {
             readonly sum: string;
             readonly top_hits: string;
         };
-        readonly runtimeFields: string;
+        readonly runtimeFields: {
+            readonly mapping: string;
+        };
         readonly scriptedFields: {
             readonly scriptFields: string;
             readonly scriptAggs: string;
@@ -99,8 +101,9 @@ readonly links: {
             readonly luceneExpressions: string;
         };
         readonly indexPatterns: {
-            readonly loadingData: string;
             readonly introduction: string;
+            readonly fieldFormattersNumber: string;
+            readonly fieldFormattersString: string;
         };
         readonly addData: string;
         readonly kibana: string;
@@ -141,6 +144,7 @@ readonly links: {
             putComponentTemplateMetadata: string;
             putSnapshotLifecyclePolicy: string;
             putWatch: string;
+            simulatePipeline: string;
             updateTransform: string;
         }>;
         readonly observability: Record<string, string>;

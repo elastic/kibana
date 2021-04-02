@@ -36,7 +36,12 @@ describe('createStaticIndexPattern', () => {
       'xpack.apm.autocreateApmIndexPattern': false,
     });
     const savedObjectsClient = getMockSavedObjectsClient();
-    await createStaticIndexPattern(setup, context, savedObjectsClient);
+    await createStaticIndexPattern(
+      setup,
+      context,
+      savedObjectsClient,
+      'default'
+    );
     expect(savedObjectsClient.create).not.toHaveBeenCalled();
   });
 
@@ -53,7 +58,12 @@ describe('createStaticIndexPattern', () => {
 
     const savedObjectsClient = getMockSavedObjectsClient();
 
-    await createStaticIndexPattern(setup, context, savedObjectsClient);
+    await createStaticIndexPattern(
+      setup,
+      context,
+      savedObjectsClient,
+      'default'
+    );
     expect(savedObjectsClient.create).not.toHaveBeenCalled();
   });
 
@@ -70,7 +80,12 @@ describe('createStaticIndexPattern', () => {
 
     const savedObjectsClient = getMockSavedObjectsClient();
 
-    await createStaticIndexPattern(setup, context, savedObjectsClient);
+    await createStaticIndexPattern(
+      setup,
+      context,
+      savedObjectsClient,
+      'default'
+    );
 
     expect(savedObjectsClient.create).toHaveBeenCalled();
   });

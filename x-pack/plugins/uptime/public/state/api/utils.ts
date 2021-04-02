@@ -67,7 +67,7 @@ class ApiService {
 
     const response = await this._http!.fetch({
       path: apiUrl,
-      query: { ...params, ...(debugEnabled ? { _debug: true } : {}) },
+      query: { ...params, ...(debugEnabled ? { _inspect: true } : {}) },
       asResponse,
     });
 

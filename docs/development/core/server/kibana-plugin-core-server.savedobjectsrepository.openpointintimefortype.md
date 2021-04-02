@@ -6,6 +6,8 @@
 
 Opens a Point In Time (PIT) against the indices for the specified Saved Object types. The returned `id` can then be passed to `SavedObjects.find` to search against that PIT.
 
+Only use this API if you have an advanced use case that's not solved by the [SavedObjectsRepository.createPointInTimeFinder()](./kibana-plugin-core-server.savedobjectsrepository.createpointintimefinder.md) method.
+
 <b>Signature:</b>
 
 ```typescript

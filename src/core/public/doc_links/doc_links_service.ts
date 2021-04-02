@@ -16,6 +16,7 @@ interface StartDeps {
 /** @internal */
 export class DocLinksService {
   public setup() {}
+
   public start({ injectedMetadata }: StartDeps): DocLinksStart {
     const DOC_LINK_VERSION = injectedMetadata.getKibanaBranch();
     const ELASTIC_WEBSITE_URL = 'https://www.elastic.co/';
@@ -107,10 +108,12 @@ export class DocLinksService {
           sum: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-sum-aggregation.html`,
           top_hits: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-top-hits-aggregation.html`,
         },
-        runtimeFields: `${ELASTICSEARCH_DOCS}runtime.html`,
+        runtimeFields: {
+          mapping: `${ELASTICSEARCH_DOCS}runtime-mapping-fields.html`,
+        },
         scriptedFields: {
           scriptFields: `${ELASTICSEARCH_DOCS}search-request-script-fields.html`,
-          scriptAggs: `${ELASTICSEARCH_DOCS}search-aggregations.html#_values_source`,
+          scriptAggs: `${ELASTICSEARCH_DOCS}search-aggregations.html`,
           painless: `${ELASTICSEARCH_DOCS}modules-scripting-painless.html`,
           painlessApi: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-api-reference.html`,
           painlessLangSpec: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-lang-spec.html`,
@@ -120,8 +123,8 @@ export class DocLinksService {
           luceneExpressions: `${ELASTICSEARCH_DOCS}modules-scripting-expression.html`,
         },
         indexPatterns: {
-          loadingData: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/tutorial-load-dataset.html`,
           introduction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/index-patterns.html`,
+          fieldFormattersNumber: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/numeral.html`,
           fieldFormattersString: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/field-formatters-string.html`,
         },
         addData: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/connect-to-elasticsearch.html`,
@@ -186,10 +189,11 @@ export class DocLinksService {
         },
         visualize: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/dashboard.html`,
-          timelionDeprecation: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/create-panels-with-timelion.html`,
+          timelionDeprecation: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/timelion.html`,
           lens: `${ELASTIC_WEBSITE_URL}what-is/kibana-lens`,
-          lensPanels: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/dashboard.html#create-panels-with-lens`,
+          lensPanels: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/lens.html`,
           maps: `${ELASTIC_WEBSITE_URL}maps`,
+          vega: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/vega.html`,
         },
         observability: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/index.html`,
@@ -201,10 +205,10 @@ export class DocLinksService {
           emailActionConfig: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/email-action-type.html#configuring-email`,
           generalSettings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/alert-action-settings-kb.html#general-alert-action-settings`,
           indexAction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/index-action-type.html`,
-          esQuery: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/alert-type-es-query.html`,
-          indexThreshold: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/alert-type-index-threshold.html#index-action-configuration`,
+          esQuery: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/rule-type-es-query.html`,
+          indexThreshold: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/rule-type-index-threshold.html`,
           pagerDutyAction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/pagerduty-action-type.html`,
-          preconfiguredConnectors: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/pre-configured-action-types-and-connectors.html`,
+          preconfiguredConnectors: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/pre-configured-connectors.html`,
           serviceNowAction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/servicenow-action-type.html#configuring-servicenow`,
           setupPrerequisites: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/alerting-getting-started.html#alerting-setup-prerequisites`,
           slackAction: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/slack-action-type.html#configuring-slack`,
@@ -214,12 +218,15 @@ export class DocLinksService {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/maps.html`,
         },
         monitoring: {
-          alertsCluster: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/cluster-alerts.html`,
           alertsKibana: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/kibana-alerts.html`,
           alertsKibanaCpuThreshold: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/kibana-alerts.html#kibana-alerts-cpu-threshold`,
           alertsKibanaDiskThreshold: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/kibana-alerts.html#kibana-alerts-disk-usage-threshold`,
           alertsKibanaJvmThreshold: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/kibana-alerts.html#kibana-alerts-jvm-memory-threshold`,
           alertsKibanaMissingData: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/kibana-alerts.html#kibana-alerts-missing-monitoring-data`,
+          alertsKibanaThreadpoolRejections: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/kibana-alerts.html#kibana-alerts-thread-pool-rejections`,
+          alertsKibanaCCRReadExceptions: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/kibana-alerts.html#kibana-alerts-ccr-read-exceptions`,
+          alertsKibanaLargeShardSize: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/kibana-alerts.html#kibana-alerts-large-shard-size`,
+          alertsKibanaClusterAlerts: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/kibana-alerts.html#kibana-alerts-cluster-alerts`,
           metricbeatBlog: `${ELASTIC_WEBSITE_URL}blog/external-collection-for-elastic-stack-monitoring-is-now-available-via-metricbeat`,
           monitorElasticsearch: `${ELASTICSEARCH_DOCS}configuring-metricbeat.html`,
           monitorKibana: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/monitoring-metricbeat.html`,
@@ -230,7 +237,7 @@ export class DocLinksService {
           apiKeyServiceSettings: `${ELASTICSEARCH_DOCS}security-settings.html#api-key-service-settings`,
           clusterPrivileges: `${ELASTICSEARCH_DOCS}security-privileges.html#privileges-list-cluster`,
           elasticsearchSettings: `${ELASTICSEARCH_DOCS}security-settings.html`,
-          elasticsearchEnableSecurity: `${ELASTICSEARCH_DOCS}get-started-enable-security.html`,
+          elasticsearchEnableSecurity: `${ELASTICSEARCH_DOCS}configuring-stack-security.html`,
           indicesPrivileges: `${ELASTICSEARCH_DOCS}security-privileges.html#privileges-list-indices`,
           kibanaTLS: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/configuring-tls.html`,
           kibanaPrivileges: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/kibana-privileges.html`,
@@ -264,8 +271,10 @@ export class DocLinksService {
           painlessExecute: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-execute-api.html`,
           painlessExecuteAPIContexts: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-execute-api.html#_contexts`,
           putComponentTemplateMetadata: `${ELASTICSEARCH_DOCS}indices-component-template.html#component-templates-metadata`,
+          putEnrichPolicy: `${ELASTICSEARCH_DOCS}put-enrich-policy-api.html`,
           putSnapshotLifecyclePolicy: `${ELASTICSEARCH_DOCS}slm-api-put-policy.html`,
-          putWatch: `${ELASTICSEARCH_DOCS}/watcher-api-put-watch.html`,
+          putWatch: `${ELASTICSEARCH_DOCS}watcher-api-put-watch.html`,
+          simulatePipeline: `${ELASTICSEARCH_DOCS}simulate-pipeline-api.html`,
           updateTransform: `${ELASTICSEARCH_DOCS}update-transform.html`,
         },
         plugins: {
@@ -283,11 +292,50 @@ export class DocLinksService {
           registerSourceOnly: `${ELASTICSEARCH_DOCS}snapshots-register-repository.html#snapshots-source-only-repository`,
           registerUrl: `${ELASTICSEARCH_DOCS}snapshots-register-repository.html#snapshots-read-only-repository`,
           restoreSnapshot: `${ELASTICSEARCH_DOCS}snapshots-restore-snapshot.html`,
+          restoreSnapshotApi: `${ELASTICSEARCH_DOCS}restore-snapshot-api.html#restore-snapshot-api-request-body`,
         },
         ingest: {
+          append: `${ELASTICSEARCH_DOCS}append-processor.html`,
+          bytes: `${ELASTICSEARCH_DOCS}bytes-processor.html`,
+          circle: `${ELASTICSEARCH_DOCS}ingest-circle-processor.html`,
+          convert: `${ELASTICSEARCH_DOCS}convert-processor.html`,
+          csv: `${ELASTICSEARCH_DOCS}csv-processor.html`,
+          date: `${ELASTICSEARCH_DOCS}date-processor.html`,
+          dateIndexName: `${ELASTICSEARCH_DOCS}date-index-name-processor.html`,
+          dissect: `${ELASTICSEARCH_DOCS}dissect-processor.html`,
+          dissectKeyModifiers: `${ELASTICSEARCH_DOCS}dissect-processor.html#dissect-key-modifiers`,
+          dotExpander: `${ELASTICSEARCH_DOCS}dot-expand-processor.html`,
+          drop: `${ELASTICSEARCH_DOCS}drop-processor.html`,
+          enrich: `${ELASTICSEARCH_DOCS}ingest-enriching-data.html`,
+          fail: `${ELASTICSEARCH_DOCS}fail-processor.html`,
+          foreach: `${ELASTICSEARCH_DOCS}foreach-processor.html`,
+          geoIp: `${ELASTICSEARCH_DOCS}geoip-processor.html`,
+          grok: `${ELASTICSEARCH_DOCS}grok-processor.html`,
+          gsub: `${ELASTICSEARCH_DOCS}gsub-processor.html`,
+          htmlString: `${ELASTICSEARCH_DOCS}htmlstrip-processor.html`,
+          inference: `${ELASTICSEARCH_DOCS}inference-processor.html`,
+          inferenceClassification: `${ELASTICSEARCH_DOCS}inference-processor.html#inference-processor-classification-opt`,
+          inferenceRegression: `${ELASTICSEARCH_DOCS}inference-processor.html#inference-processor-regression-opt`,
+          join: `${ELASTICSEARCH_DOCS}join-processor.html`,
+          json: `${ELASTICSEARCH_DOCS}json-processor.html`,
+          kv: `${ELASTICSEARCH_DOCS}kv-processor.html`,
+          lowercase: `${ELASTICSEARCH_DOCS}lowercase-processor.html`,
+          pipeline: `${ELASTICSEARCH_DOCS}pipeline-processor.html`,
           pipelines: `${ELASTICSEARCH_DOCS}ingest.html`,
           pipelineFailure: `${ELASTICSEARCH_DOCS}ingest.html#handling-pipeline-failures`,
           processors: `${ELASTICSEARCH_DOCS}processors.html`,
+          remove: `${ELASTICSEARCH_DOCS}remove-processor.html`,
+          rename: `${ELASTICSEARCH_DOCS}rename-processor.html`,
+          script: `${ELASTICSEARCH_DOCS}script-processor.html`,
+          set: `${ELASTICSEARCH_DOCS}set-processor.html`,
+          setSecurityUser: `${ELASTICSEARCH_DOCS}ingest-node-set-security-user-processor.html`,
+          sort: `${ELASTICSEARCH_DOCS}sort-processor.html`,
+          split: `${ELASTICSEARCH_DOCS}split-processor.html`,
+          trim: `${ELASTICSEARCH_DOCS}trim-processor.html`,
+          uppercase: `${ELASTICSEARCH_DOCS}uppercase-processor.html`,
+          uriParts: `${ELASTICSEARCH_DOCS}uri-parts-processor.html`,
+          urlDecode: `${ELASTICSEARCH_DOCS}urldecode-processor.html`,
+          userAgent: `${ELASTICSEARCH_DOCS}user-agent-processor.html`,
         },
       },
     });
@@ -378,7 +426,9 @@ export interface DocLinksStart {
       readonly sum: string;
       readonly top_hits: string;
     };
-    readonly runtimeFields: string;
+    readonly runtimeFields: {
+      readonly mapping: string;
+    };
     readonly scriptedFields: {
       readonly scriptFields: string;
       readonly scriptAggs: string;
@@ -390,8 +440,9 @@ export interface DocLinksStart {
       readonly luceneExpressions: string;
     };
     readonly indexPatterns: {
-      readonly loadingData: string;
       readonly introduction: string;
+      readonly fieldFormattersNumber: string;
+      readonly fieldFormattersString: string;
     };
     readonly addData: string;
     readonly kibana: string;
@@ -432,6 +483,7 @@ export interface DocLinksStart {
       putComponentTemplateMetadata: string;
       putSnapshotLifecyclePolicy: string;
       putWatch: string;
+      simulatePipeline: string;
       updateTransform: string;
     }>;
     readonly observability: Record<string, string>;

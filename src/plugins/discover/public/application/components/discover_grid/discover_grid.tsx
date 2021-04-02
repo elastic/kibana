@@ -61,6 +61,10 @@ export interface DiscoverGridProps {
    */
   indexPattern: IndexPattern;
   /**
+   * Determines if data is currently loaded
+   */
+  isLoading: boolean;
+  /**
    * Function used to add a column in the document flyout
    */
   onAddColumn: (column: string) => void;
@@ -135,6 +139,7 @@ export const DiscoverGrid = ({
   ariaLabelledBy,
   columns,
   indexPattern,
+  isLoading,
   expandedDoc,
   onAddColumn,
   onFilter,
@@ -258,7 +263,13 @@ export const DiscoverGrid = ({
         isDarkMode: services.uiSettings.get('theme:darkMode'),
       }}
     >
-      <>
+      <span
+        data-test-subj="discoverDocTable"
+        data-render-complete={isLoading ? 'false' : 'true'}
+        data-shared-item=""
+        data-title={searchTitle}
+        data-description={searchDescription}
+      >
         <KibanaContextProvider services={{ uiSettings: services.uiSettings }}>
           <EuiDataGridMemoized
             aria-describedby={randomId}
@@ -324,16 +335,18 @@ export const DiscoverGrid = ({
           <DiscoverGridFlyout
             indexPattern={indexPattern}
             hit={expandedDoc}
+            hits={rows}
             // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
             columns={defaultColumns ? [] : displayedColumns}
             onFilter={onFilter}
             onRemoveColumn={onRemoveColumn}
             onAddColumn={onAddColumn}
             onClose={() => setExpandedDoc(undefined)}
+            setExpandedDoc={setExpandedDoc}
             services={services}
           />
         )}
-      </>
+      </span>
     </DiscoverGridContext.Provider>
   );
 };

@@ -14,7 +14,7 @@ import { ComingSoonPrompt } from './coming_soon_prompt';
 import { UpgradeAssistantTabs } from './tabs';
 
 export const PageContent: React.FunctionComponent = () => {
-  const { kibanaVersionInfo, isReadOnlyMode, http } = useAppContext();
+  const { kibanaVersionInfo, isReadOnlyMode } = useAppContext();
   const { nextMajor } = kibanaVersionInfo;
 
   // Read-only mode will be enabled up until the last minor before the next major release
@@ -38,7 +38,7 @@ export const PageContent: React.FunctionComponent = () => {
         </EuiPageHeaderSection>
       </EuiPageHeader>
 
-      <UpgradeAssistantTabs http={http} />
+      <UpgradeAssistantTabs />
     </>
   );
 };

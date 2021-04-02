@@ -10,7 +10,10 @@ import { EuiFormRow, EuiSelect, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@el
 import * as i18n from './translations';
 
 import { ConnectorFieldsProps } from '../types';
-import { ConnectorTypes, ServiceNowITSMFieldsType } from '../../../../../../cases/common';
+import {
+  ConnectorTypes,
+  ServiceNowITSMFieldsType,
+} from '../../../../../../cases/common/api/connectors';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ConnectorCard } from '../card';
 import { useGetChoices } from './use_get_choices';

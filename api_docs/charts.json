@@ -9,7 +9,7 @@
         "children": [
           {
             "type": "Object",
-            "label": "{\n  onChange,\n  color: selectedColor,\n  label,\n  useLegacyColors = true,\n  colorIsOverwritten = true,\n}",
+            "label": "{\n  onChange,\n  color: selectedColor,\n  label,\n  useLegacyColors = true,\n  colorIsOverwritten = true,\n  onKeyDown,\n}",
             "isRequired": true,
             "signature": [
               "ColorPickerProps"
@@ -17,18 +17,18 @@
             "description": [],
             "source": {
               "path": "src/plugins/charts/public/static/components/color_picker.tsx",
-              "lineNumber": 108
+              "lineNumber": 111
             }
           }
         ],
         "signature": [
-          "({ onChange, color: selectedColor, label, useLegacyColors, colorIsOverwritten, }: ColorPickerProps) => JSX.Element"
+          "({ onChange, color: selectedColor, label, useLegacyColors, colorIsOverwritten, onKeyDown, }: ColorPickerProps) => JSX.Element"
         ],
         "description": [],
         "label": "ColorPicker",
         "source": {
           "path": "src/plugins/charts/public/static/components/color_picker.tsx",
-          "lineNumber": 108
+          "lineNumber": 111
         },
         "tags": [],
         "returnComment": [],
@@ -1597,7 +1597,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
-          "lineNumber": 3160
+          "lineNumber": 174
         },
         "signature": [
           {
@@ -1816,7 +1816,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
-                  "lineNumber": 558
+                  "lineNumber": 56
                 },
                 "signature": [
                   {
@@ -1837,7 +1837,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
-                  "lineNumber": 559
+                  "lineNumber": 57
                 }
               },
               {
@@ -1848,7 +1848,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
-                  "lineNumber": 562
+                  "lineNumber": 60
                 },
                 "signature": [
                   "[number, number[]][]"
@@ -1859,7 +1859,7 @@
             "label": "[ColorSchemas.Greens]",
             "source": {
               "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
-              "lineNumber": 557
+              "lineNumber": 55
             }
           },
           {
@@ -1875,7 +1875,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
-                  "lineNumber": 1078
+                  "lineNumber": 74
                 },
                 "signature": [
                   {
@@ -1896,7 +1896,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
-                  "lineNumber": 1079
+                  "lineNumber": 75
                 }
               },
               {
@@ -1907,7 +1907,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
-                  "lineNumber": 1082
+                  "lineNumber": 78
                 },
                 "signature": [
                   "[number, number[]][]"
@@ -1918,7 +1918,7 @@
             "label": "[ColorSchemas.Greys]",
             "source": {
               "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
-              "lineNumber": 1077
+              "lineNumber": 73
             }
           },
           {
@@ -1934,7 +1934,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
-                  "lineNumber": 1598
+                  "lineNumber": 92
                 },
                 "signature": [
                   {
@@ -1955,7 +1955,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
-                  "lineNumber": 1599
+                  "lineNumber": 93
                 }
               },
               {
@@ -1966,7 +1966,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
-                  "lineNumber": 1602
+                  "lineNumber": 96
                 },
                 "signature": [
                   "[number, number[]][]"
@@ -1977,7 +1977,7 @@
             "label": "[ColorSchemas.Reds]",
             "source": {
               "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
-              "lineNumber": 1597
+              "lineNumber": 91
             }
           },
           {
@@ -1993,7 +1993,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
-                  "lineNumber": 2118
+                  "lineNumber": 110
                 },
                 "signature": [
                   {
@@ -2014,7 +2014,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
-                  "lineNumber": 2119
+                  "lineNumber": 111
                 }
               },
               {
@@ -2025,7 +2025,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
-                  "lineNumber": 2122
+                  "lineNumber": 114
                 },
                 "signature": [
                   "[number, number[]][]"
@@ -2036,7 +2036,7 @@
             "label": "[ColorSchemas.YellowToRed]",
             "source": {
               "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
-              "lineNumber": 2117
+              "lineNumber": 109
             }
           },
           {
@@ -2052,7 +2052,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
-                  "lineNumber": 2639
+                  "lineNumber": 129
                 },
                 "signature": [
                   {
@@ -2073,7 +2073,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
-                  "lineNumber": 2640
+                  "lineNumber": 130
                 }
               },
               {
@@ -2084,7 +2084,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
-                  "lineNumber": 2643
+                  "lineNumber": 133
                 },
                 "signature": [
                   "[number, number[]][]"
@@ -2095,7 +2095,7 @@
             "label": "[ColorSchemas.GreenToRed]",
             "source": {
               "path": "src/plugins/charts/public/static/color_maps/color_maps.ts",
-              "lineNumber": 2638
+              "lineNumber": 128
             }
           }
         ],

@@ -16,10 +16,10 @@ import {
   CasesFindRequestRt,
   throwErrors,
   caseStatuses,
-} from '../../../../common';
+} from '../../../../common/api';
 import { transformCases, wrapError, escapeHatch } from '../utils';
 import { RouteDeps } from '../types';
-import { CASES_URL } from '../../../../common';
+import { CASES_URL } from '../../../../common/constants';
 import { constructQueryOptions } from './helpers';
 
 export function initFindCasesApi({ caseService, router, logger }: RouteDeps) {
@@ -66,11 +66,13 @@ export function initFindCasesApi({ caseService, router, logger }: RouteDeps) {
         return response.ok({
           body: CasesFindResponseRt.encode(
             transformCases({
-              ...cases,
+              casesMap: cases.casesMap,
+              page: cases.page,
+              perPage: cases.perPage,
+              total: cases.total,
               countOpenCases: openCases,
               countInProgressCases: inProgressCases,
               countClosedCases: closedCases,
-              total: cases.casesMap.size,
             })
           ),
         });

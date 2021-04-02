@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { ES_FIELD_TYPES } from '../../../../../src/plugins/data/common';
 import {
   ML_JOB_AGGREGATION,
@@ -108,8 +109,8 @@ export interface AggCardinality {
 export type RollupFields = Record<FieldId, [Record<'agg', ES_AGGREGATION>]>;
 
 // Replace this with import once #88995 is merged
-const RUNTIME_FIELD_TYPES = ['keyword', 'long', 'double', 'date', 'ip', 'boolean'] as const;
-type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
+export const RUNTIME_FIELD_TYPES = ['keyword', 'long', 'double', 'date', 'ip', 'boolean'] as const;
+export type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
 
 export interface RuntimeField {
   type: RuntimeType;
@@ -120,4 +121,4 @@ export interface RuntimeField {
       };
 }
 
-export type RuntimeMappings = Record<string, RuntimeField>;
+export type RuntimeMappings = estypes.RuntimeFields;

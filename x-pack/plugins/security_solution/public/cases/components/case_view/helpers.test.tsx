@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AssociationType, CommentType } from '../../../../../cases/common';
+import { AssociationType, CommentType } from '../../../../../cases/common/api';
 import { Comment } from '../../containers/types';
 
 import { getManualAlertIdsWithNoRuleId, buildAlertsQuery } from './helpers';
