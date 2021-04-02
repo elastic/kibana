@@ -142,11 +142,11 @@ export function CustomizablePalette({
   setPalette: (palette: PaletteOutput<CustomPaletteParams>) => void;
 }) {
   const [minLocalValue, setMinLocalValue] = useState<string>(
-    '' + (activePalette.params?.rangeMin ?? DEFAULT_MIN_STOP)
+    String(activePalette.params?.rangeMin ?? DEFAULT_MIN_STOP)
   );
 
   const [maxLocalValue, setMaxLocalValue] = useState<string>(
-    '' + (activePalette.params?.rangeMax ?? DEFAULT_MAX_STOP)
+    String(activePalette.params?.rangeMax ?? DEFAULT_MAX_STOP)
   );
 
   const { colorStops } = applyPaletteParams(palettes, activePalette);
