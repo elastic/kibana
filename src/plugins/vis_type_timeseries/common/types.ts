@@ -63,6 +63,9 @@ export interface PanelData {
   id: string;
   label: string;
   data: Array<[number, number]>;
+  seriesId: string;
+  splitByLabel: string;
+  isSplitByTerms: boolean;
 }
 
 export const isVisTableData = (data: TimeseriesVisData): data is TableData =>
