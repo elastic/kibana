@@ -24,45 +24,46 @@ describe('applyAggsToSearchSource', () => {
     const aggsConfig = applyAggsToSearchSource(true, searchSource, 'auto', indexPattern, dataMock);
 
     expect(aggsConfig!.aggs).toMatchInlineSnapshot(`
-    Array [
-      Object {
-        "enabled": true,
-        "id": "1",
-        "params": Object {},
-        "schema": "metric",
-        "type": "count",
-      },
-      Object {
-        "enabled": true,
-        "id": "2",
-        "params": Object {
-          "drop_partials": false,
-          "extended_bounds": Object {},
-          "field": "timestamp",
-          "interval": "auto",
-          "min_doc_count": 1,
-          "scaleMetricValues": false,
-          "useNormalizedEsInterval": true,
+      Array [
+        Object {
+          "enabled": true,
+          "id": "1",
+          "params": Object {},
+          "schema": "metric",
+          "type": "count",
         },
-        "schema": "segment",
-        "type": "date_histogram",
-      },
-    ]
-  `);
+        Object {
+          "enabled": true,
+          "id": "2",
+          "params": Object {
+            "drop_partials": false,
+            "extended_bounds": Object {},
+            "field": "timestamp",
+            "interval": "auto",
+            "min_doc_count": 1,
+            "scaleMetricValues": false,
+            "useNormalizedEsInterval": true,
+            "used_interval": "0ms",
+          },
+          "schema": "segment",
+          "type": "date_histogram",
+        },
+      ]
+    `);
 
     expect(setField).toHaveBeenCalledWith('aggs', expect.any(Function));
     const dslFn = setField.mock.calls[0][1];
     expect(dslFn()).toMatchInlineSnapshot(`
-    Object {
-      "2": Object {
-        "date_histogram": Object {
-          "field": "timestamp",
-          "min_doc_count": 1,
-          "time_zone": "America/New_York",
-        },
-      },
-    }
-  `);
+          Object {
+            "2": Object {
+              "date_histogram": Object {
+                "field": "timestamp",
+                "min_doc_count": 1,
+                "time_zone": "America/New_York",
+              },
+            },
+          }
+      `);
   });
 
   test('enabled = false', () => {
