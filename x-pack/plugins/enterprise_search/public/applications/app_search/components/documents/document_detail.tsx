@@ -91,7 +91,7 @@ export const DocumentDetail: React.FC<Props> = ({ engineBreadcrumb }) => {
           </EuiButton>,
         ]}
       />
-      <EuiPageContent>
+      <EuiPageContent hasBorder>
         <EuiPageContentBody>
           <FlashMessages />
           <EuiBasicTable columns={columns} items={fields} />
