@@ -30,6 +30,7 @@ export const ScheduleField = ({ number, onChange, unit }: Props) => {
           )}
           id="syntheticsFleetScheduleField--number"
           data-test-subj="scheduleFieldInput"
+          step={'any'}
           min={0}
           value={number}
           onChange={(event) => {

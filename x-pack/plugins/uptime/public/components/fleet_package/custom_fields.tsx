@@ -313,6 +313,7 @@ export const CustomFields = memo<Props>(
                       onChange={(event) =>
                         handleInputChange({ value: event.target.value, configKey: ConfigKeys.WAIT })
                       }
+                      step={'any'}
                     />
                   </EuiFormRow>
                 )}
@@ -409,6 +410,7 @@ export const CustomFields = memo<Props>(
                         configKey: ConfigKeys.TIMEOUT,
                       })
                     }
+                    step={'any'}
                   />
                 </EuiFormRow>
                 <EuiFormRow

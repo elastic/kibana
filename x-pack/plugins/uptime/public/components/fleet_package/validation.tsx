@@ -6,7 +6,7 @@
  */
 import { ConfigKeys, DataStream, ICustomFields, Validation } from './types';
 
-const digitsOnly = /^[0-9]*$/g;
+export const digitsOnly = /^[0-9]*$/g;
 
 function validateHeaders<T>(headers: T): boolean {
   return Object.keys(headers).some((key) => {
@@ -22,14 +22,13 @@ function validateHeaders<T>(headers: T): boolean {
 // validation functions return true when invalid
 const validateCommon = {
   [ConfigKeys.MAX_REDIRECTS]: (value: unknown) =>
-    !!value &&
-    !digitsOnly.test(`${value}`) &&
+    (!!value && !`${value}`.match(digitsOnly)) ||
     (value as ICustomFields[ConfigKeys.MAX_REDIRECTS]) < 0,
   [ConfigKeys.MONITOR_TYPE]: (value: unknown) => !value,
   [ConfigKeys.SCHEDULE]: (value: unknown) => {
     const { number, unit } = value as ICustomFields[ConfigKeys.SCHEDULE];
     const parsedFloat = parseFloat(number);
-    return !parsedFloat || !unit || !`${number}`.match(digitsOnly) || parsedFloat < 1;
+    return !parsedFloat || !unit || parsedFloat < 1;
   },
   [ConfigKeys.TIMEOUT]: (value: unknown) =>
     !!value && !digitsOnly.test(`${value}`) && (value as ICustomFields[ConfigKeys.TIMEOUT]) < 0,
