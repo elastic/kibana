@@ -38,6 +38,12 @@ const appToPatternMap: Record<DataType, string> = {
   metrics: 'metrics-*,metricbeat-*',
 };
 
+function isParamsSame(param1, param2) {
+  return (
+    param1?.inputFormat === param2?.inputFormat && param1?.outputFormat === param2?.outputFormat
+  );
+}
+
 export class ObservabilityIndexPatterns {
   data?: DataPublicPluginStart;
 
@@ -67,14 +73,18 @@ export class ObservabilityIndexPatterns {
   // we want to make sure field formats remain same
   async validateFieldFormats(app: DataType, indexPattern: IndexPattern) {
     const defaultFieldFormats = getFieldFormatsForApp('rum');
-
+    let isParamsDifferent = false;
     defaultFieldFormats.forEach(({ field, format }) => {
-      // const fieldFormat = indexPattern.getFormatterForField(indexPattern.getFieldByName(field)!);
-      // const params = fieldFormat.params();
-      indexPattern.setFieldFormat(field, format);
+      const fieldFormat = indexPattern.getFormatterForField(indexPattern.getFieldByName(field)!);
+      const params = fieldFormat.params();
+      if (!isParamsSame(params, format.params)) {
+        indexPattern.setFieldFormat(field, format);
+        isParamsDifferent = true;
+      }
     });
-    // FIXME only update if it actually changes
-    await this.data?.indexPatterns.updateSavedObject(indexPattern);
+    if (isParamsDifferent) {
+      await this.data?.indexPatterns.updateSavedObject(indexPattern);
+    }
   }
 
   getFieldFormats() {

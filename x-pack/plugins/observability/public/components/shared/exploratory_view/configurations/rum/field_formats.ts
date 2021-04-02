@@ -51,7 +51,7 @@ export const rumFieldFormats: FieldFormat[] = [
       id: 'duration',
       params: {
         inputFormat: 'milliseconds',
-        outputFormat: 'asMilliseconds',
+        outputFormat: 'asSeconds',
       },
     },
   },
@@ -61,7 +61,7 @@ export const rumFieldFormats: FieldFormat[] = [
       id: 'duration',
       params: {
         inputFormat: 'milliseconds',
-        outputFormat: 'asMilliseconds',
+        outputFormat: 'asSeconds',
       },
     },
   },
