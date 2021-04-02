@@ -52,7 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
           ],
           scatterplotMatrixColorsWizard: [
             // markers
-            { color: '#52B398', percentage: 25 },
+            { color: '#52B398', percentage: 15 },
             // grey boilerplate
             { color: '#6A717D', percentage: 30 },
           ],
@@ -62,9 +62,9 @@ export default function ({ getService }: FtrProviderContext) {
             // tick/grid/axis, grey markers
             { color: '#6A717D', percentage: 30 },
             { color: '#D3DAE6', percentage: 8 },
-            { color: '#98A1B3', percentage: 25 },
+            { color: '#98A1B3', percentage: 12 },
             // anti-aliasing
-            { color: '#F5F7FA', percentage: 27 },
+            { color: '#F5F7FA', percentage: 30 },
           ],
           row: {
             type: 'outlier_detection',
@@ -125,6 +125,11 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('displays the include fields selection');
           await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
+
+          await ml.testExecution.logTestStep(
+            'sets the randomize query switch to true for the scatterplot matrix'
+          );
+          await ml.dataFrameAnalyticsCreation.setScatterplotMatrixRandomizeQueryCheckState(true);
 
           await ml.testExecution.logTestStep('displays the scatterplot matrix');
           await ml.dataFrameAnalyticsCreation.assertScatterplotMatrix(
@@ -255,6 +260,13 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
           await ml.dataFrameAnalyticsResults.assertFeatureInfluenceCellNotEmpty();
+
+          await ml.testExecution.logTestStep(
+            'sets the randomize query switch to true for the scatterplot matrix'
+          );
+          await ml.dataFrameAnalyticsResults.setScatterplotMatrixRandomizeQueryCheckState(true);
+
+          await ml.testExecution.logTestStep('displays the scatterplot matrix');
           await ml.dataFrameAnalyticsResults.assertScatterplotMatrix(
             testData.expected.scatterplotMatrixColorStatsResults
           );

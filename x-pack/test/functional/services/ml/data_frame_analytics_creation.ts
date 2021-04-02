@@ -274,6 +274,29 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       );
     },
 
+    async getScatterplotMatrixRandomizeQuerySwitchCheckState(): Promise<boolean> {
+      const state = await testSubjects.getAttribute(
+        'mlScatterplotMatrixRandomizeQuerySwitch',
+        'aria-checked'
+      );
+      return state === 'true';
+    },
+
+    async assertScatterplotMatrixRandomizeQueryCheckState(expectedCheckState: boolean) {
+      const actualCheckState = await this.getScatterplotMatrixRandomizeQuerySwitchCheckState();
+      expect(actualCheckState).to.eql(
+        expectedCheckState,
+        `Randomize query check state should be '${expectedCheckState}' (got '${actualCheckState}')`
+      );
+    },
+
+    async setScatterplotMatrixRandomizeQueryCheckState(checkState: boolean) {
+      if ((await this.getScatterplotMatrixRandomizeQuerySwitchCheckState()) !== checkState) {
+        await testSubjects.click('mlScatterplotMatrixRandomizeQuerySwitch');
+      }
+      await this.assertScatterplotMatrixRandomizeQueryCheckState(checkState);
+    },
+
     async assertTrainingPercentInputExists() {
       await testSubjects.existOrFail('mlAnalyticsCreateJobWizardTrainingPercentSlider');
     },

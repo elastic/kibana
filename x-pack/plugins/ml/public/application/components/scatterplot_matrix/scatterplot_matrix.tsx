@@ -341,6 +341,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
                 fullWidth
               >
                 <EuiSwitch
+                  data-test-subj={`mlScatterplotMatrixRandomizeQuerySwitch`}
                   name="mlScatterplotMatrixRandomizeQuery"
                   label={randomizeQuery ? TOGGLE_ON : TOGGLE_OFF}
                   checked={randomizeQuery}
