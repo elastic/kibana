@@ -139,6 +139,11 @@ const PieComponent = (props: PieComponentProps) => {
     });
   }, [props.uiState]);
 
+  useEffect(() => {
+    setShowLegend(props.visParams.addLegend);
+    props.uiState?.set('vis.legendOpen', props.visParams.addLegend);
+  }, [props.uiState, props.visParams.addLegend]);
+
   const setColor = useCallback(
     (newColor: string | null, seriesLabel: string | number) => {
       const colors = props.uiState?.get('vis.colors') || {};
@@ -179,26 +184,13 @@ const PieComponent = (props: PieComponentProps) => {
     visParams,
   ]);
 
-  const parentSeries = useMemo(() => {
-    const parentBucketId = bucketColumns[0].id;
-    const series: string[] = [];
-    visData.rows.forEach((row) => {
-      if (!parentBucketId) return [];
-      if (!series.includes(row[parentBucketId])) {
-        series.push(row[parentBucketId]);
-      }
-    });
-    return series;
-  }, [bucketColumns, visData.rows]);
-
   const layers = useMemo(
     () =>
       getLayers(
         bucketColumns,
         visParams,
-        parentSeries,
         props.uiState?.get('vis.colors', {}),
-        visData.rows.length,
+        visData.rows,
         palettesRegistry,
         services.fieldFormats,
         syncColors
@@ -206,9 +198,8 @@ const PieComponent = (props: PieComponentProps) => {
     [
       bucketColumns,
       visParams,
-      parentSeries,
       props.uiState,
-      visData.rows.length,
+      visData.rows,
       palettesRegistry,
       services.fieldFormats,
       syncColors,
@@ -230,9 +221,18 @@ const PieComponent = (props: PieComponentProps) => {
         bucketColumns,
         visParams.palette.name,
         visData.rows,
-        props.uiState
+        props.uiState,
+        visParams.distinctColors
       ),
-    [bucketColumns, legendPosition, setColor, visData.rows, visParams.palette.name, props.uiState]
+    [
+      legendPosition,
+      setColor,
+      bucketColumns,
+      visParams.palette.name,
+      visParams.distinctColors,
+      visData.rows,
+      props.uiState,
+    ]
   );
 
   const splitChartColumnAccessor = visParams.dimensions.splitColumn

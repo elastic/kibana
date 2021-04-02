@@ -13,3 +13,4 @@ export { canFilter, getFilterClickData, getFilterEventData } from './filter_help
 export { getConfig } from './get_config';
 export { getColumns } from './get_columns';
 export { getComplexAccessor } from './get_complex_accessor';
+export { getDistinctSeries } from './get_distinct_series';

@@ -23,6 +23,7 @@ describe('interpreter/functions#pie', () => {
     legendPosition: 'right',
     isDonut: true,
     nestedLegend: true,
+    distinctColors: false,
     palette: 'kibana_palette',
     labels: {
       show: false,

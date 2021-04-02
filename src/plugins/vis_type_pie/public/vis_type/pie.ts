@@ -34,6 +34,7 @@ export const getPieVisTypeDefinition = ({
       addLegend: false,
       legendPosition: Position.Right,
       nestedLegend: false,
+      distinctColors: false,
       isDonut: true,
       palette: {
         type: 'palette',

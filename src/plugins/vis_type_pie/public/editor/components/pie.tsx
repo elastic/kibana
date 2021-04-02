@@ -33,9 +33,17 @@ const PieOptions = (props: PieOptionsProps) => {
     paramName: T,
     value: PieVisParams['labels'][T]
   ) => setValue('labels', { ...stateParams.labels, [paramName]: value });
-
+  const legendUiStateValue = props.uiState?.get('vis.legendOpen');
   const [palettesRegistry, setPalettesRegistry] = useState<PaletteRegistry | undefined>(undefined);
+  const [legendVisibility, setLegendVisibility] = useState<boolean>(() => {
+    const bwcLegendStateDefault = stateParams.addLegend == null ? false : stateParams.addLegend;
+    return props.uiState?.get('vis.legendOpen', bwcLegendStateDefault) as boolean;
+  });
   const hasSplitChart = aggs?.aggs?.find((agg) => agg.schema === 'split' && agg.enabled);
+
+  useEffect(() => {
+    setLegendVisibility(legendUiStateValue);
+  }, [legendUiStateValue]);
 
   useEffect(() => {
     const fetchPalettes = async () => {
@@ -68,6 +76,29 @@ const PieOptions = (props: PieOptionsProps) => {
         <BasicOptions {...props} legendPositions={getLegendPositions} />
         {props.showElasticChartsOptions && (
           <>
+            <SwitchOption
+              label={i18n.translate('visTypePie.editors.pie.distinctColorsLabel', {
+                defaultMessage: 'Distinct colors per slice',
+              })}
+              paramName="distinctColors"
+              value={stateParams.distinctColors}
+              setValue={(paramName, value) => {
+                setValue(paramName, value);
+              }}
+              data-test-subj="visTypePiedistinctColorsSwitch"
+            />
+            <SwitchOption
+              label={i18n.translate('visTypePie.editors.pie.addLegendLabel', {
+                defaultMessage: 'Show legend',
+              })}
+              paramName="addLegend"
+              value={legendVisibility}
+              setValue={(paramName, value) => {
+                setLegendVisibility(value);
+                setValue(paramName, value);
+              }}
+              data-test-subj="visTypePieAddLegendSwitch"
+            />
             <SwitchOption
               label={i18n.translate('visTypePie.editors.pie.nestedLegendLabel', {
                 defaultMessage: 'Nested legend',

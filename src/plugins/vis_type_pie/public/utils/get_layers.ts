@@ -7,19 +7,86 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Datum, PartitionFillLabel, PartitionLayer } from '@elastic/charts';
+import { Datum, PartitionFillLabel, PartitionLayer, ShapeTreeNode } from '@elastic/charts';
 import { SeriesLayer, PaletteRegistry, lightenColor } from '../../../charts/public';
 import { DataPublicPluginStart } from '../../../data/public';
+import { DatatableRow } from '../../../expressions/public';
 import { BucketColumns, PieVisParams } from '../types';
+import { getDistinctSeries } from './get_distinct_series';
 
 const EMPTY_SLICE = Symbol('empty_slice');
+
+const computeColor = (
+  d: ShapeTreeNode,
+  isSplitChart: boolean,
+  overwriteColors: { [key: string]: string },
+  columns: Array<Partial<BucketColumns>>,
+  rows: DatatableRow[],
+  visParams: PieVisParams,
+  palettes: PaletteRegistry | null,
+  syncColors: boolean
+) => {
+  const { parentSeries, allSeries } = getDistinctSeries(rows, columns);
+
+  if (visParams.distinctColors) {
+    if (Object.keys(overwriteColors).includes(d.dataName.toString())) {
+      return overwriteColors[d.dataName];
+    }
+    return palettes?.get(visParams.palette.name).getColor(
+      [
+        {
+          name: d.dataName,
+          rankAtDepth: allSeries.findIndex((name) => name === d.dataName),
+          totalSeriesAtDepth: allSeries.length,
+        },
+      ],
+      {
+        maxDepth: 1,
+        totalSeries: allSeries.length,
+        behindText: false,
+        syncColors,
+      }
+    );
+  } else {
+    const seriesLayers: SeriesLayer[] = [];
+    let tempParent: typeof d | typeof d['parent'] = d;
+    while (tempParent.parent && tempParent.depth > 0) {
+      const seriesName = String(tempParent.parent.children[tempParent.sortIndex][0]);
+      seriesLayers.unshift({
+        name: seriesName,
+        rankAtDepth:
+          isSplitChart && parentSeries.includes(seriesName)
+            ? parentSeries.findIndex((name) => name === seriesName)
+            : tempParent.sortIndex,
+        totalSeriesAtDepth: tempParent.parent.children.length,
+      });
+      tempParent = tempParent.parent;
+    }
+
+    let overwriteColor;
+    seriesLayers.forEach((layer) => {
+      if (Object.keys(overwriteColors).includes(layer.name)) {
+        overwriteColor = overwriteColors[layer.name];
+      }
+    });
+
+    if (overwriteColor) {
+      return lightenColor(overwriteColor, seriesLayers.length, columns.length);
+    }
+    return palettes?.get(visParams.palette.name).getColor(seriesLayers, {
+      behindText: visParams.labels.show,
+      maxDepth: columns.length,
+      totalSeries: rows.length,
+      syncColors,
+    });
+  }
+};
 
 export const getLayers = (
   columns: Array<Partial<BucketColumns>>,
   visParams: PieVisParams,
-  parentSeries: string[],
   overwriteColors: { [key: string]: string },
-  totalSeries: number,
+  rows: DatatableRow[],
   palettes: PaletteRegistry | null,
   formatter: DataPublicPluginStart['fieldFormats'],
   syncColors: boolean
@@ -55,41 +122,16 @@ export const getLayers = (
       fillLabel,
       shape: {
         fillColor: (d) => {
-          const seriesLayers: SeriesLayer[] = [];
-
-          // Color is determined by round-robin on the index of the innermost slice
-          // This has to be done recursively until we get to the slice index
-          let tempParent: typeof d | typeof d['parent'] = d;
-          while (tempParent.parent && tempParent.depth > 0) {
-            const seriesName = String(tempParent.parent.children[tempParent.sortIndex][0]);
-            seriesLayers.unshift({
-              name: seriesName,
-              rankAtDepth:
-                isSplitChart && parentSeries.includes(seriesName)
-                  ? parentSeries.findIndex((name) => name === seriesName)
-                  : tempParent.sortIndex,
-              totalSeriesAtDepth: tempParent.parent.children.length,
-            });
-            tempParent = tempParent.parent;
-          }
-
-          let overwriteColor;
-          seriesLayers.forEach((layer) => {
-            if (Object.keys(overwriteColors).includes(layer.name)) {
-              overwriteColor = overwriteColors[layer.name];
-            }
-          });
-
-          if (overwriteColor) {
-            return lightenColor(overwriteColor, seriesLayers.length, columns.length);
-          }
-
-          const outputColor = palettes?.get(visParams.palette.name).getColor(seriesLayers, {
-            behindText: visParams.labels.show,
-            maxDepth: columns.length,
-            totalSeries,
-            syncColors,
-          });
+          const outputColor = computeColor(
+            d,
+            isSplitChart,
+            overwriteColors,
+            columns,
+            rows,
+            visParams,
+            palettes,
+            syncColors
+          );
 
           return outputColor || 'rgba(0,0,0,0)';
         },

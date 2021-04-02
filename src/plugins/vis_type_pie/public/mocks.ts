@@ -278,6 +278,7 @@ export const createMockPieParams = (): PieVisParams => {
     },
     legendPosition: 'right',
     nestedLegend: false,
+    distinctColors: false,
     palette: {
       name: 'default',
       type: 'palette',

@@ -46,7 +46,8 @@ describe('getColorPicker', function () {
     bucketColumns,
     'default',
     visData.rows,
-    uiState
+    uiState,
+    false
   );
   let wrapper: ReactWrapper<LegendColorPickerProps>;
 
@@ -97,14 +98,15 @@ describe('getColorPicker', function () {
     expect(wrapper.find(ColorPicker).prop('colorIsOverwritten')).toBe(true);
   });
 
-  it('renders the picker for kibana palette and not inner layer', () => {
+  it('renders the picker for kibana palette and not distinctColors', () => {
     const LegacyPaletteComponent: ComponentType<LegendColorPickerProps> = getColorPicker(
       'left',
       jest.fn(),
       bucketColumns,
       'kibana_palette',
       visData.rows,
-      uiState
+      uiState,
+      true
     );
     const newProps = { ...wrapperProps, seriesIdentifier: { key: '1', specId: 'pie' } };
     wrapper = mountWithIntl(<LegacyPaletteComponent {...newProps} />);

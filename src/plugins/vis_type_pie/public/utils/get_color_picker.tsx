@@ -54,7 +54,8 @@ export const getColorPicker = (
   bucketColumns: Array<Partial<BucketColumns>>,
   palette: string,
   data: DatatableRow[],
-  uiState: PersistedState
+  uiState: PersistedState,
+  distinctColors: boolean
 ): LegendColorPicker => ({
   anchor,
   color,
@@ -88,8 +89,7 @@ export const getColorPicker = (
     onClose?.();
   }, [onClose]);
 
-  // For the EuiPalette we want the user to be able to change only the colors of the inner layer
-  if (palette !== 'kibana_palette') {
+  if (!distinctColors) {
     const enablePicker = isOnInnerLayer(bucketColumns[0], data, seriesName) || !bucketColumns[0].id;
     if (!enablePicker) return null;
   }
