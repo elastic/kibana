@@ -14,17 +14,17 @@ const readOperations: string[] = ['get', 'find'];
 const writeOperations: string[] = ['update'];
 const allOperations: string[] = [...readOperations, ...writeOperations];
 
-export class FeaturePrivilegeAlertsBuilder extends BaseFeaturePrivilegeBuilder {
-  public getActions(privilegeDefinition: FeatureKibanaPrivileges): string[] {
-    const getAlertsPrivilege = (operations: string[], owners: readonly string[]) => {
+export class FeaturePrivilegeRacBuilder extends BaseFeaturePrivilegeBuilder {
+  public getActions(privilegeDefinition: FeatureKibanaPrivileges, spaceId: string): string[] {
+    const getRacPrivilege = (owners: readonly string[], operations: string[]) => {
       return owners.flatMap((owner) =>
-        operations.map((operation) => this.actions.alerts.get(operation, owner))
+        operations.map((operation) => this.actions.rac.get(spaceId, owner, operation))
       );
     };
 
     return uniq([
-      ...getAlertsPrivilege(allOperations, privilegeDefinition.alerts?.all ?? []),
-      ...getAlertsPrivilege(readOperations, privilegeDefinition.alerts?.read ?? []),
+      ...getRacPrivilege(allOperations, privilegeDefinition.alerts?.all ?? []),
+      ...getRacPrivilege(readOperations, privilegeDefinition.alerts?.read ?? []),
     ]);
   }
 }

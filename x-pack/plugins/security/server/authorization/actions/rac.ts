@@ -7,14 +7,18 @@
 
 import { isString } from 'lodash';
 
-export class AlertsActions {
+export class RacActions {
   private readonly prefix: string;
 
-  constructor(versionNumber: string, spaceId: string) {
-    this.prefix = `alerts:${spaceId}:${versionNumber}`;
+  constructor(versionNumber: string) {
+    this.prefix = `rac:${versionNumber}`;
   }
 
-  public get(owner: string, operation: string): string {
+  public get(spaceId: string, owner: string, operation: string): string {
+    if (!spaceId || !isString(spaceId)) {
+      throw new Error('"spaceId" is required and must be a string');
+    }
+
     if (!operation || !isString(operation)) {
       throw new Error('"operation" is required and must be a string');
     }
@@ -23,6 +27,6 @@ export class AlertsActions {
       throw new Error('"owner" is required and must be a string');
     }
 
-    return `${this.prefix}:${owner}/${operation}`;
+    return `${this.prefix}:${spaceId}:${owner}/${operation}`;
   }
 }

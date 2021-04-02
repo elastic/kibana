@@ -99,6 +99,11 @@ export interface KibanaFeatureConfig {
   alerting?: readonly string[];
 
   /**
+   * If your feature grants access to specific alerts, you can specify them here to control visibility based on the current space.
+   */
+  rac?: readonly string[];
+
+  /**
    * Feature privilege definition.
    *
    * @example
@@ -189,6 +194,10 @@ export class KibanaFeature {
 
   public get reserved() {
     return this.config.reserved;
+  }
+
+  public get rac() {
+    return this.config.rac;
   }
 
   public toRaw() {

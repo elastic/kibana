@@ -108,7 +108,7 @@ export interface FeatureKibanaPrivileges {
   /**
    * Solutions should specify owners of alerts here which will provide the solution read / write access to those alerts.
    */
-  alerts?: {
+  rac?: {
     /**
      * List of owners of alerts which users should have full read/write access to when granted this privilege.
      * @example
