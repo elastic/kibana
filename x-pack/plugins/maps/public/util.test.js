@@ -6,7 +6,7 @@
  */
 
 import { EMSClient } from '@elastic/ems-client';
-import { getEMSClient, getGlyphUrl } from './meta';
+import { getEMSClient, getGlyphUrl } from './util';
 
 jest.mock('@elastic/ems-client');
 
