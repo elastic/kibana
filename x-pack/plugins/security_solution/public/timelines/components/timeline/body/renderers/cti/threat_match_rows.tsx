@@ -24,15 +24,21 @@ const sliceThreatMatchFields = (
     }));
 
 export const ThreatMatchRows = ({ flattenedData }: { flattenedData?: TimelineNonEcsData[] }) => {
-  const threatMatchCount =
-    flattenedData?.find((field) => isThreatMatchField(field))?.value?.length ?? 0;
-  const slicedThreatMatchFields = Array.from(Array(threatMatchCount)).map((_, index) =>
+  // TODO this code sucks and we should get rid of it
+  // where do our threat fields get flattened like this? it's not in the fields response itself
+  // it comes from the backend, so it must be the search strategy
+
+  const threatMatchCount = flattenedData?.find((field) => isThreatMatchField(field))?.value;
+  const t = threatMatchCount?.length ?? 0;
+  console.log('threatMatchCount', threatMatchCount);
+  const slicedThreatMatchFields = Array.from(Array(t)).map((_, index) =>
     sliceThreatMatchFields(flattenedData ?? [], index)
   );
 
   return (
     <RowRendererContainer data-test-subj="threat-match-row-renderer">
       {slicedThreatMatchFields?.map((fields, index) => (
+        // TODO object with keys instead of fields
         <ThreatMatchRow key={index} fields={fields} />
       ))}
     </RowRendererContainer>
