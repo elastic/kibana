@@ -34,6 +34,7 @@ export const RecentApiLogs: React.FC = () => {
           {VIEW_API_LOGS}
         </EuiButtonEmptyTo>
       }
+      hasBorder
     >
       TODO: API Logs Table
       {/* <ApiLogsTable hidePagination={true} /> */}
