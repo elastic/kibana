@@ -17,14 +17,13 @@ import {
   LegacyAPICaller,
 } from 'src/core/server';
 
-import { License } from '../../../../src/plugins/es_ui_shared/server';
 import { Index } from '../../index_management/server';
 import { PLUGIN } from '../common/constants';
 import type { SetupDependencies, CcrRequestHandlerContext } from './types';
 import { registerApiRoutes } from './routes';
 import { elasticsearchJsPlugin } from './client/elasticsearch_ccr';
 import { CrossClusterReplicationConfig } from './config';
-import { isEsError } from './shared_imports';
+import { License, isEsError } from './shared_imports';
 import { formatEsError } from './lib/format_es_error';
 
 async function getCustomEsClient(getStartServices: CoreSetup['getStartServices']) {

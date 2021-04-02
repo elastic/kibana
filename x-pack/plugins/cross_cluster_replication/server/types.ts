@@ -10,10 +10,8 @@ import { PluginSetupContract as FeaturesPluginSetup } from '../../features/serve
 import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
 import { IndexManagementPluginSetup } from '../../index_management/server';
 import { RemoteClustersPluginSetup } from '../../remote_clusters/server';
-import { isEsError } from './shared_imports';
+import { License, isEsError } from './shared_imports';
 import { formatEsError } from './lib/format_es_error';
-
-import type { License } from '../../../../src/plugins/es_ui_shared/server';
 
 export interface SetupDependencies {
   licensing: LicensingPluginSetup;
