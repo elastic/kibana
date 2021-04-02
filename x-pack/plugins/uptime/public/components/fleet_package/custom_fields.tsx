@@ -116,7 +116,7 @@ export const CustomFields = memo<Props>(
           description={
             <FormattedMessage
               id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSectionDescription"
-              defaultMessage="Configure your Heartbeat monitor with the following options."
+              defaultMessage="Configure your monitor with the following options."
             />
           }
         >
@@ -310,7 +310,7 @@ export const CustomFields = memo<Props>(
                     helpText={
                       <FormattedMessage
                         id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.maxRedirects.helpText"
-                        defaultMessage="The total number of redirections Heartbeat will follow."
+                        defaultMessage="The total number of redirections to follow."
                       />
                     }
                   >

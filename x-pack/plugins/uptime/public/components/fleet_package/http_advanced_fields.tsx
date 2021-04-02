@@ -153,7 +153,7 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, valida
           helpText={
             <FormattedMessage
               id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.requestHeadersField.helpText"
-              defaultMessage="A dictionary of additional HTTP headers to send. By default heartbeat will set the User-Agent header to identify itself."
+              defaultMessage="A dictionary of additional HTTP headers to send. By default the client will set the User-Agent header to identify itself."
             />
           }
         >
