@@ -76,7 +76,6 @@ describe('createRuleRoute', () => {
         group: mockedAlert.actions[0].group,
         id: mockedAlert.actions[0].id,
         params: mockedAlert.actions[0].params,
-        connector_type_id: mockedAlert.actions[0].actionTypeId,
       },
     ],
   };
@@ -132,7 +131,6 @@ describe('createRuleRoute', () => {
           "data": Object {
             "actions": Array [
               Object {
-                "actionTypeId": "test",
                 "group": "default",
                 "id": "2",
                 "params": Object {
@@ -205,7 +203,6 @@ describe('createRuleRoute', () => {
           "data": Object {
             "actions": Array [
               Object {
-                "actionTypeId": "test",
                 "group": "default",
                 "id": "2",
                 "params": Object {

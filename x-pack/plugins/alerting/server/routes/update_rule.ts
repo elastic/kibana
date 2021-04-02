@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { IRouter } from 'kibana/server';
 import { ILicenseState, AlertTypeDisabledError, validateDurationSchema } from '../lib';
-import { AlertAction, AlertNotifyWhenType } from '../../common';
+import { AlertNotifyWhenType } from '../../common';
 import { UpdateOptions } from '../alerts_client';
 import {
   verifyAccessAndContext,
@@ -41,29 +41,19 @@ const bodySchema = schema.object({
       group: schema.string(),
       id: schema.string(),
       params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
-      connector_type_id: schema.string(),
     }),
     { defaultValue: [] }
   ),
   notify_when: schema.string({ validate: validateNotifyWhenType }),
 });
 
-const rewriteBodyReqActions: RewriteRequestCase<AlertAction> = ({
-  connector_type_id: actionTypeId,
-  ...rest
-}) => ({
-  actionTypeId,
-  ...rest,
-});
-
 const rewriteBodyReq: RewriteRequestCase<UpdateOptions<AlertTypeParams>> = (result) => {
-  const { notify_when: notifyWhen, actions, ...rest } = result.data;
+  const { notify_when: notifyWhen, ...rest } = result.data;
   return {
     ...result,
     data: {
       ...rest,
       notifyWhen,
-      actions: actions.map((action) => rewriteBodyReqActions(action)),
     },
   };
 };

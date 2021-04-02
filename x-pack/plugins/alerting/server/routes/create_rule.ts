@@ -22,7 +22,6 @@ import {
   AlertingRequestHandlerContext,
   BASE_ALERTING_API_PATH,
   AlertNotifyWhenType,
-  AlertAction,
 } from '../types';
 
 export const bodySchema = schema.object({
@@ -41,31 +40,20 @@ export const bodySchema = schema.object({
       group: schema.string(),
       id: schema.string(),
       params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
-      connector_type_id: schema.string(),
     }),
     { defaultValue: [] }
   ),
   notify_when: schema.string({ validate: validateNotifyWhenType }),
 });
 
-const rewriteBodyReqActions: RewriteRequestCase<AlertAction> = ({
-  connector_type_id: actionTypeId,
-  ...rest
-}) => ({
-  actionTypeId,
-  ...rest,
-});
-
 const rewriteBodyReq: RewriteRequestCase<CreateOptions<AlertTypeParams>['data']> = ({
   rule_type_id: alertTypeId,
   notify_when: notifyWhen,
-  actions,
   ...rest
 }) => ({
   ...rest,
   alertTypeId,
   notifyWhen,
-  actions: actions.map((action) => rewriteBodyReqActions(action)),
 });
 const rewriteBodyRes: RewriteResponseCase<SanitizedAlert<AlertTypeParams>> = ({
   actions,
@@ -130,12 +118,10 @@ export const createRuleRoute = (
           try {
             const createdRule: SanitizedAlert<AlertTypeParams> = await alertsClient.create<AlertTypeParams>(
               {
-                data: {
-                  ...rewriteBodyReq({
-                    ...rule,
-                    notify_when: rule.notify_when as AlertNotifyWhenType,
-                  }),
-                },
+                data: rewriteBodyReq({
+                  ...rule,
+                  notify_when: rule.notify_when as AlertNotifyWhenType,
+                }),
                 options: { id: params?.id },
               }
             );
