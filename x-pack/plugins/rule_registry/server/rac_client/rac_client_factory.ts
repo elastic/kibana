@@ -10,8 +10,8 @@ import { RacClient } from './rac_client';
 import { SecurityPluginSetup, SecurityPluginStart } from '../../../security/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
 // TODO: implement this class and audit logger
-import { AlertsAuthorization } from './authorization/alerts_authorization';
-import { AlertsAuthorizationAuditLogger } from './authorization/audit_logger';
+import { RacAuthorization } from '../authorization/rac_authorization';
+// import { AlertsAuthorizationAuditLogger } from './authorization/audit_logger';
 import { Space } from '../../../spaces/server';
 
 export interface RacClientFactoryOpts {
@@ -53,11 +53,12 @@ export class RacClientFactory {
     const { features, securityPluginSetup, securityPluginStart } = this;
     const spaceId = this.getSpaceId(request);
 
-    const authorization = new AlertsAuthorization({
+    const authorization = RacAuthorization.create({
       authorization: securityPluginStart?.authz,
       request,
       getSpace: this.getSpace,
       features: features!,
+      isAuthEnabled: true,
     });
 
     return new RacClient({

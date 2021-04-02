@@ -6,17 +6,16 @@
  */
 
 import type { FeatureKibanaPrivileges } from '../../../../../features/server';
-import { KibanaFeature } from '../../../../../features/server';
 import { Actions } from '../../actions';
-import { FeaturePrivilegeAlertsBuilder } from './alerts';
+import { FeaturePrivilegeRacBuilder } from './rac';
 
 const version = '1.0.0-zeta1';
 
-describe(`alerts`, () => {
+describe(`rac`, () => {
   describe(`feature_privilege_builder`, () => {
     it('grants no privileges by default', () => {
       const actions = new Actions(version);
-      const alertsFeaturePrivileges = new FeaturePrivilegealertsBuilder(actions);
+      const racFeaturePrivileges = new FeaturePrivilegeRacBuilder(actions);
 
       const privilege: FeatureKibanaPrivileges = {
         savedObject: {
@@ -26,30 +25,18 @@ describe(`alerts`, () => {
         ui: [],
       };
 
-      const feature = new KibanaFeature({
-        id: 'my-feature',
-        name: 'my-feature',
-        app: [],
-        category: { id: 'foo', label: 'foo' },
-        privileges: {
-          all: privilege,
-          read: privilege,
-        },
-      });
-
-      expect(alertsFeaturePrivileges.getActions(privilege, feature)).toEqual([]);
+      expect(racFeaturePrivileges.getActions(privilege)).toEqual([]);
     });
 
     describe(`within feature`, () => {
       it('grants `read` privileges under feature', () => {
         const actions = new Actions(version);
-        const alertsFeaturePrivilege = new FeaturePrivilegealertsBuilder(actions);
+        const alertsFeaturePrivilege = new FeaturePrivilegeRacBuilder(actions);
 
         const privilege: FeatureKibanaPrivileges = {
-          alerts: {
+          rac: {
             read: ['observability'],
           },
-
           savedObject: {
             all: [],
             read: [],
@@ -57,31 +44,20 @@ describe(`alerts`, () => {
           ui: [],
         };
 
-        const feature = new KibanaFeature({
-          id: 'my-feature',
-          name: 'my-feature',
-          app: [],
-          category: { id: 'foo', label: 'foo' },
-          privileges: {
-            all: privilege,
-            read: privilege,
-          },
-        });
-
-        expect(alertsFeaturePrivilege.getActions(privilege, feature)).toMatchInlineSnapshot(`
+        expect(alertsFeaturePrivilege.getActions(privilege)).toMatchInlineSnapshot(`
           Array [
-            "alerts:1.0.0-zeta1:observability/get",
-            "alerts:1.0.0-zeta1:observability/find",
+            "alerting:1.0.0-zeta1:default/observability/get",
+            "alerting:1.0.0-zeta1:default/observability/find",
           ]
         `);
       });
 
       it('grants `all` privileges under feature', () => {
         const actions = new Actions(version);
-        const alertsFeaturePrivilege = new FeaturePrivilegealertsBuilder(actions);
+        const alertsFeaturePrivilege = new FeaturePrivilegeRacBuilder(actions);
 
         const privilege: FeatureKibanaPrivileges = {
-          alerts: {
+          rac: {
             all: ['security'],
           },
 
@@ -92,34 +68,21 @@ describe(`alerts`, () => {
           ui: [],
         };
 
-        const feature = new KibanaFeature({
-          id: 'my-feature',
-          name: 'my-feature',
-          app: [],
-          category: { id: 'foo', label: 'foo' },
-          privileges: {
-            all: privilege,
-            read: privilege,
-          },
-        });
-
-        expect(alertsFeaturePrivilege.getActions(privilege, feature)).toMatchInlineSnapshot(`
+        expect(alertsFeaturePrivilege.getActions(privilege)).toMatchInlineSnapshot(`
           Array [
-            "alerts:1.0.0-zeta1:security/get",
-            "alerts:1.0.0-zeta1:security/find",
-            "alerts:1.0.0-zeta1:security/create",
-            "alerts:1.0.0-zeta1:security/delete",
-            "alerts:1.0.0-zeta1:security/update",
+            "alerting:1.0.0-zeta1:default/security/get",
+            "alerting:1.0.0-zeta1:default/security/find",
+            "alerting:1.0.0-zeta1:default/security/update",
           ]
         `);
       });
 
       it('grants both `all` and `read` privileges under feature', () => {
         const actions = new Actions(version);
-        const alertsFeaturePrivilege = new FeaturePrivilegealertsBuilder(actions);
+        const alertsFeaturePrivilege = new FeaturePrivilegeRacBuilder(actions);
 
         const privilege: FeatureKibanaPrivileges = {
-          alerts: {
+          rac: {
             all: ['security'],
             read: ['obs'],
           },
@@ -131,36 +94,23 @@ describe(`alerts`, () => {
           ui: [],
         };
 
-        const feature = new KibanaFeature({
-          id: 'my-feature',
-          name: 'my-feature',
-          app: [],
-          category: { id: 'foo', label: 'foo' },
-          privileges: {
-            all: privilege,
-            read: privilege,
-          },
-        });
-
-        expect(alertsFeaturePrivilege.getActions(privilege, feature)).toMatchInlineSnapshot(`
+        expect(alertsFeaturePrivilege.getActions(privilege)).toMatchInlineSnapshot(`
           Array [
-            "alerts:1.0.0-zeta1:security/get",
-            "alerts:1.0.0-zeta1:security/find",
-            "alerts:1.0.0-zeta1:security/create",
-            "alerts:1.0.0-zeta1:security/delete",
-            "alerts:1.0.0-zeta1:security/update",
-            "alerts:1.0.0-zeta1:obs/get",
-            "alerts:1.0.0-zeta1:obs/find",
+            "alerting:1.0.0-zeta1:default/security/get",
+            "alerting:1.0.0-zeta1:default/security/find",
+            "alerting:1.0.0-zeta1:default/security/update",
+            "alerting:1.0.0-zeta1:default/obs/get",
+            "alerting:1.0.0-zeta1:default/obs/find",
           ]
         `);
       });
 
-      it('grants both `all` and `read` privileges under feature with multiple values in alerts array', () => {
+      it('grants both `all` and `read` privileges under feature with multiple values in rac array', () => {
         const actions = new Actions(version);
-        const alertsFeaturePrivilege = new FeaturePrivilegealertsBuilder(actions);
+        const alertsFeaturePrivilege = new FeaturePrivilegeRacBuilder(actions);
 
         const privilege: FeatureKibanaPrivileges = {
-          alerts: {
+          rac: {
             all: ['security', 'other-security'],
             read: ['obs', 'other-obs'],
           },
@@ -172,33 +122,18 @@ describe(`alerts`, () => {
           ui: [],
         };
 
-        const feature = new KibanaFeature({
-          id: 'my-feature',
-          name: 'my-feature',
-          app: [],
-          category: { id: 'foo', label: 'foo' },
-          privileges: {
-            all: privilege,
-            read: privilege,
-          },
-        });
-
-        expect(alertsFeaturePrivilege.getActions(privilege, feature)).toMatchInlineSnapshot(`
+        expect(alertsFeaturePrivilege.getActions(privilege)).toMatchInlineSnapshot(`
           Array [
-            "alerts:1.0.0-zeta1:security/get",
-            "alerts:1.0.0-zeta1:security/find",
-            "alerts:1.0.0-zeta1:security/create",
-            "alerts:1.0.0-zeta1:security/delete",
-            "alerts:1.0.0-zeta1:security/update",
-            "alerts:1.0.0-zeta1:other-security/get",
-            "alerts:1.0.0-zeta1:other-security/find",
-            "alerts:1.0.0-zeta1:other-security/create",
-            "alerts:1.0.0-zeta1:other-security/delete",
-            "alerts:1.0.0-zeta1:other-security/update",
-            "alerts:1.0.0-zeta1:obs/get",
-            "alerts:1.0.0-zeta1:obs/find",
-            "alerts:1.0.0-zeta1:other-obs/get",
-            "alerts:1.0.0-zeta1:other-obs/find",
+            "alerting:1.0.0-zeta1:default/security/get",
+            "alerting:1.0.0-zeta1:default/security/find",
+            "alerting:1.0.0-zeta1:default/security/update",
+            "alerting:1.0.0-zeta1:default/other-security/get",
+            "alerting:1.0.0-zeta1:default/other-security/find",
+            "alerting:1.0.0-zeta1:default/other-security/update",
+            "alerting:1.0.0-zeta1:default/obs/get",
+            "alerting:1.0.0-zeta1:default/obs/find",
+            "alerting:1.0.0-zeta1:default/other-obs/get",
+            "alerting:1.0.0-zeta1:default/other-obs/find",
           ]
         `);
       });

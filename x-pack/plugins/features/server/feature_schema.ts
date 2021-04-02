@@ -306,7 +306,7 @@ export function validateKibanaFeature(feature: KibanaFeatureConfig) {
     validateManagementEntry(privilegeId, privilegeDefinition.management);
     validateAlertingEntry(privilegeId, privilegeDefinition.alerting);
 
-    validateRacEntry(privilegeId, privilegeDefinition.rac);
+    // validateRacEntry(privilegeId, privilegeDefinition.rac);
   });
 
   const subFeatureEntries = feature.subFeatures ?? [];
@@ -317,7 +317,7 @@ export function validateKibanaFeature(feature: KibanaFeatureConfig) {
         validateCatalogueEntry(subFeaturePrivilege.id, subFeaturePrivilege.catalogue);
         validateManagementEntry(subFeaturePrivilege.id, subFeaturePrivilege.management);
         validateAlertingEntry(subFeaturePrivilege.id, subFeaturePrivilege.alerting);
-        validateRacEntry(subFeaturePrivilege.id, subFeaturePrivilege.rac);
+        // validateRacEntry(subFeaturePrivilege.id, subFeaturePrivilege.rac);
       });
     });
   });
