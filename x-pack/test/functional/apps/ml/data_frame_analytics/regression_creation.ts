@@ -46,7 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
             { color: '#D1E5E0', percentage: 2 },
             // tick/grid/axis
             { color: '#6A717D', percentage: 10 },
-            { color: '#F5F7FA', percentage: 12 },
+            { color: '#F5F7FA', percentage: 10 },
             { color: '#D3DAE6', percentage: 3 },
           ],
           row: {
