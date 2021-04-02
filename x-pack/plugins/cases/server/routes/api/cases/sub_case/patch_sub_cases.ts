@@ -17,6 +17,7 @@ import {
   Logger,
 } from 'kibana/server';
 
+import { nodeBuilder } from '../../../../../../../../src/plugins/data/common';
 import { CasesClient } from '../../../../client';
 import { CaseServiceSetup, CaseUserActionServiceSetup } from '../../../../services';
 import {
@@ -209,7 +210,10 @@ async function getAlertComments({
     client,
     id: ids,
     options: {
-      filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.alert} OR ${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.generatedAlert}`,
+      filter: nodeBuilder.or([
+        nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`, CommentType.alert),
+        nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`, CommentType.generatedAlert),
+      ]),
     },
   });
 }

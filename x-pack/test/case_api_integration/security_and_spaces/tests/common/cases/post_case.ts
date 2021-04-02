@@ -6,20 +6,33 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 import {
-  postCaseReq,
+  ConnectorTypes,
+  ConnectorJiraTypeFields,
+} from '../../../../../../plugins/cases/common/api';
+import {
+  getPostCaseRequest,
   postCaseResp,
   removeServerGeneratedPropertiesFromCase,
 } from '../../../../common/lib/mock';
-import { deleteCases } from '../../../../common/lib/utils';
+import { createCaseAsUser, deleteCases } from '../../../../common/lib/utils';
+import {
+  secOnly,
+  secOnlyRead,
+  globalRead,
+  obsOnlyRead,
+  obsSecRead,
+  noKibanaPrivileges,
+} from '../../../../common/lib/authentication/users';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('post_case', () => {
     afterEach(async () => {
@@ -30,7 +43,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
-        .send(postCaseReq)
+        .send(getPostCaseRequest())
         .expect(200);
 
       const data = removeServerGeneratedPropertiesFromCase(postedCase);
@@ -41,12 +54,13 @@ export default ({ getService }: FtrProviderContext): void => {
       await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
-        .send({ ...postCaseReq, badKey: true })
+        // @ts-expect-error
+        .send({ ...getPostCaseRequest({ badKey: true }) })
         .expect(400);
     });
 
     it('unhappy path - 400s when connector is not supplied', async () => {
-      const { connector, ...caseWithoutConnector } = postCaseReq;
+      const { connector, ...caseWithoutConnector } = getPostCaseRequest();
 
       await supertest
         .post(CASES_URL)
@@ -60,8 +74,10 @@ export default ({ getService }: FtrProviderContext): void => {
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
         .send({
-          ...postCaseReq,
-          connector: { id: 'wrong', name: 'wrong', type: '.not-exists', fields: null },
+          ...getPostCaseRequest({
+            // @ts-expect-error
+            connector: { id: 'wrong', name: 'wrong', type: '.not-exists', fields: null },
+          }),
         })
         .expect(400);
     });
@@ -71,15 +87,63 @@ export default ({ getService }: FtrProviderContext): void => {
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
         .send({
-          ...postCaseReq,
-          connector: {
-            id: 'wrong',
-            name: 'wrong',
-            type: '.jira',
-            fields: { unsupported: 'value' },
-          },
+          ...getPostCaseRequest({
+            // @ts-expect-error
+            connector: {
+              id: 'wrong',
+              name: 'wrong',
+              type: ConnectorTypes.jira,
+              fields: { unsupported: 'value' },
+            } as ConnectorJiraTypeFields,
+          }),
         })
         .expect(400);
+    });
+
+    describe('rbac', () => {
+      it('User: security solution only - should create a case', async () => {
+        const theCase = await createCaseAsUser({
+          supertestWithoutAuth,
+          user: secOnly,
+          space: 'space1',
+          owner: 'securitySolutionFixture',
+        });
+        expect(theCase.owner).to.eql('securitySolutionFixture');
+      });
+
+      it('User: security solution only - should NOT create a case of different owner', async () => {
+        await createCaseAsUser({
+          supertestWithoutAuth,
+          user: secOnly,
+          space: 'space1',
+          owner: 'observabilityFixture',
+          expectedHttpCode: 403,
+        });
+      });
+
+      for (const user of [globalRead, secOnlyRead, obsOnlyRead, obsSecRead, noKibanaPrivileges]) {
+        it(`User ${
+          user.username
+        } with role(s) ${user.roles.join()} - should NOT create a case`, async () => {
+          await createCaseAsUser({
+            supertestWithoutAuth,
+            user,
+            space: 'space1',
+            owner: 'securitySolutionFixture',
+            expectedHttpCode: 403,
+          });
+        });
+      }
+
+      it('should NOT create a case in a space with no permissions', async () => {
+        await createCaseAsUser({
+          supertestWithoutAuth,
+          user: secOnly,
+          space: 'space2',
+          owner: 'securitySolutionFixture',
+          expectedHttpCode: 403,
+        });
+      });
     });
   });
 };

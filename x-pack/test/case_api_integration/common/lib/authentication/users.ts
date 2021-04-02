@@ -5,31 +5,78 @@
  * 2.0.
  */
 
-import { securitySolutionOnlyAll, observabilityOnlyAll } from './roles';
+import {
+  securitySolutionOnlyAll,
+  observabilityOnlyAll,
+  securitySolutionOnlyRead,
+  observabilityOnlyRead,
+  globalRead as globalReadRole,
+  noKibanaPrivileges as noKibanaPrivilegesRole,
+} from './roles';
 import { User } from './types';
 
-const superUser: User = {
+export const superUser: User = {
   username: 'superuser',
   password: 'superuser',
   roles: ['superuser'],
 };
 
-const secOnly: User = {
+export const secOnly: User = {
   username: 'sec_only',
   password: 'sec_only',
   roles: [securitySolutionOnlyAll.name],
 };
 
-const obsOnly: User = {
+export const secOnlyRead: User = {
+  username: 'sec_only_read',
+  password: 'sec_only_read',
+  roles: [securitySolutionOnlyRead.name],
+};
+
+export const obsOnly: User = {
   username: 'obs_only',
   password: 'obs_only',
   roles: [observabilityOnlyAll.name],
 };
 
-const obsSec: User = {
+export const obsOnlyRead: User = {
+  username: 'obs_only_read',
+  password: 'obs_only_read',
+  roles: [observabilityOnlyRead.name],
+};
+
+export const obsSec: User = {
   username: 'obs_sec',
   password: 'obs_sec',
   roles: [securitySolutionOnlyAll.name, observabilityOnlyAll.name],
 };
 
-export const users = [superUser, secOnly, obsOnly, obsSec];
+export const obsSecRead: User = {
+  username: 'obs_sec_read',
+  password: 'obs_sec_read',
+  roles: [securitySolutionOnlyRead.name, observabilityOnlyRead.name],
+};
+
+export const globalRead: User = {
+  username: 'global_read',
+  password: 'global_read',
+  roles: [globalReadRole.name],
+};
+
+export const noKibanaPrivileges: User = {
+  username: 'no_kibana_privileges',
+  password: 'no_kibana_privileges',
+  roles: [noKibanaPrivilegesRole.name],
+};
+
+export const users = [
+  superUser,
+  secOnly,
+  secOnlyRead,
+  obsOnly,
+  obsOnlyRead,
+  obsSec,
+  obsSecRead,
+  globalRead,
+  noKibanaPrivileges,
+];

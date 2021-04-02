@@ -11,6 +11,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
 import { SavedObject, SavedObjectsClientContract, Logger } from 'src/core/server';
+import { nodeBuilder } from '../../../../../../src/plugins/data/common';
 import { decodeCommentRequest, isCommentRequestTypeGenAlert } from '../../routes/api/utils';
 
 import {
@@ -63,7 +64,10 @@ async function getSubCase({
       id: mostRecentSubCase.id,
       options: {
         fields: [],
-        filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.generatedAlert}`,
+        filter: nodeBuilder.is(
+          `${CASE_COMMENT_SAVED_OBJECT}.attributes.type`,
+          CommentType.generatedAlert
+        ),
         page: 1,
         perPage: 1,
       },

@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { ApiResponse, estypes } from '@elastic/elasticsearch';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 import { findSubCasesResp, postCollectionReq } from '../../../../../common/lib/mock';
 import {
