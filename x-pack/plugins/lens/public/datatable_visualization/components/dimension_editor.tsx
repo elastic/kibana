@@ -246,6 +246,7 @@ export function TableDimensionEditor(
                     })}
                   </EuiButtonEmpty>
                   <PalettePanelContainer
+                    siblingRef={props.panelRef}
                     isOpen={isPaletteOpen}
                     handleClose={() => setIsPaletteOpen(!isPaletteOpen)}
                   >

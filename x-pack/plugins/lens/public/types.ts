@@ -9,6 +9,7 @@ import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { CoreSetup } from 'kibana/public';
 import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import { SavedObjectReference } from 'kibana/public';
+import { MutableRefObject } from 'react';
 import { RowClickContext } from '../../../../src/plugins/ui_actions/public';
 import {
   ExpressionAstExpression,
@@ -402,6 +403,7 @@ export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfig
   groupId: string;
   accessor: string;
   setState: (newState: T) => void;
+  panelRef: MutableRefObject<HTMLDivElement | null>;
 };
 
 export interface AccessorConfig {
