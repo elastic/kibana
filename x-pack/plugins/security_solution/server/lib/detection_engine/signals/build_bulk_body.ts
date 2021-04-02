@@ -73,11 +73,12 @@ export const buildBulkBody = ({
     ...buildSignal([doc], rule),
     ...additionalSignalFields(doc),
   };
-  // @ts-expect-error @elastic/elasticsearch _source is optional
-  delete doc._source.threshold_result;
   const event = buildEventTypeSignal(doc);
+  const { threshold_result: thresholdResult, ...filteredSource } = doc._source || {
+    threshold_result: null,
+  };
   const signalHit: SignalHit = {
-    ...doc._source,
+    ...filteredSource,
     '@timestamp': new Date().toISOString(),
     event,
     signal,
