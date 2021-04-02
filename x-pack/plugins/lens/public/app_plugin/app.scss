@@ -32,7 +32,7 @@
 
   // Not great, but the easiest way to fix the gray fill when stuck in a button with a fill
   // Like when selected in a button group
-  .euiButton--fill & {
+  .lnsLayerChartSwitch__item-isSelected & {
     fill: currentColor;
   }
 }
