@@ -23,7 +23,7 @@ export const getStatusColor = (status: number) => {
 export const safeJsonParseAndStringify = (json: string) => {
   try {
     return JSON.stringify(JSON.parse(json), null, 2);
-  } catch (e) {
+  } catch {
     return json;
   }
 };
