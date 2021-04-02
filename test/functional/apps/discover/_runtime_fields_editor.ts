@@ -56,14 +56,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('allows editing of a newly created field', async function () {
-      await PageObjects.discover.clickFieldListItemAdd('runtimefield');
       await PageObjects.discover.editField('runtimefield');
       await fieldEditor.setName('runtimefield edited');
       await fieldEditor.save();
+      await fieldEditor.confirmSave();
       await PageObjects.header.waitUntilLoadingHasFinished();
       expect((await PageObjects.discover.getAllFieldNames()).includes('runtimefield')).to.be(false);
-      expect((await PageObjects.discover.getAllFieldNames()).includes('runtimefield 2')).to.be(
-        false
+      expect((await PageObjects.discover.getAllFieldNames()).includes('runtimefield edited')).to.be(
+        true
       );
     });
   });
