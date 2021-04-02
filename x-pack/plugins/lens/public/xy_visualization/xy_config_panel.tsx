@@ -103,7 +103,7 @@ export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
           .filter((t) => isHorizontalSeries(t.id as SeriesType) === horizontalOnly)
           .map((t) => ({
             className: `lnsLayerChartSwitch__item ${
-              layer.seriesType === t.id && 'lnsLayerChartSwitch__item-isSelected'
+              layer.seriesType === t.id ? 'lnsLayerChartSwitch__item-isSelected' : ''
             }`,
             id: t.id,
             label: t.label,
