@@ -6,13 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { isEsError, handleEsError, parseEsError } from './errors';
 export { License } from './license';
-
-/** dummy plugin*/
-export function plugin() {
-  return new (class EsUiSharedPlugin {
-    setup() {}
-    start() {}
-  })();
-}

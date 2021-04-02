@@ -15,6 +15,7 @@
     "static/**/*"
   ],
   "references": [
+    { "path": "../../../x-pack/plugins/licensing/tsconfig.json" },
     { "path": "../../core/tsconfig.json" },
     { "path": "../data/tsconfig.json" },
   ]
