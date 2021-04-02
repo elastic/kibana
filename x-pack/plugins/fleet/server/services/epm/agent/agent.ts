@@ -90,7 +90,7 @@ function buildTemplateVariables(variables: PackagePolicyConfigRecord, templateSt
 
     if (recordEntry.type && recordEntry.type === 'yaml') {
       const yamlKeyPlaceholder = `##${key}##`;
-      varPart[lastKeyPart] = `"${yamlKeyPlaceholder}"`;
+      varPart[lastKeyPart] = recordEntry.value ? `"${yamlKeyPlaceholder}"` : null;
       yamlValues[yamlKeyPlaceholder] = recordEntry.value ? safeLoad(recordEntry.value) : null;
     } else if (
       recordEntry.type &&

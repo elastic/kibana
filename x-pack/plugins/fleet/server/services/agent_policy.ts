@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { uniq } from 'lodash';
+import { uniq, omit } from 'lodash';
 import { safeLoad } from 'js-yaml';
 import uuid from 'uuid/v4';
 import type {
@@ -23,19 +23,28 @@ import {
 import type {
   PackagePolicy,
   NewAgentPolicy,
+  PreconfiguredAgentPolicy,
   AgentPolicy,
   AgentPolicySOAttributes,
   FullAgentPolicy,
   ListWithKuery,
+  NewPackagePolicy,
 } from '../types';
 import {
   agentPolicyStatuses,
   storedPackagePoliciesToAgentInputs,
   dataTypes,
+  packageToPackagePolicy,
   AGENT_POLICY_INDEX,
   DEFAULT_FLEET_SERVER_AGENT_POLICY,
 } from '../../common';
-import type { DeleteAgentPolicyResponse, Settings, FleetServerPolicy } from '../../common';
+import type {
+  DeleteAgentPolicyResponse,
+  Settings,
+  FleetServerPolicy,
+  Installation,
+  Output,
+} from '../../common';
 import {
   AgentPolicyNameExistsError,
   AgentPolicyDeletionError,
@@ -43,6 +52,7 @@ import {
 } from '../errors';
 import { getFullAgentPolicyKibanaConfig } from '../../common/services/full_agent_policy_kibana_config';
 
+import { getPackageInfo } from './epm/packages';
 import { createAgentPolicyAction, getAgentsByKuery } from './agents';
 import { packagePolicyService } from './package_policy';
 import { outputService } from './output';
@@ -106,32 +116,13 @@ class AgentPolicyService {
     esClient: ElasticsearchClient
   ): Promise<{
     created: boolean;
-    defaultAgentPolicy: AgentPolicy;
+    policy: AgentPolicy;
   }> {
-    const agentPolicies = await soClient.find<AgentPolicySOAttributes>({
-      type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+    const searchParams = {
       searchFields: ['is_default'],
       search: 'true',
-    });
-
-    if (agentPolicies.total === 0) {
-      const newDefaultAgentPolicy: NewAgentPolicy = {
-        ...DEFAULT_AGENT_POLICY,
-      };
-
-      return {
-        created: true,
-        defaultAgentPolicy: await this.create(soClient, esClient, newDefaultAgentPolicy),
-      };
-    }
-
-    return {
-      created: false,
-      defaultAgentPolicy: {
-        id: agentPolicies.saved_objects[0].id,
-        ...agentPolicies.saved_objects[0].attributes,
-      },
     };
+    return await this.ensureAgentPolicy(soClient, esClient, DEFAULT_AGENT_POLICY, searchParams);
   }
 
   public async ensureDefaultFleetServerAgentPolicy(
@@ -141,20 +132,68 @@ class AgentPolicyService {
     created: boolean;
     policy: AgentPolicy;
   }> {
-    const agentPolicies = await soClient.find<AgentPolicySOAttributes>({
-      type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+    const searchParams = {
       searchFields: ['is_default_fleet_server'],
       search: 'true',
+    };
+    return await this.ensureAgentPolicy(
+      soClient,
+      esClient,
+      DEFAULT_FLEET_SERVER_AGENT_POLICY,
+      searchParams
+    );
+  }
+
+  public async ensurePreconfiguredAgentPolicy(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    config: PreconfiguredAgentPolicy
+  ): Promise<{
+    created: boolean;
+    policy: AgentPolicy;
+  }> {
+    const { id, ...preconfiguredAgentPolicy } = omit(config, 'package_policies');
+    const preconfigurationId = String(id);
+    const searchParams = {
+      searchFields: ['preconfiguration_id'],
+      search: escapeSearchQueryPhrase(preconfigurationId),
+    };
+
+    const newAgentPolicyDefaults: Partial<NewAgentPolicy> = {
+      namespace: 'default',
+      monitoring_enabled: ['logs', 'metrics'],
+    };
+
+    const newAgentPolicy = {
+      ...newAgentPolicyDefaults,
+      ...preconfiguredAgentPolicy,
+      preconfiguration_id: preconfigurationId,
+    } as NewAgentPolicy;
+
+    return await this.ensureAgentPolicy(soClient, esClient, newAgentPolicy, searchParams);
+  }
+
+  private async ensureAgentPolicy(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    newAgentPolicy: NewAgentPolicy,
+    searchParams: {
+      searchFields: string[];
+      search: string;
+    }
+  ): Promise<{
+    created: boolean;
+    policy: AgentPolicy;
+  }> {
+    const agentPolicies = await soClient.find<AgentPolicySOAttributes>({
+      type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+      ...searchParams,
     });
 
     if (agentPolicies.total === 0) {
-      const newDefaultAgentPolicy: NewAgentPolicy = {
-        ...DEFAULT_FLEET_SERVER_AGENT_POLICY,
-      };
-
       return {
         created: true,
-        policy: await this.create(soClient, esClient, newDefaultAgentPolicy),
+        policy: await this.create(soClient, esClient, newAgentPolicy),
       };
     }
 
@@ -514,7 +553,7 @@ class AgentPolicyService {
     }
 
     const {
-      defaultAgentPolicy: { id: defaultAgentPolicyId },
+      policy: { id: defaultAgentPolicyId },
     } = await this.ensureDefaultAgentPolicy(soClient, esClient);
     if (id === defaultAgentPolicyId) {
       throw new Error('The default agent policy cannot be deleted');
@@ -655,7 +694,7 @@ class AgentPolicyService {
       id: agentPolicy.id,
       outputs: {
         // TEMPORARY as we only support a default output
-        ...[defaultOutput].reduce(
+        ...[defaultOutput].reduce<FullAgentPolicy['outputs']>(
           // eslint-disable-next-line @typescript-eslint/naming-convention
           (outputs, { config_yaml, name, type, hosts, ca_sha256, api_key }) => {
             const configJs = config_yaml ? safeLoad(config_yaml) : {};
@@ -675,7 +714,7 @@ class AgentPolicyService {
 
             return outputs;
           },
-          {} as FullAgentPolicy['outputs']
+          {}
         ),
       },
       inputs: storedPackagePoliciesToAgentInputs(agentPolicy.package_policies as PackagePolicy[]),
@@ -697,6 +736,26 @@ class AgentPolicyService {
             },
           }),
     };
+
+    // Only add permissions if output.type is "elasticsearch"
+    fullAgentPolicy.output_permissions = Object.keys(fullAgentPolicy.outputs).reduce<
+      NonNullable<FullAgentPolicy['output_permissions']>
+    >((permissions, outputName) => {
+      const output = fullAgentPolicy.outputs[outputName];
+      if (output && output.type === 'elasticsearch') {
+        permissions[outputName] = {};
+        permissions[outputName]._fallback = {
+          cluster: ['monitor'],
+          indices: [
+            {
+              names: ['logs-*', 'metrics-*', 'traces-*', '.logs-endpoint.diagnostic.collection-*'],
+              privileges: ['auto_configure', 'create_doc'],
+            },
+          ],
+        };
+      }
+      return permissions;
+    }, {});
 
     // only add settings if not in standalone
     if (!standalone) {
@@ -726,3 +785,37 @@ class AgentPolicyService {
 }
 
 export const agentPolicyService = new AgentPolicyService();
+
+export async function addPackageToAgentPolicy(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  packageToInstall: Installation,
+  agentPolicy: AgentPolicy,
+  defaultOutput: Output,
+  packagePolicyName?: string,
+  packagePolicyDescription?: string,
+  transformPackagePolicy?: (p: NewPackagePolicy) => NewPackagePolicy
+) {
+  const packageInfo = await getPackageInfo({
+    savedObjectsClient: soClient,
+    pkgName: packageToInstall.name,
+    pkgVersion: packageToInstall.version,
+  });
+
+  const basePackagePolicy = packageToPackagePolicy(
+    packageInfo,
+    agentPolicy.id,
+    defaultOutput.id,
+    agentPolicy.namespace ?? 'default',
+    packagePolicyName,
+    packagePolicyDescription
+  );
+
+  const newPackagePolicy = transformPackagePolicy
+    ? transformPackagePolicy(basePackagePolicy)
+    : basePackagePolicy;
+
+  await packagePolicyService.create(soClient, esClient, newPackagePolicy, {
+    bumpRevision: false,
+  });
+}

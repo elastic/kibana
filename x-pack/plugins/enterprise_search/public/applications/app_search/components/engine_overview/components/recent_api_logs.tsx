@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
+
+import { useActions } from 'kea';
 
 import { EuiButtonEmptyTo } from '../../../../shared/react_router_helpers';
 import { ENGINE_API_LOGS_PATH } from '../../../routes';
+import { ApiLogsLogic } from '../../api_logs';
 import { RECENT_API_EVENTS } from '../../api_logs/constants';
 import { DataPanel } from '../../data_panel';
 import { generateEnginePath } from '../../engine';
@@ -16,6 +19,13 @@ import { generateEnginePath } from '../../engine';
 import { VIEW_API_LOGS } from '../constants';
 
 export const RecentApiLogs: React.FC = () => {
+  const { fetchApiLogs, pollForApiLogs } = useActions(ApiLogsLogic);
+
+  useEffect(() => {
+    fetchApiLogs();
+    pollForApiLogs();
+  }, []);
+
   return (
     <DataPanel
       title={<h2>{RECENT_API_EVENTS}</h2>}
@@ -24,6 +34,7 @@ export const RecentApiLogs: React.FC = () => {
           {VIEW_API_LOGS}
         </EuiButtonEmptyTo>
       }
+      hasBorder
     >
       TODO: API Logs Table
       {/* <ApiLogsTable hidePagination={true} /> */}
