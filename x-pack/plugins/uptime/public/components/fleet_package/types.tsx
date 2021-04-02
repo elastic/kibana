@@ -80,8 +80,6 @@ export interface ISimpleFields {
   [ConfigKeys.HOSTS]: string;
   [ConfigKeys.MAX_REDIRECTS]: number;
   [ConfigKeys.MONITOR_TYPE]: DataStream;
-  [ConfigKeys.PROXY_URL]: string;
-  [ConfigKeys.PROXY_USE_LOCAL_RESOLVER]: boolean;
   [ConfigKeys.SCHEDULE]: { number: string; unit: ScheduleUnit };
   [ConfigKeys.APM_SERVICE_NAME]: string;
   [ConfigKeys.SSL_CERTIFICATE_AUTHORITIES]: string;
@@ -96,6 +94,7 @@ export interface ISimpleFields {
 }
 
 export interface IHTTPAdvancedFields {
+  [ConfigKeys.PROXY_URL]: string;
   [ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]: string[];
   [ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE]: string[];
   [ConfigKeys.RESPONSE_BODY_INDEX]: ResponseBodyIndexPolicy;
@@ -108,6 +107,8 @@ export interface IHTTPAdvancedFields {
 }
 
 export interface ITCPAdvancedFields {
+  [ConfigKeys.PROXY_URL]: string;
+  [ConfigKeys.PROXY_USE_LOCAL_RESOLVER]: boolean;
   [ConfigKeys.RESPONSE_RECEIVE_CHECK]: string[];
   [ConfigKeys.REQUEST_SEND_CHECK]: string;
 }

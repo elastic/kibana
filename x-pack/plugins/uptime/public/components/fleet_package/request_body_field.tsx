@@ -40,7 +40,7 @@ const CodeEditor = ({
   value: string;
 }) => {
   return (
-    <CodeEditorContainer borderRadius="none">
+    <CodeEditorContainer borderRadius="none" hasShadow={false} hasBorder={true}>
       <div id={`${id}-editor`}>
         <EuiCodeEditor
           mode={mode}

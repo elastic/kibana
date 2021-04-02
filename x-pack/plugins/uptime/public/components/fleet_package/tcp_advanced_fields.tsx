@@ -10,6 +10,7 @@ import useDebounce from 'react-use/lib/useDebounce';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiAccordion,
+  EuiCheckbox,
   EuiFormRow,
   EuiDescribedFormGroup,
   EuiFieldText,
@@ -64,6 +65,51 @@ export const TCPAdvancedFields = memo<Props>(({ defaultValues, onChange }) => {
         }
       >
         <EuiSpacer size="s" />
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.proxyURL.label"
+              defaultMessage="Proxy URL"
+            />
+          }
+          labelAppend={<OptionalLabel />}
+          helpText={
+            <FormattedMessage
+              id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.proxyUrl.tcp.helpText"
+              defaultMessage="The URL of the SOCKS5 proxy to use when connecting to the server. The value must be a URL with a scheme of socks5://."
+            />
+          }
+        >
+          <EuiFieldText
+            value={fields[ConfigKeys.PROXY_URL]}
+            onChange={(event) =>
+              handleInputChange({
+                value: event.target.value,
+                configKey: ConfigKeys.PROXY_URL,
+              })
+            }
+          />
+        </EuiFormRow>
+        {!!fields[ConfigKeys.PROXY_URL] && (
+          <EuiFormRow>
+            <EuiCheckbox
+              id={'uptimeFleetUseLocalResolverCheckbox'}
+              checked={fields[ConfigKeys.PROXY_USE_LOCAL_RESOLVER]}
+              label={
+                <FormattedMessage
+                  id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.resolveHostnamesLocally"
+                  defaultMessage="Resolve hostnames locally"
+                />
+              }
+              onChange={(event) =>
+                handleInputChange({
+                  value: event.target.checked,
+                  configKey: ConfigKeys.PROXY_USE_LOCAL_RESOLVER,
+                })
+              }
+            />
+          </EuiFormRow>
+        )}
         <EuiFormRow
           label={
             <FormattedMessage

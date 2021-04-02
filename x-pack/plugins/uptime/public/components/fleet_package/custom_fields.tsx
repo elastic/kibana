@@ -203,60 +203,6 @@ export const CustomFields = memo<Props>(
                     />
                   </EuiFormRow>
                 )}
-                {(isHTTP || isTCP) && (
-                  <EuiFormRow
-                    label={
-                      <FormattedMessage
-                        id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.proxyURL.label"
-                        defaultMessage="Proxy URL"
-                      />
-                    }
-                    labelAppend={<OptionalLabel />}
-                    helpText={
-                      isHTTP ? (
-                        <FormattedMessage
-                          id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.proxyUrl.http.helpText"
-                          defaultMessage="An optional HTTP proxy URL."
-                        />
-                      ) : (
-                        <FormattedMessage
-                          id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.proxyUrl.tcp.helpText"
-                          defaultMessage="The URL of the SOCKS5 proxy to use when connecting to the server. The value must be a URL with a scheme of socks5://."
-                        />
-                      )
-                    }
-                  >
-                    <EuiFieldText
-                      value={fields[ConfigKeys.PROXY_URL]}
-                      onChange={(event) =>
-                        handleInputChange({
-                          value: event.target.value,
-                          configKey: ConfigKeys.PROXY_URL,
-                        })
-                      }
-                    />
-                  </EuiFormRow>
-                )}
-                {isTCP && !!fields[ConfigKeys.PROXY_URL] && (
-                  <EuiFormRow>
-                    <EuiCheckbox
-                      id={'uptimeFleetUseLocalResolverCheckbox'}
-                      checked={fields[ConfigKeys.PROXY_USE_LOCAL_RESOLVER]}
-                      label={
-                        <FormattedMessage
-                          id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.resolveHostnamesLocally"
-                          defaultMessage="Resolve hostnames locally"
-                        />
-                      }
-                      onChange={(event) =>
-                        handleInputChange({
-                          value: event.target.checked,
-                          configKey: ConfigKeys.PROXY_USE_LOCAL_RESOLVER,
-                        })
-                      }
-                    />
-                  </EuiFormRow>
-                )}
                 <EuiFormRow
                   id="syntheticsFleetScheduleField--number syntheticsFleetScheduleField--unit"
                   label={
@@ -471,6 +417,7 @@ export const CustomFields = memo<Props>(
         {isHTTP && (
           <HTTPAdvancedFields
             defaultValues={{
+              [ConfigKeys.PROXY_URL]: defaultValues[ConfigKeys.PROXY_URL],
               [ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]:
                 defaultValues[ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE],
               [ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE]:
@@ -490,6 +437,9 @@ export const CustomFields = memo<Props>(
         {isTCP && (
           <TCPAdvancedFields
             defaultValues={{
+              [ConfigKeys.PROXY_URL]: defaultValues[ConfigKeys.PROXY_URL],
+              [ConfigKeys.PROXY_USE_LOCAL_RESOLVER]:
+                defaultValues[ConfigKeys.PROXY_USE_LOCAL_RESOLVER],
               [ConfigKeys.REQUEST_SEND_CHECK]: defaultValues[ConfigKeys.REQUEST_SEND_CHECK],
               [ConfigKeys.RESPONSE_RECEIVE_CHECK]: defaultValues[ConfigKeys.RESPONSE_RECEIVE_CHECK],
             }}
