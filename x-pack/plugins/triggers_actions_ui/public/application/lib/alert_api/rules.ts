@@ -8,7 +8,7 @@ import { HttpSetup } from 'kibana/public';
 import { BASE_ALERTING_API_PATH } from '../../constants';
 import { Alert, Pagination, Sorting } from '../../../types';
 import { AsApiContract } from '../../../../../actions/common';
-import { mapFiltersToKql } from './mapFiltersToKql';
+import { mapFiltersToKql } from './map_filters_to_kql';
 import {
   transformAction,
   transformExecutionStatus,

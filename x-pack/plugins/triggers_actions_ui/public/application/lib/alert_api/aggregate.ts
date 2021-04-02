@@ -7,7 +7,7 @@
 import { HttpSetup } from 'kibana/public';
 import { AlertAggregations } from '../../../types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
-import { mapFiltersToKql } from './mapFiltersToKql';
+import { mapFiltersToKql } from './map_filters_to_kql';
 import { RewriteRequestCase } from '../../../../../actions/common';
 
 const rewriteBodyRes: RewriteRequestCase<AlertAggregations> = ({

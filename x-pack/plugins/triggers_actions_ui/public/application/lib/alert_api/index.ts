@@ -6,7 +6,7 @@
  */
 
 export { alertingFrameworkHealth } from './health';
-export { mapFiltersToKql } from './mapFiltersToKql';
+export { mapFiltersToKql } from './map_filters_to_kql';
 export { loadAlertAggregations } from './aggregate';
 export { createAlert } from './create';
 export { deleteAlerts } from './delete';

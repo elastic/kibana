@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mapFiltersToKql } from './mapFiltersToKql';
+import { mapFiltersToKql } from './map_filters_to_kql';
 
 describe('mapFiltersToKql', () => {
   beforeEach(() => jest.resetAllMocks());

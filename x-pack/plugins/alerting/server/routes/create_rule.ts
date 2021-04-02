@@ -59,11 +59,13 @@ const rewriteBodyReqActions: RewriteRequestCase<AlertAction> = ({
 const rewriteBodyReq: RewriteRequestCase<CreateOptions<AlertTypeParams>['data']> = ({
   rule_type_id: alertTypeId,
   notify_when: notifyWhen,
+  actions,
   ...rest
 }) => ({
   ...rest,
   alertTypeId,
   notifyWhen,
+  actions,
 });
 const rewriteBodyRes: RewriteResponseCase<SanitizedAlert<AlertTypeParams>> = ({
   actions,
