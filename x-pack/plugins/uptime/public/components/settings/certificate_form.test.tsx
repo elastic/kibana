@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { CertificateExpirationForm } from './certificate_form';
-import { shallowWithRouter, mountWithRouter } from '../../lib';
+import { shallowWithRouter, mountWithRouter } from '../../lib/helper/enzyme_helpers';
 
 describe('CertificateForm', () => {
   it('shallow renders expected elements for valid props', () => {
