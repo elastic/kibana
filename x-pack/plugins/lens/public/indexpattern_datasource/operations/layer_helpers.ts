@@ -353,7 +353,7 @@ export function replaceColumn({
               newColumn,
               indexPattern,
               operationDefinitionMap
-            )
+            ).newLayer
           : basicLayer;
       } catch (e) {
         newLayer = basicLayer;

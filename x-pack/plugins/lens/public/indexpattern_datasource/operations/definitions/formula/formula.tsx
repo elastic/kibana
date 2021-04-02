@@ -18,7 +18,7 @@ import {
   EuiSpacer,
   EuiModal,
   EuiModalHeader,
-  EuiModalFooter,
+  EuiPopover,
 } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import {
@@ -215,6 +215,7 @@ function FormulaEditor({
 }: ParamEditorProps<FormulaIndexPatternColumn>) {
   const [text, setText] = useState(currentColumn.params.formula);
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false);
   const editorModel = React.useRef<monaco.editor.ITextModel>(
     monaco.editor.createModel(text ?? '', LANGUAGE_ID)
   );
@@ -515,6 +516,72 @@ function FormulaEditor({
     };
   }, [provideCompletionItems, provideSignatureHelp, provideHover]);
 
+  const helpComponent = (
+    <div style={{ height: 250, overflow: 'auto' }}>
+      <EuiText size="s">
+        <Markdown
+          markdown={i18n.translate('xpack.lens.formulaDocumentation', {
+            defaultMessage: `
+## How it works
+
+Lens formulas let you do math using a combination of Elasticsearch aggregations and
+math functions. There are three main types of functions:
+
+* Elasticsearch metrics, like sum(bytes)
+* Time series functions use Elasticsearch metrics as input, like cumulative_sum()
+* Math functions like round()
+
+An example formula that uses all of these:
+
+round(100 * moving_average(avg(cpu.load.pct), window=10))
+
+Elasticsearch functions take a field name, which can be in quotes. sum(bytes) is the same
+as sum("bytes").
+
+Some functions take named arguments, like moving_average(count(), window=5)
+
+Math functions can take positional arguments, like pow(count(), 3) is the same as count() * count() * count()
+
+### Basic math
+
+Use the symbols +, -, /, and * to perform basic math.
+                  `,
+            description:
+              'Text is in markdown. Do not translate function names or field names like sum(bytes)',
+          })}
+        />
+
+        <EuiDescriptionList
+          compressed
+          listItems={getPossibleFunctions(indexPattern)
+            .filter((key) => key in tinymathFunctions)
+            .map((key) => ({
+              title: `${key}`,
+              description: <Markdown markdown={tinymathFunctions[key].help} />,
+            }))}
+        />
+      </EuiText>
+
+      <EuiSpacer />
+
+      <EuiText>
+        {i18n.translate('xpack.lens.formula.elasticsearchFunctions', {
+          defaultMessage: 'Elasticsearch aggregations',
+          description: 'Do not translate Elasticsearch',
+        })}
+      </EuiText>
+      <EuiDescriptionList
+        compressed
+        listItems={getPossibleFunctions(indexPattern)
+          .filter((key) => key in operationDefinitionMap)
+          .map((key) => ({
+            title: `${key}: ${operationDefinitionMap[key].displayName}`,
+            description: getHelpText(key, operationDefinitionMap),
+          }))}
+      />
+    </div>
+  );
+
   // The Monaco editor will lazily load Monaco, which takes a render cycle to trigger. This can cause differences
   // in the behavior of Monaco when it's first loaded and then reloaded.
   return (
@@ -533,37 +600,28 @@ function FormulaEditor({
       <EuiSpacer />
       <EuiFlexGroup>
         <EuiFlexItem>
+          <EuiPopover
+            isOpen={isHelpOpen}
+            closePopover={() => setIsHelpOpen(false)}
+            button={
+              <EuiButton onClick={() => setIsHelpOpen(!isHelpOpen)} iconType="help" size="s">
+                {i18n.translate('xpack.lens.formula.functionReferenceEditorLabel', {
+                  defaultMessage: 'Function reference',
+                })}
+              </EuiButton>
+            }
+          >
+            {helpComponent}
+          </EuiPopover>
+        </EuiFlexItem>
+
+        <EuiFlexItem>
           <EuiButton onClick={() => setIsOpen(!isOpen)} iconType="expand" size="s">
-            {i18n.translate('xpack.lens.formula.expandEditorLabel', {
-              defaultMessage: 'Pop out',
+            {i18n.translate('xpack.lens.formula.fullScreenEditorLabel', {
+              defaultMessage: 'Full screen',
             })}
           </EuiButton>
         </EuiFlexItem>
-        {/* <EuiFlexItem>
-          <EuiButton
-            disabled={currentColumn.params.formula === text}
-            color={currentColumn.params.formula !== text ? 'primary' : 'text'}
-            fill={currentColumn.params.formula !== text}
-            onClick={() => {
-              updateLayer(
-                regenerateLayerFromAst(
-                  text || '',
-                  layer,
-                  columnId,
-                  currentColumn,
-                  indexPattern,
-                  operationDefinitionMap
-                )
-              );
-            }}
-            iconType="play"
-            size="s"
-          >
-            {i18n.translate('xpack.lens.indexPattern.formulaSubmitLabel', {
-              defaultMessage: 'Submit',
-            })}
-          </EuiButton>
-        </EuiFlexItem> */}
       </EuiFlexGroup>
 
       {isOpen ? (
@@ -604,73 +662,11 @@ function FormulaEditor({
                   })}
                 </EuiText>
                 <EuiSpacer size="s" />
-                <div style={{ height: 250, overflow: 'auto' }}>
-                  <EuiText size="s">
-                    <Markdown
-                      markdown={i18n.translate('xpack.lens.formulaDocumentation', {
-                        defaultMessage: `
-## How it works
-
-Lens formulas let you do math using a combination of Elasticsearch aggregations and
-math functions. There are three main types of functions:
-
-* Elasticsearch metrics, like sum(bytes)
-* Time series functions use Elasticsearch metrics as input, like cumulative_sum()
-* Math functions like round()
-
-An example formula that uses all of these:
-
-round(100 * moving_average(avg(cpu.load.pct), window=10))
-
-Elasticsearch functions take a field name, which can be in quotes. sum(bytes) is the same
-as sum("bytes").
-
-Some functions take named arguments, like moving_average(count(), window=5)
-
-Math functions can take positional arguments, like pow(count(), 3) is the same as count() * count() * count()
-
-### Basic math
-
-Use the symbols +, -, /, and * to perform basic math.
-                  `,
-                        description:
-                          'Text is in markdown. Do not translate function names or field names like sum(bytes)',
-                      })}
-                    />
-
-                    <EuiDescriptionList
-                      compressed
-                      listItems={getPossibleFunctions(indexPattern)
-                        .filter((key) => key in tinymathFunctions)
-                        .map((key) => ({
-                          title: `${key}`,
-                          description: <Markdown markdown={tinymathFunctions[key].help} />,
-                        }))}
-                    />
-                  </EuiText>
-
-                  <EuiSpacer />
-
-                  <EuiText>
-                    {i18n.translate('xpack.lens.formula.elasticsearchFunctions', {
-                      defaultMessage: 'Elasticsearch aggregations',
-                      description: 'Do not translate Elasticsearch',
-                    })}
-                  </EuiText>
-                  <EuiDescriptionList
-                    compressed
-                    listItems={getPossibleFunctions(indexPattern)
-                      .filter((key) => key in operationDefinitionMap)
-                      .map((key) => ({
-                        title: `${key}: ${operationDefinitionMap[key].displayName}`,
-                        description: getHelpText(key, operationDefinitionMap),
-                      }))}
-                  />
-                </div>
+                {helpComponent}
               </div>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiModalFooter>
+          {/* <EuiModalFooter>
             <EuiButton
               color="text"
               onClick={() => {
@@ -683,29 +679,7 @@ Use the symbols +, -, /, and * to perform basic math.
                 defaultMessage: 'Cancel',
               })}
             </EuiButton>
-            {/* <EuiButton
-              disabled={currentColumn.params.formula === text}
-              color={currentColumn.params.formula !== text ? 'primary' : 'text'}
-              fill={currentColumn.params.formula !== text}
-              onClick={() => {
-                updateLayer(
-                  regenerateLayerFromAst(
-                    text || '',
-                    layer,
-                    columnId,
-                    currentColumn,
-                    indexPattern,
-                    operationDefinitionMap
-                  )
-                );
-              }}
-              iconType="play"
-            >
-              {i18n.translate('xpack.lens.indexPattern.formulaSubmitLabel', {
-                defaultMessage: 'Submit',
-              })}
-            </EuiButton> */}
-          </EuiModalFooter>
+          </EuiModalFooter> */}
         </EuiModal>
       ) : null}
     </div>
