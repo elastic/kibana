@@ -437,7 +437,7 @@ export class HttpServer {
       xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
     };
 
-    this.server.route({
+    this.server!.route({
       handler: route.handler,
       method: route.method,
       path: route.path,
