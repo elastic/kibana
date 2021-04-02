@@ -210,7 +210,7 @@ const IndexActionConnectorFields: React.FunctionComponent<
                 content={i18n.translate(
                   'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.definedateFieldTooltip',
                   {
-                    defaultMessage: `Document ingest time will be written to this field.`,
+                    defaultMessage: `Set this time field to the time the document was indexed.`,
                   }
                 )}
               />
