@@ -13,6 +13,6 @@
 // we need to ignore this for now. A PR is up in vega-lite to hopefully fix this in future
 // releases: https://github.com/vega/vega-lite/pull/7352
 // @ts-ignore
-import { compile } from 'vega-lite/build/vega-lite';
+export { compile } from 'vega-lite';
 export { parse, View, Warn } from 'vega';
 export { Handler } from 'vega-tooltip';
