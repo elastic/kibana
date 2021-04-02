@@ -69,13 +69,6 @@ export async function fetchIndexShardSize(
           },
           aggs: {
             over_threshold: {
-              filter: {
-                range: {
-                  'index_stats.primaries.store.size_in_bytes': {
-                    gt: threshold * gbMultiplier,
-                  },
-                },
-              },
               aggs: {
                 index: {
                   terms: {
@@ -96,7 +89,8 @@ export async function fetchIndexShardSize(
                         _source: {
                           includes: [
                             '_index',
-                            'index_stats.primaries.store.size_in_bytes',
+                            'index_stats.shards.total',
+                            'index_stats.total.store.size_in_bytes',
                             'source_node.name',
                             'source_node.uuid',
                           ],
@@ -123,7 +117,7 @@ export async function fetchIndexShardSize(
   if (!clusterBuckets.length) {
     return stats;
   }
-
+  const thresholdGB = threshold * gbMultiplier;
   for (const clusterBucket of clusterBuckets) {
     const indexBuckets = clusterBucket.over_threshold.index.buckets;
     const clusterUuid = clusterBucket.key;
@@ -143,9 +137,17 @@ export async function fetchIndexShardSize(
         _source: { source_node: sourceNode, index_stats: indexStats },
       } = topHit;
 
-      const { size_in_bytes: shardSizeBytes } = indexStats?.primaries?.store!;
+      const { total: totalShards } = indexStats?.shards;
+      const { size_in_bytes: shardSizeBytes = 0 } = indexStats?.total?.store!;
+      if (!shardSizeBytes) {
+        continue;
+      }
       const { name: nodeName, uuid: nodeId } = sourceNode;
-      const shardSize = +(shardSizeBytes! / gbMultiplier).toFixed(2);
+      const avgShardSize = shardSizeBytes ? shardSizeBytes / totalShards : 0;
+      const shardSize = +(avgShardSize / gbMultiplier).toFixed(2);
+      if (shardSize < thresholdGB) {
+        continue;
+      }
       stats.push({
         shardIndex,
         shardSize,
