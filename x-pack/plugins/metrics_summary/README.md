@@ -18,6 +18,11 @@ TODO: Add a note about scripts, setup, and running
 TODO: Add how to develop here
 
 ## TODO List
+- Add these properties to the route which are:
+  - retention policy,
+  - disable_transforms,
+  - pipeline,
+  - documents per second 
  - Fix bug with when two different modules refer to the same mapping. Probably need to do this:
         First remove the transforms from the module
         Then before removing a mapping do a search against all remaining templates and filter out any mappings that are there
@@ -29,7 +34,7 @@ TODO: Add how to develop here
    _meta, at least one alias, a mapping section, etc... 
  - Add text/keyword and other things to the mappings (not just keyword)
  - Add dynamic version number during creation that has this info: "version" : { "created" : "8.0.0" },
- - Module (server/modules) templating with variables and then push those variables down 
+ - Module (server/modules) templating with variables and then push those variables down? (Maybe we don't need them)
  - Add bootstrapped indexes and templates and mappings for the cache
  - Add grouping
  - Add namespace

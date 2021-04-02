@@ -1,0 +1,16 @@
+{
+  "query": {
+    "range": {
+      "@timestamp": {
+        "gte": "now-1d/d",
+        "format": "strict_date_optional_time"
+      }
+    }
+  },
+  "modules": ["security_solutions"],
+  "indices": ["auditbeat-*"],
+  "auto_start": true,
+  "settings": {
+    "max_page_search_size": 5000
+  }
+}
