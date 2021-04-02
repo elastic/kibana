@@ -5,48 +5,49 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from 'src/core/server/mocks';
-import { ArtifactConstants, getArtifactId } from '../../lib/artifacts';
 import { getInternalArtifactMock } from '../../schemas/artifacts/saved_objects.mock';
-import { ArtifactClient } from './artifact_client';
+import { EndpointArtifactClient } from './artifact_client';
+import { createArtifactsClientMock } from '../../../../../fleet/server/mocks';
 
 describe('artifact_client', () => {
   describe('ArtifactClient sanity checks', () => {
+    let fleetArtifactClient: ReturnType<typeof createArtifactsClientMock>;
+    let artifactClient: EndpointArtifactClient;
+
+    beforeEach(() => {
+      fleetArtifactClient = createArtifactsClientMock();
+      artifactClient = new EndpointArtifactClient(fleetArtifactClient);
+    });
+
     test('can create ArtifactClient', () => {
-      const artifactClient = new ArtifactClient(savedObjectsClientMock.create());
-      expect(artifactClient).toBeInstanceOf(ArtifactClient);
+      expect(artifactClient).toBeInstanceOf(EndpointArtifactClient);
     });
 
     test('can get artifact', async () => {
-      const savedObjectsClient = savedObjectsClientMock.create();
-      const artifactClient = new ArtifactClient(savedObjectsClient);
       await artifactClient.getArtifact('abcd');
-      expect(savedObjectsClient.get).toHaveBeenCalled();
+      expect(fleetArtifactClient.listArtifacts).toHaveBeenCalled();
     });
 
     test('can create artifact', async () => {
-      const savedObjectsClient = savedObjectsClientMock.create();
-      const artifactClient = new ArtifactClient(savedObjectsClient);
-      const artifact = await getInternalArtifactMock('linux', 'v1');
+      const artifact = await getInternalArtifactMock('linux', 'v1', { compress: true });
       await artifactClient.createArtifact(artifact);
-      expect(savedObjectsClient.create).toHaveBeenCalledWith(
-        ArtifactConstants.SAVED_OBJECT_TYPE,
-        {
-          ...artifact,
-          created: expect.any(Number),
-        },
-        { id: getArtifactId(artifact) }
-      );
+      expect(fleetArtifactClient.createArtifact).toHaveBeenCalledWith({
+        identifier: artifact.identifier,
+        type: 'exceptionlist',
+        content:
+          '{"entries":[{"type":"simple","entries":[{"entries":[{"field":"some.nested.field","operator":"included","type":"exact_cased","value":"some value"}],' +
+          '"field":"some.parentField","type":"nested"},{"field":"some.not.nested.field","operator":"included","type":"exact_cased","value":"some value"}]},' +
+          '{"type":"simple","entries":[{"field":"some.other.not.nested.field","operator":"included","type":"exact_cased","value":"some other value"}]}]}',
+      });
     });
 
     test('can delete artifact', async () => {
-      const savedObjectsClient = savedObjectsClientMock.create();
-      const artifactClient = new ArtifactClient(savedObjectsClient);
-      await artifactClient.deleteArtifact('abcd');
-      expect(savedObjectsClient.delete).toHaveBeenCalledWith(
-        ArtifactConstants.SAVED_OBJECT_TYPE,
-        'abcd'
-      );
+      await artifactClient.deleteArtifact('endpoint-trustlist-linux-v1-sha26hash');
+      expect(fleetArtifactClient.listArtifacts).toHaveBeenCalledWith({
+        kuery: `decoded_sha256: "sha26hash" AND identifier: "endpoint-trustlist-linux-v1"`,
+        perPage: 1,
+      });
+      expect(fleetArtifactClient.deleteArtifact).toHaveBeenCalledWith('123');
     });
   });
 });

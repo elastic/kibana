@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { SearchResponse } from 'elasticsearch';
+import { estypes } from '@elastic/elasticsearch';
+
 import { TimeRange } from 'src/plugins/data/common/query/timefilter/types';
 import { CombinedJob, Datafeed, Job } from '../../../common/types/anomaly_detection_jobs';
 import { Calendar } from '../../../common/types/calendars';
@@ -40,7 +41,7 @@ declare interface JobService {
   ): Promise<any>;
   createResultsUrl(jobId: string[], start: number, end: number, location: string): string;
   getJobAndGroupIds(): Promise<ExistingJobsAndGroups>;
-  searchPreview(job: CombinedJob): Promise<SearchResponse<any>>;
+  searchPreview(job: CombinedJob): Promise<estypes.SearchResponse<any>>;
   getJob(jobId: string): CombinedJob;
   loadJobsWrapper(): Promise<CombinedJob[]>;
 }
