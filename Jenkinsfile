@@ -3,19 +3,16 @@
 library 'kibana-pipeline-library'
 kibanaLibrary.load()
 
-kibanaPipeline(timeoutMinutes: 210, checkPrChanges: true, setCommitStatus: true) {
-  slackNotifications.onFailure(disabled: !params.NOTIFY_ON_FAILURE) {
-    githubPr.withDefaultPrComments {
-      ciStats.trackBuild {
-        catchError {
-          retryable.enable()
-          kibanaPipeline.allCiTasks()
-        }
+workers.ci(name: 'ci-worker', size: 'xxl', ramDisk: true, bootstrapped: false) {
+  def PARALLEL_COUNT = 50
+  def ITERATIONS_PER = 100
+
+  def tasks = [:]
+  for (def i = 0; i < PARALLEL_COUNT; i++) {
+    tasks["task-${i}"] = {
+      for (def j = 0; j < ITERATIONS_PER; j++) {
+        runbld('./echo.sh', "Execution ${i}-${j}")
       }
     }
-  }
-
-  if (params.NOTIFY_ON_FAILURE) {
-    kibanaPipeline.sendMail()
   }
 }
