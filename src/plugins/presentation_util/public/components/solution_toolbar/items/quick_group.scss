@@ -1,0 +1,8 @@
+.quickButtonGroup {
+  .euiButtonGroup__buttons {
+    border-radius: $euiSizeXS;
+  }
+  .quickButtonGroup__button {
+    background-color: $euiColorEmptyShade;
+  }
+}

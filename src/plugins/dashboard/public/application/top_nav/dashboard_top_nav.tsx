@@ -11,6 +11,13 @@ import angular from 'angular';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import UseUnmount from 'react-use/lib/useUnmount';
+import { VisualizeInput } from '../../../../visualizations/public';
+import {
+  AddFromLibraryButton,
+  PrimaryActionButton,
+  QuickButtonGroup,
+  SolutionToolbar,
+} from '../../../../presentation_util/public';
 import { useKibana } from '../../services/kibana_react';
 import { IndexPattern, SavedQuery, TimefilterContract } from '../../services/data';
 import {
@@ -43,7 +50,6 @@ import { showCloneModal } from './show_clone_modal';
 import { showOptionsPopover } from './show_options_popover';
 import { TopNavIds } from './top_nav_ids';
 import { ShowShareModal } from './show_share_modal';
-import { PanelToolbar } from './panel_toolbar';
 import { confirmDiscardOrKeepUnsavedChanges } from '../listing/confirm_overlays';
 import { OverlayRef } from '../../../../../core/public';
 import { getNewDashboardTitle, unsavedChangesBadge } from '../../dashboard_strings';
@@ -147,11 +153,27 @@ export function DashboardTopNav({
   const createNew = useCallback(async () => {
     const type = 'visualization';
     const factory = embeddable.getEmbeddableFactory(type);
+
     if (!factory) {
       throw new EmbeddableFactoryNotFoundError(type);
     }
+
     await factory.create({} as EmbeddableInput, dashboardContainer);
   }, [dashboardContainer, embeddable]);
+
+  const createNewVisType = useCallback(
+    (newVisType: string) => async () => {
+      const type = 'visualization';
+      const factory = embeddable.getEmbeddableFactory(type);
+
+      if (!factory) {
+        throw new EmbeddableFactoryNotFoundError(type);
+      }
+
+      await factory.create({ newVisType, id: newVisType } as VisualizeInput, dashboardContainer);
+    },
+    [dashboardContainer, embeddable]
+  );
 
   const clearAddPanel = useCallback(() => {
     if (state.addPanelOverlay) {
@@ -540,11 +562,51 @@ export function DashboardTopNav({
   };
 
   const { TopNavMenu } = navigation.ui;
+
+  const quickButtons = [
+    {
+      iconType: 'visText',
+      createType: i18n.translate('dashboard.solutionToolbar.markdownQuickButtonLabel', {
+        defaultMessage: 'Markdown',
+      }),
+      onClick: createNewVisType('markdown'),
+      'data-test-subj': 'dashboardMarkdownQuickButton',
+    },
+    {
+      iconType: 'controlsHorizontal',
+      createType: i18n.translate('dashboard.solutionToolbar.inputControlsQuickButtonLabel', {
+        defaultMessage: 'Input control',
+      }),
+      onClick: createNewVisType('input_control_vis'),
+      'data-test-subj': 'dashboardInputControlsQuickButton',
+    },
+  ];
+
   return (
     <>
       <TopNavMenu {...getNavBarProps()} />
       {viewMode !== ViewMode.VIEW ? (
-        <PanelToolbar onAddPanelClick={createNew} onLibraryClick={addFromLibrary} />
+        <SolutionToolbar>
+          {{
+            primaryActionButton: (
+              <PrimaryActionButton
+                label={i18n.translate('dashboard.solutionToolbar.addPanelButtonLabel', {
+                  defaultMessage: 'Create panel',
+                })}
+                onClick={createNew}
+                iconType="plusInCircleFilled"
+                data-test-subj="dashboardAddNewPanelButton"
+              />
+            ),
+            quickButtonGroup: <QuickButtonGroup buttons={quickButtons} />,
+            addFromLibraryButton: (
+              <AddFromLibraryButton
+                onClick={addFromLibrary}
+                data-test-subj="dashboardAddPanelButton"
+              />
+            ),
+          }}
+        </SolutionToolbar>
       ) : null}
     </>
   );

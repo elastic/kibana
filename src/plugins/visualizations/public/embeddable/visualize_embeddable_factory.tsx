@@ -58,7 +58,7 @@ interface VisualizationAttributes extends SavedObjectAttributes {
 
 export interface VisualizeEmbeddableFactoryDeps {
   start: StartServicesGetter<
-    Pick<VisualizationsStartDeps, 'inspector' | 'embeddable' | 'dashboard' | 'savedObjectsClient'>
+    Pick<VisualizationsStartDeps, 'inspector' | 'embeddable' | 'savedObjectsClient'>
   >;
 }
 
@@ -162,7 +162,10 @@ export class VisualizeEmbeddableFactory
     }
   }
 
-  public async create(input: VisualizeInput & { savedVis?: SerializedVis }, parent?: IContainer) {
+  public async create(
+    input: VisualizeInput & { savedVis?: SerializedVis; newVisType?: string },
+    parent?: IContainer
+  ) {
     // TODO: This is a bit of a hack to preserve the original functionality. Ideally we will clean this up
     // to allow for in place creation of visualizations without having to navigate away to a new URL.
     if (input.savedVis) {
@@ -181,6 +184,7 @@ export class VisualizeEmbeddableFactory
       showNewVisModal({
         originatingApp: await this.getCurrentAppId(),
         outsideVisualizeApp: true,
+        newVisType: input?.newVisType,
       });
       return undefined;
     }
