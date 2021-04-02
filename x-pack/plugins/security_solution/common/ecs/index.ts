@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AgentEcs } from './agent';
@@ -14,6 +15,7 @@ import { FileEcs } from './file';
 import { GeoEcs } from './geo';
 import { HostEcs } from './host';
 import { NetworkEcs } from './network';
+import { RegistryEcs } from './registry';
 import { RuleEcs } from './rule';
 import { SignalEcs } from './signal';
 import { SourceEcs } from './source';
@@ -26,6 +28,7 @@ import { UserEcs } from './user';
 import { WinlogEcs } from './winlog';
 import { ProcessEcs } from './process';
 import { SystemEcs } from './system';
+import { Ransomware } from './ransomware';
 
 export interface Ecs {
   _id: string;
@@ -39,6 +42,7 @@ export interface Ecs {
   geo?: GeoEcs;
   host?: HostEcs;
   network?: NetworkEcs;
+  registry?: RegistryEcs;
   rule?: RuleEcs;
   signal?: SignalEcs;
   source?: SourceEcs;
@@ -54,4 +58,7 @@ export interface Ecs {
   process?: ProcessEcs;
   file?: FileEcs;
   system?: SystemEcs;
+  // This should be temporary
+  eql?: { parentId: string; sequenceNumber: string };
+  Ransomware?: Ransomware;
 }

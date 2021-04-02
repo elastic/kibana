@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import testSubjSelector from '@kbn/test-subj-selector';
@@ -111,9 +100,13 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
       await find.clickByCssSelectorWhenNotDisabled(testSubjSelector(selector), { timeout });
     }
 
-    public async click(selector: string, timeout: number = FIND_TIME): Promise<void> {
+    public async click(
+      selector: string,
+      timeout: number = FIND_TIME,
+      topOffset?: number
+    ): Promise<void> {
       log.debug(`TestSubjects.click(${selector})`);
-      await find.clickByCssSelector(testSubjSelector(selector), timeout);
+      await find.clickByCssSelector(testSubjSelector(selector), timeout, topOffset);
     }
 
     public async doubleClick(selector: string, timeout: number = FIND_TIME): Promise<void> {
@@ -198,12 +191,13 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
     public async setValue(
       selector: string,
       text: string,
-      options: SetValueOptions = {}
+      options: SetValueOptions = {},
+      topOffset?: number
     ): Promise<void> {
       return await retry.try(async () => {
         const { clearWithKeyboard = false, typeCharByChar = false } = options;
         log.debug(`TestSubjects.setValue(${selector}, ${text})`);
-        await this.click(selector);
+        await this.click(selector, undefined, topOffset);
         // in case the input element is actually a child of the testSubject, we
         // call clearValue() and type() on the element that is focused after
         // clicking on the testSubject

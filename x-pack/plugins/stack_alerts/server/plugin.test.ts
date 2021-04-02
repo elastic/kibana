@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { AlertingBuiltinsPlugin } from './plugin';
 import { coreMock } from '../../../../src/core/server/mocks';
-import { alertsMock } from '../../alerts/server/mocks';
+import { alertsMock } from '../../alerting/server/mocks';
 import { featuresPluginMock } from '../../features/server/mocks';
 import { BUILT_IN_ALERTS_FEATURE } from './feature';
 
@@ -25,7 +26,7 @@ describe('AlertingBuiltins Plugin', () => {
     it('should register built-in alert types', async () => {
       const alertingSetup = alertsMock.createSetup();
       const featuresSetup = featuresPluginMock.createSetup();
-      await plugin.setup(coreSetup, { alerts: alertingSetup, features: featuresSetup });
+      await plugin.setup(coreSetup, { alerting: alertingSetup, features: featuresSetup });
 
       expect(alertingSetup.registerType).toHaveBeenCalledTimes(3);
 
@@ -40,7 +41,7 @@ describe('AlertingBuiltins Plugin', () => {
           "actionGroups": Array [
             Object {
               "id": "threshold met",
-              "name": "Threshold Met",
+              "name": "Threshold met",
             },
           ],
           "id": ".index-threshold",
@@ -58,12 +59,31 @@ describe('AlertingBuiltins Plugin', () => {
         Object {
           "actionGroups": Array [
             Object {
-              "id": "tracking threshold met",
-              "name": "Tracking threshold met",
+              "id": "Tracked entity contained",
+              "name": "Tracking containment met",
             },
           ],
-          "id": ".geo-threshold",
-          "name": "Geo tracking threshold",
+          "id": ".geo-containment",
+          "name": "Tracking containment",
+        }
+      `);
+
+      const esQueryArgs = alertingSetup.registerType.mock.calls[2][0];
+      const testedEsQueryArgs = {
+        id: esQueryArgs.id,
+        name: esQueryArgs.name,
+        actionGroups: esQueryArgs.actionGroups,
+      };
+      expect(testedEsQueryArgs).toMatchInlineSnapshot(`
+        Object {
+          "actionGroups": Array [
+            Object {
+              "id": "query matched",
+              "name": "Query matched",
+            },
+          ],
+          "id": ".es-query",
+          "name": "Elasticsearch query",
         }
       `);
 

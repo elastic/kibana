@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 import { mountWithIntl as mount, shallowWithIntl as shallow } from '@kbn/test/jest';
-import { EuiButtonGroupProps, EuiSuperSelect, EuiButtonGroup } from '@elastic/eui';
+import { EuiButtonGroupProps, EuiButtonGroup } from '@elastic/eui';
 import { LayerContextMenu, XyToolbar, DimensionEditor } from './xy_config_panel';
-import { ToolbarPopover } from '../shared_components';
 import { AxisSettingsPopover } from './axis_settings_popover';
 import { FramePublicAPI } from '../types';
 import { State } from './types';
@@ -100,179 +100,6 @@ describe('XY Config panels', () => {
   });
 
   describe('XyToolbar', () => {
-    it('should show currently selected fitting function', () => {
-      const state = testState();
-
-      const component = shallow(
-        <XyToolbar
-          frame={frame}
-          setState={jest.fn()}
-          state={{
-            ...state,
-            layers: [{ ...state.layers[0], seriesType: 'line' }],
-            fittingFunction: 'Carry',
-          }}
-        />
-      );
-
-      expect(component.find(EuiSuperSelect).prop('valueOfSelected')).toEqual('Carry');
-    });
-
-    it('should show currently selected value labels display setting', () => {
-      const state = testState();
-
-      const component = shallow(
-        <XyToolbar
-          frame={frame}
-          setState={jest.fn()}
-          state={{
-            ...state,
-            layers: [{ ...state.layers[0], seriesType: 'bar' }],
-            fittingFunction: 'Carry',
-            valueLabels: 'inside',
-          }}
-        />
-      );
-
-      expect(component.find(EuiButtonGroup).prop('idSelected')).toEqual('value_labels_inside');
-    });
-
-    it('should disable the popover for stacked bar charts', () => {
-      const state = testState();
-      const component = shallow(
-        <XyToolbar
-          frame={frame}
-          setState={jest.fn()}
-          state={{
-            ...state,
-            layers: [{ ...state.layers[0], seriesType: 'bar_stacked' }],
-          }}
-        />
-      );
-
-      expect(component.find(ToolbarPopover).prop('isDisabled')).toEqual(true);
-    });
-
-    it('should disable the popover for percentage area charts', () => {
-      const state = testState();
-      const component = shallow(
-        <XyToolbar
-          frame={frame}
-          setState={jest.fn()}
-          state={{
-            ...state,
-            layers: [{ ...state.layers[0], seriesType: 'area_percentage_stacked' }],
-          }}
-        />
-      );
-
-      expect(component.find(ToolbarPopover).prop('isDisabled')).toEqual(true);
-    });
-
-    it('should disabled the popover if there is histogram series', () => {
-      // make it detect an histogram series
-      frame.datasourceLayers.first.getOperationForColumnId = jest.fn().mockReturnValueOnce({
-        isBucketed: true,
-        scale: 'interval',
-      });
-      const state = testState();
-      const component = shallow(
-        <XyToolbar
-          frame={frame}
-          setState={jest.fn()}
-          state={{
-            ...state,
-            layers: [{ ...state.layers[0] }],
-          }}
-        />
-      );
-
-      expect(component.find(ToolbarPopover).prop('isDisabled')).toEqual(true);
-    });
-
-    it('should show the popover and display field enabled for bar and horizontal_bar series', () => {
-      const state = testState();
-
-      const component = shallow(
-        <XyToolbar
-          frame={frame}
-          setState={jest.fn()}
-          state={{
-            ...state,
-            layers: [{ ...state.layers[0], seriesType: 'bar_horizontal' }],
-            fittingFunction: 'Carry',
-          }}
-        />
-      );
-
-      expect(component.exists('[data-test-subj="lnsValueLabelsDisplay"]')).toEqual(true);
-    });
-
-    it('should hide the fitting option for bar series', () => {
-      const state = testState();
-      const component = shallow(
-        <XyToolbar
-          frame={frame}
-          setState={jest.fn()}
-          state={{
-            ...state,
-            layers: [{ ...state.layers[0], seriesType: 'bar_horizontal' }],
-            fittingFunction: 'Carry',
-          }}
-        />
-      );
-
-      expect(component.exists('[data-test-subj="lnsMissingValuesSelect"]')).toEqual(false);
-    });
-
-    it('should hide in the popover the display option for area and line series', () => {
-      const state = testState();
-      const component = shallow(
-        <XyToolbar
-          frame={frame}
-          setState={jest.fn()}
-          state={{
-            ...state,
-            layers: [{ ...state.layers[0], seriesType: 'area' }],
-            fittingFunction: 'Carry',
-          }}
-        />
-      );
-
-      expect(component.exists('[data-test-subj="lnsValueLabelsDisplay"]')).toEqual(false);
-    });
-
-    it('should keep the display option for bar series with multiple layers', () => {
-      frame.datasourceLayers = {
-        ...frame.datasourceLayers,
-        second: createMockDatasource('test').publicAPIMock,
-      };
-
-      const state = testState();
-      const component = shallow(
-        <XyToolbar
-          frame={frame}
-          setState={jest.fn()}
-          state={{
-            ...state,
-            layers: [
-              { ...state.layers[0], seriesType: 'bar' },
-              {
-                seriesType: 'bar',
-                layerId: 'second',
-                splitAccessor: 'baz',
-                xAccessor: 'foo',
-                accessors: ['bar'],
-              },
-            ],
-            fittingFunction: 'Carry',
-          }}
-        />
-      );
-
-      expect(component.exists('[data-test-subj="lnsValueLabelsDisplay"]')).toEqual(true);
-    });
-
     it('should disable the popover if there is no right axis', () => {
       const state = testState();
       const component = shallow(<XyToolbar frame={frame} setState={jest.fn()} state={state} />);

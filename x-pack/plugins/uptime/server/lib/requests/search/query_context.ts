@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import moment from 'moment';
@@ -9,7 +10,7 @@ import { CursorPagination } from './types';
 import { parseRelativeDate } from '../../helper';
 import { CursorDirection, SortOrder } from '../../../../common/runtime_types';
 import { UptimeESClient } from '../../lib';
-import { ESFilter } from '../../../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../../../typings/elasticsearch';
 
 export class QueryContext {
   callES: UptimeESClient;
@@ -20,6 +21,7 @@ export class QueryContext {
   size: number;
   statusFilter?: string;
   hasTimespanCache?: boolean;
+  query?: string;
 
   constructor(
     database: UptimeESClient,
@@ -28,7 +30,8 @@ export class QueryContext {
     pagination: CursorPagination,
     filterClause: any | null,
     size: number,
-    statusFilter?: string
+    statusFilter?: string,
+    query?: string
   ) {
     this.callES = database;
     this.dateRangeStart = dateRangeStart;
@@ -37,6 +40,7 @@ export class QueryContext {
     this.filterClause = filterClause;
     this.size = size;
     this.statusFilter = statusFilter;
+    this.query = query;
   }
 
   async search<TParams>(params: TParams) {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -13,11 +14,28 @@ export function getLensTopNavConfig(options: {
   enableExportToCSV: boolean;
   showCancel: boolean;
   isByValueMode: boolean;
+  allowByValue: boolean;
   actions: LensTopNavActions;
-  savingPermitted: boolean;
+  savingToLibraryPermitted: boolean;
+  savingToDashboardPermitted: boolean;
 }): TopNavMenuData[] {
-  const { showSaveAndReturn, showCancel, actions, savingPermitted, enableExportToCSV } = options;
+  const {
+    actions,
+    showCancel,
+    allowByValue,
+    enableExportToCSV,
+    showSaveAndReturn,
+    savingToLibraryPermitted,
+    savingToDashboardPermitted,
+  } = options;
   const topNavMenu: TopNavMenuData[] = [];
+
+  const enableSaveButton =
+    savingToLibraryPermitted ||
+    (allowByValue &&
+      savingToDashboardPermitted &&
+      !options.isByValueMode &&
+      !options.showSaveAndReturn);
 
   const saveButtonLabel = options.isByValueMode
     ? i18n.translate('xpack.lens.app.addToLibrary', {
@@ -46,7 +64,7 @@ export function getLensTopNavConfig(options: {
   if (showCancel) {
     topNavMenu.push({
       label: i18n.translate('xpack.lens.app.cancel', {
-        defaultMessage: 'cancel',
+        defaultMessage: 'Cancel',
       }),
       run: actions.cancel,
       testId: 'lnsApp_cancelButton',
@@ -65,7 +83,7 @@ export function getLensTopNavConfig(options: {
     description: i18n.translate('xpack.lens.app.saveButtonAriaLabel', {
       defaultMessage: 'Save the current lens visualization',
     }),
-    disableButton: !savingPermitted,
+    disableButton: !enableSaveButton,
   });
 
   if (showSaveAndReturn) {
@@ -77,7 +95,7 @@ export function getLensTopNavConfig(options: {
       iconType: 'checkInCircleFilled',
       run: actions.saveAndReturn,
       testId: 'lnsApp_saveAndReturnButton',
-      disableButton: !savingPermitted,
+      disableButton: !savingToDashboardPermitted,
       description: i18n.translate('xpack.lens.app.saveAndReturnButtonAriaLabel', {
         defaultMessage: 'Save the current lens visualization and return to the last app',
       }),

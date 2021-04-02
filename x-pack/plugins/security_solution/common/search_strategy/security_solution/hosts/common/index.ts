@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CloudEcs } from '../../../../ecs/cloud';
@@ -12,6 +13,7 @@ export enum HostPolicyResponseActionStatus {
   success = 'success',
   failure = 'failure',
   warning = 'warning',
+  unsupported = 'unsupported',
 }
 
 export enum HostsFields {
@@ -68,7 +70,6 @@ export interface HostAggEsItem {
   cloud_machine_type?: HostBuckets;
   cloud_provider?: HostBuckets;
   cloud_region?: HostBuckets;
-  firstSeen?: HostValue;
   host_architecture?: HostBuckets;
   host_id?: HostBuckets;
   host_ip?: HostBuckets;
@@ -78,7 +79,6 @@ export interface HostAggEsItem {
   host_os_version?: HostBuckets;
   host_type?: HostBuckets;
   key?: string;
-  lastSeen?: HostValue;
   os?: HostOsHitsItem;
 }
 

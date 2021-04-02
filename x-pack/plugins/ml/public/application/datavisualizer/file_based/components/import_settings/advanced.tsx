@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -19,7 +20,7 @@ import {
 
 import { CombinedField, CombinedFieldsForm } from '../combined_fields';
 import { MLJobEditor, ML_EDITOR_MODE } from '../../../../jobs/jobs_list/components/ml_job_editor';
-import { FindFileStructureResponse } from '../../../../../../common/types/file_datavisualizer';
+import { FindFileStructureResponse } from '../../../../../../../file_upload/common';
 const EDITOR_HEIGHT = '300px';
 
 interface Props {

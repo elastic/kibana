@@ -1,8 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import { rangeQuery } from '../../../server/utils/queries';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { TRACE_ID } from '../../../common/elasticsearch_fieldnames';
 import {
@@ -10,37 +13,45 @@ import {
   ExternalConnectionNode,
   ServiceConnectionNode,
 } from '../../../common/service_map';
-import { Setup } from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { withApmSpan } from '../../utils/with_apm_span';
 
 export async function fetchServicePathsFromTraceIds(
-  setup: Setup,
+  setup: Setup & SetupTimeRange,
   traceIds: string[]
 ) {
-  const { apmEventClient } = setup;
+  return withApmSpan('get_service_paths_from_trace_ids', async () => {
+    const { apmEventClient } = setup;
 
-  const serviceMapParams = {
-    apm: {
-      events: [ProcessorEvent.span, ProcessorEvent.transaction],
-    },
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            {
-              terms: {
-                [TRACE_ID]: traceIds,
-              },
-            },
-          ],
-        },
+    // make sure there's a range so ES can skip shards
+    const dayInMs = 24 * 60 * 60 * 1000;
+    const start = setup.start - dayInMs;
+    const end = setup.end + dayInMs;
+
+    const serviceMapParams = {
+      apm: {
+        events: [ProcessorEvent.span, ProcessorEvent.transaction],
       },
-      aggs: {
-        service_map: {
-          scripted_metric: {
-            init_script: {
-              lang: 'painless',
-              source: `state.eventsById = new HashMap();
+      body: {
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              {
+                terms: {
+                  [TRACE_ID]: traceIds,
+                },
+              },
+              ...rangeQuery(start, end),
+            ],
+          },
+        },
+        aggs: {
+          service_map: {
+            scripted_metric: {
+              init_script: {
+                lang: 'painless',
+                source: `state.eventsById = new HashMap();
 
               String[] fieldsToCopy = new String[] {
                   'parent.id',
@@ -54,10 +65,10 @@ export async function fetchServicePathsFromTraceIds(
                   'agent.name'
                 };
                 state.fieldsToCopy = fieldsToCopy;`,
-            },
-            map_script: {
-              lang: 'painless',
-              source: `def id;
+              },
+              map_script: {
+                lang: 'painless',
+                source: `def id;
                 if (!doc['span.id'].empty) {
                   id = doc['span.id'].value;
                 } else {
@@ -74,14 +85,14 @@ export async function fetchServicePathsFromTraceIds(
                 }
 
                 state.eventsById[id] = copy`,
-            },
-            combine_script: {
-              lang: 'painless',
-              source: `return state.eventsById;`,
-            },
-            reduce_script: {
-              lang: 'painless',
-              source: `
+              },
+              combine_script: {
+                lang: 'painless',
+                source: `return state.eventsById;`,
+              },
+              reduce_script: {
+                lang: 'painless',
+                source: `
               def getDestination ( def event ) {
                 def destination = new HashMap();
                 destination['span.destination.service.resource'] = event['span.destination.service.resource'];
@@ -197,28 +208,29 @@ export async function fetchServicePathsFromTraceIds(
               response.discoveredServices = discoveredServices;
 
               return response;`,
+              },
             },
           },
         },
       },
-    },
-  };
+    };
 
-  const serviceMapFromTraceIdsScriptResponse = await apmEventClient.search(
-    serviceMapParams
-  );
+    const serviceMapFromTraceIdsScriptResponse = await apmEventClient.search(
+      serviceMapParams
+    );
 
-  return serviceMapFromTraceIdsScriptResponse as {
-    aggregations?: {
-      service_map: {
-        value: {
-          paths: ConnectionNode[][];
-          discoveredServices: Array<{
-            from: ExternalConnectionNode;
-            to: ServiceConnectionNode;
-          }>;
+    return serviceMapFromTraceIdsScriptResponse as {
+      aggregations?: {
+        service_map: {
+          value: {
+            paths: ConnectionNode[][];
+            discoveredServices: Array<{
+              from: ExternalConnectionNode;
+              to: ServiceConnectionNode;
+            }>;
+          };
         };
       };
     };
-  };
+  });
 }

@@ -1,26 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { useReducer, useCallback } from 'react';
-
-import { CasePostRequest } from '../../../../case/common/api';
+import { useReducer, useCallback, useRef, useEffect } from 'react';
+import { CasePostRequest } from '../../../../cases/common/api';
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
 import { postCase } from './api';
 import * as i18n from './translations';
 import { Case } from './types';
-
 interface NewCaseState {
-  caseData: Case | null;
   isLoading: boolean;
   isError: boolean;
 }
-type Action =
-  | { type: 'FETCH_INIT' }
-  | { type: 'FETCH_SUCCESS'; payload: Case }
-  | { type: 'FETCH_FAILURE' };
+type Action = { type: 'FETCH_INIT' } | { type: 'FETCH_SUCCESS' } | { type: 'FETCH_FAILURE' };
 
 const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => {
   switch (action.type) {
@@ -35,7 +30,6 @@ const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => 
         ...state,
         isLoading: false,
         isError: false,
-        caseData: action.payload ?? null,
       };
     case 'FETCH_FAILURE':
       return {
@@ -47,47 +41,51 @@ const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => 
       return state;
   }
 };
-
 export interface UsePostCase extends NewCaseState {
-  postCase: (data: CasePostRequest) => Promise<() => void>;
+  postCase: (data: CasePostRequest) => Promise<Case | undefined>;
 }
 export const usePostCase = (): UsePostCase => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoading: false,
     isError: false,
-    caseData: null,
   });
   const [, dispatchToaster] = useStateToaster();
+  const isCancelledRef = useRef(false);
+  const abortCtrlRef = useRef(new AbortController());
 
   const postMyCase = useCallback(async (data: CasePostRequest) => {
-    let cancel = false;
-    const abortCtrl = new AbortController();
-
     try {
+      isCancelledRef.current = false;
+      abortCtrlRef.current.abort();
+      abortCtrlRef.current = new AbortController();
+
       dispatch({ type: 'FETCH_INIT' });
-      const response = await postCase(data, abortCtrl.signal);
-      if (!cancel) {
-        dispatch({
-          type: 'FETCH_SUCCESS',
-          payload: response,
-        });
+      const response = await postCase(data, abortCtrlRef.current.signal);
+
+      if (!isCancelledRef.current) {
+        dispatch({ type: 'FETCH_SUCCESS' });
       }
+      return response;
     } catch (error) {
-      if (!cancel) {
-        errorToToaster({
-          title: i18n.ERROR_TITLE,
-          error: error.body && error.body.message ? new Error(error.body.message) : error,
-          dispatchToaster,
-        });
+      if (!isCancelledRef.current) {
+        if (error.name !== 'AbortError') {
+          errorToToaster({
+            title: i18n.ERROR_TITLE,
+            error: error.body && error.body.message ? new Error(error.body.message) : error,
+            dispatchToaster,
+          });
+        }
         dispatch({ type: 'FETCH_FAILURE' });
       }
     }
-    return () => {
-      abortCtrl.abort();
-      cancel = true;
-    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    return () => {
+      isCancelledRef.current = true;
+      abortCtrlRef.current.abort();
+    };
+  }, []);
   return { ...state, postCase: postMyCase };
 };

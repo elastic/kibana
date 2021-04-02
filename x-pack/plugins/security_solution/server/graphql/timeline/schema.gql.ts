@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import gql from 'graphql-tag';
@@ -18,6 +19,14 @@ const columnHeader = `
   placeholder: String
   searchable: Boolean
   type: String
+`;
+
+const eqlOptions = `
+  eventCategoryField: String
+  tiebreakerField: String
+  timestampField: String
+  query: String
+  size: ToAny
 `;
 
 const queryMatch = `
@@ -121,6 +130,10 @@ export const timelineSchema = gql`
     ${filtersMetaTimeline}
   }
 
+  input EqlOptionsInput {
+    ${eqlOptions}
+  }
+
   input FilterTimelineInput {
     exists: String
     meta: FilterMetaTimelineInput
@@ -143,10 +156,13 @@ export const timelineSchema = gql`
   }
 
   enum RowRendererId {
+    alerts
     auditd
     auditd_file
+    library
     netflow
     plain
+    registry
     suricata
     system
     system_dns
@@ -162,6 +178,7 @@ export const timelineSchema = gql`
     columns: [ColumnHeaderInput!]
     dataProviders: [DataProviderInput!]
     description: String
+    eqlOptions: EqlOptionsInput
     eventType: String
     excludedRowRendererIds: [RowRendererId!]
     filters: [FilterTimelineInput!]
@@ -242,6 +259,10 @@ export const timelineSchema = gql`
     ${filtersMetaTimeline}
   }
 
+  type EqlOptionsResult {
+    ${eqlOptions}
+  }
+
   type FilterTimelineResult {
     exists: String
     meta: FilterMetaTimelineResult
@@ -259,6 +280,7 @@ export const timelineSchema = gql`
     dataProviders: [DataProviderResult!]
     dateRange: DateRangePickerResult
     description: String
+    eqlOptions: EqlOptionsResult
     eventIdToNoteIds: [NoteResult!]
     eventType: String
     excludedRowRendererIds: [RowRendererId!]
@@ -294,6 +316,9 @@ export const timelineSchema = gql`
     code: Float
     message: String
     savedObjectId: String!
+    templateTimelineId: String
+    templateTimelineVersion: Int
+    timelineType: TimelineType
     version: String!
     favorite: [FavoriteTimelineResult!]
   }
@@ -320,7 +345,7 @@ export const timelineSchema = gql`
   extend type Mutation {
     "Persists a timeline"
     persistTimeline(id: ID, version: String, timeline: TimelineInput!): ResponseTimeline!
-    persistFavorite(timelineId: ID): ResponseFavoriteTimeline!
+    persistFavorite(timelineId: ID, templateTimelineId: String, templateTimelineVersion: Int, timelineType: TimelineType): ResponseFavoriteTimeline!
     deleteTimeline(id: [ID!]!): Boolean!
   }
 `;

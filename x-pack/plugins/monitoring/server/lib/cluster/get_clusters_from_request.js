@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { notFound } from '@hapi/boom';
@@ -14,8 +15,6 @@ import { getKibanasForClusters } from '../kibana';
 import { getLogstashForClusters } from '../logstash';
 import { getLogstashPipelineIds } from '../logstash/get_pipeline_ids';
 import { getBeatsForClusters } from '../beats';
-import { verifyMonitoringLicense } from '../../cluster_alerts/verify_monitoring_license';
-import { checkLicense as checkLicenseForAlerts } from '../../cluster_alerts/check_license';
 import { getClustersSummary } from './get_clusters_summary';
 import {
   STANDALONE_CLUSTER_CLUSTER_UUID,
@@ -119,20 +118,14 @@ export async function getClustersFromRequest(
     // add alerts data
     if (isInCodePath(codePaths, [CODE_PATH_ALERTS])) {
       const alertsClient = req.getAlertsClient();
-      for (const cluster of clusters) {
-        const verification = verifyMonitoringLicense(req.server);
-        if (!verification.enabled) {
-          // return metadata detailing that alerts is disabled because of the monitoring cluster license
-          cluster.alerts = {
-            alertsMeta: {
-              enabled: verification.enabled,
-              message: verification.message, // NOTE: this is only defined when the alert feature is disabled
-            },
-            list: {},
-          };
-          continue;
-        }
+      const alertStatus = await fetchStatus(
+        alertsClient,
+        req.server.plugins.monitoring.info,
+        undefined,
+        clusters.map((cluster) => cluster.cluster_uuid)
+      );
 
+      for (const cluster of clusters) {
         if (!alertsClient) {
           cluster.alerts = {
             list: {},
@@ -140,25 +133,23 @@ export async function getClustersFromRequest(
               enabled: false,
             },
           };
-          continue;
-        }
-
-        // check the license type of the production cluster for alerts feature support
-        const license = cluster.license || {};
-        const prodLicenseInfo = checkLicenseForAlerts(
-          license.type,
-          license.status === 'active',
-          'production'
-        );
-        if (prodLicenseInfo.clusterAlerts.enabled) {
+        } else {
           try {
             cluster.alerts = {
-              list: await fetchStatus(
-                alertsClient,
-                req.server.plugins.monitoring.info,
-                undefined,
-                cluster.cluster_uuid
-              ),
+              list: Object.keys(alertStatus).reduce((accum, alertName) => {
+                const value = alertStatus[alertName];
+                if (value.states && value.states.length) {
+                  accum[alertName] = {
+                    ...value,
+                    states: value.states.filter(
+                      (state) => state.state.cluster.clusterUuid === cluster.cluster_uuid
+                    ),
+                  };
+                } else {
+                  accum[alertName] = value;
+                }
+                return accum;
+              }, {}),
               alertsMeta: {
                 enabled: true,
               },
@@ -174,29 +165,7 @@ export async function getClustersFromRequest(
               },
             };
           }
-          continue;
         }
-
-        cluster.alerts = {
-          list: {},
-          alertsMeta: {
-            enabled: false,
-          },
-          clusterMeta: {
-            enabled: false,
-            message: i18n.translate(
-              'xpack.monitoring.clusterAlerts.unsupportedClusterAlertsDescription',
-              {
-                defaultMessage:
-                  'Cluster [{clusterName}] license type [{licenseType}] does not support Cluster Alerts',
-                values: {
-                  clusterName: cluster.cluster_name,
-                  licenseType: `${license.type}`,
-                },
-              }
-            ),
-          },
-        };
       }
     }
   }
@@ -242,7 +211,11 @@ export async function getClustersFromRequest(
     : [];
   apmsByCluster.forEach((apm) => {
     const clusterIndex = findIndex(clusters, { cluster_uuid: apm.clusterUuid });
-    set(clusters[clusterIndex], 'apm', apm.stats);
+    const { stats, config } = apm;
+    clusters[clusterIndex].apm = {
+      ...stats,
+      config,
+    };
   });
 
   // check ccr configuration

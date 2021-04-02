@@ -1,0 +1,25 @@
+.relevanceTuningForm {
+  &__item {
+    width: 100%;
+    margin-left: $euiSizeS;
+  }
+
+  &__panel + &__panel {
+    margin-top: $euiSizeM;
+  }
+
+  &__panel .euiAccordion__button {
+    &:hover,
+    &:focus {
+      text-decoration: none;
+      h3 {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .relevanceTuningAccordionItem {
+    border-top: $euiBorderThin;
+    border-radius: 0;
+  }
+}

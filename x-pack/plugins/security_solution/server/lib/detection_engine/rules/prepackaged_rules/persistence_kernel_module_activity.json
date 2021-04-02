@@ -12,7 +12,7 @@
     "logs-endpoint.events.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Persistence via Kernel Module Modification",
   "query": "event.category:process and event.type:(start or process_started) and process.name:(insmod or kmod or modprobe or rmod)",
   "references": [
@@ -38,13 +38,21 @@
       },
       "technique": [
         {
-          "id": "T1215",
-          "name": "Kernel Modules and Extensions",
-          "reference": "https://attack.mitre.org/techniques/T1215/"
+          "id": "T1547",
+          "name": "Boot or Logon Autostart Execution",
+          "reference": "https://attack.mitre.org/techniques/T1547/",
+          "subtechnique": [
+            {
+              "id": "T1547.006",
+              "name": "Kernel Modules and Extensions",
+              "reference": "https://attack.mitre.org/techniques/T1547/006/"
+            }
+          ]
         }
       ]
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 5
+  "version": 8
 }

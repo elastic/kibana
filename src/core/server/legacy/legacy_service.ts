@@ -1,35 +1,30 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { combineLatest, ConnectableObservable, EMPTY, Observable, Subscription } from 'rxjs';
+import { combineLatest, ConnectableObservable, Observable, Subscription } from 'rxjs';
 import { first, map, publishReplay, tap } from 'rxjs/operators';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { PathConfigType } from '@kbn/utils';
 
+import type { RequestHandlerContext } from 'src/core/server';
 // @ts-expect-error legacy config class
 import { Config as LegacyConfigClass } from '../../../legacy/server/config';
 import { CoreService } from '../../types';
 import { Config } from '../config';
 import { CoreContext } from '../core_context';
 import { CspConfigType, config as cspConfig } from '../csp';
-import { DevConfig, DevConfigType, config as devConfig } from '../dev';
-import { BasePathProxyServer, HttpConfig, HttpConfigType, config as httpConfig } from '../http';
+import {
+  HttpConfig,
+  HttpConfigType,
+  config as httpConfig,
+  IRouter,
+  RequestHandlerContextProvider,
+} from '../http';
 import { Logger } from '../logging';
 import { LegacyServiceSetupDeps, LegacyServiceStartDeps, LegacyConfig, LegacyVars } from './types';
 import { ExternalUrlConfigType, config as externalUrlConfig } from '../external_url';
@@ -67,7 +62,6 @@ export class LegacyService implements CoreService {
   /** Symbol to represent the legacy platform as a fake "plugin". Used by the ContextService */
   public readonly legacyId = Symbol();
   private readonly log: Logger;
-  private readonly devConfig$: Observable<DevConfig>;
   private readonly httpConfig$: Observable<HttpConfig>;
   private kbnServer?: LegacyKbnServer;
   private configSubscription?: Subscription;
@@ -80,9 +74,6 @@ export class LegacyService implements CoreService {
     const { logger, configService } = coreContext;
 
     this.log = logger.get('legacy-service');
-    this.devConfig$ = configService
-      .atPath<DevConfigType>(devConfig.path)
-      .pipe(map((rawConfig) => new DevConfig(rawConfig)));
     this.httpConfig$ = combineLatest(
       configService.atPath<HttpConfigType>(httpConfig.path),
       configService.atPath<CspConfigType>(cspConfig.path),
@@ -145,17 +136,12 @@ export class LegacyService implements CoreService {
 
     this.log.debug('starting legacy service');
 
-    // Receive initial config and create kbnServer/ClusterManager.
-    if (this.coreContext.env.isDevCliParent) {
-      await this.setupCliDevMode(this.legacyRawConfig!);
-    } else {
-      this.kbnServer = await this.createKbnServer(
-        this.settings!,
-        this.legacyRawConfig!,
-        setupDeps,
-        startDeps
-      );
-    }
+    this.kbnServer = await this.createKbnServer(
+      this.settings!,
+      this.legacyRawConfig!,
+      setupDeps,
+      startDeps
+    );
   }
 
   public async stop() {
@@ -170,26 +156,6 @@ export class LegacyService implements CoreService {
       await this.kbnServer.close();
       this.kbnServer = undefined;
     }
-  }
-
-  private async setupCliDevMode(config: LegacyConfig) {
-    const basePathProxy$ = this.coreContext.env.cliArgs.basePath
-      ? combineLatest([this.devConfig$, this.httpConfig$]).pipe(
-          first(),
-          map(
-            ([dev, http]) =>
-              new BasePathProxyServer(this.coreContext.logger.get('server'), http, dev)
-          )
-        )
-      : EMPTY;
-
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { CliDevMode } = require('./cli_dev_mode');
-    CliDevMode.fromCoreServices(
-      this.coreContext.env.cliArgs,
-      config,
-      await basePathProxy$.toPromise()
-    );
   }
 
   private async createKbnServer(
@@ -211,6 +177,8 @@ export class LegacyService implements CoreService {
         createScopedRepository: startDeps.core.savedObjects.createScopedRepository,
         createInternalRepository: startDeps.core.savedObjects.createInternalRepository,
         createSerializer: startDeps.core.savedObjects.createSerializer,
+        createExporter: startDeps.core.savedObjects.createExporter,
+        createImporter: startDeps.core.savedObjects.createImporter,
         getTypeRegistry: startDeps.core.savedObjects.getTypeRegistry,
       },
       metrics: {
@@ -234,11 +202,15 @@ export class LegacyService implements CoreService {
       },
       http: {
         createCookieSessionStorageFactory: setupDeps.core.http.createCookieSessionStorageFactory,
-        registerRouteHandlerContext: setupDeps.core.http.registerRouteHandlerContext.bind(
-          null,
-          this.legacyId
-        ),
-        createRouter: () => router,
+        registerRouteHandlerContext: <
+          Context extends RequestHandlerContext,
+          ContextName extends keyof Context
+        >(
+          contextName: ContextName,
+          provider: RequestHandlerContextProvider<Context, ContextName>
+        ) => setupDeps.core.http.registerRouteHandlerContext(this.legacyId, contextName, provider),
+        createRouter: <Context extends RequestHandlerContext = RequestHandlerContext>() =>
+          router as IRouter<Context>,
         resources: setupDeps.core.httpResources.createRegistrar(router),
         registerOnPreRouting: setupDeps.core.http.registerOnPreRouting,
         registerOnPreAuth: setupDeps.core.http.registerOnPreAuth,
@@ -265,7 +237,6 @@ export class LegacyService implements CoreService {
         setClientFactoryProvider: setupDeps.core.savedObjects.setClientFactoryProvider,
         addClientWrapper: setupDeps.core.savedObjects.addClientWrapper,
         registerType: setupDeps.core.savedObjects.registerType,
-        getImportExportObjectLimit: setupDeps.core.savedObjects.getImportExportObjectLimit,
       },
       status: {
         isStatusPageAnonymous: setupDeps.core.status.isStatusPageAnonymous,
@@ -285,6 +256,11 @@ export class LegacyService implements CoreService {
       },
       uiSettings: {
         register: setupDeps.core.uiSettings.register,
+      },
+      deprecations: {
+        registerDeprecations: () => {
+          throw new Error('core.setup.deprecations.registerDeprecations is unsupported in legacy');
+        },
       },
       getStartServices: () => Promise.resolve([coreStart, startDeps.plugins, {}]),
     };

@@ -9,6 +9,9 @@ def check() {
     kibanaPipeline.scriptTask('Check TypeScript Projects', 'test/scripts/checks/ts_projects.sh'),
     kibanaPipeline.scriptTask('Check Jest Configs', 'test/scripts/checks/jest_configs.sh'),
     kibanaPipeline.scriptTask('Check Doc API Changes', 'test/scripts/checks/doc_api_changes.sh'),
+    kibanaPipeline.scriptTask('Check @kbn/pm Distributable', 'test/scripts/checks/kbn_pm_dist.sh'),
+    kibanaPipeline.scriptTask('Check Plugin List Docs', 'test/scripts/checks/plugin_list_docs.sh'),
+    // kibanaPipeline.scriptTask('Check Public API Docs', 'test/scripts/checks/plugin_public_api_docs.sh'),
     kibanaPipeline.scriptTask('Check Types', 'test/scripts/checks/type_check.sh'),
     kibanaPipeline.scriptTask('Check Bundle Limits', 'test/scripts/checks/bundle_limits.sh'),
     kibanaPipeline.scriptTask('Check i18n', 'test/scripts/checks/i18n.sh'),
@@ -24,20 +27,26 @@ def check() {
 def lint() {
   tasks([
     kibanaPipeline.scriptTask('Lint: eslint', 'test/scripts/lint/eslint.sh'),
-    kibanaPipeline.scriptTask('Lint: sasslint', 'test/scripts/lint/sasslint.sh'),
+    kibanaPipeline.scriptTask('Lint: stylelint', 'test/scripts/lint/stylelint.sh'),
   ])
 }
 
 def test() {
   tasks([
-    // These 2 tasks require isolation because of hard-coded, conflicting ports and such, so let's use Docker here
+    // This task requires isolation because of hard-coded, conflicting ports and such, so let's use Docker here
     kibanaPipeline.scriptTaskDocker('Jest Integration Tests', 'test/scripts/test/jest_integration.sh'),
-    kibanaPipeline.scriptTaskDocker('Mocha Tests', 'test/scripts/test/mocha.sh'),
-
-    kibanaPipeline.scriptTask('Jest Unit Tests', 'test/scripts/test/jest_unit.sh'),
     kibanaPipeline.scriptTask('API Integration Tests', 'test/scripts/test/api_integration.sh'),
-    kibanaPipeline.scriptTask('X-Pack Jest Unit Tests', 'test/scripts/test/xpack_jest_unit.sh'),
   ])
+}
+
+def ossCiGroups() {
+  def ciGroups = 1..12
+  tasks(ciGroups.collect { kibanaPipeline.ossCiGroupProcess(it, true) })
+}
+
+def xpackCiGroups() {
+  def ciGroups = 1..13
+  tasks(ciGroups.collect { kibanaPipeline.xpackCiGroupProcess(it, true) })
 }
 
 def functionalOss(Map params = [:]) {
@@ -54,8 +63,7 @@ def functionalOss(Map params = [:]) {
     kibanaPipeline.buildOss(6)
 
     if (config.ciGroups) {
-      def ciGroups = 1..12
-      tasks(ciGroups.collect { kibanaPipeline.ossCiGroupProcess(it) })
+      ossCiGroups()
     }
 
     if (config.firefox) {
@@ -95,8 +103,7 @@ def functionalXpack(Map params = [:]) {
     kibanaPipeline.buildXpack(10)
 
     if (config.ciGroups) {
-      def ciGroups = 1..11
-      tasks(ciGroups.collect { kibanaPipeline.xpackCiGroupProcess(it) })
+      xpackCiGroups()
     }
 
     if (config.firefox) {
@@ -121,8 +128,18 @@ def functionalXpack(Map params = [:]) {
       'x-pack/plugins/triggers_actions_ui/public/application/sections/action_connector_form/',
       'x-pack/plugins/triggers_actions_ui/public/application/context/actions_connectors_context.tsx',
     ]) {
-      task(kibanaPipeline.functionalTestProcess('xpack-securitySolutionCypress', './test/scripts/jenkins_security_solution_cypress.sh'))
+      if (githubPr.isPr()) {
+        task(kibanaPipeline.functionalTestProcess('xpack-securitySolutionCypressChrome', './test/scripts/jenkins_security_solution_cypress_chrome.sh'))
+        // Temporarily disabled to figure out test flake
+        // task(kibanaPipeline.functionalTestProcess('xpack-securitySolutionCypressFirefox', './test/scripts/jenkins_security_solution_cypress_firefox.sh'))
+      }
     }
+  }
+}
+
+def storybooksCi() {
+  task {
+    storybooks.buildAndUpload()
   }
 }
 

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { createStaticIndexPattern } from './create_static_index_pattern';
@@ -35,7 +36,12 @@ describe('createStaticIndexPattern', () => {
       'xpack.apm.autocreateApmIndexPattern': false,
     });
     const savedObjectsClient = getMockSavedObjectsClient();
-    await createStaticIndexPattern(setup, context, savedObjectsClient);
+    await createStaticIndexPattern(
+      setup,
+      context,
+      savedObjectsClient,
+      'default'
+    );
     expect(savedObjectsClient.create).not.toHaveBeenCalled();
   });
 
@@ -52,7 +58,12 @@ describe('createStaticIndexPattern', () => {
 
     const savedObjectsClient = getMockSavedObjectsClient();
 
-    await createStaticIndexPattern(setup, context, savedObjectsClient);
+    await createStaticIndexPattern(
+      setup,
+      context,
+      savedObjectsClient,
+      'default'
+    );
     expect(savedObjectsClient.create).not.toHaveBeenCalled();
   });
 
@@ -69,7 +80,12 @@ describe('createStaticIndexPattern', () => {
 
     const savedObjectsClient = getMockSavedObjectsClient();
 
-    await createStaticIndexPattern(setup, context, savedObjectsClient);
+    await createStaticIndexPattern(
+      setup,
+      context,
+      savedObjectsClient,
+      'default'
+    );
 
     expect(savedObjectsClient.create).toHaveBeenCalled();
   });

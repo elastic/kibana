@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
@@ -40,14 +41,27 @@ const columnNamesNotDraggable = [MESSAGE_FIELD_NAME];
 const FormattedFieldValueComponent: React.FC<{
   contextId: string;
   eventId: string;
+  isObjectArray?: boolean;
   fieldFormat?: string;
   fieldName: string;
   fieldType: string;
   truncate?: boolean;
   value: string | number | undefined | null;
   linkValue?: string | null | undefined;
-}> = ({ contextId, eventId, fieldFormat, fieldName, fieldType, truncate, value, linkValue }) => {
-  if (fieldType === IP_FIELD_TYPE) {
+}> = ({
+  contextId,
+  eventId,
+  fieldFormat,
+  fieldName,
+  fieldType,
+  isObjectArray = false,
+  truncate,
+  value,
+  linkValue,
+}) => {
+  if (isObjectArray) {
+    return <>{value}</>;
+  } else if (fieldType === IP_FIELD_TYPE) {
     return (
       <FormattedIp
         eventId={eventId}

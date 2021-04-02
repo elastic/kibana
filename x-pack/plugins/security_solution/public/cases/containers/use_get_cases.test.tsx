@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { CaseStatuses } from '../../../../case/common/api';
+import { CaseStatuses } from '../../../../cases/common/api';
 import {
   DEFAULT_FILTER_OPTIONS,
   DEFAULT_QUERY_PARAMS,
@@ -13,7 +14,7 @@ import {
   useGetCases,
   UseGetCases,
 } from './use_get_cases';
-import { UpdateKey } from './use_update_case';
+import { UpdateKey } from './types';
 import { allCases, basicCase } from './mock';
 import * as api from './api';
 

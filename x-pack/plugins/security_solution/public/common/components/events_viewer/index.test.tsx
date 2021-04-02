@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -15,6 +16,7 @@ import { useMountAppended } from '../../utils/use_mount_appended';
 import { mockEventViewerResponse } from './mock';
 import { StatefulEventsViewer } from '.';
 import { eventsDefaultModel } from './default_model';
+import { TimelineId } from '../../../../common/types/timeline';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useTimelineEvents } from '../../../timelines/containers';
 
@@ -35,7 +37,7 @@ const testProps = {
   defaultModel: eventsDefaultModel,
   end: to,
   indexNames: [],
-  id: 'test-stateful-events-viewer',
+  id: TimelineId.test,
   scopeId: SourcererScopeName.default,
   start: from,
 };

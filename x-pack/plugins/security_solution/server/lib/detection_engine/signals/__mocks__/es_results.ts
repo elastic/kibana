@@ -1,23 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { set } from '@elastic/safer-lodash-set';
-import {
+import type {
   SignalSourceHit,
   SignalSearchResponse,
   BulkResponse,
   BulkItem,
   RuleAlertAttributes,
   SignalHit,
+  WrappedSignalHit,
 } from '../types';
-import {
-  Logger,
-  SavedObject,
-  SavedObjectsFindResponse,
-} from '../../../../../../../../src/core/server';
+import { SavedObject, SavedObjectsFindResponse } from '../../../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../../../src/core/server/mocks';
 import { RuleTypeParams } from '../../types';
 import { IRuleStatusSOAttributes } from '../../rules/types';
@@ -61,6 +59,7 @@ export const sampleRuleAlertParams = (
   threatQuery: undefined,
   threatMapping: undefined,
   threatIndex: undefined,
+  threatIndicatorPath: undefined,
   threatLanguage: undefined,
   timelineId: undefined,
   timelineTitle: undefined,
@@ -168,6 +167,12 @@ export const sampleDocWithSortId = (
       ip: destIp ?? '127.0.0.1',
     },
   },
+  fields: {
+    someKey: ['someValue'],
+    '@timestamp': ['2020-04-20T21:27:45+0000'],
+    'source.ip': ip ? (Array.isArray(ip) ? ip : [ip]) : ['127.0.0.1'],
+    'destination.ip': destIp ? (Array.isArray(destIp) ? destIp : [destIp]) : ['127.0.0.1'],
+  },
   sort: ['1234567891111'],
 });
 
@@ -186,6 +191,11 @@ export const sampleDocNoSortId = (
     source: {
       ip: ip ?? '127.0.0.1',
     },
+  },
+  fields: {
+    someKey: ['someValue'],
+    '@timestamp': ['2020-04-20T21:27:45+0000'],
+    'source.ip': [ip ?? '127.0.0.1'],
   },
   sort: [],
 });
@@ -240,10 +250,20 @@ export const sampleEmptyDocSearchResults = (): SignalSearchResponse => ({
   },
 });
 
+export const sampleWrappedSignalHit = (): WrappedSignalHit => {
+  return {
+    _index: 'myFakeSignalIndex',
+    _id: sampleIdGuid,
+    _source: sampleSignalHit(),
+  };
+};
+
 export const sampleDocWithAncestors = (): SignalSearchResponse => {
   const sampleDoc = sampleDocNoSortId();
   delete sampleDoc.sort;
+  // @ts-expect-error @elastic/elasticsearch _source is optional
   delete sampleDoc._source.source;
+  // @ts-expect-error @elastic/elasticsearch _source is optional
   sampleDoc._source.signal = {
     parent: {
       id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
@@ -355,6 +375,147 @@ export const sampleSignalHit = (): SignalHit => ({
     depth: 1,
   },
 });
+
+export const sampleThresholdSignalHit = (): SignalHit => ({
+  '@timestamp': '2020-04-20T21:27:45+0000',
+  event: {
+    kind: 'signal',
+  },
+  signal: {
+    parents: [],
+    ancestors: [],
+    original_time: '2021-02-16T17:37:34.275Z',
+    status: 'open',
+    threshold_result: {
+      count: 72,
+      terms: [{ field: 'host.name', value: 'a hostname' }],
+      cardinality: [{ field: 'process.name', value: 6 }],
+      from: '2021-02-16T17:31:34.275Z',
+    },
+    rule: {
+      author: [],
+      id: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
+      created_at: '2020-04-20T21:27:45+0000',
+      updated_at: '2020-04-20T21:27:45+0000',
+      created_by: 'elastic',
+      description: 'some description',
+      enabled: true,
+      false_positives: ['false positive 1', 'false positive 2'],
+      from: 'now-6m',
+      immutable: false,
+      name: 'Query with a rule id',
+      query: 'user.name: root or user.name: admin',
+      references: ['test 1', 'test 2'],
+      severity: 'high',
+      severity_mapping: [],
+      threshold: {
+        field: ['host.name'],
+        value: 5,
+        cardinality: [
+          {
+            field: 'process.name',
+            value: 2,
+          },
+        ],
+      },
+      updated_by: 'elastic_kibana',
+      tags: ['some fake tag 1', 'some fake tag 2'],
+      to: 'now',
+      type: 'query',
+      threat: [],
+      version: 1,
+      status: 'succeeded',
+      status_date: '2020-02-22T16:47:50.047Z',
+      last_success_at: '2020-02-22T16:47:50.047Z',
+      last_success_message: 'succeeded',
+      output_index: '.siem-signals-default',
+      max_signals: 100,
+      risk_score: 55,
+      risk_score_mapping: [],
+      language: 'kuery',
+      rule_id: 'query-rule-id',
+      interval: '5m',
+      exceptions_list: getListArrayMock(),
+    },
+    depth: 1,
+  },
+});
+
+const sampleThresholdHit = sampleThresholdSignalHit();
+export const sampleLegacyThresholdSignalHit = (): unknown => ({
+  ...sampleThresholdHit,
+  signal: {
+    ...sampleThresholdHit.signal,
+    rule: {
+      ...sampleThresholdHit.signal.rule,
+      threshold: {
+        field: 'host.name',
+        value: 5,
+      },
+    },
+    threshold_result: {
+      count: 72,
+      value: 'a hostname',
+    },
+  },
+});
+
+export const sampleThresholdSignalHitWithMitigatedDupes = (): unknown => ({
+  ...sampleThresholdHit,
+  signal: {
+    ...sampleThresholdHit.signal,
+    threshold_result: {
+      ...sampleThresholdHit.signal.threshold_result,
+      from: '2021-02-16T17:34:34.275Z',
+    },
+  },
+});
+
+export const sampleThresholdSignalHitWithEverything = (): unknown => ({
+  ...sampleThresholdHit,
+  signal: {
+    ...sampleThresholdHit.signal,
+    rule: {
+      ...sampleThresholdHit.signal.rule,
+      threshold: {
+        field: ['host.name', 'event.category', 'source.ip'],
+        value: 5,
+        cardinality: [
+          {
+            field: 'process.name',
+            value: 2,
+          },
+        ],
+      },
+    },
+    threshold_result: {
+      count: 22,
+      terms: [
+        { field: 'host.name', value: 'a hostname' },
+        { field: 'event.category', value: 'network' },
+        { field: 'source.ip', value: '192.168.0.1' },
+      ],
+      cardinality: [{ field: 'process.name', value: 3 }],
+      from: '2021-02-16T17:34:34.275Z',
+    },
+  },
+});
+
+export const sampleWrappedThresholdSignalHit = (): WrappedSignalHit => {
+  return {
+    _index: 'myFakeSignalIndex',
+    _id: sampleIdGuid,
+    _source: sampleThresholdSignalHit(),
+  };
+};
+
+export const sampleWrappedLegacyThresholdSignalHit = (): WrappedSignalHit => {
+  return {
+    _index: 'myFakeSignalIndex',
+    _id: 'adb9d636-fbbe-4962-ac1c-e282f3ec5879',
+    _source: sampleLegacyThresholdSignalHit() as SignalHit,
+  };
+};
 
 export const sampleBulkCreateDuplicateResult = {
   took: 60,
@@ -606,7 +767,7 @@ export const exampleFindRuleStatusResponse: (
   saved_objects: mockStatuses.map((obj) => ({ ...obj, score: 1 })),
 });
 
-export const mockLogger: Logger = loggingSystemMock.createLogger();
+export const mockLogger = loggingSystemMock.createLogger();
 
 export const sampleBulkErrorItem = (
   {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
@@ -26,10 +27,7 @@ type CalculateModelMemoryLimitPayload = TypeOf<typeof modelMemoryLimitSchema>;
 /**
  * Routes for job validation
  */
-export function jobValidationRoutes(
-  { router, mlLicense, routeGuard }: RouteInitialization,
-  version: string
-) {
+export function jobValidationRoutes({ router, mlLicense, routeGuard }: RouteInitialization) {
   function calculateModelMemoryLimit(
     client: IScopedClusterClient,
     mlClient: MlClient,
@@ -190,12 +188,10 @@ export function jobValidationRoutes(
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
       try {
-        // version corresponds to the version used in documentation links.
         const resp = await validateJob(
           client,
           mlClient,
           request.body,
-          version,
           mlLicense.isSecurityEnabled() === false
         );
 

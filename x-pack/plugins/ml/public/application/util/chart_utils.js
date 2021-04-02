@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import d3 from 'd3';
 import { calculateTextWidth } from './string_utils';
 import { MULTI_BUCKET_IMPACT } from '../../../common/constants/multi_bucket_impact';
 import moment from 'moment';
-import { getTimefilter } from './dependency_cache';
 import { CHART_TYPE } from '../explorer/explorer_constants';
 import { ML_PAGES } from '../../../common/constants/ml_url_generator';
 
@@ -176,6 +176,11 @@ const POPULATION_DISTRIBUTION_ENABLED = true;
 // get the chart type based on its configuration
 export function getChartType(config) {
   let chartType = CHART_TYPE.SINGLE_METRIC;
+
+  if (config.functionDescription === 'lat_long' || config.mapData !== undefined) {
+    return CHART_TYPE.GEO_MAP;
+  }
+
   if (
     EVENT_DISTRIBUTION_ENABLED &&
     config.functionDescription === 'rare' &&
@@ -214,10 +219,9 @@ export function getChartType(config) {
   return chartType;
 }
 
-export async function getExploreSeriesLink(mlUrlGenerator, series) {
+export async function getExploreSeriesLink(mlUrlGenerator, series, timefilter) {
   // Open the Single Metric dashboard over the same overall bounds and
   // zoomed in to the same time as the current chart.
-  const timefilter = getTimefilter();
   const bounds = timefilter.getActiveBounds();
   const from = bounds.min.toISOString(); // e.g. 2016-02-08T16:00:00.000Z
   const to = bounds.max.toISOString();
@@ -264,7 +268,7 @@ export async function getExploreSeriesLink(mlUrlGenerator, series) {
         },
       },
     },
-    excludeBasePath: false,
+    excludeBasePath: true,
   });
   return url;
 }

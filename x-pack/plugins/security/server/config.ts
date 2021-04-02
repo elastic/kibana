@@ -1,14 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import crypto from 'crypto';
 import type { Duration } from 'moment';
-import { schema, Type, TypeOf } from '@kbn/config-schema';
+
+import type { Type, TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { Logger, config as coreConfig } from '../../../../src/core/server';
+import type { Logger } from 'src/core/server';
+
+import { config as coreConfig } from '../../../../src/core/server';
 import type { AuthenticationProvider } from '../common/model';
 
 export type ConfigType = ReturnType<typeof createConfig>;

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import PropTypes from 'prop-types';
@@ -43,8 +32,8 @@ import {
   EuiCode,
   EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { IndexPatternSelect } from './lib/index_pattern_select';
 
 function newAnnotation() {
   return {
@@ -74,6 +63,7 @@ export class AnnotationsEditor extends Component {
       handleChange(_.assign({}, item, part));
     };
   }
+
   handleQueryChange = (model, filter) => {
     const part = { query_string: filter };
     collectionActions.handleChange(this.props, {
@@ -101,7 +91,6 @@ export class AnnotationsEditor extends Component {
     const htmlId = htmlIdGenerator(model.id);
     const handleAdd = collectionActions.handleAdd.bind(null, this.props, newAnnotation);
     const handleDelete = collectionActions.handleDelete.bind(null, this.props, model);
-    const defaultIndexPattern = this.props.model.default_index_pattern;
 
     return (
       <div className="tvbAnnotationsEditor" key={model.id}>
@@ -118,30 +107,11 @@ export class AnnotationsEditor extends Component {
           <EuiFlexItem className="tvbAggRow__children">
             <EuiFlexGroup responsive={false} wrap={true} gutterSize="m">
               <EuiFlexItem>
-                <EuiFormRow
-                  id={htmlId('indexPattern')}
-                  label={
-                    <FormattedMessage
-                      id="visTypeTimeseries.annotationsEditor.indexPatternLabel"
-                      defaultMessage="Index pattern"
-                    />
-                  }
-                  helpText={
-                    defaultIndexPattern &&
-                    !model.index_pattern &&
-                    i18n.translate('visTypeTimeseries.annotationsEditor.searchByDefaultIndex', {
-                      defaultMessage: 'Default index pattern is used. To query all indexes use *',
-                    })
-                  }
-                  fullWidth
-                >
-                  <EuiFieldText
-                    onChange={this.handleChange(model, 'index_pattern')}
-                    value={model.index_pattern}
-                    placeholder={defaultIndexPattern}
-                    fullWidth
-                  />
-                </EuiFormRow>
+                <IndexPatternSelect
+                  value={model.index_pattern}
+                  indexPatternName={'index_pattern'}
+                  onChange={handleChange}
+                />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiFormRow

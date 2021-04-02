@@ -1,20 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
-import { errors } from '@elastic/elasticsearch';
+import { errors, estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { RequestHandlerContext, ElasticsearchClient } from 'src/core/server';
 import { CoreSetup, Logger } from 'src/core/server';
-import { IndexPattern, IndexPatternsService } from 'src/plugins/data/common';
+import { IndexPattern, IndexPatternsService, RuntimeField } from 'src/plugins/data/common';
 import { BASE_API_URL } from '../../common';
 import { UI_SETTINGS } from '../../../../../src/plugins/data/server';
 import { PluginStartContract } from '../plugin';
 
-export function isBoomError(error: { isBoom?: boolean }): error is Boom {
+export function isBoomError(error: { isBoom?: boolean }): error is Boom.Boom {
   return error.isBoom === true;
 }
 
@@ -29,6 +30,7 @@ export interface Field {
   isMeta: boolean;
   lang?: string;
   script?: string;
+  runtimeField?: RuntimeField;
 }
 
 export async function existingFieldsRoute(setup: CoreSetup<PluginStartContract>, logger: Logger) {
@@ -76,11 +78,9 @@ export async function existingFieldsRoute(setup: CoreSetup<PluginStartContract>,
           if (e.output.statusCode === 404) {
             return res.notFound({ body: e.output.payload.message });
           }
-          return res.internalError({ body: e.output.payload.message });
+          throw new Error(e.output.payload.message);
         } else {
-          return res.internalError({
-            body: Boom.internal(e.message || e.name),
-          });
+          throw e;
         }
       }
     }
@@ -137,6 +137,7 @@ export function buildFieldList(indexPattern: IndexPattern, metaFields: string[])
       // id is a special case - it doesn't show up in the meta field list,
       // but as it's not part of source, it has to be handled separately.
       isMeta: metaFields.includes(field.name) || field.name === '_id',
+      runtimeField: !field.isMapped ? field.runtimeField : undefined,
     };
   });
 }
@@ -180,6 +181,7 @@ async function fetchIndexPatternStats({
   };
 
   const scriptedFields = fields.filter((f) => f.isScript);
+  const runtimeFields = fields.filter((f) => f.runtimeField);
   const { body: result } = await client.search({
     index,
     body: {
@@ -188,15 +190,21 @@ async function fetchIndexPatternStats({
       sort: timeFieldName && fromDate && toDate ? [{ [timeFieldName]: 'desc' }] : [],
       fields: ['*'],
       _source: false,
+      runtime_mappings: runtimeFields.reduce((acc, field) => {
+        if (!field.runtimeField) return acc;
+        // @ts-expect-error @elastic/elasticsearch StoredScript.language is required
+        acc[field.name] = field.runtimeField;
+        return acc;
+      }, {} as Record<string, estypes.RuntimeField>),
       script_fields: scriptedFields.reduce((acc, field) => {
         acc[field.name] = {
           script: {
-            lang: field.lang,
-            source: field.script,
+            lang: field.lang!,
+            source: field.script!,
           },
         };
         return acc;
-      }, {} as Record<string, unknown>),
+      }, {} as Record<string, estypes.ScriptField>),
     },
   });
   return result.hits.hits;
@@ -205,10 +213,7 @@ async function fetchIndexPatternStats({
 /**
  * Exported only for unit tests.
  */
-export function existingFields(
-  docs: Array<{ fields: Record<string, unknown[]>; [key: string]: unknown }>,
-  fields: Field[]
-): string[] {
+export function existingFields(docs: estypes.Hit[], fields: Field[]): string[] {
   const missingFields = new Set(fields);
 
   for (const doc of docs) {
@@ -217,7 +222,7 @@ export function existingFields(
     }
 
     missingFields.forEach((field) => {
-      let fieldStore: Record<string, unknown> = doc.fields;
+      let fieldStore = doc.fields!;
       if (field.isMeta) {
         fieldStore = doc;
       }

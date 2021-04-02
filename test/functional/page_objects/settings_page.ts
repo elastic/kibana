@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { map as mapAsync } from 'bluebird';
@@ -39,6 +28,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
     async clickLinkText(text: string) {
       await find.clickByDisplayedLinkText(text);
     }
+
     async clickKibanaSettings() {
       await testSubjects.click('settings');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -96,6 +86,22 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       const input = await testSubjects.find(`advancedSetting-editField-${propertyName}`);
       await input.clearValue();
       await input.type(propertyValue);
+      await testSubjects.click(`advancedSetting-saveButton`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async setAdvancedSettingsTextArea(propertyName: string, propertyValue: string) {
+      const wrapper = await testSubjects.find(`advancedSetting-editField-${propertyName}`);
+      const textarea = await wrapper.findByTagName('textarea');
+      await textarea.focus();
+      // only way to properly replace the value of the ace editor is via the JS api
+      await browser.execute(
+        (editor: string, value: string) => {
+          return (window as any).ace.edit(editor).setValue(value);
+        },
+        `advancedSetting-editField-${propertyName}-editor`,
+        propertyValue
+      );
       await testSubjects.click(`advancedSetting-saveButton`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
@@ -173,6 +179,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async sortBy(columnName: string) {
       const chartTypes = await find.allByCssSelector('table.euiTable thead tr th button');
+
       async function getChartType(chart: Record<string, any>) {
         const chartString = await chart.getVisibleText();
         if (chartString === columnName) {
@@ -180,6 +187,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
           await PageObjects.header.waitUntilLoadingHasFinished();
         }
       }
+
       const getChartTypesPromises = chartTypes.map(getChartType);
       return Promise.all(getChartTypesPromises);
     }
@@ -260,7 +268,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
       await find.clickByCssSelector(
         `table.euiTable tbody tr.euiTableRow:nth-child(${tableFields.indexOf(name) + 1})
-          td:last-child button`
+          td:nth-last-child(2) button`
       );
     }
 
@@ -322,7 +330,8 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async createIndexPattern(
       indexPatternName: string,
-      timefield = '@timestamp',
+      // null to bypass default value
+      timefield: string | null = '@timestamp',
       isStandardIndexPattern = true
     ) {
       await retry.try(async () => {
@@ -344,8 +353,13 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
         await retry.try(async () => {
           await this.setIndexPatternField(indexPatternName);
         });
-        await PageObjects.common.sleep(2000);
-        await (await this.getCreateIndexPatternGoToStep2Button()).click();
+
+        const btn = await this.getCreateIndexPatternGoToStep2Button();
+        await retry.waitFor(`index pattern Go To Step 2 button to be enabled`, async () => {
+          return await btn.isEnabled();
+        });
+        await btn.click();
+
         await PageObjects.common.sleep(2000);
         if (timefield) {
           await this.selectTimeFieldOption(timefield);
@@ -494,6 +508,79 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       if (popularity) await this.setScriptedFieldPopularity(popularity);
       await this.setScriptedFieldScript(script);
       await this.clickSaveScriptedField();
+    }
+
+    async addRuntimeField(name: string, type: string, script: string) {
+      await this.clickAddField();
+      await this.setFieldName(name);
+      await this.setFieldType(type);
+      if (script) {
+        await this.setFieldScript(script);
+      }
+      await this.clickSaveField();
+      await this.closeIndexPatternFieldEditor();
+    }
+
+    public async confirmSave() {
+      await testSubjects.setValue('saveModalConfirmText', 'change');
+      await testSubjects.click('confirmModalConfirmButton');
+    }
+
+    public async confirmDelete() {
+      await testSubjects.setValue('deleteModalConfirmText', 'remove');
+      await testSubjects.click('confirmModalConfirmButton');
+    }
+
+    async closeIndexPatternFieldEditor() {
+      await retry.waitFor('field editor flyout to close', async () => {
+        return !(await testSubjects.exists('euiFlyoutCloseButton'));
+      });
+    }
+
+    async clickAddField() {
+      log.debug('click Add Field');
+      await testSubjects.click('addField');
+    }
+
+    async clickSaveField() {
+      log.debug('click Save');
+      await testSubjects.click('fieldSaveButton');
+    }
+
+    async setFieldName(name: string) {
+      log.debug('set field name = ' + name);
+      await testSubjects.setValue('nameField', name);
+    }
+
+    async setFieldType(type: string) {
+      log.debug('set type = ' + type);
+      await testSubjects.setValue('typeField', type);
+    }
+
+    async setFieldScript(script: string) {
+      log.debug('set script = ' + script);
+      const formatRow = await testSubjects.find('valueRow');
+      const formatRowToggle = (
+        await formatRow.findAllByCssSelector('[data-test-subj="toggle"]')
+      )[0];
+
+      await formatRowToggle.click();
+      const getMonacoTextArea = async () => (await formatRow.findAllByCssSelector('textarea'))[0];
+      retry.waitFor('monaco editor is ready', async () => !!(await getMonacoTextArea()));
+      const monacoTextArea = await getMonacoTextArea();
+      await monacoTextArea.focus();
+      browser.pressKeys(script);
+    }
+
+    async changeFieldScript(script: string) {
+      log.debug('set script = ' + script);
+      const formatRow = await testSubjects.find('valueRow');
+      const getMonacoTextArea = async () => (await formatRow.findAllByCssSelector('textarea'))[0];
+      retry.waitFor('monaco editor is ready', async () => !!(await getMonacoTextArea()));
+      const monacoTextArea = await getMonacoTextArea();
+      await monacoTextArea.focus();
+      browser.pressKeys(browser.keys.DELETE.repeat(30));
+      browser.pressKeys(script);
     }
 
     async clickAddScriptedField() {

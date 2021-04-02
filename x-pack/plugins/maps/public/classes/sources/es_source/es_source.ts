@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -15,7 +16,7 @@ import {
   getSearchService,
 } from '../../../kibana_services';
 import { createExtentFilter } from '../../../../common/elasticsearch_util';
-import { copyPersistentState } from '../../../reducers/util';
+import { copyPersistentState } from '../../../reducers/copy_persistent_state';
 import { DataRequestAbortError } from '../../util/data_request';
 import { expandToTileBoundaries } from '../../../../common/geo_tile_utils';
 import { search } from '../../../../../../../src/plugins/data/public';
@@ -33,12 +34,16 @@ import {
 import { IVectorStyle } from '../../styles/vector/vector_style';
 import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 import { IField } from '../../fields/field';
-import { ES_GEO_FIELD_TYPE, FieldFormatter } from '../../../../common/constants';
+import { FieldFormatter } from '../../../../common/constants';
 import {
   Adapters,
   RequestResponder,
 } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { isValidStringConfig } from '../../util/valid_string_config';
+
+export function isSearchSourceAbortError(error: Error) {
+  return error.name === 'AbortError';
+}
 
 export interface IESSource extends IVectorSource {
   isESSource(): true;
@@ -53,6 +58,7 @@ export interface IESSource extends IVectorSource {
     registerCancelCallback,
     sourceQuery,
     timeFilters,
+    searchSessionId,
   }: {
     layerName: string;
     style: IVectorStyle;
@@ -60,6 +66,7 @@ export interface IESSource extends IVectorSource {
     registerCancelCallback: (callback: () => void) => void;
     sourceQuery?: MapQuery;
     timeFilters: TimeRange;
+    searchSessionId?: string;
   }): Promise<object>;
 }
 
@@ -147,17 +154,19 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   }
 
   async _runEsQuery({
+    registerCancelCallback,
+    requestDescription,
     requestId,
     requestName,
-    requestDescription,
+    searchSessionId,
     searchSource,
-    registerCancelCallback,
   }: {
+    registerCancelCallback: (callback: () => void) => void;
+    requestDescription: string;
     requestId: string;
     requestName: string;
-    requestDescription: string;
+    searchSessionId?: string;
     searchSource: ISearchSource;
-    registerCancelCallback: (callback: () => void) => void;
   }): Promise<any> {
     const abortController = new AbortController();
     registerCancelCallback(() => abortController.abort());
@@ -168,6 +177,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       inspectorRequest = inspectorAdapters.requests.start(requestName, {
         id: requestId,
         description: requestDescription,
+        searchSessionId,
       });
     }
 
@@ -182,7 +192,11 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
           }
         });
       }
-      resp = await searchSource.fetch({ abortSignal: abortController.signal });
+      resp = await searchSource.fetch({
+        abortSignal: abortController.signal,
+        sessionId: searchSessionId,
+        legacyHitsTotal: false,
+      });
       if (inspectorRequest) {
         const responseStats = search.getResponseInspectorStats(resp, searchSource);
         inspectorRequest.stats(responseStats).ok({ json: resp });
@@ -191,7 +205,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       if (inspectorRequest) {
         inspectorRequest.error(error);
       }
-      if (error.name === 'AbortError') {
+      if (isSearchSourceAbortError(error)) {
         throw new DataRequestAbortError();
       }
 
@@ -223,13 +237,8 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
         typeof searchFilters.geogridPrecision === 'number'
           ? expandToTileBoundaries(searchFilters.buffer, searchFilters.geogridPrecision)
           : searchFilters.buffer;
-      const extentFilter = createExtentFilter(
-        buffer,
-        geoField.name,
-        geoField.type as ES_GEO_FIELD_TYPE
-      );
+      const extentFilter = createExtentFilter(buffer, geoField.name);
 
-      // @ts-expect-error
       allFilters.push(extentFilter);
     }
     if (searchFilters.applyGlobalTime && (await this.isTimeAware())) {
@@ -239,6 +248,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       }
     }
     const searchService = getSearchService();
+
     const searchSource = await searchService.searchSource.create(initialSearchContext);
 
     searchSource.setField('index', indexPattern);
@@ -264,6 +274,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     registerCancelCallback: (callback: () => void) => void
   ): Promise<MapExtent | null> {
     const searchSource = await this.makeSearchSource(boundsFilters, 0);
+    searchSource.setField('trackTotalHits', false);
     searchSource.setField('aggs', {
       fitToBounds: {
         geo_bounds: {
@@ -276,12 +287,33 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     try {
       const abortController = new AbortController();
       registerCancelCallback(() => abortController.abort());
-      const esResp = await searchSource.fetch({ abortSignal: abortController.signal });
-      if (!esResp.aggregations.fitToBounds.bounds) {
+      const esResp = await searchSource.fetch({
+        abortSignal: abortController.signal,
+        legacyHitsTotal: false,
+      });
+
+      if (!esResp.aggregations) {
+        return null;
+      }
+
+      const fitToBounds = esResp.aggregations.fitToBounds as {
+        bounds?: {
+          top_left: {
+            lat: number;
+            lon: number;
+          };
+          bottom_right: {
+            lat: number;
+            lon: number;
+          };
+        };
+      };
+
+      if (!fitToBounds.bounds) {
         // aggregations.fitToBounds is empty object when there are no matching documents
         return null;
       }
-      esBounds = esResp.aggregations.fitToBounds.bounds;
+      esBounds = fitToBounds.bounds;
     } catch (error) {
       if (error.name === 'AbortError') {
         throw new DataRequestAbortError();
@@ -400,6 +432,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     registerCancelCallback,
     sourceQuery,
     timeFilters,
+    searchSessionId,
   }: {
     layerName: string;
     style: IVectorStyle;
@@ -407,6 +440,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     registerCancelCallback: (callback: () => void) => void;
     sourceQuery?: MapQuery;
     timeFilters: TimeRange;
+    searchSessionId?: string;
   }): Promise<object> {
     const promises = dynamicStyleProps.map((dynamicStyleProp) => {
       return dynamicStyleProp.getFieldMetaRequest();
@@ -452,6 +486,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
             'Elasticsearch request retrieving field metadata used for calculating symbolization bands.',
         }
       ),
+      searchSessionId,
     });
 
     return resp.aggregations;

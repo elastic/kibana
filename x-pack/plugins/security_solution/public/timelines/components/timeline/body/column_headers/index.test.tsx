@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { shallow } from 'enzyme';
@@ -19,6 +20,7 @@ import { useMountAppended } from '../../../../../common/utils/use_mount_appended
 import { ColumnHeadersComponent } from '.';
 import { cloneDeep } from 'lodash/fp';
 import { timelineActions } from '../../../../store/timeline';
+import { TimelineTabs } from '../../../../../../common/types/timeline';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -38,6 +40,7 @@ describe('ColumnHeaders', () => {
     const sort: Sort[] = [
       {
         columnId: '@timestamp',
+        columnType: 'number',
         sortDirection: Direction.desc,
       },
     ];
@@ -54,6 +57,7 @@ describe('ColumnHeaders', () => {
             showEventsSelect={false}
             showSelectAllCheckbox={false}
             sort={sort}
+            tabType={TimelineTabs.query}
             timelineId={timelineId}
           />
         </TestProviders>
@@ -73,6 +77,7 @@ describe('ColumnHeaders', () => {
             showEventsSelect={false}
             showSelectAllCheckbox={false}
             sort={sort}
+            tabType={TimelineTabs.query}
             timelineId={timelineId}
           />
         </TestProviders>
@@ -93,6 +98,7 @@ describe('ColumnHeaders', () => {
             showEventsSelect={false}
             showSelectAllCheckbox={false}
             sort={sort}
+            tabType={TimelineTabs.query}
             timelineId={timelineId}
           />
         </TestProviders>
@@ -108,10 +114,12 @@ describe('ColumnHeaders', () => {
     let mockSort: Sort[] = [
       {
         columnId: '@timestamp',
+        columnType: 'number',
         sortDirection: Direction.desc,
       },
       {
         columnId: 'host.name',
+        columnType: 'text',
         sortDirection: Direction.asc,
       },
     ];
@@ -126,10 +134,12 @@ describe('ColumnHeaders', () => {
       mockSort = [
         {
           columnId: '@timestamp',
+          columnType: 'number',
           sortDirection: Direction.desc,
         },
         {
           columnId: 'host.name',
+          columnType: 'text',
           sortDirection: Direction.asc,
         },
       ];
@@ -147,6 +157,7 @@ describe('ColumnHeaders', () => {
             showEventsSelect={false}
             showSelectAllCheckbox={false}
             sort={mockSort}
+            tabType={TimelineTabs.query}
             timelineId={timelineId}
           />
         </TestProviders>
@@ -162,13 +173,15 @@ describe('ColumnHeaders', () => {
           sort: [
             {
               columnId: '@timestamp',
+              columnType: 'number',
               sortDirection: Direction.desc,
             },
             {
               columnId: 'host.name',
+              columnType: 'text',
               sortDirection: Direction.asc,
             },
-            { columnId: 'event.category', sortDirection: Direction.desc },
+            { columnId: 'event.category', columnType: 'text', sortDirection: Direction.desc },
           ],
         })
       );
@@ -186,6 +199,7 @@ describe('ColumnHeaders', () => {
             showEventsSelect={false}
             showSelectAllCheckbox={false}
             sort={mockSort}
+            tabType={TimelineTabs.query}
             timelineId={timelineId}
           />
         </TestProviders>
@@ -201,9 +215,10 @@ describe('ColumnHeaders', () => {
           sort: [
             {
               columnId: '@timestamp',
+              columnType: 'number',
               sortDirection: Direction.asc,
             },
-            { columnId: 'host.name', sortDirection: Direction.asc },
+            { columnId: 'host.name', columnType: 'text', sortDirection: Direction.asc },
           ],
         })
       );
@@ -221,6 +236,7 @@ describe('ColumnHeaders', () => {
             showEventsSelect={false}
             showSelectAllCheckbox={false}
             sort={mockSort}
+            tabType={TimelineTabs.query}
             timelineId={timelineId}
           />
         </TestProviders>
@@ -236,9 +252,10 @@ describe('ColumnHeaders', () => {
           sort: [
             {
               columnId: '@timestamp',
+              columnType: 'number',
               sortDirection: Direction.desc,
             },
-            { columnId: 'host.name', sortDirection: Direction.desc },
+            { columnId: 'host.name', columnType: 'text', sortDirection: Direction.desc },
           ],
         })
       );

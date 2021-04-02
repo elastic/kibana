@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import d3 from 'd3';
@@ -40,6 +41,8 @@ const getPosition = (element: Element): Position => {
 
   return { x: rect.left, y: rect.top };
 };
+
+const hasDraggableLock = () => _sensorApiSingleton != null && _sensorApiSingleton.isLockClaimed();
 
 /**
  * Returns the position of one of the following timeline drop targets
@@ -87,16 +90,21 @@ export const getDraggableCoordinate = (draggableId: DraggableId): Position | nul
  */
 export const animate = ({
   drag,
+  dropWhenComplete = true,
   fieldName,
   values,
 }: {
   drag: FluidDragActions;
+  dropWhenComplete?: boolean;
   fieldName: string;
   values: Position[];
 }) => {
   requestAnimationFrame(() => {
     if (values.length === 0) {
-      setTimeout(() => drag.drop(), 0); // schedule the drop the next time around
+      if (dropWhenComplete) {
+        setTimeout(() => drag.drop(), 0); // schedule the drop the next time around
+      }
+
       return;
     }
 
@@ -104,6 +112,7 @@ export const animate = ({
 
     animate({
       drag,
+      dropWhenComplete,
       fieldName,
       values: values.slice(1),
     });
@@ -119,7 +128,20 @@ export const useAddToTimeline = ({
 }: {
   draggableId: DraggableId | undefined;
   fieldName: string;
-}) => {
+}): {
+  beginDrag: () => FluidDragActions | null;
+  cancelDrag: (dragActions: FluidDragActions | null) => void;
+  dragToLocation: ({
+    dragActions,
+    position,
+  }: {
+    dragActions: FluidDragActions | null;
+    position: Position;
+  }) => void;
+  endDrag: (dragActions: FluidDragActions | null) => void;
+  hasDraggableLock: () => boolean;
+  startDragToTimeline: () => void;
+} => {
   const startDragToTimeline = useCallback(() => {
     if (_sensorApiSingleton == null) {
       throw new TypeError(
@@ -162,5 +184,48 @@ export const useAddToTimeline = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [_sensorApiSingleton, draggableId]);
 
-  return startDragToTimeline;
+  const beginDrag = useCallback(() => {
+    if (draggableId == null) {
+      // A request to start the drag should not have been made, because no draggableId was provided
+      return null;
+    }
+
+    const draggableCoordinate = getDraggableCoordinate(draggableId);
+    const preDrag = _sensorApiSingleton.tryGetLock(draggableId);
+
+    return draggableCoordinate != null && preDrag != null
+      ? preDrag.fluidLift(draggableCoordinate)
+      : null;
+  }, [draggableId]);
+
+  const dragToLocation = useCallback(
+    ({ dragActions, position }: { dragActions: FluidDragActions | null; position: Position }) => {
+      if (dragActions == null || draggableId == null) {
+        return;
+      }
+
+      const draggableCoordinate = getDraggableCoordinate(draggableId);
+
+      if (draggableCoordinate != null) {
+        requestAnimationFrame(() => {
+          dragActions.move(position);
+        });
+      }
+    },
+    [draggableId]
+  );
+
+  const endDrag = useCallback((dragActions: FluidDragActions | null) => {
+    if (dragActions !== null) {
+      dragActions.drop();
+    }
+  }, []);
+
+  const cancelDrag = useCallback((dragActions: FluidDragActions | null) => {
+    if (dragActions !== null) {
+      dragActions.cancel();
+    }
+  }, []);
+
+  return { beginDrag, cancelDrag, dragToLocation, endDrag, hasDraggableLock, startDragToTimeline };
 };

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import t, { Encode, Encoder } from 'io-ts';
@@ -12,12 +13,28 @@ import {
   Logger,
 } from 'src/core/server';
 import { Observable } from 'rxjs';
-import { RequiredKeys } from 'utility-types';
+import { RequiredKeys, DeepPartial } from 'utility-types';
+import { SpacesPluginStart } from '../../../spaces/server';
 import { ObservabilityPluginSetup } from '../../../observability/server';
+import { LicensingApiRequestHandlerContext } from '../../../licensing/server';
 import { SecurityPluginSetup } from '../../../security/server';
 import { MlPluginSetup } from '../../../ml/server';
 import { FetchOptions } from '../../common/fetch_options';
 import { APMConfig } from '..';
+
+export type HandlerReturn = Record<string, any>;
+
+interface InspectQueryParam {
+  query: { _inspect: boolean };
+}
+
+export type InspectResponse = Array<{
+  response: any;
+  duration: number;
+  requestType: string;
+  requestParams: Record<string, unknown>;
+  esError: Error;
+}>;
 
 export interface RouteParams {
   path?: Record<string, unknown>;
@@ -34,15 +51,14 @@ export type RouteParamsRT = WithoutIncompatibleMethods<t.Type<RouteParams>>;
 
 export type RouteHandler<
   TParamsRT extends RouteParamsRT | undefined,
-  TReturn
+  TReturn extends HandlerReturn
 > = (kibanaContext: {
   context: APMRequestHandlerContext<
-    (TParamsRT extends RouteParamsRT ? t.TypeOf<TParamsRT> : {}) & {
-      query: { _debug: boolean };
-    }
+    (TParamsRT extends RouteParamsRT ? t.TypeOf<TParamsRT> : {}) &
+      InspectQueryParam
   >;
   request: KibanaRequest;
-}) => Promise<TReturn>;
+}) => Promise<TReturn extends any[] ? never : TReturn>;
 
 interface RouteOptions {
   tags: Array<
@@ -56,7 +72,7 @@ interface RouteOptions {
 export interface Route<
   TEndpoint extends string,
   TRouteParamsRT extends RouteParamsRT | undefined,
-  TReturn
+  TReturn extends HandlerReturn
 > {
   endpoint: TEndpoint;
   options: RouteOptions;
@@ -64,13 +80,21 @@ export interface Route<
   handler: RouteHandler<TRouteParamsRT, TReturn>;
 }
 
+/**
+ * @internal
+ */
+export interface ApmPluginRequestHandlerContext extends RequestHandlerContext {
+  licensing: LicensingApiRequestHandlerContext;
+}
+
 export type APMRequestHandlerContext<
   TRouteParams = {}
-> = RequestHandlerContext & {
-  params: TRouteParams & { query: { _debug: boolean } };
+> = ApmPluginRequestHandlerContext & {
+  params: TRouteParams & InspectQueryParam;
   config: APMConfig;
   logger: Logger;
   plugins: {
+    spaces?: SpacesPluginStart;
     observability?: ObservabilityPluginSetup;
     security?: SecurityPluginSetup;
     ml?: MlPluginSetup;
@@ -88,8 +112,8 @@ export interface ServerAPI<TRouteState extends RouteState> {
   _S: TRouteState;
   add<
     TEndpoint extends string,
-    TRouteParamsRT extends RouteParamsRT | undefined = undefined,
-    TReturn = unknown
+    TReturn extends HandlerReturn,
+    TRouteParamsRT extends RouteParamsRT | undefined = undefined
   >(
     route:
       | Route<TEndpoint, TRouteParamsRT, TReturn>
@@ -99,7 +123,7 @@ export interface ServerAPI<TRouteState extends RouteState> {
       {
         [key in TEndpoint]: {
           params: TRouteParamsRT;
-          ret: TReturn;
+          ret: TReturn & { _inspect?: InspectResponse };
         };
       }
   >;
@@ -123,15 +147,28 @@ type MaybeOptional<T extends { params: Record<string, any> }> = RequiredKeys<
   ? { params?: T['params'] }
   : { params: T['params'] };
 
-export type Client<TRouteState> = <
+export type MaybeParams<
+  TRouteState,
   TEndpoint extends keyof TRouteState & string
->(
-  options: Omit<FetchOptions, 'query' | 'body' | 'pathname' | 'method'> & {
+> = TRouteState[TEndpoint] extends { params: t.Any }
+  ? MaybeOptional<{
+      params: t.OutputOf<TRouteState[TEndpoint]['params']> &
+        DeepPartial<InspectQueryParam>;
+    }>
+  : {};
+
+export type Client<
+  TRouteState,
+  TOptions extends { abortable: boolean } = { abortable: true }
+> = <TEndpoint extends keyof TRouteState & string>(
+  options: Omit<
+    FetchOptions,
+    'query' | 'body' | 'pathname' | 'method' | 'signal'
+  > & {
     forceCache?: boolean;
     endpoint: TEndpoint;
-  } & (TRouteState[TEndpoint] extends { params: t.Any }
-      ? MaybeOptional<{ params: t.TypeOf<TRouteState[TEndpoint]['params']> }>
-      : {})
+  } & MaybeParams<TRouteState, TEndpoint> &
+    (TOptions extends { abortable: true } ? { signal: AbortSignal | null } : {})
 ) => Promise<
   TRouteState[TEndpoint] extends { ret: any }
     ? TRouteState[TEndpoint]['ret']

@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { APMConfig } from '../..';
-import { AlertingPlugin } from '../../../../alerts/server';
+import { AlertingPlugin } from '../../../../alerting/server';
 import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
 import {
   PROCESSOR_EVENT,
@@ -19,13 +20,13 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { getDurationFormatter } from '../../../common/utils/formatters';
-import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
+import { environmentQuery } from '../../../server/utils/queries';
 import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
 
 interface RegisterAlertParams {
-  alerts: AlertingPlugin['setup'];
+  alerting: AlertingPlugin['setup'];
   config$: Observable<APMConfig>;
 }
 
@@ -46,10 +47,10 @@ const paramsSchema = schema.object({
 const alertTypeConfig = ALERT_TYPES_CONFIG[AlertType.TransactionDuration];
 
 export function registerTransactionDurationAlertType({
-  alerts,
+  alerting,
   config$,
 }: RegisterAlertParams) {
-  alerts.registerType({
+  alerting.registerType({
     id: AlertType.TransactionDuration,
     name: alertTypeConfig.name,
     actionGroups: alertTypeConfig.actionGroups,
@@ -68,6 +69,7 @@ export function registerTransactionDurationAlertType({
       ],
     },
     producer: 'apm',
+    minimumLicenseRequired: 'basic',
     executor: async ({ services, params }) => {
       const config = await config$.pipe(take(1)).toPromise();
       const alertParams = params;
@@ -94,7 +96,7 @@ export function registerTransactionDurationAlertType({
                 { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
                 { term: { [SERVICE_NAME]: alertParams.serviceName } },
                 { term: { [TRANSACTION_TYPE]: alertParams.transactionType } },
-                ...getEnvironmentUiFilterES(alertParams.environment),
+                ...environmentQuery(alertParams.environment),
               ],
             },
           },
@@ -120,7 +122,7 @@ export function registerTransactionDurationAlertType({
         },
       };
 
-      const response = await alertingEsClient(services, searchParams);
+      const { body: response } = await alertingEsClient(services, searchParams);
 
       if (!response.aggregations) {
         return;

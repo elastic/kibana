@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable complexity */
 // TODO: Disabling complexity is temporary till this component is refactored as part of lists UI integration
 
 import {
+  EuiButtonIcon,
   EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,9 +21,11 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { noop } from 'lodash/fp';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
+import styled from 'styled-components';
+import deepEqual from 'fast-deep-equal';
 
 import {
   useDeepEqualSelector,
@@ -39,12 +43,13 @@ import {
 } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { SiemSearchBar } from '../../../../../common/components/search_bar';
 import { WrapperPage } from '../../../../../common/components/wrapper_page';
-import { Rule } from '../../../../containers/detection_engine/rules';
+import { Rule, useRuleStatus, RuleInfoStatus } from '../../../../containers/detection_engine/rules';
 import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
 import { SpyRoute } from '../../../../../common/utils/route/spy_routes';
 import { StepAboutRuleToggleDetails } from '../../../../components/rules/step_about_rule_details';
 import { DetectionEngineHeaderPage } from '../../../../components/detection_engine_header_page';
 import { AlertsHistogramPanel } from '../../../../components/alerts_histogram_panel';
+import { AlertsHistogramOption } from '../../../../components/alerts_histogram_panel/types';
 import { AlertsTable } from '../../../../components/alerts_table';
 import { useUserData } from '../../../../components/user_info';
 import { OverviewEmpty } from '../../../../../overview/components/overview_empty';
@@ -55,14 +60,11 @@ import {
   buildAlertsRuleIdFilter,
   buildShowBuildingBlockFilter,
 } from '../../../../components/alerts_table/default_config';
-import { NoWriteAlertsCallOut } from '../../../../components/no_write_alerts_callout';
-import * as detectionI18n from '../../translations';
-import { ReadOnlyCallOut } from '../../../../components/rules/read_only_callout';
+import { ReadOnlyAlertsCallOut } from '../../../../components/callouts/read_only_alerts_callout';
+import { ReadOnlyRulesCallOut } from '../../../../components/callouts/read_only_rules_callout';
 import { RuleSwitch } from '../../../../components/rules/rule_switch';
 import { StepPanel } from '../../../../components/rules/step_panel';
 import { getStepsData, redirectToDetections, userHasNoPermissions } from '../helpers';
-import * as ruleI18n from '../translations';
-import * as i18n from './translations';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { alertsHistogramOptions } from '../../../../components/alerts_histogram_panel/config';
 import { inputsSelectors } from '../../../../../common/store/inputs';
@@ -83,7 +85,12 @@ import { useGlobalFullScreen } from '../../../../../common/containers/use_full_s
 import { Display } from '../../../../../hosts/pages/display';
 import { ExceptionListTypeEnum, ExceptionListIdentifiers } from '../../../../../shared_imports';
 import { useRuleAsync } from '../../../../containers/detection_engine/rules/use_rule_async';
-import { showGlobalFilters } from '../../../../../timelines/components/timeline/helpers';
+import {
+  focusUtilityBarAction,
+  onTimelineTabKeyPressed,
+  resetKeyboardFocus,
+  showGlobalFilters,
+} from '../../../../../timelines/components/timeline/helpers';
 import { timelineSelectors } from '../../../../../timelines/store/timeline';
 import { timelineDefaults } from '../../../../../timelines/store/timeline/defaults';
 import { useSourcererScope } from '../../../../../common/containers/sourcerer';
@@ -94,7 +101,22 @@ import {
   isBoolean,
 } from '../../../../../common/utils/privileges';
 
-import { AlertsHistogramOption } from '../../../../components/alerts_histogram_panel/types';
+import * as detectionI18n from '../../translations';
+import * as ruleI18n from '../translations';
+import * as statusI18n from '../../../../components/rules/rule_status/translations';
+import * as i18n from './translations';
+import { isTab } from '../../../../../common/components/accessibility/helpers';
+import { NeedAdminForUpdateRulesCallOut } from '../../../../components/callouts/need_admin_for_update_callout';
+import { getRuleStatusText } from '../../../../../../common/detection_engine/utils';
+
+/**
+ * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
+ */
+const StyledFullHeightContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+`;
 
 enum RuleDetailTabs {
   alerts = 'alerts',
@@ -127,6 +149,7 @@ const getRuleDetailsTabs = (rule: Rule | null) => {
 
 const RuleDetailsPageComponent = () => {
   const dispatch = useDispatch();
+  const containerElement = useRef<HTMLDivElement | null>(null);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
     (state) =>
@@ -149,6 +172,7 @@ const RuleDetailsPageComponent = () => {
       hasEncryptionKey,
       canUserCRUD,
       hasIndexWrite,
+      hasIndexMaintenance,
       signalIndexName,
     },
   ] = useUserData();
@@ -159,6 +183,15 @@ const RuleDetailsPageComponent = () => {
   const loading = userInfoLoading || listsConfigLoading;
   const { detailName: ruleId } = useParams<{ detailName: string }>();
   const { rule: maybeRule, refresh: refreshRule, loading: ruleLoading } = useRuleAsync(ruleId);
+  const [loadingStatus, ruleStatus, fetchRuleStatus] = useRuleStatus(ruleId);
+  const [currentStatus, setCurrentStatus] = useState<RuleInfoStatus | null>(
+    ruleStatus?.current_status ?? null
+  );
+  useEffect(() => {
+    if (!deepEqual(currentStatus, ruleStatus?.current_status)) {
+      setCurrentStatus(ruleStatus?.current_status ?? null);
+    }
+  }, [currentStatus, ruleStatus, setCurrentStatus]);
   const [rule, setRule] = useState<Rule | null>(null);
   const isLoading = ruleLoading && rule == null;
   // This is used to re-trigger api rule status when user de/activate rule
@@ -282,33 +315,68 @@ const RuleDetailsPageComponent = () => {
     ),
     [ruleDetailTabs, ruleDetailTab, setRuleDetailTab]
   );
+
+  const handleRefresh = useCallback(() => {
+    if (fetchRuleStatus != null && ruleId != null) {
+      fetchRuleStatus(ruleId);
+    }
+  }, [fetchRuleStatus, ruleId]);
+
+  const ruleStatusInfo = useMemo(() => {
+    return loadingStatus ? (
+      <EuiFlexItem>
+        <EuiLoadingSpinner size="m" data-test-subj="rule-status-loader" />
+      </EuiFlexItem>
+    ) : (
+      <>
+        <RuleStatus
+          status={getRuleStatusText(currentStatus?.status)}
+          statusDate={currentStatus?.status_date}
+        >
+          <EuiButtonIcon
+            data-test-subj="refreshButton"
+            color="primary"
+            onClick={handleRefresh}
+            iconType="refresh"
+            aria-label={ruleI18n.REFRESH}
+          />
+        </RuleStatus>
+      </>
+    );
+  }, [currentStatus, loadingStatus, handleRefresh]);
   const ruleError = useMemo(() => {
-    if (
-      rule?.status === 'failed' &&
+    if (loadingStatus) {
+      return (
+        <EuiFlexItem>
+          <EuiLoadingSpinner size="m" data-test-subj="rule-status-loader" />
+        </EuiFlexItem>
+      );
+    } else if (
+      currentStatus?.status === 'failed' &&
       ruleDetailTab === RuleDetailTabs.alerts &&
-      rule?.last_failure_at != null
+      currentStatus?.last_failure_at != null
     ) {
       return (
         <RuleStatusFailedCallOut
-          message={rule?.last_failure_message ?? ''}
-          date={rule?.last_failure_at}
+          message={currentStatus?.last_failure_message ?? ''}
+          date={currentStatus?.last_failure_at}
         />
       );
     } else if (
-      rule?.status === 'partial failure' &&
+      (currentStatus?.status === 'warning' || currentStatus?.status === 'partial failure') &&
       ruleDetailTab === RuleDetailTabs.alerts &&
-      rule?.last_success_at != null
+      currentStatus?.last_success_at != null
     ) {
       return (
         <RuleStatusFailedCallOut
-          message={rule?.last_success_message ?? ''}
-          date={rule?.last_success_at}
+          message={currentStatus?.last_success_message ?? ''}
+          date={currentStatus?.last_success_at}
           color="warning"
         />
       );
     }
     return null;
-  }, [rule, ruleDetailTab]);
+  }, [ruleDetailTab, currentStatus, loadingStatus]);
 
   const updateDateRangeCallback = useCallback<UpdateDateRange>(
     ({ x }) => {
@@ -408,6 +476,28 @@ const RuleDetailsPageComponent = () => {
     }
   }, [rule]);
 
+  const onSkipFocusBeforeEventsTable = useCallback(() => {
+    focusUtilityBarAction(containerElement.current);
+  }, [containerElement]);
+
+  const onSkipFocusAfterEventsTable = useCallback(() => {
+    resetKeyboardFocus();
+  }, []);
+
+  const onKeyDown = useCallback(
+    (keyboardEvent: React.KeyboardEvent) => {
+      if (isTab(keyboardEvent)) {
+        onTimelineTabKeyPressed({
+          containerElement: containerElement.current,
+          keyboardEvent,
+          onSkipFocusBeforeEventsTable,
+          onSkipFocusAfterEventsTable,
+        });
+      }
+    },
+    [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
+  );
+
   if (
     redirectToDetections(
       isSignalIndexExists,
@@ -427,10 +517,11 @@ const RuleDetailsPageComponent = () => {
 
   return (
     <>
-      {hasIndexWrite != null && !hasIndexWrite && <NoWriteAlertsCallOut />}
-      {userHasNoPermissions(canUserCRUD) && <ReadOnlyCallOut />}
+      <NeedAdminForUpdateRulesCallOut />
+      <ReadOnlyAlertsCallOut />
+      <ReadOnlyRulesCallOut />
       {indicesExist ? (
-        <>
+        <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
             <SiemSearchBar id="global" indexPattern={indexPattern} />
@@ -443,6 +534,7 @@ const RuleDetailsPageComponent = () => {
                   href: getRulesUrl(),
                   text: i18n.BACK_TO_RULES,
                   pageId: SecurityPageName.detections,
+                  dataTestSubj: 'ruleDetailsBackToAllRules',
                 }}
                 border
                 subtitle={subTitle}
@@ -456,7 +548,15 @@ const RuleDetailsPageComponent = () => {
                         </>,
                       ]
                     : []),
-                  <RuleStatus ruleId={ruleId ?? null} ruleEnabled={ruleEnabled} />,
+                  <>
+                    <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="flexStart">
+                      <EuiFlexItem grow={false}>
+                        {statusI18n.STATUS}
+                        {':'}
+                      </EuiFlexItem>
+                      {ruleStatusInfo}
+                    </EuiFlexGroup>
+                  </>,
                 ]}
                 title={title}
               >
@@ -466,17 +566,19 @@ const RuleDetailsPageComponent = () => {
                       position="top"
                       content={getToolTipContent(rule, hasMlPermissions, hasActionsPrivileges)}
                     >
-                      <RuleSwitch
-                        id={rule?.id ?? '-1'}
-                        isDisabled={
-                          !canEditRuleWithActions(rule, hasActionsPrivileges) ||
-                          userHasNoPermissions(canUserCRUD) ||
-                          (!hasMlPermissions && !rule?.enabled)
-                        }
-                        enabled={rule?.enabled ?? false}
-                        optionLabel={i18n.ACTIVATE_RULE}
-                        onChange={handleOnChangeEnabledRule}
-                      />
+                      <EuiFlexGroup>
+                        <RuleSwitch
+                          id={rule?.id ?? '-1'}
+                          isDisabled={
+                            !canEditRuleWithActions(rule, hasActionsPrivileges) ||
+                            userHasNoPermissions(canUserCRUD) ||
+                            (!hasMlPermissions && !rule?.enabled)
+                          }
+                          enabled={rule?.enabled ?? false}
+                          onChange={handleOnChangeEnabledRule}
+                        />
+                        <EuiFlexItem>{i18n.ACTIVATED_RULE}</EuiFlexItem>
+                      </EuiFlexGroup>
                     </EuiToolTip>
                   </EuiFlexItem>
 
@@ -562,9 +664,9 @@ const RuleDetailsPageComponent = () => {
                 {ruleId != null && (
                   <AlertsTable
                     timelineId={TimelineId.detectionsRulesDetailsPage}
-                    canUserCRUD={canUserCRUD ?? false}
                     defaultFilters={alertDefaultFilters}
                     hasIndexWrite={hasIndexWrite ?? false}
+                    hasIndexMaintenance={hasIndexMaintenance ?? false}
                     from={from}
                     loading={loading}
                     showBuildingBlockAlerts={showBuildingBlockAlerts}
@@ -588,7 +690,7 @@ const RuleDetailsPageComponent = () => {
             )}
             {ruleDetailTab === RuleDetailTabs.failures && <FailureHistory id={rule?.id} />}
           </WrapperPage>
-        </>
+        </StyledFullHeightContainer>
       ) : (
         <WrapperPage>
           <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />

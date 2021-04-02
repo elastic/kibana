@@ -10,7 +10,7 @@
     "apm-*-transaction*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Web Application Suspicious Activity: sqlmap User Agent",
   "query": "user_agent.original:\"sqlmap/1.3.11#stable (http://sqlmap.org)\"",
   "references": [
@@ -23,6 +23,7 @@
     "Elastic",
     "APM"
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 4
+  "version": 6
 }

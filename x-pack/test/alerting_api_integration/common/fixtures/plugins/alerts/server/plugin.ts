@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Plugin, CoreSetup } from 'kibana/server';
 import { PluginSetupContract as ActionsPluginSetup } from '../../../../../../../plugins/actions/server/plugin';
-import { PluginSetupContract as AlertingPluginSetup } from '../../../../../../../plugins/alerts/server/plugin';
+import { PluginSetupContract as AlertingPluginSetup } from '../../../../../../../plugins/alerting/server/plugin';
 import { EncryptedSavedObjectsPluginStart } from '../../../../../../../plugins/encrypted_saved_objects/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../../plugins/features/server';
 import { defineAlertTypes } from './alert_types';
@@ -18,7 +19,7 @@ import { SecurityPluginStart } from '../../../../../../../plugins/security/serve
 export interface FixtureSetupDeps {
   features: FeaturesPluginSetup;
   actions: ActionsPluginSetup;
-  alerts: AlertingPluginSetup;
+  alerting: AlertingPluginSetup;
 }
 
 export interface FixtureStartDeps {
@@ -28,7 +29,10 @@ export interface FixtureStartDeps {
 }
 
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
-  public setup(core: CoreSetup<FixtureStartDeps>, { features, actions, alerts }: FixtureSetupDeps) {
+  public setup(
+    core: CoreSetup<FixtureStartDeps>,
+    { features, actions, alerting }: FixtureSetupDeps
+  ) {
     features.registerKibanaFeature({
       id: 'alertsFixture',
       name: 'Alerts',
@@ -104,7 +108,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
     });
 
     defineActionTypes(core, { actions });
-    defineAlertTypes(core, { alerts });
+    defineAlertTypes(core, { alerting });
     defineRoutes(core);
   }
 

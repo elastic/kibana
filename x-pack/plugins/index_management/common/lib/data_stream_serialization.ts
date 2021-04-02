@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { DataStream, DataStreamFromEs, Health } from '../types';
@@ -16,6 +17,7 @@ export function deserializeDataStream(dataStreamFromEs: DataStreamFromEs): DataS
     template,
     ilm_policy: ilmPolicyName,
     store_size: storageSize,
+    store_size_bytes: storageSizeBytes,
     maximum_timestamp: maxTimeStamp,
     _meta,
     privileges,
@@ -37,6 +39,7 @@ export function deserializeDataStream(dataStreamFromEs: DataStreamFromEs): DataS
     indexTemplateName: template,
     ilmPolicyName,
     storageSize,
+    storageSizeBytes,
     maxTimeStamp,
     _meta,
     privileges,

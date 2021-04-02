@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /* eslint-disable @kbn/eslint/no-restricted-paths */
@@ -53,6 +54,7 @@ export interface CustomRule {
   runsEvery: Interval;
   lookBack: Interval;
   timeline: CompleteTimeline;
+  maxSignals: number;
 }
 
 export interface ThresholdRule extends CustomRule {
@@ -69,8 +71,10 @@ export interface OverrideRule extends CustomRule {
 
 export interface ThreatIndicatorRule extends CustomRule {
   indicatorIndexPattern: string[];
-  indicatorMapping: string;
+  indicatorMappingField: string;
   indicatorIndexField: string;
+  type?: string;
+  atomic?: string;
 }
 
 export interface MachineLearningRule {
@@ -173,21 +177,15 @@ export const newRule: CustomRule = {
   runsEvery,
   lookBack,
   timeline,
+  maxSignals: 100,
 };
 
 export const existingRule: CustomRule = {
-  customQuery: 'host.name:*',
+  customQuery: 'host.name: *',
   name: 'Rule 1',
   description: 'Description for Rule 1',
-  index: [
-    'apm-*-transaction*',
-    'auditbeat-*',
-    'endgame-*',
-    'filebeat-*',
-    'packetbeat-*',
-    'winlogbeat-*',
-  ],
-  interval: '4m',
+  index: ['auditbeat-*'],
+  interval: '10s',
   severity: 'High',
   riskScore: '19',
   tags: ['rule1'],
@@ -198,12 +196,15 @@ export const existingRule: CustomRule = {
   runsEvery,
   lookBack,
   timeline,
+  // Please do not change, or if you do, needs
+  // to be any number other than default value
+  maxSignals: 500,
 };
 
 export const newOverrideRule: OverrideRule = {
   customQuery: 'host.name: *',
   index: indexPatterns,
-  name: 'New Rule Test',
+  name: 'Override Rule',
   description: 'The new rule description.',
   severity: 'High',
   riskScore: '17',
@@ -219,12 +220,13 @@ export const newOverrideRule: OverrideRule = {
   runsEvery,
   lookBack,
   timeline,
+  maxSignals: 100,
 };
 
 export const newThresholdRule: ThresholdRule = {
   customQuery: 'host.name: *',
   index: indexPatterns,
-  name: 'New Rule Test',
+  name: 'Threshold Rule',
   description: 'The new rule description.',
   severity: 'High',
   riskScore: '17',
@@ -238,6 +240,7 @@ export const newThresholdRule: ThresholdRule = {
   runsEvery,
   lookBack,
   timeline,
+  maxSignals: 100,
 };
 
 export const machineLearningRule: MachineLearningRule = {
@@ -271,6 +274,7 @@ export const eqlRule: CustomRule = {
   runsEvery,
   lookBack,
   timeline,
+  maxSignals: 100,
 };
 
 export const eqlSequenceRule: CustomRule = {
@@ -291,12 +295,13 @@ export const eqlSequenceRule: CustomRule = {
   runsEvery,
   lookBack,
   timeline,
+  maxSignals: 100,
 };
 
 export const newThreatIndicatorRule: ThreatIndicatorRule = {
   name: 'Threat Indicator Rule Test',
   description: 'The threat indicator rule description.',
-  index: ['threat-data-*'],
+  index: ['suspicious-*'],
   severity: 'Critical',
   riskScore: '20',
   tags: ['test', 'threat'],
@@ -306,10 +311,13 @@ export const newThreatIndicatorRule: ThreatIndicatorRule = {
   note: '# test markdown',
   runsEvery,
   lookBack,
-  indicatorIndexPattern: ['threat-indicator-*'],
-  indicatorMapping: 'agent.id',
-  indicatorIndexField: 'agent.threat',
+  indicatorIndexPattern: ['filebeat-*'],
+  indicatorMappingField: 'myhash.mysha256',
+  indicatorIndexField: 'threatintel.indicator.file.hash.sha256',
+  type: 'file',
+  atomic: 'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
   timeline,
+  maxSignals: 100,
 };
 
 export const severitiesOverride = ['Low', 'Medium', 'High', 'Critical'];

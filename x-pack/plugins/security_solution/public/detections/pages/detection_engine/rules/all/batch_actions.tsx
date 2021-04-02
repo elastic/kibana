@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
 import React, { Dispatch } from 'react';
 import * as i18n from '../translations';
-import { Action } from './reducer';
+import { RulesTableAction } from '../../../../containers/detection_engine/rules/rules_table';
 import {
   deleteRulesAction,
   duplicateRulesAction,
@@ -22,12 +23,13 @@ import { canEditRuleWithActions } from '../../../../../common/utils/privileges';
 
 interface GetBatchItems {
   closePopover: () => void;
-  dispatch: Dispatch<Action>;
+  dispatch: Dispatch<RulesTableAction>;
   dispatchToaster: Dispatch<ActionToaster>;
   hasMlPermissions: boolean;
   hasActionsPrivileges: boolean;
   loadingRuleIds: string[];
-  reFetchRules: (refreshPrePackagedRule?: boolean) => void;
+  reFetchRules: () => Promise<void>;
+  refetchPrePackagedRulesStatus: () => Promise<void>;
   rules: Rule[];
   selectedRuleIds: string[];
 }
@@ -39,17 +41,18 @@ export const getBatchItems = ({
   hasMlPermissions,
   loadingRuleIds,
   reFetchRules,
+  refetchPrePackagedRulesStatus,
   rules,
   selectedRuleIds,
   hasActionsPrivileges,
 }: GetBatchItems) => {
-  const selectedRules = selectedRuleIds.reduce((acc, id) => {
+  const selectedRules = selectedRuleIds.reduce<Record<string, Rule>>((acc, id) => {
     const found = rules.find((r) => r.id === id);
     if (found != null) {
       return { [id]: found, ...acc };
     }
     return acc;
-  }, {} as Record<string, Rule>);
+  }, {});
 
   const containsEnabled = selectedRuleIds.some((id) => selectedRules[id]?.enabled ?? false);
   const containsDisabled = selectedRuleIds.some((id) => !selectedRules[id]?.enabled ?? false);
@@ -139,7 +142,8 @@ export const getBatchItems = ({
           dispatch,
           dispatchToaster
         );
-        reFetchRules(true);
+        await reFetchRules();
+        await refetchPrePackagedRulesStatus();
       }}
     >
       <EuiToolTip
@@ -158,7 +162,8 @@ export const getBatchItems = ({
       onClick={async () => {
         closePopover();
         await deleteRulesAction(selectedRuleIds, dispatch, dispatchToaster);
-        reFetchRules(true);
+        await reFetchRules();
+        await refetchPrePackagedRulesStatus();
       }}
     >
       {i18n.BATCH_ACTION_DELETE_SELECTED}

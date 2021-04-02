@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isEqual } from 'lodash';
@@ -34,7 +35,7 @@ import {
   getTopClasses,
 } from './common';
 import { UseIndexDataReturnType } from './types';
-import { DecisionPathPopover } from './feature_importance/decision_path_popover';
+import { DecisionPathPopover } from '../../data_frame_analytics/pages/analytics_exploration/components/feature_importance/decision_path_popover';
 import {
   FeatureImportanceBaseline,
   FeatureImportance,
@@ -119,7 +120,8 @@ export const DataGrid: FC<Props> = memo(
 
     const popOverContent = useMemo(() => {
       return analysisType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
-        analysisType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION
+        analysisType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION ||
+        analysisType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION
         ? {
             featureImportance: ({ children }: { cellContentsElement: any; children: any }) => {
               const rowIndex = children?.props?.visibleRowIndex;
@@ -165,6 +167,11 @@ export const DataGrid: FC<Props> = memo(
                 />
               );
             },
+            featureInfluence: ({
+              cellContentsElement,
+            }: {
+              cellContentsElement: HTMLDivElement;
+            }) => <EuiCodeBlock isCopyable={true}>{cellContentsElement.textContent}</EuiCodeBlock>,
           }
         : undefined;
     }, [baseline, data]);
@@ -260,20 +267,22 @@ export const DataGrid: FC<Props> = memo(
             <EuiFlexItem>
               <DataGridTitle title={props.title} />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiCopy
-                beforeMessage={props.copyToClipboardDescription}
-                textToCopy={props.copyToClipboard}
-              >
-                {(copy: () => void) => (
-                  <EuiButtonIcon
-                    onClick={copy}
-                    iconType="copyClipboard"
-                    aria-label={props.copyToClipboardDescription}
-                  />
-                )}
-              </EuiCopy>
-            </EuiFlexItem>
+            {props.copyToClipboard && props.copyToClipboardDescription && (
+              <EuiFlexItem grow={false}>
+                <EuiCopy
+                  beforeMessage={props.copyToClipboardDescription}
+                  textToCopy={props.copyToClipboard}
+                >
+                  {(copy: () => void) => (
+                    <EuiButtonIcon
+                      onClick={copy}
+                      iconType="copyClipboard"
+                      aria-label={props.copyToClipboardDescription}
+                    />
+                  )}
+                </EuiCopy>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         )}
         {errorCallout !== undefined && (
@@ -309,15 +318,16 @@ export const DataGrid: FC<Props> = memo(
                         })}
                       >
                         <EuiButtonEmpty
-                          aria-checked={chartsVisible}
+                          aria-pressed={chartsVisible === true}
                           className={`euiDataGrid__controlBtn${
-                            chartsVisible ? ' euiDataGrid__controlBtn--active' : ''
+                            chartsVisible === true ? ' euiDataGrid__controlBtn--active' : ''
                           }`}
                           data-test-subj={`${dataTestSubj}HistogramButton`}
                           size="xs"
                           iconType="visBarVertical"
                           color="text"
                           onClick={toggleChartVisibility}
+                          disabled={chartsVisible === undefined}
                         >
                           {i18n.translate('xpack.ml.dataGrid.histogramButtonText', {
                             defaultMessage: 'Histogram charts',

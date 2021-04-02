@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -14,15 +15,16 @@ import {
   Logger,
   Plugin,
   PluginInitializerContext,
-  RequestHandlerContext,
 } from 'src/core/server';
-import { APMConfig, APMXPackConfig, mergeConfigs } from '.';
+import { SpacesPluginSetup } from '../../spaces/server';
+import { APMConfig, APMXPackConfig } from '.';
+import { mergeConfigs } from './index';
 import { APMOSSPluginSetup } from '../../../../src/plugins/apm_oss/server';
 import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { UI_SETTINGS } from '../../../../src/plugins/data/common';
 import { ActionsPlugin } from '../../actions/server';
-import { AlertingPlugin } from '../../alerts/server';
+import { AlertingPlugin } from '../../alerting/server';
 import { CloudSetup } from '../../cloud/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
@@ -42,6 +44,7 @@ import { createApmApi } from './routes/create_apm_api';
 import { apmIndices, apmTelemetry } from './saved_objects';
 import { createElasticCloudInstructions } from './tutorial/elastic_cloud';
 import { uiSettings } from './ui_settings';
+import type { ApmPluginRequestHandlerContext } from './routes/typings';
 
 export interface APMPluginSetup {
   config$: Observable<APMConfig>;
@@ -49,7 +52,7 @@ export interface APMPluginSetup {
   createApmEventClient: (params: {
     debug?: boolean;
     request: KibanaRequest;
-    context: RequestHandlerContext;
+    context: ApmPluginRequestHandlerContext;
   }) => Promise<ReturnType<typeof createApmEventClient>>;
 }
 
@@ -60,16 +63,17 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
     this.initContext = initContext;
   }
 
-  public async setup(
+  public setup(
     core: CoreSetup,
     plugins: {
+      spaces?: SpacesPluginSetup;
       apmOss: APMOSSPluginSetup;
       home: HomeServerPluginSetup;
       licensing: LicensingPluginSetup;
       cloud?: CloudSetup;
       usageCollection?: UsageCollectionSetup;
       taskManager?: TaskManagerSetupContract;
-      alerts?: AlertingPlugin['setup'];
+      alerting?: AlertingPlugin['setup'];
       actions?: ActionsPlugin['setup'];
       observability?: ObservabilityPluginSetup;
       features: FeaturesPluginSetup;
@@ -88,16 +92,19 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
 
     core.uiSettings.register(uiSettings);
 
-    if (plugins.actions && plugins.alerts) {
+    if (plugins.actions && plugins.alerting) {
       registerApmAlerts({
-        alerts: plugins.alerts,
+        alerting: plugins.alerting,
         actions: plugins.actions,
         ml: plugins.ml,
         config$: mergedConfig$,
       });
     }
 
-    this.currentConfig = await mergedConfig$.pipe(take(1)).toPromise();
+    this.currentConfig = mergeConfigs(
+      plugins.apmOss.config,
+      this.initContext.config.get<APMXPackConfig>()
+    );
 
     if (
       plugins.taskManager &&
@@ -143,11 +150,7 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
     createApmApi().init(core, {
       config$: mergedConfig$,
       logger: this.logger!,
-      plugins: {
-        observability: plugins.observability,
-        security: plugins.security,
-        ml: plugins.ml,
-      },
+      plugins,
     });
 
     const boundGetApmIndices = async () =>
@@ -166,14 +169,14 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
       }: {
         debug?: boolean;
         request: KibanaRequest;
-        context: RequestHandlerContext;
+        context: ApmPluginRequestHandlerContext;
       }) => {
         const [indices, includeFrozen] = await Promise.all([
           boundGetApmIndices(),
           context.core.uiSettings.client.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN),
         ]);
 
-        const esClient = context.core.elasticsearch.legacy.client;
+        const esClient = context.core.elasticsearch.client.asCurrentUser;
 
         return createApmEventClient({
           debug: debug ?? false,
@@ -195,13 +198,13 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
 
     // create agent configuration index without blocking start lifecycle
     createApmAgentConfigurationIndex({
-      esClient: core.elasticsearch.legacy.client,
+      client: core.elasticsearch.client.asInternalUser,
       config: this.currentConfig,
       logger: this.logger,
     });
     // create custom action index without blocking start lifecycle
     createApmCustomLinkIndex({
-      esClient: core.elasticsearch.legacy.client,
+      client: core.elasticsearch.client.asInternalUser,
       config: this.currentConfig,
       logger: this.logger,
     });

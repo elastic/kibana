@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { PluginInitializerContext } from '../../../core/public';
@@ -51,6 +40,7 @@ import {
 } from '../common';
 
 import { FilterLabel } from './ui';
+import { FilterItem } from './ui/filter_bar';
 
 import {
   generateFilters,
@@ -65,6 +55,7 @@ import {
 // Filter helpers namespace:
 export const esFilters = {
   FilterLabel,
+  FilterItem,
 
   FILTERS,
   FilterStateStore,
@@ -103,7 +94,7 @@ export const esFilters = {
   extractTimeRange,
 };
 
-export {
+export type {
   RangeFilter,
   RangeFilterMeta,
   RangeFilterParams,
@@ -169,6 +160,7 @@ import {
   UrlFormat,
   StringFormat,
   TruncateFormat,
+  HistogramFormat,
 } from '../common/field_formats';
 
 import { DateNanosFormat, DateFormat } from './field_formats';
@@ -199,6 +191,7 @@ export const fieldFormats = {
   UrlFormat,
   StringFormat,
   TruncateFormat,
+  HistogramFormat,
 };
 
 export {
@@ -318,6 +311,9 @@ import {
   parseEsInterval,
   parseInterval,
   toAbsoluteDates,
+  boundsDescendingRaw,
+  getNumberHistogramIntervalByDatatableColumn,
+  getDateHistogramMetaDataByDatatableColumn,
   // expressions utils
   getRequestInspectorStats,
   getResponseInspectorStats,
@@ -354,10 +350,6 @@ export {
   ExpressionFunctionKibanaContext,
   ExpressionValueSearchContext,
   KibanaContext,
-  // tabify
-  TabbedAggColumn,
-  TabbedAggRow,
-  TabbedTable,
 } from '../common';
 
 export type { AggConfigs, AggConfig } from '../common';
@@ -385,7 +377,7 @@ export {
   SearchRequest,
   SearchSourceFields,
   SortDirection,
-  SessionState,
+  SearchSessionState,
   // expression functions and types
   EsdslExpressionFunctionDefinition,
   EsRawResponseExpressionTypeDefinition,
@@ -394,6 +386,8 @@ export {
   SearchTimeoutError,
   TimeoutErrorMode,
   PainlessError,
+  noSearchSessionStorageCapabilityMessage,
+  SEARCH_SESSIONS_MANAGEMENT_ID,
 } from './search';
 
 export type {
@@ -401,6 +395,7 @@ export type {
   ISessionService,
   SearchSessionInfoProvider,
   ISessionsClient,
+  SearchUsageCollector,
 } from './search';
 
 export { ISearchOptions, isErrorResponse, isCompleteResponse, isPartialResponse } from '../common';
@@ -427,6 +422,9 @@ export const search = {
     siblingPipelineType,
     termsAggFilter,
     toAbsoluteDates,
+    boundsDescendingRaw,
+    getNumberHistogramIntervalByDatatableColumn,
+    getDateHistogramMetaDataByDatatableColumn,
   },
   getRequestInspectorStats,
   getResponseInspectorStats,
@@ -483,6 +481,7 @@ export {
 export { isTimeRange, isQuery, isFilter, isFilters } from '../common';
 
 export { ACTION_GLOBAL_APPLY_FILTER, ApplyGlobalFilterActionContext } from './actions';
+export { APPLY_FILTER_TRIGGER } from './triggers';
 
 /*
  * Plugin setup

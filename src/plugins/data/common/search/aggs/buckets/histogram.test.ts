@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { AggConfigs } from '../agg_configs';
@@ -23,6 +12,7 @@ import { AggTypesDependencies } from '../agg_types';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { IBucketHistogramAggConfig, getHistogramBucketAgg, AutoBounds } from './histogram';
 import { BucketAggType } from './bucket_agg_type';
+import { SerializableState } from 'src/plugins/expressions/common';
 
 describe('Histogram Agg', () => {
   let aggTypesDependencies: AggTypesDependencies;
@@ -239,6 +229,27 @@ describe('Histogram Agg', () => {
         });
 
         expect(params.interval).toBeNaN();
+      });
+
+      test('will serialize the auto interval along with the actually chosen interval and deserialize correctly', () => {
+        const aggConfigs = getAggConfigs({
+          interval: 'auto',
+          field: {
+            name: 'field',
+          },
+        });
+        (aggConfigs.aggs[0] as IBucketHistogramAggConfig).setAutoBounds({ min: 0, max: 1000 });
+        const serializedAgg = aggConfigs.aggs[0].serialize();
+        const serializedIntervalParam = (serializedAgg.params as SerializableState).used_interval;
+        expect(serializedIntervalParam).toBe(500);
+        const freshHistogramAggConfig = getAggConfigs({
+          interval: 100,
+          field: {
+            name: 'field',
+          },
+        }).aggs[0];
+        freshHistogramAggConfig.setParams(serializedAgg.params);
+        expect(freshHistogramAggConfig.getParam('interval')).toEqual('auto');
       });
 
       describe('interval scaling', () => {

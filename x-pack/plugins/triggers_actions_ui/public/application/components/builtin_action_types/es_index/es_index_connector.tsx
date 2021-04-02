@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { useState, useEffect } from 'react';
 import {
   EuiFormRow,
@@ -86,10 +88,7 @@ const IndexActionConnectorFields: React.FunctionComponent<
               defaultMessage="Use * to broaden your query."
             />
             <EuiSpacer size="s" />
-            <EuiLink
-              href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/index-action-type.html`}
-              target="_blank"
-            >
+            <EuiLink href={docLinks.links.alerting.indexAction} target="_blank">
               <FormattedMessage
                 id="xpack.triggersActionsUI.components.builtinActionTypes.indexAction.configureIndexHelpLabel"
                 defaultMessage="Configuring index connector."

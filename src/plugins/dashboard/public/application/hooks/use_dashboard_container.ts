@@ -1,24 +1,12 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { useEffect, useState } from 'react';
-import _ from 'lodash';
 import { History } from 'history';
 
 import { useKibana } from '../../services/kibana_react';
@@ -26,6 +14,8 @@ import {
   ContainerOutput,
   EmbeddableFactoryNotFoundError,
   EmbeddableInput,
+  EmbeddablePackageState,
+  ErrorEmbeddable,
   isErrorEmbeddable,
   ViewMode,
 } from '../../services/embeddable';
@@ -35,12 +25,23 @@ import { getDashboardContainerInput, getSearchSessionIdFromURL } from '../dashbo
 import { DashboardContainer, DashboardContainerInput } from '../..';
 import { DashboardAppServices } from '../types';
 import { DASHBOARD_CONTAINER_TYPE } from '..';
+import { TimefilterContract } from '../../services/data';
 
-export const useDashboardContainer = (
-  dashboardStateManager: DashboardStateManager | null,
-  history: History,
-  isEmbeddedExternally: boolean
-) => {
+export const useDashboardContainer = ({
+  history,
+  timeFilter,
+  setUnsavedChanges,
+  getIncomingEmbeddable,
+  dashboardStateManager,
+  isEmbeddedExternally,
+}: {
+  history: History;
+  isEmbeddedExternally?: boolean;
+  timeFilter?: TimefilterContract;
+  setUnsavedChanges?: (dirty: boolean) => void;
+  dashboardStateManager: DashboardStateManager | null;
+  getIncomingEmbeddable: (removeAfterFetch?: boolean) => EmbeddablePackageState | undefined;
+}) => {
   const {
     dashboardCapabilities,
     data,
@@ -79,28 +80,43 @@ export const useDashboardContainer = (
       searchSession.restore(searchSessionIdFromURL);
     }
 
-    const incomingEmbeddable = embeddable
-      .getStateTransfer(scopedHistory())
-      .getIncomingEmbeddablePackage();
+    const incomingEmbeddable = getIncomingEmbeddable(true);
 
+    let canceled = false;
+    let pendingContainer: DashboardContainer | ErrorEmbeddable | null | undefined;
     (async function createContainer() {
-      const newContainer = await dashboardFactory.create(
+      pendingContainer = await dashboardFactory.create(
         getDashboardContainerInput({
+          isEmbeddedExternally: Boolean(isEmbeddedExternally),
           dashboardCapabilities,
           dashboardStateManager,
           incomingEmbeddable,
-          isEmbeddedExternally,
           query,
           searchSessionId: searchSessionIdFromURL ?? searchSession.start(),
         })
       );
 
-      if (!newContainer || isErrorEmbeddable(newContainer)) {
+      // already new container is being created
+      // no longer interested in the pending one
+      if (canceled) {
+        try {
+          pendingContainer?.destroy();
+          pendingContainer = null;
+        } catch (e) {
+          // destroy could throw if something has already destroyed the container
+          // eslint-disable-next-line no-console
+          console.warn(e);
+        }
+
+        return;
+      }
+
+      if (!pendingContainer || isErrorEmbeddable(pendingContainer)) {
         return;
       }
 
       // inject switch view mode callback for the empty screen to use
-      newContainer.switchViewMode = (newViewMode: ViewMode) =>
+      pendingContainer.switchViewMode = (newViewMode: ViewMode) =>
         dashboardStateManager.switchViewMode(newViewMode);
 
       // If the incoming embeddable is newly created, or doesn't exist in the current panels list,
@@ -109,23 +125,38 @@ export const useDashboardContainer = (
         incomingEmbeddable &&
         (!incomingEmbeddable?.embeddableId ||
           (incomingEmbeddable.embeddableId &&
-            !newContainer.getInput().panels[incomingEmbeddable.embeddableId]))
+            !pendingContainer.getInput().panels[incomingEmbeddable.embeddableId]))
       ) {
-        dashboardStateManager.switchViewMode(ViewMode.EDIT);
-        newContainer.addNewEmbeddable<EmbeddableInput>(
+        pendingContainer.addNewEmbeddable<EmbeddableInput>(
           incomingEmbeddable.type,
           incomingEmbeddable.input
         );
       }
-      setDashboardContainer(newContainer);
+      setDashboardContainer(pendingContainer);
+      setUnsavedChanges?.(dashboardStateManager.getIsDirty(data.query.timefilter.timefilter));
     })();
-    return () => setDashboardContainer(null);
+    return () => {
+      canceled = true;
+      try {
+        pendingContainer?.destroy();
+      } catch (e) {
+        // destroy could throw if something has already destroyed the container
+        // eslint-disable-next-line no-console
+        console.warn(e);
+      }
+
+      setDashboardContainer(null);
+    };
   }, [
+    data.query.timefilter.timefilter,
     dashboardCapabilities,
     dashboardStateManager,
+    getIncomingEmbeddable,
     isEmbeddedExternally,
+    setUnsavedChanges,
     searchSession,
     scopedHistory,
+    timeFilter,
     embeddable,
     history,
     query,

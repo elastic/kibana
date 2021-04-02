@@ -17,10 +17,9 @@ Consult your administrator if you do not have the appropriate access.
 [cols="50, 50"]
 |===
 
-| <<ingest-node-pipelines, Ingest Node Pipelines>>
-| Create and manage {es}
-pipelines that enable you to perform common transformations and
-enrichments on your data.
+| {ref}/ingest.html[Ingest Node Pipelines]
+| Create and manage ingest pipelines that let you perform common transformations
+and enrichments on your data.
 
 | {logstash-ref}/logstash-centralized-pipeline-management.html[Logstash Pipelines]
 | Create, edit, and delete your Logstash pipeline configurations.
@@ -79,8 +78,8 @@ You can add and remove remote clusters, and check their connectivity.
 [cols="50, 50"]
 |===
 
-| <<managing-alerts-and-actions, Alerts&nbsp;and Actions>>
-| Centrally manage your alerts across {kib}. Create and manage reusable
+| <<managing-alerts-and-actions, Rules&nbsp;and Connectors>>
+| Centrally manage your rules across {kib}. Create and manage reusable
 connectors for triggering actions.
 
 | <<reporting-getting-started, Reporting>>
@@ -139,6 +138,15 @@ a| <<index-patterns, Index Patterns>>
 | Copy, edit, delete, import, and export your saved objects.
 These include dashboards, visualizations, maps, index patterns, Canvas workpads, and more.
 
+| <<managing-tags, Tags>>
+|Create, manage, and assign tags to your saved objects.
+
+| <<search-sessions, Search Sessions>>
+| Manage your saved search sessions, groups of queries that run in the background.
+Search sessions are useful when your queries take longer than usual to process,
+for example, when you have a large volume of data or when the performance of your storage location is slow.
+
+
 | <<xpack-spaces, Spaces>>
 | Create spaces to organize your dashboards and other saved objects into categories.
 A space is isolated from all other spaces,
@@ -174,17 +182,15 @@ next major version of {es}, and then reindex, if needed.
 
 include::{kib-repo-dir}/management/advanced-options.asciidoc[]
 
-include::{kib-repo-dir}/management/alerting/alerts-and-actions-intro.asciidoc[]
+include::{kib-repo-dir}/management/alerting/rules-and-connectors-intro.asciidoc[]
 
-include::{kib-repo-dir}/management/alerting/alert-management.asciidoc[]
+include::{kib-repo-dir}/management/alerting/rule-management.asciidoc[]
 
-include::{kib-repo-dir}/management/alerting/alert-details.asciidoc[]
+include::{kib-repo-dir}/management/alerting/rule-details.asciidoc[]
 
 include::{kib-repo-dir}/management/alerting/connector-management.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-beats.asciidoc[]
-
-include::{kib-repo-dir}/management/ingest-pipelines/ingest-pipelines.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-fields.asciidoc[]
 
@@ -195,6 +201,8 @@ include::{kib-repo-dir}/management/numeral.asciidoc[]
 include::{kib-repo-dir}/management/rollups/create_and_manage_rollups.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-saved-objects.asciidoc[]
+
+include::{kib-repo-dir}/management/managing-tags.asciidoc[]
 
 include::security/index.asciidoc[]
 

@@ -1,6 +1,5 @@
 .kbnDocViewerTable {
-  margin-top: $euiSizeS;
-  @include euiBreakpoint('xs', 's') {
+  @include euiBreakpoint('xs', 's','m') {
     table-layout: fixed;
   }
 }
@@ -14,10 +13,18 @@
     white-space: pre-wrap;
     color: $euiColorFullShade;
     vertical-align: top;
-    padding-top: $euiSizeXS * 0.5;
+    padding-top: $euiSizeXS * .5;
   }
   .kbnDocViewer__field {
     padding-top: $euiSizeS;
+  }
+
+  .kbnDocViewer__multifield_row:hover td {
+    background-color: transparent;
+  }
+
+  .kbnDocViewer__multifield_title {
+    font-family: $euiFontFamily;
   }
 
   .dscFieldName {
@@ -45,7 +52,7 @@
   white-space: nowrap;
 }
 .kbnDocViewer__buttons {
-  width: 96px;
+  width: 108px;
 
   // Show all icons if one is focused,
   &:focus-within {
@@ -57,7 +64,7 @@
 
 .kbnDocViewer__field {
   width: $euiSize * 10;
-  @include euiBreakpoint('xs', 's') {
+  @include euiBreakpoint('xs', 's', 'm') {
     width: $euiSize * 6;
   }
 }

@@ -1,26 +1,33 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
+
 import { getContext } from 'kea';
 
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '../../../../../src/core/public/mocks';
+import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { licensingMock } from '../../../licensing/public/mocks';
 
-import { renderApp, renderHeaderActions } from './';
-import { EnterpriseSearch } from './enterprise_search';
 import { AppSearch } from './app_search';
-import { WorkplaceSearch } from './workplace_search';
+import { EnterpriseSearch } from './enterprise_search';
 import { KibanaLogic } from './shared/kibana';
+import { WorkplaceSearch } from './workplace_search';
+
+import { renderApp, renderHeaderActions } from './';
 
 describe('renderApp', () => {
   const kibanaDeps = {
     params: coreMock.createAppMountParamters(),
     core: coreMock.createStart(),
-    plugins: { licensing: licensingMock.createStart() },
+    plugins: {
+      licensing: licensingMock.createStart(),
+      charts: chartPluginMock.createStartContract(),
+    },
   } as any;
   const pluginData = {
     config: {},

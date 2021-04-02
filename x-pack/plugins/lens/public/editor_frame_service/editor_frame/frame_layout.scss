@@ -28,7 +28,8 @@
   // Leave out left padding so the left sidebar's focus states are visible outside of content bounds
   // This also means needing to add same amount of margin to page content and suggestion items
   padding: $euiSize $euiSize 0;
-
+  position: relative;
+  z-index: $euiZLevel1;
   &:first-child {
     padding-left: $euiSize;
   }
@@ -52,8 +53,10 @@
 
   .lnsConfigPanel {
     @include euiScrollBar;
-    padding: $euiSize 0 $euiSize $euiSize;
+    padding: $euiSize $euiSizeXS $euiSize $euiSize;
     overflow-x: hidden;
     overflow-y: scroll;
+    padding-left: $euiFormMaxWidth + $euiSize;
+    margin-left: -$euiFormMaxWidth;
   }
 }

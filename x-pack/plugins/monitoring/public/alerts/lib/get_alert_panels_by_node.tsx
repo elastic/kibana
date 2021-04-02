@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { Fragment } from 'react';
 import { EuiText, EuiToolTip } from '@elastic/eui';
 import { AlertPanel } from '../panel';
@@ -69,10 +71,11 @@ export function getAlertPanelsByNode(
           const states = (statesByNodes[nodeUuid] as CommonAlertState[]).filter(({ state }) =>
             stateFilter(state)
           );
+          const { nodeName, itemLabel } = states[0].state;
           return {
             name: (
               <EuiText>
-                {states[0].state.nodeName} ({states.length})
+                {nodeName || itemLabel} ({states.length})
               </EuiText>
             ),
             panel: index + 1,
@@ -86,7 +89,8 @@ export function getAlertPanelsByNode(
       let title = '';
       for (const { alert, states } of alertsForNode) {
         for (const alertState of states) {
-          title = alertState.state.nodeName;
+          const { nodeName, itemLabel } = alertState.state;
+          title = nodeName || itemLabel;
           panelItems.push({
             name: (
               <Fragment>

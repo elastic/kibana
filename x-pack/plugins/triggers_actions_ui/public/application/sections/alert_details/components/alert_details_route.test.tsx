@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import * as React from 'react';
 import uuid from 'uuid';
 import { shallow } from 'enzyme';
@@ -10,7 +12,7 @@ import { createMemoryHistory, createLocation } from 'history';
 import { ToastsApi } from 'kibana/public';
 import { AlertDetailsRoute, getAlertData } from './alert_details_route';
 import { Alert } from '../../../../types';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 jest.mock('../../../../common/lib/kibana');
 
 describe('alert_details_route', () => {
@@ -20,7 +22,7 @@ describe('alert_details_route', () => {
     expect(
       shallow(
         <AlertDetailsRoute {...mockRouterProps(alert)} {...mockApis()} />
-      ).containsMatchingElement(<EuiLoadingSpinner size="l" />)
+      ).containsMatchingElement(<CenterJustifiedSpinner />)
     ).toBeTruthy();
   });
 });
@@ -144,7 +146,7 @@ describe('getAlertData useEffect handler', () => {
     );
     expect(toastNotifications.addDanger).toHaveBeenCalledTimes(1);
     expect(toastNotifications.addDanger).toHaveBeenCalledWith({
-      title: 'Unable to load alert: OMG',
+      title: 'Unable to load rule: OMG',
     });
   });
 
@@ -190,7 +192,7 @@ describe('getAlertData useEffect handler', () => {
     );
     expect(toastNotifications.addDanger).toHaveBeenCalledTimes(1);
     expect(toastNotifications.addDanger).toHaveBeenCalledWith({
-      title: 'Unable to load alert: OMG no alert type',
+      title: 'Unable to load rule: OMG no alert type',
     });
   });
 
@@ -240,7 +242,7 @@ describe('getAlertData useEffect handler', () => {
     );
     expect(toastNotifications.addDanger).toHaveBeenCalledTimes(1);
     expect(toastNotifications.addDanger).toHaveBeenCalledWith({
-      title: 'Unable to load alert: OMG no action type',
+      title: 'Unable to load rule: OMG no action type',
     });
   });
 
@@ -288,7 +290,7 @@ describe('getAlertData useEffect handler', () => {
     );
     expect(toastNotifications.addDanger).toHaveBeenCalledTimes(1);
     expect(toastNotifications.addDanger).toHaveBeenCalledWith({
-      title: `Unable to load alert: Invalid Alert Type: ${alert.alertTypeId}`,
+      title: `Unable to load rule: Invalid Alert Type: ${alert.alertTypeId}`,
     });
   });
 
@@ -347,7 +349,7 @@ describe('getAlertData useEffect handler', () => {
     );
     expect(toastNotifications.addDanger).toHaveBeenCalledTimes(1);
     expect(toastNotifications.addDanger).toHaveBeenCalledWith({
-      title: `Unable to load alert: Invalid Action Type: ${missingActionType.id}`,
+      title: `Unable to load rule: Invalid Action Type: ${missingActionType.id}`,
     });
   });
 });
@@ -372,12 +374,12 @@ function mockRouterProps(alert: Alert) {
   return {
     match: {
       isExact: false,
-      path: `/alert/${alert.id}`,
+      path: `/rule/${alert.id}`,
       url: '',
-      params: { alertId: alert.id },
+      params: { ruleId: alert.id },
     },
     history: createMemoryHistory(),
-    location: createLocation(`/alert/${alert.id}`),
+    location: createLocation(`/rule/${alert.id}`),
   };
 }
 function mockAlert(overloads: Partial<Alert> = {}): Alert {

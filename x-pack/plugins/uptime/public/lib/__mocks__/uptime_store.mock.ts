@@ -1,16 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
+import { AppState } from '../../state';
 
 /**
  * NOTE: This variable name MUST start with 'mock*' in order for
  * Jest to accept its use within a jest.mock()
  */
-export const mockStore = {
+export const mockState: AppState = {
   overviewFilters: {
     filters: {
       locations: [],
@@ -111,8 +113,11 @@ export const mockStore = {
   alerts: {
     alertDeletion: { data: null, loading: false },
     anomalyAlert: { data: null, loading: false },
+    anomalyAlertDeletion: { data: null, loading: false },
     alerts: { data: null, loading: false },
     connectors: { data: null, loading: false },
     newAlert: { data: null, loading: false },
   },
+  journeys: {},
+  networkEvents: {},
 };

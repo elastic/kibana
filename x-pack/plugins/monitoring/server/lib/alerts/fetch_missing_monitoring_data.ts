@@ -1,8 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import { ElasticsearchClient } from 'kibana/server';
 import { get } from 'lodash';
 import { AlertCluster, AlertMissingData } from '../../../common/types/alerts';
 
@@ -39,7 +42,7 @@ interface TopHitESResponse {
 // TODO: only Elasticsearch until we can figure out how to handle upgrades for the rest of the stack
 // https://github.com/elastic/kibana/issues/83309
 export async function fetchMissingMonitoringData(
-  callCluster: any,
+  esClient: ElasticsearchClient,
   clusters: AlertCluster[],
   index: string,
   size: number,
@@ -96,7 +99,8 @@ export async function fetchMissingMonitoringData(
                     sort: [
                       {
                         timestamp: {
-                          order: 'desc',
+                          order: 'desc' as const,
+                          unmapped_type: 'long' as const,
                         },
                       },
                     ],
@@ -113,7 +117,7 @@ export async function fetchMissingMonitoringData(
     },
   };
 
-  const response = await callCluster('search', params);
+  const { body: response } = await esClient.search(params);
   const clusterBuckets = get(
     response,
     'aggregations.clusters.buckets',

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, {
@@ -16,7 +17,8 @@ import React, {
 import cytoscape from 'cytoscape';
 // @ts-ignore no declaration file
 import dagre from 'cytoscape-dagre';
-import { cytoscapeOptions } from './cytoscape_options';
+import { EuiThemeType } from '../../../../components/color_range_legend';
+import { getCytoscapeOptions } from './cytoscape_options';
 
 cytoscape.use(dagre);
 
@@ -25,6 +27,7 @@ export const CytoscapeContext = createContext<cytoscape.Core | undefined>(undefi
 interface CytoscapeProps {
   children?: ReactNode;
   elements: cytoscape.ElementDefinition[];
+  theme: EuiThemeType;
   height: number;
   itemsDeleted: boolean;
   resetCy: boolean;
@@ -59,8 +62,8 @@ function getLayoutOptions(width: number, height: number) {
     name: 'dagre',
     rankDir: 'LR',
     fit: true,
-    padding: 30,
-    spacingFactor: 0.85,
+    padding: 20,
+    spacingFactor: 0.95,
     boundingBox: { x1: 0, y1: 0, w: width, h: height },
   };
 }
@@ -68,6 +71,7 @@ function getLayoutOptions(width: number, height: number) {
 export function Cytoscape({
   children,
   elements,
+  theme,
   height,
   itemsDeleted,
   resetCy,
@@ -75,7 +79,7 @@ export function Cytoscape({
   width,
 }: CytoscapeProps) {
   const [ref, cy] = useCytoscape({
-    ...cytoscapeOptions,
+    ...getCytoscapeOptions(theme),
     elements,
   });
 
@@ -129,7 +133,7 @@ export function Cytoscape({
 
   return (
     <CytoscapeContext.Provider value={cy}>
-      <div ref={ref} style={divStyle}>
+      <div ref={ref} style={divStyle} data-test-subj="mlPageDataFrameAnalyticsMapCytoscape">
         {children}
       </div>
     </CytoscapeContext.Provider>

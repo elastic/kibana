@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { ConfigSchema } from '.';
 import {
   FetchDataParams,
   HasDataParams,
-  ObservabilityPluginSetup,
+  ObservabilityPublicSetup,
 } from '../../observability/public';
 import {
   AppMountParameters,
@@ -26,7 +27,7 @@ import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import {
   PluginSetupContract as AlertingPluginPublicSetup,
   PluginStartContract as AlertingPluginPublicStart,
-} from '../../alerts/public';
+} from '../../alerting/public';
 import { FeaturesPluginSetup } from '../../features/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import {
@@ -38,29 +39,31 @@ import { toggleAppLinkInNav } from './toggleAppLinkInNav';
 import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { registerApmAlerts } from './components/alerting/register_apm_alerts';
 import { MlPluginSetup, MlPluginStart } from '../../ml/public';
+import { MapsStartApi } from '../../maps/public';
 
 export type ApmPluginSetup = void;
 export type ApmPluginStart = void;
 
 export interface ApmPluginSetupDeps {
-  alerts?: AlertingPluginPublicSetup;
+  alerting?: AlertingPluginPublicSetup;
   ml?: MlPluginSetup;
   data: DataPublicPluginSetup;
   features: FeaturesPluginSetup;
   home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
-  observability?: ObservabilityPluginSetup;
+  observability?: ObservabilityPublicSetup;
 }
 
 export interface ApmPluginStartDeps {
-  alerts?: AlertingPluginPublicStart;
+  alerting?: AlertingPluginPublicStart;
   ml?: MlPluginStart;
   data: DataPublicPluginStart;
   home: void;
   licensing: void;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   embeddable: EmbeddableStart;
+  maps?: MapsStartApi;
 }
 
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
@@ -82,19 +85,19 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       const getApmDataHelper = async () => {
         const {
           fetchObservabilityOverviewPageData,
-          hasData,
+          getHasData,
           createCallApmApi,
         } = await import('./services/rest/apm_observability_overview_fetchers');
         // have to do this here as well in case app isn't mounted yet
-        createCallApmApi(core.http);
+        createCallApmApi(core);
 
-        return { fetchObservabilityOverviewPageData, hasData };
+        return { fetchObservabilityOverviewPageData, getHasData };
       };
       plugins.observability.dashboard.register({
         appName: 'apm',
         hasData: async () => {
           const dataHelper = await getApmDataHelper();
-          return await dataHelper.hasData();
+          return await dataHelper.getHasData();
         },
         fetchData: async (params: FetchDataParams) => {
           const dataHelper = await getApmDataHelper();
@@ -109,7 +112,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           createCallApmApi,
         } = await import('./components/app/RumDashboard/ux_overview_fetchers');
         // have to do this here as well in case app isn't mounted yet
-        createCallApmApi(core.http);
+        createCallApmApi(core);
 
         return { fetchUxOverviewDate, hasRumData };
       };
@@ -159,7 +162,24 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       order: 8500,
       euiIconType: 'logoObservability',
       category: DEFAULT_APP_CATEGORIES.observability,
-
+      meta: {
+        keywords: [
+          'RUM',
+          'Real User Monitoring',
+          'DEM',
+          'Digital Experience Monitoring',
+          'EUM',
+          'End User Monitoring',
+          'UX',
+          'Javascript',
+          'APM',
+          'Mobile',
+          'digital',
+          'performance',
+          'web performance',
+          'web perf',
+        ],
+      },
       async mount(params: AppMountParameters<unknown>) {
         // Load application bundle and Get start service
         const [{ renderApp }, [coreStart, corePlugins]] = await Promise.all([

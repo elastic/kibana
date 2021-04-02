@@ -1,17 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { difference } from 'lodash';
-import { EventManager, CalendarEvent } from './event_manager';
+import { EventManager } from './event_manager';
 import type { MlClient } from '../../lib/ml_client';
+
+type ScheduledEvent = estypes.ScheduledEvent;
 
 interface BasicCalendar {
   job_ids: string[];
   description?: string;
-  events: CalendarEvent[];
+  events: ScheduledEvent[];
 }
 
 export interface Calendar extends BasicCalendar {
@@ -36,23 +40,24 @@ export class CalendarManager {
       calendar_id: calendarId,
     });
 
-    const calendars = body.calendars;
+    const calendars = body.calendars as Calendar[];
     const calendar = calendars[0]; // Endpoint throws a 404 if calendar is not found.
     calendar.events = await this._eventManager.getCalendarEvents(calendarId);
     return calendar;
   }
 
   async getAllCalendars() {
+    // @ts-expect-error missing size argument
     const { body } = await this._mlClient.getCalendars({ size: 1000 });
 
-    const events: CalendarEvent[] = await this._eventManager.getAllEvents();
-    const calendars: Calendar[] = body.calendars;
+    const events: ScheduledEvent[] = await this._eventManager.getAllEvents();
+    const calendars: Calendar[] = body.calendars as Calendar[];
     calendars.forEach((cal) => (cal.events = []));
 
     // loop events and combine with related calendars
     events.forEach((event) => {
       const calendar = calendars.find((cal) => cal.calendar_id === event.calendar_id);
-      if (calendar) {
+      if (calendar && calendar.events) {
         calendar.events.push(event);
       }
     });
@@ -97,7 +102,7 @@ export class CalendarManager {
     );
 
     // if an event in the original calendar cannot be found, it must have been deleted
-    const eventsToRemove: CalendarEvent[] = origCalendar.events.filter(
+    const eventsToRemove: ScheduledEvent[] = origCalendar.events.filter(
       (event) => calendar.events.find((e) => this._eventManager.isEqual(e, event)) === undefined
     );
 

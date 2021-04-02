@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect';
 import { DeepPartial } from '../../../../../plugins/ml/common/types/common';
 import { DataFrameAnalyticsConfig } from '../../../../../plugins/ml/public/application/data_frame_analytics/common';
@@ -195,6 +197,20 @@ export default function ({ getService }: FtrProviderContext) {
           );
           await ml.dataFrameAnalyticsCreation.setJobId(cloneJobId);
           await ml.dataFrameAnalyticsCreation.setDestIndex(cloneDestIndex);
+
+          await ml.testExecution.logTestStep('should continue to the validation step');
+          await ml.dataFrameAnalyticsCreation.continueToValidationStep();
+
+          await ml.testExecution.logTestStep('Should have validation callouts');
+          await ml.dataFrameAnalyticsCreation.assertValidationCalloutsExists();
+
+          if (testData?.job?.analysis?.outlier_detection !== undefined) {
+            await ml.dataFrameAnalyticsCreation.assertAllValidationCalloutsPresent(1);
+          } else {
+            await ml.dataFrameAnalyticsCreation.assertAllValidationCalloutsPresent(
+              testData?.job?.analysis?.regression !== undefined ? 3 : 4
+            );
+          }
 
           await ml.testExecution.logTestStep('should continue to the create step');
           await ml.dataFrameAnalyticsCreation.continueToCreateStep();

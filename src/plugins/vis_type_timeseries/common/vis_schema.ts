@@ -1,26 +1,16 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { schema } from '@kbn/config-schema';
 import { TypeOptions } from '@kbn/config-schema/target/types/types';
 
 const stringOptionalNullable = schema.maybe(schema.nullable(schema.string()));
+const stringOptional = schema.maybe(schema.string());
 
 const stringRequired = schema.string();
 
@@ -38,7 +28,7 @@ const numberOptional = schema.maybe(schema.number());
 
 const queryObject = schema.object({
   language: schema.string(),
-  query: schema.string(),
+  query: schema.oneOf([schema.string(), schema.any()]),
 });
 const stringOrNumberOptionalNullable = schema.nullable(
   schema.oneOf([stringOptionalNullable, numberOptional])
@@ -47,18 +37,27 @@ const numberOptionalOrEmptyString = schema.maybe(
   schema.oneOf([numberOptional, schema.literal('')])
 );
 
-const annotationsItems = schema.object({
+export const indexPattern = schema.oneOf([
+  schema.maybe(schema.string()),
+  schema.object({
+    id: schema.string(),
+  }),
+]);
+
+export const fieldObject = stringOptionalNullable;
+
+export const annotationsItems = schema.object({
   color: stringOptionalNullable,
   fields: stringOptionalNullable,
   hidden: schema.maybe(schema.boolean()),
   icon: stringOptionalNullable,
-  id: stringOptionalNullable,
+  id: schema.string(),
   ignore_global_filters: numberIntegerOptional,
   ignore_panel_filters: numberIntegerOptional,
-  index_pattern: stringOptionalNullable,
+  index_pattern: indexPattern,
   query_string: schema.maybe(queryObject),
   template: stringOptionalNullable,
-  time_field: stringOptionalNullable,
+  time_field: fieldObject,
 });
 
 const backgroundColorRulesItems = schema.object({
@@ -76,9 +75,11 @@ const gaugeColorRulesItems = schema.object({
   operator: stringOptionalNullable,
   value: schema.maybe(schema.nullable(schema.number())),
 });
+
 export const metricsItems = schema.object({
-  field: stringOptionalNullable,
+  field: fieldObject,
   id: stringRequired,
+  alias: stringOptionalNullable,
   metric_agg: stringOptionalNullable,
   numerator: schema.maybe(queryObject),
   denominator: schema.maybe(queryObject),
@@ -98,7 +99,7 @@ export const metricsItems = schema.object({
   variables: schema.maybe(
     schema.arrayOf(
       schema.object({
-        field: stringOptionalNullable,
+        field: fieldObject,
         id: stringRequired,
         name: stringOptionalNullable,
       })
@@ -109,7 +110,7 @@ export const metricsItems = schema.object({
     schema.arrayOf(
       schema.object({
         id: stringRequired,
-        field: stringOptionalNullable,
+        field: fieldObject,
         mode: schema.oneOf([schema.literal('line'), schema.literal('band')]),
         shade: schema.oneOf([numberOptional, stringOptionalNullable]),
         value: schema.maybe(schema.oneOf([numberOptional, stringOptionalNullable])),
@@ -123,7 +124,7 @@ export const metricsItems = schema.object({
   size: stringOrNumberOptionalNullable,
   agg_with: stringOptionalNullable,
   order: stringOptionalNullable,
-  order_by: stringOptionalNullable,
+  order_by: fieldObject,
 });
 
 const splitFiltersItems = schema.object({
@@ -134,7 +135,7 @@ const splitFiltersItems = schema.object({
 });
 
 export const seriesItems = schema.object({
-  aggregate_by: stringOptionalNullable,
+  aggregate_by: fieldObject,
   aggregate_function: stringOptionalNullable,
   axis_position: stringRequired,
   axis_max: stringOrNumberOptionalNullable,
@@ -174,17 +175,21 @@ export const seriesItems = schema.object({
   point_size: numberOptionalOrEmptyString,
   separate_axis: numberIntegerOptional,
   seperate_axis: numberIntegerOptional,
-  series_index_pattern: stringOptionalNullable,
+  series_index_pattern: indexPattern,
   series_max_bars: numberIntegerOptional,
-  series_time_field: stringOptionalNullable,
+  series_time_field: fieldObject,
   series_interval: stringOptionalNullable,
   series_drop_last_bucket: numberIntegerOptional,
   split_color_mode: stringOptionalNullable,
+  palette: schema.object({
+    type: stringRequired,
+    name: stringRequired,
+  }),
   split_filters: schema.maybe(schema.arrayOf(splitFiltersItems)),
   split_mode: stringRequired,
   stacked: stringRequired,
   steps: numberIntegerOptional,
-  terms_field: stringOptionalNullable,
+  terms_field: fieldObject,
   terms_order_by: stringOptionalNullable,
   terms_size: stringOptionalNullable,
   terms_direction: stringOptionalNullable,
@@ -198,6 +203,7 @@ export const seriesItems = schema.object({
 });
 
 export const panel = schema.object({
+  use_kibana_indexes: schema.maybe(schema.boolean()),
   annotations: schema.maybe(schema.arrayOf(annotationsItems)),
   axis_formatter: stringRequired,
   axis_position: stringRequired,
@@ -209,27 +215,20 @@ export const panel = schema.object({
   background_color_rules: schema.maybe(schema.arrayOf(backgroundColorRulesItems)),
   default_index_pattern: stringOptionalNullable,
   default_timefield: stringOptionalNullable,
-  drilldown_url: stringOptionalNullable,
+  drilldown_url: stringOptional,
   drop_last_bucket: numberIntegerOptional,
-  filter: schema.nullable(
-    schema.oneOf([
-      stringOptionalNullable,
-      schema.object({
-        language: stringOptionalNullable,
-        query: stringOptionalNullable,
-      }),
-    ])
-  ),
+  filter: schema.maybe(queryObject),
   gauge_color_rules: schema.maybe(schema.arrayOf(gaugeColorRulesItems)),
   gauge_width: schema.nullable(schema.oneOf([stringOptionalNullable, numberOptional])),
   gauge_inner_color: stringOptionalNullable,
   gauge_inner_width: stringOrNumberOptionalNullable,
   gauge_style: stringOptionalNullable,
-  gauge_max: stringOrNumberOptionalNullable,
+  gauge_max: numberOptionalOrEmptyString,
+  hide_last_value_indicator: schema.boolean(),
   id: stringRequired,
   ignore_global_filters: numberOptional,
   ignore_global_filter: numberOptional,
-  index_pattern: stringRequired,
+  index_pattern: indexPattern,
   max_bars: numberIntegerOptional,
   interval: stringRequired,
   isModelInvalid: schema.maybe(schema.boolean()),
@@ -241,7 +240,7 @@ export const panel = schema.object({
   markdown_vertical_align: stringOptionalNullable,
   markdown_less: stringOptionalNullable,
   markdown_css: stringOptionalNullable,
-  pivot_id: stringOptionalNullable,
+  pivot_id: fieldObject,
   pivot_label: stringOptionalNullable,
   pivot_type: stringOptionalNullable,
   pivot_rows: stringOptionalNullable,
@@ -251,7 +250,7 @@ export const panel = schema.object({
   tooltip_mode: schema.maybe(
     schema.oneOf([schema.literal('show_all'), schema.literal('show_focused')])
   ),
-  time_field: stringOptionalNullable,
+  time_field: fieldObject,
   time_range_mode: stringOptionalNullable,
   type: schema.oneOf([
     schema.literal('table'),
@@ -281,5 +280,12 @@ export const visPayloadSchema = schema.object({
     min: stringRequired,
     max: stringRequired,
   }),
-  sessionId: schema.maybe(schema.string()),
+
+  searchSession: schema.maybe(
+    schema.object({
+      sessionId: schema.string(),
+      isRestore: schema.boolean({ defaultValue: false }),
+      isStored: schema.boolean({ defaultValue: false }),
+    })
+  ),
 });

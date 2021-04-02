@@ -9,10 +9,11 @@
   "from": "now-9m",
   "index": [
     "winlogbeat-*",
-    "logs-endpoint.events.*"
+    "logs-endpoint.events.*",
+    "logs-windows.*"
   ],
   "language": "kuery",
-  "license": "Elastic License",
+  "license": "Elastic License v2",
   "name": "Microsoft Build Engine Started by an Office Application",
   "query": "event.category:process and event.type:(start or process_started) and process.name:MSBuild.exe and process.parent.name:(eqnedt32.exe or excel.exe or fltldr.exe or msaccess.exe or mspub.exe or outlook.exe or powerpnt.exe or winword.exe)",
   "references": [
@@ -51,15 +52,10 @@
         "name": "Execution",
         "reference": "https://attack.mitre.org/tactics/TA0002/"
       },
-      "technique": [
-        {
-          "id": "T1127",
-          "name": "Trusted Developer Utilities Proxy Execution",
-          "reference": "https://attack.mitre.org/techniques/T1127/"
-        }
-      ]
+      "technique": []
     }
   ],
+  "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 4
+  "version": 7
 }

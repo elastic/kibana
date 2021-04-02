@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
@@ -11,7 +12,6 @@ import {
   getCreateRequest,
   getFindResultStatus,
   getNonEmptyIndex,
-  getEmptyIndex,
   getFindResultWithSingleHit,
   createMlRuleRequest,
 } from '../__mocks__/request_responses';
@@ -21,6 +21,8 @@ import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { createRulesRoute } from './create_rules_route';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 jest.mock('../../rules/update_rules_notifications');
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
@@ -39,6 +41,10 @@ describe('create_rules', () => {
     clients.alertsClient.create.mockResolvedValue(getResult()); // creation succeeds
     clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus()); // needed to transform
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (context.core.elasticsearch.client.asCurrentUser.search as any).mockResolvedValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 1 } })
+    );
     createRulesRoute(server.router, ml);
   });
 
@@ -63,6 +69,7 @@ describe('create_rules', () => {
 
     it('returns 404 if siem client is unavailable', async () => {
       const { securitySolution, ...contextWithoutSecuritySolution } = context;
+      // @ts-expect-error
       const response = await server.inject(getCreateRequest(), contextWithoutSecuritySolution);
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
@@ -100,7 +107,10 @@ describe('create_rules', () => {
 
   describe('unhappy paths', () => {
     test('it returns a 400 if the index does not exist', async () => {
-      clients.clusterClient.callAsCurrentUser.mockResolvedValue(getEmptyIndex());
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (context.core.elasticsearch.client.asCurrentUser.search as any).mockResolvedValueOnce(
+        elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 0 } })
+      );
       const response = await server.inject(getCreateRequest(), context);
 
       expect(response.status).toEqual(400);

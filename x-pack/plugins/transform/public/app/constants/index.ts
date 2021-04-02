@@ -1,19 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export enum SECTION_SLUG {
   HOME = 'transform_management',
   CLONE_TRANSFORM = 'clone_transform',
   CREATE_TRANSFORM = 'create_transform',
-}
-
-export enum TRANSFORM_DOC_PATHS {
-  default = 'docs.html',
-  plugins = 'plugins.html',
-  transforms = 'transforms.html',
 }
 
 // UI Metric constants

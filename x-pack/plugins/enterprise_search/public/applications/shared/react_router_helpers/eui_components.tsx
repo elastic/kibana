@@ -1,11 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
+
 import { useValues } from 'kea';
+
 import {
   EuiLink,
   EuiButton,
@@ -14,11 +17,14 @@ import {
   EuiButtonProps,
   EuiLinkAnchorProps,
   EuiPanel,
+  EuiCard,
+  EuiCardProps,
 } from '@elastic/eui';
 import { EuiPanelProps } from '@elastic/eui/src/components/panel/panel';
 
-import { KibanaLogic } from '../kibana';
 import { HttpLogic } from '../http';
+import { KibanaLogic } from '../kibana';
+
 import { letBrowserHandleEvent, createHref } from './';
 
 /**
@@ -112,5 +118,17 @@ export const EuiPanelTo: React.FC<ReactRouterEuiPanelProps> = ({
 }) => (
   <ReactRouterHelper {...{ to, onClick, shouldNotCreateHref }}>
     <EuiPanel {...rest} />
+  </ReactRouterHelper>
+);
+
+type ReactRouterEuiCardProps = ReactRouterProps & EuiCardProps;
+export const EuiCardTo: React.FC<ReactRouterEuiCardProps> = ({
+  to,
+  onClick,
+  shouldNotCreateHref,
+  ...rest
+}) => (
+  <ReactRouterHelper {...{ to, onClick, shouldNotCreateHref }}>
+    <EuiCard {...rest} />
   </ReactRouterHelper>
 );

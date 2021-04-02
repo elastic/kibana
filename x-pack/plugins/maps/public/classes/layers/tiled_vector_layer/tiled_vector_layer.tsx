@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -14,7 +15,7 @@ import { EuiIcon } from '@elastic/eui';
 import { Feature } from 'geojson';
 import { IVectorStyle, VectorStyle } from '../../styles/vector/vector_style';
 import { SOURCE_DATA_REQUEST_ID, LAYER_TYPE } from '../../../../common/constants';
-import { VectorLayer, VectorLayerArguments } from '../vector_layer/vector_layer';
+import { VectorLayer, VectorLayerArguments } from '../vector_layer';
 import { ITiledSingleLayerVectorSource } from '../../sources/vector_source';
 import { DataRequestContext } from '../../../actions';
 import {
@@ -22,6 +23,7 @@ import {
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { MVTSingleLayerVectorSourceConfig } from '../../sources/mvt_single_layer_vector_source/types';
+import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
 
 export class TiledVectorLayer extends VectorLayer {
   static type = LAYER_TYPE.TILED_VECTOR;
@@ -67,18 +69,22 @@ export class TiledVectorLayer extends VectorLayer {
       this._style as IVectorStyle
     );
     const prevDataRequest = this.getSourceDataRequest();
-
-    const templateWithMeta = await this._source.getUrlTemplateWithMeta(searchFilters);
+    const dataRequest = await this._source.getUrlTemplateWithMeta(searchFilters);
     if (prevDataRequest) {
       const data: MVTSingleLayerVectorSourceConfig = prevDataRequest.getData() as MVTSingleLayerVectorSourceConfig;
       if (data) {
-        const canSkipBecauseNoChanges =
+        const noChangesInSourceState: boolean =
           data.layerName === this._source.getLayerName() &&
           data.minSourceZoom === this._source.getMinZoom() &&
-          data.maxSourceZoom === this._source.getMaxZoom() &&
-          data.urlTemplate === templateWithMeta.urlTemplate;
-
-        if (canSkipBecauseNoChanges) {
+          data.maxSourceZoom === this._source.getMaxZoom();
+        const noChangesInSearchState: boolean = await canSkipSourceUpdate({
+          extentAware: false, // spatial extent knowledge is already fully automated by tile-loading based on pan-zooming
+          source: this.getSource(),
+          prevDataRequest,
+          nextMeta: searchFilters,
+        });
+        const canSkip = noChangesInSourceState && noChangesInSearchState;
+        if (canSkip) {
           return null;
         }
       }
@@ -86,7 +92,7 @@ export class TiledVectorLayer extends VectorLayer {
 
     startLoading(SOURCE_DATA_REQUEST_ID, requestToken, searchFilters);
     try {
-      stopLoading(SOURCE_DATA_REQUEST_ID, requestToken, templateWithMeta, {});
+      stopLoading(SOURCE_DATA_REQUEST_ID, requestToken, dataRequest, {});
     } catch (error) {
       onLoadError(SOURCE_DATA_REQUEST_ID, requestToken, error.message);
     }
@@ -147,6 +153,7 @@ export class TiledVectorLayer extends VectorLayer {
 
     this._setMbPointsProperties(mbMap, sourceMeta.layerName);
     this._setMbLinePolygonProperties(mbMap, sourceMeta.layerName);
+    this._setMbCentroidProperties(mbMap, sourceMeta.layerName);
   }
 
   _requiresPrevSourceCleanup(mbMap: MbMap): boolean {

@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { useCallback, useReducer, useEffect, useMemo } from 'react';
@@ -23,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import useUnmount from 'react-use/lib/useUnmount';
 
 import { IAggConfig, IndexPattern, AggGroupNames } from '../../../data/public';
+import type { Schema } from '../../../visualizations/public';
 
 import { DefaultEditorAggSelect } from './agg_select';
 import { DefaultEditorAggParam } from './agg_param';
@@ -39,7 +29,7 @@ import {
 } from './agg_params_state';
 import { DefaultEditorCommonProps } from './agg_common_props';
 import { EditorParamConfig, TimeIntervalParam, FixedParam, getEditorConfig } from './utils';
-import { Schema, getSchemaByName } from '../schemas';
+import { getSchemaByName } from '../schemas';
 import { useKibana } from '../../../kibana_react/public';
 import { VisDefaultEditorKibanaServices } from '../types';
 

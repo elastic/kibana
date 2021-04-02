@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -12,11 +13,16 @@ import {
   CommentRequest,
   CaseStatuses,
   CaseAttributes,
-} from '../../../../case/common/api';
+  CasePatchRequest,
+  CaseType,
+  AssociationType,
+} from '../../../../cases/common/api';
+import { CaseStatusWithAllStatus } from '../components/status';
 
-export { CaseConnector, ActionConnector } from '../../../../case/common/api';
+export { CaseConnector, ActionConnector, CaseStatuses } from '../../../../cases/common/api';
 
 export type Comment = CommentRequest & {
+  associationType: AssociationType;
   id: string;
   createdAt: string;
   createdBy: ElasticUser;
@@ -47,24 +53,37 @@ export interface CaseExternalService {
   externalTitle: string;
   externalUrl: string;
 }
-export interface Case {
+
+interface BasicCase {
   id: string;
   closedAt: string | null;
   closedBy: ElasticUser | null;
   comments: Comment[];
-  connector: CaseConnector;
   createdAt: string;
   createdBy: ElasticUser;
-  description: string;
-  externalService: CaseExternalService | null;
   status: CaseStatuses;
-  tags: string[];
   title: string;
+  totalAlerts: number;
   totalComment: number;
   updatedAt: string | null;
   updatedBy: ElasticUser | null;
   version: string;
+}
+
+export interface SubCase extends BasicCase {
+  associationType: AssociationType;
+  caseParentId: string;
+}
+
+export interface Case extends BasicCase {
+  connector: CaseConnector;
+  description: string;
+  externalService: CaseExternalService | null;
+  subCases?: SubCase[] | null;
+  subCaseIds: string[];
   settings: CaseAttributes['settings'];
+  tags: string[];
+  type: CaseType;
 }
 
 export interface QueryParams {
@@ -76,9 +95,10 @@ export interface QueryParams {
 
 export interface FilterOptions {
   search: string;
-  status: CaseStatuses;
+  status: CaseStatusWithAllStatus;
   tags: string[];
   reporters: User[];
+  onlyCollectionType?: boolean;
 }
 
 export interface CasesStatus {
@@ -130,5 +150,26 @@ export interface ActionLicense {
 
 export interface DeleteCase {
   id: string;
+  type: CaseType | null;
   title?: string;
+}
+
+export interface FieldMappings {
+  id: string;
+  title?: string;
+}
+
+export type UpdateKey = keyof Pick<
+  CasePatchRequest,
+  'connector' | 'description' | 'status' | 'tags' | 'title' | 'settings'
+>;
+
+export interface UpdateByKey {
+  updateKey: UpdateKey;
+  updateValue: CasePatchRequest[UpdateKey];
+  fetchCaseUserActions?: (caseId: string, caseConnectorId: string, subCaseId?: string) => void;
+  updateCase?: (newCase: Case) => void;
+  caseData: Case;
+  onSuccess?: () => void;
+  onError?: () => void;
 }

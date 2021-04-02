@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { useRequest, sendRequest } from './use_request';
 import { epmRouteService } from '../../services';
-import {
+import type {
   GetCategoriesRequest,
   GetCategoriesResponse,
   GetPackagesRequest,
@@ -16,6 +16,9 @@ import {
   InstallPackageResponse,
   DeletePackageResponse,
 } from '../../types';
+import type { GetStatsResponse } from '../../../../../common';
+
+import { useRequest, sendRequest } from './use_request';
 
 export const useGetCategories = (query: GetCategoriesRequest['query'] = {}) => {
   return useRequest<GetCategoriesResponse>({
@@ -43,6 +46,13 @@ export const useGetLimitedPackages = () => {
 export const useGetPackageInfoByKey = (pkgkey: string) => {
   return useRequest<GetInfoResponse>({
     path: epmRouteService.getInfoPath(pkgkey),
+    method: 'get',
+  });
+};
+
+export const useGetPackageStats = (pkgName: string) => {
+  return useRequest<GetStatsResponse>({
+    path: epmRouteService.getStatsPath(pkgName),
     method: 'get',
   });
 };

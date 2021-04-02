@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiSpacer } from '@elastic/eui';
@@ -41,6 +42,7 @@ export const EndgameSecurityEventDetails = React.memo<Props>(({ data, contextId,
   const endgameTargetUserName: string | null | undefined = get('endgame.target_user_name[0]', data);
   const eventAction: string | null | undefined = get('event.action[0]', data);
   const eventCode: string | null | undefined = get('event.code[0]', data);
+  const eventOutcome: string | null | undefined = get('event.outcome[0]', data);
   const hostName: string | null | undefined = get('host.name[0]', data);
   const id = data._id;
   const processExecutable: string | null | undefined = get('process.executable[0]', data);
@@ -63,6 +65,7 @@ export const EndgameSecurityEventDetails = React.memo<Props>(({ data, contextId,
         endgameTargetUserName={endgameTargetUserName}
         eventAction={eventAction}
         eventCode={eventCode}
+        eventOutcome={eventOutcome}
         hostName={hostName}
         id={id}
         processExecutable={processExecutable}

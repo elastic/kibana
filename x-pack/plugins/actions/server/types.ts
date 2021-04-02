@@ -1,23 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ActionTypeRegistry } from './action_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { ActionsClient } from './actions_client';
 import { LicenseType } from '../../licensing/common/types';
 import {
-  ILegacyClusterClient,
-  ILegacyScopedClusterClient,
   KibanaRequest,
   SavedObjectsClientContract,
   SavedObjectAttributes,
   ElasticsearchClient,
+  RequestHandlerContext,
 } from '../../../../src/core/server';
 import { ActionTypeExecutorResult } from '../common';
 export { ActionTypeExecutorResult } from '../common';
+export { GetFieldsByIssueTypeResponse as JiraGetFieldsResponse } from './builtin_action_types/jira/types';
+export { GetCommonFieldsResponse as ServiceNowGetFieldsResponse } from './builtin_action_types/servicenow/types';
+export { GetCommonFieldsResponse as ResilientGetFieldsResponse } from './builtin_action_types/resilient/types';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: KibanaRequest) => Services;
@@ -28,30 +32,22 @@ export type ActionTypeSecrets = Record<string, unknown>;
 export type ActionTypeParams = Record<string, unknown>;
 
 export interface Services {
-  callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
   savedObjectsClient: SavedObjectsClientContract;
   scopedClusterClient: ElasticsearchClient;
-  getLegacyScopedClusterClient(clusterClient: ILegacyClusterClient): ILegacyScopedClusterClient;
 }
 
-declare module 'src/core/server' {
-  interface RequestHandlerContext {
-    actions?: {
-      getActionsClient: () => ActionsClient;
-      listTypes: ActionTypeRegistry['list'];
-    };
-  }
+export interface ActionsApiRequestHandlerContext {
+  getActionsClient: () => ActionsClient;
+  listTypes: ActionTypeRegistry['list'];
+}
+
+export interface ActionsRequestHandlerContext extends RequestHandlerContext {
+  actions: ActionsApiRequestHandlerContext;
 }
 
 export interface ActionsPlugin {
   setup: PluginSetupContract;
   start: PluginStartContract;
-}
-
-export interface ActionsConfigType {
-  enabled: boolean;
-  allowedHosts: string[];
-  enabledActionTypes: string[];
 }
 
 // the parameters passed to an action type executor function
@@ -61,7 +57,6 @@ export interface ActionTypeExecutorOptions<Config, Secrets, Params> {
   config: Config;
   secrets: Secrets;
   params: Params;
-  proxySettings?: ProxySettings;
 }
 
 export interface ActionResult<Config extends ActionTypeConfig = ActionTypeConfig> {
@@ -112,6 +107,7 @@ export interface ActionType<
     config?: ValidatorType<Config>;
     secrets?: ValidatorType<Secrets>;
   };
+  renderParameterTemplates?(params: Params, variables: Record<string, unknown>): Params;
   executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
 }
 

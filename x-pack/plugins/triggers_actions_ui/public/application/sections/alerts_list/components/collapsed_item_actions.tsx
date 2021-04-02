@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import { asyncScheduler } from 'rxjs';
+import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonIcon,
@@ -42,6 +44,12 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   setAlertsToDelete,
 }: ComponentOpts) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
+  const [isDisabled, setIsDisabled] = useState<boolean>(!item.enabled);
+  const [isMuted, setIsMuted] = useState<boolean>(item.muteAll);
+  useEffect(() => {
+    setIsDisabled(!item.enabled);
+    setIsMuted(item.muteAll);
+  }, [item.enabled, item.muteAll]);
 
   const button = (
     <EuiButtonIcon
@@ -68,17 +76,21 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
         <div className="actCollapsedItemActions__item">
           <EuiSwitch
             name="disable"
-            disabled={!item.isEditable}
+            disabled={!item.isEditable || !item.enabledInLicense}
             compressed
-            checked={!item.enabled}
+            checked={isDisabled}
             data-test-subj="disableSwitch"
             onChange={async () => {
-              if (item.enabled) {
-                await disableAlert(item);
-              } else {
-                await enableAlert(item);
-              }
-              onAlertChanged();
+              const enabled = !isDisabled;
+              asyncScheduler.schedule(async () => {
+                if (enabled) {
+                  await disableAlert({ ...item, enabled });
+                } else {
+                  await enableAlert({ ...item, enabled });
+                }
+                onAlertChanged();
+              }, 10);
+              setIsDisabled(!isDisabled);
             }}
             label={
               <FormattedMessage
@@ -91,24 +103,28 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
           <EuiText color="subdued" size="xs">
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.disableHelpText"
-              defaultMessage="When disabled, the alert is not checked."
+              defaultMessage="When disabled, the rule is not checked."
             />
           </EuiText>
         </div>
         <div className="actCollapsedItemActions__item">
           <EuiSwitch
             name="mute"
-            checked={item.muteAll}
-            disabled={!(item.isEditable && item.enabled)}
+            checked={isMuted}
+            disabled={!(item.isEditable && !isDisabled) || !item.enabledInLicense}
             compressed
             data-test-subj="muteSwitch"
             onChange={async () => {
-              if (item.muteAll) {
-                await unmuteAlert(item);
-              } else {
-                await muteAlert(item);
-              }
-              onAlertChanged();
+              const muteAll = isMuted;
+              asyncScheduler.schedule(async () => {
+                if (muteAll) {
+                  await unmuteAlert({ ...item, muteAll });
+                } else {
+                  await muteAlert({ ...item, muteAll });
+                }
+                onAlertChanged();
+              }, 10);
+              setIsMuted(!isMuted);
             }}
             label={
               <FormattedMessage
@@ -121,7 +137,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
           <EuiText color="subdued" size="xs">
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.collapsedItemActons.muteHelpText"
-              defaultMessage="When muted, the alert is checked, but no action is performed."
+              defaultMessage="When muted, the rule is checked, but no action is performed."
             />
           </EuiText>
         </div>

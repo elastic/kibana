@@ -1,33 +1,23 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { createBrowserHistory } from 'history';
 import { getSavedDashboardMock } from './test_helpers';
-import { DashboardContainer, DashboardContainerInput } from '.';
+import { DashboardContainer, DashboardContainerInput, DashboardPanelState } from '.';
 import { DashboardStateManager } from './dashboard_state_manager';
 import { DashboardContainerServices } from './embeddable/dashboard_container';
 
-import { ViewMode } from '../services/embeddable';
+import { EmbeddableInput, ViewMode } from '../services/embeddable';
 import { createKbnUrlStateStorage } from '../services/kibana_utils';
 import { InputTimeRange, TimefilterContract, TimeRange } from '../services/data';
 
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
+import { coreMock } from '../../../../core/public/mocks';
 
 describe('DashboardState', function () {
   let dashboardState: DashboardStateManager;
@@ -52,9 +42,12 @@ describe('DashboardState', function () {
     dashboardState = new DashboardStateManager({
       savedDashboard,
       hideWriteControls: false,
+      allowByValueEmbeddables: false,
+      hasPendingEmbeddable: () => false,
       kibanaVersion: '7.0.0',
       kbnUrlStateStorage: createKbnUrlStateStorage(),
       history: createBrowserHistory(),
+      toasts: coreMock.createStart().notifications.toasts,
       hasTaggingCapabilities: mockHasTaggingCapabilities,
     });
   }
@@ -68,6 +61,7 @@ describe('DashboardState', function () {
       query: {} as DashboardContainerInput['query'],
       timeRange: {} as DashboardContainerInput['timeRange'],
       useMargins: true,
+      syncColors: false,
       title: 'ultra awesome test dashboard',
       isFullScreenMode: false,
       panels: {} as DashboardContainerInput['panels'],
@@ -133,6 +127,11 @@ describe('DashboardState', function () {
 
       const dashboardContainer = initDashboardContainer({
         expandedPanelId: 'theCoolestPanelOnThisDashboard',
+        panels: {
+          theCoolestPanelOnThisDashboard: {
+            explicitInput: { id: 'theCoolestPanelOnThisDashboard' },
+          } as DashboardPanelState<EmbeddableInput>,
+        },
       });
 
       dashboardState.handleDashboardContainerChanges(dashboardContainer);
@@ -148,15 +147,39 @@ describe('DashboardState', function () {
 
       const dashboardContainer = initDashboardContainer({
         expandedPanelId: 'theCoolestPanelOnThisDashboard',
+        panels: {
+          theCoolestPanelOnThisDashboard: {
+            explicitInput: { id: 'theCoolestPanelOnThisDashboard' },
+          } as DashboardPanelState<EmbeddableInput>,
+        },
       });
 
       dashboardState.handleDashboardContainerChanges(dashboardContainer);
       dashboardState.handleDashboardContainerChanges(dashboardContainer);
       expect(dashboardState.setExpandedPanelId).toHaveBeenCalledTimes(1);
+    });
 
-      dashboardContainer.updateInput({ expandedPanelId: 'woah it changed' });
+    test('expandedPanelId is set to undefined if panel does not exist in input', () => {
+      dashboardState.setExpandedPanelId = jest
+        .fn()
+        .mockImplementation(dashboardState.setExpandedPanelId);
+      const dashboardContainer = initDashboardContainer({
+        expandedPanelId: 'theCoolestPanelOnThisDashboard',
+        panels: {
+          theCoolestPanelOnThisDashboard: {
+            explicitInput: { id: 'theCoolestPanelOnThisDashboard' },
+          } as DashboardPanelState<EmbeddableInput>,
+        },
+      });
+
       dashboardState.handleDashboardContainerChanges(dashboardContainer);
-      expect(dashboardState.setExpandedPanelId).toHaveBeenCalledTimes(2);
+      expect(dashboardState.setExpandedPanelId).toHaveBeenCalledWith(
+        'theCoolestPanelOnThisDashboard'
+      );
+
+      dashboardContainer.updateInput({ expandedPanelId: 'theLeastCoolPanelOnThisDashboard' });
+      dashboardState.handleDashboardContainerChanges(dashboardContainer);
+      expect(dashboardState.setExpandedPanelId).toHaveBeenCalledWith(undefined);
     });
   });
 
@@ -175,6 +198,75 @@ describe('DashboardState', function () {
       dashboardState.switchViewMode(ViewMode.VIEW);
       dashboardState.isDirty = true;
       expect(dashboardState.getIsDirty()).toBeFalsy();
+    });
+  });
+
+  describe('initial view mode', () => {
+    test('initial view mode set to view when hideWriteControls is true', () => {
+      const initialViewModeDashboardState = new DashboardStateManager({
+        savedDashboard,
+        hideWriteControls: true,
+        allowByValueEmbeddables: false,
+        hasPendingEmbeddable: () => false,
+        kibanaVersion: '7.0.0',
+        kbnUrlStateStorage: createKbnUrlStateStorage(),
+        history: createBrowserHistory(),
+        toasts: coreMock.createStart().notifications.toasts,
+        hasTaggingCapabilities: mockHasTaggingCapabilities,
+      });
+      expect(initialViewModeDashboardState.getViewMode()).toBe(ViewMode.VIEW);
+    });
+
+    test('initial view mode set to edit if edit mode specified in URL', () => {
+      const kbnUrlStateStorage = createKbnUrlStateStorage();
+      kbnUrlStateStorage.set('_a', { viewMode: ViewMode.EDIT });
+
+      const initialViewModeDashboardState = new DashboardStateManager({
+        savedDashboard,
+        kbnUrlStateStorage,
+        kibanaVersion: '7.0.0',
+        hideWriteControls: false,
+        allowByValueEmbeddables: false,
+        history: createBrowserHistory(),
+        hasPendingEmbeddable: () => false,
+        toasts: coreMock.createStart().notifications.toasts,
+        hasTaggingCapabilities: mockHasTaggingCapabilities,
+      });
+      expect(initialViewModeDashboardState.getViewMode()).toBe(ViewMode.EDIT);
+    });
+
+    test('initial view mode set to edit if the dashboard is new', () => {
+      const newDashboard = getSavedDashboardMock();
+      newDashboard.id = undefined;
+      const initialViewModeDashboardState = new DashboardStateManager({
+        savedDashboard: newDashboard,
+        kibanaVersion: '7.0.0',
+        hideWriteControls: false,
+        allowByValueEmbeddables: false,
+        history: createBrowserHistory(),
+        hasPendingEmbeddable: () => false,
+        kbnUrlStateStorage: createKbnUrlStateStorage(),
+        toasts: coreMock.createStart().notifications.toasts,
+        hasTaggingCapabilities: mockHasTaggingCapabilities,
+      });
+      expect(initialViewModeDashboardState.getViewMode()).toBe(ViewMode.EDIT);
+    });
+
+    test('initial view mode set to edit if there is a pending embeddable', () => {
+      const newDashboard = getSavedDashboardMock();
+      newDashboard.id = undefined;
+      const initialViewModeDashboardState = new DashboardStateManager({
+        savedDashboard: newDashboard,
+        kibanaVersion: '7.0.0',
+        hideWriteControls: false,
+        allowByValueEmbeddables: false,
+        history: createBrowserHistory(),
+        hasPendingEmbeddable: () => true,
+        kbnUrlStateStorage: createKbnUrlStateStorage(),
+        toasts: coreMock.createStart().notifications.toasts,
+        hasTaggingCapabilities: mockHasTaggingCapabilities,
+      });
+      expect(initialViewModeDashboardState.getViewMode()).toBe(ViewMode.EDIT);
     });
   });
 });

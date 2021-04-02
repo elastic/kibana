@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { applyMiddleware, createStore } from 'redux';
@@ -20,10 +21,11 @@ import {
 } from '../test_utils';
 
 import { TrustedAppsService } from '../service';
-import { Pagination, TrustedAppsListPageState } from '../state';
+import { Pagination, TrustedAppsListPageLocation, TrustedAppsListPageState } from '../state';
 import { initialTrustedAppsPageState } from './builders';
 import { trustedAppsPageReducer } from './reducer';
 import { createTrustedAppsPageMiddleware } from './middleware';
+import { Immutable } from '../../../../../common/endpoint/types';
 
 const initialNow = 111111;
 const dateNowMock = jest.fn();
@@ -31,7 +33,7 @@ dateNowMock.mockReturnValue(initialNow);
 
 Date.now = dateNowMock;
 
-const initialState = initialTrustedAppsPageState();
+const initialState: Immutable<TrustedAppsListPageState> = initialTrustedAppsPageState();
 
 const createGetTrustedListAppsResponse = (pagination: Partial<Pagination>) => {
   const fullPagination = { ...createDefaultPagination(), ...pagination };
@@ -48,6 +50,9 @@ const createTrustedAppsServiceMock = (): jest.Mocked<TrustedAppsService> => ({
   getTrustedAppsList: jest.fn(),
   deleteTrustedApp: jest.fn(),
   createTrustedApp: jest.fn(),
+  getPolicyList: jest.fn(),
+  updateTrustedApp: jest.fn(),
+  getTrustedApp: jest.fn(),
 });
 
 const createStoreSetup = (trustedAppsService: TrustedAppsService) => {
@@ -66,6 +71,35 @@ const createStoreSetup = (trustedAppsService: TrustedAppsService) => {
 };
 
 describe('middleware', () => {
+  type TrustedAppsEntriesExistState = Pick<TrustedAppsListPageState, 'entriesExist'>;
+  const entriesExistLoadedState = (): TrustedAppsEntriesExistState => {
+    return {
+      entriesExist: {
+        data: true,
+        type: 'LoadedResourceState',
+      },
+    };
+  };
+  const entriesExistLoadingState = (): TrustedAppsEntriesExistState => {
+    return {
+      entriesExist: {
+        previousState: {
+          type: 'UninitialisedResourceState',
+        },
+        type: 'LoadingResourceState',
+      },
+    };
+  };
+
+  const createLocationState = (
+    params?: Partial<TrustedAppsListPageLocation>
+  ): TrustedAppsListPageLocation => {
+    return {
+      ...initialState.location,
+      ...(params ?? {}),
+    };
+  };
+
   beforeEach(() => {
     dateNowMock.mockReturnValue(initialNow);
   });
@@ -81,7 +115,10 @@ describe('middleware', () => {
   describe('refreshing list resource state', () => {
     it('refreshes the list when location changes and data gets outdated', async () => {
       const pagination = { pageIndex: 2, pageSize: 50 };
-      const location = { page_index: 2, page_size: 50, show: undefined, view_type: 'grid' };
+      const location = createLocationState({
+        page_index: 2,
+        page_size: 50,
+      });
       const service = createTrustedAppsServiceMock();
       const { store, spyMiddleware } = createStoreSetup(service);
 
@@ -106,6 +143,7 @@ describe('middleware', () => {
 
       expect(store.getState()).toStrictEqual({
         ...initialState,
+        ...entriesExistLoadingState(),
         listView: createLoadedListViewWithPagination(initialNow, pagination),
         active: true,
         location,
@@ -114,7 +152,10 @@ describe('middleware', () => {
 
     it('does not refresh the list when location changes and data does not get outdated', async () => {
       const pagination = { pageIndex: 2, pageSize: 50 };
-      const location = { page_index: 2, page_size: 50, show: undefined, view_type: 'grid' };
+      const location = createLocationState({
+        page_index: 2,
+        page_size: 50,
+      });
       const service = createTrustedAppsServiceMock();
       const { store, spyMiddleware } = createStoreSetup(service);
 
@@ -126,9 +167,10 @@ describe('middleware', () => {
 
       store.dispatch(createUserChangedUrlAction('/trusted_apps', '?page_index=2&page_size=50'));
 
-      expect(service.getTrustedAppsList).toBeCalledTimes(1);
+      expect(service.getTrustedAppsList).toBeCalledTimes(2);
       expect(store.getState()).toStrictEqual({
         ...initialState,
+        ...entriesExistLoadingState(),
         listView: createLoadedListViewWithPagination(initialNow, pagination),
         active: true,
         location,
@@ -138,7 +180,7 @@ describe('middleware', () => {
     it('refreshes the list when data gets outdated with and outdate action', async () => {
       const newNow = 222222;
       const pagination = { pageIndex: 0, pageSize: 10 };
-      const location = { page_index: 0, page_size: 10, show: undefined, view_type: 'grid' };
+      const location = createLocationState();
       const service = createTrustedAppsServiceMock();
       const { store, spyMiddleware } = createStoreSetup(service);
 
@@ -154,6 +196,7 @@ describe('middleware', () => {
 
       expect(store.getState()).toStrictEqual({
         ...initialState,
+        ...entriesExistLoadingState(),
         listView: {
           listResourceState: {
             type: 'LoadingResourceState',
@@ -169,6 +212,7 @@ describe('middleware', () => {
 
       expect(store.getState()).toStrictEqual({
         ...initialState,
+        ...entriesExistLoadedState(),
         listView: createLoadedListViewWithPagination(newNow, pagination),
         active: true,
         location,
@@ -179,7 +223,9 @@ describe('middleware', () => {
       const service = createTrustedAppsServiceMock();
       const { store, spyMiddleware } = createStoreSetup(service);
 
-      service.getTrustedAppsList.mockRejectedValue(createServerApiError('Internal Server Error'));
+      service.getTrustedAppsList.mockRejectedValue({
+        body: createServerApiError('Internal Server Error'),
+      });
 
       store.dispatch(createUserChangedUrlAction('/trusted_apps', '?page_index=2&page_size=50'));
 
@@ -187,6 +233,7 @@ describe('middleware', () => {
 
       expect(store.getState()).toStrictEqual({
         ...initialState,
+        ...entriesExistLoadingState(),
         listView: {
           listResourceState: {
             type: 'FailedResourceState',
@@ -196,7 +243,10 @@ describe('middleware', () => {
           freshDataTimestamp: initialNow,
         },
         active: true,
-        location: { page_index: 2, page_size: 50, show: undefined, view_type: 'grid' },
+        location: createLocationState({
+          page_index: 2,
+          page_size: 50,
+        }),
       });
 
       const infiniteLoopTest = async () => {
@@ -212,11 +262,17 @@ describe('middleware', () => {
     const entry = createSampleTrustedApp(3);
     const notFoundError = createServerApiError('Not Found');
     const pagination = { pageIndex: 0, pageSize: 10 };
-    const location = { page_index: 0, page_size: 10, show: undefined, view_type: 'grid' };
+    const location = createLocationState();
     const getTrustedAppsListResponse = createGetTrustedListAppsResponse(pagination);
     const listView = createLoadedListViewWithPagination(initialNow, pagination);
     const listViewNew = createLoadedListViewWithPagination(newNow, pagination);
-    const testStartState = { ...initialState, listView, active: true, location };
+    const testStartState = {
+      ...initialState,
+      ...entriesExistLoadingState(),
+      listView,
+      active: true,
+      location,
+    };
 
     it('does not submit when entry is undefined', async () => {
       const service = createTrustedAppsServiceMock();
@@ -268,7 +324,11 @@ describe('middleware', () => {
       await spyMiddleware.waitForAction('trustedAppDeletionSubmissionResourceStateChanged');
       await spyMiddleware.waitForAction('trustedAppsListResourceStateChanged');
 
-      expect(store.getState()).toStrictEqual({ ...testStartState, listView: listViewNew });
+      expect(store.getState()).toStrictEqual({
+        ...testStartState,
+        ...entriesExistLoadedState(),
+        listView: listViewNew,
+      });
       expect(service.deleteTrustedApp).toBeCalledWith({ id: '3' });
       expect(service.deleteTrustedApp).toBeCalledTimes(1);
     });
@@ -305,7 +365,11 @@ describe('middleware', () => {
       await spyMiddleware.waitForAction('trustedAppDeletionSubmissionResourceStateChanged');
       await spyMiddleware.waitForAction('trustedAppsListResourceStateChanged');
 
-      expect(store.getState()).toStrictEqual({ ...testStartState, listView: listViewNew });
+      expect(store.getState()).toStrictEqual({
+        ...testStartState,
+        ...entriesExistLoadedState(),
+        listView: listViewNew,
+      });
       expect(service.deleteTrustedApp).toBeCalledWith({ id: '3' });
       expect(service.deleteTrustedApp).toBeCalledTimes(1);
     });
@@ -315,7 +379,7 @@ describe('middleware', () => {
       const { store, spyMiddleware } = createStoreSetup(service);
 
       service.getTrustedAppsList.mockResolvedValue(getTrustedAppsListResponse);
-      service.deleteTrustedApp.mockRejectedValue(notFoundError);
+      service.deleteTrustedApp.mockRejectedValue({ body: notFoundError });
 
       store.dispatch(createUserChangedUrlAction('/trusted_apps'));
 
@@ -340,6 +404,7 @@ describe('middleware', () => {
 
       expect(store.getState()).toStrictEqual({
         ...testStartState,
+        ...entriesExistLoadedState(),
         deletionDialog: {
           entry,
           confirmed: true,

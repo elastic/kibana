@@ -1,55 +1,82 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { uniq } from 'lodash';
+
+import { uniq, omit } from 'lodash';
 import { safeLoad } from 'js-yaml';
-import { SavedObjectsClientContract, SavedObjectsBulkUpdateResponse } from 'src/core/server';
-import { AuthenticatedUser } from '../../../security/server';
+import uuid from 'uuid/v4';
+import type {
+  ElasticsearchClient,
+  SavedObjectsClientContract,
+  SavedObjectsBulkUpdateResponse,
+} from 'src/core/server';
+
+import type { AuthenticatedUser } from '../../../security/server';
 import {
   DEFAULT_AGENT_POLICY,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   AGENT_SAVED_OBJECT_TYPE,
 } from '../constants';
-import {
+import type {
   PackagePolicy,
   NewAgentPolicy,
+  PreconfiguredAgentPolicy,
   AgentPolicy,
   AgentPolicySOAttributes,
   FullAgentPolicy,
   ListWithKuery,
+  NewPackagePolicy,
 } from '../types';
 import {
-  DeleteAgentPolicyResponse,
-  Settings,
   agentPolicyStatuses,
   storedPackagePoliciesToAgentInputs,
   dataTypes,
+  packageToPackagePolicy,
+  AGENT_POLICY_INDEX,
+  DEFAULT_FLEET_SERVER_AGENT_POLICY,
 } from '../../common';
-import { AgentPolicyNameExistsError } from '../errors';
-import { createAgentPolicyAction, listAgents } from './agents';
+import type {
+  DeleteAgentPolicyResponse,
+  Settings,
+  FleetServerPolicy,
+  Installation,
+  Output,
+} from '../../common';
+import {
+  AgentPolicyNameExistsError,
+  AgentPolicyDeletionError,
+  IngestManagerError,
+} from '../errors';
+import { getFullAgentPolicyKibanaConfig } from '../../common/services/full_agent_policy_kibana_config';
+
+import { getPackageInfo } from './epm/packages';
+import { createAgentPolicyAction, getAgentsByKuery } from './agents';
 import { packagePolicyService } from './package_policy';
 import { outputService } from './output';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
 import { getSettings } from './settings';
 import { normalizeKuery, escapeSearchQueryPhrase } from './saved_object';
-import { getFullAgentPolicyKibanaConfig } from '../../common/services/full_agent_policy_kibana_config';
 import { isAgentsSetup } from './agents/setup';
+import { appContextService } from './app_context';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 
 class AgentPolicyService {
   private triggerAgentPolicyUpdatedEvent = async (
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     action: 'created' | 'updated' | 'deleted',
     agentPolicyId: string
   ) => {
-    return agentPolicyUpdateEventHandler(soClient, action, agentPolicyId);
+    return agentPolicyUpdateEventHandler(soClient, esClient, action, agentPolicyId);
   };
 
   private async _update(
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     id: string,
     agentPolicy: Partial<AgentPolicySOAttributes>,
     user?: AuthenticatedUser,
@@ -78,38 +105,101 @@ class AgentPolicyService {
     });
 
     if (options.bumpRevision) {
-      await this.triggerAgentPolicyUpdatedEvent(soClient, 'updated', id);
+      await this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'updated', id);
     }
 
     return (await this.get(soClient, id)) as AgentPolicy;
   }
 
   public async ensureDefaultAgentPolicy(
-    soClient: SavedObjectsClientContract
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient
   ): Promise<{
     created: boolean;
-    defaultAgentPolicy: AgentPolicy;
+    policy: AgentPolicy;
+  }> {
+    const searchParams = {
+      searchFields: ['is_default'],
+      search: 'true',
+    };
+    return await this.ensureAgentPolicy(soClient, esClient, DEFAULT_AGENT_POLICY, searchParams);
+  }
+
+  public async ensureDefaultFleetServerAgentPolicy(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient
+  ): Promise<{
+    created: boolean;
+    policy: AgentPolicy;
+  }> {
+    const searchParams = {
+      searchFields: ['is_default_fleet_server'],
+      search: 'true',
+    };
+    return await this.ensureAgentPolicy(
+      soClient,
+      esClient,
+      DEFAULT_FLEET_SERVER_AGENT_POLICY,
+      searchParams
+    );
+  }
+
+  public async ensurePreconfiguredAgentPolicy(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    config: PreconfiguredAgentPolicy
+  ): Promise<{
+    created: boolean;
+    policy: AgentPolicy;
+  }> {
+    const { id, ...preconfiguredAgentPolicy } = omit(config, 'package_policies');
+    const preconfigurationId = String(id);
+    const searchParams = {
+      searchFields: ['preconfiguration_id'],
+      search: escapeSearchQueryPhrase(preconfigurationId),
+    };
+
+    const newAgentPolicyDefaults: Partial<NewAgentPolicy> = {
+      namespace: 'default',
+      monitoring_enabled: ['logs', 'metrics'],
+    };
+
+    const newAgentPolicy = {
+      ...newAgentPolicyDefaults,
+      ...preconfiguredAgentPolicy,
+      preconfiguration_id: preconfigurationId,
+    } as NewAgentPolicy;
+
+    return await this.ensureAgentPolicy(soClient, esClient, newAgentPolicy, searchParams);
+  }
+
+  private async ensureAgentPolicy(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    newAgentPolicy: NewAgentPolicy,
+    searchParams: {
+      searchFields: string[];
+      search: string;
+    }
+  ): Promise<{
+    created: boolean;
+    policy: AgentPolicy;
   }> {
     const agentPolicies = await soClient.find<AgentPolicySOAttributes>({
       type: AGENT_POLICY_SAVED_OBJECT_TYPE,
-      searchFields: ['is_default'],
-      search: 'true',
+      ...searchParams,
     });
 
     if (agentPolicies.total === 0) {
-      const newDefaultAgentPolicy: NewAgentPolicy = {
-        ...DEFAULT_AGENT_POLICY,
-      };
-
       return {
         created: true,
-        defaultAgentPolicy: await this.create(soClient, newDefaultAgentPolicy),
+        policy: await this.create(soClient, esClient, newAgentPolicy),
       };
     }
 
     return {
       created: false,
-      defaultAgentPolicy: {
+      policy: {
         id: agentPolicies.saved_objects[0].id,
         ...agentPolicies.saved_objects[0].attributes,
       },
@@ -118,6 +208,7 @@ class AgentPolicyService {
 
   public async create(
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     agentPolicy: NewAgentPolicy,
     options?: { id?: string; user?: AuthenticatedUser }
   ): Promise<AgentPolicy> {
@@ -126,6 +217,7 @@ class AgentPolicyService {
       SAVED_OBJECT_TYPE,
       {
         ...agentPolicy,
+        is_managed: agentPolicy.is_managed ?? false,
         revision: 1,
         updated_at: new Date().toISOString(),
         updated_by: options?.user?.username || 'system',
@@ -134,7 +226,7 @@ class AgentPolicyService {
     );
 
     if (!agentPolicy.is_default) {
-      await this.triggerAgentPolicyUpdatedEvent(soClient, 'created', newSo.id);
+      await this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'created', newSo.id);
     }
 
     return { id: newSo.id, ...newSo.attributes };
@@ -188,6 +280,21 @@ class AgentPolicyService {
     }
 
     return agentPolicy;
+  }
+
+  public async getByIDs(
+    soClient: SavedObjectsClientContract,
+    ids: string[],
+    options: { fields?: string[] } = {}
+  ): Promise<AgentPolicy[]> {
+    const objects = ids.map((id) => ({ ...options, id, type: SAVED_OBJECT_TYPE }));
+    const agentPolicySO = await soClient.bulkGet<AgentPolicySOAttributes>(objects);
+
+    return agentPolicySO.saved_objects.map((so) => ({
+      id: so.id,
+      version: so.version,
+      ...so.attributes,
+    }));
   }
 
   public async list(
@@ -244,6 +351,7 @@ class AgentPolicyService {
 
   public async update(
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     id: string,
     agentPolicy: Partial<AgentPolicy>,
     options?: { user?: AuthenticatedUser }
@@ -254,11 +362,12 @@ class AgentPolicyService {
         name: agentPolicy.name,
       });
     }
-    return this._update(soClient, id, agentPolicy, options?.user);
+    return this._update(soClient, esClient, id, agentPolicy, options?.user);
   }
 
   public async copy(
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     id: string,
     newAgentPolicyProps: Pick<AgentPolicy, 'name' | 'description'>,
     options?: { user?: AuthenticatedUser }
@@ -272,6 +381,7 @@ class AgentPolicyService {
     const { namespace, monitoring_enabled } = baseAgentPolicy;
     const newAgentPolicy = await this.create(
       soClient,
+      esClient,
       {
         namespace,
         monitoring_enabled,
@@ -288,10 +398,16 @@ class AgentPolicyService {
           return newPackagePolicy;
         }
       );
-      await packagePolicyService.bulkCreate(soClient, newPackagePolicies, newAgentPolicy.id, {
-        ...options,
-        bumpRevision: false,
-      });
+      await packagePolicyService.bulkCreate(
+        soClient,
+        esClient,
+        newPackagePolicies,
+        newAgentPolicy.id,
+        {
+          ...options,
+          bumpRevision: false,
+        }
+      );
     }
 
     // Get updated agent policy
@@ -307,15 +423,18 @@ class AgentPolicyService {
 
   public async bumpRevision(
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     id: string,
     options?: { user?: AuthenticatedUser }
   ): Promise<AgentPolicy> {
-    const res = await this._update(soClient, id, {}, options?.user);
+    const res = await this._update(soClient, esClient, id, {}, options?.user);
 
     return res;
   }
+
   public async bumpAllAgentPolicies(
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     options?: { user?: AuthenticatedUser }
   ): Promise<Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>>> {
     const currentPolicies = await soClient.find<AgentPolicySOAttributes>({
@@ -335,7 +454,7 @@ class AgentPolicyService {
 
     await Promise.all(
       currentPolicies.saved_objects.map((policy) =>
-        this.triggerAgentPolicyUpdatedEvent(soClient, 'updated', policy.id)
+        this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'updated', policy.id)
       )
     );
 
@@ -344,6 +463,7 @@ class AgentPolicyService {
 
   public async assignPackagePolicies(
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     id: string,
     packagePolicyIds: string[],
     options: { user?: AuthenticatedUser; bumpRevision: boolean } = { bumpRevision: true }
@@ -354,8 +474,13 @@ class AgentPolicyService {
       throw new Error('Agent policy not found');
     }
 
+    if (oldAgentPolicy.is_managed) {
+      throw new IngestManagerError(`Cannot update integrations of managed policy ${id}`);
+    }
+
     return await this._update(
       soClient,
+      esClient,
       id,
       {
         package_policies: uniq(
@@ -369,6 +494,7 @@ class AgentPolicyService {
 
   public async unassignPackagePolicies(
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     id: string,
     packagePolicyIds: string[],
     options?: { user?: AuthenticatedUser }
@@ -379,8 +505,13 @@ class AgentPolicyService {
       throw new Error('Agent policy not found');
     }
 
+    if (oldAgentPolicy.is_managed) {
+      throw new IngestManagerError(`Cannot remove integrations of managed policy ${id}`);
+    }
+
     return await this._update(
       soClient,
+      esClient,
       id,
       {
         package_policies: uniq(
@@ -409,6 +540,7 @@ class AgentPolicyService {
 
   public async delete(
     soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     id: string
   ): Promise<DeleteAgentPolicyResponse> {
     const agentPolicy = await this.get(soClient, id, false);
@@ -416,14 +548,18 @@ class AgentPolicyService {
       throw new Error('Agent policy not found');
     }
 
+    if (agentPolicy.is_managed) {
+      throw new AgentPolicyDeletionError(`Cannot delete managed policy ${id}`);
+    }
+
     const {
-      defaultAgentPolicy: { id: defaultAgentPolicyId },
-    } = await this.ensureDefaultAgentPolicy(soClient);
+      policy: { id: defaultAgentPolicyId },
+    } = await this.ensureDefaultAgentPolicy(soClient, esClient);
     if (id === defaultAgentPolicyId) {
       throw new Error('The default agent policy cannot be deleted');
     }
 
-    const { total } = await listAgents(soClient, {
+    const { total } = await getAgentsByKuery(esClient, {
       showInactive: false,
       perPage: 0,
       page: 1,
@@ -435,12 +571,17 @@ class AgentPolicyService {
     }
 
     if (agentPolicy.package_policies && agentPolicy.package_policies.length) {
-      await packagePolicyService.delete(soClient, agentPolicy.package_policies as string[], {
-        skipUnassignFromAgentPolicies: true,
-      });
+      await packagePolicyService.delete(
+        soClient,
+        esClient,
+        agentPolicy.package_policies as string[],
+        {
+          skipUnassignFromAgentPolicies: true,
+        }
+      );
     }
     await soClient.delete(SAVED_OBJECT_TYPE, id);
-    await this.triggerAgentPolicyUpdatedEvent(soClient, 'deleted', id);
+    await this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'deleted', id);
     return {
       id,
       name: agentPolicy.name,
@@ -449,6 +590,18 @@ class AgentPolicyService {
 
   public async createFleetPolicyChangeAction(
     soClient: SavedObjectsClientContract,
+    agentPolicyId: string
+  ) {
+    const esClient = appContextService.getInternalUserESClient();
+
+    await this.createFleetPolicyChangeFleetServer(soClient, esClient, agentPolicyId);
+
+    return this.createFleetPolicyChangeActionSO(soClient, esClient, agentPolicyId);
+  }
+
+  public async createFleetPolicyChangeActionSO(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
     agentPolicyId: string
   ) {
     // If Agents is not setup skip the creation of POLICY_CHANGE agent actions
@@ -468,13 +621,46 @@ class AgentPolicyService {
       return acc;
     }, []);
 
-    await createAgentPolicyAction(soClient, {
+    await createAgentPolicyAction(soClient, esClient, {
       type: 'POLICY_CHANGE',
       data: { policy },
       ack_data: { packages },
       created_at: new Date().toISOString(),
       policy_id: policy.id,
       policy_revision: policy.revision,
+    });
+  }
+
+  public async createFleetPolicyChangeFleetServer(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    agentPolicyId: string
+  ) {
+    // If Agents is not setup skip the creation of POLICY_CHANGE agent actions
+    // the action will be created during the fleet setup
+    if (!(await isAgentsSetup(soClient))) {
+      return;
+    }
+    const policy = await agentPolicyService.get(soClient, agentPolicyId);
+    const fullPolicy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId);
+    if (!policy || !fullPolicy || !fullPolicy.revision) {
+      return;
+    }
+
+    const fleetServerPolicy: FleetServerPolicy = {
+      '@timestamp': new Date().toISOString(),
+      revision_idx: fullPolicy.revision,
+      coordinator_idx: 0,
+      data: (fullPolicy as unknown) as FleetServerPolicy['data'],
+      policy_id: fullPolicy.id,
+      default_fleet_server: policy.is_default_fleet_server === true,
+    };
+
+    await esClient.create({
+      index: AGENT_POLICY_INDEX,
+      body: fleetServerPolicy,
+      id: uuid(),
+      refresh: 'wait_for',
     });
   }
 
@@ -508,7 +694,7 @@ class AgentPolicyService {
       id: agentPolicy.id,
       outputs: {
         // TEMPORARY as we only support a default output
-        ...[defaultOutput].reduce(
+        ...[defaultOutput].reduce<FullAgentPolicy['outputs']>(
           // eslint-disable-next-line @typescript-eslint/naming-convention
           (outputs, { config_yaml, name, type, hosts, ca_sha256, api_key }) => {
             const configJs = config_yaml ? safeLoad(config_yaml) : {};
@@ -528,7 +714,7 @@ class AgentPolicyService {
 
             return outputs;
           },
-          {} as FullAgentPolicy['outputs']
+          {}
         ),
       },
       inputs: storedPackagePoliciesToAgentInputs(agentPolicy.package_policies as PackagePolicy[]),
@@ -551,6 +737,26 @@ class AgentPolicyService {
           }),
     };
 
+    // Only add permissions if output.type is "elasticsearch"
+    fullAgentPolicy.output_permissions = Object.keys(fullAgentPolicy.outputs).reduce<
+      NonNullable<FullAgentPolicy['output_permissions']>
+    >((permissions, outputName) => {
+      const output = fullAgentPolicy.outputs[outputName];
+      if (output && output.type === 'elasticsearch') {
+        permissions[outputName] = {};
+        permissions[outputName]._fallback = {
+          cluster: ['monitor'],
+          indices: [
+            {
+              names: ['logs-*', 'metrics-*', 'traces-*', '.logs-endpoint.diagnostic.collection-*'],
+              privileges: ['auto_configure', 'create_doc'],
+            },
+          ],
+        };
+      }
+      return permissions;
+    }, {});
+
     // only add settings if not in standalone
     if (!standalone) {
       let settings: Settings;
@@ -559,15 +765,57 @@ class AgentPolicyService {
       } catch (error) {
         throw new Error('Default settings is not setup');
       }
-      if (!settings.kibana_urls || !settings.kibana_urls.length)
-        throw new Error('kibana_urls is missing');
+      if (settings.fleet_server_hosts && settings.fleet_server_hosts.length) {
+        fullAgentPolicy.fleet = {
+          hosts: settings.fleet_server_hosts,
+        };
+      } // TODO remove as part of https://github.com/elastic/kibana/issues/94303
+      else {
+        if (!settings.kibana_urls || !settings.kibana_urls.length)
+          throw new Error('kibana_urls is missing');
 
-      fullAgentPolicy.fleet = {
-        kibana: getFullAgentPolicyKibanaConfig(settings.kibana_urls),
-      };
+        fullAgentPolicy.fleet = {
+          hosts: settings.kibana_urls,
+          kibana: getFullAgentPolicyKibanaConfig(settings.kibana_urls),
+        };
+      }
     }
     return fullAgentPolicy;
   }
 }
 
 export const agentPolicyService = new AgentPolicyService();
+
+export async function addPackageToAgentPolicy(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  packageToInstall: Installation,
+  agentPolicy: AgentPolicy,
+  defaultOutput: Output,
+  packagePolicyName?: string,
+  packagePolicyDescription?: string,
+  transformPackagePolicy?: (p: NewPackagePolicy) => NewPackagePolicy
+) {
+  const packageInfo = await getPackageInfo({
+    savedObjectsClient: soClient,
+    pkgName: packageToInstall.name,
+    pkgVersion: packageToInstall.version,
+  });
+
+  const basePackagePolicy = packageToPackagePolicy(
+    packageInfo,
+    agentPolicy.id,
+    defaultOutput.id,
+    agentPolicy.namespace ?? 'default',
+    packagePolicyName,
+    packagePolicyDescription
+  );
+
+  const newPackagePolicy = transformPackagePolicy
+    ? transformPackagePolicy(basePackagePolicy)
+    : basePackagePolicy;
+
+  await packagePolicyService.create(soClient, esClient, newPackagePolicy, {
+    bumpRevision: false,
+  });
+}

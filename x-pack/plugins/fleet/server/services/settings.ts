@@ -1,18 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import Boom from '@hapi/boom';
-import { SavedObjectsClientContract } from 'kibana/server';
+
 import url from 'url';
-import {
-  GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
-  SettingsSOAttributes,
-  Settings,
-  decodeCloudId,
-  BaseSettings,
-} from '../../common';
+
+import Boom from '@hapi/boom';
+import type { SavedObjectsClientContract } from 'kibana/server';
+
+import { GLOBAL_SETTINGS_SAVED_OBJECT_TYPE, decodeCloudId } from '../../common';
+import type { SettingsSOAttributes, Settings, BaseSettings } from '../../common';
+
 import { appContextService } from './app_context';
 
 export async function getSettings(soClient: SavedObjectsClientContract): Promise<Settings> {
@@ -27,6 +27,7 @@ export async function getSettings(soClient: SavedObjectsClientContract): Promise
   return {
     id: settingsSo.id,
     ...settingsSo.attributes,
+    fleet_server_hosts: settingsSo.attributes.fleet_server_hosts || [],
   };
 }
 
@@ -81,9 +82,10 @@ export function createDefaultSettings(): BaseSettings {
     pathname: basePath.serverBasePath,
   });
 
+  const fleetServerHosts = appContextService.getConfig()?.agents?.fleet_server?.hosts ?? [];
+
   return {
-    agent_auto_upgrade: true,
-    package_auto_upgrade: true,
     kibana_urls: [cloudUrl || flagsUrl || defaultUrl].flat(),
+    fleet_server_hosts: fleetServerHosts,
   };
 }

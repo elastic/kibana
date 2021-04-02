@@ -1,10 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { resolve } from 'path';
 import fs from 'fs';
+// @ts-expect-error https://github.com/elastic/kibana/issues/95679
 import { KIBANA_ROOT } from '@kbn/test';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { services } from './services';
@@ -27,6 +30,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [
       resolve(__dirname, './test_suites/resolver'),
       resolve(__dirname, './test_suites/global_search'),
+      resolve(__dirname, './test_suites/timelines'),
     ],
 
     services,
@@ -44,6 +48,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           KIBANA_ROOT,
           'test/plugin_functional/plugins/core_provider_plugin'
         )}`,
+        '--xpack.timelines.enabled=true',
         ...plugins.map((pluginDir) => `--plugin-path=${resolve(__dirname, 'plugins', pluginDir)}`),
       ],
     },
@@ -56,6 +61,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xpackFunctionalConfig.get('apps'),
       resolverTest: {
         pathname: '/app/resolverTest',
+      },
+      timelineTest: {
+        pathname: '/app/timelinesTest',
       },
     },
 

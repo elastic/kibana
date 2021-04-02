@@ -1,26 +1,17 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import d3 from 'd3';
 import _ from 'lodash';
 
 import { getHeatmapColors } from '../../../../../charts/public';
+import { UI_SETTINGS } from '../../../../../data/public';
+import { getValueForPercentageMode } from '../../percentage_mode_transform';
 
 const arcAngles = {
   angleFactor: 0.75,
@@ -58,9 +49,10 @@ const defaultConfig = {
 };
 
 export class MeterGauge {
-  constructor(gaugeChart) {
+  constructor(gaugeChart, uiSettings) {
     this.gaugeChart = gaugeChart;
     this.gaugeConfig = gaugeChart.gaugeConfig;
+    this.uiSettings = uiSettings;
     this.gaugeConfig = _.defaultsDeep(this.gaugeConfig, defaultConfig);
 
     this.gaugeChart.handler.visConfig.set('legend', {
@@ -79,12 +71,19 @@ export class MeterGauge {
 
   getLabels() {
     const isPercentageMode = this.gaugeConfig.percentageMode;
+    const percentageFormatPattern =
+      this.gaugeConfig.percentageFormatPattern ||
+      this.uiSettings.get(UI_SETTINGS.FORMAT_PERCENT_DEFAULT_PATTERN);
     const colorsRange = this.gaugeConfig.colorsRange;
     const max = _.last(colorsRange).to;
     const labels = [];
     colorsRange.forEach((range) => {
-      const from = isPercentageMode ? Math.round((100 * range.from) / max) : range.from;
-      const to = isPercentageMode ? Math.round((100 * range.to) / max) : range.to;
+      const from = isPercentageMode
+        ? getValueForPercentageMode(range.from / max, percentageFormatPattern)
+        : range.from;
+      const to = isPercentageMode
+        ? getValueForPercentageMode(range.to / max, percentageFormatPattern)
+        : range.to;
       labels.push(`${from} - ${to}`);
     });
 
@@ -344,7 +343,9 @@ export class MeterGauge {
     const transformX = width / 2;
     const transformY = height / 2 > maxRadius ? height / 2 : maxRadius;
 
-    svg.attr('transform', `translate(${transformX}, ${transformY})`);
+    svg
+      .attr('transform', `translate(${transformX}, ${transformY})`)
+      .attr('data-test-subj', `visGauge__meter--${data.label}`);
 
     return series;
   }

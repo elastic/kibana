@@ -1,11 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as t from 'io-ts';
 import Boom from '@hapi/boom';
+import { toBooleanRt } from '../../../common/runtime_types/to_boolean_rt';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getServiceNames } from '../../lib/settings/agent_configuration/get_service_names';
 import { createOrUpdateConfiguration } from '../../lib/settings/agent_configuration/create_or_update_configuration';
@@ -21,7 +23,6 @@ import {
   serviceRt,
   agentConfigurationIntakeRt,
 } from '../../../common/agent_configuration/runtime_types/agent_configuration_intake_rt';
-import { jsonRt } from '../../../common/runtime_types/json_rt';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/aggregated_transactions';
 
 // get list of configurations
@@ -30,7 +31,8 @@ export const agentConfigurationRoute = createRoute({
   options: { tags: ['access:apm'] },
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
-    return await listConfigurations({ setup });
+    const configurations = await listConfigurations({ setup });
+    return { configurations };
   },
 });
 
@@ -102,7 +104,7 @@ export const createOrUpdateAgentConfigurationRoute = createRoute({
     tags: ['access:apm', 'access:apm_write'],
   },
   params: t.intersection([
-    t.partial({ query: t.partial({ overwrite: jsonRt.pipe(t.boolean) }) }),
+    t.partial({ query: t.partial({ overwrite: toBooleanRt }) }),
     t.type({ body: agentConfigurationIntakeRt }),
   ]),
   handler: async ({ context, request }) => {
@@ -165,8 +167,8 @@ export const agentConfigurationSearchRoute = createRoute({
     });
 
     if (!config) {
-      context.logger.info(
-        `Config was not found for ${service.name}/${service.environment}`
+      context.logger.debug(
+        `[Central configuration] Config was not found for ${service.name}/${service.environment}`
       );
       throw Boom.notFound();
     }
@@ -203,10 +205,12 @@ export const listAgentConfigurationServicesRoute = createRoute({
     const searchAggregatedTransactions = await getSearchAggregatedTransactions(
       setup
     );
-    return await getServiceNames({
+    const serviceNames = await getServiceNames({
       setup,
       searchAggregatedTransactions,
     });
+
+    return { serviceNames };
   },
 });
 
@@ -224,11 +228,13 @@ export const listAgentConfigurationEnvironmentsRoute = createRoute({
       setup
     );
 
-    return await getEnvironments({
+    const environments = await getEnvironments({
       serviceName,
       setup,
       searchAggregatedTransactions,
     });
+
+    return { environments };
   },
 });
 

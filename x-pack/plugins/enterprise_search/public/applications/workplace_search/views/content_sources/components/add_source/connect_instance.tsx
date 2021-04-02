@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, useEffect, FormEvent } from 'react';
@@ -11,26 +12,40 @@ import { useActions, useValues } from 'kea';
 import {
   EuiButton,
   EuiCallOut,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFieldText,
   EuiFormRow,
+  EuiHorizontalRule,
+  EuiIcon,
   EuiLink,
+  EuiPanel,
   EuiSpacer,
   EuiSwitch,
   EuiText,
   EuiTitle,
-  EuiTextColor,
-  EuiBadge,
-  EuiBadgeGroup,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-import { LicensingLogic } from '../../../../../../applications/shared/licensing';
-
+import { LicensingLogic } from '../../../../../shared/licensing';
 import { AppLogic } from '../../../../app_logic';
-import { SourceLogic } from '../../source_logic';
+import { DOCUMENT_PERMISSIONS_DOCS_URL, ENT_SEARCH_LICENSE_MANAGEMENT } from '../../../../routes';
 import { FeatureIds, Configuration, Features } from '../../../../types';
-import { DOCUMENT_PERMISSIONS_DOCS_URL } from '../../../../routes';
+import { LEARN_MORE_LINK } from '../../constants';
+
+import { AddSourceLogic } from './add_source_logic';
+import {
+  CONNECT_WHICH_OPTION_LINK,
+  CONNECT_DOC_PERMISSIONS_LABEL,
+  CONNECT_DOC_PERMISSIONS_TITLE,
+  CONNECT_NEEDS_PERMISSIONS,
+  CONNECT_NOT_SYNCED_TITLE,
+  CONNECT_NOT_SYNCED_TEXT,
+  SOURCE_FEATURES_DOCUMENT_LEVEL_PERMISSIONS_FEATURE,
+  SOURCE_FEATURES_DOCUMENT_LEVEL_PERMISSIONS_TITLE,
+  SOURCE_FEATURES_EXPLORE_BUTTON,
+} from './constants';
 import { SourceFeatures } from './source_features';
 
 interface ConnectInstanceProps {
@@ -69,10 +84,10 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
     setSourcePasswordValue,
     setSourceSubdomainValue,
     setSourceIndexPermissionsValue,
-  } = useActions(SourceLogic);
+  } = useActions(AddSourceLogic);
 
   const { loginValue, passwordValue, indexPermissionsValue, subdomainValue } = useValues(
-    SourceLogic
+    AddSourceLogic
   );
 
   const { isOrganization } = useValues(AppLogic);
@@ -82,7 +97,7 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
     setSourceIndexPermissionsValue(needsPermissions && isOrganization && hasPlatinumLicense);
   }, []);
 
-  const redirectOauth = (oauthUrl: string) => (window.location.href = oauthUrl);
+  const redirectOauth = (oauthUrl: string) => window.location.replace(oauthUrl);
   const redirectFormCreated = () => onFormCreated(name);
   const onOauthFormSubmit = () => getSourceConnectData(serviceType, redirectOauth);
   const handleFormSubmitError = () => setFormLoading(false);
@@ -95,6 +110,10 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
     const onSubmit = hasOauthRedirect ? onOauthFormSubmit : onCredentialsFormSubmit;
     onSubmit();
   };
+
+  const permissionsExcluded = features?.basicOrgContextExcludedFeatures?.includes(
+    FeatureIds.DocumentLevelPermissions
+  );
 
   const credentialsFields = (
     <>
@@ -133,86 +152,95 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
     </>
   );
 
-  const featureBadgeGroup = () => {
-    if (isOrganization) {
-      return null;
-    }
-
-    const isRemote = features?.platinumPrivateContext.includes(FeatureIds.Remote);
-    const isPrivate = features?.platinumPrivateContext.includes(FeatureIds.Private);
-
-    if (isRemote || isPrivate) {
-      return (
-        <>
-          <EuiBadgeGroup>
-            {isRemote && <EuiBadge color="hollow">Remote</EuiBadge>}
-            {isPrivate && <EuiBadge color="hollow">Private</EuiBadge>}
-          </EuiBadgeGroup>
-          <EuiSpacer />
-        </>
-      );
-    }
-  };
-
-  const descriptionBlock = (
-    <EuiText grow={false}>
-      {sourceDescription && <p>{sourceDescription}</p>}
-      {connectStepDescription && <p>{connectStepDescription}</p>}
-      <EuiSpacer size="s" />
-    </EuiText>
-  );
-
   const whichDocsLink = (
     <EuiLink target="_blank" href={DOCUMENT_PERMISSIONS_DOCS_URL}>
-      Which option should I choose?
+      {CONNECT_WHICH_OPTION_LINK}
     </EuiLink>
   );
 
   const permissionField = (
     <>
-      <EuiTitle size="xs">
-        <span>
-          <EuiTextColor color="default">Document-level permissions</EuiTextColor>
-        </span>
-      </EuiTitle>
+      <EuiPanel paddingSize="l">
+        <EuiTitle size="xs">
+          <h3>
+            <strong>{CONNECT_DOC_PERMISSIONS_TITLE}</strong>
+          </h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiText size="xs" color="subdued">
+          {!needsPermissions && (
+            <span>
+              <FormattedMessage
+                id="xpack.enterpriseSearch.workplaceSearch.contentSource.connect.docPermissionsUnavailable.message"
+                defaultMessage="Document-level permissions are not yet available for this source. {link}"
+                values={{
+                  link: (
+                    <EuiLink target="_blank" href={DOCUMENT_PERMISSIONS_DOCS_URL}>
+                      {LEARN_MORE_LINK}
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </span>
+          )}
+          {needsPermissions && indexPermissionsValue && (
+            <span>
+              {CONNECT_NEEDS_PERMISSIONS}
+              <EuiSpacer size="s" />
+              {whichDocsLink}
+            </span>
+          )}
+        </EuiText>
+        <EuiSpacer size="s" />
+        {!indexPermissionsValue && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiCallOut title={CONNECT_NOT_SYNCED_TITLE} color="warning" size="s">
+              <p>
+                {CONNECT_NOT_SYNCED_TEXT}
+                {needsPermissions && whichDocsLink}
+              </p>
+            </EuiCallOut>
+          </>
+        )}
+        <EuiSpacer />
+        <EuiSwitch
+          label={<strong>{CONNECT_DOC_PERMISSIONS_LABEL}</strong>}
+          name="index_permissions"
+          onChange={(e) => setSourceIndexPermissionsValue(e.target.checked)}
+          checked={indexPermissionsValue}
+          disabled={!needsPermissions}
+        />
+      </EuiPanel>
+      <EuiSpacer size="xl" />
+    </>
+  );
+
+  const documentLevelPermissionsCallout = (
+    <>
+      <EuiPanel paddingSize="l" data-test-subj="DocumentLevelPermissionsCallout">
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiIcon size="m" type="lock" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs">
+              <strong>{SOURCE_FEATURES_DOCUMENT_LEVEL_PERMISSIONS_TITLE}</strong>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
+        <EuiText size="xs">
+          <p>{SOURCE_FEATURES_DOCUMENT_LEVEL_PERMISSIONS_FEATURE}</p>
+        </EuiText>
+        <EuiSpacer size="s" />
+        <EuiText size="xs">
+          <EuiLink external target="_blank" href={ENT_SEARCH_LICENSE_MANAGEMENT}>
+            {SOURCE_FEATURES_EXPLORE_BUTTON}
+          </EuiLink>
+        </EuiText>
+      </EuiPanel>
       <EuiSpacer />
-      <EuiSwitch
-        label={<strong>Enable document-level permission synchronization</strong>}
-        name="index_permissions"
-        onChange={(e) => setSourceIndexPermissionsValue(e.target.checked)}
-        checked={indexPermissionsValue}
-        disabled={!needsPermissions}
-      />
-      <EuiSpacer size="s" />
-      <EuiText size="xs" color="subdued">
-        {!needsPermissions && (
-          <span>
-            Document-level permissions are not yet available for this source.{' '}
-            <EuiLink target="_blank" href={DOCUMENT_PERMISSIONS_DOCS_URL}>
-              Learn more
-            </EuiLink>
-          </span>
-        )}
-        {needsPermissions && indexPermissionsValue && (
-          <span>
-            Document-level permission information will be synchronized. Additional configuration is
-            required following the initial connection before documents are available for search.
-            <br />
-            {whichDocsLink}
-          </span>
-        )}
-      </EuiText>
-      <EuiSpacer size="s" />
-      {!indexPermissionsValue && (
-        <EuiCallOut title="Document-level permissions will not be synchronized" color="warning">
-          <p>
-            All documents accessible to the connecting service user will be synchronized and made
-            available to the organization’s users, or group’s users. Documents are immediately
-            available for search. {needsPermissions && whichDocsLink}
-          </p>
-        </EuiCallOut>
-      )}
-      <EuiSpacer size="xxl" />
     </>
   );
 
@@ -221,36 +249,42 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
       {isOrganization && hasPlatinumLicense && permissionField}
       {!hasOauthRedirect && credentialsFields}
       {needsSubdomain && subdomainField}
+      {permissionsExcluded && !hasPlatinumLicense && documentLevelPermissionsCallout}
 
       <EuiFormRow>
         <EuiButton color="primary" type="submit" fill isLoading={formLoading}>
-          Connect {name}
+          {i18n.translate('xpack.enterpriseSearch.workplaceSearch.contentSource.connect.button', {
+            defaultMessage: 'Connect {name}',
+            values: { name },
+          })}
         </EuiButton>
       </EuiFormRow>
     </>
   );
 
   return (
-    <div className="step-4">
-      <form onSubmit={handleFormSubmit}>
-        <EuiFlexGroup
-          direction="row"
-          alignItems="flexStart"
-          justifyContent="spaceBetween"
-          gutterSize="xl"
-          responsive={false}
-        >
-          <EuiFlexItem grow={2} className="adding-a-source__connect-an-instance">
-            {header}
-            {featureBadgeGroup()}
-            {descriptionBlock}
-            {formFields}
-          </EuiFlexItem>
-          <EuiFlexItem grow={1}>
-            <SourceFeatures features={features} name={name} objTypes={objTypes} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </form>
-    </div>
+    <form onSubmit={handleFormSubmit}>
+      <EuiFlexGroup
+        direction="row"
+        alignItems="flexStart"
+        justifyContent="spaceBetween"
+        gutterSize="xl"
+        responsive={false}
+      >
+        <EuiFlexItem grow={1} className="adding-a-source__connect-an-instance">
+          <EuiPanel paddingSize="none">
+            <EuiPanel hasShadow={false} paddingSize="l">
+              {header}
+            </EuiPanel>
+            <EuiHorizontalRule margin="xs" />
+            <EuiPanel hasShadow={false} paddingSize="l">
+              <SourceFeatures features={features} name={name} objTypes={objTypes} />
+            </EuiPanel>
+          </EuiPanel>
+          <EuiSpacer />
+          {formFields}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </form>
   );
 };

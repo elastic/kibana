@@ -1,17 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { cloneDeep, getOr, omit } from 'lodash/fp';
 import { Dispatch } from 'redux';
 import ApolloClient from 'apollo-client';
 
-import {
-  mockTimelineResults,
-  mockTimelineResult,
-  mockTimelineModel,
-} from '../../../common/mock/timeline_results';
+import { mockTimelineResults, mockTimelineResult, mockTimelineModel } from '../../../common/mock';
 import { timelineDefaults } from '../../store/timeline/defaults';
 import { setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker } from '../../../common/store/inputs/actions';
 import {
@@ -35,16 +33,20 @@ import {
   formatTimelineResultToModel,
 } from './helpers';
 import { OpenTimelineResult, DispatchUpdateTimeline } from './types';
-import { KueryFilterQueryKind } from '../../../common/store/model';
+import { KueryFilterQueryKind } from '../../../common/store';
 import { Note } from '../../../common/lib/note';
 import moment from 'moment';
 import sinon from 'sinon';
-import { TimelineId, TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import {
+  TimelineId,
+  TimelineType,
+  TimelineStatus,
+  TimelineTabs,
+} from '../../../../common/types/timeline';
 import {
   mockTimeline as mockSelectedTimeline,
   mockTemplate as mockSelectedTemplate,
 } from './__mocks__';
-import { TimelineTabs } from '../../store/timeline/model';
 
 jest.mock('../../../common/store/inputs/actions');
 jest.mock('../../../common/components/url_state/normalize_time_range.ts');
@@ -238,10 +240,12 @@ describe('helpers', () => {
       const newTimeline = defaultTimelineToTimelineModel(timeline, false);
       expect(newTimeline).toEqual({
         activeTab: TimelineTabs.query,
+        prevActiveTab: TimelineTabs.query,
         columns: [
           {
             columnHeaderType: 'not-filtered',
             id: '@timestamp',
+            type: 'number',
             width: 190,
           },
           {
@@ -284,10 +288,17 @@ describe('helpers', () => {
         dateRange: { start: '2020-07-07T08:20:18.966Z', end: '2020-07-08T08:20:18.966Z' },
         description: '',
         deletedEventIds: [],
+        eqlOptions: {
+          eventCategoryField: 'event.category',
+          tiebreakerField: '',
+          timestampField: '@timestamp',
+          query: '',
+          size: 100,
+        },
         eventIdToNoteIds: {},
         eventType: 'all',
         excludedRowRendererIds: [],
-        expandedEvent: {},
+        expandedDetail: {},
         filters: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
@@ -315,6 +326,7 @@ describe('helpers', () => {
         sort: [
           {
             columnId: '@timestamp',
+            columnType: 'number',
             sortDirection: 'desc',
           },
         ],
@@ -339,10 +351,12 @@ describe('helpers', () => {
       const newTimeline = defaultTimelineToTimelineModel(timeline, false, TimelineType.template);
       expect(newTimeline).toEqual({
         activeTab: TimelineTabs.query,
+        prevActiveTab: TimelineTabs.query,
         columns: [
           {
             columnHeaderType: 'not-filtered',
             id: '@timestamp',
+            type: 'number',
             width: 190,
           },
           {
@@ -385,10 +399,17 @@ describe('helpers', () => {
         dateRange: { start: '2020-07-07T08:20:18.966Z', end: '2020-07-08T08:20:18.966Z' },
         description: '',
         deletedEventIds: [],
+        eqlOptions: {
+          eventCategoryField: 'event.category',
+          tiebreakerField: '',
+          timestampField: '@timestamp',
+          query: '',
+          size: 100,
+        },
         eventIdToNoteIds: {},
         eventType: 'all',
         excludedRowRendererIds: [],
-        expandedEvent: {},
+        expandedDetail: {},
         filters: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
@@ -416,6 +437,7 @@ describe('helpers', () => {
         sort: [
           {
             columnId: '@timestamp',
+            columnType: 'number',
             sortDirection: 'desc',
           },
         ],
@@ -440,10 +462,12 @@ describe('helpers', () => {
       const newTimeline = defaultTimelineToTimelineModel(timeline, false, TimelineType.default);
       expect(newTimeline).toEqual({
         activeTab: TimelineTabs.query,
+        prevActiveTab: TimelineTabs.query,
         columns: [
           {
             columnHeaderType: 'not-filtered',
             id: '@timestamp',
+            type: 'number',
             width: 190,
           },
           {
@@ -486,10 +510,17 @@ describe('helpers', () => {
         dateRange: { start: '2020-07-07T08:20:18.966Z', end: '2020-07-08T08:20:18.966Z' },
         description: '',
         deletedEventIds: [],
+        eqlOptions: {
+          eventCategoryField: 'event.category',
+          tiebreakerField: '',
+          timestampField: '@timestamp',
+          query: '',
+          size: 100,
+        },
         eventIdToNoteIds: {},
         eventType: 'all',
         excludedRowRendererIds: [],
-        expandedEvent: {},
+        expandedDetail: {},
         filters: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
@@ -517,6 +548,7 @@ describe('helpers', () => {
         sort: [
           {
             columnId: '@timestamp',
+            columnType: 'number',
             sortDirection: 'desc',
           },
         ],
@@ -539,10 +571,12 @@ describe('helpers', () => {
       const newTimeline = defaultTimelineToTimelineModel(timeline, false);
       expect(newTimeline).toEqual({
         activeTab: TimelineTabs.query,
+        prevActiveTab: TimelineTabs.query,
         columns: [
           {
             columnHeaderType: 'not-filtered',
             id: '@timestamp',
+            type: 'number',
             width: 190,
           },
           {
@@ -585,10 +619,17 @@ describe('helpers', () => {
         dateRange: { start: '2020-07-07T08:20:18.966Z', end: '2020-07-08T08:20:18.966Z' },
         description: '',
         deletedEventIds: [],
+        eqlOptions: {
+          eventCategoryField: 'event.category',
+          tiebreakerField: '',
+          timestampField: '@timestamp',
+          query: '',
+          size: 100,
+        },
         eventIdToNoteIds: {},
         eventType: 'all',
         excludedRowRendererIds: [],
-        expandedEvent: {},
+        expandedDetail: {},
         filters: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
@@ -616,6 +657,7 @@ describe('helpers', () => {
         sort: [
           {
             columnId: '@timestamp',
+            columnType: 'number',
             sortDirection: 'desc',
           },
         ],
@@ -638,6 +680,7 @@ describe('helpers', () => {
       const newTimeline = defaultTimelineToTimelineModel(timeline, false);
       expect(newTimeline).toEqual({
         activeTab: TimelineTabs.query,
+        prevActiveTab: TimelineTabs.query,
         savedObjectId: 'savedObject-1',
         columns: [
           {
@@ -648,7 +691,7 @@ describe('helpers', () => {
             example: undefined,
             id: '@timestamp',
             placeholder: undefined,
-            type: undefined,
+            type: 'number',
             width: 190,
           },
           {
@@ -723,10 +766,17 @@ describe('helpers', () => {
         dateRange: { start: '2020-07-07T08:20:18.966Z', end: '2020-07-08T08:20:18.966Z' },
         description: '',
         deletedEventIds: [],
+        eqlOptions: {
+          eventCategoryField: 'event.category',
+          tiebreakerField: '',
+          timestampField: '@timestamp',
+          query: '',
+          size: 100,
+        },
         eventIdToNoteIds: {},
         eventType: 'all',
         excludedRowRendererIds: [],
-        expandedEvent: {},
+        expandedDetail: {},
         filters: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
@@ -756,6 +806,7 @@ describe('helpers', () => {
         sort: [
           {
             columnId: '@timestamp',
+            columnType: 'number',
             sortDirection: 'desc',
           },
         ],
@@ -806,11 +857,13 @@ describe('helpers', () => {
       const newTimeline = defaultTimelineToTimelineModel(timeline, false);
       expect(newTimeline).toEqual({
         activeTab: TimelineTabs.query,
+        prevActiveTab: TimelineTabs.query,
         savedObjectId: 'savedObject-1',
         columns: [
           {
             columnHeaderType: 'not-filtered',
             id: '@timestamp',
+            type: 'number',
             width: 190,
           },
           {
@@ -849,10 +902,17 @@ describe('helpers', () => {
         dataProviders: [],
         description: '',
         deletedEventIds: [],
+        eqlOptions: {
+          eventCategoryField: 'event.category',
+          tiebreakerField: '',
+          timestampField: '@timestamp',
+          query: '',
+          size: 100,
+        },
         eventIdToNoteIds: {},
         eventType: 'all',
         excludedRowRendererIds: [],
-        expandedEvent: {},
+        expandedDetail: {},
         filters: [
           {
             $state: {
@@ -925,6 +985,7 @@ describe('helpers', () => {
         sort: [
           {
             columnId: '@timestamp',
+            columnType: 'number',
             sortDirection: 'desc',
           },
         ],
@@ -945,10 +1006,12 @@ describe('helpers', () => {
       const newTimeline = defaultTimelineToTimelineModel(timeline, false, TimelineType.template);
       expect(newTimeline).toEqual({
         activeTab: TimelineTabs.query,
+        prevActiveTab: TimelineTabs.query,
         columns: [
           {
             columnHeaderType: 'not-filtered',
             id: '@timestamp',
+            type: 'number',
             width: 190,
           },
           {
@@ -991,10 +1054,17 @@ describe('helpers', () => {
         dateRange: { end: '2020-10-28T11:37:31.655Z', start: '2020-10-27T11:37:31.655Z' },
         description: '',
         deletedEventIds: [],
+        eqlOptions: {
+          eventCategoryField: 'event.category',
+          tiebreakerField: '',
+          timestampField: '@timestamp',
+          query: '',
+          size: 100,
+        },
         eventIdToNoteIds: {},
         eventType: 'all',
         excludedRowRendererIds: [],
-        expandedEvent: {},
+        expandedDetail: {},
         filters: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
@@ -1022,6 +1092,7 @@ describe('helpers', () => {
         sort: [
           {
             columnId: '@timestamp',
+            columnType: 'number',
             sortDirection: 'desc',
           },
         ],
@@ -1046,10 +1117,12 @@ describe('helpers', () => {
       const newTimeline = defaultTimelineToTimelineModel(timeline, false, TimelineType.default);
       expect(newTimeline).toEqual({
         activeTab: TimelineTabs.query,
+        prevActiveTab: TimelineTabs.query,
         columns: [
           {
             columnHeaderType: 'not-filtered',
             id: '@timestamp',
+            type: 'number',
             width: 190,
           },
           {
@@ -1092,10 +1165,17 @@ describe('helpers', () => {
         dateRange: { end: '2020-07-08T08:20:18.966Z', start: '2020-07-07T08:20:18.966Z' },
         description: '',
         deletedEventIds: [],
+        eqlOptions: {
+          eventCategoryField: 'event.category',
+          tiebreakerField: '',
+          timestampField: '@timestamp',
+          query: '',
+          size: 100,
+        },
         eventIdToNoteIds: {},
         eventType: 'all',
         excludedRowRendererIds: [],
-        expandedEvent: {},
+        expandedDetail: {},
         filters: [],
         highlightedDropAndProviderId: '',
         historyIds: [],
@@ -1123,6 +1203,7 @@ describe('helpers', () => {
         sort: [
           {
             columnId: '@timestamp',
+            columnType: 'number',
             sortDirection: 'desc',
           },
         ],
@@ -1198,7 +1279,7 @@ describe('helpers', () => {
 
     describe('update a timeline', () => {
       const updateIsLoading = jest.fn();
-      const updateTimeline = jest.fn();
+      const updateTimeline = jest.fn().mockImplementation(() => jest.fn());
       const selectedTimeline = { ...mockSelectedTimeline };
       const apolloClient = {
         query: (jest.fn().mockResolvedValue(selectedTimeline) as unknown) as ApolloClient<{}>,
@@ -1239,6 +1320,7 @@ describe('helpers', () => {
           args.duplicate,
           args.timelineType
         );
+
         expect(updateTimeline).toBeCalledWith({
           timeline: {
             ...timeline,

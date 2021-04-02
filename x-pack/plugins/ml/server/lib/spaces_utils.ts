@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Legacy } from 'kibana';
@@ -52,5 +53,16 @@ export function spacesUtilsProvider(
     return spaces.filter((s) => s.disabledFeatures.includes(PLUGIN_ID) === false).map((s) => s.id);
   }
 
-  return { isMlEnabledInSpace, getAllSpaces, getAllSpaceIds, getMlSpaceIds };
+  async function getCurrentSpaceId(): Promise<string | null> {
+    if (getSpacesPlugin === undefined) {
+      // if spaces is disabled force isMlEnabledInSpace to be true
+      return null;
+    }
+    const space = await (await getSpacesPlugin()).spacesService.getActiveSpace(
+      request instanceof KibanaRequest ? request : KibanaRequest.from(request)
+    );
+    return space.id;
+  }
+
+  return { isMlEnabledInSpace, getAllSpaces, getAllSpaceIds, getMlSpaceIds, getCurrentSpaceId };
 }

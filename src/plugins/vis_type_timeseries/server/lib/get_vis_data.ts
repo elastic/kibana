@@ -1,81 +1,55 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { FakeRequest, RequestHandlerContext } from 'kibana/server';
 import _ from 'lodash';
-import { first, map } from 'rxjs/operators';
 
-import { Filter, Query } from 'src/plugins/data/common';
-import { getPanelData } from './vis_data/get_panel_data';
 import { Framework } from '../plugin';
-import { ReqFacade } from './search_strategies/strategies/abstract_search_strategy';
 import { TimeseriesVisData } from '../../common/types';
+import { PANEL_TYPES } from '../../common/panel_types';
+import type {
+  VisTypeTimeseriesVisDataRequest,
+  VisTypeTimeseriesRequestHandlerContext,
+  VisTypeTimeseriesRequestServices,
+} from '../types';
+import { getSeriesData } from './vis_data/get_series_data';
+import { getTableData } from './vis_data/get_table_data';
+import { getEsQueryConfig } from './vis_data/helpers/get_es_query_uisettings';
+import { getCachedIndexPatternFetcher } from './search_strategies/lib/cached_index_pattern_fetcher';
 
-export interface GetVisDataOptions {
-  timerange: {
-    min: number | string;
-    max: number | string;
-    timezone?: string;
-  };
-  panels: unknown[];
-  filters?: Filter[];
-  state?: Record<string, unknown>;
-  query?: Query | Query[];
-  sessionId?: string;
-}
-
-export type GetVisData = (
-  requestContext: RequestHandlerContext,
-  options: GetVisDataOptions,
-  framework: Framework
-) => Promise<TimeseriesVisData>;
-
-export function getVisData(
-  requestContext: RequestHandlerContext,
-  request: FakeRequest & { body: GetVisDataOptions },
+export async function getVisData(
+  requestContext: VisTypeTimeseriesRequestHandlerContext,
+  request: VisTypeTimeseriesVisDataRequest,
   framework: Framework
 ): Promise<TimeseriesVisData> {
-  // NOTE / TODO: This facade has been put in place to make migrating to the New Platform easier. It
-  // removes the need to refactor many layers of dependencies on "req", and instead just augments the top
-  // level object passed from here. The layers should be refactored fully at some point, but for now
-  // this works and we are still using the New Platform services for these vis data portions.
-  const reqFacade: ReqFacade<GetVisDataOptions> = {
-    requestContext,
-    ...request,
-    framework,
-    pre: {},
-    payload: request.body,
-    getUiSettingsService: () => requestContext.core.uiSettings.client,
-    getSavedObjectsClient: () => requestContext.core.savedObjects.client,
-    getEsShardTimeout: async () => {
-      return await framework.globalConfig$
-        .pipe(
-          first(),
-          map((config) => config.elasticsearch.shardTimeout.asMilliseconds())
-        )
-        .toPromise();
-    },
+  const uiSettings = requestContext.core.uiSettings.client;
+  const esShardTimeout = await framework.getEsShardTimeout();
+  const indexPatternsService = await framework.getIndexPatternsService(requestContext);
+  const esQueryConfig = await getEsQueryConfig(uiSettings);
+
+  const services: VisTypeTimeseriesRequestServices = {
+    esQueryConfig,
+    esShardTimeout,
+    indexPatternsService,
+    uiSettings,
+    searchStrategyRegistry: framework.searchStrategyRegistry,
+    cachedIndexPatternFetcher: getCachedIndexPatternFetcher(indexPatternsService),
   };
-  const promises = reqFacade.payload.panels.map(getPanelData(reqFacade));
+
+  const promises = request.body.panels.map((panel) => {
+    if (panel.type === PANEL_TYPES.TABLE) {
+      return getTableData(requestContext, request, panel, services);
+    }
+    return getSeriesData(requestContext, request, panel, services);
+  });
+
   return Promise.all(promises).then((res) => {
     return res.reduce((acc, data) => {
-      return _.assign(acc as any, data);
+      return _.assign(acc, data);
     }, {});
   }) as Promise<TimeseriesVisData>;
 }

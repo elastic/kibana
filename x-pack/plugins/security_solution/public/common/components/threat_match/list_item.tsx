@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useMemo, useCallback } from 'react';
@@ -22,7 +23,6 @@ const MyOverflowContainer = styled(EuiFlexItem)`
 
 interface ListItemProps {
   listItem: ThreatMapEntries;
-  listId: string;
   listItemIndex: number;
   indexPattern: IndexPattern;
   threatIndexPatterns: IndexPattern;
@@ -35,7 +35,6 @@ interface ListItemProps {
 export const ListItemComponent = React.memo<ListItemProps>(
   ({
     listItem,
-    listId,
     listItemIndex,
     indexPattern,
     threatIndexPatterns,
@@ -88,7 +87,7 @@ export const ListItemComponent = React.memo<ListItemProps>(
           <MyOverflowContainer grow={6}>
             <EuiFlexGroup gutterSize="s" direction="column">
               {entries.map((item, index) => (
-                <EuiFlexItem key={`${listId}-${index}`} grow={1}>
+                <EuiFlexItem key={item.id} grow={1}>
                   <EuiFlexGroup gutterSize="xs" alignItems="center" direction="row">
                     <MyOverflowContainer grow={1}>
                       <EntryItem

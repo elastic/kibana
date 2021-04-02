@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -31,16 +32,21 @@ import { ITableColumn, ManagedTable } from '../../../../shared/ManagedTable';
 import { TimestampTooltip } from '../../../../shared/TimestampTooltip';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 
-type Config = APIReturnType<'GET /api/apm/settings/agent-configuration'>[0];
+type Config = APIReturnType<'GET /api/apm/settings/agent-configuration'>['configurations'][0];
 
 interface Props {
   status: FETCH_STATUS;
-  data: Config[];
+  configurations: Config[];
   refetch: () => void;
 }
 
-export function AgentConfigurationList({ status, data, refetch }: Props) {
+export function AgentConfigurationList({
+  status,
+  configurations,
+  refetch,
+}: Props) {
   const { core } = useApmPluginContext();
+  const canSave = core.application.capabilities.apm.save;
   const { basePath } = core.http;
   const { search } = useLocation();
   const theme = useTheme();
@@ -59,30 +65,31 @@ export function AgentConfigurationList({ status, data, refetch }: Props) {
           )}
         </h2>
       }
-      body={
-        <>
-          <p>
-            {i18n.translate(
-              'xpack.apm.agentConfig.configTable.emptyPromptText',
+      actions={
+        <EuiToolTip
+          content={
+            !canSave &&
+            i18n.translate(
+              'xpack.apm.settings.agentConfig.createConfigButton.tooltip',
               {
                 defaultMessage:
-                  "Let's change that! You can fine-tune agent configuration directly from Kibana without having to redeploy. Get started by creating your first configuration.",
+                  "You don't have permissions to create agent configurations",
               }
-            )}
-          </p>
-        </>
-      }
-      actions={
-        <EuiButton
-          color="primary"
-          fill
-          href={createAgentConfigurationHref(search, basePath)}
+            )
+          }
         >
-          {i18n.translate(
-            'xpack.apm.agentConfig.configTable.createConfigButtonLabel',
-            { defaultMessage: 'Create configuration' }
-          )}
-        </EuiButton>
+          <EuiButton
+            color="primary"
+            fill
+            href={createAgentConfigurationHref(search, basePath)}
+            isDisabled={!canSave}
+          >
+            {i18n.translate(
+              'xpack.apm.agentConfig.configTable.createConfigButtonLabel',
+              { defaultMessage: 'Create configuration' }
+            )}
+          </EuiButton>
+        </EuiToolTip>
       }
     />
   );
@@ -110,7 +117,7 @@ export function AgentConfigurationList({ status, data, refetch }: Props) {
     return failurePrompt;
   }
 
-  if (status === FETCH_STATUS.SUCCESS && isEmpty(data)) {
+  if (status === FETCH_STATUS.SUCCESS && isEmpty(configurations)) {
     return emptyStatePrompt;
   }
 
@@ -180,28 +187,36 @@ export function AgentConfigurationList({ status, data, refetch }: Props) {
         <TimestampTooltip time={value} timeUnit="minutes" />
       ),
     },
-    {
-      width: px(units.double),
-      name: '',
-      render: (config: Config) => (
-        <EuiButtonIcon
-          aria-label="Edit"
-          iconType="pencil"
-          href={editAgentConfigurationHref(config.service, search, basePath)}
-        />
-      ),
-    },
-    {
-      width: px(units.double),
-      name: '',
-      render: (config: Config) => (
-        <EuiButtonIcon
-          aria-label="Delete"
-          iconType="trash"
-          onClick={() => setConfigToBeDeleted(config)}
-        />
-      ),
-    },
+    ...(canSave
+      ? [
+          {
+            width: px(units.double),
+            name: '',
+            render: (config: Config) => (
+              <EuiButtonIcon
+                aria-label="Edit"
+                iconType="pencil"
+                href={editAgentConfigurationHref(
+                  config.service,
+                  search,
+                  basePath
+                )}
+              />
+            ),
+          },
+          {
+            width: px(units.double),
+            name: '',
+            render: (config: Config) => (
+              <EuiButtonIcon
+                aria-label="Delete"
+                iconType="trash"
+                onClick={() => setConfigToBeDeleted(config)}
+              />
+            ),
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -220,7 +235,7 @@ export function AgentConfigurationList({ status, data, refetch }: Props) {
       <ManagedTable
         noItemsMessage={<LoadingStatePrompt />}
         columns={columns}
-        items={data}
+        items={configurations}
         initialSortField="service.name"
         initialSortDirection="asc"
         initialPageSize={20}

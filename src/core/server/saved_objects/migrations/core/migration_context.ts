@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /**
@@ -24,7 +13,7 @@
  * serves as a central blueprint for what migrations will end up doing.
  */
 
-import { Logger } from 'src/core/server/logging';
+import { Logger } from '../../../logging';
 import { MigrationEsClient } from './migration_es_client';
 import { SavedObjectsSerializer } from '../../serialization';
 import {
@@ -44,6 +33,7 @@ export interface MigrationOpts {
   scrollDuration: string;
   client: MigrationEsClient;
   index: string;
+  kibanaVersion: string;
   log: Logger;
   setStatus: (status: KibanaMigratorStatus) => void;
   mappingProperties: SavedObjectsTypeMappingDefinitions;
@@ -67,6 +57,7 @@ export interface Context {
   source: Index.FullIndexInfo;
   dest: Index.FullIndexInfo;
   documentMigrator: VersionedTransformer;
+  kibanaVersion: string;
   log: SavedObjectsMigrationLogger;
   setStatus: (status: KibanaMigratorStatus) => void;
   batchSize: number;
@@ -92,6 +83,7 @@ export async function migrationContext(opts: MigrationOpts): Promise<Context> {
     alias,
     source,
     dest,
+    kibanaVersion: opts.kibanaVersion,
     log: new MigrationLogger(log),
     setStatus,
     batchSize: opts.batchSize,

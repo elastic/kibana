@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CollectConfigProps as CollectConfigPropsBase } from '../../../../../../src/plugins/kibana_utils/public';
 import { ApplyGlobalFilterActionContext } from '../../../../../../src/plugins/data/public';
+import { IEmbeddable } from '../../../../../../src/plugins/embeddable/public';
 
-export type ActionContext = ApplyGlobalFilterActionContext;
+export type ActionContext = ApplyGlobalFilterActionContext & { embeddable: IEmbeddable };
 
 export type Config = {
   /**

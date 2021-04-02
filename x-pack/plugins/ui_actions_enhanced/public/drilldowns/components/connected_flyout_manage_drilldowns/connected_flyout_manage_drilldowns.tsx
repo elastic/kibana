@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState, useMemo } from 'react';
@@ -10,7 +11,7 @@ import { intersection } from 'lodash';
 import { DrilldownWizardConfig, FlyoutDrilldownWizard } from '../flyout_drilldown_wizard';
 import { FlyoutListManageDrilldowns } from '../flyout_list_manage_drilldowns';
 import { IStorageWrapper } from '../../../../../../../src/plugins/kibana_utils/public';
-import { Trigger, TriggerId } from '../../../../../../../src/plugins/ui_actions/public';
+import { Trigger } from '../../../../../../../src/plugins/ui_actions/public';
 import { DrilldownListItem } from '../list_manage_drilldowns';
 import { insufficientLicenseLevel, invalidDrilldownType } from './i18n';
 import {
@@ -35,7 +36,7 @@ interface ConnectedFlyoutManageDrilldownsProps<
   /**
    * List of possible triggers in current context
    */
-  triggers: TriggerId[];
+  triggers: string[];
 
   /**
    * Extra action factory context passed into action factories CollectConfig, getIconType, getDisplayName and etc...
@@ -61,7 +62,7 @@ export function createFlyoutManageDrilldowns({
   getTrigger,
 }: {
   actionFactories: ActionFactory[];
-  getTrigger: (triggerId: TriggerId) => Trigger;
+  getTrigger: (triggerId: string) => Trigger;
   storage: IStorageWrapper;
   toastService: ToastsStart;
   docsLink?: string;
@@ -122,7 +123,7 @@ export function createFlyoutManageDrilldowns({
         actionFactory: allActionFactoriesById[drilldownToEdit.action.factoryId],
         actionConfig: drilldownToEdit.action.config as BaseActionConfig,
         name: drilldownToEdit.action.name,
-        selectedTriggers: (drilldownToEdit.triggers ?? []) as TriggerId[],
+        selectedTriggers: (drilldownToEdit.triggers ?? []) as string[],
       };
     }
 
@@ -133,7 +134,7 @@ export function createFlyoutManageDrilldowns({
       const actionFactory = allActionFactoriesById[drilldown.action.factoryId];
       const drilldownFactoryContext: BaseActionFactoryContext = {
         ...props.placeContext,
-        triggers: drilldown.triggers as TriggerId[],
+        triggers: drilldown.triggers as string[],
       };
       return {
         id: drilldown.eventId,
@@ -146,7 +147,7 @@ export function createFlyoutManageDrilldowns({
           : !actionFactory.isCompatibleLicense()
           ? insufficientLicenseLevel
           : undefined,
-        triggers: drilldown.triggers.map((trigger) => getTrigger(trigger as TriggerId)),
+        triggers: drilldown.triggers.map((trigger) => getTrigger(trigger as string)),
       };
     }
 

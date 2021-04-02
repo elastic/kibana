@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+// @ts-expect-error https://github.com/elastic/kibana/issues/95679
 import { esTestConfig, kbnTestConfig, kibanaServerTestUser } from '@kbn/test';
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 import { format as formatUrl } from 'url';
@@ -41,7 +43,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--server.maxPayloadBytes=1679958`,
         `--server.port=${kbnTestConfig.getPort()}`,
         `--xpack.reporting.capture.maxAttempts=1`,
-        `--xpack.reporting.csv.maxSizeBytes=2850`,
+        `--xpack.reporting.csv.maxSizeBytes=6000`,
         `--xpack.reporting.queue.pollInterval=3000`,
         `--xpack.security.session.idleTimeout=3600000`,
         `--xpack.reporting.capture.networkPolicy.rules=${JSON.stringify(testPolicyRules)}`,

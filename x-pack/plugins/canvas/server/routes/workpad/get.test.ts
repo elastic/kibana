@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { CANVAS_TYPE } from '../../../common/lib/constants';
 import { initializeGetWorkpadRoute } from './get';
 import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
 import { savedObjectsClientMock, httpServerMock } from 'src/core/server/mocks';
-import { workpadWithGroupAsElement } from '../../../__tests__/fixtures/workpads';
+import { workpadWithGroupAsElement } from '../../../__fixtures__/workpads';
 import { CanvasWorkpad } from '../../../types';
 import { getMockedRouterDeps } from '../test_helpers';
 

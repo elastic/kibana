@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
+import { delay } from 'bluebird';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { logWrapper } from './log_wrapper';
 
@@ -12,10 +14,20 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const log = getService('log');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const elasticChart = getService('elasticChart');
   const find = getService('find');
   const comboBox = getService('comboBox');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['header', 'timePicker', 'common']);
+
+  const PageObjects = getPageObjects([
+    'common',
+    'header',
+    'timePicker',
+    'common',
+    'visualize',
+    'dashboard',
+    'timeToVisualize',
+  ]);
 
   return logWrapper('lensPage', log, {
     /**
@@ -123,6 +135,32 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /**
+     * Changes the specified dimension to the specified operation and (optinally) field.
+     *
+     * @param opts.dimension - the selector of the dimension being changed
+     * @param opts.operation - the desired operation ID for the dimension
+     * @param opts.field - the desired field for the dimension
+     * @param layerIndex - the index of the layer
+     */
+    async configureReference(opts: {
+      operation?: string;
+      field?: string;
+      isPreviousIncompatible?: boolean;
+    }) {
+      if (opts.operation) {
+        const target = await testSubjects.find('indexPattern-subFunction-selection-row');
+        await comboBox.openOptionsList(target);
+        await comboBox.setElement(target, opts.operation);
+      }
+
+      if (opts.field) {
+        const target = await testSubjects.find('indexPattern-reference-field-selection-row');
+        await comboBox.openOptionsList(target);
+        await comboBox.setElement(target, opts.field);
+      }
+    },
+
+    /**
      * Drags field to workspace
      *
      * @param field  - the desired field for the dimension
@@ -132,6 +170,115 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         testSubjects.getCssSelector(`lnsFieldListPanelField-${field}`),
         testSubjects.getCssSelector('lnsWorkspace')
       );
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    },
+
+    /**
+     * Drags field to workspace
+     *
+     * @param field  - the desired field for the dimension
+     * */
+    async clickField(field: string) {
+      await testSubjects.click(`lnsFieldListPanelField-${field}`);
+    },
+
+    async editField() {
+      await retry.try(async () => {
+        await testSubjects.click('lnsFieldListPanelEdit');
+        await testSubjects.missingOrFail('lnsFieldListPanelEdit');
+      });
+    },
+
+    async removeField() {
+      await retry.try(async () => {
+        await testSubjects.click('lnsFieldListPanelRemove');
+        await testSubjects.missingOrFail('lnsFieldListPanelRemove');
+      });
+    },
+
+    async searchField(name: string) {
+      await testSubjects.setValue('lnsIndexPatternFieldSearch', name, {
+        clearWithKeyboard: true,
+        typeCharByChar: true,
+      });
+    },
+
+    async waitForField(field: string) {
+      await retry.try(async () => {
+        await testSubjects.existOrFail(`lnsFieldListPanelField-${field}`);
+      });
+    },
+
+    async waitForFieldMissing(field: string) {
+      await retry.try(async () => {
+        await testSubjects.missingOrFail(`lnsFieldListPanelField-${field}`);
+      });
+    },
+
+    /**
+     * Copies field to chosen destination that is defined by distance of `steps`
+     * (right arrow presses) from it
+     *
+     * @param fieldName  - the desired field for the dimension
+     * @param steps - number of steps user has to press right
+     * @param reverse - defines the direction of going through drops
+     * */
+    async dragFieldWithKeyboard(fieldName: string, steps = 1, reverse = false) {
+      const field = await find.byCssSelector(
+        `[data-test-subj="lnsDragDrop_draggable-${fieldName}"] [data-test-subj="lnsDragDrop-keyboardHandler"]`
+      );
+      await field.focus();
+      await browser.pressKeys(browser.keys.ENTER);
+      for (let i = 0; i < steps; i++) {
+        await browser.pressKeys(reverse ? browser.keys.LEFT : browser.keys.RIGHT);
+      }
+      await browser.pressKeys(browser.keys.ENTER);
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    },
+
+    /**
+     * Selects draggable element and moves it by number of `steps`
+     *
+     * @param group  - the group of the element
+     * @param index  - the index of the element in the group
+     * @param steps - number of steps of presses right or left
+     * @param reverse - defines the direction of going through drops
+     * */
+    async dimensionKeyboardDragDrop(group: string, index = 0, steps = 1, reverse = false) {
+      const elements = await find.allByCssSelector(
+        `[data-test-subj="${group}"]  [data-test-subj="lnsDragDrop-keyboardHandler"]`
+      );
+      const el = elements[index];
+      await el.focus();
+      await browser.pressKeys(browser.keys.ENTER);
+      for (let i = 0; i < steps; i++) {
+        await browser.pressKeys(reverse ? browser.keys.LEFT : browser.keys.RIGHT);
+      }
+      await browser.pressKeys(browser.keys.ENTER);
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    },
+    /**
+     * Selects draggable element and reorders it by number of `steps`
+     *
+     * @param group  - the group of the element
+     * @param index  - the index of the element in the group
+     * @param steps - number of steps of presses right or left
+     * @param reverse - defines the direction of going through drops
+     * */
+    async dimensionKeyboardReorder(group: string, index = 0, steps = 1, reverse = false) {
+      const elements = await find.allByCssSelector(
+        `[data-test-subj="${group}"]  [data-test-subj="lnsDragDrop-keyboardHandler"]`
+      );
+      const el = elements[index];
+      await el.focus();
+      await browser.pressKeys(browser.keys.ENTER);
+      for (let i = 0; i < steps; i++) {
+        await browser.pressKeys(reverse ? browser.keys.ARROW_UP : browser.keys.ARROW_DOWN);
+      }
+      await browser.pressKeys(browser.keys.ENTER);
+
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
@@ -166,16 +313,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * Reorder elements within the group
      *
-     * @param startIndex - the index of dragging element
-     * @param endIndex - the index of drop
+     * @param startIndex - the index of dragging element starting from 1
+     * @param endIndex - the index of drop starting from 1
      * */
     async reorderDimensions(dimension: string, startIndex: number, endIndex: number) {
-      const dragging = `[data-test-subj='${dimension}']:nth-of-type(${
-        startIndex + 1
-      }) .lnsDragDrop`;
-      const dropping = `[data-test-subj='${dimension}']:nth-of-type(${
-        endIndex + 1
-      }) [data-test-subj='lnsDragDrop-reorderableDrop'`;
+      const dragging = `[data-test-subj='${dimension}']:nth-of-type(${startIndex}) .lnsDragDrop`;
+      const dropping = `[data-test-subj='${dimension}']:nth-of-type(${endIndex}) [data-test-subj='lnsDragDrop-reorderableDropLayer'`;
       await browser.html5DragAndDrop(dragging, dropping);
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
@@ -188,6 +331,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         ).getAttribute('id');
         expect(currentPalette).to.equal(palette);
       });
+    },
+
+    async toggleToolbarPopover(buttonTestSub: string) {
+      await testSubjects.click(buttonTestSub);
     },
 
     /**
@@ -210,6 +357,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
+    async isTopLevelAggregation() {
+      return await testSubjects.isEuiSwitchChecked('indexPattern-nesting-switch');
+    },
     /**
      * Removes the dimension matching a specific test subject
      */
@@ -239,22 +389,24 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * Save the current Lens visualization.
      */
-    async save(title: string, saveAsNew?: boolean, redirectToOrigin?: boolean) {
+    async save(
+      title: string,
+      saveAsNew?: boolean,
+      redirectToOrigin?: boolean,
+      saveToLibrary?: boolean,
+      addToDashboard?: 'new' | 'existing' | null,
+      dashboardId?: string
+    ) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click('lnsApp_saveButton');
-      await testSubjects.setValue('savedObjectTitle', title);
 
-      const saveAsNewCheckboxExists = await testSubjects.exists('saveAsNewCheckbox');
-      if (saveAsNewCheckboxExists) {
-        const state = saveAsNew ? 'check' : 'uncheck';
-        await testSubjects.setEuiSwitch('saveAsNewCheckbox', state);
-      }
-
-      const redirectToOriginCheckboxExists = await testSubjects.exists('returnToOriginModeSwitch');
-      if (redirectToOriginCheckboxExists) {
-        const state = redirectToOrigin ? 'check' : 'uncheck';
-        await testSubjects.setEuiSwitch('returnToOriginModeSwitch', state);
-      }
+      await PageObjects.timeToVisualize.setSaveModalValues(title, {
+        saveAsNew,
+        redirectToOrigin,
+        addToDashboard: addToDashboard ? addToDashboard : null,
+        dashboardId,
+        saveToLibrary,
+      });
 
       await testSubjects.click('confirmSaveSavedObjectButton');
       await retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
@@ -282,11 +434,16 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await colorPickerInput.type(color);
       await PageObjects.common.sleep(1000); // give time for debounced components to rerender
     },
-    async editMissingValues(option: string) {
+    async openVisualOptions() {
       await retry.try(async () => {
-        await testSubjects.click('lnsValuesButton');
-        await testSubjects.exists('lnsValuesButton');
+        await testSubjects.click('lnsVisualOptionsButton');
+        await testSubjects.exists('lnsVisualOptionsButton');
       });
+    },
+    async useCurvedLines() {
+      await testSubjects.click('lnsCurveStyleToggle');
+    },
+    async editMissingValues(option: string) {
       await testSubjects.click('lnsMissingValuesSelect');
       const optionSelector = await find.byCssSelector(`#${option}`);
       await optionSelector.click();
@@ -312,18 +469,47 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param subVisualizationId - the ID of the sub-visualization to switch to, such as
      * lnsDatatable or bar_stacked
      */
-    async switchToVisualization(subVisualizationId: string) {
+    async switchToVisualization(subVisualizationId: string, searchTerm?: string) {
       await this.openChartSwitchPopover();
+      await this.searchOnChartSwitch(subVisualizationId, searchTerm);
       await testSubjects.click(`lnsChartSwitchPopover_${subVisualizationId}`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
     async openChartSwitchPopover() {
-      if (await testSubjects.exists('visTypeTitle')) {
+      if (await testSubjects.exists('lnsChartSwitchList')) {
         return;
       }
       await retry.try(async () => {
         await testSubjects.click('lnsChartSwitchPopover');
-        await testSubjects.existOrFail('visTypeTitle');
+        await testSubjects.existOrFail('lnsChartSwitchList');
+      });
+    },
+
+    async changeAxisSide(newSide: string) {
+      await testSubjects.click(`lnsXY_axisSide_groups_${newSide}`);
+    },
+
+    /** Counts the visible warnings in the config panel */
+    async getErrorCount() {
+      const moreButton = await testSubjects.exists('configuration-failure-more-errors');
+      if (moreButton) {
+        await retry.try(async () => {
+          await testSubjects.click('configuration-failure-more-errors');
+          await testSubjects.missingOrFail('configuration-failure-more-errors');
+        });
+      }
+      const errors = await testSubjects.findAll('configuration-failure-error');
+      return errors?.length ?? 0;
+    },
+
+    async searchOnChartSwitch(subVisualizationId: string, searchTerm?: string) {
+      // Because the new chart switcher is now a virtualized list, the process needs some help
+      // So either pass a search string or pick the last 3 letters from the id (3 because pie
+      // is the smallest chart name) and use them to search
+      const queryTerm = searchTerm ?? subVisualizationId.substring(subVisualizationId.length - 3);
+      return await testSubjects.setValue('lnsChartSwitchSearch', queryTerm, {
+        clearWithKeyboard: true,
       });
     },
 
@@ -333,11 +519,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param subVisualizationId - the ID of the sub-visualization to switch to, such as
      * lnsDatatable or bar_stacked
      */
-    async hasChartSwitchWarning(subVisualizationId: string) {
+    async hasChartSwitchWarning(subVisualizationId: string, searchTerm?: string) {
       await this.openChartSwitchPopover();
+      await this.searchOnChartSwitch(subVisualizationId, searchTerm);
       const element = await testSubjects.find(`lnsChartSwitchPopover_${subVisualizationId}`);
-      return await find.descendantExistsByCssSelector(
-        '.euiKeyPadMenuItem__betaBadgeWrapper',
+      return await testSubjects.descendantExists(
+        `lnsChartSwitchPopoverAlert_${subVisualizationId}`,
         element
       );
     },
@@ -445,19 +632,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       );
     },
 
+    async getCurrentChartDebugState() {
+      return await elasticChart.getChartDebugData('lnsWorkspace');
+    },
+
     /**
      * Gets text of the specified datatable header cell
      *
      * @param index - index of th element in datatable
      */
     async getDatatableHeaderText(index = 0) {
-      return find
-        .byCssSelector(
-          `[data-test-subj="lnsDataTable"] thead th:nth-child(${
-            index + 1
-          }) .euiTableCellContent__text`
-        )
-        .then((el) => el.getVisibleText());
+      const el = await this.getDatatableHeader(index);
+      return el.getVisibleText();
     },
 
     /**
@@ -467,13 +653,67 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param colIndex - index of column of the cell
      */
     async getDatatableCellText(rowIndex = 0, colIndex = 0) {
-      return find
-        .byCssSelector(
-          `[data-test-subj="lnsDataTable"] tr:nth-child(${rowIndex + 1}) td:nth-child(${
-            colIndex + 1
-          })`
-        )
-        .then((el) => el.getVisibleText());
+      const el = await this.getDatatableCell(rowIndex, colIndex);
+      return el.getVisibleText();
+    },
+
+    async getDatatableHeader(index = 0) {
+      return find.byCssSelector(
+        `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridHeader"] [role=columnheader]:nth-child(${
+          index + 1
+        })`
+      );
+    },
+
+    async getDatatableCell(rowIndex = 0, colIndex = 0) {
+      const table = await find.byCssSelector('.euiDataGrid');
+      const $ = await table.parseDomContent();
+      const columnNumber = $('.euiDataGridHeaderCell__content').length;
+      return await find.byCssSelector(
+        `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRowCell"]:nth-child(${
+          rowIndex * columnNumber + colIndex + 2
+        })`
+      );
+    },
+
+    async isDatatableHeaderSorted(index = 0) {
+      return find.existsByCssSelector(
+        `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridHeader"] [role=columnheader]:nth-child(${
+          index + 1
+        }) [data-test-subj^="dataGridHeaderCellSortingIcon"]`
+      );
+    },
+
+    async changeTableSortingBy(colIndex = 0, direction: 'none' | 'ascending' | 'descending') {
+      const el = await this.getDatatableHeader(colIndex);
+      await el.click();
+      let buttonEl;
+      if (direction !== 'none') {
+        buttonEl = await find.byCssSelector(
+          `[data-test-subj^="dataGridHeaderCellActionGroup"] [title="Sort ${direction}"]`
+        );
+      } else {
+        buttonEl = await find.byCssSelector(
+          `[data-test-subj^="dataGridHeaderCellActionGroup"] li[class$="selected"] [title^="Sort"]`
+        );
+      }
+      return buttonEl.click();
+    },
+
+    async toggleColumnVisibility(dimension: string) {
+      await this.openDimensionEditor(dimension);
+      const id = 'lns-table-column-hidden';
+      const isChecked = await testSubjects.isEuiSwitchChecked(id);
+      await testSubjects.setEuiSwitch(id, isChecked ? 'uncheck' : 'check');
+      await this.closeDimensionEditor();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    },
+
+    async clickTableCellAction(rowIndex = 0, colIndex = 0, actionTestSub: string) {
+      const el = await this.getDatatableCell(rowIndex, colIndex);
+      await el.focus();
+      const action = await el.findByTestSubject(actionTestSub);
+      return action.click();
     },
 
     /**
@@ -493,6 +733,178 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async assertColor(color: string) {
       // TODO: target dimensionTrigger color element after merging https://github.com/elastic/kibana/pull/76871
       await testSubjects.getAttribute('colorPickerAnchor', color);
+    },
+
+    /**
+     * Creates and saves a lens visualization from a dashboard
+     *
+     * @param title - title for the new lens. If left undefined, the panel will be created by value
+     * @param redirectToOrigin - whether to redirect back to the dashboard after saving the panel
+     */
+    async createAndAddLensFromDashboard({
+      title,
+      redirectToOrigin,
+    }: {
+      title?: string;
+      redirectToOrigin?: boolean;
+    }) {
+      log.debug(`createAndAddLens${title}`);
+      const inViewMode = await PageObjects.dashboard.getIsInViewMode();
+      if (inViewMode) {
+        await PageObjects.dashboard.switchToEditMode();
+      }
+      await PageObjects.visualize.clickLensWidget();
+      await this.goToTimeRange();
+      await this.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+
+      await this.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'average',
+        field: 'bytes',
+      });
+
+      await this.configureDimension({
+        dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
+        operation: 'terms',
+        field: 'ip',
+      });
+      if (title) {
+        await this.save(title, false, redirectToOrigin);
+      } else {
+        await this.saveAndReturn();
+      }
+    },
+
+    /**
+     * Asserts that the focused element is a field with a specified text
+     *
+     * @param name - the element visible text
+     */
+    async assertFocusedField(name: string) {
+      const input = await find.activeElement();
+      const fieldAncestor = await input.findByXpath('./../../..');
+      const focusedElementText = await fieldAncestor.getVisibleText();
+      const dataTestSubj = await fieldAncestor.getAttribute('data-test-subj');
+      expect(focusedElementText).to.eql(name);
+      expect(dataTestSubj).to.eql('lnsFieldListPanelField');
+    },
+
+    /**
+     * Asserts that the focused element is a dimension with with a specified text
+     *
+     * @param name - the element visible text
+     */
+    async assertFocusedDimension(name: string) {
+      const input = await find.activeElement();
+      const fieldAncestor = await input.findByXpath('./../../..');
+      const focusedElementText = await fieldAncestor.getVisibleText();
+      expect(focusedElementText).to.eql(name);
+    },
+
+    async waitForVisualization() {
+      async function getRenderingCount() {
+        const visualizationContainer = await testSubjects.find('lnsVisualizationContainer');
+        const renderingCount = await visualizationContainer.getAttribute('data-rendering-count');
+        return Number(renderingCount);
+      }
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await retry.waitFor('rendering count to stabilize', async () => {
+        const firstCount = await getRenderingCount();
+
+        await PageObjects.common.sleep(1000);
+
+        const secondCount = await getRenderingCount();
+
+        return firstCount === secondCount;
+      });
+    },
+
+    async clickAddField() {
+      await testSubjects.click('lnsIndexPatternActions');
+      await testSubjects.existOrFail('indexPattern-add-field');
+      await testSubjects.click('indexPattern-add-field');
+    },
+
+    /** resets visualization/layer or removes a layer */
+    async removeLayer() {
+      await testSubjects.click('lnsLayerRemove');
+    },
+
+    /**
+     * Starts dragging @param dragging, drags over @param draggedOver and drops it into @dropTarget
+     */
+    async dragEnterDrop(dragging: string, draggedOver: string, dropTarget: string) {
+      await browser.execute(
+        `
+          function createEvent(typeOfEvent) {
+            const event = document.createEvent("CustomEvent");
+            event.initCustomEvent(typeOfEvent, true, true, null);
+            event.dataTransfer = {
+                data: {},
+                setData: function(key, value) {
+                    this.data[key] = value;
+                },
+                getData: function(key) {
+                    return this.data[key];
+                }
+            };
+            return event;
+          }
+          function dispatchEvent(element, event, transferData) {
+            if (transferData !== undefined) {
+                event.dataTransfer = transferData;
+            }
+            if (element.dispatchEvent) {
+                element.dispatchEvent(event);
+            } else if (element.fireEvent) {
+                element.fireEvent("on" + event.type, event);
+            }
+          }
+
+          const origin = document.querySelector(arguments[0]);
+          const dragStartEvent = createEvent('dragstart');
+          dispatchEvent(origin, dragStartEvent);
+
+          setTimeout(() => {
+            const target = document.querySelector(arguments[1]);
+            const dragenter = createEvent('dragenter');
+            const dragover = createEvent('dragover');
+            dispatchEvent(target, dragenter, dragStartEvent.dataTransfer);
+            dispatchEvent(target, dragover, dragStartEvent.dataTransfer);
+            setTimeout(() => {
+              const target = document.querySelector(arguments[2]);
+              const dropEvent = createEvent('drop');
+              dispatchEvent(target, dropEvent, dragStartEvent.dataTransfer);
+              const dragEndEvent = createEvent('dragend');
+              dispatchEvent(origin, dragEndEvent, dropEvent.dataTransfer);
+            }, 100)
+          }, 100);
+      `,
+        dragging,
+        draggedOver,
+        dropTarget
+      );
+      await delay(150);
+    },
+
+    /**
+     * Drags field to dimension trigger to extra drop type
+     *
+     * @param from - the selector of the dimension being moved
+     * @param to - the selector of the main drop type of dimension being dropped to
+     * @param type - extra drop type
+     * */
+    async dragDimensionToExtraDropType(from: string, to: string, type: 'duplicate' | 'swap') {
+      await this.dragEnterDrop(
+        testSubjects.getCssSelector(from),
+        testSubjects.getCssSelector(`${to} > lnsDragDrop`),
+        testSubjects.getCssSelector(`${to} > lnsDragDrop-${type}`)
+      );
+      await PageObjects.header.waitUntilLoadingHasFinished();
     },
   });
 }

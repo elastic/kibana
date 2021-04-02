@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { PureComponent } from 'react';
@@ -151,63 +140,92 @@ const editDescription = i18n.translate(
   { defaultMessage: 'Edit' }
 );
 
+const deleteLabel = i18n.translate(
+  'indexPatternManagement.editIndexPattern.fields.table.deleteLabel',
+  {
+    defaultMessage: 'Delete',
+  }
+);
+
+const deleteDescription = i18n.translate(
+  'indexPatternManagement.editIndexPattern.fields.table.deleteDescription',
+  { defaultMessage: 'Delete' }
+);
+
 const labelDescription = i18n.translate(
   'indexPatternManagement.editIndexPattern.fields.table.customLabelTooltip',
   { defaultMessage: 'A custom label for the field.' }
+);
+
+const runtimeIconTipTitle = i18n.translate(
+  'indexPatternManagement.editIndexPattern.fields.table.runtimeIconTipTitle',
+  { defaultMessage: 'Runtime field' }
+);
+
+const runtimeIconTipText = i18n.translate(
+  'indexPatternManagement.editIndexPattern.fields.table.runtimeIconTipText',
+  { defaultMessage: 'This field exists on the index pattern only.' }
 );
 
 interface IndexedFieldProps {
   indexPattern: IIndexPattern;
   items: IndexedFieldItem[];
   editField: (field: IndexedFieldItem) => void;
+  deleteField: (fieldName: string) => void;
 }
+
+export const renderFieldName = (field: IndexedFieldItem, timeFieldName?: string) => (
+  <span>
+    {field.name}
+    {field.info && field.info.length ? (
+      <span>
+        &nbsp;
+        <EuiIconTip
+          type="questionInCircle"
+          color="primary"
+          aria-label={additionalInfoAriaLabel}
+          content={field.info.map((info: string, i: number) => (
+            <div key={i}>{info}</div>
+          ))}
+        />
+      </span>
+    ) : null}
+    {timeFieldName === field.name ? (
+      <span>
+        &nbsp;
+        <EuiIconTip
+          type="clock"
+          color="primary"
+          aria-label={primaryTimeAriaLabel}
+          content={primaryTimeTooltip}
+        />
+      </span>
+    ) : null}
+    {!field.isMapped ? (
+      <span>
+        &nbsp;
+        <EuiIconTip
+          type="indexSettings"
+          title={runtimeIconTipTitle}
+          content={<span>{runtimeIconTipText}</span>}
+        />
+      </span>
+    ) : null}
+    {field.customLabel && field.customLabel !== field.name ? (
+      <div>
+        <EuiToolTip content={labelDescription}>
+          <EuiBadge iconType="flag" iconSide="left">
+            {field.customLabel}
+          </EuiBadge>
+        </EuiToolTip>
+      </div>
+    ) : null}
+  </span>
+);
 
 export class Table extends PureComponent<IndexedFieldProps> {
   renderBooleanTemplate(value: string, arialLabel: string) {
     return value ? <EuiIcon type="dot" color="secondary" aria-label={arialLabel} /> : <span />;
-  }
-
-  renderFieldName(name: string, field: IndexedFieldItem) {
-    const { indexPattern } = this.props;
-
-    return (
-      <span>
-        {field.name}
-        {field.info && field.info.length ? (
-          <span>
-            &nbsp;
-            <EuiIconTip
-              type="questionInCircle"
-              color="primary"
-              aria-label={additionalInfoAriaLabel}
-              content={field.info.map((info: string, i: number) => (
-                <div key={i}>{info}</div>
-              ))}
-            />
-          </span>
-        ) : null}
-        {indexPattern.timeFieldName === name ? (
-          <span>
-            &nbsp;
-            <EuiIconTip
-              type="clock"
-              color="primary"
-              aria-label={primaryTimeAriaLabel}
-              content={primaryTimeTooltip}
-            />
-          </span>
-        ) : null}
-        {field.customLabel && field.customLabel !== field.name ? (
-          <div>
-            <EuiToolTip content={labelDescription}>
-              <EuiBadge iconType="flag" iconSide="left">
-                {field.customLabel}
-              </EuiBadge>
-            </EuiToolTip>
-          </div>
-        ) : null}
-      </span>
-    );
   }
 
   renderFieldType(type: string, isConflict: boolean) {
@@ -232,7 +250,7 @@ export class Table extends PureComponent<IndexedFieldProps> {
   }
 
   render() {
-    const { items, editField } = this.props;
+    const { items, editField, deleteField, indexPattern } = this.props;
 
     const pagination = {
       initialPageSize: 10,
@@ -246,7 +264,7 @@ export class Table extends PureComponent<IndexedFieldProps> {
         dataType: 'string',
         sortable: true,
         render: (value: string, field: IndexedFieldItem) => {
-          return this.renderFieldName(value, field);
+          return renderFieldName(field, indexPattern.timeFieldName);
         },
         width: '38%',
         'data-test-subj': 'indexedFieldName',
@@ -256,8 +274,8 @@ export class Table extends PureComponent<IndexedFieldProps> {
         name: typeHeader,
         dataType: 'string',
         sortable: true,
-        render: (value: string) => {
-          return this.renderFieldType(value, value === 'conflict');
+        render: (value: string, field: IndexedFieldItem) => {
+          return this.renderFieldType(value, field.kbnType === 'conflict');
         },
         'data-test-subj': 'indexedFieldType',
       },
@@ -305,10 +323,30 @@ export class Table extends PureComponent<IndexedFieldProps> {
         ],
         width: '40px',
       },
+      {
+        name: '',
+        actions: [
+          {
+            name: deleteLabel,
+            description: deleteDescription,
+            icon: 'trash',
+            onClick: (field) => deleteField(field.name),
+            type: 'icon',
+            'data-test-subj': 'deleteField',
+            available: (field) => !field.isMapped,
+          },
+        ],
+        width: '40px',
+      },
     ];
 
     return (
-      <EuiInMemoryTable items={items} columns={columns} pagination={pagination} sorting={true} />
+      <EuiInMemoryTable
+        items={items}
+        columns={columns}
+        pagination={pagination}
+        sorting={{ sort: { field: 'displayName', direction: 'asc' } }}
+      />
     );
   }
 }

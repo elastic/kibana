@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import moment from 'moment';
 
 import {
@@ -76,6 +78,7 @@ export const buildAuthenticationsHistogramQuery = ({
     index: defaultIndex,
     allowNoIndices: true,
     ignoreUnavailable: true,
+    track_total_hits: true,
     body: {
       aggregations: getHistogramAggregation(),
       query: {
@@ -84,7 +87,6 @@ export const buildAuthenticationsHistogramQuery = ({
         },
       },
       size: 0,
-      track_total_hits: true,
     },
   };
 

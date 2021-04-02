@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
 
 import {
@@ -56,7 +58,9 @@ import { addBasePath } from '../index';
 
 import { isRequestTimeout, fillResultsWithTimeouts, wrapError, wrapEsError } from './error_utils';
 import { registerTransformsAuditMessagesRoutes } from './transforms_audit_messages';
+import { registerTransformNodesRoutes } from './transforms_nodes';
 import { IIndexPattern } from '../../../../../../src/plugins/data/common/index_patterns';
+import { isLatestTransform } from '../../../common/types/transform';
 
 enum TRANSFORM_ACTIONS {
   STOP = 'stop',
@@ -172,7 +176,6 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
       }
     })
   );
-  registerTransformsAuditMessagesRoutes(routeDependencies);
 
   /**
    * @apiGroup Transforms
@@ -203,6 +206,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
 
         await ctx.core.elasticsearch.client.asCurrentUser.transform
           .putTransform({
+            // @ts-expect-error @elastic/elasticsearch max_page_search_size is required in TransformPivot
             body: req.body,
             transform_id: transformId,
           })
@@ -247,6 +251,7 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
           const {
             body,
           } = await ctx.core.elasticsearch.client.asCurrentUser.transform.updateTransform({
+            // @ts-expect-error query doesn't satisfy QueryContainer from @elastic/elasticsearch
             body: req.body,
             transform_id: transformId,
           });
@@ -386,6 +391,9 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
       }
     })
   );
+
+  registerTransformsAuditMessagesRoutes(routeDependencies);
+  registerTransformNodesRoutes(routeDependencies);
 }
 
 async function getIndexPatternId(
@@ -446,11 +454,14 @@ async function deleteTransforms(
           transform_id: transformId,
         });
         const transformConfig = body.transforms[0];
+        // @ts-expect-error @elastic/elasticsearch doesn't provide typings for Transform
         destinationIndex = Array.isArray(transformConfig.dest.index)
-          ? transformConfig.dest.index[0]
-          : transformConfig.dest.index;
+          ? // @ts-expect-error @elastic/elasticsearch doesn't provide typings for Transform
+            transformConfig.dest.index[0]
+          : // @ts-expect-error @elastic/elasticsearch doesn't provide typings for Transform
+            transformConfig.dest.index;
       } catch (getTransformConfigError) {
-        transformDeleted.error = wrapError(getTransformConfigError);
+        transformDeleted.error = getTransformConfigError.meta.body.error;
         results[transformId] = {
           transformDeleted,
           destIndexDeleted,
@@ -471,7 +482,7 @@ async function deleteTransforms(
           });
           destIndexDeleted.success = true;
         } catch (deleteIndexError) {
-          destIndexDeleted.error = wrapError(deleteIndexError);
+          destIndexDeleted.error = deleteIndexError.meta.body.error;
         }
       }
 
@@ -487,7 +498,7 @@ async function deleteTransforms(
             destIndexPatternDeleted.success = true;
           }
         } catch (deleteDestIndexPatternError) {
-          destIndexPatternDeleted.error = wrapError(deleteDestIndexPatternError);
+          destIndexPatternDeleted.error = deleteDestIndexPatternError.meta.body.error;
         }
       }
 
@@ -498,7 +509,7 @@ async function deleteTransforms(
         });
         transformDeleted.success = true;
       } catch (deleteTransformJobError) {
-        transformDeleted.error = wrapError(deleteTransformJobError);
+        transformDeleted.error = deleteTransformJobError.meta.body.error;
         if (deleteTransformJobError.statusCode === 403) {
           return response.forbidden();
         }
@@ -519,7 +530,7 @@ async function deleteTransforms(
           action: TRANSFORM_ACTIONS.DELETE,
         });
       }
-      results[transformId] = { transformDeleted: { success: false, error: JSON.stringify(e) } };
+      results[transformId] = { transformDeleted: { success: false, error: e.meta.body.error } };
     }
   }
   return results;
@@ -531,9 +542,37 @@ const previewTransformHandler: RequestHandler<
   PostTransformsPreviewRequestSchema
 > = async (ctx, req, res) => {
   try {
+    const reqBody = req.body;
     const { body } = await ctx.core.elasticsearch.client.asCurrentUser.transform.previewTransform({
-      body: req.body,
+      // @ts-expect-error max_page_search_size is required in TransformPivot
+      body: reqBody,
     });
+    if (isLatestTransform(reqBody)) {
+      // for the latest transform mappings properties have to be retrieved from the source
+      const fieldCapsResponse = await ctx.core.elasticsearch.client.asCurrentUser.fieldCaps({
+        index: reqBody.source.index,
+        fields: '*',
+        include_unmapped: false,
+      });
+
+      const fieldNamesSet = new Set(Object.keys(fieldCapsResponse.body.fields));
+
+      const fields = Object.entries(
+        fieldCapsResponse.body.fields as Record<string, Record<string, { type: string }>>
+      ).reduce((acc, [fieldName, fieldCaps]) => {
+        const fieldDefinition = Object.values(fieldCaps)[0];
+        const isMetaField = fieldDefinition.type.startsWith('_') || fieldName === '_doc_count';
+        const isKeywordDuplicate =
+          fieldName.endsWith('.keyword') && fieldNamesSet.has(fieldName.split('.keyword')[0]);
+        if (isMetaField || isKeywordDuplicate) {
+          return acc;
+        }
+        acc[fieldName] = { ...fieldDefinition };
+        return acc;
+      }, {} as Record<string, { type: string }>);
+
+      body.generated_dest_index.mappings.properties = fields;
+    }
     return res.ok({ body });
   } catch (e) {
     return res.customError(wrapError(wrapEsError(e)));
@@ -579,7 +618,7 @@ async function startTransforms(
           action: TRANSFORM_ACTIONS.START,
         });
       }
-      results[transformId] = { success: false, error: JSON.stringify(e) };
+      results[transformId] = { success: false, error: e.meta.body.error };
     }
   }
   return results;
@@ -628,7 +667,7 @@ async function stopTransforms(
           action: TRANSFORM_ACTIONS.STOP,
         });
       }
-      results[transformId] = { success: false, error: JSON.stringify(e) };
+      results[transformId] = { success: false, error: e.meta.body.error };
     }
   }
   return results;

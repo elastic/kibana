@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import PropTypes from 'prop-types';
@@ -19,6 +20,7 @@ import {
 import { ml } from '../../../../../services/ml_api_service';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { tabColor } from '../../../../../../../common/util/group_color_utils';
 
 export class JobDetails extends Component {
   constructor(props) {
@@ -43,7 +45,7 @@ export class JobDetails extends Component {
     ml.jobs
       .groups()
       .then((resp) => {
-        const groups = resp.map((g) => ({ label: g.id }));
+        const groups = resp.map((g) => ({ label: g.id, color: tabColor(g.id) }));
         this.setState({ groups });
       })
       .catch((error) => {
@@ -53,7 +55,9 @@ export class JobDetails extends Component {
 
   static getDerivedStateFromProps(props) {
     const selectedGroups =
-      props.jobGroups !== undefined ? props.jobGroups.map((g) => ({ label: g })) : [];
+      props.jobGroups !== undefined
+        ? props.jobGroups.map((g) => ({ label: g, color: tabColor(g) }))
+        : [];
 
     return {
       description: props.jobDescription,

@@ -1,10 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { SearchParams } from 'elasticsearch';
 import { get } from 'lodash';
 import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
 import { collectFns } from './collector_helpers';
@@ -114,9 +114,9 @@ export function summarizeCustomElements(
 
 const customElementCollector: TelemetryCollector = async function customElementCollector(
   kibanaIndex,
-  callCluster
+  esClient
 ) {
-  const customElementParams: SearchParams = {
+  const customElementParams = {
     size: 10000,
     index: kibanaIndex,
     ignoreUnavailable: true,
@@ -124,10 +124,10 @@ const customElementCollector: TelemetryCollector = async function customElementC
     body: { query: { bool: { filter: { term: { type: CUSTOM_ELEMENT_TYPE } } } } },
   };
 
-  const esResponse = await callCluster<CustomElementSearch>('search', customElementParams);
+  const { body: esResponse } = await esClient.search<CustomElementSearch>(customElementParams);
 
   if (get(esResponse, 'hits.hits.length') > 0) {
-    const customElements = esResponse.hits.hits.map((hit) => hit._source[CUSTOM_ELEMENT_TYPE]);
+    const customElements = esResponse.hits.hits.map((hit) => hit._source![CUSTOM_ELEMENT_TYPE]);
     return summarizeCustomElements(customElements);
   }
 

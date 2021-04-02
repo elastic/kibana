@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { isEmpty, isEqual, each, pick } from 'lodash';
+import { each, isEmpty, isEqual, pick } from 'lodash';
 import semverGte from 'semver/functions/gte';
 import moment, { Duration } from 'moment';
 // @ts-ignore
@@ -15,7 +16,7 @@ import { ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '../constants/validation';
 import { parseInterval } from './parse_interval';
 import { maxLengthValidator } from './validators';
 import { CREATED_BY_LABEL } from '../constants/new_job';
-import { CombinedJob, CustomSettings, Datafeed, JobId, Job } from '../types/anomaly_detection_jobs';
+import { CombinedJob, CustomSettings, Datafeed, Job, JobId } from '../types/anomaly_detection_jobs';
 import { EntityField } from './anomaly_utils';
 import { MlServerLimits } from '../types/ml_server_info';
 import { JobValidationMessage, JobValidationMessageId } from '../constants/messages';
@@ -27,6 +28,8 @@ import {
   getDatafeedAggregations,
 } from './datafeed_utils';
 import { findAggField } from './validation_utils';
+import { isPopulatedObject } from './object_utils';
+import { isDefined } from '../types/guards';
 
 export interface ValidationResults {
   valid: boolean;
@@ -49,6 +52,14 @@ export function calculateDatafeedFrequencyDefaultSeconds(bucketSpanSeconds: numb
   return freq;
 }
 
+export function hasRuntimeMappings(job: CombinedJob): boolean {
+  const hasDatafeed = isPopulatedObject(job.datafeed_config);
+  if (hasDatafeed) {
+    return isPopulatedObject(job.datafeed_config.runtime_mappings);
+  }
+  return false;
+}
+
 export function isTimeSeriesViewJob(job: CombinedJob): boolean {
   return getSingleMetricViewerJobErrorMessage(job) === undefined;
 }
@@ -60,6 +71,18 @@ export function isTimeSeriesViewDetector(job: CombinedJob, detectorIndex: number
     isSourceDataChartableForDetector(job, detectorIndex) ||
     isModelPlotChartableForDetector(job, detectorIndex)
   );
+}
+
+// Returns a flag to indicate whether the specified job is suitable for embedded map viewing.
+export function isMappableJob(job: CombinedJob, detectorIndex: number): boolean {
+  let isMappable = false;
+  const { detectors } = job.analysis_config;
+  if (detectorIndex >= 0 && detectorIndex < detectors.length) {
+    const dtr = detectors[detectorIndex];
+    const functionName = dtr.function;
+    isMappable = functionName === ML_JOB_AGGREGATION.LAT_LONG;
+  }
+  return isMappable;
 }
 
 // Returns a flag to indicate whether the source data can be plotted in a time
@@ -85,7 +108,11 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
     // If the datafeed uses script fields, we can only plot the time series if
     // model plot is enabled. Without model plot it will be very difficult or impossible
     // to invert to a reverse search of the underlying metric data.
-    if (isSourceDataChartable === true && typeof job.datafeed_config?.script_fields === 'object') {
+    if (
+      isSourceDataChartable === true &&
+      job.datafeed_config?.script_fields !== null &&
+      typeof job.datafeed_config?.script_fields === 'object'
+    ) {
       // Perform extra check to see if the detector is using a scripted field.
       const scriptFields = Object.keys(job.datafeed_config.script_fields);
       isSourceDataChartable =
@@ -94,10 +121,9 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
         scriptFields.indexOf(dtr.over_field_name!) === -1;
     }
 
-    // We cannot plot the source data for some specific aggregation configurations
-    const hasDatafeed =
-      typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0;
+    const hasDatafeed = isPopulatedObject(job.datafeed_config);
     if (hasDatafeed) {
+      // We cannot plot the source data for some specific aggregation configurations
       const aggs = getDatafeedAggregations(job.datafeed_config);
       if (aggs !== undefined) {
         const aggBucketsName = getAggregationBucketsName(aggs);
@@ -109,6 +135,11 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
             return false;
           }
         }
+      }
+
+      // We also cannot plot the source data if they datafeed uses any field defined by runtime_mappings
+      if (hasRuntimeMappings(job)) {
+        return false;
       }
     }
   }
@@ -149,6 +180,12 @@ export function isModelPlotChartableForDetector(job: Job, detectorIndex: number)
 // Returns a reason to indicate why the job configuration is not supported
 // if the result is undefined, that means the single metric job should be viewable
 export function getSingleMetricViewerJobErrorMessage(job: CombinedJob): string | undefined {
+  // if job has runtime mappings with no model plot
+  if (hasRuntimeMappings(job) && !job.model_plot_config?.enabled) {
+    return i18n.translate('xpack.ml.timeSeriesJob.jobWithRunTimeMessage', {
+      defaultMessage: 'the datafeed contains runtime fields and model plot is disabled',
+    });
+  }
   // only allow jobs with at least one detector whose function corresponds to
   // an ES aggregation which can be viewed in the single metric view and which
   // doesn't use a scripted field which can be very difficult or impossible to
@@ -696,7 +733,7 @@ export function validateGroupNames(job: Job): ValidationResults {
  * @return {Duration} the parsed interval, or null if it does not represent a valid
  * time interval.
  */
-export function parseTimeIntervalForJob(value: string | undefined): Duration | null {
+export function parseTimeIntervalForJob(value: string | number | undefined): Duration | null {
   if (value === undefined) {
     return null;
   }
@@ -711,7 +748,7 @@ export function parseTimeIntervalForJob(value: string | undefined): Duration | n
 
 // Checks that the value for a field which represents a time interval,
 // such as a job bucket span or datafeed query delay, is valid.
-function isValidTimeInterval(value: string | undefined): boolean {
+function isValidTimeInterval(value: string | number | undefined): boolean {
   if (value === undefined) {
     return true;
   }
@@ -764,4 +801,17 @@ export function splitIndexPatternNames(indexPatternName: string): string[] {
   return indexPatternName.includes(',')
     ? indexPatternName.split(',').map((i) => i.trim())
     : [indexPatternName];
+}
+
+/**
+ * Resolves the longest bucket span from the list.
+ * @param bucketSpans Collection of bucket spans
+ */
+export function resolveBucketSpanInSeconds(bucketSpans: string[]): number {
+  return Math.max(
+    ...bucketSpans
+      .map((b) => parseInterval(b))
+      .filter(isDefined)
+      .map((v) => v.asSeconds())
+  );
 }

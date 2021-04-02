@@ -1,17 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import Boom from '@hapi/boom';
+import { RuntimeMappings } from './fields';
+
 import { EsErrorBody } from '../util/errors';
 import { ANALYSIS_CONFIG_TYPE } from '../constants/data_frame_analytics';
 import { DATA_FRAME_TASK_STATE } from '../constants/data_frame_analytics';
 
 export interface DeleteDataFrameAnalyticsWithIndexStatus {
   success: boolean;
-  error?: EsErrorBody | Boom;
+  error?: EsErrorBody | Boom.Boom;
 }
 
 export type IndexName = string;
@@ -27,15 +30,16 @@ export interface OutlierAnalysis {
 
 interface Regression {
   dependent_variable: string;
-  training_percent?: number;
+  training_percent: number;
   num_top_feature_importance_values?: number;
   prediction_field_name?: string;
 }
 
 interface Classification {
+  class_assignment_objective?: string;
   dependent_variable: string;
-  training_percent?: number;
-  num_top_classes?: string;
+  training_percent: number;
+  num_top_classes?: number;
   num_top_feature_importance_values?: number;
   prediction_field_name?: string;
 }
@@ -72,6 +76,7 @@ export interface DataFrameAnalyticsConfig {
   source: {
     index: IndexName | IndexName[];
     query?: any;
+    runtime_mappings?: RuntimeMappings;
   };
   analysis: AnalysisConfig;
   analyzed_fields: {

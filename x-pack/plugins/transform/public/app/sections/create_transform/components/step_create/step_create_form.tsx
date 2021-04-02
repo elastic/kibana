@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, FC, useEffect, useState } from 'react';
@@ -25,10 +26,7 @@ import {
 
 import { toMountPoint } from '../../../../../../../../../src/plugins/kibana_react/public';
 
-import type {
-  PutTransformsRequestSchema,
-  PutTransformsResponseSchema,
-} from '../../../../../../common/api_schemas/transforms';
+import type { PutTransformsResponseSchema } from '../../../../../../common/api_schemas/transforms';
 import {
   isGetTransformsStatsResponseSchema,
   isPutTransformsResponseSchema,
@@ -44,6 +42,13 @@ import { useAppDependencies, useToastNotifications } from '../../../../app_depen
 import { RedirectToTransformManagement } from '../../../../common/navigation';
 import { ToastNotificationText } from '../../../../components';
 import { DuplicateIndexPatternError } from '../../../../../../../../../src/plugins/data/public';
+import {
+  PutTransformsLatestRequestSchema,
+  PutTransformsPivotRequestSchema,
+} from '../../../../../../common/api_schemas/transforms';
+import type { RuntimeField } from '../../../../../../../../../src/plugins/data/common/index_patterns';
+import { isPopulatedObject } from '../../../../../../common/shared_imports';
+import { isLatestTransform } from '../../../../../../common/types/transform';
 
 export interface StepDetailsExposedState {
   created: boolean;
@@ -62,7 +67,7 @@ export function getDefaultStepCreateState(): StepDetailsExposedState {
 export interface StepCreateFormProps {
   createIndexPattern: boolean;
   transformId: string;
-  transformConfig: PutTransformsRequestSchema;
+  transformConfig: PutTransformsPivotRequestSchema | PutTransformsLatestRequestSchema;
   overrides: StepDetailsExposedState;
   timeFieldName?: string | undefined;
   onChange(s: StepDetailsExposedState): void;
@@ -187,12 +192,19 @@ export const StepCreateForm: FC<StepCreateFormProps> = React.memo(
     const createKibanaIndexPattern = async () => {
       setLoading(true);
       const indexPatternName = transformConfig.dest.index;
+      const runtimeMappings = transformConfig.source.runtime_mappings as Record<
+        string,
+        RuntimeField
+      >;
 
       try {
         const newIndexPattern = await indexPatterns.createAndSave(
           {
             title: indexPatternName,
             timeFieldName,
+            ...(isPopulatedObject(runtimeMappings) && isLatestTransform(transformConfig)
+              ? { runtimeFieldMap: runtimeMappings }
+              : {}),
           },
           false,
           true

@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { AppMountParameters, CoreStart } from 'kibana/public';
 import React from 'react';
 import { HasDataContextValue } from '../../../../context/has_data_context';
 import * as fetcherHook from '../../../../hooks/use_fetcher';
 import * as hasDataHook from '../../../../hooks/use_has_data';
 import * as pluginContext from '../../../../hooks/use_plugin_context';
-import { ObservabilityPluginSetupDeps } from '../../../../plugin';
+import { ObservabilityPublicPluginsStart } from '../../../../plugin';
 import { render } from '../../../../utils/test_helper';
 import { UXSection } from './';
 import { response } from './mock_data/ux.mock';
@@ -50,7 +52,7 @@ describe('UXSection', () => {
             },
           },
         },
-      } as unknown) as ObservabilityPluginSetupDeps,
+      } as unknown) as ObservabilityPublicPluginsStart,
     }));
   });
   it('renders with core web vitals', () => {
@@ -67,7 +69,7 @@ describe('UXSection', () => {
     expect(getByText('Largest contentful paint')).toBeInTheDocument();
     expect(getByText('1.94 s')).toBeInTheDocument();
     expect(getByText('14 ms')).toBeInTheDocument();
-    expect(getByText('0.01')).toBeInTheDocument();
+    expect(getByText('0.010')).toBeInTheDocument();
 
     // LCP Rank Values
     expect(getByText('Good (65%)')).toBeInTheDocument();

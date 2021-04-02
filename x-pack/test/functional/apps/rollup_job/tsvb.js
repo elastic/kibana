@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -11,6 +12,7 @@ export default function ({ getService, getPageObjects }) {
   const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
+  const esDeleteAllIndices = getService('esDeleteAllIndices');
   const PageObjects = getPageObjects([
     'common',
     'settings',
@@ -81,7 +83,8 @@ export default function ({ getService, getPageObjects }) {
         'Oct 15, 2019 @ 19:31:44.000'
       );
       await PageObjects.visualBuilder.clickPanelOptions('metric');
-      await PageObjects.visualBuilder.setIndexPatternValue(rollupTargetIndexName);
+      await PageObjects.visualBuilder.setIndexPatternValue(rollupTargetIndexName, false);
+      await PageObjects.visualBuilder.setMetricsDataTimerangeMode('Last value');
       await PageObjects.visualBuilder.setIntervalValue('1d');
       await PageObjects.visualBuilder.setDropLastBucket(false);
       await PageObjects.common.sleep(3000);
@@ -96,8 +99,7 @@ export default function ({ getService, getPageObjects }) {
         method: 'DELETE',
       });
 
-      await es.indices.delete({ index: rollupTargetIndexName });
-      await es.indices.delete({ index: rollupSourceIndexName });
+      await esDeleteAllIndices([rollupTargetIndexName, rollupSourceIndexName]);
       await esArchiver.load('empty_kibana');
     });
   });

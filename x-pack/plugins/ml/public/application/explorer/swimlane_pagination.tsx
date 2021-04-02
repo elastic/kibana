@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useCallback, useState } from 'react';
@@ -56,6 +57,7 @@ export const SwimLanePagination: FC<SwimLanePaginationProps> = ({
           closePopover();
           setPerPage(v);
         }}
+        data-test-subj={`${v} rows`}
       >
         <FormattedMessage
           id="xpack.ml.explorer.swimLaneSelectRowsPerPage"
@@ -77,19 +79,22 @@ export const SwimLanePagination: FC<SwimLanePaginationProps> = ({
               iconType="arrowDown"
               iconSide="right"
               onClick={onButtonClick}
+              data-test-subj="mlSwimLanePageSizeControl"
             >
-              <FormattedMessage
-                id="xpack.ml.explorer.swimLaneRowsPerPage"
-                defaultMessage="Rows per page: {rowsCount}"
-                values={{ rowsCount: perPage }}
-              />
+              <span data-test-subj={perPage}>
+                <FormattedMessage
+                  id="xpack.ml.explorer.swimLaneRowsPerPage"
+                  defaultMessage="Rows per page: {rowsCount}"
+                  values={{ rowsCount: perPage }}
+                />
+              </span>
             </EuiButtonEmpty>
           }
           isOpen={isPopoverOpen}
           closePopover={closePopover}
           panelPaddingSize="none"
         >
-          <EuiContextMenuPanel items={items} />
+          <EuiContextMenuPanel items={items} data-test-subj="mlSwimLanePageSizePanel" />
         </EuiPopover>
       </EuiFlexItem>
 
@@ -101,6 +106,7 @@ export const SwimLanePagination: FC<SwimLanePaginationProps> = ({
           pageCount={pageCount}
           activePage={componentFromPage}
           onPageClick={goToPage}
+          data-test-subj="mlSwimLanePagination"
         />
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { useReducer, useCallback } from 'react';
-
-import { CommentRequest } from '../../../../case/common/api';
+import { useReducer, useCallback, useRef, useEffect } from 'react';
+import { CommentRequest } from '../../../../cases/common/api';
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
 
 import { postComment } from './api';
@@ -41,8 +41,14 @@ const dataFetchReducer = (state: NewCommentState, action: Action): NewCommentSta
   }
 };
 
+interface PostComment {
+  caseId: string;
+  data: CommentRequest;
+  updateCase?: (newCase: Case) => void;
+  subCaseId?: string;
+}
 export interface UsePostComment extends NewCommentState {
-  postComment: (caseId: string, data: CommentRequest, updateCase?: (newCase: Case) => void) => void;
+  postComment: (args: PostComment) => Promise<void>;
 }
 
 export const usePostComment = (): UsePostComment => {
@@ -51,38 +57,47 @@ export const usePostComment = (): UsePostComment => {
     isError: false,
   });
   const [, dispatchToaster] = useStateToaster();
+  const isCancelledRef = useRef(false);
+  const abortCtrlRef = useRef(new AbortController());
 
   const postMyComment = useCallback(
-    async (caseId: string, data: CommentRequest, updateCase?: (newCase: Case) => void) => {
-      let cancel = false;
-      const abortCtrl = new AbortController();
-
+    async ({ caseId, data, updateCase, subCaseId }: PostComment) => {
       try {
+        isCancelledRef.current = false;
+        abortCtrlRef.current.abort();
+        abortCtrlRef.current = new AbortController();
         dispatch({ type: 'FETCH_INIT' });
-        const response = await postComment(data, caseId, abortCtrl.signal);
-        if (!cancel) {
+
+        const response = await postComment(data, caseId, abortCtrlRef.current.signal, subCaseId);
+
+        if (!isCancelledRef.current) {
           dispatch({ type: 'FETCH_SUCCESS' });
           if (updateCase) {
             updateCase(response);
           }
         }
       } catch (error) {
-        if (!cancel) {
-          errorToToaster({
-            title: i18n.ERROR_TITLE,
-            error: error.body && error.body.message ? new Error(error.body.message) : error,
-            dispatchToaster,
-          });
+        if (!isCancelledRef.current) {
+          if (error.name !== 'AbortError') {
+            errorToToaster({
+              title: i18n.ERROR_TITLE,
+              error: error.body && error.body.message ? new Error(error.body.message) : error,
+              dispatchToaster,
+            });
+          }
           dispatch({ type: 'FETCH_FAILURE' });
         }
       }
-      return () => {
-        abortCtrl.abort();
-        cancel = true;
-      };
     },
     [dispatchToaster]
   );
+
+  useEffect(() => {
+    return () => {
+      isCancelledRef.current = true;
+      abortCtrlRef.current.abort();
+    };
+  }, []);
 
   return { ...state, postComment: postMyComment };
 };

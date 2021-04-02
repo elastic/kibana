@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 /* eslint max-len: 0 */
@@ -33,7 +22,7 @@ export const getSavedObjects = (): SavedObject[] => [
         defaultMessage: '[Logs] Unique Visitors vs. Average Bytes',
       }),
       visState:
-        '{"title":"[Logs] Unique Visitors vs. Average Bytes","type":"area","params":{"type":"area","grid":{"categoryLines":false,"style":{"color":"#eee"}},"categoryAxes":[{"id":"CategoryAxis-1","type":"category","position":"bottom","show":true,"style":{},"scale":{"type":"linear"},"labels":{"show":true,"truncate":100},"title":{}}],"valueAxes":[{"id":"ValueAxis-1","name":"LeftAxis-1","type":"value","position":"left","show":true,"style":{},"scale":{"type":"linear","mode":"normal"},"labels":{"show":true,"rotate":0,"filter":false,"truncate":100},"title":{"text":"Avg. Bytes"}},{"id":"ValueAxis-2","name":"RightAxis-1","type":"value","position":"right","show":true,"style":{},"scale":{"type":"linear","mode":"normal"},"labels":{"show":true,"rotate":0,"filter":false,"truncate":100},"title":{"text":"Unique Visitors"}}],"seriesParams":[{"show":"true","type":"histogram","mode":"stacked","data":{"label":"Avg. Bytes","id":"1"},"drawLinesBetweenPoints":true,"showCircles":true,"interpolate":"linear","valueAxis":"ValueAxis-1"},{"show":true,"mode":"stacked","type":"line","drawLinesBetweenPoints":false,"showCircles":true,"interpolate":"linear","data":{"id":"2","label":"Unique Visitors"},"valueAxis":"ValueAxis-2"}],"addTooltip":true,"addLegend":true,"legendPosition":"right","times":[],"addTimeMarker":false,"radiusRatio":17},"aggs":[{"id":"1","enabled":true,"type":"avg","schema":"metric","params":{"field":"bytes","customLabel":"Avg. Bytes"}},{"id":"2","enabled":true,"type":"cardinality","schema":"metric","params":{"field":"clientip","customLabel":"Unique Visitors"}},{"id":"3","enabled":true,"type":"date_histogram","schema":"segment","params":{"field":"timestamp","interval":"auto","time_zone":"America/Los_Angeles","customInterval":"2h","min_doc_count":1,"extended_bounds":{}}},{"id":"4","enabled":true,"type":"count","schema":"radius","params":{}}]}',
+        '{"title":"[Logs] Unique Visitors vs. Average Bytes","type":"area","params":{"type":"area","grid":{"categoryLines":false,"style":{"color":"#eee"}},"categoryAxes":[{"id":"CategoryAxis-1","type":"category","position":"bottom","show":true,"style":{},"scale":{"type":"linear"},"labels":{"show":true,"truncate":100,"filter":true},"title":{}}],"valueAxes":[{"id":"ValueAxis-1","name":"LeftAxis-1","type":"value","position":"left","show":true,"style":{},"scale":{"type":"linear","mode":"normal"},"labels":{"show":true,"rotate":0,"filter":false,"truncate":100},"title":{"text":"Avg. Bytes"}},{"id":"ValueAxis-2","name":"RightAxis-1","type":"value","position":"right","show":true,"style":{},"scale":{"type":"linear","mode":"normal"},"labels":{"show":true,"rotate":0,"filter":false,"truncate":100},"title":{"text":"Unique Visitors"}}],"seriesParams":[{"show":"true","type":"histogram","mode":"stacked","data":{"label":"Avg. Bytes","id":"1"},"drawLinesBetweenPoints":true,"showCircles":true,"interpolate":"linear","valueAxis":"ValueAxis-1"},{"show":true,"mode":"stacked","type":"line","drawLinesBetweenPoints":false,"showCircles":true,"interpolate":"linear","data":{"id":"2","label":"Unique Visitors"},"valueAxis":"ValueAxis-2"}],"addTooltip":true,"addLegend":true,"legendPosition":"right","times":[],"addTimeMarker":false,"radiusRatio":17,"detailedTooltip":true,"palette":{"type":"palette","name":"default"}},"aggs":[{"id":"1","enabled":true,"type":"avg","schema":"metric","params":{"field":"bytes","customLabel":"Avg. Bytes"}},{"id":"2","enabled":true,"type":"cardinality","schema":"metric","params":{"field":"clientip","customLabel":"Unique Visitors"}},{"id":"3","enabled":true,"type":"date_histogram","schema":"segment","params":{"field":"timestamp","interval":"auto","min_doc_count":1,"extended_bounds":{}}},{"id":"4","enabled":true,"type":"count","schema":"radius","params":{}}]}',
       uiStateJSON: '{"vis":{"colors":{"Avg. Bytes":"#70DBED","Unique Visitors":"#0A437C"}}}',
       description: '',
       version: 1,
@@ -100,7 +89,7 @@ export const getSavedObjects = (): SavedObject[] => [
         defaultMessage: '[Logs] Host, Visits and Bytes Table',
       }),
       visState:
-        '{"title":"[Logs] Host, Visits and Bytes Table","type":"metrics","params":{"id":"61ca57f0-469d-11e7-af02-69e470af7417","type":"table","series":[{"id":"bd09d600-e5b1-11e7-bfc2-a1f7e71965a1","color":"#68BC00","split_mode":"everything","metrics":[{"id":"bd09d601-e5b1-11e7-bfc2-a1f7e71965a1","type":"sum","field":"bytes"},{"sigma":"","id":"c9514c90-e5b1-11e7-bfc2-a1f7e71965a1","type":"sum_bucket","field":"bd09d601-e5b1-11e7-bfc2-a1f7e71965a1"}],"seperate_axis":0,"axis_position":"right","formatter":"bytes","chart_type":"line","line_width":1,"point_size":1,"fill":0.5,"stacked":"none","color_rules":[{"id":"c0c668d0-e5b1-11e7-bfc2-a1f7e71965a1"}],"label":"Bytes (Total)"},{"id":"b7672c30-a6df-11e8-8b18-1da1dfc50975","color":"#68BC00","split_mode":"everything","metrics":[{"id":"b7672c31-a6df-11e8-8b18-1da1dfc50975","type":"sum","field":"bytes"}],"seperate_axis":0,"axis_position":"right","formatter":"bytes","chart_type":"line","line_width":1,"point_size":1,"fill":0.5,"stacked":"none","color_rules":[{"id":"c0c668d0-e5b1-11e7-bfc2-a1f7e71965a1"}],"label":"Bytes (Last Hour)"},{"id":"f2c20700-a6df-11e8-8b18-1da1dfc50975","color":"#68BC00","split_mode":"everything","metrics":[{"id":"f2c20701-a6df-11e8-8b18-1da1dfc50975","type":"cardinality","field":"ip"},{"sigma":"","id":"f46333e0-a6df-11e8-8b18-1da1dfc50975","type":"sum_bucket","field":"f2c20701-a6df-11e8-8b18-1da1dfc50975"}],"seperate_axis":0,"axis_position":"right","formatter":"number","chart_type":"line","line_width":1,"point_size":1,"fill":0.5,"stacked":"none","label":"Unique Visits (Total)","color_rules":[{"value":1000,"id":"2e963080-a6e0-11e8-8b18-1da1dfc50975","text":"rgba(211,49,21,1)","operator":"lt"},{"value":1000,"id":"3d4fb880-a6e0-11e8-8b18-1da1dfc50975","text":"rgba(252,196,0,1)","operator":"gte"},{"value":1500,"id":"435f8a20-a6e0-11e8-8b18-1da1dfc50975","text":"rgba(104,188,0,1)","operator":"gte"}],"offset_time":"","value_template":"","trend_arrows":1},{"id":"46fd7fc0-e5b1-11e7-bfc2-a1f7e71965a1","color":"#68BC00","split_mode":"everything","metrics":[{"id":"46fd7fc1-e5b1-11e7-bfc2-a1f7e71965a1","type":"cardinality","field":"ip"}],"seperate_axis":0,"axis_position":"right","formatter":"number","chart_type":"line","line_width":1,"point_size":1,"fill":0.5,"stacked":"none","label":"Unique Visits (Last Hour)","color_rules":[{"value":10,"id":"4e90aeb0-a6e0-11e8-8b18-1da1dfc50975","text":"rgba(211,49,21,1)","operator":"lt"},{"value":10,"id":"6d59b1c0-a6e0-11e8-8b18-1da1dfc50975","text":"rgba(252,196,0,1)","operator":"gte"},{"value":25,"id":"77578670-a6e0-11e8-8b18-1da1dfc50975","text":"rgba(104,188,0,1)","operator":"gte"}],"offset_time":"","value_template":"","trend_arrows":1}],"time_field":"timestamp","index_pattern":"kibana_sample_data_logs","interval":"1h","axis_position":"left","axis_formatter":"number","show_legend":1,"show_grid":1,"bar_color_rules":[{"id":"e9b4e490-e1c6-11e7-b4f6-0f68c45f7387"}],"pivot_id":"extension.keyword","pivot_label":"Type","drilldown_url":"","axis_scale":"normal"},"aggs":[]}',
+        '{"title":"[Logs] Host, Visits and Bytes Table","type":"metrics","params":{"id":"61ca57f0-469d-11e7-af02-69e470af7417","type":"table","series":[{"id":"bd09d600-e5b1-11e7-bfc2-a1f7e71965a1","color":"#68BC00","split_mode":"everything","metrics":[{"id":"bd09d601-e5b1-11e7-bfc2-a1f7e71965a1","type":"sum","field":"bytes"},{"sigma":"","id":"c9514c90-e5b1-11e7-bfc2-a1f7e71965a1","type":"sum_bucket","field":"bd09d601-e5b1-11e7-bfc2-a1f7e71965a1"}],"seperate_axis":0,"axis_position":"right","formatter":"bytes","chart_type":"line","line_width":1,"point_size":1,"fill":0.5,"stacked":"none","color_rules":[{"id":"c0c668d0-e5b1-11e7-bfc2-a1f7e71965a1"}],"label":"Bytes (Total)"},{"id":"b7672c30-a6df-11e8-8b18-1da1dfc50975","color":"#68BC00","split_mode":"everything","metrics":[{"id":"b7672c31-a6df-11e8-8b18-1da1dfc50975","type":"sum","field":"bytes"}],"seperate_axis":0,"axis_position":"right","formatter":"bytes","chart_type":"line","line_width":1,"point_size":1,"fill":0.5,"stacked":"none","color_rules":[{"id":"c0c668d0-e5b1-11e7-bfc2-a1f7e71965a1"}],"label":"Bytes (Last Hour)"},{"id":"f2c20700-a6df-11e8-8b18-1da1dfc50975","color":"#68BC00","split_mode":"everything","metrics":[{"id":"f2c20701-a6df-11e8-8b18-1da1dfc50975","type":"cardinality","field":"ip"},{"sigma":"","id":"f46333e0-a6df-11e8-8b18-1da1dfc50975","type":"sum_bucket","field":"f2c20701-a6df-11e8-8b18-1da1dfc50975"}],"seperate_axis":0,"axis_position":"right","formatter":"number","chart_type":"line","line_width":1,"point_size":1,"fill":0.5,"stacked":"none","label":"Unique Visits (Total)","color_rules":[{"value":1000,"id":"2e963080-a6e0-11e8-8b18-1da1dfc50975","text":"rgba(211,49,21,1)","operator":"lt"},{"value":1000,"id":"3d4fb880-a6e0-11e8-8b18-1da1dfc50975","text":"rgba(252,196,0,1)","operator":"gte"},{"value":1500,"id":"435f8a20-a6e0-11e8-8b18-1da1dfc50975","text":"rgba(104,188,0,1)","operator":"gte"}],"offset_time":"","value_template":"","trend_arrows":1},{"id":"46fd7fc0-e5b1-11e7-bfc2-a1f7e71965a1","color":"#68BC00","split_mode":"everything","metrics":[{"id":"46fd7fc1-e5b1-11e7-bfc2-a1f7e71965a1","type":"cardinality","field":"ip"}],"seperate_axis":0,"axis_position":"right","formatter":"number","chart_type":"line","line_width":1,"point_size":1,"fill":0.5,"stacked":"none","label":"Unique Visits (Last Hour)","color_rules":[{"value":10,"id":"4e90aeb0-a6e0-11e8-8b18-1da1dfc50975","text":"rgba(211,49,21,1)","operator":"lt"},{"value":10,"id":"6d59b1c0-a6e0-11e8-8b18-1da1dfc50975","text":"rgba(252,196,0,1)","operator":"gte"},{"value":25,"id":"77578670-a6e0-11e8-8b18-1da1dfc50975","text":"rgba(104,188,0,1)","operator":"gte"}],"offset_time":"","value_template":"","trend_arrows":1}],"time_field":"timestamp","index_pattern_ref_name":"ref_1_index_pattern","use_kibana_indexes": true,"interval":"1h","axis_position":"left","axis_formatter":"number","show_legend":1,"show_grid":1,"bar_color_rules":[{"id":"e9b4e490-e1c6-11e7-b4f6-0f68c45f7387"}],"pivot_id":"extension.keyword","pivot_label":"Type","drilldown_url":"","axis_scale":"normal"},"aggs":[]}',
       uiStateJSON: '{}',
       description: '',
       version: 1,
@@ -108,7 +97,13 @@ export const getSavedObjects = (): SavedObject[] => [
         searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
       },
     },
-    references: [],
+    references: [
+      {
+        name: 'ref_1_index_pattern',
+        type: 'index_pattern',
+        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      },
+    ],
   },
   {
     id: '69a34b00-9ee8-11e7-8711-e7a007dcef99',
@@ -186,7 +181,7 @@ export const getSavedObjects = (): SavedObject[] => [
         defaultMessage: '[Logs] Response Codes Over Time + Annotations',
       }),
       visState:
-        '{"title":"[Logs] Response Codes Over Time + Annotations","type":"metrics","params":{"id":"61ca57f0-469d-11e7-af02-69e470af7417","type":"timeseries","series":[{"id":"61ca57f1-469d-11e7-af02-69e470af7417","color":"rgba(115,216,255,1)","split_mode":"terms","metrics":[{"id":"61ca57f2-469d-11e7-af02-69e470af7417","type":"cardinality","field":"ip"}],"seperate_axis":0,"axis_position":"right","formatter":"percent","chart_type":"line","line_width":"2","point_size":"0","fill":"0.5","stacked":"percent","terms_field":"response.keyword","terms_order_by":"61ca57f2-469d-11e7-af02-69e470af7417","label":"Response Code Count","split_color_mode":"gradient"}],"time_field":"timestamp","index_pattern":"kibana_sample_data_logs","interval":">=4h","axis_position":"left","axis_formatter":"number","show_legend":1,"show_grid":1,"annotations":[{"fields":"geo.src, host","template":"Security Error from {{geo.src}} on {{host}}","index_pattern":"kibana_sample_data_logs","query_string":"tags:error AND tags:security","id":"bd7548a0-2223-11e8-832f-d5027f3c8a47","color":"rgba(211,49,21,1)","time_field":"timestamp","icon":"fa-asterisk","ignore_global_filters":1,"ignore_panel_filters":1}],"legend_position":"bottom","axis_scale":"normal","drop_last_bucket":0},"aggs":[]}',
+        '{"title":"[Logs] Response Codes Over Time + Annotations","type":"metrics","params":{"id":"61ca57f0-469d-11e7-af02-69e470af7417","type":"timeseries","series":[{"id":"61ca57f1-469d-11e7-af02-69e470af7417","color":"rgba(115,216,255,1)","split_mode":"terms","metrics":[{"id":"61ca57f2-469d-11e7-af02-69e470af7417","type":"cardinality","field":"ip"}],"seperate_axis":0,"axis_position":"right","formatter":"percent","chart_type":"line","line_width":"2","point_size":"0","fill":"0.5","stacked":"percent","terms_field":"response.keyword","terms_order_by":"61ca57f2-469d-11e7-af02-69e470af7417","label":"Response Code Count","split_color_mode":"gradient"}],"time_field":"timestamp","index_pattern_ref_name":"ref_1_index_pattern","use_kibana_indexes":true,"interval":">=4h","axis_position":"left","axis_formatter":"number","show_legend":1,"show_grid":1,"annotations":[{"fields":"geo.src, host","template":"Security Error from {{geo.src}} on {{host}}","index_pattern_ref_name":"ref_2_index_pattern","query_string":"tags:error AND tags:security","id":"bd7548a0-2223-11e8-832f-d5027f3c8a47","color":"rgba(211,49,21,1)","time_field":"timestamp","icon":"fa-asterisk","ignore_global_filters":1,"ignore_panel_filters":1}],"legend_position":"bottom","axis_scale":"normal","drop_last_bucket":0},"aggs":[]}',
       uiStateJSON: '{}',
       description: '',
       version: 1,
@@ -194,7 +189,18 @@ export const getSavedObjects = (): SavedObject[] => [
         searchSourceJSON: '{"query":{"query":"","language":"kuery"},"filter":[]}',
       },
     },
-    references: [],
+    references: [
+      {
+        name: 'ref_1_index_pattern',
+        type: 'index_pattern',
+        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      },
+      {
+        name: 'ref_2_index_pattern',
+        type: 'index_pattern',
+        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      },
+    ],
   },
   {
     id: '24a3e970-4257-11e8-b3aa-73fdaf54bfc9',

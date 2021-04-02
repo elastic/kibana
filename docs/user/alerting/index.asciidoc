@@ -1,5 +1,5 @@
 include::alerting-getting-started.asciidoc[]
-include::defining-alerts.asciidoc[]
+include::defining-rules.asciidoc[]
 include::action-types.asciidoc[]
-include::alert-types.asciidoc[]
-include::alerting-scale-performance.asciidoc[]
+include::rule-types.asciidoc[]
+include::alerting-troubleshooting.asciidoc[]

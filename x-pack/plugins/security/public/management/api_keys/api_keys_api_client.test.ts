@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { APIKeysAPIClient } from './api_keys_api_client';
+import { httpServiceMock } from 'src/core/public/mocks';
 
-import { httpServiceMock } from '../../../../../../src/core/public/mocks';
+import { APIKeysAPIClient } from './api_keys_api_client';
 
 describe('APIKeysAPIClient', () => {
   it('checkPrivileges() queries correct endpoint', async () => {

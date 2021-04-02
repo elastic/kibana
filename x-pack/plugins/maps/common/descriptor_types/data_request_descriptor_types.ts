@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { Query } from 'src/plugins/data/public';
@@ -18,11 +20,13 @@ export type MapFilters = {
   filters: Filter[];
   query?: MapQuery;
   refreshTimerLastTriggeredAt?: string;
+  searchSessionId?: string;
   timeFilters: TimeRange;
   zoom: number;
 };
 
 type ESSearchSourceSyncMeta = {
+  filterByMapBounds: boolean;
   sortField: string;
   sortOrder: SortDirection;
   scalingType: SCALING_TYPES;
@@ -39,10 +43,15 @@ type ESGeoLineSourceSyncMeta = {
   sortField: string;
 };
 
+type ESTermSourceSyncMeta = {
+  size: number;
+};
+
 export type VectorSourceSyncMeta =
   | ESSearchSourceSyncMeta
   | ESGeoGridSourceSyncMeta
   | ESGeoLineSourceSyncMeta
+  | ESTermSourceSyncMeta
   | null;
 
 export type VectorSourceRequestMeta = MapFilters & {
@@ -54,10 +63,9 @@ export type VectorSourceRequestMeta = MapFilters & {
   sourceMeta: VectorSourceSyncMeta;
 };
 
-export type VectorJoinSourceRequestMeta = Omit<
-  VectorSourceRequestMeta,
-  'geogridPrecision' | 'sourceMeta'
-> & { sourceQuery?: Query };
+export type VectorJoinSourceRequestMeta = Omit<VectorSourceRequestMeta, 'geogridPrecision'> & {
+  sourceQuery?: Query;
+};
 
 export type VectorStyleRequestMeta = MapFilters & {
   dynamicStyleFields: string[];
@@ -68,6 +76,7 @@ export type VectorStyleRequestMeta = MapFilters & {
 
 export type ESSearchSourceResponseMeta = {
   areResultsTrimmed?: boolean;
+  resultsCount?: number;
 
   // top hits meta
   areEntitiesTrimmed?: boolean;
@@ -83,13 +92,18 @@ export type ESGeoLineSourceResponseMeta = {
   totalEntities: number;
 };
 
+export type VectorTileLayerMeta = {
+  tileLayerId: string;
+};
+
 // Partial because objects are justified downstream in constructors
 export type DataMeta = Partial<
   VectorSourceRequestMeta &
     VectorJoinSourceRequestMeta &
     VectorStyleRequestMeta &
     ESSearchSourceResponseMeta &
-    ESGeoLineSourceResponseMeta
+    ESGeoLineSourceResponseMeta &
+    VectorTileLayerMeta
 >;
 
 type NumericalStyleFieldData = {

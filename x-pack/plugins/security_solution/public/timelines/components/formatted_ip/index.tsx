@@ -1,13 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { isArray, isEmpty, isString, uniq } from 'lodash/fp';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useContext } from 'react';
+import { useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
+import { FlowTarget } from '../../../../common/search_strategy/security_solution/network';
 import {
   DragEffects,
   DraggableWrapper,
@@ -15,13 +18,24 @@ import {
 import { escapeDataProviderId } from '../../../common/components/drag_and_drop/helpers';
 import { Content } from '../../../common/components/draggables';
 import { getOrEmptyTagFromValue } from '../../../common/components/empty_value';
-import { NetworkDetailsLink } from '../../../common/components/links';
 import { parseQueryValue } from '../../../timelines/components/timeline/body/renderers/parse_query_value';
 import {
   DataProvider,
   IS_OPERATOR,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
+import {
+  TimelineExpandedDetailType,
+  TimelineId,
+  TimelineTabs,
+} from '../../../../common/types/timeline';
+import { activeTimeline } from '../../containers/active_timeline_context';
+import { timelineActions } from '../../store/timeline';
+import { StatefulEventContext } from '../timeline/body/events/stateful_event_context';
+import { LinkAnchor } from '../../../common/components/links';
+import { SecurityPageName } from '../../../app/types';
+import { useFormatUrl, getNetworkDetailsUrl } from '../../../common/components/link_to';
+import { encodeIpv6 } from '../../../common/lib/helpers';
 
 const getUniqueId = ({
   contextId,
@@ -127,20 +141,52 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
   fieldName,
   truncate,
 }) => {
-  const key = useMemo(
-    () =>
-      `address-links-draggable-wrapper-${getUniqueId({
-        contextId,
-        eventId,
-        fieldName,
-        address,
-      })}`,
-    [address, contextId, eventId, fieldName]
-  );
+  const key = `address-links-draggable-wrapper-${getUniqueId({
+    contextId,
+    eventId,
+    fieldName,
+    address,
+  })}`;
 
   const dataProviderProp = useMemo(
     () => getDataProvider({ contextId, eventId, fieldName, address }),
     [address, contextId, eventId, fieldName]
+  );
+
+  const dispatch = useDispatch();
+  const eventContext = useContext(StatefulEventContext);
+  const { formatUrl } = useFormatUrl(SecurityPageName.network);
+  const isInTimelineContext = address && eventContext?.tabType && eventContext?.timelineID;
+
+  const openNetworkDetailsSidePanel = useCallback(
+    (e) => {
+      e.preventDefault();
+      if (eventContext && isInTimelineContext) {
+        const { tabType, timelineID } = eventContext;
+        const updatedExpandedDetail: TimelineExpandedDetailType = {
+          panelView: 'networkDetail',
+          params: {
+            ip: address,
+            flowTarget: fieldName.includes(FlowTarget.destination)
+              ? FlowTarget.destination
+              : FlowTarget.source,
+          },
+        };
+
+        dispatch(
+          timelineActions.toggleDetailPanel({
+            ...updatedExpandedDetail,
+            tabType,
+            timelineId: timelineID,
+          })
+        );
+
+        if (timelineID === TimelineId.active && tabType === TimelineTabs.query) {
+          activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
+        }
+      }
+    },
+    [eventContext, isInTimelineContext, address, fieldName, dispatch]
   );
 
   const render = useCallback(
@@ -151,10 +197,25 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
         </DragEffects>
       ) : (
         <Content field={fieldName} tooltipContent={address}>
-          <NetworkDetailsLink data-test-subj="network-details" ip={address} />
+          <LinkAnchor
+            href={formatUrl(getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(address))))}
+            data-test-subj="network-details"
+            // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined
+            // When this component is used outside of timeline (i.e. in the flyout) we would still like it to link to the IP Overview page
+            onClick={isInTimelineContext ? openNetworkDetailsSidePanel : undefined}
+          >
+            {address}
+          </LinkAnchor>
         </Content>
       ),
-    [address, dataProviderProp, fieldName]
+    [
+      dataProviderProp,
+      fieldName,
+      address,
+      formatUrl,
+      isInTimelineContext,
+      openNetworkDetailsSidePanel,
+    ]
   );
 
   return (

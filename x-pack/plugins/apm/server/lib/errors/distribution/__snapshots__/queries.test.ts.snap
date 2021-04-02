@@ -38,11 +38,6 @@ Object {
               },
             },
           },
-          Object {
-            "term": Object {
-              "service.environment": "test",
-            },
-          },
         ],
       },
     },
@@ -87,11 +82,6 @@ Object {
                 "gte": 1528113600000,
                 "lte": 1528977600000,
               },
-            },
-          },
-          Object {
-            "term": Object {
-              "service.environment": "test",
             },
           },
           Object {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 /*
@@ -35,6 +36,8 @@ import { NavigationMenu } from '../../../components/navigation_menu';
 import { isValidFilterListId, saveFilterList } from './utils';
 import { ml } from '../../../services/ml_api_service';
 import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { getDocLinks } from '../../../util/dependency_cache';
+import { HelpMenu } from '../../../components/help_menu';
 
 const DEFAULT_ITEMS_PER_PAGE = 50;
 
@@ -320,6 +323,8 @@ export class EditFilterListUI extends Component {
 
     const totalItemCount = items !== undefined ? items.length : 0;
 
+    const helpLink = getDocLinks().links.ml.customRules;
+
     return (
       <Fragment>
         <NavigationMenu tabId="settings" />
@@ -393,6 +398,7 @@ export class EditFilterListUI extends Component {
             </EuiPageContent>
           </EuiPageBody>
         </EuiPage>
+        <HelpMenu docLink={helpLink} />
       </Fragment>
     );
   }

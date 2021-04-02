@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -9,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export * from '../../translations';
 
 export const SHOWING_CASES = (actionDate: string, actionName: string, userName: string) =>
-  i18n.translate('xpack.securitySolution.case.caseView.actionHeadline', {
+  i18n.translate('xpack.securitySolution.cases.caseView.actionHeadline', {
     values: {
       actionDate,
       actionName,
@@ -19,21 +20,21 @@ export const SHOWING_CASES = (actionDate: string, actionName: string, userName: 
   });
 
 export const ADDED_FIELD = i18n.translate(
-  'xpack.securitySolution.case.caseView.actionLabel.addedField',
+  'xpack.securitySolution.cases.caseView.actionLabel.addedField',
   {
     defaultMessage: 'added',
   }
 );
 
 export const CHANGED_FIELD = i18n.translate(
-  'xpack.securitySolution.case.caseView.actionLabel.changededField',
+  'xpack.securitySolution.cases.caseView.actionLabel.changededField',
   {
     defaultMessage: 'changed',
   }
 );
 
 export const SELECTED_THIRD_PARTY = (thirdParty: string) =>
-  i18n.translate('xpack.securitySolution.case.caseView.actionLabel.selectedThirdParty', {
+  i18n.translate('xpack.securitySolution.cases.caseView.actionLabel.selectedThirdParty', {
     values: {
       thirdParty,
     },
@@ -41,28 +42,28 @@ export const SELECTED_THIRD_PARTY = (thirdParty: string) =>
   });
 
 export const REMOVED_THIRD_PARTY = i18n.translate(
-  'xpack.securitySolution.case.caseView.actionLabel.removedThirdParty',
+  'xpack.securitySolution.cases.caseView.actionLabel.removedThirdParty',
   {
     defaultMessage: 'removed external incident management system',
   }
 );
 
 export const EDITED_FIELD = i18n.translate(
-  'xpack.securitySolution.case.caseView.actionLabel.editedField',
+  'xpack.securitySolution.cases.caseView.actionLabel.editedField',
   {
     defaultMessage: 'edited',
   }
 );
 
 export const REMOVED_FIELD = i18n.translate(
-  'xpack.securitySolution.case.caseView.actionLabel.removedField',
+  'xpack.securitySolution.cases.caseView.actionLabel.removedField',
   {
     defaultMessage: 'removed',
   }
 );
 
 export const VIEW_INCIDENT = (incidentNumber: string) =>
-  i18n.translate('xpack.securitySolution.case.caseView.actionLabel.viewIncident', {
+  i18n.translate('xpack.securitySolution.cases.caseView.actionLabel.viewIncident', {
     defaultMessage: 'View {incidentNumber}',
     values: {
       incidentNumber,
@@ -70,83 +71,87 @@ export const VIEW_INCIDENT = (incidentNumber: string) =>
   });
 
 export const PUSHED_NEW_INCIDENT = i18n.translate(
-  'xpack.securitySolution.case.caseView.actionLabel.pushedNewIncident',
+  'xpack.securitySolution.cases.caseView.actionLabel.pushedNewIncident',
   {
     defaultMessage: 'pushed as new incident',
   }
 );
 
 export const UPDATE_INCIDENT = i18n.translate(
-  'xpack.securitySolution.case.caseView.actionLabel.updateIncident',
+  'xpack.securitySolution.cases.caseView.actionLabel.updateIncident',
   {
     defaultMessage: 'updated incident',
   }
 );
 
 export const ADDED_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.case.caseView.actionLabel.addDescription',
+  'xpack.securitySolution.cases.caseView.actionLabel.addDescription',
   {
     defaultMessage: 'added description',
   }
 );
 
 export const EDIT_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.case.caseView.edit.description',
+  'xpack.securitySolution.cases.caseView.edit.description',
   {
     defaultMessage: 'Edit description',
   }
 );
 
-export const QUOTE = i18n.translate('xpack.securitySolution.case.caseView.edit.quote', {
+export const QUOTE = i18n.translate('xpack.securitySolution.cases.caseView.edit.quote', {
   defaultMessage: 'Quote',
 });
 
-export const EDIT_COMMENT = i18n.translate('xpack.securitySolution.case.caseView.edit.comment', {
+export const EDIT_COMMENT = i18n.translate('xpack.securitySolution.cases.caseView.edit.comment', {
   defaultMessage: 'Edit comment',
 });
 
-export const ON = i18n.translate('xpack.securitySolution.case.caseView.actionLabel.on', {
+export const ON = i18n.translate('xpack.securitySolution.cases.caseView.actionLabel.on', {
   defaultMessage: 'on',
 });
 
 export const ADDED_COMMENT = i18n.translate(
-  'xpack.securitySolution.case.caseView.actionLabel.addComment',
+  'xpack.securitySolution.cases.caseView.actionLabel.addComment',
   {
     defaultMessage: 'added comment',
   }
 );
 
-export const STATUS = i18n.translate('xpack.securitySolution.case.caseView.statusLabel', {
+export const STATUS = i18n.translate('xpack.securitySolution.cases.caseView.statusLabel', {
   defaultMessage: 'Status',
 });
 
-export const CASE = i18n.translate('xpack.securitySolution.case.caseView.case', {
+export const CASE = i18n.translate('xpack.securitySolution.cases.caseView.case', {
   defaultMessage: 'case',
 });
 
-export const COMMENT = i18n.translate('xpack.securitySolution.case.caseView.comment', {
+export const COMMENT = i18n.translate('xpack.securitySolution.cases.caseView.comment', {
   defaultMessage: 'comment',
 });
 
-export const CASE_REFRESH = i18n.translate('xpack.securitySolution.case.caseView.caseRefresh', {
+export const CASE_REFRESH = i18n.translate('xpack.securitySolution.cases.caseView.caseRefresh', {
   defaultMessage: 'Refresh case',
 });
 
 export const EMAIL_SUBJECT = (caseTitle: string) =>
-  i18n.translate('xpack.securitySolution.case.caseView.emailSubject', {
+  i18n.translate('xpack.securitySolution.cases.caseView.emailSubject', {
     values: { caseTitle },
     defaultMessage: 'Security Case - {caseTitle}',
   });
 
 export const EMAIL_BODY = (caseUrl: string) =>
-  i18n.translate('xpack.securitySolution.case.caseView.emailBody', {
+  i18n.translate('xpack.securitySolution.cases.caseView.emailBody', {
     values: { caseUrl },
     defaultMessage: 'Case reference: {caseUrl}',
   });
 
 export const CHANGED_CONNECTOR_FIELD = i18n.translate(
-  'xpack.securitySolution.case.caseView.fieldChanged',
+  'xpack.securitySolution.cases.caseView.fieldChanged',
   {
     defaultMessage: `changed connector field`,
   }
 );
+
+export const SYNC_ALERTS = i18n.translate('xpack.securitySolution.cases.caseView.syncAlertsLabel', {
+  defaultMessage: `Sync alerts`,
+});

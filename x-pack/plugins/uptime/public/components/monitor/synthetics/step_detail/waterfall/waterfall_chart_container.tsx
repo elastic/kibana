@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLoadingChart } from '@elastic/eui';
@@ -59,7 +60,10 @@ export const WaterfallChartContainer: React.FC<Props> = ({ checkGroup, stepIndex
         </EuiFlexGroup>
       )}
       {networkEvents && !networkEvents.loading && networkEvents.events.length > 0 && (
-        <WaterfallChartWrapper data={extractItems(networkEvents.events)} />
+        <WaterfallChartWrapper
+          data={extractItems(networkEvents.events)}
+          total={networkEvents.total}
+        />
       )}
     </>
   );

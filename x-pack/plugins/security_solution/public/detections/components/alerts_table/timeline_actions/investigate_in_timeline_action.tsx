@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback } from 'react';
@@ -23,12 +24,18 @@ import {
 } from '../translations';
 
 interface InvestigateInTimelineActionProps {
-  ecsRowData: Ecs;
+  ecsRowData: Ecs | Ecs[] | null;
   nonEcsRowData: TimelineNonEcsData[];
+  ariaLabel?: string;
+  alertIds?: string[];
+  fetchEcsAlertsData?: (alertIds?: string[]) => Promise<Ecs[]>;
 }
 
 const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineActionProps> = ({
+  ariaLabel = ACTION_INVESTIGATE_IN_TIMELINE_ARIA_LABEL,
+  alertIds,
   ecsRowData,
+  fetchEcsAlertsData,
   nonEcsRowData,
 }) => {
   const {
@@ -63,29 +70,46 @@ const InvestigateInTimelineActionComponent: React.FC<InvestigateInTimelineAction
     [dispatch, updateTimelineIsLoading]
   );
 
-  const investigateInTimelineAlertClick = useCallback(
-    () =>
-      sendAlertToTimelineAction({
-        apolloClient,
-        createTimeline,
-        ecsData: ecsRowData,
-        nonEcsData: nonEcsRowData,
-        searchStrategyClient,
-        updateTimelineIsLoading,
-      }),
-    [
-      apolloClient,
-      createTimeline,
-      ecsRowData,
-      nonEcsRowData,
-      searchStrategyClient,
-      updateTimelineIsLoading,
-    ]
-  );
+  const investigateInTimelineAlertClick = useCallback(async () => {
+    try {
+      if (ecsRowData != null) {
+        await sendAlertToTimelineAction({
+          apolloClient,
+          createTimeline,
+          ecsData: ecsRowData,
+          nonEcsData: nonEcsRowData,
+          searchStrategyClient,
+          updateTimelineIsLoading,
+        });
+      }
+      if (ecsRowData == null && fetchEcsAlertsData) {
+        const alertsEcsData = await fetchEcsAlertsData(alertIds);
+        await sendAlertToTimelineAction({
+          apolloClient,
+          createTimeline,
+          ecsData: alertsEcsData,
+          nonEcsData: nonEcsRowData,
+          searchStrategyClient,
+          updateTimelineIsLoading,
+        });
+      }
+    } catch {
+      // TODO show a toaster that something went wrong
+    }
+  }, [
+    alertIds,
+    apolloClient,
+    createTimeline,
+    ecsRowData,
+    fetchEcsAlertsData,
+    nonEcsRowData,
+    searchStrategyClient,
+    updateTimelineIsLoading,
+  ]);
 
   return (
     <ActionIconItem
-      ariaLabel={ACTION_INVESTIGATE_IN_TIMELINE_ARIA_LABEL}
+      ariaLabel={ariaLabel}
       content={ACTION_INVESTIGATE_IN_TIMELINE}
       dataTestSubj="send-alert-to-timeline"
       iconType="timeline"

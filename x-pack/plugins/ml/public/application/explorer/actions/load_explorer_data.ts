@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import memoizeOne from 'memoize-one';
@@ -12,7 +13,6 @@ import { forkJoin, of, Observable, Subject } from 'rxjs';
 import { mergeMap, switchMap, tap } from 'rxjs/operators';
 
 import { useCallback, useMemo } from 'react';
-import { anomalyDataChange } from '../explorer_charts/explorer_charts_container_service';
 import { explorerService } from '../explorer_dashboard_service';
 import {
   getDateFormatTz,
@@ -26,14 +26,18 @@ import {
   loadTopInfluencers,
   AppStateSelectedCells,
   ExplorerJob,
-  TimeRangeBounds,
 } from '../explorer_utils';
 import { ExplorerState } from '../reducers';
 import { useMlKibana, useTimefilter } from '../../contexts/kibana';
 import { AnomalyTimelineService } from '../../services/anomaly_timeline_service';
-import { mlResultsServiceProvider } from '../../services/results_service';
+import { MlResultsService, mlResultsServiceProvider } from '../../services/results_service';
 import { isViewBySwimLaneData } from '../swimlane_container';
 import { ANOMALY_SWIM_LANE_HARD_LIMIT } from '../explorer_constants';
+import { TimefilterContract } from '../../../../../../../src/plugins/data/public';
+import { AnomalyExplorerChartsService } from '../../services/anomaly_explorer_charts_service';
+import { CombinedJob } from '../../../../common/types/anomaly_detection_jobs';
+import { mlJobService } from '../../services/job_service';
+import { InfluencersFilterQuery } from '../../../../common/types/es_client';
 
 // Memoize the data fetching methods.
 // wrapWithLastRefreshArg() wraps any given function and preprends a `lastRefresh` argument
@@ -51,7 +55,6 @@ const memoize = <T extends (...a: any[]) => any>(func: T, context?: any) => {
   return memoizeOne(wrapWithLastRefreshArg<T>(func, context) as any, memoizeIsEqual);
 };
 
-const memoizedAnomalyDataChange = memoize<typeof anomalyDataChange>(anomalyDataChange);
 const memoizedLoadAnnotationsTableData = memoize<typeof loadAnnotationsTableData>(
   loadAnnotationsTableData
 );
@@ -63,8 +66,7 @@ const memoizedLoadTopInfluencers = memoize(loadTopInfluencers);
 const memoizedLoadAnomaliesTableData = memoize(loadAnomaliesTableData);
 
 export interface LoadExplorerDataConfig {
-  bounds: TimeRangeBounds;
-  influencersFilterQuery: any;
+  influencersFilterQuery: InfluencersFilterQuery;
   lastRefresh: number;
   noInfluencersConfigured: boolean;
   selectedCells: AppStateSelectedCells | undefined;
@@ -82,7 +84,6 @@ export interface LoadExplorerDataConfig {
 export const isLoadExplorerDataConfig = (arg: any): arg is LoadExplorerDataConfig => {
   return (
     arg !== undefined &&
-    arg.bounds !== undefined &&
     arg.selectedJobs !== undefined &&
     arg.selectedJobs !== null &&
     arg.viewBySwimlaneFieldName !== undefined
@@ -92,7 +93,12 @@ export const isLoadExplorerDataConfig = (arg: any): arg is LoadExplorerDataConfi
 /**
  * Fetches the data necessary for the Anomaly Explorer using observables.
  */
-const loadExplorerDataProvider = (anomalyTimelineService: AnomalyTimelineService) => {
+const loadExplorerDataProvider = (
+  mlResultsService: MlResultsService,
+  anomalyTimelineService: AnomalyTimelineService,
+  anomalyExplorerService: AnomalyExplorerChartsService,
+  timefilter: TimefilterContract
+) => {
   const memoizedLoadOverallData = memoize(
     anomalyTimelineService.loadOverallData,
     anomalyTimelineService
@@ -101,13 +107,17 @@ const loadExplorerDataProvider = (anomalyTimelineService: AnomalyTimelineService
     anomalyTimelineService.loadViewBySwimlane,
     anomalyTimelineService
   );
+  const memoizedAnomalyDataChange = memoize(
+    anomalyExplorerService.getAnomalyData,
+    anomalyExplorerService
+  );
+
   return (config: LoadExplorerDataConfig): Observable<Partial<ExplorerState>> => {
     if (!isLoadExplorerDataConfig(config)) {
       return of({});
     }
 
     const {
-      bounds,
       lastRefresh,
       influencersFilterQuery,
       noInfluencersConfigured,
@@ -123,8 +133,15 @@ const loadExplorerDataProvider = (anomalyTimelineService: AnomalyTimelineService
       viewByPerPage,
     } = config;
 
+    const combinedJobRecords: Record<string, CombinedJob> = selectedJobs.reduce((acc, job) => {
+      return { ...acc, [job.id]: mlJobService.getJob(job.id) };
+    }, {});
+
     const selectionInfluencers = getSelectionInfluencers(selectedCells, viewBySwimlaneFieldName);
     const jobIds = getSelectionJobIds(selectedCells, selectedJobs);
+
+    const bounds = timefilter.getBounds();
+
     const timerange = getSelectionTimeRange(
       selectedCells,
       swimlaneBucketInterval.asSeconds(),
@@ -145,6 +162,7 @@ const loadExplorerDataProvider = (anomalyTimelineService: AnomalyTimelineService
       ),
       anomalyChartRecords: memoizedLoadDataForCharts(
         lastRefresh,
+        mlResultsService,
         jobIds,
         timerange.earliestMs,
         timerange.latestMs,
@@ -156,6 +174,7 @@ const loadExplorerDataProvider = (anomalyTimelineService: AnomalyTimelineService
         selectionInfluencers.length === 0
           ? memoizedLoadTopInfluencers(
               lastRefresh,
+              mlResultsService,
               jobIds,
               timerange.earliestMs,
               timerange.latestMs,
@@ -196,23 +215,29 @@ const loadExplorerDataProvider = (anomalyTimelineService: AnomalyTimelineService
       // and pass on the data we already fetched.
       tap(explorerService.setViewBySwimlaneLoading),
       // Trigger a side-effect to update the charts.
-      tap(({ anomalyChartRecords }) => {
+      tap(({ anomalyChartRecords, topFieldValues }) => {
         if (selectedCells !== undefined && Array.isArray(anomalyChartRecords)) {
           memoizedAnomalyDataChange(
             lastRefresh,
+            explorerService,
+            combinedJobRecords,
             swimlaneContainerWidth,
             anomalyChartRecords,
             timerange.earliestMs,
             timerange.latestMs,
+            timefilter,
             tableSeverity
           );
         } else {
           memoizedAnomalyDataChange(
             lastRefresh,
+            explorerService,
+            combinedJobRecords,
             swimlaneContainerWidth,
             [],
             timerange.earliestMs,
             timerange.latestMs,
+            timefilter,
             tableSeverity
           );
         }
@@ -230,6 +255,7 @@ const loadExplorerDataProvider = (anomalyTimelineService: AnomalyTimelineService
               anomalyChartRecords.length > 0
                 ? memoizedLoadFilteredTopInfluencers(
                     lastRefresh,
+                    mlResultsService,
                     jobIds,
                     timerange.earliestMs,
                     timerange.latestMs,
@@ -287,12 +313,23 @@ export const useExplorerData = (): [Partial<ExplorerState> | undefined, (d: any)
   } = useMlKibana();
 
   const loadExplorerData = useMemo(() => {
-    const service = new AnomalyTimelineService(
+    const mlResultsService = mlResultsServiceProvider(mlApiServices);
+    const anomalyTimelineService = new AnomalyTimelineService(
       timefilter,
       uiSettings,
-      mlResultsServiceProvider(mlApiServices)
+      mlResultsService
     );
-    return loadExplorerDataProvider(service);
+    const anomalyExplorerService = new AnomalyExplorerChartsService(
+      timefilter,
+      mlApiServices,
+      mlResultsService
+    );
+    return loadExplorerDataProvider(
+      mlResultsService,
+      anomalyTimelineService,
+      anomalyExplorerService,
+      timefilter
+    );
   }, []);
 
   const loadExplorerData$ = useMemo(() => new Subject<LoadExplorerDataConfig>(), []);

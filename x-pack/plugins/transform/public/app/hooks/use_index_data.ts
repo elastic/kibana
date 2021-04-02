@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 
-import { EuiDataGridColumn } from '@elastic/eui';
+import type { estypes } from '@elastic/elasticsearch';
+import type { EuiDataGridColumn } from '@elastic/eui';
 
 import {
   isEsSearchResponse,
@@ -20,10 +22,12 @@ import { SearchItems } from './use_search_items';
 import { useApi } from './use_api';
 
 import { useAppDependencies, useToastNotifications } from '../app_dependencies';
+import type { StepDefineExposedState } from '../sections/create_transform/components/step_define/common';
 
 export const useIndexData = (
   indexPattern: SearchItems['indexPattern'],
-  query: PivotQuery
+  query: PivotQuery,
+  combinedRuntimeMappings?: StepDefineExposedState['runtimeMappings']
 ): UseIndexDataReturnType => {
   const api = useApi();
   const toastNotifications = useToastNotifications();
@@ -31,6 +35,7 @@ export const useIndexData = (
     ml: {
       getFieldType,
       getDataGridSchemaFromKibanaFieldType,
+      getDataGridSchemaFromESFieldType,
       getFieldsFromKibanaIndexPattern,
       showDataGridColumnChartErrorMessageToast,
       useDataGrid,
@@ -42,14 +47,37 @@ export const useIndexData = (
 
   const indexPatternFields = getFieldsFromKibanaIndexPattern(indexPattern);
 
-  // EuiDataGrid State
-  const columns: EuiDataGridColumn[] = [
-    ...indexPatternFields.map((id) => {
+  const columns: EuiDataGridColumn[] = useMemo(() => {
+    let result: Array<{ id: string; schema: string | undefined }> = [];
+
+    // Get the the runtime fields that are defined from API field and index patterns
+    if (combinedRuntimeMappings !== undefined) {
+      result = Object.keys(combinedRuntimeMappings).map((fieldName) => {
+        const field = combinedRuntimeMappings[fieldName];
+        const schema = getDataGridSchemaFromESFieldType(field.type);
+        return { id: fieldName, schema };
+      });
+    }
+
+    // Combine the runtime field that are defined from API field
+    indexPatternFields.forEach((id) => {
       const field = indexPattern.fields.getByName(id);
-      const schema = getDataGridSchemaFromKibanaFieldType(field);
-      return { id, schema };
-    }),
-  ];
+      if (!field?.runtimeField) {
+        const schema = getDataGridSchemaFromKibanaFieldType(field);
+        result.push({ id, schema });
+      }
+    });
+
+    return result.sort((a, b) => a.id.localeCompare(b.id));
+  }, [
+    indexPatternFields,
+    indexPattern.fields,
+    combinedRuntimeMappings,
+    getDataGridSchemaFromESFieldType,
+    getDataGridSchemaFromKibanaFieldType,
+  ]);
+
+  // EuiDataGrid State
 
   const dataGrid = useDataGrid(columns);
 
@@ -60,6 +88,7 @@ export const useIndexData = (
     setColumnCharts,
     setErrorMessage,
     setRowCount,
+    setRowCountRelation,
     setStatus,
     setTableItems,
     sortingColumns,
@@ -91,9 +120,12 @@ export const useIndexData = (
         from: pagination.pageIndex * pagination.pageSize,
         size: pagination.pageSize,
         ...(Object.keys(sort).length > 0 ? { sort } : {}),
+        ...(typeof combinedRuntimeMappings === 'object' &&
+        Object.keys(combinedRuntimeMappings).length > 0
+          ? { runtime_mappings: combinedRuntimeMappings }
+          : {}),
       },
     };
-
     const resp = await api.esSearch(esSearchRequest);
 
     if (!isEsSearchResponse(resp)) {
@@ -102,9 +134,14 @@ export const useIndexData = (
       return;
     }
 
-    const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields));
+    const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
 
-    setRowCount(resp.hits.total.value);
+    setRowCount(typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total.value);
+    setRowCountRelation(
+      typeof resp.hits.total === 'number'
+        ? ('eq' as estypes.TotalHitsRelation)
+        : resp.hits.total.relation
+    );
     setTableItems(docs);
     setStatus(INDEX_STATUS.LOADED);
   };
@@ -118,7 +155,8 @@ export const useIndexData = (
           fieldName: cT.id,
           type: getFieldType(cT.schema),
         })),
-      isDefaultQuery(query) ? matchAllQuery : query
+      isDefaultQuery(query) ? matchAllQuery : query,
+      combinedRuntimeMappings
     );
 
     if (!isFieldHistogramsResponseSchema(columnChartsData)) {
@@ -133,7 +171,17 @@ export const useIndexData = (
     fetchDataGridData();
     // custom comparison
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [indexPattern.title, JSON.stringify([query, pagination, sortingColumns])]);
+  }, [
+    indexPattern.title,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    JSON.stringify([
+      query,
+      pagination,
+      sortingColumns,
+      indexPatternFields,
+      combinedRuntimeMappings,
+    ]),
+  ]);
 
   useEffect(() => {
     if (chartsVisible) {

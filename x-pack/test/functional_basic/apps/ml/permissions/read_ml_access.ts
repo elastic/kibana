@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import path from 'path';
@@ -14,14 +15,16 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  const testUsers = [USER.ML_VIEWER, USER.ML_VIEWER_SPACES];
+  const testUsers = [
+    { user: USER.ML_VIEWER, discoverAvailable: true },
+    { user: USER.ML_VIEWER_SPACES, discoverAvailable: false },
+  ];
 
   describe('for user with read ML access', function () {
-    for (const user of testUsers) {
-      describe(`(${user})`, function () {
+    for (const testUser of testUsers) {
+      describe(`(${testUser.user})`, function () {
         const ecIndexPattern = 'ft_module_sample_ecommerce';
         const ecExpectedTotalCount = '287';
-        const ecExpectedFieldPanelCount = 2;
         const ecExpectedModuleId = 'sample_data_ecommerce';
 
         const uploadFilePath = path.join(
@@ -45,7 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
           await esArchiver.loadIfNeeded('ml/module_sample_ecommerce');
           await ml.testResources.createIndexPatternIfNeeded(ecIndexPattern, 'order_date');
 
-          await ml.securityUI.loginAs(user);
+          await ml.securityUI.loginAs(testUser.user);
         });
 
         after(async () => {
@@ -124,13 +127,21 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('should load data for full time range');
           await ml.dataVisualizerIndexBased.clickUseFullDataButton(ecExpectedTotalCount);
 
-          await ml.testExecution.logTestStep('should display the panels of fields');
-          await ml.dataVisualizerIndexBased.assertFieldsPanelsExist(ecExpectedFieldPanelCount);
+          await ml.testExecution.logTestStep('should display the data visualizer table');
+          await ml.dataVisualizerIndexBased.assertDataVisualizerTableExist();
 
-          await ml.testExecution.logTestStep('should not display the actions panel with cards');
-          await ml.dataVisualizerIndexBased.assertActionsPanelNotExists();
+          await ml.testExecution.logTestStep(
+            `should display the actions panel ${
+              testUser.discoverAvailable ? 'with' : 'without'
+            } Discover card`
+          );
+          await ml.dataVisualizerIndexBased.assertActionsPanelExists();
+          await ml.dataVisualizerIndexBased.assertViewInDiscoverCard(testUser.discoverAvailable);
+
+          await ml.testExecution.logTestStep('should not display job cards');
           await ml.dataVisualizerIndexBased.assertCreateAdvancedJobCardNotExists();
           await ml.dataVisualizerIndexBased.assertRecognizerCardNotExists(ecExpectedModuleId);
+          await ml.dataVisualizerIndexBased.assertCreateDataFrameAnalyticsCardNotExists();
         });
 
         it('should display elements on File Data Visualizer page correctly', async () => {

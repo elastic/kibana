@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { TypeRegistry } from '../../../type_registry';
 import { registerBuiltInActionTypes } from '../index';
 import { ActionTypeModel } from '../../../../types';
@@ -42,8 +44,13 @@ describe('index connector validation', () => {
     } as EsIndexActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        index: [],
+      config: {
+        errors: {
+          index: [],
+        },
+      },
+      secrets: {
+        errors: {},
       },
     });
   });
@@ -62,8 +69,13 @@ describe('index connector validation with minimal config', () => {
     } as EsIndexActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        index: [],
+      config: {
+        errors: {
+          index: [],
+        },
+      },
+      secrets: {
+        errors: {},
       },
     });
   });

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
@@ -205,6 +206,37 @@ describe('useTimelineEvents', () => {
           updatedAt: result.current[1].updatedAt,
         },
       ]);
+    });
+  });
+
+  test('Correlation pagination is calling search strategy when switching page', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate, rerender } = renderHook<
+        UseTimelineEventsProps,
+        [boolean, TimelineArgs]
+      >((args) => useTimelineEvents(args), {
+        initialProps: {
+          ...props,
+          language: 'eql',
+          eqlOptions: {
+            eventCategoryField: 'category',
+            tiebreakerField: '',
+            timestampField: '@timestamp',
+            query: 'find it EQL',
+            size: 100,
+          },
+        },
+      });
+
+      // useEffect on params request
+      await waitForNextUpdate();
+      rerender({ ...props, startDate, endDate });
+      // useEffect on params request
+      await waitForNextUpdate();
+      expect(mockSearch).toHaveBeenCalledTimes(2);
+      result.current[1].loadPage(4);
+      await waitForNextUpdate();
+      expect(mockSearch).toHaveBeenCalledTimes(3);
     });
   });
 });

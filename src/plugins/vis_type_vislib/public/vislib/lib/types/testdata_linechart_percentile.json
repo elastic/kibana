@@ -31,7 +31,7 @@
         },
         "params": {
           "date": true,
-          "interval": "P1D",
+          "interval": 86400000,
           "format": "YYYY-MM-DD",
           "bounds": {
             "min": "2019-05-10T04:00:00.000Z",
@@ -128,7 +128,7 @@
       },
       "xAxisLabel": "timestamp per day",
       "ordered": {
-        "interval": "P1D",
+        "interval": 86400000,
         "date": true,
         "min": 1557460800000,
         "max": 1557656337342

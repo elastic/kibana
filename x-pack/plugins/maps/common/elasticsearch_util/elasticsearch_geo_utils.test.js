@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -136,6 +137,71 @@ describe('hitsToGeoJson', () => {
       geometry: {
         coordinates: [110, 30],
         type: 'Point',
+      },
+      id: 'index1:doc1:1',
+      properties: {
+        _id: 'doc1',
+        _index: 'index1',
+        myField: 8,
+      },
+      type: 'Feature',
+    });
+  });
+
+  it('Should create feature per item when geometry value is a geometry-collection', () => {
+    const hits = [
+      {
+        _id: 'doc1',
+        _index: 'index1',
+        _source: {
+          [geoFieldName]: {
+            type: 'GeometryCollection',
+            geometries: [
+              {
+                type: 'geometrycollection', //explicitly test coercion to proper GeoJson type value
+                geometries: [
+                  {
+                    type: 'point', //explicitly test coercion to proper GeoJson type value
+                    coordinates: [0, 0],
+                  },
+                ],
+              },
+              {
+                type: 'LineString',
+                coordinates: [
+                  [0, 0],
+                  [1, 1],
+                ],
+              },
+            ],
+          },
+          myField: 8,
+        },
+      },
+    ];
+    const geojson = hitsToGeoJson(hits, flattenHitMock, geoFieldName, 'geo_shape', []);
+    expect(geojson.type).toBe('FeatureCollection');
+    expect(geojson.features.length).toBe(2);
+    expect(geojson.features[0]).toEqual({
+      geometry: {
+        coordinates: [0, 0],
+        type: 'Point',
+      },
+      id: 'index1:doc1:0',
+      properties: {
+        _id: 'doc1',
+        _index: 'index1',
+        myField: 8,
+      },
+      type: 'Feature',
+    });
+    expect(geojson.features[1]).toEqual({
+      geometry: {
+        coordinates: [
+          [0, 0],
+          [1, 1],
+        ],
+        type: 'LineString',
       },
       id: 'index1:doc1:1',
       properties: {
@@ -323,143 +389,89 @@ describe('geoShapeToGeometry', () => {
 });
 
 describe('createExtentFilter', () => {
-  describe('geo_point field', () => {
-    it('should return elasticsearch geo_bounding_box filter for geo_point field', () => {
-      const mapExtent = {
-        maxLat: 39,
-        maxLon: -83,
-        minLat: 35,
-        minLon: -89,
-      };
-      const filter = createExtentFilter(mapExtent, geoFieldName, 'geo_point');
-      expect(filter).toEqual({
-        geo_bounding_box: {
-          location: {
-            top_left: [-89, 39],
-            bottom_right: [-83, 35],
-          },
-        },
-      });
-    });
-
-    it('should clamp longitudes to -180 to 180 and latitudes to -90 to 90', () => {
-      const mapExtent = {
-        maxLat: 120,
-        maxLon: 200,
-        minLat: -100,
-        minLon: -190,
-      };
-      const filter = createExtentFilter(mapExtent, geoFieldName, 'geo_point');
-      expect(filter).toEqual({
-        geo_bounding_box: {
-          location: {
-            top_left: [-180, 89],
-            bottom_right: [180, -89],
-          },
-        },
-      });
-    });
-
-    it('should make left longitude greater then right longitude when area crosses 180 meridian east to west', () => {
-      const mapExtent = {
-        maxLat: 39,
-        maxLon: 200,
-        minLat: 35,
-        minLon: 100,
-      };
-      const filter = createExtentFilter(mapExtent, geoFieldName, 'geo_point');
-      const leftLon = filter.geo_bounding_box.location.top_left[0];
-      const rightLon = filter.geo_bounding_box.location.bottom_right[0];
-      expect(leftLon).toBeGreaterThan(rightLon);
-      expect(filter).toEqual({
-        geo_bounding_box: {
-          location: {
-            top_left: [100, 39],
-            bottom_right: [-160, 35],
-          },
-        },
-      });
-    });
-
-    it('should make left longitude greater then right longitude when area crosses 180 meridian west to east', () => {
-      const mapExtent = {
-        maxLat: 39,
-        maxLon: -100,
-        minLat: 35,
-        minLon: -200,
-      };
-      const filter = createExtentFilter(mapExtent, geoFieldName, 'geo_point');
-      const leftLon = filter.geo_bounding_box.location.top_left[0];
-      const rightLon = filter.geo_bounding_box.location.bottom_right[0];
-      expect(leftLon).toBeGreaterThan(rightLon);
-      expect(filter).toEqual({
-        geo_bounding_box: {
-          location: {
-            top_left: [160, 39],
-            bottom_right: [-100, 35],
-          },
-        },
-      });
+  it('should return elasticsearch geo_bounding_box filter', () => {
+    const mapExtent = {
+      maxLat: 39,
+      maxLon: -83,
+      minLat: 35,
+      minLon: -89,
+    };
+    const filter = createExtentFilter(mapExtent, geoFieldName);
+    expect(filter.geo_bounding_box).toEqual({
+      location: {
+        top_left: [-89, 39],
+        bottom_right: [-83, 35],
+      },
     });
   });
 
-  describe('geo_shape field', () => {
-    it('should return elasticsearch geo_shape filter', () => {
-      const mapExtent = {
-        maxLat: 39,
-        maxLon: -83,
-        minLat: 35,
-        minLon: -89,
-      };
-      const filter = createExtentFilter(mapExtent, geoFieldName, 'geo_shape');
-      expect(filter).toEqual({
-        geo_shape: {
-          location: {
-            relation: 'INTERSECTS',
-            shape: {
-              coordinates: [
-                [
-                  [-89, 39],
-                  [-89, 35],
-                  [-83, 35],
-                  [-83, 39],
-                  [-89, 39],
-                ],
-              ],
-              type: 'Polygon',
-            },
-          },
-        },
-      });
+  it('should clamp longitudes to -180 to 180 and latitudes to -90 to 90', () => {
+    const mapExtent = {
+      maxLat: 120,
+      maxLon: 200,
+      minLat: -100,
+      minLon: -190,
+    };
+    const filter = createExtentFilter(mapExtent, geoFieldName);
+    expect(filter.geo_bounding_box).toEqual({
+      location: {
+        top_left: [-180, 89],
+        bottom_right: [180, -89],
+      },
     });
+  });
 
-    it('should clamp longitudes to -180 to 180 when lonitude wraps globe', () => {
-      const mapExtent = {
-        maxLat: 39,
-        maxLon: 209,
-        minLat: 35,
-        minLon: -191,
-      };
-      const filter = createExtentFilter(mapExtent, geoFieldName, 'geo_shape');
-      expect(filter).toEqual({
-        geo_shape: {
-          location: {
-            relation: 'INTERSECTS',
-            shape: {
-              coordinates: [
-                [
-                  [-180, 39],
-                  [-180, 35],
-                  [180, 35],
-                  [180, 39],
-                  [-180, 39],
-                ],
-              ],
-              type: 'Polygon',
-            },
-          },
-        },
-      });
+  it('should make left longitude greater then right longitude when area crosses 180 meridian east to west', () => {
+    const mapExtent = {
+      maxLat: 39,
+      maxLon: 200,
+      minLat: 35,
+      minLon: 100,
+    };
+    const filter = createExtentFilter(mapExtent, geoFieldName);
+    const leftLon = filter.geo_bounding_box.location.top_left[0];
+    const rightLon = filter.geo_bounding_box.location.bottom_right[0];
+    expect(leftLon).toBeGreaterThan(rightLon);
+    expect(filter.geo_bounding_box).toEqual({
+      location: {
+        top_left: [100, 39],
+        bottom_right: [-160, 35],
+      },
+    });
+  });
+
+  it('should make left longitude greater then right longitude when area crosses 180 meridian west to east', () => {
+    const mapExtent = {
+      maxLat: 39,
+      maxLon: -100,
+      minLat: 35,
+      minLon: -200,
+    };
+    const filter = createExtentFilter(mapExtent, geoFieldName);
+    const leftLon = filter.geo_bounding_box.location.top_left[0];
+    const rightLon = filter.geo_bounding_box.location.bottom_right[0];
+    expect(leftLon).toBeGreaterThan(rightLon);
+    expect(filter.geo_bounding_box).toEqual({
+      location: {
+        top_left: [160, 39],
+        bottom_right: [-100, 35],
+      },
+    });
+  });
+
+  it('should clamp longitudes to -180 to 180 when longitude wraps globe', () => {
+    const mapExtent = {
+      maxLat: 39,
+      maxLon: 209,
+      minLat: 35,
+      minLon: -191,
+    };
+    const filter = createExtentFilter(mapExtent, geoFieldName);
+    expect(filter.geo_bounding_box).toEqual({
+      location: {
+        top_left: [-180, 39],
+        bottom_right: [180, 35],
+      },
     });
   });
 });

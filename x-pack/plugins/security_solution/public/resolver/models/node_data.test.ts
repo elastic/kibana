@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EndpointDocGenerator } from '../../../common/endpoint/generate_data';
@@ -43,12 +44,18 @@ describe('node data model', () => {
   });
 
   it('overwrites the existing entries and creates new ones when calling setRequestedNodes', () => {
-    const state: Map<string, NodeData> = new Map([
-      ['1', { events: [generator.generateEvent()], status: 'running', eventType: ['start'] }],
+    const state = new Map<string, NodeData>([
+      [
+        '1',
+        {
+          events: [generator.generateEvent({ eventType: ['start'] })],
+          status: 'running',
+        },
+      ],
     ]);
 
     expect(setRequestedNodes(state, new Set(['1', '2']))).toEqual(
-      new Map([
+      new Map<string, NodeData>([
         ['1', { events: [], status: 'loading' }],
         ['2', { events: [], status: 'loading' }],
       ])
@@ -56,12 +63,18 @@ describe('node data model', () => {
   });
 
   it('overwrites the existing entries and creates new ones when calling setErrorNodes', () => {
-    const state: Map<string, NodeData> = new Map([
-      ['1', { events: [generator.generateEvent()], status: 'running', eventType: ['start'] }],
+    const state = new Map<string, NodeData>([
+      [
+        '1',
+        {
+          events: [generator.generateEvent({ eventType: ['start'] })],
+          status: 'running',
+        },
+      ],
     ]);
 
     expect(setErrorNodes(state, new Set(['1', '2']))).toEqual(
-      new Map([
+      new Map<string, NodeData>([
         ['1', { events: [], status: 'error' }],
         ['2', { events: [], status: 'error' }],
       ])
@@ -70,7 +83,7 @@ describe('node data model', () => {
 
   describe('setReloadedNodes', () => {
     it('removes the id from the map', () => {
-      const state: Map<string, NodeData> = new Map([['1', { events: [], status: 'error' }]]);
+      const state = new Map<string, NodeData>([['1', { events: [], status: 'error' }]]);
       expect(setReloadedNodes(state, '1')).toEqual(new Map());
     });
   });
@@ -78,7 +91,7 @@ describe('node data model', () => {
   describe('updateWithReceivedNodes', () => {
     const node1Events = [generator.generateEvent({ entityID: '1', eventType: ['start'] })];
     const node2Events = [generator.generateEvent({ entityID: '2', eventType: ['start'] })];
-    const state: Map<string, NodeData> = new Map([
+    const state = new Map<string, NodeData>([
       ['1', { events: node1Events, status: 'error' }],
       ['2', { events: node2Events, status: 'error' }],
     ]);
@@ -95,7 +108,7 @@ describe('node data model', () => {
             numberOfRequestedEvents: 10,
           })
         ).toEqual(
-          new Map([
+          new Map<string, NodeData>([
             ['1', { events: [genNodeEvent], status: 'running' }],
             ['2', { events: node2Events, status: 'error' }],
           ])
@@ -111,7 +124,7 @@ describe('node data model', () => {
             numberOfRequestedEvents: 1,
           })
         ).toEqual(
-          new Map([
+          new Map<string, NodeData>([
             ['1', { events: [], status: 'running' }],
             ['2', { events: [], status: 'running' }],
           ])
@@ -128,7 +141,9 @@ describe('node data model', () => {
             requestedNodes: new Set(['1']),
             numberOfRequestedEvents: 0,
           })
-        ).toEqual(new Map([['2', { events: node2Events, status: 'error' }]]));
+        ).toEqual(
+          new Map<string, NodeData>([['2', { events: node2Events, status: 'error' }]])
+        );
       });
 
       it('attempts to remove entries from the map even if they do not exist', () => {
@@ -140,7 +155,7 @@ describe('node data model', () => {
             numberOfRequestedEvents: 0,
           })
         ).toEqual(
-          new Map([
+          new Map<string, NodeData>([
             ['1', { events: node1Events, status: 'error' }],
             ['2', { events: node2Events, status: 'error' }],
           ])
@@ -158,7 +173,7 @@ describe('node data model', () => {
             numberOfRequestedEvents: 1,
           })
         ).toEqual(
-          new Map([
+          new Map<string, NodeData>([
             ['1', { events: [genNodeEvent], status: 'running' }],
             ['2', { events: node2Events, status: 'error' }],
           ])

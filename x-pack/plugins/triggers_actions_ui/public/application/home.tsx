@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect } from 'react';
@@ -20,7 +21,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
-import { Section, routeToConnectors, routeToAlerts } from './constants';
+import { Section, routeToConnectors, routeToRules } from './constants';
 import { getAlertingSectionBreadcrumb } from './lib/breadcrumb';
 import { getCurrentDocTitle } from './lib/doc_title';
 import { hasShowActionsCapability } from './lib/capabilities';
@@ -55,9 +56,9 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   }> = [];
 
   tabs.push({
-    id: 'alerts',
+    id: 'rules',
     name: (
-      <FormattedMessage id="xpack.triggersActionsUI.home.alertsTabTitle" defaultMessage="Alerts" />
+      <FormattedMessage id="xpack.triggersActionsUI.home.rulesTabTitle" defaultMessage="Rules" />
     ),
   });
 
@@ -92,19 +93,19 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
               <h1 data-test-subj="appTitle">
                 <FormattedMessage
                   id="xpack.triggersActionsUI.home.appTitle"
-                  defaultMessage="Alerts and Actions"
+                  defaultMessage="Rules and Connectors"
                 />
               </h1>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/managing-alerts-and-actions.html`}
+                href={docLinks.links.alerting.guide}
                 target="_blank"
                 iconType="help"
                 data-test-subj="documentationLink"
               >
                 <FormattedMessage
-                  id="xpack.triggersActionsUI.home.alertsAndActionsDocsLinkText"
+                  id="xpack.triggersActionsUI.home.docsLinkText"
                   defaultMessage="Documentation"
                 />
               </EuiButtonEmpty>
@@ -116,7 +117,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
           <p>
             <FormattedMessage
               id="xpack.triggersActionsUI.home.sectionDescription"
-              defaultMessage="Detect conditions using alerts, and take actions using connectors."
+              defaultMessage="Detect conditions using rules, and take actions using connectors."
             />
           </p>
         </EuiText>
@@ -152,7 +153,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
           )}
           <Route
             exact
-            path={routeToAlerts}
+            path={routeToRules}
             component={() => (
               <HealthContextProvider>
                 <HealthCheck inFlyout={true} waitForCheck={true}>

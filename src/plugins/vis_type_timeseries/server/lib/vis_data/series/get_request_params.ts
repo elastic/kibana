@@ -1,0 +1,54 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import { buildRequestBody } from './build_request_body';
+
+import type { FetchedIndexPattern, PanelSchema, SeriesItemsSchema } from '../../../../common/types';
+import type {
+  VisTypeTimeseriesRequestServices,
+  VisTypeTimeseriesVisDataRequest,
+} from '../../../types';
+import type { DefaultSearchCapabilities } from '../../search_strategies';
+
+export async function getSeriesRequestParams(
+  req: VisTypeTimeseriesVisDataRequest,
+  panel: PanelSchema,
+  panelIndex: FetchedIndexPattern,
+  series: SeriesItemsSchema,
+  capabilities: DefaultSearchCapabilities,
+  {
+    esQueryConfig,
+    esShardTimeout,
+    uiSettings,
+    cachedIndexPatternFetcher,
+  }: VisTypeTimeseriesRequestServices
+) {
+  let seriesIndex = panelIndex;
+
+  if (series.override_index_pattern) {
+    seriesIndex = await cachedIndexPatternFetcher(series.series_index_pattern ?? '');
+  }
+
+  const request = await buildRequestBody(
+    req,
+    panel,
+    series,
+    esQueryConfig,
+    seriesIndex.indexPattern,
+    capabilities,
+    uiSettings
+  );
+
+  return {
+    index: seriesIndex.indexPatternString,
+    body: {
+      ...request,
+      timeout: esShardTimeout > 0 ? `${esShardTimeout}ms` : undefined,
+    },
+  };
+}

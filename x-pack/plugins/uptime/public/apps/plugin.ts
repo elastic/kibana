@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -26,13 +27,13 @@ import {
   DataPublicPluginStart,
 } from '../../../../../src/plugins/data/public';
 import { alertTypeInitializers } from '../lib/alert_types';
-import { FetchDataParams, ObservabilityPluginSetup } from '../../../observability/public';
+import { FetchDataParams, ObservabilityPublicSetup } from '../../../observability/public';
 import { PLUGIN } from '../../common/constants/plugin';
 
 export interface ClientPluginsSetup {
   data: DataPublicPluginSetup;
   home?: HomePublicPluginSetup;
-  observability: ObservabilityPluginSetup;
+  observability: ObservabilityPublicSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 }
 
@@ -49,10 +50,7 @@ export class UptimePlugin
   implements Plugin<ClientSetup, ClientStart, ClientPluginsSetup, ClientPluginsStart> {
   constructor(_context: PluginInitializerContext) {}
 
-  public async setup(
-    core: CoreSetup<ClientPluginsStart, unknown>,
-    plugins: ClientPluginsSetup
-  ): Promise<void> {
+  public setup(core: CoreSetup<ClientPluginsStart, unknown>, plugins: ClientPluginsSetup): void {
     if (plugins.home) {
       plugins.home.featureCatalogue.register({
         id: PLUGIN.ID,
@@ -89,6 +87,28 @@ export class UptimePlugin
       order: 8400,
       title: PLUGIN.TITLE,
       category: DEFAULT_APP_CATEGORIES.observability,
+      meta: {
+        keywords: [
+          'Synthetics',
+          'pings',
+          'checks',
+          'availability',
+          'response duration',
+          'response time',
+          'outside in',
+          'reachability',
+          'reachable',
+          'digital',
+          'performance',
+          'web performance',
+          'web perf',
+        ],
+        searchDeepLinks: [
+          { id: 'Down monitors', title: 'Down monitors', path: '/?statusFilter=down' },
+          { id: 'Certificates', title: 'TLS Certificates', path: '/certificates' },
+          { id: 'Settings', title: 'Settings', path: '/settings' },
+        ],
+      },
       mount: async (params: AppMountParameters) => {
         const [coreStart, corePlugins] = await core.getStartServices();
 

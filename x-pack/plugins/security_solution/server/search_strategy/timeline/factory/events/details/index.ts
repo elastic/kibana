@@ -1,21 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { cloneDeep, merge } from 'lodash/fp';
+import { cloneDeep, merge, unionBy } from 'lodash/fp';
 
 import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 import {
+  EventHit,
   TimelineEventsQueries,
   TimelineEventsDetailsStrategyResponse,
   TimelineEventsDetailsRequestOptions,
-} from '../../../../../../common/search_strategy/timeline';
+  TimelineEventsDetailsItem,
+  EventSource,
+} from '../../../../../../common/search_strategy';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { SecuritySolutionTimelineFactory } from '../../types';
 import { buildTimelineDetailsQuery } from './query.events_details.dsl';
-import { getDataFromHits } from './helpers';
+import { getDataFromFieldsHits, getDataFromSourceHits, getDataSafety } from './helpers';
 
 export const timelineEventsDetails: SecuritySolutionTimelineFactory<TimelineEventsQueries.details> = {
   buildDsl: (options: TimelineEventsDetailsRequestOptions) => {
@@ -24,18 +28,31 @@ export const timelineEventsDetails: SecuritySolutionTimelineFactory<TimelineEven
   },
   parse: async (
     options: TimelineEventsDetailsRequestOptions,
-    response: IEsSearchResponse<unknown>
+    response: IEsSearchResponse<EventHit>
   ): Promise<TimelineEventsDetailsStrategyResponse> => {
     const { indexName, eventId, docValueFields = [] } = options;
-    const fieldsData = cloneDeep(response.rawResponse.hits.hits[0]?.fields ?? {});
-    const hitsData = cloneDeep(response.rawResponse.hits.hits[0] ?? {});
-    delete hitsData._source;
-    delete hitsData.fields;
+    const { _source, fields, ...hitsData } = cloneDeep(response.rawResponse.hits.hits[0] ?? {});
     const inspect = {
       dsl: [inspectStringifyObject(buildTimelineDetailsQuery(indexName, eventId, docValueFields))],
     };
-    const data = getDataFromHits(merge(fieldsData, hitsData));
+    if (response.isRunning) {
+      return {
+        ...response,
+        data: [],
+        inspect,
+      };
+    }
+    const sourceData = await getDataSafety<EventSource, TimelineEventsDetailsItem[]>(
+      getDataFromSourceHits,
+      // @ts-expect-error @elastic/elasticsearch _source is optional
+      _source
+    );
+    const fieldsData = await getDataSafety<EventHit['fields'], TimelineEventsDetailsItem[]>(
+      getDataFromFieldsHits,
+      merge(fields, hitsData)
+    );
 
+    const data = unionBy('field', fieldsData, sourceData);
     return {
       ...response,
       data,

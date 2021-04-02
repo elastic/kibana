@@ -1,14 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
 
+export const MAX_WORKERS_LIMIT = 100;
 export const DEFAULT_MAX_WORKERS = 10;
 export const DEFAULT_POLL_INTERVAL = 3000;
 export const DEFAULT_MAX_POLL_INACTIVITY_CYCLES = 10;
+export const DEFAULT_VERSION_CONFLICT_THRESHOLD = 80;
 
 // Monitoring Constants
 // ===================
@@ -74,6 +77,12 @@ export const configSchema = schema.object(
       defaultValue: DEFAULT_MAX_WORKERS,
       // disable the task manager rather than trying to specify it with 0 workers
       min: 1,
+    }),
+    /* The threshold percenatge for workers experiencing version conflicts for shifting the polling interval. */
+    version_conflict_threshold: schema.number({
+      defaultValue: DEFAULT_VERSION_CONFLICT_THRESHOLD,
+      min: 50,
+      max: 100,
     }),
     /* The rate at which we emit fresh monitored stats. By default we'll use the poll_interval (+ a slight buffer) */
     monitored_stats_required_freshness: schema.number({

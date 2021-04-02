@@ -1,16 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { kibanaResponseFactory, RequestHandlerContext } from '../../../../../../../src/core/server';
-import { LicenseCheck } from '../../../../../licensing/server';
-import { RawKibanaPrivileges } from '../../../../common/model';
-import { defineGetPrivilegesRoutes } from './get';
+import { kibanaResponseFactory } from 'src/core/server';
+import { httpServerMock } from 'src/core/server/mocks';
 
-import { httpServerMock } from '../../../../../../../src/core/server/mocks';
+import type { LicenseCheck } from '../../../../../licensing/server';
+import type { RawKibanaPrivileges } from '../../../../common/model';
+import type { SecurityRequestHandlerContext } from '../../../types';
 import { routeDefinitionParamsMock } from '../../index.mock';
+import { defineGetPrivilegesRoutes } from './get';
 
 const createRawKibanaPrivileges: () => RawKibanaPrivileges = () => {
   return {
@@ -66,7 +68,7 @@ describe('GET privileges', () => {
       });
       const mockContext = ({
         licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
-      } as unknown) as RequestHandlerContext;
+      } as unknown) as SecurityRequestHandlerContext;
 
       const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
       expect(response.status).toBe(asserts.statusCode);

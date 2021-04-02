@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect } from 'react';
+
 import { useActions, useValues } from 'kea';
 
 import {
   EuiPageHeader,
-  EuiPageHeaderSection,
   EuiTitle,
   EuiPageContentBody,
   EuiPanel,
@@ -23,24 +24,28 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { FlashMessages } from '../../../shared/flash_messages';
-
-import { CredentialsLogic } from './credentials_logic';
 import { externalUrl } from '../../../shared/enterprise_search_url/external_url';
+import { FlashMessages } from '../../../shared/flash_messages';
+import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
+
 import { CREDENTIALS_TITLE } from './constants';
-import { CredentialsList } from './credentials_list';
 import { CredentialsFlyout } from './credentials_flyout';
+import { CredentialsList } from './credentials_list';
+import { CredentialsLogic } from './credentials_logic';
 
 export const Credentials: React.FC = () => {
-  const { initializeCredentialsData, resetCredentials, showCredentialsForm } = useActions(
+  const { fetchCredentials, fetchDetails, resetCredentials, showCredentialsForm } = useActions(
     CredentialsLogic
   );
 
-  const { dataLoading, shouldShowCredentialsForm } = useValues(CredentialsLogic);
+  const { meta, dataLoading, shouldShowCredentialsForm } = useValues(CredentialsLogic);
 
   useEffect(() => {
-    initializeCredentialsData();
+    fetchCredentials();
+  }, [meta.page.current]);
+
+  useEffect(() => {
+    fetchDetails();
     return () => {
       resetCredentials();
     };
@@ -49,16 +54,10 @@ export const Credentials: React.FC = () => {
   return (
     <>
       <SetPageChrome trail={[CREDENTIALS_TITLE]} />
-      <EuiPageHeader>
-        <EuiPageHeaderSection>
-          <EuiTitle size="l">
-            <h1>{CREDENTIALS_TITLE}</h1>
-          </EuiTitle>
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
+      <EuiPageHeader pageTitle={CREDENTIALS_TITLE} />
       <EuiPageContentBody>
         {shouldShowCredentialsForm && <CredentialsFlyout />}
-        <EuiPanel className="eui-textCenter">
+        <EuiPanel hasBorder className="eui-textCenter">
           <EuiTitle size="s">
             <h2>
               {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.apiEndpoint', {
@@ -105,7 +104,7 @@ export const Credentials: React.FC = () => {
               <EuiButton
                 color="primary"
                 data-test-subj="CreateAPIKeyButton"
-                fill={true}
+                fill
                 onClick={() => showCredentialsForm()}
               >
                 {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.createKey', {
@@ -117,7 +116,9 @@ export const Credentials: React.FC = () => {
         </EuiPageContentHeader>
         <EuiSpacer size="m" />
         <FlashMessages />
-        <EuiPanel>{!!dataLoading ? <EuiLoadingContent lines={3} /> : <CredentialsList />}</EuiPanel>
+        <EuiPanel hasBorder>
+          {!!dataLoading ? <EuiLoadingContent lines={3} /> : <CredentialsList />}
+        </EuiPanel>
       </EuiPageContentBody>
     </>
   );

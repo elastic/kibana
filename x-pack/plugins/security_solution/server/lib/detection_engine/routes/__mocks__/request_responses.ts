@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { SavedObjectsFindResponse } from 'kibana/server';
@@ -16,6 +17,7 @@ import {
   INTERNAL_IMMUTABLE_KEY,
   DETECTION_ENGINE_PREPACKAGED_URL,
   DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL,
+  DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL,
 } from '../../../../../common/constants';
 import { ShardsResponse } from '../../../types';
 import {
@@ -32,6 +34,7 @@ import { getFinalizeSignalsMigrationSchemaMock } from '../../../../../common/det
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { EqlSearchResponse } from '../../../../../common/detection_engine/types';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
+import { getSignalsMigrationStatusSchemaMock } from '../../../../../common/detection_engine/schemas/request/get_signals_migration_status_schema.mock';
 
 export const typicalSetStatusSignalByIdsPayload = (): SetSignalsStatusSchemaDecoded => ({
   signal_ids: ['somefakeid1', 'somefakeid2'],
@@ -390,6 +393,7 @@ export const getResult = (): RuleAlertType => ({
     threatMapping: undefined,
     threatLanguage: undefined,
     threatIndex: undefined,
+    threatIndicatorPath: undefined,
     threatQuery: undefined,
     references: ['http://www.example.com', 'https://ww.example.com'],
     note: '# Investigative notes',
@@ -432,6 +436,35 @@ export const getMlResult = (): RuleAlertType => {
       type: 'machine_learning',
       anomalyThreshold: 44,
       machineLearningJobId: 'some_job_id',
+    },
+  };
+};
+
+export const getThresholdResult = (): RuleAlertType => {
+  const result = getResult();
+
+  return {
+    ...result,
+    params: {
+      ...result.params,
+      type: 'threshold',
+      threshold: {
+        field: 'host.ip',
+        value: 5,
+      },
+    },
+  };
+};
+
+export const getEqlResult = (): RuleAlertType => {
+  const result = getResult();
+
+  return {
+    ...result,
+    params: {
+      ...result.params,
+      type: 'eql',
+      query: 'process where true',
     },
   };
 };
@@ -658,4 +691,11 @@ export const getFinalizeSignalsMigrationRequest = () =>
     method: 'post',
     path: DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL,
     body: getFinalizeSignalsMigrationSchemaMock(),
+  });
+
+export const getSignalsMigrationStatusRequest = () =>
+  requestMock.create({
+    method: 'get',
+    path: DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL,
+    query: getSignalsMigrationStatusSchemaMock(),
   });

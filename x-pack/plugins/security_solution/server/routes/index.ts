@@ -1,10 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { IRouter } from '../../../../../src/core/server';
+import { SecuritySolutionPluginRouter } from '../types';
 
 import { createRulesRoute } from '../lib/detection_engine/routes/rules/create_rules_route';
 import { createIndexRoute } from '../lib/detection_engine/routes/index/create_index_route';
@@ -15,6 +16,7 @@ import { deleteRulesRoute } from '../lib/detection_engine/routes/rules/delete_ru
 import { updateRulesRoute } from '../lib/detection_engine/routes/rules/update_rules_route';
 import { patchRulesRoute } from '../lib/detection_engine/routes/rules/patch_rules_route';
 import { createSignalsMigrationRoute } from '../lib/detection_engine/routes/signals/create_signals_migration_route';
+import { deleteSignalsMigrationRoute } from '../lib/detection_engine/routes/signals/delete_signals_migration_route';
 import { finalizeSignalsMigrationRoute } from '../lib/detection_engine/routes/signals/finalize_signals_migration_route';
 import { getSignalsMigrationStatusRoute } from '../lib/detection_engine/routes/signals/get_signals_migration_status_route';
 import { querySignalsRoute } from '../lib/detection_engine/routes/signals/query_signals_route';
@@ -31,21 +33,21 @@ import { importRulesRoute } from '../lib/detection_engine/routes/rules/import_ru
 import { exportRulesRoute } from '../lib/detection_engine/routes/rules/export_rules_route';
 import { findRulesStatusesRoute } from '../lib/detection_engine/routes/rules/find_rules_status_route';
 import { getPrepackagedRulesStatusRoute } from '../lib/detection_engine/routes/rules/get_prepackaged_rules_status_route';
-import { importTimelinesRoute } from '../lib/timeline/routes/import_timelines_route';
-import { exportTimelinesRoute } from '../lib/timeline/routes/export_timelines_route';
-import { createTimelinesRoute } from '../lib/timeline/routes/create_timelines_route';
-import { updateTimelinesRoute } from '../lib/timeline/routes/update_timelines_route';
-import { getDraftTimelinesRoute } from '../lib/timeline/routes/get_draft_timelines_route';
-import { cleanDraftTimelinesRoute } from '../lib/timeline/routes/clean_draft_timelines_route';
+import { importTimelinesRoute } from '../lib/timeline/routes/timelines/import_timelines';
+import { exportTimelinesRoute } from '../lib/timeline/routes/timelines/export_timelines';
+import { createTimelinesRoute } from '../lib/timeline/routes/timelines/create_timelines';
+import { updateTimelinesRoute } from '../lib/timeline/routes/timelines/patch_timelines';
+import { getDraftTimelinesRoute } from '../lib/timeline/routes/draft_timelines/get_draft_timelines';
+import { cleanDraftTimelinesRoute } from '../lib/timeline/routes/draft_timelines/clean_draft_timelines';
 import { SetupPlugins } from '../plugin';
 import { ConfigType } from '../config';
-import { installPrepackedTimelinesRoute } from '../lib/timeline/routes/install_prepacked_timelines_route';
-import { getTimelineRoute } from '../lib/timeline/routes/get_timeline_route';
+import { installPrepackedTimelinesRoute } from '../lib/timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
+import { getTimelineRoute } from '../lib/timeline/routes/timelines/get_timeline';
 
 export const initRoutes = (
-  router: IRouter,
+  router: SecuritySolutionPluginRouter,
   config: ConfigType,
-  usingEphemeralEncryptionKey: boolean,
+  hasEncryptionKey: boolean,
   security: SetupPlugins['security'],
   ml: SetupPlugins['ml']
 ) => {
@@ -83,11 +85,12 @@ export const initRoutes = (
   // Detection Engine Signals routes that have the REST endpoints of /api/detection_engine/signals
   // POST /api/detection_engine/signals/status
   // Example usage can be found in security_solution/server/lib/detection_engine/scripts/signals
-  getSignalsMigrationStatusRoute(router);
-  createSignalsMigrationRoute(router);
-  finalizeSignalsMigrationRoute(router);
   setSignalsStatusRoute(router);
   querySignalsRoute(router);
+  getSignalsMigrationStatusRoute(router);
+  createSignalsMigrationRoute(router, security);
+  finalizeSignalsMigrationRoute(router, security);
+  deleteSignalsMigrationRoute(router, security);
 
   // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index
   // All REST index creation, policy management for spaces
@@ -99,5 +102,5 @@ export const initRoutes = (
   readTagsRoute(router);
 
   // Privileges API to get the generic user privileges
-  readPrivilegesRoute(router, usingEphemeralEncryptionKey);
+  readPrivilegesRoute(router, hasEncryptionKey);
 };

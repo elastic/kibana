@@ -1,9 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
+import { isEqual } from 'lodash';
 import expect from '@kbn/expect';
 
 import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
@@ -19,12 +21,24 @@ import {
   deleteSignalsIndex,
   getSignalsByIds,
   removeServerGeneratedProperties,
-  waitForRuleSuccess,
+  waitForRuleSuccessOrStatus,
   waitForSignalsToBePresent,
 } from '../../utils';
 
 import { getCreateThreatMatchRulesSchemaMock } from '../../../../plugins/security_solution/common/detection_engine/schemas/request/rule_schemas.mock';
 import { getThreatMatchingSchemaPartialMock } from '../../../../plugins/security_solution/common/detection_engine/schemas/response/rules_schema.mocks';
+
+const format = (value: unknown): string => JSON.stringify(value, null, 2);
+
+// Asserts that each expected value is included in the subject, independent of
+// ordering. Uses _.isEqual for value comparison.
+const assertContains = (subject: unknown[], expected: unknown[]) =>
+  expected.forEach((expectedValue) =>
+    expect(subject.some((value) => isEqual(value, expectedValue))).to.eql(
+      true,
+      `expected ${format(subject)} to contain ${format(expectedValue)}`
+    )
+  );
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -54,11 +68,13 @@ export default ({ getService }: FtrProviderContext) => {
     describe('creating threat match rule', () => {
       beforeEach(async () => {
         await createSignalsIndex(supertest);
+        await esArchiver.load('auditbeat/hosts');
       });
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(supertest);
+        await esArchiver.unload('auditbeat/hosts');
       });
 
       it('should create a single rule with a rule_id', async () => {
@@ -72,7 +88,8 @@ export default ({ getService }: FtrProviderContext) => {
           supertest,
           getCreateThreatMatchRulesSchemaMock('rule-1', true)
         );
-        await waitForRuleSuccess(supertest, ruleResponse.id);
+
+        await waitForRuleSuccessOrStatus(supertest, ruleResponse.id, 'succeeded');
 
         const { body: statusBody } = await supertest
           .post(DETECTION_ENGINE_RULES_STATUS_URL)
@@ -104,6 +121,7 @@ export default ({ getService }: FtrProviderContext) => {
           description: 'Detecting root and admin users',
           name: 'Query with a rule id',
           severity: 'high',
+          index: ['auditbeat-*'],
           type: 'threat_match',
           risk_score: 55,
           language: 'kuery',
@@ -128,7 +146,7 @@ export default ({ getService }: FtrProviderContext) => {
         };
 
         const { id } = await createRule(supertest, rule);
-        await waitForRuleSuccess(supertest, id);
+        await waitForRuleSuccessOrStatus(supertest, id);
         await waitForSignalsToBePresent(supertest, 10, [id]);
         const signalsOpen = await getSignalsByIds(supertest, [id]);
         expect(signalsOpen.hits.hits.length).equal(10);
@@ -139,6 +157,7 @@ export default ({ getService }: FtrProviderContext) => {
           description: 'Detecting root and admin users',
           name: 'Query with a rule id',
           severity: 'high',
+          index: ['auditbeat-*'],
           type: 'threat_match',
           risk_score: 55,
           language: 'kuery',
@@ -163,7 +182,7 @@ export default ({ getService }: FtrProviderContext) => {
         };
 
         const ruleResponse = await createRule(supertest, rule);
-        await waitForRuleSuccess(supertest, ruleResponse.id);
+        await waitForRuleSuccessOrStatus(supertest, ruleResponse.id);
         const signalsOpen = await getSignalsByIds(supertest, [ruleResponse.id]);
         expect(signalsOpen.hits.hits.length).equal(0);
       });
@@ -173,6 +192,7 @@ export default ({ getService }: FtrProviderContext) => {
           description: 'Detecting root and admin users',
           name: 'Query with a rule id',
           severity: 'high',
+          index: ['auditbeat-*'],
           type: 'threat_match',
           risk_score: 55,
           language: 'kuery',
@@ -201,7 +221,7 @@ export default ({ getService }: FtrProviderContext) => {
         };
 
         const ruleResponse = await createRule(supertest, rule);
-        await waitForRuleSuccess(supertest, ruleResponse.id);
+        await waitForRuleSuccessOrStatus(supertest, ruleResponse.id);
         const signalsOpen = await getSignalsByIds(supertest, [ruleResponse.id]);
         expect(signalsOpen.hits.hits.length).equal(0);
       });
@@ -212,6 +232,7 @@ export default ({ getService }: FtrProviderContext) => {
           name: 'Query with a rule id',
           severity: 'high',
           type: 'threat_match',
+          index: ['auditbeat-*'],
           risk_score: 55,
           language: 'kuery',
           rule_id: 'rule-1',
@@ -239,9 +260,510 @@ export default ({ getService }: FtrProviderContext) => {
         };
 
         const ruleResponse = await createRule(supertest, rule);
-        await waitForRuleSuccess(supertest, ruleResponse.id);
+        await waitForRuleSuccessOrStatus(supertest, ruleResponse.id);
         const signalsOpen = await getSignalsByIds(supertest, [ruleResponse.id]);
         expect(signalsOpen.hits.hits.length).equal(0);
+      });
+
+      describe('indicator enrichment', () => {
+        beforeEach(async () => {
+          await esArchiver.load('filebeat/threat_intel');
+        });
+
+        afterEach(async () => {
+          await esArchiver.unload('filebeat/threat_intel');
+        });
+
+        it('enriches signals with the single indicator that matched', async () => {
+          const rule: CreateRulesSchema = {
+            description: 'Detecting root and admin users',
+            name: 'Query with a rule id',
+            severity: 'high',
+            index: ['auditbeat-*'],
+            type: 'threat_match',
+            risk_score: 55,
+            language: 'kuery',
+            rule_id: 'rule-1',
+            from: '1900-01-01T00:00:00.000Z',
+            query: '*:*',
+            threat_indicator_path: 'threat.indicator',
+            threat_query: 'threat.indicator.domain: *', // narrow things down to indicators with a domain
+            threat_index: ['filebeat-*'], // Mimics indicators from the filebeat MISP module
+            threat_mapping: [
+              {
+                entries: [
+                  {
+                    value: 'threat.indicator.domain',
+                    field: 'destination.ip',
+                    type: 'mapping',
+                  },
+                ],
+              },
+            ],
+            threat_filters: [],
+          };
+
+          const { id } = await createRule(supertest, rule);
+          await waitForRuleSuccessOrStatus(supertest, id);
+          await waitForSignalsToBePresent(supertest, 2, [id]);
+          const signalsOpen = await getSignalsByIds(supertest, [id]);
+          expect(signalsOpen.hits.hits.length).equal(2);
+
+          const { hits } = signalsOpen.hits;
+          const threats = hits.map((hit) => hit._source.threat);
+          expect(threats).to.eql([
+            {
+              indicator: [
+                {
+                  description: "domain should match the auditbeat hosts' data's source.ip",
+                  domain: '159.89.119.67',
+                  event: {
+                    category: 'threat',
+                    created: '2021-01-26T11:09:05.529Z',
+                    dataset: 'threatintel.abuseurl',
+                    ingested: '2021-01-26T11:09:06.595350Z',
+                    kind: 'enrichment',
+                    module: 'threatintel',
+                    reference: 'https://urlhaus.abuse.ch/url/978783/',
+                    type: 'indicator',
+                  },
+                  first_seen: '2021-01-26T11:09:04.000Z',
+                  matched: {
+                    atomic: '159.89.119.67',
+                    id: '978783',
+                    index: 'filebeat-8.0.0-2021.01.26-000001',
+                    field: 'destination.ip',
+                    type: 'url',
+                  },
+                  provider: 'geenensp',
+                  type: 'url',
+                  url: {
+                    full: 'http://159.89.119.67:59600/bin.sh',
+                    scheme: 'http',
+                  },
+                },
+              ],
+            },
+            {
+              indicator: [
+                {
+                  description: "domain should match the auditbeat hosts' data's source.ip",
+                  domain: '159.89.119.67',
+                  event: {
+                    category: 'threat',
+                    created: '2021-01-26T11:09:05.529Z',
+                    dataset: 'threatintel.abuseurl',
+                    ingested: '2021-01-26T11:09:06.595350Z',
+                    kind: 'enrichment',
+                    module: 'threatintel',
+                    reference: 'https://urlhaus.abuse.ch/url/978783/',
+                    type: 'indicator',
+                  },
+                  first_seen: '2021-01-26T11:09:04.000Z',
+                  matched: {
+                    atomic: '159.89.119.67',
+                    id: '978783',
+                    index: 'filebeat-8.0.0-2021.01.26-000001',
+                    field: 'destination.ip',
+                    type: 'url',
+                  },
+                  provider: 'geenensp',
+                  type: 'url',
+                  url: {
+                    full: 'http://159.89.119.67:59600/bin.sh',
+                    scheme: 'http',
+                  },
+                },
+              ],
+            },
+          ]);
+        });
+
+        it('enriches signals with multiple indicators if several matched', async () => {
+          const rule: CreateRulesSchema = {
+            description: 'Detecting root and admin users',
+            name: 'Query with a rule id',
+            severity: 'high',
+            index: ['auditbeat-*'],
+            type: 'threat_match',
+            risk_score: 55,
+            language: 'kuery',
+            rule_id: 'rule-1',
+            from: '1900-01-01T00:00:00.000Z',
+            query: 'source.port: 57324', // narrow our query to a single record that matches two indicators
+            threat_indicator_path: 'threat.indicator',
+            threat_query: 'threat.indicator.ip: *',
+            threat_index: ['filebeat-*'], // Mimics indicators from the filebeat MISP module
+            threat_mapping: [
+              {
+                entries: [
+                  {
+                    value: 'threat.indicator.ip',
+                    field: 'source.ip',
+                    type: 'mapping',
+                  },
+                ],
+              },
+            ],
+            threat_filters: [],
+          };
+
+          const { id } = await createRule(supertest, rule);
+          await waitForRuleSuccessOrStatus(supertest, id);
+          await waitForSignalsToBePresent(supertest, 1, [id]);
+          const signalsOpen = await getSignalsByIds(supertest, [id]);
+          expect(signalsOpen.hits.hits.length).equal(1);
+
+          const { hits } = signalsOpen.hits;
+          const [threat] = hits.map((hit) => hit._source.threat) as Array<{ indicator: unknown[] }>;
+
+          assertContains(threat.indicator, [
+            {
+              description: 'this should match auditbeat/hosts on both port and ip',
+              first_seen: '2021-01-26T11:06:03.000Z',
+              ip: '45.115.45.3',
+              matched: {
+                atomic: '45.115.45.3',
+                id: '978785',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'source.ip',
+                type: 'url',
+              },
+              port: 57324,
+              provider: 'geenensp',
+              type: 'url',
+              event: {
+                category: 'threat',
+                created: '2021-01-26T11:09:05.529Z',
+                dataset: 'threatintel.abuseurl',
+                ingested: '2021-01-26T11:09:06.616763Z',
+                kind: 'enrichment',
+                module: 'threatintel',
+                reference: 'https://urlhaus.abuse.ch/url/978782/',
+                type: 'indicator',
+              },
+            },
+            {
+              description: 'this should match auditbeat/hosts on ip',
+              first_seen: '2021-01-26T11:06:03.000Z',
+              ip: '45.115.45.3',
+              matched: {
+                atomic: '45.115.45.3',
+                id: '978787',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'source.ip',
+                type: 'ip',
+              },
+              provider: 'other_provider',
+              type: 'ip',
+              event: {
+                category: 'threat',
+                created: '2021-01-26T11:09:05.529Z',
+                dataset: 'threatintel.abuseurl',
+                ingested: '2021-01-26T11:09:06.616763Z',
+                kind: 'enrichment',
+                module: 'threatintel',
+                reference: 'https://urlhaus.abuse.ch/url/978782/',
+                type: 'indicator',
+              },
+            },
+          ]);
+        });
+
+        it('adds a single indicator that matched multiple fields', async () => {
+          const rule: CreateRulesSchema = {
+            description: 'Detecting root and admin users',
+            name: 'Query with a rule id',
+            severity: 'high',
+            index: ['auditbeat-*'],
+            type: 'threat_match',
+            risk_score: 55,
+            language: 'kuery',
+            rule_id: 'rule-1',
+            from: '1900-01-01T00:00:00.000Z',
+            query: 'source.port: 57324', // narrow our query to a single record that matches two indicators
+            threat_indicator_path: 'threat.indicator',
+            threat_query: 'threat.indicator.ip: *',
+            threat_index: ['filebeat-*'], // Mimics indicators from the filebeat MISP module
+            threat_mapping: [
+              {
+                entries: [
+                  {
+                    value: 'threat.indicator.port',
+                    field: 'source.port',
+                    type: 'mapping',
+                  },
+                ],
+              },
+              {
+                entries: [
+                  {
+                    value: 'threat.indicator.ip',
+                    field: 'source.ip',
+                    type: 'mapping',
+                  },
+                ],
+              },
+            ],
+            threat_filters: [],
+          };
+
+          const { id } = await createRule(supertest, rule);
+          await waitForRuleSuccessOrStatus(supertest, id);
+          await waitForSignalsToBePresent(supertest, 1, [id]);
+          const signalsOpen = await getSignalsByIds(supertest, [id]);
+          expect(signalsOpen.hits.hits.length).equal(1);
+
+          const { hits } = signalsOpen.hits;
+          const [threat] = hits.map((hit) => hit._source.threat) as Array<{ indicator: unknown[] }>;
+
+          assertContains(threat.indicator, [
+            {
+              description: 'this should match auditbeat/hosts on both port and ip',
+              first_seen: '2021-01-26T11:06:03.000Z',
+              ip: '45.115.45.3',
+              matched: {
+                atomic: '45.115.45.3',
+                id: '978785',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'source.ip',
+                type: 'url',
+              },
+              port: 57324,
+              provider: 'geenensp',
+              type: 'url',
+              event: {
+                category: 'threat',
+                created: '2021-01-26T11:09:05.529Z',
+                dataset: 'threatintel.abuseurl',
+                ingested: '2021-01-26T11:09:06.616763Z',
+                kind: 'enrichment',
+                module: 'threatintel',
+                reference: 'https://urlhaus.abuse.ch/url/978782/',
+                type: 'indicator',
+              },
+            },
+            // We do not merge matched indicators during enrichment, so in
+            // certain circumstances a given indicator document could appear
+            // multiple times in an enriched alert (albeit with different
+            // threat.indicator.matched data). That's the case with the
+            // first and third indicators matched, here.
+            {
+              description: 'this should match auditbeat/hosts on both port and ip',
+              first_seen: '2021-01-26T11:06:03.000Z',
+              ip: '45.115.45.3',
+              matched: {
+                atomic: 57324,
+                id: '978785',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'source.port',
+                type: 'url',
+              },
+              port: 57324,
+              provider: 'geenensp',
+              type: 'url',
+              event: {
+                category: 'threat',
+                created: '2021-01-26T11:09:05.529Z',
+                dataset: 'threatintel.abuseurl',
+                ingested: '2021-01-26T11:09:06.616763Z',
+                kind: 'enrichment',
+                module: 'threatintel',
+                reference: 'https://urlhaus.abuse.ch/url/978782/',
+                type: 'indicator',
+              },
+            },
+            {
+              description: 'this should match auditbeat/hosts on ip',
+              first_seen: '2021-01-26T11:06:03.000Z',
+              ip: '45.115.45.3',
+              matched: {
+                atomic: '45.115.45.3',
+                id: '978787',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'source.ip',
+                type: 'ip',
+              },
+              provider: 'other_provider',
+              type: 'ip',
+              event: {
+                category: 'threat',
+                created: '2021-01-26T11:09:05.529Z',
+                dataset: 'threatintel.abuseurl',
+                ingested: '2021-01-26T11:09:06.616763Z',
+                kind: 'enrichment',
+                module: 'threatintel',
+                reference: 'https://urlhaus.abuse.ch/url/978782/',
+                type: 'indicator',
+              },
+            },
+          ]);
+        });
+
+        it('generates multiple signals with multiple matches', async () => {
+          const rule: CreateRulesSchema = {
+            description: 'Detecting root and admin users',
+            name: 'Query with a rule id',
+            severity: 'high',
+            index: ['auditbeat-*'],
+            type: 'threat_match',
+            risk_score: 55,
+            language: 'kuery',
+            rule_id: 'rule-1',
+            from: '1900-01-01T00:00:00.000Z',
+            query: '*:*', // narrow our query to a single record that matches two indicators
+            threat_indicator_path: 'threat.indicator',
+            threat_query: '',
+            threat_index: ['filebeat-*'], // Mimics indicators from the filebeat MISP module
+            threat_mapping: [
+              {
+                entries: [
+                  {
+                    value: 'threat.indicator.port',
+                    field: 'source.port',
+                    type: 'mapping',
+                  },
+                  {
+                    value: 'threat.indicator.ip',
+                    field: 'source.ip',
+                    type: 'mapping',
+                  },
+                ],
+              },
+              {
+                entries: [
+                  {
+                    value: 'threat.indicator.domain',
+                    field: 'destination.ip',
+                    type: 'mapping',
+                  },
+                ],
+              },
+            ],
+            threat_filters: [],
+          };
+
+          const { id } = await createRule(supertest, rule);
+          await waitForRuleSuccessOrStatus(supertest, id);
+          await waitForSignalsToBePresent(supertest, 2, [id]);
+          const signalsOpen = await getSignalsByIds(supertest, [id]);
+          expect(signalsOpen.hits.hits.length).equal(2);
+
+          const { hits } = signalsOpen.hits;
+          const threats = hits.map((hit) => hit._source.threat) as Array<{ indicator: unknown[] }>;
+
+          assertContains(threats[0].indicator, [
+            {
+              description: "domain should match the auditbeat hosts' data's source.ip",
+              domain: '159.89.119.67',
+              first_seen: '2021-01-26T11:09:04.000Z',
+              matched: {
+                atomic: '159.89.119.67',
+                id: '978783',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'destination.ip',
+                type: 'url',
+              },
+              provider: 'geenensp',
+              type: 'url',
+              url: {
+                full: 'http://159.89.119.67:59600/bin.sh',
+                scheme: 'http',
+              },
+              event: {
+                category: 'threat',
+                created: '2021-01-26T11:09:05.529Z',
+                dataset: 'threatintel.abuseurl',
+                ingested: '2021-01-26T11:09:06.595350Z',
+                kind: 'enrichment',
+                module: 'threatintel',
+                reference: 'https://urlhaus.abuse.ch/url/978783/',
+                type: 'indicator',
+              },
+            },
+          ]);
+
+          assertContains(threats[1].indicator, [
+            {
+              description: "domain should match the auditbeat hosts' data's source.ip",
+              domain: '159.89.119.67',
+              first_seen: '2021-01-26T11:09:04.000Z',
+              matched: {
+                atomic: '159.89.119.67',
+                id: '978783',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'destination.ip',
+                type: 'url',
+              },
+              provider: 'geenensp',
+              type: 'url',
+              url: {
+                full: 'http://159.89.119.67:59600/bin.sh',
+                scheme: 'http',
+              },
+              event: {
+                category: 'threat',
+                created: '2021-01-26T11:09:05.529Z',
+                dataset: 'threatintel.abuseurl',
+                ingested: '2021-01-26T11:09:06.595350Z',
+                kind: 'enrichment',
+                module: 'threatintel',
+                reference: 'https://urlhaus.abuse.ch/url/978783/',
+                type: 'indicator',
+              },
+            },
+            {
+              description: 'this should match auditbeat/hosts on both port and ip',
+              first_seen: '2021-01-26T11:06:03.000Z',
+              ip: '45.115.45.3',
+              matched: {
+                atomic: '45.115.45.3',
+                id: '978785',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'source.ip',
+                type: 'url',
+              },
+              port: 57324,
+              provider: 'geenensp',
+              type: 'url',
+              event: {
+                category: 'threat',
+                created: '2021-01-26T11:09:05.529Z',
+                dataset: 'threatintel.abuseurl',
+                ingested: '2021-01-26T11:09:06.616763Z',
+                kind: 'enrichment',
+                module: 'threatintel',
+                reference: 'https://urlhaus.abuse.ch/url/978782/',
+                type: 'indicator',
+              },
+            },
+            {
+              description: 'this should match auditbeat/hosts on both port and ip',
+              first_seen: '2021-01-26T11:06:03.000Z',
+              ip: '45.115.45.3',
+              matched: {
+                atomic: 57324,
+                id: '978785',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'source.port',
+                type: 'url',
+              },
+              port: 57324,
+              provider: 'geenensp',
+              type: 'url',
+              event: {
+                category: 'threat',
+                created: '2021-01-26T11:09:05.529Z',
+                dataset: 'threatintel.abuseurl',
+                ingested: '2021-01-26T11:09:06.616763Z',
+                kind: 'enrichment',
+                module: 'threatintel',
+                reference: 'https://urlhaus.abuse.ch/url/978782/',
+                type: 'indicator',
+              },
+            },
+          ]);
+        });
       });
     });
   });

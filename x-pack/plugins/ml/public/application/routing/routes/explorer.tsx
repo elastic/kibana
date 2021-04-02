@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useEffect, useState, useCallback, useMemo } from 'react';
@@ -36,6 +37,7 @@ import { JOB_ID } from '../../../../common/constants/anomalies';
 import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_updates_context';
 import { AnnotationUpdatesService } from '../../services/annotations_service';
 import { useExplorerUrlState } from '../../explorer/hooks/use_explorer_url_state';
+import { useTimeBuckets } from '../../components/custom_hooks/use_time_buckets';
 
 export const explorerRouteFactory = (
   navigateToPath: NavigateToPath,
@@ -83,9 +85,14 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   const [lastRefresh, setLastRefresh] = useState(0);
   const [stoppedPartitions, setStoppedPartitions] = useState<string[] | undefined>();
   const [invalidTimeRangeError, setInValidTimeRangeError] = useState<boolean>(false);
+
+  const timeBuckets = useTimeBuckets();
   const timefilter = useTimefilter({ timeRangeSelector: true, autoRefreshSelector: true });
 
   const { jobIds } = useJobSelection(jobsWithTimeRange);
+  const selectedJobsRunning = jobsWithTimeRange.some(
+    (job) => jobIds.includes(job.id) && job.isRunning === true
+  );
 
   const explorerAppState = useObservable(explorerService.appState$);
   const explorerState = useObservable(explorerService.state$);
@@ -119,13 +126,6 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
         from: globalState.time.from,
         to: globalState.time.to,
       });
-
-      const timefilterBounds = timefilter.getBounds();
-      // Only if both min/max bounds are valid moment times set the bounds.
-      // An invalid string restored from globalState might return `undefined`.
-      if (timefilterBounds?.min !== undefined && timefilterBounds?.max !== undefined) {
-        explorerService.setBounds(timefilterBounds);
-      }
     }
   }, [globalState?.time?.from, globalState?.time?.to]);
 
@@ -208,8 +208,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   const [selectedCells, setSelectedCells] = useSelectedCells(
     explorerUrlState,
     setExplorerUrlState,
-    explorerState?.bounds,
-    explorerState?.swimlaneBucketInterval
+    explorerState?.swimlaneBucketInterval?.asSeconds()
   );
 
   useEffect(() => {
@@ -219,7 +218,6 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
   const loadExplorerDataConfig =
     explorerState !== undefined
       ? {
-          bounds: explorerState.bounds,
           lastRefresh,
           influencersFilterQuery: explorerState.influencersFilterQuery,
           noInfluencersConfigured: explorerState.noInfluencersConfigured,
@@ -269,6 +267,9 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
           severity: tableSeverity.val,
           stoppedPartitions,
           invalidTimeRangeError,
+          selectedJobsRunning,
+          timeBuckets,
+          timefilter,
         }}
       />
     </div>

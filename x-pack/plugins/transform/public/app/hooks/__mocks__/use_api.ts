@@ -1,8 +1,11 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import { estypes } from '@elastic/elasticsearch';
 
 import { HttpFetchError } from 'kibana/public';
 
@@ -36,7 +39,6 @@ import type {
   PostTransformsUpdateResponseSchema,
 } from '../../../../common/api_schemas/update_transforms';
 
-import type { SearchResponse7 } from '../../../../common/shared_imports';
 import { EsIndex } from '../../../../common/types/es_index';
 
 import type { SavedSearchQuery } from '../use_search_items';
@@ -133,13 +135,13 @@ const apiFactory = () => ({
   ): Promise<GetTransformsAuditMessagesResponseSchema | HttpFetchError> {
     return Promise.resolve([]);
   },
-  async esSearch(payload: any): Promise<SearchResponse7 | HttpFetchError> {
+  async esSearch(payload: any): Promise<estypes.SearchResponse | HttpFetchError> {
     return Promise.resolve({
       hits: {
         hits: [],
         total: {
           value: 0,
-          relation: 'the-relation',
+          relation: 'eq',
         },
         max_score: 0,
       },

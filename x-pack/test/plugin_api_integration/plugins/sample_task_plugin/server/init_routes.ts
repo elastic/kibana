@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { schema } from '@kbn/config-schema';
 import {
   RequestHandlerContext,
@@ -69,20 +71,16 @@ export function initRoutes(
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
-      try {
-        const taskManager = await taskManagerStart;
-        const { task: taskFields } = req.body;
-        const task = {
-          ...taskFields,
-          scope: [scope],
-        };
+      const taskManager = await taskManagerStart;
+      const { task: taskFields } = req.body;
+      const task = {
+        ...taskFields,
+        scope: [scope],
+      };
 
-        const taskResult = await taskManager.schedule(task, { req });
+      const taskResult = await taskManager.schedule(task, { req });
 
-        return res.ok({ body: taskResult });
-      } catch (err) {
-        return res.internalError({ body: err });
-      }
+      return res.ok({ body: taskResult });
     }
   );
 
@@ -216,10 +214,9 @@ export function initRoutes(
         await ensureIndexIsRefreshed();
         const taskManager = await taskManagerStart;
         return res.ok({ body: await taskManager.get(req.params.taskId) });
-      } catch (err) {
-        return res.ok({ body: err });
+      } catch ({ isBoom, output, message }) {
+        return res.ok({ body: isBoom ? output.payload : { message } });
       }
-      return res.ok({ body: {} });
     }
   );
 
@@ -249,6 +246,7 @@ export function initRoutes(
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
       try {
+        await ensureIndexIsRefreshed();
         let tasksFound = 0;
         const taskManager = await taskManagerStart;
         do {
@@ -259,8 +257,8 @@ export function initRoutes(
           await Promise.all(tasks.map((task) => taskManager.remove(task.id)));
         } while (tasksFound > 0);
         return res.ok({ body: 'OK' });
-      } catch (err) {
-        return res.ok({ body: err });
+      } catch ({ isBoom, output, message }) {
+        return res.ok({ body: isBoom ? output.payload : { message } });
       }
     }
   );

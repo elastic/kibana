@@ -1,19 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { KibanaFeature } from '../../../../../features/common';
-import { RouteDefinitionParams } from '../../index';
-import { createLicensedRouteHandler } from '../../licensed_route_handler';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+
+import type { KibanaFeature } from '../../../../../features/common';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
-import {
-  ElasticsearchRole,
-  getPutPayloadSchema,
-  transformPutPayloadToElasticsearchRole,
-} from './model';
+import type { RouteDefinitionParams } from '../../index';
+import { createLicensedRouteHandler } from '../../licensed_route_handler';
+import { getPutPayloadSchema, transformPutPayloadToElasticsearchRole } from './model';
 
 const roleGrantsSubFeaturePrivileges = (
   features: KibanaFeature[],
@@ -65,13 +64,15 @@ export function definePutRolesRoutes({
       try {
         const {
           body: rawRoles,
-        } = await context.core.elasticsearch.client.asCurrentUser.security.getRole<
-          Record<string, ElasticsearchRole>
-        >({ name: request.params.name }, { ignore: [404] });
+        } = await context.core.elasticsearch.client.asCurrentUser.security.getRole(
+          { name: request.params.name },
+          { ignore: [404] }
+        );
 
         const body = transformPutPayloadToElasticsearchRole(
           request.body,
           authz.applicationName,
+          // @ts-expect-error @elastic/elasticsearch `XPackRole` type doesn't define `applications`.
           rawRoles[name] ? rawRoles[name].applications : []
         );
 
@@ -79,6 +80,7 @@ export function definePutRolesRoutes({
           getFeatures(),
           context.core.elasticsearch.client.asCurrentUser.security.putRole({
             name: request.params.name,
+            // @ts-expect-error RoleIndexPrivilege is not compatible. grant is required in IndicesPrivileges.field_security
             body,
           }),
         ]);

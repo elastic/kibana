@@ -1,17 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
-import { schema } from '@kbn/config-schema';
-import { RoleMapping } from '../../../common/model';
-import { createLicensedRouteHandler } from '../licensed_route_handler';
-import { wrapError } from '../../errors';
-import { RouteDefinitionParams } from '..';
 
-interface RoleMappingsResponse {
-  [roleMappingName: string]: Omit<RoleMapping, 'name'>;
-}
+import { schema } from '@kbn/config-schema';
+
+import type { RouteDefinitionParams } from '../';
+import type { RoleMapping } from '../../../common/model';
+import { wrapError } from '../../errors';
+import { createLicensedRouteHandler } from '../licensed_route_handler';
 
 export function defineRoleMappingGetRoutes(params: RouteDefinitionParams) {
   const { logger, router } = params;
@@ -29,7 +28,7 @@ export function defineRoleMappingGetRoutes(params: RouteDefinitionParams) {
       const expectSingleEntity = typeof request.params.name === 'string';
 
       try {
-        const roleMappingsResponse = await context.core.elasticsearch.client.asCurrentUser.security.getRoleMapping<RoleMappingsResponse>(
+        const roleMappingsResponse = await context.core.elasticsearch.client.asCurrentUser.security.getRoleMapping(
           { name: request.params.name }
         );
 
@@ -37,7 +36,8 @@ export function defineRoleMappingGetRoutes(params: RouteDefinitionParams) {
           return {
             name,
             ...mapping,
-            role_templates: (mapping.role_templates || []).map((entry) => {
+            // @ts-expect-error @elastic/elasticsearch `XPackRoleMapping` type doesn't define `role_templates` property.
+            role_templates: (mapping.role_templates || []).map((entry: RoleTemplate) => {
               return {
                 ...entry,
                 template: tryParseRoleTemplate(entry.template as string),

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -22,7 +23,7 @@ import { EuiLoadingChart, EuiSpacer, EuiFlexGrid, EuiFlexItem } from '@elastic/e
 import { TabContent, TabProps } from '../shared';
 import { useSnapshot } from '../../../../hooks/use_snaphot';
 import { useWaffleOptionsContext } from '../../../../hooks/use_waffle_options';
-import { useSourceContext } from '../../../../../../../containers/source';
+import { useSourceContext } from '../../../../../../../containers/metrics_source';
 import { findInventoryFields } from '../../../../../../../../common/inventory_models';
 import { convertKueryToElasticSearchQuery } from '../../../../../../../utils/kuery';
 import { SnapshotMetricType } from '../../../../../../../../common/inventory_models/types';

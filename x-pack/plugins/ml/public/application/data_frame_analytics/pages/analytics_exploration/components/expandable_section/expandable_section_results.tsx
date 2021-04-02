@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC } from 'react';
@@ -17,15 +18,21 @@ import {
   isClassificationAnalysis,
   isRegressionAnalysis,
 } from '../../../../../../../common/util/analytics_utils';
+import { ES_CLIENT_TOTAL_HITS_RELATION } from '../../../../../../../common/types/es_client';
 
 import { getToastNotifications } from '../../../../../util/dependency_cache';
 import { useColorRange, ColorRangeLegend } from '../../../../../components/color_range_legend';
-import { DataGrid, UseIndexDataReturnType } from '../../../../../components/data_grid';
+import {
+  DataGrid,
+  RowCountRelation,
+  UseIndexDataReturnType,
+} from '../../../../../components/data_grid';
 import { SavedSearchQuery } from '../../../../../contexts/ml';
 
 import {
   defaultSearchQuery,
   DataFrameAnalyticsConfig,
+  INDEX_STATUS,
   SEARCH_SIZE,
   getAnalysisType,
 } from '../../../../common';
@@ -54,11 +61,13 @@ const showingFirstDocs = i18n.translate(
 
 const getResultsSectionHeaderItems = (
   columnsWithCharts: EuiDataGridColumn[],
+  status: INDEX_STATUS,
   tableItems: Array<Record<string, any>>,
   rowCount: number,
+  rowCountRelation: RowCountRelation,
   colorRange?: ReturnType<typeof useColorRange>
 ): ExpandableSectionProps['headerItems'] => {
-  return columnsWithCharts.length > 0 && tableItems.length > 0
+  return columnsWithCharts.length > 0 && (tableItems.length > 0 || status === INDEX_STATUS.LOADED)
     ? [
         {
           id: 'explorationTableTotalDocs',
@@ -68,7 +77,7 @@ const getResultsSectionHeaderItems = (
               defaultMessage="Total docs"
             />
           ),
-          value: rowCount,
+          value: `${rowCountRelation === ES_CLIENT_TOTAL_HITS_RELATION.GTE ? '>' : ''}${rowCount}`,
         },
         ...(colorRange !== undefined
           ? [
@@ -109,13 +118,15 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
   needsDestIndexPattern,
   searchQuery,
 }) => {
-  const { columnsWithCharts, tableItems } = indexData;
+  const { columnsWithCharts, status, tableItems } = indexData;
 
   // Results section header items and content
   const resultsSectionHeaderItems = getResultsSectionHeaderItems(
     columnsWithCharts,
+    status,
     tableItems,
     indexData.rowCount,
+    indexData.rowCountRelation,
     colorRange
   );
   const analysisType =
@@ -137,14 +148,15 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
       {(columnsWithCharts.length > 0 || searchQuery !== defaultSearchQuery) &&
         indexPattern !== undefined && (
           <>
-            {columnsWithCharts.length > 0 && tableItems.length > 0 && (
-              <DataGrid
-                {...indexData}
-                analysisType={analysisType}
-                dataTestSubj="mlExplorationDataGrid"
-                toastNotifications={getToastNotifications()}
-              />
-            )}
+            {columnsWithCharts.length > 0 &&
+              (tableItems.length > 0 || status === INDEX_STATUS.LOADED) && (
+                <DataGrid
+                  {...indexData}
+                  analysisType={analysisType}
+                  dataTestSubj="mlExplorationDataGrid"
+                  toastNotifications={getToastNotifications()}
+                />
+              )}
           </>
         )}
     </>

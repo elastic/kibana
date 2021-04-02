@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { sortBy, slice, get } from 'lodash';
@@ -17,7 +18,7 @@ import {
 } from '../../../common/types/anomalies';
 import { JOB_ID, PARTITION_FIELD_VALUE } from '../../../common/constants/anomalies';
 import { GetStoppedPartitionResult } from '../../../common/types/results';
-import { MlJobsResponse } from '../job_service/jobs';
+import { MlJobsResponse } from '../../../common/types/job_service';
 import type { MlClient } from '../../lib/ml_client';
 
 // Service for carrying out Elasticsearch queries to obtain data for the
@@ -182,6 +183,7 @@ export function resultsServiceProvider(mlClient: MlClient) {
       anomalies: [],
       interval: 'second',
     };
+    // @ts-expect-error update to correct search response
     if (body.hits.total.value > 0) {
       let records: AnomalyRecordDoc[] = [];
       body.hits.hits.forEach((hit: any) => {
@@ -400,6 +402,7 @@ export function resultsServiceProvider(mlClient: MlClient) {
     );
 
     const examplesByCategoryId: { [key: string]: any } = {};
+    // @ts-expect-error update to correct search response
     if (body.hits.total.value > 0) {
       body.hits.hits.forEach((hit: any) => {
         if (maxExamples) {
@@ -436,6 +439,7 @@ export function resultsServiceProvider(mlClient: MlClient) {
     );
 
     const definition = { categoryId, terms: null, regex: null, examples: [] };
+    // @ts-expect-error update to correct search response
     if (body.hits.total.value > 0) {
       const source = body.hits.hits[0]._source;
       definition.categoryId = source.category_id;
@@ -575,6 +579,7 @@ export function resultsServiceProvider(mlClient: MlClient) {
       );
       if (fieldToBucket === JOB_ID) {
         finalResults = {
+          // @ts-expect-error update search response
           jobs: results.aggregations?.unique_terms?.buckets.map(
             (b: { key: string; doc_count: number }) => b.key
           ),
@@ -587,6 +592,7 @@ export function resultsServiceProvider(mlClient: MlClient) {
           },
           {}
         );
+        // @ts-expect-error update search response
         results.aggregations.jobs.buckets.forEach(
           (bucket: { key: string | number; unique_stopped_partitions: { buckets: any[] } }) => {
             jobs[bucket.key] = bucket.unique_stopped_partitions.buckets.map((b) => b.key);

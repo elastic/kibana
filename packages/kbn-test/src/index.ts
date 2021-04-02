@@ -1,22 +1,12 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
+// @internal
 import {
   runTestsCli,
   processRunTestsCliOptions,
@@ -25,33 +15,35 @@ import {
   // @ts-ignore not typed yet
 } from './functional_tests/cli';
 
+// @internal
 export { runTestsCli, processRunTestsCliOptions, startServersCli, processStartServersCliOptions };
 
 // @ts-ignore not typed yet
+// @internal
 export { runTests, startServers } from './functional_tests/tasks';
 
 // @ts-ignore not typed yet
+// @internal
 export { KIBANA_ROOT } from './functional_tests/lib/paths';
 
 // @ts-ignore not typed yet
+// @internal
 export { esTestConfig, createLegacyEsTestCluster } from './legacy_es';
 
 // @ts-ignore not typed yet
+// @internal
 export { kbnTestConfig, kibanaServerTestUser, kibanaTestUser, adminTestUser } from './kbn';
 
 // @ts-ignore not typed yet
+// @internal
 export { setupUsers, DEFAULT_SUPERUSER_PASS } from './functional_tests/lib/auth';
 
 export { readConfigFile } from './functional_test_runner/lib/config/read_config_file';
 
 export { runFtrCli } from './functional_test_runner/cli';
 
-export {
-  createAutoJUnitReporter,
-  runMochaCli,
-  setupJUnitReportGeneration,
-  escapeCdata,
-} from './mocha';
+// @internal
+export { setupJUnitReportGeneration, escapeCdata } from './mocha';
 
 export { runFailedTestsReporterCli } from './failed_tests_reporter';
 
@@ -62,3 +54,9 @@ export * from './functional_test_runner';
 export { getUrl } from './jest/utils/get_url';
 
 export { runCheckJestConfigsCli } from './jest/run_check_jest_configs_cli';
+
+export { runJest } from './jest/run';
+
+export * from './kbn_archiver_cli';
+
+export * from './kbn_client';

@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { apiService } from './utils';
 import { FetchJourneyStepsParams } from '../actions/journey';
 import {
+  Ping,
   SyntheticsJourneyApiResponse,
   SyntheticsJourneyApiResponseType,
 } from '../../../common/runtime_types';
@@ -16,7 +18,7 @@ export async function fetchJourneySteps(
 ): Promise<SyntheticsJourneyApiResponse> {
   return (await apiService.get(
     `/api/uptime/journey/${params.checkGroup}`,
-    undefined,
+    { syntheticEventTypes: params.syntheticEventTypes },
     SyntheticsJourneyApiResponseType
   )) as SyntheticsJourneyApiResponse;
 }
@@ -31,6 +33,22 @@ export async function fetchJourneysFailedSteps({
     { checkGroups },
     SyntheticsJourneyApiResponseType
   )) as SyntheticsJourneyApiResponse;
+}
+
+export async function fetchLastSuccessfulStep({
+  monitorId,
+  timestamp,
+  stepIndex,
+}: {
+  monitorId: string;
+  timestamp: string;
+  stepIndex: number;
+}): Promise<Ping> {
+  return (await apiService.get(`/api/uptime/synthetics/step/success/`, {
+    monitorId,
+    timestamp,
+    stepIndex,
+  })) as Ping;
 }
 
 export async function getJourneyScreenshot(imgSrc: string) {

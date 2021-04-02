@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -22,35 +11,36 @@ import {
   IndexPatternLoadExpressionFunctionDefinition,
 } from '../../data/public';
 import { buildExpression, buildExpressionFunction } from '../../expressions/public';
-import { getVisSchemas, Vis, BuildPipelineParams } from '../../visualizations/public';
+import { getVisSchemas, SchemaConfig, VisToExpressionAst } from '../../visualizations/public';
+import { TableVisParams } from '../common';
 import { TableExpressionFunctionDefinition } from './table_vis_fn';
-import { TableVisConfig, TableVisParams } from './types';
 
-const buildTableVisConfig = (
-  schemas: ReturnType<typeof getVisSchemas>,
-  visParams: TableVisParams
-) => {
-  const visConfig = {} as any;
-  const metrics = schemas.metric;
-  const buckets = schemas.bucket || [];
-  visConfig.dimensions = {
-    metrics,
-    buckets,
-    splitRow: schemas.split_row,
-    splitColumn: schemas.split_column,
-  };
+const prepareDimension = (params: SchemaConfig) => {
+  const visdimension = buildExpressionFunction('visdimension', { accessor: params.accessor });
 
-  if (visParams.showPartialRows && !visParams.showMetricsAtAllLevels) {
+  if (params.format) {
+    visdimension.addArgument('format', params.format.id);
+    visdimension.addArgument('formatParams', JSON.stringify(params.format.params));
+  }
+
+  return buildExpression([visdimension]);
+};
+
+const getMetrics = (schemas: ReturnType<typeof getVisSchemas>, visParams: TableVisParams) => {
+  const metrics = [...schemas.metric];
+
+  if (schemas.bucket && visParams.showPartialRows && !visParams.showMetricsAtAllLevels) {
     // Handle case where user wants to see partial rows but not metrics at all levels.
     // This requires calculating how many metrics will come back in the tabified response,
     // and removing all metrics from the dimensions except the last set.
-    const metricsPerBucket = metrics.length / buckets.length;
-    visConfig.dimensions.metrics.splice(0, metricsPerBucket * buckets.length - metricsPerBucket);
+    const metricsPerBucket = metrics.length / schemas.bucket.length;
+    metrics.splice(0, metricsPerBucket * schemas.bucket.length - metricsPerBucket);
   }
-  return visConfig;
+
+  return metrics;
 };
 
-export const toExpressionAst = (vis: Vis<TableVisParams>, params: BuildPipelineParams) => {
+export const toExpressionAst: VisToExpressionAst<TableVisParams> = (vis, params) => {
   const esaggs = buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
     index: buildExpression([
       buildExpressionFunction<IndexPatternLoadExpressionFunctionDefinition>('indexPatternLoad', {
@@ -63,16 +53,32 @@ export const toExpressionAst = (vis: Vis<TableVisParams>, params: BuildPipelineP
   });
 
   const schemas = getVisSchemas(vis, params);
+  const metrics = getMetrics(schemas, vis.params);
 
-  const visConfig: TableVisConfig = {
-    ...vis.params,
-    ...buildTableVisConfig(schemas, vis.params),
+  const args = {
+    // explicitly pass each param to prevent extra values trapping
+    perPage: vis.params.perPage,
+    percentageCol: vis.params.percentageCol,
+    row: vis.params.row,
+    showPartialRows: vis.params.showPartialRows,
+    showMetricsAtAllLevels: vis.params.showMetricsAtAllLevels,
+    showToolbar: vis.params.showToolbar,
+    showTotal: vis.params.showTotal,
+    totalFunc: vis.params.totalFunc,
     title: vis.title,
+    metrics: metrics.map(prepareDimension),
+    buckets: schemas.bucket?.map(prepareDimension),
   };
 
-  const table = buildExpressionFunction<TableExpressionFunctionDefinition>('kibana_table', {
-    visConfig: JSON.stringify(visConfig),
-  });
+  const table = buildExpressionFunction<TableExpressionFunctionDefinition>('kibana_table', args);
+
+  if (schemas.split_column) {
+    table.addArgument('splitColumn', prepareDimension(schemas.split_column[0]));
+  }
+
+  if (schemas.split_row) {
+    table.addArgument('splitRow', prepareDimension(schemas.split_row[0]));
+  }
 
   const ast = buildExpression([esaggs, table]);
 

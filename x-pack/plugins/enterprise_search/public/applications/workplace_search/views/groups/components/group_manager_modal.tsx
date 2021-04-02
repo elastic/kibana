@@ -1,14 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
 
 import { useValues } from 'kea';
-
-import { i18n } from '@kbn/i18n';
 
 import {
   EuiButton,
@@ -22,32 +21,18 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiOverlayMask,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { EuiButtonTo } from '../../../../shared/react_router_helpers';
-
-import { Group } from '../../../types';
-import { SOURCES_PATH } from '../../../routes';
-
 import noSharedSourcesIcon from '../../../assets/share_circle.svg';
-
+import { UPDATE_BUTTON, CANCEL_BUTTON } from '../../../constants';
+import { SOURCES_PATH } from '../../../routes';
+import { Group } from '../../../types';
 import { GroupLogic } from '../group_logic';
 import { GroupsLogic } from '../groups_logic';
 
-const CANCEL_BUTTON_TEXT = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.groups.groupManagerCancel',
-  {
-    defaultMessage: 'Cancel',
-  }
-);
-const UPDATE_BUTTON_TEXT = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.groups.groupManagerUpdate',
-  {
-    defaultMessage: 'Update',
-  }
-);
 const ADD_SOURCE_BUTTON_TEXT = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.groupManagerUpdateAddSourceButton',
   {
@@ -153,12 +138,12 @@ export const GroupManagerModal: React.FC<GroupManagerModalProps> = ({
             <EuiFlexGroup gutterSize="none">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty data-test-subj="CloseGroupsModal" onClick={handleClose}>
-                  {CANCEL_BUTTON_TEXT}
+                  {CANCEL_BUTTON}
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton isDisabled={false} onClick={saveItems} fill>
-                  {UPDATE_BUTTON_TEXT}
+                  {UPDATE_BUTTON}
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -169,14 +154,12 @@ export const GroupManagerModal: React.FC<GroupManagerModalProps> = ({
   );
 
   return (
-    <EuiOverlayMask>
-      <EuiModal
-        onClose={handleClose}
-        initialFocus=".euiFieldSearch"
-        data-test-subj="GroupManagerModal"
-      >
-        {showEmptyState ? emptyState : modalContent}
-      </EuiModal>
-    </EuiOverlayMask>
+    <EuiModal
+      onClose={handleClose}
+      initialFocus=".euiFieldSearch"
+      data-test-subj="GroupManagerModal"
+    >
+      {showEmptyState ? emptyState : modalContent}
+    </EuiModal>
   );
 };

@@ -1,0 +1,222 @@
+[[lens]]
+=== Lens
+
+To create visualizations with *Lens*, you drag and drop data fields onto the visualization builder, 
+then *Lens* uses heuristics to apply each field. 
+
+[role="screenshot"]
+image:dashboard/images/lens.png[Lens]
+
+[float]
+[[lens-required-choices]]
+==== Open and set up Lens
+
+Open *Lens*, then explore the fields in your data. The list of fields are determined by the index pattern and time filter.
+
+. On the dashboard, click *Create panel*.
+
+. On the *New visualization* window, click *Lens*.
+
+. <<set-time-filter,Set the time filter>>. 
+
+. To view the fields in the a different index pattern, click the index pattern, then select a different index pattern from the dropdown.
+
+. Scan through the list of fields to see what’s in your data.
++
+TIP: For sparse datasets, *Empty fields* can contain data, which you can use to create visualizations.
+
+. To filter the data fields, use the following options:
+
+* Enter the field name in the *Search field names* field. 
+
+* Click *Field by type*, then select the filter. To show all fields in the index pattern, deselect *Only show fields with data*.
+
+[float]
+[[view-the-data-summaries]]
+===== View the data summaries
+
+For each field, *Lens* displays a summary depending on the type of data. To analyze the fields, *Lens* uses a sample of 5,000 documents. 
+Each summary displays the percentage of sampled documents over all available documents.
+
+To view a data summary, click *i* next to the field.
+
+[role="screenshot"]
+image::images/lens_data_info_documents.png[Data summary analyzed documents]
+
+Each data type display the following summaries:
+
+* *Date* &mdash; Displays the time distribution.
+
+* *String* &mdash; Displays the top 10 values.
+
+* *Numeric* &mdash; Displays the top 10 values and a value distribution. When *Lens* displays the top 10 values distribution, the percentage of *Other* values is also displayed. 
+For array value fields, the percentage distribution considers each value in the array as separate.
+
+TIP: *Other* can equal more than 100% by a small amount.
+
+[float]
+[[create-the-visualization-panel]]
+==== Create the visualization panel
+
+Drag and drop the fields on to the visualization builder, then 
+
+. Drag and drop the fields to the visualization builder.
+
+. To change the visualization type, use the following options:
+
+* Click the *Suggestions*.
+
+* From the *Chart Type* dropdown, click the visualization.
+
+. To configure the data, use the editor, then click *Close*.
+
+. To configure the visualization, use the dropdown menus.
++
+[role="screenshot"]
+image::images/lens_value_labels_xychart_toggle.png[Lens Bar chart value labels menu]
+
+[float]
+[[drag-and-drop-keyboard-navigation]]
+===== Create visualization panels with keyboard navigation
+
+*Lens* has a fully accessible, continuously improved drag and drop system, which allows you to use a keyboard instead of a mouse.
+
+[role="screenshot"]
+image::images/lens_drag_drop_1.gif[Presented Lens drag and drop]
+
+. Set a focus on the chosen item. Most of the draggable elements have two focus states. The inner focus state opens a panel with detailed information or options. 
+The outer focus state allows you to drag an item. Tab through the page until you get the outer focus state on the chosen item:
++
+[role="screenshot"]
+image::images/lens_drag_drop_2.png[Lens drag and drop focus state]
+
+. Complete the following actions:
+
+* To start dragging an item, press Space bar.
+
+* To select where you want to drop the item, use the Left and Right arrows.
+
+* To reorder the fields in the group, use Up and Down arrows.
+
+* To duplicate an operation, use the Left and Right arrows to select the `Drop a field or click to add` in the same group.
++
+[role="screenshot"]
+image::images/lens_drag_drop_3.gif[Using drag and drop to reorder]
+
+. Press Space bar to confirm, or to cancel, press Esc.
+
+[float]
+[[lens-faq]]
+==== Frequently asked questions
+
+For the answers to common *Lens* questions, review the following. 
+
+[float]
+[[kql-]]
+===== When should I use the Filter function instead of KQL filters?
+
+The easiest way to apply KQL filters is to use <<semi-structured-search>>, but you can also use the *Filters* function in the following scenarios:
+
+* When you want to apply more than one KQL filter to the visualization.
+
+* When you want to apply the KQL filter to a single layer, which allows you to visualize filtered and unfiltered data.
+
+[float]
+[[when-should-i-normalize-the-data-by-unit-or-use-a-custom-interval]]
+===== When should I normalize the data by unit or use a custom interval?
+
+* *Normalize by unit* &mdash; Calculates the average for the specified interval. When you normalize the data by unit, the data appears less granular, but *Lens* is able to calculate the data faster. 
+
+* *Customize time interval* &mdash; Creates a bucket for each specified interval. When you customize the time interval, you can use a large time range, but *Lens* calculates the data slower.
+
+To normalize the interval: 
+
+. In the editor, click a field.
+
+. Click *Add advanced options > Normalize by unit*. 
+
+. From the *Normalize by unit* dropdown, select an option, then click *Close*.
+
+To create a custom interval:
+
+. In the editor, click a field.
+
+. Select *Customize time interval*.
+
+. Change the *Minimum interval*, then click *Close*.
+
+[float]
+[[can-i-show-value-labels-for-my-chart]]
+===== How do I display value labels?
+
+A subset of *Lens* visualizations support value labels.
+
+* *Bar* and *Horizontal Bar*
++
+[role="screenshot"]
+image::images/lens_value_labels_xychart_toggle.png[Lens Bar chart value labels menu]
+
+* *Pie*, *Donut*, and *Treemap*
++
+[role="screenshot"]
+image::images/lens_value_labels_partition_toggle.png[Lens Pie chart value labels menu]
+
+[float]
+[[what-is-the-other-category]]
+===== What data is categorized as Other?
+
+The *Other* category contains all of the documents that do not match the specified criteria or filters. 
+Use *Other* when you want to compare a value, or multiple values, to a whole.
+By default, *Group other values as "Other"* is enabled when you select the *Top values* function. 
+
+To disable *Group other values as "Other"*:
+
+. In the editor, click *Advanced*. 
+
+. Deselect *Group other values as "Other"*.
+
+[float]
+[[how-can-i-include-documents-without-the-field-in-the-operation]]
+===== How can I include documents without the field?
+
+By default, *Lens* retrieves only the documents from the specified field. 
+For bucket aggregations, such as *Top values*, you can choose to include documents that do not contain the specified field, 
+which is helpful when you want to compare to the whole documentation set.
+
+. In the editor, click *Advanced*.
+
+. Select *Include documents without this field*.
++
+[role="screenshot"]
+image::images/lens_bucketed_aggregation_advanced_dropdown.png[Lens Advanced options for bucketed aggregations]
+
+[float]
+[[is-it-possible-to-select-color-for-specific-bar-or-point]]
+===== How do I change the color for a single data point?
+
+*Lens* provides you with color pallettes that you can apply to the entire visualization, but you are unable to change the color for a single data point, such as a bar or line.
+
+[float]
+[[can-i-sort-by-multiple-columns]]
+===== How do I sort by multiple columns?
+
+Multiple column sorting is unsupported in *Lens*, but is supported in *Discover*. For information on how to sort multiple columns in *Discover*, 
+refer to <<explore-fields-in-your-data,Explore the fields in your data>>.
+
+[float]
+[[is-it-possible-to-sort-dimensions-in-a-chart]]
+===== How do I sort the dimensions in a chart?
+
+Sorting dimensions in visualizations is unsupported in *Lens*.
+
+[float]
+[[is-it-possible-to-use-saved-serches-in-lens]]
+===== How do I visualize saved searches?
+
+Visualizing saved searches in unsupported in *Lens*.
+
+[float]
+[[is-it-possible-to-decrease-or-increase-the-number-of-suggestions]]
+===== How do I change the number of suggestions?
+
+Configuring the *Suggestions* that *Lens* automatically populates is unsupported.

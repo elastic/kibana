@@ -1,19 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useState } from 'react';
 import { useRouteMatch, Switch, Route, useLocation, useHistory } from 'react-router-dom';
-import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
+import type { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import { i18n } from '@kbn/i18n';
+
 import { installationStatuses } from '../../../../../../../common/constants';
 import { PAGE_ROUTING_PATHS } from '../../../../constants';
 import { useLink, useGetCategories, useGetPackages, useBreadcrumbs } from '../../../../hooks';
 import { WithHeaderLayout } from '../../../../layouts';
-import { CategorySummaryItem } from '../../../../types';
+import type { CategorySummaryItem } from '../../../../types';
 import { PackageListGrid } from '../../components/package_list_grid';
+
 import { CategoryFacets } from './category_facets';
 import { HeroCopy, HeroImage } from './header';
 

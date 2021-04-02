@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -15,10 +17,11 @@ import {
   EuiButtonEmpty,
   EuiSpacer,
 } from '@elastic/eui';
+
 import { WithHeaderLayout } from '../../../../layouts';
-import { AgentPolicy, PackageInfo } from '../../../../types';
+import type { AgentPolicy, PackageInfo } from '../../../../types';
 import { PackageIcon } from '../../../../components/package_icon';
-import { CreatePackagePolicyFrom } from '../types';
+import type { CreatePackagePolicyFrom } from '../types';
 
 export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
   from: CreatePackagePolicyFrom;
@@ -51,8 +54,8 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText>
-                <h1>
-                  {from === 'edit' ? (
+                <h1 data-test-subj={`${dataTestSubj}_pageTitle`}>
+                  {from === 'edit' || from === 'package-edit' ? (
                     <FormattedMessage
                       id="xpack.fleet.editPackagePolicy.pageTitleWithPackageName"
                       defaultMessage="Edit {packageName} integration"
@@ -78,7 +81,7 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
 
       return from === 'edit' || from === 'package-edit' ? (
         <EuiText>
-          <h1>
+          <h1 data-test-subj={`${dataTestSubj}_pageTitle`}>
             <FormattedMessage
               id="xpack.fleet.editPackagePolicy.pageTitle"
               defaultMessage="Edit integration"
@@ -95,7 +98,7 @@ export const CreatePackagePolicyPageLayout: React.FunctionComponent<{
           </h1>
         </EuiText>
       );
-    }, [from, packageInfo]);
+    }, [dataTestSubj, from, packageInfo]);
 
     const pageDescription = useMemo(() => {
       return from === 'edit' || from === 'package-edit' ? (

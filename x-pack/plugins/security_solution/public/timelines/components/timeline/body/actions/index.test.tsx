@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { mount } from 'enzyme';
 import React from 'react';
 
@@ -25,11 +27,12 @@ describe('Actions', () => {
       <TestProviders>
         <Actions
           actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
+          ariaRowindex={2}
           checked={false}
-          expanded={false}
+          columnValues={'abc def'}
           eventId="abc"
           loadingEventIds={[]}
-          onEventToggled={jest.fn()}
+          onEventDetailsPanelOpened={jest.fn()}
           onRowSelected={jest.fn()}
           showCheckboxes={true}
         />
@@ -44,11 +47,12 @@ describe('Actions', () => {
       <TestProviders>
         <Actions
           actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
+          ariaRowindex={2}
           checked={false}
+          columnValues={'abc def'}
           eventId="abc"
-          expanded={false}
           loadingEventIds={[]}
-          onEventToggled={jest.fn()}
+          onEventDetailsPanelOpened={jest.fn()}
           onRowSelected={jest.fn()}
           showCheckboxes={false}
         />

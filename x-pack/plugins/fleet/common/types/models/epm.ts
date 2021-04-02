@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // Follow pattern from https://github.com/elastic/kibana/pull/52447
 // TODO: Update when https://github.com/elastic/kibana/issues/53021 is closed
-import { SavedObject, SavedObjectAttributes, SavedObjectReference } from 'src/core/public';
-import {
+import type { SavedObject, SavedObjectAttributes, SavedObjectReference } from 'src/core/public';
+
+import type {
   ASSETS_SAVED_OBJECT_TYPE,
   agentAssetTypes,
   dataTypes,
@@ -15,8 +17,9 @@ import {
   installationStatuses,
   requiredPackages,
 } from '../../constants';
-import { ValueOf } from '../../types';
-import { PackageSpecManifest, PackageSpecScreenshot } from './package_spec';
+import type { ValueOf } from '../../types';
+
+import type { PackageSpecManifest, PackageSpecScreenshot } from './package_spec';
 
 export type InstallationStatus = typeof installationStatuses;
 
@@ -46,6 +49,8 @@ export enum KibanaAssetType {
   search = 'search',
   indexPattern = 'index_pattern',
   map = 'map',
+  lens = 'lens',
+  mlModule = 'ml_module',
 }
 
 /*
@@ -57,6 +62,8 @@ export enum KibanaSavedObjectType {
   search = 'search',
   indexPattern = 'index-pattern',
   map = 'map',
+  lens = 'lens',
+  mlModule = 'ml-module',
 }
 
 export enum ElasticsearchAssetType {
@@ -65,6 +72,7 @@ export enum ElasticsearchAssetType {
   indexTemplate = 'index_template',
   ilmPolicy = 'ilm_policy',
   transform = 'transform',
+  dataStreamIlmPolicy = 'data_stream_ilm_policy',
 }
 
 export type DataType = typeof dataTypes;
@@ -111,28 +119,56 @@ export interface RegistryImage {
   type?: string;
 }
 
+export enum RegistryPolicyTemplateKeys {
+  name = 'name',
+  title = 'title',
+  description = 'description',
+  inputs = 'inputs',
+  multiple = 'multiple',
+}
+
 export interface RegistryPolicyTemplate {
-  name: string;
-  title: string;
-  description: string;
-  inputs?: RegistryInput[];
-  multiple?: boolean;
+  [RegistryPolicyTemplateKeys.name]: string;
+  [RegistryPolicyTemplateKeys.title]: string;
+  [RegistryPolicyTemplateKeys.description]: string;
+  [RegistryPolicyTemplateKeys.inputs]?: RegistryInput[];
+  [RegistryPolicyTemplateKeys.multiple]?: boolean;
 }
+
+export enum RegistryInputKeys {
+  type = 'type',
+  title = 'title',
+  description = 'description',
+  template_path = 'template_path',
+  condition = 'condition',
+  vars = 'vars',
+}
+
 export interface RegistryInput {
-  type: string;
-  title: string;
-  description: string;
-  template_path?: string;
-  condition?: string;
-  vars?: RegistryVarsEntry[];
+  [RegistryInputKeys.type]: string;
+  [RegistryInputKeys.title]: string;
+  [RegistryInputKeys.description]: string;
+  [RegistryInputKeys.template_path]?: string;
+  [RegistryInputKeys.condition]?: string;
+  [RegistryInputKeys.vars]?: RegistryVarsEntry[];
 }
+
+export enum RegistryStreamKeys {
+  input = 'input',
+  title = 'title',
+  description = 'description',
+  enabled = 'enabled',
+  vars = 'vars',
+  template_path = 'template_path',
+}
+
 export interface RegistryStream {
-  input: string;
-  title: string;
-  description?: string;
-  enabled?: boolean;
-  vars?: RegistryVarsEntry[];
-  template_path: string;
+  [RegistryStreamKeys.input]: string;
+  [RegistryStreamKeys.title]: string;
+  [RegistryStreamKeys.description]?: string;
+  [RegistryStreamKeys.enabled]?: boolean;
+  [RegistryStreamKeys.vars]?: RegistryVarsEntry[];
+  [RegistryStreamKeys.template_path]: string;
 }
 
 export type RequirementVersion = string;
@@ -186,8 +222,8 @@ export type AssetTypeToParts = KibanaAssetTypeToParts & ElasticsearchAssetTypeTo
 export type AssetsGroupedByServiceByType = Record<
   Extract<ServiceName, 'kibana'>,
   KibanaAssetTypeToParts
->;
-// & Record<Extract<ServiceName, 'elasticsearch'>, ElasticsearchAssetTypeToParts>;
+> &
+  Record<Extract<ServiceName, 'elasticsearch'>, ElasticsearchAssetTypeToParts>;
 
 export type KibanaAssetParts = AssetParts & {
   service: Extract<ServiceName, 'kibana'>;
@@ -205,17 +241,34 @@ export type ElasticsearchAssetTypeToParts = Record<
   ElasticsearchAssetParts[]
 >;
 
+export enum RegistryDataStreamKeys {
+  type = 'type',
+  ilm_policy = 'ilm_policy',
+  hidden = 'hidden',
+  dataset = 'dataset',
+  title = 'title',
+  release = 'release',
+  streams = 'streams',
+  package = 'package',
+  path = 'path',
+  ingest_pipeline = 'ingest_pipeline',
+  elasticsearch = 'elasticsearch',
+  dataset_is_prefix = 'dataset_is_prefix',
+}
+
 export interface RegistryDataStream {
-  type: string;
-  hidden?: boolean;
-  dataset: string;
-  title: string;
-  release: string;
-  streams?: RegistryStream[];
-  package: string;
-  path: string;
-  ingest_pipeline: string;
-  elasticsearch?: RegistryElasticsearch;
+  [RegistryDataStreamKeys.type]: string;
+  [RegistryDataStreamKeys.ilm_policy]?: string;
+  [RegistryDataStreamKeys.hidden]?: boolean;
+  [RegistryDataStreamKeys.dataset]: string;
+  [RegistryDataStreamKeys.title]: string;
+  [RegistryDataStreamKeys.release]: string;
+  [RegistryDataStreamKeys.streams]?: RegistryStream[];
+  [RegistryDataStreamKeys.package]: string;
+  [RegistryDataStreamKeys.path]: string;
+  [RegistryDataStreamKeys.ingest_pipeline]: string;
+  [RegistryDataStreamKeys.elasticsearch]?: RegistryElasticsearch;
+  [RegistryDataStreamKeys.dataset_is_prefix]?: boolean;
 }
 
 export interface RegistryElasticsearch {
@@ -223,20 +276,32 @@ export interface RegistryElasticsearch {
   'index_template.mappings'?: object;
 }
 
-export type RegistryVarType = 'integer' | 'bool' | 'password' | 'text' | 'yaml';
+export type RegistryVarType = 'integer' | 'bool' | 'password' | 'text' | 'yaml' | 'string';
+export enum RegistryVarsEntryKeys {
+  name = 'name',
+  title = 'title',
+  description = 'description',
+  type = 'type',
+  required = 'required',
+  show_user = 'show_user',
+  multi = 'multi',
+  default = 'default',
+  os = 'os',
+}
+
 // EPR types this as `[]map[string]interface{}`
 // which means the official/possible type is Record<string, any>
 // but we effectively only see this shape
 export interface RegistryVarsEntry {
-  name: string;
-  title?: string;
-  description?: string;
-  type: RegistryVarType;
-  required?: boolean;
-  show_user?: boolean;
-  multi?: boolean;
-  default?: string | string[];
-  os?: {
+  [RegistryVarsEntryKeys.name]: string;
+  [RegistryVarsEntryKeys.title]?: string;
+  [RegistryVarsEntryKeys.description]?: string;
+  [RegistryVarsEntryKeys.type]: RegistryVarType;
+  [RegistryVarsEntryKeys.required]?: boolean;
+  [RegistryVarsEntryKeys.show_user]?: boolean;
+  [RegistryVarsEntryKeys.multi]?: boolean;
+  [RegistryVarsEntryKeys.default]?: string | string[];
+  [RegistryVarsEntryKeys.os]?: {
     [key: string]: {
       default: string | string[];
     };
@@ -267,7 +332,7 @@ export type PackageInfo =
 export interface Installation extends SavedObjectAttributes {
   installed_kibana: KibanaAssetReference[];
   installed_es: EsAssetReference[];
-  package_assets: PackageAssetReference[];
+  package_assets?: PackageAssetReference[];
   es_index_patterns: Record<string, string>;
   name: string;
   version: string;
@@ -275,6 +340,10 @@ export interface Installation extends SavedObjectAttributes {
   install_version: string;
   install_started_at: string;
   install_source: InstallSource;
+}
+
+export interface PackageUsageStats {
+  agent_policy_count: number;
 }
 
 export type Installable<T> = Installed<T> | NotInstalled<T>;
@@ -318,7 +387,6 @@ export interface IndexTemplate {
   template: {
     settings: any;
     mappings: any;
-    aliases: object;
   };
   data_stream: { hidden?: boolean };
   composed_of: string[];

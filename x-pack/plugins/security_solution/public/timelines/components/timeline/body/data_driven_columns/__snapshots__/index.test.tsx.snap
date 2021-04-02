@@ -5,12 +5,23 @@ exports[`Columns it renders the expected columns 1`] = `
   data-test-subj="data-driven-columns"
 >
   <styled.div
+    $ariaColumnIndex={2}
     key="message"
+    onKeyDown={[Function]}
+    role="button"
+    tabIndex={0}
     width={180}
   >
     <styled.div
       data-test-subj="cell-container"
     >
+      <EuiScreenReaderOnly
+        data-test-subj="screenReaderOnly"
+      >
+        <p>
+          You are in a table cell. row: 2, column: 2
+        </p>
+      </EuiScreenReaderOnly>
       <DraggableWrapper
         dataProvider={
           Object {
@@ -35,114 +46,180 @@ exports[`Columns it renders the expected columns 1`] = `
     </styled.div>
   </styled.div>
   <styled.div
+    $ariaColumnIndex={3}
     key="event.category"
+    onKeyDown={[Function]}
+    role="button"
+    tabIndex={0}
     width={180}
   >
     <styled.div
       data-test-subj="cell-container"
     >
+      <EuiScreenReaderOnly
+        data-test-subj="screenReaderOnly"
+      >
+        <p>
+          You are in a table cell. row: 2, column: 3
+        </p>
+      </EuiScreenReaderOnly>
       <Memo(FormattedFieldValueComponent)
         contextId="plain-column-renderer-formatted-field-value-test"
         eventId="1"
         fieldFormat=""
         fieldName="event.category"
         fieldType=""
-        key="plain-column-renderer-formatted-field-value-test-event.category-1-event.category-Access"
+        key="plain-column-renderer-formatted-field-value-test-event.category-1-event.category-Access-0"
         truncate={true}
         value="Access"
       />
     </styled.div>
   </styled.div>
   <styled.div
+    $ariaColumnIndex={4}
     key="event.action"
+    onKeyDown={[Function]}
+    role="button"
+    tabIndex={0}
     width={180}
   >
     <styled.div
       data-test-subj="cell-container"
     >
+      <EuiScreenReaderOnly
+        data-test-subj="screenReaderOnly"
+      >
+        <p>
+          You are in a table cell. row: 2, column: 4
+        </p>
+      </EuiScreenReaderOnly>
       <Memo(FormattedFieldValueComponent)
         contextId="plain-column-renderer-formatted-field-value-test"
         eventId="1"
         fieldFormat=""
         fieldName="event.action"
         fieldType=""
-        key="plain-column-renderer-formatted-field-value-test-event.action-1-event.action-Action"
+        key="plain-column-renderer-formatted-field-value-test-event.action-1-event.action-Action-0"
         truncate={true}
         value="Action"
       />
     </styled.div>
   </styled.div>
   <styled.div
+    $ariaColumnIndex={5}
     key="host.name"
+    onKeyDown={[Function]}
+    role="button"
+    tabIndex={0}
     width={180}
   >
     <styled.div
       data-test-subj="cell-container"
     >
+      <EuiScreenReaderOnly
+        data-test-subj="screenReaderOnly"
+      >
+        <p>
+          You are in a table cell. row: 2, column: 5
+        </p>
+      </EuiScreenReaderOnly>
       <Memo(FormattedFieldValueComponent)
         contextId="plain-column-renderer-formatted-field-value-test"
         eventId="1"
         fieldFormat=""
         fieldName="host.name"
         fieldType=""
-        key="plain-column-renderer-formatted-field-value-test-host.name-1-host.name-apache"
+        key="plain-column-renderer-formatted-field-value-test-host.name-1-host.name-apache-0"
         truncate={true}
         value="apache"
       />
     </styled.div>
   </styled.div>
   <styled.div
+    $ariaColumnIndex={6}
     key="source.ip"
+    onKeyDown={[Function]}
+    role="button"
+    tabIndex={0}
     width={180}
   >
     <styled.div
       data-test-subj="cell-container"
     >
+      <EuiScreenReaderOnly
+        data-test-subj="screenReaderOnly"
+      >
+        <p>
+          You are in a table cell. row: 2, column: 6
+        </p>
+      </EuiScreenReaderOnly>
       <Memo(FormattedFieldValueComponent)
         contextId="plain-column-renderer-formatted-field-value-test"
         eventId="1"
         fieldFormat=""
         fieldName="source.ip"
         fieldType=""
-        key="plain-column-renderer-formatted-field-value-test-source.ip-1-source.ip-192.168.0.1"
+        key="plain-column-renderer-formatted-field-value-test-source.ip-1-source.ip-192.168.0.1-0"
         truncate={true}
         value="192.168.0.1"
       />
     </styled.div>
   </styled.div>
   <styled.div
+    $ariaColumnIndex={7}
     key="destination.ip"
+    onKeyDown={[Function]}
+    role="button"
+    tabIndex={0}
     width={180}
   >
     <styled.div
       data-test-subj="cell-container"
     >
+      <EuiScreenReaderOnly
+        data-test-subj="screenReaderOnly"
+      >
+        <p>
+          You are in a table cell. row: 2, column: 7
+        </p>
+      </EuiScreenReaderOnly>
       <Memo(FormattedFieldValueComponent)
         contextId="plain-column-renderer-formatted-field-value-test"
         eventId="1"
         fieldFormat=""
         fieldName="destination.ip"
         fieldType=""
-        key="plain-column-renderer-formatted-field-value-test-destination.ip-1-destination.ip-192.168.0.3"
+        key="plain-column-renderer-formatted-field-value-test-destination.ip-1-destination.ip-192.168.0.3-0"
         truncate={true}
         value="192.168.0.3"
       />
     </styled.div>
   </styled.div>
   <styled.div
+    $ariaColumnIndex={8}
     key="user.name"
+    onKeyDown={[Function]}
+    role="button"
+    tabIndex={0}
     width={180}
   >
     <styled.div
       data-test-subj="cell-container"
     >
+      <EuiScreenReaderOnly
+        data-test-subj="screenReaderOnly"
+      >
+        <p>
+          You are in a table cell. row: 2, column: 8
+        </p>
+      </EuiScreenReaderOnly>
       <Memo(FormattedFieldValueComponent)
         contextId="plain-column-renderer-formatted-field-value-test"
         eventId="1"
         fieldFormat=""
         fieldName="user.name"
         fieldType=""
-        key="plain-column-renderer-formatted-field-value-test-user.name-1-user.name-john.dee"
+        key="plain-column-renderer-formatted-field-value-test-user.name-1-user.name-john.dee-0"
         truncate={true}
         value="john.dee"
       />

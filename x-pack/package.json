@@ -9,11 +9,8 @@
     "kbn": "node ../scripts/kbn",
     "kbn:bootstrap": "node plugins/canvas/scripts/storybook --clean",
     "start": "node ../scripts/kibana --dev",
-    "build": "../node_modules/.bin/gulp build",
-    "testonly": "echo 'Deprecated, use `yarn test`'",
-    "test": "../node_modules/.bin/gulp test",
-    "test:jest": "node scripts/jest",
-    "test:mocha": "node scripts/mocha"
+    "build": "node --preserve-symlinks ../node_modules/.bin/gulp build",
+    "test:jest": "node ../scripts/jest"
   },
   "kibana": {
     "build": {
@@ -40,7 +37,6 @@
     "@kbn/utility-types": "link:../packages/kbn-utility-types"
   },
   "dependencies": {
-    "@elastic/datemath": "link:../packages/elastic-datemath",
     "@elastic/safer-lodash-set": "link:../packages/elastic-safer-lodash-set",
     "@kbn/config-schema": "link:../packages/kbn-config-schema",
     "@kbn/i18n": "link:../packages/kbn-i18n",

@@ -1,28 +1,42 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { produce } from 'immer';
 
 import { SerializedPolicy } from '../../../../../common/types';
-
 import { splitSizeAndUnits } from '../../../lib/policies';
-
 import { determineDataTierAllocationType, isUsingDefaultRollover } from '../../../lib';
-
+import { getDefaultRepository } from '../lib';
 import { FormInternal } from '../types';
+import { CLOUD_DEFAULT_REPO } from '../constants';
 
-export const deserializer = (policy: SerializedPolicy): FormInternal => {
+export const createDeserializer = (isCloudEnabled: boolean) => (
+  policy: SerializedPolicy
+): FormInternal => {
   const {
-    phases: { hot, warm, cold, delete: deletePhase },
+    phases: { hot, warm, cold, frozen, delete: deletePhase },
   } = policy;
+
+  let defaultRepository = getDefaultRepository([
+    hot?.actions.searchable_snapshot,
+    cold?.actions.searchable_snapshot,
+    frozen?.actions.searchable_snapshot,
+  ]);
+
+  if (!defaultRepository && isCloudEnabled) {
+    defaultRepository = CLOUD_DEFAULT_REPO;
+  }
 
   const _meta: FormInternal['_meta'] = {
     hot: {
-      useRollover: Boolean(hot?.actions?.rollover),
       isUsingDefaultRollover: isUsingDefaultRollover(policy),
+      customRollover: {
+        enabled: Boolean(hot?.actions?.rollover),
+      },
       bestCompression: hot?.actions?.forcemerge?.index_codec === 'best_compression',
       readonlyEnabled: Boolean(hot?.actions?.readonly),
     },
@@ -38,8 +52,16 @@ export const deserializer = (policy: SerializedPolicy): FormInternal => {
       dataTierAllocationType: determineDataTierAllocationType(cold?.actions),
       freezeEnabled: Boolean(cold?.actions?.freeze),
     },
+    frozen: {
+      enabled: Boolean(frozen),
+      dataTierAllocationType: determineDataTierAllocationType(frozen?.actions),
+      freezeEnabled: Boolean(frozen?.actions?.freeze),
+    },
     delete: {
       enabled: Boolean(deletePhase),
+    },
+    searchableSnapshot: {
+      repository: defaultRepository,
     },
   };
 
@@ -53,13 +75,13 @@ export const deserializer = (policy: SerializedPolicy): FormInternal => {
         if (draft.phases.hot.actions.rollover.max_size) {
           const maxSize = splitSizeAndUnits(draft.phases.hot.actions.rollover.max_size);
           draft.phases.hot.actions.rollover.max_size = maxSize.size;
-          draft._meta.hot.maxStorageSizeUnit = maxSize.units;
+          draft._meta.hot.customRollover.maxStorageSizeUnit = maxSize.units;
         }
 
         if (draft.phases.hot.actions.rollover.max_age) {
           const maxAge = splitSizeAndUnits(draft.phases.hot.actions.rollover.max_age);
           draft.phases.hot.actions.rollover.max_age = maxAge.size;
-          draft._meta.hot.maxAgeUnit = maxAge.units;
+          draft._meta.hot.customRollover.maxAgeUnit = maxAge.units;
         }
       }
 

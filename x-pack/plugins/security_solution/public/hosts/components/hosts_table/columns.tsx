@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
@@ -23,6 +24,7 @@ import {
 import { HostsTableColumns } from './';
 
 import * as i18n from './translations';
+import { Maybe } from '../../../../common/search_strategy';
 
 export const getHostsColumns = (): HostsTableColumns => [
   {
@@ -75,9 +77,13 @@ export const getHostsColumns = (): HostsTableColumns => [
     truncateText: false,
     hideForMobile: false,
     sortable: true,
-    render: (lastSeen) => {
+    render: (lastSeen: Maybe<string | string[]> | undefined) => {
       if (lastSeen != null) {
-        return <FormattedRelativePreferenceDate value={lastSeen} />;
+        return (
+          <FormattedRelativePreferenceDate
+            value={Array.isArray(lastSeen) ? lastSeen[0] : lastSeen}
+          />
+        );
       }
       return getEmptyTagValue();
     },

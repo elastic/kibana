@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { shallow } from 'enzyme';
@@ -19,6 +20,15 @@ import { columnRenderers } from '.';
 import { getColumnRenderer } from './get_column_renderer';
 import { getValues, findItem, deleteItemIdx } from './helpers';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
+
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    // eslint-disable-next-line react/display-name
+    EuiScreenReaderOnly: () => <></>,
+  };
+});
 
 describe('get_column_renderer', () => {
   let nonSuricata: TimelineNonEcsData[];

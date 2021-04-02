@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FetchDataParams, MetricsFetchDataResponse } from '../../observability/public';
@@ -13,9 +14,7 @@ export const createMetricsHasData = (
 ) => async () => {
   const [coreServices] = await getStartServices();
   const { http } = coreServices;
-  const results = await http.get<{ hasData: boolean }>(
-    '/api/metrics/source/default/metrics/hasData'
-  );
+  const results = await http.get<{ hasData: boolean }>('/api/metrics/source/default/hasData');
   return results.hasData;
 };
 

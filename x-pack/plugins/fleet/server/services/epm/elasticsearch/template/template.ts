@@ -1,18 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Field, Fields } from '../../fields/field';
-import {
+import type { ElasticsearchClient } from 'kibana/server';
+
+import type { Field, Fields } from '../../fields/field';
+import type {
   RegistryDataStream,
-  CallESAsCurrentUser,
   TemplateRef,
   IndexTemplate,
   IndexTemplateMappings,
-  DataType,
 } from '../../../../types';
+import { appContextService } from '../../../';
 import { getRegistryDataStreamAssetBaseName } from '../index';
 
 interface Properties {
@@ -26,12 +28,19 @@ interface MultiFields {
 export interface IndexTemplateMapping {
   [key: string]: any;
 }
-export interface CurrentIndex {
-  indexName: string;
+export interface CurrentDataStream {
+  dataStreamName: string;
   indexTemplate: IndexTemplate;
 }
 const DEFAULT_SCALING_FACTOR = 1000;
 const DEFAULT_IGNORE_ABOVE = 1024;
+
+// see discussion in https://github.com/elastic/kibana/issues/88307
+const DEFAULT_TEMPLATE_PRIORITY = 200;
+const DATASET_IS_PREFIX_TEMPLATE_PRIORITY = 150;
+
+const QUERY_DEFAULT_FIELD_TYPES = ['keyword', 'text'];
+const QUERY_DEFAULT_FIELD_LIMIT = 1024;
 
 /**
  * getTemplate retrieves the default template but overwrites the index pattern with the given value.
@@ -40,27 +49,36 @@ const DEFAULT_IGNORE_ABOVE = 1024;
  */
 export function getTemplate({
   type,
-  templateName,
+  templateIndexPattern,
+  fields,
   mappings,
   pipelineName,
   packageName,
   composedOfTemplates,
+  templatePriority,
+  ilmPolicy,
   hidden,
 }: {
   type: string;
-  templateName: string;
+  templateIndexPattern: string;
+  fields: Fields;
   mappings: IndexTemplateMappings;
   pipelineName?: string | undefined;
   packageName: string;
   composedOfTemplates: string[];
+  templatePriority: number;
+  ilmPolicy?: string | undefined;
   hidden?: boolean;
 }): IndexTemplate {
   const template = getBaseTemplate(
     type,
-    templateName,
+    templateIndexPattern,
+    fields,
     mappings,
     packageName,
     composedOfTemplates,
+    templatePriority,
+    ilmPolicy,
     hidden
   );
   if (pipelineName) {
@@ -239,6 +257,35 @@ export function generateTemplateName(dataStream: RegistryDataStream): string {
   return getRegistryDataStreamAssetBaseName(dataStream);
 }
 
+export function generateTemplateIndexPattern(dataStream: RegistryDataStream): string {
+  // undefined or explicitly set to false
+  // See also https://github.com/elastic/package-spec/pull/102
+  if (!dataStream.dataset_is_prefix) {
+    return getRegistryDataStreamAssetBaseName(dataStream) + '-*';
+  } else {
+    return getRegistryDataStreamAssetBaseName(dataStream) + '.*-*';
+  }
+}
+
+// Template priorities are discussed in https://github.com/elastic/kibana/issues/88307
+// See also https://www.elastic.co/guide/en/elasticsearch/reference/current/index-templates.html
+//
+// Built-in templates like logs-*-* and metrics-*-* have priority 100
+//
+// EPM generated templates for data streams have priority 200 (DEFAULT_TEMPLATE_PRIORITY)
+//
+// EPM generated templates for data streams with dataset_is_prefix: true have priority 150 (DATASET_IS_PREFIX_TEMPLATE_PRIORITY)
+
+export function getTemplatePriority(dataStream: RegistryDataStream): number {
+  // undefined or explicitly set to false
+  // See also https://github.com/elastic/package-spec/pull/102
+  if (!dataStream.dataset_is_prefix) {
+    return DEFAULT_TEMPLATE_PRIORITY;
+  } else {
+    return DATASET_IS_PREFIX_TEMPLATE_PRIORITY;
+  }
+}
+
 /**
  * Returns a map of the data stream path fields to elasticsearch index pattern.
  * @param dataStreams an array of RegistryDataStream objects
@@ -252,19 +299,42 @@ export function generateESIndexPatterns(
 
   const patterns: Record<string, string> = {};
   for (const dataStream of dataStreams) {
-    patterns[dataStream.path] = generateTemplateName(dataStream) + '-*';
+    patterns[dataStream.path] = generateTemplateIndexPattern(dataStream);
   }
   return patterns;
 }
 
+const flattenFieldsToNameAndType = (
+  fields: Fields,
+  path: string = ''
+): Array<Pick<Field, 'name' | 'type'>> => {
+  let newFields: Array<Pick<Field, 'name' | 'type'>> = [];
+  fields.forEach((field) => {
+    const fieldName = path ? `${path}.${field.name}` : field.name;
+    newFields.push({
+      name: fieldName,
+      type: field.type,
+    });
+    if (field.fields && field.fields.length) {
+      newFields = newFields.concat(flattenFieldsToNameAndType(field.fields, fieldName));
+    }
+  });
+  return newFields;
+};
+
 function getBaseTemplate(
   type: string,
-  templateName: string,
+  templateIndexPattern: string,
+  fields: Fields,
   mappings: IndexTemplateMappings,
   packageName: string,
   composedOfTemplates: string[],
+  templatePriority: number,
+  ilmPolicy?: string | undefined,
   hidden?: boolean
 ): IndexTemplate {
+  const logger = appContextService.getLogger();
+
   // Meta information to identify Ingest Manager's managed templates and indices
   const _meta = {
     package: {
@@ -274,20 +344,31 @@ function getBaseTemplate(
     managed: true,
   };
 
+  // Find all field names to set `index.query.default_field` to, which will be
+  // the first 1024 keyword or text fields
+  const defaultFields = flattenFieldsToNameAndType(fields).filter(
+    (field) => field.type && QUERY_DEFAULT_FIELD_TYPES.includes(field.type)
+  );
+  if (defaultFields.length > QUERY_DEFAULT_FIELD_LIMIT) {
+    logger.warn(
+      `large amount of default fields detected for index template ${templateIndexPattern} in package ${packageName}, applying the first ${QUERY_DEFAULT_FIELD_LIMIT} fields`
+    );
+  }
+  const defaultFieldNames = (defaultFields.length > QUERY_DEFAULT_FIELD_LIMIT
+    ? defaultFields.slice(0, QUERY_DEFAULT_FIELD_LIMIT)
+    : defaultFields
+  ).map((field) => field.name);
+
   return {
-    // This takes precedence over all index templates installed by ES by default (logs-*-* and metrics-*-*)
-    // if this number is lower than the ES value (which is 100) this template will never be applied when a data stream
-    // is created. I'm using 200 here to give some room for users to create their own template and fit it between the
-    // default and the one the ingest manager uses.
-    priority: 200,
+    priority: templatePriority,
     // To be completed with the correct index patterns
-    index_patterns: [`${templateName}-*`],
+    index_patterns: [templateIndexPattern],
     template: {
       settings: {
         index: {
           // ILM Policy must be added here, for now point to the default global ILM policy name
           lifecycle: {
-            name: type,
+            name: ilmPolicy ? ilmPolicy : type,
           },
           // What should be our default for the compression?
           codec: 'best_compression',
@@ -301,13 +382,18 @@ function getBaseTemplate(
           refresh_interval: '5s',
           // Default in the stack now, still good to have it in
           number_of_shards: '1',
-          // All the default fields which should be queried have to be added here.
-          // So far we add all keyword and text fields here.
-          query: {
-            default_field: ['message'],
-          },
           // We are setting 30 because it can be devided by several numbers. Useful when shrinking.
           number_of_routing_shards: '30',
+          // All the default fields which should be queried have to be added here.
+          // So far we add all keyword and text fields here if there are any, otherwise
+          // this setting is skipped.
+          ...(defaultFieldNames.length
+            ? {
+                query: {
+                  default_field: defaultFieldNames,
+                },
+              }
+            : {}),
         },
       },
       mappings: {
@@ -331,8 +417,6 @@ function getBaseTemplate(
         properties: mappings.properties,
         _meta,
       },
-      // To be filled with the aliases that we need
-      aliases: {},
     },
     data_stream: { hidden },
     composed_of: composedOfTemplates,
@@ -341,66 +425,63 @@ function getBaseTemplate(
 }
 
 export const updateCurrentWriteIndices = async (
-  callCluster: CallESAsCurrentUser,
+  esClient: ElasticsearchClient,
   templates: TemplateRef[]
 ): Promise<void> => {
   if (!templates.length) return;
 
-  const allIndices = await queryIndicesFromTemplates(callCluster, templates);
+  const allIndices = await queryDataStreamsFromTemplates(esClient, templates);
   if (!allIndices.length) return;
-  return updateAllIndices(allIndices, callCluster);
+  return updateAllDataStreams(allIndices, esClient);
 };
 
-function isCurrentIndex(item: CurrentIndex[] | undefined): item is CurrentIndex[] {
+function isCurrentDataStream(item: CurrentDataStream[] | undefined): item is CurrentDataStream[] {
   return item !== undefined;
 }
 
-const queryIndicesFromTemplates = async (
-  callCluster: CallESAsCurrentUser,
+const queryDataStreamsFromTemplates = async (
+  esClient: ElasticsearchClient,
   templates: TemplateRef[]
-): Promise<CurrentIndex[]> => {
-  const indexPromises = templates.map((template) => {
-    return getIndices(callCluster, template);
+): Promise<CurrentDataStream[]> => {
+  const dataStreamPromises = templates.map((template) => {
+    return getDataStreams(esClient, template);
   });
-  const indexObjects = await Promise.all(indexPromises);
-  return indexObjects.filter(isCurrentIndex).flat();
+  const dataStreamObjects = await Promise.all(dataStreamPromises);
+  return dataStreamObjects.filter(isCurrentDataStream).flat();
 };
 
-const getIndices = async (
-  callCluster: CallESAsCurrentUser,
+const getDataStreams = async (
+  esClient: ElasticsearchClient,
   template: TemplateRef
-): Promise<CurrentIndex[] | undefined> => {
+): Promise<CurrentDataStream[] | undefined> => {
   const { templateName, indexTemplate } = template;
-  // Until ES provides a way to update mappings of a data stream
-  // get the last index of the data stream, which is the current write index
-  const res = await callCluster('transport.request', {
-    method: 'GET',
-    path: `/_data_stream/${templateName}-*`,
-  });
-  const dataStreams = res.data_streams;
+  const { body } = await esClient.indices.getDataStream({ name: `${templateName}-*` });
+  const dataStreams = body.data_streams;
   if (!dataStreams.length) return;
   return dataStreams.map((dataStream: any) => ({
-    indexName: dataStream.indices[dataStream.indices.length - 1].index_name,
+    dataStreamName: dataStream.name,
     indexTemplate,
   }));
 };
 
-const updateAllIndices = async (
-  indexNameWithTemplates: CurrentIndex[],
-  callCluster: CallESAsCurrentUser
+const updateAllDataStreams = async (
+  indexNameWithTemplates: CurrentDataStream[],
+  esClient: ElasticsearchClient
 ): Promise<void> => {
-  const updateIndexPromises = indexNameWithTemplates.map(({ indexName, indexTemplate }) => {
-    return updateExistingIndex({ indexName, callCluster, indexTemplate });
-  });
-  await Promise.all(updateIndexPromises);
+  const updatedataStreamPromises = indexNameWithTemplates.map(
+    ({ dataStreamName, indexTemplate }) => {
+      return updateExistingDataStream({ dataStreamName, esClient, indexTemplate });
+    }
+  );
+  await Promise.all(updatedataStreamPromises);
 };
-const updateExistingIndex = async ({
-  indexName,
-  callCluster,
+const updateExistingDataStream = async ({
+  dataStreamName,
+  esClient,
   indexTemplate,
 }: {
-  indexName: string;
-  callCluster: CallESAsCurrentUser;
+  dataStreamName: string;
+  esClient: ElasticsearchClient;
   indexTemplate: IndexTemplate;
 }) => {
   const { settings, mappings } = indexTemplate.template;
@@ -413,56 +494,17 @@ const updateExistingIndex = async ({
 
   // try to update the mappings first
   try {
-    await callCluster('indices.putMapping', {
-      index: indexName,
+    await esClient.indices.putMapping({
+      index: dataStreamName,
       body: mappings,
+      // @ts-expect-error @elastic/elasticsearch doesn't declare it on PutMappingRequest
+      write_index_only: true,
     });
     // if update fails, rollover data stream
   } catch (err) {
     try {
-      // get the data_stream values to compose datastream name
-      const searchDataStreamFieldsResponse = await callCluster('search', {
-        index: indexTemplate.index_patterns[0],
-        body: {
-          size: 1,
-          _source: ['data_stream.namespace', 'data_stream.type', 'data_stream.dataset'],
-          query: {
-            bool: {
-              filter: [
-                {
-                  exists: {
-                    field: 'data_stream.type',
-                  },
-                },
-                {
-                  exists: {
-                    field: 'data_stream.dataset',
-                  },
-                },
-                {
-                  exists: {
-                    field: 'data_stream.namespace',
-                  },
-                },
-              ],
-            },
-          },
-        },
-      });
-      if (searchDataStreamFieldsResponse.hits.total.value === 0)
-        throw new Error('data_stream fields are missing from datastream indices');
-      const {
-        dataset,
-        namespace,
-        type,
-      }: {
-        dataset: string;
-        namespace: string;
-        type: DataType;
-      } = searchDataStreamFieldsResponse.hits.hits[0]._source.data_stream;
-      const dataStreamName = `${type}-${dataset}-${namespace}`;
       const path = `/${dataStreamName}/_rollover`;
-      await callCluster('transport.request', {
+      await esClient.transport.request({
         method: 'POST',
         path,
       });
@@ -475,11 +517,11 @@ const updateExistingIndex = async ({
   // for now, only update the pipeline
   if (!settings.index.default_pipeline) return;
   try {
-    await callCluster('indices.putSettings', {
-      index: indexName,
+    await esClient.indices.putSettings({
+      index: dataStreamName,
       body: { index: { default_pipeline: settings.index.default_pipeline } },
     });
   } catch (err) {
-    throw new Error(`could not update index template settings for ${indexName}`);
+    throw new Error(`could not update index template settings for ${dataStreamName}`);
   }
 };

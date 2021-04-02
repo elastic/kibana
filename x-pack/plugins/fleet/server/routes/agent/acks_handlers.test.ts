@@ -1,19 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { postAgentAcksHandlerBuilder } from './acks_handlers';
-import {
+import type {
+  ElasticsearchClient,
   KibanaResponseFactory,
   RequestHandlerContext,
   SavedObjectsClientContract,
 } from 'kibana/server';
-import { httpServerMock, savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
-import { PostAgentAcksResponse } from '../../../common/types/rest_spec';
+
+import {
+  elasticsearchServiceMock,
+  httpServerMock,
+  savedObjectsClientMock,
+} from '../../../../../../src/core/server/mocks';
+import type { PostAgentAcksResponse } from '../../../common/types/rest_spec';
 import { AckEventSchema } from '../../types/models';
-import { AcksService } from '../../services/agents';
+import type { AcksService } from '../../services/agents';
+
+import { postAgentAcksHandlerBuilder } from './acks_handlers';
 
 describe('test acks schema', () => {
   it('validate that ack event schema expect action id', async () => {
@@ -45,9 +53,11 @@ describe('test acks schema', () => {
 describe('test acks handlers', () => {
   let mockResponse: jest.Mocked<KibanaResponseFactory>;
   let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  let mockElasticsearchClient: jest.Mocked<ElasticsearchClient>;
 
   beforeEach(() => {
     mockSavedObjectsClient = savedObjectsClientMock.create();
+    mockElasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     mockResponse = httpServerMock.createResponseFactory();
   });
 
@@ -81,6 +91,7 @@ describe('test acks handlers', () => {
         id: 'agent',
       }),
       getSavedObjectsClientContract: jest.fn().mockReturnValueOnce(mockSavedObjectsClient),
+      getElasticsearchClientContract: jest.fn().mockReturnValueOnce(mockElasticsearchClient),
       saveAgentEvents: jest.fn(),
     } as jest.Mocked<AcksService>;
 

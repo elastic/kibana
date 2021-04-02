@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Query } from '@elastic/eui';
@@ -20,13 +21,25 @@ export const buildParseSearchQuery = ({
   cache,
 }: BuildParseSearchQueryOptions): SavedObjectsTaggingApiUi['parseSearchQuery'] => {
   return (query: string, { tagField = 'tag', useName = true }: ParseSearchQueryOptions = {}) => {
-    const parsed = Query.parse(query);
+    let parsed: Query;
+
+    try {
+      parsed = Query.parse(query);
+    } catch (e) {
+      return {
+        searchTerm: query,
+        tagReferences: [],
+        valid: false,
+      };
+    }
+
     // from other usages of `Query.parse` in the codebase, it seems that
     // for empty term, the parsed query can be undefined, even if the type def state otherwise.
     if (!query) {
       return {
         searchTerm: '',
         tagReferences: [],
+        valid: true,
       };
     }
 
@@ -58,7 +71,8 @@ export const buildParseSearchQuery = ({
 
     return {
       searchTerm,
-      tagReferences: tagReferences.length ? tagReferences : undefined,
+      tagReferences,
+      valid: true,
     };
   };
 };

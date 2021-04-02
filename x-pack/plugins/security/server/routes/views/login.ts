@@ -1,18 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
-import { parseNext } from '../../../common/parse_next';
-import { LoginState } from '../../../common/login_state';
-import { shouldProviderUseLoginForm } from '../../../common/model';
+
+import type { RouteDefinitionParams } from '../';
 import {
   LOGOUT_REASON_QUERY_STRING_PARAMETER,
   NEXT_URL_QUERY_STRING_PARAMETER,
 } from '../../../common/constants';
-import { RouteDefinitionParams } from '..';
+import type { LoginState } from '../../../common/login_state';
+import { shouldProviderUseLoginForm } from '../../../common/model';
+import { parseNext } from '../../../common/parse_next';
 
 /**
  * Defines routes required for the Login view.

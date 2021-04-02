@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import * as t from 'io-ts';
@@ -13,6 +14,7 @@ import {
   threat_query,
   concurrentSearchesOrUndefined,
   itemsPerSearchOrUndefined,
+  threatIndicatorPathOrUndefined,
 } from '../../../../common/detection_engine/schemas/types/threat_mapping';
 import {
   authorOrUndefined,
@@ -43,7 +45,7 @@ import {
   severityMappingOrUndefined,
   tags,
   timestampOverrideOrUndefined,
-  threat,
+  threats,
   to,
   references,
   version,
@@ -85,7 +87,7 @@ export const baseRuleParams = t.exact(
     severity,
     severityMapping: severityMappingOrUndefined,
     timestampOverride: timestampOverrideOrUndefined,
-    threat,
+    threat: threats,
     to,
     references,
     version,
@@ -102,6 +104,8 @@ const eqlSpecificRuleParams = t.type({
   filters: filtersOrUndefined,
   eventCategoryOverride: eventCategoryOverrideOrUndefined,
 });
+export const eqlRuleParams = t.intersection([baseRuleParams, eqlSpecificRuleParams]);
+export type EqlRuleParams = t.TypeOf<typeof eqlRuleParams>;
 
 const threatSpecificRuleParams = t.type({
   type: t.literal('threat_match'),
@@ -115,9 +119,12 @@ const threatSpecificRuleParams = t.type({
   threatMapping: threat_mapping,
   threatLanguage: t.union([nonEqlLanguages, t.undefined]),
   threatIndex: threat_index,
+  threatIndicatorPath: threatIndicatorPathOrUndefined,
   concurrentSearches: concurrentSearchesOrUndefined,
   itemsPerSearch: itemsPerSearchOrUndefined,
 });
+export const threatRuleParams = t.intersection([baseRuleParams, threatSpecificRuleParams]);
+export type ThreatRuleParams = t.TypeOf<typeof threatRuleParams>;
 
 const querySpecificRuleParams = t.exact(
   t.type({
@@ -129,6 +136,8 @@ const querySpecificRuleParams = t.exact(
     savedId: savedIdOrUndefined,
   })
 );
+export const queryRuleParams = t.intersection([baseRuleParams, querySpecificRuleParams]);
+export type QueryRuleParams = t.TypeOf<typeof queryRuleParams>;
 
 const savedQuerySpecificRuleParams = t.type({
   type: t.literal('saved_query'),
@@ -140,6 +149,8 @@ const savedQuerySpecificRuleParams = t.type({
   filters: filtersOrUndefined,
   savedId: saved_id,
 });
+export const savedQueryRuleParams = t.intersection([baseRuleParams, savedQuerySpecificRuleParams]);
+export type SavedQueryRuleParams = t.TypeOf<typeof savedQueryRuleParams>;
 
 const thresholdSpecificRuleParams = t.type({
   type: t.literal('threshold'),
@@ -150,12 +161,19 @@ const thresholdSpecificRuleParams = t.type({
   savedId: savedIdOrUndefined,
   threshold,
 });
+export const thresholdRuleParams = t.intersection([baseRuleParams, thresholdSpecificRuleParams]);
+export type ThresholdRuleParams = t.TypeOf<typeof thresholdRuleParams>;
 
 const machineLearningSpecificRuleParams = t.type({
   type: t.literal('machine_learning'),
   anomalyThreshold: anomaly_threshold,
   machineLearningJobId: machine_learning_job_id,
 });
+export const machineLearningRuleParams = t.intersection([
+  baseRuleParams,
+  machineLearningSpecificRuleParams,
+]);
+export type MachineLearningRuleParams = t.TypeOf<typeof machineLearningRuleParams>;
 
 export const typeSpecificRuleParams = t.union([
   eqlSpecificRuleParams,

@@ -1,18 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import { URL } from 'url';
+
 import mime from 'mime-types';
 import semverValid from 'semver/functions/valid';
-import { Response } from 'node-fetch';
-import { URL } from 'url';
-import {
+import type { Response } from 'node-fetch';
+
+import { KibanaAssetType } from '../../../types';
+import type {
   AssetsGroupedByServiceByType,
   CategoryId,
   CategorySummaryList,
   InstallSource,
-  KibanaAssetType,
   RegistryPackage,
   RegistrySearchResults,
   RegistrySearchResult,
@@ -24,11 +28,17 @@ import {
   getPackageInfo,
   setPackageInfo,
 } from '../archive';
-import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { streamToBuffer } from '../streams';
-import { getRegistryUrl } from './registry_url';
 import { appContextService } from '../..';
-import { PackageNotFoundError, PackageCacheError } from '../../../errors';
+import {
+  PackageKeyInvalidError,
+  PackageNotFoundError,
+  PackageCacheError,
+  RegistryResponseError,
+} from '../../../errors';
+
+import { fetchUrl, getResponse, getResponseStream } from './requests';
+import { getRegistryUrl } from './registry_url';
 
 export interface SearchParams {
   category?: CategoryId;
@@ -48,13 +58,15 @@ export function splitPkgKey(pkgkey: string): { pkgName: string; pkgVersion: stri
   // this will return an empty string if `indexOf` returns -1
   const pkgName = pkgkey.substr(0, pkgkey.indexOf('-'));
   if (pkgName === '') {
-    throw new Error('Package key parsing failed: package name was empty');
+    throw new PackageKeyInvalidError('Package key parsing failed: package name was empty');
   }
 
   // this will return the entire string if `indexOf` return -1
   const pkgVersion = pkgkey.substr(pkgkey.indexOf('-') + 1);
   if (!semverValid(pkgVersion)) {
-    throw new Error('Package key parsing failed: package version was not a valid semver');
+    throw new PackageKeyInvalidError(
+      'Package key parsing failed: package version was not a valid semver'
+    );
   }
   return { pkgName, pkgVersion };
 }
@@ -107,7 +119,16 @@ export async function fetchFindLatestPackage(packageName: string): Promise<Regis
 
 export async function fetchInfo(pkgName: string, pkgVersion: string): Promise<RegistryPackage> {
   const registryUrl = getRegistryUrl();
-  return fetchUrl(`${registryUrl}/package/${pkgName}/${pkgVersion}`).then(JSON.parse);
+  try {
+    const res = await fetchUrl(`${registryUrl}/package/${pkgName}/${pkgVersion}`).then(JSON.parse);
+
+    return res;
+  } catch (err) {
+    if (err instanceof RegistryResponseError && err.status === 404) {
+      throw new PackageNotFoundError(`${pkgName}@${pkgVersion} not found`);
+    }
+    throw err;
+  }
 }
 
 export async function getFile(
@@ -163,7 +184,6 @@ export async function getRegistryPackage(
   }
 
   const packageInfo = await getInfo(name, version);
-
   return { paths, packageInfo };
 }
 
@@ -209,7 +229,10 @@ export function groupPathsByService(paths: string[]): AssetsGroupedByServiceByTy
   // ASK: best way, if any, to avoid `any`?
   const assets = paths.reduce((map: any, path) => {
     const parts = getPathParts(path.replace(/^\/package\//, ''));
-    if (parts.service === 'kibana' && kibanaAssetTypes.includes(parts.type)) {
+    if (
+      (parts.service === 'kibana' && kibanaAssetTypes.includes(parts.type)) ||
+      parts.service === 'elasticsearch'
+    ) {
       if (!map[parts.service]) map[parts.service] = {};
       if (!map[parts.service][parts.type]) map[parts.service][parts.type] = [];
       map[parts.service][parts.type].push(parts);
@@ -220,6 +243,6 @@ export function groupPathsByService(paths: string[]): AssetsGroupedByServiceByTy
 
   return {
     kibana: assets.kibana,
-    // elasticsearch: assets.elasticsearch,
+    elasticsearch: assets.elasticsearch,
   };
 }

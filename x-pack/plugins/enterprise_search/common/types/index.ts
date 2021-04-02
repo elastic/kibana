@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -18,10 +19,7 @@ export interface InitialAppData {
   ilmEnabled?: boolean;
   isFederatedAuth?: boolean;
   configuredLimits?: ConfiguredLimits;
-  access?: {
-    hasAppSearchAccess: boolean;
-    hasWorkplaceSearchAccess: boolean;
-  };
+  access?: ProductAccess;
   appSearch?: AppSearchAccount;
   workplaceSearch?: WorkplaceSearchInitialData;
 }
@@ -29,6 +27,11 @@ export interface InitialAppData {
 export interface ConfiguredLimits {
   appSearch: AppSearchConfiguredLimits;
   workplaceSearch: WorkplaceSearchConfiguredLimits;
+}
+
+export interface ProductAccess {
+  hasAppSearchAccess: boolean;
+  hasWorkplaceSearchAccess: boolean;
 }
 
 export interface MetaPage {

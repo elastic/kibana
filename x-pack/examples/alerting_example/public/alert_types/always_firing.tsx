@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { Fragment, useState } from 'react';
@@ -32,7 +33,6 @@ import {
 export function getAlertType(): AlertTypeModel {
   return {
     id: 'example.always-firing',
-    name: 'Always Fires',
     description: 'Alert when called',
     iconClass: 'bolt',
     documentationUrl: null,
@@ -134,8 +134,10 @@ export const AlwaysFiringExpression: React.FunctionComponent<
 };
 
 interface TShirtSelectorProps {
-  actionGroup?: ActionGroupWithCondition<number>;
-  setTShirtThreshold: (actionGroup: ActionGroupWithCondition<number>) => void;
+  actionGroup?: ActionGroupWithCondition<number, AlwaysFiringActionGroupIds>;
+  setTShirtThreshold: (
+    actionGroup: ActionGroupWithCondition<number, AlwaysFiringActionGroupIds>
+  ) => void;
 }
 const TShirtSelector = ({ actionGroup, setTShirtThreshold }: TShirtSelectorProps) => {
   const [isOpen, setIsOpen] = useState(false);

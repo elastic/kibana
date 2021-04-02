@@ -256,7 +256,7 @@ Each alert type should be defined as `AlertTypeModel` object with the these prop
 |requiresAppContext|Define if alert type is enabled for create and edit in the alerting management UI.|
 
 IMPORTANT: The current UI supports a single action group only. 
-Action groups are mapped from the server API result for [GET /api/alerts/list_alert_types: List alert types](https://github.com/elastic/kibana/tree/master/x-pack/plugins/alerts#get-apialerttypes-list-alert-types).
+Action groups are mapped from the server API result for [GET /api/alerts/list_alert_types: List alert types](https://github.com/elastic/kibana/tree/master/x-pack/plugins/alerting#get-apialerttypes-list-alert-types).
 Server side alert type model:
 ```
 export interface AlertType {
@@ -294,7 +294,7 @@ triggersActionsUi.alertTypeRegistry.register(getSomeNewAlertType());
 
 ## Create and register new alert type UI example
 
-Before registering a UI for a new Alert Type, you should first register the type on the server-side by following the Alerting guide: https://github.com/elastic/kibana/tree/master/x-pack/plugins/alerts#example 
+Before registering a UI for a new Alert Type, you should first register the type on the server-side by following the Alerting guide: https://github.com/elastic/kibana/tree/master/x-pack/plugins/alerting#example 
 
 Alert type UI is expected to be defined as `AlertTypeModel` object.
 
@@ -833,7 +833,7 @@ interface AlertAddProps {
   alertTypeId?: string;
   canChangeTrigger?: boolean;
   initialValues?: Partial<Alert>;
-  reloadAlerts?: () => Promise<void>;
+  onSave?: () => Promise<void>;
   metadata?: MetaData;
 }
 ```
@@ -845,7 +845,7 @@ interface AlertAddProps {
 |setAddFlyoutVisibility|Function for changing visibility state of the Create Alert flyout.|
 |alertTypeId|Optional property to preselect alert type.|
 |canChangeTrigger|Optional property, that hides change alert type possibility.|
-|reloadAlerts|Optional function, which will be executed if alert was saved sucsessfuly.|
+|onSave|Optional function, which will be executed if alert was saved sucsessfuly.|
 |initialValues|Default values for Alert properties.|
 |metadata|Optional generic property, which allows to define component specific metadata. This metadata can be used for passing down preloaded data for Alert type expression component.|
 
@@ -1116,7 +1116,7 @@ Each action type should be defined as an `ActionTypeModel` object with the follo
   validateConnector: (connector: any) => ValidationResult;
   validateParams: (actionParams: any) => ValidationResult;
   actionConnectorFields: React.FunctionComponent<any> | null;
-  actionParamsFields: any;
+  actionParamsFields: React.LazyExoticComponent<ComponentType<ActionParamsProps<ActionParams>>>;
 ```
 |Property|Description|
 |---|---|
@@ -1149,7 +1149,7 @@ triggersActionsUi.actionTypeRegistry.register(getSomeNewActionType());
 
 ## Create and register new action type UI
 
-Before starting the UI implementation, the [server side registration](https://github.com/elastic/kibana/tree/master/x-pack/plugins/actions#kibana-actions-configuration) should be done first.
+Before starting the UI implementation, the [server side registration](https://github.com/elastic/kibana/tree/master/x-pack/plugins/actions#action-types) should be done first.
 
 Action type UI is expected to be defined as `ActionTypeModel` object.
 
@@ -1470,7 +1470,7 @@ interface ActionAccordionFormProps {
 
 |Property|Description|
 |---|---|
-|reloadAlerts|Optional function, which will be executed if alert was saved sucsessfuly.|
+|onSave|Optional function, which will be executed if alert was saved sucsessfuly.|
 |http|HttpSetup needed for executing API calls.|
 |alertTypeRegistry|Registry for alert types.|
 |actionTypeRegistry|Registry for action types.|

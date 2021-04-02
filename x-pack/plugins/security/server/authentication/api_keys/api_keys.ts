@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import type { IClusterClient, KibanaRequest, Logger } from '../../../../../../src/core/server';
+import type { IClusterClient, KibanaRequest, Logger } from 'src/core/server';
+
 import type { SecurityLicense } from '../../../common/licensing';
 import {
-  HTTPAuthorizationHeader,
   BasicHTTPAuthorizationHeaderCredentials,
+  HTTPAuthorizationHeader,
 } from '../http_authentication';
 
 /**
@@ -39,10 +41,10 @@ interface GrantAPIKeyParams {
 }
 
 /**
- * Represents the params for invalidating an API key
+ * Represents the params for invalidating multiple API keys
  */
-export interface InvalidateAPIKeyParams {
-  id: string;
+export interface InvalidateAPIKeysParams {
+  ids: string[];
 }
 
 /**
@@ -107,7 +109,7 @@ export interface InvalidateAPIKeyResult {
   error_details?: Array<{
     type: string;
     reason: string;
-    caused_by: {
+    caused_by?: {
       type: string;
       reason: string;
     };
@@ -143,7 +145,11 @@ export class APIKeys {
     );
 
     try {
-      await this.clusterClient.asInternalUser.security.invalidateApiKey({ body: { id } });
+      await this.clusterClient.asInternalUser.security.invalidateApiKey({
+        body: {
+          ids: [id],
+        },
+      });
       return true;
     } catch (e) {
       if (this.doesErrorIndicateAPIKeysAreDisabled(e)) {
@@ -169,12 +175,12 @@ export class APIKeys {
     this.logger.debug('Trying to create an API key');
 
     // User needs `manage_api_key` privilege to use this API
-    let result;
+    let result: CreateAPIKeyResult;
     try {
       result = (
         await this.clusterClient
           .asScoped(request)
-          .asCurrentUser.security.createApiKey<CreateAPIKeyResult>({ body: params })
+          .asCurrentUser.security.createApiKey({ body: params })
       ).body;
       this.logger.debug('API key was created successfully');
     } catch (e) {
@@ -205,10 +211,11 @@ export class APIKeys {
     const params = this.getGrantParams(createParams, authorizationHeader);
 
     // User needs `manage_api_key` or `grant_api_key` privilege to use this API
-    let result;
+    let result: GrantAPIKeyResult;
     try {
       result = (
-        await this.clusterClient.asInternalUser.security.grantApiKey<GrantAPIKeyResult>({
+        await this.clusterClient.asInternalUser.security.grantApiKey({
+          // @ts-expect-error @elastic/elasticsearch api_key.role_descriptors
           body: params,
         })
       ).body;
@@ -222,30 +229,36 @@ export class APIKeys {
   }
 
   /**
-   * Tries to invalidate an API key.
+   * Tries to invalidate an API keys.
    * @param request Request instance.
-   * @param params The params to invalidate an API key.
+   * @param params The params to invalidate an API keys.
    */
-  async invalidate(request: KibanaRequest, params: InvalidateAPIKeyParams) {
+  async invalidate(request: KibanaRequest, params: InvalidateAPIKeysParams) {
     if (!this.license.isEnabled()) {
       return null;
     }
 
-    this.logger.debug('Trying to invalidate an API key as current user');
+    this.logger.debug(`Trying to invalidate ${params.ids.length} an API key as current user`);
 
-    let result;
+    let result: InvalidateAPIKeyResult;
     try {
       // User needs `manage_api_key` privilege to use this API
       result = (
-        await this.clusterClient
-          .asScoped(request)
-          .asCurrentUser.security.invalidateApiKey<InvalidateAPIKeyResult>({
-            body: { id: params.id },
-          })
+        await this.clusterClient.asScoped(request).asCurrentUser.security.invalidateApiKey({
+          body: {
+            ids: params.ids,
+          },
+        })
       ).body;
-      this.logger.debug('API key was invalidated successfully as current user');
+      this.logger.debug(
+        `API keys by ids=[${params.ids.join(', ')}] was invalidated successfully as current user`
+      );
     } catch (e) {
-      this.logger.error(`Failed to invalidate API key as current user: ${e.message}`);
+      this.logger.error(
+        `Failed to invalidate API keys by ids=[${params.ids.join(', ')}] as current user: ${
+          e.message
+        }`
+      );
       throw e;
     }
 
@@ -253,27 +266,31 @@ export class APIKeys {
   }
 
   /**
-   * Tries to invalidate an API key by using the internal user.
-   * @param params The params to invalidate an API key.
+   * Tries to invalidate the API keys by using the internal user.
+   * @param params The params to invalidate the API keys.
    */
-  async invalidateAsInternalUser(params: InvalidateAPIKeyParams) {
+  async invalidateAsInternalUser(params: InvalidateAPIKeysParams) {
     if (!this.license.isEnabled()) {
       return null;
     }
 
-    this.logger.debug('Trying to invalidate an API key');
+    this.logger.debug(`Trying to invalidate ${params.ids.length} API keys`);
 
-    let result;
+    let result: InvalidateAPIKeyResult;
     try {
       // Internal user needs `cluster:admin/xpack/security/api_key/invalidate` privilege to use this API
       result = (
-        await this.clusterClient.asInternalUser.security.invalidateApiKey<InvalidateAPIKeyResult>({
-          body: { id: params.id },
+        await this.clusterClient.asInternalUser.security.invalidateApiKey({
+          body: {
+            ids: params.ids,
+          },
         })
       ).body;
-      this.logger.debug('API key was invalidated successfully');
+      this.logger.debug(`API keys by ids=[${params.ids.join(', ')}] was invalidated successfully`);
     } catch (e) {
-      this.logger.error(`Failed to invalidate API key: ${e.message}`);
+      this.logger.error(
+        `Failed to invalidate API keys by ids=[${params.ids.join(', ')}]: ${e.message}`
+      );
       throw e;
     }
 

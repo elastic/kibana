@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import './suggestion_panel.scss';
 
 import _, { camelCase } from 'lodash';
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiIcon,
@@ -33,7 +34,7 @@ import {
 } from '../../../../../../src/plugins/expressions/public';
 import { prependDatasourceExpression } from './expression_helpers';
 import { trackUiEvent, trackSuggestionEvent } from '../../lens_ui_telemetry';
-import { validateDatasourceAndVisualization } from './state_helpers';
+import { getMissingIndexPattern, validateDatasourceAndVisualization } from './state_helpers';
 
 const MAX_SUGGESTIONS_DISPLAYED = 5;
 
@@ -181,46 +182,52 @@ export function SuggestionPanel({
     ? stagedPreview.visualization.activeId
     : activeVisualizationId;
 
+  const missingIndexPatterns = getMissingIndexPattern(
+    activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
+    activeDatasourceId ? datasourceStates[activeDatasourceId] : null
+  );
   const { suggestions, currentStateExpression, currentStateError } = useMemo(
     () => {
-      const newSuggestions = getSuggestions({
-        datasourceMap,
-        datasourceStates: currentDatasourceStates,
-        visualizationMap,
-        activeVisualizationId: currentVisualizationId,
-        visualizationState: currentVisualizationState,
-        activeData: frame.activeData,
-      })
-        .filter((suggestion) => !suggestion.hide)
-        .filter(
-          ({
-            visualizationId,
-            visualizationState: suggestionVisualizationState,
-            datasourceState: suggestionDatasourceState,
-            datasourceId: suggetionDatasourceId,
-          }) => {
-            return (
-              validateDatasourceAndVisualization(
-                suggetionDatasourceId ? datasourceMap[suggetionDatasourceId] : null,
-                suggestionDatasourceState,
-                visualizationMap[visualizationId],
-                suggestionVisualizationState,
-                frame
-              ) == null
-            );
-          }
-        )
-        .slice(0, MAX_SUGGESTIONS_DISPLAYED)
-        .map((suggestion) => ({
-          ...suggestion,
-          previewExpression: preparePreviewExpression(
-            suggestion,
-            visualizationMap[suggestion.visualizationId],
+      const newSuggestions = missingIndexPatterns.length
+        ? []
+        : getSuggestions({
             datasourceMap,
-            currentDatasourceStates,
-            frame
-          ),
-        }));
+            datasourceStates: currentDatasourceStates,
+            visualizationMap,
+            activeVisualizationId: currentVisualizationId,
+            visualizationState: currentVisualizationState,
+            activeData: frame.activeData,
+          })
+            .filter((suggestion) => !suggestion.hide)
+            .filter(
+              ({
+                visualizationId,
+                visualizationState: suggestionVisualizationState,
+                datasourceState: suggestionDatasourceState,
+                datasourceId: suggetionDatasourceId,
+              }) => {
+                return (
+                  validateDatasourceAndVisualization(
+                    suggetionDatasourceId ? datasourceMap[suggetionDatasourceId] : null,
+                    suggestionDatasourceState,
+                    visualizationMap[visualizationId],
+                    suggestionVisualizationState,
+                    frame
+                  ) == null
+                );
+              }
+            )
+            .slice(0, MAX_SUGGESTIONS_DISPLAYED)
+            .map((suggestion) => ({
+              ...suggestion,
+              previewExpression: preparePreviewExpression(
+                suggestion,
+                visualizationMap[suggestion.visualizationId],
+                datasourceMap,
+                currentDatasourceStates,
+                frame
+              ),
+            }));
 
       const validationErrors = validateDatasourceAndVisualization(
         activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
@@ -270,13 +277,21 @@ export function SuggestionPanel({
     [frame.query, frame.dateRange.fromDate, frame.dateRange.toDate, frame.filters]
   );
 
+  const contextRef = useRef<ExecutionContextSearch>(context);
+  contextRef.current = context;
+
+  const sessionIdRef = useRef<string>(frame.searchSessionId);
+  sessionIdRef.current = frame.searchSessionId;
+
   const AutoRefreshExpressionRenderer = useMemo(() => {
-    const autoRefreshFetch$ = plugins.data.query.timefilter.timefilter.getAutoRefreshFetch$();
     return (props: ReactExpressionRendererProps) => (
-      <ExpressionRendererComponent {...props} searchContext={context} reload$={autoRefreshFetch$} />
+      <ExpressionRendererComponent
+        {...props}
+        searchContext={contextRef.current}
+        searchSessionId={sessionIdRef.current}
+      />
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [plugins.data.query.timefilter.timefilter, context]);
+  }, [ExpressionRendererComponent]);
 
   const [lastSelectedSuggestion, setLastSelectedSuggestion] = useState<number>(-1);
 

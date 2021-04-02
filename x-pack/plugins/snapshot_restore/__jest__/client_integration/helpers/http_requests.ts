@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import sinon, { SinonFakeServer } from 'sinon';
@@ -107,6 +108,14 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     ]);
   };
 
+  const setRestoreSnapshotResponse = (response?: HttpResponse) => {
+    server.respondWith('POST', `${API_BASE_PATH}restore/:repository/:snapshot`, [
+      200,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(response),
+    ]);
+  };
+
   return {
     setLoadRepositoriesResponse,
     setLoadRepositoryTypesResponse,
@@ -118,6 +127,7 @@ const registerHttpRequestMockHelpers = (server: SinonFakeServer) => {
     setAddPolicyResponse,
     setGetPolicyResponse,
     setCleanupRepositoryResponse,
+    setRestoreSnapshotResponse,
   };
 };
 

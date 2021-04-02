@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { schema } from '@kbn/config-schema';
@@ -32,6 +33,7 @@ async function fetchPolicies(client: ElasticsearchClient): Promise<ApiResponse<P
     ignore: [404],
   };
 
+  // @ts-expect-error Policy doesn't contain name property
   return client.ilm.getLifecycle({}, options);
 }
 
@@ -43,7 +45,7 @@ async function addLinkedIndices(client: ElasticsearchClient, policiesMap: Polici
 
   const response = await client.ilm.explainLifecycle<{
     indices: { [indexName: string]: IndexLifecyclePolicy };
-  }>({ index: '*' }, options);
+  }>({ index: '*,.*' }, options); // '*,.*' will include hidden indices
   const policyExplanation = response.body;
   Object.entries(policyExplanation.indices).forEach(([indexName, { policy }]) => {
     if (policy && policiesMap[policy]) {

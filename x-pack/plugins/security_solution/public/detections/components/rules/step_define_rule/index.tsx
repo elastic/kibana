@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { EuiButtonEmpty, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import React, { FC, memo, useCallback, useState, useEffect, useMemo } from 'react';
+import React, { FC, memo, useCallback, useState, useEffect } from 'react';
 import styled from 'styled-components';
 // Prefer importing entire lodash library, e.g. import { get } from "lodash"
 // eslint-disable-next-line no-restricted-imports
@@ -52,8 +53,8 @@ import {
 } from '../../../../../common/detection_engine/utils';
 import { EqlQueryBar } from '../eql_query_bar';
 import { ThreatMatchInput } from '../threatmatch_input';
-import { useFetchIndex } from '../../../../common/containers/source';
-import { PreviewQuery, Threshold } from '../query_preview';
+import { BrowserField, BrowserFields, useFetchIndex } from '../../../../common/containers/source';
+import { PreviewQuery } from '../query_preview';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -81,6 +82,10 @@ const stepDefineDefaultValue: DefineStepRule = {
   threshold: {
     field: [],
     value: '200',
+    cardinality: {
+      field: [],
+      value: '',
+    },
   },
   timeline: {
     id: null,
@@ -149,25 +154,46 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       ruleType: formRuleType,
       queryBar: formQuery,
       threatIndex: formThreatIndex,
-      'threshold.value': formThresholdValue,
-      'threshold.field': formThresholdField,
+      threshold: formThreshold,
     },
-  ] = useFormData<
-    DefineStepRule & {
-      'threshold.value': number | undefined;
-      'threshold.field': string[] | undefined;
-    }
-  >({
+  ] = useFormData<DefineStepRule>({
     form,
-    watch: ['index', 'ruleType', 'queryBar', 'threshold.value', 'threshold.field', 'threatIndex'],
+    watch: [
+      'index',
+      'ruleType',
+      'queryBar',
+      'threshold',
+      'threshold.field',
+      'threshold.value',
+      'threshold.cardinality.field',
+      'threshold.cardinality.value',
+      'threatIndex',
+    ],
   });
   const [isQueryBarValid, setIsQueryBarValid] = useState(false);
   const index = formIndex || initialState.index;
   const threatIndex = formThreatIndex || initialState.threatIndex;
   const ruleType = formRuleType || initialState.ruleType;
-  const queryBarQuery =
-    formQuery != null ? formQuery.query.query : '' || initialState.queryBar.query.query;
   const [indexPatternsLoading, { browserFields, indexPatterns }] = useFetchIndex(index);
+  const aggregatableFields = Object.entries(browserFields).reduce<BrowserFields>(
+    (groupAcc, [groupName, groupValue]) => {
+      return {
+        ...groupAcc,
+        [groupName]: {
+          fields: Object.entries(groupValue.fields ?? {}).reduce<
+            Record<string, Partial<BrowserField>>
+          >((fieldAcc, [fieldName, fieldValue]) => {
+            if (fieldValue.aggregatable === true) {
+              fieldAcc[fieldName] = fieldValue;
+            }
+            return fieldAcc;
+          }, {}),
+        } as Partial<BrowserField>,
+      };
+    },
+    {}
+  );
+
   const [
     threatIndexPatternsLoading,
     { browserFields: threatBrowserFields, indexPatterns: threatIndexPatterns },
@@ -253,21 +279,17 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     setOpenTimelineSearch(false);
   }, []);
 
-  const thresholdFormValue = useMemo((): Threshold | undefined => {
-    return formThresholdValue != null && formThresholdField != null
-      ? { value: formThresholdValue, field: formThresholdField[0] }
-      : undefined;
-  }, [formThresholdField, formThresholdValue]);
-
   const ThresholdInputChildren = useCallback(
-    ({ thresholdField, thresholdValue }) => (
+    ({ thresholdField, thresholdValue, thresholdCardinalityField, thresholdCardinalityValue }) => (
       <ThresholdInput
-        browserFields={browserFields}
+        browserFields={aggregatableFields}
         thresholdField={thresholdField}
         thresholdValue={thresholdValue}
+        thresholdCardinalityField={thresholdCardinalityField}
+        thresholdCardinalityValue={thresholdCardinalityValue}
       />
     ),
-    [browserFields]
+    [aggregatableFields]
   );
 
   const ThreatMatchInputChildren = useCallback(
@@ -409,6 +431,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   thresholdValue: {
                     path: 'threshold.value',
                   },
+                  thresholdCardinalityField: {
+                    path: 'threshold.cardinality.field',
+                  },
+                  thresholdCardinalityValue: {
+                    path: 'threshold.cardinality.value',
+                  },
                 }}
               >
                 {ThresholdInputChildren}
@@ -451,8 +479,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               ruleType={ruleType}
               index={index}
               query={formQuery}
-              isDisabled={queryBarQuery.trim() === '' || !isQueryBarValid || index.length === 0}
-              threshold={thresholdFormValue}
+              isDisabled={!isQueryBarValid || index.length === 0}
+              threshold={formThreshold}
             />
           </>
         )}

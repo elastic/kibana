@@ -1,11 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { Observable } from 'rxjs';
-import { AlertingPlugin } from '../../../../alerts/server';
+import { AlertingPlugin } from '../../../../alerting/server';
 import { ActionsPlugin } from '../../../../actions/server';
 import { registerTransactionDurationAlertType } from './register_transaction_duration_alert_type';
 import { registerTransactionDurationAnomalyAlertType } from './register_transaction_duration_anomaly_alert_type';
@@ -15,7 +16,7 @@ import { MlPluginSetup } from '../../../../ml/server';
 import { registerTransactionErrorRateAlertType } from './register_transaction_error_rate_alert_type';
 
 interface Params {
-  alerts: AlertingPlugin['setup'];
+  alerting: AlertingPlugin['setup'];
   actions: ActionsPlugin['setup'];
   ml?: MlPluginSetup;
   config$: Observable<APMConfig>;
@@ -23,20 +24,20 @@ interface Params {
 
 export function registerApmAlerts(params: Params) {
   registerTransactionDurationAlertType({
-    alerts: params.alerts,
+    alerting: params.alerting,
     config$: params.config$,
   });
   registerTransactionDurationAnomalyAlertType({
-    alerts: params.alerts,
+    alerting: params.alerting,
     ml: params.ml,
     config$: params.config$,
   });
   registerErrorCountAlertType({
-    alerts: params.alerts,
+    alerting: params.alerting,
     config$: params.config$,
   });
   registerTransactionErrorRateAlertType({
-    alerts: params.alerts,
+    alerting: params.alerting,
     config$: params.config$,
   });
 }

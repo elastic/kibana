@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -23,12 +24,14 @@ import {
   ElementClickListener,
   TooltipValue,
   HeatmapSpec,
+  TooltipSettings,
+  HeatmapBrushEvent,
+  Position,
+  ScaleType,
 } from '@elastic/charts';
 import moment from 'moment';
-import { HeatmapBrushEvent } from '@elastic/charts/dist/chart_types/heatmap/layout/types/config_types';
 
 import { i18n } from '@kbn/i18n';
-import { TooltipSettings } from '@elastic/charts/dist/specs/settings';
 import { SwimLanePagination } from './swimlane_pagination';
 import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
 import { ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../../../common';
@@ -43,14 +46,23 @@ import './_explorer.scss';
 import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
 import { useUiSettings } from '../contexts/kibana';
 
+declare global {
+  interface Window {
+    /**
+     * Flag used to enable debugState on elastic charts
+     */
+    _echDebugStateFlag?: boolean;
+  }
+}
+
 /**
  * Ignore insignificant resize, e.g. browser scrollbar appearance.
  */
-const RESIZE_IGNORED_DIFF_PX = 20;
 const RESIZE_THROTTLE_TIME_MS = 500;
 const CELL_HEIGHT = 30;
 const LEGEND_HEIGHT = 34;
 const Y_AXIS_HEIGHT = 24;
+export const SWIM_LANE_LABEL_WIDTH = 200;
 
 export function isViewBySwimLaneData(arg: any): arg is ViewBySwimLaneData {
   return arg && arg.hasOwnProperty('cardinality');
@@ -167,12 +179,9 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
 
   const resizeHandler = useCallback(
     throttle((e: { width: number; height: number }) => {
-      const labelWidth = 200;
-      const resultNewWidth = e.width - labelWidth;
-      if (Math.abs(resultNewWidth - chartWidth) > RESIZE_IGNORED_DIFF_PX) {
-        setChartWidth(resultNewWidth);
-        onResize(resultNewWidth);
-      }
+      const resultNewWidth = e.width - SWIM_LANE_LABEL_WIDTH;
+      setChartWidth(resultNewWidth);
+      onResize(resultNewWidth);
     }, RESIZE_THROTTLE_TIME_MS),
     [chartWidth]
   );
@@ -255,7 +264,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
       onBrushEnd: (e: HeatmapBrushEvent) => {
         onCellsSelection({
           lanes: e.y as string[],
-          times: e.x.map((v) => (v as number) / 1000),
+          times: e.x.map((v) => (v as number) / 1000) as [number, number],
           type: swimlaneType,
           viewByFieldName: swimlaneData.fieldName,
         });
@@ -326,7 +335,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
       const startTime = (cell.datum.x as number) / 1000;
       const payload = {
         lanes: [String(cell.datum.y)],
-        times: [startTime, startTime + swimlaneData.interval],
+        times: [startTime, startTime + swimlaneData.interval] as [number, number],
         type: swimlaneType,
         viewByFieldName: swimlaneData.fieldName,
       };
@@ -352,9 +361,9 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
         <EuiFlexGroup
           gutterSize={'none'}
           direction={'column'}
-          style={{ width: '100%', height: '100%', overflow: 'hidden' }}
+          style={{ width: '100%', overflow: 'hidden' }}
           ref={resizeRef}
-          data-test-subj="mlSwimLaneContainer"
+          data-test-subj={dataTestSubj}
         >
           <EuiFlexItem
             style={{
@@ -363,26 +372,24 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
             }}
             grow={false}
           >
-            <div
-              style={{ height: `${containerHeight}px`, position: 'relative' }}
-              data-test-subj={dataTestSubj}
-            >
+            <div style={{ height: `${containerHeight}px`, position: 'relative' }}>
               {showSwimlane && !isLoading && (
                 <Chart className={'mlSwimLaneContainer'}>
                   <Settings
                     onElementClick={onElementClick}
                     showLegend
-                    legendPosition="top"
+                    legendPosition={Position.Top}
                     xDomain={{
                       min: swimlaneData.earliest * 1000,
                       max: swimlaneData.latest * 1000,
                       minInterval: swimlaneData.interval * 1000,
                     }}
                     tooltip={tooltipOptions}
+                    debugState={window._echDebugStateFlag ?? false}
                   />
                   <Heatmap
                     id={id}
-                    colorScale="threshold"
+                    colorScale={ScaleType.Threshold}
                     ranges={[
                       ANOMALY_THRESHOLD.LOW,
                       ANOMALY_THRESHOLD.WARNING,
@@ -404,7 +411,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                     valueAccessor="value"
                     highlightedData={highlightedData}
                     valueFormatter={getFormattedSeverityScore}
-                    xScaleType="time"
+                    xScaleType={ScaleType.Time}
                     ySortPredicate="dataIndex"
                     config={swimLaneConfig}
                   />

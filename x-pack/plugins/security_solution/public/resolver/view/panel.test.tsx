@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import { createMemoryHistory, History as HistoryPackageHistoryInterface } from 'history';
 import { noAncestorsTwoChildrenWithRelatedEventsOnOrigin } from '../data_access_layer/mocks/no_ancestors_two_children_with_related_events_on_origin';
 import { Simulator } from '../test_utilities/simulator';
@@ -32,7 +34,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
   /**
    * These are the details we expect to see in the node detail view when the origin is selected.
    */
-  const originEventDetailEntries: ReadonlyMap<string, string> = new Map([
+  const originEventDetailEntries: Array<[string, string]> = [
     ['@timestamp', 'Sep 23, 2020 @ 08:25:32.316'],
     ['process.executable', 'executable'],
     ['process.pid', '0'],
@@ -40,8 +42,10 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
     ['user.domain', 'user.domain'],
     ['process.parent.pid', '0'],
     ['process.hash.md5', 'hash.md5'],
-    ['process.args', 'args'],
-  ]);
+    ['process.args', 'args0'],
+    ['process.args', 'args1'],
+    ['process.args', 'args2'],
+  ];
 
   beforeEach(() => {
     // create a mock data access layer
@@ -65,6 +69,8 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
           resolverComponentInstanceID,
           history: memoryHistory,
           indices: [],
+          shouldUpdate: false,
+          filters: {},
         });
         return simulatorInstance;
       }
@@ -125,11 +131,16 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
     describe.each([...originEventDetailEntries])(
       'when the user hovers over the description for the field (%p) with their mouse',
       (fieldTitleText, value) => {
+        // If there are multiple values for a field, i.e. an array, this is the index for the value we are testing.
+        const entryIndex = originEventDetailEntries
+          .filter(([fieldName]) => fieldName === fieldTitleText)
+          .findIndex(([_, fieldValue]) => fieldValue === value);
         beforeEach(async () => {
           const dt = await simulator().resolveWrapper(() => {
             return simulator()
               .testSubject('resolver:node-detail:entry-title')
-              .filterWhere((title) => title.text() === fieldTitleText);
+              .filterWhere((title) => title.text() === fieldTitleText)
+              .at(entryIndex);
           });
 
           expect(dt).toHaveLength(1);
@@ -180,7 +191,9 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
         ['user.domain', 'user.domain'],
         ['process.parent.pid', '0'],
         ['process.hash.md5', 'hash.md5'],
-        ['process.args', 'args'],
+        ['process.args', 'args0'],
+        ['process.args', 'args1'],
+        ['process.args', 'args2'],
       ]);
     });
   });

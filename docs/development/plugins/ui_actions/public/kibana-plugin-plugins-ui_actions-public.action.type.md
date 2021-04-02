@@ -9,5 +9,5 @@ The action type is what determines the context shape.
 <b>Signature:</b>
 
 ```typescript
-readonly type: T;
+readonly type: string;
 ```

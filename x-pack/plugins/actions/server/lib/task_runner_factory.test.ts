@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import sinon from 'sinon';
@@ -53,7 +54,6 @@ afterAll(() => fakeTimer.restore());
 
 const services = {
   log: jest.fn(),
-  callCluster: jest.fn(),
   savedObjectsClient: savedObjectsClientMock.create(),
 };
 const actionExecutorInitializerParams = {
@@ -83,18 +83,14 @@ beforeEach(() => {
 });
 
 test(`throws an error if factory isn't initialized`, () => {
-  const factory = new TaskRunnerFactory(
-    new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false })
-  );
+  const factory = new TaskRunnerFactory(new ActionExecutor({ isESOCanEncrypt: true }));
   expect(() =>
     factory.create({ taskInstance: mockedTaskInstance })
   ).toThrowErrorMatchingInlineSnapshot(`"TaskRunnerFactory not initialized"`);
 });
 
 test(`throws an error if factory is already initialized`, () => {
-  const factory = new TaskRunnerFactory(
-    new ActionExecutor({ isESOUsingEphemeralEncryptionKey: false })
-  );
+  const factory = new TaskRunnerFactory(new ActionExecutor({ isESOCanEncrypt: true }));
   factory.initialize(taskRunnerFactoryInitializerParams);
   expect(() =>
     factory.initialize(taskRunnerFactoryInitializerParams)

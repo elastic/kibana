@@ -1,41 +1,44 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { Observable } from 'rxjs';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { HomeServerPluginSetup } from 'src/plugins/home/server';
-import {
+import type { Observable } from 'rxjs';
+
+import type {
   CoreSetup,
   CoreStart,
   Logger,
+  Plugin,
   PluginInitializerContext,
-} from '../../../../src/core/server';
-import {
+} from 'src/core/server';
+import type { HomeServerPluginSetup } from 'src/plugins/home/server';
+import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+
+import type {
   PluginSetupContract as FeaturesPluginSetup,
   PluginStartContract as FeaturesPluginStart,
 } from '../../features/server';
-import { LicensingPluginSetup } from '../../licensing/server';
-import { createSpacesTutorialContextFactory } from './lib/spaces_tutorial_context_factory';
-import { registerSpacesUsageCollector } from './usage_collection';
-import { SpacesService, SpacesServiceSetup, SpacesServiceStart } from './spaces_service';
-import { UsageStatsService } from './usage_stats';
-import { ConfigType } from './config';
+import type { LicensingPluginSetup } from '../../licensing/server';
+import { SpacesLicenseService } from '../common/licensing';
+import { setupCapabilities } from './capabilities';
+import type { ConfigType } from './config';
+import { DefaultSpaceService } from './default_space';
 import { initSpacesRequestInterceptors } from './lib/request_interceptors';
+import { createSpacesTutorialContextFactory } from './lib/spaces_tutorial_context_factory';
 import { initExternalSpacesApi } from './routes/api/external';
 import { initInternalSpacesApi } from './routes/api/internal';
 import { initSpacesViewsRoutes } from './routes/views';
-import { setupCapabilities } from './capabilities';
 import { SpacesSavedObjectsService } from './saved_objects';
-import { DefaultSpaceService } from './default_space';
-import { SpacesLicenseService } from '../common/licensing';
-import {
-  SpacesClientRepositoryFactory,
-  SpacesClientService,
-  SpacesClientWrapper,
-} from './spaces_client';
+import type { SpacesClientRepositoryFactory, SpacesClientWrapper } from './spaces_client';
+import { SpacesClientService } from './spaces_client';
+import type { SpacesServiceSetup, SpacesServiceStart } from './spaces_service';
+import { SpacesService } from './spaces_service';
+import type { SpacesRequestHandlerContext } from './types';
+import { registerSpacesUsageCollector } from './usage_collection';
+import { UsageStatsService } from './usage_stats';
 
 export interface PluginsSetup {
   features: FeaturesPluginSetup;
@@ -60,7 +63,8 @@ export interface SpacesPluginStart {
   spacesService: SpacesServiceStart;
 }
 
-export class Plugin {
+export class SpacesPlugin
+  implements Plugin<SpacesPluginSetup, SpacesPluginStart, PluginsSetup, PluginsStart> {
   private readonly config$: Observable<ConfigType>;
 
   private readonly kibanaIndexConfig$: Observable<{ kibana: { index: string } }>;
@@ -123,17 +127,16 @@ export class Plugin {
       logger: this.log,
     });
 
-    const externalRouter = core.http.createRouter();
+    const externalRouter = core.http.createRouter<SpacesRequestHandlerContext>();
     initExternalSpacesApi({
       externalRouter,
       log: this.log,
       getStartServices: core.getStartServices,
-      getImportExportObjectLimit: core.savedObjects.getImportExportObjectLimit,
       getSpacesService,
       usageStatsServicePromise,
     });
 
-    const internalRouter = core.http.createRouter();
+    const internalRouter = core.http.createRouter<SpacesRequestHandlerContext>();
     initInternalSpacesApi({
       internalRouter,
       getSpacesService,

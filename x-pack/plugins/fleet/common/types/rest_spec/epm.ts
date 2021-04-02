@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import {
+import type {
   AssetReference,
   CategorySummaryList,
   Installable,
   RegistrySearchResult,
   PackageInfo,
+  PackageUsageStats,
 } from '../models/epm';
 
 export interface GetCategoriesRequest {
@@ -54,6 +56,16 @@ export interface GetInfoResponse {
   response: PackageInfo;
 }
 
+export interface GetStatsRequest {
+  params: {
+    pkgname: string;
+  };
+}
+
+export interface GetStatsResponse {
+  response: PackageUsageStats;
+}
+
 export interface InstallPackageRequest {
   params: {
     pkgkey: string;
@@ -70,12 +82,15 @@ export interface IBulkInstallPackageHTTPError {
   error: string | Error;
 }
 
+export interface InstallResult {
+  assets: AssetReference[];
+  status: 'installed' | 'already_installed';
+}
+
 export interface BulkInstallPackageInfo {
   name: string;
-  newVersion: string;
-  // this will be null if no package was present before the upgrade (aka it was an install)
-  oldVersion: string | null;
-  assets: AssetReference[];
+  version: string;
+  result: InstallResult;
 }
 
 export interface BulkInstallPackagesResponse {

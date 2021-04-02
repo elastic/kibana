@@ -63,6 +63,7 @@ Array [
         >
           <button
             className="euiButton euiButton--danger euiButton--small euiButton--fill"
+            disabled={false}
             onClick={[Function]}
             style={
               Object {
@@ -92,6 +93,7 @@ Array [
         >
           <button
             className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+            disabled={false}
             onClick={[Function]}
             type="button"
           >

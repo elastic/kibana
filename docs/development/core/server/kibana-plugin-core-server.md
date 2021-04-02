@@ -26,6 +26,10 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [RouteValidationError](./kibana-plugin-core-server.routevalidationerror.md) | Error to return when the validation is not successful. |
 |  [SavedObjectsClient](./kibana-plugin-core-server.savedobjectsclient.md) |  |
 |  [SavedObjectsErrorHelpers](./kibana-plugin-core-server.savedobjectserrorhelpers.md) |  |
+|  [SavedObjectsExporter](./kibana-plugin-core-server.savedobjectsexporter.md) |  |
+|  [SavedObjectsExportError](./kibana-plugin-core-server.savedobjectsexporterror.md) |  |
+|  [SavedObjectsImporter](./kibana-plugin-core-server.savedobjectsimporter.md) |  |
+|  [SavedObjectsImportError](./kibana-plugin-core-server.savedobjectsimporterror.md) |  |
 |  [SavedObjectsRepository](./kibana-plugin-core-server.savedobjectsrepository.md) |  |
 |  [SavedObjectsSerializer](./kibana-plugin-core-server.savedobjectsserializer.md) | A serializer that can be used to manually convert [raw](./kibana-plugin-core-server.savedobjectsrawdoc.md) or [sanitized](./kibana-plugin-core-server.savedobjectsanitizeddoc.md) documents to the other kind. |
 |  [SavedObjectsUtils](./kibana-plugin-core-server.savedobjectsutils.md) |  |
@@ -38,14 +42,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [AuthResultType](./kibana-plugin-core-server.authresulttype.md) |  |
 |  [AuthStatus](./kibana-plugin-core-server.authstatus.md) | Status indicating an outcome of the authentication. |
 
-## Functions
-
-|  Function | Description |
-|  --- | --- |
-|  [exportSavedObjectsToStream({ types, hasReference, objects, search, savedObjectsClient, exportSizeLimit, includeReferencesDeep, excludeExportDetails, namespace, })](./kibana-plugin-core-server.exportsavedobjectstostream.md) | Generates sorted saved object stream to be used for export. See the [options](./kibana-plugin-core-server.savedobjectsexportoptions.md) for more detailed information. |
-|  [importSavedObjectsFromStream({ readStream, objectLimit, overwrite, createNewCopies, savedObjectsClient, typeRegistry, namespace, })](./kibana-plugin-core-server.importsavedobjectsfromstream.md) | Import saved objects from given stream. See the [options](./kibana-plugin-core-server.savedobjectsimportoptions.md) for more detailed information. |
-|  [resolveSavedObjectsImportErrors({ readStream, objectLimit, retries, savedObjectsClient, typeRegistry, namespace, createNewCopies, })](./kibana-plugin-core-server.resolvesavedobjectsimporterrors.md) | Resolve and return saved object import errors. See the [options](./kibana-plugin-core-server.savedobjectsresolveimporterrorsoptions.md) for more detailed informations. |
-
 ## Interfaces
 
 |  Interface | Description |
@@ -53,6 +49,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [AppCategory](./kibana-plugin-core-server.appcategory.md) | A category definition for nav links to know where to sort them in the left hand nav |
 |  [AssistanceAPIResponse](./kibana-plugin-core-server.assistanceapiresponse.md) |  |
 |  [AssistantAPIClientParams](./kibana-plugin-core-server.assistantapiclientparams.md) |  |
+|  [AsyncPlugin](./kibana-plugin-core-server.asyncplugin.md) | A plugin with asynchronous lifecycle methods. |
 |  [Authenticated](./kibana-plugin-core-server.authenticated.md) |  |
 |  [AuthNotHandled](./kibana-plugin-core-server.authnothandled.md) |  |
 |  [AuthRedirected](./kibana-plugin-core-server.authredirected.md) |  |
@@ -72,14 +69,16 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [DeprecationAPIClientParams](./kibana-plugin-core-server.deprecationapiclientparams.md) |  |
 |  [DeprecationAPIResponse](./kibana-plugin-core-server.deprecationapiresponse.md) |  |
 |  [DeprecationInfo](./kibana-plugin-core-server.deprecationinfo.md) |  |
+|  [DeprecationsDetails](./kibana-plugin-core-server.deprecationsdetails.md) |  |
 |  [DeprecationSettings](./kibana-plugin-core-server.deprecationsettings.md) | UiSettings deprecation field options. |
+|  [DeprecationsServiceSetup](./kibana-plugin-core-server.deprecationsservicesetup.md) | The deprecations service provides a way for the Kibana platform to communicate deprecated features and configs with its users. These deprecations are only communicated if the deployment is using these features. Allowing for a user tailored experience for upgrading the stack version.<!-- -->The Deprecation service is consumed by the upgrade assistant to assist with the upgrade experience.<!-- -->If a deprecated feature can be resolved without manual user intervention. Using correctiveActions.api allows the Upgrade Assistant to use this api to correct the deprecation upon a user trigger. |
 |  [DiscoveredPlugin](./kibana-plugin-core-server.discoveredplugin.md) | Small container object used to expose information about discovered plugins that may or may not have been started. |
 |  [ElasticsearchServiceSetup](./kibana-plugin-core-server.elasticsearchservicesetup.md) |  |
 |  [ElasticsearchServiceStart](./kibana-plugin-core-server.elasticsearchservicestart.md) |  |
 |  [ElasticsearchStatusMeta](./kibana-plugin-core-server.elasticsearchstatusmeta.md) |  |
 |  [ErrorHttpResponseOptions](./kibana-plugin-core-server.errorhttpresponseoptions.md) | HTTP response parameters |
-|  [Explanation](./kibana-plugin-core-server.explanation.md) |  |
 |  [FakeRequest](./kibana-plugin-core-server.fakerequest.md) | Fake request object created manually by Kibana plugins. |
+|  [GetDeprecationsContext](./kibana-plugin-core-server.getdeprecationscontext.md) |  |
 |  [GetResponse](./kibana-plugin-core-server.getresponse.md) |  |
 |  [HttpAuth](./kibana-plugin-core-server.httpauth.md) |  |
 |  [HttpResources](./kibana-plugin-core-server.httpresources.md) | HttpResources service is responsible for serving static &amp; dynamic assets for Kibana application via HTTP. Provides API allowing plug-ins to respond with: - a pre-configured HTML page bootstrapping Kibana client app - custom HTML page - custom JS script file. |
@@ -102,6 +101,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [IndexSettingsDeprecationInfo](./kibana-plugin-core-server.indexsettingsdeprecationinfo.md) |  |
 |  [IRenderOptions](./kibana-plugin-core-server.irenderoptions.md) |  |
 |  [IRouter](./kibana-plugin-core-server.irouter.md) | Registers route handlers for specified resource path and method. See [RouteConfig](./kibana-plugin-core-server.routeconfig.md) and [RequestHandler](./kibana-plugin-core-server.requesthandler.md) for more information about arguments to route registrations. |
+|  [ISavedObjectsPointInTimeFinder](./kibana-plugin-core-server.isavedobjectspointintimefinder.md) |  |
 |  [IScopedClusterClient](./kibana-plugin-core-server.iscopedclusterclient.md) | Serves the same purpose as the normal [cluster client](./kibana-plugin-core-server.iclusterclient.md) but exposes an additional <code>asCurrentUser</code> method that doesn't use credentials of the Kibana internal user (as <code>asInternalUser</code> does) to request Elasticsearch API, but rather passes HTTP headers extracted from the current user request to the API instead. |
 |  [IUiSettingsClient](./kibana-plugin-core-server.iuisettingsclient.md) | Server-side client that provides access to the advanced settings stored in elasticsearch. The settings provide control over the behavior of the Kibana application. For example, a user can specify how to display numeric or date fields. Users can adjust the settings via Management UI. |
 |  [KibanaRequestEvents](./kibana-plugin-core-server.kibanarequestevents.md) | Request events. |
@@ -131,7 +131,9 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [PluginConfigDescriptor](./kibana-plugin-core-server.pluginconfigdescriptor.md) | Describes a plugin configuration properties. |
 |  [PluginInitializerContext](./kibana-plugin-core-server.plugininitializercontext.md) | Context that's available to plugins during initialization stage. |
 |  [PluginManifest](./kibana-plugin-core-server.pluginmanifest.md) | Describes the set of required and optional properties plugin can define in its mandatory JSON manifest file. |
+|  [RegisterDeprecationsConfig](./kibana-plugin-core-server.registerdeprecationsconfig.md) |  |
 |  [RequestHandlerContext](./kibana-plugin-core-server.requesthandlercontext.md) | Plugin specific context passed to a route handler.<!-- -->Provides the following clients and services: - [savedObjects.client](./kibana-plugin-core-server.savedobjectsclient.md) - Saved Objects client which uses the credentials of the incoming request - [savedObjects.typeRegistry](./kibana-plugin-core-server.isavedobjecttyperegistry.md) - Type registry containing all the registered types. - [elasticsearch.client](./kibana-plugin-core-server.iscopedclusterclient.md) - Elasticsearch data client which uses the credentials of the incoming request - [elasticsearch.legacy.client](./kibana-plugin-core-server.legacyscopedclusterclient.md) - The legacy Elasticsearch data client which uses the credentials of the incoming request - [uiSettings.client](./kibana-plugin-core-server.iuisettingsclient.md) - uiSettings client which uses the credentials of the incoming request |
+|  [ResolveCapabilitiesOptions](./kibana-plugin-core-server.resolvecapabilitiesoptions.md) | Defines a set of additional options for the <code>resolveCapabilities</code> method of [CapabilitiesStart](./kibana-plugin-core-server.capabilitiesstart.md)<!-- -->. |
 |  [RouteConfig](./kibana-plugin-core-server.routeconfig.md) | Route specific configuration. |
 |  [RouteConfigOptions](./kibana-plugin-core-server.routeconfigoptions.md) | Additional route options. |
 |  [RouteConfigOptionsBody](./kibana-plugin-core-server.routeconfigoptionsbody.md) | Additional body options for a route |
@@ -140,8 +142,9 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [RouteValidatorOptions](./kibana-plugin-core-server.routevalidatoroptions.md) | Additional options for the RouteValidator class to modify its default behaviour. |
 |  [SavedObject](./kibana-plugin-core-server.savedobject.md) |  |
 |  [SavedObjectAttributes](./kibana-plugin-core-server.savedobjectattributes.md) | The data for a Saved Object is stored as an object in the <code>attributes</code> property. |
+|  [SavedObjectExportBaseOptions](./kibana-plugin-core-server.savedobjectexportbaseoptions.md) |  |
 |  [SavedObjectMigrationContext](./kibana-plugin-core-server.savedobjectmigrationcontext.md) | Migration context provided when invoking a [migration handler](./kibana-plugin-core-server.savedobjectmigrationfn.md) |
-|  [SavedObjectMigrationMap](./kibana-plugin-core-server.savedobjectmigrationmap.md) | A map of [migration functions](./kibana-plugin-core-server.savedobjectmigrationfn.md) to be used for a given type. The map's keys must be valid semver versions.<!-- -->For a given document, only migrations with a higher version number than that of the document will be applied. Migrations are executed in order, starting from the lowest version and ending with the highest one. |
+|  [SavedObjectMigrationMap](./kibana-plugin-core-server.savedobjectmigrationmap.md) | A map of [migration functions](./kibana-plugin-core-server.savedobjectmigrationfn.md) to be used for a given type. The map's keys must be valid semver versions, and they cannot exceed the current Kibana version.<!-- -->For a given document, only migrations with a higher version number than that of the document will be applied. Migrations are executed in order, starting from the lowest version and ending with the highest one. |
 |  [SavedObjectReference](./kibana-plugin-core-server.savedobjectreference.md) | A reference to another saved object. |
 |  [SavedObjectsAddToNamespacesOptions](./kibana-plugin-core-server.savedobjectsaddtonamespacesoptions.md) |  |
 |  [SavedObjectsAddToNamespacesResponse](./kibana-plugin-core-server.savedobjectsaddtonamespacesresponse.md) |  |
@@ -156,26 +159,33 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsCheckConflictsResponse](./kibana-plugin-core-server.savedobjectscheckconflictsresponse.md) |  |
 |  [SavedObjectsClientProviderOptions](./kibana-plugin-core-server.savedobjectsclientprovideroptions.md) | Options to control the creation of the Saved Objects Client. |
 |  [SavedObjectsClientWrapperOptions](./kibana-plugin-core-server.savedobjectsclientwrapperoptions.md) | Options passed to each SavedObjectsClientWrapperFactory to aid in creating the wrapper instance. |
+|  [SavedObjectsClosePointInTimeResponse](./kibana-plugin-core-server.savedobjectsclosepointintimeresponse.md) |  |
 |  [SavedObjectsComplexFieldMapping](./kibana-plugin-core-server.savedobjectscomplexfieldmapping.md) | See [SavedObjectsFieldMapping](./kibana-plugin-core-server.savedobjectsfieldmapping.md) for documentation. |
 |  [SavedObjectsCoreFieldMapping](./kibana-plugin-core-server.savedobjectscorefieldmapping.md) | See [SavedObjectsFieldMapping](./kibana-plugin-core-server.savedobjectsfieldmapping.md) for documentation. |
 |  [SavedObjectsCreateOptions](./kibana-plugin-core-server.savedobjectscreateoptions.md) |  |
+|  [SavedObjectsCreatePointInTimeFinderDependencies](./kibana-plugin-core-server.savedobjectscreatepointintimefinderdependencies.md) |  |
 |  [SavedObjectsDeleteByNamespaceOptions](./kibana-plugin-core-server.savedobjectsdeletebynamespaceoptions.md) |  |
 |  [SavedObjectsDeleteFromNamespacesOptions](./kibana-plugin-core-server.savedobjectsdeletefromnamespacesoptions.md) |  |
 |  [SavedObjectsDeleteFromNamespacesResponse](./kibana-plugin-core-server.savedobjectsdeletefromnamespacesresponse.md) |  |
 |  [SavedObjectsDeleteOptions](./kibana-plugin-core-server.savedobjectsdeleteoptions.md) |  |
-|  [SavedObjectsExportOptions](./kibana-plugin-core-server.savedobjectsexportoptions.md) | Options controlling the export operation. |
+|  [SavedObjectsExportByObjectOptions](./kibana-plugin-core-server.savedobjectsexportbyobjectoptions.md) | Options for the [export by objects API](./kibana-plugin-core-server.savedobjectsexporter.exportbyobjects.md) |
+|  [SavedObjectsExportByTypeOptions](./kibana-plugin-core-server.savedobjectsexportbytypeoptions.md) | Options for the [export by type API](./kibana-plugin-core-server.savedobjectsexporter.exportbytypes.md) |
 |  [SavedObjectsExportResultDetails](./kibana-plugin-core-server.savedobjectsexportresultdetails.md) | Structure of the export result details entry |
+|  [SavedObjectsExportTransformContext](./kibana-plugin-core-server.savedobjectsexporttransformcontext.md) | Context passed down to a [export transform function](./kibana-plugin-core-server.savedobjectsexporttransform.md) |
 |  [SavedObjectsFindOptions](./kibana-plugin-core-server.savedobjectsfindoptions.md) |  |
 |  [SavedObjectsFindOptionsReference](./kibana-plugin-core-server.savedobjectsfindoptionsreference.md) |  |
 |  [SavedObjectsFindResponse](./kibana-plugin-core-server.savedobjectsfindresponse.md) | Return type of the Saved Objects <code>find()</code> method.<!-- -->\*Note\*: this type is different between the Public and Server Saved Objects clients. |
 |  [SavedObjectsFindResult](./kibana-plugin-core-server.savedobjectsfindresult.md) |  |
+|  [SavedObjectsImportActionRequiredWarning](./kibana-plugin-core-server.savedobjectsimportactionrequiredwarning.md) | A warning meant to notify that a specific user action is required to finalize the import of some type of object. The <code>actionUrl</code> must be a path relative to the basePath, and not include it. |
 |  [SavedObjectsImportAmbiguousConflictError](./kibana-plugin-core-server.savedobjectsimportambiguousconflicterror.md) | Represents a failure to import due to a conflict, which can be resolved in different ways with an overwrite. |
 |  [SavedObjectsImportConflictError](./kibana-plugin-core-server.savedobjectsimportconflicterror.md) | Represents a failure to import due to a conflict. |
-|  [SavedObjectsImportError](./kibana-plugin-core-server.savedobjectsimporterror.md) | Represents a failure to import. |
+|  [SavedObjectsImportFailure](./kibana-plugin-core-server.savedobjectsimportfailure.md) | Represents a failure to import. |
+|  [SavedObjectsImportHookResult](./kibana-plugin-core-server.savedobjectsimporthookresult.md) | Result from a [import hook](./kibana-plugin-core-server.savedobjectsimporthook.md) |
 |  [SavedObjectsImportMissingReferencesError](./kibana-plugin-core-server.savedobjectsimportmissingreferenceserror.md) | Represents a failure to import due to missing references. |
 |  [SavedObjectsImportOptions](./kibana-plugin-core-server.savedobjectsimportoptions.md) | Options to control the import operation. |
 |  [SavedObjectsImportResponse](./kibana-plugin-core-server.savedobjectsimportresponse.md) | The response describing the result of an import. |
 |  [SavedObjectsImportRetry](./kibana-plugin-core-server.savedobjectsimportretry.md) | Describes a retry operation for importing a saved object. |
+|  [SavedObjectsImportSimpleWarning](./kibana-plugin-core-server.savedobjectsimportsimplewarning.md) | A simple informative warning that will be displayed to the user. |
 |  [SavedObjectsImportSuccess](./kibana-plugin-core-server.savedobjectsimportsuccess.md) | Represents a successful import. |
 |  [SavedObjectsImportUnknownError](./kibana-plugin-core-server.savedobjectsimportunknownerror.md) | Represents a failure to import due to an unknown reason. |
 |  [SavedObjectsImportUnsupportedTypeError](./kibana-plugin-core-server.savedobjectsimportunsupportedtypeerror.md) | Represents a failure to import due to having an unsupported saved object type. |
@@ -184,11 +194,16 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsMappingProperties](./kibana-plugin-core-server.savedobjectsmappingproperties.md) | Describe the fields of a [saved object type](./kibana-plugin-core-server.savedobjectstypemappingdefinition.md)<!-- -->. |
 |  [SavedObjectsMigrationLogger](./kibana-plugin-core-server.savedobjectsmigrationlogger.md) |  |
 |  [SavedObjectsMigrationVersion](./kibana-plugin-core-server.savedobjectsmigrationversion.md) | Information about the migrations that have been applied to this SavedObject. When Kibana starts up, KibanaMigrator detects outdated documents and migrates them based on this value. For each migration that has been applied, the plugin's name is used as a key and the latest migration version as the value. |
+|  [SavedObjectsOpenPointInTimeOptions](./kibana-plugin-core-server.savedobjectsopenpointintimeoptions.md) |  |
+|  [SavedObjectsOpenPointInTimeResponse](./kibana-plugin-core-server.savedobjectsopenpointintimeresponse.md) |  |
+|  [SavedObjectsPitParams](./kibana-plugin-core-server.savedobjectspitparams.md) |  |
 |  [SavedObjectsRawDoc](./kibana-plugin-core-server.savedobjectsrawdoc.md) | A raw document as represented directly in the saved object index. |
+|  [SavedObjectsRawDocParseOptions](./kibana-plugin-core-server.savedobjectsrawdocparseoptions.md) | Options that can be specified when using the saved objects serializer to parse a raw document. |
 |  [SavedObjectsRemoveReferencesToOptions](./kibana-plugin-core-server.savedobjectsremovereferencestooptions.md) |  |
 |  [SavedObjectsRemoveReferencesToResponse](./kibana-plugin-core-server.savedobjectsremovereferencestoresponse.md) |  |
 |  [SavedObjectsRepositoryFactory](./kibana-plugin-core-server.savedobjectsrepositoryfactory.md) | Factory provided when invoking a [client factory provider](./kibana-plugin-core-server.savedobjectsclientfactoryprovider.md) See [SavedObjectsServiceSetup.setClientFactoryProvider](./kibana-plugin-core-server.savedobjectsservicesetup.setclientfactoryprovider.md) |
 |  [SavedObjectsResolveImportErrorsOptions](./kibana-plugin-core-server.savedobjectsresolveimporterrorsoptions.md) | Options to control the "resolve import" operation. |
+|  [SavedObjectsResolveResponse](./kibana-plugin-core-server.savedobjectsresolveresponse.md) |  |
 |  [SavedObjectsServiceSetup](./kibana-plugin-core-server.savedobjectsservicesetup.md) | Saved Objects is Kibana's data persistence mechanism allowing plugins to use Elasticsearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods for registering Saved Object types, creating and registering Saved Object client wrappers and factories. |
 |  [SavedObjectsServiceStart](./kibana-plugin-core-server.savedobjectsservicestart.md) | Saved Objects is Kibana's data persisentence mechanism allowing plugins to use Elasticsearch for storing and querying state. The SavedObjectsServiceStart API provides a scoped Saved Objects client for interacting with Saved Objects. |
 |  [SavedObjectStatusMeta](./kibana-plugin-core-server.savedobjectstatusmeta.md) | Meta information about the SavedObjectService's status. Available to plugins via [CoreSetup.status](./kibana-plugin-core-server.coresetup.status.md)<!-- -->. |
@@ -249,6 +264,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ILegacyCustomClusterClient](./kibana-plugin-core-server.ilegacycustomclusterclient.md) | Represents an Elasticsearch cluster API client created by a plugin. It allows to call API on behalf of the internal Kibana user and the actual user that is derived from the request headers (via <code>asScoped(...)</code>).<!-- -->See [LegacyClusterClient](./kibana-plugin-core-server.legacyclusterclient.md)<!-- -->. |
 |  [ILegacyScopedClusterClient](./kibana-plugin-core-server.ilegacyscopedclusterclient.md) | Serves the same purpose as "normal" <code>ClusterClient</code> but exposes additional <code>callAsCurrentUser</code> method that doesn't use credentials of the Kibana internal user (as <code>callAsInternalUser</code> does) to request Elasticsearch API, but rather passes HTTP headers extracted from the current user request to the API.<!-- -->See [LegacyScopedClusterClient](./kibana-plugin-core-server.legacyscopedclusterclient.md)<!-- -->. |
 |  [IsAuthenticated](./kibana-plugin-core-server.isauthenticated.md) | Returns authentication status for a request. |
+|  [ISavedObjectsExporter](./kibana-plugin-core-server.isavedobjectsexporter.md) |  |
+|  [ISavedObjectsImporter](./kibana-plugin-core-server.isavedobjectsimporter.md) |  |
 |  [ISavedObjectsRepository](./kibana-plugin-core-server.isavedobjectsrepository.md) | See [SavedObjectsRepository](./kibana-plugin-core-server.savedobjectsrepository.md) |
 |  [ISavedObjectTypeRegistry](./kibana-plugin-core-server.isavedobjecttyperegistry.md) | See [SavedObjectTypeRegistry](./kibana-plugin-core-server.savedobjecttyperegistry.md) for documentation. |
 |  [KibanaRequestRouteOptions](./kibana-plugin-core-server.kibanarequestrouteoptions.md) | Route options: If 'GET' or 'OPTIONS' method, body options won't be returned. |
@@ -271,7 +288,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [PluginOpaqueId](./kibana-plugin-core-server.pluginopaqueid.md) |  |
 |  [PublicUiSettingsParams](./kibana-plugin-core-server.publicuisettingsparams.md) | A sub-set of [UiSettingsParams](./kibana-plugin-core-server.uisettingsparams.md) exposed to the client-side. |
 |  [RedirectResponseOptions](./kibana-plugin-core-server.redirectresponseoptions.md) | HTTP response parameters for redirection response |
-|  [RequestHandler](./kibana-plugin-core-server.requesthandler.md) | A function executed when route path matched requested resource path. Request handler is expected to return a result of one of [KibanaResponseFactory](./kibana-plugin-core-server.kibanaresponsefactory.md) functions. |
+|  [RequestHandler](./kibana-plugin-core-server.requesthandler.md) | A function executed when route path matched requested resource path. Request handler is expected to return a result of one of [KibanaResponseFactory](./kibana-plugin-core-server.kibanaresponsefactory.md) functions. If anything else is returned, or an error is thrown, the HTTP service will automatically log the error and respond <code>500 - Internal Server Error</code>. |
 |  [RequestHandlerContextContainer](./kibana-plugin-core-server.requesthandlercontextcontainer.md) | An object that handles registration of http request context providers. |
 |  [RequestHandlerContextProvider](./kibana-plugin-core-server.requesthandlercontextprovider.md) | Context provider for request handler. Extends request context object with provided functionality or data. |
 |  [RequestHandlerWrapper](./kibana-plugin-core-server.requesthandlerwrapper.md) | Type-safe wrapper for [RequestHandler](./kibana-plugin-core-server.requesthandler.md) function. |
@@ -293,8 +310,13 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsClientFactory](./kibana-plugin-core-server.savedobjectsclientfactory.md) | Describes the factory used to create instances of the Saved Objects Client. |
 |  [SavedObjectsClientFactoryProvider](./kibana-plugin-core-server.savedobjectsclientfactoryprovider.md) | Provider to invoke to retrieve a [SavedObjectsClientFactory](./kibana-plugin-core-server.savedobjectsclientfactory.md)<!-- -->. |
 |  [SavedObjectsClientWrapperFactory](./kibana-plugin-core-server.savedobjectsclientwrapperfactory.md) | Describes the factory used to create instances of Saved Objects Client Wrappers. |
+|  [SavedObjectsClosePointInTimeOptions](./kibana-plugin-core-server.savedobjectsclosepointintimeoptions.md) |  |
+|  [SavedObjectsCreatePointInTimeFinderOptions](./kibana-plugin-core-server.savedobjectscreatepointintimefinderoptions.md) |  |
+|  [SavedObjectsExportTransform](./kibana-plugin-core-server.savedobjectsexporttransform.md) | Transformation function used to mutate the exported objects of the associated type.<!-- -->A type's export transform function will be executed once per user-initiated export, for all objects of that type. |
 |  [SavedObjectsFieldMapping](./kibana-plugin-core-server.savedobjectsfieldmapping.md) | Describe a [saved object type mapping](./kibana-plugin-core-server.savedobjectstypemappingdefinition.md) field.<!-- -->Please refer to [elasticsearch documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-types.html) For the mapping documentation |
-|  [SavedObjectsNamespaceType](./kibana-plugin-core-server.savedobjectsnamespacetype.md) | The namespace type dictates how a saved object can be interacted in relation to namespaces. Each type is mutually exclusive: \* single (default): this type of saved object is namespace-isolated, e.g., it exists in only one namespace. \* multiple: this type of saved object is shareable, e.g., it can exist in one or more namespaces. \* agnostic: this type of saved object is global. |
+|  [SavedObjectsImportHook](./kibana-plugin-core-server.savedobjectsimporthook.md) | A hook associated with a specific saved object type, that will be invoked during the import process. The hook will have access to the objects of the registered type.<!-- -->Currently, the only supported feature for import hooks is to return warnings to be displayed in the UI when the import succeeds. The only interactions the hook can have with the import process is via the hook's response. Mutating the objects inside the hook's code will have no effect. |
+|  [SavedObjectsImportWarning](./kibana-plugin-core-server.savedobjectsimportwarning.md) | Composite type of all the possible types of import warnings.<!-- -->See [SavedObjectsImportSimpleWarning](./kibana-plugin-core-server.savedobjectsimportsimplewarning.md) and [SavedObjectsImportActionRequiredWarning](./kibana-plugin-core-server.savedobjectsimportactionrequiredwarning.md) for more details. |
+|  [SavedObjectsNamespaceType](./kibana-plugin-core-server.savedobjectsnamespacetype.md) | The namespace type dictates how a saved object can be interacted in relation to namespaces. Each type is mutually exclusive: \* single (default): This type of saved object is namespace-isolated, e.g., it exists in only one namespace. \* multiple: This type of saved object is shareable, e.g., it can exist in one or more namespaces. \* multiple-isolated: This type of saved object is namespace-isolated, e.g., it exists in only one namespace, but object IDs must be unique across all namespaces. This is intended to be an intermediate step when objects with a "single" namespace type are being converted to a "multiple" namespace type. In other words, objects with a "multiple-isolated" namespace type will be \*share-capable\*, but will not actually be shareable until the namespace type is changed to "multiple". \* agnostic: This type of saved object is global. |
 |  [SavedObjectUnsanitizedDoc](./kibana-plugin-core-server.savedobjectunsanitizeddoc.md) | Describes Saved Object documents from Kibana &lt; 7.0.0 which don't have a <code>references</code> root property defined. This type should only be used in migrations. |
 |  [ScopeableRequest](./kibana-plugin-core-server.scopeablerequest.md) | A user credentials container. It accommodates the necessary auth credentials to impersonate the current user.<!-- -->See [KibanaRequest](./kibana-plugin-core-server.kibanarequest.md)<!-- -->. |
 |  [ServiceStatusLevel](./kibana-plugin-core-server.servicestatuslevel.md) | A convenience type that represents the union of each value in [ServiceStatusLevels](./kibana-plugin-core-server.servicestatuslevels.md)<!-- -->. |

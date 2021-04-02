@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
@@ -9,6 +10,10 @@ import { LensUsage } from './types';
 
 const eventsSchema: MakeSchemaFrom<LensUsage['events_30_days']> = {
   app_query_change: { type: 'long' },
+  open_help_popover: {
+    type: 'long',
+    _meta: { description: 'Number of times the user opened one of the in-product help popovers.' },
+  },
   indexpattern_field_info_click: { type: 'long' },
   loaded: { type: 'long' },
   app_filters_updated: { type: 'long' },
@@ -33,15 +38,130 @@ const eventsSchema: MakeSchemaFrom<LensUsage['events_30_days']> = {
   xy_change_layer_display: { type: 'long' },
   xy_layer_removed: { type: 'long' },
   xy_layer_added: { type: 'long' },
-  indexpattern_dimension_operation_terms: { type: 'long' },
-  indexpattern_dimension_operation_date_histogram: { type: 'long' },
-  indexpattern_dimension_operation_avg: { type: 'long' },
-  indexpattern_dimension_operation_min: { type: 'long' },
-  indexpattern_dimension_operation_max: { type: 'long' },
-  indexpattern_dimension_operation_sum: { type: 'long' },
-  indexpattern_dimension_operation_count: { type: 'long' },
-  indexpattern_dimension_operation_cardinality: { type: 'long' },
-  indexpattern_dimension_operation_filters: { type: 'long' },
+  open_field_editor_edit: {
+    type: 'long',
+    _meta: {
+      description:
+        'Number of times the user opened the editor flyout to edit a field from within Lens.',
+    },
+  },
+  open_field_editor_add: {
+    type: 'long',
+    _meta: {
+      description:
+        'Number of times the user opened the editor flyout to add a field from within Lens.',
+    },
+  },
+  save_field_edit: {
+    type: 'long',
+    _meta: {
+      description: 'Number of times the user edited a field from within Lens.',
+    },
+  },
+  save_field_add: {
+    type: 'long',
+    _meta: {
+      description: 'Number of times the user added a field from within Lens.',
+    },
+  },
+  open_field_delete_modal: {
+    type: 'long',
+    _meta: {
+      description: 'Number of times the user opened the field delete modal from within Lens.',
+    },
+  },
+  delete_field: {
+    type: 'long',
+    _meta: {
+      description: 'Number of times the user deleted a field from within Lens.',
+    },
+  },
+  indexpattern_dimension_operation_terms: {
+    type: 'long',
+    _meta: {
+      description: 'Number of times the top values function was selected',
+    },
+  },
+  indexpattern_dimension_operation_date_histogram: {
+    type: 'long',
+    _meta: {
+      description: 'Number of times the date histogram function was selected',
+    },
+  },
+  indexpattern_dimension_operation_avg: {
+    type: 'long',
+    _meta: {
+      description: 'Number of times the average function was selected',
+    },
+  },
+  indexpattern_dimension_operation_min: {
+    type: 'long',
+    _meta: {
+      description: 'Number of times the min function was selected',
+    },
+  },
+  indexpattern_dimension_operation_max: {
+    type: 'long',
+    _meta: {
+      description: 'Number of times the max function was selected',
+    },
+  },
+  indexpattern_dimension_operation_sum: {
+    type: 'long',
+    _meta: {
+      description: 'Number of times the sum function was selected',
+    },
+  },
+  indexpattern_dimension_operation_count: {
+    type: 'long',
+    _meta: {
+      description: 'Number of times the count function was selected',
+    },
+  },
+  indexpattern_dimension_operation_cardinality: {
+    type: 'long',
+    _meta: {
+      description: 'Number of times the cardinality function was selected',
+    },
+  },
+  indexpattern_dimension_operation_filters: {
+    type: 'long',
+    _meta: {
+      description: 'Number of times the filters function was selected',
+    },
+  },
+  indexpattern_dimension_operation_range: {
+    type: 'long',
+    _meta: { description: 'Number of times the range function was selected' },
+  },
+  indexpattern_dimension_operation_median: {
+    type: 'long',
+    _meta: { description: 'Number of times the median function was selected' },
+  },
+  indexpattern_dimension_operation_percentile: {
+    type: 'long',
+    _meta: { description: 'Number of times the percentile function was selected' },
+  },
+  indexpattern_dimension_operation_last_value: {
+    type: 'long',
+    _meta: { description: 'Number of times the last value function was selected' },
+  },
+  indexpattern_dimension_operation_cumulative_sum: {
+    type: 'long',
+    _meta: { description: 'Number of times the cumulative sum function was selected' },
+  },
+  indexpattern_dimension_operation_counter_rate: {
+    type: 'long',
+    _meta: { description: 'Number of times the counter rate function was selected' },
+  },
+  indexpattern_dimension_operation_derivative: {
+    type: 'long',
+    _meta: { description: 'Number of times the derivative function was selected' },
+  },
+  indexpattern_dimension_operation_moving_average: {
+    type: 'long',
+    _meta: { description: 'Number of times the moving average function was selected' },
+  },
 };
 
 const suggestionEventsSchema: MakeSchemaFrom<LensUsage['suggestion_events_30_days']> = {

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import {
@@ -9,7 +10,7 @@ import {
   getFindResultWithSingleHit,
   FindHit,
 } from '../routes/__mocks__/request_responses';
-import { alertsClientMock } from '../../../../../alerts/server/mocks';
+import { alertsClientMock } from '../../../../../alerting/server/mocks';
 import { getExportAll } from './get_export_all';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../common/detection_engine/schemas/types/threat.mock';

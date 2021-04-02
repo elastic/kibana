@@ -1,28 +1,50 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { RequestHandler, RequestHandlerContext } from 'kibana/server';
+import type { KibanaResponseFactory, RequestHandler, IKibanaResponse, Logger } from 'kibana/server';
+import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 
 import { ExceptionListClient } from '../../../../../lists/server';
 
 import {
   DeleteTrustedAppsRequestParams,
+  GetOneTrustedAppRequestParams,
   GetTrustedAppsListRequest,
   PostTrustedAppCreateRequest,
+  PutTrustedAppsRequestParams,
+  PutTrustedAppUpdateRequest,
 } from '../../../../common/endpoint/types';
-
 import { EndpointAppContext } from '../../types';
+
 import {
   createTrustedApp,
   deleteTrustedApp,
+  getTrustedApp,
   getTrustedAppsList,
-  MissingTrustedAppException,
+  getTrustedAppsSummary,
+  updateTrustedApp,
 } from './service';
+import { TrustedAppNotFoundError, TrustedAppVersionConflictError } from './errors';
 
-const exceptionListClientFromContext = (context: RequestHandlerContext): ExceptionListClient => {
+const getBodyAfterFeatureFlagCheck = (
+  body: PutTrustedAppUpdateRequest | PostTrustedAppCreateRequest,
+  endpointAppContext: EndpointAppContext
+): PutTrustedAppUpdateRequest | PostTrustedAppCreateRequest => {
+  const isTrustedAppsByPolicyEnabled =
+    endpointAppContext.experimentalFeatures.trustedAppsByPolicyEnabled;
+  return {
+    ...body,
+    ...(isTrustedAppsByPolicyEnabled ? body.effectScope : { effectSctope: { type: 'policy:all' } }),
+  };
+};
+
+const exceptionListClientFromContext = (
+  context: SecuritySolutionRequestHandlerContext
+): ExceptionListClient => {
   const exceptionLists = context.lists?.getExceptionListClient();
 
   if (!exceptionLists) {
@@ -32,9 +54,33 @@ const exceptionListClientFromContext = (context: RequestHandlerContext): Excepti
   return exceptionLists;
 };
 
+const errorHandler = <E extends Error>(
+  logger: Logger,
+  res: KibanaResponseFactory,
+  error: E
+): IKibanaResponse => {
+  if (error instanceof TrustedAppNotFoundError) {
+    logger.error(error);
+    return res.notFound({ body: error });
+  }
+
+  if (error instanceof TrustedAppVersionConflictError) {
+    logger.error(error);
+    return res.conflict({ body: error });
+  }
+
+  // Kibana will take care of `500` errors when the handler `throw`'s, including logging the error
+  throw error;
+};
+
 export const getTrustedAppsDeleteRouteHandler = (
   endpointAppContext: EndpointAppContext
-): RequestHandler<DeleteTrustedAppsRequestParams, undefined, undefined> => {
+): RequestHandler<
+  DeleteTrustedAppsRequestParams,
+  unknown,
+  unknown,
+  SecuritySolutionRequestHandlerContext
+> => {
   const logger = endpointAppContext.logFactory.get('trusted_apps');
 
   return async (context, req, res) => {
@@ -43,19 +89,40 @@ export const getTrustedAppsDeleteRouteHandler = (
 
       return res.ok();
     } catch (error) {
-      if (error instanceof MissingTrustedAppException) {
-        return res.notFound({ body: `trusted app id [${req.params.id}] not found` });
-      } else {
-        logger.error(error);
-        return res.internalError({ body: error });
-      }
+      return errorHandler(logger, res, error);
+    }
+  };
+};
+
+export const getTrustedAppsGetOneHandler = (
+  endpointAppContext: EndpointAppContext
+): RequestHandler<
+  GetOneTrustedAppRequestParams,
+  unknown,
+  unknown,
+  SecuritySolutionRequestHandlerContext
+> => {
+  const logger = endpointAppContext.logFactory.get('trusted_apps');
+
+  return async (context, req, res) => {
+    try {
+      return res.ok({
+        body: await getTrustedApp(exceptionListClientFromContext(context), req.params.id),
+      });
+    } catch (error) {
+      return errorHandler(logger, res, error);
     }
   };
 };
 
 export const getTrustedAppsListRouteHandler = (
   endpointAppContext: EndpointAppContext
-): RequestHandler<undefined, GetTrustedAppsListRequest> => {
+): RequestHandler<
+  unknown,
+  GetTrustedAppsListRequest,
+  unknown,
+  SecuritySolutionRequestHandlerContext
+> => {
   const logger = endpointAppContext.logFactory.get('trusted_apps');
 
   return async (context, req, res) => {
@@ -64,25 +131,68 @@ export const getTrustedAppsListRouteHandler = (
         body: await getTrustedAppsList(exceptionListClientFromContext(context), req.query),
       });
     } catch (error) {
-      logger.error(error);
-      return res.internalError({ body: error });
+      return errorHandler(logger, res, error);
     }
   };
 };
 
 export const getTrustedAppsCreateRouteHandler = (
   endpointAppContext: EndpointAppContext
-): RequestHandler<undefined, undefined, PostTrustedAppCreateRequest> => {
+): RequestHandler<
+  unknown,
+  unknown,
+  PostTrustedAppCreateRequest,
+  SecuritySolutionRequestHandlerContext
+> => {
+  const logger = endpointAppContext.logFactory.get('trusted_apps');
+  return async (context, req, res) => {
+    try {
+      const body = getBodyAfterFeatureFlagCheck(req.body, endpointAppContext);
+
+      return res.ok({
+        body: await createTrustedApp(exceptionListClientFromContext(context), body),
+      });
+    } catch (error) {
+      return errorHandler(logger, res, error);
+    }
+  };
+};
+
+export const getTrustedAppsUpdateRouteHandler = (
+  endpointAppContext: EndpointAppContext
+): RequestHandler<
+  PutTrustedAppsRequestParams,
+  unknown,
+  PutTrustedAppUpdateRequest,
+  SecuritySolutionRequestHandlerContext
+> => {
+  const logger = endpointAppContext.logFactory.get('trusted_apps');
+
+  return async (context, req, res) => {
+    try {
+      const body = getBodyAfterFeatureFlagCheck(req.body, endpointAppContext);
+
+      return res.ok({
+        body: await updateTrustedApp(exceptionListClientFromContext(context), req.params.id, body),
+      });
+    } catch (error) {
+      return errorHandler(logger, res, error);
+    }
+  };
+};
+
+export const getTrustedAppsSummaryRouteHandler = (
+  endpointAppContext: EndpointAppContext
+): RequestHandler<unknown, unknown, unknown, SecuritySolutionRequestHandlerContext> => {
   const logger = endpointAppContext.logFactory.get('trusted_apps');
 
   return async (context, req, res) => {
     try {
       return res.ok({
-        body: await createTrustedApp(exceptionListClientFromContext(context), req.body),
+        body: await getTrustedAppsSummary(exceptionListClientFromContext(context)),
       });
     } catch (error) {
-      logger.error(error);
-      return res.internalError({ body: error });
+      return errorHandler(logger, res, error);
     }
   };
 };

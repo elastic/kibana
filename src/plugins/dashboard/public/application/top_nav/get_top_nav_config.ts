@@ -1,26 +1,16 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
 import { ViewMode } from '../../services/embeddable';
 import { TopNavIds } from './top_nav_ids';
 import { NavAction } from '../../types';
+import { TopNavMenuData } from '../../../../navigation/public';
 
 /**
  * @param actions - A mapping of TopNavIds to an action function that should run when the
@@ -31,11 +21,16 @@ import { NavAction } from '../../types';
 export function getTopNavConfig(
   dashboardMode: ViewMode,
   actions: { [key: string]: NavAction },
-  hideWriteControls: boolean
+  options: {
+    hideWriteControls: boolean;
+    isNewDashboard: boolean;
+    isDirty: boolean;
+    isSaveInProgress?: boolean;
+  }
 ) {
   switch (dashboardMode) {
     case ViewMode.VIEW:
-      return hideWriteControls
+      return options.hideWriteControls
         ? [
             getFullScreenConfig(actions[TopNavIds.FULL_SCREEN]),
             getShareConfig(actions[TopNavIds.SHARE]),
@@ -47,17 +42,39 @@ export function getTopNavConfig(
             getEditConfig(actions[TopNavIds.ENTER_EDIT_MODE]),
           ];
     case ViewMode.EDIT:
-      return [
-        getOptionsConfig(actions[TopNavIds.OPTIONS]),
-        getShareConfig(actions[TopNavIds.SHARE]),
-        getAddConfig(actions[TopNavIds.ADD_EXISTING]),
-        getViewConfig(actions[TopNavIds.EXIT_EDIT_MODE]),
-        getSaveConfig(actions[TopNavIds.SAVE]),
-        getCreateNewConfig(actions[TopNavIds.VISUALIZE]),
+      const disableButton = options.isSaveInProgress;
+      const navItems: TopNavMenuData[] = [
+        getOptionsConfig(actions[TopNavIds.OPTIONS], disableButton),
+        getShareConfig(actions[TopNavIds.SHARE], disableButton),
       ];
+      if (!options.isNewDashboard) {
+        navItems.push(
+          getSaveConfig(actions[TopNavIds.SAVE], options.isNewDashboard, disableButton)
+        );
+        navItems.push(getViewConfig(actions[TopNavIds.EXIT_EDIT_MODE], disableButton));
+        navItems.push(getQuickSave(actions[TopNavIds.QUICK_SAVE], disableButton, options.isDirty));
+      } else {
+        navItems.push(getViewConfig(actions[TopNavIds.EXIT_EDIT_MODE], true));
+        navItems.push(
+          getSaveConfig(actions[TopNavIds.SAVE], options.isNewDashboard, disableButton)
+        );
+      }
+      return navItems;
     default:
       return [];
   }
+}
+
+function getSaveButtonLabel() {
+  return i18n.translate('dashboard.topNave.saveButtonAriaLabel', {
+    defaultMessage: 'save',
+  });
+}
+
+function getSaveAsButtonLabel() {
+  return i18n.translate('dashboard.topNave.saveAsButtonAriaLabel', {
+    defaultMessage: 'save as',
+  });
 }
 
 function getFullScreenConfig(action: NavAction) {
@@ -99,16 +116,18 @@ function getEditConfig(action: NavAction) {
 /**
  * @returns {kbnTopNavConfig}
  */
-function getSaveConfig(action: NavAction) {
+function getQuickSave(action: NavAction, isLoading?: boolean, isDirty?: boolean) {
   return {
-    id: 'save',
-    label: i18n.translate('dashboard.topNave.saveButtonAriaLabel', {
-      defaultMessage: 'save',
-    }),
+    isLoading,
+    disableButton: !isDirty,
+    id: 'quick-save',
+    iconType: 'save',
+    emphasize: true,
+    label: getSaveButtonLabel(),
     description: i18n.translate('dashboard.topNave.saveConfigDescription', {
-      defaultMessage: 'Save your dashboard',
+      defaultMessage: 'Quick save your dashboard without any prompts',
     }),
-    testId: 'dashboardSaveMenuItem',
+    testId: 'dashboardQuickSaveMenuItem',
     run: action,
   };
 }
@@ -116,14 +135,33 @@ function getSaveConfig(action: NavAction) {
 /**
  * @returns {kbnTopNavConfig}
  */
-function getViewConfig(action: NavAction) {
+function getSaveConfig(action: NavAction, isNewDashboard = false, disableButton?: boolean) {
   return {
+    disableButton,
+    id: 'save',
+    label: isNewDashboard ? getSaveButtonLabel() : getSaveAsButtonLabel(),
+    iconType: isNewDashboard ? 'save' : undefined,
+    description: i18n.translate('dashboard.topNave.saveAsConfigDescription', {
+      defaultMessage: 'Save as a new dashboard',
+    }),
+    testId: 'dashboardSaveMenuItem',
+    run: action,
+    emphasize: isNewDashboard,
+  };
+}
+
+/**
+ * @returns {kbnTopNavConfig}
+ */
+function getViewConfig(action: NavAction, disableButton?: boolean) {
+  return {
+    disableButton,
     id: 'cancel',
     label: i18n.translate('dashboard.topNave.cancelButtonAriaLabel', {
-      defaultMessage: 'cancel',
+      defaultMessage: 'Switch to view mode',
     }),
     description: i18n.translate('dashboard.topNave.viewConfigDescription', {
-      defaultMessage: 'Cancel editing and switch to view-only mode',
+      defaultMessage: 'Switch to view-only mode',
     }),
     testId: 'dashboardViewOnlyMode',
     run: action,
@@ -150,43 +188,7 @@ function getCloneConfig(action: NavAction) {
 /**
  * @returns {kbnTopNavConfig}
  */
-function getAddConfig(action: NavAction) {
-  return {
-    id: 'add',
-    label: i18n.translate('dashboard.topNave.addButtonAriaLabel', {
-      defaultMessage: 'add',
-    }),
-    description: i18n.translate('dashboard.topNave.addConfigDescription', {
-      defaultMessage: 'Add a panel to the dashboard',
-    }),
-    testId: 'dashboardAddPanelButton',
-    run: action,
-  };
-}
-
-/**
- * @returns {kbnTopNavConfig}
- */
-function getCreateNewConfig(action: NavAction) {
-  return {
-    emphasize: true,
-    iconType: 'plusInCircleFilled',
-    id: 'addNew',
-    label: i18n.translate('dashboard.topNave.addNewButtonAriaLabel', {
-      defaultMessage: 'Create new',
-    }),
-    description: i18n.translate('dashboard.topNave.addNewConfigDescription', {
-      defaultMessage: 'Create a new panel on this dashboard',
-    }),
-    testId: 'dashboardAddNewPanelButton',
-    run: action,
-  };
-}
-
-// /**
-//  * @returns {kbnTopNavConfig}
-//  */
-function getShareConfig(action: NavAction | undefined) {
+function getShareConfig(action: NavAction | undefined, disableButton?: boolean) {
   return {
     id: 'share',
     label: i18n.translate('dashboard.topNave.shareButtonAriaLabel', {
@@ -198,15 +200,16 @@ function getShareConfig(action: NavAction | undefined) {
     testId: 'shareTopNavButton',
     run: action ?? (() => {}),
     // disable the Share button if no action specified
-    disableButton: !action,
+    disableButton: !action || disableButton,
   };
 }
 
 /**
  * @returns {kbnTopNavConfig}
  */
-function getOptionsConfig(action: NavAction) {
+function getOptionsConfig(action: NavAction, disableButton?: boolean) {
   return {
+    disableButton,
     id: 'options',
     label: i18n.translate('dashboard.topNave.optionsButtonAriaLabel', {
       defaultMessage: 'options',

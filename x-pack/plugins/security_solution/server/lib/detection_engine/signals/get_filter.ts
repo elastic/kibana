@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { assertUnreachable } from '../../../../common/utility_types';
@@ -15,18 +16,22 @@ import {
   Language,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
-import { AlertServices } from '../../../../../alerts/server';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertServices,
+} from '../../../../../alerting/server';
 import { PartialFilter } from '../types';
 import { BadRequestError } from '../errors/bad_request_error';
 import { QueryFilter } from './types';
 
 interface GetFilterArgs {
   type: Type;
-  filters: PartialFilter[] | undefined;
+  filters: unknown | undefined;
   language: LanguageOrUndefined;
   query: QueryOrUndefined;
   savedId: SavedIdOrUndefined;
-  services: AlertServices;
+  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   index: IndexOrUndefined;
   lists: ExceptionListItemSchema[];
 }

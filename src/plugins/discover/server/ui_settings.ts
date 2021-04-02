@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -25,7 +14,6 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import {
   DEFAULT_COLUMNS_SETTING,
   SAMPLE_SIZE_SETTING,
-  AGGS_TERMS_SIZE_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
   SEARCH_ON_PAGE_LOAD_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -33,7 +21,9 @@ import {
   CONTEXT_DEFAULT_SIZE_SETTING,
   CONTEXT_STEP_SETTING,
   CONTEXT_TIE_BREAKER_FIELDS_SETTING,
+  DOC_TABLE_LEGACY,
   MODIFY_COLUMNS_ON_SWITCH,
+  SEARCH_FIELDS_FROM_SOURCE,
 } from '../common';
 
 export const uiSettings: Record<string, UiSettingsParams> = {
@@ -55,20 +45,6 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     value: 500,
     description: i18n.translate('discover.advancedSettings.sampleSizeText', {
       defaultMessage: 'The number of rows to show in the table',
-    }),
-    category: ['discover'],
-    schema: schema.number(),
-  },
-  [AGGS_TERMS_SIZE_SETTING]: {
-    name: i18n.translate('discover.advancedSettings.aggsTermsSizeTitle', {
-      defaultMessage: 'Number of terms',
-    }),
-    value: 20,
-    type: 'number',
-    description: i18n.translate('discover.advancedSettings.aggsTermsSizeText', {
-      defaultMessage:
-        'Determines how many terms will be visualized when clicking the "visualize" ' +
-        'button, in the field drop downs, in the discover sidebar.',
     }),
     category: ['discover'],
     schema: schema.number(),
@@ -165,6 +141,23 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     category: ['discover'],
     schema: schema.arrayOf(schema.string()),
   },
+  [DOC_TABLE_LEGACY]: {
+    name: i18n.translate('discover.advancedSettings.docTableVersionName', {
+      defaultMessage: 'Use legacy table',
+    }),
+    value: true,
+    description: i18n.translate('discover.advancedSettings.docTableVersionDescription', {
+      defaultMessage:
+        'Discover uses a new table layout that includes better data sorting, drag-and-drop columns, and a full screen ' +
+        'view. Enable this option if you prefer to fall back to the legacy table.',
+    }),
+    category: ['discover'],
+    schema: schema.boolean(),
+    metric: {
+      type: METRIC_TYPE.CLICK,
+      name: 'discover:useLegacyDataGrid',
+    },
+  },
   [MODIFY_COLUMNS_ON_SWITCH]: {
     name: i18n.translate('discover.advancedSettings.discover.modifyColumnsOnSwitchTitle', {
       defaultMessage: 'Modify columns when changing index patterns',
@@ -179,5 +172,12 @@ export const uiSettings: Record<string, UiSettingsParams> = {
       type: METRIC_TYPE.CLICK,
       name: 'discover:modifyColumnsOnSwitchTitle',
     },
+  },
+  [SEARCH_FIELDS_FROM_SOURCE]: {
+    name: 'Read fields from _source',
+    description: `When enabled will load documents directly from \`_source\`. This is soon going to be deprecated. When disabled, will retrieve fields via the new Fields API in the high-level search service.`,
+    value: false,
+    category: ['discover'],
+    schema: schema.boolean(),
   },
 };

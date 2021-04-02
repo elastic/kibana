@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
 import expect from '@kbn/expect/expect.js';
 import { FtrProviderContext } from '../ftr_provider_context';
 import {
@@ -136,7 +138,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             filters: {
-              kql: 'not HostDetails.host.ip:10.46.229.234',
+              kql: 'not (HostDetails.host.ip:10.46.229.234 or host.ip:10.46.229.234)',
             },
           })
           .expect(200);
@@ -162,7 +164,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
             ],
             filters: {
-              kql: `not HostDetails.host.ip:${notIncludedIp}`,
+              kql: `not (HostDetails.host.ip:${notIncludedIp} or host.ip:${notIncludedIp})`,
             },
           })
           .expect(200);
@@ -192,7 +194,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             filters: {
-              kql: `HostDetails.host.os.Ext.variant:${variantValue}`,
+              kql: `HostDetails.host.os.Ext.variant:${variantValue} or host.os.Ext.variant:${variantValue}`,
             },
           })
           .expect(200);
@@ -214,7 +216,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             filters: {
-              kql: `HostDetails.host.ip:${targetEndpointIp}`,
+              kql: `HostDetails.host.ip:${targetEndpointIp} or host.ip:${targetEndpointIp}`,
             },
           })
           .expect(200);
@@ -236,7 +238,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             filters: {
-              kql: `not HostDetails.Endpoint.policy.applied.status:success`,
+              kql: `not (HostDetails.Endpoint.policy.applied.status:success or Endpoint.policy.applied.status:success)`,
             },
           })
           .expect(200);
@@ -249,7 +251,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(Array.from(statuses)).to.eql(['failure']);
       });
 
-      it('metadata api should return the endpoint based on the elastic agent id, and status should be error', async () => {
+      it('metadata api should return the endpoint based on the elastic agent id, and status should be unhealthy', async () => {
         const targetEndpointId = 'fc0ff548-feba-41b6-8367-65e8790d0eaf';
         const targetElasticAgentId = '023fa40c-411d-4188-a941-4147bfadd095';
         const { body } = await supertest
@@ -257,7 +259,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .send({
             filters: {
-              kql: `HostDetails.elastic.agent.id:${targetElasticAgentId}`,
+              kql: `HostDetails.elastic.agent.id:${targetElasticAgentId} or elastic.agent.id:${targetElasticAgentId}`,
             },
           })
           .expect(200);
@@ -267,7 +269,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resultHostId).to.eql(targetEndpointId);
         expect(resultElasticAgentId).to.eql(targetElasticAgentId);
         expect(body.hosts[0].metadata.event.created).to.eql(1579881969541);
-        expect(body.hosts[0].host_status).to.eql('error');
+        expect(body.hosts[0].host_status).to.eql('unhealthy');
         expect(body.hosts.length).to.eql(1);
         expect(body.request_page_size).to.eql(10);
         expect(body.request_page_index).to.eql(0);

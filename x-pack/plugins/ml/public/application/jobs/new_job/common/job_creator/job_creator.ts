@@ -1,14 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { BehaviorSubject } from 'rxjs';
+import { cloneDeep } from 'lodash';
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { UrlConfig } from '../../../../../../common/types/custom_urls';
 import { IndexPatternTitle } from '../../../../../../common/types/kibana';
-import { ML_JOB_AGGREGATION } from '../../../../../../common/constants/aggregation_types';
+import {
+  ML_JOB_AGGREGATION,
+  aggregations,
+  mlOnlyAggregations,
+} from '../../../../../../common/constants/aggregation_types';
 import { ES_FIELD_TYPES } from '../../../../../../../../../src/plugins/data/public';
 import {
   Job,
@@ -19,7 +25,8 @@ import {
   BucketSpan,
   CustomSettings,
 } from '../../../../../../common/types/anomaly_detection_jobs';
-import { Aggregation, Field } from '../../../../../../common/types/fields';
+import { Aggregation, Field, RuntimeMappings } from '../../../../../../common/types/fields';
+import { combineFieldsAndAggs } from '../../../../../../common/util/fields_utils';
 import { createEmptyJob, createEmptyDatafeed } from './util/default_configs';
 import { mlJobService } from '../../../../services/job_service';
 import { JobRunner, ProgressSubscriber } from '../job_runner';
@@ -28,7 +35,8 @@ import {
   CREATED_BY_LABEL,
   SHARED_RESULTS_INDEX_NAME,
 } from '../../../../../../common/constants/new_job';
-import { isSparseDataJob, collectAggs } from './util/general';
+import { collectAggs } from './util/general';
+import { filterRuntimeMappings } from './util/filter_runtime_mappings';
 import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { Calendar } from '../../../../../../common/types/calendars';
 import { mlCalendarService } from '../../../../services/calendar_service';
@@ -56,6 +64,9 @@ export class JobCreator {
   protected _aggs: Aggregation[] = [];
   protected _fields: Field[] = [];
   protected _scriptFields: Field[] = [];
+  protected _runtimeFields: Field[] = [];
+  protected _runtimeMappings: RuntimeMappings | null = null;
+  protected _filterRuntimeMappingsOnSave: boolean = true;
   protected _aggregationFields: Field[] = [];
   protected _sparseData: boolean = false;
   private _stopAllRefreshPolls: {
@@ -83,6 +94,8 @@ export class JobCreator {
     if (typeof indexPattern.timeFieldName === 'string') {
       this._job_config.data_description.time_field = indexPattern.timeFieldName;
     }
+
+    this._extractRuntimeMappings();
 
     this._datafeed_config.query = query;
   }
@@ -233,12 +246,20 @@ export class JobCreator {
   private _initModelPlotConfig() {
     // initialize configs to false if they are missing
     if (this._job_config.model_plot_config === undefined) {
-      this._job_config.model_plot_config = {};
+      this._job_config.model_plot_config = {
+        enabled: false,
+      };
     }
-    if (this._job_config.model_plot_config.enabled === undefined) {
+    if (
+      this._job_config.model_plot_config !== undefined &&
+      this._job_config.model_plot_config.enabled === undefined
+    ) {
       this._job_config.model_plot_config.enabled = false;
     }
-    if (this._job_config.model_plot_config.annotations_enabled === undefined) {
+    if (
+      this._job_config.model_plot_config !== undefined &&
+      this._job_config.model_plot_config.annotations_enabled === undefined
+    ) {
       this._job_config.model_plot_config.annotations_enabled = false;
     }
   }
@@ -487,12 +508,20 @@ export class JobCreator {
     return this._scriptFields;
   }
 
+  public get runtimeMappings(): RuntimeMappings | null {
+    return this._runtimeMappings;
+  }
+
+  public get runtimeFields(): Field[] {
+    return this._runtimeFields;
+  }
+
   public get aggregationFields(): Field[] {
     return this._aggregationFields;
   }
 
   public get additionalFields(): Field[] {
-    return [...this._scriptFields, ...this._aggregationFields];
+    return [...this._scriptFields, ...this._runtimeFields, ...this._aggregationFields];
   }
 
   public get subscribers(): ProgressSubscriber[] {
@@ -527,7 +556,8 @@ export class JobCreator {
 
   public async createDatafeed(): Promise<object> {
     try {
-      return await mlJobService.saveNewDatafeed(this._datafeed_config, this._job_config.job_id);
+      const tempDatafeed = this._getDatafeedWithFilteredRuntimeMappings();
+      return await mlJobService.saveNewDatafeed(tempDatafeed, this._job_config.job_id);
     } catch (error) {
       throw error;
     }
@@ -538,6 +568,23 @@ export class JobCreator {
     const jobRunner = new JobRunner(this);
     await jobRunner.startDatafeed();
     return jobRunner;
+  }
+
+  private _getDatafeedWithFilteredRuntimeMappings(): Datafeed {
+    if (this._filterRuntimeMappingsOnSave === false) {
+      return this._datafeed_config;
+    }
+
+    const { runtime_mappings: filteredRuntimeMappings } = filterRuntimeMappings(
+      this._job_config,
+      this._datafeed_config
+    );
+
+    return {
+      ...this._datafeed_config,
+      runtime_mappings:
+        Object.keys(filteredRuntimeMappings).length > 0 ? filteredRuntimeMappings : undefined,
+    };
   }
 
   public subscribeToProgress(func: ProgressSubscriber) {
@@ -597,6 +644,7 @@ export class JobCreator {
       this._job_config.custom_settings !== undefined &&
       this._job_config.custom_settings[setting] !== undefined
     ) {
+      // @ts-expect-error
       return this._job_config.custom_settings[setting];
     }
     return null;
@@ -626,7 +674,15 @@ export class JobCreator {
     return JSON.stringify(this._datafeed_config, null, 2);
   }
 
-  private _initPerPartitionCategorization() {
+  public set filterRuntimeMappingsOnSave(filter: boolean) {
+    this._filterRuntimeMappingsOnSave = filter;
+  }
+
+  public get filterRuntimeMappingsOnSave(): boolean {
+    return this._filterRuntimeMappingsOnSave;
+  }
+
+  protected _initPerPartitionCategorization() {
     if (this._job_config.analysis_config.per_partition_categorization === undefined) {
       this._job_config.analysis_config.per_partition_categorization = {};
     }
@@ -656,6 +712,53 @@ export class JobCreator {
     this._job_config.analysis_config.per_partition_categorization!.stop_on_warn = enabled;
   }
 
+  private _extractRuntimeMappings() {
+    const runtimeFieldMap = this._indexPattern.toSpec().runtimeFieldMap;
+    if (runtimeFieldMap !== undefined) {
+      if (this._datafeed_config.runtime_mappings === undefined) {
+        this._datafeed_config.runtime_mappings = {};
+      }
+      Object.entries(runtimeFieldMap).forEach(([key, val]) => {
+        // @ts-expect-error
+        this._datafeed_config.runtime_mappings![key] = val;
+      });
+    }
+    this._populateRuntimeFields();
+  }
+
+  private _populateRuntimeFields() {
+    this._runtimeFields = [];
+    this._runtimeMappings = this._datafeed_config.runtime_mappings ?? null;
+    if (this._runtimeMappings !== null) {
+      const tempRuntimeFields = Object.entries(this._runtimeMappings).map(
+        ([id, runtimeField]) =>
+          ({
+            id,
+            name: id,
+            type: runtimeField.type,
+            aggregatable: true,
+            aggs: [],
+            runtimeField,
+          } as Field)
+      );
+
+      const aggs = cloneDeep([...aggregations, ...mlOnlyAggregations]);
+      this._runtimeFields = combineFieldsAndAggs(tempRuntimeFields, aggs, {}).fields;
+    }
+  }
+
+  private _populateScriptFields() {
+    this._scriptFields = [];
+    if (this._datafeed_config.script_fields !== undefined) {
+      this._scriptFields = Object.keys(this._datafeed_config.script_fields).map((f) => ({
+        id: f,
+        name: f,
+        type: ES_FIELD_TYPES.KEYWORD,
+        aggregatable: true,
+      }));
+    }
+  }
+
   protected _overrideConfigs(job: Job, datafeed: Datafeed) {
     this._job_config = job;
     this._datafeed_config = datafeed;
@@ -676,17 +779,9 @@ export class JobCreator {
     ) {
       this.useDedicatedIndex = true;
     }
-    this._sparseData = isSparseDataJob(job, datafeed);
 
-    this._scriptFields = [];
-    if (this._datafeed_config.script_fields !== undefined) {
-      this._scriptFields = Object.keys(this._datafeed_config.script_fields).map((f) => ({
-        id: f,
-        name: f,
-        type: ES_FIELD_TYPES.KEYWORD,
-        aggregatable: true,
-      }));
-    }
+    this._populateScriptFields();
+    this._populateRuntimeFields();
 
     this._aggregationFields = [];
     const aggs = getDatafeedAggregations(this._datafeed_config);

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { OverlayStart, NotificationsStart } from 'src/core/public';
@@ -40,8 +41,7 @@ export const getBulkDeleteAction = ({
         i18n.translate('xpack.savedObjectsTagging.management.actions.bulkDelete.confirm.text', {
           defaultMessage:
             'By deleting {count, plural, one {this tag} other {these tags}}, you will no longer be able to assign {count, plural, one {it} other {them}} to saved objects. ' +
-            '{count, plural, one {This tag} other {These tags}} will be removed from any saved objects that currently use {count, plural, one {it} other {them}}. ' +
-            'Are you sure you wish to proceed?',
+            '{count, plural, one {This tag} other {These tags}} will be removed from any saved objects that currently use {count, plural, one {it} other {them}}.',
           values: {
             count: tagIds.length,
           },

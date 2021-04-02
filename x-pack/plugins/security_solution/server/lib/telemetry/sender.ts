@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { cloneDeep } from 'lodash';
@@ -104,7 +105,7 @@ export class TelemetryEventsSender {
   public async fetchDiagnosticAlerts(executeFrom: string, executeTo: string) {
     const query = {
       expand_wildcards: 'open,hidden',
-      index: 'logs-endpoint.diagnostic.collection-*',
+      index: '.logs-endpoint.diagnostic.collection-*',
       ignore_unavailable: true,
       size: this.maxQueueSize,
       body: {
@@ -292,6 +293,43 @@ interface AllowlistFields {
   [key: string]: boolean | AllowlistFields;
 }
 
+// Allow list process fields within events.  This includes "process" and "Target.process".'
+/* eslint-disable @typescript-eslint/naming-convention */
+const allowlistProcessFields: AllowlistFields = {
+  name: true,
+  executable: true,
+  command_line: true,
+  hash: true,
+  pid: true,
+  uptime: true,
+  Ext: {
+    architecture: true,
+    code_signature: true,
+    dll: true,
+    token: {
+      integrity_level_name: true,
+    },
+  },
+  parent: {
+    name: true,
+    executable: true,
+    command_line: true,
+    hash: true,
+    Ext: {
+      architecture: true,
+      code_signature: true,
+      dll: true,
+      token: {
+        integrity_level_name: true,
+      },
+    },
+    uptime: true,
+    pid: true,
+    ppid: true,
+  },
+  thread: true,
+};
+
 // Allow list for the data we include in the events. True means that it is deep-cloned
 // blindly. Object contents means that we only copy the fields that appear explicitly in
 // the sub-object.
@@ -299,12 +337,15 @@ const allowlistEventFields: AllowlistFields = {
   '@timestamp': true,
   agent: true,
   Endpoint: true,
+  Memory_protection: true,
   Ransomware: true,
   data_stream: true,
   ecs: true,
   elastic: true,
   event: true,
   rule: {
+    id: true,
+    name: true,
     ruleset: true,
   },
   file: {
@@ -319,36 +360,17 @@ const allowlistEventFields: AllowlistFields = {
     Ext: {
       code_signature: true,
       malware_classification: true,
+      malware_signature: true,
+      quarantine_result: true,
+      quarantine_message: true,
     },
   },
   host: {
     os: true,
   },
-  process: {
-    name: true,
-    executable: true,
-    command_line: true,
-    hash: true,
-    pid: true,
-    uptime: true,
-    Ext: {
-      code_signature: true,
-    },
-    parent: {
-      name: true,
-      executable: true,
-      command_line: true,
-      hash: true,
-      Ext: {
-        code_signature: true,
-      },
-      uptime: true,
-      pid: true,
-      ppid: true,
-    },
-    token: {
-      integrity_level_name: true,
-    },
+  process: allowlistProcessFields,
+  Target: {
+    process: allowlistProcessFields,
   },
 };
 
@@ -358,7 +380,7 @@ export function copyAllowlistedFields(
 ): TelemetryEvent {
   return Object.entries(allowlist).reduce<TelemetryEvent>((newEvent, [allowKey, allowValue]) => {
     const eventValue = event[allowKey];
-    if (eventValue) {
+    if (eventValue !== null && eventValue !== undefined) {
       if (allowValue === true) {
         return { ...newEvent, [allowKey]: eventValue };
       } else if (typeof allowValue === 'object' && typeof eventValue === 'object') {

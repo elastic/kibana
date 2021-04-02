@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -41,11 +30,13 @@ describe('extractReferences', () => {
             type: 'visualization',
             id: '1',
             title: 'Title 1',
+            version: '7.9.1',
           },
           {
             type: 'visualization',
             id: '2',
             title: 'Title 2',
+            version: '7.9.1',
           },
         ]),
       },
@@ -57,7 +48,7 @@ describe('extractReferences', () => {
       Object {
         "attributes": Object {
           "foo": true,
-          "panelsJSON": "[{\\"embeddableConfig\\":{},\\"title\\":\\"Title 1\\",\\"panelRefName\\":\\"panel_0\\"},{\\"embeddableConfig\\":{},\\"title\\":\\"Title 2\\",\\"panelRefName\\":\\"panel_1\\"}]",
+          "panelsJSON": "[{\\"version\\":\\"7.9.1\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 1\\",\\"panelRefName\\":\\"panel_0\\"},{\\"version\\":\\"7.9.1\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 2\\",\\"panelRefName\\":\\"panel_1\\"}]",
         },
         "references": Array [
           Object {
@@ -84,6 +75,7 @@ describe('extractReferences', () => {
           {
             id: '1',
             title: 'Title 1',
+            version: '7.9.1',
           },
         ]),
       },
@@ -103,6 +95,7 @@ describe('extractReferences', () => {
           {
             type: 'visualization',
             title: 'Title 1',
+            version: '7.9.1',
           },
         ]),
       },
@@ -112,11 +105,84 @@ describe('extractReferences', () => {
       Object {
         "attributes": Object {
           "foo": true,
-          "panelsJSON": "[{\\"type\\":\\"visualization\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 1\\"}]",
+          "panelsJSON": "[{\\"version\\":\\"7.9.1\\",\\"type\\":\\"visualization\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 1\\"}]",
         },
         "references": Array [],
       }
     `);
+  });
+
+  // https://github.com/elastic/kibana/issues/93772
+  test('passes when received older RAW SO with older panels', () => {
+    const doc = {
+      id: '1',
+      attributes: {
+        hits: 0,
+        timeFrom: 'now-16h/h',
+        timeTo: 'now',
+        refreshInterval: {
+          display: '1 minute',
+          section: 2,
+          value: 60000,
+          pause: false,
+        },
+        description: '',
+        uiStateJSON: '{"P-1":{"vis":{"legendOpen":false}}}',
+        title: 'Errors/Fatals/Warnings dashboard',
+        timeRestore: true,
+        version: 1,
+        panelsJSON:
+          '[{"col":1,"id":"544891f0-2cf2-11e8-9735-93e95b055f48","panelIndex":1,"row":1,"size_x":12,"size_y":8,"type":"visualization"}]',
+        optionsJSON: '{"darkTheme":true}',
+        kibanaSavedObjectMeta: {
+          searchSourceJSON:
+            '{"highlightAll":true,"filter":[{"query":{"query_string":{"analyze_wildcard":true,"query":"*"}}}]}',
+        },
+      },
+      references: [],
+    };
+    const updatedDoc = extractReferences(doc, deps);
+
+    expect(updatedDoc).toMatchInlineSnapshot(`
+      Object {
+        "attributes": Object {
+          "description": "",
+          "hits": 0,
+          "kibanaSavedObjectMeta": Object {
+            "searchSourceJSON": "{\\"highlightAll\\":true,\\"filter\\":[{\\"query\\":{\\"query_string\\":{\\"analyze_wildcard\\":true,\\"query\\":\\"*\\"}}}]}",
+          },
+          "optionsJSON": "{\\"darkTheme\\":true}",
+          "panelsJSON": "[{\\"col\\":1,\\"panelIndex\\":1,\\"row\\":1,\\"size_x\\":12,\\"size_y\\":8,\\"panelRefName\\":\\"panel_0\\"}]",
+          "refreshInterval": Object {
+            "display": "1 minute",
+            "pause": false,
+            "section": 2,
+            "value": 60000,
+          },
+          "timeFrom": "now-16h/h",
+          "timeRestore": true,
+          "timeTo": "now",
+          "title": "Errors/Fatals/Warnings dashboard",
+          "uiStateJSON": "{\\"P-1\\":{\\"vis\\":{\\"legendOpen\\":false}}}",
+          "version": 1,
+        },
+        "references": Array [
+          Object {
+            "id": "544891f0-2cf2-11e8-9735-93e95b055f48",
+            "name": "panel_0",
+            "type": "visualization",
+          },
+        ],
+      }
+    `);
+
+    const panel = JSON.parse(updatedDoc.attributes.panelsJSON as string)[0];
+
+    // unknown older panel keys are left untouched
+    expect(panel).toHaveProperty('col');
+    expect(panel).toHaveProperty('row');
+    expect(panel).toHaveProperty('size_x');
+    expect(panel).toHaveProperty('size_y');
   });
 });
 

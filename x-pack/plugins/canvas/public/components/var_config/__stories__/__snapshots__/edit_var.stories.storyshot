@@ -264,6 +264,7 @@ Array [
         >
           <button
             className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+            disabled={false}
             onClick={[Function]}
             type="button"
           >
@@ -489,6 +490,7 @@ Array [
         >
           <button
             className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+            disabled={false}
             onClick={[Function]}
             type="button"
           >
@@ -714,6 +716,7 @@ Array [
         >
           <button
             className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+            disabled={false}
             onClick={[Function]}
             type="button"
           >
@@ -915,6 +918,7 @@ Array [
         >
           <button
             className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+            disabled={false}
             onClick={[Function]}
             type="button"
           >

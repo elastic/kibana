@@ -2,8 +2,9 @@
 /* eslint-disable */
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 export type Maybe<T> = T | null;
@@ -78,6 +79,8 @@ export interface TimelineInput {
   dataProviders?: Maybe<DataProviderInput[]>;
 
   description?: Maybe<string>;
+
+  eqlOptions?: Maybe<EqlOptionsInput>;
 
   eventType?: Maybe<string>;
 
@@ -160,6 +163,18 @@ export interface QueryMatchInput {
   displayValue?: Maybe<string>;
 
   operator?: Maybe<string>;
+}
+
+export interface EqlOptionsInput {
+  eventCategoryField?: Maybe<string>;
+
+  tiebreakerField?: Maybe<string>;
+
+  timestampField?: Maybe<string>;
+
+  query?: Maybe<string>;
+
+  size?: Maybe<ToAny>;
 }
 
 export interface FilterTimelineInput {
@@ -272,6 +287,7 @@ export enum HostPolicyResponseActionStatus {
   success = 'success',
   failure = 'failure',
   warning = 'warning',
+  unsupported = 'unsupported',
 }
 
 export enum TimelineType {
@@ -285,10 +301,13 @@ export enum DataProviderType {
 }
 
 export enum RowRendererId {
+  alerts = 'alerts',
   auditd = 'auditd',
   auditd_file = 'auditd_file',
+  library = 'library',
   netflow = 'netflow',
   plain = 'plain',
+  registry = 'registry',
   suricata = 'suricata',
   system = 'system',
   system_dns = 'system_dns',
@@ -604,6 +623,8 @@ export interface TimelineResult {
 
   description?: Maybe<string>;
 
+  eqlOptions?: Maybe<EqlOptionsResult>;
+
   eventIdToNoteIds?: Maybe<NoteResult[]>;
 
   eventType?: Maybe<string>;
@@ -709,6 +730,18 @@ export interface DateRangePickerResult {
   start?: Maybe<ToAny>;
 
   end?: Maybe<ToAny>;
+}
+
+export interface EqlOptionsResult {
+  eventCategoryField?: Maybe<string>;
+
+  tiebreakerField?: Maybe<string>;
+
+  timestampField?: Maybe<string>;
+
+  query?: Maybe<string>;
+
+  size?: Maybe<ToAny>;
 }
 
 export interface FavoriteTimelineResult {
@@ -834,6 +867,12 @@ export interface ResponseFavoriteTimeline {
   message?: Maybe<string>;
 
   savedObjectId: string;
+
+  templateTimelineId?: Maybe<string>;
+
+  templateTimelineVersion?: Maybe<number>;
+
+  timelineType?: Maybe<TimelineType>;
 
   version: string;
 
@@ -1691,6 +1730,12 @@ export interface PersistTimelineMutationArgs {
 }
 export interface PersistFavoriteMutationArgs {
   timelineId?: Maybe<string>;
+
+  templateTimelineId?: Maybe<string>;
+
+  templateTimelineVersion?: Maybe<number>;
+
+  timelineType?: Maybe<TimelineType>;
 }
 export interface DeleteTimelineMutationArgs {
   id: string[];
@@ -2096,6 +2141,9 @@ export namespace DeleteTimelineMutation {
 export namespace PersistTimelineFavoriteMutation {
   export type Variables = {
     timelineId?: Maybe<string>;
+    templateTimelineId?: Maybe<string>;
+    templateTimelineVersion?: Maybe<number>;
+    timelineType: TimelineType;
   };
 
   export type Mutation = {
@@ -2112,6 +2160,12 @@ export namespace PersistTimelineFavoriteMutation {
     version: string;
 
     favorite: Maybe<Favorite[]>;
+
+    templateTimelineId: Maybe<string>;
+
+    templateTimelineVersion: Maybe<number>;
+
+    timelineType: Maybe<TimelineType>;
   };
 
   export type Favorite = {
@@ -2197,6 +2251,8 @@ export namespace GetOneTimeline {
     dateRange: Maybe<DateRange>;
 
     description: Maybe<string>;
+
+    eqlOptions: Maybe<EqlOptions>;
 
     eventType: Maybe<string>;
 
@@ -2343,6 +2399,20 @@ export namespace GetOneTimeline {
     start: Maybe<ToAny>;
 
     end: Maybe<ToAny>;
+  };
+
+  export type EqlOptions = {
+    __typename?: 'EqlOptionsResult';
+
+    eventCategoryField: Maybe<string>;
+
+    tiebreakerField: Maybe<string>;
+
+    timestampField: Maybe<string>;
+
+    query: Maybe<string>;
+
+    size: Maybe<ToAny>;
   };
 
   export type EventIdToNoteIds = {

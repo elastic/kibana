@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import expect from '@kbn/expect';
@@ -12,9 +13,20 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const es = getService('es');
+  const esArchiver = getService('esArchiver');
 
   describe('fleet_agents_setup', () => {
     skipIfNoDockerRegistry(providerContext);
+    before(async () => {
+      await esArchiver.load('empty_kibana');
+      await esArchiver.load('fleet/empty_fleet_server');
+    });
+
+    after(async () => {
+      await esArchiver.unload('empty_kibana');
+      await esArchiver.load('fleet/empty_fleet_server');
+    });
+
     beforeEach(async () => {
       try {
         await es.security.deleteUser({
@@ -59,15 +71,8 @@ export default function (providerContext: FtrProviderContext) {
         cluster: ['monitor', 'manage_api_key'],
         indices: [
           {
-            names: [
-              'logs-*',
-              'metrics-*',
-              'events-*',
-              '.ds-logs-*',
-              '.ds-metrics-*',
-              '.ds-events-*',
-            ],
-            privileges: ['write', 'create_index', 'indices:admin/auto_create'],
+            names: ['logs-*', 'metrics-*', 'traces-*', '.logs-endpoint.diagnostic.collection-*'],
+            privileges: ['auto_configure', 'create_doc'],
             allow_restricted_indices: false,
           },
         ],

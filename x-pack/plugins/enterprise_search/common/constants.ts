@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -81,4 +82,4 @@ export const JSON_HEADER = {
 
 export const READ_ONLY_MODE_HEADER = 'x-ent-search-read-only-mode';
 
-export const ENGINES_PAGE_SIZE = 10;
+export const ENTERPRISE_SEARCH_KIBANA_COOKIE = '_enterprise_search';

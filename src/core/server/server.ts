@@ -1,20 +1,9 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import apm from 'elastic-apm-node';
@@ -52,6 +41,7 @@ import { ContextService } from './context';
 import { RequestHandlerContext } from '.';
 import { InternalCoreSetup, InternalCoreStart, ServiceConfigDescriptor } from './internal_types';
 import { CoreUsageDataService } from './core_usage_data';
+import { DeprecationsService } from './deprecations';
 import { CoreRouteHandlerContext } from './core_route_handler_context';
 import { config as externalUrlConfig } from './external_url';
 
@@ -78,6 +68,7 @@ export class Server {
   private readonly coreApp: CoreApp;
   private readonly coreUsageData: CoreUsageDataService;
   private readonly i18n: I18nService;
+  private readonly deprecations: DeprecationsService;
 
   private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
   private resolveSavedObjectsStartPromise?: (value: SavedObjectsServiceStart) => void;
@@ -113,6 +104,7 @@ export class Server {
     this.logging = new LoggingService(core);
     this.coreUsageData = new CoreUsageDataService(core);
     this.i18n = new I18nService(core);
+    this.deprecations = new DeprecationsService(core);
 
     this.savedObjectsStartPromise = new Promise((resolve) => {
       this.resolveSavedObjectsStartPromise = resolve;
@@ -131,13 +123,10 @@ export class Server {
     });
     const legacyConfigSetup = await this.legacy.setupLegacyConfig();
 
-    // rely on dev server to validate config, don't validate in the parent process
-    if (!this.env.isDevCliParent) {
-      // Immediately terminate in case of invalid configuration
-      // This needs to be done after plugin discovery
-      await this.configService.validate();
-      await ensureValidConfiguration(this.configService, legacyConfigSetup);
-    }
+    // Immediately terminate in case of invalid configuration
+    // This needs to be done after plugin discovery
+    await this.configService.validate();
+    await ensureValidConfiguration(this.configService, legacyConfigSetup);
 
     const contextServiceSetup = this.context.setup({
       // We inject a fake "legacy plugin" with dependencies on every plugin so that legacy plugins:
@@ -166,6 +155,7 @@ export class Server {
     const metricsSetup = await this.metrics.setup({ http: httpSetup });
 
     const coreUsageDataSetup = this.coreUsageData.setup({
+      http: httpSetup,
       metrics: metricsSetup,
       savedObjectsStartPromise: this.savedObjectsStartPromise,
     });
@@ -205,6 +195,12 @@ export class Server {
       loggingSystem: this.loggingSystem,
     });
 
+    const deprecationsSetup = this.deprecations.setup({
+      http: httpSetup,
+      elasticsearch: elasticsearchServiceSetup,
+      coreUsageData: coreUsageDataSetup,
+    });
+
     const coreSetup: InternalCoreSetup = {
       capabilities: capabilitiesSetup,
       context: contextServiceSetup,
@@ -219,6 +215,7 @@ export class Server {
       httpResources: httpResourcesSetup,
       logging: loggingSetup,
       metrics: metricsSetup,
+      deprecations: deprecationsSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
@@ -231,7 +228,7 @@ export class Server {
     });
 
     this.registerCoreContext(coreSetup);
-    this.coreApp.setup(coreSetup);
+    this.coreApp.setup(coreSetup, uiPlugins);
 
     setupTransaction?.end();
     return coreSetup;
@@ -298,19 +295,20 @@ export class Server {
     await this.metrics.stop();
     await this.status.stop();
     await this.logging.stop();
+    this.deprecations.stop();
   }
 
   private registerCoreContext(coreSetup: InternalCoreSetup) {
     coreSetup.http.registerRouteHandlerContext(
       coreId,
       'core',
-      async (context, req, res): Promise<RequestHandlerContext['core']> => {
+      (context, req, res): RequestHandlerContext['core'] => {
         return new CoreRouteHandlerContext(this.coreStart!, req);
       }
     );
   }
 
-  public async setupCoreConfig() {
+  public setupCoreConfig() {
     const configDescriptors: Array<ServiceConfigDescriptor<unknown>> = [
       pathConfig,
       cspConfig,
@@ -335,7 +333,7 @@ export class Server {
       if (descriptor.deprecations) {
         this.configService.addDeprecationProvider(descriptor.path, descriptor.deprecations);
       }
-      await this.configService.setSchema(descriptor.path, descriptor.schema);
+      this.configService.setSchema(descriptor.path, descriptor.schema);
     }
   }
 }

@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -35,10 +36,19 @@ export default function ({ getService }: FtrProviderContext) {
           return `user-${this.jobId}`;
         },
         dependentVariable: 'stab',
-        trainingPercent: '20',
+        trainingPercent: 20,
         modelMemory: '20mb',
         createIndexPattern: true,
         expected: {
+          scatterplotMatrixColorStats: [
+            // some marker colors of the continuous color scale
+            { key: '#61AFA3', value: 2 },
+            { key: '#D1E5E0', value: 2 },
+            // tick/grid/axis
+            { key: '#6A717D', value: 10 },
+            { key: '#F5F7FA', value: 12 },
+            { key: '#D3DAE6', value: 3 },
+          ],
           row: {
             type: 'regression',
             status: 'stopped',
@@ -89,6 +99,11 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('displays the include fields selection');
           await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
 
+          await ml.testExecution.logTestStep('displays the scatterplot matrix');
+          await ml.dataFrameAnalyticsCreation.assertScatterplotMatrix(
+            testData.expected.scatterplotMatrixColorStats
+          );
+
           await ml.testExecution.logTestStep('continues to the additional options step');
           await ml.dataFrameAnalyticsCreation.continueToAdditionalOptionsStep();
 
@@ -123,6 +138,13 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.setCreateIndexPatternSwitchState(
             testData.createIndexPattern
           );
+
+          await ml.testExecution.logTestStep('continues to the validation step');
+          await ml.dataFrameAnalyticsCreation.continueToValidationStep();
+
+          await ml.testExecution.logTestStep('checks validation callouts exist');
+          await ml.dataFrameAnalyticsCreation.assertValidationCalloutsExists();
+          await ml.dataFrameAnalyticsCreation.assertAllValidationCalloutsPresent(3);
 
           await ml.testExecution.logTestStep('continues to the create step');
           await ml.dataFrameAnalyticsCreation.continueToCreateStep();
@@ -207,6 +229,17 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableTrainingFiltersExist();
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
+          await ml.dataFrameAnalyticsResults.assertScatterplotMatrix(
+            testData.expected.scatterplotMatrixColorStats
+          );
+        });
+
+        it('displays the analytics job in the map view', async () => {
+          await ml.testExecution.logTestStep('should open the map view for created job');
+          await ml.navigation.navigateToDataFrameAnalytics();
+          await ml.dataFrameAnalyticsTable.openMapView(testData.jobId);
+          await ml.dataFrameAnalyticsMap.assertMapElementsExists();
+          await ml.dataFrameAnalyticsMap.assertJobMapTitle(testData.jobId);
         });
       });
     }

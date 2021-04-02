@@ -1,7 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { shallow } from 'enzyme';
@@ -12,6 +13,15 @@ import { TestProviders } from '../../../common/mock/test_providers';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
 
 import { Ip } from '.';
+
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    // eslint-disable-next-line react/display-name
+    EuiScreenReaderOnly: () => <></>,
+  };
+});
 
 jest.mock('../../../common/components/link_to');
 
@@ -35,7 +45,7 @@ describe('Port', () => {
     expect(wrapper.find('[data-test-subj="formatted-ip"]').first().text()).toEqual('10.1.2.3');
   });
 
-  test('it hyperlinks to the network/ip page', () => {
+  test('it dispalys a button which opens the network/ip side panel', () => {
     const wrapper = mount(
       <TestProviders>
         <Ip contextId="test" eventId="abcd" fieldName="destination.ip" value="10.1.2.3" />
@@ -43,8 +53,7 @@ describe('Port', () => {
     );
 
     expect(
-      wrapper.find('[data-test-subj="draggable-truncatable-content"]').find('a').first().props()
-        .href
-    ).toEqual('/ip/10.1.2.3/source');
+      wrapper.find('[data-test-subj="draggable-truncatable-content"]').find('a').first().text()
+    ).toEqual('10.1.2.3');
   });
 });
