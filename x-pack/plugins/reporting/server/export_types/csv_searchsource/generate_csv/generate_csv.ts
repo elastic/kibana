@@ -60,6 +60,7 @@ function isPlainStringArray(
 }
 
 export class CsvGenerator {
+  private _columns: string[] | null = null;
   private _formatters: Record<string, FieldFormat> | null = null;
   private csvContainsFormulas = false;
   private maxSizeReached = false;
@@ -135,27 +136,37 @@ export class CsvGenerator {
     };
   }
 
-  // use fields/fieldsFromSource from the searchSource to get the ordering of columns
-  // otherwise use the table columns as they are
-  private getColumnsFromSearchSource(searchSource: ISearchSource, table: Datatable): string[] {
-    const fieldValues: Record<string, string | boolean | SearchFieldValue[] | undefined> = {
-      fields: searchSource.getField('fields'),
-      fieldsFromSource: searchSource.getField('fieldsFromSource'),
-    };
-    const fieldSource = fieldValues.fieldsFromSource ? 'fieldsFromSource' : 'fields';
-    this.logger.debug(`Getting columns from '${fieldSource}' in search source.`);
-
-    const fields = fieldValues[fieldSource];
-    // Check if field name values are string[] and if the fields are user-defined
-    if (isPlainStringArray(fields)) {
-      return fields;
+  private getColumns(searchSource: ISearchSource, table: Datatable) {
+    if (this._columns != null) {
+      return this._columns;
     }
 
-    // Default to using the table column IDs as the fields
-    const columnIds = table.columns.map((c) => c.id);
-    // Fields in the API response don't come sorted - they need to be sorted client-side
-    columnIds.sort();
-    return columnIds;
+    // if columns is not provided in job params,
+    // default to use fields/fieldsFromSource from the searchSource to get the ordering of columns
+    const getFromSearchSource = (): string[] => {
+      const fieldValues: Record<string, string | boolean | SearchFieldValue[] | undefined> = {
+        fields: searchSource.getField('fields'),
+        fieldsFromSource: searchSource.getField('fieldsFromSource'),
+      };
+      const fieldSource = fieldValues.fieldsFromSource ? 'fieldsFromSource' : 'fields';
+      this.logger.debug(`Getting columns from '${fieldSource}' in search source.`);
+
+      const fields = fieldValues[fieldSource];
+      // Check if field name values are string[] and if the fields are user-defined
+      if (isPlainStringArray(fields)) {
+        return fields;
+      }
+
+      // Default to using the table column IDs as the fields
+      const columnIds = table.columns.map((c) => c.id);
+      // Fields in the API response don't come sorted - they need to be sorted client-side
+      columnIds.sort();
+      return columnIds;
+    };
+    const jobColumns = this.job.columns && this.job.columns.length > 0 && this.job.columns;
+    this._columns = jobColumns ? jobColumns : getFromSearchSource();
+
+    return this._columns;
   }
 
   private formatCellValues(formatters: Record<string, FieldFormat>) {
@@ -340,10 +351,7 @@ export class CsvGenerator {
 
         // If columns exists in the job params, use it to order the CSV columns
         // otherwise, get the ordering from the searchSource's fields / fieldsFromSource
-        const jobColumns = this.job.columns && this.job.columns.length > 0 && this.job.columns;
-        const columns = jobColumns
-          ? jobColumns
-          : this.getColumnsFromSearchSource(searchSource, table);
+        const columns = this.getColumns(searchSource, table);
 
         if (first) {
           first = false;
