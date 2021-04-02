@@ -14,6 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const security = getService('security');
   const retry = getService('retry');
+  const spacesService = getService('spaces');
 
   describe('search session', () => {
     describe('session management', () => {
@@ -594,6 +595,81 @@ export default function ({ getService }: FtrProviderContext) {
           .auth('analyst', 'analyst-password')
           .set('kbn-xsrf', 'foo')
           .expect(403);
+      });
+    });
+
+    describe('in non-default space', () => {
+      const spaceId = 'foo-space';
+      before(async () => {
+        await spacesService.create({
+          id: spaceId,
+          name: 'Foo Space',
+        });
+      });
+
+      after(async () => {
+        await spacesService.delete(spaceId);
+      });
+
+      it('should complete and delete non-persistent sessions', async () => {
+        const sessionId = `my-session-${Math.random()}`;
+
+        // run search
+        const searchRes = await supertest
+          .post(`/s/${spaceId}/internal/search/ese`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            sessionId,
+            params: {
+              body: {
+                query: {
+                  term: {
+                    agent: '1',
+                  },
+                },
+              },
+              wait_for_completion_timeout: '1ms',
+            },
+          })
+          .expect(200);
+
+        const { id } = searchRes.body;
+
+        await retry.waitForWithTimeout('searches persisted into session', 5000, async () => {
+          const resp = await supertest
+            .get(`/s/${spaceId}/internal/session/${sessionId}`)
+            .set('kbn-xsrf', 'foo')
+            .expect(200);
+
+          const { touched, created, persisted, idMapping } = resp.body.attributes;
+          expect(persisted).to.be(false);
+          expect(touched).not.to.be(undefined);
+          expect(created).not.to.be(undefined);
+
+          const idMappings = Object.values(idMapping).map((value: any) => value.id);
+          expect(idMappings).to.contain(id);
+          return true;
+        });
+
+        // not touched timeout in tests is 15s, wait to give a chance for status to update
+        await new Promise((resolve) =>
+          setTimeout(() => {
+            resolve(void 0);
+          }, 15_000)
+        );
+
+        await retry.waitForWithTimeout(
+          'searches eventually complete and session gets into the complete state',
+          60_000,
+          async () => {
+            await supertest
+              .get(`/s/${spaceId}/internal/session/${sessionId}`)
+              .set('kbn-xsrf', 'foo')
+              .expect(404);
+
+            return true;
+          }
+        );
       });
     });
   });
