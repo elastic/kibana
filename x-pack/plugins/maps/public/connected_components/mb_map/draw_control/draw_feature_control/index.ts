@@ -9,13 +9,11 @@ import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { DrawFeatureControl } from './draw_feature_control';
-import { updateDrawState } from '../../../../actions';
-import { getDrawState, isDrawingFilter } from '../../../../selectors/map_selectors';
+import { updateDrawFeatureState } from '../../../../actions';
 import { MapStoreState } from '../../../../reducers/store';
 
 function mapStateToProps(state: MapStoreState) {
   return {
-    isDrawingFilter: isDrawingFilter(state),
     drawType: state.map.mapState.drawFeatureState,
   };
 }
@@ -23,7 +21,7 @@ function mapStateToProps(state: MapStoreState) {
 function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
     disableDrawState() {
-      dispatch(updateDrawState(null));
+      dispatch(updateDrawFeatureState(null));
     },
   };
 }

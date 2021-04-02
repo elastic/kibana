@@ -120,6 +120,7 @@ export class DrawFilterControl extends Component<Props, {}> {
         }
         onDraw={this._onDraw}
         mbMap={this.props.mbMap}
+        drawActive={!!(this.props.drawState && this.props.drawState.drawType)}
       />
     );
   }

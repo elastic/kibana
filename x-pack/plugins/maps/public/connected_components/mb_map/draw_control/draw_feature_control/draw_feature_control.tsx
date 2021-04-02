@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { Feature } from 'geojson';
 import { getToasts } from '../../../../kibana_services';
 import { DrawControl } from '../draw_control';
-import { DRAW_TYPE } from "../../../../../common";
+import { DRAW_TYPE } from '../../../../../common';
 
 export interface Props {
   disableDrawState: () => void;
@@ -43,6 +43,7 @@ export class DrawFeatureControl extends Component<Props, {}> {
         drawType={this.props.drawType}
         onDraw={this._onDraw}
         mbMap={this.props.mbMap}
+        drawActive={true}
       />
     );
   }

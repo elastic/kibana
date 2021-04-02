@@ -325,9 +325,11 @@ export function updateDrawState(drawState: DrawState | null) {
   };
 }
 
-export function updateDrawFeatureState(drawFeatureState: DRAW_TYPE) {
+export function updateDrawFeatureState(drawFeatureState: DRAW_TYPE | null) {
   return (dispatch: Dispatch) => {
-    dispatch({ type: SET_OPEN_TOOLTIPS, openTooltips: [] });
+    if (drawFeatureState !== null) {
+      dispatch({ type: SET_OPEN_TOOLTIPS, openTooltips: [] });
+    }
     dispatch({
       type: UPDATE_DRAW_FEATURE_STATE,
       drawFeatureState,

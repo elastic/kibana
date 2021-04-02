@@ -28,6 +28,7 @@ export interface Props {
   drawType?: DRAW_TYPE;
   onDraw: (event: { features: Feature[] }) => void;
   mbMap: MbMap;
+  drawActive: boolean;
 }
 
 export class DrawControl extends Component<Props, {}> {
@@ -58,7 +59,7 @@ export class DrawControl extends Component<Props, {}> {
       return;
     }
 
-    if (this.props.drawType) {
+    if (this.props.drawActive) {
       this._updateDrawControl();
     } else {
       this._removeDrawControl();
