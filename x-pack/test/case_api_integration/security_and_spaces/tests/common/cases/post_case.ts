@@ -17,7 +17,7 @@ import {
   postCaseResp,
   removeServerGeneratedPropertiesFromCase,
 } from '../../../../common/lib/mock';
-import { createCaseAsUser, deleteCases, getSpaceUrlPrefix } from '../../../../common/lib/utils';
+import { createCaseAsUser, deleteCases } from '../../../../common/lib/utils';
 import {
   secOnly,
   secOnlyRead,

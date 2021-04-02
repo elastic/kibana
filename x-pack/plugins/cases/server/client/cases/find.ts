@@ -66,6 +66,7 @@ export const find = async ({
       sortByField: queryParams.sortField,
       status: queryParams.status,
       caseType: queryParams.type,
+      owner: queryParams.owner,
     };
 
     const caseQueries = constructQueryOptions({ ...queryArgs, authorizationFilter });

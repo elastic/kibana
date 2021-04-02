@@ -99,6 +99,7 @@ export const constructQueryOptions = ({
   status,
   sortByField,
   caseType,
+  owner,
   authorizationFilter,
 }: {
   tags?: string | string[];
@@ -106,6 +107,7 @@ export const constructQueryOptions = ({
   status?: CaseStatuses;
   sortByField?: string;
   caseType?: CaseType;
+  owner?: string | string[];
   authorizationFilter?: KueryNode;
 }): { case: SavedObjectFindOptionsKueryNode; subCase?: SavedObjectFindOptionsKueryNode } => {
   const kueryNodeExists = (filter: KueryNode | null | undefined): filter is KueryNode =>
@@ -118,6 +120,7 @@ export const constructQueryOptions = ({
     operator: 'or',
   });
   const sortField = sortToSnake(sortByField);
+  const ownerFilter = buildFilter({ filters: owner ?? [], field: 'owner', operator: 'or' });
 
   switch (caseType) {
     case CaseType.individual: {
@@ -130,7 +133,7 @@ export const constructQueryOptions = ({
         CaseType.individual
       );
 
-      const filters: KueryNode[] = [typeFilter, tagsFilter, reportersFilter].filter(
+      const filters: KueryNode[] = [typeFilter, tagsFilter, reportersFilter, ownerFilter].filter(
         kueryNodeExists
       );
 
@@ -160,7 +163,7 @@ export const constructQueryOptions = ({
         CaseType.collection
       );
 
-      const filters: KueryNode[] = [typeFilter, tagsFilter, reportersFilter].filter(
+      const filters: KueryNode[] = [typeFilter, tagsFilter, reportersFilter, ownerFilter].filter(
         kueryNodeExists
       );
       const caseFilters = filters.length > 1 ? nodeBuilder.and(filters) : filters[0];
@@ -210,7 +213,7 @@ export const constructQueryOptions = ({
           : typeIndividual;
       const statusAndType = nodeBuilder.or([statusFilter, typeParent]);
 
-      const filters: KueryNode[] = [statusAndType, tagsFilter, reportersFilter].filter(
+      const filters: KueryNode[] = [statusAndType, tagsFilter, reportersFilter, ownerFilter].filter(
         kueryNodeExists
       );
 

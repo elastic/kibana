@@ -23,7 +23,7 @@ import {
   createCaseAction,
   deleteCaseAction,
   createCaseAsUser,
-  expectCasesToBeValidOwner,
+  ensureSavedObjectIsAuthorized,
   findCasesAsUser,
 } from '../../../../common/lib/utils';
 import {
@@ -40,6 +40,7 @@ import {
   superUser,
   globalRead,
   obsSecRead,
+  obsSec,
 } from '../../../../common/lib/authentication/users';
 
 interface CaseAttributes {
@@ -692,22 +693,22 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should return the correct cases', async () => {
-        // Create case owned by the security solution user
-
-        await createCaseAsUser({
-          supertestWithoutAuth,
-          user: secOnly,
-          space: 'space1',
-          owner: 'securitySolutionFixture',
-        });
-
-        // Create case owned by the observability user
-        await createCaseAsUser({
-          supertestWithoutAuth,
-          user: obsOnly,
-          space: 'space1',
-          owner: 'observabilityFixture',
-        });
+        await Promise.all([
+          // Create case owned by the security solution user
+          await createCaseAsUser({
+            supertestWithoutAuth,
+            user: secOnly,
+            space: 'space1',
+            owner: 'securitySolutionFixture',
+          }),
+          // Create case owned by the observability user
+          await createCaseAsUser({
+            supertestWithoutAuth,
+            user: obsOnly,
+            space: 'space1',
+            owner: 'observabilityFixture',
+          }),
+        ]);
 
         for (const scenario of [
           {
@@ -734,7 +735,7 @@ export default ({ getService }: FtrProviderContext): void => {
             space: 'space1',
           });
 
-          expectCasesToBeValidOwner(res.cases, scenario.numberOfExpectedCases, scenario.owners);
+          ensureSavedObjectIsAuthorized(res.cases, scenario.numberOfExpectedCases, scenario.owners);
         }
       });
 
@@ -763,22 +764,23 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       }
 
-      it('should return the correct cases when trying to exploit RBAC through the search field', async () => {
-        // super user creates a case with owner securitySolutionFixture
-        await createCaseAsUser({
-          supertestWithoutAuth,
-          user: superUser,
-          space: 'space1',
-          owner: 'securitySolutionFixture',
-        });
-
-        // super user creates a case with owner observabilityFixture
-        await createCaseAsUser({
-          supertestWithoutAuth,
-          user: superUser,
-          space: 'space1',
-          owner: 'observabilityFixture',
-        });
+      it('should return the correct cases when trying to exploit RBAC through the search query parameter', async () => {
+        await Promise.all([
+          // super user creates a case with owner securitySolutionFixture
+          await createCaseAsUser({
+            supertestWithoutAuth,
+            user: superUser,
+            space: 'space1',
+            owner: 'securitySolutionFixture',
+          }),
+          // super user creates a case with owner observabilityFixture
+          await createCaseAsUser({
+            supertestWithoutAuth,
+            user: superUser,
+            space: 'space1',
+            owner: 'observabilityFixture',
+          }),
+        ]);
 
         const res = await findCasesAsUser({
           supertestWithoutAuth,
@@ -787,7 +789,7 @@ export default ({ getService }: FtrProviderContext): void => {
           appendToUrl: 'search=securitySolutionFixture+observabilityFixture&searchFields=owner',
         });
 
-        expectCasesToBeValidOwner(res.cases, 1, ['securitySolutionFixture']);
+        ensureSavedObjectIsAuthorized(res.cases, 1, ['securitySolutionFixture']);
       });
 
       // This test is to prevent a future developer to add the filter attribute without taking into consideration
@@ -824,6 +826,60 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .send()
           .expect(400);
+      });
+
+      it('should respect the owner filter when having permissions', async () => {
+        await Promise.all([
+          await createCaseAsUser({
+            supertestWithoutAuth,
+            user: obsSec,
+            space: 'space1',
+            owner: 'securitySolutionFixture',
+          }),
+          await createCaseAsUser({
+            supertestWithoutAuth,
+            user: obsSec,
+            space: 'space1',
+            owner: 'observabilityFixture',
+          }),
+        ]);
+
+        const res = await findCasesAsUser({
+          supertestWithoutAuth,
+          user: obsSec,
+          space: 'space1',
+          appendToUrl: 'owner=securitySolutionFixture',
+        });
+
+        ensureSavedObjectIsAuthorized(res.cases, 1, ['securitySolutionFixture']);
+      });
+
+      it('should return the correct cases when trying to exploit RBAC through the owner query parameter', async () => {
+        await Promise.all([
+          await createCaseAsUser({
+            supertestWithoutAuth,
+            user: obsSec,
+            space: 'space1',
+            owner: 'securitySolutionFixture',
+          }),
+          await createCaseAsUser({
+            supertestWithoutAuth,
+            user: obsSec,
+            space: 'space1',
+            owner: 'observabilityFixture',
+          }),
+        ]);
+
+        // User with permissions only to security solution request cases from observability
+        const res = await findCasesAsUser({
+          supertestWithoutAuth,
+          user: secOnly,
+          space: 'space1',
+          appendToUrl: 'owner=securitySolutionFixture&owner=observabilityFixture',
+        });
+
+        // Only security solution cases are being returned
+        ensureSavedObjectIsAuthorized(res.cases, 1, ['securitySolutionFixture']);
       });
     });
   });

@@ -460,7 +460,7 @@ export const findCasesAsUser = async ({
   return res;
 };
 
-export const expectCasesToBeValidOwner = (
+export const ensureSavedObjectIsAuthorized = (
   cases: CaseResponse[],
   numberOfExpectedCases: number,
   owners: string[]
