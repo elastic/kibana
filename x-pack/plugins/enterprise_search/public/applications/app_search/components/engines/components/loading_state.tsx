@@ -18,7 +18,7 @@ export const LoadingState: React.FC = () => {
     <>
       <SetPageChrome />
       <EnginesOverviewHeader />
-      <EuiPageContent paddingSize="l">
+      <EuiPageContent hasBorder paddingSize="l">
         <EuiLoadingContent lines={5} />
         <EuiSpacer size="xxl" />
         <EuiLoadingContent lines={4} />

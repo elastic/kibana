@@ -23,9 +23,9 @@ export const SampleEngineCreationCta: React.FC = () => {
   const { createSampleEngine } = useActions(SampleEngineCreationCtaLogic);
 
   return (
-    <EuiPanel>
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem>
+    <EuiPanel color="subdued">
+      <EuiFlexGroup alignItems="center" gutterSize="s">
+        <EuiFlexItem className="eui-textLeft eui-textNoWrap">
           <EuiTitle size="s">
             <h3>{SAMPLE_ENGINE_CREATION_CTA_TITLE}</h3>
           </EuiTitle>
