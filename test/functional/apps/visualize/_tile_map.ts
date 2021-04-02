@@ -15,7 +15,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const inspector = getService('inspector');
   const filterBar = getService('filterBar');
-  const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const PageObjects = getPageObjects([
     'common',
