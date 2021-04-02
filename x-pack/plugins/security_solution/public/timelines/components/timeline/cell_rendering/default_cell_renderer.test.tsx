@@ -94,14 +94,14 @@ describe('DefaultCellRenderer', () => {
       </TestProviders>
     );
 
-    expect(mockImplementation.renderColumn).toBeCalledWith(
-      expect.objectContaining({
-        columnName: header.id,
-        eventId,
-        field: header,
-        linkValues,
-        timelineId,
-      })
-    );
+    expect(mockImplementation.renderColumn).toBeCalledWith({
+      columnName: header.id,
+      eventId,
+      field: header,
+      linkValues,
+      timelineId,
+      truncate: true,
+      values: ['2018-11-05T19:03:25.937Z'],
+    });
   });
 });
