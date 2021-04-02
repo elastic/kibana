@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiCard } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibanaUrl } from '../../../hooks/useKibanaUrl';
@@ -43,7 +43,7 @@ export function LicensePrompt({ text, showBetaBadge = false }: Props) {
   );
 
   const renderWithBetaBadge = (
-    <EuiPanel
+    <EuiCard
       betaBadgeLabel={i18n.translate('xpack.apm.license.betaBadge', {
         defaultMessage: 'Beta',
       })}
@@ -54,9 +54,11 @@ export function LicensePrompt({ text, showBetaBadge = false }: Props) {
             'This feature is currently in beta. If you encounter any bugs or have feedback, please open an issue or visit our discussion forum.',
         }
       )}
+      description={<></>}
+      title={<></>}
     >
       {renderLicenseBody}
-    </EuiPanel>
+    </EuiCard>
   );
 
   return <>{showBetaBadge ? renderWithBetaBadge : renderLicenseBody}</>;

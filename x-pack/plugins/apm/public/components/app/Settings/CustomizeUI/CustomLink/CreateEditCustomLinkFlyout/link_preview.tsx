@@ -7,9 +7,8 @@
 
 import React, { useEffect, useState } from 'react';
 import {
-  EuiPanel,
+  EuiCard,
   EuiText,
-  EuiSpacer,
   EuiLink,
   EuiToolTip,
   EuiIcon,
@@ -66,43 +65,52 @@ export function LinkPreview({ label, url, filters }: Props) {
   const { formattedUrl, error } = replaceTemplateVariables(url, transaction);
 
   return (
-    <EuiPanel betaBadgeLabel="Preview" paddingSize="l">
-      <EuiText
-        size="s"
-        color={getTextColor(label)}
-        className="eui-textBreakWord"
-        data-test-subj="preview-label"
-      >
-        {label
-          ? label
-          : i18n.translate(
-              'xpack.apm.settings.customizeUI.customLink.default.label',
-              { defaultMessage: 'Elastic.co' }
-            )}
-      </EuiText>
-
-      <EuiText
-        size="s"
-        color={getTextColor(url)}
-        className="eui-textBreakWord"
-        data-test-subj="preview-url"
-      >
-        {url ? (
-          <EuiLink
-            href={formattedUrl}
-            target="_blank"
-            data-test-subj="preview-link"
-          >
-            {formattedUrl}
-          </EuiLink>
-        ) : (
-          i18n.translate(
-            'xpack.apm.settings.customizeUI.customLink.default.url',
-            { defaultMessage: 'https://www.elastic.co' }
-          )
-        )}
-      </EuiText>
-      <EuiSpacer />
+    <EuiCard
+      betaBadgeLabel={i18n.translate(
+        'xpack.apm.settings.customizeUI.customLinkPreviewBadgeLabel',
+        { defaultMessage: 'Preview' }
+      )}
+      description={
+        <EuiText
+          size="s"
+          color={getTextColor(url)}
+          className="eui-textBreakWord"
+          data-test-subj="preview-url"
+        >
+          {url ? (
+            <EuiLink
+              href={formattedUrl}
+              target="_blank"
+              data-test-subj="preview-link"
+            >
+              {formattedUrl}
+            </EuiLink>
+          ) : (
+            i18n.translate(
+              'xpack.apm.settings.customizeUI.customLink.default.url',
+              { defaultMessage: 'https://www.elastic.co' }
+            )
+          )}
+        </EuiText>
+      }
+      paddingSize="l"
+      textAlign="left"
+      title={
+        <EuiText
+          size="s"
+          color={getTextColor(label)}
+          className="eui-textBreakWord"
+          data-test-subj="preview-label"
+        >
+          {label
+            ? label
+            : i18n.translate(
+                'xpack.apm.settings.customizeUI.customLink.default.label',
+                { defaultMessage: 'Elastic.co' }
+              )}
+        </EuiText>
+      }
+    >
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiText size="s" color="subdued">
@@ -128,6 +136,6 @@ export function LinkPreview({ label, url, filters }: Props) {
           )}
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPanel>
+    </EuiCard>
   );
 }
