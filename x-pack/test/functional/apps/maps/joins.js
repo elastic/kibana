@@ -121,7 +121,9 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it('should not apply query to source and apply query to join', async () => {
-        const joinResponse = await PageObjects.maps.getResponse('meta_for_geo_shapes*.shape_name');
+        const joinResponse = await PageObjects.maps.getResponse(
+          'meta_for_geo_shapes*.runtime_shape_name'
+        );
         expect(joinResponse.aggregations.join.buckets.length).to.equal(2);
       });
     });
