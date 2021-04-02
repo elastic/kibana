@@ -460,10 +460,14 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       actions: [
         {
           render: (agent: Agent) => {
+            const agentPolicy =
+              typeof agent.policy_id === 'string'
+                ? agentPoliciesIndexedById[agent.policy_id]
+                : undefined;
             return (
               <RowActions
                 agent={agent}
-                agentPolicy={agent.policy_id && agentPoliciesIndexedById[agent.policy_id]}
+                agentPolicy={agentPolicy}
                 refresh={() => fetchData()}
                 onReassignClick={() => setAgentToReassign(agent)}
                 onUnenrollClick={() => setAgentToUnenroll(agent)}
