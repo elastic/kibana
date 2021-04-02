@@ -127,6 +127,11 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
 
           await ml.testExecution.logTestStep(
+            'sets the sample size to 10000 for the scatterplot matrix'
+          );
+          await ml.dataFrameAnalyticsCreation.setScatterplotMatrixSampleSizeSelectValue('10000');
+
+          await ml.testExecution.logTestStep(
             'sets the randomize query switch to true for the scatterplot matrix'
           );
           await ml.dataFrameAnalyticsCreation.setScatterplotMatrixRandomizeQueryCheckState(true);
@@ -262,6 +267,11 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsResults.assertFeatureInfluenceCellNotEmpty();
 
           await ml.testExecution.logTestStep(
+            'sets the sample size to 10000 for the scatterplot matrix'
+          );
+          await ml.dataFrameAnalyticsResults.setScatterplotMatrixSampleSizeSelectValue('10000');
+
+          await ml.testExecution.logTestStep(
             'sets the randomize query switch to true for the scatterplot matrix'
           );
           await ml.dataFrameAnalyticsResults.setScatterplotMatrixRandomizeQueryCheckState(true);
@@ -270,6 +280,8 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsResults.assertScatterplotMatrix(
             testData.expected.scatterplotMatrixColorStatsResults
           );
+
+          await ml.commonUI.resetAntiAliasing();
         });
 
         it('displays the analytics job in the map view', async () => {

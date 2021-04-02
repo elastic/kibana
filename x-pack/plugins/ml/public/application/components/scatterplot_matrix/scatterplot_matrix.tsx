@@ -317,6 +317,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
                 fullWidth
               >
                 <EuiSelect
+                  data-test-subj="mlScatterplotMatrixSampleSizeSelect"
                   compressed
                   options={sampleSizeOptions}
                   value={fetchSize}
@@ -341,7 +342,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
                 fullWidth
               >
                 <EuiSwitch
-                  data-test-subj={`mlScatterplotMatrixRandomizeQuerySwitch`}
+                  data-test-subj="mlScatterplotMatrixRandomizeQuerySwitch"
                   name="mlScatterplotMatrixRandomizeQuery"
                   label={randomizeQuery ? TOGGLE_ON : TOGGLE_OFF}
                   checked={randomizeQuery}

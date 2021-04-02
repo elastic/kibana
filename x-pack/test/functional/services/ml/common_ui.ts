@@ -10,7 +10,7 @@ import { ProvidedType } from '@kbn/test/types/ftr';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-import { CanvasElementColorStats } from '../canvas_element';
+import type { CanvasElementColorStats } from '../canvas_element';
 
 interface SetValueOptions {
   clearWithKeyboard?: boolean;

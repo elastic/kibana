@@ -274,6 +274,20 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       );
     },
 
+    async setScatterplotMatrixSampleSizeSelectValue(selectValue: string) {
+      await testSubjects.selectValue('mlScatterplotMatrixSampleSizeSelect', selectValue);
+
+      const actualSelectState = await testSubjects.getAttribute(
+        'mlScatterplotMatrixSampleSizeSelect',
+        'value'
+      );
+
+      expect(actualSelectState).to.eql(
+        selectValue,
+        `Sample size should be '${selectValue}' (got '${actualSelectState}')`
+      );
+    },
+
     async getScatterplotMatrixRandomizeQuerySwitchCheckState(): Promise<boolean> {
       const state = await testSubjects.getAttribute(
         'mlScatterplotMatrixRandomizeQuerySwitch',
@@ -291,10 +305,12 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async setScatterplotMatrixRandomizeQueryCheckState(checkState: boolean) {
-      if ((await this.getScatterplotMatrixRandomizeQuerySwitchCheckState()) !== checkState) {
-        await testSubjects.click('mlScatterplotMatrixRandomizeQuerySwitch');
-      }
-      await this.assertScatterplotMatrixRandomizeQueryCheckState(checkState);
+      await retry.tryForTime(30000, async () => {
+        if ((await this.getScatterplotMatrixRandomizeQuerySwitchCheckState()) !== checkState) {
+          await testSubjects.click('mlScatterplotMatrixRandomizeQuerySwitch');
+        }
+        await this.assertScatterplotMatrixRandomizeQueryCheckState(checkState);
+      });
     },
 
     async assertTrainingPercentInputExists() {

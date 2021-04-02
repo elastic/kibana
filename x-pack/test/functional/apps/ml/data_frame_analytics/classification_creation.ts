@@ -54,7 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
             // tick/grid/axis
             { color: '#DDDDDD', percentage: 8 },
             { color: '#D3DAE6', percentage: 8 },
-            { color: '#F5F7FA', percentage: 20 },
+            { color: '#F5F7FA', percentage: 15 },
           ],
           row: {
             type: 'classification',
@@ -77,6 +77,10 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.navigation.navigateToDataFrameAnalytics();
 
           await ml.testExecution.logTestStep('loads the source selection modal');
+
+          // Disable anti-aliasing to stabilize canvas image rendering assertions
+          await ml.commonUI.disableAntiAliasing();
+
           await ml.dataFrameAnalytics.startAnalyticsCreation();
 
           await ml.testExecution.logTestStep(
@@ -104,6 +108,11 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('displays the include fields selection');
           await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
+
+          await ml.testExecution.logTestStep(
+            'sets the sample size to 10000 for the scatterplot matrix'
+          );
+          await ml.dataFrameAnalyticsCreation.setScatterplotMatrixSampleSizeSelectValue('10000');
 
           await ml.testExecution.logTestStep(
             'sets the randomize query switch to true for the scatterplot matrix'
@@ -259,6 +268,11 @@ export default function ({ getService }: FtrProviderContext) {
           );
 
           await ml.testExecution.logTestStep(
+            'sets the sample size to 10000 for the scatterplot matrix'
+          );
+          await ml.dataFrameAnalyticsResults.setScatterplotMatrixSampleSizeSelectValue('10000');
+
+          await ml.testExecution.logTestStep(
             'sets the randomize query switch to true for the scatterplot matrix'
           );
           await ml.dataFrameAnalyticsResults.setScatterplotMatrixRandomizeQueryCheckState(true);
@@ -267,6 +281,8 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsResults.assertScatterplotMatrix(
             testData.expected.scatterplotMatrixColorStats
           );
+
+          await ml.commonUI.resetAntiAliasing();
         });
 
         it('displays the analytics job in the map view', async () => {
