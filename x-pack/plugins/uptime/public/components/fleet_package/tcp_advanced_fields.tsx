@@ -46,7 +46,7 @@ export const TCPAdvancedFields = memo<Props>(({ defaultValues, onChange }) => {
   );
 
   return (
-    <EuiAccordion id="uptimeFleetAdvancedOptions" buttonContent="Advanced options">
+    <EuiAccordion id="uptimeFleetTCPAdvancedOptions" buttonContent="Advanced TCP options">
       <EuiSpacer size="m" />
       <EuiDescribedFormGroup
         title={

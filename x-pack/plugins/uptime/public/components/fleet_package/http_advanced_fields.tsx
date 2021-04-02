@@ -53,11 +53,11 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, valida
 
   return (
     <EuiAccordion
-      id="uptimeFleetAdvancedOptions"
+      id="uptimeFleetHttpAdvancedOptions"
       buttonContent={
         <FormattedMessage
           id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions"
-          defaultMessage="Advanced options"
+          defaultMessage="Advanced HTTP options"
         />
       }
     >

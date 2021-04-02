@@ -15,6 +15,7 @@ import {
   EuiFieldText,
   EuiFieldNumber,
   EuiSelect,
+  EuiSpacer,
   EuiDescribedFormGroup,
   EuiCheckbox,
 } from '@elastic/eui';
@@ -383,37 +384,44 @@ export const CustomFields = memo<Props>(
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiDescribedFormGroup>
-        <EuiDescribedFormGroup
-          title={
-            <h4>
+        {(isHTTP || isTCP) && (
+          <EuiDescribedFormGroup
+            title={
+              <h4>
+                <FormattedMessage
+                  id="xpack.uptime.createPackagePolicy.stepConfigure.tlsSettings.label"
+                  defaultMessage="TLS settings"
+                />
+              </h4>
+            }
+            description={
               <FormattedMessage
-                id="xpack.uptime.createPackagePolicy.stepConfigure.tlsSettings.label"
-                defaultMessage="TLS settings"
-              />
-            </h4>
-          }
-          description={
-            <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.tlsSettings.description"
-              defaultMessage="Configure TLS options, including verification mode, certificate authorities, and client certificates."
-            />
-          }
-        >
-          <EuiCheckbox
-            id={'uptimeFleetIsTLSEnabled'}
-            checked={isTLSEnabled}
-            label={
-              <FormattedMessage
-                id="xpack.uptime.createPackagePolicy.stepConfigure.certificateSettings.enableSSLSettings.label"
-                defaultMessage="Enable SSL configuration"
+                id="xpack.uptime.createPackagePolicy.stepConfigure.tlsSettings.description"
+                defaultMessage="Configure TLS options, including verification mode, certificate authorities, and client certificates."
               />
             }
-            onChange={(event) => setIsTLSEnabled(event.target.checked)}
-          />
-          {isTLSEnabled && (
-            <CertsField onChange={handleChangeCerts} sslRole={SSLRole.CLIENT} showLegend={false} />
-          )}
-        </EuiDescribedFormGroup>
+          >
+            <EuiCheckbox
+              id={'uptimeFleetIsTLSEnabled'}
+              checked={isTLSEnabled}
+              label={
+                <FormattedMessage
+                  id="xpack.uptime.createPackagePolicy.stepConfigure.certificateSettings.enableSSLSettings.label"
+                  defaultMessage="Enable SSL configuration"
+                />
+              }
+              onChange={(event) => setIsTLSEnabled(event.target.checked)}
+            />
+            {isTLSEnabled && (
+              <CertsField
+                onChange={handleChangeCerts}
+                sslRole={SSLRole.CLIENT}
+                showLegend={false}
+              />
+            )}
+          </EuiDescribedFormGroup>
+        )}
+        <EuiSpacer size="m" />
         {isHTTP && (
           <HTTPAdvancedFields
             defaultValues={{
