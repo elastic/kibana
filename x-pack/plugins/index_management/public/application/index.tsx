@@ -31,7 +31,7 @@ export const renderApp = (
 
   const { i18n, docLinks, notifications, application } = core;
   const { Context: I18nContext } = i18n;
-  const { services, history, setBreadcrumbs, uiSettings } = dependencies;
+  const { services, history, setBreadcrumbs, uiSettings, managementPageLayout } = dependencies;
 
   // uiSettings is required by the CodeEditor component used to edit runtime field Painless scripts.
   const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
@@ -56,7 +56,7 @@ export const renderApp = (
             <MappingsEditorProvider>
               <ComponentTemplatesProvider value={componentTemplateProviderValues}>
                 <GlobalFlyoutProvider>
-                  <App history={history} />
+                  <App history={history} managementPageLayout={managementPageLayout} />
                 </GlobalFlyoutProvider>
               </ComponentTemplatesProvider>
             </MappingsEditorProvider>

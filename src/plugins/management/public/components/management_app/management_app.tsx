@@ -9,15 +9,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from 'kibana/public';
 import { I18nProvider } from '@kbn/i18n/react';
-import { EuiPage } from '@elastic/eui';
 import { ManagementSection, MANAGEMENT_BREADCRUMB } from '../../utils';
 
 import { ManagementRouter } from './management_router';
-import { ManagementSidebarNav } from '../management_sidebar_nav';
 import { reactRouterNavigate } from '../../../../kibana_react/public';
 import { SectionsServiceStart } from '../../types';
-
-import './management_app.scss';
 
 interface ManagementAppProps {
   appBasePath: string;
@@ -33,13 +29,7 @@ export interface ManagementAppDependencies {
 
 export const ManagementApp = ({ dependencies, history }: ManagementAppProps) => {
   const { setBreadcrumbs } = dependencies;
-  const [selectedId, setSelectedId] = useState<string>('');
   const [sections, setSections] = useState<ManagementSection[]>();
-
-  const onAppMounted = useCallback((id: string) => {
-    setSelectedId(id);
-    window.scrollTo(0, 0);
-  }, []);
 
   const setBreadcrumbsScoped = useCallback(
     (crumbs: ChromeBreadcrumb[] = [], appHistory?: ScopedHistory) => {
@@ -66,16 +56,12 @@ export const ManagementApp = ({ dependencies, history }: ManagementAppProps) => 
 
   return (
     <I18nProvider>
-      <EuiPage>
-        <ManagementSidebarNav selectedId={selectedId} sections={sections} history={history} />
-        <ManagementRouter
-          history={history}
-          setBreadcrumbs={setBreadcrumbsScoped}
-          onAppMounted={onAppMounted}
-          sections={sections}
-          dependencies={dependencies}
-        />
-      </EuiPage>
+      <ManagementRouter
+        history={history}
+        setBreadcrumbs={setBreadcrumbsScoped}
+        sections={sections}
+        dependencies={dependencies}
+      />
     </I18nProvider>
   );
 };

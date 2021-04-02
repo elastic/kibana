@@ -22,20 +22,31 @@ import {
   ComponentTemplateEdit,
   ComponentTemplateClone,
 } from './components';
+import { ManagementAppMountParams } from '../../../../../src/plugins/management/public';
 
-export const App = ({ history }: { history: ScopedHistory }) => {
+export const App = ({
+  history,
+  managementPageLayout,
+}: {
+  history: ScopedHistory;
+  managementPageLayout: ManagementAppMountParams['managementPageLayout'];
+}) => {
   const { uiMetricService } = useServices();
   useEffect(() => uiMetricService.trackMetric(METRIC_TYPE.LOADED, UIM_APP_LOAD), [uiMetricService]);
 
   return (
     <Router history={history}>
-      <AppWithoutRouter />
+      <AppWithoutRouter managementPageLayout={managementPageLayout} />
     </Router>
   );
 };
 
 // Export this so we can test it with a different router.
-export const AppWithoutRouter = () => (
+export const AppWithoutRouter = ({
+  managementPageLayout,
+}: {
+  managementPageLayout: ManagementAppMountParams['managementPageLayout'];
+}) => (
   <Switch>
     <Route exact path="/create_template" component={TemplateCreate} />
     <Route exact path="/clone_template/:name*" component={TemplateClone} />
@@ -47,7 +58,16 @@ export const AppWithoutRouter = () => (
       component={ComponentTemplateClone}
     />
     <Route exact path="/edit_component_template/:name*" component={ComponentTemplateEdit} />
-    <Route path={`/:section(${homeSections.join('|')})`} component={IndexManagementHome} />
+    <Route
+      path={`/:section(${homeSections.join('|')})`}
+      render={(props) => (
+        <IndexManagementHome
+          section={props.match.params.section}
+          historyPush={props.history.push}
+          managementPageLayout={managementPageLayout}
+        />
+      )}
+    />
     <Redirect from={`/`} to={`/indices`} />
   </Switch>
 );

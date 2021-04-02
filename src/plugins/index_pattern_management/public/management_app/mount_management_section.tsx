@@ -82,7 +82,10 @@ export async function mountManagementSection(
               <EditIndexPatternContainer />
             </Route>
             <Route path={['/']}>
-              <IndexPatternTableWithRouter canSave={canSave} />
+              <IndexPatternTableWithRouter
+                canSave={canSave}
+                managementPageLayout={params.managementPageLayout}
+              />
             </Route>
           </Switch>
         </Router>

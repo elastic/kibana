@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { Route, RouteComponentProps, Switch } from 'react-router-dom';
+import { Route, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButtonEmpty, EuiPageHeader, EuiSpacer, EuiHorizontalRule } from '@elastic/eui';
 import { documentationService } from '../../services/documentation';
@@ -15,6 +15,7 @@ import { IndexList } from './index_list';
 import { TemplateList } from './template_list';
 import { ComponentTemplateList } from '../../components/component_templates';
 import { breadcrumbService } from '../../services/breadcrumbs';
+import { ManagementAppMountParams } from '../../../../../../../src/plugins/management/public';
 
 export enum Section {
   Indices = 'indices',
@@ -32,22 +33,23 @@ export const homeSections = [
 
 interface MatchParams {
   section: Section;
+  historyPush: (newRoute: string) => void;
+  managementPageLayout: ManagementAppMountParams['managementPageLayout'];
 }
 
-export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
-  match: {
-    params: { section },
-  },
-  history,
-}) => {
+export const IndexManagementHome = ({
+  section,
+  historyPush,
+  managementPageLayout: ManagementPageLayout,
+}: MatchParams) => {
   const tabs = [
     {
       id: Section.Indices,
-      name: <FormattedMessage id="xpack.idxMgmt.home.indicesTabTitle" defaultMessage="Indices" />,
+      label: <FormattedMessage id="xpack.idxMgmt.home.indicesTabTitle" defaultMessage="Indices" />,
     },
     {
       id: Section.DataStreams,
-      name: (
+      label: (
         <FormattedMessage
           id="xpack.idxMgmt.home.dataStreamsTabTitle"
           defaultMessage="Data Streams"
@@ -56,7 +58,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
     },
     {
       id: Section.IndexTemplates,
-      name: (
+      label: (
         <FormattedMessage
           id="xpack.idxMgmt.home.indexTemplatesTabTitle"
           defaultMessage="Index Templates"
@@ -65,7 +67,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
     },
     {
       id: Section.ComponentTemplates,
-      name: (
+      label: (
         <FormattedMessage
           id="xpack.idxMgmt.home.componentTemplatesTabTitle"
           defaultMessage="Component Templates"
@@ -75,7 +77,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
   ];
 
   const onSectionChange = (newSection: Section) => {
-    history.push(`/${newSection}`);
+    historyPush(`/${newSection}`);
   };
 
   useEffect(() => {
@@ -83,14 +85,14 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
   }, []);
 
   return (
-    <>
-      <EuiPageHeader
-        pageTitle={
+    <ManagementPageLayout
+      pageHeader={{
+        pageTitle: (
           <span data-test-subj="appTitle">
             <FormattedMessage id="xpack.idxMgmt.home.appTitle" defaultMessage="Index Management" />
           </span>
-        }
-        rightSideItems={[
+        ),
+        rightSideItems: [
           <EuiButtonEmpty
             href={documentationService.getIdxMgmtDocumentationLink()}
             target="_blank"
@@ -102,23 +104,16 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
               defaultMessage="Index Management docs"
             />
           </EuiButtonEmpty>,
-        ]}
-        tabs={tabs.map((tab) => {
-          const rObj = {
-            label: tab.name,
-            onClick: () => onSectionChange(tab.id),
-            isSelected: tab.id === section,
-            key: tab.id,
-            'data-test-subj': `${tab.id}Tab`,
-          };
-          return rObj;
-        })}
-      />
-      {/* TODO: Use the new bottomBorder prop. But better, pass the page header props up */}
-      <EuiHorizontalRule margin="none" />
-
-      <EuiSpacer size="l" />
-
+        ],
+        tabs: tabs.map(({ label, id }) => ({
+          label,
+          onClick: () => onSectionChange(id),
+          isSelected: id === section,
+          key: id,
+          'data-test-subj': `${id}Tab`,
+        })),
+      }}
+    >
       <Switch>
         <Route
           exact
@@ -140,6 +135,6 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
           component={ComponentTemplateList}
         />
       </Switch>
-    </>
+    </ManagementPageLayout>
   );
 };

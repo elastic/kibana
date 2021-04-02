@@ -6,17 +6,20 @@
  * Side Public License, v 1.
  */
 
-import React, { createRef, Component } from 'react';
+import React, { createRef, Component, ComponentType } from 'react';
 
 import { ChromeBreadcrumb, AppMountParameters, ScopedHistory } from 'kibana/public';
 import { ManagementApp } from '../../utils';
 import { Unmount } from '../../types';
+import { APP_WRAPPER_CLASS } from '../../../../../../src/core/public';
+import { KibanaPageTemplateProps } from '../../../../kibana_react/public';
 
 interface ManagementSectionWrapperProps {
   app: ManagementApp;
   setBreadcrumbs: (crumbs?: ChromeBreadcrumb[], history?: ScopedHistory) => void;
   onAppMounted: (id: string) => void;
   history: AppMountParameters['history'];
+  managementPageLayout: ComponentType<KibanaPageTemplateProps>;
 }
 
 export class ManagementAppWrapper extends Component<ManagementSectionWrapperProps> {
@@ -24,7 +27,7 @@ export class ManagementAppWrapper extends Component<ManagementSectionWrapperProp
   private mountElementRef = createRef<HTMLDivElement>();
 
   componentDidMount() {
-    const { setBreadcrumbs, app, onAppMounted, history } = this.props;
+    const { setBreadcrumbs, app, onAppMounted, history, managementPageLayout } = this.props;
     const { mount, basePath } = app;
     const appHistory = history.createSubHistory(app.basePath);
 
@@ -33,6 +36,7 @@ export class ManagementAppWrapper extends Component<ManagementSectionWrapperProp
       setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => setBreadcrumbs(crumbs, appHistory),
       element: this.mountElementRef.current!,
       history: appHistory,
+      managementPageLayout,
     });
 
     onAppMounted(app.id);
@@ -53,6 +57,6 @@ export class ManagementAppWrapper extends Component<ManagementSectionWrapperProp
   }
 
   render() {
-    return <div ref={this.mountElementRef} />;
+    return <div className={APP_WRAPPER_CLASS} ref={this.mountElementRef} />;
   }
 }

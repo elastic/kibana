@@ -52,7 +52,7 @@ export async function mountManagementSection(
   extensionsService: ExtensionsService,
   isFleetEnabled: boolean
 ) {
-  const { element, setBreadcrumbs, history } = params;
+  const { element, setBreadcrumbs, history, managementPageLayout } = params;
   const [core, startDependencies] = await coreSetup.getStartServices();
   const {
     docLinks,
@@ -88,6 +88,7 @@ export async function mountManagementSection(
     uiSettings,
     urlGenerators,
     docLinks,
+    managementPageLayout,
   };
 
   const unmountAppCallback = renderApp(element, { core, dependencies: appDependencies });

@@ -11,11 +11,13 @@ import ReactDOM from 'react-dom';
 
 import { AppMountParameters } from 'kibana/public';
 import { ManagementApp, ManagementAppDependencies } from './components/management_app';
+import { APP_WRAPPER_CLASS } from '../../../core/public';
 
 export const renderApp = async (
   { history, appBasePath, element }: AppMountParameters,
   dependencies: ManagementAppDependencies
 ) => {
+  element.classList.add(APP_WRAPPER_CLASS);
   ReactDOM.render(
     <ManagementApp dependencies={dependencies} appBasePath={appBasePath} history={history} />,
     element

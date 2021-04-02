@@ -6,60 +6,55 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { ComponentType } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-
-import {
-  EuiHorizontalRule,
-  EuiIcon,
-  EuiPageContent,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiHorizontalRule, EuiText } from '@elastic/eui';
+import { KibanaPageTemplateProps } from '../../../../../../src/plugins/kibana_react/public';
 
 interface ManagementLandingPageProps {
   version: string;
   setBreadcrumbs: () => void;
+  managementPageLayout: ComponentType<KibanaPageTemplateProps>;
 }
 
-export const ManagementLandingPage = ({ version, setBreadcrumbs }: ManagementLandingPageProps) => {
+export const ManagementLandingPage = ({
+  version,
+  setBreadcrumbs,
+  managementPageLayout: ManagementPageLayout,
+}: ManagementLandingPageProps) => {
   setBreadcrumbs();
 
   return (
-    <EuiPageContent horizontalPosition="center" data-test-subj="managementHome">
-      <div>
-        <div className="eui-textCenter">
-          <EuiIcon type="managementApp" size="xxl" />
-          <EuiSpacer />
-          <EuiTitle>
-            <h1>
-              <FormattedMessage
-                id="management.landing.header"
-                defaultMessage="Welcome to Stack Management {version}"
-                values={{ version }}
-              />
-            </h1>
-          </EuiTitle>
-          <EuiText>
-            <FormattedMessage
-              id="management.landing.subhead"
-              defaultMessage="Manage your indices, index patterns, saved objects, Kibana settings, and more."
-            />
-          </EuiText>
-        </div>
+    <ManagementPageLayout
+      data-test-subj="managementHome"
+      template="centeredBody"
+      pageHeader={{
+        iconType: 'managementApp',
+        pageTitle: (
+          <FormattedMessage
+            id="management.landing.header"
+            defaultMessage="Welcome to Stack Management {version}"
+            values={{ version }}
+          />
+        ),
+        description: (
+          <FormattedMessage
+            id="management.landing.subhead"
+            defaultMessage="Manage your indices, index patterns, saved objects, Kibana settings, and more."
+          />
+        ),
+      }}
+    >
+      <EuiHorizontalRule />
 
-        <EuiHorizontalRule />
-
-        <EuiText color="subdued" size="s" textAlign="center">
-          <p>
-            <FormattedMessage
-              id="management.landing.text"
-              defaultMessage="A complete list of apps is in the menu on the left."
-            />
-          </p>
-        </EuiText>
-      </div>
-    </EuiPageContent>
+      <EuiText color="subdued" size="s" textAlign="center">
+        <p>
+          <FormattedMessage
+            id="management.landing.text"
+            defaultMessage="A complete list of apps is in the menu on the left."
+          />
+        </p>
+      </EuiText>
+    </ManagementPageLayout>
   );
 };

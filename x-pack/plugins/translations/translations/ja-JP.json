@@ -3367,7 +3367,6 @@
     "kibana-react.tableListView.listing.unableToDeleteDangerMessage": "{entityName} を削除できません",
     "kibanaOverview.addData.sampleDataButtonLabel": "サンプルデータを試す",
     "kibanaOverview.addData.sectionTitle": "データを取り込む",
-    "kibanaOverview.apps.title": "これらのアプリを検索",
     "kibanaOverview.gettingStarted.addDataButtonLabel": "データを追加",
     "kibanaOverview.gettingStarted.description": "Kibanaを使用すると、データや方法を可視化する能力が高まります。 1つの質問から始めて、解答から知見を得ることができます。",
     "kibanaOverview.gettingStarted.title": "Kibanaの基本操作",

@@ -37,6 +37,7 @@ export interface AppDependencies {
   uiSettings: CoreSetup['uiSettings'];
   urlGenerators: SharePluginStart['urlGenerators'];
   docLinks: CoreStart['docLinks'];
+  managementPageLayout: ManagementAppMountParams['managementPageLayout'];
 }
 
 export const AppContextProvider = ({

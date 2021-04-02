@@ -7,8 +7,10 @@
  */
 
 import { ScopedHistory, Capabilities } from 'kibana/public';
+import { ComponentType } from 'react';
 import { ManagementSection, RegisterManagementSectionArgs } from './utils';
 import { ChromeBreadcrumb } from '../../../core/public/';
+import { KibanaPageTemplateProps } from '../../kibana_react/public';
 
 export interface ManagementSetup {
   sections: SectionsServiceSetup;
@@ -60,6 +62,7 @@ export interface ManagementAppMountParams {
   element: HTMLElement; // element the section should render into
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   history: ScopedHistory;
+  managementPageLayout: ComponentType<KibanaPageTemplateProps>;
 }
 
 export interface CreateManagementItemArgs {
