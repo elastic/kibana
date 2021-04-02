@@ -9,9 +9,7 @@ jest.mock('../../../../../../../src/plugins/vis_type_vega/public/default_spec', 
   getDefaultSpec: () => ({}),
 }));
 
-// import { compile } from 'vega-lite';
-import { mlDraftExport } from '../../../../../../../src/plugins/vis_type_vega/public';
-const { compile } = mlDraftExport;
+import { getVegaSharedImports } from '../../../../../../../src/plugins/vis_type_vega/public';
 
 import euiThemeLight from '@elastic/eui/dist/eui_theme_light.json';
 
@@ -60,7 +58,9 @@ describe('getColorSpec()', () => {
 });
 
 describe('getScatterplotMatrixVegaLiteSpec()', () => {
-  it('should return the default spec for non-outliers without a legend', () => {
+  it('should return the default spec for non-outliers without a legend', async () => {
+    const { compile } = await getVegaSharedImports();
+
     const data = [{ x: 1, y: 1 }];
 
     // Casting to any since vega-lite's TopLevelSpec union type has an issue with the scatterplots repeat spec.
@@ -86,7 +86,9 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
     ]);
   });
 
-  it('should return the spec for outliers', () => {
+  it('should return the spec for outliers', async () => {
+    const { compile } = await getVegaSharedImports();
+
     const data = [{ x: 1, y: 1 }];
 
     // Casting to any since vega-lite's TopLevelSpec union type has an issue with the scatterplots repeat spec.
@@ -130,7 +132,9 @@ describe('getScatterplotMatrixVegaLiteSpec()', () => {
     ]);
   });
 
-  it('should return the spec for classification', () => {
+  it('should return the spec for classification', async () => {
+    const { compile } = await getVegaSharedImports();
+
     const data = [{ x: 1, y: 1 }];
 
     // Casting to any since vega-lite's TopLevelSpec union type has an issue with the scatterplots repeat spec.

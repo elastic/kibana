@@ -8,9 +8,6 @@
 
 // DRAFT PR bundle size experiment
 export type { TopLevelSpec } from 'vega-lite';
-import { compile } from 'vega-lite';
-import { parse, View, Warn } from 'vega';
-import { Handler } from 'vega-tooltip';
 
 import { PluginInitializerContext } from 'kibana/public';
 import { ConfigSchema } from '../config';
@@ -20,11 +17,8 @@ export function plugin(initializerContext: PluginInitializerContext<ConfigSchema
   return new Plugin(initializerContext);
 }
 
-// DRAFT PR bundle size experiment
-export const mlDraftExport = {
-  compile,
-  parse,
-  View,
-  Warn,
-  Handler,
+// Bundled shared exports
+// Exported this way so the code doesn't end up in the page load bundle
+export const getVegaSharedImports = async () => {
+  return await import('./shared');
 };

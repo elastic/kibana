@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect, FC } from 'react';
+import React, { useMemo, useEffect, useState, FC } from 'react';
 
 // import type { TopLevelSpec } from 'vega-lite';
 // import { compile } from 'vega-lite';
@@ -15,8 +15,9 @@ import React, { useMemo, useEffect, FC } from 'react';
 import { htmlIdGenerator } from '@elastic/eui';
 
 import type { TopLevelSpec } from '../../../../../../../src/plugins/vis_type_vega/public';
-import { mlDraftExport } from '../../../../../../../src/plugins/vis_type_vega/public';
-const { compile, parse, View, Warn, Handler } = mlDraftExport;
+import { getVegaSharedImports } from '../../../../../../../src/plugins/vis_type_vega/public';
+
+type Await<T> = T extends PromiseLike<infer U> ? U : T;
 
 export interface VegaChartViewProps {
   vegaSpec: TopLevelSpec;
@@ -25,7 +26,24 @@ export interface VegaChartViewProps {
 export const VegaChartView: FC<VegaChartViewProps> = ({ vegaSpec }) => {
   const htmlId = useMemo(() => htmlIdGenerator()(), []);
 
+  const [vega, setVega] = useState<Await<ReturnType<typeof getVegaSharedImports>>>();
+
   useEffect(() => {
+    async function initializeVega() {
+      const vegaSharedImports = await getVegaSharedImports();
+      setVega(vegaSharedImports);
+    }
+
+    initializeVega();
+  }, []);
+
+  useEffect(() => {
+    if (typeof vega === 'undefined') {
+      return;
+    }
+
+    const { compile, parse, View, Warn, Handler } = vega;
+
     const vgSpec = compile(vegaSpec).spec;
 
     const view = new View(parse(vgSpec))
@@ -35,7 +53,7 @@ export const VegaChartView: FC<VegaChartViewProps> = ({ vegaSpec }) => {
       .initialize(`#${htmlId}`);
 
     view.runAsync(); // evaluate and render the view
-  }, [vegaSpec]);
+  }, [vega, vegaSpec]);
 
   return <div id={htmlId} className="mlVegaChart" data-test-subj="mlVegaChart" />;
 };
