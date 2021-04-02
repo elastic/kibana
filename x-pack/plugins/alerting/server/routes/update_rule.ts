@@ -57,12 +57,13 @@ const rewriteBodyReqActions: RewriteRequestCase<AlertAction> = ({
 });
 
 const rewriteBodyReq: RewriteRequestCase<UpdateOptions<AlertTypeParams>> = (result) => {
-  const { notify_when: notifyWhen, ...rest } = result.data;
+  const { notify_when: notifyWhen, actions, ...rest } = result.data;
   return {
     ...result,
     data: {
       ...rest,
       notifyWhen,
+      actions: actions.map((action) => rewriteBodyReqActions(action)),
     },
   };
 };
@@ -137,7 +138,6 @@ export const updateRuleRoute = (
                 data: {
                   ...rule,
                   notify_when: rule.notify_when as AlertNotifyWhenType,
-                  actions: rule.actions.map((action) => rewriteBodyReqActions(action)),
                 },
               })
             );

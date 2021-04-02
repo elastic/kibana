@@ -65,7 +65,7 @@ const rewriteBodyReq: RewriteRequestCase<CreateOptions<AlertTypeParams>['data']>
   ...rest,
   alertTypeId,
   notifyWhen,
-  actions,
+  actions: actions.map((action) => rewriteBodyReqActions(action)),
 });
 const rewriteBodyRes: RewriteResponseCase<SanitizedAlert<AlertTypeParams>> = ({
   actions,
@@ -130,11 +130,12 @@ export const createRuleRoute = (
           try {
             const createdRule: SanitizedAlert<AlertTypeParams> = await alertsClient.create<AlertTypeParams>(
               {
-                data: rewriteBodyReq({
-                  ...rule,
-                  notify_when: rule.notify_when as AlertNotifyWhenType,
-                  actions: rule.actions.map((action) => rewriteBodyReqActions(action)),
-                }),
+                data: {
+                  ...rewriteBodyReq({
+                    ...rule,
+                    notify_when: rule.notify_when as AlertNotifyWhenType,
+                  }),
+                },
                 options: { id: params?.id },
               }
             );
