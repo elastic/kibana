@@ -61,13 +61,13 @@ export const convertSeriesToDataTable = async (
   initialIndexPattern: IndexPattern
 ) => {
   const tables: TSVBTables = {};
+  const { indexPatterns } = getDataStart();
   for (let layerIdx = 0; layerIdx < model.series.length; layerIdx++) {
     const layer = model.series[layerIdx];
     let usedIndexPattern = initialIndexPattern;
     // The user can overwrite the index pattern of a layer.
     // In that case, the index pattern should be fetched again.
     if (layer.override_index_pattern) {
-      const { indexPatterns } = getDataStart();
       const { indexPattern } = await fetchIndexPattern(layer.series_index_pattern, indexPatterns);
       if (indexPattern) {
         usedIndexPattern = indexPattern;
