@@ -11,7 +11,12 @@ import Joi from 'joi';
 const HANDLED_IN_KIBANA_PLATFORM = Joi.any().description(
   'This key is handled in the new platform ONLY'
 );
-
+/**
+ * @deprecated
+ *
+ * Legacy logging has been deprecated and will be removed in 8.0.
+ * Set up logging from the platform logging instead
+ */
 export interface LegacyLoggingConfig {
   silent: boolean;
   quiet: boolean;
@@ -38,13 +43,11 @@ export const legacyLoggingConfigSchema = Joi.object()
     root: HANDLED_IN_KIBANA_PLATFORM,
 
     silent: Joi.boolean().default(false),
-
     quiet: Joi.boolean().when('silent', {
       is: true,
       then: Joi.boolean().default(true).valid(true),
       otherwise: Joi.boolean().default(false),
     }),
-
     verbose: Joi.boolean().when('quiet', {
       is: true,
       then: Joi.valid(false).default(false),

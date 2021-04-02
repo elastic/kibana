@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ESFilter } from '../../../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../../../typings/elasticsearch';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
 import {
   SERVICE_NAME,
@@ -183,6 +183,7 @@ export async function getLatencyPeriods({
   latencyAggregationType,
   comparisonStart,
   comparisonEnd,
+  kuery,
 }: {
   serviceName: string;
   transactionType: string | undefined;
@@ -192,6 +193,7 @@ export async function getLatencyPeriods({
   latencyAggregationType: LatencyAggregationType;
   comparisonStart?: number;
   comparisonEnd?: number;
+  kuery?: string;
 }) {
   const { start, end } = setup;
   const options = {
@@ -200,6 +202,7 @@ export async function getLatencyPeriods({
     transactionName,
     setup,
     searchAggregatedTransactions,
+    kuery,
   };
 
   const currentPeriodPromise = getLatencyTimeseries({

@@ -57,6 +57,7 @@ export const createThreatSignals = async ({
 
   let results: SearchAfterAndBulkCreateReturnType = {
     success: true,
+    warning: false,
     bulkCreateTimes: [],
     searchAfterTimes: [],
     lastLookBackDate: null,
@@ -66,7 +67,7 @@ export const createThreatSignals = async ({
   };
 
   let threatListCount = await getThreatListCount({
-    callCluster: services.callCluster,
+    esClient: services.scopedClusterClient.asCurrentUser,
     exceptionItems,
     threatFilters,
     query: threatQuery,
@@ -76,7 +77,7 @@ export const createThreatSignals = async ({
   logger.debug(buildRuleMessage(`Total indicator items: ${threatListCount}`));
 
   let threatList = await getThreatList({
-    callCluster: services.callCluster,
+    esClient: services.scopedClusterClient.asCurrentUser,
     exceptionItems,
     threatFilters,
     query: threatQuery,
@@ -166,12 +167,13 @@ export const createThreatSignals = async ({
     logger.debug(buildRuleMessage(`Indicator items left to check are ${threatListCount}`));
 
     threatList = await getThreatList({
-      callCluster: services.callCluster,
+      esClient: services.scopedClusterClient.asCurrentUser,
       exceptionItems,
       query: threatQuery,
       language: threatLanguage,
       threatFilters,
       index: threatIndex,
+      // @ts-expect-error@elastic/elasticsearch SortResults might contain null
       searchAfter: threatList.hits.hits[threatList.hits.hits.length - 1].sort,
       sortField: undefined,
       sortOrder: undefined,

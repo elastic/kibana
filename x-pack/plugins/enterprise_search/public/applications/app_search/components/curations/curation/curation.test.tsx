@@ -12,7 +12,7 @@ import { setMockActions, setMockValues, rerender } from '../../../../__mocks__';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 
-import { shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiPageHeader } from '@elastic/eui';
 
@@ -21,6 +21,8 @@ import { Loading } from '../../../../shared/loading';
 
 jest.mock('./curation_logic', () => ({ CurationLogic: jest.fn() }));
 import { CurationLogic } from './curation_logic';
+
+import { AddResultFlyout } from './results';
 
 import { Curation } from './';
 
@@ -31,9 +33,11 @@ describe('Curation', () => {
   const values = {
     dataLoading: false,
     queries: ['query A', 'query B'],
+    isFlyoutOpen: false,
   };
   const actions = {
     loadCuration: jest.fn(),
+    resetCuration: jest.fn(),
   };
 
   beforeEach(() => {
@@ -59,6 +63,13 @@ describe('Curation', () => {
     expect(wrapper.find(Loading)).toHaveLength(1);
   });
 
+  it('renders the add result flyout when open', () => {
+    setMockValues({ ...values, isFlyoutOpen: true });
+    const wrapper = shallow(<Curation {...props} />);
+
+    expect(wrapper.find(AddResultFlyout)).toHaveLength(1);
+  });
+
   it('initializes CurationLogic with a curationId prop from URL param', () => {
     (useParams as jest.Mock).mockReturnValueOnce({ curationId: 'hello-world' });
     shallow(<Curation {...props} />);
@@ -74,5 +85,34 @@ describe('Curation', () => {
     (useParams as jest.Mock).mockReturnValueOnce({ curationId: 'cur-987654321' });
     rerender(wrapper);
     expect(actions.loadCuration).toHaveBeenCalledTimes(2);
+  });
+
+  describe('restore defaults button', () => {
+    let restoreDefaultsButton: ShallowWrapper;
+    let confirmSpy: jest.SpyInstance;
+
+    beforeAll(() => {
+      const wrapper = shallow(<Curation {...props} />);
+      const headerActions = wrapper.find(EuiPageHeader).prop('rightSideItems');
+      restoreDefaultsButton = shallow(headerActions![0] as React.ReactElement);
+
+      confirmSpy = jest.spyOn(window, 'confirm');
+    });
+
+    afterAll(() => {
+      confirmSpy.mockRestore();
+    });
+
+    it('resets the curation upon user confirmation', () => {
+      confirmSpy.mockReturnValueOnce(true);
+      restoreDefaultsButton.simulate('click');
+      expect(actions.resetCuration).toHaveBeenCalled();
+    });
+
+    it('does not reset the curation if the user cancels', () => {
+      confirmSpy.mockReturnValueOnce(false);
+      restoreDefaultsButton.simulate('click');
+      expect(actions.resetCuration).not.toHaveBeenCalled();
+    });
   });
 });

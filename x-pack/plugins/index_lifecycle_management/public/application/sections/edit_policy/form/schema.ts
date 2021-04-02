@@ -9,20 +9,16 @@ import { i18n } from '@kbn/i18n';
 
 import { FormSchema, fieldValidators } from '../../../../shared_imports';
 import { defaultIndexPriority } from '../../../constants';
-import { ROLLOVER_FORM_PATHS } from '../constants';
-
-import { FormInternal } from '../types';
-
-const rolloverFormPaths = Object.values(ROLLOVER_FORM_PATHS);
-
+import { ROLLOVER_FORM_PATHS, CLOUD_DEFAULT_REPO } from '../constants';
+import { i18nTexts } from '../i18n_texts';
 import {
   ifExistsNumberGreaterThanZero,
   ifExistsNumberNonNegative,
   rolloverThresholdsValidator,
-  minAgeValidator,
+  integerValidator,
 } from './validations';
 
-import { i18nTexts } from '../i18n_texts';
+const rolloverFormPaths = Object.values(ROLLOVER_FORM_PATHS);
 
 const { emptyField, numberGreaterThanField } = fieldValidators;
 
@@ -54,6 +50,13 @@ export const searchableSnapshotFields = {
     validations: [
       { validator: emptyField(i18nTexts.editPolicy.errors.searchableSnapshotRepoRequired) },
     ],
+    // TODO: update text copy
+    helpText: i18n.translate(
+      'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshot.repositoryHelpText',
+      {
+        defaultMessage: 'Each phase uses the same snapshot repository.',
+      }
+    ),
   },
   storage: {
     label: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.searchableSnapshot.storageLabel', {
@@ -114,7 +117,21 @@ const getPriorityField = (phase: 'hot' | 'warm' | 'cold' | 'frozen') => ({
   serializer: serializers.stringToNumber,
 });
 
-export const schema: FormSchema<FormInternal> = {
+const getMinAgeField = (defaultValue: string = '0') => ({
+  defaultValue,
+  validations: [
+    {
+      validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
+    },
+    {
+      validator: ifExistsNumberNonNegative,
+    },
+    {
+      validator: integerValidator,
+    },
+  ],
+});
+export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
   _meta: {
     hot: {
       isUsingDefaultRollover: {
@@ -230,6 +247,11 @@ export const schema: FormSchema<FormInternal> = {
         defaultValue: 'd',
       },
     },
+    searchableSnapshot: {
+      repository: {
+        defaultValue: isCloudEnabled ? CLOUD_DEFAULT_REPO : '',
+      },
+    },
   },
   phases: {
     hot: {
@@ -246,6 +268,9 @@ export const schema: FormSchema<FormInternal> = {
               {
                 validator: ifExistsNumberGreaterThanZero,
               },
+              {
+                validator: integerValidator,
+              },
             ],
             fieldsToValidateOnChange: rolloverFormPaths,
           },
@@ -259,6 +284,9 @@ export const schema: FormSchema<FormInternal> = {
               },
               {
                 validator: ifExistsNumberGreaterThanZero,
+              },
+              {
+                validator: integerValidator,
               },
             ],
             serializer: serializers.stringToNumber,
@@ -288,17 +316,11 @@ export const schema: FormSchema<FormInternal> = {
         set_priority: {
           priority: getPriorityField('hot'),
         },
+        searchable_snapshot: searchableSnapshotFields,
       },
     },
     warm: {
-      min_age: {
-        defaultValue: '0',
-        validations: [
-          {
-            validator: minAgeValidator,
-          },
-        ],
-      },
+      min_age: getMinAgeField(),
       actions: {
         allocate: {
           number_of_replicas: numberOfReplicasField,
@@ -315,14 +337,7 @@ export const schema: FormSchema<FormInternal> = {
       },
     },
     cold: {
-      min_age: {
-        defaultValue: '0',
-        validations: [
-          {
-            validator: minAgeValidator,
-          },
-        ],
-      },
+      min_age: getMinAgeField(),
       actions: {
         allocate: {
           number_of_replicas: numberOfReplicasField,
@@ -334,14 +349,7 @@ export const schema: FormSchema<FormInternal> = {
       },
     },
     frozen: {
-      min_age: {
-        defaultValue: '0',
-        validations: [
-          {
-            validator: minAgeValidator,
-          },
-        ],
-      },
+      min_age: getMinAgeField(),
       actions: {
         allocate: {
           number_of_replicas: numberOfReplicasField,
@@ -353,14 +361,7 @@ export const schema: FormSchema<FormInternal> = {
       },
     },
     delete: {
-      min_age: {
-        defaultValue: '365',
-        validations: [
-          {
-            validator: minAgeValidator,
-          },
-        ],
-      },
+      min_age: getMinAgeField('365'),
       actions: {
         wait_for_snapshot: {
           policy: {
@@ -375,4 +376,4 @@ export const schema: FormSchema<FormInternal> = {
       },
     },
   },
-};
+});

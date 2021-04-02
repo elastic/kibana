@@ -15,35 +15,35 @@
         "body": {
           "type": "binary"
         },
-        "compressionAlgorithm": {
+        "compression_algorithm": {
           "index": false,
           "type": "keyword"
         },
         "created": {
           "type": "date"
         },
-        "decodedSha256": {
+        "decoded_sha256": {
           "type": "keyword"
         },
-        "decodedSize": {
+        "decoded_size": {
           "index": false,
           "type": "long"
         },
-        "encodedSha256": {
+        "encoded_sha256": {
           "type": "keyword"
         },
-        "encodedSize": {
+        "encoded_size": {
           "index": false,
           "type": "long"
         },
-        "encryptionAlgorithm": {
+        "encryption_algorithm": {
           "index": false,
           "type": "keyword"
         },
         "identifier": {
           "type": "keyword"
         },
-        "packageName": {
+        "package_name": {
           "type": "keyword"
         },
         "relative_url": {

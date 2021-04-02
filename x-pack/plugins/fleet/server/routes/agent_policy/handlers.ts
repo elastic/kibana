@@ -11,7 +11,7 @@ import bluebird from 'bluebird';
 
 import { fullAgentPolicyToYaml } from '../../../common/services';
 import { appContextService, agentPolicyService, packagePolicyService } from '../../services';
-import { listAgents } from '../../services/agents';
+import { getAgentsByKuery } from '../../services/agents';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import type {
   GetAgentPoliciesRequestSchema,
@@ -58,7 +58,7 @@ export const getAgentPoliciesHandler: RequestHandler<
     await bluebird.map(
       items,
       (agentPolicy: GetAgentPoliciesResponseItem) =>
-        listAgents(esClient, {
+        getAgentsByKuery(esClient, {
           showInactive: false,
           perPage: 0,
           page: 1,

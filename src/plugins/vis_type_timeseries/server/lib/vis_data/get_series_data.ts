@@ -21,6 +21,7 @@ import type {
   VisTypeTimeseriesRequestServices,
 } from '../../types';
 import type { PanelSchema } from '../../../common/types';
+import { PANEL_TYPES } from '../../../common/panel_types';
 
 export async function getSeriesData(
   requestContext: VisTypeTimeseriesRequestHandlerContext,
@@ -28,10 +29,12 @@ export async function getSeriesData(
   panel: PanelSchema,
   services: VisTypeTimeseriesRequestServices
 ) {
-  const strategy = await services.searchStrategyRegistry.getViableStrategyForPanel(
+  const panelIndex = await services.cachedIndexPatternFetcher(panel.index_pattern);
+
+  const strategy = await services.searchStrategyRegistry.getViableStrategy(
     requestContext,
     req,
-    panel
+    panelIndex
   );
 
   if (!strategy) {
@@ -50,14 +53,15 @@ export async function getSeriesData(
 
   try {
     const bodiesPromises = getActiveSeries(panel).map((series) =>
-      getSeriesRequestParams(req, panel, series, capabilities, services)
+      getSeriesRequestParams(req, panel, panelIndex, series, capabilities, services)
     );
 
     const searches = await Promise.all(bodiesPromises);
     const data = await searchStrategy.search(requestContext, req, searches);
 
     const handleResponseBodyFn = handleResponseBody(panel, req, {
-      requestContext,
+      indexPatternsService: services.indexPatternsService,
+      cachedIndexPatternFetcher: services.cachedIndexPatternFetcher,
       searchStrategy,
       capabilities,
     });
@@ -70,7 +74,7 @@ export async function getSeriesData(
 
     let annotations = null;
 
-    if (panel.annotations && panel.annotations.length) {
+    if (panel.type === PANEL_TYPES.TIMESERIES && panel.annotations && panel.annotations.length) {
       annotations = await getAnnotations({
         req,
         panel,

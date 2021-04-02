@@ -6,7 +6,7 @@
  */
 
 import { Filter } from 'src/plugins/data/common';
-import { ESFilter } from '../../../../../../../typings/elasticsearch';
+import { ESFilter } from '../../../../../../../../typings/elasticsearch';
 import { ThresholdSignalHistory, ThresholdSignalHistoryRecord } from '../types';
 
 export const getThresholdBucketFilters = async ({
@@ -34,7 +34,7 @@ export const getThresholdBucketFilters = async ({
 
       bucket.terms.forEach((term) => {
         if (term.field != null) {
-          (filter.bool.filter as ESFilter[]).push({
+          (filter.bool!.filter as ESFilter[]).push({
             term: {
               [term.field]: `${term.value}`,
             },

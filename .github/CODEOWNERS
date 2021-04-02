@@ -53,11 +53,13 @@
 /src/plugins/navigation/ @elastic/kibana-app-services
 /src/plugins/share/ @elastic/kibana-app-services
 /src/plugins/ui_actions/ @elastic/kibana-app-services
+/src/plugins/index_pattern_field_editor @elastic/kibana-app-services
 /x-pack/examples/ui_actions_enhanced_examples/ @elastic/kibana-app-services
 /x-pack/plugins/data_enhanced/ @elastic/kibana-app-services
 /x-pack/plugins/embeddable_enhanced/ @elastic/kibana-app-services
 /x-pack/plugins/ui_actions_enhanced/ @elastic/kibana-app-services
 /x-pack/plugins/runtime_fields @elastic/kibana-app-services
+/x-pack/test/search_sessions_integration/ @elastic/kibana-app-services
 #CC# /src/plugins/bfetch/ @elastic/kibana-app-services
 #CC# /src/plugins/index_pattern_management/ @elastic/kibana-app-services
 #CC# /src/plugins/inspector/ @elastic/kibana-app-services
@@ -99,6 +101,7 @@
 /src/plugins/dashboard/ @elastic/kibana-presentation
 /src/plugins/input_control_vis/ @elastic/kibana-presentation
 /src/plugins/vis_type_markdown/ @elastic/kibana-presentation
+/src/plugins/presentation_util/ @elastic/kibana-presentation
 /test/functional/apps/dashboard/  @elastic/kibana-presentation
 /x-pack/plugins/canvas/  @elastic/kibana-presentation
 /x-pack/plugins/dashboard_enhanced/ @elastic/kibana-presentation
@@ -116,18 +119,23 @@
 
 # Machine Learning
 /x-pack/plugins/ml/  @elastic/ml-ui
-/x-pack/test/functional/apps/ml/  @elastic/ml-ui
-/x-pack/test/functional/services/ml/  @elastic/ml-ui
 /x-pack/test/accessibility/apps/ml.ts  @elastic/ml-ui
+/x-pack/test/accessibility/apps/ml_embeddables_in_dashboard.ts  @elastic/ml-ui
+/x-pack/test/api_integration/apis/ml/ @elastic/ml-ui
+/x-pack/test/api_integration_basic/apis/ml/ @elastic/ml-ui
+/x-pack/test/functional/apps/ml/  @elastic/ml-ui
+/x-pack/test/functional/es_archives/ml/  @elastic/ml-ui
+/x-pack/test/functional/services/ml/  @elastic/ml-ui
+/x-pack/test/functional_basic/apps/ml/ @elastic/ml-ui
+/x-pack/test/functional_with_es_ssl/apps/ml/ @elastic/ml-ui
+
 # ML team owns and maintains the transform plugin despite it living in the Elasticsearch management section.
 /x-pack/plugins/transform/  @elastic/ml-ui
+/x-pack/test/accessibility/apps/transform.ts  @elastic/ml-ui
+/x-pack/test/api_integration/apis/transform/ @elastic/ml-ui
+/x-pack/test/api_integration_basic/apis/transform/ @elastic/ml-ui
 /x-pack/test/functional/apps/transform/ @elastic/ml-ui
 /x-pack/test/functional/services/transform/ @elastic/ml-ui
-/x-pack/test/accessibility/apps/transform.ts  @elastic/ml-ui
-/x-pack/test/api_integration_basic/apis/ml/ @elastic/ml-ui
-/x-pack/test/functional_basic/apps/ml/ @elastic/ml-ui
-
-/x-pack/test/api_integration_basic/apis/transform/ @elastic/ml-ui
 /x-pack/test/functional_basic/apps/transform/ @elastic/ml-ui
 
 # Maps
@@ -145,7 +153,6 @@
 # Operations
 /src/dev/ @elastic/kibana-operations
 /src/setup_node_env/ @elastic/kibana-operations
-/src/optimize/ @elastic/kibana-operations
 /packages/*eslint*/ @elastic/kibana-operations
 /packages/*babel*/ @elastic/kibana-operations
 /packages/kbn-dev-utils*/ @elastic/kibana-operations
@@ -156,6 +163,7 @@
 /packages/kbn-ui-shared-deps/ @elastic/kibana-operations
 /packages/kbn-es-archiver/ @elastic/kibana-operations
 /packages/kbn-utils/ @elastic/kibana-operations
+/packages/kbn-cli-dev-mode/ @elastic/kibana-operations
 /src/cli/keystore/ @elastic/kibana-operations
 /src/legacy/server/warnings/ @elastic/kibana-operations
 /.ci/es-snapshots/ @elastic/kibana-operations
@@ -192,6 +200,8 @@
 /packages/kbn-config/ @elastic/kibana-core
 /packages/kbn-logging/ @elastic/kibana-core
 /packages/kbn-legacy-logging/ @elastic/kibana-core
+/packages/kbn-crypto/ @elastic/kibana-core
+/packages/kbn-http-tools/ @elastic/kibana-core
 /src/legacy/server/config/ @elastic/kibana-core
 /src/legacy/server/http/ @elastic/kibana-core
 /src/legacy/server/logging/ @elastic/kibana-core
@@ -232,8 +242,8 @@
 /x-pack/plugins/telemetry_collection_xpack/ @elastic/kibana-core
 /.telemetryrc.json @elastic/kibana-core
 /x-pack/.telemetryrc.json @elastic/kibana-core
-src/plugins/telemetry/schema/ @elastic/kibana-core @elastic/kibana-telemetry @elastic/infra-telemetry
-x-pack/plugins/telemetry_collection_xpack/schema/ @elastic/kibana-core @elastic/kibana-telemetry @elastic/infra-telemetry
+/src/plugins/telemetry/schema/ @elastic/kibana-core @elastic/kibana-telemetry
+/x-pack/plugins/telemetry_collection_xpack/schema/ @elastic/kibana-core @elastic/kibana-telemetry
 
 # Kibana Localization
 /src/dev/i18n/  @elastic/kibana-localization @elastic/kibana-core
@@ -338,6 +348,7 @@ x-pack/plugins/telemetry_collection_xpack/schema/ @elastic/kibana-core @elastic/
 
 # Security Solution sub teams
 /x-pack/plugins/case @elastic/security-threat-hunting
+/x-pack/plugins/timelines @elastic/security-threat-hunting
 /x-pack/test/case_api_integration @elastic/security-threat-hunting
 /x-pack/plugins/lists @elastic/security-detections-response
 

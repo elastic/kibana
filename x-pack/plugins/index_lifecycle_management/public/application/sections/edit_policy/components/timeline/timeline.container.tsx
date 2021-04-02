@@ -11,7 +11,7 @@ import { useFormData } from '../../../../../shared_imports';
 
 import { formDataToAbsoluteTimings } from '../../lib';
 
-import { useConfigurationIssues } from '../../form';
+import { useConfiguration } from '../../form';
 
 import { FormInternal } from '../../types';
 
@@ -20,7 +20,7 @@ import { Timeline as ViewComponent } from './timeline';
 export const Timeline: FunctionComponent = () => {
   const [formData] = useFormData<FormInternal>();
   const timings = formDataToAbsoluteTimings(formData);
-  const { isUsingRollover } = useConfigurationIssues();
+  const { isUsingRollover } = useConfiguration();
   return (
     <ViewComponent
       hotPhaseMinAge={timings.hot.min_age}

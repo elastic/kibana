@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { IndexPattern } from '../../../kibana_services';
 import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
-import { getPopoverContents, getSchemaDetectors } from './discover_grid_schema';
+import { getSchemaDetectors } from './discover_grid_schema';
 import { DiscoverGridFlyout } from './discover_grid_flyout';
 import { DiscoverGridContext } from './discover_grid_context';
 import { getRenderCellValueFn } from './get_render_cell_value';
@@ -36,6 +36,7 @@ import {
 import { defaultPageSize, gridStyle, pageSizeArr, toolbarVisibility } from './constants';
 import { DiscoverServices } from '../../../build_services';
 import { getDisplayedColumns } from '../../helpers/columns';
+import { KibanaContextProvider } from '../../../../../kibana_react/public';
 
 interface SortObj {
   id: string;
@@ -59,6 +60,10 @@ export interface DiscoverGridProps {
    * The used index pattern
    */
   indexPattern: IndexPattern;
+  /**
+   * Determines if data is currently loaded
+   */
+  isLoading: boolean;
   /**
    * Function used to add a column in the document flyout
    */
@@ -134,6 +139,7 @@ export const DiscoverGrid = ({
   ariaLabelledBy,
   columns,
   indexPattern,
+  isLoading,
   expandedDoc,
   onAddColumn,
   onFilter,
@@ -219,7 +225,6 @@ export const DiscoverGrid = ({
     [displayedColumns, indexPattern, showTimeCol, settings, defaultColumns]
   );
   const schemaDetectors = useMemo(() => getSchemaDetectors(), []);
-  const popoverContents = useMemo(() => getPopoverContents(), []);
   const columnsVisibility = useMemo(
     () => ({
       visibleColumns: getVisibleColumns(displayedColumns, indexPattern, showTimeCol) as string[],
@@ -258,35 +263,42 @@ export const DiscoverGrid = ({
         isDarkMode: services.uiSettings.get('theme:darkMode'),
       }}
     >
-      <>
-        <EuiDataGridMemoized
-          aria-describedby={randomId}
-          aria-labelledby={ariaLabelledBy}
-          columns={euiGridColumns}
-          columnVisibility={columnsVisibility}
-          data-test-subj="docTable"
-          gridStyle={gridStyle as EuiDataGridStyle}
-          leadingControlColumns={lead}
-          onColumnResize={(col: { columnId: string; width: number }) => {
-            if (onResize) {
-              onResize(col);
+      <span
+        data-test-subj="discoverDocTable"
+        data-render-complete={isLoading ? 'false' : 'true'}
+        data-shared-item=""
+        data-title={searchTitle}
+        data-description={searchDescription}
+      >
+        <KibanaContextProvider services={{ uiSettings: services.uiSettings }}>
+          <EuiDataGridMemoized
+            aria-describedby={randomId}
+            aria-labelledby={ariaLabelledBy}
+            columns={euiGridColumns}
+            columnVisibility={columnsVisibility}
+            data-test-subj="docTable"
+            gridStyle={gridStyle as EuiDataGridStyle}
+            leadingControlColumns={lead}
+            onColumnResize={(col: { columnId: string; width: number }) => {
+              if (onResize) {
+                onResize(col);
+              }
+            }}
+            pagination={paginationObj}
+            renderCellValue={renderCellValue}
+            rowCount={rowCount}
+            schemaDetectors={schemaDetectors}
+            sorting={sorting as EuiDataGridSorting}
+            toolbarVisibility={
+              defaultColumns
+                ? {
+                    ...toolbarVisibility,
+                    showColumnSelector: false,
+                  }
+                : toolbarVisibility
             }
-          }}
-          pagination={paginationObj}
-          popoverContents={popoverContents}
-          renderCellValue={renderCellValue}
-          rowCount={rowCount}
-          schemaDetectors={schemaDetectors}
-          sorting={sorting as EuiDataGridSorting}
-          toolbarVisibility={
-            defaultColumns
-              ? {
-                  ...toolbarVisibility,
-                  showColumnSelector: false,
-                }
-              : toolbarVisibility
-          }
-        />
+          />
+        </KibanaContextProvider>
 
         {showDisclaimer && (
           <p className="dscDiscoverGrid__footer">
@@ -323,16 +335,18 @@ export const DiscoverGrid = ({
           <DiscoverGridFlyout
             indexPattern={indexPattern}
             hit={expandedDoc}
+            hits={rows}
             // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
             columns={defaultColumns ? [] : displayedColumns}
             onFilter={onFilter}
             onRemoveColumn={onRemoveColumn}
             onAddColumn={onAddColumn}
             onClose={() => setExpandedDoc(undefined)}
+            setExpandedDoc={setExpandedDoc}
             services={services}
           />
         )}
-      </>
+      </span>
     </DiscoverGridContext.Provider>
   );
 };

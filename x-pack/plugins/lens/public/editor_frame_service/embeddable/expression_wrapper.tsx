@@ -37,13 +37,17 @@ export interface ExpressionWrapperProps {
   hasCompatibleActions?: ReactExpressionRendererProps['hasCompatibleActions'];
   style?: React.CSSProperties;
   className?: string;
+  canEdit: boolean;
 }
 
 interface VisualizationErrorProps {
   errors: ExpressionWrapperProps['errors'];
+  canEdit: boolean;
 }
 
-export function VisualizationErrorPanel({ errors }: VisualizationErrorProps) {
+export function VisualizationErrorPanel({ errors, canEdit }: VisualizationErrorProps) {
+  const showMore = errors && errors.length > 1;
+  const canFixInLens = canEdit && errors?.some(({ type }) => type === 'fixable');
   return (
     <div className="lnsEmbeddedError">
       <EuiEmptyPrompt
@@ -55,11 +59,19 @@ export function VisualizationErrorPanel({ errors }: VisualizationErrorProps) {
             {errors ? (
               <>
                 <p>{errors[0].longMessage}</p>
-                {errors.length > 1 ? (
+                {showMore && !canFixInLens ? (
                   <p>
                     <FormattedMessage
                       id="xpack.lens.embeddable.moreErrors"
                       defaultMessage="Edit in Lens editor to see more errors"
+                    />
+                  </p>
+                ) : null}
+                {canFixInLens ? (
+                  <p>
+                    <FormattedMessage
+                      id="xpack.lens.embeddable.fixErrors"
+                      defaultMessage="Edit in Lens editor to fix the error"
                     />
                   </p>
                 ) : null}
@@ -93,11 +105,12 @@ export function ExpressionWrapper({
   style,
   className,
   errors,
+  canEdit,
 }: ExpressionWrapperProps) {
   return (
     <I18nProvider>
       {errors || expression === null || expression === '' ? (
-        <VisualizationErrorPanel errors={errors} />
+        <VisualizationErrorPanel errors={errors} canEdit={canEdit} />
       ) : (
         <div className={classNames('lnsExpressionRenderer', className)} style={style}>
           <ExpressionRendererComponent

@@ -8,7 +8,7 @@
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { useConfigurationIssues } from '../../../form';
+import { useConfiguration } from '../../../form';
 
 import {
   ForcemergeField,
@@ -30,7 +30,7 @@ const i18nTexts = {
 };
 
 export const WarmPhase: FunctionComponent = () => {
-  const { isUsingSearchableSnapshotInHotPhase } = useConfigurationIssues();
+  const { isUsingSearchableSnapshotInHotPhase } = useConfiguration();
 
   return (
     <Phase phase="warm">

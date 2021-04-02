@@ -41,7 +41,7 @@ function toURL(base: string, path: string) {
 }
 
 function filterHeaders(originalHeaders: object, headersToKeep: string[]): object {
-  const normalizeHeader = function (header: any) {
+  const normalizeHeader = function (header: string) {
     if (!header) {
       return '';
     }
@@ -68,7 +68,7 @@ function getRequestConfig(
     return {
       ...proxyConfigCollection.configForUri(uri),
       headers: newHeaders,
-    } as any;
+    };
   }
 
   return {
@@ -81,7 +81,7 @@ function getProxyHeaders(req: KibanaRequest) {
   const headers = Object.create(null);
 
   // Scope this proto-unsafe functionality to where it is being used.
-  function extendCommaList(obj: Record<string, any>, property: string, value: any) {
+  function extendCommaList(obj: Record<string, any>, property: string, value: string) {
     obj[property] = (obj[property] ? obj[property] + ',' : '') + value;
   }
 
@@ -142,7 +142,7 @@ export const createHandler = ({
       };
 
       esIncomingMessage = await proxyRequest({
-        method: method.toLowerCase() as any,
+        method: method.toLowerCase() as 'get' | 'post' | 'put' | 'delete' | 'patch' | 'head',
         headers: requestHeaders,
         uri,
         timeout,

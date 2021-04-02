@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { MonitorBarSeries, MonitorBarSeriesProps } from './monitor_bar_series';
-import { renderWithRouter, shallowWithRouter, MountWithReduxProvider } from '../../../lib';
+import { renderWithRouter, shallowWithRouter } from '../../../lib/helper/enzyme_helpers';
+import { MountWithReduxProvider } from '../../../lib/helper/helper_with_redux';
 import { HistogramPoint } from '../../../../common/runtime_types';
 
 describe('MonitorBarSeries component', () => {

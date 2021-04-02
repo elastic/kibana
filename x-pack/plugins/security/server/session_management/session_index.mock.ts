@@ -14,7 +14,7 @@ export const sessionIndexMock = {
     get: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
-    clear: jest.fn(),
+    invalidate: jest.fn(),
     initialize: jest.fn(),
     cleanUp: jest.fn(),
   }),

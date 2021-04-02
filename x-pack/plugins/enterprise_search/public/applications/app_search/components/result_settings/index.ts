@@ -6,4 +6,5 @@
  */
 
 export { RESULT_SETTINGS_TITLE } from './constants';
+export { ResultSettingsLogic } from './result_settings_logic';
 export { ResultSettings } from './result_settings';

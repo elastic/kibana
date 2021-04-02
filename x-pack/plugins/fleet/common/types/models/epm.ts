@@ -50,6 +50,7 @@ export enum KibanaAssetType {
   indexPattern = 'index_pattern',
   map = 'map',
   lens = 'lens',
+  mlModule = 'ml_module',
 }
 
 /*
@@ -62,6 +63,7 @@ export enum KibanaSavedObjectType {
   indexPattern = 'index-pattern',
   map = 'map',
   lens = 'lens',
+  mlModule = 'ml-module',
 }
 
 export enum ElasticsearchAssetType {
@@ -274,6 +276,7 @@ export interface RegistryElasticsearch {
   'index_template.mappings'?: object;
 }
 
+export type RegistryVarType = 'integer' | 'bool' | 'password' | 'text' | 'yaml' | 'string';
 export enum RegistryVarsEntryKeys {
   name = 'name',
   title = 'title',
@@ -286,7 +289,6 @@ export enum RegistryVarsEntryKeys {
   os = 'os',
 }
 
-export type RegistryVarType = 'integer' | 'bool' | 'password' | 'text' | 'yaml' | 'string';
 // EPR types this as `[]map[string]interface{}`
 // which means the official/possible type is Record<string, any>
 // but we effectively only see this shape

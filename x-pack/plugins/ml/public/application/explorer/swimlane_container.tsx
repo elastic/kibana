@@ -26,6 +26,8 @@ import {
   HeatmapSpec,
   TooltipSettings,
   HeatmapBrushEvent,
+  Position,
+  ScaleType,
 } from '@elastic/charts';
 import moment from 'moment';
 
@@ -43,6 +45,15 @@ import { getFormattedSeverityScore } from '../../../common/util/anomaly_utils';
 import './_explorer.scss';
 import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
 import { useUiSettings } from '../contexts/kibana';
+
+declare global {
+  interface Window {
+    /**
+     * Flag used to enable debugState on elastic charts
+     */
+    _echDebugStateFlag?: boolean;
+  }
+}
 
 /**
  * Ignore insignificant resize, e.g. browser scrollbar appearance.
@@ -350,9 +361,9 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
         <EuiFlexGroup
           gutterSize={'none'}
           direction={'column'}
-          style={{ width: '100%', height: '100%', overflow: 'hidden' }}
+          style={{ width: '100%', overflow: 'hidden' }}
           ref={resizeRef}
-          data-test-subj="mlSwimLaneContainer"
+          data-test-subj={dataTestSubj}
         >
           <EuiFlexItem
             style={{
@@ -361,26 +372,24 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
             }}
             grow={false}
           >
-            <div
-              style={{ height: `${containerHeight}px`, position: 'relative' }}
-              data-test-subj={dataTestSubj}
-            >
+            <div style={{ height: `${containerHeight}px`, position: 'relative' }}>
               {showSwimlane && !isLoading && (
                 <Chart className={'mlSwimLaneContainer'}>
                   <Settings
                     onElementClick={onElementClick}
                     showLegend
-                    legendPosition="top"
+                    legendPosition={Position.Top}
                     xDomain={{
                       min: swimlaneData.earliest * 1000,
                       max: swimlaneData.latest * 1000,
                       minInterval: swimlaneData.interval * 1000,
                     }}
                     tooltip={tooltipOptions}
+                    debugState={window._echDebugStateFlag ?? false}
                   />
                   <Heatmap
                     id={id}
-                    colorScale="threshold"
+                    colorScale={ScaleType.Threshold}
                     ranges={[
                       ANOMALY_THRESHOLD.LOW,
                       ANOMALY_THRESHOLD.WARNING,
@@ -402,7 +411,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                     valueAccessor="value"
                     highlightedData={highlightedData}
                     valueFormatter={getFormattedSeverityScore}
-                    xScaleType="time"
+                    xScaleType={ScaleType.Time}
                     ySortPredicate="dataIndex"
                     config={swimLaneConfig}
                   />

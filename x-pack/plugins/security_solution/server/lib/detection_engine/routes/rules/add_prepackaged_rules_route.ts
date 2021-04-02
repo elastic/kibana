@@ -22,8 +22,7 @@ import { DETECTION_ENGINE_PREPACKAGED_URL } from '../../../../../common/constant
 
 import { ConfigType } from '../../../../config';
 import { SetupPlugins } from '../../../../plugin';
-import { buildFrameworkRequest } from '../../../timeline/routes/utils/common';
-import { installPrepackagedTimelines } from '../../../timeline/routes/utils/install_prepacked_timelines';
+import { buildFrameworkRequest } from '../../../timeline/utils/common';
 
 import { getIndexExists } from '../../index/get_index_exists';
 import { getPrepackagedRules } from '../../rules/get_prepackaged_rules';
@@ -38,6 +37,7 @@ import { AlertsClient } from '../../../../../../alerting/server';
 import { FrameworkRequest } from '../../../framework';
 
 import { ExceptionListClient } from '../../../../../../lists/server';
+import { installPrepackagedTimelines } from '../../../timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
 
 export const addPrepackedRulesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -106,7 +106,7 @@ export const createPrepackagedRules = async (
   maxTimelineImportExportSize: number,
   exceptionsClient?: ExceptionListClient
 ): Promise<PrePackagedRulesAndTimelinesSchema | null> => {
-  const clusterClient = context.core.elasticsearch.legacy.client;
+  const esClient = context.core.elasticsearch.client;
   const savedObjectsClient = context.core.savedObjects.client;
   const exceptionsListClient =
     context.lists != null ? context.lists.getExceptionListClient() : exceptionsClient;
@@ -126,7 +126,7 @@ export const createPrepackagedRules = async (
   const rulesToUpdate = getRulesToUpdate(rulesFromFileSystem, prepackagedRules);
   const signalsIndex = siemClient.getSignalsIndex();
   if (rulesToInstall.length !== 0 || rulesToUpdate.length !== 0) {
-    const signalsIndexExists = await getIndexExists(clusterClient.callAsCurrentUser, signalsIndex);
+    const signalsIndexExists = await getIndexExists(esClient.asCurrentUser, signalsIndex);
     if (!signalsIndexExists) {
       throw new PrepackagedRulesError(
         `Pre-packaged rules cannot be installed until the signals index is created: ${signalsIndex}`,

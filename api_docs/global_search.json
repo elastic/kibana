@@ -527,7 +527,7 @@
           "lineNumber": 72
         },
         "signature": [
-          "Pick<GlobalSearchProviderResult, \"type\" | \"id\" | \"title\" | \"meta\" | \"icon\" | \"score\"> & { url: string; }"
+          "Pick<GlobalSearchProviderResult, \"type\" | \"title\" | \"id\" | \"meta\" | \"icon\" | \"score\"> & { url: string; }"
         ],
         "initialIsOpen": false
       }
@@ -704,7 +704,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\">; typeRegistry: Pick<",
+              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">; typeRegistry: Pick<",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -1242,7 +1242,7 @@
           "lineNumber": 72
         },
         "signature": [
-          "Pick<GlobalSearchProviderResult, \"type\" | \"id\" | \"title\" | \"meta\" | \"icon\" | \"score\"> & { url: string; }"
+          "Pick<GlobalSearchProviderResult, \"type\" | \"title\" | \"id\" | \"meta\" | \"icon\" | \"score\"> & { url: string; }"
         ],
         "initialIsOpen": false
       }

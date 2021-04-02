@@ -34,11 +34,16 @@ export const AddSourceHeader: React.FC<AddSourceHeaderProps> = ({
         responsive={false}
       >
         <EuiFlexItem grow={false}>
-          <SourceIcon serviceType={serviceType} name={name} className="adding-a-source__icon" />
+          <SourceIcon
+            serviceType={serviceType}
+            name={name}
+            className="adding-a-source__icon"
+            size="xxl"
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="m">
-            <h3 className="adding-a-source__name">
+            <h3>
               <EuiTextColor color="default">{name}</EuiTextColor>
             </h3>
           </EuiText>

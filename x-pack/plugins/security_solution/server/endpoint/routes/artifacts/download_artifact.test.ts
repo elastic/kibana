@@ -24,6 +24,7 @@ import {
   httpServerMock,
   loggingSystemMock,
 } from 'src/core/server/mocks';
+import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
 import { ArtifactConstants } from '../../lib/artifacts';
 import { registerDownloadArtifactRoute } from './download_artifact';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
@@ -130,6 +131,7 @@ describe('test alerts route', () => {
         logFactory: loggingSystemMock.create(),
         service: endpointAppContextService,
         config: () => Promise.resolve(createMockConfig()),
+        experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
       },
       cache
     );
@@ -169,7 +171,7 @@ describe('test alerts route', () => {
     // and this entire test file refactored to start using fleet's exposed FleetArtifactClient class.
     endpointAppContextService!
       .getManifestManager()!
-      .getArtifactsClient().getArtifact = jest.fn().mockResolvedValue(soFindResp);
+      .getArtifactsClient().getArtifact = jest.fn().mockResolvedValue(soFindResp.attributes);
 
     [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
       path.startsWith('/api/endpoint/artifacts/download')

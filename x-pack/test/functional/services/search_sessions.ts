@@ -32,7 +32,7 @@ export function SearchSessionsProvider({ getService }: FtrProviderContext) {
   const browser = getService('browser');
   const supertest = getService('supertest');
 
-  return new (class SendToBackgroundService {
+  return new (class SearchSessionsService {
     public async find(): Promise<WebElementWrapper> {
       return testSubjects.find(SEARCH_SESSION_INDICATOR_TEST_SUBJ);
     }
@@ -65,10 +65,19 @@ export function SearchSessionsProvider({ getService }: FtrProviderContext) {
       await testSubjects.click('searchSessionIndicatorViewSearchSessionsLink');
     }
 
-    public async save() {
+    public async save({ searchSessionName }: { searchSessionName?: string } = {}) {
       log.debug('save the search session');
       await this.ensurePopoverOpened();
       await testSubjects.click('searchSessionIndicatorSaveBtn');
+
+      if (searchSessionName) {
+        await testSubjects.click('searchSessionNameEdit');
+        await testSubjects.setValue('searchSessionNameInput', searchSessionName, {
+          clearWithKeyboard: true,
+        });
+        await testSubjects.click('searchSessionNameSave');
+      }
+
       await this.ensurePopoverClosed();
     }
 

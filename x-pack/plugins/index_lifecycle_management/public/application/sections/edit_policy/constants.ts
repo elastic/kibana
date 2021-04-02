@@ -18,3 +18,9 @@ export const ROLLOVER_FORM_PATHS = {
   maxAge: 'phases.hot.actions.rollover.max_age',
   maxSize: 'phases.hot.actions.rollover.max_size',
 };
+
+/**
+ * This repository is provisioned by Elastic Cloud and will always
+ * exist as a "managed" repository.
+ */
+export const CLOUD_DEFAULT_REPO = 'found-snapshots';

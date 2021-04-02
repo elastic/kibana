@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
+import { ElasticsearchClient } from 'kibana/server';
 import { BaseAlert } from './base_alert';
 import {
   AlertData,
@@ -68,7 +69,7 @@ export class MemoryUsageAlert extends BaseAlert {
 
   protected async fetchData(
     params: CommonAlertParams,
-    callCluster: any,
+    esClient: ElasticsearchClient,
     clusters: AlertCluster[],
     availableCcs: string[]
   ): Promise<AlertData[]> {
@@ -82,7 +83,7 @@ export class MemoryUsageAlert extends BaseAlert {
     const startMs = endMs - parsedDuration;
 
     const stats = await fetchMemoryUsageNodeStats(
-      callCluster,
+      esClient,
       clusters,
       esIndexPattern,
       startMs,

@@ -17,7 +17,7 @@ import sprites2 from '@elastic/maki/dist/sprite@2.png';
 import { Adapters } from 'src/plugins/inspector/public';
 import { Filter } from 'src/plugins/data/public';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
-import { DrawControl } from './draw_control';
+import { DrawFilterControl } from './draw_control';
 import { ScaleControl } from './scale_control';
 // @ts-expect-error
 import { TooltipControl } from './tooltip_control';
@@ -33,7 +33,7 @@ import {
   RawValue,
   ZOOM_PRECISION,
 } from '../../../common/constants';
-import { getGlyphUrl, isRetina } from '../../meta';
+import { getGlyphUrl, isRetina } from '../../util';
 import { syncLayerOrder } from './sort_layers';
 // @ts-expect-error
 import { removeOrphanedSourcesAndLayers, addSpritesheetToMap } from './utils';
@@ -137,7 +137,6 @@ export class MbMap extends Component<Props, State> {
   }
 
   _queryForMeta = _.debounce((layerId, layer) => {
-    console.log('query for da meta!!!', layerId, layer);
     const mbFeatures = layer.queryForTileMeta(this.state.mbMap);
     this.props.updateCounts(layerId, mbFeatures);
   }, 512);
@@ -215,7 +214,6 @@ export class MbMap extends Component<Props, State> {
         mbMap,
         getCurrentLayerList: () => this.props.layerList,
         setAreTilesLoaded: (layerId, areTilesLoaded, layer) => {
-          console.log('setAreTilesLaoded');
           this.props.setAreTilesLoaded(layerId, areTilesLoaded);
           this._queryForMeta(layerId, layer);
         },
@@ -430,7 +428,7 @@ export class MbMap extends Component<Props, State> {
     let scaleControl;
     if (this.state.mbMap) {
       drawControl = this.props.addFilters ? (
-        <DrawControl mbMap={this.state.mbMap} addFilters={this.props.addFilters} />
+        <DrawFilterControl mbMap={this.state.mbMap} addFilters={this.props.addFilters} />
       ) : null;
       tooltipControl = !this.props.settings.disableTooltipControl ? (
         <TooltipControl

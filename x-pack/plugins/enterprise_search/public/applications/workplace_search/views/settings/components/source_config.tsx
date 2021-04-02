@@ -13,6 +13,7 @@ import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { Loading } from '../../../../shared/loading';
+import { REMOVE_BUTTON, CANCEL_BUTTON } from '../../../constants';
 import { SourceDataItem } from '../../../types';
 import { AddSourceHeader } from '../../content_sources/components/add_source/add_source_header';
 import { AddSourceLogic } from '../../content_sources/components/add_source/add_source_logic';
@@ -60,6 +61,12 @@ export const SourceConfig: React.FC<SourceConfigProps> = ({ sourceIndex }) => {
           onConfirm={() => deleteSourceConfig(serviceType, name)}
           onCancel={hideConfirmModal}
           buttonColor="danger"
+          title={i18n.translate(
+            'xpack.enterpriseSearch.workplaceSearch.settings.confirmRemoveConfigTitle',
+            { defaultMessage: 'Remove configuration' }
+          )}
+          confirmButtonText={REMOVE_BUTTON}
+          cancelButtonText={CANCEL_BUTTON}
         >
           {i18n.translate(
             'xpack.enterpriseSearch.workplaceSearch.settings.confirmRemoveConfig.message',

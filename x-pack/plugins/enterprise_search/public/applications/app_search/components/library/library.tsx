@@ -10,10 +10,12 @@ import React, { useState } from 'react';
 import {
   EuiSpacer,
   EuiPageHeader,
-  EuiPageHeaderSection,
   EuiTitle,
   EuiPageContentBody,
   EuiPageContent,
+  EuiDragDropContext,
+  EuiDroppable,
+  EuiDraggable,
 } from '@elastic/eui';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
@@ -83,14 +85,8 @@ export const Library: React.FC = () => {
   return (
     <>
       <SetPageChrome trail={['Library']} />
-      <EuiPageHeader>
-        <EuiPageHeaderSection>
-          <EuiTitle size="l">
-            <h1>Library</h1>
-          </EuiTitle>
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
-      <EuiPageContent>
+      <EuiPageHeader pageTitle="Library" />
+      <EuiPageContent hasBorder>
         <EuiPageContentBody>
           <EuiTitle size="m">
             <h2>Result</h2>
@@ -226,6 +222,28 @@ export const Library: React.FC = () => {
           </EuiTitle>
           <EuiSpacer />
           <Result {...props} actions={actions} shouldLinkToDetailPage />
+          <EuiSpacer />
+
+          <EuiSpacer />
+          <EuiTitle size="s">
+            <h3>With a drag handle</h3>
+          </EuiTitle>
+          <EuiSpacer />
+          <EuiDragDropContext onDragEnd={() => {}}>
+            <EuiDroppable spacing="m" droppableId="DraggableResultsTest">
+              {[1, 2, 3].map((_, i) => (
+                <EuiDraggable
+                  spacing="m"
+                  key={`draggable-${i}`}
+                  index={i}
+                  draggableId={`draggable-${i}`}
+                  customDragHandle
+                >
+                  {(provided) => <Result {...props} dragHandleProps={provided.dragHandleProps} />}
+                </EuiDraggable>
+              ))}
+            </EuiDroppable>
+          </EuiDragDropContext>
           <EuiSpacer />
 
           <EuiSpacer />

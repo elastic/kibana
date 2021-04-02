@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { DslQuery, Filter } from 'src/plugins/data/common';
 import moment, { Moment } from 'moment';
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
@@ -17,7 +18,7 @@ import {
   AlertExecutorOptions,
   AlertServices,
 } from '../../../../../alerting/server';
-import { BaseSearchResponse, SearchHit, SearchResponse, TermAggregationBucket } from '../../types';
+import { BaseSearchResponse, SearchHit, TermAggregationBucket } from '../../types';
 import {
   EqlSearchResponse,
   BaseHit,
@@ -30,6 +31,13 @@ import { Logger } from '../../../../../../../src/core/server';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
 import { BuildRuleMessage } from './rule_messages';
 import { TelemetryEventsSender } from '../../telemetry/sender';
+import {
+  EqlRuleParams,
+  MachineLearningRuleParams,
+  QueryRuleParams,
+  ThreatRuleParams,
+  ThresholdRuleParams,
+} from '../schemas/rule_schemas';
 
 // used for gap detection code
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -150,11 +158,10 @@ export interface GetResponse {
   _source: SearchTypes;
 }
 
-export type EventSearchResponse = SearchResponse<EventSource>;
-export type SignalSearchResponse = SearchResponse<SignalSource>;
-export type SignalSourceHit = SignalSearchResponse['hits']['hits'][number];
+export type SignalSearchResponse = estypes.SearchResponse<SignalSource>;
+export type SignalSourceHit = estypes.Hit<SignalSource>;
 export type WrappedSignalHit = BaseHit<SignalHit>;
-export type BaseSignalHit = BaseHit<SignalSource>;
+export type BaseSignalHit = estypes.Hit<SignalSource>;
 
 export type EqlSignalSearchResponse = EqlSearchResponse<SignalSource>;
 
@@ -241,6 +248,26 @@ export interface RuleAlertAttributes extends AlertAttributes {
   params: RuleTypeParams;
 }
 
+export interface MachineLearningRuleAttributes extends AlertAttributes {
+  params: MachineLearningRuleParams;
+}
+
+export interface ThresholdRuleAttributes extends AlertAttributes {
+  params: ThresholdRuleParams;
+}
+
+export interface ThreatRuleAttributes extends AlertAttributes {
+  params: ThreatRuleParams;
+}
+
+export interface QueryRuleAttributes extends AlertAttributes {
+  params: QueryRuleParams;
+}
+
+export interface EqlRuleAttributes extends AlertAttributes {
+  params: EqlRuleParams;
+}
+
 export type BulkResponseErrorAggregation = Record<string, { count: number; statusCode: number }>;
 
 /**
@@ -291,6 +318,7 @@ export interface SearchAfterAndBulkCreateParams {
 
 export interface SearchAfterAndBulkCreateReturnType {
   success: boolean;
+  warning: boolean;
   searchAfterTimes: string[];
   bulkCreateTimes: string[];
   lastLookBackDate: Date | null | undefined;

@@ -24,7 +24,10 @@ import React, { useEffect, useState } from 'react';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { clearCache } from '../../../../services/rest/callApi';
-import { callApmApi } from '../../../../services/rest/createCallApmApi';
+import {
+  APIReturnType,
+  callApmApi,
+} from '../../../../services/rest/createCallApmApi';
 
 const APM_INDEX_LABELS = [
   {
@@ -84,8 +87,10 @@ async function saveApmIndices({
   clearCache();
 }
 
+type ApiResponse = APIReturnType<`GET /api/apm/settings/apm-index-settings`>;
+
 // avoid infinite loop by initializing the state outside the component
-const INITIAL_STATE = [] as [];
+const INITIAL_STATE: ApiResponse = { apmIndexSettings: [] };
 
 export function ApmIndices() {
   const { core } = useApmPluginContext();
@@ -108,7 +113,7 @@ export function ApmIndices() {
 
   useEffect(() => {
     setApmIndices(
-      data.reduce(
+      data.apmIndexSettings.reduce(
         (acc, { configurationName, savedValue }) => ({
           ...acc,
           [configurationName]: savedValue,
@@ -178,8 +183,8 @@ export function ApmIndices() {
           })}
         </h1>
       </EuiTitle>
-      <EuiSpacer size="l" />
-      <EuiText>
+      <EuiSpacer size="s" />
+      <EuiText color="subdued">
         {i18n.translate('xpack.apm.settings.apmIndices.description', {
           defaultMessage: `The APM UI uses index patterns to query your APM indices. If you've customized the index names that APM Server writes events to, you may need to update these patterns for the APM UI to work. Settings here take precedence over those set in kibana.yml.`,
         })}
@@ -190,7 +195,7 @@ export function ApmIndices() {
           <EuiFlexItem grow={false}>
             <EuiForm>
               {APM_INDEX_LABELS.map(({ configurationName, label }) => {
-                const matchedConfiguration = data.find(
+                const matchedConfiguration = data.apmIndexSettings.find(
                   ({ configurationName: configName }) =>
                     configName === configurationName
                 );

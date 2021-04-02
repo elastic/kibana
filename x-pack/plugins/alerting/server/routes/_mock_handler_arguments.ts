@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { KibanaRequest, KibanaResponseFactory, ILegacyClusterClient } from 'kibana/server';
+import { KibanaRequest, KibanaResponseFactory } from 'kibana/server';
 import { identity } from 'lodash';
 import type { MethodKeysOf } from '@kbn/utility-types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { ScopedClusterClientMock } from '../../../../../src/core/server/elasticsearch/client/mocks';
 import { httpServerMock } from '../../../../../src/core/server/mocks';
 import { alertsClientMock, AlertsClientMock } from '../alerts_client.mock';
 import { AlertsHealth, AlertType } from '../../common';
@@ -18,12 +20,12 @@ export function mockHandlerArguments(
   {
     alertsClient = alertsClientMock.create(),
     listTypes: listTypesRes = [],
-    esClient = elasticsearchServiceMock.createLegacyClusterClient(),
+    esClient = elasticsearchServiceMock.createScopedClusterClient(),
     getFrameworkHealth,
   }: {
     alertsClient?: AlertsClientMock;
     listTypes?: AlertType[];
-    esClient?: jest.Mocked<ILegacyClusterClient>;
+    esClient?: jest.Mocked<ScopedClusterClientMock>;
     getFrameworkHealth?: jest.MockInstance<Promise<AlertsHealth>, []> &
       (() => Promise<AlertsHealth>);
   },
@@ -37,7 +39,7 @@ export function mockHandlerArguments(
   const listTypes = jest.fn(() => listTypesRes);
   return [
     ({
-      core: { elasticsearch: { legacy: { client: esClient } } },
+      core: { elasticsearch: { client: esClient } },
       alerting: {
         listTypes,
         getAlertsClient() {
