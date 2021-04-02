@@ -60,13 +60,13 @@ describe('buildAlertHistoryDocument', () => {
   it(`doesn't include context if context is empty`, () => {
     const alertHistoryDoc = buildAlertHistoryDocument(getVariables({ context: {} }));
     expect(alertHistoryDoc).not.toBeNull();
-    expect(alertHistoryDoc!.alert.context).toBeFalsy();
+    expect(alertHistoryDoc!.alert?.context).toBeFalsy();
   });
 
   it(`doesn't include params if params is empty`, () => {
     const alertHistoryDoc = buildAlertHistoryDocument(getVariables({ params: {} }));
     expect(alertHistoryDoc).not.toBeNull();
-    expect(alertHistoryDoc!.rule.params).toBeFalsy();
+    expect(alertHistoryDoc!.rule?.params).toBeFalsy();
   });
 
   it(`doesn't include tags if tags is empty array`, () => {
