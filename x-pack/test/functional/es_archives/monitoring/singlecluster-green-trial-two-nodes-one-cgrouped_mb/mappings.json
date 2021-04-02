@@ -813,6 +813,77 @@
             },
             "state": {
               "properties": {
+                "beat": {
+                  "properties": {
+                    "host": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "type": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "uuid": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "version": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "cluster": {
+                  "properties": {
+                    "uuid": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "host": {
+                  "properties": {
+                    "containerized": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "os": {
+                      "properties": {
+                        "kernel": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "name": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "platform": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "version": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        }
+                      }
+                    }
+                  }
+                },
+                "input": {
+                  "properties": {
+                    "count": {
+                      "type": "long"
+                    },
+                    "names": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
                 "management": {
                   "properties": {
                     "enabled": {
@@ -824,6 +895,10 @@
                   "properties": {
                     "count": {
                       "type": "long"
+                    },
+                    "names": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
                     }
                   }
                 },
@@ -842,13 +917,507 @@
                       "type": "keyword"
                     }
                   }
+                },
+                "service": {
+                  "properties": {
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "version": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
                 }
               }
             },
             "stats": {
               "properties": {
+                "apm_server": {
+                  "properties": {
+                    "acm": {
+                      "properties": {
+                        "request": {
+                          "properties": {
+                            "count": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "response": {
+                          "properties": {
+                            "count": {
+                              "type": "long"
+                            },
+                            "errors": {
+                              "properties": {
+                                "closed": {
+                                  "type": "long"
+                                },
+                                "count": {
+                                  "type": "long"
+                                },
+                                "decode": {
+                                  "type": "long"
+                                },
+                                "forbidden": {
+                                  "type": "long"
+                                },
+                                "internal": {
+                                  "type": "long"
+                                },
+                                "invalidquery": {
+                                  "type": "long"
+                                },
+                                "method": {
+                                  "type": "long"
+                                },
+                                "notfound": {
+                                  "type": "long"
+                                },
+                                "queue": {
+                                  "type": "long"
+                                },
+                                "ratelimit": {
+                                  "type": "long"
+                                },
+                                "toolarge": {
+                                  "type": "long"
+                                },
+                                "unauthorized": {
+                                  "type": "long"
+                                },
+                                "unavailable": {
+                                  "type": "long"
+                                },
+                                "validate": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "request": {
+                              "properties": {
+                                "count": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "unset": {
+                              "type": "long"
+                            },
+                            "valid": {
+                              "properties": {
+                                "accepted": {
+                                  "type": "long"
+                                },
+                                "count": {
+                                  "type": "long"
+                                },
+                                "notmodified": {
+                                  "type": "long"
+                                },
+                                "ok": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "decoder": {
+                      "properties": {
+                        "deflate": {
+                          "properties": {
+                            "content-length": {
+                              "type": "long"
+                            },
+                            "count": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "gzip": {
+                          "properties": {
+                            "content-length": {
+                              "type": "long"
+                            },
+                            "count": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "missing-content-length": {
+                          "properties": {
+                            "count": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "reader": {
+                          "properties": {
+                            "count": {
+                              "type": "long"
+                            },
+                            "size": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "uncompressed": {
+                          "properties": {
+                            "content-length": {
+                              "type": "long"
+                            },
+                            "count": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "processor": {
+                      "properties": {
+                        "error": {
+                          "properties": {
+                            "decoding": {
+                              "properties": {
+                                "count": {
+                                  "type": "long"
+                                },
+                                "errors": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "frames": {
+                              "type": "long"
+                            },
+                            "spans": {
+                              "type": "long"
+                            },
+                            "stacktraces": {
+                              "type": "long"
+                            },
+                            "transformations": {
+                              "type": "long"
+                            },
+                            "validation": {
+                              "properties": {
+                                "count": {
+                                  "type": "long"
+                                },
+                                "errors": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "metric": {
+                          "properties": {
+                            "decoding": {
+                              "properties": {
+                                "count": {
+                                  "type": "long"
+                                },
+                                "errors": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "transformations": {
+                              "type": "long"
+                            },
+                            "validation": {
+                              "properties": {
+                                "count": {
+                                  "type": "long"
+                                },
+                                "errors": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "sourcemap": {
+                          "properties": {
+                            "counter": {
+                              "type": "long"
+                            },
+                            "decoding": {
+                              "properties": {
+                                "count": {
+                                  "type": "long"
+                                },
+                                "errors": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "validation": {
+                              "properties": {
+                                "count": {
+                                  "type": "long"
+                                },
+                                "errors": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "span": {
+                          "properties": {
+                            "transformations": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "transaction": {
+                          "properties": {
+                            "decoding": {
+                              "properties": {
+                                "count": {
+                                  "type": "long"
+                                },
+                                "errors": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "frames": {
+                              "type": "long"
+                            },
+                            "spans": {
+                              "type": "long"
+                            },
+                            "stacktraces": {
+                              "type": "long"
+                            },
+                            "transactions": {
+                              "type": "long"
+                            },
+                            "transformations": {
+                              "type": "long"
+                            },
+                            "validation": {
+                              "properties": {
+                                "count": {
+                                  "type": "long"
+                                },
+                                "errors": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "server": {
+                      "properties": {
+                        "concurrent": {
+                          "properties": {
+                            "wait": {
+                              "properties": {
+                                "ms": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "request": {
+                          "properties": {
+                            "count": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "response": {
+                          "properties": {
+                            "count": {
+                              "type": "long"
+                            },
+                            "errors": {
+                              "properties": {
+                                "closed": {
+                                  "type": "long"
+                                },
+                                "concurrency": {
+                                  "type": "long"
+                                },
+                                "count": {
+                                  "type": "long"
+                                },
+                                "decode": {
+                                  "type": "long"
+                                },
+                                "forbidden": {
+                                  "type": "long"
+                                },
+                                "internal": {
+                                  "type": "long"
+                                },
+                                "method": {
+                                  "type": "long"
+                                },
+                                "queue": {
+                                  "type": "long"
+                                },
+                                "ratelimit": {
+                                  "type": "long"
+                                },
+                                "toolarge": {
+                                  "type": "long"
+                                },
+                                "unauthorized": {
+                                  "type": "long"
+                                },
+                                "validate": {
+                                  "type": "long"
+                                }
+                              }
+                            },
+                            "valid": {
+                              "properties": {
+                                "accepted": {
+                                  "type": "long"
+                                },
+                                "count": {
+                                  "type": "long"
+                                },
+                                "ok": {
+                                  "type": "long"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "beat": {
+                  "properties": {
+                    "host": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "type": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "uuid": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "version": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "cpu": {
+                  "properties": {
+                    "system": {
+                      "properties": {
+                        "ticks": {
+                          "type": "long"
+                        },
+                        "time": {
+                          "properties": {
+                            "ms": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "total": {
+                      "properties": {
+                        "ticks": {
+                          "type": "long"
+                        },
+                        "time": {
+                          "properties": {
+                            "ms": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "value": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "user": {
+                      "properties": {
+                        "ticks": {
+                          "type": "long"
+                        },
+                        "time": {
+                          "properties": {
+                            "ms": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "info": {
+                  "properties": {
+                    "ephemeral_id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "uptime": {
+                      "properties": {
+                        "ms": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
                 "libbeat": {
                   "properties": {
+                    "config": {
+                      "properties": {
+                        "module": {
+                          "properties": {
+                            "running": {
+                              "type": "short"
+                            },
+                            "starts": {
+                              "type": "short"
+                            },
+                            "stops": {
+                              "type": "short"
+                            }
+                          }
+                        },
+                        "reloads": {
+                          "type": "short"
+                        },
+                        "scans": {
+                          "type": "short"
+                        }
+                      }
+                    },
                     "output": {
                       "properties": {
                         "events": {
@@ -904,6 +1473,65 @@
                           }
                         }
                       }
+                    },
+                    "pipeline": {
+                      "properties": {
+                        "client": {
+                          "type": "long"
+                        },
+                        "events": {
+                          "properties": {
+                            "active": {
+                              "type": "long"
+                            },
+                            "dropped": {
+                              "type": "long"
+                            },
+                            "failed": {
+                              "type": "long"
+                            },
+                            "filtered": {
+                              "type": "long"
+                            },
+                            "published": {
+                              "type": "long"
+                            },
+                            "retry": {
+                              "type": "long"
+                            },
+                            "total": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "queue": {
+                          "properties": {
+                            "acked": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "memstats": {
+                  "properties": {
+                    "gc_next": {
+                      "type": "long"
+                    },
+                    "memory": {
+                      "properties": {
+                        "alloc": {
+                          "type": "long"
+                        },
+                        "total": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "rss": {
+                      "type": "long"
                     }
                   }
                 },
@@ -911,6 +1539,43 @@
                   "properties": {
                     "goroutines": {
                       "type": "long"
+                    }
+                  }
+                },
+                "system": {
+                  "properties": {
+                    "cpu": {
+                      "properties": {
+                        "cores": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "load": {
+                      "properties": {
+                        "1": {
+                          "type": "double"
+                        },
+                        "15": {
+                          "type": "double"
+                        },
+                        "5": {
+                          "type": "double"
+                        },
+                        "norm": {
+                          "properties": {
+                            "1": {
+                              "type": "double"
+                            },
+                            "15": {
+                              "type": "double"
+                            },
+                            "5": {
+                              "type": "double"
+                            }
+                          }
+                        }
+                      }
                     }
                   }
                 },
@@ -926,6 +1591,601 @@
             "type": {
               "ignore_above": 1024,
               "type": "keyword"
+            }
+          }
+        },
+        "beats_state": {
+          "properties": {
+            "beat": {
+              "properties": {
+                "host": {
+                  "path": "beat.state.beat.host",
+                  "type": "alias"
+                },
+                "name": {
+                  "path": "beat.state.beat.name",
+                  "type": "alias"
+                },
+                "type": {
+                  "path": "beat.state.beat.type",
+                  "type": "alias"
+                },
+                "uuid": {
+                  "path": "beat.state.beat.uuid",
+                  "type": "alias"
+                },
+                "version": {
+                  "path": "beat.state.beat.version",
+                  "type": "alias"
+                }
+              }
+            },
+            "state": {
+              "properties": {
+                "beat": {
+                  "properties": {
+                    "name": {
+                      "path": "beat.state.beat.name",
+                      "type": "alias"
+                    }
+                  }
+                },
+                "host": {
+                  "properties": {
+                    "architecture": {
+                      "path": "host.architecture",
+                      "type": "alias"
+                    },
+                    "hostname": {
+                      "path": "host.hostname",
+                      "type": "alias"
+                    },
+                    "name": {
+                      "path": "host.name",
+                      "type": "alias"
+                    },
+                    "os": {
+                      "properties": {
+                        "platform": {
+                          "path": "beat.state.host.os.platform",
+                          "type": "alias"
+                        },
+                        "version": {
+                          "path": "beat.state.host.os.version",
+                          "type": "alias"
+                        }
+                      }
+                    }
+                  }
+                },
+                "input": {
+                  "properties": {
+                    "count": {
+                      "path": "beat.state.input.count",
+                      "type": "alias"
+                    },
+                    "names": {
+                      "path": "beat.state.input.names",
+                      "type": "alias"
+                    }
+                  }
+                },
+                "module": {
+                  "properties": {
+                    "count": {
+                      "path": "beat.state.module.count",
+                      "type": "alias"
+                    },
+                    "names": {
+                      "path": "beat.state.module.names",
+                      "type": "alias"
+                    }
+                  }
+                },
+                "output": {
+                  "properties": {
+                    "name": {
+                      "path": "beat.state.output.name",
+                      "type": "alias"
+                    }
+                  }
+                },
+                "service": {
+                  "properties": {
+                    "id": {
+                      "path": "beat.state.service.id",
+                      "type": "alias"
+                    },
+                    "name": {
+                      "path": "beat.state.service.name",
+                      "type": "alias"
+                    },
+                    "version": {
+                      "path": "beat.state.service.version",
+                      "type": "alias"
+                    }
+                  }
+                }
+              }
+            },
+            "timestamp": {
+              "path": "@timestamp",
+              "type": "alias"
+            }
+          }
+        },
+        "beats_stats": {
+          "properties": {
+            "apm_server": {
+              "properties": {
+                "acm": {
+                  "properties": {
+                    "request": {
+                      "properties": {
+                        "count": {
+                          "path": "beat.stats.apm_server.acm.request.count",
+                          "type": "alias"
+                        }
+                      }
+                    },
+                    "response": {
+                      "properties": {
+                        "count": {
+                          "path": "beat.stats.apm_server.acm.response.count",
+                          "type": "alias"
+                        },
+                        "errors": {
+                          "properties": {
+                            "closed": {
+                              "path": "beat.stats.apm_server.acm.response.errors.closed",
+                              "type": "alias"
+                            },
+                            "count": {
+                              "path": "beat.stats.apm_server.acm.response.errors.count",
+                              "type": "alias"
+                            },
+                            "decode": {
+                              "path": "beat.stats.apm_server.acm.response.errors.decode",
+                              "type": "alias"
+                            },
+                            "forbidden": {
+                              "path": "beat.stats.apm_server.acm.response.errors.forbidden",
+                              "type": "alias"
+                            },
+                            "internal": {
+                              "path": "beat.stats.apm_server.acm.response.errors.internal",
+                              "type": "alias"
+                            },
+                            "invalidquery": {
+                              "path": "beat.stats.apm_server.acm.response.errors.invalidquery",
+                              "type": "alias"
+                            },
+                            "method": {
+                              "path": "beat.stats.apm_server.acm.response.errors.method",
+                              "type": "alias"
+                            },
+                            "notfound": {
+                              "path": "beat.stats.apm_server.acm.response.errors.notfound",
+                              "type": "alias"
+                            },
+                            "queue": {
+                              "path": "beat.stats.apm_server.acm.response.errors.queue",
+                              "type": "alias"
+                            },
+                            "ratelimit": {
+                              "path": "beat.stats.apm_server.acm.response.errors.ratelimit",
+                              "type": "alias"
+                            },
+                            "toolarge": {
+                              "path": "beat.stats.apm_server.acm.response.errors.toolarge",
+                              "type": "alias"
+                            },
+                            "unauthorized": {
+                              "path": "beat.stats.apm_server.acm.response.errors.unauthorized",
+                              "type": "alias"
+                            },
+                            "unavailable": {
+                              "path": "beat.stats.apm_server.acm.response.errors.unavailable",
+                              "type": "alias"
+                            },
+                            "validate": {
+                              "path": "beat.stats.apm_server.acm.response.errors.validate",
+                              "type": "alias"
+                            }
+                          }
+                        },
+                        "request": {
+                          "properties": {
+                            "count": {
+                              "path": "beat.stats.apm_server.acm.response.request.count",
+                              "type": "alias"
+                            }
+                          }
+                        },
+                        "unset": {
+                          "path": "beat.stats.apm_server.acm.response.unset",
+                          "type": "alias"
+                        },
+                        "valid": {
+                          "properties": {
+                            "accepted": {
+                              "path": "beat.stats.apm_server.acm.response.valid.accepted",
+                              "type": "alias"
+                            },
+                            "count": {
+                              "path": "beat.stats.apm_server.acm.response.valid.count",
+                              "type": "alias"
+                            },
+                            "notmodified": {
+                              "path": "beat.stats.apm_server.acm.response.valid.notmodified",
+                              "type": "alias"
+                            },
+                            "ok": {
+                              "path": "beat.stats.apm_server.acm.response.valid.ok",
+                              "type": "alias"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "decoder": {
+                  "properties": {
+                    "deflate": {
+                      "properties": {
+                        "content-length": {
+                          "path": "beat.stats.apm_server.decoder.deflate.content-length",
+                          "type": "alias"
+                        },
+                        "count": {
+                          "path": "beat.stats.apm_server.decoder.deflate.count",
+                          "type": "alias"
+                        }
+                      }
+                    },
+                    "gzip": {
+                      "properties": {
+                        "content-length": {
+                          "path": "beat.stats.apm_server.decoder.gzip.content-length",
+                          "type": "alias"
+                        },
+                        "count": {
+                          "path": "beat.stats.apm_server.decoder.gzip.count",
+                          "type": "alias"
+                        }
+                      }
+                    },
+                    "missing-content-length": {
+                      "properties": {
+                        "count": {
+                          "path": "beat.stats.apm_server.decoder.missing-content-length.count",
+                          "type": "alias"
+                        }
+                      }
+                    },
+                    "reader": {
+                      "properties": {
+                        "count": {
+                          "path": "beat.stats.apm_server.decoder.reader.count",
+                          "type": "alias"
+                        },
+                        "size": {
+                          "path": "beat.stats.apm_server.decoder.reader.size",
+                          "type": "alias"
+                        }
+                      }
+                    },
+                    "uncompressed": {
+                      "properties": {
+                        "content-length": {
+                          "path": "beat.stats.apm_server.decoder.uncompressed.content-length",
+                          "type": "alias"
+                        },
+                        "count": {
+                          "path": "beat.stats.apm_server.decoder.uncompressed.count",
+                          "type": "alias"
+                        }
+                      }
+                    }
+                  }
+                },
+                "processor": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "decoding": {
+                          "properties": {
+                            "count": {
+                              "path": "beat.stats.apm_server.processor.error.decoding.count",
+                              "type": "alias"
+                            },
+                            "errors": {
+                              "path": "beat.stats.apm_server.processor.error.decoding.errors",
+                              "type": "alias"
+                            }
+                          }
+                        },
+                        "frames": {
+                          "path": "beat.stats.apm_server.processor.transaction.frames",
+                          "type": "alias"
+                        },
+                        "spans": {
+                          "path": "beat.stats.apm_server.processor.transaction.spans",
+                          "type": "alias"
+                        },
+                        "stacktraces": {
+                          "path": "beat.stats.apm_server.processor.transaction.stacktraces",
+                          "type": "alias"
+                        },
+                        "transformations": {
+                          "path": "beat.stats.apm_server.processor.transaction.transformations",
+                          "type": "alias"
+                        },
+                        "validation": {
+                          "properties": {
+                            "count": {
+                              "path": "beat.stats.apm_server.processor.error.validation.count",
+                              "type": "alias"
+                            },
+                            "errors": {
+                              "path": "beat.stats.apm_server.processor.error.validation.errors",
+                              "type": "alias"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "metric": {
+                      "properties": {
+                        "decoding": {
+                          "properties": {
+                            "count": {
+                              "path": "beat.stats.apm_server.processor.metric.decoding.count",
+                              "type": "alias"
+                            },
+                            "errors": {
+                              "path": "beat.stats.apm_server.processor.metric.decoding.errors",
+                              "type": "alias"
+                            }
+                          }
+                        },
+                        "transformations": {
+                          "path": "beat.stats.apm_server.processor.metric.transformations",
+                          "type": "alias"
+                        },
+                        "validation": {
+                          "properties": {
+                            "count": {
+                              "path": "beat.stats.apm_server.processor.metric.validation.count",
+                              "type": "alias"
+                            },
+                            "errors": {
+                              "path": "beat.stats.apm_server.processor.metric.validation.errors",
+                              "type": "alias"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "sourcemap": {
+                      "properties": {
+                        "counter": {
+                          "path": "beat.stats.apm_server.processor.sourcemap.counter",
+                          "type": "alias"
+                        },
+                        "decoding": {
+                          "properties": {
+                            "count": {
+                              "path": "beat.stats.apm_server.processor.sourcemap.decoding.count",
+                              "type": "alias"
+                            },
+                            "errors": {
+                              "path": "beat.stats.apm_server.processor.sourcemap.decoding.errors",
+                              "type": "alias"
+                            }
+                          }
+                        },
+                        "validation": {
+                          "properties": {
+                            "count": {
+                              "path": "beat.stats.apm_server.processor.sourcemap.validation.count",
+                              "type": "alias"
+                            },
+                            "errors": {
+                              "path": "beat.stats.apm_server.processor.sourcemap.validation.errors",
+                              "type": "alias"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "span": {
+                      "properties": {
+                        "transformations": {
+                          "path": "beat.stats.apm_server.processor.span.transformations",
+                          "type": "alias"
+                        }
+                      }
+                    },
+                    "transaction": {
+                      "properties": {
+                        "decoding": {
+                          "properties": {
+                            "count": {
+                              "path": "beat.stats.apm_server.processor.transaction.decoding.count",
+                              "type": "alias"
+                            },
+                            "errors": {
+                              "path": "beat.stats.apm_server.processor.transaction.decoding.errors",
+                              "type": "alias"
+                            }
+                          }
+                        },
+                        "frames": {
+                          "path": "beat.stats.apm_server.processor.transaction.frames",
+                          "type": "alias"
+                        },
+                        "spans": {
+                          "path": "beat.stats.apm_server.processor.transaction.spans",
+                          "type": "alias"
+                        },
+                        "stacktraces": {
+                          "path": "beat.stats.apm_server.processor.transaction.stacktraces",
+                          "type": "alias"
+                        },
+                        "transactions": {
+                          "path": "beat.stats.apm_server.processor.transaction.transactions",
+                          "type": "alias"
+                        },
+                        "transformations": {
+                          "path": "beat.stats.apm_server.processor.transaction.transformations",
+                          "type": "alias"
+                        },
+                        "validation": {
+                          "properties": {
+                            "count": {
+                              "path": "beat.stats.apm_server.processor.transaction.validation.count",
+                              "type": "alias"
+                            },
+                            "errors": {
+                              "path": "beat.stats.apm_server.processor.transaction.validation.errors",
+                              "type": "alias"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "server": {
+                  "properties": {
+                    "concurrent": {
+                      "properties": {
+                        "wait": {
+                          "properties": {
+                            "ms": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "request": {
+                      "properties": {
+                        "count": {
+                          "path": "beat.stats.apm_server.server.request.count",
+                          "type": "alias"
+                        }
+                      }
+                    },
+                    "response": {
+                      "properties": {
+                        "count": {
+                          "path": "beat.stats.apm_server.server.response.count",
+                          "type": "alias"
+                        },
+                        "errors": {
+                          "properties": {
+                            "closed": {
+                              "path": "beat.stats.apm_server.server.response.errors.closed",
+                              "type": "alias"
+                            },
+                            "concurrency": {
+                              "path": "beat.stats.apm_server.server.response.errors.concurrency",
+                              "type": "alias"
+                            },
+                            "count": {
+                              "path": "beat.stats.apm_server.server.response.errors.count",
+                              "type": "alias"
+                            },
+                            "decode": {
+                              "path": "beat.stats.apm_server.server.response.errors.decode",
+                              "type": "alias"
+                            },
+                            "forbidden": {
+                              "path": "beat.stats.apm_server.server.response.errors.forbidden",
+                              "type": "alias"
+                            },
+                            "internal": {
+                              "path": "beat.stats.apm_server.server.response.errors.internal",
+                              "type": "alias"
+                            },
+                            "method": {
+                              "path": "beat.stats.apm_server.server.response.errors.method",
+                              "type": "alias"
+                            },
+                            "queue": {
+                              "path": "beat.stats.apm_server.server.response.errors.queue",
+                              "type": "alias"
+                            },
+                            "ratelimit": {
+                              "path": "beat.stats.apm_server.server.response.errors.ratelimit",
+                              "type": "alias"
+                            },
+                            "toolarge": {
+                              "path": "beat.stats.apm_server.server.response.errors.toolarge",
+                              "type": "alias"
+                            },
+                            "unauthorized": {
+                              "path": "beat.stats.apm_server.server.response.errors.unauthorized",
+                              "type": "alias"
+                            },
+                            "validate": {
+                              "path": "beat.stats.apm_server.server.response.errors.validate",
+                              "type": "alias"
+                            }
+                          }
+                        },
+                        "valid": {
+                          "properties": {
+                            "accepted": {
+                              "path": "beat.stats.apm_server.server.response.valid.accepted",
+                              "type": "alias"
+                            },
+                            "count": {
+                              "path": "beat.stats.apm_server.server.response.valid.count",
+                              "type": "alias"
+                            },
+                            "ok": {
+                              "path": "beat.stats.apm_server.server.response.valid.ok",
+                              "type": "alias"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "beat": {
+              "properties": {
+                "host": {
+                  "path": "beat.stats.beat.host",
+                  "type": "alias"
+                },
+                "name": {
+                  "path": "beat.stats.beat.name",
+                  "type": "alias"
+                },
+                "type": {
+                  "path": "beat.stats.beat.type",
+                  "type": "alias"
+                },
+                "uuid": {
+                  "path": "beat.stats.beat.uuid",
+                  "type": "alias"
+                },
+                "version": {
+                  "path": "beat.stats.beat.version",
+                  "type": "alias"
+                }
+              }
+            },
+            "timestamp": {
+              "path": "@timestamp",
+              "type": "alias"
             }
           }
         },
@@ -2177,7 +3437,7 @@
                   "type": "long"
                 },
                 "get_hits": {
-                  "type": "long"
+                  "type": "double"
                 },
                 "hostname": {
                   "ignore_above": 1024,
@@ -2227,7 +3487,7 @@
                   }
                 },
                 "ops": {
-                  "type": "long"
+                  "type": "double"
                 },
                 "swap": {
                   "properties": {
@@ -7126,6 +8386,10 @@
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
+                "type": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "version": {
                   "ignore_above": 1024,
                   "type": "keyword"
@@ -8087,13 +9351,13 @@
                     "load": {
                       "properties": {
                         "15m": {
-                          "type": "double"
+                          "type": "half_float"
                         },
                         "1m": {
-                          "type": "double"
+                          "type": "half_float"
                         },
                         "5m": {
-                          "type": "double"
+                          "type": "half_float"
                         }
                       }
                     },
@@ -8224,10 +9488,6 @@
                       "type": "keyword"
                     }
                   }
-                },
-                "uuid": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
                 }
               }
             },
@@ -8291,7 +9551,7 @@
                   "type": "alias"
                 },
                 "uuid": {
-                  "path": "kibana.stats.uuid",
+                  "path": "service.id",
                   "type": "alias"
                 }
               }
@@ -9573,6 +10833,22 @@
                 },
                 "status": {
                   "properties": {
+                    "disk_pressure": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "memory_pressure": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "out_of_disk": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "pid_pressure": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
                     "ready": {
                       "ignore_above": 1024,
                       "type": "keyword"
@@ -11012,13 +12288,13 @@
                             "load_average": {
                               "properties": {
                                 "15m": {
-                                  "type": "half_float"
+                                  "type": "long"
                                 },
                                 "1m": {
-                                  "type": "half_float"
+                                  "type": "long"
                                 },
                                 "5m": {
-                                  "type": "half_float"
+                                  "type": "long"
                                 }
                               }
                             }
@@ -15073,6 +16349,10 @@
                 "backend_start": {
                   "type": "date"
                 },
+                "backend_type": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "client": {
                   "properties": {
                     "address": {
@@ -15129,6 +16409,14 @@
                       "type": "keyword"
                     }
                   }
+                },
+                "wait_event": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "wait_event_type": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
                 },
                 "waiting": {
                   "type": "boolean"
@@ -19498,8 +20786,7 @@
                       "type": "long"
                     },
                     "rss": {
-                      "ignore_above": 1024,
-                      "type": "keyword"
+                      "type": "long"
                     },
                     "running_time": {
                       "type": "long"
@@ -20383,8 +21670,30 @@
             "apache.status.hostname",
             "beat.id",
             "beat.type",
+            "beat.state.service.id",
+            "beat.state.service.name",
+            "beat.state.service.version",
+            "beat.state.input.names",
+            "beat.state.beat.host",
+            "beat.state.beat.name",
+            "beat.state.beat.type",
+            "beat.state.beat.uuid",
+            "beat.state.beat.version",
+            "beat.state.cluster.uuid",
+            "beat.state.host.containerized",
+            "beat.state.host.os.kernel",
+            "beat.state.host.os.name",
+            "beat.state.host.os.platform",
+            "beat.state.host.os.version",
+            "beat.state.module.names",
             "beat.state.output.name",
             "beat.state.queue.name",
+            "beat.stats.beat.name",
+            "beat.stats.beat.host",
+            "beat.stats.beat.type",
+            "beat.stats.beat.uuid",
+            "beat.stats.beat.version",
+            "beat.stats.info.ephemeral_id",
             "beat.stats.libbeat.output.type",
             "ceph.cluster_health.overall_status",
             "ceph.cluster_health.timechecks.round.status",
@@ -20509,11 +21818,6 @@
             "kafka.partition.topic.name",
             "kafka.partition.broker.address",
             "kafka.producer.mbean",
-            "kibana.stats.uuid",
-            "kibana.stats.os.distro",
-            "kibana.stats.os.distroRelease",
-            "kibana.stats.os.platform",
-            "kibana.stats.os.platformRelease",
             "kibana.settings.uuid",
             "kibana.settings.name",
             "kibana.settings.index",
@@ -20590,6 +21894,10 @@
             "kubernetes.cronjob.concurrency",
             "kubernetes.daemonset.name",
             "kubernetes.node.status.ready",
+            "kubernetes.node.status.memory_pressure",
+            "kubernetes.node.status.disk_pressure",
+            "kubernetes.node.status.out_of_disk",
+            "kubernetes.node.status.pid_pressure",
             "kubernetes.persistentvolume.name",
             "kubernetes.persistentvolume.phase",
             "kubernetes.persistentvolume.storage_class",
@@ -20674,8 +21982,11 @@
             "postgresql.activity.application_name",
             "postgresql.activity.client.address",
             "postgresql.activity.client.hostname",
+            "postgresql.activity.backend_type",
             "postgresql.activity.state",
             "postgresql.activity.query",
+            "postgresql.activity.wait_event",
+            "postgresql.activity.wait_event_type",
             "postgresql.database.name",
             "postgresql.statement.query.text",
             "rabbitmq.vhost",
@@ -20753,7 +22064,6 @@
             "system.users.scope",
             "system.users.remote_host",
             "uwsgi.status.worker.status",
-            "uwsgi.status.worker.rss",
             "vsphere.datastore.name",
             "vsphere.datastore.fstype",
             "vsphere.host.name",

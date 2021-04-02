@@ -40,7 +40,7 @@ export function getKibanasForClusters(req, kbnIndexPattern, clusters) {
       ignoreUnavailable: true,
       body: {
         query: createQuery({
-          type: 'kibana_stats',
+          types: ['stats', 'kibana_stats'],
           start,
           end,
           clusterUuid,

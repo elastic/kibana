@@ -77,6 +77,8 @@ function convertLegacyTypeToMetricsetName(type: string) {
       return 'shard';
     case 'ccr_stats':
       return 'ccr';
+    case 'kibana_stats':
+      return 'stats';
   }
   return type;
 }

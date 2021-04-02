@@ -109,7 +109,7 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid, nod
                     bool: {
                       should: [
                         { term: { type: 'kibana_stats' } },
-                        { term: { 'metricset.name': 'kibana_stats' } },
+                        { term: { 'metricset.name': 'stats' } },
                       ],
                     },
                   },

@@ -74,7 +74,7 @@ export async function getKibanas(
     ignoreUnavailable: true,
     body: {
       query: createQuery({
-        type: 'kibana_stats',
+        types: ['kibana_stats', 'stats'],
         start,
         end,
         clusterUuid,
