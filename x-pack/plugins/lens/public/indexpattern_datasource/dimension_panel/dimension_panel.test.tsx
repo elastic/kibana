@@ -25,6 +25,7 @@ import {
 import { mountWithIntl as mount, shallowWithIntl as shallow } from '@kbn/test/jest';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup, CoreSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { generateId } from '../../id_generator';
 import { IndexPatternPrivateState } from '../types';
 import { IndexPatternColumn, replaceColumn } from '../operations';
 import { documentField } from '../document_field';
@@ -48,6 +49,7 @@ jest.mock('lodash', () => {
     debounce: (fn: unknown) => fn,
   };
 });
+jest.mock('../../id_generator');
 
 const fields = [
   {
@@ -1034,7 +1036,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
     }
 
     it('should not show custom options if time scaling is not available', () => {
-      wrapper = shallow(
+      wrapper = mount(
         <IndexPatternDimensionEditorComponent
           {...getProps({
             operationType: 'average',
@@ -1045,21 +1047,17 @@ describe('IndexPatternDimensionEditorPanel', () => {
       expect(
         wrapper
           .find(DimensionEditor)
-          .dive()
           .find(AdvancedOptions)
-          .dive()
           .find('[data-test-subj="indexPattern-time-scaling-enable"]')
       ).toHaveLength(0);
     });
 
     it('should show custom options if time scaling is available', () => {
-      wrapper = shallow(<IndexPatternDimensionEditorComponent {...getProps({})} />);
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...getProps({})} />);
       expect(
         wrapper
           .find(DimensionEditor)
-          .dive()
           .find(AdvancedOptions)
-          .dive()
           .find('[data-test-subj="indexPattern-time-scaling-enable"]')
       ).toHaveLength(1);
     });
@@ -1076,12 +1074,10 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     it('should allow to set time scaling initially', () => {
       const props = getProps({});
-      wrapper = shallow(<IndexPatternDimensionEditorComponent {...props} />);
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
       wrapper
         .find(DimensionEditor)
-        .dive()
         .find(AdvancedOptions)
-        .dive()
         .find('[data-test-subj="indexPattern-time-scaling-enable"]')
         .prop('onClick')!({} as MouseEvent);
       expect(props.setState).toHaveBeenCalledWith(
@@ -1283,7 +1279,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
     }
 
     it('should not show custom options if time scaling is not available', () => {
-      wrapper = shallow(
+      wrapper = mount(
         <IndexPatternDimensionEditorComponent
           {...getProps({
             operationType: 'terms',
@@ -1294,21 +1290,17 @@ describe('IndexPatternDimensionEditorPanel', () => {
       expect(
         wrapper
           .find(DimensionEditor)
-          .dive()
           .find(AdvancedOptions)
-          .dive()
           .find('[data-test-subj="indexPattern-filter-by-enable"]')
       ).toHaveLength(0);
     });
 
     it('should show custom options if filtering is available', () => {
-      wrapper = shallow(<IndexPatternDimensionEditorComponent {...getProps({})} />);
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...getProps({})} />);
       expect(
         wrapper
           .find(DimensionEditor)
-          .dive()
           .find(AdvancedOptions)
-          .dive()
           .find('[data-test-subj="indexPattern-filter-by-enable"]')
       ).toHaveLength(1);
     });
@@ -1326,12 +1318,10 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     it('should allow to set filter initially', () => {
       const props = getProps({});
-      wrapper = shallow(<IndexPatternDimensionEditorComponent {...props} />);
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
       wrapper
         .find(DimensionEditor)
-        .dive()
         .find(AdvancedOptions)
-        .dive()
         .find('[data-test-subj="indexPattern-filter-by-enable"]')
         .prop('onClick')!({} as MouseEvent);
       expect(props.setState).toHaveBeenCalledWith(
@@ -1909,6 +1899,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
   });
 
   it('should hide the top level field selector when switching from non-reference to reference', () => {
+    (generateId as jest.Mock).mockReturnValue(`second`);
     wrapper = mount(<IndexPatternDimensionEditorComponent {...defaultProps} />);
 
     expect(wrapper.find('ReferenceEditor')).toHaveLength(0);

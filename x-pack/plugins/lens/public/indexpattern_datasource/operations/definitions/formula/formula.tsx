@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { isObject } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { TinymathAST, TinymathVariable } from '@kbn/tinymath';
+import type { TinymathAST, TinymathVariable, TinymathLocation } from '@kbn/tinymath';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -34,7 +34,7 @@ import {
 } from '../index';
 import { ReferenceBasedIndexPatternColumn } from '../column_types';
 import { IndexPattern, IndexPatternLayer } from '../../../types';
-import { getColumnOrder } from '../../layer_helpers';
+import { getColumnOrder, getManagedColumnsFrom } from '../../layer_helpers';
 import { mathOperation } from './math';
 import { documentField } from '../../../document_field';
 import { ErrorWrapper, runASTValidation, shouldHaveFieldArgument, tryToParse } from './validation';
@@ -289,13 +289,60 @@ function FormulaEditor({
                 startLineNumber: startPosition.lineNumber,
                 endColumn: endPosition.column + 1,
                 endLineNumber: endPosition.lineNumber,
-                severity: monaco.MarkerSeverity.Error,
+                severity:
+                  innerError.severity === 'warning'
+                    ? monaco.MarkerSeverity.Warning
+                    : monaco.MarkerSeverity.Error,
               };
             })
           )
         );
       } else {
         monaco.editor.setModelMarkers(editorModel.current, 'LENS', []);
+
+        // Only submit if valid
+        const { newLayer, locations } = regenerateLayerFromAst(
+          text || '',
+          layer,
+          columnId,
+          currentColumn,
+          indexPattern,
+          operationDefinitionMap
+        );
+        updateLayer(newLayer);
+
+        const managedColumns = getManagedColumnsFrom(columnId, newLayer.columns);
+        const markers: monaco.editor.IMarkerData[] = managedColumns
+          .flatMap(([id, column]) => {
+            if (locations[id]) {
+              const def = operationDefinitionMap[column.operationType];
+              if (def.getErrorMessage) {
+                const messages = def.getErrorMessage(
+                  newLayer,
+                  id,
+                  indexPattern,
+                  operationDefinitionMap
+                );
+                if (messages) {
+                  const startPosition = offsetToRowColumn(text, locations[id].min);
+                  const endPosition = offsetToRowColumn(text, locations[id].max);
+                  return [
+                    {
+                      message: messages.join(', '),
+                      startColumn: startPosition.column + 1,
+                      startLineNumber: startPosition.lineNumber,
+                      endColumn: endPosition.column + 1,
+                      endLineNumber: endPosition.lineNumber,
+                      severity: monaco.MarkerSeverity.Warning,
+                    },
+                  ];
+                }
+              }
+            }
+            return [];
+          })
+          .filter((marker) => marker);
+        monaco.editor.setModelMarkers(editorModel.current, 'LENS', markers);
       }
     },
     // Make it validate on flyout open in case of a broken formula left over
@@ -492,7 +539,7 @@ function FormulaEditor({
             })}
           </EuiButton>
         </EuiFlexItem>
-        <EuiFlexItem>
+        {/* <EuiFlexItem>
           <EuiButton
             disabled={currentColumn.params.formula === text}
             color={currentColumn.params.formula !== text ? 'primary' : 'text'}
@@ -516,7 +563,7 @@ function FormulaEditor({
               defaultMessage: 'Submit',
             })}
           </EuiButton>
-        </EuiFlexItem>
+        </EuiFlexItem> */}
       </EuiFlexGroup>
 
       {isOpen ? (
@@ -636,7 +683,7 @@ Use the symbols +, -, /, and * to perform basic math.
                 defaultMessage: 'Cancel',
               })}
             </EuiButton>
-            <EuiButton
+            {/* <EuiButton
               disabled={currentColumn.params.formula === text}
               color={currentColumn.params.formula !== text ? 'primary' : 'text'}
               fill={currentColumn.params.formula !== text}
@@ -657,7 +704,7 @@ Use the symbols +, -, /, and * to perform basic math.
               {i18n.translate('xpack.lens.indexPattern.formulaSubmitLabel', {
                 defaultMessage: 'Submit',
               })}
-            </EuiButton>
+            </EuiButton> */}
           </EuiModalFooter>
         </EuiModal>
       ) : null}
@@ -708,14 +755,17 @@ export function regenerateLayerFromAst(
     ...layer.columns,
   };
 
+  const locations: Record<string, TinymathLocation> = {};
+
   Object.keys(columns).forEach((k) => {
     if (k.startsWith(columnId)) {
       delete columns[k];
     }
   });
 
-  extracted.forEach((extractedColumn, index) => {
-    columns[`${columnId}X${index}`] = extractedColumn;
+  extracted.forEach(({ column, location }, index) => {
+    columns[`${columnId}X${index}`] = column;
+    if (location) locations[`${columnId}X${index}`] = location;
   });
 
   columns[columnId] = {
@@ -729,12 +779,15 @@ export function regenerateLayerFromAst(
   };
 
   return {
-    ...layer,
-    columns,
-    columnOrder: getColumnOrder({
+    newLayer: {
       ...layer,
       columns,
-    }),
+      columnOrder: getColumnOrder({
+        ...layer,
+        columns,
+      }),
+    },
+    locations,
   };
 
   // TODO
@@ -748,8 +801,8 @@ function extractColumns(
   ast: TinymathAST,
   layer: IndexPatternLayer,
   indexPattern: IndexPattern
-) {
-  const columns: IndexPatternColumn[] = [];
+): Array<{ column: IndexPatternColumn; location?: TinymathLocation }> {
+  const columns: Array<{ column: IndexPatternColumn; location?: TinymathLocation }> = [];
 
   function parseNode(node: TinymathAST) {
     if (typeof node === 'number' || node.type !== 'function') {
@@ -796,7 +849,7 @@ function extractColumns(
       const newColId = `${idPrefix}X${columns.length}`;
       newCol.customLabel = true;
       newCol.label = newColId;
-      columns.push(newCol);
+      columns.push({ column: newCol, location: node.location });
       // replace by new column id
       return newColId;
     }
@@ -812,7 +865,7 @@ function extractColumns(
       });
       mathColumn.references = subNodeVariables.map(({ value }) => value);
       mathColumn.params.tinymathAst = consumedParam!;
-      columns.push(mathColumn);
+      columns.push({ column: mathColumn });
       mathColumn.customLabel = true;
       mathColumn.label = `${idPrefix}X${columns.length - 1}`;
 
@@ -831,7 +884,7 @@ function extractColumns(
       const newColId = `${idPrefix}X${columns.length}`;
       newCol.customLabel = true;
       newCol.label = newColId;
-      columns.push(newCol);
+      columns.push({ column: newCol, location: node.location });
       // replace by new column id
       return newColId;
     }
@@ -850,7 +903,7 @@ function extractColumns(
   const newColId = `${idPrefix}X${columns.length}`;
   mathColumn.customLabel = true;
   mathColumn.label = newColId;
-  columns.push(mathColumn);
+  columns.push({ column: mathColumn });
   return columns;
 }
 

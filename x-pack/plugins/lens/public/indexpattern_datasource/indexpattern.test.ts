@@ -287,6 +287,30 @@ describe('IndexPattern Data Source', () => {
       expect(indexPatternDatasource.toExpression(state, 'first')).toEqual(null);
     });
 
+    it('should generate an empty expression when there is a formula without aggs', async () => {
+      const queryBaseState: IndexPatternBaseState = {
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['col1'],
+            columns: {
+              col1: {
+                label: 'Formula',
+                dataType: 'number',
+                isBucketed: false,
+                operationType: 'formula',
+                references: [],
+                params: {},
+              },
+            },
+          },
+        },
+      };
+      const state = enrichBaseState(queryBaseState);
+      expect(indexPatternDatasource.toExpression(state, 'first')).toEqual(null);
+    });
+
     it('should generate an expression for an aggregated query', async () => {
       const queryBaseState: IndexPatternBaseState = {
         currentIndexPatternId: '1',

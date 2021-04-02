@@ -105,6 +105,10 @@ function getExpressionForLayer(
       const def = operationDefinitionMap[col.operationType];
       return !(def.input === 'fullReference' || def.input === 'managedReference');
     });
+    if (aggColumnEntries.length === 0) {
+      // Return early if there are no aggs, for example if the user has an empty formula
+      return null;
+    }
     const idMap = aggColumnEntries.reduce((currentIdMap, [colId, column], index) => {
       const esAggsId = `col-${aggColumnEntries.length === 1 ? 0 : index}-${colId}`;
       return {

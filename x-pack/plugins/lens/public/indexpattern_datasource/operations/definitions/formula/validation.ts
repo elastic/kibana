@@ -67,6 +67,7 @@ type ErrorValues<K extends ErrorTypes> = typeof validationErrors[K]['type'];
 export interface ErrorWrapper {
   message: string;
   locations: TinymathLocation[];
+  severity?: 'error' | 'warning';
 }
 
 export function isParsingError(message: string) {

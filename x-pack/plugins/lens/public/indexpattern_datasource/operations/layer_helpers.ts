@@ -1127,6 +1127,25 @@ export function isColumnValidAsReference({
   );
 }
 
+export function getManagedColumnsFrom(
+  columnId: string,
+  columns: Record<string, IndexPatternColumn>
+): Array<[string, IndexPatternColumn]> {
+  const allNodes: Record<string, string[]> = {};
+  Object.entries(columns).forEach(([id, col]) => {
+    allNodes[id] = 'references' in col ? col.references : [];
+  });
+  const queue: string[] = allNodes[columnId];
+  const store: Array<[string, IndexPatternColumn]> = [];
+
+  while (queue.length > 0) {
+    const nextId = queue.shift()!;
+    store.push([nextId, columns[nextId]]);
+    queue.push(...allNodes[nextId]);
+  }
+  return store.filter(([, column]) => column);
+}
+
 function topologicalSort(columns: Array<[string, IndexPatternColumn]>) {
   const allNodes: Record<string, string[]> = {};
   columns.forEach(([id, col]) => {

@@ -332,10 +332,11 @@ export function getSuggestion(
       kind = monaco.languages.CompletionItemKind.Value;
       break;
     case SUGGESTION_TYPE.FUNCTIONS:
+      insertText = `${label}($0)`;
+      insertTextRules = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
       if (typeof suggestion !== 'string') {
         if ('text' in suggestion) break;
         const tinymathFunction = tinymathFunctions[suggestion.label];
-        insertText = `${label}()`;
         if (tinymathFunction) {
           label = `${label}(${tinymathFunction.positionalArguments
             .map(({ name }) => name)

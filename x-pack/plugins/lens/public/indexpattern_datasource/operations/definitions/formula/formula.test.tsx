@@ -49,10 +49,21 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
     }),
   } as unknown) as GenericOperationDefinition,
   derivative: { input: 'fullReference' } as GenericOperationDefinition,
-  moving_average: {
+  moving_average: ({
     input: 'fullReference',
     operationParams: [{ name: 'window', type: 'number', required: true }],
-  } as GenericOperationDefinition,
+    buildColumn: ({ references }: { references: string[] }) => ({
+      label: 'moving_average',
+      dataType: 'number',
+      operationType: 'moving_average',
+      isBucketed: false,
+      scale: 'ratio',
+      timeScale: false,
+      params: { window: 5 },
+      references,
+    }),
+    getErrorMessage: () => ['mock error'],
+  } as unknown) as GenericOperationDefinition,
   cumulative_sum: { input: 'fullReference' } as GenericOperationDefinition,
 };
 
@@ -236,7 +247,7 @@ describe('formula', () => {
           currentColumn,
           indexPattern,
           operationDefinitionMap
-        )
+        ).newLayer
       ).toEqual({
         ...layer,
         columns: {
@@ -275,7 +286,7 @@ describe('formula', () => {
           currentColumn,
           indexPattern,
           operationDefinitionMap
-        )
+        ).newLayer
       ).toEqual({
         ...layer,
         columnOrder: ['col1X0', 'col1X1', 'col1'],
@@ -418,6 +429,23 @@ describe('formula', () => {
     it('returns error if a math operation has the wrong argument type', () => {
       const formula = 'pow(bytes)';
       testIsBrokenFormula(formula);
+    });
+
+    it('returns the locations of each function', () => {
+      expect(
+        regenerateLayerFromAst(
+          'moving_average(average(bytes), window=7) + count()',
+          layer,
+          'col1',
+          currentColumn,
+          indexPattern,
+          operationDefinitionMap
+        ).locations
+      ).toEqual({
+        col1X0: { min: 15, max: 29 },
+        col1X2: { min: 0, max: 41 },
+        col1X3: { min: 43, max: 50 },
+      });
     });
   });
 
