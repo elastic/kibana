@@ -39,7 +39,7 @@ export default function ({ getPageObjects, getService }) {
 
     it('should re-fetch join with refresh timer', async () => {
       async function getRequestTimestamp() {
-        await PageObjects.maps.openInspectorRequest('meta_for_geo_shapes*.shape_name');
+        await PageObjects.maps.openInspectorRequest('meta_for_geo_shapes*.runtime_shape_name');
         const requestStats = await inspector.getTableData();
         const requestTimestamp = PageObjects.maps.getInspectorStatRowHit(
           requestStats,
