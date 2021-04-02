@@ -27,8 +27,7 @@ export const VegaChartView: FC<VegaChartViewProps> = ({ vegaSpec }) => {
 
   useEffect(() => {
     async function initializeVega() {
-      const vegaSharedImports = await getVegaSharedImports();
-      setVega(vegaSharedImports);
+      setVega(await getVegaSharedImports());
     }
 
     initializeVega();

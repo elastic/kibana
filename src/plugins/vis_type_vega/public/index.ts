@@ -16,6 +16,7 @@ export function plugin(initializerContext: PluginInitializerContext<ConfigSchema
 
 // Bundled shared exports
 // Exported this way so the code doesn't end up in the page load bundle
+/** @internal */
 export const getVegaSharedImports = async () => {
   return await import('./shared');
 };
