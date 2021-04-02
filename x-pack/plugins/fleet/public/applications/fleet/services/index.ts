@@ -20,6 +20,7 @@ export {
   outputRoutesService,
   settingsRoutesService,
   appRoutesService,
+  packageToPackagePolicy,
   packageToPackagePolicyInputs,
   storedPackagePoliciesToAgentInputs,
   fullAgentPolicyToYaml,

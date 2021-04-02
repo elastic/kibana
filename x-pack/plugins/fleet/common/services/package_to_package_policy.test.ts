@@ -378,10 +378,11 @@ describe('Fleet - packageToPackagePolicy', () => {
         },
       });
     });
-    it('returns package policy with inputs', () => {
+    it('returns package policy with inputs and package-level vars', () => {
       const mockPackageWithPolicyTemplates = ({
         ...mockPackage,
         policy_templates: [{ inputs: [{ type: 'foo' }] }],
+        vars: [{ default: 'foo-var-value', name: 'var-name', type: 'text' }],
       } as unknown) as PackageInfo;
 
       expect(
@@ -390,7 +391,6 @@ describe('Fleet - packageToPackagePolicy', () => {
         policy_id: '1',
         namespace: 'default',
         enabled: true,
-        inputs: [{ type: 'foo', enabled: true, streams: [] }],
         name: 'pkgPolicy-1',
         output_id: '2',
         package: {
@@ -398,6 +398,8 @@ describe('Fleet - packageToPackagePolicy', () => {
           title: 'Mock package',
           version: '0.0.0',
         },
+        inputs: [{ type: 'foo', enabled: true, streams: [] }],
+        vars: { 'var-name': { value: 'foo-var-value', type: 'text' } },
       });
     });
   });

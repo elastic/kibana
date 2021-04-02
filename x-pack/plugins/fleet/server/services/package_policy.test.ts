@@ -34,6 +34,12 @@ paths:
 {{#each paths}}
 - {{this}}
 {{/each}}
+{{#if hosts}}
+hosts:
+{{#each hosts}}
+- {{this}}
+{{/each}}
+{{/if}}
 `),
       },
     ];
@@ -86,6 +92,7 @@ describe('Package policy service', () => {
             },
           ],
         } as unknown) as PackageInfo,
+        {},
         [
           {
             type: 'log',
@@ -147,6 +154,7 @@ describe('Package policy service', () => {
             },
           ],
         } as unknown) as PackageInfo,
+        {},
         [
           {
             type: 'log',
@@ -192,6 +200,73 @@ describe('Package policy service', () => {
       ]);
     });
 
+    it('should work with config variables at the package level', async () => {
+      const inputs = await packagePolicyService.compilePackagePolicyInputs(
+        ({
+          data_streams: [
+            {
+              dataset: 'package.dataset1',
+              type: 'logs',
+              streams: [{ input: 'log', template_path: 'some_template_path.yml' }],
+            },
+          ],
+          policy_templates: [
+            {
+              inputs: [{ type: 'log' }],
+            },
+          ],
+        } as unknown) as PackageInfo,
+        {
+          hosts: {
+            value: ['localhost'],
+          },
+        },
+        [
+          {
+            type: 'log',
+            enabled: true,
+            vars: {
+              paths: {
+                value: ['/var/log/set.log'],
+              },
+            },
+            streams: [
+              {
+                id: 'datastream01',
+                data_stream: { dataset: 'package.dataset1', type: 'logs' },
+                enabled: true,
+              },
+            ],
+          },
+        ]
+      );
+
+      expect(inputs).toEqual([
+        {
+          type: 'log',
+          enabled: true,
+          vars: {
+            paths: {
+              value: ['/var/log/set.log'],
+            },
+          },
+          streams: [
+            {
+              id: 'datastream01',
+              data_stream: { dataset: 'package.dataset1', type: 'logs' },
+              enabled: true,
+              compiled_stream: {
+                metricset: ['dataset1'],
+                paths: ['/var/log/set.log'],
+                type: 'log',
+                hosts: ['localhost'],
+              },
+            },
+          ],
+        },
+      ]);
+    });
+
     it('should work with an input with a template and no streams', async () => {
       const inputs = await packagePolicyService.compilePackagePolicyInputs(
         ({
@@ -202,6 +277,7 @@ describe('Package policy service', () => {
             },
           ],
         } as unknown) as PackageInfo,
+        {},
         [
           {
             type: 'log',
@@ -249,6 +325,7 @@ describe('Package policy service', () => {
             },
           ],
         } as unknown) as PackageInfo,
+        {},
         [
           {
             type: 'log',
@@ -295,6 +372,7 @@ describe('Package policy service', () => {
               compiled_stream: {
                 metricset: ['dataset1'],
                 paths: ['/var/log/set.log'],
+                hosts: ['localhost'],
                 type: 'log',
               },
             },
@@ -312,6 +390,7 @@ describe('Package policy service', () => {
             },
           ],
         } as unknown) as PackageInfo,
+        {},
         []
       );
 
@@ -327,6 +406,7 @@ describe('Package policy service', () => {
             },
           ],
         } as unknown) as PackageInfo,
+        {},
         []
       );
 

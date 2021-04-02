@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { memo, useEffect, useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFormRow,
@@ -19,12 +19,20 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 
-import type { AgentPolicy, PackageInfo, PackagePolicy, NewPackagePolicy } from '../../../types';
-import { packageToPackagePolicyInputs } from '../../../services';
+import type {
+  AgentPolicy,
+  PackageInfo,
+  PackagePolicy,
+  NewPackagePolicy,
+  RegistryVarsEntry,
+} from '../../../types';
+import { packageToPackagePolicy } from '../../../services';
 import { Loading } from '../../../components';
 import { pkgKeyFromPackageInfo } from '../../../services/pkg_key_from_package_info';
 
+import { isAdvancedVar } from './services';
 import type { PackagePolicyValidationResults } from './services';
+import { PackagePolicyInputVarField } from './components';
 
 export const StepDefinePackagePolicy: React.FunctionComponent<{
   agentPolicy: AgentPolicy;
@@ -32,9 +40,23 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
   packagePolicy: NewPackagePolicy;
   updatePackagePolicy: (fields: Partial<NewPackagePolicy>) => void;
   validationResults: PackagePolicyValidationResults;
-}> = ({ agentPolicy, packageInfo, packagePolicy, updatePackagePolicy, validationResults }) => {
+}> = memo(({ agentPolicy, packageInfo, packagePolicy, updatePackagePolicy, validationResults }) => {
   // Form show/hide states
   const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
+
+  // Package-level vars
+  const requiredVars: RegistryVarsEntry[] = [];
+  const advancedVars: RegistryVarsEntry[] = [];
+
+  if (packageInfo.vars) {
+    packageInfo.vars.forEach((varDef) => {
+      if (isAdvancedVar(varDef)) {
+        advancedVars.push(varDef);
+      } else {
+        requiredVars.push(varDef);
+      }
+    });
+  }
 
   // Update package policy's package and agent policy info
   useEffect(() => {
@@ -51,20 +73,21 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
         .map((ds) => parseInt(ds.name.match(pkgPoliciesNamePattern)![1], 10))
         .sort((a, b) => a - b);
 
-      updatePackagePolicy({
-        // FIXME: Improve package policies name uniqueness - https://github.com/elastic/kibana/issues/72948
-        name: `${packageInfo.name}-${
-          pkgPoliciesWithMatchingNames.length
-            ? pkgPoliciesWithMatchingNames[pkgPoliciesWithMatchingNames.length - 1] + 1
-            : 1
-        }`,
-        package: {
-          name: packageInfo.name,
-          title: packageInfo.title,
-          version: packageInfo.version,
-        },
-        inputs: packageToPackagePolicyInputs(packageInfo),
-      });
+      updatePackagePolicy(
+        packageToPackagePolicy(
+          packageInfo,
+          agentPolicy.id,
+          packagePolicy.output_id,
+          packagePolicy.namespace,
+          // FIXME: Improve package policies name uniqueness - https://github.com/elastic/kibana/issues/72948
+          `${packageInfo.name}-${
+            pkgPoliciesWithMatchingNames.length
+              ? pkgPoliciesWithMatchingNames[pkgPoliciesWithMatchingNames.length - 1] + 1
+              : 1
+          }`,
+          packagePolicy.description
+        )
+      );
     }
 
     // If agent policy has changed, update package policy's agent policy ID and namespace
@@ -74,13 +97,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
         namespace: agentPolicy.namespace,
       });
     }
-  }, [
-    packagePolicy.package,
-    packagePolicy.policy_id,
-    agentPolicy,
-    packageInfo,
-    updatePackagePolicy,
-  ]);
+  }, [packagePolicy, agentPolicy, packageInfo, updatePackagePolicy]);
 
   return validationResults ? (
     <EuiDescribedFormGroup
@@ -99,126 +116,185 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
         />
       }
     >
-      <>
+      <EuiFlexGroup direction="column" gutterSize="m">
         {/* Name */}
-        <EuiFormRow
-          isInvalid={!!validationResults.name}
-          error={validationResults.name}
-          label={
-            <FormattedMessage
-              id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNameInputLabel"
-              defaultMessage="Integration name"
-            />
-          }
-        >
-          <EuiFieldText
-            value={packagePolicy.name}
-            onChange={(e) =>
-              updatePackagePolicy({
-                name: e.target.value,
-              })
+        <EuiFlexItem>
+          <EuiFormRow
+            isInvalid={!!validationResults.name}
+            error={validationResults.name}
+            label={
+              <FormattedMessage
+                id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNameInputLabel"
+                defaultMessage="Integration name"
+              />
             }
-            data-test-subj="packagePolicyNameInput"
-          />
-        </EuiFormRow>
+          >
+            <EuiFieldText
+              value={packagePolicy.name}
+              onChange={(e) =>
+                updatePackagePolicy({
+                  name: e.target.value,
+                })
+              }
+              data-test-subj="packagePolicyNameInput"
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
 
         {/* Description */}
-        <EuiFormRow
-          label={
-            <FormattedMessage
-              id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDescriptionInputLabel"
-              defaultMessage="Description"
-            />
-          }
-          labelAppend={
-            <EuiText size="xs" color="subdued">
+        <EuiFlexItem>
+          <EuiFormRow
+            label={
               <FormattedMessage
-                id="xpack.fleet.createPackagePolicy.stepConfigure.inputVarFieldOptionalLabel"
-                defaultMessage="Optional"
+                id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDescriptionInputLabel"
+                defaultMessage="Description"
               />
-            </EuiText>
-          }
-          isInvalid={!!validationResults.description}
-          error={validationResults.description}
-        >
-          <EuiFieldText
-            value={packagePolicy.description}
-            onChange={(e) =>
-              updatePackagePolicy({
-                description: e.target.value,
-              })
             }
-            data-test-subj="packagePolicyDescriptionInput"
-          />
-        </EuiFormRow>
-        <EuiSpacer size="m" />
-
-        {/* Advanced options toggle */}
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="xs"
-              iconType={isShowingAdvanced ? 'arrowDown' : 'arrowRight'}
-              onClick={() => setIsShowingAdvanced(!isShowingAdvanced)}
-              flush="left"
-            >
-              <FormattedMessage
-                id="xpack.fleet.createPackagePolicy.stepConfigure.advancedOptionsToggleLinkText"
-                defaultMessage="Advanced options"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          {!isShowingAdvanced && !!validationResults.namespace ? (
-            <EuiFlexItem grow={false}>
-              <EuiText color="danger" size="s">
+            labelAppend={
+              <EuiText size="xs" color="subdued">
                 <FormattedMessage
-                  id="xpack.fleet.createPackagePolicy.stepConfigure.errorCountText"
-                  defaultMessage="{count, plural, one {# error} other {# errors}}"
-                  values={{ count: 1 }}
+                  id="xpack.fleet.createPackagePolicy.stepConfigure.inputVarFieldOptionalLabel"
+                  defaultMessage="Optional"
                 />
               </EuiText>
+            }
+            isInvalid={!!validationResults.description}
+            error={validationResults.description}
+          >
+            <EuiFieldText
+              value={packagePolicy.description}
+              onChange={(e) =>
+                updatePackagePolicy({
+                  description: e.target.value,
+                })
+              }
+              data-test-subj="packagePolicyDescriptionInput"
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+
+        {/* Required vars */}
+        {requiredVars.map((varDef) => {
+          const { name: varName, type: varType } = varDef;
+          if (!packagePolicy.vars || !packagePolicy.vars[varName]) return null;
+          const value = packagePolicy.vars[varName].value;
+          return (
+            <EuiFlexItem key={varName}>
+              <PackagePolicyInputVarField
+                varDef={varDef}
+                value={value}
+                onChange={(newValue: any) => {
+                  updatePackagePolicy({
+                    vars: {
+                      ...packagePolicy.vars,
+                      [varName]: {
+                        type: varType,
+                        value: newValue,
+                      },
+                    },
+                  });
+                }}
+              />
             </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
+          );
+        })}
+
+        {/* Advanced options toggle */}
+        <EuiFlexItem>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                iconType={isShowingAdvanced ? 'arrowDown' : 'arrowRight'}
+                onClick={() => setIsShowingAdvanced(!isShowingAdvanced)}
+                flush="left"
+              >
+                <FormattedMessage
+                  id="xpack.fleet.createPackagePolicy.stepConfigure.advancedOptionsToggleLinkText"
+                  defaultMessage="Advanced options"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            {!isShowingAdvanced && !!validationResults.namespace ? (
+              <EuiFlexItem grow={false}>
+                <EuiText color="danger" size="s">
+                  <FormattedMessage
+                    id="xpack.fleet.createPackagePolicy.stepConfigure.errorCountText"
+                    defaultMessage="{count, plural, one {# error} other {# errors}}"
+                    values={{ count: 1 }}
+                  />
+                </EuiText>
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
+        </EuiFlexItem>
 
         {/* Advanced options content */}
         {/* Todo: Populate list of existing namespaces */}
         {isShowingAdvanced ? (
-          <>
-            <EuiSpacer size="m" />
-            <EuiFormRow
-              isInvalid={!!validationResults.namespace}
-              error={validationResults.namespace}
-              label={
-                <FormattedMessage
-                  id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceInputLabel"
-                  defaultMessage="Namespace"
-                />
-              }
-            >
-              <EuiComboBox
-                noSuggestions
-                singleSelection={true}
-                selectedOptions={
-                  packagePolicy.namespace ? [{ label: packagePolicy.namespace }] : []
-                }
-                onCreateOption={(newNamespace: string) => {
-                  updatePackagePolicy({
-                    namespace: newNamespace,
-                  });
-                }}
-                onChange={(newNamespaces: Array<{ label: string }>) => {
-                  updatePackagePolicy({
-                    namespace: newNamespaces.length ? newNamespaces[0].label : '',
-                  });
-                }}
-              />
-            </EuiFormRow>
-          </>
+          <EuiFlexItem>
+            <EuiFlexGroup direction="column" gutterSize="m">
+              <EuiFlexItem>
+                <EuiFormRow
+                  isInvalid={!!validationResults.namespace}
+                  error={validationResults.namespace}
+                  label={
+                    <FormattedMessage
+                      id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyNamespaceInputLabel"
+                      defaultMessage="Namespace"
+                    />
+                  }
+                >
+                  <EuiComboBox
+                    noSuggestions
+                    singleSelection={true}
+                    selectedOptions={
+                      packagePolicy.namespace ? [{ label: packagePolicy.namespace }] : []
+                    }
+                    onCreateOption={(newNamespace: string) => {
+                      updatePackagePolicy({
+                        namespace: newNamespace,
+                      });
+                    }}
+                    onChange={(newNamespaces: Array<{ label: string }>) => {
+                      updatePackagePolicy({
+                        namespace: newNamespaces.length ? newNamespaces[0].label : '',
+                      });
+                    }}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              {/* Advanced vars */}
+              {advancedVars.map((varDef) => {
+                const { name: varName, type: varType } = varDef;
+                if (!packagePolicy.vars || !packagePolicy.vars[varName]) return null;
+                const value = packagePolicy.vars![varName].value;
+                return (
+                  <EuiFlexItem key={varName}>
+                    <PackagePolicyInputVarField
+                      varDef={varDef}
+                      value={value}
+                      onChange={(newValue: any) => {
+                        updatePackagePolicy({
+                          vars: {
+                            ...packagePolicy.vars,
+                            [varName]: {
+                              type: varType,
+                              value: newValue,
+                            },
+                          },
+                        });
+                      }}
+                    />
+                  </EuiFlexItem>
+                );
+              })}
+            </EuiFlexGroup>
+          </EuiFlexItem>
         ) : null}
-      </>
+      </EuiFlexGroup>
     </EuiDescribedFormGroup>
   ) : (
     <Loading />
   );
-};
+});
