@@ -7,14 +7,11 @@
 
 import React, { useMemo, useEffect, useState, FC } from 'react';
 
-// import type { TopLevelSpec } from 'vega-lite';
-// import { compile } from 'vega-lite';
-// import { parse, View, Warn } from 'vega';
-// import { Handler } from 'vega-tooltip';
+// @ts-ignore
+import type { TopLevelSpec } from 'vega-lite';
 
 import { htmlIdGenerator } from '@elastic/eui';
 
-import type { TopLevelSpec } from '../../../../../../../src/plugins/vis_type_vega/public';
 import { getVegaSharedImports } from '../../../../../../../src/plugins/vis_type_vega/public';
 
 type Await<T> = T extends PromiseLike<infer U> ? U : T;

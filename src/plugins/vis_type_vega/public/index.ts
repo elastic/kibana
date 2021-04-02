@@ -6,9 +6,6 @@
  * Side Public License, v 1.
  */
 
-// DRAFT PR bundle size experiment
-export type { TopLevelSpec } from 'vega-lite';
-
 import { PluginInitializerContext } from 'kibana/public';
 import { ConfigSchema } from '../config';
 import { VegaPlugin as Plugin } from './plugin';
