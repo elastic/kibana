@@ -171,7 +171,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
         {isSingleAgent ? (
           <FormattedMessage
             id="xpack.fleet.upgradeAgents.upgradeSingleDescription"
-            defaultMessage="This action upgrades the agent running on '{hostName}' to version {version}. This action can not be undone. Are you sure you wish to continue?"
+            defaultMessage="This action will upgrade the agent running on '{hostName}' to version {version}. This action can not be undone. Are you sure you wish to continue?"
             values={{
               hostName: ((agents[0] as Agent).local_metadata.host as any).hostname,
               version,
@@ -180,7 +180,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
         ) : (
           <FormattedMessage
             id="xpack.fleet.upgradeAgents.upgradeMultipleDescription"
-            defaultMessage="This action upgrades multiple agents to version {version}. This action can not be undone. Are you sure you wish to continue?"
+            defaultMessage="This action will upgrade multiple agents to version {version}. This action can not be undone. Are you sure you wish to continue?"
             values={{ version }}
           />
         )}
