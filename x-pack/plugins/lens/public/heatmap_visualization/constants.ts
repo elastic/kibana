@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { LensIconChartDonut } from '../assets/chart_donut';
+import { LensIconChartHeatmap } from '../assets/chart_heatmap';
 
 export const LENS_HEATMAP_RENDERER = 'lens_heatmap_renderer';
 
@@ -19,7 +19,7 @@ const groupLabel = i18n.translate('xpack.lens.heatmap.groupLabel', {
 export const CHART_NAMES = {
   heatmap: {
     shapeType: 'heatmap',
-    icon: LensIconChartDonut,
+    icon: LensIconChartHeatmap,
     label: i18n.translate('xpack.lens.heatmap.heatmapLabel', {
       defaultMessage: 'Heatmap',
     }),

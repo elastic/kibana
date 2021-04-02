@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 import { Ast } from '@kbn/interpreter/common';
 import { Position } from '@elastic/charts';
-import { LensIconChartBar } from '../assets/chart_bar';
 import { PaletteRegistry } from '../../../../../src/plugins/charts/public';
 import { OperationMetadata, Visualization } from '../types';
 import { HeatmapVisualizationState } from './types';
@@ -26,6 +25,7 @@ import {
   LENS_HEATMAP_ID,
 } from './constants';
 import { HeatmapToolbar } from './toolbar_component';
+import { LensIconChartHeatmap } from '../assets/chart_heatmap';
 
 const groupLabelForBar = i18n.translate('xpack.lens.heatmapVisualization.heatmapGroupLabel', {
   defaultMessage: 'Heatmap',
@@ -62,7 +62,7 @@ export const getHeatmapVisualization = ({
   visualizationTypes: [
     {
       id: 'heatmap',
-      icon: LensIconChartBar,
+      icon: LensIconChartHeatmap,
       label: i18n.translate('xpack.lens.heatmapVisualization.heatmapLabel', {
         defaultMessage: 'Heatmap',
       }),
