@@ -35,7 +35,6 @@ interface SingleSearchAfterParams {
   filter?: estypes.QueryContainer;
   timestampOverride: TimestampOverrideOrUndefined;
   buildRuleMessage: BuildRuleMessage;
-  excludeDocsWithTimestampOverride: boolean;
 }
 
 // utilize search_after for paging results into bulk.
@@ -52,7 +51,6 @@ export const singleSearchAfter = async ({
   sortOrder,
   timestampOverride,
   buildRuleMessage,
-  excludeDocsWithTimestampOverride,
 }: SingleSearchAfterParams): Promise<{
   searchResult: SignalSearchResponse;
   searchDuration: string;

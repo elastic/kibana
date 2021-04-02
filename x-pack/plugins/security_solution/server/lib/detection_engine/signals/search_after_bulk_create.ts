@@ -84,7 +84,6 @@ export const searchAfterAndBulkCreate = async ({
             filter,
             pageSize: Math.ceil(Math.min(tuple.maxSignals, pageSize)),
             timestampOverride: ruleParams.timestampOverride,
-            excludeDocsWithTimestampOverride: false,
           });
           mergedSearchResults = mergeSearchResults([mergedSearchResults, searchResult]);
           toReturn = mergeReturns([
