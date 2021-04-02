@@ -88,6 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('lens datatable with custom palette stops', async () => {
       await PageObjects.lens.setPalette('custom');
       await a11y.testAppSnapshot();
+      await PageObjects.lens.closePaletteEditor();
       await PageObjects.lens.closeDimensionEditor();
     });
 

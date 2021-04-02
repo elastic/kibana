@@ -719,6 +719,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click('lnsDatatable_dynamicColoring_trigger');
     },
 
+    async closePaletteEditor() {
+      await retry.try(async () => {
+        await testSubjects.click('lns-indexPattern-PalettePanelContainerBack');
+        await testSubjects.missingOrFail('lns-indexPattern-PalettePanelContainerBack');
+      });
+    },
+
     async setPalette(paletteName: string) {
       await testSubjects.click('lns-palettePicker');
       await find.clickByCssSelector(`#${paletteName}`);
