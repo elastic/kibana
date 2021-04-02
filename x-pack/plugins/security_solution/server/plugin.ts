@@ -95,7 +95,7 @@ export interface SetupPlugins {
   features: FeaturesSetup;
   lists?: ListPluginSetup;
   ml?: MlSetup;
-  ruleRegistry: RuleRegistryPluginSetupContract;
+  ruleRegistry: RacPluginSetupContract;
   security?: SecuritySetup;
   spaces?: SpacesSetup;
   taskManager?: TaskManagerSetupContract;
@@ -108,7 +108,7 @@ export interface StartPlugins {
   data: DataPluginStart;
   fleet?: FleetStartContract;
   licensing: LicensingPluginStart;
-  ruleRegistry: RuleRegistryPluginSetupContract;
+  ruleRegistry: RacPluginSetupContract;
   taskManager?: TaskManagerStartContract;
   telemetry?: TelemetryPluginStart;
   security: SecurityPluginStart;
@@ -210,7 +210,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       config,
       plugins.encryptedSavedObjects?.canEncrypt === true,
       plugins.security,
-      plugins.ml
+      plugins.ml,
+      plugins.ruleRegistry
     );
     registerEndpointRoutes(router, endpointContext);
     registerLimitedConcurrencyRoutes(core);
@@ -221,6 +222,38 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     const referenceRuleTypes = [REFERENCE_RULE_ALERT_TYPE_ID];
     const ruleTypes = [SIGNALS_ID, NOTIFICATIONS_ID, ...referenceRuleTypes];
+
+    plugins.features.registerKibanaFeature({
+      id: 'rac',
+      name: 'RAC',
+      order: 1100,
+      app: [...securitySubPlugins, 'kibana'],
+      category: DEFAULT_APP_CATEGORIES.security,
+      rac: ['securitySolution'],
+      privileges: {
+        all: {
+          app: [...securitySubPlugins, 'kibana'],
+          rac: {
+            all: ['securitySolution'],
+          },
+          savedObject: {
+            all: [
+              'alert',
+              ...caseSavedObjects,
+              'exception-list',
+              'exception-list-agnostic',
+              ...savedObjectTypes,
+            ],
+            read: ['config'],
+          },
+          ui: ['show', 'crud'],
+        },
+        read: {
+          savedObject: { all: [], read: [] },
+          ui: ['show'],
+        },
+      },
+    });
 
     plugins.features.registerKibanaFeature({
       id: SERVER_APP_ID,
@@ -235,6 +268,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         insightsAndAlerting: ['triggersActions'],
       },
       alerting: ruleTypes,
+      rac: ['securitySolution'],
       privileges: {
         all: {
           rac: {

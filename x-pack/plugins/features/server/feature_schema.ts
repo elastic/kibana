@@ -118,7 +118,7 @@ const kibanaFeatureSchema = Joi.object({
   management: managementSchema,
   catalogue: catalogueSchema,
   alerting: alertingSchema,
-  cases: racSchema,
+  rac: racSchema,
   privileges: Joi.object({
     all: kibanaPrivilegeSchema,
     read: kibanaPrivilegeSchema,

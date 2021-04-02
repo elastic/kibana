@@ -59,7 +59,8 @@ export const initRoutes = (
   config: ConfigType,
   hasEncryptionKey: boolean,
   security: SetupPlugins['security'],
-  ml: SetupPlugins['ml']
+  ml: SetupPlugins['ml'],
+  ruleRegistry: SetupPlugins['ruleRegistry']
 ) => {
   // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
   // All REST rule creation, deletion, updating, etc......
@@ -68,7 +69,7 @@ export const initRoutes = (
   updateRulesRoute(router, ml);
   patchRulesRoute(router, ml);
   deleteRulesRoute(router);
-  findRulesRoute(router);
+  findRulesRoute(router, ruleRegistry);
 
   addPrepackedRulesRoute(router, config, security);
   getPrepackagedRulesStatusRoute(router, config, security);

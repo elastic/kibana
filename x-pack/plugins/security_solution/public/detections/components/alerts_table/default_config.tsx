@@ -187,13 +187,13 @@ export const requiredFieldsForActions = [
   'tags',
 ];
 
-export const alertsHeaders: ColumnHeaderOptions[] = requiredFieldsForActions.map<ColumnHeaderOptions>(
-  (field) => ({
-    columnHeaderType: defaultColumnHeaderType,
-    id: field,
-    width: 120,
-  })
-);
+// export const alertsHeaders: ColumnHeaderOptions[] = requiredFieldsForActions.map<ColumnHeaderOptions>(
+//   (field) => ({
+//     columnHeaderType: defaultColumnHeaderType,
+//     id: field,
+//     width: 120,
+//   })
+// );
 
 export const alertsDefaultModel: SubsetTimelineModel = {
   ...timelineDefaults,
