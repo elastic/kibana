@@ -395,7 +395,7 @@ describe('Case Configuration API', () => {
       settings: {
         syncAlerts: true,
       },
-      scope: 'securitySolution',
+      owner: 'securitySolution',
     };
 
     test('check url, method, signal', async () => {

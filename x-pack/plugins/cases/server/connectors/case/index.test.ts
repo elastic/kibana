@@ -981,7 +981,7 @@ describe('case connector', () => {
           settings: {
             syncAlerts: true,
           },
-          scope: 'securitySolution',
+          owner: 'securitySolution',
         };
 
         mockCasesClient.create.mockReturnValue(Promise.resolve(createReturn));
@@ -1078,7 +1078,7 @@ describe('case connector', () => {
             settings: {
               syncAlerts: true,
             },
-            scope: 'securitySolution',
+            owner: 'securitySolution',
           },
         ];
 
@@ -1170,7 +1170,7 @@ describe('case connector', () => {
           settings: {
             syncAlerts: true,
           },
-          scope: 'securitySolution',
+          owner: 'securitySolution',
         };
 
         mockCasesClient.addComment.mockReturnValue(Promise.resolve(commentReturn));
