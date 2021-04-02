@@ -19,6 +19,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     defaultIndex: 'logstash-*',
     'discover:searchFieldsFromSource': false,
   };
+
+  const createRuntimeField = async (fieldName: string) => {
+    await PageObjects.discover.clickIndexPatternActions();
+    await PageObjects.discover.clickAddNewField();
+    await fieldEditor.setName(fieldName);
+    await fieldEditor.enableValue();
+    await fieldEditor.typeScript("emit('abc')");
+    await fieldEditor.save();
+  };
+
   describe('discover integration with runtime fields editor', function describeIndexTests() {
     before(async function () {
       await esArchiver.load('discover');
@@ -45,12 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('allows creation of a new field', async function () {
-      await PageObjects.discover.clickIndexPatternActions();
-      await PageObjects.discover.clickAddNewField();
-      await fieldEditor.setName('runtimefield');
-      await fieldEditor.enableValue();
-      await fieldEditor.typeScript("emit('abc')");
-      await fieldEditor.save();
+      await createRuntimeField('runtimefield');
       await PageObjects.header.waitUntilLoadingHasFinished();
       expect((await PageObjects.discover.getAllFieldNames()).includes('runtimefield')).to.be(true);
     });
@@ -65,6 +70,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect((await PageObjects.discover.getAllFieldNames()).includes('runtimefield edited')).to.be(
         true
       );
+    });
+
+    it('allows creation of a new field and use it in a saved search', async function () {
+      await createRuntimeField('discover runtimefield');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.clickFieldListItemAdd('discover runtimefield');
+      expect(await PageObjects.discover.getDocHeader()).to.have.string('discover runtimefield');
+      expect(await PageObjects.discover.saveSearch('Saved Search with runtimefield'));
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await PageObjects.discover.clickNewSearchButton();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await PageObjects.discover.loadSavedSearch('Saved Search with runtimefield');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      expect(await PageObjects.discover.getDocHeader()).to.have.string('discover runtimefield');
     });
   });
 }
