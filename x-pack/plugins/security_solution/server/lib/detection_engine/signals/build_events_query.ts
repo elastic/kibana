@@ -22,7 +22,6 @@ interface BuildEventsSearchQuery {
   sortOrder?: SortOrderOrUndefined;
   searchAfterSortIds: SortResults | undefined;
   timestampOverride: TimestampOverrideOrUndefined;
-  excludeDocsWithTimestampOverride: boolean;
 }
 
 export const buildEventsSearchQuery = ({
@@ -35,7 +34,6 @@ export const buildEventsSearchQuery = ({
   searchAfterSortIds,
   sortOrder,
   timestampOverride,
-  excludeDocsWithTimestampOverride,
 }: BuildEventsSearchQuery) => {
   const defaultTimeFields = ['@timestamp'];
   const timestamps =
@@ -44,11 +42,6 @@ export const buildEventsSearchQuery = ({
     field: tstamp,
     format: 'strict_date_optional_time',
   }));
-
-  // const sortField =
-  //   timestampOverride != null && !excludeDocsWithTimestampOverride
-  //     ? timestampOverride
-  //     : '@timestamp';
 
   const rangeFilter: estypes.QueryContainer[] =
     timestampOverride != null
@@ -99,17 +92,6 @@ export const buildEventsSearchQuery = ({
             },
           },
         ];
-  // if (excludeDocsWithTimestampOverride) {
-  //   rangeFilter.push({
-  //     bool: {
-  //       must_not: {
-  //         exists: {
-  //           field: timestampOverride,
-  //         },
-  //       },
-  //     },
-  //   });
-  // }
 
   const filterWithTime: estypes.QueryContainer[] = [
     // but tests contain undefined, so I suppose it's desired behaviour

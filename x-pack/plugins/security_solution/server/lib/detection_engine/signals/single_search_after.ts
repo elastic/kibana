@@ -69,7 +69,6 @@ export const singleSearchAfter = async ({
       sortOrder,
       searchAfterSortIds,
       timestampOverride,
-      excludeDocsWithTimestampOverride,
     });
 
     const start = performance.now();

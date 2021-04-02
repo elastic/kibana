@@ -17,7 +17,6 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortIds: undefined,
       timestampOverride: undefined,
-      excludeDocsWithTimestampOverride: false,
     });
     expect(query).toEqual({
       allow_no_indices: true,
@@ -90,7 +89,6 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortIds: undefined,
       timestampOverride: 'event.ingested',
-      excludeDocsWithTimestampOverride: false,
     });
     expect(query).toEqual({
       allow_no_indices: true,
@@ -197,7 +195,6 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortIds: [''],
       timestampOverride: undefined,
-      excludeDocsWithTimestampOverride: false,
     });
     expect(query).toEqual({
       allow_no_indices: true,
@@ -270,7 +267,6 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortIds: [fakeSortId],
       timestampOverride: undefined,
-      excludeDocsWithTimestampOverride: false,
     });
     expect(query).toEqual({
       allow_no_indices: true,
@@ -344,7 +340,6 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortIds: [fakeSortIdNumber],
       timestampOverride: undefined,
-      excludeDocsWithTimestampOverride: false,
     });
     expect(query).toEqual({
       allow_no_indices: true,
@@ -417,7 +412,6 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortIds: undefined,
       timestampOverride: undefined,
-      excludeDocsWithTimestampOverride: false,
     });
     expect(query).toEqual({
       allow_no_indices: true,
@@ -497,7 +491,6 @@ describe('create_signals', () => {
       size: 100,
       searchAfterSortIds: undefined,
       timestampOverride: undefined,
-      excludeDocsWithTimestampOverride: false,
     });
     expect(query).toEqual({
       allow_no_indices: true,

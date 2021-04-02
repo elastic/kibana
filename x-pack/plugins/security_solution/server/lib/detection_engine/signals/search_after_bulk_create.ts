@@ -71,54 +71,6 @@ export const searchAfterAndBulkCreate = async ({
         let mergedSearchResults = createSearchResultReturnType();
         logger.debug(buildRuleMessage(`sortIds: ${sortIds}`));
 
-        // if there is a timestampOverride param we always want to do a secondary search against @timestamp
-        // if (ruleParams.timestampOverride != null && hasBackupSortId) {
-        //   // only execute search if we have something to sort on or if it is the first search
-        //   const {
-        //     searchResult: searchResultB,
-        //     searchDuration: searchDurationB,
-        //     searchErrors: searchErrorsB,
-        //   } = await singleSearchAfter({
-        //     buildRuleMessage,
-        //     searchAfterSortId: backupSortId,
-        //     index: inputIndexPattern,
-        //     from: tuple.from.toISOString(),
-        //     to: tuple.to.toISOString(),
-        //     services,
-        //     logger,
-        //     // @ts-expect-error please, declare a type explicitly instead of unknown
-        //     filter,
-        //     pageSize: Math.ceil(Math.min(tuple.maxSignals, pageSize)),
-        //     timestampOverride: ruleParams.timestampOverride,
-        //     excludeDocsWithTimestampOverride: true,
-        //   });
-
-        //   // call this function setSortIdOrExit()
-        //   const lastSortId = searchResultB?.hits?.hits[searchResultB.hits.hits.length - 1]?.sort;
-        //   if (lastSortId != null && lastSortId.length !== 0) {
-        //     // @ts-expect-error @elastic/elasticsearch SortResults contains null not assignable to backupSortId
-        //     backupSortId = lastSortId[0];
-        //     hasBackupSortId = true;
-        //   } else {
-        //     logger.debug(buildRuleMessage('backupSortIds was empty on searchResultB'));
-        //     hasBackupSortId = false;
-        //   }
-
-        //   mergedSearchResults = mergeSearchResults([mergedSearchResults, searchResultB]);
-
-        //   toReturn = mergeReturns([
-        //     toReturn,
-        //     createSearchAfterReturnTypeFromResponse({
-        //       searchResult: mergedSearchResults,
-        //       timestampOverride: undefined,
-        //     }),
-        //     createSearchAfterReturnType({
-        //       searchAfterTimes: [searchDurationB],
-        //       errors: searchErrorsB,
-        //     }),
-        //   ]);
-        // }
-
         if (hasSortId) {
           const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
             buildRuleMessage,
