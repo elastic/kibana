@@ -13,12 +13,14 @@ export type SavedObjectsMigrationConfigType = TypeOf<typeof savedObjectsMigratio
 export const savedObjectsMigrationConfig = {
   path: 'migrations',
   schema: schema.object({
-    batchSize: schema.number({ defaultValue: 100 }),
+    batchSize: schema.number({ defaultValue: 1000 }),
     scrollDuration: schema.string({ defaultValue: '15m' }),
     pollInterval: schema.number({ defaultValue: 1500 }),
     skip: schema.boolean({ defaultValue: false }),
     // TODO migrationsV2: remove/deprecate once we release migrations v2
     enableV2: schema.boolean({ defaultValue: true }),
+    /** the number of times v2 migrations will retry temporary failures such as a timeout, 503 status code or snapshot_in_progress_exception */
+    retryAttempts: schema.number({ defaultValue: 15 }),
   }),
 };
 

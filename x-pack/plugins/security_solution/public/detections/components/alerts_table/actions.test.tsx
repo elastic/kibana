@@ -108,6 +108,7 @@ describe('alert actions', () => {
           notes: null,
           timeline: {
             activeTab: TimelineTabs.query,
+            prevActiveTab: TimelineTabs.query,
             columns: [
               {
                 columnHeaderType: 'not-filtered',
