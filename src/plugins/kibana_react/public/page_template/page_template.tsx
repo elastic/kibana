@@ -48,6 +48,7 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
     children = (
       <EuiEmptyPrompt
         iconType={iconType}
+        iconColor={''} // This is likely a solution or app logo, so keep it multi-color
         title={pageTitle ? <h1>{pageTitle}</h1> : undefined}
         body={description ? <p>{description}</p> : undefined}
         actions={rightSideItems}
@@ -62,6 +63,7 @@ export const KibanaPageTemplate: FunctionComponent<KibanaPageTemplateProps> = ({
   return (
     <EuiPageTemplate
       template={template}
+      paddingSize={template === 'centeredBody' ? 'none' : 'l'}
       pageHeader={pageHeader}
       restrictWidth={restrictWidth}
       {...localBottomBarProps}

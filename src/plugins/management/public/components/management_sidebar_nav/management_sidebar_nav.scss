@@ -1,6 +1,5 @@
 .mgtSideBarNav {
-  width: 210px;
-  margin-right: $euiSize;
+  padding: $euiSizeL;
 }
 
 @include euiBreakpoint('xs','s') {

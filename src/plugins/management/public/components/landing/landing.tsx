@@ -38,23 +38,19 @@ export const ManagementLandingPage = ({
           />
         ),
         description: (
-          <FormattedMessage
-            id="management.landing.subhead"
-            defaultMessage="Manage your indices, index patterns, saved objects, Kibana settings, and more."
-          />
+          <>
+            <FormattedMessage
+              id="management.landing.subhead"
+              defaultMessage="Manage your indices, index patterns, saved objects, Kibana settings, and more."
+            />
+            <EuiHorizontalRule />
+            <FormattedMessage
+              id="management.landing.text"
+              defaultMessage="A complete list of apps is in the menu on the left."
+            />
+          </>
         ),
       }}
-    >
-      <EuiHorizontalRule />
-
-      <EuiText color="subdued" size="s" textAlign="center">
-        <p>
-          <FormattedMessage
-            id="management.landing.text"
-            defaultMessage="A complete list of apps is in the menu on the left."
-          />
-        </p>
-      </EuiText>
-    </ManagementPageLayout>
+    />
   );
 };

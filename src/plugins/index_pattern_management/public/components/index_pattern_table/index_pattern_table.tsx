@@ -45,7 +45,7 @@ const search = {
 };
 
 const title = i18n.translate('indexPatternManagement.indexPatternTable.title', {
-  defaultMessage: 'Index patterns',
+  defaultMessage: 'Index Patterns',
 });
 
 interface Props extends RouteComponentProps {
@@ -132,7 +132,7 @@ export const IndexPatternTable = ({
         }
       ) => (
         <>
-          <EuiButtonEmpty size="xs" {...reactRouterNavigate(history, `patterns/${index.id}`)}>
+          <EuiButtonEmpty size="s" {...reactRouterNavigate(history, `patterns/${index.id}`)}>
             {name}
           </EuiButtonEmpty>
           &emsp;
