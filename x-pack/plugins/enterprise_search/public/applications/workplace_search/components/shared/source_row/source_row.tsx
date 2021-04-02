@@ -68,7 +68,7 @@ export const SourceRow: React.FC<SourceRowProps> = ({
   const fixLink = (
     <EuiLinkTo
       to={getSourcesPath(
-        `${ADD_SOURCE_PATH}/${serviceType}/re-authenticate?sourceId=${id}`,
+        `${ADD_SOURCE_PATH}/${serviceType}/reauthenticate?sourceId=${id}`,
         isOrganization
       )}
     >
