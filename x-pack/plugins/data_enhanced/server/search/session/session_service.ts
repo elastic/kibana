@@ -369,6 +369,7 @@ export class SearchSessionService
     searchId: string,
     { sessionId, strategy }: ISearchOptions
   ) => {
+    if (!this.config.search.sessions.enabled) return;
     if (!sessionId || !searchId) return;
     this.logger.debug(`trackId | ${sessionId} | ${searchId}`);
 
