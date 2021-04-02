@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import uuid from 'uuid';
+import moment from 'moment';
 import { schema } from '@kbn/config-schema';
 
 import { IRouter } from '../../../../../../src/core/server';
@@ -111,7 +113,7 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
           query: request.body.query.query,
         },
       };
-      const query = await esClient.index<{}, {}>({
+      const actionResponse = await esClient.index<{}, {}>({
         index: '.fleet-actions',
         body: action,
       });
@@ -119,7 +121,7 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
       return response.ok({
         body: {
           response: actionResponse,
-          actions,
+          actions: [action],
         },
       });
     }

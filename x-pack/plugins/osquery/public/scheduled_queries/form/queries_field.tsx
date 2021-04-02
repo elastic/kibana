@@ -7,35 +7,20 @@
 
 /* eslint-disable react/display-name */
 
-import { findIndex, mapKeys } from 'lodash';
+import { findIndex, forEach, pullAt, mapKeys } from 'lodash';
 
 import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiBottomBar,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
-  EuiButton,
-  EuiDescribedFormGroup,
-  EuiLink,
-  EuiTextColor,
-  EuiFormRow,
-  EuiAccordion,
-  EuiSpacer,
-  EuiFieldText,
-  EuiComboBoxOptionOption,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSpacer } from '@elastic/eui';
 
 import { produce } from 'immer';
 import React, { useCallback, useState, useEffect, useRef, useMemo } from 'react';
 import styled from 'styled-components';
 
-import { ComboBoxField, FieldHook } from '../../shared_imports';
-import { useAgentPolicies } from '../../agent_policies';
-import { ScheduledQueries } from '../../routes/scheduled_queries';
+import { FieldHook } from '../../shared_imports';
 import { ScheduledQueryQueriesTable } from '../../fleet_integration/components/scheduled_queries_table';
 import { AddQueryFlyout } from './add_query_flyout';
 import { EditQueryFlyout } from './edit_query_flyout';
+import { OsqueryPackUploader } from './pack_uploader';
 
 interface PropsRepositoryCombobox {
   field: FieldHook;
@@ -57,6 +42,26 @@ export const QueriesField = ({ field }: PropsRepositoryCombobox) => {
 
   console.error('field', field);
 
+  const handleDeleteClick = useCallback(
+    (stream) => {
+      const streamIndex = findIndex(field.value[0].streams, [
+        'vars.id.value',
+        stream.vars.id.value,
+      ]);
+
+      if (streamIndex > -1) {
+        setValue(
+          produce((draft) => {
+            pullAt(draft[0].streams, [streamIndex]);
+
+            return draft;
+          })
+        );
+      }
+    },
+    [field.value, setValue]
+  );
+
   const handleEditClick = useCallback(
     (stream) => {
       const streamIndex = findIndex(field.value[0].streams, [
@@ -74,19 +79,10 @@ export const QueriesField = ({ field }: PropsRepositoryCombobox) => {
       if (showEditQueryFlyout) {
         setValue(
           produce((draft) => {
-            draft[0].streams[showEditQueryFlyout] = {
-              data_stream: { type: 'logs', dataset: 'osquery_manager.result' },
-              enabled: true,
-              id: 'osquery-osquery_manager.result-7e451187-d06d-4e7e-ae43-88f06e3aa9cd',
-              vars: {
-                id: { type: 'text', value: updatedQuery.id },
-                interval: {
-                  type: 'text',
-                  value: updatedQuery.interval,
-                },
-                query: { type: 'text', value: updatedQuery.query },
-              },
-            };
+            draft[0].streams[showEditQueryFlyout].vars.id.value = updatedQuery.id;
+            draft[0].streams[showEditQueryFlyout].vars.interval.value = updatedQuery.interval;
+            draft[0].streams[showEditQueryFlyout].vars.query.value = updatedQuery.query;
+
             return draft;
           })
         );
@@ -104,7 +100,7 @@ export const QueriesField = ({ field }: PropsRepositoryCombobox) => {
           draft[0].streams.push({
             data_stream: { type: 'logs', dataset: 'osquery_manager.result' },
             enabled: true,
-            id: 'osquery-osquery_manager.result-7e451187-d06d-4e7e-ae43-88f06e3aa9cd',
+            id: 'osquery-osquery_manager.result-900083be-ef20-4b25-9896-e0485cf7e88b',
             vars: {
               id: { type: 'text', value: newQuery.id },
               interval: {
@@ -122,10 +118,50 @@ export const QueriesField = ({ field }: PropsRepositoryCombobox) => {
     [handleHideAddFlyout, setValue]
   );
 
+  const handlePackUpload = useCallback(
+    (newQueries) => {
+      setValue(
+        produce((draft) => {
+          forEach(newQueries, (newQuery, newQueryId) => {
+            draft[0].streams.push({
+              data_stream: { type: 'logs', dataset: 'osquery_manager.result' },
+              enabled: true,
+              id: 'osquery-osquery_manager.result-900083be-ef20-4b25-9896-e0485cf7e88b',
+              vars: {
+                id: { type: 'text', value: newQueryId },
+                interval: {
+                  type: 'text',
+                  value: newQuery.interval,
+                },
+                query: { type: 'text', value: newQuery.query },
+              },
+            });
+          });
+
+          return draft;
+        })
+      );
+    },
+    [setValue]
+  );
+
   return (
     <>
-      <ScheduledQueryQueriesTable data={{ inputs: field.value }} onEditClick={handleEditClick} />
+      <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          <EuiButton fill onClick={handleShowAddFlyout} iconType="plusInCircle">
+            {'Add query'}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer />
+      <ScheduledQueryQueriesTable
+        data={{ inputs: field.value }}
+        onEditClick={handleEditClick}
+        onDeleteClick={handleDeleteClick}
+      />
+      <EuiSpacer />
+      <OsqueryPackUploader onChange={handlePackUpload} />
       {showAddQueryFlyout && (
         <AddQueryFlyout onSave={handleAddQuery} onClose={handleHideAddFlyout} />
       )}
@@ -136,9 +172,6 @@ export const QueriesField = ({ field }: PropsRepositoryCombobox) => {
           onClose={handleHideEditFlyout}
         />
       )}
-      <EuiButton fill onClick={handleShowAddFlyout}>
-        {'Add query'}
-      </EuiButton>
     </>
   );
 };

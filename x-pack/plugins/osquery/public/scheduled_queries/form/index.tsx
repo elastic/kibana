@@ -18,6 +18,7 @@ import {
   EuiSpacer,
   EuiAccordion,
   EuiBottomBar,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { useMutation } from 'react-query';
@@ -86,6 +87,10 @@ const ScheduledQueryFormComponent = ({ defaultValue, editMode = false }) => {
       policy_id: {
         type: FIELD_TYPES.COMBO_BOX,
         label: 'Agent policy',
+      },
+      integration_type: {
+        type: FIELD_TYPES.RADIO_GROUP,
+        label: 'Integration type',
       },
     },
     onSubmit: (payload) => {
@@ -166,7 +171,11 @@ const ScheduledQueryFormComponent = ({ defaultValue, editMode = false }) => {
 
           <CommonUseField path="description" />
 
-          <CommonUseField path="policy_id" component={PolicyIdComboBoxField} />
+          <CommonUseField
+            path="policy_id"
+            disabled={!!defaultValue}
+            component={PolicyIdComboBoxField}
+          />
 
           <EuiSpacer />
           <EuiAccordion id="accordion1" buttonContent="Advanced">
@@ -174,9 +183,11 @@ const ScheduledQueryFormComponent = ({ defaultValue, editMode = false }) => {
           </EuiAccordion>
         </EuiDescribedFormGroup>
 
-        <CommonUseField path="enabled" />
+        <EuiHorizontalRule />
+
         <CommonUseField path="inputs" component={QueriesField} />
 
+        <CommonUseField path="enabled" component={GhostFormField} />
         <CommonUseField path="output_id" component={GhostFormField} />
         <CommonUseField path="package" component={GhostFormField} />
       </Form>

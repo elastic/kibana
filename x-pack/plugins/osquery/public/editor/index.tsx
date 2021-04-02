@@ -40,7 +40,7 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
     name="osquery_editor"
     setOptions={EDITOR_SET_OPTIONS}
     editorProps={EDITOR_PROPS}
-    height="100px"
+    height="200px"
     width="100%"
   />
 );

@@ -36,21 +36,21 @@ export const configSchema = schema.object({
     defaultValue: 'http://localhost:9200',
   }),
   username: schema.maybe(
-    schema.conditional(
-      schema.contextRef('dist'),
-      false,
-      schema.string({
-        validate: (rawConfig) => {
-          if (rawConfig === 'elastic') {
-            return (
-              'value of "elastic" is forbidden. This is a superuser account that can obfuscate ' +
-              'privilege-related issues. You should use the "kibana_system" user instead.'
-            );
-          }
-        },
-      }),
-      schema.string()
-    )
+    // schema.conditional(
+    //   schema.contextRef('dist'),
+    //   false,
+    //   schema.string({
+    //     validate: (rawConfig) => {
+    //       if (rawConfig === 'elastic') {
+    //         return (
+    //           'value of "elastic" is forbidden. This is a superuser account that can obfuscate ' +
+    //           'privilege-related issues. You should use the "kibana_system" user instead.'
+    //         );
+    //       }
+    //     },
+    //   }),
+    schema.string()
+    // )
   ),
   password: schema.maybe(schema.string()),
   requestHeadersWhitelist: schema.oneOf(

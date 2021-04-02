@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash/fp';
 import { EuiFormRow, EuiLink, EuiText } from '@elastic/eui';
 import React from 'react';
 
@@ -26,12 +27,14 @@ const OsquerySchemaLink = React.memo(() => (
 OsquerySchemaLink.displayName = 'OsquerySchemaLink';
 
 const CodeEditorFieldComponent: React.FC<CodeEditorFieldProps> = ({ field }) => {
-  const { value, label, labelAppend = OsquerySchemaLink, helpText, setValue } = field;
+  const { value, label, labelAppend, helpText, setValue } = field;
+
+  console.error('labelAppend', labelAppend);
 
   return (
     <EuiFormRow
       label={label}
-      labelAppend={labelAppend}
+      labelAppend={!isEmpty(labelAppend) ? labelAppend : <OsquerySchemaLink />}
       helpText={helpText}
       // isInvalid={typeof error === 'string'}
       // error={error}

@@ -12,8 +12,30 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiInMemoryTable, EuiCodeBlock, EuiButtonIcon } from '@elastic/eui';
 
-// @ts-expect-error update types
-export const ScheduledQueryQueriesTable = ({ data, onEditClick }) => {
+interface ScheduledQueryQueriesTableProps {
+  data: unknown;
+  onDeleteClick?: () => void;
+  onEditClick?: () => void;
+}
+
+export const ScheduledQueryQueriesTable: React.FC<ScheduledQueryQueriesTableProps> = ({
+  data,
+  onDeleteClick,
+  onEditClick,
+}) => {
+  const renderDeleteAction = useCallback(
+    (item) => (
+      <EuiButtonIcon
+        color="danger"
+        // eslint-disable-next-line react/jsx-no-bind
+        onClick={() => onDeleteClick(item)}
+        iconType="trash"
+        aria-label={`Delete ${item.vars.id.value}`}
+      />
+    ),
+    [onDeleteClick]
+  );
+
   const renderEditAction = useCallback(
     (item) => (
       <EuiButtonIcon
@@ -52,10 +74,13 @@ export const ScheduledQueryQueriesTable = ({ data, onEditClick }) => {
           {
             render: renderEditAction,
           },
+          {
+            render: renderDeleteAction,
+          },
         ],
       },
     ],
-    [renderEditAction]
+    [renderDeleteAction, renderEditAction]
   );
 
   const sorting = {

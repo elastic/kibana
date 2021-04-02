@@ -71,9 +71,9 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
   const actionId = useMemo(() => data?.actions[0].action_id, [data?.actions]);
 
-  const [{ agents, query }] = useFormData({ form, watch: ['agents', 'query'] });
+  const [{ agentSelection, query }] = useFormData({ form, watch: ['agentSelection', 'query'] });
 
-  const agentSelected = useMemo(() => !!agents?.length, [agents]);
+  const agentSelected = useMemo(() => true ?? !!agentSelection?.length, [agentSelection?.agents]);
 
   const queryValueProvided = useMemo(() => !!query?.query?.length, [query]);
 
@@ -103,7 +103,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         title: i18n.translate('xpack.osquery.liveQueryForm.steps.agentsStepHeading', {
           defaultMessage: 'Select agents',
         }),
-        children: <UseField path="agents" component={AgentsTableField} />,
+        children: <UseField path="agentSelection" component={AgentsTableField} />,
         status: agentSelected ? 'complete' : 'incomplete',
       },
       {
@@ -138,12 +138,12 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           defaultMessage: 'Check results',
         }),
         children: actionId ? (
-          <ResultTabs actionId={actionId} agentIds={agents} isLive={true} />
+          <ResultTabs actionId={actionId} agentIds={agentSelection?.agents} isLive={true} />
         ) : null,
         status: resultsStatus,
       },
     ],
-    [actionId, agentSelected, agents, queryStatus, resultsStatus, submit, submitQueryStatus]
+    [actionId, agentSelected, agentSelection, queryStatus, resultsStatus, submit, submitQueryStatus]
   );
 
   return (
