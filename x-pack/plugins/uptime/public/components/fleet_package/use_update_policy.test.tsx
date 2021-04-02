@@ -41,7 +41,7 @@ describe('useBarChartsHooks', () => {
                 type: 'text',
               },
               schedule: {
-                value: '"@every 5s"',
+                value: '"@every 3m"',
                 type: 'text',
               },
               urls: {

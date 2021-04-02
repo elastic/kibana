@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, waitFor, waitForElement } from '@testing-library/react';
+import { fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../lib/helper/rtl_helpers';
 import { defaultConfig } from './synthetics_policy_create_extension';
 import { CustomFields } from './custom_fields';
@@ -69,7 +69,7 @@ describe('<CustomFields />', () => {
     expect(queryByLabelText('Wait in seconds')).not.toBeInTheDocument();
 
     // ensure at least one http advanced option is present
-    const advancedOptionsButton = getByText('Advanced options');
+    const advancedOptionsButton = getByText('Advanced HTTP options');
     fireEvent.click(advancedOptionsButton);
     await waitFor(() => {
       expect(getByLabelText('Request method')).toBeInTheDocument();
@@ -232,7 +232,7 @@ describe('<CustomFields />', () => {
     expect(queryByLabelText('Max redirects')).not.toBeInTheDocument();
 
     // ensure at least one tcp advanced option is present
-    const advancedOptionsButton = getByText('Advanced options');
+    const advancedOptionsButton = getByText('Advanced TCP options');
     fireEvent.click(advancedOptionsButton);
 
     expect(queryByLabelText('Request method')).not.toBeInTheDocument();

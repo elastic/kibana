@@ -292,7 +292,7 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
     expect(queryByLabelText('Wait in seconds')).not.toBeInTheDocument();
 
     // ensure at least one http advanced option is present
-    const advancedOptionsButton = getByText('Advanced options');
+    const advancedOptionsButton = getByText('Advanced HTTP options');
     fireEvent.click(advancedOptionsButton);
     await waitFor(() => {
       expect(getByLabelText('Request method')).toBeInTheDocument();
@@ -399,7 +399,7 @@ describe('<SyntheticsPolicyCreateExtension />', () => {
     expect(queryByLabelText('Max redirects')).not.toBeInTheDocument();
 
     // ensure at least one tcp advanced option is present
-    const advancedOptionsButton = getByText('Advanced options');
+    const advancedOptionsButton = getByText('Advanced TCP options');
     fireEvent.click(advancedOptionsButton);
 
     expect(queryByLabelText('Request method')).not.toBeInTheDocument();

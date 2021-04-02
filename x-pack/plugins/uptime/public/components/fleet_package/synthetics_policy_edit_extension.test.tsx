@@ -46,7 +46,7 @@ const defaultNewPolicy: NewPackagePolicy = {
               type: 'text',
             },
             schedule: {
-              value: '"@every 5s"',
+              value: '"@every 3m"',
               type: 'text',
             },
             urls: {
@@ -301,7 +301,7 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     expect(queryByLabelText('Wait in seconds')).not.toBeInTheDocument();
 
     // ensure at least one http advanced option is present
-    const advancedOptionsButton = getByText('Advanced options');
+    const advancedOptionsButton = getByText('Advanced HTTP options');
     fireEvent.click(advancedOptionsButton);
     await waitFor(() => {
       expect(getByLabelText('Request method')).toBeInTheDocument();
@@ -614,7 +614,7 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     expect(queryByLabelText('Wait in seconds')).not.toBeInTheDocument();
 
     // ensure at least one http advanced option is present
-    const advancedOptionsButton = getByText('Advanced options');
+    const advancedOptionsButton = getByText('Advanced HTTP options');
     fireEvent.click(advancedOptionsButton);
     await waitFor(() => {
       const requestMethod = getByLabelText('Request method') as HTMLInputElement;
@@ -686,7 +686,7 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     expect(queryByLabelText('Wait in seconds')).not.toBeInTheDocument();
 
     // ensure at least one tcp advanced option is present
-    const advancedOptionsButton = getByText('Advanced options');
+    const advancedOptionsButton = getByText('Advanced TCP options');
     fireEvent.click(advancedOptionsButton);
     await waitFor(() => {
       expect(getByLabelText('Request payload')).toBeInTheDocument();

@@ -84,8 +84,8 @@ const defaultValues = {
   [ConfigKeys.REQUEST_METHOD_CHECK]: HTTPMethod.GET,
   [ConfigKeys.REQUEST_SEND_CHECK]: '',
   [ConfigKeys.SCHEDULE]: {
-    number: '5',
-    unit: ScheduleUnit.SECONDS,
+    number: '3',
+    unit: ScheduleUnit.MINUTES,
   },
   [ConfigKeys.APM_SERVICE_NAME]: '',
   [ConfigKeys.SSL_CERTIFICATE_AUTHORITIES]: '',
