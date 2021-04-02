@@ -126,7 +126,7 @@ describe('service_settings (FKA tile_map test)', function () {
             id: 'road_map',
             name: 'Road Map - Bright',
             url:
-              'https://tiles.foobar/raster/styles/osm-bright/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3',
+              'https://tiles.foobar/raster/styles/osm-bright/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3&license=sspl',
             minZoom: 0,
             maxZoom: 10,
             attribution:
@@ -173,19 +173,19 @@ describe('service_settings (FKA tile_map test)', function () {
         );
 
         expect(desaturationFalse.url).toEqual(
-          'https://tiles.foobar/raster/styles/osm-bright/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3'
+          'https://tiles.foobar/raster/styles/osm-bright/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3&license=sspl'
         );
         expect(desaturationFalse.maxZoom).toEqual(10);
         expect(desaturationTrue.url).toEqual(
-          'https://tiles.foobar/raster/styles/osm-bright-desaturated/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3'
+          'https://tiles.foobar/raster/styles/osm-bright-desaturated/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3&license=sspl'
         );
         expect(desaturationTrue.maxZoom).toEqual(18);
         expect(darkThemeDesaturationFalse.url).toEqual(
-          'https://tiles.foobar/raster/styles/dark-matter/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3'
+          'https://tiles.foobar/raster/styles/dark-matter/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3&license=sspl'
         );
         expect(darkThemeDesaturationFalse.maxZoom).toEqual(22);
         expect(darkThemeDesaturationTrue.url).toEqual(
-          'https://tiles.foobar/raster/styles/dark-matter/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3'
+          'https://tiles.foobar/raster/styles/dark-matter/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=1.2.3&license=sspl'
         );
         expect(darkThemeDesaturationTrue.maxZoom).toEqual(22);
       });
