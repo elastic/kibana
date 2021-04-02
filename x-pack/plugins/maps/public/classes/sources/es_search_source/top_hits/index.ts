@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { MountWithReduxProvider } from './helper';
-export * from './helper/enzyme_helpers';
+export { TopHitsUpdateSourceEditor } from './update_source_editor';
+export { esTopHitsLayerWizardConfig } from './wizard';
