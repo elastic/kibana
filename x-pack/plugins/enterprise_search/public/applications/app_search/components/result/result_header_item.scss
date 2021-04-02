@@ -1,16 +1,12 @@
+.euiFlexItem:not(:first-child):not(:last-child) .appSearchResultHeaderItem {
+  padding-right: .75rem;
+  box-shadow: inset -1px 0 0 0 $euiBorderColor;
+}
+
 .appSearchResultHeaderItem {
-  display: flex;
+  @include euiCodeFont;
 
-  &__key,
-  &__value {
-    line-height: $euiLineHeight;
-    font-size: $euiFontSizeXS;
-  }
-
-  &__key {
-    text-transform: uppercase;
-    font-weight: $euiFontWeightLight;
-    color: $euiColorDarkShade;
-    margin-right: $euiSizeXS;
+  &__score {
+    color: $euiColorSuccessText;
   }
 }

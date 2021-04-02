@@ -7,6 +7,8 @@
 
 import { InternalSchemaTypes, SchemaTypes } from '../../../shared/types';
 
+import { EuiIconProps } from '@elastic/eui';
+
 export type FieldType = InternalSchemaTypes | SchemaTypes;
 
 export type Raw = string | string[] | number | number[];
@@ -38,5 +40,5 @@ export interface ResultAction {
   onClick(): void;
   title: string;
   iconType: string;
-  iconColor?: string;
+  iconColor?: EuiIconProps['color'];
 }

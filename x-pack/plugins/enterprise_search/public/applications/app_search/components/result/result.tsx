@@ -8,16 +8,15 @@
 import React, { useState, useMemo } from 'react';
 import { DraggableProvidedDragHandleProps } from 'react-beautiful-dnd';
 
-import classNames from 'classnames';
-
 import './result.scss';
 
-import { EuiPanel, EuiIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { ReactRouterHelper } from '../../../shared/react_router_helpers/eui_components';
 
 import { Schema } from '../../../shared/types';
+
 import { ENGINE_DOCUMENT_DETAIL_PATH } from '../../routes';
 import { generateEncodedPath } from '../../utils/encode_path_params';
 
@@ -56,34 +55,53 @@ export const Result: React.FC<Props> = ({
     [result]
   );
   const numResults = resultFields.length;
-  const typeForField = (fieldName: string) => {
-    if (schemaForTypeHighlights) return schemaForTypeHighlights[fieldName];
-  };
-
   const documentLink = generateEncodedPath(ENGINE_DOCUMENT_DETAIL_PATH, {
     engineName: resultMeta.engine,
     documentId: resultMeta.id,
   });
-  const conditionallyLinkedArticle = (children: React.ReactNode) => {
-    return shouldLinkToDetailPage ? (
-      <ReactRouterHelper to={documentLink}>
-        <article className="appSearchResult__content appSearchResult__content--link">
-          {children}
-        </article>
-      </ReactRouterHelper>
-    ) : (
-      <article className="appSearchResult__content">{children}</article>
-    );
+
+  const typeForField = (fieldName: string) => {
+    if (schemaForTypeHighlights) return schemaForTypeHighlights[fieldName];
   };
 
-  const classes = classNames('appSearchResult', {
-    'appSearchResult--link': shouldLinkToDetailPage,
-  });
+  const ResultActions = () => {
+    if (!shouldLinkToDetailPage && !actions.length) return null;
+    return (
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="s">
+          {shouldLinkToDetailPage && (
+            <ReactRouterHelper to={documentLink}>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  iconType="eye"
+                  aria-label={i18n.translate(
+                    'xpack.enterpriseSearch.appSearch.result.documentDetailLink',
+                    { defaultMessage: 'Visit document details' }
+                  )}
+                />
+              </EuiFlexItem>
+            </ReactRouterHelper>
+          )}
+          {actions.map(({ onClick, title, iconType, iconColor }) => (
+            <EuiFlexItem key={title}>
+              <EuiButtonIcon
+                iconType={iconType}
+                onClick={onClick}
+                color={iconColor ? 'primary' : undefined}
+                aria-label={title}
+              />
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    );
+  };
 
   return (
     <EuiPanel
       paddingSize="none"
-      className={classes}
+      hasShadow={false}
+      className="appSearchResult"
       data-test-subj="AppSearchResult"
       title={i18n.translate('xpack.enterpriseSearch.appSearch.result.title', {
         defaultMessage: 'Document {id}',
@@ -95,26 +113,26 @@ export const Result: React.FC<Props> = ({
           <EuiIcon type="grab" />
         </div>
       )}
-      {conditionallyLinkedArticle(
-        <>
-          <ResultHeader
-            resultMeta={resultMeta}
-            showScore={!!showScore}
-            isMetaEngine={isMetaEngine}
-          />
-          {resultFields
-            .slice(0, isOpen ? resultFields.length : RESULT_CUTOFF)
-            .map(([field, value]: [string, FieldValue]) => (
-              <ResultField
-                key={field}
-                field={field}
-                raw={value.raw}
-                snippet={value.snippet}
-                type={typeForField(field)}
-              />
-            ))}
-        </>
-      )}
+      <article className="appSearchResult__content">
+        <ResultHeader
+          resultMeta={resultMeta}
+          showScore={!!showScore}
+          isMetaEngine={isMetaEngine}
+          shouldLinkToDetailPage={shouldLinkToDetailPage}
+          actions={<ResultActions />}
+        />
+        {resultFields
+          .slice(0, isOpen ? resultFields.length : RESULT_CUTOFF)
+          .map(([field, value]: [string, FieldValue]) => (
+            <ResultField
+              key={field}
+              field={field}
+              raw={value.raw}
+              snippet={value.snippet}
+              type={typeForField(field)}
+            />
+          ))}
+      </article>
       {numResults > RESULT_CUTOFF && (
         <button
           type="button"
@@ -138,33 +156,6 @@ export const Result: React.FC<Props> = ({
           />
         </button>
       )}
-      <div className="appSearchResult__actionButtons">
-        {shouldLinkToDetailPage && (
-          <ReactRouterHelper to={documentLink}>
-            <a
-              className="appSearchResult__actionButton appSearchResult__actionButton--link"
-              aria-label={i18n.translate(
-                'xpack.enterpriseSearch.appSearch.result.documentDetailLink',
-                { defaultMessage: 'Visit document details' }
-              )}
-            >
-              <EuiIcon type="eye" />
-            </a>
-          </ReactRouterHelper>
-        )}
-        {actions.map(({ onClick, title, iconType, iconColor }) => (
-          <button
-            key={title}
-            aria-label={title}
-            title={title}
-            onClick={onClick}
-            className="appSearchResult__actionButton"
-            type="button"
-          >
-            <EuiIcon type={iconType} color={iconColor} />
-          </button>
-        ))}
-      </div>
     </EuiPanel>
   );
 };
