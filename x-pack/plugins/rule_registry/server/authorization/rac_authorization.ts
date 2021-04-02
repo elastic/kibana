@@ -73,24 +73,41 @@ export class RacAuthorization {
     isAuthEnabled: boolean;
   }): Promise<RacAuthorization> {
     let owners: Set<string>;
+    // console.error(
+    //   `************\nFEATURES: ${JSON.stringify(
+    //     features.getKibanaFeatures(),
+    //     null,
+    //     2
+    //   )}\n************`
+    // );
 
     try {
       // Gather all disabled features from user Space
       const disabledFeatures = new Set((await getSpace(request))?.disabledFeatures ?? []);
+      console.error(
+        `***********\nDISABLED FEATURES ${JSON.stringify(
+          Array.from(disabledFeatures),
+          null,
+          2
+        )}\n**********`
+      );
 
       // Filter through all user Kibana features to find corresponding enabled
       // Rac feature owners like 'security-solution' or 'observability'
-      owners = new Set(
+      owners = await new Set(
         features
           .getKibanaFeatures()
           // get all the rac 'owners' that aren't disabled
-          .filter(({ id }) => !disabledFeatures.has(id))
-          .flatMap((feature) => feature.rac ?? [])
+          // .filter(({ id }) => !disabledFeatures.has(id))
+          .flatMap((feature) => {
+            console.error('RAC FEATURES:', feature.id);
+            return feature.rac ?? [];
+          })
       );
     } catch (error) {
       owners = new Set<string>();
     }
-    console.error('---------> OWNERS', JSON.stringify(owners));
+    console.error('---------> OWNERS', JSON.stringify(Array.from(owners)));
     return new RacAuthorization({ request, authorization, owners, isAuthEnabled });
   }
 

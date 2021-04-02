@@ -49,17 +49,20 @@ export class RacClientFactory {
     this.securityPluginStart = options.securityPluginStart;
   }
 
-  public create(request: KibanaRequest): RacClient {
+  public async create(request: KibanaRequest): RacClient {
     const { features, securityPluginSetup, securityPluginStart } = this;
     const spaceId = this.getSpaceId(request);
 
-    const authorization = RacAuthorization.create({
+    const authorization = await RacAuthorization.create({
       authorization: securityPluginStart?.authz,
       request,
       getSpace: this.getSpace,
       features: features!,
       isAuthEnabled: true,
     });
+    console.error(
+      `*********\nDID WE CREATE RAC AUTH?: ${JSON.stringify(authorization)}\n*********`
+    );
 
     return new RacClient({
       spaceId,
