@@ -307,15 +307,15 @@ export function CustomizablePalette({
       ) : null}
       {activePalette.name === 'custom' ? (
         <EuiFormRow
-          label={i18n.translate('xpack.lens.table.dynamicColoring.progression.label', {
-            defaultMessage: 'Color progression',
+          label={i18n.translate('xpack.lens.table.dynamicColoring.customPalette.label', {
+            defaultMessage: 'Custom palette',
           })}
           display="columnCompressed"
         >
           <EuiColorStops
             data-test-subj="lnsDatatable_dynamicColoring_progression_custom_stops"
-            label={i18n.translate('xpack.lens.table.dynamicColoring.progression.label', {
-              defaultMessage: 'Color progression',
+            label={i18n.translate('xpack.lens.table.dynamicColoring.customPalette.label', {
+              defaultMessage: 'Custom palette',
             })}
             onChange={(colorSteps) =>
               setPalette(
