@@ -309,7 +309,7 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
                         <EuiText size="xs" color="subdued">
                           <FormattedMessage
                             id="xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixActualLabel"
-                            defaultMessage="Actual label"
+                            defaultMessage="Actual class"
                           />
                         </EuiText>
                       </div>
@@ -320,7 +320,7 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
                               <EuiText size="xs" color="subdued">
                                 <FormattedMessage
                                   id="xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixPredictedLabel"
-                                  defaultMessage="Predicted label"
+                                  defaultMessage="Predicted class"
                                 />
                               </EuiText>
                             </div>
