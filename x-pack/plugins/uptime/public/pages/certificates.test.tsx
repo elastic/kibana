@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { shallowWithRouter } from '../lib';
+import { shallowWithRouter } from '../lib/helper/enzyme_helpers';
 import { CertificatesPage } from './certificates';
 
 describe('CertificatesPage', () => {

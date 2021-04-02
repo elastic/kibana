@@ -541,6 +541,10 @@ Documentation: https://www.elastic.co/guide/en/kibana/master/task-manager-produc
 |Gathers all usage collection, retrieving them from both: OSS and X-Pack plugins.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/timelines/README.md[timelines]
+|Timelines is a plugin that provides a grid component with accompanying server side apis to help users identify events of interest and perform root cause analysis within Kibana.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/transform/readme.md[transform]
 |This plugin provides access to the transforms features provided by Elastic.
 
