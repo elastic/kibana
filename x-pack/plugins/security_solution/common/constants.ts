@@ -115,6 +115,11 @@ export const SIGNALS_ID = `siem.signals`;
 export const NOTIFICATIONS_ID = `siem.notifications`;
 
 /**
+ * Id's for reference rule types
+ */
+export const REFERENCE_RULE_ALERT_TYPE_ID = `siem.referenceRule`;
+
+/**
  * Special internal structure for tags for signals. This is used
  * to filter out tags that have internal structures within them.
  */

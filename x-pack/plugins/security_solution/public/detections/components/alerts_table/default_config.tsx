@@ -20,23 +20,23 @@ import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import * as i18n from './translations';
 
 export const buildAlertStatusFilter = (status: Status): Filter[] => [
-  {
-    meta: {
-      alias: null,
-      negate: false,
-      disabled: false,
-      type: 'phrase',
-      key: 'signal.status',
-      params: {
-        query: status,
-      },
-    },
-    query: {
-      term: {
-        'signal.status': status,
-      },
-    },
-  },
+  // {
+  //   meta: {
+  //     alias: null,
+  //     negate: false,
+  //     disabled: false,
+  //     type: 'phrase',
+  //     key: 'signal.status',
+  //     params: {
+  //       query: status,
+  //     },
+  //   },
+  //   query: {
+  //     term: {
+  //       'signal.status': status,
+  //     },
+  //   },
+  // },
 ];
 
 export const buildAlertsRuleIdFilter = (ruleId: string | null): Filter[] =>
@@ -176,35 +176,34 @@ export const alertsHeaders: ColumnHeaderOptions[] = [
   },
 ];
 
+export const requiredFieldsForActions = [
+  'alert.id',
+  '@timestamp',
+  'event.kind',
+  'alert.start',
+  'alert.uuid',
+  'event.action',
+  'alert.status',
+  'alert.duration.us',
+  'rule.uuid',
+  'rule.id',
+  'rule.name',
+  'rule.category',
+  'producer',
+  'tags',
+];
+
+export const alertsHeaders: ColumnHeaderOptions[] = requiredFieldsForActions.map<ColumnHeaderOptions>(
+  (field) => ({
+    columnHeaderType: defaultColumnHeaderType,
+    id: field,
+    width: 120,
+  })
+);
+
 export const alertsDefaultModel: SubsetTimelineModel = {
   ...timelineDefaults,
   columns: alertsHeaders,
   showCheckboxes: true,
   excludedRowRendererIds: Object.values(RowRendererId),
 };
-
-export const requiredFieldsForActions = [
-  '@timestamp',
-  'signal.status',
-  'signal.group.id',
-  'signal.original_time',
-  'signal.rule.building_block_type',
-  'signal.rule.filters',
-  'signal.rule.from',
-  'signal.rule.language',
-  'signal.rule.query',
-  'signal.rule.name',
-  'signal.rule.to',
-  'signal.rule.id',
-  'signal.rule.index',
-  'signal.rule.type',
-  'signal.original_event.kind',
-  'signal.original_event.module',
-  // Endpoint exception fields
-  'file.path',
-  'file.Ext.code_signature.subject_name',
-  'file.Ext.code_signature.trusted',
-  'file.hash.sha256',
-  'host.os.family',
-  'event.code',
-];

@@ -11,6 +11,8 @@ import { PluginStartContract as FeaturesPluginStart } from '../../../features/se
 import { Space } from '../../../spaces/server';
 import { KueryNode } from '../../../../../src/plugins/data/server';
 
+export type GetSpaceFn = (request: KibanaRequest) => Promise<Space | undefined>;
+
 export enum ReadOperations {
   Get = 'get',
   Find = 'find',
@@ -25,48 +27,71 @@ interface HasPrivileges {
   read: boolean;
   all: boolean;
 }
-
-type AuthorizedConsumers = Record<string, HasPrivileges>;
-export interface RegistryAlertTypeWithAuth extends RegistryAlertType {
-  authorizedConsumers: AuthorizedConsumers;
-}
-
-type IsAuthorizedAtProducerLevel = boolean;
-
 export interface ConstructorOptions {
   request: KibanaRequest;
   owners: FeaturesPluginStart;
   getSpace: (request: KibanaRequest) => Promise<Space | undefined>;
-  auditLogger: AlertsAuthorizationAuditLogger;
+  // auditLogger: AlertsAuthorizationAuditLogger;
   authorization?: SecurityPluginStart['authz'];
 }
 
 export class RacAuthorization {
   private readonly request: KibanaRequest;
   private readonly authorization?: SecurityPluginStart['authz'];
-  private readonly auditLogger: AlertsAuthorizationAuditLogger;
-  private readonly owners: Set<string>;
+  // private readonly auditLogger: AlertsAuthorizationAuditLogger;
+  private readonly featureOwners: Set<string>;
   private readonly isAuthEnabled: boolean;
 
-  constructor({ request, authorization, owners, auditLogger, getSpace }: ConstructorOptions) {
+  private constructor({
+    request,
+    authorization,
+    owners,
+    isAuthEnabled,
+  }: {
+    request: KibanaRequest;
+    authorization?: SecurityPluginStart['authz'];
+    owners: Set<string>;
+    isAuthEnabled: boolean;
+  }) {
     this.request = request;
     this.authorization = authorization;
-    this.auditLogger = auditLogger;
-    this.owners = new Set<string>();
+    this.featureOwners = owners;
+    this.isAuthEnabled = isAuthEnabled;
+  }
+
+  static async create({
+    request,
+    authorization,
+    getSpace,
+    features,
+    isAuthEnabled,
+  }: {
+    request: KibanaRequest;
+    authorization?: SecurityPluginStart['authz'];
+    getSpace: GetSpaceFn;
+    features: FeaturesPluginStart;
+    isAuthEnabled: boolean;
+  }): Promise<RacAuthorization> {
+    let owners: Set<string>;
 
     try {
+      // Gather all disabled features from user Space
       const disabledFeatures = new Set((await getSpace(request))?.disabledFeatures ?? []);
 
-      this.owners = new Set(
-        owners
+      // Filter through all user Kibana features to find corresponding enabled
+      // Rac feature owners like 'security-solution' or 'observability'
+      owners = new Set(
+        features
           .getKibanaFeatures()
-          // get all the alert owners that aren't disabled
+          // get all the rac 'owners' that aren't disabled
           .filter(({ id }) => !disabledFeatures.has(id))
           .flatMap((feature) => feature.rac ?? [])
       );
     } catch (error) {
-      this.owners = new Set<string>();
+      owners = new Set<string>();
     }
+    console.error('---------> OWNERS', JSON.stringify(owners));
+    return new RacAuthorization({ request, authorization, owners, isAuthEnabled });
   }
 
   private shouldCheckAuthorization(): boolean {
@@ -78,8 +103,7 @@ export class RacAuthorization {
     consumer: string,
     operation: ReadOperations | WriteOperations
   ) {
-    const { authorization } = this;
-
+    // const { authorization } = this;
     // const isAvailableConsumer = has(await this.allPossibleConsumers, consumer);
     // if (authorization && this.shouldCheckAuthorization()) {
     //   const alertType = this.alertTypeRegistry.get(alertTypeId);
@@ -87,11 +111,9 @@ export class RacAuthorization {
     //     consumer: authorization.actions.alerting.get(alertTypeId, consumer, operation),
     //     producer: authorization.actions.alerting.get(alertTypeId, alertType.producer, operation),
     //   };
-
     //   // We special case the Alerts Management `consumer` as we don't want to have to
     //   // manually authorize each alert type in the management UI
     //   const shouldAuthorizeConsumer = consumer !== ALERTS_FEATURE_ID;
-
     //   const checkPrivileges = authorization.checkPrivilegesDynamicallyWithRequest(this.request);
     //   const { hasAllRequested, username, privileges } = await checkPrivileges({
     //     kibana: shouldAuthorizeConsumer
@@ -107,7 +129,6 @@ export class RacAuthorization {
     //           requiredPrivilegesByScope.producer,
     //         ],
     //   });
-
     //   if (!isAvailableConsumer) {
     //     /**
     //      * Under most circumstances this would have been caught by `checkPrivileges` as
@@ -126,7 +147,6 @@ export class RacAuthorization {
     //       )
     //     );
     //   }
-
     //   if (hasAllRequested) {
     //     this.auditLogger.alertsAuthorizationSuccess(
     //       username,
@@ -144,12 +164,10 @@ export class RacAuthorization {
     //       requiredPrivilegesByScope,
     //       (privilege) => !authorizedPrivileges.includes(privilege)
     //     );
-
     //     const [unauthorizedScopeType, unauthorizedScope] =
     //       shouldAuthorizeConsumer && unauthorizedScopes.consumer
     //         ? [ScopeType.Consumer, consumer]
     //         : [ScopeType.Producer, alertType.producer];
-
     //     throw Boom.forbidden(
     //       this.auditLogger.alertsAuthorizationFailure(
     //         username,
@@ -178,14 +196,13 @@ export class RacAuthorization {
     ensureAlertTypeIsAuthorized: (alertTypeId: string, consumer: string) => void;
     logSuccessfulAuthorization: () => void;
   } {
-    if (this.authorization && this.shouldCheckAuthorization()) {
-      // create set of all possible auth spaceId/owner pairs user has
-
-      return {
-        filter: ('' as unknown) as KueryNode, // auth filter here
-        ensureAlertTypeIsAuthorized: () => {},
-        logSuccessfulAuthorization: () => {},
-      };
-    }
+    // if (this.authorization && this.shouldCheckAuthorization()) {
+    //   // create set of all possible auth spaceId/owner pairs user has
+    //   return {
+    //     filter: ('' as unknown) as KueryNode, // auth filter here
+    //     ensureAlertTypeIsAuthorized: () => {},
+    //     logSuccessfulAuthorization: () => {},
+    //   };
+    // }
   }
 }

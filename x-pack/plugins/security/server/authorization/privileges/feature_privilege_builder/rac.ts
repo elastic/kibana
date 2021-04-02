@@ -10,21 +10,36 @@ import { uniq } from 'lodash';
 import type { FeatureKibanaPrivileges } from '../../../../../features/server';
 import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
 
+// TODO: Sync with Larry/team to figure out best method of passing in
+// and checking space id since we're not dealing with saved objects for alerts
+// ie: mimicking spaces in data index
+const spaceId: string = 'default';
 const readOperations: string[] = ['get', 'find'];
 const writeOperations: string[] = ['update'];
 const allOperations: string[] = [...readOperations, ...writeOperations];
 
 export class FeaturePrivilegeRacBuilder extends BaseFeaturePrivilegeBuilder {
-  public getActions(privilegeDefinition: FeatureKibanaPrivileges, spaceId: string): string[] {
-    const getRacPrivilege = (owners: readonly string[], operations: string[]) => {
-      return owners.flatMap((owner) =>
-        operations.map((operation) => this.actions.rac.get(spaceId, owner, operation))
+  // TODO: Figure out if we need to pass in KibanaFeature id here
+  public getActions(privilegeDefinition: FeatureKibanaPrivileges): string[] {
+    /**
+     * Returns the operator type, may not need this if using io-ts types
+     *
+     * @param operations all CRUD operations to check privileges for
+     * @param owners plugin or feature registered with RAC whose rule generate alerts
+     * @param spacesId spaceId corresponding to the rule generating the alert
+     */
+    const getAlertingPrivilege = (
+      operations: string[],
+      owners: readonly string[],
+      spacesId: string
+    ) =>
+      owners.flatMap((owner) =>
+        operations.map((operation) => this.actions.alerting.get(spacesId, owner, operation))
       );
-    };
 
     return uniq([
-      ...getRacPrivilege(allOperations, privilegeDefinition.alerts?.all ?? []),
-      ...getRacPrivilege(readOperations, privilegeDefinition.alerts?.read ?? []),
+      ...getAlertingPrivilege(allOperations, privilegeDefinition.rac?.all ?? [], spaceId),
+      ...getAlertingPrivilege(readOperations, privilegeDefinition.rac?.read ?? [], spaceId),
     ]);
   }
 }

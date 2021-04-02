@@ -7,6 +7,7 @@
   "requiredPlugins": [
     "actions",
     "alerting",
+    "ruleRegistry",
     "data",
     "dataEnhanced",
     "embeddable",
