@@ -8,7 +8,7 @@
 import * as t from 'io-ts';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceCount } from '../lib/observability_overview/get_service_count';
-import { getTransactionPerMinute } from '../lib/observability_overview/get_transaction_per_minute';
+import { getTransactionsPerMinute } from '../lib/observability_overview/get_transactions_per_minute';
 import { getHasData } from '../lib/observability_overview/has_data';
 import { createRoute } from './create_route';
 import { rangeRt } from './default_api_types';
@@ -44,7 +44,7 @@ export const observabilityOverviewRoute = createRoute({
           setup,
           searchAggregatedTransactions,
         }),
-        getTransactionPerMinute({
+        getTransactionsPerMinute({
           setup,
           bucketSize,
           searchAggregatedTransactions,

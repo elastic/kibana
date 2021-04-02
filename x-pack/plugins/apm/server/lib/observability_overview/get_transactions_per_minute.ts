@@ -16,7 +16,7 @@ import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregate
 import { calculateThroughput } from '../helpers/calculate_throughput';
 import { withApmSpan } from '../../utils/with_apm_span';
 
-export function getTransactionPerMinute({
+export function getTransactionsPerMinute({
   setup,
   bucketSize,
   searchAggregatedTransactions,
@@ -26,7 +26,7 @@ export function getTransactionPerMinute({
   searchAggregatedTransactions: boolean;
 }) {
   return withApmSpan(
-    'observability_overview_get_transaction_distribution',
+    'observability_overview_get_transactions_per_minute',
     async () => {
       const { apmEventClient, start, end } = setup;
 
