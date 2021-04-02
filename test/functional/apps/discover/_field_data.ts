@@ -22,8 +22,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover tab', function describeIndexTests() {
     this.tags('includeFirefox');
     before(async function () {
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
+      await kibanaServer.importExport.load('discover');
       await esArchiver.loadIfNeeded('logstash_functional');
-      await esArchiver.load('discover');
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
         'discover:searchFieldsFromSource': true,

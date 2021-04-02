@@ -8,9 +8,11 @@
 
 import expect from '@kbn/expect';
 
+import { inspect } from 'util';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const savedObjectInfo = getService('savedObjectInfo');
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const retry = getService('retry');
@@ -19,10 +21,42 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'home', 'settings', 'discover']);
 
+  const logTypes = (msg: string = '') => async () =>
+    log.debug(
+      `\n### Saved Object Types In Index: [.kibana] ${msg}: \n${inspect(
+        await savedObjectInfo.types(),
+        {
+          compact: false,
+          depth: 99,
+          breakLength: 80,
+          sorted: true,
+        }
+      )}`
+    );
+
   describe('test large strings', function () {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'kibana_large_strings']);
-      await esArchiver.load('empty_kibana');
+      // await esArchiver.load('empty_kibana');
+      // try {
+      //   await esArchiver.load('hamlet_kibana');
+      // } catch (e) {
+      //   log.debug(`! hamlet_kibana: ${inspect(e,             {
+      //       compact: false,
+      //       depth: 99,
+      //       breakLength: 80,
+      //       sorted: true,
+      //     }
+      //   )}`)
+      //   throw e;
+      // }
+
+      await kibanaServer.importExport.load(
+        'testlargestring',
+        { space: undefined },
+        // @ts-ignore
+        logTypes('[Large Strings Test]')
+      );
       await esArchiver.loadIfNeeded('hamlet');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'testlargestring' });
     });
@@ -73,6 +107,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await security.testUser.restoreDefaults();
       await esArchiver.unload('hamlet');
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
     });
   });
 }

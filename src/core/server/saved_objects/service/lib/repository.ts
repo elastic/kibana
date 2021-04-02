@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { inspect } from 'util';
+
 import { omit, isObject } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '../../../elasticsearch/';
@@ -350,187 +352,208 @@ export class SavedObjectsRepository {
     objects: Array<SavedObjectsBulkCreateObject<T>>,
     options: SavedObjectsCreateOptions = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
-    const { overwrite = false, refresh = DEFAULT_REFRESH_SETTING } = options;
-    const namespace = normalizeNamespace(options.namespace);
-    const time = this._getCurrentTime();
-
-    let bulkGetRequestIndexCounter = 0;
-    const expectedResults: Either[] = objects.map((object) => {
-      let error: DecoratedError | undefined;
-      if (!this._allowedTypes.includes(object.type)) {
-        error = SavedObjectsErrorHelpers.createUnsupportedTypeError(object.type);
-      } else if (object.initialNamespaces) {
-        if (!this._registry.isShareable(object.type)) {
-          error = SavedObjectsErrorHelpers.createBadRequestError(
-            '"initialNamespaces" can only be used on multi-namespace types'
-          );
-        } else if (!object.initialNamespaces.length) {
-          error = SavedObjectsErrorHelpers.createBadRequestError(
-            '"initialNamespaces" must be a non-empty array of strings'
-          );
-        }
-      }
-
-      if (error) {
-        return {
-          tag: 'Left' as 'Left',
-          error: { id: object.id, type: object.type, error: errorContent(error) },
-        };
-      }
-
-      const method = object.id && overwrite ? 'index' : 'create';
-      const requiresNamespacesCheck = object.id && this._registry.isMultiNamespace(object.type);
-
-      if (object.id == null) {
-        object.id = SavedObjectsUtils.generateId();
-      }
-
-      return {
-        tag: 'Right' as 'Right',
-        value: {
-          method,
-          object,
-          ...(requiresNamespacesCheck && { esRequestIndex: bulkGetRequestIndexCounter++ }),
-        },
-      };
-    });
-
-    const bulkGetDocs = expectedResults
-      .filter(isRight)
-      .filter(({ value }) => value.esRequestIndex !== undefined)
-      .map(({ value: { object: { type, id } } }) => ({
-        _id: this._serializer.generateRawId(namespace, type, id),
-        _index: this.getIndexForType(type),
-        _source: ['type', 'namespaces'],
-      }));
-    const bulkGetResponse = bulkGetDocs.length
-      ? await this.client.mget<SavedObjectsRawDocSource>(
+    try {
+      this._logger.debug(
+        `savedObjects.bulkCreate ${inspect(
           {
-            body: {
-              docs: bulkGetDocs,
-            },
+            objects,
+            options,
           },
-          { ignore: [404] }
-        )
-      : undefined;
-
-    let bulkRequestIndexCounter = 0;
-    const bulkCreateParams: object[] = [];
-    const expectedBulkResults: Either[] = expectedResults.map((expectedBulkGetResult) => {
-      if (isLeft(expectedBulkGetResult)) {
-        return expectedBulkGetResult;
-      }
-
-      let savedObjectNamespace;
-      let savedObjectNamespaces;
-      let versionProperties;
-      const {
-        esRequestIndex,
-        object: { initialNamespaces, version, ...object },
-        method,
-      } = expectedBulkGetResult.value;
-      if (esRequestIndex !== undefined) {
-        const indexFound = bulkGetResponse?.statusCode !== 404;
-        const actualResult = indexFound ? bulkGetResponse?.body.docs[esRequestIndex] : undefined;
-        const docFound = indexFound && actualResult?.found === true;
-        // @ts-expect-error MultiGetHit._source is optional
-        if (docFound && !this.rawDocExistsInNamespace(actualResult!, namespace)) {
-          const { id, type } = object;
-          return {
-            tag: 'Left' as 'Left',
-            error: {
-              id,
-              type,
-              error: {
-                ...errorContent(SavedObjectsErrorHelpers.createConflictError(type, id)),
-                metadata: { isNotOverwritable: true },
-              },
-            },
-          };
-        }
-        savedObjectNamespaces =
-          initialNamespaces ||
-          // @ts-expect-error MultiGetHit._source is optional
-          getSavedObjectNamespaces(namespace, docFound ? actualResult : undefined);
-        // @ts-expect-error MultiGetHit._source is optional
-        versionProperties = getExpectedVersionProperties(version, actualResult);
-      } else {
-        if (this._registry.isSingleNamespace(object.type)) {
-          savedObjectNamespace = namespace;
-        } else if (this._registry.isMultiNamespace(object.type)) {
-          savedObjectNamespaces = initialNamespaces || getSavedObjectNamespaces(namespace);
-        }
-        versionProperties = getExpectedVersionProperties(version);
-      }
-
-      const expectedResult = {
-        esRequestIndex: bulkRequestIndexCounter++,
-        requestedId: object.id,
-        rawMigratedDoc: this._serializer.savedObjectToRaw(
-          this._migrator.migrateDocument({
-            id: object.id,
-            type: object.type,
-            attributes: object.attributes,
-            migrationVersion: object.migrationVersion,
-            ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
-            ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
-            updated_at: time,
-            references: object.references || [],
-            originId: object.originId,
-          }) as SavedObjectSanitizedDoc
-        ),
-      };
-
-      bulkCreateParams.push(
-        {
-          [method]: {
-            _id: expectedResult.rawMigratedDoc._id,
-            _index: this.getIndexForType(object.type),
-            ...(overwrite && versionProperties),
-          },
-        },
-        expectedResult.rawMigratedDoc._source
+          {
+            depth: 100,
+          }
+        )}`
       );
 
-      return { tag: 'Right' as 'Right', value: expectedResult };
-    });
+      const { overwrite = false, refresh = DEFAULT_REFRESH_SETTING } = options;
+      const namespace = normalizeNamespace(options.namespace);
+      const time = this._getCurrentTime();
 
-    const bulkResponse = bulkCreateParams.length
-      ? await this.client.bulk({
-          refresh,
-          require_alias: true,
-          body: bulkCreateParams,
-        })
-      : undefined;
-
-    return {
-      saved_objects: expectedBulkResults.map((expectedResult) => {
-        if (isLeft(expectedResult)) {
-          return expectedResult.error as any;
+      let bulkGetRequestIndexCounter = 0;
+      const expectedResults: Either[] = objects.map((object) => {
+        let error: DecoratedError | undefined;
+        if (!this._allowedTypes.includes(object.type)) {
+          error = SavedObjectsErrorHelpers.createUnsupportedTypeError(object.type);
+        } else if (object.initialNamespaces) {
+          if (!this._registry.isShareable(object.type)) {
+            error = SavedObjectsErrorHelpers.createBadRequestError(
+              '"initialNamespaces" can only be used on multi-namespace types'
+            );
+          } else if (!object.initialNamespaces.length) {
+            error = SavedObjectsErrorHelpers.createBadRequestError(
+              '"initialNamespaces" must be a non-empty array of strings'
+            );
+          }
         }
-
-        const { requestedId, rawMigratedDoc, esRequestIndex } = expectedResult.value;
-        const { error, ...rawResponse } = Object.values(
-          bulkResponse?.body.items[esRequestIndex] ?? {}
-        )[0] as any;
 
         if (error) {
           return {
-            id: requestedId,
-            type: rawMigratedDoc._source.type,
-            error: getBulkOperationError(error, rawMigratedDoc._source.type, requestedId),
+            tag: 'Left' as 'Left',
+            error: { id: object.id, type: object.type, error: errorContent(error) },
           };
         }
 
-        // When method == 'index' the bulkResponse doesn't include the indexed
-        // _source so we return rawMigratedDoc but have to spread the latest
-        // _seq_no and _primary_term values from the rawResponse.
-        return this._rawToSavedObject({
-          ...rawMigratedDoc,
-          ...{ _seq_no: rawResponse._seq_no, _primary_term: rawResponse._primary_term },
-        });
-      }),
-    };
+        const method = object.id && overwrite ? 'index' : 'create';
+        const requiresNamespacesCheck = object.id && this._registry.isMultiNamespace(object.type);
+
+        if (object.id == null) {
+          object.id = SavedObjectsUtils.generateId();
+        }
+
+        return {
+          tag: 'Right' as 'Right',
+          value: {
+            method,
+            object,
+            ...(requiresNamespacesCheck && { esRequestIndex: bulkGetRequestIndexCounter++ }),
+          },
+        };
+      });
+
+      const bulkGetDocs = expectedResults
+        .filter(isRight)
+        .filter(({ value }) => value.esRequestIndex !== undefined)
+        .map(({ value: { object: { type, id } } }) => ({
+          _id: this._serializer.generateRawId(namespace, type, id),
+          _index: this.getIndexForType(type),
+          _source: ['type', 'namespaces'],
+        }));
+      const bulkGetResponse = bulkGetDocs.length
+        ? await this.client.mget<SavedObjectsRawDocSource>(
+            {
+              body: {
+                docs: bulkGetDocs,
+              },
+            },
+            { ignore: [404] }
+          )
+        : undefined;
+
+      let bulkRequestIndexCounter = 0;
+      const bulkCreateParams: object[] = [];
+      const expectedBulkResults: Either[] = expectedResults.map((expectedBulkGetResult) => {
+        if (isLeft(expectedBulkGetResult)) {
+          return expectedBulkGetResult;
+        }
+
+        let savedObjectNamespace;
+        let savedObjectNamespaces;
+        let versionProperties;
+        const {
+          esRequestIndex,
+          object: { initialNamespaces, version, ...object },
+          method,
+        } = expectedBulkGetResult.value;
+        if (esRequestIndex !== undefined) {
+          const indexFound = bulkGetResponse?.statusCode !== 404;
+          const actualResult = indexFound ? bulkGetResponse?.body.docs[esRequestIndex] : undefined;
+          const docFound = indexFound && actualResult?.found === true;
+          // @ts-expect-error MultiGetHit._source is optional
+          if (docFound && !this.rawDocExistsInNamespace(actualResult!, namespace)) {
+            const { id, type } = object;
+            return {
+              tag: 'Left' as 'Left',
+              error: {
+                id,
+                type,
+                error: {
+                  ...errorContent(SavedObjectsErrorHelpers.createConflictError(type, id)),
+                  metadata: { isNotOverwritable: true },
+                },
+              },
+            };
+          }
+          savedObjectNamespaces =
+            initialNamespaces ||
+            // @ts-expect-error MultiGetHit._source is optional
+            getSavedObjectNamespaces(namespace, docFound ? actualResult : undefined);
+          // @ts-expect-error MultiGetHit._source is optional
+          versionProperties = getExpectedVersionProperties(version, actualResult);
+        } else {
+          if (this._registry.isSingleNamespace(object.type)) {
+            savedObjectNamespace = namespace;
+          } else if (this._registry.isMultiNamespace(object.type)) {
+            savedObjectNamespaces = initialNamespaces || getSavedObjectNamespaces(namespace);
+          }
+          versionProperties = getExpectedVersionProperties(version);
+        }
+
+        const expectedResult = {
+          esRequestIndex: bulkRequestIndexCounter++,
+          requestedId: object.id,
+          rawMigratedDoc: this._serializer.savedObjectToRaw(
+            this._migrator.migrateDocument({
+              id: object.id,
+              type: object.type,
+              attributes: object.attributes,
+              migrationVersion: object.migrationVersion,
+              ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
+              ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
+              updated_at: time,
+              references: object.references || [],
+              originId: object.originId,
+            }) as SavedObjectSanitizedDoc
+          ),
+        };
+
+        bulkCreateParams.push(
+          {
+            [method]: {
+              _id: expectedResult.rawMigratedDoc._id,
+              _index: this.getIndexForType(object.type),
+              ...(overwrite && versionProperties),
+            },
+          },
+          expectedResult.rawMigratedDoc._source
+        );
+
+        return { tag: 'Right' as 'Right', value: expectedResult };
+      });
+
+      const bulkResponse = bulkCreateParams.length
+        ? await this.client.bulk({
+            refresh,
+            require_alias: true,
+            body: bulkCreateParams,
+          })
+        : undefined;
+
+      const result = {
+        saved_objects: expectedBulkResults.map((expectedResult) => {
+          if (isLeft(expectedResult)) {
+            return expectedResult.error as any;
+          }
+
+          const { requestedId, rawMigratedDoc, esRequestIndex } = expectedResult.value;
+          const { error, ...rawResponse } = Object.values(
+            bulkResponse?.body.items[esRequestIndex] ?? {}
+          )[0] as any;
+
+          if (error) {
+            return {
+              id: requestedId,
+              type: rawMigratedDoc._source.type,
+              error: getBulkOperationError(error, rawMigratedDoc._source.type, requestedId),
+              rawResponse: { error, ...rawResponse },
+            };
+          }
+
+          // When method == 'index' the bulkResponse doesn't include the indexed
+          // _source so we return rawMigratedDoc but have to spread the latest
+          // _seq_no and _primary_term values from the rawResponse.
+          return this._rawToSavedObject({
+            ...rawMigratedDoc,
+            ...{ _seq_no: rawResponse._seq_no, _primary_term: rawResponse._primary_term },
+          });
+        }),
+      };
+
+      this._logger.info(`savedObjects.bulkCreate success ${inspect(result, { depth: 100 })}`);
+      return result;
+    } catch (error) {
+      this._logger.error(`savedObjects.bulkCreate error ${inspect(error, { depth: 100 })}`);
+      throw error;
+    }
   }
 
   /**

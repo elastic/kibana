@@ -10,7 +10,7 @@ import Url from 'url';
 import Https from 'https';
 import Qs from 'querystring';
 
-import Axios, { AxiosResponse } from 'axios';
+import Axios, { AxiosResponse, ResponseType } from 'axios';
 import { ToolingLog, isAxiosRequestError, isAxiosResponseError } from '@kbn/dev-utils';
 
 const isConcliftOnGetError = (error: any) => {
@@ -53,6 +53,7 @@ export interface ReqOptions {
   body?: any;
   retries?: number;
   headers?: Record<string, string>;
+  responseType?: ResponseType;
 }
 
 const delay = (ms: number) =>
@@ -108,6 +109,8 @@ export class KbnClientRequester {
           },
           httpsAgent: this.httpsAgent,
           paramsSerializer: (params) => Qs.stringify(params),
+          responseType: options.responseType,
+          transformResponse: options.responseType === 'text' ? [(x) => x] : undefined,
         });
 
         return response;

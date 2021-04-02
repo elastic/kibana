@@ -12,7 +12,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
 
-  describe('discover app', function () {
+  describe.only('discover app', function () {
     this.tags('ciGroup6');
 
     before(function () {
