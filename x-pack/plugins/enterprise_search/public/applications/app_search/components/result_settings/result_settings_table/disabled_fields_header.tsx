@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 export const DisabledFieldsHeader: React.FC = () => {
   return (
-    <EuiTableRow className="resultSettingsTable__subHeader">
+    <EuiTableRow>
       <EuiTableHeaderCell align="left" colSpan={5}>
         {i18n.translate(
           'xpack.enterpriseSearch.appSearch.engine.resultSettings.table.column.disabledFieldsTitle',
