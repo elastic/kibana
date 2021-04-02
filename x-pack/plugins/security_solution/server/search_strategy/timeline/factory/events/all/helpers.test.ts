@@ -7,7 +7,7 @@
 
 import { EventHit } from '../../../../../../common/search_strategy';
 import { TIMELINE_EVENTS_FIELDS } from './constants';
-import { formatTimelineData } from './helpers';
+import { buildObjectFromField, formatTimelineData } from './helpers';
 import { eventHit } from '../mocks';
 
 describe('#formatTimelineData', () => {
@@ -42,12 +42,12 @@ describe('#formatTimelineData', () => {
             value: ['beats-ci-immutable-ubuntu-1804-1605624279743236239'],
           },
           {
-            field: 'source.geo.location',
-            value: [`{"lon":118.7778,"lat":32.0617}`],
+            field: 'threat.indicator.matched.field',
+            value: ['matched_field', 'other_matched_field', 'matched_field_2'],
           },
           {
-            field: 'threat.indicator.matched.field',
-            value: ['matched_field', 'matched_field_2'],
+            field: 'source.geo.location',
+            value: [`{"lon":118.7778,"lat":32.0617}`],
           },
         ],
         ecs: {
@@ -93,6 +93,34 @@ describe('#formatTimelineData', () => {
           timestamp: '2020-11-17T14:48:08.922Z',
           user: {
             name: ['jenkins'],
+          },
+          threat: {
+            indicator: [
+              {
+                event: {
+                  dataset: [],
+                  reference: [],
+                },
+                matched: {
+                  atomic: ['matched_atomic'],
+                  field: ['matched_field', 'other_matched_field'],
+                  type: [],
+                },
+                provider: ['yourself'],
+              },
+              {
+                event: {
+                  dataset: [],
+                  reference: [],
+                },
+                matched: {
+                  atomic: ['matched_atomic_2'],
+                  field: ['matched_field_2'],
+                  type: [],
+                },
+                provider: ['other_you'],
+              },
+            ],
           },
         },
       },
@@ -369,6 +397,90 @@ describe('#formatTimelineData', () => {
           },
         },
       },
+    });
+  });
+
+  describe('buildObjectFromField', () => {
+    it('base case', () => {
+      expect(buildObjectFromField('@timestamp', eventHit)).toEqual({
+        '@timestamp': ['2020-11-17T14:48:08.922Z'],
+      });
+    });
+
+    it('another base case', () => {
+      const event = {
+        fields: {
+          foo: [{ bar: ['baz'] }],
+        },
+      };
+      // @ts-expect-error nestedEvent is minimal
+      expect(buildObjectFromField('foo.bar', event, 'foo')).toEqual({
+        foo: [{ bar: ['baz'] }],
+      });
+    });
+
+    it('simple nested', () => {
+      const nestedEvent = {
+        fields: {
+          'foo.bar': [
+            {
+              baz: ['host.name'],
+            },
+          ],
+        },
+      };
+      // @ts-expect-error nestedEvent is minimal
+      expect(buildObjectFromField('foo.bar.baz', nestedEvent, 'foo.bar')).toEqual({
+        foo: {
+          bar: [
+            {
+              baz: ['host.name'],
+            },
+          ],
+        },
+      });
+    });
+
+    it('nested field', () => {
+      expect(
+        buildObjectFromField('threat.indicator.matched.atomic', eventHit, 'threat.indicator')
+      ).toEqual({
+        threat: {
+          indicator: [
+            {
+              matched: {
+                atomic: ['matched_atomic'],
+              },
+            },
+            {
+              matched: {
+                atomic: ['matched_atomic_2'],
+              },
+            },
+          ],
+        },
+      });
+    });
+
+    it('nested field with multiple values', () => {
+      expect(
+        buildObjectFromField('threat.indicator.matched.field', eventHit, 'threat.indicator')
+      ).toEqual({
+        threat: {
+          indicator: [
+            {
+              matched: {
+                field: ['matched_field', 'other_matched_field'],
+              },
+            },
+            {
+              matched: {
+                field: ['matched_field_2'],
+              },
+            },
+          ],
+        },
+      });
     });
   });
 });

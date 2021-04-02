@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { set } from '@elastic/safer-lodash-set';
 import { get, has, merge, uniq } from 'lodash/fp';
 import {
   EventHit,
@@ -99,6 +100,40 @@ const getValuesFromFields = async (
   );
 };
 
+export const buildObjectFromField = (
+  fieldPath: string,
+  hit: EventHit,
+  nestedParentPath?: string
+) => {
+  if (nestedParentPath) {
+    const childPath = fieldPath.replace(`${nestedParentPath}.`, '');
+    return set(
+      {},
+      nestedParentPath,
+      (get(nestedParentPath, hit.fields) ?? []).map((nestedFields) => {
+        const value = get(childPath, nestedFields);
+        return set({}, childPath, toStringArray(value));
+      })
+    );
+  } else {
+    const value = has(fieldPath, hit._source)
+      ? get(fieldPath, hit._source)
+      : get(fieldPath, hit.fields);
+    return set({}, fieldPath, toStringArray(value));
+  }
+};
+
+/**
+ * If a prefix of our full field path is present as a field, we know that our field is nested
+ */
+const getNestedParentPath = (fieldPath: string, fields: Record<string, unknown[]> = {}) => {
+  const fieldParts = fieldPath.split('.');
+  return Object.keys(fields).find(
+    (field) =>
+      field !== fieldPath && field === fieldParts.slice(0, field.split('.').length).join('.')
+  );
+};
+
 const mergeTimelineFieldsWithHit = async <T>(
   fieldName: string,
   flattenedFields: T,
@@ -106,15 +141,12 @@ const mergeTimelineFieldsWithHit = async <T>(
   dataFields: readonly string[],
   ecsFields: readonly string[]
 ) => {
+  const nestedParentPath = getNestedParentPath(fieldName, hit.fields);
   if (fieldName != null || dataFields.includes(fieldName)) {
-    const fieldNameAsArray = fieldName.split('.');
-    const nestedParentFieldName = Object.keys(hit.fields ?? []).find((f) => {
-      return f === fieldNameAsArray.slice(0, f.split('.').length).join('.');
-    });
     if (
       has(fieldName, hit._source) ||
       has(fieldName, hit.fields) ||
-      nestedParentFieldName != null ||
+      nestedParentPath != null ||
       specialFields.includes(fieldName)
     ) {
       const objectWithProperty = {
@@ -123,22 +155,13 @@ const mergeTimelineFieldsWithHit = async <T>(
           data: dataFields.includes(fieldName)
             ? [
                 ...get('node.data', flattenedFields),
-                ...(await getValuesFromFields(fieldName, hit, nestedParentFieldName)),
+                ...(await getValuesFromFields(fieldName, hit, nestedParentPath)),
               ]
             : get('node.data', flattenedFields),
           ecs: ecsFields.includes(fieldName)
             ? {
                 ...get('node.ecs', flattenedFields),
-                // @ts-expect-error
-                ...fieldName.split('.').reduceRight(
-                  // @ts-expect-error
-                  (obj, next) => ({ [next]: obj }),
-                  toStringArray(
-                    has(fieldName, hit._source)
-                      ? get(fieldName, hit._source)
-                      : hit.fields[fieldName]
-                  )
-                ),
+                ...buildObjectFromField(fieldName, hit, nestedParentPath),
               }
             : get('node.ecs', flattenedFields),
         },
