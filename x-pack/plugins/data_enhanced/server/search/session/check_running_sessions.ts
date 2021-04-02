@@ -158,10 +158,6 @@ export async function checkRunningSessions(
 
           logger.debug(`Found ${runningSearchSessionsResponse.total} running sessions`);
 
-          const updatedSessions = new Array<
-            SavedObjectsFindResult<SearchSessionSavedObjectAttributes>
-          >();
-
           await Promise.all(
             runningSearchSessionsResponse.saved_objects.map(async (session) => {
               const updated = await updateSessionStatus(session, client, logger);
@@ -169,12 +165,20 @@ export async function checkRunningSessions(
 
               if (!session.attributes.persisted) {
                 if (isSessionStale(session, config, logger)) {
-                  deleted = true;
                   // delete saved object to free up memory
                   // TODO: there's a potential rare edge case of deleting an object and then receiving a new trackId for that same session!
                   // Maybe we want to change state to deleted and cleanup later?
                   logger.debug(`Deleting stale session | ${session.id}`);
-                  await savedObjectsClient.delete(SEARCH_SESSION_TYPE, session.id);
+                  try {
+                    await savedObjectsClient.delete(SEARCH_SESSION_TYPE, session.id, {
+                      namespace: session.namespaces?.[0],
+                    });
+                    deleted = true;
+                  } catch (e) {
+                    logger.error(
+                      `Error while deleting stale search session ${session.id}: ${e.message}`
+                    );
+                  }
 
                   // Send a delete request for each async search to ES
                   Object.keys(session.attributes.idMapping).map(async (searchKey: string) => {
@@ -183,8 +187,8 @@ export async function checkRunningSessions(
                       try {
                         await client.asyncSearch.delete({ id: searchInfo.id });
                       } catch (e) {
-                        logger.debug(
-                          `Error ignored while deleting async_search ${searchInfo.id}: ${e.message}`
+                        logger.error(
+                          `Error while deleting async_search ${searchInfo.id}: ${e.message}`
                         );
                       }
                     }
@@ -193,19 +197,22 @@ export async function checkRunningSessions(
               }
 
               if (updated && !deleted) {
-                updatedSessions.push(session);
+                try {
+                  // TODO: consider using bulkUpdate grouped by `session.namespaces?.[0]`
+                  await savedObjectsClient.update(
+                    SEARCH_SESSION_TYPE,
+                    session.id,
+                    session.attributes,
+                    {
+                      namespace: session.namespaces?.[0],
+                    }
+                  );
+                } catch (e) {
+                  logger.error(`Error while updating search session ${session.id}: ${e.message}`);
+                }
               }
             })
           );
-
-          // Do a bulk update
-          if (updatedSessions.length) {
-            // If there's an error, we'll try again in the next iteration, so there's no need to check the output.
-            const updatedResponse = await savedObjectsClient.bulkUpdate<SearchSessionSavedObjectAttributes>(
-              updatedSessions
-            );
-            logger.debug(`Updated ${updatedResponse.saved_objects.length} search sessions`);
-          }
         })
       )
       .toPromise();
