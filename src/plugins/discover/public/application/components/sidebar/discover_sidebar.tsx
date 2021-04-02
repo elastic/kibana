@@ -303,8 +303,8 @@ export function DiscoverSidebar({
         responsive={false}
       >
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
+          <EuiFlexGroup direction="row" alignItems="center">
+            <EuiFlexItem grow={true} className="dscSidebar__indexPatternSwitcher">
               <DiscoverIndexPattern
                 config={config}
                 selectedIndexPattern={selectedIndexPattern}

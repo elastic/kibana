@@ -43,5 +43,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.discover.getDocHeader()).to.have.string('megabytes');
       expect((await PageObjects.discover.getAllFieldNames()).includes('megabytes')).to.be(true);
     });
+
+    it('allows creation of a new field', async function () {
+      await PageObjects.discover.clickIndexPatternActions();
+      await PageObjects.discover.clickAddNewField();
+      await fieldEditor.setName('runtimefield');
+      await fieldEditor.enableValue();
+      await fieldEditor.typeScript("emit('abc')");
+      await fieldEditor.save();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      expect((await PageObjects.discover.getAllFieldNames()).includes('runtimefield')).to.be(true);
+    });
+
+    it('allows editing of a newly created field', async function () {
+      await PageObjects.discover.clickFieldListItemAdd('runtimefield');
+      await PageObjects.discover.editField('runtimefield');
+      await fieldEditor.setName('runtimefield edited');
+      await fieldEditor.save();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      expect((await PageObjects.discover.getAllFieldNames()).includes('runtimefield')).to.be(false);
+      expect((await PageObjects.discover.getAllFieldNames()).includes('runtimefield 2')).to.be(
+        false
+      );
+    });
   });
 }
