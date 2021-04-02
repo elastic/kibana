@@ -3,7 +3,7 @@
 library 'kibana-pipeline-library'
 kibanaLibrary.load()
 
-workers.ci(name: 'ci-worker', size: 'xxl', ramDisk: true, bootstrapped: false) {
+workers.base(name: 'ci-worker', size: 'xxl', ramDisk: true, bootstrapped: false) {
   def PARALLEL_COUNT = 50
   def ITERATIONS_PER = 100
 
@@ -15,4 +15,6 @@ workers.ci(name: 'ci-worker', size: 'xxl', ramDisk: true, bootstrapped: false) {
       }
     }
   }
+
+  parallel(tasks)
 }
