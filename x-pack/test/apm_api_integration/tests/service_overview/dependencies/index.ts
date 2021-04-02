@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { last, omit, pick, sortBy } from 'lodash';
+import { last, pick, sortBy } from 'lodash';
 import { ValuesType } from 'utility-types';
 import moment from 'moment';
 import { createApmApiSupertest } from '../../../common/apm_api_supertest';
