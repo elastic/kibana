@@ -66,6 +66,7 @@ describe('data table dimension editor', () => {
       state,
       setState,
       paletteService: chartPluginMock.createPaletteRegistry(),
+      panelRef: React.createRef(),
     };
   });
 
