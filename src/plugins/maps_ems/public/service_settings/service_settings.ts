@@ -22,7 +22,6 @@ export class ServiceSettings implements IServiceSettings {
   private readonly _mapConfig: MapsEmsConfig;
   private readonly _tilemapsConfig: TileMapConfig;
   private readonly _hasTmsConfigured: boolean;
-  private _showZoomMessage: boolean;
   private readonly _emsClient: EMSClient;
   private readonly tmsOptionsFromConfig: any;
 
@@ -31,7 +30,6 @@ export class ServiceSettings implements IServiceSettings {
     this._tilemapsConfig = tilemapsConfig;
     this._hasTmsConfigured = typeof tilemapsConfig.url === 'string' && tilemapsConfig.url !== '';
 
-    this._showZoomMessage = true;
     this._emsClient = new EMSClient({
       language: i18n.getLocale(),
       appVersion: getKibanaVersion(),
@@ -59,14 +57,6 @@ export class ServiceSettings implements IServiceSettings {
       attribution: _.escape(markdownIt.render(this._tilemapsConfig.options.attribution || '')),
       url: this._tilemapsConfig.url,
     });
-  }
-
-  enableZoomMessage(): void {
-    this._showZoomMessage = true;
-  }
-
-  disableZoomMessage(): void {
-    this._showZoomMessage = false;
   }
 
   __debugStubManifestCalls(manifestRetrieval: () => Promise<unknown>): { removeStub: () => void } {
