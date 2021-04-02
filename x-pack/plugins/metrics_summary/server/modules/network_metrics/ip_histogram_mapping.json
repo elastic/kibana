@@ -51,6 +51,39 @@
                 }
               }
             }
+          },
+          "network": {
+            "properties": {
+              "events": {
+                "properties": {
+                  "value_count": {
+                    "type": "long"
+                  }
+                }
+              },
+              "tls": {
+                "properties": {
+                  "version": {
+                    "properties": {
+                      "value_count": {
+                        "type": "long"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "dns": {
+            "properties": {
+              "queries": {
+                "properties": {
+                  "value_count": {
+                    "type": "long"
+                  }
+                }
+              }
+            }
           }
         }
       }

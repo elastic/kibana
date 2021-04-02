@@ -26,6 +26,7 @@ import { userEntities, userEntitiesMapping } from './user_summaries';
  * These module names will map 1 to 1 to the REST interface.
  */
 export enum ModuleNames {
+  securitySolutions = 'security_solutions',
   hostMetrics = 'host_metrics',
   hostSummaries = 'host_summaries',
   networkSummaries = 'network_summaries',
@@ -39,6 +40,14 @@ export enum ModuleNames {
  * key values.
  */
 export const installableTransforms: Record<ModuleNames, Transforms[]> = {
+  [ModuleNames.securitySolutions]: [
+    hostHistogram,
+    hostEntities,
+    destinationIpEntities,
+    sourceIpEntities,
+    destinationCountryIsoCodeEntities,
+    sourceCountryIsoCodeEntities,
+  ],
   [ModuleNames.hostMetrics]: [hostHistogram],
   [ModuleNames.hostSummaries]: [hostEntities],
   [ModuleNames.networkSummaries]: [
@@ -58,6 +67,17 @@ export const installableTransforms: Record<ModuleNames, Transforms[]> = {
  * that will be ok as we will not installs the mapping twice.
  */
 export const installableMappings: Record<ModuleNames, Mappings[]> = {
+  [ModuleNames.securitySolutions]: [
+    hostHistogramMapping,
+    hostEntitiesMapping,
+    sourceIpEntitiesMapping,
+    destinationIpEntitiesMapping,
+    destinationCountryIsoCodeEntitiesMapping,
+    sourceCountryIsoCodeEntitiesMapping,
+    ipHistogramMapping,
+    userEntitiesMapping,
+    userHistogramMapping,
+  ],
   [ModuleNames.hostMetrics]: [hostHistogramMapping],
   [ModuleNames.hostSummaries]: [hostEntitiesMapping],
   [ModuleNames.networkSummaries]: [

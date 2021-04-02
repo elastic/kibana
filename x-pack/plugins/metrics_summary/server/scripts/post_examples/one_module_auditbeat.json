@@ -1,5 +1,5 @@
 {
-  "modules": ["network_summaries"],
+  "modules": ["network_metrics"],
   "indices": ["auditbeat-*"],
   "auto_start": true,
   "query": {
