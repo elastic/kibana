@@ -95,8 +95,8 @@ describe('HeaderSection', () => {
     );
     const siemHeaderSection = wrapper.find('.siemHeaderSection').first();
 
-    expect(siemHeaderSection).not.toHaveStyleRule('border-bottom', euiThemeVars.euiBorderThin);
-    expect(siemHeaderSection).not.toHaveStyleRule('padding-bottom', euiThemeVars.paddingSizes.l);
+    expect(siemHeaderSection).not.toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
+    expect(siemHeaderSection).not.toHaveStyleRule('padding-bottom', euiDarkVars.paddingSizes.l);
   });
 
   test('it splits the title and supplement areas evenly when split is true', () => {
