@@ -184,6 +184,21 @@ describe('datatable cell renderer', () => {
         expect(gradientHelper).not.toHaveBeenCalled();
       });
 
+      it('should set the coloring of the cell when enabled with a single value range', async () => {
+        const columnConfig = getColumnConfiguration();
+        columnConfig.columns[0].colorMode = 'cell';
+
+        const { setCellProps } = await renderCellComponent(columnConfig, {
+          minMaxByColumnId: { a: { min: 0, max: 0 } },
+          gradientHelpers: {},
+        });
+
+        expect(setCellProps).toHaveBeenCalledWith({
+          // 123 is above the max range of 100 set, so it picks the last color
+          style: expect.objectContaining({ backgroundColor: '#ccc' }),
+        });
+      });
+
       it('should set the coloring of the text when enabled', async () => {
         const columnConfig = getColumnConfiguration();
         columnConfig.columns[0].colorMode = 'text';
