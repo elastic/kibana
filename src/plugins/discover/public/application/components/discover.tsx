@@ -206,7 +206,6 @@ export function Discover({
 
   const onEditRuntimeField = () => {
     if (refreshAppState) {
-      debugger;
       refreshAppState();
     }
   };
