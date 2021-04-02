@@ -68,10 +68,13 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
             values: { count: 1 },
           })
         : i18n.translate('xpack.fleet.upgradeAgents.successMultiNotificationTitle', {
-            defaultMessage: 'Upgraded {success} of {total} agents',
+            defaultMessage:
+              'Upgraded {isMixed, select, true {{success} of {total}} other {{isAllAgents, select, true {all selected} other {{success}} }}} agents',
             values: {
+              isMixed: counts.success !== counts.total,
               success: counts.success,
               total: counts.total,
+              isAllAgents,
             },
           });
       if (counts.success === counts.total) {
@@ -88,8 +91,9 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
         notifications.toasts.addWarning({
           title: successMessage,
           text: i18n.translate('xpack.fleet.upgradeAgents.bulkResultErrorResultsSummary', {
-            defaultMessage: '{count, plural, one {agent was} other {agents were}} not successful',
-            values: { count: isAllAgents || agentCount },
+            defaultMessage:
+              '{count} {count, plural, one {agent was} other {agents were}} not successful',
+            values: { count: counts.error },
           }),
         });
       }
