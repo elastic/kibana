@@ -1,11 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-import { fleetSetupRouteService, GetFleetStatusResponse } from '../../../../../common';
-import { httpHandlerMockFactory, ResponseProvidersInterface } from '../http_handler_mock_factory';
+import type { GetFleetStatusResponse } from '../../../../../common';
+import { fleetSetupRouteService } from '../../../../../common';
+import type { ResponseProvidersInterface } from '../http_handler_mock_factory';
+import { httpHandlerMockFactory } from '../http_handler_mock_factory';
 
 export const agentsSetupResponseMock = (): GetFleetStatusResponse => {
   return {
