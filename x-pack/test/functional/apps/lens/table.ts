@@ -118,7 +118,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.setPalette('custom');
       await PageObjects.header.waitUntilLoadingHasFinished();
       const styleObj = await PageObjects.lens.getDatatableCellStyle(0, 2);
-      expect(styleObj['background-color']).to.be('rgb(187, 218, 211)');
+      expect(styleObj['background-color']).to.be('rgb(119, 182, 168)');
     });
 
     it('should set a specific range for the dynamic coloring', async () => {
