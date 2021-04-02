@@ -72,6 +72,21 @@ interface EnsureAuthorizedTypeResult {
   isGloballyAuthorized?: boolean;
 }
 
+interface EnsureAuthorizedV2Options {
+  /** Whether or not to throw an error if the user is not fully authorized. Default is true. */
+  requireFullAuthorization?: boolean;
+}
+
+interface EnsureAuthorizedV2Result<T extends string> {
+  status: 'fully_authorized' | 'partially_authorized' | 'unauthorized';
+  typeActionMap: Map<string, Record<T, EnsureAuthorizedV2ActionResult>>;
+}
+
+interface EnsureAuthorizedV2ActionResult {
+  authorizedSpaces: string[];
+  isGloballyAuthorized?: boolean;
+}
+
 export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContract {
   private readonly actions: Actions;
   private readonly legacyAuditLogger: PublicMethodsOf<SecurityAuditLogger>;
@@ -652,17 +667,18 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       ...response.objects.flatMap(({ spaces }) => spaces)
     );
 
-    const authAction = options.purpose === 'updateObjectsSpaces' ? 'share_to_space' : 'bulk_get';
-    const { typeMap } = await this.ensureAuthorized(uniqueTypes, authAction, uniqueSpaces, {
-      args: { objects, options },
-      requireFullAuthorization: false,
-      auditAction: 'collectMultiNamespaceReferences',
-    });
+    const { typeActionMap } = await this.ensureAuthorizedV2<'bulk_get' | 'share_to_space'>(
+      uniqueTypes,
+      options.purpose === 'updateObjectsSpaces' ? ['bulk_get', 'share_to_space'] : ['bulk_get'],
+      uniqueSpaces,
+      { requireFullAuthorization: false }
+    );
 
     // The user must be authorized to access every requested object in the current space.
     // Note: non-multi-namespace object types will have an empty spaces array.
+    const authAction = options.purpose === 'updateObjectsSpaces' ? 'share_to_space' : 'bulk_get';
     try {
-      this.ensureAuthorizedInAllSpaces(objects, authAction, typeMap, currentSpaceId);
+      this.ensureAuthorizedInAllSpaces(objects, authAction, typeActionMap, [currentSpaceId]);
     } catch (error) {
       objects.forEach(({ type, id }) =>
         this.auditLogger.log(
@@ -689,9 +705,12 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
           return acc;
         }
         // Is the user authorized to access this object in all required space(s)?
-        const isAuthorizedForObject = isAuthorizedForObjectInAllSpaces(type, typeMap, [
-          currentSpaceId,
-        ]);
+        const isAuthorizedForObject = isAuthorizedForObjectInAllSpaces(
+          type,
+          authAction,
+          typeActionMap,
+          [currentSpaceId]
+        );
         // If the user is not authorized to access at least one inbound reference of this object, then we should omit this object.
         // Note: this check relies on the fact that the order of the objects array is retained!
         const isAuthorizedForInboundReference =
@@ -705,7 +724,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
               savedObject: { type, id },
             })
           );
-          const redactedSpaces = getRedactedSpaces(type, typeMap, spaces);
+          const redactedSpaces = getRedactedSpaces(type, 'bulk_get', typeActionMap, spaces);
           return acc.set(`${type}:${id}`, { type, id, spaces: redactedSpaces, inboundReferences });
         }
         return acc;
@@ -727,17 +746,30 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     const { namespace } = options;
     const currentSpaceId = SavedObjectsUtils.namespaceIdToString(namespace); // We need this whether the Spaces plugin is enabled or not.
 
-    const uniqueSpaces = this.getUniqueSpaces(currentSpaceId, ...spacesToAdd, ...spacesToRemove);
-    const uniqueTypes = this.getUniqueObjectTypes(objects);
-    const { typeMap } = await this.ensureAuthorized(uniqueTypes, 'share_to_space', uniqueSpaces, {
-      args: { objects, spacesToAdd, spacesToRemove, options },
-      requireFullAuthorization: false,
-      auditAction: 'updateObjectsSpaces',
+    const allSpacesSet = new Set<string>([currentSpaceId, ...spacesToAdd, ...spacesToRemove]);
+    const bulkGetResponse = await this.baseClient.bulkGet(objects, { namespace });
+    const objectsToUpdate = objects.map(({ type, id }, i) => {
+      const { namespaces: spaces = [], version } = bulkGetResponse.saved_objects[i];
+      // If 'namespaces' is undefined, the object was not found (or it is namespace-agnostic).
+      // Either way, we will pass in an empty 'spaces' array to the base client, which will cause it to skip this object.
+      for (const space of spaces) {
+        allSpacesSet.add(space);
+      }
+      return { type, id, spaces, version };
     });
+
+    const uniqueTypes = this.getUniqueObjectTypes(objects);
+    const { typeActionMap } = await this.ensureAuthorizedV2<'bulk_get' | 'share_to_space'>(
+      uniqueTypes,
+      ['bulk_get', 'share_to_space'],
+      Array.from(allSpacesSet),
+      { requireFullAuthorization: false }
+    );
 
     // The user must be authorized to share every requested object in each of: the current space, spacesToAdd, and spacesToRemove.
     try {
-      this.ensureAuthorizedInAllSpaces(objects, 'share_to_space', typeMap, uniqueSpaces);
+      const spaces = this.getUniqueSpaces(currentSpaceId, ...spacesToAdd, ...spacesToRemove);
+      this.ensureAuthorizedInAllSpaces(objects, 'share_to_space', typeActionMap, spaces);
     } catch (error) {
       objects.forEach(({ type, id }) =>
         this.auditLogger.log(
@@ -754,7 +786,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     }
 
     const response = await this.baseClient.updateObjectsSpaces(
-      objects,
+      objectsToUpdate,
       spacesToAdd,
       spacesToRemove,
       { namespace } // Intentionally omit `includeReferences`, as we've already resolved references above.
@@ -762,7 +794,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     // Now that we have updated the objects' spaces, redact any spaces that the user is not authorized to see from the response.
     const redactedObjects = response.objects.map((obj) => {
       const { type, spaces } = obj;
-      const redactedSpaces = getRedactedSpaces(type, typeMap, spaces);
+      const redactedSpaces = getRedactedSpaces(type, 'bulk_get', typeActionMap, spaces);
       return { ...obj, spaces: redactedSpaces };
     });
 
@@ -861,21 +893,77 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     }
   }
 
+  /** Unlike `ensureAuthorized`, this accepts multiple actions, and it does not utilize legacy audit logging */
+  private async ensureAuthorizedV2<T extends string>(
+    types: string[],
+    actions: string[],
+    namespaces: string[],
+    options: EnsureAuthorizedV2Options = {}
+  ): Promise<EnsureAuthorizedV2Result<T>> {
+    const { requireFullAuthorization = true } = options;
+    const privilegeActionsMap = new Map(
+      types.flatMap((type) =>
+        actions.map((action) => [this.actions.savedObject.get(type, action), { type, action }])
+      )
+    );
+    const privilegeActions = Array.from(privilegeActionsMap.keys());
+    const result = await this.checkPrivileges(privilegeActions, namespaces);
+
+    const { hasAllRequested, privileges } = result;
+    const missingPrivileges = this.getMissingPrivileges(privileges);
+    const typeActionMap = privileges.kibana.reduce<
+      Map<string, Record<T, EnsureAuthorizedV2ActionResult>>
+    >((acc, { resource, privilege, authorized }) => {
+      if (!authorized) {
+        return acc;
+      }
+      const { type, action } = privilegeActionsMap.get(privilege)!; // always defined
+      const value = acc.get(type) ?? ({} as Record<T, EnsureAuthorizedV2ActionResult>);
+      const record: EnsureAuthorizedV2ActionResult = value[action as T] ?? { authorizedSpaces: [] };
+      if (resource === undefined) {
+        return acc.set(type, { ...value, [action]: { ...record, isGloballyAuthorized: true } });
+      }
+      const authorizedSpaces = record.authorizedSpaces.concat(resource);
+      return acc.set(type, { ...value, [action]: { ...record, authorizedSpaces } });
+    }, new Map());
+
+    if (hasAllRequested) {
+      return { typeActionMap, status: 'fully_authorized' };
+    } else if (!requireFullAuthorization) {
+      const isPartiallyAuthorized = privileges.kibana.some(({ authorized }) => authorized);
+      if (isPartiallyAuthorized) {
+        return { typeActionMap, status: 'partially_authorized' };
+      } else {
+        return { typeActionMap, status: 'unauthorized' };
+      }
+    } else {
+      const targetTypesAndActions = uniq(
+        missingPrivileges
+          .map(({ privilege }) => {
+            const { type, action } = privilegeActionsMap.get(privilege)!;
+            return `(${type} ${action})`;
+          })
+          .sort()
+      ).join(',');
+      const msg = `Unable to ${targetTypesAndActions}`;
+      throw this.errors.decorateForbiddenError(new Error(msg));
+    }
+  }
+
   /**
-   * If `ensureAuthorized` was called with `requireFullAuthorization: false`, this can be used with the result to ensure that a given array
-   * of objects are authorized in the required space(s).
+   * If `ensureAuthorizedV2` was called with `requireFullAuthorization: false`, this can be used with the result to ensure that a given
+   * array of objects are authorized in the required space(s).
    */
-  private ensureAuthorizedInAllSpaces(
+  private ensureAuthorizedInAllSpaces<T extends string>(
     objects: Array<{ type: string }>,
-    action: string,
-    typeMap: Map<string, EnsureAuthorizedTypeResult>,
-    spaceOrSpaces: string | string[]
+    action: T,
+    typeActionMap: EnsureAuthorizedV2Result<T>['typeActionMap'],
+    spaces: string[]
   ) {
-    const spaces = Array.isArray(spaceOrSpaces) ? spaceOrSpaces : [spaceOrSpaces];
     const uniqueTypes = uniq(objects.map(({ type }) => type));
     const unauthorizedTypes = new Set<string>();
     for (const type of uniqueTypes) {
-      if (!isAuthorizedForObjectInAllSpaces(type, typeMap, spaces)) {
+      if (!isAuthorizedForObjectInAllSpaces(type, action, typeActionMap, spaces)) {
         unauthorizedTypes.add(type);
       }
     }
@@ -1027,32 +1115,41 @@ function namespaceComparator(a: string, b: string) {
   return A > B ? 1 : A < B ? -1 : 0;
 }
 
-function isAuthorizedForObjectInAllSpaces(
+function isAuthorizedForObjectInAllSpaces<T extends string>(
   objectType: string,
-  authorizationTypeMap: Map<string, EnsureAuthorizedTypeResult>,
+  action: T,
+  typeActionMap: EnsureAuthorizedV2Result<T>['typeActionMap'],
   spacesToAuthorizeFor: string[]
 ) {
-  const { isGloballyAuthorized, authorizedSpaces } = authorizationTypeMap.get(objectType) ?? {
-    authorizedSpaces: [],
-  };
+  const actionResult = getEnsureAuthorizedV2ActionResult(objectType, action, typeActionMap);
+  const { authorizedSpaces, isGloballyAuthorized } = actionResult;
   const authorizedSpacesSet = new Set(authorizedSpaces);
   return (
     isGloballyAuthorized || spacesToAuthorizeFor.every((space) => authorizedSpacesSet.has(space))
   );
 }
 
-function getRedactedSpaces(
+function getRedactedSpaces<T extends string>(
   objectType: string,
-  authorizationTypeMap: Map<string, EnsureAuthorizedTypeResult>,
+  action: T,
+  typeActionMap: EnsureAuthorizedV2Result<T>['typeActionMap'],
   spacesToRedact: string[]
 ) {
-  const { authorizedSpaces, isGloballyAuthorized } = authorizationTypeMap.get(objectType) ?? {
-    authorizedSpaces: [],
-  };
+  const actionResult = getEnsureAuthorizedV2ActionResult(objectType, action, typeActionMap);
+  const { authorizedSpaces, isGloballyAuthorized } = actionResult;
   const authorizedSpacesSet = new Set(authorizedSpaces);
   return spacesToRedact
     .map((x) =>
       isGloballyAuthorized || x === ALL_SPACES_ID || authorizedSpacesSet.has(x) ? x : UNKNOWN_SPACE
     )
     .sort(namespaceComparator);
+}
+
+function getEnsureAuthorizedV2ActionResult<T extends string>(
+  objectType: string,
+  action: T,
+  typeActionMap: EnsureAuthorizedV2Result<T>['typeActionMap']
+): EnsureAuthorizedV2ActionResult {
+  const record = typeActionMap.get(objectType) ?? ({} as Record<T, EnsureAuthorizedV2ActionResult>);
+  return record[action] ?? { authorizedSpaces: [] };
 }

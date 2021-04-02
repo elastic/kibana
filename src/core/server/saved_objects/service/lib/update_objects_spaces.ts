@@ -211,6 +211,13 @@ export async function updateObjectsSpaces({
         currentSpaces = doc._source?.namespaces ?? [];
         // @ts-expect-error MultiGetHit._source is optional
         versionProperties = getExpectedVersionProperties(version, doc);
+      } else if (spaces?.length === 0) {
+        // A SOC wrapper attempted to retrieve this object in a pre-flight request and it was not found.
+        const error = errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id));
+        return {
+          tag: 'Left' as 'Left',
+          error: { id, type, spaces: [], error },
+        };
       } else {
         versionProperties = getExpectedVersionProperties(version);
       }

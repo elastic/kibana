@@ -194,40 +194,47 @@ describe('#updateObjectsSpaces', () => {
     it('returns mix of type errors, mget/bulk cluster errors, and successes', async () => {
       const obj1 = { type: SHAREABLE_HIDDEN_OBJ_TYPE, id: 'id-1' }; // invalid type (Not Found)
       const obj2 = { type: NON_SHAREABLE_OBJ_TYPE, id: 'id-2' }; // non-shareable type (Bad Request)
-      const obj3 = { type: SHAREABLE_OBJ_TYPE, id: 'id-3' }; // mget error (found but doesn't exist in the current space)
-      const obj4 = { type: SHAREABLE_OBJ_TYPE, id: 'id-4' }; // mget error (Not Found)
-      const obj5 = { type: SHAREABLE_OBJ_TYPE, id: 'id-5' }; // bulk error (mocked as BULK_ERROR)
-      const obj6 = { type: SHAREABLE_OBJ_TYPE, id: 'id-6' }; // success
+      // obj3 below is mocking an example where a SOC wrapper attempted to retrieve it in a pre-flight request but it was not found.
+      // Since it has 'spaces: []', that indicates it should be skipped for cluster calls and just returned as a Not Found error.
+      // Realistically this would not be intermingled with other requested objects that do not have 'spaces' arrays, but it's fine for this
+      // specific test case.
+      const obj3 = { type: SHAREABLE_OBJ_TYPE, id: 'id-3', spaces: [] }; // does not exist (Not Found)
+      const obj4 = { type: SHAREABLE_OBJ_TYPE, id: 'id-4' }; // mget error (found but doesn't exist in the current space)
+      const obj5 = { type: SHAREABLE_OBJ_TYPE, id: 'id-5' }; // mget error (Not Found)
+      const obj6 = { type: SHAREABLE_OBJ_TYPE, id: 'id-6' }; // bulk error (mocked as BULK_ERROR)
+      const obj7 = { type: SHAREABLE_OBJ_TYPE, id: 'id-7' }; // success
 
-      const objects = [obj1, obj2, obj3, obj4, obj5, obj6];
+      const objects = [obj1, obj2, obj3, obj4, obj5, obj6, obj7];
       const spacesToAdd = ['foo-space'];
       const params = setup({ objects, spacesToAdd });
-      mockMgetResults({ found: true }, { found: false }, { found: true }, { found: true }); // results for obj3, obj4, obj5, and obj6
-      mockRawDocExistsInNamespace.mockReturnValueOnce(false); // for obj3
-      mockRawDocExistsInNamespace.mockReturnValueOnce(true); // for obj5
+      mockMgetResults({ found: true }, { found: false }, { found: true }, { found: true }); // results for obj4, obj5, obj6, and obj7
+      mockRawDocExistsInNamespace.mockReturnValueOnce(false); // for obj4
       mockRawDocExistsInNamespace.mockReturnValueOnce(true); // for obj6
-      mockBulkResults({ error: true }, { error: false }); // results for obj5 and obj6
+      mockRawDocExistsInNamespace.mockReturnValueOnce(true); // for obj7
+      mockBulkResults({ error: true }, { error: false }); // results for obj6 and obj7
 
       const result = await updateObjectsSpaces(params);
       expect(client.mget).toHaveBeenCalledTimes(1);
-      expectMgetArgs(obj3, obj4, obj5, obj6);
+      expectMgetArgs(obj4, obj5, obj6, obj7);
       expect(mockRawDocExistsInNamespace).toHaveBeenCalledTimes(3);
       expect(client.bulk).toHaveBeenCalledTimes(1);
-      expectBulkArgs({ action: 'update', object: obj5 }, { action: 'update', object: obj6 });
+      expectBulkArgs({ action: 'update', object: obj6 }, { action: 'update', object: obj7 });
       expect(result.objects).toEqual([
         { ...obj1, spaces: [], error: expect.objectContaining({ error: 'Not Found' }) },
         { ...obj2, spaces: [], error: expect.objectContaining({ error: 'Bad Request' }) },
         { ...obj3, spaces: [], error: expect.objectContaining({ error: 'Not Found' }) },
         { ...obj4, spaces: [], error: expect.objectContaining({ error: 'Not Found' }) },
-        { ...obj5, spaces: [], error: BULK_ERROR },
-        { ...obj6, spaces: [EXISTING_SPACE, 'foo-space'] },
+        { ...obj5, spaces: [], error: expect.objectContaining({ error: 'Not Found' }) },
+        { ...obj6, spaces: [], error: BULK_ERROR },
+        { ...obj7, spaces: [EXISTING_SPACE, 'foo-space'] },
       ]);
     });
   });
 
+  // Note: these test cases do not include requested objects that will result in errors (those are covered above)
   describe('cluster and module calls', () => {
     it('mget call skips objects that have "spaces" defined', async () => {
-      const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1', spaces: [EXISTING_SPACE] }; // will not be passed to mget
+      const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1', spaces: [EXISTING_SPACE] }; // will not be retrieved
       const obj2 = { type: SHAREABLE_OBJ_TYPE, id: 'id-2' }; // will be passed to mget
 
       const objects = [obj1, obj2];
@@ -242,7 +249,7 @@ describe('#updateObjectsSpaces', () => {
     });
 
     it('does not call mget if all objects have "spaces" defined', async () => {
-      const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1', spaces: [EXISTING_SPACE] }; // will not be passed to mget
+      const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1', spaces: [EXISTING_SPACE] }; // will not be retrieved
 
       const objects = [obj1];
       const spacesToAdd = ['foo-space'];
@@ -253,7 +260,7 @@ describe('#updateObjectsSpaces', () => {
       expect(client.mget).not.toHaveBeenCalled();
     });
 
-    describe('bulk call skips objects that will not be modified', () => {
+    describe('bulk call skips objects that will not be changed', () => {
       it('when adding spaces', async () => {
         const space1 = 'space-to-add';
         const space2 = 'other-space';
@@ -280,20 +287,18 @@ describe('#updateObjectsSpaces', () => {
         const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1', spaces: [space2] }; // will not be changed
         const obj2 = { type: SHAREABLE_OBJ_TYPE, id: 'id-2', spaces: [space1, space2] }; // will be updated to remove space1
         const obj3 = { type: SHAREABLE_OBJ_TYPE, id: 'id-3', spaces: [space1] }; // will be deleted (since it would have no spaces left)
-        const obj4 = { type: SHAREABLE_OBJ_TYPE, id: 'id-4', spaces: [] }; // will be deleted (since it has no spaces, it shouldn't exist)
 
-        const objects = [obj1, obj2, obj3, obj4];
+        const objects = [obj1, obj2, obj3];
         const spacesToRemove = [space1];
         const params = setup({ objects, spacesToRemove });
         // this test case does not call mget
-        mockBulkResults({ error: false }, { error: false }, { error: false }); // results for obj2, obj3, and obj4
+        mockBulkResults({ error: false }, { error: false }); // results for obj2 and obj3
 
         await updateObjectsSpaces(params);
         expect(client.bulk).toHaveBeenCalledTimes(1);
         expectBulkArgs(
           { action: 'update', object: { ...obj2, namespaces: [space2] } },
-          { action: 'delete', object: obj3 },
-          { action: 'delete', object: obj4 }
+          { action: 'delete', object: obj3 }
         );
       });
 
@@ -326,7 +331,7 @@ describe('#updateObjectsSpaces', () => {
     describe('does not call bulk if all objects do not need to be changed', () => {
       it('when adding spaces', async () => {
         const space = 'space-to-add';
-        const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1', spaces: [space] }; // will not be updated
+        const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1', spaces: [space] }; // will not be changed
 
         const objects = [obj1];
         const spacesToAdd = [space];
@@ -394,20 +399,18 @@ describe('#updateObjectsSpaces', () => {
       const obj1 = { type: SHAREABLE_OBJ_TYPE, id: 'id-1', spaces: [space2] }; // will not be changed
       const obj2 = { type: SHAREABLE_OBJ_TYPE, id: 'id-2', spaces: [space1, space2] }; // will be updated to remove space1
       const obj3 = { type: SHAREABLE_OBJ_TYPE, id: 'id-3', spaces: [space1] }; // will be deleted (since it would have no spaces left)
-      const obj4 = { type: SHAREABLE_OBJ_TYPE, id: 'id-4', spaces: [] }; // will be deleted (since it has no spaces, it shouldn't exist)
 
-      const objects = [obj1, obj2, obj3, obj4];
+      const objects = [obj1, obj2, obj3];
       const spacesToRemove = [space1];
       const params = setup({ objects, spacesToRemove });
       // this test case does not call mget
-      mockBulkResults({ error: false }, { error: false }, { error: false }); // results for obj2, obj3, and obj4
+      mockBulkResults({ error: false }, { error: false }); // results for obj2 and obj3
 
       const result = await updateObjectsSpaces(params);
       expect(result.objects).toEqual([
         { ...obj1, spaces: [space2] },
         { ...obj2, spaces: [space2] },
         { ...obj3, spaces: [] },
-        { ...obj4, spaces: [] },
       ]);
     });
 
