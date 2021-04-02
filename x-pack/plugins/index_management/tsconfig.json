@@ -1,5 +1,5 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "../../../tsconfig.project.json",
   "compilerOptions": {
     "composite": true,
     "outDir": "./target/types",
@@ -8,11 +8,9 @@
     "declarationMap": true
   },
   "include": [
-    "__jest__/**/*",
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "test/**/*",
     "../../../typings/**/*",
   ],
   "references": [
