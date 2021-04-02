@@ -8,6 +8,7 @@
 import { ExceptionsBuilderExceptionItem } from '../types';
 import { ExceptionListItemSchema, OperatorTypeEnum } from '../../../../../public/lists_plugin_deps';
 import { getDefaultEmptyEntry } from './helpers';
+import { OsType } from '../../../../shared_imports';
 
 export type ViewerModalName = 'addModal' | 'editModal' | null;
 
@@ -20,6 +21,7 @@ export interface State {
   exceptions: ExceptionsBuilderExceptionItem[];
   exceptionsToDelete: ExceptionListItemSchema[];
   errorExists: number;
+  selectedOS: OsType;
 }
 
 export type Action =
@@ -51,6 +53,10 @@ export type Action =
   | {
       type: 'setErrorsExist';
       errorExists: boolean;
+    }
+  | {
+      type: 'setSelectedOS';
+      selectedOS: OsType;
     };
 
 export const exceptionsBuilderReducer = () => (state: State, action: Action): State => {
@@ -119,6 +125,12 @@ export const exceptionsBuilderReducer = () => (state: State, action: Action): St
       return {
         ...state,
         errorExists: errTotal < 0 ? 0 : errTotal,
+      };
+    }
+    case 'setSelectedOS': {
+      return {
+        ...state,
+        selectedOS: action.selectedOS,
       };
     }
     default:

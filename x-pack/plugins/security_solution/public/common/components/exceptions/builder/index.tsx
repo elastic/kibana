@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useReducer } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { useCallback, useEffect, useReducer, useMemo } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiComboBoxOptionOption,
+  EuiComboBox,
+  EuiFormRow,
+  EuiSpacer,
+} from '@elastic/eui';
 import styled from 'styled-components';
 
 import { HttpStart } from 'kibana/public';
@@ -36,7 +43,7 @@ import {
   getDefaultEmptyEntry,
   getDefaultNestedEmptyEntry,
 } from './helpers';
-import { OsTypeArray } from '../../../../shared_imports';
+import { OsTypeArray, OsType } from '../../../../shared_imports';
 
 const MyInvisibleAndBadge = styled(EuiFlexItem)`
   visibility: hidden;
@@ -61,6 +68,7 @@ const initialState: State = {
   exceptions: [],
   exceptionsToDelete: [],
   errorExists: 0,
+  selectedOS: 'windows',
 };
 
 interface OnChangeProps {
@@ -76,6 +84,8 @@ interface ExceptionBuilderProps {
   listType: ExceptionListType;
   listId: string;
   osTypes: OsTypeArray;
+  hasOSSelection?: boolean;
+  onOSSelectionChange?: (arg: OsType) => void;
   listNamespaceType: NamespaceType;
   ruleName: string;
   indexPatterns: IIndexPattern;
@@ -92,6 +102,8 @@ export const ExceptionBuilderComponent = ({
   exceptionListItems,
   listType,
   listId,
+  hasOSSelection = false,
+  onOSSelectionChange,
   listNamespaceType,
   ruleName,
   osTypes,
@@ -112,6 +124,7 @@ export const ExceptionBuilderComponent = ({
       disableOr,
       addNested,
       errorExists,
+      selectedOS,
     },
     dispatch,
   ] = useReducer(exceptionsBuilderReducer(), {
@@ -177,6 +190,16 @@ export const ExceptionBuilderComponent = ({
       dispatch({
         type: 'setDisableOr',
         shouldDisable,
+      });
+    },
+    [dispatch]
+  );
+
+  const setSelectedOS = useCallback(
+    (os: OsType): void => {
+      dispatch({
+        type: 'setSelectedOS',
+        selectedOS: os,
       });
     },
     [dispatch]
@@ -340,6 +363,12 @@ export const ExceptionBuilderComponent = ({
     });
   }, [onChange, exceptionsToDelete, exceptions, errorExists]);
 
+  useEffect(() => {
+    if (onOSSelectionChange) {
+      onOSSelectionChange(selectedOS);
+    }
+  }, [onOSSelectionChange, selectedOS]);
+
   // Defaults builder to never be sans entry, instead
   // always falls back to an empty entry if user deletes all
   useEffect(() => {
@@ -360,8 +389,56 @@ export const ExceptionBuilderComponent = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const OSOptions: Array<EuiComboBoxOptionOption<OsType>> = useMemo((): Array<
+    EuiComboBoxOptionOption<OsType>
+  > => {
+    return [
+      {
+        label: 'Windows',
+        value: 'windows',
+      },
+      {
+        label: 'macOS',
+        value: 'macos',
+      },
+      {
+        label: 'Linux',
+        value: 'linux',
+      },
+    ];
+  }, []);
+
+  const handleOSSelectionChange = useCallback(
+    (selectedOptions): void => {
+      setSelectedOS(selectedOptions[0].value);
+      setUpdateExceptions([]);
+    },
+    [setSelectedOS, setUpdateExceptions]
+  );
+
+  const selectedOStoOptions = useMemo((): Array<EuiComboBoxOptionOption<OsType>> => {
+    return OSOptions.filter((option) => {
+      return selectedOS === option.value;
+    });
+  }, [selectedOS, OSOptions]);
+
   return (
     <EuiFlexGroup gutterSize="s" direction="column" data-test-subj="exceptionsBuilderWrapper">
+      {hasOSSelection && (
+        <>
+          <EuiFormRow label="Selected OS">
+            <EuiComboBox
+              placeholder="Select an OS"
+              singleSelection={{ asPlainText: true }}
+              options={OSOptions}
+              selectedOptions={selectedOStoOptions}
+              onChange={handleOSSelectionChange}
+              isClearable={false}
+            />
+          </EuiFormRow>
+          <EuiSpacer size="m" />
+        </>
+      )}
       {exceptions.map((exceptionListItem, index) => (
         <EuiFlexItem grow={1} key={getExceptionListItemId(exceptionListItem, index)}>
           <EuiFlexGroup gutterSize="s" direction="column">

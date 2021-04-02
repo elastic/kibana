@@ -22,8 +22,6 @@ import {
   EuiFormRow,
   EuiText,
   EuiCallOut,
-  EuiComboBox,
-  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { hasEqlSequenceQuery, isEqlRule } from '../../../../../common/detection_engine/utils';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
@@ -130,6 +128,7 @@ export const AddExceptionModal = memo(function AddExceptionModal({
   >([]);
   const [fetchOrCreateListError, setFetchOrCreateListError] = useState<ErrorInfo | null>(null);
   const { addError, addSuccess, addWarning } = useAppToasts();
+  const [selectedOS, setSelectedOS] = useState<OsType>('windows');
   const { loading: isSignalIndexLoading, signalIndexName } = useSignalIndex();
   const memoSignalIndexName = useMemo(() => (signalIndexName !== null ? [signalIndexName] : []), [
     signalIndexName,
@@ -160,28 +159,6 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     },
     [addError, onCancel]
   );
-
-  const OSOptions: Array<EuiComboBoxOptionOption<OsType>> = [
-    {
-      label: 'Windows',
-      value: 'windows',
-    },
-    {
-      label: 'MacOs',
-      value: 'macos',
-    },
-    {
-      label: 'Linux',
-      value: 'linux',
-    },
-  ];
-
-  const [selectedOS, setSelectedOS] = useState([OSOptions[0]]);
-
-  // const onChange = (selectedOptions) => {
-  //   // We should only get back either 0 or 1 options.
-  //   setSelected(selectedOptions);
-  // };
 
   const onSuccess = useCallback(
     (updated: number, conflicts: number): void => {
@@ -273,14 +250,6 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     }
   }, [exceptionListType, ruleExceptionList, ruleName, alertData]);
 
-  const handleOSSelectionChange = useCallback(
-    (selectedOptions): void => {
-      setSelectedOS(selectedOptions);
-      setExceptionItemsToAdd(initialExceptionItems);
-    },
-    [setSelectedOS, setExceptionItemsToAdd, initialExceptionItems]
-  );
-
   useEffect((): void => {
     if (isSignalIndexPatternLoading === false && isSignalIndexLoading === false) {
       setShouldDisableBulkClose(
@@ -328,13 +297,16 @@ export const AddExceptionModal = memo(function AddExceptionModal({
     return alertData !== undefined;
   }, [alertData]);
 
-  const osTypesFromAlert = useMemo((): OsTypeArray => {
-    return retrieveAlertOsTypes(alertData);
-  }, [alertData]);
+  const handleOSSelectionChange = useCallback(
+    (os: OsType): void => {
+      setSelectedOS(os);
+    },
+    [setSelectedOS]
+  );
 
   const osTypesSelection = useMemo((): OsTypeArray => {
-    return hasAlertData ? osTypesFromAlert : [selectedOS[0].value];
-  }, [hasAlertData, osTypesFromAlert, selectedOS]);
+    return hasAlertData ? retrieveAlertOsTypes(alertData) : [selectedOS];
+  }, [hasAlertData, alertData, selectedOS]);
 
   const enrichExceptionItems = useCallback((): Array<
     ExceptionListItemSchema | CreateExceptionListItemSchema
@@ -438,18 +410,6 @@ export const AddExceptionModal = memo(function AddExceptionModal({
               )}
               <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
               <EuiSpacer />
-              {!hasAlertData && (
-                <>
-                  <EuiComboBox
-                    placeholder="Select an OS"
-                    singleSelection={{ asPlainText: true }}
-                    options={OSOptions}
-                    selectedOptions={selectedOS}
-                    onChange={handleOSSelectionChange}
-                    isClearable={false}
-                  />
-                </>
-              )}
               <ExceptionBuilderComponent
                 httpService={http}
                 autocompleteService={data.autocomplete}
@@ -463,6 +423,8 @@ export const AddExceptionModal = memo(function AddExceptionModal({
                 isOrDisabled={false}
                 isAndDisabled={false}
                 isNestedDisabled={false}
+                hasOSSelection={!hasAlertData}
+                onOSSelectionChange={handleOSSelectionChange}
                 data-test-subj="alert-exception-builder"
                 id-aria="alert-exception-builder"
                 onChange={handleBuilderOnChange}

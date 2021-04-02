@@ -107,6 +107,21 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
       [exceptionItem.entries, indexPattern]
     );
 
+    // useEffect(() => {
+    //   const filePathFieldToCheck = osTypes[0] === 'linux' ? 'file.path.caseless' : 'file.path.text';
+    //   const filePathFieldToUpdate =
+    //     osTypes[0] === 'linux' ? 'file.path.text' : 'file.path.caseless';
+
+    //   const indexDeleteArray: number[] = [];
+    //   const entryIndicesToDelete = entries.reduce((deleteArray, entry) => {
+    //     if (entry?.field?.name === filePathFieldToCheck) {
+    //       deleteArray.push(entry.entryIndex);
+    //     }
+    //     return deleteArray;
+    //   }, indexDeleteArray);
+
+    // }, [osTypes]);
+
     return (
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="s" data-test-subj="exceptionEntriesContainer">
