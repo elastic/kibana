@@ -475,7 +475,7 @@ export class SavedObjectsService
 
   private createMigrator(
     kibanaConfig: KibanaConfigType,
-    savedObjectsConfig: SavedObjectsMigrationConfigType,
+    soMigrationsConfig: SavedObjectsMigrationConfigType,
     client: ElasticsearchClient,
     migrationsRetryDelay?: number
   ): IKibanaMigrator {
@@ -483,7 +483,7 @@ export class SavedObjectsService
       typeRegistry: this.typeRegistry,
       logger: this.logger,
       kibanaVersion: this.coreContext.env.packageInfo.version,
-      savedObjectsConfig,
+      soMigrationsConfig,
       kibanaConfig,
       client,
       migrationsRetryDelay,
