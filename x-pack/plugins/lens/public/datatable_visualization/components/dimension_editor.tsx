@@ -70,7 +70,12 @@ export function TableDimensionEditor(
     type: 'palette',
     name: defaultParams.name,
   };
-  const { colorStops, mode: paletteMode } = applyPaletteParams(props.paletteService, activePalette);
+  // need to tell the helper that the colorStops are required to display
+  const { colorStops, mode: paletteMode } = applyPaletteParams(
+    props.paletteService,
+    activePalette,
+    { forDisplay: true }
+  );
 
   return (
     <>

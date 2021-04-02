@@ -41,11 +41,28 @@ export const defaultParams: RequiredParamTypes = {
   steps: DEFAULT_COLOR_STEPS,
 };
 
+function shiftPalette(stops: Required<CustomPaletteParams>['stops']) {
+  // shift everything right and add an additional stop at the end
+  const result = stops.map((entry, i, array) => ({
+    ...entry,
+    stop: i + 1 < array.length ? array[i + 1].stop : DEFAULT_MAX_STOP,
+  }));
+  if (stops[stops.length - 1].stop === DEFAULT_MAX_STOP) {
+    // pop out the last value (to void any conflict)
+    result.pop();
+  }
+  return result;
+}
+
 function getPaletteColors(
   palettes: PaletteRegistry,
-  activePaletteParams?: CustomPaletteParams,
+  activePaletteParams: CustomPaletteParams,
   // used to customize color resolution
-  { stopFactor, prevPalette }: { stopFactor: number; prevPalette?: string } = {
+  {
+    stopFactor,
+    prevPalette,
+    shouldShift,
+  }: { stopFactor: number; prevPalette?: string; shouldShift?: boolean } = {
     stopFactor: 1,
   }
 ) {
@@ -55,35 +72,42 @@ function getPaletteColors(
     // make sure to regenerate if the user changes number of steps
     activePaletteParams.stops.length === activePaletteParams.steps
   ) {
-    return activePaletteParams.stops;
+    return shouldShift ? shiftPalette(activePaletteParams.stops) : activePaletteParams.stops;
   }
-  return palettes
+  const colorStops = palettes
     .get(prevPalette || activePaletteParams?.name || defaultParams.name)
     .getCategoricalColors(
       activePaletteParams?.steps || defaultParams.steps,
       activePaletteParams ?? undefined
     )
     .map((color, i) => ({ color, stop: i * stopFactor }));
+
+  return shouldShift ? shiftPalette(colorStops) : colorStops;
 }
 
 export function applyPaletteParams(
   palettes: PaletteRegistry,
-  activePalette?: PaletteOutput<CustomPaletteParams>
+  activePalette: PaletteOutput<CustomPaletteParams> | undefined,
+  { forDisplay }: { forDisplay?: boolean } = {}
 ) {
   if (!activePalette) {
     return {};
   }
-  // make a copy of it as they have to be manipulated later on
-  const paletteColorRepresentation = getPaletteColors(
-    palettes,
-    activePalette?.params
-  ).map(({ color, stop }) => ({ color, stop }));
 
   const paletteDisplayMode = activePalette?.params?.progression
     ? activePalette?.params?.progression !== 'stepped'
       ? activePalette?.params?.progression
       : 'gradient'
     : 'fixed';
+
+  // make a copy of it as they have to be manipulated later on
+  const paletteColorRepresentation = getPaletteColors(palettes, activePalette?.params || {}, {
+    // shifting is a specific subtask for custom palettes in fixed mode when have to be visualized
+    // on the EuiColorDisplay component: see https://github.com/elastic/eui/issues/4664
+    shouldShift:
+      forDisplay && activePalette?.params?.name === 'custom' && paletteDisplayMode === 'fixed',
+    stopFactor: 1,
+  }).map(({ color, stop }) => ({ color, stop }));
 
   if (activePalette?.params?.reverse && paletteColorRepresentation) {
     const stops = paletteColorRepresentation.map(({ stop }) => stop);
@@ -173,7 +197,7 @@ export function CustomizablePalette({
                 newParams,
                 newPalette.name === 'custom'
                   ? // pick the previous palette to calculate init colors in custom mode
-                    { stopFactor: 50, prevPalette: activePalette.name }
+                    { stopFactor: 50, prevPalette: activePalette.name, shouldShift: false }
                   : undefined
               ),
             },
@@ -393,7 +417,7 @@ export function CustomizablePalette({
       {activePalette?.params?.name !== 'custom' && progressionType !== 'gradient' && (
         <EuiFormRow
           label={i18n.translate('xpack.lens.table.dynamicColoring.progression.stops.label', {
-            defaultMessage: 'Color stops',
+            defaultMessage: 'Color steps',
           })}
           display="columnCompressed"
         >
@@ -410,6 +434,7 @@ export function CustomizablePalette({
                     { ...activePalette.params, steps: Number(currentTarget.value) },
                     {
                       stopFactor: 1,
+                      shouldShift: false,
                     }
                   ),
                   steps: Number(currentTarget.value),

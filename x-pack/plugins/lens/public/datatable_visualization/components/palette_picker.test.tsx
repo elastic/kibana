@@ -18,7 +18,7 @@ describe('palette utilities', () => {
   const paletteRegistry = chartPluginMock.createPaletteRegistry();
   describe('applyPaletteParams', () => {
     it('should return empty params for no palette', () => {
-      expect(applyPaletteParams(paletteRegistry)).toEqual({});
+      expect(applyPaletteParams(paletteRegistry, undefined)).toEqual({});
     });
 
     it('should return a set of colors for a basic configuration', () => {
@@ -132,6 +132,148 @@ describe('palette utilities', () => {
           { color: 'yellow', stop: 1 },
         ],
         mode: 'fixed',
+      });
+    });
+
+    it('should shift color stops only for custom palettes is in fixed mode', () => {
+      expect(
+        applyPaletteParams(
+          paletteRegistry,
+          {
+            type: 'palette',
+            name: 'custom',
+            params: {
+              name: 'custom',
+              progression: 'fixed',
+              steps: 3,
+              stops: [
+                { color: 'yellow', stop: 0 },
+                { color: 'red', stop: 50 },
+                { color: 'green', stop: 100 },
+              ],
+            },
+          },
+          { forDisplay: true }
+        )
+      ).toEqual({
+        colorStops: [
+          { color: 'yellow', stop: 50 },
+          { color: 'red', stop: 100 },
+        ],
+        mode: 'fixed',
+      });
+      // keep it the same
+      expect(
+        applyPaletteParams(
+          paletteRegistry,
+          {
+            type: 'palette',
+            name: 'custom',
+            params: {
+              name: 'custom',
+              progression: 'gradient',
+              steps: 3,
+              stops: [
+                { color: 'yellow', stop: 0 },
+                { color: 'red', stop: 50 },
+                { color: 'green', stop: 100 },
+              ],
+            },
+          },
+          { forDisplay: true }
+        )
+      ).toEqual({
+        colorStops: [
+          { color: 'yellow', stop: 0 },
+          { color: 'red', stop: 50 },
+          { color: 'green', stop: 100 },
+        ],
+        mode: 'gradient',
+      });
+      // same
+      expect(
+        applyPaletteParams(
+          paletteRegistry,
+          {
+            type: 'palette',
+            name: 'positive',
+            params: {
+              name: 'positive',
+              progression: 'fixed',
+              steps: 3,
+              stops: [
+                { color: 'yellow', stop: 0 },
+                { color: 'red', stop: 50 },
+                { color: 'green', stop: 100 },
+              ],
+            },
+          },
+          { forDisplay: true }
+        )
+      ).toEqual({
+        colorStops: [
+          { color: 'yellow', stop: 0 },
+          { color: 'red', stop: 50 },
+          { color: 'green', stop: 100 },
+        ],
+        mode: 'fixed',
+      });
+    });
+    it('should shift color stops and set last stop at 100 if the last one is not lower than that, only for display', () => {
+      expect(
+        applyPaletteParams(
+          paletteRegistry,
+          {
+            type: 'palette',
+            name: 'custom',
+            params: {
+              name: 'custom',
+              progression: 'fixed',
+              steps: 3,
+              stops: [
+                { color: 'yellow', stop: 0 },
+                { color: 'red', stop: 50 },
+                { color: 'green', stop: 90 },
+              ],
+            },
+          },
+          { forDisplay: true }
+        )
+      ).toEqual({
+        colorStops: [
+          { color: 'yellow', stop: 50 },
+          { color: 'red', stop: 90 },
+          { color: 'green', stop: 100 },
+        ],
+        mode: 'fixed',
+      });
+      // same
+      expect(
+        applyPaletteParams(
+          paletteRegistry,
+          {
+            type: 'palette',
+            name: 'custom',
+            params: {
+              name: 'custom',
+              progression: 'gradient',
+              steps: 3,
+              stops: [
+                { color: 'yellow', stop: 0 },
+                { color: 'red', stop: 50 },
+                { color: 'green', stop: 90 },
+              ],
+            },
+          },
+          { forDisplay: true }
+        )
+      ).toEqual({
+        colorStops: [
+          { color: 'yellow', stop: 0 },
+          { color: 'red', stop: 50 },
+          { color: 'green', stop: 90 },
+        ],
+        mode: 'gradient',
       });
     });
   });
