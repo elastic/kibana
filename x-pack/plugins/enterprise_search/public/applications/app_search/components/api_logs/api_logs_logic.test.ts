@@ -12,14 +12,12 @@ import { nextTick } from '@kbn/test/jest';
 
 import { DEFAULT_META } from '../../../shared/constants';
 
-import { POLLING_ERROR_MESSAGE } from './constants';
-
 import { ApiLogsLogic } from './';
 
 describe('ApiLogsLogic', () => {
   const { mount, unmount } = new LogicMounter(ApiLogsLogic);
   const { http } = mockHttpValues;
-  const { flashAPIErrors, setErrorMessage } = mockFlashMessageHelpers;
+  const { flashAPIErrors, flashErrorToast } = mockFlashMessageHelpers;
 
   const DEFAULT_VALUES = {
     dataLoading: true,
@@ -213,7 +211,10 @@ describe('ApiLogsLogic', () => {
           ApiLogsLogic.actions.fetchApiLogs({ isPoll: true });
           await nextTick();
 
-          expect(setErrorMessage).toHaveBeenCalledWith(POLLING_ERROR_MESSAGE);
+          expect(flashErrorToast).toHaveBeenCalledWith('Could not refresh API log data', {
+            text: expect.stringContaining('Please check your connection'),
+            toastLifeTimeMs: 3750,
+          });
         });
       });
 
