@@ -9,7 +9,12 @@
 import React, { Suspense, ComponentType, ReactElement } from 'react';
 import { EuiLoadingSpinner, EuiErrorBoundary } from '@elastic/eui';
 
-const withSuspense = <P extends {}>(
+/**
+ * A HOC which supplies React.Suspense with a fallback component, and a `EuiErrorBoundary` to contain errors.
+ * @param Component A component deferred by `React.lazy`
+ * @param fallback A fallback component to render while things load; default is `EuiLoadingSpinner`
+ */
+export const withSuspense = <P extends {}>(
   Component: ComponentType<P>,
   fallback: ReactElement | null = <EuiLoadingSpinner />
 ) => (props: P) => (
@@ -20,8 +25,6 @@ const withSuspense = <P extends {}>(
   </EuiErrorBoundary>
 );
 
-export { SaveModalDashboardProps } from './saved_object_save_modal_dashboard';
-
 export const ExperimentsButton = withSuspense(
   React.lazy(() => import('./experiments/experiments_button'))
 );
@@ -30,8 +33,8 @@ export const ExperimentsFlyout = withSuspense(
   React.lazy(() => import('./experiments/experiments_flyout'))
 );
 
-export const DashboardPicker = withSuspense(React.lazy(() => import('./dashboard_picker')));
+export const LazyDashboardPicker = React.lazy(() => import('./dashboard_picker'));
 
-export const SavedObjectSaveModalDashboard = withSuspense(
-  React.lazy(() => import('./saved_object_save_modal_dashboard'))
+export const LazySavedObjectSaveModalDashboard = React.lazy(
+  () => import('./saved_object_save_modal_dashboard')
 );

@@ -28,7 +28,10 @@ import {
 import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { SavedMap } from './saved_map';
 import { getMapEmbeddableDisplayName } from '../../../common/i18n_getters';
-import { SavedObjectSaveModalDashboard } from '../../../../../../src/plugins/presentation_util/public';
+import {
+  LazySavedObjectSaveModalDashboard,
+  withSuspense,
+} from '../../../../../../src/plugins/presentation_util/public';
 
 export function getTopNavConfig({
   savedMap,
@@ -192,21 +195,28 @@ export function getTopNavConfig({
           }),
         };
         const PresentationUtilContext = getPresentationUtilContext();
-        const saveModal =
-          savedMap.getOriginatingApp() || !getIsAllowByValueEmbeddables() ? (
+
+        let saveModal;
+
+        if (savedMap.getOriginatingApp() || !getIsAllowByValueEmbeddables()) {
+          saveModal = (
             <SavedObjectSaveModalOrigin
               {...saveModalProps}
               originatingApp={savedMap.getOriginatingApp()}
               getAppNameFromId={savedMap.getAppNameFromId}
               options={tagSelector}
             />
-          ) : (
+          );
+        } else {
+          const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
+          saveModal = (
             <SavedObjectSaveModalDashboard
               {...saveModalProps}
               canSaveByReference={true} // we know here that we have save capabilities.
               tagOptions={tagSelector}
             />
           );
+        }
 
         showSaveModal(saveModal, getCoreI18n().Context, PresentationUtilContext);
       },

@@ -13,12 +13,14 @@ export { PresentationUtilPluginSetup, PresentationUtilPluginStart } from './type
 export * from '../common/experiments';
 
 export {
-  DashboardPicker,
   ExperimentsButton,
   ExperimentsFlyout,
-  SavedObjectSaveModalDashboard,
-  SaveModalDashboardProps,
+  LazyDashboardPicker,
+  LazySavedObjectSaveModalDashboard,
+  withSuspense,
 } from './components';
+
+export { SaveModalDashboardProps } from './components/types';
 
 export function plugin() {
   return new PresentationUtilPlugin();
