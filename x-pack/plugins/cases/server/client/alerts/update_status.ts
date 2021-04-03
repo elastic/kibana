@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient, Logger } from 'src/core/server';
 import { AlertServiceContract } from '../../services';
-import { UpdateAlertRequest } from '../types';
+import { UpdateAlertRequest } from './client';
 
 interface UpdateAlertsStatusArgs {
   alertsService: AlertServiceContract;
@@ -16,7 +16,7 @@ interface UpdateAlertsStatusArgs {
   logger: Logger;
 }
 
-export const updateAlertsStatus = async ({
+export const updateStatus = async ({
   alertsService,
   alerts,
   scopedClusterClient,

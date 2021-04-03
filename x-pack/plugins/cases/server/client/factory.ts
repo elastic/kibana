@@ -17,19 +17,20 @@ import { Authorization } from '../authorization/authorization';
 import { GetSpaceFn } from '../authorization/types';
 import {
   AlertServiceContract,
-  CaseConfigureServiceSetup,
-  CaseServiceSetup,
-  CaseUserActionServiceSetup,
-  ConnectorMappingsServiceSetup,
+  CaseConfigureService,
+  CaseService,
+  CaseUserActionService,
+  ConnectorMappingsService,
 } from '../services';
-import { CasesClientHandler } from './client';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
+import { CasesClient } from './types';
+import { createCasesClient } from '.';
 
 interface CasesClientFactoryArgs {
-  caseConfigureService: CaseConfigureServiceSetup;
-  caseService: CaseServiceSetup;
-  connectorMappingsService: ConnectorMappingsServiceSetup;
-  userActionService: CaseUserActionServiceSetup;
+  caseConfigureService: CaseConfigureService;
+  caseService: CaseService;
+  connectorMappingsService: ConnectorMappingsService;
+  userActionService: CaseUserActionService;
   alertsService: AlertServiceContract;
   securityPluginSetup?: SecurityPluginSetup;
   securityPluginStart?: SecurityPluginStart;
@@ -39,7 +40,7 @@ interface CasesClientFactoryArgs {
 }
 
 /**
- * This class handles the logic for creating a CasesClientHandler. We need this because some of the member variables
+ * This class handles the logic for creating a CasesClient. We need this because some of the member variables
  * can't be initialized until a plugin's start() method but we need to register the case context in the setup() method.
  */
 export class CasesClientFactory {
@@ -71,7 +72,7 @@ export class CasesClientFactory {
     request?: KibanaRequest;
     savedObjectsService?: SavedObjectsServiceStart;
     scopedClusterClient: ElasticsearchClient;
-  }): Promise<CasesClientHandler> {
+  }): Promise<CasesClient> {
     if (!this.isInitialized || !this.options) {
       throw new Error('CasesClientFactory must be initialized before calling create');
     }
@@ -93,7 +94,7 @@ export class CasesClientFactory {
 
     const user = this.options.caseService.getUser({ request });
 
-    return new CasesClientHandler({
+    return createCasesClient({
       alertsService: this.options.alertsService,
       scopedClusterClient,
       savedObjectsClient: savedObjectsService.getScopedClient(request, {

@@ -31,9 +31,9 @@ import {
   buildCommentUserActionItem,
 } from '../../services/user_actions/helpers';
 
-import { CaseServiceSetup, CaseUserActionServiceSetup } from '../../services';
+import { CaseService, CaseUserActionService } from '../../services';
 import { CommentableCase, createAlertUpdateRequest } from '../../common';
-import { CasesClientHandler } from '..';
+import { CasesClientArgs, CasesClientInternal } from '..';
 import { createCaseError } from '../../common/error';
 import {
   MAX_GENERATED_ALERTS_PER_SUB_CASE,
@@ -49,11 +49,11 @@ async function getSubCase({
   userActionService,
   user,
 }: {
-  caseService: CaseServiceSetup;
+  caseService: CaseService;
   savedObjectsClient: SavedObjectsClientContract;
   caseId: string;
   createdAt: string;
-  userActionService: CaseUserActionServiceSetup;
+  userActionService: CaseUserActionService;
   user: User;
 }): Promise<SavedObject<SubCaseAttributes>> {
   const mostRecentSubCase = await caseService.getMostRecentSubCase(savedObjectsClient, caseId);
@@ -80,7 +80,7 @@ async function getSubCase({
     caseId,
     createdBy: user,
   });
-  await userActionService.postUserActions({
+  await userActionService.bulkCreate({
     client: savedObjectsClient,
     actions: [
       buildCaseUserActionItem({
@@ -98,12 +98,12 @@ async function getSubCase({
 }
 
 interface AddCommentFromRuleArgs {
-  casesClient: CasesClientHandler;
+  casesClientInternal: CasesClientInternal;
   caseId: string;
   comment: CommentRequestAlertType;
   savedObjectsClient: SavedObjectsClientContract;
-  caseService: CaseServiceSetup;
-  userActionService: CaseUserActionServiceSetup;
+  caseService: CaseService;
+  userActionService: CaseUserActionService;
   logger: Logger;
 }
 
@@ -111,7 +111,7 @@ const addGeneratedAlerts = async ({
   savedObjectsClient,
   caseService,
   userActionService,
-  casesClient,
+  casesClientInternal,
   caseId,
   comment,
   logger,
@@ -180,12 +180,12 @@ const addGeneratedAlerts = async ({
         comment: query,
         status: subCase.attributes.status,
       });
-      await casesClient.updateAlertsStatus({
+      await casesClientInternal.alerts.updateStatus({
         alerts: alertsToUpdate,
       });
     }
 
-    await userActionService.postUserActions({
+    await userActionService.bulkCreate({
       client: savedObjectsClient,
       actions: [
         buildCommentUserActionItem({
@@ -217,7 +217,7 @@ async function getCombinedCase({
   id,
   logger,
 }: {
-  service: CaseServiceSetup;
+  service: CaseService;
   client: SavedObjectsClientContract;
   id: string;
   logger: Logger;
@@ -268,30 +268,24 @@ async function getCombinedCase({
 }
 
 interface AddCommentArgs {
-  casesClient: CasesClientHandler;
   caseId: string;
   comment: CommentRequest;
-  savedObjectsClient: SavedObjectsClientContract;
-  caseService: CaseServiceSetup;
-  userActionService: CaseUserActionServiceSetup;
-  user: User;
-  logger: Logger;
+  getCasesInternalClient: () => CasesClientInternal;
 }
 
 export const addComment = async ({
-  savedObjectsClient,
-  caseService,
-  userActionService,
-  casesClient,
   caseId,
   comment,
-  user,
-  logger,
-}: AddCommentArgs): Promise<CaseResponse> => {
+  getCasesInternalClient,
+  ...rest
+}: AddCommentArgs & CasesClientArgs): Promise<CaseResponse> => {
   const query = pipe(
     CommentRequestRt.decode(comment),
     fold(throwErrors(Boom.badRequest), identity)
   );
+
+  const { savedObjectsClient, caseService, userActionService, user, logger } = rest;
+  const casesClientInternal = getCasesInternalClient();
 
   if (isCommentRequestTypeGenAlert(comment)) {
     if (!ENABLE_CASE_CONNECTOR) {
@@ -303,7 +297,7 @@ export const addComment = async ({
     return addGeneratedAlerts({
       caseId,
       comment,
-      casesClient,
+      casesClientInternal,
       savedObjectsClient,
       userActionService,
       caseService,
@@ -342,12 +336,12 @@ export const addComment = async ({
         status: updatedCase.status,
       });
 
-      await casesClient.updateAlertsStatus({
+      await casesClientInternal.alerts.updateStatus({
         alerts: alertsToUpdate,
       });
     }
 
-    await userActionService.postUserActions({
+    await userActionService.bulkCreate({
       client: savedObjectsClient,
       actions: [
         buildCommentUserActionItem({

@@ -45,17 +45,17 @@ import {
   transformCaseConnectorToEsConnector,
 } from '../../routes/api/cases/helpers';
 
-import { CaseServiceSetup, CaseUserActionServiceSetup } from '../../services';
+import { CaseService, CaseUserActionService } from '../../services';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   SUB_CASE_SAVED_OBJECT,
 } from '../../../common/constants';
-import { CasesClientHandler } from '..';
 import { createAlertUpdateRequest } from '../../common';
-import { UpdateAlertRequest } from '../types';
+import { CasesClientInternal } from '../types';
 import { createCaseError } from '../../common/error';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
+import { UpdateAlertRequest } from '../alerts/client';
 
 /**
  * Throws an error if any of the requests attempt to update a collection style cases' status field.
@@ -124,7 +124,7 @@ async function throwIfInvalidUpdateOfTypeWithAlerts({
   client,
 }: {
   requests: ESCasePatchRequest[];
-  caseService: CaseServiceSetup;
+  caseService: CaseService;
   client: SavedObjectsClientContract;
 }) {
   const getAlertsForID = async (caseToUpdate: ESCasePatchRequest) => {
@@ -180,7 +180,7 @@ async function getAlertComments({
   client,
 }: {
   casesToSync: ESCasePatchRequest[];
-  caseService: CaseServiceSetup;
+  caseService: CaseService;
   client: SavedObjectsClientContract;
 }): Promise<SavedObjectsFindResponse<CommentAttributes>> {
   const idsOfCasesToSync = casesToSync.map((casePatchReq) => casePatchReq.id);
@@ -206,7 +206,7 @@ async function getSubCasesToStatus({
   client,
 }: {
   totalAlerts: SavedObjectsFindResponse<CommentAttributes>;
-  caseService: CaseServiceSetup;
+  caseService: CaseService;
   client: SavedObjectsClientContract;
 }): Promise<Map<string, CaseStatuses>> {
   const subCasesToRetrieve = totalAlerts.saved_objects.reduce((acc, alertComment) => {
@@ -271,14 +271,14 @@ async function updateAlerts({
   casesMap,
   caseService,
   client,
-  casesClient,
+  casesClientInternal,
 }: {
   casesWithSyncSettingChangedToOn: ESCasePatchRequest[];
   casesWithStatusChangedAndSynced: ESCasePatchRequest[];
   casesMap: Map<string, SavedObject<ESCaseAttributes>>;
-  caseService: CaseServiceSetup;
+  caseService: CaseService;
   client: SavedObjectsClientContract;
-  casesClient: CasesClientHandler;
+  casesClientInternal: CasesClientInternal;
 }) {
   /**
    * It's possible that a case ID can appear multiple times in each array. I'm intentionally placing the status changes
@@ -326,15 +326,15 @@ async function updateAlerts({
     []
   );
 
-  await casesClient.updateAlertsStatus({ alerts: alertsToUpdate });
+  await casesClientInternal.alerts.updateStatus({ alerts: alertsToUpdate });
 }
 
 interface UpdateArgs {
   savedObjectsClient: SavedObjectsClientContract;
-  caseService: CaseServiceSetup;
-  userActionService: CaseUserActionServiceSetup;
+  caseService: CaseService;
+  userActionService: CaseUserActionService;
   user: User;
-  casesClient: CasesClientHandler;
+  getCasesInternalClient: () => CasesClientInternal;
   cases: CasesPatchRequest;
   logger: Logger;
 }
@@ -344,7 +344,7 @@ export const update = async ({
   caseService,
   userActionService,
   user,
-  casesClient,
+  getCasesInternalClient,
   cases,
   logger,
 }: UpdateArgs): Promise<CasesResponse> => {
@@ -354,6 +354,8 @@ export const update = async ({
   );
 
   try {
+    const casesClientInternal = getCasesInternalClient();
+
     const myCases = await caseService.getCases({
       client: savedObjectsClient,
       caseIds: query.cases.map((q) => q.id),
@@ -491,7 +493,7 @@ export const update = async ({
       casesWithSyncSettingChangedToOn,
       caseService,
       client: savedObjectsClient,
-      casesClient,
+      casesClientInternal,
       casesMap,
     });
 
@@ -512,7 +514,7 @@ export const update = async ({
         });
       });
 
-    await userActionService.postUserActions({
+    await userActionService.bulkCreate({
       client: savedObjectsClient,
       actions: buildCaseUserActions({
         originalCases: myCases.saved_objects,

@@ -18,7 +18,7 @@ import {
 } from 'kibana/server';
 
 import { CasesClient } from '../../../../client';
-import { CaseServiceSetup, CaseUserActionServiceSetup } from '../../../../services';
+import { CaseService, CaseUserActionService } from '../../../../services';
 import {
   CaseStatuses,
   SubCasesPatchRequest,
@@ -55,8 +55,8 @@ import { createCaseError } from '../../../../common/error';
 
 interface UpdateArgs {
   client: SavedObjectsClientContract;
-  caseService: CaseServiceSetup;
-  userActionService: CaseUserActionServiceSetup;
+  caseService: CaseService;
+  userActionService: CaseUserActionService;
   request: KibanaRequest;
   casesClient: CasesClient;
   subCases: SubCasesPatchRequest;
@@ -135,7 +135,7 @@ async function getParentCases({
   subCaseIDs,
   subCasesMap,
 }: {
-  caseService: CaseServiceSetup;
+  caseService: CaseService;
   client: SavedObjectsClientContract;
   subCaseIDs: string[];
   subCasesMap: Map<string, SavedObject<SubCaseAttributes>>;
@@ -201,7 +201,7 @@ async function getAlertComments({
   client,
 }: {
   subCasesToSync: SubCasePatchRequest[];
-  caseService: CaseServiceSetup;
+  caseService: CaseService;
   client: SavedObjectsClientContract;
 }): Promise<SavedObjectsFindResponse<CommentAttributes>> {
   const ids = subCasesToSync.map((subCase) => subCase.id);
@@ -225,7 +225,7 @@ async function updateAlerts({
   logger,
 }: {
   subCasesToSync: SubCasePatchRequest[];
-  caseService: CaseServiceSetup;
+  caseService: CaseService;
   client: SavedObjectsClientContract;
   casesClient: CasesClient;
   logger: Logger;

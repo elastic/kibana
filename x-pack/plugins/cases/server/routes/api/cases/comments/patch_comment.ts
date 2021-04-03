@@ -25,10 +25,10 @@ import {
   ENABLE_CASE_CONNECTOR,
 } from '../../../../../common/constants';
 import { CommentPatchRequestRt, throwErrors, User } from '../../../../../common/api';
-import { CaseServiceSetup } from '../../../../services';
+import { CaseService } from '../../../../services';
 
 interface CombinedCaseParams {
-  service: CaseServiceSetup;
+  service: CaseService;
   client: SavedObjectsClientContract;
   caseID: string;
   logger: Logger;

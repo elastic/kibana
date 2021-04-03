@@ -29,22 +29,18 @@ import {
   transformCaseConnectorToEsConnector,
 } from '../../routes/api/cases/helpers';
 
-import {
-  CaseConfigureServiceSetup,
-  CaseServiceSetup,
-  CaseUserActionServiceSetup,
-} from '../../services';
+import { CaseConfigureService, CaseService, CaseUserActionService } from '../../services';
 import { createCaseError } from '../../common/error';
 import { Authorization } from '../../authorization/authorization';
 import { WriteOperations } from '../../authorization/types';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 
 interface CreateCaseArgs {
-  caseConfigureService: CaseConfigureServiceSetup;
-  caseService: CaseServiceSetup;
+  caseConfigureService: CaseConfigureService;
+  caseService: CaseService;
   user: User;
   savedObjectsClient: SavedObjectsClientContract;
-  userActionService: CaseUserActionServiceSetup;
+  userActionService: CaseUserActionService;
   theCase: CasePostRequest;
   logger: Logger;
   auth: Authorization;
@@ -107,7 +103,7 @@ export const create = async ({
       }),
     });
 
-    await userActionService.postUserActions({
+    await userActionService.bulkCreate({
       client: savedObjectsClient,
       actions: [
         buildCaseUserActionItem({

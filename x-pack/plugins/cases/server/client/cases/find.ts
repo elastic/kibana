@@ -21,7 +21,7 @@ import {
 } from '../../../common/api';
 
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
-import { CaseServiceSetup } from '../../services';
+import { CaseService } from '../../services';
 import { createCaseError } from '../../common/error';
 import { constructQueryOptions } from '../../routes/api/cases/helpers';
 import { transformCases } from '../../routes/api/utils';
@@ -30,7 +30,7 @@ import { includeFieldsRequiredForAuthentication } from '../../authorization/util
 
 interface FindParams {
   savedObjectsClient: SavedObjectsClientContract;
-  caseService: CaseServiceSetup;
+  caseService: CaseService;
   logger: Logger;
   auth: Authorization;
   options: CasesFindRequest;

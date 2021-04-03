@@ -8,20 +8,20 @@
 import type { Logger } from 'kibana/server';
 
 import type {
-  CaseConfigureServiceSetup,
-  CaseServiceSetup,
-  CaseUserActionServiceSetup,
-  ConnectorMappingsServiceSetup,
+  CaseConfigureService,
+  CaseService,
+  CaseUserActionService,
+  ConnectorMappingsService,
 } from '../../services';
 
 import type { CasesRouter } from '../../types';
 
 export interface RouteDeps {
-  caseConfigureService: CaseConfigureServiceSetup;
-  caseService: CaseServiceSetup;
-  connectorMappingsService: ConnectorMappingsServiceSetup;
+  caseConfigureService: CaseConfigureService;
+  caseService: CaseService;
+  connectorMappingsService: ConnectorMappingsService;
   router: CasesRouter;
-  userActionService: CaseUserActionServiceSetup;
+  userActionService: CaseUserActionService;
   logger: Logger;
 }
 

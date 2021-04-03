@@ -12,14 +12,14 @@ import { buildCaseUserActionItem } from '../../../services/user_actions/helpers'
 import { RouteDeps } from '../types';
 import { wrapError } from '../utils';
 import { CASES_URL, SAVED_OBJECT_TYPES, ENABLE_CASE_CONNECTOR } from '../../../../common/constants';
-import { CaseServiceSetup } from '../../../services';
+import { CaseService } from '../../../services';
 
 async function deleteSubCases({
   caseService,
   client,
   caseIds,
 }: {
-  caseService: CaseServiceSetup;
+  caseService: CaseService;
   client: SavedObjectsClientContract;
   caseIds: string[];
 }) {

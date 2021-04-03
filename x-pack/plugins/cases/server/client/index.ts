@@ -5,18 +5,6 @@
  * 2.0.
  */
 
-import { CasesClientConstructorArguments, CasesClient } from './types';
-import { CasesClientHandler } from './client';
-
-export { CasesClientHandler } from './client';
-export { CasesClient } from './types';
-
-/**
- * Create a CasesClientHandler to external services (other plugins).
- */
-export const createExternalCasesClient = (
-  clientArgs: CasesClientConstructorArguments
-): CasesClient => {
-  const client = new CasesClientHandler(clientArgs);
-  return client;
-};
+export { CasesClient, CasesClientInternal, CasesClientArgs } from './types';
+export { createCasesClient } from './client';
+export { createCasesClientInternal } from './client_internal';

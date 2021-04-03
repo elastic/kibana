@@ -8,14 +8,14 @@
 import { SavedObjectsClientContract, Logger, SavedObject } from 'kibana/server';
 import { flattenCaseSavedObject } from '../../routes/api/utils';
 import { CaseResponseRt, CaseResponse, ESCaseAttributes } from '../../../common/api';
-import { CaseServiceSetup } from '../../services';
+import { CaseService } from '../../services';
 import { countAlertsForID } from '../../common';
 import { createCaseError } from '../../common/error';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 
 interface GetParams {
   savedObjectsClient: SavedObjectsClientContract;
-  caseService: CaseServiceSetup;
+  caseService: CaseService;
   id: string;
   includeComments?: boolean;
   includeSubCaseComments?: boolean;

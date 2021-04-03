@@ -33,14 +33,11 @@ import {
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 
 import { createIncident, getCommentContextFromAttributes } from './utils';
-import {
-  CaseConfigureServiceSetup,
-  CaseServiceSetup,
-  CaseUserActionServiceSetup,
-} from '../../services';
-import { CasesClientHandler } from '../client';
+import { CaseConfigureService, CaseService, CaseUserActionService } from '../../services';
 import { createCaseError } from '../../common/error';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
+import { CasesClient } from '../types';
+import { CasesClientInternal } from '..';
 
 /**
  * Returns true if the case should be closed based on the configuration settings and whether the case
@@ -60,13 +57,14 @@ function shouldCloseByPush(
 
 interface PushParams {
   savedObjectsClient: SavedObjectsClientContract;
-  caseService: CaseServiceSetup;
-  caseConfigureService: CaseConfigureServiceSetup;
-  userActionService: CaseUserActionServiceSetup;
+  caseService: CaseService;
+  caseConfigureService: CaseConfigureService;
+  userActionService: CaseUserActionService;
   user: User;
   caseId: string;
   connectorId: string;
-  casesClient: CasesClientHandler;
+  getCasesClient: () => CasesClient;
+  getCasesInternalClient: () => CasesClientInternal;
   actionsClient: ActionsClient;
   logger: Logger;
 }
@@ -76,7 +74,8 @@ export const push = async ({
   caseService,
   caseConfigureService,
   userActionService,
-  casesClient,
+  getCasesClient,
+  getCasesInternalClient,
   actionsClient,
   connectorId,
   caseId,
@@ -90,16 +89,18 @@ export const push = async ({
   let alerts;
   let connectorMappings;
   let externalServiceIncident;
+  const casesClient = getCasesClient();
+  const casesClientInternal = getCasesInternalClient();
 
   try {
     [theCase, connector, userActions] = await Promise.all([
-      casesClient.get({
+      casesClient.cases.get({
         id: caseId,
         includeComments: true,
         includeSubCaseComments: ENABLE_CASE_CONNECTOR,
       }),
       actionsClient.get({ id: connectorId }),
-      casesClient.getUserActions({ caseId }),
+      casesClient.userActions.getAll({ caseId }),
     ]);
   } catch (e) {
     const message = `Error getting case and/or connector and/or user actions: ${e.message}`;
@@ -116,7 +117,7 @@ export const push = async ({
   const alertsInfo = getAlertInfoFromComments(theCase?.comments);
 
   try {
-    alerts = await casesClient.getAlerts({
+    alerts = await casesClientInternal.alerts.get({
       alertsInfo,
     });
   } catch (e) {
@@ -128,7 +129,7 @@ export const push = async ({
   }
 
   try {
-    connectorMappings = await casesClient.getMappings({
+    connectorMappings = await casesClientInternal.configuration.getMappings({
       actionsClient,
       connectorId: connector.id,
       connectorType: connector.actionTypeId,
@@ -250,7 +251,7 @@ export const push = async ({
           })),
       }),
 
-      userActionService.postUserActions({
+      userActionService.bulkCreate({
         client: savedObjectsClient,
         actions: [
           ...(shouldMarkAsClosed
