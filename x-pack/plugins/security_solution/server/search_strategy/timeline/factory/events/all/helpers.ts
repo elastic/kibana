@@ -6,7 +6,7 @@
  */
 
 import { set } from '@elastic/safer-lodash-set';
-import { get, has, isObject, merge, uniq } from 'lodash/fp';
+import { get, has, merge, uniq } from 'lodash/fp';
 import { Ecs } from '../../../../../../common/ecs';
 import {
   EventHit,
@@ -103,7 +103,7 @@ const getValuesFromFields = async (
 
 type Fields = Record<string, unknown[] | Fields[]>;
 
-const buildNestedObject = (fieldPath: string, fields: Fields): Partial<Ecs> => {
+const buildObjectRecursive = (fieldPath: string, fields: Fields): Partial<Ecs> => {
   const nestedParentPath = getNestedParentPath(fieldPath, fields);
   if (!nestedParentPath) {
     return set({}, fieldPath, toStringArray(get(fieldPath, fields)));
@@ -111,42 +111,27 @@ const buildNestedObject = (fieldPath: string, fields: Fields): Partial<Ecs> => {
 
   const subPath = fieldPath.replace(`${nestedParentPath}.`, '');
   const subFields = (get(nestedParentPath, fields) ?? []) as Fields[];
-
   return set(
     {},
     nestedParentPath,
-    subFields.map((subField) => buildNestedObject(subPath, subField))
+    subFields.map((subField) => buildObjectRecursive(subPath, subField))
   );
 };
 
-export const buildObjectForFieldPath = (
-  fieldPath: string,
-  hit: EventHit,
-  nestedParentPath?: string
-): Partial<Ecs> => {
-  if (nestedParentPath) {
-    return buildNestedObject(fieldPath, hit.fields);
-  } else {
-    const value = has(fieldPath, hit._source)
-      ? get(fieldPath, hit._source)
-      : get(fieldPath, hit.fields);
+export const buildObjectForFieldPath = (fieldPath: string, hit: EventHit): Partial<Ecs> => {
+  if (has(fieldPath, hit._source)) {
+    const value = get(fieldPath, hit._source);
     return set({}, fieldPath, toStringArray(value));
   }
+
+  return buildObjectRecursive(fieldPath, hit.fields);
 };
 
 /**
  * If a prefix of our full field path is present as a field, we know that our field is nested
  */
-const getNestedParentPath = (fieldPath: string, fields: Fields): string | undefined => {
-  if (!isObject(fields)) {
-    return;
-  }
-  const fieldParts = fieldPath.split('.');
-  return Object.keys(fields).find(
-    (field) =>
-      field !== fieldPath && field === fieldParts.slice(0, field.split('.').length).join('.')
-  );
-};
+const getNestedParentPath = (fieldPath: string, fields: Fields): string | undefined =>
+  Object.keys(fields).find((field) => field !== fieldPath && fieldPath.startsWith(`${field}.`));
 
 const mergeTimelineFieldsWithHit = async <T>(
   fieldName: string,
@@ -155,12 +140,12 @@ const mergeTimelineFieldsWithHit = async <T>(
   dataFields: readonly string[],
   ecsFields: readonly string[]
 ) => {
-  const nestedParentPath = getNestedParentPath(fieldName, hit.fields);
   if (fieldName != null || dataFields.includes(fieldName)) {
+    const nestedParentPath = getNestedParentPath(fieldName, hit.fields);
     if (
+      nestedParentPath != null ||
       has(fieldName, hit._source) ||
       has(fieldName, hit.fields) ||
-      nestedParentPath != null ||
       specialFields.includes(fieldName)
     ) {
       const objectWithProperty = {
@@ -175,7 +160,7 @@ const mergeTimelineFieldsWithHit = async <T>(
           ecs: ecsFields.includes(fieldName)
             ? {
                 ...get('node.ecs', flattenedFields),
-                ...buildObjectForFieldPath(fieldName, hit, nestedParentPath),
+                ...buildObjectForFieldPath(fieldName, hit),
               }
             : get('node.ecs', flattenedFields),
         },

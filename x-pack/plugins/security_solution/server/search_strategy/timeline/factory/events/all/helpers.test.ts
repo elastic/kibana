@@ -428,7 +428,7 @@ describe('#formatTimelineData', () => {
           foo: [{ bar: ['baz'] }],
         },
       };
-      expect(buildObjectForFieldPath('foo.bar', hit, 'foo')).toEqual({
+      expect(buildObjectForFieldPath('foo.bar', hit)).toEqual({
         foo: [{ bar: ['baz'] }],
       });
     });
@@ -444,7 +444,7 @@ describe('#formatTimelineData', () => {
           ],
         },
       };
-      expect(buildObjectForFieldPath('foo.bar.baz', nestedHit, 'foo.bar')).toEqual({
+      expect(buildObjectForFieldPath('foo.bar.baz', nestedHit)).toEqual({
         foo: {
           bar: [
             {
@@ -456,9 +456,7 @@ describe('#formatTimelineData', () => {
     });
 
     it('builds intermediate objects at multiple levels', () => {
-      expect(
-        buildObjectForFieldPath('threat.indicator.matched.atomic', eventHit, 'threat.indicator')
-      ).toEqual({
+      expect(buildObjectForFieldPath('threat.indicator.matched.atomic', eventHit)).toEqual({
         threat: {
           indicator: [
             {
@@ -477,9 +475,7 @@ describe('#formatTimelineData', () => {
     });
 
     it('preserves multiple values for a single leaf', () => {
-      expect(
-        buildObjectForFieldPath('threat.indicator.matched.field', eventHit, 'threat.indicator')
-      ).toEqual({
+      expect(buildObjectForFieldPath('threat.indicator.matched.field', eventHit)).toEqual({
         threat: {
           indicator: [
             {
@@ -523,9 +519,7 @@ describe('#formatTimelineData', () => {
       });
 
       it('includes objects without the field', () => {
-        expect(
-          buildObjectForFieldPath('nested_1.foo.nested_2.bar.leaf', nestedHit, 'nested_1.foo')
-        ).toEqual({
+        expect(buildObjectForFieldPath('nested_1.foo.nested_2.bar.leaf', nestedHit)).toEqual({
           nested_1: {
             foo: [
               {
@@ -544,9 +538,7 @@ describe('#formatTimelineData', () => {
       });
 
       it('groups multiple leaf values', () => {
-        expect(
-          buildObjectForFieldPath('nested_1.foo.nested_2.bar.leaf_2', nestedHit, 'nested_1.foo')
-        ).toEqual({
+        expect(buildObjectForFieldPath('nested_1.foo.nested_2.bar.leaf_2', nestedHit)).toEqual({
           nested_1: {
             foo: [
               {
