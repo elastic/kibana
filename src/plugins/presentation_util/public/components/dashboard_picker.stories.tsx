@@ -9,7 +9,7 @@
 import React from 'react';
 import { action } from '@storybook/addon-actions';
 
-import { DashboardPicker } from '.';
+import { DashboardPicker } from './dashboard_picker';
 
 export default {
   component: DashboardPicker,
