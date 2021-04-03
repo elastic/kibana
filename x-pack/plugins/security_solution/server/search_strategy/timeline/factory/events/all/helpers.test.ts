@@ -7,7 +7,7 @@
 
 import { EventHit } from '../../../../../../common/search_strategy';
 import { TIMELINE_EVENTS_FIELDS } from './constants';
-import { buildObjectFromField, formatTimelineData } from './helpers';
+import { buildObjectForFieldPath, formatTimelineData } from './helpers';
 import { eventHit } from '../mocks';
 
 describe('#formatTimelineData', () => {
@@ -400,27 +400,42 @@ describe('#formatTimelineData', () => {
     });
   });
 
-  describe('buildObjectFromField', () => {
-    it('base case', () => {
-      expect(buildObjectFromField('@timestamp', eventHit)).toEqual({
+  describe('buildObjectForFieldPath', () => {
+    it('builds an object from a single non-nested field', () => {
+      expect(buildObjectForFieldPath('@timestamp', eventHit)).toEqual({
         '@timestamp': ['2020-11-17T14:48:08.922Z'],
       });
     });
 
-    it('another base case', () => {
-      const event = {
+    it('does not misinterpret non-nested fields with a common prefix', () => {
+      // @ts-expect-error hit is minimal
+      const hit: EventHit = {
+        fields: {
+          'foo.bar': ['baz'],
+          'foo.barBaz': ['foo'],
+        },
+      };
+
+      expect(buildObjectForFieldPath('foo.barBaz', hit)).toEqual({
+        foo: { barBaz: ['foo'] },
+      });
+    });
+
+    it('builds an array of objects from a nested field', () => {
+      // @ts-expect-error hit is minimal
+      const hit: EventHit = {
         fields: {
           foo: [{ bar: ['baz'] }],
         },
       };
-      // @ts-expect-error nestedEvent is minimal
-      expect(buildObjectFromField('foo.bar', event, 'foo')).toEqual({
+      expect(buildObjectForFieldPath('foo.bar', hit, 'foo')).toEqual({
         foo: [{ bar: ['baz'] }],
       });
     });
 
-    it('simple nested', () => {
-      const nestedEvent = {
+    it('builds intermediate objects for nested fields', () => {
+      // @ts-expect-error nestedHit is minimal
+      const nestedHit: EventHit = {
         fields: {
           'foo.bar': [
             {
@@ -429,8 +444,7 @@ describe('#formatTimelineData', () => {
           ],
         },
       };
-      // @ts-expect-error nestedEvent is minimal
-      expect(buildObjectFromField('foo.bar.baz', nestedEvent, 'foo.bar')).toEqual({
+      expect(buildObjectForFieldPath('foo.bar.baz', nestedHit, 'foo.bar')).toEqual({
         foo: {
           bar: [
             {
@@ -441,9 +455,9 @@ describe('#formatTimelineData', () => {
       });
     });
 
-    it('nested field', () => {
+    it('builds intermediate objects at multiple levels', () => {
       expect(
-        buildObjectFromField('threat.indicator.matched.atomic', eventHit, 'threat.indicator')
+        buildObjectForFieldPath('threat.indicator.matched.atomic', eventHit, 'threat.indicator')
       ).toEqual({
         threat: {
           indicator: [
@@ -462,9 +476,9 @@ describe('#formatTimelineData', () => {
       });
     });
 
-    it('nested field with multiple values', () => {
+    it('preserves multiple values for a single leaf', () => {
       expect(
-        buildObjectFromField('threat.indicator.matched.field', eventHit, 'threat.indicator')
+        buildObjectForFieldPath('threat.indicator.matched.field', eventHit, 'threat.indicator')
       ).toEqual({
         threat: {
           indicator: [
@@ -480,6 +494,77 @@ describe('#formatTimelineData', () => {
             },
           ],
         },
+      });
+    });
+
+    describe('multiple levels of nested fields', () => {
+      let nestedHit: EventHit;
+
+      beforeEach(() => {
+        // @ts-expect-error nestedHit is minimal
+        nestedHit = {
+          fields: {
+            'nested_1.foo': [
+              {
+                'nested_2.bar': [
+                  { leaf: ['leaf_value'], leaf_2: ['leaf_2_value'] },
+                  { leaf_2: ['leaf_2_value_2', 'leaf_2_value_3'] },
+                ],
+              },
+              {
+                'nested_2.bar': [
+                  { leaf: ['leaf_value_2'], leaf_2: ['leaf_2_value_4'] },
+                  { leaf: ['leaf_value_3'], leaf_2: ['leaf_2_value_5'] },
+                ],
+              },
+            ],
+          },
+        };
+      });
+
+      it('includes objects without the field', () => {
+        expect(
+          buildObjectForFieldPath('nested_1.foo.nested_2.bar.leaf', nestedHit, 'nested_1.foo')
+        ).toEqual({
+          nested_1: {
+            foo: [
+              {
+                nested_2: {
+                  bar: [{ leaf: ['leaf_value'] }, { leaf: [] }],
+                },
+              },
+              {
+                nested_2: {
+                  bar: [{ leaf: ['leaf_value_2'] }, { leaf: ['leaf_value_3'] }],
+                },
+              },
+            ],
+          },
+        });
+      });
+
+      it('groups multiple leaf values', () => {
+        expect(
+          buildObjectForFieldPath('nested_1.foo.nested_2.bar.leaf_2', nestedHit, 'nested_1.foo')
+        ).toEqual({
+          nested_1: {
+            foo: [
+              {
+                nested_2: {
+                  bar: [
+                    { leaf_2: ['leaf_2_value'] },
+                    { leaf_2: ['leaf_2_value_2', 'leaf_2_value_3'] },
+                  ],
+                },
+              },
+              {
+                nested_2: {
+                  bar: [{ leaf_2: ['leaf_2_value_4'] }, { leaf_2: ['leaf_2_value_5'] }],
+                },
+              },
+            ],
+          },
+        });
       });
     });
   });
