@@ -10,6 +10,7 @@ import { get, has, merge, uniq } from 'lodash/fp';
 import { Ecs } from '../../../../../../common/ecs';
 import {
   EventHit,
+  Fields,
   TimelineEdges,
   TimelineNonEcsData,
 } from '../../../../../../common/search_strategy';
@@ -95,8 +96,6 @@ const getValuesFromFields = async (
     []
   );
 };
-
-type Fields = Record<string, unknown[] | Fields[]>;
 
 const buildObjectRecursive = (fieldPath: string, fields: Fields): Partial<Ecs> => {
   const nestedParentPath = getNestedParentPath(fieldPath, fields);
