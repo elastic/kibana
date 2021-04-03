@@ -9,11 +9,10 @@
 import { PresentationUtilPlugin } from './plugin';
 
 export {
+  DashboardPicker,
   SavedObjectSaveModalDashboard,
   SaveModalDashboardProps,
-} from './components/saved_object_save_modal_dashboard';
-
-export { DashboardPicker } from './components/dashboard_picker';
+} from './components';
 
 export function plugin() {
   return new PresentationUtilPlugin();
