@@ -25,10 +25,11 @@ import {
   ENABLE_CASE_CONNECTOR,
 } from '../../../../../common/constants';
 import { CommentPatchRequestRt, throwErrors, User } from '../../../../../common/api';
-import { CaseService } from '../../../../services';
+import { CaseService, AttachmentService } from '../../../../services';
 
 interface CombinedCaseParams {
-  service: CaseService;
+  attachmentService: AttachmentService;
+  caseService: CaseService;
   client: SavedObjectsClientContract;
   caseID: string;
   logger: Logger;
@@ -36,7 +37,8 @@ interface CombinedCaseParams {
 }
 
 async function getCommentableCase({
-  service,
+  attachmentService,
+  caseService,
   client,
   caseID,
   subCaseId,
@@ -44,32 +46,45 @@ async function getCommentableCase({
 }: CombinedCaseParams) {
   if (subCaseId) {
     const [caseInfo, subCase] = await Promise.all([
-      service.getCase({
+      caseService.getCase({
         client,
         id: caseID,
       }),
-      service.getSubCase({
+      caseService.getSubCase({
         client,
         id: subCaseId,
       }),
     ]);
     return new CommentableCase({
+      attachmentService,
+      caseService,
       collection: caseInfo,
-      service,
       subCase,
       soClient: client,
       logger,
     });
   } else {
-    const caseInfo = await service.getCase({
+    const caseInfo = await caseService.getCase({
       client,
       id: caseID,
     });
-    return new CommentableCase({ collection: caseInfo, service, soClient: client, logger });
+    return new CommentableCase({
+      attachmentService,
+      caseService,
+      collection: caseInfo,
+      soClient: client,
+      logger,
+    });
   }
 }
 
-export function initPatchCommentApi({ caseService, router, userActionService, logger }: RouteDeps) {
+export function initPatchCommentApi({
+  attachmentService,
+  caseService,
+  router,
+  userActionService,
+  logger,
+}: RouteDeps) {
   router.patch(
     {
       path: CASE_COMMENTS_URL,
@@ -105,16 +120,17 @@ export function initPatchCommentApi({ caseService, router, userActionService, lo
         decodeCommentRequest(queryRestAttributes);
 
         const commentableCase = await getCommentableCase({
-          service: caseService,
+          attachmentService,
+          caseService,
           client,
           caseID: request.params.case_id,
           subCaseId: request.query?.subCaseId,
           logger,
         });
 
-        const myComment = await caseService.getComment({
+        const myComment = await attachmentService.get({
           client,
-          commentId: queryCommentId,
+          attachmentId: queryCommentId,
         });
 
         if (myComment == null) {
@@ -158,7 +174,7 @@ export function initPatchCommentApi({ caseService, router, userActionService, lo
           user: userInfo,
         });
 
-        await userActionService.postUserActions({
+        await userActionService.bulkCreate({
           client,
           actions: [
             buildCommentUserActionItem({

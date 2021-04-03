@@ -12,13 +12,15 @@ import { buildCaseUserActionItem } from '../../../services/user_actions/helpers'
 import { RouteDeps } from '../types';
 import { wrapError } from '../utils';
 import { CASES_URL, SAVED_OBJECT_TYPES, ENABLE_CASE_CONNECTOR } from '../../../../common/constants';
-import { CaseService } from '../../../services';
+import { CaseService, AttachmentService } from '../../../services';
 
 async function deleteSubCases({
+  attachmentService,
   caseService,
   client,
   caseIds,
 }: {
+  attachmentService: AttachmentService;
   caseService: CaseService;
   client: SavedObjectsClientContract;
   caseIds: string[];
@@ -35,7 +37,7 @@ async function deleteSubCases({
   // per case ID
   await Promise.all(
     commentsForSubCases.saved_objects.map((commentSO) =>
-      caseService.deleteComment({ client, commentId: commentSO.id })
+      attachmentService.delete({ client, attachmentId: commentSO.id })
     )
   );
 
@@ -46,7 +48,13 @@ async function deleteSubCases({
   );
 }
 
-export function initDeleteCasesApi({ caseService, router, userActionService, logger }: RouteDeps) {
+export function initDeleteCasesApi({
+  attachmentService,
+  caseService,
+  router,
+  userActionService,
+  logger,
+}: RouteDeps) {
   router.delete(
     {
       path: CASES_URL,
@@ -83,9 +91,9 @@ export function initDeleteCasesApi({ caseService, router, userActionService, log
             comments.map((c) =>
               Promise.all(
                 c.saved_objects.map(({ id }) =>
-                  caseService.deleteComment({
+                  attachmentService.delete({
                     client,
-                    commentId: id,
+                    attachmentId: id,
                   })
                 )
               )
@@ -94,14 +102,19 @@ export function initDeleteCasesApi({ caseService, router, userActionService, log
         }
 
         if (ENABLE_CASE_CONNECTOR) {
-          await deleteSubCases({ caseService, client, caseIds: request.query.ids });
+          await deleteSubCases({
+            attachmentService,
+            caseService,
+            client,
+            caseIds: request.query.ids,
+          });
         }
 
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const { username, full_name, email } = await caseService.getUser({ request });
         const deleteDate = new Date().toISOString();
 
-        await userActionService.postUserActions({
+        await userActionService.bulkCreate({
           client,
           actions: request.query.ids.map((id) =>
             buildCaseUserActionItem({

@@ -21,6 +21,7 @@ import {
   CaseService,
   CaseUserActionService,
   ConnectorMappingsService,
+  AttachmentService,
 } from '../services';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
 import { CasesClient } from './types';
@@ -32,6 +33,7 @@ interface CasesClientFactoryArgs {
   connectorMappingsService: ConnectorMappingsService;
   userActionService: CaseUserActionService;
   alertsService: AlertServiceContract;
+  attachmentService: AttachmentService;
   securityPluginSetup?: SecurityPluginSetup;
   securityPluginStart?: SecurityPluginStart;
   getSpace: GetSpaceFn;
@@ -105,6 +107,7 @@ export class CasesClientFactory {
       caseConfigureService: this.options.caseConfigureService,
       connectorMappingsService: this.options.connectorMappingsService,
       userActionService: this.options.userActionService,
+      attachmentService: this.options.attachmentService,
       logger: this.logger,
       authorization: auth,
     });

@@ -20,6 +20,7 @@ import {
 } from '../../../../../common/constants';
 
 export function initDeleteCommentApi({
+  attachmentService,
   caseService,
   router,
   userActionService,
@@ -55,9 +56,9 @@ export function initDeleteCommentApi({
         const { username, full_name, email } = caseService.getUser({ request });
         const deleteDate = new Date().toISOString();
 
-        const myComment = await caseService.getComment({
+        const myComment = await attachmentService.get({
           client,
-          commentId: request.params.comment_id,
+          attachmentId: request.params.comment_id,
         });
 
         if (myComment == null) {
@@ -74,12 +75,12 @@ export function initDeleteCommentApi({
           );
         }
 
-        await caseService.deleteComment({
+        await attachmentService.delete({
           client,
-          commentId: request.params.comment_id,
+          attachmentId: request.params.comment_id,
         });
 
-        await userActionService.postUserActions({
+        await userActionService.bulkCreate({
           client,
           actions: [
             buildCommentUserActionItem({

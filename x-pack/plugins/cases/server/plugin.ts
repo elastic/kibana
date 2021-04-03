@@ -35,6 +35,7 @@ import type { CasesRequestHandlerContext } from './types';
 import { CasesClientFactory } from './client/factory';
 import { SpacesPluginStart } from '../../spaces/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
+import { AttachmentService } from './services/attachments';
 
 function createConfig(context: PluginInitializerContext) {
   return context.config.get<ConfigType>();
@@ -58,6 +59,7 @@ export class CasePlugin {
   private connectorMappingsService?: ConnectorMappingsService;
   private userActionService?: CaseUserActionService;
   private alertsService?: AlertService;
+  private attachmentService?: AttachmentService;
   private clientFactory: CasesClientFactory;
   private securityPluginSetup?: SecurityPluginSetup;
   private config?: ConfigType;
@@ -98,6 +100,7 @@ export class CasePlugin {
     this.connectorMappingsService = new ConnectorMappingsService(this.log);
     this.userActionService = new CaseUserActionService(this.log);
     this.alertsService = new AlertService();
+    this.attachmentService = new AttachmentService(this.log);
 
     core.http.registerRouteHandlerContext<CasesRequestHandlerContext, 'cases'>(
       APP_ID,
@@ -113,6 +116,7 @@ export class CasePlugin {
       caseConfigureService: this.caseConfigureService,
       connectorMappingsService: this.connectorMappingsService,
       userActionService: this.userActionService,
+      attachmentService: this.attachmentService,
       router,
     });
 
@@ -135,6 +139,7 @@ export class CasePlugin {
       caseService: this.caseService!,
       connectorMappingsService: this.connectorMappingsService!,
       userActionService: this.userActionService!,
+      attachmentService: this.attachmentService!,
       securityPluginSetup: this.securityPluginSetup,
       securityPluginStart: plugins.security,
       getSpace: async (request: KibanaRequest) => {

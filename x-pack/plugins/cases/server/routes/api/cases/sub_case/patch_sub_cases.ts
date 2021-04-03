@@ -50,8 +50,8 @@ import {
 import { getCaseToUpdate } from '../helpers';
 import { buildSubCaseUserActions } from '../../../../services/user_actions/helpers';
 import { createAlertUpdateRequest } from '../../../../common';
-import { UpdateAlertRequest } from '../../../../client/types';
 import { createCaseError } from '../../../../common/error';
+import { UpdateAlertRequest } from '../../../../client/alerts/client';
 
 interface UpdateArgs {
   client: SavedObjectsClientContract;
@@ -218,17 +218,17 @@ async function getAlertComments({
  * Updates the status of alerts for the specified sub cases.
  */
 async function updateAlerts({
-  subCasesToSync,
   caseService,
   client,
   casesClient,
   logger,
+  subCasesToSync,
 }: {
-  subCasesToSync: SubCasePatchRequest[];
   caseService: CaseService;
   client: SavedObjectsClientContract;
   casesClient: CasesClient;
   logger: Logger;
+  subCasesToSync: SubCasePatchRequest[];
 }) {
   try {
     const subCasesToSyncMap = subCasesToSync.reduce((acc, subCase) => {
@@ -389,7 +389,7 @@ async function update({
       []
     );
 
-    await userActionService.postUserActions({
+    await userActionService.bulkCreate({
       client,
       actions: buildSubCaseUserActions({
         originalSubCases: bulkSubCases.saved_objects,

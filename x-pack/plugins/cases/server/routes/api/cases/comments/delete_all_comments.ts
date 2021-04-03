@@ -18,6 +18,7 @@ import {
 import { AssociationType } from '../../../../../common/api';
 
 export function initDeleteAllCommentsApi({
+  attachmentService,
   caseService,
   router,
   userActionService,
@@ -62,14 +63,14 @@ export function initDeleteAllCommentsApi({
 
         await Promise.all(
           comments.saved_objects.map((comment) =>
-            caseService.deleteComment({
+            attachmentService.delete({
               client,
-              commentId: comment.id,
+              attachmentId: comment.id,
             })
           )
         );
 
-        await userActionService.postUserActions({
+        await userActionService.bulkCreate({
           client,
           actions: comments.saved_objects.map((comment) =>
             buildCommentUserActionItem({

@@ -12,6 +12,7 @@ import type {
   CaseService,
   CaseUserActionService,
   ConnectorMappingsService,
+  AttachmentService,
 } from '../../services';
 
 import type { CasesRouter } from '../../types';
@@ -22,6 +23,7 @@ export interface RouteDeps {
   connectorMappingsService: ConnectorMappingsService;
   router: CasesRouter;
   userActionService: CaseUserActionService;
+  attachmentService: AttachmentService;
   logger: Logger;
 }
 

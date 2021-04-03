@@ -33,7 +33,12 @@ import {
 import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 
 import { createIncident, getCommentContextFromAttributes } from './utils';
-import { CaseConfigureService, CaseService, CaseUserActionService } from '../../services';
+import {
+  CaseConfigureService,
+  CaseService,
+  CaseUserActionService,
+  AttachmentService,
+} from '../../services';
 import { createCaseError } from '../../common/error';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import { CasesClient } from '../types';
@@ -60,6 +65,7 @@ interface PushParams {
   caseService: CaseService;
   caseConfigureService: CaseConfigureService;
   userActionService: CaseUserActionService;
+  attachmentService: AttachmentService;
   user: User;
   caseId: string;
   connectorId: string;
@@ -71,6 +77,7 @@ interface PushParams {
 
 export const push = async ({
   savedObjectsClient,
+  attachmentService,
   caseService,
   caseConfigureService,
   userActionService,
@@ -237,12 +244,12 @@ export const push = async ({
         version: myCase.version,
       }),
 
-      caseService.patchComments({
+      attachmentService.bulkUpdate({
         client: savedObjectsClient,
         comments: comments.saved_objects
           .filter((comment) => comment.attributes.pushed_at == null)
           .map((comment) => ({
-            commentId: comment.id,
+            attachmentId: comment.id,
             updatedAttributes: {
               pushed_at: pushedDate,
               pushed_by: { username, full_name, email },

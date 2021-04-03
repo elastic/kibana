@@ -17,6 +17,7 @@ import {
 } from '../../../../../common/constants';
 
 export function initDeleteSubCasesApi({
+  attachmentService,
   caseService,
   router,
   userActionService,
@@ -62,7 +63,7 @@ export function initDeleteSubCasesApi({
 
         await Promise.all(
           comments.saved_objects.map((comment) =>
-            caseService.deleteComment({ client, commentId: comment.id })
+            attachmentService.delete({ client, attachmentId: comment.id })
           )
         );
 
@@ -72,7 +73,7 @@ export function initDeleteSubCasesApi({
         const { username, full_name, email } = await caseService.getUser({ request });
         const deleteDate = new Date().toISOString();
 
-        await userActionService.postUserActions({
+        await userActionService.bulkCreate({
           client,
           actions: request.query.ids.map((id) =>
             buildCaseUserActionItem({

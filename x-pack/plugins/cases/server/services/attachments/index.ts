@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  Logger,
-  SavedObject,
-  SavedObjectsUpdateResponse,
-  SavedObjectReference,
-  SavedObjectsBulkUpdateResponse,
-} from 'kibana/server';
+import { Logger, SavedObject, SavedObjectReference } from 'kibana/server';
 
 import {
   CommentAttributes as AttachmentAttributes,
@@ -41,17 +35,7 @@ interface BulkUpdateAttachmentArgs extends ClientArgs {
   comments: UpdateArgs[];
 }
 
-export interface AttachmentServiceImplementation {
-  delete(args: GetAttachmentArgs): Promise<{}>;
-  get(args: GetAttachmentArgs): Promise<SavedObject<AttachmentAttributes>>;
-  create(args: CreateAttachmentArgs): Promise<SavedObject<AttachmentAttributes>>;
-  update(args: UpdateAttachmentArgs): Promise<SavedObjectsUpdateResponse<AttachmentAttributes>>;
-  bulkUpdate(
-    args: BulkUpdateAttachmentArgs
-  ): Promise<SavedObjectsBulkUpdateResponse<AttachmentAttributes>>;
-}
-
-export class AttachmentService implements AttachmentServiceImplementation {
+export class AttachmentService {
   constructor(private readonly log: Logger) {}
 
   public async get({
@@ -60,7 +44,7 @@ export class AttachmentService implements AttachmentServiceImplementation {
   }: GetAttachmentArgs): Promise<SavedObject<AttachmentAttributes>> {
     try {
       this.log.debug(`Attempting to GET attachment ${attachmentId}`);
-      return await client.get(CASE_COMMENT_SAVED_OBJECT, attachmentId);
+      return await client.get<AttachmentAttributes>(CASE_COMMENT_SAVED_OBJECT, attachmentId);
     } catch (error) {
       this.log.error(`Error on GET attachment ${attachmentId}: ${error}`);
       throw error;
@@ -80,7 +64,9 @@ export class AttachmentService implements AttachmentServiceImplementation {
   public async create({ client, attributes, references }: CreateAttachmentArgs) {
     try {
       this.log.debug(`Attempting to POST a new comment`);
-      return await client.create(CASE_COMMENT_SAVED_OBJECT, attributes, { references });
+      return await client.create<AttachmentAttributes>(CASE_COMMENT_SAVED_OBJECT, attributes, {
+        references,
+      });
     } catch (error) {
       this.log.error(`Error on POST a new comment: ${error}`);
       throw error;
@@ -109,7 +95,7 @@ export class AttachmentService implements AttachmentServiceImplementation {
       this.log.debug(
         `Attempting to UPDATE comments ${comments.map((c) => c.attachmentId).join(', ')}`
       );
-      return await client.bulkUpdate(
+      return await client.bulkUpdate<AttachmentAttributes>(
         comments.map((c) => ({
           type: CASE_COMMENT_SAVED_OBJECT,
           id: c.attachmentId,

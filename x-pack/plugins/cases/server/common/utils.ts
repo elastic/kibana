@@ -13,7 +13,7 @@ import {
   CommentType,
   User,
 } from '../../common/api';
-import { UpdateAlertRequest } from '../client/types';
+import { UpdateAlertRequest } from '../client/alerts/client';
 import { getAlertInfoFromComments } from '../routes/api/utils';
 
 /**

@@ -28,7 +28,7 @@ export function initPostCaseApi({ router, logger }: RouteDeps) {
         const theCase = request.body as CasePostRequest;
 
         return response.ok({
-          body: await casesClient.create({ ...theCase }),
+          body: await casesClient.cases.create({ ...theCase }),
         });
       } catch (error) {
         logger.error(`Failed to post case in route: ${error}`);

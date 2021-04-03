@@ -14,6 +14,7 @@ import {
   CaseService,
   CaseUserActionService,
   ConnectorMappingsService,
+  AttachmentService,
 } from '../services';
 import { AlertSubClient } from './alerts/client';
 import { AttachmentsSubClient } from './attachments/client';
@@ -30,6 +31,7 @@ export interface CasesClientArgs {
   readonly savedObjectsClient: SavedObjectsClientContract;
   readonly userActionService: CaseUserActionService;
   readonly alertsService: AlertServiceContract;
+  readonly attachmentService: AttachmentService;
   readonly logger: Logger;
   readonly authorization: Authorization;
 }

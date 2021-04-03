@@ -12,6 +12,7 @@ export { CaseConfigureService } from './configure';
 export { CaseUserActionService } from './user_actions';
 export { ConnectorMappingsService } from './connector_mappings';
 export { AlertService, AlertServiceContract } from './alerts';
+export { AttachmentService } from './attachments';
 
 export interface ClientArgs {
   client: SavedObjectsClientContract;

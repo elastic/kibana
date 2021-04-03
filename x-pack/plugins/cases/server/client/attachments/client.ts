@@ -6,7 +6,7 @@
  */
 
 import { CaseResponse, CommentRequest as AttachmentsRequest } from '../../../common/api';
-import { CasesClientArgs, CasesSubClientImplementation } from '../types';
+import { CasesSubClientImplementation } from '../types';
 import { addComment } from './add';
 
 export interface AttachmentsAdd {
