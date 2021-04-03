@@ -59,3 +59,51 @@ export const createMonitorListRoute: UMRestApiRouteFactory = (libs) => ({
     return result;
   },
 });
+
+export const createMonitorListPaginationRoute: UMRestApiRouteFactory = (libs) => ({
+  method: 'GET',
+  path: API_URLS.MONITOR_LIST_PAGINATION,
+  validate: {
+    query: schema.object({
+      dateRangeStart: schema.string(),
+      dateRangeEnd: schema.string(),
+      beforeMonitorId: schema.string(),
+      afterMonitorId: schema.string(),
+      filters: schema.maybe(schema.string()),
+      statusFilter: schema.maybe(schema.string()),
+      query: schema.maybe(schema.string()),
+      _inspect: schema.maybe(schema.boolean()),
+    }),
+  },
+  options: {
+    tags: ['access:uptime-read'],
+  },
+  handler: async ({ uptimeEsClient, request }): Promise<any> => {
+    const {
+      dateRangeStart,
+      dateRangeEnd,
+      filters,
+      pagination,
+      statusFilter,
+      query,
+      beforeMonitorId,
+      afterMonitorId,
+    } = request.query;
+
+    const decodedPagination = pagination
+      ? JSON.parse(decodeURIComponent(pagination))
+      : CONTEXT_DEFAULTS.CURSOR_PAGINATION;
+
+    return await libs.requests.getMonitorListPagination({
+      query,
+      filters,
+      uptimeEsClient,
+      dateRangeStart,
+      dateRangeEnd,
+      beforeMonitorId,
+      afterMonitorId,
+      pagination: decodedPagination,
+      statusFilter,
+    });
+  },
+});

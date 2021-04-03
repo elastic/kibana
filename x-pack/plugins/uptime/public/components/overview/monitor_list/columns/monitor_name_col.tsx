@@ -56,9 +56,7 @@ export const MonitorNameColumn = ({ summary }: Props) => {
   return (
     <div>
       <MonitorPageLink monitorId={summary.monitor_id} linkParameters={linkParameters}>
-        {summary.state.monitor.name
-          ? summary.state.monitor.name
-          : `Unnamed - ${summary.monitor_id}`}
+        {summary.monitor_id}
       </MonitorPageLink>
       <div>
         <EuiButtonEmpty

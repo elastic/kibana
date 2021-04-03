@@ -8,6 +8,7 @@
 import { API_URLS } from '../../../common/constants';
 import { apiService } from './utils';
 import {
+  FetchMonitorListPaginationParams,
   FetchMonitorStatesQueryArgs,
   MonitorSummariesResult,
   MonitorSummariesResultType,
@@ -17,4 +18,17 @@ export const fetchMonitorList = async (
   params: FetchMonitorStatesQueryArgs
 ): Promise<MonitorSummariesResult> => {
   return await apiService.get(API_URLS.MONITOR_LIST, params, MonitorSummariesResultType);
+};
+
+export const fetchMonitorListPagination = async (
+  params: FetchMonitorListPaginationParams
+): Promise<MonitorSummariesResult> => {
+  return await apiService.get(API_URLS.MONITOR_LIST_PAGINATION, params);
+};
+
+export const fetchMonitorListHistogram = async (
+  params: FetchMonitorListPaginationParams,
+  data: string[]
+): Promise<MonitorSummariesResult> => {
+  return await apiService.post(API_URLS.MONITOR_LIST_HISTOGRAM, data, null, params);
 };

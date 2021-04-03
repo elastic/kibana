@@ -25,6 +25,8 @@ import { getJourneyDetails } from './get_journey_details';
 import { getNetworkEvents } from './get_network_events';
 import { getJourneyFailedSteps } from './get_journey_failed_steps';
 import { getStepLastSuccessfulStep } from './get_last_successful_step';
+import { getMonitorListPagination } from './get_monitor_list_pagination';
+import { getHistogramForMonitors } from './get_monitors_histogram';
 
 export const requests = {
   getCerts,
@@ -47,6 +49,8 @@ export const requests = {
   getJourneyScreenshot,
   getJourneyDetails,
   getNetworkEvents,
+  getMonitorListPagination,
+  getHistogramForMonitors,
 };
 
 export type UptimeRequests = typeof requests;

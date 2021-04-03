@@ -15,7 +15,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import React, { useState } from 'react';
-import { HistogramPoint, X509Expiry } from '../../../../common/runtime_types';
+import { X509Expiry } from '../../../../common/runtime_types';
 import { MonitorSummary } from '../../../../common/runtime_types';
 import { MonitorListStatusColumn } from './columns/monitor_status_column';
 import { ExpandedRowMap } from './types';
@@ -33,6 +33,7 @@ import { STATUS_ALERT_COLUMN } from './translations';
 import { MonitorNameColumn } from './columns/monitor_name_col';
 import { MonitorTags } from '../../common/monitor_tags';
 import { ListPagination } from './list_pagination';
+import { useMonitorHistogram } from './use_monitor_histogram';
 
 interface Props extends MonitorListProps {
   pageSize: number;
@@ -70,6 +71,8 @@ export const MonitorListComponent: ({
       };
     }, {});
   };
+
+  const { histograms, minInterval } = useMonitorHistogram({ items });
 
   const columns = [
     {
@@ -125,13 +128,16 @@ export const MonitorListComponent: ({
     },
     {
       align: 'center' as const,
-      field: 'histogram.points',
+      field: 'monitor_id',
       name: labels.HISTORY_COLUMN_LABEL,
       mobileOptions: {
         show: false,
       },
-      render: (histogramSeries: HistogramPoint[] | null, summary: MonitorSummary) => (
-        <MonitorBarSeries histogramSeries={histogramSeries} minInterval={summary.minInterval!} />
+      render: (monitorId: string) => (
+        <MonitorBarSeries
+          histogramSeries={histograms?.[monitorId]?.points}
+          minInterval={minInterval!}
+        />
       ),
     },
     {
@@ -195,7 +201,12 @@ export const MonitorListComponent: ({
           <MonitorListPageSizeSelect size={pageSize} setSize={setPageSize} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <ListPagination next={nextPagePagination} previous={prevPagePagination} />
+          <ListPagination
+            next={nextPagePagination}
+            items={items}
+            previous={prevPagePagination}
+            loading={loading}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

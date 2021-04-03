@@ -5,29 +5,30 @@
  * 2.0.
  */
 
-import { EuiButtonIcon } from '@elastic/eui';
-import React, { FunctionComponent } from 'react';
+import { EuiButtonEmpty } from '@elastic/eui';
+import React, { FunctionComponent, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
-import styled from 'styled-components';
-import { useUrlParams } from '../../../hooks';
-
-const OverviewPageLinkButtonIcon = styled(EuiButtonIcon)`
-  margin-top: 12px;
-`;
+import { useGetUrlParams } from '../../../hooks';
+import { stringifyUrlParams } from '../../../lib/helper/stringify_url_params';
+import { UptimeSettingsContext } from '../../../contexts';
 
 interface OverviewPageLinkProps {
   dataTestSubj: string;
   direction: string;
   pagination: string;
+  label: string;
+  loading: boolean;
 }
 
 export const OverviewPageLink: FunctionComponent<OverviewPageLinkProps> = ({
+  label,
+  loading,
   dataTestSubj,
   direction,
   pagination,
 }) => {
-  const [, updateUrlParams] = useUrlParams();
   const icon = direction === 'prev' ? 'arrowLeft' : 'arrowRight';
+  const iconSide = direction === 'prev' ? 'left' : 'right';
 
   const ariaLabel =
     direction === 'next'
@@ -43,16 +44,23 @@ export const OverviewPageLink: FunctionComponent<OverviewPageLinkProps> = ({
       'A disabled pagination button indicating that there cannot be any further navigation in the monitors list.',
   });
 
+  const params = useGetUrlParams();
+
+  const { basePath } = useContext(UptimeSettingsContext);
+
+  const linkParameters = stringifyUrlParams({ ...params, pagination }, true);
+
   return (
-    <OverviewPageLinkButtonIcon
+    <EuiButtonEmpty
       color="text"
-      onClick={() => {
-        updateUrlParams({ pagination });
-      }}
+      href={basePath + '/app/uptime' + linkParameters}
       data-test-subj={dataTestSubj}
       iconType={icon}
       aria-label={!pagination ? disableLinkLabel : ariaLabel}
-      isDisabled={!pagination}
-    />
+      isDisabled={!pagination || loading}
+      iconSide={iconSide}
+    >
+      {label}
+    </EuiButtonEmpty>
   );
 };

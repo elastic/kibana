@@ -95,8 +95,8 @@ export class MonitorSummaryIterator {
 
     return {
       monitorSummaries,
-      nextPagePagination: paginationAfter,
-      prevPagePagination: paginationBefore,
+      nextPagePagination: ssAligned ? paginationAfter : paginationBefore,
+      prevPagePagination: ssAligned ? paginationBefore : paginationAfter,
     };
   }
 
@@ -166,13 +166,6 @@ export class MonitorSummaryIterator {
 
   // Get a CursorPaginator object that will resume after the current() value.
   async paginationAfterCurrent(): Promise<CursorPagination | null> {
-    if (!this.queryContext.skipRefinePhase) {
-      const peek = await this.peek();
-      if (!peek) {
-        return null;
-      }
-    }
-
     const current = this.getCurrent();
     if (!current) {
       return null;
@@ -184,9 +177,6 @@ export class MonitorSummaryIterator {
 
   // Get a CursorPaginator object that will resume before the current() value.
   async paginationBeforeCurrent(): Promise<CursorPagination | null> {
-    if (this.queryContext.skipRefinePhase && !this.queryContext.pagination?.cursorKey) {
-      return null;
-    }
     const reverseFetcher = await this.reverse();
     return reverseFetcher && (await reverseFetcher.paginationAfterCurrent());
   }

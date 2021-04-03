@@ -86,7 +86,7 @@ export const useUrlParams: UptimeUrlParamsHook = () => {
               [key]: value,
             };
           }, {}),
-          { sort: false }
+          { sort: false, skipEmptyString: true, skipNull: true }
         ),
       });
       const filterMap = getMapFromFilters(mergedParams.filters);

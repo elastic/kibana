@@ -85,7 +85,7 @@ export const getListOfMonitors = async (queryContext: QueryContext): Promise<Chu
                 monitor_id: {
                   terms: {
                     field: 'monitor.id',
-                    order: 'asc',
+                    order: queryContext.cursorOrder(),
                   },
                 },
               },

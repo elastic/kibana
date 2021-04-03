@@ -116,3 +116,19 @@ export enum SortOrder {
   ASC = 'ASC',
   DESC = 'DESC',
 }
+
+export const FetchMonitorListPaginationType = t.intersection([
+  t.partial({
+    filters: t.string,
+    statusFilter: t.string,
+    query: t.string,
+  }),
+  t.type({
+    dateRangeStart: t.string,
+    dateRangeEnd: t.string,
+    beforeMonitorId: t.string,
+    afterMonitorId: t.string,
+  }),
+]);
+
+export type FetchMonitorListPaginationParams = t.TypeOf<typeof FetchMonitorListPaginationType>;

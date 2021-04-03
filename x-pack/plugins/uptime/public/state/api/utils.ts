@@ -89,9 +89,13 @@ class ApiService {
     return response;
   }
 
-  public async post(apiUrl: string, data?: any, decodeType?: any) {
+  public async post(apiUrl: string, data?: any, decodeType?: any, params?: HttpFetchQuery) {
+    const debugEnabled =
+      sessionStorage.getItem('uptime_debug') === 'true' && startsWith(apiUrl, '/api/uptime');
+
     const response = await this._http!.post(apiUrl, {
       method: 'POST',
+      query: { ...params, ...(debugEnabled ? { _inspect: true } : {}) },
       body: JSON.stringify(data),
     });
 
