@@ -36,7 +36,14 @@ export const EmptyState: React.FC = ({ children }) => {
   }, [dispatch, heartbeatIndices]);
 
   useEffect(() => {
-    dispatch(getDynamicSettings());
+    // we only want to load this when user has made some change in
+    // settings page and they have already at least once loaded index status
+    // hence have data as truthy
+    if (data) {
+      dispatch(getDynamicSettings());
+    }
+    // Don't add data , it will create endless loop
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch]);
 
   return (
