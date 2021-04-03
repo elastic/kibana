@@ -6,12 +6,32 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { Suspense, ComponentType, ReactElement } from 'react';
+import { EuiLoadingSpinner, EuiErrorBoundary } from '@elastic/eui';
 
-export const ExperimentsButton = React.lazy(() => import('./experiments/experiments_button'));
-export const ExperimentsFlyout = React.lazy(() => import('./experiments/experiments_flyout'));
-export const DashboardPicker = React.lazy(() => import('./dashboard_picker'));
-export const SavedObjectSaveModalDashboard = React.lazy(
-  () => import('./saved_object_save_modal_dashboard')
+const withSuspense = <P extends {}>(
+  Component: ComponentType<P>,
+  fallback: ReactElement | null = <EuiLoadingSpinner />
+) => (props: P) => (
+  <EuiErrorBoundary>
+    <Suspense fallback={fallback}>
+      <Component {...props} />
+    </Suspense>
+  </EuiErrorBoundary>
 );
+
 export { SaveModalDashboardProps } from './saved_object_save_modal_dashboard';
+
+export const ExperimentsButton = withSuspense(
+  React.lazy(() => import('./experiments/experiments_button'))
+);
+
+export const ExperimentsFlyout = withSuspense(
+  React.lazy(() => import('./experiments/experiments_flyout'))
+);
+
+export const DashboardPicker = withSuspense(React.lazy(() => import('./dashboard_picker')));
+
+export const SavedObjectSaveModalDashboard = withSuspense(
+  React.lazy(() => import('./saved_object_save_modal_dashboard'))
+);
