@@ -134,7 +134,7 @@ const mergeTimelineFieldsWithHit = async <T>(
   dataFields: readonly string[],
   ecsFields: readonly string[]
 ) => {
-  if (fieldName != null || dataFields.includes(fieldName)) {
+  if (fieldName != null) {
     const nestedParentPath = getNestedParentPath(fieldName, hit.fields);
     if (
       nestedParentPath != null ||
