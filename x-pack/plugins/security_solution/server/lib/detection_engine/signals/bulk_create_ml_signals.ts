@@ -14,7 +14,6 @@ import {
   AlertInstanceState,
   AlertServices,
 } from '../../../../../alerting/server';
-import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RefreshTypes } from '../types';
 import { singleBulkCreate, SingleBulkCreateResponse } from './single_bulk_create';
 import { AnomalyResults, Anomaly } from '../../machine_learning';

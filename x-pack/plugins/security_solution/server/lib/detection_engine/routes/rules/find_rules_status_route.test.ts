@@ -11,6 +11,7 @@ import { serverMock, requestContextMock, requestMock } from '../__mocks__';
 import { findRulesStatusesRoute } from './find_rules_status_route';
 import { RuleStatusResponse } from '../../rules/types';
 import { AlertExecutionStatusErrorReasons } from '../../../../../../alerting/common';
+import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 
 jest.mock('../../signals/rule_status_service');
 
