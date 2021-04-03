@@ -20,7 +20,6 @@ import {
   ItemsPerSearch,
   ThreatIndicatorPathOrUndefined,
 } from '../../../../../common/detection_engine/schemas/types/threat_mapping';
-import { RuleTypeParams } from '../../types';
 import {
   AlertInstanceContext,
   AlertInstanceState,
@@ -28,7 +27,6 @@ import {
 } from '../../../../../../alerting/server';
 import { ExceptionListItemSchema } from '../../../../../../lists/common/schemas';
 import { ElasticsearchClient, Logger, SavedObject } from '../../../../../../../../src/core/server';
-import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
 import {

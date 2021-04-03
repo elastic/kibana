@@ -233,13 +233,7 @@ export const searchAfterAndBulkCreate = async ({
             buildRuleMessage(`filteredEvents.hits.hits: ${filteredEvents.hits.hits.length}`)
           );
 
-          sendAlertTelemetryEvents(
-            logger,
-            eventsTelemetry,
-            filteredEvents,
-            ruleParams,
-            buildRuleMessage
-          );
+          sendAlertTelemetryEvents(logger, eventsTelemetry, filteredEvents, buildRuleMessage);
         }
 
         if (!hasSortId && !hasBackupSortId) {

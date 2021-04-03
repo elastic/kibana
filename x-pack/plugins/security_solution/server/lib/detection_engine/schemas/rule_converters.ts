@@ -9,7 +9,6 @@ import uuid from 'uuid';
 import { SavedObject } from 'kibana/server';
 import {
   InternalRuleCreate,
-  InternalRuleResponse,
   RuleParams,
   TypeSpecificRuleParams,
   BaseRuleParams,
@@ -17,7 +16,6 @@ import {
 import { normalizeThresholdField } from '../../../../common/detection_engine/utils';
 import { assertUnreachable } from '../../../../common/utility_types';
 import {
-  CommonResponseParams,
   CreateRulesSchema,
   CreateTypeSpecific,
   FullResponseSchema,
@@ -267,6 +265,7 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
     references: params.references,
     version: params.version,
     exceptions_list: params.exceptionsList ?? [],
+    immutable: params.immutable,
   };
 };
 
@@ -278,7 +277,6 @@ export const internalRuleToAPIResponse = (
   return {
     // Alerting framework params
     id: rule.id,
-    immutable: rule.params.immutable,
     updated_at: rule.updatedAt.toISOString(),
     updated_by: rule.updatedBy ?? 'elastic',
     created_at: rule.createdAt.toISOString(),

@@ -31,7 +31,6 @@ export const buildRuleWithoutOverrides = (ruleSO: SavedObject<AlertAttributes>):
     updated_at: ruleSO.updated_at ?? '',
     ...commonParamsCamelToSnake(ruleParams),
     ...typeSpecificCamelToSnake(ruleParams),
-    immutable: ruleParams.immutable,
   };
 };
 
