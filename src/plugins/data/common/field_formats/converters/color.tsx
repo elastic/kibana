@@ -7,14 +7,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { findLast, cloneDeep, template, escape } from 'lodash';
+import React from 'react';
+import ReactDOM from 'react-dom/server';
+import { findLast, cloneDeep, escape } from 'lodash';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../field_format';
 import { HtmlContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 import { asPrettyString } from '../utils';
 import { DEFAULT_CONVERTER_COLOR } from '../constants/color_default';
-
-const convertTemplate = template('<span style="<%- style %>"><%- val %></span>');
 
 export class ColorFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.COLOR;
@@ -51,11 +51,18 @@ export class ColorFormat extends FieldFormat {
 
   htmlConvert: HtmlContextTypeConvert = (val) => {
     const color = this.findColorRuleForVal(val) as typeof DEFAULT_CONVERTER_COLOR;
-    if (!color) return escape(asPrettyString(val));
 
-    let style = '';
-    if (color.text) style += `color: ${color.text};`;
-    if (color.background) style += `background-color: ${color.background};`;
-    return convertTemplate({ val, style });
+    const displayVal = escape(asPrettyString(val));
+    if (!color) return displayVal;
+
+    return ReactDOM.renderToStaticMarkup(
+      <span
+        style={{
+          color: color.text,
+          backgroundColor: color.background,
+        }}
+        dangerouslySetInnerHTML={{ __html: displayVal }} // eslint-disable-line react/no-danger
+      />
+    );
   };
 }
