@@ -84,7 +84,7 @@ export const EnginesOverview: React.FC = () => {
       <SendTelemetry action="viewed" metric="engines_overview" />
 
       <EnginesOverviewHeader />
-      <EuiPageContent panelPaddingSize="s" className="enginesOverview">
+      <EuiPageContent hasBorder panelPaddingSize="s" className="enginesOverview">
         <FlashMessages />
         <EuiPageContentHeader responsive={false}>
           <EuiPageContentHeaderSection>
