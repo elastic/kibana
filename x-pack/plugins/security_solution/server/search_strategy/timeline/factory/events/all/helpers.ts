@@ -77,18 +77,13 @@ const getValuesFromFields = async (
       [fieldName]: get(fieldName, hit._source),
     };
   } else {
-    if (nestedParentFieldName == null || nestedParentFieldName === fieldName) {
+    if (nestedParentFieldName == null) {
       fieldToEval = {
         [fieldName]: hit.fields[fieldName],
       };
-    } else if (nestedParentFieldName != null) {
+    } else {
       fieldToEval = {
         [nestedParentFieldName]: hit.fields[nestedParentFieldName],
-      };
-    } else {
-      // fallback, should never hit
-      fieldToEval = {
-        [fieldName]: [],
       };
     }
   }
