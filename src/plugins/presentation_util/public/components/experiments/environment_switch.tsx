@@ -28,20 +28,21 @@ export interface Props {
 
 export const EnvironmentSwitch = ({ env, isChecked, onChange }: Props) => (
   <EuiFlexItem grow={false} style={{ marginBottom: '.25rem' }}>
-    <EuiSwitch
-      checked={isChecked}
-      style={{ marginTop: 1 }}
-      label={
-        <EuiFlexGroup gutterSize="xs" alignItems="flexEnd" responsive={false}>
-          <EuiFlexItem grow={false}>{switchText[env].name}</EuiFlexItem>
-          <EuiFlexItem style={{ textAlign: 'right' }}>
-            <EuiIconTip content={switchText[env].help} position="left" />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      }
-      onChange={(e) => onChange(e.target.checked)}
-      compressed
-    />
+	<EuiFlexGroup gutterSize="xs" alignItems="flexEnd" responsive={false}>
+		<EuiFlexItem grow={false}>
+		    <EuiSwitch
+		      checked={isChecked}
+		      style={{ marginTop: 1 }}
+		      label={{switchText[env].name}}
+		      onChange={(e) => onChange(e.target.checked)}
+		      compressed
+			/>
+		</EuiFlexItem>
+		          
+	    <EuiFlexItem style={{ textAlign: 'right' }}>
+	  		<EuiIconTip content={switchText[env].help} position="left" />
+	  	</EuiFlexItem>
+	 </EuiFlexGroup>    
     <EuiSpacer size="xs" />
   </EuiFlexItem>
 );
