@@ -27,7 +27,6 @@ import { getIndexPatternLoad } from './expressions';
 import { UiSettingsServerToCommon } from './ui_settings_wrapper';
 import { IndexPatternsApiServer } from './index_patterns_api_client';
 import { SavedObjectsClientServerToCommon } from './saved_objects_client_wrapper';
-import { DataRequestHandlerContext } from '../types';
 import { registerIndexPatternsUsageCollector } from './register_index_pattern_usage_collection';
 
 export interface IndexPatternsServiceStart {
@@ -89,22 +88,6 @@ export class IndexPatternsServiceProvider implements Plugin<void, IndexPatternsS
   ) {
     core.savedObjects.registerType(indexPatternSavedObjectType);
     core.capabilities.registerProvider(capabilitiesProvider);
-
-    core.http.registerRouteHandlerContext<DataRequestHandlerContext, 'indexPatterns'>(
-      'indexPatterns',
-      async (context, request) => {
-        const [coreStart, , dataStart] = await core.getStartServices();
-        try {
-          return await dataStart.indexPatterns.indexPatternsServiceFactory(
-            coreStart.savedObjects.getScopedClient(request),
-            coreStart.elasticsearch.client.asScoped(request).asCurrentUser
-          );
-        } catch (e) {
-          logger.error(e);
-          return undefined;
-        }
-      }
-    );
 
     registerRoutes(core.http, core.getStartServices);
 
