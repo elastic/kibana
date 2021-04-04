@@ -30,6 +30,7 @@ export default {
 const experiments = mapValues(experimentConfigs, (experiment) =>
   applyExperimentStatus(experiment, { kibana: false, session: false, browser: false })
 );
+
 export function List() {
   return <ExperimentsList {...{ experiments }} onStatusChange={action('onStatusChange')} />;
 }

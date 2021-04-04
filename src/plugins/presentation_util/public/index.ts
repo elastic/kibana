@@ -10,11 +10,11 @@ import { PresentationUtilPlugin } from './plugin';
 import { pluginServices } from './services';
 
 export { PresentationUtilPluginSetup, PresentationUtilPluginStart } from './types';
-export * from '../common/experiments';
+export { experimentIDs, ExperimentID, Experiment } from '../common/experiments';
 
 export {
-  ExperimentsButton,
-  ExperimentsFlyout,
+  LazyExperimentsButton,
+  LazyExperimentsFlyout,
   LazyDashboardPicker,
   LazySavedObjectSaveModalDashboard,
   withSuspense,

@@ -25,11 +25,11 @@ export const withSuspense = <P extends {}>(
   </EuiErrorBoundary>
 );
 
-export const ExperimentsButton = withSuspense(
+export const LazyExperimentsButton = withSuspense(
   React.lazy(() => import('./experiments/experiments_button'))
 );
 
-export const ExperimentsFlyout = withSuspense(
+export const LazyExperimentsFlyout = withSuspense(
   React.lazy(() => import('./experiments/experiments_flyout'))
 );
 
