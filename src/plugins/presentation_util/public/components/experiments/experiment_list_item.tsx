@@ -73,7 +73,12 @@ export const ExperimentListItem = ({ experiment, onStatusChange }: Props) => {
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFormFieldset legend={{ children: 'Override flags' }}>
+          <EuiFormFieldset legend={
+          	<>
+          		<EuiScreenreaderOnly><span>{name}</span></EuiScreenreaderOnly>
+          		{strings.getLegend()}
+          	</>
+          }>
             {environmentNames.map((env) => {
               const envStatus = status[env];
               if (envStatus !== undefined) {
