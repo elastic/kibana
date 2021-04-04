@@ -12,9 +12,9 @@ import { IRouter, SharedGlobalConfig } from 'kibana/server';
 
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
+import type { estypes } from '@elastic/elasticsearch';
 import { IFieldType } from '../index';
 import { findIndexPatternById, getFieldByName } from '../index_patterns';
-import type { estypes } from '@elastic/elasticsearch';
 import { getRequestAbortedSignal } from '../lib';
 
 export function registerValueSuggestionsRoute(
