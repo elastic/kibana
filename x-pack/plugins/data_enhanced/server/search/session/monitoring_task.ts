@@ -60,7 +60,7 @@ function searchSessionRunner(
 }
 
 export function registerSearchSessionsTask(
-  core: CoreSetup<DataEnhancedStartDependencies>, 
+  core: CoreSetup<DataEnhancedStartDependencies>,
   deps: SearchSessionTaskDeps
 ) {
   deps.taskManager.registerTaskDefinitions({
