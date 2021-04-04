@@ -109,8 +109,8 @@ export interface AggCardinality {
 export type RollupFields = Record<FieldId, [Record<'agg', ES_AGGREGATION>]>;
 
 // Replace this with import once #88995 is merged
-const RUNTIME_FIELD_TYPES = ['keyword', 'long', 'double', 'date', 'ip', 'boolean'] as const;
-type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
+export const RUNTIME_FIELD_TYPES = ['keyword', 'long', 'double', 'date', 'ip', 'boolean'] as const;
+export type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
 
 export interface RuntimeField {
   type: RuntimeType;

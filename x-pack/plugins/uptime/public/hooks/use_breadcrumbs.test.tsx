@@ -8,10 +8,11 @@
 import { ChromeBreadcrumb } from 'kibana/public';
 import React from 'react';
 import { Route } from 'react-router-dom';
-import { mountWithRouter } from '../lib';
+import { mountWithRouter } from '../lib/helper/enzyme_helpers';
 import { OVERVIEW_ROUTE } from '../../common/constants';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
-import { UptimeUrlParams, getSupportedUrlParams, MountWithReduxProvider } from '../lib/helper';
+import { UptimeUrlParams, getSupportedUrlParams } from '../lib/helper';
+import { MountWithReduxProvider } from '../lib/helper/helper_with_redux';
 import { makeBaseBreadcrumb, useBreadcrumbs } from './use_breadcrumbs';
 
 describe('useBreadcrumbs', () => {
