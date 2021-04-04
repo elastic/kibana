@@ -29,6 +29,7 @@ import {
   TaskManagerStartContract,
 } from '../../../../task_manager/server';
 import {
+  ENHANCED_ES_SEARCH_STRATEGY,
   SearchSessionRequestInfo,
   SearchSessionSavedObjectAttributes,
   SearchSessionStatus,
@@ -217,6 +218,7 @@ export class SearchSessionService
       restoreState = {},
     }: Partial<SearchSessionSavedObjectAttributes>
   ) => {
+    if (!this.sessionConfig.enabled) throw new Error('Feature is disabled');
     if (!name) throw new Error('Name is required');
     if (!appId) throw new Error('AppId is required');
     if (!urlGeneratorId) throw new Error('UrlGeneratorId is required');
@@ -316,6 +318,7 @@ export class SearchSessionService
     attributes: Partial<SearchSessionSavedObjectAttributes>
   ) => {
     this.logger.debug(`update | ${sessionId}`);
+    if (!this.sessionConfig.enabled) throw new Error('Feature is disabled');
     await this.get(deps, user, sessionId); // Verify correct user
     return deps.savedObjectsClient.update<SearchSessionSavedObjectAttributes>(
       SEARCH_SESSION_TYPE,
@@ -353,6 +356,7 @@ export class SearchSessionService
     user: AuthenticatedUser | null,
     sessionId: string
   ) => {
+    if (!this.sessionConfig.enabled) throw new Error('Feature is disabled');
     this.logger.debug(`delete | ${sessionId}`);
     await this.get(deps, user, sessionId); // Verify correct user
     return deps.savedObjectsClient.delete(SEARCH_SESSION_TYPE, sessionId);
@@ -367,9 +371,9 @@ export class SearchSessionService
     user: AuthenticatedUser | null,
     searchRequest: IKibanaSearchRequest,
     searchId: string,
-    { sessionId, strategy }: ISearchOptions
+    { sessionId, strategy = ENHANCED_ES_SEARCH_STRATEGY }: ISearchOptions
   ) => {
-    if (!sessionId || !searchId) return;
+    if (!this.sessionConfig.enabled || !sessionId || !searchId) return;
     this.logger.debug(`trackId | ${sessionId} | ${searchId}`);
 
     let idMapping: Record<string, SearchSessionRequestInfo> = {};
@@ -378,7 +382,7 @@ export class SearchSessionService
       const requestHash = createRequestHash(searchRequest.params);
       const searchInfo = {
         id: searchId,
-        strategy: strategy!,
+        strategy,
         status: SearchStatus.IN_PROGRESS,
       };
       idMapping = { [requestHash]: searchInfo };
@@ -411,7 +415,9 @@ export class SearchSessionService
     searchRequest: IKibanaSearchRequest,
     { sessionId, isStored, isRestore }: ISearchOptions
   ) => {
-    if (!sessionId) {
+    if (!this.sessionConfig.enabled) {
+      throw new Error('Feature is disabled');
+    } else if (!sessionId) {
       throw new Error('Session ID is required');
     } else if (!isStored) {
       throw new Error('Cannot get search ID from a session that is not stored');

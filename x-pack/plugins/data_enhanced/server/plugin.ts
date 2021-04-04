@@ -6,13 +6,7 @@
  */
 
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
-import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
-import {
-  PluginSetup as DataPluginSetup,
-  PluginStart as DataPluginStart,
-  usageProvider,
-} from '../../../../src/plugins/data/server';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
+import { PluginStart as DataPluginStart, usageProvider } from '../../../../src/plugins/data/server';
 import { ENHANCED_ES_SEARCH_STRATEGY, EQL_SEARCH_STRATEGY } from '../common';
 import { registerSessionRoutes } from './routes';
 import { searchSessionSavedObjectType } from './saved_objects';
@@ -22,22 +16,13 @@ import {
   eqlSearchStrategyProvider,
 } from './search';
 import { getUiSettings } from './ui_settings';
-import type { DataEnhancedRequestHandlerContext } from './type';
+import type {
+  DataEnhancedRequestHandlerContext,
+  DataEnhancedSetupDependencies as SetupDependencies,
+  DataEnhancedStartDependencies as StartDependencies,
+} from './type';
 import { ConfigSchema } from '../config';
 import { registerUsageCollector } from './collectors';
-import { SecurityPluginSetup } from '../../security/server';
-
-interface SetupDependencies {
-  data: DataPluginSetup;
-  usageCollection?: UsageCollectionSetup;
-  taskManager: TaskManagerSetupContract;
-  security?: SecurityPluginSetup;
-}
-
-export interface StartDependencies {
-  data: DataPluginStart;
-  taskManager: TaskManagerStartContract;
-}
 
 export class EnhancedDataServerPlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies> {

@@ -15,6 +15,7 @@ import { checkRunningSessions } from './check_running_sessions';
 import { CoreSetup, SavedObjectsClient, Logger } from '../../../../../../src/core/server';
 import { ConfigSchema } from '../../../config';
 import { SEARCH_SESSION_TYPE } from '../../../common';
+import { DataEnhancedStartDependencies } from '../../type';
 
 export const SEARCH_SESSIONS_TASK_TYPE = 'search_sessions_monitor';
 export const SEARCH_SESSIONS_TASK_ID = `data_enhanced_${SEARCH_SESSIONS_TASK_TYPE}`;
@@ -25,12 +26,20 @@ interface SearchSessionTaskDeps {
   config: ConfigSchema;
 }
 
-function searchSessionRunner(core: CoreSetup, { logger, config }: SearchSessionTaskDeps) {
+function searchSessionRunner(
+  core: CoreSetup<DataEnhancedStartDependencies>,
+  { logger, config }: SearchSessionTaskDeps
+) {
   return ({ taskInstance }: RunContext) => {
     return {
       async run() {
         const sessionConfig = config.search.sessions;
-        const [coreStart] = await core.getStartServices();
+        const [coreStart, pluginsStart] = await core.getStartServices();
+        if (!sessionConfig.enabled) {
+          logger.info('Search sessions are disabled. Clearing task.');
+          await pluginsStart.taskManager.removeIfExists(SEARCH_SESSIONS_TASK_ID);
+          return;
+        }
         const internalRepo = coreStart.savedObjects.createInternalRepository([SEARCH_SESSION_TYPE]);
         const internalSavedObjectsClient = new SavedObjectsClient(internalRepo);
         await checkRunningSessions(
@@ -50,7 +59,10 @@ function searchSessionRunner(core: CoreSetup, { logger, config }: SearchSessionT
   };
 }
 
-export function registerSearchSessionsTask(core: CoreSetup, deps: SearchSessionTaskDeps) {
+export function registerSearchSessionsTask(
+  core: CoreSetup<DataEnhancedStartDependencies>, 
+  deps: SearchSessionTaskDeps
+) {
   deps.taskManager.registerTaskDefinitions({
     [SEARCH_SESSIONS_TASK_TYPE]: {
       title: 'Search Sessions Monitor',
