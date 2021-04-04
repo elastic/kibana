@@ -39,18 +39,20 @@ export const ExperimentsList = (props: Props) => {
       }
 
       return (
-        <ExperimentListItem
-          experiment={experiment}
-          key={experiment.id}
-          onStatusChange={onStatusChange}
-        />
+        <li>
+          <ExperimentListItem
+            experiment={experiment}
+            key={experiment.id}
+            onStatusChange={onStatusChange}
+          />
+        </li>
       );
     })
     .filter((item) => item !== null);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
-      {items.length > 0 ? items : <EmptyList />}
+      {items.length > 0 ? <ul>{items}</ul> : <EmptyList />}
     </EuiFlexGroup>
   );
 };

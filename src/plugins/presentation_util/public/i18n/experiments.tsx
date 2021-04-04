@@ -47,6 +47,10 @@ export const ExperimentsStrings = {
         }),
     },
     ListItem: {
+      getOverrideLegend: () =>
+        i18n.translate('presentationUtil.experiments.components.overrideFlagsLabel', {
+          defaultMessage: 'Override flags',
+        }),
       getEnabledStatusMessage: () => (
         <FormattedMessage
           id="presentationUtil.experiments.components.defaultStatusMessage"

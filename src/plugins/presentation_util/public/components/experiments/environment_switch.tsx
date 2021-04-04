@@ -7,7 +7,14 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiIconTip, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSwitch,
+  EuiIconTip,
+  EuiSpacer,
+  EuiScreenReaderOnly,
+} from '@elastic/eui';
 
 import { ExperimentEnvironment } from '../../../common/experiments';
 import { ExperimentsStrings } from '../../i18n';
@@ -24,25 +31,32 @@ export interface Props {
   env: ExperimentEnvironment;
   isChecked: boolean;
   onChange: (checked: boolean) => void;
+  name: string;
 }
 
-export const EnvironmentSwitch = ({ env, isChecked, onChange }: Props) => (
+export const EnvironmentSwitch = ({ env, isChecked, onChange, name }: Props) => (
   <EuiFlexItem grow={false} style={{ marginBottom: '.25rem' }}>
-	<EuiFlexGroup gutterSize="xs" alignItems="flexEnd" responsive={false}>
-		<EuiFlexItem grow={false}>
-		    <EuiSwitch
-		      checked={isChecked}
-		      style={{ marginTop: 1 }}
-		      label={{switchText[env].name}}
-		      onChange={(e) => onChange(e.target.checked)}
-		      compressed
-			/>
-		</EuiFlexItem>
-		          
-	    <EuiFlexItem style={{ textAlign: 'right' }}>
-	  		<EuiIconTip content={switchText[env].help} position="left" />
-	  	</EuiFlexItem>
-	 </EuiFlexGroup>    
+    <EuiFlexGroup gutterSize="xs" alignItems="flexEnd" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiSwitch
+          checked={isChecked}
+          style={{ marginTop: 1 }}
+          label={
+            <EuiFlexItem grow={false}>
+              <EuiScreenReaderOnly>
+                <span>{name} - </span>
+              </EuiScreenReaderOnly>
+              {switchText[env].name}
+            </EuiFlexItem>
+          }
+          onChange={(e) => onChange(e.target.checked)}
+          compressed
+        />
+      </EuiFlexItem>
+      <EuiFlexItem style={{ textAlign: 'right' }}>
+        <EuiIconTip content={switchText[env].help} position="left" />
+      </EuiFlexItem>
+    </EuiFlexGroup>
     <EuiSpacer size="xs" />
   </EuiFlexItem>
 );

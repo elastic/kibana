@@ -14,6 +14,7 @@ import {
   EuiTitle,
   EuiText,
   EuiFormFieldset,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import classnames from 'classnames';
 
@@ -73,12 +74,18 @@ export const ExperimentListItem = ({ experiment, onStatusChange }: Props) => {
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFormFieldset legend={
-          	<>
-          		<EuiScreenreaderOnly><span>{name}</span></EuiScreenreaderOnly>
-          		{strings.getLegend()}
-          	</>
-          }>
+          <EuiFormFieldset
+            legend={{
+              children: (
+                <>
+                  <EuiScreenReaderOnly>
+                    <span>{name}</span>
+                  </EuiScreenReaderOnly>
+                  {strings.getOverrideLegend()}
+                </>
+              ),
+            }}
+          >
             {environmentNames.map((env) => {
               const envStatus = status[env];
               if (envStatus !== undefined) {
@@ -86,8 +93,8 @@ export const ExperimentListItem = ({ experiment, onStatusChange }: Props) => {
                   <EnvironmentSwitch
                     key={env}
                     isChecked={envStatus}
-                    env={env}
                     onChange={(checked) => onStatusChange(id, env, checked)}
+                    {...{ env, name }}
                   />
                 );
               }
