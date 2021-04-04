@@ -37,6 +37,23 @@ export interface BaseState extends ControlState {
   readonly outdatedDocumentsQuery: Record<string, unknown>;
   readonly retryCount: number;
   readonly retryDelay: number;
+  /**
+   * How many times to retry a step that fails with retryable_es_client_error
+   * such as a statusCode: 503 or a snapshot_in_progress_exception.
+   *
+   * We don't want to immediately crash Kibana and cause a reboot for these
+   * intermittent. However, if we're still receiving e.g. a 503 after 10 minutes
+   * this is probably not just a temporary problem so we stop trying and exit
+   * with a fatal error.
+   *
+   * Because of the exponential backoff the total time we will retry such errors
+   * is:
+   * max_retry_time = 2+4+8+16+32+64*(RETRY_ATTEMPTS-5) + ACTION_DURATION*RETRY_ATTEMPTS
+   *
+   * For RETRY_ATTEMPTS=15 (default), ACTION_DURATION=0
+   * max_retry_time = 11.7 minutes
+   */
+  readonly retryAttempts: number;
   readonly logs: Array<{ level: 'error' | 'info'; message: string }>;
   /**
    * The current alias e.g. `.kibana` which always points to the latest
