@@ -9,8 +9,12 @@ import { schema } from '@kbn/config-schema';
 
 import { v4 as uuidv4 } from 'uuid';
 
-import { createLifecycleRuleTypeFactory } from '../../../../../rule_registry/server';
-import { REFERENCE_RULE_ALERT_TYPE_ID } from '../../../../common/constants';
+import {
+  createLifecycleRuleTypeFactory,
+} from '../../../../../rule_registry/server';
+import {
+  REFERENCE_RULE_ALERT_TYPE_ID,
+} from '../../../../common/constants';
 import { SecurityRuleRegistry } from '../../../plugin';
 
 const createSecurityLifecycleRuleType = createLifecycleRuleTypeFactory<SecurityRuleRegistry>();

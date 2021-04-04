@@ -42,7 +42,12 @@ import { ILicense, LicensingPluginStart } from '../../licensing/server';
 import { FleetStartContract } from '../../fleet/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { compose } from './lib/compose/kibana';
-import { referenceRuleAlertType } from './lib/detection_engine/reference_rules/reference_rule';
+import {
+  referenceRuleAlertType,
+} from './lib/detection_engine/reference_rules/reference_rule';
+import {
+  referenceRulePersistenceAlertType,
+} from './lib/detection_engine/reference_rules/reference_rule_persistence';
 import { initRoutes } from './routes';
 import { isAlertExecutor } from './lib/detection_engine/signals/types';
 import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule_alert_type';
@@ -60,6 +65,8 @@ import {
   SIGNALS_ID,
   NOTIFICATIONS_ID,
   REFERENCE_RULE_ALERT_TYPE_ID,
+  REFERENCE_RULE_HIERARCHICAL_ALERT_TYPE_ID,
+  REFERENCE_RULE_PERSISTENCE_ALERT_TYPE_ID,
 } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerLimitedConcurrencyRoutes } from './endpoint/routes/limited_concurrency';
@@ -219,7 +226,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     registerTrustedAppsRoutes(router, endpointContext);
     registerHostIsolationRoutes(router, endpointContext);
 
-    const referenceRuleTypes = [REFERENCE_RULE_ALERT_TYPE_ID];
+    const referenceRuleTypes = [
+      REFERENCE_RULE_ALERT_TYPE_ID,
+      REFERENCE_RULE_HIERARCHICAL_ALERT_TYPE_ID,
+      REFERENCE_RULE_PERSISTENCE_ALERT_TYPE_ID,
+    ];
     const ruleTypes = [SIGNALS_ID, NOTIFICATIONS_ID, ...referenceRuleTypes];
 
     plugins.features.registerKibanaFeature({
@@ -293,6 +304,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     // Register reference rule types via rule-registry
     this.setupPlugins.ruleRegistry.registerType(referenceRuleAlertType);
+    this.setupPlugins.ruleRegistry.registerType(referenceRulePersistenceAlertType);
 
     // Continue to register legacy rules against alerting client exposed through rule-registry
     if (this.setupPlugins.alerting != null) {

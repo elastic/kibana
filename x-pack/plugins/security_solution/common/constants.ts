@@ -152,6 +152,8 @@ export const SIGNALS_ID = `siem.signals`;
  * Id's for reference rule types
  */
 export const REFERENCE_RULE_ALERT_TYPE_ID = `siem.referenceRule`;
+export const REFERENCE_RULE_HIERARCHICAL_ALERT_TYPE_ID = `siem.referenceRuleHierarchical`;
+export const REFERENCE_RULE_PERSISTENCE_ALERT_TYPE_ID = `siem.referenceRulePersistence`;
 
 /**
  * Id for the notifications alerting type

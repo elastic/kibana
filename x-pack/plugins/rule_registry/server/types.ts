@@ -15,8 +15,12 @@ import {
 } from '../../alerting/common';
 import { ActionGroup, AlertExecutorOptions } from '../../alerting/server';
 import { RuleRegistry } from './rule_registry';
-import { ScopedRuleRegistryClient } from './rule_registry/create_scoped_rule_registry_client/types';
 import { BaseRuleFieldMap } from '../common';
+import {
+  FieldsESSearchRequest,
+  ScopedRuleRegistryClient,
+} from './rule_registry/create_scoped_rule_registry_client/types';
+import { DefaultFieldMap } from './rule_registry/defaults/field_map';
 
 export type RuleParams = Type<any>;
 
@@ -66,6 +70,11 @@ type RuleExecutorFunction<
   }
 ) => Promise<Record<string, any>>;
 
+type RuleQueryFunction<
+  TFieldMap extends DefaultFieldMap,
+  TRuleParams extends RuleParams
+> = (options: { params: TypeOfRuleParams<TRuleParams> }) => FieldsESSearchRequest<TFieldMap>;
+
 interface RuleTypeBase {
   id: string;
   name: string;
@@ -93,6 +102,7 @@ export type RuleType<
     TActionVariable,
     TAdditionalRuleExecutorServices
   >;
+  query?: RuleQueryFunction<TFieldMap, TRuleParams>;
 };
 
 export type FieldMapOf<

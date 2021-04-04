@@ -25,7 +25,7 @@ type FieldsOf<TFieldMap extends BaseRuleFieldMap> =
 
 type Fields<TPattern extends string> = Array<{ field: TPattern } | TPattern> | TPattern;
 
-type FieldsESSearchRequest<TFieldMap extends BaseRuleFieldMap> = ESSearchRequest & {
+export type FieldsESSearchRequest<TFieldMap extends BaseRuleFieldMap> = ESSearchRequest & {
   body?: { fields: FieldsOf<TFieldMap> };
 };
 
