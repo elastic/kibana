@@ -9,7 +9,7 @@
 import { relative, resolve } from 'path';
 import { getConfigFromFiles } from './read_config';
 
-const fixtureFile = (name: string) => resolve(__dirname, '..', '..', '__fixtures__', name);
+const fixtureFile = (name: string) => resolve(__dirname, '..', '__fixtures__', name);
 
 test('reads single yaml from file system and parses to json', () => {
   const config = getConfigFromFiles([fixtureFile('config.yml')]);

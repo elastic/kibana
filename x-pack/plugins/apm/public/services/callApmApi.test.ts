@@ -7,7 +7,7 @@
 
 import * as callApiExports from './rest/callApi';
 import { createCallApmApi, callApmApi } from './rest/createCallApmApi';
-import { HttpSetup } from 'kibana/public';
+import { CoreStart } from 'kibana/public';
 
 const callApi = jest
   .spyOn(callApiExports, 'callApi')
@@ -15,7 +15,7 @@ const callApi = jest
 
 describe('callApmApi', () => {
   beforeEach(() => {
-    createCallApmApi({} as HttpSetup);
+    createCallApmApi({} as CoreStart);
   });
 
   afterEach(() => {
@@ -79,7 +79,7 @@ describe('callApmApi', () => {
       {},
       expect.objectContaining({
         pathname: '/api/apm',
-        method: 'POST',
+        method: 'post',
         body: {
           foo: 'bar',
           bar: 'foo',

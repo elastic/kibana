@@ -24,6 +24,7 @@ import {
   HorizontalAlignment,
   ElementClickListener,
   BrushEndListener,
+  CurveType,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
@@ -45,11 +46,7 @@ import {
 import { XYArgs, SeriesType, visualizationTypes, LayerArgs } from './types';
 import { VisualizationContainer } from '../visualization_container';
 import { isHorizontalChart, getSeriesColor } from './state_helpers';
-import {
-  DataPublicPluginStart,
-  ExpressionValueSearchContext,
-  search,
-} from '../../../../../src/plugins/data/public';
+import { ExpressionValueSearchContext, search } from '../../../../../src/plugins/data/public';
 import {
   ChartsPluginSetup,
   PaletteRegistry,
@@ -179,6 +176,13 @@ export const xyChart: ExpressionFunctionDefinition<
       help: 'Layers of visual series',
       multi: true,
     },
+    curveType: {
+      types: ['string'],
+      options: ['LINEAR', 'CURVE_MONOTONE_X'],
+      help: i18n.translate('xpack.lens.xyChart.curveType.help', {
+        defaultMessage: 'Define how curve type is rendered for a line chart',
+      }),
+    },
   },
   fn(data: LensMultiTable, args: XYArgs) {
     return {
@@ -192,10 +196,7 @@ export const xyChart: ExpressionFunctionDefinition<
   },
 };
 
-export async function calculateMinInterval(
-  { args: { layers }, data }: XYChartProps,
-  getIntervalByColumn: DataPublicPluginStart['search']['aggs']['getDateMetaByDatatableColumn']
-) {
+export async function calculateMinInterval({ args: { layers }, data }: XYChartProps) {
   const filteredLayers = getFilteredLayers(layers, data);
   if (filteredLayers.length === 0) return;
   const isTimeViz = data.dateRange && filteredLayers.every((l) => l.xScaleType === 'time');
@@ -212,9 +213,9 @@ export async function calculateMinInterval(
       return undefined;
     }
   }
-  const dateMetaData = await getIntervalByColumn(xColumn);
-  if (!dateMetaData) return;
-  const intervalDuration = search.aggs.parseInterval(dateMetaData.interval);
+  const dateInterval = search.aggs.getDateHistogramMetaDataByDatatableColumn(xColumn)?.interval;
+  if (!dateInterval) return;
+  const intervalDuration = search.aggs.parseInterval(dateInterval);
   if (!intervalDuration) return;
   return intervalDuration.as('milliseconds');
 }
@@ -223,7 +224,6 @@ export const getXyChartRenderer = (dependencies: {
   formatFactory: Promise<FormatFactory>;
   chartsThemeService: ChartsPluginSetup['theme'];
   paletteService: PaletteRegistry;
-  getIntervalByColumn: DataPublicPluginStart['search']['aggs']['getDateMetaByDatatableColumn'];
   timeZone: string;
 }): ExpressionRenderDefinition<XYChartProps> => ({
   name: 'lens_xy_chart_renderer',
@@ -254,7 +254,7 @@ export const getXyChartRenderer = (dependencies: {
           chartsThemeService={dependencies.chartsThemeService}
           paletteService={dependencies.paletteService}
           timeZone={dependencies.timeZone}
-          minInterval={await calculateMinInterval(config, dependencies.getIntervalByColumn)}
+          minInterval={await calculateMinInterval(config)}
           onClickValue={onClickValue}
           onSelectRange={onSelectRange}
           renderMode={handlers.getRenderMode()}
@@ -773,10 +773,17 @@ export function XYChart({
 
           const index = `${layerIndex}-${accessorIndex}`;
 
+          const curveType = args.curveType ? CurveType[args.curveType] : undefined;
+
           switch (seriesType) {
             case 'line':
               return (
-                <LineSeries key={index} {...seriesProps} fit={getFitOptions(fittingFunction)} />
+                <LineSeries
+                  key={index}
+                  {...seriesProps}
+                  fit={getFitOptions(fittingFunction)}
+                  curve={curveType}
+                />
               );
             case 'bar':
             case 'bar_stacked':
@@ -804,11 +811,17 @@ export function XYChart({
                   key={index}
                   {...seriesProps}
                   fit={isPercentage ? 'zero' : getFitOptions(fittingFunction)}
+                  curve={curveType}
                 />
               );
             case 'area':
               return (
-                <AreaSeries key={index} {...seriesProps} fit={getFitOptions(fittingFunction)} />
+                <AreaSeries
+                  key={index}
+                  {...seriesProps}
+                  fit={getFitOptions(fittingFunction)}
+                  curve={curveType}
+                />
               );
             default:
               return assertNever(seriesType);

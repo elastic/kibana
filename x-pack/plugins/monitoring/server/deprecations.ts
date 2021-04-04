@@ -44,7 +44,7 @@ export const deprecations = ({
       'monitoring.ui.elasticsearch.logFetchCount'
     ),
     renameFromRoot('xpack.monitoring', 'monitoring'),
-    (config, fromPath, logger) => {
+    (config, fromPath, addDeprecation) => {
       const clusterAlertsEnabled = get(config, 'monitoring.cluster_alerts.enabled', true);
       const emailNotificationsEnabled =
         clusterAlertsEnabled &&
@@ -52,38 +52,38 @@ export const deprecations = ({
       const updatedKey = get(config, `monitoring.${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}`);
       const legacyKey = get(config, `xpack.monitoring.${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}`);
       if (emailNotificationsEnabled && !updatedKey && !legacyKey) {
-        logger(
-          `Config key [${fromPath}.${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}] will be required for email notifications to work in 8.0."`
-        );
+        addDeprecation({
+          message: `Config key [${fromPath}.${CLUSTER_ALERTS_ADDRESS_CONFIG_KEY}] will be required for email notifications to work in 8.0."`,
+        });
       }
       return config;
     },
-    (config, fromPath, logger) => {
+    (config, fromPath, addDeprecation) => {
       const es: Record<string, any> = get(config, 'elasticsearch');
       if (es) {
         if (es.username === 'elastic') {
-          logger(
-            `Setting [${fromPath}.username] to "elastic" is deprecated. You should use the "kibana_system" user instead.`
-          );
+          addDeprecation({
+            message: `Setting [${fromPath}.username] to "elastic" is deprecated. You should use the "kibana_system" user instead.`,
+          });
         } else if (es.username === 'kibana') {
-          logger(
-            `Setting [${fromPath}.username] to "kibana" is deprecated. You should use the "kibana_system" user instead.`
-          );
+          addDeprecation({
+            message: `Setting [${fromPath}.username] to "kibana" is deprecated. You should use the "kibana_system" user instead.`,
+          });
         }
       }
       return config;
     },
-    (config, fromPath, logger) => {
+    (config, fromPath, addDeprecation) => {
       const ssl: Record<string, any> = get(config, 'elasticsearch.ssl');
       if (ssl) {
         if (ssl.key !== undefined && ssl.certificate === undefined) {
-          logger(
-            `Setting [${fromPath}.key] without [${fromPath}.certificate] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`
-          );
+          addDeprecation({
+            message: `Setting [${fromPath}.key] without [${fromPath}.certificate] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`,
+          });
         } else if (ssl.certificate !== undefined && ssl.key === undefined) {
-          logger(
-            `Setting [${fromPath}.certificate] without [${fromPath}.key] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`
-          );
+          addDeprecation({
+            message: `Setting [${fromPath}.certificate] without [${fromPath}.key] is deprecated. This has no effect, you should use both settings to enable TLS client authentication to Elasticsearch.`,
+          });
         }
       }
       return config;

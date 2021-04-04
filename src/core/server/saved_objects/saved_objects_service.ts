@@ -421,6 +421,7 @@ export class SavedObjectsService
         this.typeRegistry,
         kibanaConfig.index,
         esClient,
+        this.logger.get('repository'),
         includedHiddenTypes
       );
     };

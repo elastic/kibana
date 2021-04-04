@@ -106,4 +106,26 @@ describe('SourceSettings', () => {
       sourceConfigData.configuredFields.publicKey
     );
   });
+
+  describe('DownloadDiagnosticsButton', () => {
+    it('renders for org with correct href', () => {
+      const wrapper = shallow(<SourceSettings />);
+
+      expect(wrapper.find('[data-test-subj="DownloadDiagnosticsButton"]').prop('href')).toEqual(
+        '/api/workplace_search/org/sources/123/download_diagnostics'
+      );
+    });
+
+    it('renders for account with correct href', () => {
+      setMockValues({
+        ...mockValues,
+        isOrganization: false,
+      });
+      const wrapper = shallow(<SourceSettings />);
+
+      expect(wrapper.find('[data-test-subj="DownloadDiagnosticsButton"]').prop('href')).toEqual(
+        '/api/workplace_search/account/sources/123/download_diagnostics'
+      );
+    });
+  });
 });

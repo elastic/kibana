@@ -472,7 +472,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\">, elasticsearchClient: ",
+              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">, elasticsearchClient: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -3506,7 +3506,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 471
+                  "lineNumber": 472
                 }
               },
               {
@@ -3519,7 +3519,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 471
+                  "lineNumber": 472
                 }
               }
             ],
@@ -3527,7 +3527,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 471
+              "lineNumber": 472
             }
           },
           {
@@ -3544,7 +3544,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 496
+                  "lineNumber": 497
                 }
               }
             ],
@@ -3565,7 +3565,7 @@
             "label": "get",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 496
+              "lineNumber": 497
             },
             "tags": [],
             "returnComment": []
@@ -3613,7 +3613,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 515
+                  "lineNumber": 516
                 }
               },
               {
@@ -3626,7 +3626,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 515
+                  "lineNumber": 516
                 }
               }
             ],
@@ -3636,7 +3636,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 515
+              "lineNumber": 516
             }
           },
           {
@@ -3682,7 +3682,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 540
+                  "lineNumber": 541
                 }
               },
               {
@@ -3697,7 +3697,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 540
+                  "lineNumber": 541
                 }
               },
               {
@@ -3712,7 +3712,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 540
+                  "lineNumber": 541
                 }
               }
             ],
@@ -3720,7 +3720,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 540
+              "lineNumber": 541
             }
           },
           {
@@ -3766,7 +3766,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 553
+                  "lineNumber": 554
                 }
               },
               {
@@ -3781,7 +3781,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 553
+                  "lineNumber": 554
                 }
               }
             ],
@@ -3789,7 +3789,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 553
+              "lineNumber": 554
             }
           },
           {
@@ -3827,7 +3827,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 579
+                  "lineNumber": 580
                 }
               },
               {
@@ -3840,7 +3840,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 580
+                  "lineNumber": 581
                 }
               },
               {
@@ -3853,7 +3853,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 581
+                  "lineNumber": 582
                 }
               }
             ],
@@ -3861,7 +3861,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 578
+              "lineNumber": 579
             }
           },
           {
@@ -3887,7 +3887,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 664
+                  "lineNumber": 665
                 }
               }
             ],
@@ -3895,7 +3895,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 664
+              "lineNumber": 665
             }
           }
         ],
@@ -3992,7 +3992,7 @@
         "label": "getIndexPatternLoadMeta",
         "source": {
           "path": "src/plugins/data/common/index_patterns/expressions/load_index_pattern.ts",
-          "lineNumber": 41
+          "lineNumber": 42
         },
         "tags": [],
         "returnComment": [],
@@ -6040,7 +6040,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/expressions/load_index_pattern.ts",
-              "lineNumber": 18
+              "lineNumber": 19
             },
             "signature": [
               "\"index_pattern\""
@@ -6054,7 +6054,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/expressions/load_index_pattern.ts",
-              "lineNumber": 19
+              "lineNumber": 20
             },
             "signature": [
               {
@@ -6069,7 +6069,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/index_patterns/expressions/load_index_pattern.ts",
-          "lineNumber": 17
+          "lineNumber": 18
         },
         "initialIsOpen": false
       },
@@ -6780,7 +6780,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/index_patterns/expressions/load_index_pattern.ts",
-          "lineNumber": 34
+          "lineNumber": 35
         },
         "signature": [
           "ExpressionFunctionDefinition<\"indexPatternLoad\", null, Arguments, Output, ",
@@ -6813,7 +6813,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-          "lineNumber": 670
+          "lineNumber": 671
         },
         "signature": [
           "{ get: (id: string) => Promise<IndexPattern>; delete: (indexPatternId: string) => Promise<{}>; create: (spec: IndexPatternSpec, skipFetchFields?: boolean) => Promise<IndexPattern>; ensureDefaultIndexPattern: EnsureDefaultIndexPattern; getIds: (refresh?: boolean) => Promise<string[]>; getTitles: (refresh?: boolean) => Promise<string[]>; find: (search: string, size?: number) => Promise<IndexPattern[]>; getIdsWithTitle: (refresh?: boolean) => Promise<{ id: string; title: string; }[]>; clearCache: (id?: string | undefined) => void; getCache: () => Promise<SavedObject<IndexPatternSavedObjectAttrs>[] | null | undefined>; getDefault: () => Promise<IndexPattern | null>; setDefault: (id: string, force?: boolean) => Promise<void>; getFieldsForWildcard: (options: GetFieldsOptions) => Promise<any>; getFieldsForIndexPattern: (indexPattern: IndexPattern | IndexPatternSpec, options?: GetFieldsOptions | undefined) => Promise<any>; refreshFields: (indexPattern: IndexPattern) => Promise<void>; fieldArrayToMap: (fields: FieldSpec[], fieldAttrs?: FieldAttrs | undefined) => Record<string, FieldSpec>; savedObjectToSpec: (savedObject: SavedObject<IndexPatternAttributes>) => IndexPatternSpec; migrate: (indexPattern: IndexPattern, newTitle: string) => Promise<IndexPatternsService>; createAndSave: (spec: IndexPatternSpec, override?: boolean, skipFetchFields?: boolean) => Promise<IndexPattern>; createSavedObject: (indexPattern: IndexPattern, override?: boolean) => Promise<IndexPattern>; updateSavedObject: (indexPattern: IndexPattern, saveAttempts?: number, ignoreErrors?: boolean) => Promise<void | Error>; }"

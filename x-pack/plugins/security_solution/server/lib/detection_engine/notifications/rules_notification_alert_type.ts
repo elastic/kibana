@@ -91,6 +91,7 @@ export const rulesNotificationAlertType = ({
         signalsCount,
         resultsLink,
         ruleParams,
+        // @ts-expect-error @elastic/elasticsearch _source is optional
         signals,
       });
     }

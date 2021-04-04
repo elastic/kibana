@@ -2145,7 +2145,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/plugin.ts",
-                  "lineNumber": 71
+                  "lineNumber": 72
                 }
               }
             ],
@@ -2153,7 +2153,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/public/plugin.ts",
-              "lineNumber": 71
+              "lineNumber": 72
             }
           },
           {
@@ -2237,7 +2237,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/plugin.ts",
-                  "lineNumber": 81
+                  "lineNumber": 82
                 }
               },
               {
@@ -2256,7 +2256,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/plugin.ts",
-                  "lineNumber": 82
+                  "lineNumber": 83
                 }
               }
             ],
@@ -2264,7 +2264,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/public/plugin.ts",
-              "lineNumber": 80
+              "lineNumber": 81
             }
           },
           {
@@ -2315,7 +2315,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/plugin.ts",
-                  "lineNumber": 131
+                  "lineNumber": 132
                 }
               },
               {
@@ -2334,7 +2334,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/public/plugin.ts",
-                  "lineNumber": 131
+                  "lineNumber": 132
                 }
               }
             ],
@@ -2342,7 +2342,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/public/plugin.ts",
-              "lineNumber": 131
+              "lineNumber": 132
             }
           },
           {
@@ -2358,13 +2358,13 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/public/plugin.ts",
-              "lineNumber": 213
+              "lineNumber": 218
             }
           }
         ],
         "source": {
           "path": "src/plugins/data/public/plugin.ts",
-          "lineNumber": 55
+          "lineNumber": 56
         },
         "initialIsOpen": false
       },
@@ -3604,6 +3604,38 @@
             }
           },
           {
+            "id": "def-public.IndexPattern.getIndex",
+            "type": "Function",
+            "label": "getIndex",
+            "signature": [
+              "() => string"
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
+              "lineNumber": 285
+            }
+          },
+          {
+            "id": "def-public.IndexPattern.isUnsupportedTimePattern",
+            "type": "Function",
+            "label": "isUnsupportedTimePattern",
+            "signature": [
+              "() => boolean"
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
+              "lineNumber": 304
+            }
+          },
+          {
             "id": "def-public.IndexPattern.isTimeBased",
             "type": "Function",
             "label": "isTimeBased",
@@ -3616,7 +3648,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-              "lineNumber": 285
+              "lineNumber": 308
             }
           },
           {
@@ -3632,7 +3664,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-              "lineNumber": 289
+              "lineNumber": 312
             }
           },
           {
@@ -3656,7 +3688,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-              "lineNumber": 294
+              "lineNumber": 317
             }
           },
           {
@@ -3686,7 +3718,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 299
+                  "lineNumber": 322
                 }
               }
             ],
@@ -3694,7 +3726,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-              "lineNumber": 299
+              "lineNumber": 322
             }
           },
           {
@@ -3710,7 +3742,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-              "lineNumber": 304
+              "lineNumber": 327
             }
           },
           {
@@ -3728,7 +3760,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-              "lineNumber": 311
+              "lineNumber": 334
             }
           },
           {
@@ -3805,7 +3837,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 340
+                  "lineNumber": 363
                 }
               }
             ],
@@ -3813,7 +3845,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-              "lineNumber": 339
+              "lineNumber": 362
             }
           },
           {
@@ -3847,7 +3879,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 360
+                  "lineNumber": 383
                 }
               },
               {
@@ -3868,7 +3900,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 360
+                  "lineNumber": 383
                 }
               }
             ],
@@ -3876,7 +3908,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-              "lineNumber": 360
+              "lineNumber": 383
             }
           },
           {
@@ -3902,7 +3934,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 384
+                  "lineNumber": 407
                 }
               }
             ],
@@ -3910,7 +3942,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-              "lineNumber": 384
+              "lineNumber": 407
             }
           },
           {
@@ -3942,7 +3974,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 404
+                  "lineNumber": 427
                 }
               }
             ],
@@ -3950,7 +3982,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-              "lineNumber": 404
+              "lineNumber": 427
             }
           },
           {
@@ -3980,7 +4012,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 412
+                  "lineNumber": 435
                 }
               },
               {
@@ -3993,7 +4025,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 413
+                  "lineNumber": 436
                 }
               },
               {
@@ -4013,7 +4045,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 414
+                  "lineNumber": 437
                 }
               }
             ],
@@ -4021,7 +4053,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-              "lineNumber": 411
+              "lineNumber": 434
             }
           },
           {
@@ -4043,7 +4075,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 422
+                  "lineNumber": 445
                 }
               },
               {
@@ -4056,7 +4088,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 422
+                  "lineNumber": 445
                 }
               }
             ],
@@ -4064,7 +4096,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-              "lineNumber": 422
+              "lineNumber": 445
             }
           },
           {
@@ -4086,7 +4118,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 433
+                  "lineNumber": 456
                 }
               },
               {
@@ -4099,7 +4131,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 433
+                  "lineNumber": 456
                 }
               }
             ],
@@ -4107,7 +4139,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-              "lineNumber": 433
+              "lineNumber": 456
             }
           },
           {
@@ -4124,7 +4156,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 446
+                  "lineNumber": 469
                 }
               },
               {
@@ -4144,7 +4176,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 446
+                  "lineNumber": 469
                 }
               }
             ],
@@ -4163,7 +4195,7 @@
             "label": "setFieldFormat",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-              "lineNumber": 446
+              "lineNumber": 469
             },
             "tags": [],
             "returnComment": []
@@ -4182,7 +4214,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 450
+                  "lineNumber": 473
                 }
               }
             ],
@@ -4193,7 +4225,7 @@
             "label": "deleteFieldFormat",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-              "lineNumber": 450
+              "lineNumber": 473
             },
             "tags": [],
             "returnComment": []
@@ -4807,7 +4839,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 67
+              "lineNumber": 69
             },
             "signature": [
               {
@@ -4830,7 +4862,7 @@
             "children": [
               {
                 "type": "Object",
-                "label": "{\n    uiSettings,\n    savedObjectsClient,\n    apiClient,\n    fieldFormats,\n    onNotification,\n    onError,\n    onRedirectNoIndexPattern = () => {},\n  }",
+                "label": "{\n    uiSettings,\n    savedObjectsClient,\n    apiClient,\n    fieldFormats,\n    onNotification,\n    onError,\n    onUnsupportedTimePattern,\n    onRedirectNoIndexPattern = () => {},\n  }",
                 "isRequired": true,
                 "signature": [
                   "IndexPatternsServiceDeps"
@@ -4838,7 +4870,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 69
+                  "lineNumber": 71
                 }
               }
             ],
@@ -4846,7 +4878,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 69
+              "lineNumber": 71
             }
           },
           {
@@ -4863,7 +4895,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 108
+                  "lineNumber": 112
                 }
               }
             ],
@@ -4876,7 +4908,7 @@
             "label": "getIds",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 108
+              "lineNumber": 112
             },
             "tags": [],
             "returnComment": []
@@ -4895,7 +4927,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 122
+                  "lineNumber": 126
                 }
               }
             ],
@@ -4908,7 +4940,7 @@
             "label": "getTitles",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 122
+              "lineNumber": 126
             },
             "tags": [],
             "returnComment": []
@@ -4927,7 +4959,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 138
+                  "lineNumber": 142
                 }
               },
               {
@@ -4940,7 +4972,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 138
+                  "lineNumber": 142
                 }
               }
             ],
@@ -4961,7 +4993,7 @@
             "label": "find",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 138
+              "lineNumber": 142
             },
             "tags": [],
             "returnComment": [
@@ -4982,7 +5014,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 157
+                  "lineNumber": 161
                 }
               }
             ],
@@ -4995,7 +5027,7 @@
             "label": "getIdsWithTitle",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 156
+              "lineNumber": 160
             },
             "tags": [],
             "returnComment": []
@@ -5014,7 +5046,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 175
+                  "lineNumber": 179
                 }
               }
             ],
@@ -5027,7 +5059,7 @@
             "label": "clearCache",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 175
+              "lineNumber": 179
             },
             "tags": [],
             "returnComment": []
@@ -5059,7 +5091,7 @@
             "label": "getCache",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 184
+              "lineNumber": 188
             },
             "tags": [],
             "returnComment": []
@@ -5085,7 +5117,7 @@
             "label": "getDefault",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 194
+              "lineNumber": 198
             },
             "tags": [],
             "returnComment": []
@@ -5104,7 +5136,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 208
+                  "lineNumber": 212
                 }
               },
               {
@@ -5117,7 +5149,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 208
+                  "lineNumber": 212
                 }
               }
             ],
@@ -5130,7 +5162,7 @@
             "label": "setDefault",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 208
+              "lineNumber": 212
             },
             "tags": [],
             "returnComment": []
@@ -5155,7 +5187,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 219
+                  "lineNumber": 223
                 }
               }
             ],
@@ -5176,7 +5208,7 @@
             "label": "getFieldsForWildcard",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 219
+              "lineNumber": 223
             },
             "tags": [],
             "returnComment": [
@@ -5211,7 +5243,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 236
+                  "lineNumber": 240
                 }
               },
               {
@@ -5231,7 +5263,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 237
+                  "lineNumber": 241
                 }
               }
             ],
@@ -5268,7 +5300,7 @@
             "label": "getFieldsForIndexPattern",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 235
+              "lineNumber": 239
             },
             "tags": [],
             "returnComment": [
@@ -5295,7 +5327,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 250
+                  "lineNumber": 254
                 }
               }
             ],
@@ -5316,7 +5348,7 @@
             "label": "refreshFields",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 250
+              "lineNumber": 254
             },
             "tags": [],
             "returnComment": []
@@ -5342,7 +5374,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 327
+                  "lineNumber": 331
                 }
               },
               {
@@ -5362,7 +5394,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 327
+                  "lineNumber": 331
                 }
               }
             ],
@@ -5399,7 +5431,7 @@
             "label": "fieldArrayToMap",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 327
+              "lineNumber": 331
             },
             "tags": [],
             "returnComment": [
@@ -5435,7 +5467,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 343
+                  "lineNumber": 347
                 }
               }
             ],
@@ -5471,12 +5503,69 @@
             "label": "savedObjectToSpec",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 343
+              "lineNumber": 347
             },
             "tags": [],
             "returnComment": [
               "IndexPatternSpec"
             ]
+          },
+          {
+            "id": "def-public.IndexPatternsService.migrate",
+            "type": "Function",
+            "label": "migrate",
+            "signature": [
+              "(indexPattern: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataIndexPatternsPluginApi",
+                "section": "def-common.IndexPattern",
+                "text": "IndexPattern"
+              },
+              ", newTitle: string) => Promise<this>"
+            ],
+            "description": [],
+            "children": [
+              {
+                "type": "Object",
+                "label": "indexPattern",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataIndexPatternsPluginApi",
+                    "section": "def-common.IndexPattern",
+                    "text": "IndexPattern"
+                  }
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
+                  "lineNumber": 472
+                }
+              },
+              {
+                "type": "string",
+                "label": "newTitle",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
+                  "lineNumber": 472
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
+              "lineNumber": 472
+            }
           },
           {
             "id": "def-public.IndexPatternsService.get",
@@ -5492,7 +5581,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 465
+                  "lineNumber": 497
                 }
               }
             ],
@@ -5513,7 +5602,7 @@
             "label": "get",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 465
+              "lineNumber": 497
             },
             "tags": [],
             "returnComment": []
@@ -5561,7 +5650,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 484
+                  "lineNumber": 516
                 }
               },
               {
@@ -5574,7 +5663,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 484
+                  "lineNumber": 516
                 }
               }
             ],
@@ -5584,7 +5673,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 484
+              "lineNumber": 516
             }
           },
           {
@@ -5630,7 +5719,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 509
+                  "lineNumber": 541
                 }
               },
               {
@@ -5645,7 +5734,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 509
+                  "lineNumber": 541
                 }
               },
               {
@@ -5660,7 +5749,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 509
+                  "lineNumber": 541
                 }
               }
             ],
@@ -5668,7 +5757,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 509
+              "lineNumber": 541
             }
           },
           {
@@ -5714,7 +5803,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 522
+                  "lineNumber": 554
                 }
               },
               {
@@ -5729,7 +5818,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 522
+                  "lineNumber": 554
                 }
               }
             ],
@@ -5737,7 +5826,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 522
+              "lineNumber": 554
             }
           },
           {
@@ -5775,7 +5864,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 548
+                  "lineNumber": 580
                 }
               },
               {
@@ -5788,7 +5877,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 549
+                  "lineNumber": 581
                 }
               },
               {
@@ -5801,7 +5890,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 550
+                  "lineNumber": 582
                 }
               }
             ],
@@ -5809,7 +5898,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 547
+              "lineNumber": 579
             }
           },
           {
@@ -5835,7 +5924,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 633
+                  "lineNumber": 665
                 }
               }
             ],
@@ -5843,13 +5932,13 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 633
+              "lineNumber": 665
             }
           }
         ],
         "source": {
           "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-          "lineNumber": 57
+          "lineNumber": 59
         },
         "initialIsOpen": false
       },
@@ -7022,8 +7111,7 @@
             "docId": "kibDataSearchPluginApi",
             "section": "def-common.ISearchRequestParams",
             "text": "ISearchRequestParams"
-          },
-          "<Record<string, any>>"
+          }
         ],
         "description": [],
         "children": [
@@ -7363,7 +7451,7 @@
             "section": "def-common.IKibanaSearchResponse",
             "text": "IKibanaSearchResponse"
           },
-          "<any> | undefined) => boolean | undefined"
+          "<any> | undefined) => boolean"
         ],
         "description": [],
         "label": "isErrorResponse",
@@ -8696,7 +8784,7 @@
             "section": "def-common.ISearchRequestParams",
             "text": "ISearchRequestParams"
           },
-          "<Record<string, any>>>"
+          ">"
         ],
         "description": [],
         "tags": [],
@@ -8709,7 +8797,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/es_search/types.ts",
-              "lineNumber": 20
+              "lineNumber": 19
             },
             "signature": [
               "string | undefined"
@@ -8718,7 +8806,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/es_search/types.ts",
-          "lineNumber": 19
+          "lineNumber": 18
         },
         "initialIsOpen": false
       },
@@ -8737,7 +8825,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 154
+              "lineNumber": 165
             },
             "signature": [
               "{ parent: string; } | undefined"
@@ -8751,7 +8839,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 155
+              "lineNumber": 166
             },
             "signature": [
               "{ path: string; } | undefined"
@@ -8760,7 +8848,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/index_patterns/types.ts",
-          "lineNumber": 153
+          "lineNumber": 164
         },
         "initialIsOpen": false
       },
@@ -9156,6 +9244,20 @@
             ]
           },
           {
+            "tags": [],
+            "id": "def-public.IIndexPattern.intervalName",
+            "type": "CompoundType",
+            "label": "intervalName",
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/index_patterns/types.ts",
+              "lineNumber": 40
+            },
+            "signature": [
+              "string | null | undefined"
+            ]
+          },
+          {
             "id": "def-public.IIndexPattern.getTimeField",
             "type": "Function",
             "label": "getTimeField",
@@ -9176,7 +9278,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 40
+              "lineNumber": 41
             }
           },
           {
@@ -9187,7 +9289,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 41
+              "lineNumber": 42
             },
             "signature": [
               "Record<string, ",
@@ -9211,7 +9313,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 45
+              "lineNumber": 46
             },
             "signature": [
               "((field: ",
@@ -9887,7 +9989,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 54
+              "lineNumber": 55
             }
           },
           {
@@ -9898,7 +10000,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 55
+              "lineNumber": 56
             }
           },
           {
@@ -9909,7 +10011,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 56
+              "lineNumber": 57
             }
           },
           {
@@ -9920,7 +10022,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 57
+              "lineNumber": 58
             }
           },
           {
@@ -9931,7 +10033,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 58
+              "lineNumber": 59
             },
             "signature": [
               "string | undefined"
@@ -9945,7 +10047,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 59
+              "lineNumber": 60
             },
             "signature": [
               "string | undefined"
@@ -9959,7 +10061,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 60
+              "lineNumber": 61
             },
             "signature": [
               "string | undefined"
@@ -9973,7 +10075,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 61
+              "lineNumber": 62
             },
             "signature": [
               "string | undefined"
@@ -9987,7 +10089,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 62
+              "lineNumber": 63
             },
             "signature": [
               "string | undefined"
@@ -10001,7 +10103,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 63
+              "lineNumber": 64
             },
             "signature": [
               "string | undefined"
@@ -10017,7 +10119,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 67
+              "lineNumber": 68
             },
             "signature": [
               "boolean | undefined"
@@ -10026,7 +10128,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/index_patterns/types.ts",
-          "lineNumber": 53
+          "lineNumber": 54
         },
         "initialIsOpen": false
       },
@@ -10049,7 +10151,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 228
+              "lineNumber": 239
             },
             "signature": [
               "string | undefined"
@@ -10065,7 +10167,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 232
+              "lineNumber": 243
             },
             "signature": [
               "string | undefined"
@@ -10079,7 +10181,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 233
+              "lineNumber": 244
             },
             "signature": [
               "string | undefined"
@@ -10095,7 +10197,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 238
+              "lineNumber": 249
             },
             "signature": [
               "string | undefined"
@@ -10109,7 +10211,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 239
+              "lineNumber": 250
             },
             "signature": [
               "string | undefined"
@@ -10123,7 +10225,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 240
+              "lineNumber": 251
             },
             "signature": [
               {
@@ -10144,7 +10246,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 241
+              "lineNumber": 252
             },
             "signature": [
               "Record<string, ",
@@ -10166,7 +10268,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 242
+              "lineNumber": 253
             },
             "signature": [
               {
@@ -10187,7 +10289,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 243
+              "lineNumber": 254
             },
             "signature": [
               "string | undefined"
@@ -10201,7 +10303,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 244
+              "lineNumber": 255
             },
             "signature": [
               "Record<string, ",
@@ -10223,7 +10325,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 245
+              "lineNumber": 256
             },
             "signature": [
               "Record<string, ",
@@ -10245,7 +10347,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 246
+              "lineNumber": 257
             },
             "signature": [
               {
@@ -10266,7 +10368,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 247
+              "lineNumber": 258
             },
             "signature": [
               "boolean | undefined"
@@ -10275,7 +10377,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/index_patterns/types.ts",
-          "lineNumber": 224
+          "lineNumber": 235
         },
         "initialIsOpen": false
       },
@@ -10763,7 +10865,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/fetch/types.ts",
-              "lineNumber": 37
+              "lineNumber": 40
             }
           },
           {
@@ -10774,7 +10876,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/fetch/types.ts",
-              "lineNumber": 38
+              "lineNumber": 41
             }
           },
           {
@@ -10785,7 +10887,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/fetch/types.ts",
-              "lineNumber": 39
+              "lineNumber": 42
             }
           },
           {
@@ -10796,7 +10898,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/fetch/types.ts",
-              "lineNumber": 40
+              "lineNumber": 43
             }
           },
           {
@@ -10807,7 +10909,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/fetch/types.ts",
-              "lineNumber": 41
+              "lineNumber": 44
             }
           },
           {
@@ -10818,13 +10920,13 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/fetch/types.ts",
-              "lineNumber": 42
+              "lineNumber": 45
             }
           }
         ],
         "source": {
           "path": "src/plugins/data/common/search/search_source/fetch/types.ts",
-          "lineNumber": 36
+          "lineNumber": 39
         },
         "initialIsOpen": false
       },
@@ -11239,7 +11341,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 159
+              "lineNumber": 170
             },
             "signature": [
               "Record<string, Record<string, { agg?: string | undefined; interval?: number | undefined; fixed_interval?: string | undefined; calendar_interval?: string | undefined; delay?: string | undefined; time_zone?: string | undefined; }>> | undefined"
@@ -11253,7 +11355,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 160
+              "lineNumber": 171
             },
             "signature": [
               "any"
@@ -11262,7 +11364,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/index_patterns/types.ts",
-          "lineNumber": 158
+          "lineNumber": 169
         },
         "initialIsOpen": false
       }
@@ -11402,7 +11504,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/index_patterns/types.ts",
-          "lineNumber": 141
+          "lineNumber": 152
         },
         "signature": [
           "{ [x: string]: { agg?: string | undefined; interval?: number | undefined; fixed_interval?: string | undefined; calendar_interval?: string | undefined; delay?: string | undefined; time_zone?: string | undefined; }; }"
@@ -11484,7 +11586,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/es_search/types.ts",
-          "lineNumber": 13
+          "lineNumber": 12
         },
         "signature": [
           "\"es\""
@@ -11608,7 +11710,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-          "lineNumber": 26
+          "lineNumber": 34
         },
         "signature": [
           "ExpressionFunctionDefinition<\"kibana_context\", ",
@@ -11751,10 +11853,10 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/es_search/types.ts",
-          "lineNumber": 23
+          "lineNumber": 22
         },
         "signature": [
-          "IKibanaSearchResponse<SearchResponse<Source>>"
+          "IKibanaSearchResponse<estypes.SearchResponse<Source>>"
         ],
         "initialIsOpen": false
       },
@@ -11847,7 +11949,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/index_patterns/expressions/load_index_pattern.ts",
-          "lineNumber": 34
+          "lineNumber": 35
         },
         "signature": [
           "ExpressionFunctionDefinition<\"indexPatternLoad\", null, Arguments, Output, ",
@@ -11880,10 +11982,10 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-          "lineNumber": 639
+          "lineNumber": 671
         },
         "signature": [
-          "{ get: (id: string) => Promise<IndexPattern>; delete: (indexPatternId: string) => Promise<{}>; create: (spec: IndexPatternSpec, skipFetchFields?: boolean) => Promise<IndexPattern>; ensureDefaultIndexPattern: EnsureDefaultIndexPattern; getIds: (refresh?: boolean) => Promise<string[]>; getTitles: (refresh?: boolean) => Promise<string[]>; find: (search: string, size?: number) => Promise<IndexPattern[]>; getIdsWithTitle: (refresh?: boolean) => Promise<{ id: string; title: string; }[]>; clearCache: (id?: string | undefined) => void; getCache: () => Promise<SavedObject<IndexPatternSavedObjectAttrs>[] | null | undefined>; getDefault: () => Promise<IndexPattern | null>; setDefault: (id: string, force?: boolean) => Promise<void>; getFieldsForWildcard: (options: GetFieldsOptions) => Promise<any>; getFieldsForIndexPattern: (indexPattern: IndexPattern | IndexPatternSpec, options?: GetFieldsOptions | undefined) => Promise<any>; refreshFields: (indexPattern: IndexPattern) => Promise<void>; fieldArrayToMap: (fields: FieldSpec[], fieldAttrs?: FieldAttrs | undefined) => Record<string, FieldSpec>; savedObjectToSpec: (savedObject: SavedObject<IndexPatternAttributes>) => IndexPatternSpec; createAndSave: (spec: IndexPatternSpec, override?: boolean, skipFetchFields?: boolean) => Promise<IndexPattern>; createSavedObject: (indexPattern: IndexPattern, override?: boolean) => Promise<IndexPattern>; updateSavedObject: (indexPattern: IndexPattern, saveAttempts?: number, ignoreErrors?: boolean) => Promise<void | Error>; }"
+          "{ get: (id: string) => Promise<IndexPattern>; delete: (indexPatternId: string) => Promise<{}>; create: (spec: IndexPatternSpec, skipFetchFields?: boolean) => Promise<IndexPattern>; ensureDefaultIndexPattern: EnsureDefaultIndexPattern; getIds: (refresh?: boolean) => Promise<string[]>; getTitles: (refresh?: boolean) => Promise<string[]>; find: (search: string, size?: number) => Promise<IndexPattern[]>; getIdsWithTitle: (refresh?: boolean) => Promise<{ id: string; title: string; }[]>; clearCache: (id?: string | undefined) => void; getCache: () => Promise<SavedObject<IndexPatternSavedObjectAttrs>[] | null | undefined>; getDefault: () => Promise<IndexPattern | null>; setDefault: (id: string, force?: boolean) => Promise<void>; getFieldsForWildcard: (options: GetFieldsOptions) => Promise<any>; getFieldsForIndexPattern: (indexPattern: IndexPattern | IndexPatternSpec, options?: GetFieldsOptions | undefined) => Promise<any>; refreshFields: (indexPattern: IndexPattern) => Promise<void>; fieldArrayToMap: (fields: FieldSpec[], fieldAttrs?: FieldAttrs | undefined) => Record<string, FieldSpec>; savedObjectToSpec: (savedObject: SavedObject<IndexPatternAttributes>) => IndexPatternSpec; migrate: (indexPattern: IndexPattern, newTitle: string) => Promise<IndexPatternsService>; createAndSave: (spec: IndexPatternSpec, override?: boolean, skipFetchFields?: boolean) => Promise<IndexPattern>; createSavedObject: (indexPattern: IndexPattern, override?: boolean) => Promise<IndexPattern>; updateSavedObject: (indexPattern: IndexPattern, saveAttempts?: number, ignoreErrors?: boolean) => Promise<void | Error>; }"
         ],
         "initialIsOpen": false
       },
@@ -14487,15 +14589,7 @@
             "lineNumber": 46
           },
           "signature": [
-            "{ addQuerySuggestionProvider: (language: string, provider: ",
-            {
-              "pluginId": "data",
-              "scope": "public",
-              "docId": "kibDataAutocompletePluginApi",
-              "section": "def-public.QuerySuggestionGetFn",
-              "text": "QuerySuggestionGetFn"
-            },
-            ") => void; getQuerySuggestions: ",
+            "{ getQuerySuggestions: ",
             {
               "pluginId": "data",
               "scope": "public",
@@ -14687,7 +14781,7 @@
               "section": "def-common.IndexPatternsService",
               "text": "IndexPatternsService"
             },
-            ", \"get\" | \"delete\" | \"create\" | \"ensureDefaultIndexPattern\" | \"getIds\" | \"getTitles\" | \"find\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"setDefault\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\">"
+            ", \"get\" | \"delete\" | \"create\" | \"ensureDefaultIndexPattern\" | \"getIds\" | \"getTitles\" | \"find\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"setDefault\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"migrate\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\">"
           ]
         },
         {
@@ -15163,7 +15257,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\">, elasticsearchClient: ",
+              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">, elasticsearchClient: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -15190,7 +15284,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/server/plugin.ts",
-                  "lineNumber": 107
+                  "lineNumber": 104
                 }
               }
             ],
@@ -15198,7 +15292,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/server/plugin.ts",
-              "lineNumber": 107
+              "lineNumber": 104
             }
           },
           {
@@ -15214,7 +15308,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/server/plugin.ts",
-              "lineNumber": 121
+              "lineNumber": 118
             }
           }
         ],
@@ -15791,6 +15885,38 @@
             }
           },
           {
+            "id": "def-server.IndexPattern.getIndex",
+            "type": "Function",
+            "label": "getIndex",
+            "signature": [
+              "() => string"
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
+              "lineNumber": 285
+            }
+          },
+          {
+            "id": "def-server.IndexPattern.isUnsupportedTimePattern",
+            "type": "Function",
+            "label": "isUnsupportedTimePattern",
+            "signature": [
+              "() => boolean"
+            ],
+            "description": [],
+            "children": [],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
+              "lineNumber": 304
+            }
+          },
+          {
             "id": "def-server.IndexPattern.isTimeBased",
             "type": "Function",
             "label": "isTimeBased",
@@ -15803,7 +15929,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-              "lineNumber": 285
+              "lineNumber": 308
             }
           },
           {
@@ -15819,7 +15945,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-              "lineNumber": 289
+              "lineNumber": 312
             }
           },
           {
@@ -15843,7 +15969,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-              "lineNumber": 294
+              "lineNumber": 317
             }
           },
           {
@@ -15873,7 +15999,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 299
+                  "lineNumber": 322
                 }
               }
             ],
@@ -15881,7 +16007,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-              "lineNumber": 299
+              "lineNumber": 322
             }
           },
           {
@@ -15897,7 +16023,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-              "lineNumber": 304
+              "lineNumber": 327
             }
           },
           {
@@ -15915,7 +16041,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-              "lineNumber": 311
+              "lineNumber": 334
             }
           },
           {
@@ -15992,7 +16118,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 340
+                  "lineNumber": 363
                 }
               }
             ],
@@ -16000,7 +16126,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-              "lineNumber": 339
+              "lineNumber": 362
             }
           },
           {
@@ -16034,7 +16160,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 360
+                  "lineNumber": 383
                 }
               },
               {
@@ -16055,7 +16181,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 360
+                  "lineNumber": 383
                 }
               }
             ],
@@ -16063,7 +16189,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-              "lineNumber": 360
+              "lineNumber": 383
             }
           },
           {
@@ -16089,7 +16215,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 384
+                  "lineNumber": 407
                 }
               }
             ],
@@ -16097,7 +16223,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-              "lineNumber": 384
+              "lineNumber": 407
             }
           },
           {
@@ -16129,7 +16255,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 404
+                  "lineNumber": 427
                 }
               }
             ],
@@ -16137,7 +16263,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-              "lineNumber": 404
+              "lineNumber": 427
             }
           },
           {
@@ -16167,7 +16293,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 412
+                  "lineNumber": 435
                 }
               },
               {
@@ -16180,7 +16306,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 413
+                  "lineNumber": 436
                 }
               },
               {
@@ -16200,7 +16326,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 414
+                  "lineNumber": 437
                 }
               }
             ],
@@ -16208,7 +16334,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-              "lineNumber": 411
+              "lineNumber": 434
             }
           },
           {
@@ -16230,7 +16356,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 422
+                  "lineNumber": 445
                 }
               },
               {
@@ -16243,7 +16369,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 422
+                  "lineNumber": 445
                 }
               }
             ],
@@ -16251,7 +16377,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-              "lineNumber": 422
+              "lineNumber": 445
             }
           },
           {
@@ -16273,7 +16399,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 433
+                  "lineNumber": 456
                 }
               },
               {
@@ -16286,7 +16412,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 433
+                  "lineNumber": 456
                 }
               }
             ],
@@ -16294,7 +16420,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-              "lineNumber": 433
+              "lineNumber": 456
             }
           },
           {
@@ -16311,7 +16437,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 446
+                  "lineNumber": 469
                 }
               },
               {
@@ -16331,7 +16457,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 446
+                  "lineNumber": 469
                 }
               }
             ],
@@ -16350,7 +16476,7 @@
             "label": "setFieldFormat",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-              "lineNumber": 446
+              "lineNumber": 469
             },
             "tags": [],
             "returnComment": []
@@ -16369,7 +16495,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-                  "lineNumber": 450
+                  "lineNumber": 473
                 }
               }
             ],
@@ -16380,7 +16506,7 @@
             "label": "deleteFieldFormat",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts",
-              "lineNumber": 450
+              "lineNumber": 473
             },
             "tags": [],
             "returnComment": []
@@ -16407,7 +16533,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 67
+              "lineNumber": 69
             },
             "signature": [
               {
@@ -16430,7 +16556,7 @@
             "children": [
               {
                 "type": "Object",
-                "label": "{\n    uiSettings,\n    savedObjectsClient,\n    apiClient,\n    fieldFormats,\n    onNotification,\n    onError,\n    onRedirectNoIndexPattern = () => {},\n  }",
+                "label": "{\n    uiSettings,\n    savedObjectsClient,\n    apiClient,\n    fieldFormats,\n    onNotification,\n    onError,\n    onUnsupportedTimePattern,\n    onRedirectNoIndexPattern = () => {},\n  }",
                 "isRequired": true,
                 "signature": [
                   "IndexPatternsServiceDeps"
@@ -16438,7 +16564,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 69
+                  "lineNumber": 71
                 }
               }
             ],
@@ -16446,7 +16572,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 69
+              "lineNumber": 71
             }
           },
           {
@@ -16463,7 +16589,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 108
+                  "lineNumber": 112
                 }
               }
             ],
@@ -16476,7 +16602,7 @@
             "label": "getIds",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 108
+              "lineNumber": 112
             },
             "tags": [],
             "returnComment": []
@@ -16495,7 +16621,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 122
+                  "lineNumber": 126
                 }
               }
             ],
@@ -16508,7 +16634,7 @@
             "label": "getTitles",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 122
+              "lineNumber": 126
             },
             "tags": [],
             "returnComment": []
@@ -16527,7 +16653,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 138
+                  "lineNumber": 142
                 }
               },
               {
@@ -16540,7 +16666,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 138
+                  "lineNumber": 142
                 }
               }
             ],
@@ -16561,7 +16687,7 @@
             "label": "find",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 138
+              "lineNumber": 142
             },
             "tags": [],
             "returnComment": [
@@ -16582,7 +16708,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 157
+                  "lineNumber": 161
                 }
               }
             ],
@@ -16595,7 +16721,7 @@
             "label": "getIdsWithTitle",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 156
+              "lineNumber": 160
             },
             "tags": [],
             "returnComment": []
@@ -16614,7 +16740,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 175
+                  "lineNumber": 179
                 }
               }
             ],
@@ -16627,7 +16753,7 @@
             "label": "clearCache",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 175
+              "lineNumber": 179
             },
             "tags": [],
             "returnComment": []
@@ -16659,7 +16785,7 @@
             "label": "getCache",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 184
+              "lineNumber": 188
             },
             "tags": [],
             "returnComment": []
@@ -16685,7 +16811,7 @@
             "label": "getDefault",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 194
+              "lineNumber": 198
             },
             "tags": [],
             "returnComment": []
@@ -16704,7 +16830,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 208
+                  "lineNumber": 212
                 }
               },
               {
@@ -16717,7 +16843,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 208
+                  "lineNumber": 212
                 }
               }
             ],
@@ -16730,7 +16856,7 @@
             "label": "setDefault",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 208
+              "lineNumber": 212
             },
             "tags": [],
             "returnComment": []
@@ -16755,7 +16881,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 219
+                  "lineNumber": 223
                 }
               }
             ],
@@ -16776,7 +16902,7 @@
             "label": "getFieldsForWildcard",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 219
+              "lineNumber": 223
             },
             "tags": [],
             "returnComment": [
@@ -16811,7 +16937,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 236
+                  "lineNumber": 240
                 }
               },
               {
@@ -16831,7 +16957,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 237
+                  "lineNumber": 241
                 }
               }
             ],
@@ -16868,7 +16994,7 @@
             "label": "getFieldsForIndexPattern",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 235
+              "lineNumber": 239
             },
             "tags": [],
             "returnComment": [
@@ -16895,7 +17021,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 250
+                  "lineNumber": 254
                 }
               }
             ],
@@ -16916,7 +17042,7 @@
             "label": "refreshFields",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 250
+              "lineNumber": 254
             },
             "tags": [],
             "returnComment": []
@@ -16942,7 +17068,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 327
+                  "lineNumber": 331
                 }
               },
               {
@@ -16962,7 +17088,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 327
+                  "lineNumber": 331
                 }
               }
             ],
@@ -16999,7 +17125,7 @@
             "label": "fieldArrayToMap",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 327
+              "lineNumber": 331
             },
             "tags": [],
             "returnComment": [
@@ -17035,7 +17161,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 343
+                  "lineNumber": 347
                 }
               }
             ],
@@ -17071,12 +17197,69 @@
             "label": "savedObjectToSpec",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 343
+              "lineNumber": 347
             },
             "tags": [],
             "returnComment": [
               "IndexPatternSpec"
             ]
+          },
+          {
+            "id": "def-server.IndexPatternsService.migrate",
+            "type": "Function",
+            "label": "migrate",
+            "signature": [
+              "(indexPattern: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataIndexPatternsPluginApi",
+                "section": "def-common.IndexPattern",
+                "text": "IndexPattern"
+              },
+              ", newTitle: string) => Promise<this>"
+            ],
+            "description": [],
+            "children": [
+              {
+                "type": "Object",
+                "label": "indexPattern",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataIndexPatternsPluginApi",
+                    "section": "def-common.IndexPattern",
+                    "text": "IndexPattern"
+                  }
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
+                  "lineNumber": 472
+                }
+              },
+              {
+                "type": "string",
+                "label": "newTitle",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
+                  "lineNumber": 472
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
+              "lineNumber": 472
+            }
           },
           {
             "id": "def-server.IndexPatternsService.get",
@@ -17092,7 +17275,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 465
+                  "lineNumber": 497
                 }
               }
             ],
@@ -17113,7 +17296,7 @@
             "label": "get",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 465
+              "lineNumber": 497
             },
             "tags": [],
             "returnComment": []
@@ -17161,7 +17344,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 484
+                  "lineNumber": 516
                 }
               },
               {
@@ -17174,7 +17357,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 484
+                  "lineNumber": 516
                 }
               }
             ],
@@ -17184,7 +17367,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 484
+              "lineNumber": 516
             }
           },
           {
@@ -17230,7 +17413,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 509
+                  "lineNumber": 541
                 }
               },
               {
@@ -17245,7 +17428,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 509
+                  "lineNumber": 541
                 }
               },
               {
@@ -17260,7 +17443,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 509
+                  "lineNumber": 541
                 }
               }
             ],
@@ -17268,7 +17451,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 509
+              "lineNumber": 541
             }
           },
           {
@@ -17314,7 +17497,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 522
+                  "lineNumber": 554
                 }
               },
               {
@@ -17329,7 +17512,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 522
+                  "lineNumber": 554
                 }
               }
             ],
@@ -17337,7 +17520,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 522
+              "lineNumber": 554
             }
           },
           {
@@ -17375,7 +17558,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 548
+                  "lineNumber": 580
                 }
               },
               {
@@ -17388,7 +17571,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 549
+                  "lineNumber": 581
                 }
               },
               {
@@ -17401,7 +17584,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 550
+                  "lineNumber": 582
                 }
               }
             ],
@@ -17409,7 +17592,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 547
+              "lineNumber": 579
             }
           },
           {
@@ -17435,7 +17618,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 633
+                  "lineNumber": 665
                 }
               }
             ],
@@ -17443,13 +17626,13 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 633
+              "lineNumber": 665
             }
           }
         ],
         "source": {
           "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-          "lineNumber": 57
+          "lineNumber": 59
         },
         "initialIsOpen": false
       },
@@ -17468,7 +17651,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 67
+              "lineNumber": 69
             },
             "signature": [
               {
@@ -17491,7 +17674,7 @@
             "children": [
               {
                 "type": "Object",
-                "label": "{\n    uiSettings,\n    savedObjectsClient,\n    apiClient,\n    fieldFormats,\n    onNotification,\n    onError,\n    onRedirectNoIndexPattern = () => {},\n  }",
+                "label": "{\n    uiSettings,\n    savedObjectsClient,\n    apiClient,\n    fieldFormats,\n    onNotification,\n    onError,\n    onUnsupportedTimePattern,\n    onRedirectNoIndexPattern = () => {},\n  }",
                 "isRequired": true,
                 "signature": [
                   "IndexPatternsServiceDeps"
@@ -17499,7 +17682,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 69
+                  "lineNumber": 71
                 }
               }
             ],
@@ -17507,7 +17690,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 69
+              "lineNumber": 71
             }
           },
           {
@@ -17524,7 +17707,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 108
+                  "lineNumber": 112
                 }
               }
             ],
@@ -17537,7 +17720,7 @@
             "label": "getIds",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 108
+              "lineNumber": 112
             },
             "tags": [],
             "returnComment": []
@@ -17556,7 +17739,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 122
+                  "lineNumber": 126
                 }
               }
             ],
@@ -17569,7 +17752,7 @@
             "label": "getTitles",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 122
+              "lineNumber": 126
             },
             "tags": [],
             "returnComment": []
@@ -17588,7 +17771,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 138
+                  "lineNumber": 142
                 }
               },
               {
@@ -17601,7 +17784,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 138
+                  "lineNumber": 142
                 }
               }
             ],
@@ -17622,7 +17805,7 @@
             "label": "find",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 138
+              "lineNumber": 142
             },
             "tags": [],
             "returnComment": [
@@ -17643,7 +17826,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 157
+                  "lineNumber": 161
                 }
               }
             ],
@@ -17656,7 +17839,7 @@
             "label": "getIdsWithTitle",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 156
+              "lineNumber": 160
             },
             "tags": [],
             "returnComment": []
@@ -17675,7 +17858,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 175
+                  "lineNumber": 179
                 }
               }
             ],
@@ -17688,7 +17871,7 @@
             "label": "clearCache",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 175
+              "lineNumber": 179
             },
             "tags": [],
             "returnComment": []
@@ -17720,7 +17903,7 @@
             "label": "getCache",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 184
+              "lineNumber": 188
             },
             "tags": [],
             "returnComment": []
@@ -17746,7 +17929,7 @@
             "label": "getDefault",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 194
+              "lineNumber": 198
             },
             "tags": [],
             "returnComment": []
@@ -17765,7 +17948,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 208
+                  "lineNumber": 212
                 }
               },
               {
@@ -17778,7 +17961,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 208
+                  "lineNumber": 212
                 }
               }
             ],
@@ -17791,7 +17974,7 @@
             "label": "setDefault",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 208
+              "lineNumber": 212
             },
             "tags": [],
             "returnComment": []
@@ -17816,7 +17999,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 219
+                  "lineNumber": 223
                 }
               }
             ],
@@ -17837,7 +18020,7 @@
             "label": "getFieldsForWildcard",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 219
+              "lineNumber": 223
             },
             "tags": [],
             "returnComment": [
@@ -17872,7 +18055,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 236
+                  "lineNumber": 240
                 }
               },
               {
@@ -17892,7 +18075,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 237
+                  "lineNumber": 241
                 }
               }
             ],
@@ -17929,7 +18112,7 @@
             "label": "getFieldsForIndexPattern",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 235
+              "lineNumber": 239
             },
             "tags": [],
             "returnComment": [
@@ -17956,7 +18139,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 250
+                  "lineNumber": 254
                 }
               }
             ],
@@ -17977,7 +18160,7 @@
             "label": "refreshFields",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 250
+              "lineNumber": 254
             },
             "tags": [],
             "returnComment": []
@@ -18003,7 +18186,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 327
+                  "lineNumber": 331
                 }
               },
               {
@@ -18023,7 +18206,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 327
+                  "lineNumber": 331
                 }
               }
             ],
@@ -18060,7 +18243,7 @@
             "label": "fieldArrayToMap",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 327
+              "lineNumber": 331
             },
             "tags": [],
             "returnComment": [
@@ -18096,7 +18279,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 343
+                  "lineNumber": 347
                 }
               }
             ],
@@ -18132,12 +18315,69 @@
             "label": "savedObjectToSpec",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 343
+              "lineNumber": 347
             },
             "tags": [],
             "returnComment": [
               "IndexPatternSpec"
             ]
+          },
+          {
+            "id": "def-server.IndexPatternsService.migrate",
+            "type": "Function",
+            "label": "migrate",
+            "signature": [
+              "(indexPattern: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataIndexPatternsPluginApi",
+                "section": "def-common.IndexPattern",
+                "text": "IndexPattern"
+              },
+              ", newTitle: string) => Promise<this>"
+            ],
+            "description": [],
+            "children": [
+              {
+                "type": "Object",
+                "label": "indexPattern",
+                "isRequired": true,
+                "signature": [
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataIndexPatternsPluginApi",
+                    "section": "def-common.IndexPattern",
+                    "text": "IndexPattern"
+                  }
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
+                  "lineNumber": 472
+                }
+              },
+              {
+                "type": "string",
+                "label": "newTitle",
+                "isRequired": true,
+                "signature": [
+                  "string"
+                ],
+                "description": [],
+                "source": {
+                  "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
+                  "lineNumber": 472
+                }
+              }
+            ],
+            "tags": [],
+            "returnComment": [],
+            "source": {
+              "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
+              "lineNumber": 472
+            }
           },
           {
             "id": "def-server.IndexPatternsService.get",
@@ -18153,7 +18393,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 465
+                  "lineNumber": 497
                 }
               }
             ],
@@ -18174,7 +18414,7 @@
             "label": "get",
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 465
+              "lineNumber": 497
             },
             "tags": [],
             "returnComment": []
@@ -18222,7 +18462,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 484
+                  "lineNumber": 516
                 }
               },
               {
@@ -18235,7 +18475,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 484
+                  "lineNumber": 516
                 }
               }
             ],
@@ -18245,7 +18485,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 484
+              "lineNumber": 516
             }
           },
           {
@@ -18291,7 +18531,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 509
+                  "lineNumber": 541
                 }
               },
               {
@@ -18306,7 +18546,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 509
+                  "lineNumber": 541
                 }
               },
               {
@@ -18321,7 +18561,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 509
+                  "lineNumber": 541
                 }
               }
             ],
@@ -18329,7 +18569,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 509
+              "lineNumber": 541
             }
           },
           {
@@ -18375,7 +18615,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 522
+                  "lineNumber": 554
                 }
               },
               {
@@ -18390,7 +18630,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 522
+                  "lineNumber": 554
                 }
               }
             ],
@@ -18398,7 +18638,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 522
+              "lineNumber": 554
             }
           },
           {
@@ -18436,7 +18676,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 548
+                  "lineNumber": 580
                 }
               },
               {
@@ -18449,7 +18689,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 549
+                  "lineNumber": 581
                 }
               },
               {
@@ -18462,7 +18702,7 @@
                 "description": [],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 550
+                  "lineNumber": 582
                 }
               }
             ],
@@ -18470,7 +18710,7 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 547
+              "lineNumber": 579
             }
           },
           {
@@ -18496,7 +18736,7 @@
                 ],
                 "source": {
                   "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-                  "lineNumber": 633
+                  "lineNumber": 665
                 }
               }
             ],
@@ -18504,13 +18744,13 @@
             "returnComment": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-              "lineNumber": 633
+              "lineNumber": 665
             }
           }
         ],
         "source": {
           "path": "src/plugins/data/common/index_patterns/index_patterns/index_patterns.ts",
-          "lineNumber": 57
+          "lineNumber": 59
         },
         "initialIsOpen": false
       },
@@ -19507,7 +19747,7 @@
             "section": "def-common.ISearchRequestParams",
             "text": "ISearchRequestParams"
           },
-          "<Record<string, any>>>"
+          ">"
         ],
         "description": [],
         "tags": [],
@@ -19520,7 +19760,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/es_search/types.ts",
-              "lineNumber": 20
+              "lineNumber": 19
             },
             "signature": [
               "string | undefined"
@@ -19529,7 +19769,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/es_search/types.ts",
-          "lineNumber": 19
+          "lineNumber": 18
         },
         "initialIsOpen": false
       },
@@ -19548,7 +19788,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 154
+              "lineNumber": 165
             },
             "signature": [
               "{ parent: string; } | undefined"
@@ -19562,7 +19802,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 155
+              "lineNumber": 166
             },
             "signature": [
               "{ path: string; } | undefined"
@@ -19571,7 +19811,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/index_patterns/types.ts",
-          "lineNumber": 153
+          "lineNumber": 164
         },
         "initialIsOpen": false
       },
@@ -19898,7 +20138,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 54
+              "lineNumber": 55
             }
           },
           {
@@ -19909,7 +20149,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 55
+              "lineNumber": 56
             }
           },
           {
@@ -19920,7 +20160,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 56
+              "lineNumber": 57
             }
           },
           {
@@ -19931,7 +20171,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 57
+              "lineNumber": 58
             }
           },
           {
@@ -19942,7 +20182,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 58
+              "lineNumber": 59
             },
             "signature": [
               "string | undefined"
@@ -19956,7 +20196,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 59
+              "lineNumber": 60
             },
             "signature": [
               "string | undefined"
@@ -19970,7 +20210,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 60
+              "lineNumber": 61
             },
             "signature": [
               "string | undefined"
@@ -19984,7 +20224,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 61
+              "lineNumber": 62
             },
             "signature": [
               "string | undefined"
@@ -19998,7 +20238,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 62
+              "lineNumber": 63
             },
             "signature": [
               "string | undefined"
@@ -20012,7 +20252,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 63
+              "lineNumber": 64
             },
             "signature": [
               "string | undefined"
@@ -20028,7 +20268,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/index_patterns/types.ts",
-              "lineNumber": 67
+              "lineNumber": 68
             },
             "signature": [
               "boolean | undefined"
@@ -20037,7 +20277,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/index_patterns/types.ts",
-          "lineNumber": 53
+          "lineNumber": 54
         },
         "initialIsOpen": false
       },
@@ -20433,7 +20673,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/es_search/types.ts",
-          "lineNumber": 13
+          "lineNumber": 12
         },
         "signature": [
           "\"es\""
@@ -20527,7 +20767,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-          "lineNumber": 26
+          "lineNumber": 34
         },
         "signature": [
           "ExpressionFunctionDefinition<\"kibana_context\", ",
@@ -20636,10 +20876,10 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/es_search/types.ts",
-          "lineNumber": 23
+          "lineNumber": 22
         },
         "signature": [
-          "IKibanaSearchResponse<SearchResponse<Source>>"
+          "IKibanaSearchResponse<estypes.SearchResponse<Source>>"
         ],
         "initialIsOpen": false
       },
@@ -20717,7 +20957,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/index_patterns/expressions/load_index_pattern.ts",
-          "lineNumber": 34
+          "lineNumber": 35
         },
         "signature": [
           "ExpressionFunctionDefinition<\"indexPatternLoad\", null, Arguments, Output, ",

@@ -78,12 +78,13 @@ export function initFindSubCasesApi({ caseService, router, logger }: RouteDeps) 
         return response.ok({
           body: SubCasesFindResponseRt.encode(
             transformSubCases({
-              ...subCases,
+              page: subCases.page,
+              perPage: subCases.perPage,
+              total: subCases.total,
+              subCasesMap: subCases.subCasesMap,
               open,
               inProgress,
               closed,
-              // there should only be one entry in the map for the requested case ID
-              total: subCases.subCasesMap.get(request.params.case_id)?.length ?? 0,
             })
           ),
         });

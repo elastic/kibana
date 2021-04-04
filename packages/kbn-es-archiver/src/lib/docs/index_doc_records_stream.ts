@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import AggregateError from 'aggregate-error';
 import { Writable } from 'stream';
 import { Stats } from '../stats';
@@ -14,7 +14,7 @@ import { Progress } from '../progress';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
 
 export function createIndexDocRecordsStream(
-  client: Client,
+  client: KibanaClient,
   stats: Stats,
   progress: Progress,
   useCreate: boolean = false
