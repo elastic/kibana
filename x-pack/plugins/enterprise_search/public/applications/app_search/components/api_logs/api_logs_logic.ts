@@ -8,12 +8,12 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { DEFAULT_META } from '../../../shared/constants';
-import { flashAPIErrors, setErrorMessage } from '../../../shared/flash_messages';
+import { flashAPIErrors, flashErrorToast } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { updateMetaPageIndex } from '../../../shared/table_pagination';
 import { EngineLogic } from '../engine';
 
-import { POLLING_DURATION, POLLING_ERROR_MESSAGE } from './constants';
+import { POLLING_DURATION, POLLING_ERROR_TITLE, POLLING_ERROR_TEXT } from './constants';
 import { ApiLogsData, ApiLog } from './types';
 import { getDateString } from './utils';
 
@@ -122,9 +122,12 @@ export const ApiLogsLogic = kea<MakeLogicType<ApiLogsValues, ApiLogsActions>>({
         }
       } catch (e) {
         if (isPoll) {
-          // If polling fails, it will typically be due due to http connection -
+          // If polling fails, it will typically be due to http connection -
           // we should send a more human-readable message if so
-          setErrorMessage(POLLING_ERROR_MESSAGE);
+          flashErrorToast(POLLING_ERROR_TITLE, {
+            text: POLLING_ERROR_TEXT,
+            toastLifeTimeMs: POLLING_DURATION * 0.75,
+          });
         } else {
           flashAPIErrors(e);
         }
