@@ -127,8 +127,7 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({ phase, descr
           /**
            * Node role allocation moves data in a phase to a corresponding tier of the same name. To prevent policy execution from getting
            * stuck ILM allocation will fall back to a previous tier if possible. We show the WARNING below to inform a user when even
-           * this fallback will not succeed.
-           * NOTE: Can this ever happen?
+           * this fallback will not succeed, for example if the user only has 'data' node roles, and no `data_<tier>` node roles.
            */
           if (noTiersAvailable) {
             return (
