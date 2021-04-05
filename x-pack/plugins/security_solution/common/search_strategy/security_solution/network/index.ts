@@ -23,6 +23,8 @@ export enum NetworkQueries {
   overview = 'overviewNetwork',
   tls = 'tls',
   topCountries = 'topCountries',
+  topCountriesSummary = 'topCountriesSummary',
   topNFlow = 'topNFlow',
+  topNFlowSummary = 'topNFlowSummary',
   users = 'users',
 }

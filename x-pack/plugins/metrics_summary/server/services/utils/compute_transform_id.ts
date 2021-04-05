@@ -24,9 +24,9 @@ export const computeTransformId = ({
   // TODO: Check for invalid characters on the main route for prefixExists and suffixExists and do an invalidation
   // if either have invalid characters for a job name. Might want to add that same check within the API too at a top level?
   if (prefixExists && suffixExists) {
-    return `${prefix}_${ELASTIC_NAME}_${moduleName}_${id}_${suffix}`;
+    return `${ELASTIC_NAME}_${prefix}_${moduleName}_${id}_${suffix}`;
   } else if (prefixExists) {
-    return `${prefix}_${ELASTIC_NAME}_${moduleName}_${id}`;
+    return `${ELASTIC_NAME}_${prefix}_${moduleName}_${id}`;
   } else if (suffixExists) {
     return `${ELASTIC_NAME}_${moduleName}_${id}_${suffix}`;
   } else {

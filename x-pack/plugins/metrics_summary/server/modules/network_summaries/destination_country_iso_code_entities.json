@@ -1,5 +1,5 @@
 {
-  "id": "destination_country_iso_code_entities",
+  "id": "dest_country_iso_code_entities",
   "description": "Unique destination country iso code",
   "pivot": {
     "group_by": {

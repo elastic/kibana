@@ -40,6 +40,7 @@ export enum ModuleNames {
  * key values.
  */
 export const installableTransforms: Record<ModuleNames, Transforms[]> = {
+  // TODO: Do we want all modules based on security solutions or broken apart?
   [ModuleNames.securitySolutions]: [
     hostHistogram,
     hostEntities,
@@ -47,7 +48,11 @@ export const installableTransforms: Record<ModuleNames, Transforms[]> = {
     sourceIpEntities,
     destinationCountryIsoCodeEntities,
     sourceCountryIsoCodeEntities,
+    userEntities,
+    ipHistogram,
+    userHistogram,
   ],
+
   [ModuleNames.hostMetrics]: [hostHistogram],
   [ModuleNames.hostSummaries]: [hostEntities],
   [ModuleNames.networkSummaries]: [
@@ -67,6 +72,7 @@ export const installableTransforms: Record<ModuleNames, Transforms[]> = {
  * that will be ok as we will not installs the mapping twice.
  */
 export const installableMappings: Record<ModuleNames, Mappings[]> = {
+  // TODO: Do we want all modules based on security solutions or broken apart?
   [ModuleNames.securitySolutions]: [
     hostHistogramMapping,
     hostEntitiesMapping,
@@ -78,6 +84,7 @@ export const installableMappings: Record<ModuleNames, Mappings[]> = {
     userEntitiesMapping,
     userHistogramMapping,
   ],
+
   [ModuleNames.hostMetrics]: [hostHistogramMapping],
   [ModuleNames.hostSummaries]: [hostEntitiesMapping],
   [ModuleNames.networkSummaries]: [

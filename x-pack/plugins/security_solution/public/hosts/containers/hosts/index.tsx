@@ -30,6 +30,7 @@ import * as i18n from './translations';
 import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
+import { useTransforms } from '../../../transforms/containers/use_transforms';
 
 const ID = 'hostsAllQuery';
 
@@ -76,6 +77,7 @@ export const useAllHost = ({
   const searchSubscription = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
   const [hostsRequest, setHostRequest] = useState<HostsRequestOptions | null>(null);
+  const { getTransformChangesIfTheyExist } = useTransforms();
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
@@ -165,11 +167,16 @@ export const useAllHost = ({
 
   useEffect(() => {
     setHostRequest((prevRequest) => {
+      const { indices, factoryQueryType } = getTransformChangesIfTheyExist({
+        factoryQueryType: HostsQueries.hosts,
+        indices: indexNames,
+        filterQuery,
+      });
       const myRequest = {
         ...(prevRequest ?? {}),
-        defaultIndex: indexNames,
+        defaultIndex: indices,
         docValueFields: docValueFields ?? [],
-        factoryQueryType: HostsQueries.hosts,
+        factoryQueryType,
         filterQuery: createFilter(filterQuery),
         pagination: generateTablePaginationOptions(activePage, limit),
         timerange: {
@@ -197,6 +204,7 @@ export const useAllHost = ({
     limit,
     startDate,
     sortField,
+    getTransformChangesIfTheyExist,
   ]);
 
   useEffect(() => {

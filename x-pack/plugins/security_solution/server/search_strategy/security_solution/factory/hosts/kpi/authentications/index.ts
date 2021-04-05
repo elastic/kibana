@@ -16,7 +16,11 @@ import {
 import { inspectStringifyObject } from '../../../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../../../types';
 import { buildHostsKpiAuthenticationsQuery } from './query.hosts_kpi_authentications.dsl';
-import { formatAuthenticationsHistogramData } from './helpers';
+import {
+  formatAuthenticationsHistogramData,
+  formatAuthenticationsHistogramDataSummary,
+} from './helpers';
+import { buildHostsKpiAuthenticationsQuerySummary } from './query.hosts_kpi_authentications_summary.dsl';
 
 export const hostsKpiAuthentications: SecuritySolutionFactory<HostsKpiQueries.kpiAuthentications> = {
   buildDsl: (options: HostsKpiAuthenticationsRequestOptions) =>
@@ -57,6 +61,51 @@ export const hostsKpiAuthentications: SecuritySolutionFactory<HostsKpiQueries.kp
         response.rawResponse
       ),
       authenticationsFailureHistogram: formatAuthenticationsHistogramData(
+        authenticationsFailureHistogram
+      ),
+    };
+  },
+};
+
+export const hostsKpiAuthenticationsSummary: SecuritySolutionFactory<HostsKpiQueries.kpiAuthentications> = {
+  buildDsl: (options: HostsKpiAuthenticationsRequestOptions) =>
+    buildHostsKpiAuthenticationsQuerySummary(options),
+  parse: async (
+    options: HostsKpiAuthenticationsRequestOptions,
+    response: IEsSearchResponse<unknown>
+  ): Promise<HostsKpiAuthenticationsStrategyResponse> => {
+    const inspect = {
+      dsl: [inspectStringifyObject(buildHostsKpiAuthenticationsQuerySummary(options))],
+    };
+
+    const authenticationsSuccessHistogram = getOr(
+      null,
+      'aggregations.authentication_success_histogram.buckets',
+      response.rawResponse
+    );
+    const authenticationsFailureHistogram = getOr(
+      null,
+      'aggregations.authentication_failure_histogram.buckets',
+      response.rawResponse
+    );
+
+    return {
+      ...response,
+      inspect,
+      authenticationsSuccess: getOr(
+        null,
+        'aggregations.authentication_success.value',
+        response.rawResponse
+      ),
+      authenticationsSuccessHistogram: formatAuthenticationsHistogramDataSummary(
+        authenticationsSuccessHistogram
+      ),
+      authenticationsFailure: getOr(
+        null,
+        'aggregations.authentication_failure.value',
+        response.rawResponse
+      ),
+      authenticationsFailureHistogram: formatAuthenticationsHistogramDataSummary(
         authenticationsFailureHistogram
       ),
     };

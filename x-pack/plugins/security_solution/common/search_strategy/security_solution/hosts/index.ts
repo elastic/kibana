@@ -16,9 +16,11 @@ export * from './uncommon_processes';
 
 export enum HostsQueries {
   authentications = 'authentications',
+  authenticationsSummary = 'authenticationsSummary',
   details = 'details',
   firstOrLastSeen = 'firstOrLastSeen',
   hosts = 'hosts',
+  hostsSummary = 'hostsSummary',
   overview = 'overviewHost',
   uncommonProcesses = 'uncommonProcesses',
 }

@@ -6,6 +6,7 @@
  */
 
 import { ENABLE_CASE_CONNECTOR } from '../../cases/common/constants';
+import type { TransformConfigSchema } from './transforms/types';
 
 export const APP_ID = 'securitySolution';
 export const SERVER_APP_ID = 'siem';
@@ -36,6 +37,7 @@ export const DEFAULT_INTERVAL_PAUSE = true;
 export const DEFAULT_INTERVAL_TYPE = 'manual';
 export const DEFAULT_INTERVAL_VALUE = 300000; // ms
 export const DEFAULT_TIMEPICKER_QUICK_RANGES = 'timepicker:quickRanges';
+export const DEFAULT_TRANSFORMS = 'securitySolution:transforms';
 export const SCROLLING_DISABLED_CLASS_NAME = 'scrolling-disabled';
 export const GLOBAL_HEADER_HEIGHT = 98; // px
 export const FILTERS_GLOBAL_HEIGHT = 109; // px
@@ -103,6 +105,38 @@ export const IP_REPUTATION_LINKS_SETTING_DEFAULT = `[
   { "name": "virustotal.com", "url_template": "https://www.virustotal.com/gui/search/{{ip}}" },
   { "name": "talosIntelligence.com", "url_template": "https://talosintelligence.com/reputation_center/lookup?search={{ip}}" }
 ]`;
+
+/** The default settings for the transforms */
+export const defaultTransformsSetting: TransformConfigSchema = {
+  enabled: false,
+  query: [
+    {
+      range: {
+        '@timestamp': {
+          gte: 'now-1d/d',
+          format: 'strict_date_optional_time',
+        },
+      },
+    },
+  ],
+  retention_policy: {
+    time: {
+      field: '@timestamp',
+      max_age: '3d',
+    },
+  },
+  max_page_search_size: 5000,
+  settings: [
+    {
+      prefix: 'all',
+      indices: ['auditbeat-*', 'endgame-*', 'filebeat-*', 'logs-*', 'packetbeat-*', 'winlogbeat-*'],
+      data_sources: [
+        ['auditbeat-*', 'endgame-*', 'filebeat-*', 'logs-*', 'packetbeat-*', 'winlogbeat-*'],
+      ],
+    },
+  ],
+};
+export const DEFAULT_TRANSFORMS_SETTING = JSON.stringify(defaultTransformsSetting, null, 2);
 
 /**
  * Id for the signals alerting type

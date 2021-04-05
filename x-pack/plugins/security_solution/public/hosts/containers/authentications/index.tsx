@@ -33,6 +33,7 @@ import { InspectResponse } from '../../../types';
 import { hostsModel, hostsSelectors } from '../../store';
 
 import * as i18n from './translations';
+import { useTransforms } from '../../../transforms/containers/use_transforms';
 
 const ID = 'hostsAuthenticationsQuery';
 
@@ -80,6 +81,7 @@ export const useAuthentications = ({
     authenticationsRequest,
     setAuthenticationsRequest,
   ] = useState<HostAuthenticationsRequestOptions | null>(null);
+  const { getTransformChangesIfTheyExist } = useTransforms();
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
@@ -169,11 +171,17 @@ export const useAuthentications = ({
 
   useEffect(() => {
     setAuthenticationsRequest((prevRequest) => {
+      const { indices, factoryQueryType } = getTransformChangesIfTheyExist({
+        factoryQueryType: HostsQueries.authentications,
+        indices: indexNames,
+        filterQuery,
+      });
+
       const myRequest = {
         ...(prevRequest ?? {}),
-        defaultIndex: indexNames,
+        defaultIndex: indices,
         docValueFields: docValueFields ?? [],
-        factoryQueryType: HostsQueries.authentications,
+        factoryQueryType,
         filterQuery: createFilter(filterQuery),
         pagination: generateTablePaginationOptions(activePage, limit),
         timerange: {
@@ -188,7 +196,16 @@ export const useAuthentications = ({
       }
       return prevRequest;
     });
-  }, [activePage, docValueFields, endDate, filterQuery, indexNames, limit, startDate]);
+  }, [
+    activePage,
+    docValueFields,
+    endDate,
+    filterQuery,
+    indexNames,
+    limit,
+    startDate,
+    getTransformChangesIfTheyExist,
+  ]);
 
   useEffect(() => {
     authenticationsSearch(authenticationsRequest);

@@ -10,6 +10,7 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
+import { useTransforms } from '../../../../transforms/containers/use_transforms';
 import { inputsModel } from '../../../../common/store';
 import { createFilter } from '../../../../common/containers/helpers';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -54,6 +55,8 @@ export const useHostsKpiUniqueIps = ({
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
+  const { getTransformChangesIfTheyExist } = useTransforms();
+
   const [
     hostsKpiUniqueIpsRequest,
     setHostsKpiUniqueIpsRequest,
@@ -129,11 +132,16 @@ export const useHostsKpiUniqueIps = ({
   );
 
   useEffect(() => {
+    const { indices, factoryQueryType } = getTransformChangesIfTheyExist({
+      factoryQueryType: HostsKpiQueries.kpiUniqueIps,
+      indices: indexNames,
+      filterQuery,
+    });
     setHostsKpiUniqueIpsRequest((prevRequest) => {
       const myRequest = {
         ...(prevRequest ?? {}),
-        defaultIndex: indexNames,
-        factoryQueryType: HostsKpiQueries.kpiUniqueIps,
+        defaultIndex: indices,
+        factoryQueryType,
         filterQuery: createFilter(filterQuery),
         timerange: {
           interval: '12h',
@@ -146,7 +154,7 @@ export const useHostsKpiUniqueIps = ({
       }
       return prevRequest;
     });
-  }, [indexNames, endDate, filterQuery, skip, startDate]);
+  }, [indexNames, endDate, filterQuery, skip, startDate, getTransformChangesIfTheyExist]);
 
   useEffect(() => {
     hostsKpiUniqueIpsSearch(hostsKpiUniqueIpsRequest);

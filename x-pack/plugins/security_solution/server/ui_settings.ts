@@ -29,7 +29,10 @@ import {
   DEFAULT_RULE_REFRESH_INTERVAL_ON,
   DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
   DEFAULT_RULE_REFRESH_IDLE_VALUE,
+  DEFAULT_TRANSFORMS,
+  DEFAULT_TRANSFORMS_SETTING,
 } from '../common/constants';
+import { transformConfigSchema } from '../common/transforms/types';
 
 export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
   uiSettings.register({
@@ -180,6 +183,24 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
           url_template: schema.string(),
         })
       ),
+    },
+    [DEFAULT_TRANSFORMS]: {
+      name: i18n.translate('xpack.securitySolution.uiSettings.transforms', {
+        defaultMessage: 'Default transforms to use',
+      }),
+      value: DEFAULT_TRANSFORMS_SETTING,
+      type: 'json',
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.ipReputationLinksDescription',
+        {
+          // TODO: Add a hyperlink to documentation about this feature
+          defaultMessage: 'Transforms to use within the application',
+        }
+      ),
+      sensitive: true,
+      category: [APP_ID],
+      requiresPageReload: false,
+      schema: transformConfigSchema,
     },
   });
 };

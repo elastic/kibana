@@ -14,6 +14,7 @@ import {
 import { inspectStringifyObject } from '../../../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../../../types';
 import { buildTlsHandshakeQuery } from './query.network_kpi_tls_handshakes.dsl';
+import { buildTlsHandshakeQuerySummary } from './query.network_kpi_tls_handshakes_summary.dsl';
 
 export const networkKpiTlsHandshakes: SecuritySolutionFactory<NetworkKpiQueries.tlsHandshakes> = {
   buildDsl: (options: NetworkKpiTlsHandshakesRequestOptions) => buildTlsHandshakeQuery(options),
@@ -30,6 +31,26 @@ export const networkKpiTlsHandshakes: SecuritySolutionFactory<NetworkKpiQueries.
       inspect,
       // @ts-expect-error code doesn't handle TotalHits
       tlsHandshakes: response.rawResponse.hits.total,
+    };
+  },
+};
+
+export const networkKpiTlsHandshakesSummary: SecuritySolutionFactory<NetworkKpiQueries.tlsHandshakes> = {
+  buildDsl: (options: NetworkKpiTlsHandshakesRequestOptions) =>
+    buildTlsHandshakeQuerySummary(options),
+  parse: async (
+    options: NetworkKpiTlsHandshakesRequestOptions,
+    response: IEsSearchResponse<unknown>
+  ): Promise<NetworkKpiTlsHandshakesStrategyResponse> => {
+    const inspect = {
+      dsl: [inspectStringifyObject(buildTlsHandshakeQuerySummary(options))],
+    };
+
+    return {
+      ...response,
+      inspect,
+      // @ts-expect-error code doesn't handle TotalHits
+      tlsHandshakes: response.rawResponse.aggregations?.tls?.value ?? null,
     };
   },
 };

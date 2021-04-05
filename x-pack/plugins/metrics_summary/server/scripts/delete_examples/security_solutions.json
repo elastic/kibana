@@ -1,3 +1,4 @@
 {
-  "modules": ["security_solutions"]
+  "modules": ["security_solutions"],
+  "prefix": "all"
 }

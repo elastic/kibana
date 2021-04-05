@@ -5,10 +5,19 @@
  * 2.0.
  */
 
+import { getSummaryParser } from '../helpers';
 import { buildAuthenticationsHistogramQuery } from './query.authentications_histogram.dsl';
+import { buildAuthenticationsHistogramQuerySummary } from './query.authentications_histogram_summary.dsl';
 
 export const authenticationsMatrixHistogramConfig = {
   buildDsl: buildAuthenticationsHistogramQuery,
   aggName: 'aggregations.eventActionGroup.buckets',
   parseKey: 'events.buckets',
+};
+
+export const authenticationsMatrixHistogramSummaryConfig = {
+  buildDsl: buildAuthenticationsHistogramQuerySummary,
+  aggName: 'aggregations.events.buckets',
+  parseKey: 'events.buckets',
+  parser: getSummaryParser,
 };

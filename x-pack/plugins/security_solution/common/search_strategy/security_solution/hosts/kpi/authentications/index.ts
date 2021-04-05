@@ -12,6 +12,8 @@ import { HostsKpiHistogramData } from '../common';
 
 export interface HostsKpiAuthenticationsHistogramCount {
   doc_count: number;
+  // TODO: Should I keep this or split this interface into two for summary and non-summary?
+  value?: number;
 }
 
 export type HostsKpiAuthenticationsRequestOptions = RequestBasicOptions;

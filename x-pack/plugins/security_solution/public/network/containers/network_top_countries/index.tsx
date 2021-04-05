@@ -29,6 +29,7 @@ import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/pl
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import * as i18n from './translations';
+import { useTransforms } from '../../../transforms/containers/use_transforms';
 
 const ID = 'networkTopCountriesQuery';
 
@@ -74,6 +75,7 @@ export const useNetworkTopCountries = ({
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
   const queryId = useMemo(() => `${ID}-${flowTarget}`, [flowTarget]);
+  const { getTransformChangesIfTheyExist } = useTransforms();
 
   const [
     networkTopCountriesRequest,
@@ -172,10 +174,16 @@ export const useNetworkTopCountries = ({
 
   useEffect(() => {
     setHostRequest((prevRequest) => {
+      const { indices, factoryQueryType } = getTransformChangesIfTheyExist({
+        factoryQueryType: NetworkQueries.topCountries,
+        indices: indexNames,
+        filterQuery,
+      });
+
       const myRequest = {
         ...(prevRequest ?? {}),
-        defaultIndex: indexNames,
-        factoryQueryType: NetworkQueries.topCountries,
+        defaultIndex: indices,
+        factoryQueryType,
         filterQuery: createFilter(filterQuery),
         flowTarget,
         ip,
@@ -192,7 +200,18 @@ export const useNetworkTopCountries = ({
       }
       return prevRequest;
     });
-  }, [activePage, indexNames, endDate, filterQuery, ip, limit, startDate, sort, flowTarget]);
+  }, [
+    activePage,
+    indexNames,
+    endDate,
+    filterQuery,
+    ip,
+    limit,
+    startDate,
+    sort,
+    flowTarget,
+    getTransformChangesIfTheyExist,
+  ]);
 
   useEffect(() => {
     networkTopCountriesSearch(networkTopCountriesRequest);

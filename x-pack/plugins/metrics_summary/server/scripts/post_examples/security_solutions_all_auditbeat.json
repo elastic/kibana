@@ -9,6 +9,7 @@
   },
   "modules": ["security_solutions"],
   "indices": ["auditbeat-*"],
+  "prefix": "all",
   "auto_start": true,
   "settings": {
     "max_page_search_size": 5000

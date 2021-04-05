@@ -10,6 +10,7 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
+import { useTransforms } from '../../../../transforms/containers/use_transforms';
 import { inputsModel } from '../../../../common/store';
 import { createFilter } from '../../../../common/containers/helpers';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -57,6 +58,7 @@ export const useHostsKpiHosts = ({
     hostsKpiHostsRequest,
     setHostsKpiHostsRequest,
   ] = useState<HostsKpiHostsRequestOptions | null>(null);
+  const { getTransformChangesIfTheyExist } = useTransforms();
 
   const [hostsKpiHostsResponse, setHostsKpiHostsResponse] = useState<HostsKpiHostsArgs>({
     hosts: 0,
@@ -123,10 +125,15 @@ export const useHostsKpiHosts = ({
 
   useEffect(() => {
     setHostsKpiHostsRequest((prevRequest) => {
+      const { indices, factoryQueryType } = getTransformChangesIfTheyExist({
+        factoryQueryType: HostsKpiQueries.kpiHosts,
+        indices: indexNames,
+        filterQuery,
+      });
       const myRequest = {
         ...(prevRequest ?? {}),
-        defaultIndex: indexNames,
-        factoryQueryType: HostsKpiQueries.kpiHosts,
+        defaultIndex: indices,
+        factoryQueryType,
         filterQuery: createFilter(filterQuery),
         timerange: {
           interval: '12h',
@@ -139,7 +146,7 @@ export const useHostsKpiHosts = ({
       }
       return prevRequest;
     });
-  }, [indexNames, endDate, filterQuery, startDate]);
+  }, [indexNames, endDate, filterQuery, startDate, getTransformChangesIfTheyExist]);
 
   useEffect(() => {
     hostsKpiHostsSearch(hostsKpiHostsRequest);

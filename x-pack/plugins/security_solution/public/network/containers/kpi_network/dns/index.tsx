@@ -10,6 +10,7 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
+import { useTransforms } from '../../../../transforms/containers/use_transforms';
 import { inputsModel } from '../../../../common/store';
 import { createFilter } from '../../../../common/containers/helpers';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -62,6 +63,7 @@ export const useNetworkKpiDns = ({
     networkKpiDnsRequest,
     setNetworkKpiDnsRequest,
   ] = useState<NetworkKpiDnsRequestOptions | null>(null);
+  const { getTransformChangesIfTheyExist } = useTransforms();
 
   const [networkKpiDnsResponse, setNetworkKpiDnsResponse] = useState<NetworkKpiDnsArgs>({
     dnsQueries: 0,
@@ -127,10 +129,16 @@ export const useNetworkKpiDns = ({
 
   useEffect(() => {
     setNetworkKpiDnsRequest((prevRequest) => {
+      const { indices, factoryQueryType } = getTransformChangesIfTheyExist({
+        factoryQueryType: NetworkKpiQueries.dns,
+        indices: indexNames,
+        filterQuery,
+      });
+
       const myRequest = {
         ...(prevRequest ?? {}),
-        defaultIndex: indexNames,
-        factoryQueryType: NetworkKpiQueries.dns,
+        defaultIndex: indices,
+        factoryQueryType,
         filterQuery: createFilter(filterQuery),
         timerange: {
           interval: '12h',
@@ -143,7 +151,7 @@ export const useNetworkKpiDns = ({
       }
       return prevRequest;
     });
-  }, [indexNames, endDate, filterQuery, startDate]);
+  }, [indexNames, endDate, filterQuery, startDate, getTransformChangesIfTheyExist]);
 
   useEffect(() => {
     networkKpiDnsSearch(networkKpiDnsRequest);

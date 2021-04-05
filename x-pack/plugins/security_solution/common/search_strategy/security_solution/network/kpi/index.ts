@@ -19,10 +19,14 @@ import { NetworkKpiUniquePrivateIpsStrategyResponse } from './unique_private_ips
 
 export enum NetworkKpiQueries {
   dns = 'networkKpiDns',
+  dnsSummary = 'networkKpiDnsSummary',
   networkEvents = 'networkKpiNetworkEvents',
+  networkEventsSummary = 'networkKpiNetworkEventsSummary',
   tlsHandshakes = 'networkKpiTlsHandshakes',
+  tlsHandshakesSummary = 'networkKpiTlsHandshakesSummary',
   uniqueFlows = 'networkKpiUniqueFlows',
   uniquePrivateIps = 'networkKpiUniquePrivateIps',
+  uniquePrivateIpsSummary = 'networkKpiUniquePrivateIpsSummary',
 }
 
 export type NetworkKpiStrategyResponse =

@@ -10,6 +10,7 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
+import { useTransforms } from '../../../../transforms/containers/use_transforms';
 import { inputsModel } from '../../../../common/store';
 import { createFilter } from '../../../../common/containers/helpers';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -62,6 +63,7 @@ export const useNetworkKpiNetworkEvents = ({
     networkKpiNetworkEventsRequest,
     setNetworkKpiNetworkEventsRequest,
   ] = useState<NetworkKpiNetworkEventsRequestOptions | null>(null);
+  const { getTransformChangesIfTheyExist } = useTransforms();
 
   const [
     networkKpiNetworkEventsResponse,
@@ -133,10 +135,15 @@ export const useNetworkKpiNetworkEvents = ({
 
   useEffect(() => {
     setNetworkKpiNetworkEventsRequest((prevRequest) => {
+      const { indices, factoryQueryType } = getTransformChangesIfTheyExist({
+        factoryQueryType: NetworkKpiQueries.networkEvents,
+        indices: indexNames,
+        filterQuery,
+      });
       const myRequest = {
         ...(prevRequest ?? {}),
-        defaultIndex: indexNames,
-        factoryQueryType: NetworkKpiQueries.networkEvents,
+        defaultIndex: indices,
+        factoryQueryType,
         filterQuery: createFilter(filterQuery),
         timerange: {
           interval: '12h',
@@ -149,7 +156,7 @@ export const useNetworkKpiNetworkEvents = ({
       }
       return prevRequest;
     });
-  }, [indexNames, endDate, filterQuery, startDate]);
+  }, [indexNames, endDate, filterQuery, startDate, getTransformChangesIfTheyExist]);
 
   useEffect(() => {
     networkKpiNetworkEventsSearch(networkKpiNetworkEventsRequest);

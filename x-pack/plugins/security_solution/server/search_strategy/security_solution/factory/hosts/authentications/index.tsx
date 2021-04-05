@@ -21,7 +21,16 @@ import {
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../../types';
 import { auditdFieldsMap, buildQuery as buildAuthenticationQuery } from './dsl/query.dsl';
-import { authenticationsFields, formatAuthenticationData, getHits } from './helpers';
+
+import { buildQuerySummary as buildAuthenticationQuerySummary } from './dsl/query_summary.dsl';
+
+import {
+  authenticationsFields,
+  formatAuthenticationData,
+  formatAuthenticationSummaryData,
+  getHits,
+  getHitsSummary,
+} from './helpers';
 
 export const authentications: SecuritySolutionFactory<HostsQueries.authentications> = {
   buildDsl: (options: HostAuthenticationsRequestOptions) => {
@@ -47,6 +56,47 @@ export const authentications: SecuritySolutionFactory<HostsQueries.authenticatio
     const edges = authenticationEdges.splice(cursorStart, querySize - cursorStart);
     const inspect = {
       dsl: [inspectStringifyObject(buildAuthenticationQuery(options))],
+    };
+    const showMorePagesIndicator = totalCount > fakeTotalCount;
+
+    return {
+      ...response,
+      inspect,
+      edges,
+      totalCount,
+      pageInfo: {
+        activePage: activePage ?? 0,
+        fakeTotalCount,
+        showMorePagesIndicator,
+      },
+    };
+  },
+};
+
+export const authenticationsSummary: SecuritySolutionFactory<HostsQueries.authentications> = {
+  buildDsl: (options: HostAuthenticationsRequestOptions) => {
+    if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
+      throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
+    }
+
+    return buildAuthenticationQuerySummary(options);
+  },
+  parse: async (
+    options: HostAuthenticationsRequestOptions,
+    response: IEsSearchResponse<unknown>
+  ): Promise<HostAuthenticationsStrategyResponse> => {
+    const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
+    const totalCount = getOr(0, 'aggregations.user_count.value', response.rawResponse);
+
+    const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
+    const hits: AuthenticationHit[] = getHitsSummary(response);
+    const authenticationEdges: AuthenticationsEdges[] = hits.map((hit) =>
+      formatAuthenticationSummaryData(authenticationsFields, hit, auditdFieldsMap)
+    );
+
+    const edges = authenticationEdges.splice(cursorStart, querySize - cursorStart);
+    const inspect = {
+      dsl: [inspectStringifyObject(buildAuthenticationQuerySummary(options))],
     };
     const showMorePagesIndicator = totalCount > fakeTotalCount;
 

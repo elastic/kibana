@@ -11,19 +11,22 @@ import {
   NetworkKpiQueries,
 } from '../../../../../common/search_strategy/security_solution';
 
-import { networkKpiDns } from './kpi/dns';
-import { networkKpiNetworkEvents } from './kpi/network_events';
-import { networkKpiTlsHandshakes } from './kpi/tls_handshakes';
+import { networkKpiDns, networkKpiDnsSummary } from './kpi/dns';
+import { networkKpiNetworkEvents, networkKpiNetworkEventsSummary } from './kpi/network_events';
+import { networkKpiTlsHandshakes, networkKpiTlsHandshakesSummary } from './kpi/tls_handshakes';
 import { networkKpiUniqueFlows } from './kpi/unique_flows';
-import { networkKpiUniquePrivateIps } from './kpi/unique_private_ips';
+import {
+  networkKpiUniquePrivateIps,
+  networkKpiUniquePrivateIpsSummary,
+} from './kpi/unique_private_ips';
 import { SecuritySolutionFactory } from '../types';
 import { networkDetails } from './details';
 import { networkDns } from './dns';
 import { networkHttp } from './http';
 import { networkOverview } from './overview';
 import { networkTls } from './tls';
-import { networkTopCountries } from './top_countries';
-import { networkTopNFlow } from './top_n_flow';
+import { networkTopCountries, networkTopCountriesSummary } from './top_countries';
+import { networkTopNFlow, networkTopNFlowSummary } from './top_n_flow';
 import { networkUsers } from './users';
 
 export const networkFactory: Record<
@@ -36,11 +39,17 @@ export const networkFactory: Record<
   [NetworkQueries.overview]: networkOverview,
   [NetworkQueries.tls]: networkTls,
   [NetworkQueries.topCountries]: networkTopCountries,
+  [NetworkQueries.topCountriesSummary]: networkTopCountriesSummary,
   [NetworkQueries.topNFlow]: networkTopNFlow,
+  [NetworkQueries.topNFlowSummary]: networkTopNFlowSummary,
   [NetworkQueries.users]: networkUsers,
   [NetworkKpiQueries.dns]: networkKpiDns,
+  [NetworkKpiQueries.dnsSummary]: networkKpiDnsSummary,
   [NetworkKpiQueries.networkEvents]: networkKpiNetworkEvents,
+  [NetworkKpiQueries.networkEventsSummary]: networkKpiNetworkEventsSummary,
   [NetworkKpiQueries.tlsHandshakes]: networkKpiTlsHandshakes,
+  [NetworkKpiQueries.tlsHandshakesSummary]: networkKpiTlsHandshakesSummary,
   [NetworkKpiQueries.uniqueFlows]: networkKpiUniqueFlows,
   [NetworkKpiQueries.uniquePrivateIps]: networkKpiUniquePrivateIps,
+  [NetworkKpiQueries.uniquePrivateIpsSummary]: networkKpiUniquePrivateIpsSummary,
 };
