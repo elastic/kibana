@@ -11,7 +11,7 @@ import uuid from 'uuid';
 const OS_FAMILY = ['windows', 'macos', 'linux'];
 
 /**
- * A generic base class to assist in creating data generators
+ * A generic base class to assist in creating domain specific data generators
  */
 export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
   protected random: seedrandom.prng;

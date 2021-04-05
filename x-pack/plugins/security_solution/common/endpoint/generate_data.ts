@@ -35,7 +35,7 @@ import { EsAssetReference, KibanaAssetReference } from '../../../fleet/common/ty
 import { agentPolicyStatuses } from '../../../fleet/common/constants';
 import { firstNonNullValue } from './models/ecs_safety_helpers';
 import { EventOptions } from './types/generator';
-import { BaseDataGenerator } from './data_generators/base_generator';
+import { BaseDataGenerator } from './data_generators/base_data_generator';
 
 export type Event = AlertEvent | SafeEndpointEvent;
 /**

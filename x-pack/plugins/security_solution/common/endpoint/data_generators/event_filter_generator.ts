@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BaseDataGenerator } from './base_generator';
+import { BaseDataGenerator } from './base_data_generator';
 import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '../../../../lists/common/constants';
 import { CreateExceptionListItemSchema } from '../../../../lists/common';
 import { getCreateEndpointListItemSchemaMock } from '../../../../lists/common/schemas/request/create_endpoint_list_item_schema.mock';
