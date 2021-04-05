@@ -321,12 +321,6 @@ export const config: PluginConfigDescriptor<ConfigSchema>;
 
 // @internal (undocumented)
 export interface DataRequestHandlerContext extends RequestHandlerContext {
-    // Warning: (ae-forgotten-export) The symbol "IndexPatternsHandlerContext" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    indexPatterns?: IndexPatternsHandlerContext;
-    // Warning: (ae-forgotten-export) The symbol "SearchRequestHandlerContext" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
     search: SearchRequestHandlerContext;
 }
@@ -1343,6 +1337,11 @@ export const search: {
     tabifyGetColumns: typeof tabifyGetColumns;
 };
 
+// Warning: (ae-missing-release-tag) "SearchRequestHandlerContext" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export type SearchRequestHandlerContext = IScopedSearchClient;
+
 // @internal
 export class SearchSessionService implements ISearchSessionService {
     constructor();
@@ -1530,7 +1529,7 @@ export function usageProvider(core: CoreSetup_2): SearchUsage;
 // src/plugins/data/server/index.ts:270:1 - (ae-forgotten-export) The symbol "toAbsoluteDates" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:271:1 - (ae-forgotten-export) The symbol "calcAutoIntervalLessThan" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/plugin.ts:81:74 - (ae-forgotten-export) The symbol "DataEnhancements" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/search/types.ts:112:5 - (ae-forgotten-export) The symbol "ISearchStartSearchSource" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/search/types.ts:114:5 - (ae-forgotten-export) The symbol "ISearchStartSearchSource" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 
