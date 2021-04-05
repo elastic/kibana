@@ -92,7 +92,7 @@ export const SampleResponseLogic = kea<MakeLogicType<SampleResponseValues, Sampl
           flashAPIErrors(e);
           actions.getSearchResultsFailure(ERROR_MESSAGE);
         } else {
-          actions.getSearchResultsFailure(e.body?.message || ERROR_MESSAGE);
+          actions.getSearchResultsFailure(e.body?.attributes || ERROR_MESSAGE);
         }
       }
     },

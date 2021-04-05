@@ -151,7 +151,7 @@ describe('SampleResponseLogic', () => {
         );
       });
 
-      it('handles 400 errors by setting the response message, but does not show a flash error message', async () => {
+      it('handles 400 errors by setting the response, but does not show a flash error message', async () => {
         mount();
         jest.spyOn(SampleResponseLogic.actions, 'getSearchResultsFailure');
 
@@ -161,7 +161,9 @@ describe('SampleResponseLogic', () => {
               status: 400,
             },
             body: {
-              message: 'A validation error occurred.',
+              attributes: {
+                errors: ['A validation error occurred.'],
+              },
             },
           })
         );
@@ -170,9 +172,9 @@ describe('SampleResponseLogic', () => {
         jest.runAllTimers();
         await nextTick();
 
-        expect(SampleResponseLogic.actions.getSearchResultsFailure).toHaveBeenCalledWith(
-          'A validation error occurred.'
-        );
+        expect(SampleResponseLogic.actions.getSearchResultsFailure).toHaveBeenCalledWith({
+          errors: ['A validation error occurred.'],
+        });
       });
 
       it('sets a generic message on a 400 error if no custom message is provided in the response', async () => {
