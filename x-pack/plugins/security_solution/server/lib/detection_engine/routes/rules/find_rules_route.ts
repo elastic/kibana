@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SetupPlugins } from 'x-pack/plugins/security_solution/server/plugin';
+import { SetupPlugins } from '../../../../plugin';
 import { findRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/find_rules_type_dependents';
 import {
   findRulesSchema,
@@ -47,12 +47,12 @@ export const findRulesRoute = (
         const { query } = request;
         const alertsClient = context.alerting?.getAlertsClient();
         const savedObjectsClient = context.core.savedObjects.client;
-        const something = context.ruleRegistry?.rac.getRacClient();
+        const racClient = await context.ruleRegistry?.getRacClient();
         try {
-          something?.find();
-          console.error('SOMETHING DID NOT THROW AN ERROR', JSON.stringify(something));
+          const helloWorld = await racClient?.get({ id: 'hello world!!!' });
+          console.error('RESPONSE FROM RAC CLIENT', helloWorld);
         } catch (exc) {
-          console.error('SOMETHING THREW AN ERROR');
+          console.error('SOMETHING THREW AN ERROR', exc);
         }
 
         if (!alertsClient) {

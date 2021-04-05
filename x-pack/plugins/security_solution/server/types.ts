@@ -6,7 +6,7 @@
  */
 
 import type { IRouter, RequestHandlerContext } from 'src/core/server';
-import { RacRequestHandlerContext } from '../../rule_registry/server';
+import { RacApiRequestHandlerContext } from '../../rule_registry/server';
 import type { ListsApiRequestHandlerContext } from '../../lists/server';
 import type { LicensingApiRequestHandlerContext } from '../../licensing/server';
 import type { AlertingApiRequestHandlerContext } from '../../alerting/server';
@@ -24,7 +24,7 @@ export type SecuritySolutionRequestHandlerContext = RequestHandlerContext & {
   licensing: LicensingApiRequestHandlerContext;
   alerting: AlertingApiRequestHandlerContext;
   lists?: ListsApiRequestHandlerContext;
-  ruleRegistry?: RacRequestHandlerContext;
+  ruleRegistry?: RacApiRequestHandlerContext;
 };
 
 export type SecuritySolutionPluginRouter = IRouter<SecuritySolutionRequestHandlerContext>;

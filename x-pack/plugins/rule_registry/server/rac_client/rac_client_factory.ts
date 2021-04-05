@@ -60,10 +60,6 @@ export class RacClientFactory {
       features: features!,
       isAuthEnabled: true,
     });
-    console.error(
-      `*********\nDID WE CREATE RAC AUTH?: ${JSON.stringify(authorization)}\n*********`
-    );
-
     return new RacClient({
       spaceId,
       kibanaVersion: this.kibanaVersion,
