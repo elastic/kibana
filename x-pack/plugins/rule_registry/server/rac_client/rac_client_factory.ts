@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { KibanaRequest, Logger, PluginInitializerContext } from 'src/core/server';
+import {
+  ElasticsearchClient,
+  KibanaRequest,
+  Logger,
+  PluginInitializerContext,
+} from 'src/core/server';
 import { RacClient } from './rac_client';
 import { SecurityPluginSetup, SecurityPluginStart } from '../../../security/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
@@ -22,6 +27,7 @@ export interface RacClientFactoryOpts {
   getSpace: (request: KibanaRequest) => Promise<Space | undefined>;
   features: FeaturesPluginStart;
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
+  esClient: ElasticsearchClient;
 }
 
 export class RacClientFactory {
@@ -33,6 +39,7 @@ export class RacClientFactory {
   private getSpace!: (request: KibanaRequest) => Promise<Space | undefined>;
   private features!: FeaturesPluginStart;
   private kibanaVersion!: PluginInitializerContext['env']['packageInfo']['version'];
+  private esClient!: ElasticsearchClient;
 
   public initialize(options: RacClientFactoryOpts) {
     /**
@@ -47,6 +54,7 @@ export class RacClientFactory {
     this.features = options.features;
     this.securityPluginSetup = options.securityPluginSetup;
     this.securityPluginStart = options.securityPluginStart;
+    this.esClient = options.esClient;
   }
 
   public async create(request: KibanaRequest): RacClient {
@@ -66,6 +74,7 @@ export class RacClientFactory {
       logger: this.logger,
       authorization,
       auditLogger: securityPluginSetup?.audit.asScoped(request),
+      esClient: this.esClient,
     });
   }
 }

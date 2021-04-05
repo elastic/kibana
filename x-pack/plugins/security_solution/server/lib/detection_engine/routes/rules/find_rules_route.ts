@@ -52,7 +52,7 @@ export const findRulesRoute = (
           const helloWorld = await racClient?.get({ id: 'hello world!!!' });
           console.error('RESPONSE FROM RAC CLIENT', helloWorld);
         } catch (exc) {
-          console.error('SOMETHING THREW AN ERROR', exc);
+          console.error('SOMETHING THREW AN ERROR', JSON.stringify(exc, null, 2));
         }
 
         if (!alertsClient) {

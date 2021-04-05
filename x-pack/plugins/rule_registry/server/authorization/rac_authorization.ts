@@ -4,12 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import Boom from '@hapi/boom';
+import { has, map, mapValues } from 'lodash';
 
 import { KibanaRequest } from 'src/core/server';
 import { SecurityPluginStart } from '../../../security/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
 import { Space } from '../../../spaces/server';
 import { KueryNode } from '../../../../../src/plugins/data/server';
+import { getOwnersFilter } from './utils';
 
 export type GetSpaceFn = (request: KibanaRequest) => Promise<Space | undefined>;
 
@@ -102,110 +105,149 @@ export class RacAuthorization {
     return this.authorization?.mode?.useRbacForRequest(this.request) ?? false;
   }
 
-  public async ensureAuthorized(
-    alertTypeId: string,
-    consumer: string,
-    operation: ReadOperations | WriteOperations
-  ) {
-    // const { authorization } = this;
-    // const isAvailableConsumer = has(await this.allPossibleConsumers, consumer);
-    // if (authorization && this.shouldCheckAuthorization()) {
-    //   const alertType = this.alertTypeRegistry.get(alertTypeId);
-    //   const requiredPrivilegesByScope = {
-    //     consumer: authorization.actions.alerting.get(alertTypeId, consumer, operation),
-    //     producer: authorization.actions.alerting.get(alertTypeId, alertType.producer, operation),
-    //   };
-    //   // We special case the Alerts Management `consumer` as we don't want to have to
-    //   // manually authorize each alert type in the management UI
-    //   const shouldAuthorizeConsumer = consumer !== ALERTS_FEATURE_ID;
-    //   const checkPrivileges = authorization.checkPrivilegesDynamicallyWithRequest(this.request);
-    //   const { hasAllRequested, username, privileges } = await checkPrivileges({
-    //     kibana: shouldAuthorizeConsumer
-    //       ? [
-    //           // check for access at consumer level
-    //           requiredPrivilegesByScope.consumer,
-    //           // check for access at producer level
-    //           requiredPrivilegesByScope.producer,
-    //         ]
-    //       : [
-    //           // skip consumer privilege checks under `alerts` as all alert types can
-    //           // be created under `alerts` if you have producer level privileges
-    //           requiredPrivilegesByScope.producer,
-    //         ],
-    //   });
-    //   if (!isAvailableConsumer) {
-    //     /**
-    //      * Under most circumstances this would have been caught by `checkPrivileges` as
-    //      * a user can't have Privileges to an unknown consumer, but super users
-    //      * don't actually get "privilege checked" so the made up consumer *will* return
-    //      * as Privileged.
-    //      * This check will ensure we don't accidentally let these through
-    //      */
-    //     throw Boom.forbidden(
-    //       this.auditLogger.alertsAuthorizationFailure(
-    //         username,
-    //         alertTypeId,
-    //         ScopeType.Consumer,
-    //         consumer,
-    //         operation
-    //       )
-    //     );
-    //   }
-    //   if (hasAllRequested) {
-    //     this.auditLogger.alertsAuthorizationSuccess(
-    //       username,
-    //       alertTypeId,
-    //       ScopeType.Consumer,
-    //       consumer,
-    //       operation
-    //     );
-    //   } else {
-    //     const authorizedPrivileges = map(
-    //       privileges.kibana.filter((privilege) => privilege.authorized),
-    //       'privilege'
-    //     );
-    //     const unauthorizedScopes = mapValues(
-    //       requiredPrivilegesByScope,
-    //       (privilege) => !authorizedPrivileges.includes(privilege)
-    //     );
-    //     const [unauthorizedScopeType, unauthorizedScope] =
-    //       shouldAuthorizeConsumer && unauthorizedScopes.consumer
-    //         ? [ScopeType.Consumer, consumer]
-    //         : [ScopeType.Producer, alertType.producer];
-    //     throw Boom.forbidden(
-    //       this.auditLogger.alertsAuthorizationFailure(
-    //         username,
-    //         alertTypeId,
-    //         unauthorizedScopeType,
-    //         unauthorizedScope,
-    //         operation
-    //       )
-    //     );
-    //   }
-    // } else if (!isAvailableConsumer) {
-    //   throw Boom.forbidden(
-    //     this.auditLogger.alertsAuthorizationFailure(
-    //       '',
-    //       alertTypeId,
-    //       ScopeType.Consumer,
-    //       consumer,
-    //       operation
-    //     )
-    //   );
-    // }
+  public async ensureAuthorized(owner: string, operation: ReadOperations | WriteOperations) {
+    const { authorization } = this;
+    const isAvailableConsumer = has(await this.featureOwners, owner);
+    if (authorization && this.shouldCheckAuthorization()) {
+      const requiredPrivilegesByScope = {
+        owner: authorization.actions.rac.get('default', owner, operation),
+      };
+      // We special case the Alerts Management `consumer` as we don't want to have to
+      // manually authorize each alert type in the management UI
+      const checkPrivileges = authorization.checkPrivilegesDynamicallyWithRequest(this.request);
+      const { hasAllRequested, username, privileges } = await checkPrivileges({
+        kibana: [
+          // check for access at owner level
+          requiredPrivilegesByScope.owner,
+        ],
+      });
+      if (!isAvailableConsumer) {
+        // TODO: implement this and send to audit logger later
+        /**
+         * Under most circumstances this would have been caught by `checkPrivileges` as
+         * a user can't have Privileges to an unknown consumer, but super users
+         * don't actually get "privilege checked" so the made up consumer *will* return
+         * as Privileged.
+         * This check will ensure we don't accidentally let these through
+         */
+        // throw Boom.forbidden(
+        //   this.auditLogger.alertsAuthorizationFailure(
+        //     username,
+        //     alertTypeId,
+        //     ScopeType.Consumer,
+        //     consumer,
+        //     operation
+        //   )
+        // );
+        console.error('UNKNOWN CONSUMER');
+        throw Error('UNKNOWN CONSUMER');
+      }
+      if (hasAllRequested) {
+        // TODO: implement when we add audit logger
+        // this.auditLogger.alertsAuthorizationSuccess(
+        //   username,
+        //   alertTypeId,
+        //   ScopeType.Consumer,
+        //   consumer,
+        //   operation
+        // );
+        console.error('GREAT SUCCESS');
+      } else {
+        console.error('DOES NOT HAVE ALL REQUESTED');
+        // throw Boom.forbidden(
+        //   this.auditLogger.alertsAuthorizationFailure(
+        //     username,
+        //     alertTypeId,
+        //     unauthorizedScopeType,
+        //     unauthorizedScope,
+        //     operation
+        //   )
+        // );
+        throw Error('DOES NOT HAVE ALL REQUESTED');
+      }
+    } else if (!isAvailableConsumer) {
+      // throw Boom.forbidden(
+      //   this.auditLogger.alertsAuthorizationFailure(
+      //     '',
+      //     alertTypeId,
+      //     ScopeType.Consumer,
+      //     consumer,
+      //     operation
+      //   )
+      // );
+      console.error('UNAVAILABLE OWNER');
+      throw Error('UNAVAILABLE OWNER');
+    }
   }
 
-  // public getFindAuthorizationFilter(): {
-  //   filter?: KueryNode;
-  //   ensureAlertTypeIsAuthorized: (alertTypeId: string, consumer: string) => void;
-  //   logSuccessfulAuthorization: () => void;
-  // } {
-  // if (this.authorization && this.shouldCheckAuthorization()) {
-  //   // create set of all possible auth spaceId/owner pairs user has
-  //   return {
-  //     filter: ('' as unknown) as KueryNode, // auth filter here
-  //     ensureAlertTypeIsAuthorized: () => {},
-  //     logSuccessfulAuthorization: () => {},
-  //   };
+  public async getFindAuthorizationFilter(): Promise<{
+    filter?: KueryNode;
+    ensureAlertTypeIsAuthorized: (alertTypeId: string, consumer: string) => void;
+    logSuccessfulAuthorization: () => void;
+  }> {
+    // if (this.authorization && this.shouldCheckAuthorization()) {
+    //   const { authorizedOwners } = await this.getAuthorizedOwners([ReadOperations.Find]);
+    //   if (!authorizedOwners.length) {
+    //     // TODO: Better error message, log error
+    //     throw Boom.forbidden('Not authorized for this owner');
+    //   }
+    //   return {
+    //     filter: getOwnersFilter(savedObjectType, authorizedOwners),
+    //     ensureAlertTypeIsAuthorized: (owner: string) => {
+    //       if (!authorizedOwners.includes(owner)) {
+    //         // TODO: log error
+    //         throw Boom.forbidden('Not authorized for this owner');
+    //       }
+    //     },
+    //   };
+    // }
+    return {
+      ensureAlertTypeIsAuthorized: (alertTypeId: string, consumer: string) => {},
+      logSuccessfulAuthorization: () => {},
+    };
+  }
+
+  // private async getAuthorizedOwners(
+  //   operations: Array<ReadOperations | WriteOperations>
+  // ): Promise<{
+  //   username?: string;
+  //   hasAllRequested: boolean;
+  //   authorizedOwners: string[];
+  // }> {
+  //   const { securityAuth, featureCaseOwners } = this;
+  //   if (securityAuth && this.shouldCheckAuthorization()) {
+  //     const checkPrivileges = securityAuth.checkPrivilegesDynamicallyWithRequest(this.request);
+  //     const requiredPrivileges = new Map<string, [string]>();
+
+  //     for (const owner of featureCaseOwners) {
+  //       for (const operation of operations) {
+  //         requiredPrivileges.set(securityAuth.actions.cases.get(owner, operation), [owner]);
+  //       }
+  //     }
+
+  //     const { hasAllRequested, username, privileges } = await checkPrivileges({
+  //       kibana: [...requiredPrivileges.keys()],
+  //     });
+
+  //     return {
+  //       hasAllRequested,
+  //       username,
+  //       authorizedOwners: hasAllRequested
+  //         ? Array.from(featureCaseOwners)
+  //         : privileges.kibana.reduce<string[]>((authorizedOwners, { authorized, privilege }) => {
+  //             if (authorized && requiredPrivileges.has(privilege)) {
+  //               const [owner] = requiredPrivileges.get(privilege)!;
+  //               authorizedOwners.push(owner);
+  //             }
+
+  //             return authorizedOwners;
+  //           }, []),
+  //     };
+  //   } else {
+  //     return {
+  //       hasAllRequested: true,
+  //       authorizedOwners: Array.from(featureCaseOwners),
+  //     };
+  //   }
   // }
 }
