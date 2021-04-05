@@ -37,6 +37,9 @@ const deleteVerbs: Verbs = {
   past: 'deleted',
 };
 
+/**
+ * Definition of all APIs within the cases backend.
+ */
 export const Operations: Record<ReadOperations | WriteOperations, OperationDetails> = {
   // case operations
   [WriteOperations.CreateCase]: {

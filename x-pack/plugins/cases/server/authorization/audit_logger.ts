@@ -29,13 +29,13 @@ export class AuthorizationAuditLogger {
     owner?: string;
     operation: OperationDetails;
   }): string {
-    const scopeMsg = owner == null ? 'of any class' : `of class "${owner}"`;
+    const ownerMsg = owner == null ? 'of any owner' : `with "${owner}" as the owner`;
     /**
      * This will take the form:
-     * `Unauthorized to create case of class "securitySolution"`
-     * `Unauthorized to find cases of any class`.
+     * `Unauthorized to create case with "securitySolution" as the owner`
+     * `Unauthorized to find cases of any owner`.
      */
-    return `${result} to ${operation.verbs.present} ${operation.docType} ${scopeMsg}`;
+    return `${result} to ${operation.verbs.present} ${owner} ${operation.docType} ${ownerMsg}`;
   }
 
   private logSuccessEvent({
@@ -116,15 +116,15 @@ export class AuthorizationAuditLogger {
   public bulkSuccess({
     username,
     operation,
-    scopes,
+    owners,
   }: {
     username?: string;
-    scopes: string[];
+    owners: string[];
     operation: OperationDetails;
   }): string {
     const message = `${AuthorizationResult.Authorized} to ${operation.verbs.present} ${
       operation.docType
-    } of owner: ${scopes.join(', ')}`;
+    } of owner: ${owners.join(', ')}`;
     this.logSuccessEvent({ message, operation, username });
     return message;
   }

@@ -19,7 +19,7 @@ import {
   SavedObjectsFindResult,
 } from 'kibana/server';
 
-import { KueryNode, nodeBuilder } from 'src/plugins/data/common';
+import { KueryNode, nodeBuilder } from '../../../../../src/plugins/data/common';
 import { AuthenticatedUser, SecurityPluginSetup } from '../../../security/server';
 import {
   ESCaseAttributes,

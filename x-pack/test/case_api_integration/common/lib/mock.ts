@@ -35,7 +35,6 @@ export const postCaseReq: CasePostRequest = {
   description: 'This is a brand new case of a bad meanie defacing data',
   title: 'Super Bad Security Issue',
   tags: ['defacement'],
-  scope: 'securitySolution',
   connector: {
     id: 'none',
     name: 'none',

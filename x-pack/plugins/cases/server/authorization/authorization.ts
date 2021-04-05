@@ -133,7 +133,7 @@ export class Authorization {
         },
         logSuccessfulAuthorization: () => {
           if (authorizedOwners.length) {
-            this.auditLogger.bulkSuccess({ username, scopes: authorizedOwners, operation });
+            this.auditLogger.bulkSuccess({ username, owners: authorizedOwners, operation });
           }
         },
       };
