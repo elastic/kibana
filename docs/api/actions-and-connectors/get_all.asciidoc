@@ -1,31 +1,31 @@
-[[actions-and-connectors-api-get-all]]
-=== Get all actions API
+[[get-all-connectors-api]]
+=== Get all connectors API
 ++++
-<titleabbrev>Get all actions API</titleabbrev>
+<titleabbrev>Get all connectors</titleabbrev>
 ++++
 
 Retrieves all connectors.
 
-[[actions-and-connectors-api-get-all-request]]
+[[get-all-connectors-api-request]]
 ==== Request
 
 `GET <kibana host>:<port>/api/actions/connectors`
 
 `GET <kibana host>:<port>/s/<space_id>/api/actions/connectors`
 
-[[actions-and-connectors-api-get-all-path-params]]
+[[get-all-connectors-api-path-params]]
 ==== Path parameters
 
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
-[[actions-and-connectors-api-get-all-codes]]
+[[get-all-connectors-api-codes]]
 ==== Response code
 
 `200`::
     Indicates a successful call.
 
-[[actions-and-connectors-api-get-all-example]]
+[[get-all-connectors-api-example]]
 ==== Example
 
 [source,sh]

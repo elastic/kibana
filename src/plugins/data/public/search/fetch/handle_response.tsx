@@ -9,13 +9,13 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
-import { SearchResponse } from 'elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { ShardFailureOpenModalButton } from '../../ui/shard_failure_modal';
 import { toMountPoint } from '../../../../kibana_react/public';
 import { getNotifications } from '../../services';
 import { SearchRequest } from '..';
 
-export function handleResponse(request: SearchRequest, response: SearchResponse<any>) {
+export function handleResponse(request: SearchRequest, response: estypes.SearchResponse<any>) {
   if (response.timed_out) {
     getNotifications().toasts.addWarning({
       title: i18n.translate('data.search.searchSource.fetch.requestTimedOutNotificationMessage', {

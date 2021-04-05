@@ -14,9 +14,7 @@ export const createMetricsHasData = (
 ) => async () => {
   const [coreServices] = await getStartServices();
   const { http } = coreServices;
-  const results = await http.get<{ hasData: boolean }>(
-    '/api/metrics/source/default/metrics/hasData'
-  );
+  const results = await http.get<{ hasData: boolean }>('/api/metrics/source/default/hasData');
   return results.hasData;
 };
 

@@ -5,32 +5,58 @@
  * 2.0.
  */
 
-import { IIndexPattern } from '../../../../../src/plugins/data/common';
+import { IndexPattern } from '../../../../../src/plugins/data/common';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { useFetcher } from './use_fetcher';
 import { ESFilter } from '../../../../../typings/elasticsearch';
-import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 
-interface Props {
+export interface Props {
   sourceField: string;
   query?: string;
-  indexPattern: IIndexPattern;
+  indexPattern: IndexPattern;
   filters?: ESFilter[];
+  time?: { from: string; to: string };
 }
 
-export const useValuesList = ({ sourceField, indexPattern, query, filters }: Props) => {
+export const useValuesList = ({
+  sourceField,
+  indexPattern,
+  query = '',
+  filters,
+  time,
+}: Props): { values: string[]; loading?: boolean } => {
   const {
     services: { data },
   } = useKibana<{ data: DataPublicPluginStart }>();
 
-  const { data: values, status } = useFetcher(() => {
+  const { from, to } = time ?? {};
+
+  const { data: values, loading } = useFetcher(() => {
+    if (!sourceField || !indexPattern) {
+      return [];
+    }
     return data.autocomplete.getValueSuggestions({
       indexPattern,
       query: query || '',
-      field: indexPattern.fields.find(({ name }) => name === sourceField)!,
-      boolFilter: filters ?? [],
+      useTimeRange: !(from && to),
+      field: indexPattern.getFieldByName(sourceField)!,
+      boolFilter:
+        from && to
+          ? [
+              ...(filters || []),
+              {
+                range: {
+                  '@timestamp': {
+                    gte: from,
+                    lte: to,
+                  },
+                },
+              },
+            ]
+          : filters || [],
     });
-  }, [sourceField, query, data.autocomplete, indexPattern, filters]);
+  }, [query, sourceField, data.autocomplete, indexPattern, from, to, filters]);
 
-  return { values, loading: status === 'loading' || status === 'pending' };
+  return { values: values as string[], loading };
 };

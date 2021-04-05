@@ -34,7 +34,6 @@ import {
   getIgnoreThrottled,
 } from './request_utils';
 import { toAsyncKibanaSearchResponse } from './response_utils';
-import { AsyncSearchResponse } from './types';
 import { ConfigSchema } from '../../config';
 import { getKbnServerError, KbnServerError } from '../../../../../src/plugins/kibana_utils/server';
 
@@ -66,12 +65,14 @@ export const enhancedEsSearchStrategyProvider = (
             ...(await getDefaultAsyncSubmitParams(uiSettingsClient, config, options)),
             ...request.params,
           };
-      const promise = id
-        ? client.get<AsyncSearchResponse>({ ...params, id })
-        : client.submit<AsyncSearchResponse>(params);
+      const promise = id ? client.get({ ...params, id }) : client.submit(params);
       const { body } = await shimAbortSignal(promise, options.abortSignal);
       const response = shimHitsTotal(body.response, options);
-      return toAsyncKibanaSearchResponse({ ...body, response });
+
+      return toAsyncKibanaSearchResponse(
+        // @ts-expect-error @elastic/elasticsearch start_time_in_millis expected to be number
+        { ...body, response }
+      );
     };
 
     const cancel = async () => {
@@ -167,7 +168,7 @@ export const enhancedEsSearchStrategyProvider = (
     extend: async (id, keepAlive, options, { esClient }) => {
       logger.debug(`extend ${id} by ${keepAlive}`);
       try {
-        await esClient.asCurrentUser.asyncSearch.get({ id, keep_alive: keepAlive });
+        await esClient.asCurrentUser.asyncSearch.get({ id, body: { keep_alive: keepAlive } });
       } catch (e) {
         throw getKbnServerError(e);
       }

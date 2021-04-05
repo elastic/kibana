@@ -17,8 +17,6 @@ import { BfetchPublicSetup } from '../../../../src/plugins/bfetch/public';
 import { ManagementSetup } from '../../../../src/plugins/management/public';
 import { SharePluginStart } from '../../../../src/plugins/share/public';
 
-import { setAutocompleteService } from './services';
-import { setupKqlQuerySuggestionProvider, KUERY_LANGUAGE_NAME } from './autocomplete';
 import { EnhancedSearchInterceptor } from './search/search_interceptor';
 import { registerSearchSessionsMgmt } from './search/sessions_mgmt';
 import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
@@ -52,11 +50,6 @@ export class DataEnhancedPlugin
     core: CoreSetup<DataEnhancedStartDependencies>,
     { bfetch, data, management }: DataEnhancedSetupDependencies
   ) {
-    data.autocomplete.addQuerySuggestionProvider(
-      KUERY_LANGUAGE_NAME,
-      setupKqlQuerySuggestionProvider(core)
-    );
-
     this.enhancedSearchInterceptor = new EnhancedSearchInterceptor({
       bfetch,
       toasts: core.notifications.toasts,
@@ -83,8 +76,6 @@ export class DataEnhancedPlugin
   }
 
   public start(core: CoreStart, plugins: DataEnhancedStartDependencies) {
-    setAutocompleteService(plugins.data.autocomplete);
-
     if (this.config.search.sessions.enabled) {
       core.chrome.setBreadcrumbsAppendExtension({
         content: toMountPoint(

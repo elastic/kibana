@@ -30,7 +30,8 @@ import {
   serviceDependenciesRoute,
   serviceMetadataDetailsRoute,
   serviceMetadataIconsRoute,
-  serviceInstancesRoute,
+  serviceInstancesPrimaryStatisticsRoute,
+  serviceInstancesComparisonStatisticsRoute,
   serviceProfilingStatisticsRoute,
   serviceProfilingTimelineRoute,
 } from './services';
@@ -57,7 +58,9 @@ import {
   rootTransactionByTraceIdRoute,
 } from './traces';
 import {
+  correlationsLatencyDistributionRoute,
   correlationsForSlowTransactionsRoute,
+  correlationsErrorDistributionRoute,
   correlationsForFailedTransactionsRoute,
 } from './correlations';
 import {
@@ -134,7 +137,8 @@ const createApmApi = () => {
     .add(serviceDependenciesRoute)
     .add(serviceMetadataDetailsRoute)
     .add(serviceMetadataIconsRoute)
-    .add(serviceInstancesRoute)
+    .add(serviceInstancesPrimaryStatisticsRoute)
+    .add(serviceInstancesComparisonStatisticsRoute)
     .add(serviceErrorGroupsComparisonStatisticsRoute)
     .add(serviceProfilingTimelineRoute)
     .add(serviceProfilingStatisticsRoute)
@@ -150,7 +154,9 @@ const createApmApi = () => {
     .add(createOrUpdateAgentConfigurationRoute)
 
     // Correlations
+    .add(correlationsLatencyDistributionRoute)
     .add(correlationsForSlowTransactionsRoute)
+    .add(correlationsErrorDistributionRoute)
     .add(correlationsForFailedTransactionsRoute)
 
     // APM indices

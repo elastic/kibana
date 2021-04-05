@@ -50,5 +50,6 @@ export const IgnoreMissingField: FunctionComponent<Props> = (props) => (
     config={{ ...fieldsConfig.ignore_missing, ...props }}
     component={ToggleField}
     path="fields.ignore_missing"
+    data-test-subj="ignoreMissingSwitch"
   />
 );

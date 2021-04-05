@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
-import { RequestParams } from '@elastic/elasticsearch';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import {
@@ -22,8 +22,6 @@ import {
   getModelSnapshotsSchema,
   updateModelSnapshotSchema,
 } from './schemas/anomaly_detectors_schema';
-
-import { Job, JobStats } from '../../common/types/anomaly_detection_jobs';
 
 /**
  * Routes for the anomaly detectors
@@ -49,7 +47,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, response }) => {
       try {
-        const { body } = await mlClient.getJobs<{ jobs: Job[] }>();
+        const { body } = await mlClient.getJobs();
         return response.ok({
           body,
         });
@@ -81,7 +79,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { jobId } = request.params;
-        const { body } = await mlClient.getJobs<{ jobs: Job[] }>({ job_id: jobId });
+        const { body } = await mlClient.getJobs({ job_id: jobId });
         return response.ok({
           body,
         });
@@ -111,7 +109,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, response }) => {
       try {
-        const { body } = await mlClient.getJobStats<{ jobs: JobStats[] }>();
+        const { body } = await mlClient.getJobStats();
         return response.ok({
           body,
         });
@@ -283,7 +281,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const options: RequestParams.MlCloseJob = {
+        const options: estypes.CloseJobRequest = {
           job_id: request.params.jobId,
         };
         const force = request.query.force;
@@ -321,7 +319,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        const options: RequestParams.MlDeleteJob = {
+        const options: estypes.DeleteJobRequest = {
           job_id: request.params.jobId,
           wait_for_completion: false,
         };
@@ -395,7 +393,9 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
         const duration = request.body.duration;
         const { body } = await mlClient.forecast({
           job_id: jobId,
-          duration,
+          body: {
+            duration,
+          },
         });
         return response.ok({
           body,
@@ -513,10 +513,12 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
       try {
         const { body } = await mlClient.getOverallBuckets({
           job_id: request.params.jobId,
-          top_n: request.body.topN,
-          bucket_span: request.body.bucketSpan,
-          start: request.body.start,
-          end: request.body.end,
+          body: {
+            top_n: request.body.topN,
+            bucket_span: request.body.bucketSpan,
+            start: request.body.start !== undefined ? String(request.body.start) : undefined,
+            end: request.body.end !== undefined ? String(request.body.end) : undefined,
+          },
         });
         return response.ok({
           body,

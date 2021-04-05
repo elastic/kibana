@@ -172,7 +172,9 @@ describe('EngineLogic', () => {
         });
       });
     });
+  });
 
+  describe('listeners', () => {
     describe('initializeEngine', () => {
       it('fetches and sets engine data', async () => {
         mount({ engineName: 'some-engine' });

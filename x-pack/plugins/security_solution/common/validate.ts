@@ -26,6 +26,19 @@ export const validate = <T extends t.Mixed>(
   return pipe(checked, fold(left, right));
 };
 
+export const validateNonExact = <T extends t.Mixed>(
+  obj: object,
+  schema: T
+): [t.TypeOf<T> | null, string | null] => {
+  const decoded = schema.decode(obj);
+  const left = (errors: t.Errors): [T | null, string | null] => [
+    null,
+    formatErrors(errors).join(','),
+  ];
+  const right = (output: T): [T | null, string | null] => [output, null];
+  return pipe(decoded, fold(left, right));
+};
+
 export const validateEither = <T extends t.Mixed, A extends unknown>(
   schema: T,
   obj: A
