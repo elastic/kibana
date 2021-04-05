@@ -43,4 +43,4 @@ export GCS_UPLOAD_PREFIX=asihdauishd98u42589
 # TODO
 export NODE_VERSION=14.16.0
 
-export DEFAULT_BUILD_LOCATION="$WORKSPACE/kibana-build-xpack"
+export KIBANA_BUILD_LOCATION="$WORKSPACE/kibana-build-xpack"

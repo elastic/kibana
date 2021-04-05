@@ -21,21 +21,21 @@ node scripts/build_kibana_platform_plugins \
 
 export KBN_NP_PLUGINS_BUILT=true
 
-echo "--- Build Default Distribution"
+echo "--- Build Kibana Distribution"
 node scripts/build --debug --no-oss
 
-echo "--- Ship Default Metrics to CI Stats"
+echo "--- Ship Kibana Distribution Metrics to CI Stats"
 node scripts/ship_ci_stats \
   --metrics target/optimizer_bundle_metrics.json \
   --metrics packages/kbn-ui-shared-deps/target/metrics.json
 
-echo "--- Archive Default Distribution"
+echo "--- Archive Kibana Distribution"
 linuxBuild="$(find "$KIBANA_DIR/target" -name 'kibana-*-linux-x86_64.tar.gz')"
 installDir="$KIBANA_DIR/install/kibana"
 mkdir -p "$installDir"
 tar -xzf "$linuxBuild" -C "$installDir" --strip=1
-mkdir -p "$DEFAULT_BUILD_LOCATION"
-cp -pR install/kibana/. "$DEFAULT_BUILD_LOCATION/"
+mkdir -p "$KIBANA_BUILD_LOCATION"
+cp -pR install/kibana/. "$KIBANA_BUILD_LOCATION/"
 
 # Moving to `target/` first will keep `buildkite-agent` from including directories in the artifact name
 cd "$KIBANA_DIR/target"

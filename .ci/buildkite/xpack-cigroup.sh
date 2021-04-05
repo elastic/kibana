@@ -10,5 +10,5 @@ cd "$XPACK_DIR"
 
 node scripts/functional_tests \
   --debug --bail \
-  --kibana-install-dir "$DEFAULT_BUILD_LOCATION" \
+  --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
   --include-tag "ciGroup$CI_GROUP"
