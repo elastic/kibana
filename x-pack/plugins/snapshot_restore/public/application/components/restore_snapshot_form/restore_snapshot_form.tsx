@@ -140,6 +140,7 @@ export const RestoreSnapshotForm: React.FunctionComponent<Props> = ({
                 iconType="arrowRight"
                 onClick={() => onNext()}
                 disabled={!validation.isValid}
+                data-test-subj="nextButton"
               >
                 <FormattedMessage
                   id="xpack.snapshotRestore.restoreForm.nextButtonLabel"
@@ -156,6 +157,7 @@ export const RestoreSnapshotForm: React.FunctionComponent<Props> = ({
                 iconType="check"
                 onClick={() => executeRestore()}
                 isLoading={isSaving}
+                data-test-subj="restoreButton"
               >
                 {isSaving ? (
                   <FormattedMessage

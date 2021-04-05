@@ -38,7 +38,7 @@ import { FieldFormatsStart } from '../field_formats';
 import { IndexPatternsServiceStart } from '../index_patterns';
 import { getCallMsearch, registerMsearchRoute, registerSearchRoute } from './routes';
 import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './es_search';
-import { DataPluginStart } from '../plugin';
+import { DataPluginStart, DataPluginStartDependencies } from '../plugin';
 import { UsageCollectionSetup } from '../../../usage_collection/server';
 import { registerUsageCollector } from './collectors/register';
 import { usageProvider } from './collectors/usage';
@@ -63,8 +63,9 @@ import {
   searchSourceRequiredUiSettings,
   SearchSourceService,
   phraseFilterFunction,
+  esRawResponse,
 } from '../../common/search';
-import { getEsaggs } from './expressions';
+import { getEsaggs, getEsdsl } from './expressions';
 import {
   getShardDelayBucketAgg,
   SHARD_DELAY_AGG_NAME,
@@ -113,7 +114,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   }
 
   public setup(
-    core: CoreSetup<{}, DataPluginStart>,
+    core: CoreSetup<DataPluginStartDependencies, DataPluginStart>,
     { bfetch, expressions, usageCollection }: SearchServiceSetupDependencies
   ): ISearchSetup {
     const usage = usageCollection ? usageProvider(core) : undefined;
@@ -150,6 +151,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     }
 
     expressions.registerFunction(getEsaggs({ getStartServices: core.getStartServices }));
+    expressions.registerFunction(getEsdsl({ getStartServices: core.getStartServices }));
     expressions.registerFunction(kibana);
     expressions.registerFunction(luceneFunction);
     expressions.registerFunction(kqlFunction);
@@ -162,6 +164,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     expressions.registerFunction(rangeFilterFunction);
     expressions.registerFunction(phraseFilterFunction);
     expressions.registerType(kibanaContext);
+    expressions.registerType(esRawResponse);
 
     const aggs = this.aggsService.setup({ registerFunction: expressions.registerFunction });
 

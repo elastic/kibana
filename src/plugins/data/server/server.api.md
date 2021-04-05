@@ -73,6 +73,7 @@ import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
 import { UiCounterMetricType } from '@kbn/analytics';
 import { Unit } from '@elastic/datemath';
+import { UsageCollectionSetup as UsageCollectionSetup_2 } from 'src/plugins/usage_collection/server';
 
 // Warning: (ae-forgotten-export) The symbol "AggConfigSerialized" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "AggConfigOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -202,6 +203,10 @@ export interface AggFunctionsMapping {
     //
     // (undocumented)
     aggSignificantTerms: ReturnType<typeof aggSignificantTerms>;
+    // Warning: (ae-forgotten-export) The symbol "aggSinglePercentile" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    aggSinglePercentile: ReturnType<typeof aggSinglePercentile>;
     // Warning: (ae-forgotten-export) The symbol "aggStdDeviation" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -403,7 +408,7 @@ export const ES_SEARCH_STRATEGY = "es";
 // Warning: (ae-missing-release-tag) "EsaggsExpressionFunctionDefinition" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type EsaggsExpressionFunctionDefinition = ExpressionFunctionDefinition<'esaggs', Input_35, Arguments_21, Output_35>;
+export type EsaggsExpressionFunctionDefinition = ExpressionFunctionDefinition<'esaggs', Input_36, Arguments_21, Output_36>;
 
 // Warning: (ae-missing-release-tag) "esFilters" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -954,16 +959,14 @@ export { IndexPatternsService }
 //
 // @public (undocumented)
 export class IndexPatternsServiceProvider implements Plugin_3<void, IndexPatternsServiceStart> {
-    // Warning: (ae-forgotten-export) The symbol "DataPluginStartDependencies" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "IndexPatternsServiceStartDeps" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "IndexPatternsServiceSetupDeps" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
-    setup(core: CoreSetup_2<DataPluginStartDependencies, PluginStart>, { expressions }: IndexPatternsServiceSetupDeps): void;
-    // Warning: (ae-forgotten-export) The symbol "IndexPatternsServiceStartDeps" needs to be exported by the entry point index.d.ts
-    //
+    setup(core: CoreSetup_2<IndexPatternsServiceStartDeps, PluginStart>, { expressions, usageCollection }: IndexPatternsServiceSetupDeps): void;
     // (undocumented)
     start(core: CoreStart, { fieldFormats, logger }: IndexPatternsServiceStartDeps): {
-        indexPatternsServiceFactory: (savedObjectsClient: SavedObjectsClientContract_2, elasticsearchClient: ElasticsearchClient_2) => Promise<IndexPatternsService>;
+        indexPatternsServiceFactory: (savedObjectsClient: Pick<import("../../../../core/server").SavedObjectsClient, "get" | "delete" | "create" | "bulkCreate" | "checkConflicts" | "find" | "bulkGet" | "resolve" | "update" | "addToNamespaces" | "deleteFromNamespaces" | "bulkUpdate" | "removeReferencesTo" | "openPointInTimeForType" | "closePointInTime" | "createPointInTimeFinder" | "errors">, elasticsearchClient: ElasticsearchClient_2) => Promise<IndexPatternsService>;
     };
 }
 
@@ -1163,6 +1166,8 @@ export enum METRIC_TYPES {
     // (undocumented)
     SERIAL_DIFF = "serial_diff",
     // (undocumented)
+    SINGLE_PERCENTILE = "single_percentile",
+    // (undocumented)
     STD_DEV = "std_dev",
     // (undocumented)
     SUM = "sum",
@@ -1207,6 +1212,7 @@ export type ParsedInterval = ReturnType<typeof parseEsInterval>;
 export function parseInterval(interval: string): moment.Duration | null;
 
 // Warning: (ae-forgotten-export) The symbol "DataPluginSetupDependencies" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "DataPluginStartDependencies" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "DataServerPlugin" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -1297,7 +1303,7 @@ export const search: {
         intervalOptions: ({
             display: string;
             val: string;
-            enabled(agg: import("../common").IBucketAggConfig): boolean | "" | undefined;
+            enabled(agg: import("../common").IBucketAggConfig): boolean;
         } | {
             display: string;
             val: string;
@@ -1516,7 +1522,7 @@ export function usageProvider(core: CoreSetup_2): SearchUsage;
 // src/plugins/data/server/index.ts:267:1 - (ae-forgotten-export) The symbol "propFilter" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:270:1 - (ae-forgotten-export) The symbol "toAbsoluteDates" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:271:1 - (ae-forgotten-export) The symbol "calcAutoIntervalLessThan" needs to be exported by the entry point index.d.ts
-// src/plugins/data/server/plugin.ts:79:74 - (ae-forgotten-export) The symbol "DataEnhancements" needs to be exported by the entry point index.d.ts
+// src/plugins/data/server/plugin.ts:81:74 - (ae-forgotten-export) The symbol "DataEnhancements" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/search/types.ts:114:5 - (ae-forgotten-export) The symbol "ISearchStartSearchSource" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)

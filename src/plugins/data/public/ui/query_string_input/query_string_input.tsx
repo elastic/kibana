@@ -379,14 +379,12 @@ export default class QueryStringInputUI extends Component<Props, State> {
     const newQueryString = value.substr(0, start) + text + value.substr(end);
 
     this.reportUiCounter?.(
-      METRIC_TYPE.LOADED,
-      `query_string:${type}:suggestions_select_position`,
-      listIndex
+      METRIC_TYPE.CLICK,
+      `query_string:${type}:suggestions_select_position_${listIndex}`
     );
     this.reportUiCounter?.(
-      METRIC_TYPE.LOADED,
-      `query_string:${type}:suggestions_select_q_length`,
-      end - start
+      METRIC_TYPE.CLICK,
+      `query_string:${type}:suggestions_select_q_length_${end - start}`
     );
 
     this.onQueryStringChange(newQueryString);
