@@ -49,9 +49,8 @@ import { getNestedProperty } from '../../util/object_utils';
 import { mlFieldFormatService } from '../../services/field_format_service';
 
 import { DataGridItem, IndexPagination, RenderCellValue } from './types';
-import type { RuntimeField } from '../../../../../../../src/plugins/data/common/index_patterns';
-import { RuntimeMappings } from '../../../../common/types/fields';
-import { isPopulatedObject } from '../../../../common/util/object_utils';
+import { RuntimeMappings, RuntimeField } from '../../../../common/types/fields';
+import { isRuntimeMappings } from '../../../../common/util/runtime_field_utils';
 
 export const INIT_MAX_COLUMNS = 10;
 export const COLUMN_CHART_DEFAULT_VISIBILITY_ROWS_THRESHOLED = 10000;
@@ -94,34 +93,36 @@ export const getFieldsFromKibanaIndexPattern = (indexPattern: IndexPattern): str
 /**
  * Return a map of runtime_mappings for each of the index pattern field provided
  * to provide in ES search queries
- * @param indexPatternFields
  * @param indexPattern
- * @param clonedRuntimeMappings
+ * @param RuntimeMappings
  */
-export const getRuntimeFieldsMapping = (
-  indexPatternFields: string[] | undefined,
+export function getCombinedRuntimeMappings(
   indexPattern: IndexPattern | undefined,
-  clonedRuntimeMappings?: RuntimeMappings
-) => {
-  if (!Array.isArray(indexPatternFields) || indexPattern === undefined) return {};
-  const ipRuntimeMappings = indexPattern.getComputedFields().runtimeFields;
-  let combinedRuntimeMappings: RuntimeMappings = {};
+  runtimeMappings?: RuntimeMappings
+): RuntimeMappings | undefined {
+  let combinedRuntimeMappings = {};
 
-  if (isPopulatedObject(ipRuntimeMappings)) {
-    indexPatternFields.forEach((ipField) => {
-      if (ipRuntimeMappings.hasOwnProperty(ipField)) {
-        // @ts-expect-error
-        combinedRuntimeMappings[ipField] = ipRuntimeMappings[ipField];
+  // And runtime field mappings defined by index pattern
+  if (indexPattern) {
+    const computedFields = indexPattern?.getComputedFields();
+    if (computedFields?.runtimeFields !== undefined) {
+      const indexPatternRuntimeMappings = computedFields.runtimeFields;
+      if (isRuntimeMappings(indexPatternRuntimeMappings)) {
+        combinedRuntimeMappings = { ...combinedRuntimeMappings, ...indexPatternRuntimeMappings };
       }
-    });
+    }
   }
-  if (isPopulatedObject(clonedRuntimeMappings)) {
-    combinedRuntimeMappings = { ...combinedRuntimeMappings, ...clonedRuntimeMappings };
+
+  // Use runtime field mappings defined inline from API
+  // and override fields with same name from index pattern
+  if (isRuntimeMappings(runtimeMappings)) {
+    combinedRuntimeMappings = { ...combinedRuntimeMappings, ...runtimeMappings };
   }
-  return Object.keys(combinedRuntimeMappings).length > 0
-    ? { runtime_mappings: combinedRuntimeMappings }
-    : {};
-};
+
+  if (isRuntimeMappings(combinedRuntimeMappings)) {
+    return combinedRuntimeMappings;
+  }
+}
 
 export interface FieldTypes {
   [key: string]: ES_FIELD_TYPES;
