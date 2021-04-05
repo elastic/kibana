@@ -35,7 +35,7 @@ export const NonTextFieldsBody: React.FC = () => {
           <EuiTableRowCellCheckbox>
             <EuiCheckbox
               aria-label={i18n.translate(
-                'xpack.enterpriseSearch.appSearch.engine.resultSettings.table.rawArialLabel',
+                'xpack.enterpriseSearch.appSearch.engine.resultSettings.table.rawAriaLabel',
                 { defaultMessage: 'Toggle raw enabled' }
               )}
               data-test-subj="ResultSettingRawCheckBox"
