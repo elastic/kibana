@@ -83,6 +83,7 @@
     "x-pack/plugins/uptime/server/lib/requests/helper.ts",
     "x-pack/plugins/uptime/public/lib/helper/rtl_helpers.tsx",
     "x-pack/plugins/uptime/public/lib/helper/enzyme_helpers.tsx",
+    "x-pack/plugins/observability/public/components/shared/exploratory_view/rtl_helpers.tsx",
     "x-pack/plugins/apm/server/utils/test_helpers.tsx",
     "x-pack/plugins/apm/public/utils/testHelpers.tsx",
 
