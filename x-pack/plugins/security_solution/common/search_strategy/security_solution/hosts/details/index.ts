@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
 
-import { Direction, Inspect, Maybe, TimerangeInput } from '../../../common';
+import { Inspect, Maybe, TimerangeInput } from '../../../common';
 import { HostItem, HostsFields } from '../common';
 import { RequestOptionsPaginated } from '../..';
 
@@ -24,39 +25,5 @@ export interface HostDetailsRequestOptions extends Partial<RequestOptionsPaginat
 }
 
 export interface AggregationRequest {
-  [aggField: string]: {
-    terms?: {
-      field?: string;
-      missing?: string;
-      size?: number;
-      script?: {
-        source: string;
-        lang: string;
-      };
-      order?: {
-        [aggSortField: string]: Direction;
-      };
-    };
-    max?: {
-      field: string;
-    };
-    aggs?: {
-      [aggSortField: string]: {
-        [aggType: string]: {
-          field: string;
-        };
-      };
-    };
-    top_hits?: {
-      size?: number;
-      sort?: Array<{
-        [aggSortField: string]: {
-          order: Direction;
-        };
-      }>;
-      _source: {
-        includes: string[];
-      };
-    };
-  };
+  [aggField: string]: estypes.AggregationContainer;
 }
