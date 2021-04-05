@@ -36,7 +36,7 @@ export const NonTextFieldsBody: React.FC = () => {
             <EuiCheckbox
               aria-label={i18n.translate(
                 'xpack.enterpriseSearch.appSearch.engine.resultSettings.table.rawAriaLabel',
-                { defaultMessage: 'Toggle raw enabled' }
+                { defaultMessage: 'Toggle raw field' }
               )}
               data-test-subj="ResultSettingRawCheckBox"
               id={`${fieldName}-raw}`}

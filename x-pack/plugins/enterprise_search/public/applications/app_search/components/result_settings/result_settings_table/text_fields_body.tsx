@@ -46,7 +46,7 @@ export const TextFieldsBody: React.FC = () => {
             <EuiCheckbox
               aria-label={i18n.translate(
                 'xpack.enterpriseSearch.appSearch.engine.resultSettings.table.rawArialLabel',
-                { defaultMessage: 'Toggle raw enabled' }
+                { defaultMessage: 'Toggle raw field' }
               )}
               data-test-subj="ResultSettingRawCheckBox"
               id={`${fieldName}-raw}`}
@@ -70,7 +70,7 @@ export const TextFieldsBody: React.FC = () => {
             <EuiCheckbox
               aria-label={i18n.translate(
                 'xpack.enterpriseSearch.appSearch.engine.resultSettings.table.snippetArialLabel',
-                { defaultMessage: 'Toggle snippet enabled' }
+                { defaultMessage: 'Toggle text snippet' }
               )}
               data-test-subj="ResultSettingSnippetTextBox"
               id={`${fieldName}-snippet}`}
@@ -84,7 +84,7 @@ export const TextFieldsBody: React.FC = () => {
             <EuiCheckbox
               aria-label={i18n.translate(
                 'xpack.enterpriseSearch.appSearch.engine.resultSettings.table.snippetFallbackArialLabel',
-                { defaultMessage: 'Toggle snippet fallback enabled' }
+                { defaultMessage: 'Toggle snippet fallback' }
               )}
               data-test-subj="ResultSettingFallbackTextBox"
               id={`${fieldName}-snippetFallback}`}
