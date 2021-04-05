@@ -33,6 +33,7 @@ import {
 } from '../actions';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 
 const { startES } = kbnTestServer.createTestServers({
   adjustTimeout: (t: number) => jest.setTimeout(t),
@@ -162,6 +163,7 @@ describe('migration actions', () => {
                 Object {
                   "_tag": "Left",
                   "left": Object {
+                    "index": "no_such_index",
                     "type": "index_not_found_exception",
                   },
                 }
@@ -290,6 +292,45 @@ describe('migration actions', () => {
           },
         }
       `);
+    });
+    it('resolves left with a retryable_es_client_error if clone target already exists but takes longer than the specified timeout before turning yellow', async () => {
+      // Create a red index
+      await client.indices
+        .create({
+          index: 'clone_red_index',
+          timeout: '5s',
+          body: {
+            mappings: { properties: {} },
+            settings: {
+              // Allocate 1 replica so that this index stays yellow
+              number_of_replicas: '1',
+              // Disable all shard allocation so that the index status is red
+              'index.routing.allocation.enable': 'none',
+            },
+          },
+        })
+        .catch((e) => {});
+
+      // Call clone even though the index already exists
+      const cloneIndexPromise = cloneIndex(
+        client,
+        'existing_index_with_write_block',
+        'clone_red_index',
+        '0s'
+      )();
+
+      await cloneIndexPromise.then((res) => {
+        expect(res).toMatchInlineSnapshot(`
+          Object {
+            "_tag": "Left",
+            "left": Object {
+              "error": [ResponseError: Response Error],
+              "message": "Response Error",
+              "type": "retryable_es_client_error",
+            },
+          }
+        `);
+      });
     });
   });
 
@@ -587,6 +628,28 @@ describe('migration actions', () => {
                 }
               `);
     });
+    it('resolves left wait_for_task_completion_timeout when the task does not finish within the timeout', async () => {
+      const res = (await reindex(
+        client,
+        'existing_index_with_docs',
+        'reindex_target',
+        Option.none,
+        false
+      )()) as Either.Right<ReindexResponse>;
+
+      const task = waitForReindexTask(client, res.right.taskId, '0s');
+
+      await expect(task()).resolves.toMatchObject({
+        _tag: 'Left',
+        left: {
+          error: expect.any(ResponseError),
+          message: expect.stringMatching(
+            /\[timeout_exception\] Timed out waiting for completion of \[org.elasticsearch.index.reindex.BulkByScrollTask/
+          ),
+          type: 'wait_for_task_completion_timeout',
+        },
+      });
+    });
   });
 
   describe('verifyReindex', () => {
@@ -701,6 +764,25 @@ describe('migration actions', () => {
                         [Error: pickupUpdatedMappings task failed with the following error:
                         {"type":"index_not_found_exception","reason":"no such index [no_such_index]","resource.type":"index_or_alias","resource.id":"no_such_index","index_uuid":"_na_","index":"no_such_index"}]
                     `);
+    });
+    it('resolves left wait_for_task_completion_timeout when the task does not complete within the timeout', async () => {
+      const res = (await pickupUpdatedMappings(
+        client,
+        'existing_index_with_docs'
+      )()) as Either.Right<UpdateByQueryResponse>;
+
+      const task = waitForPickupUpdatedMappingsTask(client, res.right.taskId, '0s');
+
+      await expect(task()).resolves.toMatchObject({
+        _tag: 'Left',
+        left: {
+          error: expect.any(ResponseError),
+          message: expect.stringMatching(
+            /\[timeout_exception\] Timed out waiting for completion of \[org.elasticsearch.index.reindex.BulkByScrollTask/
+          ),
+          type: 'wait_for_task_completion_timeout',
+        },
+      });
     });
     it('resolves right when successful', async () => {
       const res = (await pickupUpdatedMappings(
