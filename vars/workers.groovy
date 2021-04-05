@@ -7,8 +7,6 @@ def label(size) {
       return 'flyweight'
     case 's':
       return 'docker && linux && immutable'
-    case 's-ubuntu':
-      return 'docker && linux && immutable && ubuntu'
     case 's-highmem':
       return 'docker && tests-s'
     case 'm-highmem':
