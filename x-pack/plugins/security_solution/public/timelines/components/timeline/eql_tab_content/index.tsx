@@ -22,10 +22,12 @@ import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
 
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
+import { CellValueElementProps } from '../cell_rendering';
 import { TimelineItem } from '../../../../../common/search_strategy';
 import { useTimelineEvents } from '../../../containers/index';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { StatefulBody } from '../body';
+import { RowRenderer } from '../body/renderers/row_renderer';
 import { Footer, footerHeight } from '../footer';
 import { calculateTotalPages } from '../helpers';
 import { TimelineRefetch } from '../refetch_timeline';
@@ -133,6 +135,8 @@ const isTimerangeSame = (prevProps: Props, nextProps: Props) =>
   prevProps.timerangeKind === nextProps.timerangeKind;
 
 interface OwnProps {
+  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
+  rowRenderers: RowRenderer[];
   timelineId: string;
 }
 
@@ -154,6 +158,8 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   itemsPerPage,
   itemsPerPageOptions,
   onEventClosed,
+  renderCellValue,
+  rowRenderers,
   showExpandedDetails,
   start,
   timerangeKind,
@@ -284,6 +290,8 @@ export const EqlTabContentComponent: React.FC<Props> = ({
                 data={isBlankTimeline ? EMPTY_EVENTS : events}
                 id={timelineId}
                 refetch={refetch}
+                renderCellValue={renderCellValue}
+                rowRenderers={rowRenderers}
                 sort={NO_SORTING}
                 tabType={TimelineTabs.eql}
                 totalPages={calculateTotalPages({
