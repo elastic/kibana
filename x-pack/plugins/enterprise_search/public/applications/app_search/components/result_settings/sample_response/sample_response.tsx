@@ -35,7 +35,7 @@ export const SampleResponse: React.FC = () => {
   }, [query, reducedServerResultFields]);
 
   return (
-    <EuiPanel hasShadow>
+    <EuiPanel hasBorder>
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
           <EuiTitle size="s">
