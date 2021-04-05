@@ -24,8 +24,20 @@ export default function apmApiIntegrationTests(providerContext: FtrProviderConte
       loadTestFile(require.resolve('./alerts/chart_preview'));
     });
 
-    describe('correlations/slow_transactions', function () {
-      loadTestFile(require.resolve('./correlations/slow_transactions'));
+    describe('correlations/latency_slow_transactions', function () {
+      loadTestFile(require.resolve('./correlations/latency_slow_transactions'));
+    });
+
+    describe('correlations/latency_overall', function () {
+      loadTestFile(require.resolve('./correlations/latency_overall'));
+    });
+
+    describe('correlations/errors_overall', function () {
+      loadTestFile(require.resolve('./correlations/errors_overall'));
+    });
+
+    describe('correlations/errors_failed_transactions', function () {
+      loadTestFile(require.resolve('./correlations/errors_failed_transactions'));
     });
 
     describe('metrics_charts/metrics_charts', function () {

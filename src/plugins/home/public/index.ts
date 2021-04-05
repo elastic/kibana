@@ -8,24 +8,28 @@
 
 import { PluginInitializerContext } from 'kibana/public';
 
-export {
+export type {
   FeatureCatalogueSetup,
   EnvironmentSetup,
   TutorialSetup,
   HomePublicPluginSetup,
   HomePublicPluginStart,
 } from './plugin';
-export {
+
+export { FeatureCatalogueCategory } from './services';
+
+export type {
   FeatureCatalogueEntry,
   FeatureCatalogueSolution,
-  FeatureCatalogueCategory,
   Environment,
   TutorialVariables,
   TutorialDirectoryNoticeComponent,
   TutorialDirectoryHeaderLinkComponent,
   TutorialModuleNoticeComponent,
 } from './services';
-export * from '../common/instruction_variant';
+
+export { INSTRUCTION_VARIANT, getDisplayText } from '../common/instruction_variant';
+
 import { HomePublicPlugin } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>

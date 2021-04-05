@@ -254,7 +254,7 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
     /**
      * FROZEN PHASE SERIALIZATION
      */
-    if (_meta.frozen.enabled) {
+    if (_meta.frozen?.enabled) {
       draft.phases.frozen!.actions = draft.phases.frozen?.actions ?? {};
       const frozenPhase = draft.phases.frozen!;
 
