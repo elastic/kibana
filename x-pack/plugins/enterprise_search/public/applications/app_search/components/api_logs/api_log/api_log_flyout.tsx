@@ -32,7 +32,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { getStatusColor, safeJsonParseAndStringify } from '../utils';
+import { getStatusColor, attemptToFormatJson } from '../utils';
 
 import { ApiLogLogic } from './';
 
@@ -112,7 +112,7 @@ export const ApiLogFlyout: React.FC = () => {
             })}
           </ApiLogHeading>
           <EuiCodeBlock language="json" paddingSize="m">
-            {safeJsonParseAndStringify(apiLog.request_body)}
+            {attemptToFormatJson(apiLog.request_body)}
           </EuiCodeBlock>
           <EuiSpacer />
 
@@ -122,7 +122,7 @@ export const ApiLogFlyout: React.FC = () => {
             })}
           </ApiLogHeading>
           <EuiCodeBlock language="json" paddingSize="m">
-            {safeJsonParseAndStringify(apiLog.response_body)}
+            {attemptToFormatJson(apiLog.response_body)}
           </EuiCodeBlock>
         </EuiFlyoutBody>
       </EuiFlyout>

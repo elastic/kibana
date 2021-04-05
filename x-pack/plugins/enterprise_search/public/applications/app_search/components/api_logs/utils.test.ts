@@ -7,7 +7,7 @@
 
 import dedent from 'dedent';
 
-import { getDateString, getStatusColor, safeJsonParseAndStringify } from './utils';
+import { getDateString, getStatusColor, attemptToFormatJson } from './utils';
 
 describe('getDateString', () => {
   const mockDate = jest
@@ -35,9 +35,9 @@ describe('getStatusColor', () => {
   });
 });
 
-describe('safeJsonParseAndStringify', () => {
+describe('attemptToFormatJson', () => {
   it('takes an unformatted JSON string and correctly newlines/indents it', () => {
-    expect(safeJsonParseAndStringify('{"hello":"world","lorem":{"ipsum":"dolor","sit":"amet"}}'))
+    expect(attemptToFormatJson('{"hello":"world","lorem":{"ipsum":"dolor","sit":"amet"}}'))
       .toEqual(dedent`{
         "hello": "world",
         "lorem": {
@@ -48,6 +48,6 @@ describe('safeJsonParseAndStringify', () => {
   });
 
   it('returns the original content if it is not properly formatted JSON', () => {
-    expect(safeJsonParseAndStringify('{invalid json}')).toEqual('{invalid json}');
+    expect(attemptToFormatJson('{invalid json}')).toEqual('{invalid json}');
   });
 });

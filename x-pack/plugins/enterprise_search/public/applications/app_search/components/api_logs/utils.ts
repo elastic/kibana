@@ -20,12 +20,12 @@ export const getStatusColor = (status: number) => {
   return color;
 };
 
-export const attemptToFormatPossibleJson = (possibleJson: string) => {
+export const attemptToFormatJson = (possibleJson: string) => {
   try {
-    // it is JSON, we can format it
+    // it is JSON, we can format it with newlines/indentation
     return JSON.stringify(JSON.parse(possibleJson), null, 2);
   } catch {
-   // it's not JSON, likely a string message, we return it rather than format it
+    // if it's not JSON, we return the original content
     return possibleJson;
   }
 };
