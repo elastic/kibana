@@ -263,7 +263,7 @@ const PieComponent = (props: PieComponentProps) => {
           <ChartSplit
             splitColumnAccessor={splitChartColumnAccessor}
             splitRowAccessor={splitChartRowAccessor}
-            splitColumn={splitChartDimension}
+            splitDimension={splitChartDimension}
           />
           <Settings
             showLegend={showLegend}

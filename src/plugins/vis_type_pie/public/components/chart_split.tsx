@@ -13,7 +13,11 @@ import { DatatableColumn } from '../../../expressions/public';
 interface ChartSplitProps {
   splitColumnAccessor?: Accessor | AccessorFn;
   splitRowAccessor?: Accessor | AccessorFn;
-  splitColumn?: DatatableColumn;
+  splitDimension?: DatatableColumn;
+}
+
+interface SplitDimensionParams {
+  order?: string;
 }
 
 const CHART_SPLIT_ID = '__pie_chart_split__';
@@ -22,12 +26,13 @@ export const SMALL_MULTIPLES_ID = '__pie_chart_sm__';
 export const ChartSplit = ({
   splitColumnAccessor,
   splitRowAccessor,
-  splitColumn,
+  splitDimension,
 }: ChartSplitProps) => {
   if (!splitColumnAccessor && !splitRowAccessor) return null;
   let sort: GroupBySort = 'alphaDesc';
-  if (splitColumn?.meta?.params?.id === 'terms') {
-    sort = splitColumn?.meta?.sourceParams?.order === 'asc' ? 'alphaAsc' : 'alphaDesc';
+  if (splitDimension?.meta?.params?.id === 'terms') {
+    const params = splitDimension?.meta?.sourceParams?.params as SplitDimensionParams;
+    sort = params?.order === 'asc' ? 'alphaAsc' : 'alphaDesc';
   }
 
   return (

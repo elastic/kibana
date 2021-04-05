@@ -52,13 +52,15 @@ const computeColor = (
     let tempParent: typeof d | typeof d['parent'] = d;
     while (tempParent.parent && tempParent.depth > 0) {
       const seriesName = String(tempParent.parent.children[tempParent.sortIndex][0]);
+      const isSplitParentLayer = isSplitChart && parentSeries.includes(seriesName);
       seriesLayers.unshift({
         name: seriesName,
-        rankAtDepth:
-          isSplitChart && parentSeries.includes(seriesName)
-            ? parentSeries.findIndex((name) => name === seriesName)
-            : tempParent.sortIndex,
-        totalSeriesAtDepth: tempParent.parent.children.length,
+        rankAtDepth: isSplitParentLayer
+          ? parentSeries.findIndex((name) => name === seriesName)
+          : tempParent.sortIndex,
+        totalSeriesAtDepth: isSplitParentLayer
+          ? parentSeries.length
+          : tempParent.parent.children.length,
       });
       tempParent = tempParent.parent;
     }
