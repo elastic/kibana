@@ -198,6 +198,15 @@ describe('Parser', () => {
         functionEqual('foo', [namedArgumentEqual('filter', `😀 > "\ttab"`)])
       );
     });
+
+    it('named with escape characters', () => {
+      expect(parse(`foo(filter='Women\\'s Clothing')`)).toEqual(
+        functionEqual('foo', [namedArgumentEqual('filter', `Women's Clothing`)])
+      );
+      expect(parse(`foo(filter="\\"Quoted inner string\\"")`)).toEqual(
+        functionEqual('foo', [namedArgumentEqual('filter', `"Quoted inner string"`)])
+      );
+    });
   });
 
   it('Missing expression', () => {
