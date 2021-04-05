@@ -11,6 +11,7 @@ export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const find = getService('find');
   const PageObjects = getPageObjects(['security', 'settings', 'common', 'header']);
 
   const USERS_PATH = 'security/users';
@@ -20,6 +21,7 @@ export default function ({ getService, getPageObjects }) {
   const ROLES_PATH = 'security/roles';
   const EDIT_ROLES_PATH = `${ROLES_PATH}/edit`;
   const CLONE_ROLES_PATH = `${ROLES_PATH}/clone`;
+  const security = getService('security');
 
   describe('Management', function () {
     this.tags(['skipFirefox']);
@@ -40,6 +42,12 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.security.clickSaveEditRole();
 
       await PageObjects.settings.navigateTo();
+    });
+
+    after(async () => {
+      await security.role.delete('logstash-readonly');
+      await security.user.delete('dashuser', 'new-user');
+      await PageObjects.security.forceLogout();
     });
 
     describe('Security', () => {
@@ -66,8 +74,6 @@ export default function ({ getService, getPageObjects }) {
           await testSubjects.setValue('passwordConfirmationInput', '123456');
           await testSubjects.setValue('userFormFullNameInput', 'Full User Name');
           await testSubjects.setValue('userFormEmailInput', 'example@example.com');
-
-          //await PageObjects.security.clickSaveEditUser();
           await PageObjects.security.clickSaveCreateUser();
 
           const currentUrl = await browser.getCurrentUrl();
@@ -143,16 +149,11 @@ export default function ({ getService, getPageObjects }) {
           await testSubjects.setValue('passwordConfirmationInput', '123456');
           await testSubjects.setValue('userFormFullNameInput', 'dashuser');
           await testSubjects.setValue('userFormEmailInput', 'example@example.com');
-          await PageObjects.security.assignRoleToUser('kibana_dashboard_only_user');
           await PageObjects.security.assignRoleToUser('logstash-readonly');
-
           await PageObjects.security.clickSaveCreateUser();
-
           await PageObjects.settings.navigateTo();
-          await testSubjects.click('roles');
-          await testSubjects.click('tablePaginationPopoverButton');
-          await testSubjects.click('tablePagination-100-rows');
-          await PageObjects.settings.clickLinkText('kibana_dashboard_only_user');
+          await testSubjects.click('users');
+          await find.clickByButtonText('logstash-readonly');
           const currentUrl = await browser.getCurrentUrl();
           expect(currentUrl).to.contain(EDIT_ROLES_PATH);
         });
