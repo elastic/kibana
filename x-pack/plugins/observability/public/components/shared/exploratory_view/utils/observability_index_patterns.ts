@@ -8,16 +8,22 @@
 import {
   DataPublicPluginStart,
   IndexPattern,
+  FieldFormat as IFieldFormat,
   IndexPatternSpec,
 } from '../../../../../../../../src/plugins/data/public';
 import { rumFieldFormats } from '../configurations/rum/field_formats';
+import { FieldFormat, FieldFormatParams } from '../types';
 
-const fieldFormats = {
+const appFieldFormats: Record<DataType, FieldFormat[] | null> = {
   rum: rumFieldFormats,
+  apm: null,
+  logs: null,
+  metrics: null,
+  synthetics: null,
 };
 
 function getFieldFormatsForApp(app: DataType) {
-  return rumFieldFormats;
+  return appFieldFormats[app];
 }
 
 export type DataType = 'synthetics' | 'apm' | 'logs' | 'metrics' | 'rum';
@@ -38,7 +44,7 @@ const appToPatternMap: Record<DataType, string> = {
   metrics: 'metrics-*,metricbeat-*',
 };
 
-function isParamsSame(param1, param2) {
+function isParamsSame(param1: IFieldFormat['_params'], param2: FieldFormatParams) {
   return (
     param1?.inputFormat === param2?.inputFormat && param1?.outputFormat === param2?.outputFormat
   );
@@ -72,18 +78,20 @@ export class ObservabilityIndexPatterns {
   }
   // we want to make sure field formats remain same
   async validateFieldFormats(app: DataType, indexPattern: IndexPattern) {
-    const defaultFieldFormats = getFieldFormatsForApp('rum');
-    let isParamsDifferent = false;
-    defaultFieldFormats.forEach(({ field, format }) => {
-      const fieldFormat = indexPattern.getFormatterForField(indexPattern.getFieldByName(field)!);
-      const params = fieldFormat.params();
-      if (!isParamsSame(params, format.params)) {
-        indexPattern.setFieldFormat(field, format);
-        isParamsDifferent = true;
+    const defaultFieldFormats = getFieldFormatsForApp(app);
+    if (defaultFieldFormats && defaultFieldFormats.length > 0) {
+      let isParamsDifferent = false;
+      defaultFieldFormats.forEach(({ field, format }) => {
+        const fieldFormat = indexPattern.getFormatterForField(indexPattern.getFieldByName(field)!);
+        const params = fieldFormat.params();
+        if (!isParamsSame(params, format.params)) {
+          indexPattern.setFieldFormat(field, format);
+          isParamsDifferent = true;
+        }
+      });
+      if (isParamsDifferent) {
+        await this.data?.indexPatterns.updateSavedObject(indexPattern);
       }
-    });
-    if (isParamsDifferent) {
-      await this.data?.indexPatterns.updateSavedObject(indexPattern);
     }
   }
 

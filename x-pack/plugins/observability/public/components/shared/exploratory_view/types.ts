@@ -92,13 +92,15 @@ type FormatType = 'duration' | 'number';
 type InputFormat = 'microseconds' | 'milliseconds' | 'seconds';
 type OutputFormat = 'asSeconds' | 'asMilliseconds' | 'humanize';
 
+export interface FieldFormatParams {
+  inputFormat: InputFormat;
+  outputFormat: OutputFormat;
+}
+
 export interface FieldFormat {
   field: string;
   format: {
     id: FormatType;
-    params: {
-      inputFormat: InputFormat;
-      outputFormat: OutputFormat;
-    };
+    params: FieldFormatParams;
   };
 }
