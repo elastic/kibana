@@ -16,11 +16,12 @@ import {
   Mode,
   ResponseBodyIndexPolicy,
   ScheduleUnit,
+  TLSVersion,
+  VerificationMode,
 } from './types';
 import { CustomFields } from './custom_fields';
 import { useUpdatePolicy } from './use_update_policy';
 import { validate } from './validation';
-import { VerificationMode } from './certs_field';
 
 /**
  * Exports Synthetics-specific package policy instructions
@@ -88,11 +89,30 @@ const defaultValues = {
     unit: ScheduleUnit.MINUTES,
   },
   [ConfigKeys.APM_SERVICE_NAME]: '',
-  [ConfigKeys.SSL_CERTIFICATE_AUTHORITIES]: '',
-  [ConfigKeys.SSL_CERTIFICATE]: '',
-  [ConfigKeys.SSL_KEY]: '',
-  [ConfigKeys.SSL_KEY_PASSPHRASE]: '',
-  [ConfigKeys.SSL_VERIFICATION_MODE]: VerificationMode.FULL,
+  [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]: {
+    value: '',
+    isEnabled: false,
+  },
+  [ConfigKeys.TLS_CERTIFICATE]: {
+    value: '',
+    isEnabled: false,
+  },
+  [ConfigKeys.TLS_KEY]: {
+    value: '',
+    isEnabled: false,
+  },
+  [ConfigKeys.TLS_KEY_PASSPHRASE]: {
+    value: '',
+    isEnabled: false,
+  },
+  [ConfigKeys.TLS_VERIFICATION_MODE]: {
+    value: VerificationMode.FULL,
+    isEnabled: false,
+  },
+  [ConfigKeys.TLS_VERSION]: {
+    value: [TLSVersion.ONE_ONE, TLSVersion.ONE_TWO, TLSVersion.ONE_THREE],
+    isEnabled: false,
+  },
   [ConfigKeys.TAGS]: [],
   [ConfigKeys.TIMEOUT]: 16,
   [ConfigKeys.URLS]: '',

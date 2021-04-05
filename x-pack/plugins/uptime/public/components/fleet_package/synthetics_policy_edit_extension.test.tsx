@@ -281,6 +281,8 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     const apmServiceName = getByLabelText('APM service name') as HTMLInputElement;
     const maxRedirects = getByLabelText('Max redirects') as HTMLInputElement;
     const timeout = getByLabelText('Timeout in seconds') as HTMLInputElement;
+    const verificationMode = getByLabelText('Verification mode') as HTMLInputElement;
+    const enableTLSConfig = getByLabelText('Enable TLS configuration') as HTMLInputElement;
     expect(url).toBeInTheDocument();
     expect(url.value).toEqual(defaultConfig[ConfigKeys.URLS]);
     expect(proxyUrl).toBeInTheDocument();
@@ -295,6 +297,12 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     expect(maxRedirects.value).toEqual(`${defaultConfig[ConfigKeys.MAX_REDIRECTS]}`);
     expect(timeout).toBeInTheDocument();
     expect(timeout.value).toEqual(`${defaultConfig[ConfigKeys.TIMEOUT]}`);
+    // expect TLS settings to be in the document when at least one tls key is populated
+    expect(enableTLSConfig.checked).toBe(true);
+    expect(verificationMode).toBeInTheDocument();
+    expect(verificationMode.value).toEqual(
+      `${defaultConfig[ConfigKeys.TLS_VERIFICATION_MODE].value}`
+    );
 
     // ensure other monitor type options are not in the DOM
     expect(queryByLabelText('Host')).not.toBeInTheDocument();
@@ -584,7 +592,7 @@ describe('<SyntheticsPolicyEditExtension />', () => {
         defaultCurrentPolicy.inputs[2],
       ],
     };
-    const { getByText, getByLabelText, queryByLabelText } = render(
+    const { getByText, getByLabelText, queryByLabelText, queryByText } = render(
       <WrappedComponent policy={currentPolicy} />
     );
     const url = getByLabelText('URL') as HTMLInputElement;
@@ -594,6 +602,8 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     const apmServiceName = getByLabelText('APM service name') as HTMLInputElement;
     const maxRedirects = getByLabelText('Max redirects') as HTMLInputElement;
     const timeout = getByLabelText('Timeout in seconds') as HTMLInputElement;
+    const enableTLSConfig = getByLabelText('Enable TLS configuration') as HTMLInputElement;
+
     expect(url).toBeInTheDocument();
     expect(url.value).toEqual(defaultConfig[ConfigKeys.URLS]);
     expect(proxyUrl).toBeInTheDocument();
@@ -608,6 +618,11 @@ describe('<SyntheticsPolicyEditExtension />', () => {
     expect(maxRedirects.value).toEqual(`${defaultConfig[ConfigKeys.MAX_REDIRECTS]}`);
     expect(timeout).toBeInTheDocument();
     expect(timeout.value).toEqual(`${defaultConfig[ConfigKeys.TIMEOUT]}`);
+
+    /* expect TLS settings not to be in the document when and Enable TLS settings not to be checked
+     * when all TLS values are falsey */
+    expect(enableTLSConfig.checked).toBe(false);
+    expect(queryByText('Verification mode')).not.toBeInTheDocument();
 
     // ensure other monitor type options are not in the DOM
     expect(queryByLabelText('Host')).not.toBeInTheDocument();

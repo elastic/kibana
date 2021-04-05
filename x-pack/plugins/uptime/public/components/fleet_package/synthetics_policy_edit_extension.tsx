@@ -19,7 +19,8 @@ import { validate } from './validation';
  */
 export const SyntheticsPolicyEditExtension = memo<PackagePolicyEditExtensionComponentProps>(
   ({ policy: currentPolicy, newPolicy, onChange }) => {
-    const defaultConfig = useMemo(() => {
+    const { enableTLS: isTLSEnabled, config: defaultConfig } = useMemo(() => {
+      let enableTLS = false;
       const getDefaultConfig = () => {
         const currentInput = currentPolicy.inputs.find((input) => input.enabled === true);
         const vars = currentInput?.streams[0]?.vars;
@@ -84,6 +85,20 @@ export const SyntheticsPolicyEditExtension = memo<PackagePolicyEditExtensionComp
                   type,
                 };
                 break;
+              case ConfigKeys.TLS_CERTIFICATE:
+              case ConfigKeys.TLS_CERTIFICATE_AUTHORITIES:
+              case ConfigKeys.TLS_KEY:
+              case ConfigKeys.TLS_KEY_PASSPHRASE:
+              case ConfigKeys.TLS_VERIFICATION_MODE:
+                const isEnabled = !!value;
+                acc[key] = {
+                  value: value ?? fallbackConfig[key].value,
+                  isEnabled,
+                };
+                if (isEnabled) {
+                  enableTLS = true;
+                }
+                break;
               default:
                 acc[key] = value ?? fallbackConfig[key];
             }
@@ -92,7 +107,7 @@ export const SyntheticsPolicyEditExtension = memo<PackagePolicyEditExtensionComp
           {}
         );
 
-        return (formattedDefaultConfig as unknown) as Config;
+        return { config: (formattedDefaultConfig as unknown) as Config, enableTLS };
       };
 
       return getDefaultConfig();
@@ -108,6 +123,7 @@ export const SyntheticsPolicyEditExtension = memo<PackagePolicyEditExtensionComp
 
     return (
       <CustomFields
+        isTLSEnabled={isTLSEnabled}
         defaultValues={defaultConfig}
         onChange={handleInputChange}
         validate={validate[config[ConfigKeys.MONITOR_TYPE]]}

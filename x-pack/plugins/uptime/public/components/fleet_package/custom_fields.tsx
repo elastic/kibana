@@ -31,13 +31,20 @@ import { ScheduleField } from './schedule_field';
 interface Props {
   defaultValues: ICustomFields;
   typeEditable?: boolean;
+  isTLSEnabled?: boolean;
   onChange: (fields: ICustomFields) => void;
   validate: Validation;
 }
 
 export const CustomFields = memo<Props>(
-  ({ defaultValues, typeEditable = false, validate, onChange }) => {
-    const [isTLSEnabled, setIsTLSEnabled] = useState<boolean>(false);
+  ({
+    defaultValues,
+    typeEditable = false,
+    isTLSEnabled: defaultIsTLSEnabled = false,
+    validate,
+    onChange,
+  }) => {
+    const [isTLSEnabled, setIsTLSEnabled] = useState<boolean>(defaultIsTLSEnabled);
     const [fields, setFields] = useState<ICustomFields>(defaultValues);
     const { type } = fields;
 
@@ -54,19 +61,6 @@ export const CustomFields = memo<Props>(
       }));
     }, [defaultValues, type]);
 
-    useEffect(() => {
-      if (!isTLSEnabled) {
-        setFields((prevFields) => ({
-          ...prevFields,
-          [ConfigKeys.SSL_CERTIFICATE_AUTHORITIES]: '',
-          [ConfigKeys.SSL_CERTIFICATE]: '',
-          [ConfigKeys.SSL_KEY]: '',
-          [ConfigKeys.SSL_KEY_PASSPHRASE]: '',
-          [ConfigKeys.SSL_VERIFICATION_MODE]: undefined,
-        }));
-      }
-    }, [isTLSEnabled]);
-
     useDebounce(
       () => {
         onChange(fields);
@@ -80,25 +74,11 @@ export const CustomFields = memo<Props>(
     };
 
     const onChangeAdvancedFields = useCallback(
-      (values) =>
+      (values: Partial<ICustomFields>) =>
         setFields((prevFields) => ({
           ...prevFields,
           ...values,
         })),
-      [setFields]
-    );
-
-    const handleChangeCerts = useCallback(
-      (certsFields) => {
-        setFields((prevFields) => ({
-          ...prevFields,
-          [ConfigKeys.SSL_CERTIFICATE_AUTHORITIES]: certsFields.certificateAuthorities,
-          [ConfigKeys.SSL_CERTIFICATE]: certsFields.certificate,
-          [ConfigKeys.SSL_KEY]: certsFields.key,
-          [ConfigKeys.SSL_KEY_PASSPHRASE]: certsFields.keyPassphrase,
-          [ConfigKeys.SSL_VERIFICATION_MODE]: certsFields.verificationMode,
-        }));
-      },
       [setFields]
     );
 
@@ -407,18 +387,25 @@ export const CustomFields = memo<Props>(
               label={
                 <FormattedMessage
                   id="xpack.uptime.createPackagePolicy.stepConfigure.certificateSettings.enableSSLSettings.label"
-                  defaultMessage="Enable SSL configuration"
+                  defaultMessage="Enable TLS configuration"
                 />
               }
               onChange={(event) => setIsTLSEnabled(event.target.checked)}
             />
-            {isTLSEnabled && (
-              <CertsField
-                onChange={handleChangeCerts}
-                sslRole={SSLRole.CLIENT}
-                showLegend={false}
-              />
-            )}
+            <CertsField
+              onChange={onChangeAdvancedFields}
+              sslRole={SSLRole.CLIENT}
+              isEnabled={isTLSEnabled}
+              defaultValues={{
+                [ConfigKeys.TLS_VERIFICATION_MODE]: defaultValues[ConfigKeys.TLS_VERIFICATION_MODE],
+                [ConfigKeys.TLS_VERSION]: defaultValues[ConfigKeys.TLS_VERSION],
+                [ConfigKeys.TLS_KEY]: defaultValues[ConfigKeys.TLS_KEY],
+                [ConfigKeys.TLS_CERTIFICATE]: defaultValues[ConfigKeys.TLS_CERTIFICATE],
+                [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]:
+                  defaultValues[ConfigKeys.TLS_CERTIFICATE_AUTHORITIES],
+                [ConfigKeys.TLS_KEY_PASSPHRASE]: defaultValues[ConfigKeys.TLS_KEY_PASSPHRASE],
+              }}
+            />
           </EuiDescribedFormGroup>
         )}
         <EuiSpacer size="m" />

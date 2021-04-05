@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import React, { useState, memo } from 'react';
+import React, { useEffect, useState, memo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiCallOut,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
   EuiFormRow,
-  EuiText,
   EuiFieldText,
   EuiTextArea,
   EuiFormFieldset,
@@ -22,153 +23,377 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-export enum VerificationMode {
-  CERTIFICATE = 'certificate',
-  FULL = 'full',
-  NONE = 'none',
-  STRICT = 'strict',
-}
+import { OptionalLabel } from './optional_label';
+
+import { VerificationMode, ConfigKeys, ITLSFields, TLSVersion } from './types';
 
 export enum SSLRole {
   CLIENT = 'client',
   SERVER = 'server',
 }
 
-export enum FieldKey {
-  CERTIFICATE = 'certificate',
-  CERTIFICATE_AUTHORITIES = 'certificateAuthorities',
-  KEY = 'key',
-  KEY_PASSPHRASE = 'keyPassphrase',
-  VERIFICATION_MODE = 'verificationMode',
-}
+export const CertsField: React.FunctionComponent<{
+  defaultValues: ITLSFields;
+  isEnabled: boolean;
+  onChange: (newValue: any) => void;
+  sslRole: SSLRole;
+}> = memo(({ defaultValues, isEnabled, onChange, sslRole = SSLRole.CLIENT }) => {
+  const [fields, setFields] = useState<ITLSFields>(defaultValues);
+  const [
+    verificationVersionInputRef,
+    setVerificationVersionInputRef,
+  ] = useState<HTMLInputElement | null>(null);
+  const [hasVerificationVersionError, setHasVerificationVersionError] = useState<
+    string | undefined
+  >(undefined);
+  useDebounce(
+    () => {
+      onChange(fields);
+    },
+    250,
+    [onChange, fields]
+  );
 
-interface Fields {
-  [FieldKey.CERTIFICATE]: string;
-  [FieldKey.CERTIFICATE_AUTHORITIES]: string;
-  [FieldKey.KEY]: string;
-  [FieldKey.KEY_PASSPHRASE]: string;
-  [FieldKey.VERIFICATION_MODE]: VerificationMode;
-}
+  useEffect(() => {
+    setFields((prevFields) => ({
+      [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]: {
+        value: prevFields[ConfigKeys.TLS_CERTIFICATE_AUTHORITIES].value,
+        isEnabled,
+      },
+      [ConfigKeys.TLS_CERTIFICATE]: {
+        value: prevFields[ConfigKeys.TLS_CERTIFICATE].value,
+        isEnabled,
+      },
+      [ConfigKeys.TLS_KEY]: {
+        value: prevFields[ConfigKeys.TLS_KEY].value,
+        isEnabled,
+      },
+      [ConfigKeys.TLS_KEY_PASSPHRASE]: {
+        value: prevFields[ConfigKeys.TLS_KEY_PASSPHRASE].value,
+        isEnabled,
+      },
+      [ConfigKeys.TLS_VERIFICATION_MODE]: {
+        value: prevFields[ConfigKeys.TLS_VERIFICATION_MODE].value,
+        isEnabled,
+      },
+      [ConfigKeys.TLS_VERSION]: {
+        value: prevFields[ConfigKeys.TLS_VERSION].value,
+        isEnabled,
+      },
+    }));
+  }, [isEnabled]);
 
-interface Config {
-  error?: string;
-  isInvalid?: boolean;
-  isOptional?: boolean;
-  helpText?: string;
-}
+  const onVerificationVersionChange = (
+    selectedVersionOptions: Array<EuiComboBoxOptionOption<TLSVersion>>
+  ) => {
+    setFields((prevFields) => ({
+      ...prevFields,
+      [ConfigKeys.TLS_VERSION]: {
+        value: selectedVersionOptions.map((option) => option.label as TLSVersion),
+        isEnabled: true,
+      },
+    }));
+    setHasVerificationVersionError(undefined);
+  };
 
-export type FieldConfig = Record<FieldKey, Config>;
+  const onSearchChange = (value: string, hasMatchingOptions?: boolean) => {
+    setHasVerificationVersionError(
+      value.length === 0 || hasMatchingOptions ? undefined : `"${value}" is not a valid option`
+    );
+  };
 
-const defaultFields = {
-  [FieldKey.CERTIFICATE]: '',
-  [FieldKey.CERTIFICATE_AUTHORITIES]: '',
-  [FieldKey.KEY]: '',
-  [FieldKey.KEY_PASSPHRASE]: '',
-  [FieldKey.VERIFICATION_MODE]: VerificationMode.FULL,
-};
+  const onBlur = () => {
+    if (verificationVersionInputRef) {
+      const { value } = verificationVersionInputRef;
+      setHasVerificationVersionError(
+        value.length === 0 ? undefined : `"${value}" is not a valid option`
+      );
+    }
+  };
 
-const fieldLabels = {
-  [FieldKey.CERTIFICATE]: i18n.translate(
-    'xpack.fleet.createPackagePolicy.stepConfigure.certsField.certificate.label',
-    {
-      defaultMessage: 'certificate',
-    }
-  ),
-  [FieldKey.CERTIFICATE_AUTHORITIES]: i18n.translate(
-    'xpack.fleet.createPackagePolicy.stepConfigure.certsField.certificateAuthorities.label',
-    {
-      defaultMessage: 'Certificate authorities',
-    }
-  ),
-  [FieldKey.KEY]: i18n.translate(
-    'xpack.fleet.createPackagePolicy.stepConfigure.certsField.key.label',
-    {
-      defaultMessage: 'key',
-    }
-  ),
-  [FieldKey.KEY_PASSPHRASE]: i18n.translate(
-    'xpack.fleet.createPackagePolicy.stepConfigure.certsField.key.label',
-    {
-      defaultMessage: 'key passphrase',
-    }
-  ),
-  [FieldKey.VERIFICATION_MODE]: i18n.translate(
-    'xpack.fleet.createPackagePolicy.stepConfigure.certsField.verificationMode.label',
-    {
-      defaultMessage: 'Verification mode',
-    }
-  ),
-};
+  return isEnabled ? (
+    <EuiFormFieldset
+      legend={{
+        children: (
+          <EuiScreenReaderOnly>
+            <span>
+              <FormattedMessage
+                id="xpack.fleet.createPackagePolicy.stepConfigure.certsField.legend"
+                defaultMessage="Certificate settings"
+              />
+            </span>
+          </EuiScreenReaderOnly>
+        ),
+      }}
+    >
+      <EuiFormRow
+        label={
+          <FormattedMessage
+            id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.verificationMode.label"
+            defaultMessage="Verification mode"
+          />
+        }
+        helpText={
+          <ReactMarkdown
+            source={verificationModeHelpText[fields[ConfigKeys.TLS_VERIFICATION_MODE].value]}
+          />
+        }
+      >
+        <EuiSelect
+          options={verificationModeOptions}
+          value={fields[ConfigKeys.TLS_VERIFICATION_MODE].value}
+          onChange={(event) => {
+            const value = event.target.value as VerificationMode;
+            setFields((prevFields) => ({
+              ...prevFields,
+              [ConfigKeys.TLS_VERIFICATION_MODE]: {
+                value,
+                isEnabled: true,
+              },
+            }));
+          }}
+        />
+      </EuiFormRow>
+      {fields[ConfigKeys.TLS_VERIFICATION_MODE].value === VerificationMode.NONE && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut title="Proceed with caution!" color="warning" iconType="help" size="s">
+            <p>
+              <FormattedMessage
+                id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.verificationMode.warning"
+                defaultMessage="This mode disables many of the security benefits of SSL/TLS and should only be used
+                  after cautious consideration."
+              />
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="s" />
+        </>
+      )}
+      <EuiFormRow
+        label={
+          <FormattedMessage
+            id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.version.label"
+            defaultMessage="Supported TLS protocols"
+          />
+        }
+        error={hasVerificationVersionError}
+        isInvalid={hasVerificationVersionError !== undefined}
+      >
+        <EuiComboBox
+          placeholder={i18n.translate(
+            'xpack.uptime.createPackagePolicy.stepConfigure.certsField.version.placeholder',
+            {
+              defaultMessage: 'Select one or more TLS protocols.',
+            }
+          )}
+          options={tlsVersionOptions}
+          selectedOptions={fields[ConfigKeys.TLS_VERSION].value.map((version: TLSVersion) => ({
+            label: version,
+          }))}
+          inputRef={setVerificationVersionInputRef}
+          onChange={onVerificationVersionChange}
+          onSearchChange={onSearchChange}
+          onBlur={onBlur}
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        label={
+          <FormattedMessage
+            id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.certificateAuthorities.label"
+            defaultMessage="Certificate authorities"
+          />
+        }
+        helpText={
+          <FormattedMessage
+            id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.certificateAuthorities.helpText"
+            defaultMessage="Optional custom certificate authorities."
+          />
+        }
+        labelAppend={<OptionalLabel />}
+      >
+        <EuiTextArea
+          value={fields[ConfigKeys.TLS_CERTIFICATE_AUTHORITIES].value}
+          onChange={(event) => {
+            const value = event.target.value;
+            setFields((prevFields) => ({
+              ...prevFields,
+              [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]: {
+                value,
+                isEnabled: true,
+              },
+            }));
+          }}
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        label={
+          <>
+            {sslRoleLabels[sslRole]}{' '}
+            <FormattedMessage
+              id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.certificate.label"
+              defaultMessage="certificate"
+            />
+          </>
+        }
+        helpText={
+          <FormattedMessage
+            id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.certificate.helpText"
+            defaultMessage="Optional certificate for SSL client authentication."
+          />
+        }
+        labelAppend={<OptionalLabel />}
+      >
+        <EuiTextArea
+          value={fields[ConfigKeys.TLS_CERTIFICATE].value}
+          onChange={(event) => {
+            const value = event.target.value;
+            setFields((prevFields) => ({
+              ...prevFields,
+              [ConfigKeys.TLS_CERTIFICATE]: {
+                value,
+                isEnabled: true,
+              },
+            }));
+          }}
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        label={
+          <>
+            {sslRoleLabels[sslRole]}{' '}
+            <FormattedMessage
+              id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.certificateKey.label"
+              defaultMessage="key"
+            />
+          </>
+        }
+        helpText={
+          <FormattedMessage
+            id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.certificateKey.helpText"
+            defaultMessage="Optional certificate key for SSL client authentication."
+          />
+        }
+        labelAppend={<OptionalLabel />}
+      >
+        <EuiTextArea
+          value={fields[ConfigKeys.TLS_KEY].value}
+          onChange={(event) => {
+            const value = event.target.value;
+            setFields((prevFields) => ({
+              ...prevFields,
+              [ConfigKeys.TLS_KEY]: {
+                value,
+                isEnabled: true,
+              },
+            }));
+          }}
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        label={
+          <>
+            {sslRoleLabels[sslRole]}{' '}
+            <FormattedMessage
+              id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.certificateKeyPassphrase.label"
+              defaultMessage="key passphrase"
+            />
+          </>
+        }
+        helpText={
+          <FormattedMessage
+            id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.certificateKeyPassphrase.helpText"
+            defaultMessage="Optional certificate key passphrase for SSL client authentication."
+          />
+        }
+        labelAppend={<OptionalLabel />}
+      >
+        <EuiFieldText
+          value={fields[ConfigKeys.TLS_KEY_PASSPHRASE].value}
+          onChange={(event) => {
+            const value = event.target.value;
+            setFields((prevFields) => ({
+              ...prevFields,
+              [ConfigKeys.TLS_KEY_PASSPHRASE]: {
+                value,
+                isEnabled: true,
+              },
+            }));
+          }}
+        />
+      </EuiFormRow>
+    </EuiFormFieldset>
+  ) : null;
+});
 
 const sslRoleLabels = {
-  [SSLRole.CLIENT]: i18n.translate(
-    'xpack.fleet.createPackagePolicy.stepConfigure.certsField.sslRole.client',
-    {
-      defaultMessage: 'Client',
-    }
+  [SSLRole.CLIENT]: (
+    <FormattedMessage
+      id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.sslRole.client"
+      defaultMessage="Client"
+    />
   ),
-  [SSLRole.SERVER]: i18n.translate(
-    'xpack.fleet.createPackagePolicy.stepConfigure.certsField.sslRole.server',
-    {
-      defaultMessage: 'Server',
-    }
-  ),
-};
-
-const verificationModeLabels = {
-  [VerificationMode.CERTIFICATE]: i18n.translate(
-    'xpack.fleet.createPackagePolicy.stepConfigure.certsField.verificationMode.certificate.label',
-    {
-      defaultMessage: 'Certificate',
-    }
-  ),
-  [VerificationMode.FULL]: i18n.translate(
-    'xpack.fleet.createPackagePolicy.stepConfigure.certsField.verificationMode.full.label',
-    {
-      defaultMessage: 'Full',
-    }
-  ),
-  [VerificationMode.NONE]: i18n.translate(
-    'xpack.fleet.createPackagePolicy.stepConfigure.certsField.verificationMode.none.label',
-    {
-      defaultMessage: 'None',
-    }
-  ),
-  [VerificationMode.STRICT]: i18n.translate(
-    'xpack.fleet.createPackagePolicy.stepConfigure.certsField.verificationMode.strict.label',
-    {
-      defaultMessage: 'Strict',
-    }
+  [SSLRole.SERVER]: (
+    <FormattedMessage
+      id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.sslRole.server"
+      defaultMessage="Server"
+    />
   ),
 };
 
 const verificationModeHelpText = {
   [VerificationMode.CERTIFICATE]: i18n.translate(
-    'xpack.fleet.createPackagePolicy.stepConfigure.certsField.verificationMode.certificate.description',
+    'xpack.uptime.createPackagePolicy.stepConfigure.certsField.verificationMode.certificate.description',
     {
       defaultMessage:
         'Verifies that the provided certificate is signed by a trusted authority (CA), but does not perform any hostname verification.',
     }
   ),
   [VerificationMode.FULL]: i18n.translate(
-    'xpack.fleet.createPackagePolicy.stepConfigure.certsField.verificationMode.full.description',
+    'xpack.uptime.createPackagePolicy.stepConfigure.certsField.verificationMode.full.description',
     {
       defaultMessage:
         'Verifies that the provided certificate is signed by a trusted authority (CA) and also verifies that the server’s hostname (or IP address) matches the names identified within the certificate.',
     }
   ),
   [VerificationMode.NONE]: i18n.translate(
-    'xpack.fleet.createPackagePolicy.stepConfigure.certsField.verificationMode.none.description',
+    'xpack.uptime.createPackagePolicy.stepConfigure.certsField.verificationMode.none.description',
     {
       defaultMessage:
         'Performs *no verification* of the server’s certificate. It is primarily intended as a temporary diagnostic mechanism when attempting to resolve TLS errors; its use in production environments is strongly discouraged.',
     }
   ),
   [VerificationMode.STRICT]: i18n.translate(
-    'xpack.fleet.createPackagePolicy.stepConfigure.certsField.verificationMode.strict.description',
+    'xpack.uptime.createPackagePolicy.stepConfigure.certsField.verificationMode.strict.description',
     {
       defaultMessage:
         'Verifies that the provided certificate is signed by a trusted authority (CA) and also verifies that the server’s hostname (or IP address) matches the names identified within the certificate. If the Subject Alternative Name is empty, it returns an error.',
+    }
+  ),
+};
+
+const verificationModeLabels = {
+  [VerificationMode.CERTIFICATE]: i18n.translate(
+    'xpack.uptime.createPackagePolicy.stepConfigure.certsField.verificationMode.certificate.label',
+    {
+      defaultMessage: 'Certificate',
+    }
+  ),
+  [VerificationMode.FULL]: i18n.translate(
+    'xpack.uptime.createPackagePolicy.stepConfigure.certsField.verificationMode.full.label',
+    {
+      defaultMessage: 'Full',
+    }
+  ),
+  [VerificationMode.NONE]: i18n.translate(
+    'xpack.uptime.createPackagePolicy.stepConfigure.certsField.verificationMode.none.label',
+    {
+      defaultMessage: 'None',
+    }
+  ),
+  [VerificationMode.STRICT]: i18n.translate(
+    'xpack.uptime.createPackagePolicy.stepConfigure.certsField.verificationMode.strict.label',
+    {
+      defaultMessage: 'Strict',
     }
   ),
 };
@@ -183,213 +408,6 @@ const verificationModeOptions = [
   { value: VerificationMode.STRICT, text: verificationModeLabels[VerificationMode.STRICT] },
 ];
 
-const defaultLegend = i18n.translate(
-  'xpack.fleet.createPackagePolicy.stepConfigure.certsField.legend',
-  {
-    defaultMessage: 'Certificate settings',
-  }
-);
-
-const defaultFieldConfig = {
-  [FieldKey.CERTIFICATE]: {
-    error: '',
-    helpText: '',
-    isInvalid: false,
-    isOptional: true,
-  },
-  [FieldKey.CERTIFICATE_AUTHORITIES]: {
-    error: '',
-    helpText: '',
-    isInvalid: false,
-    isOptional: true,
-  },
-  [FieldKey.KEY]: {
-    error: '',
-    helpText: '',
-    isInvalid: false,
-    isOptional: true,
-  },
-  [FieldKey.KEY_PASSPHRASE]: {
-    error: '',
-    helpText: '',
-    isInvalid: false,
-    isOptional: true,
-  },
-  [FieldKey.VERIFICATION_MODE]: {
-    error: '',
-    helpText: '',
-    isInvalid: false,
-    isOptional: false,
-  },
-};
-
-export const CertsField: React.FunctionComponent<{
-  fieldConfig?: FieldConfig;
-  defaultValues?: Fields;
-  legend?: string;
-  onChange: (newValue: any) => void;
-  sslRole: SSLRole;
-  showLegend?: boolean;
-}> = memo(
-  ({
-    fieldConfig = defaultFieldConfig,
-    defaultValues = defaultFields,
-    legend = defaultLegend,
-    onChange,
-    sslRole = SSLRole.CLIENT,
-    showLegend = true,
-  }) => {
-    const [fields, setFields] = useState<Fields>(defaultValues);
-    useDebounce(
-      () => {
-        onChange(fields);
-      },
-      250,
-      [onChange, fields]
-    );
-
-    return (
-      <EuiFormFieldset
-        legend={{
-          children: showLegend ? (
-            legend
-          ) : (
-            <EuiScreenReaderOnly>
-              <span>{legend}</span>
-            </EuiScreenReaderOnly>
-          ),
-        }}
-      >
-        <EuiFormRow
-          label={fieldLabels[FieldKey.VERIFICATION_MODE]}
-          helpText={
-            <ReactMarkdown
-              source={
-                fieldConfig[FieldKey.VERIFICATION_MODE].helpText ||
-                verificationModeHelpText[fields[FieldKey.VERIFICATION_MODE]]
-              }
-            />
-          }
-          isInvalid={fieldConfig[FieldKey.VERIFICATION_MODE].isInvalid}
-          error={fieldConfig[FieldKey.VERIFICATION_MODE].error}
-          labelAppend={
-            fieldConfig[FieldKey.VERIFICATION_MODE].isOptional ? <OptionalLabel /> : null
-          }
-        >
-          <EuiSelect
-            options={verificationModeOptions}
-            value={fields[FieldKey.VERIFICATION_MODE]}
-            onChange={(event) => {
-              const value = event.target.value as VerificationMode;
-              setFields((prevFields) => ({
-                ...prevFields,
-                [FieldKey.VERIFICATION_MODE]: value,
-              }));
-            }}
-          />
-        </EuiFormRow>
-        {fields[FieldKey.VERIFICATION_MODE] === VerificationMode.NONE && (
-          <>
-            <EuiSpacer size="s" />
-            <EuiCallOut title="Proceed with caution!" color="warning" iconType="help" size="s">
-              <p>
-                <FormattedMessage
-                  id="xpack.fleet.createPackagePolicy.stepConfigure.certsField.verificationMode.warning"
-                  defaultMessage="This mode disables many of the security benefits of SSL/TLS and should only be used
-                  after cautious consideration."
-                />
-              </p>
-            </EuiCallOut>
-            <EuiSpacer size="s" />
-          </>
-        )}
-        <EuiFormRow
-          label={fieldLabels[FieldKey.CERTIFICATE_AUTHORITIES]}
-          helpText={
-            <ReactMarkdown source={fieldConfig[FieldKey.CERTIFICATE_AUTHORITIES].helpText} />
-          }
-          isInvalid={fieldConfig[FieldKey.CERTIFICATE_AUTHORITIES].isInvalid}
-          error={fieldConfig[FieldKey.CERTIFICATE_AUTHORITIES].error}
-          labelAppend={
-            fieldConfig[FieldKey.CERTIFICATE_AUTHORITIES].isOptional ? <OptionalLabel /> : null
-          }
-        >
-          <EuiTextArea
-            value={fields[FieldKey.CERTIFICATE_AUTHORITIES]}
-            onChange={(event) => {
-              const value = event.target.value;
-              setFields((prevFields) => ({
-                ...prevFields,
-                [FieldKey.CERTIFICATE_AUTHORITIES]: value,
-              }));
-            }}
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          label={`${sslRoleLabels[sslRole]} ${fieldLabels[FieldKey.CERTIFICATE]}`}
-          helpText={<ReactMarkdown source={fieldConfig[FieldKey.CERTIFICATE].helpText} />}
-          isInvalid={fieldConfig[FieldKey.CERTIFICATE].isInvalid}
-          error={fieldConfig[FieldKey.CERTIFICATE].error}
-          labelAppend={fieldConfig[FieldKey.CERTIFICATE].isOptional ? <OptionalLabel /> : null}
-        >
-          <EuiTextArea
-            value={fields[FieldKey.CERTIFICATE]}
-            onChange={(event) => {
-              const value = event.target.value;
-              setFields((prevFields) => ({
-                ...prevFields,
-                [FieldKey.CERTIFICATE]: value,
-              }));
-            }}
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          label={`${sslRoleLabels[sslRole]} ${fieldLabels[FieldKey.KEY]}`}
-          helpText={<ReactMarkdown source={fieldConfig[FieldKey.KEY].helpText} />}
-          isInvalid={fieldConfig[FieldKey.KEY].isInvalid}
-          error={fieldConfig[FieldKey.KEY].error}
-          labelAppend={fieldConfig[FieldKey.KEY].isOptional ? <OptionalLabel /> : null}
-        >
-          <EuiTextArea
-            value={fields[FieldKey.KEY]}
-            onChange={(event) => {
-              const value = event.target.value;
-              setFields((prevFields) => ({
-                ...prevFields,
-                [FieldKey.KEY]: value,
-              }));
-            }}
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          label={`${sslRoleLabels[sslRole]} ${fieldLabels[FieldKey.KEY_PASSPHRASE]}`}
-          helpText={<ReactMarkdown source={fieldConfig[FieldKey.KEY_PASSPHRASE].helpText} />}
-          isInvalid={fieldConfig[FieldKey.KEY_PASSPHRASE].isInvalid}
-          error={fieldConfig[FieldKey.KEY_PASSPHRASE].error}
-          labelAppend={fieldConfig[FieldKey.KEY_PASSPHRASE].isOptional ? <OptionalLabel /> : null}
-        >
-          <EuiFieldText
-            value={fields[FieldKey.KEY_PASSPHRASE]}
-            onChange={(event) => {
-              const value = event.target.value;
-              setFields((prevFields) => ({
-                ...prevFields,
-                [FieldKey.KEY_PASSPHRASE]: value,
-              }));
-            }}
-          />
-        </EuiFormRow>
-      </EuiFormFieldset>
-    );
-  }
-);
-
-export const OptionalLabel = () => {
-  return (
-    <EuiText size="xs" color="subdued">
-      {i18n.translate('xpack.fleet.createPackagePolicy.stepConfigure.certsField.optionalLabel', {
-        defaultMessage: 'Optional',
-      })}
-    </EuiText>
-  );
-};
+const tlsVersionOptions = Object.values(TLSVersion).map((method) => ({
+  label: method,
+}));

@@ -10,7 +10,7 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { NewPackagePolicy } from '../../../../fleet/public';
 import { defaultConfig } from './synthetics_policy_create_extension';
 import { validate } from './validation';
-import { ConfigKeys, DataStream } from './types';
+import { ConfigKeys, DataStream, TLSVersion } from './types';
 
 describe('useBarChartsHooks', () => {
   const newPolicy: NewPackagePolicy = {
@@ -122,6 +122,10 @@ describe('useBarChartsHooks', () => {
               'ssl.verification_mode': {
                 value: 'full',
                 type: 'text',
+              },
+              'ssl.supported_protocols': {
+                value: '',
+                type: 'yaml',
               },
             },
           },
@@ -318,19 +322,23 @@ describe('useBarChartsHooks', () => {
     ).toEqual(defaultConfig[ConfigKeys.RESPONSE_HEADERS_INDEX]);
   });
 
-  it('returns null for empty array values', () => {
+  it('stringifies array values and returns null for empty array values', () => {
     const onChange = jest.fn();
-    const { result, rerender } = renderHook((props) => useUpdatePolicy(props), {
+    const { result } = renderHook((props) => useUpdatePolicy(props), {
       initialProps: { defaultConfig, newPolicy, onChange, validate },
     });
 
     act(() => {
       result.current.setConfig({
         ...defaultConfig,
-        [ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE]: ['hi'],
-        [ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]: ['hi'],
-        [ConfigKeys.RESPONSE_STATUS_CHECK]: ['hi'],
-        [ConfigKeys.TAGS]: ['hi'],
+        [ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE]: ['test'],
+        [ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]: ['test'],
+        [ConfigKeys.RESPONSE_STATUS_CHECK]: ['test'],
+        [ConfigKeys.TAGS]: ['test'],
+        [ConfigKeys.TLS_VERSION]: {
+          value: [TLSVersion.ONE_ONE],
+          isEnabled: true,
+        },
       });
     });
 
@@ -343,19 +351,22 @@ describe('useBarChartsHooks', () => {
       result.current.updatedPolicy.inputs[0]?.streams[0]?.vars?.[
         ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE
       ].value
-    ).toEqual('["hi"]');
+    ).toEqual('["test"]');
     expect(
       result.current.updatedPolicy.inputs[0]?.streams[0]?.vars?.[
         ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE
       ].value
-    ).toEqual('["hi"]');
+    ).toEqual('["test"]');
     expect(
       result.current.updatedPolicy.inputs[0]?.streams[0]?.vars?.[ConfigKeys.RESPONSE_STATUS_CHECK]
         .value
-    ).toEqual('["hi"]');
+    ).toEqual('["test"]');
     expect(
       result.current.updatedPolicy.inputs[0]?.streams[0]?.vars?.[ConfigKeys.TAGS].value
-    ).toEqual('["hi"]');
+    ).toEqual('["test"]');
+    expect(
+      result.current.updatedPolicy.inputs[0]?.streams[0]?.vars?.[ConfigKeys.TLS_VERSION].value
+    ).toEqual('["TLSv1.1"]');
 
     act(() => {
       result.current.setConfig({
@@ -364,6 +375,10 @@ describe('useBarChartsHooks', () => {
         [ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]: [],
         [ConfigKeys.RESPONSE_STATUS_CHECK]: [],
         [ConfigKeys.TAGS]: [],
+        [ConfigKeys.TLS_VERSION]: {
+          value: [],
+          isEnabled: true,
+        },
       });
     });
 
@@ -383,6 +398,9 @@ describe('useBarChartsHooks', () => {
     ).toEqual(null);
     expect(
       result.current.updatedPolicy.inputs[0]?.streams[0]?.vars?.[ConfigKeys.TAGS].value
+    ).toEqual(null);
+    expect(
+      result.current.updatedPolicy.inputs[0]?.streams[0]?.vars?.[ConfigKeys.TLS_VERSION].value
     ).toEqual(null);
   });
 

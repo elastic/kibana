@@ -46,6 +46,7 @@ export const useUpdatePolicy = ({ defaultConfig, newPolicy, onChange, validate }
       // enable only the input type and data stream that matches the monitor type.
       currentInput.enabled = true;
       dataStream.enabled = true;
+      const isTLSEnabled = false;
       configKeys.forEach((key) => {
         const configItem = dataStream.vars?.[key];
         if (configItem) {
@@ -72,6 +73,20 @@ export const useUpdatePolicy = ({ defaultConfig, newPolicy, onChange, validate }
               break;
             case ConfigKeys.REQUEST_BODY_CHECK:
               configItem.value = config[key].value ? JSON.stringify(config[key].value) : null; // only need value of REQUEST_BODY_CHECK for outputted policy
+              break;
+            case ConfigKeys.TLS_CERTIFICATE:
+            case ConfigKeys.TLS_CERTIFICATE_AUTHORITIES:
+            case ConfigKeys.TLS_KEY:
+            case ConfigKeys.TLS_KEY_PASSPHRASE:
+            case ConfigKeys.TLS_VERIFICATION_MODE:
+              configItem.value =
+                config[key].isEnabled && config[key].value ? config[key].value : null; // only add tls settings if they are enabled by the user
+              break;
+            case ConfigKeys.TLS_VERSION:
+              configItem.value =
+                config[key].isEnabled && config[key].value.length
+                  ? JSON.stringify(config[key].value)
+                  : null; // only add tls settings if they are enabled by the user
               break;
             default:
               configItem.value =

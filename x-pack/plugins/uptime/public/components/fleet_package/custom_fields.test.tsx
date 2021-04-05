@@ -10,7 +10,7 @@ import { fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../lib/helper/rtl_helpers';
 import { defaultConfig } from './synthetics_policy_create_extension';
 import { CustomFields } from './custom_fields';
-import { ConfigKeys, DataStream, ScheduleUnit } from './types';
+import { ConfigKeys, DataStream, ScheduleUnit, VerificationMode } from './types';
 import { validate as centralValidation } from './validation';
 
 // ensures that fields appropriately match to their label
@@ -78,7 +78,7 @@ describe('<CustomFields />', () => {
 
   it('shows SSL fields when Enable SSL Fields is checked', async () => {
     const { findByLabelText, queryByLabelText } = render(<WrappedComponent />);
-    const enableSSL = queryByLabelText('Enable SSL configuration') as HTMLInputElement;
+    const enableSSL = queryByLabelText('Enable TLS configuration') as HTMLInputElement;
     expect(queryByLabelText('Certificate authorities')).not.toBeInTheDocument();
     expect(queryByLabelText('Client key')).not.toBeInTheDocument();
     expect(queryByLabelText('Client certificate')).not.toBeInTheDocument();
@@ -88,11 +88,26 @@ describe('<CustomFields />', () => {
     await waitFor(() => {
       expect(onChange).toBeCalledWith(
         expect.objectContaining({
-          [ConfigKeys.SSL_CERTIFICATE_AUTHORITIES]: '',
-          [ConfigKeys.SSL_CERTIFICATE]: '',
-          [ConfigKeys.SSL_KEY]: '',
-          [ConfigKeys.SSL_KEY_PASSPHRASE]: '',
-          [ConfigKeys.SSL_VERIFICATION_MODE]: undefined,
+          [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]: {
+            value: defaultConfig[ConfigKeys.TLS_CERTIFICATE_AUTHORITIES].value,
+            isEnabled: false,
+          },
+          [ConfigKeys.TLS_CERTIFICATE]: {
+            value: defaultConfig[ConfigKeys.TLS_CERTIFICATE].value,
+            isEnabled: false,
+          },
+          [ConfigKeys.TLS_KEY]: {
+            value: defaultConfig[ConfigKeys.TLS_KEY].value,
+            isEnabled: false,
+          },
+          [ConfigKeys.TLS_KEY_PASSPHRASE]: {
+            value: defaultConfig[ConfigKeys.TLS_KEY_PASSPHRASE].value,
+            isEnabled: false,
+          },
+          [ConfigKeys.TLS_VERIFICATION_MODE]: {
+            value: defaultConfig[ConfigKeys.TLS_VERIFICATION_MODE].value,
+            isEnabled: false,
+          },
         })
       );
     });
@@ -107,70 +122,112 @@ describe('<CustomFields />', () => {
     )) as HTMLInputElement;
     const clientCertificate = (await findByLabelText('Client certificate')) as HTMLInputElement;
     const verificationMode = (await findByLabelText('Verification mode')) as HTMLInputElement;
+    expect(ca).toBeInTheDocument();
+    expect(clientKey).toBeInTheDocument();
+    expect(clientKeyPassphrase).toBeInTheDocument();
+    expect(clientCertificate).toBeInTheDocument();
+    expect(verificationMode).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(ca).toBeInTheDocument();
-      expect(clientKey).toBeInTheDocument();
-      expect(clientKeyPassphrase).toBeInTheDocument();
-      expect(clientCertificate).toBeInTheDocument();
-      expect(verificationMode).toBeInTheDocument();
-      expect(ca.value).toEqual(defaultConfig[ConfigKeys.SSL_CERTIFICATE_AUTHORITIES]);
-      expect(clientKey.value).toEqual(defaultConfig[ConfigKeys.SSL_KEY]);
-      expect(clientKeyPassphrase.value).toEqual(defaultConfig[ConfigKeys.SSL_KEY_PASSPHRASE]);
-      expect(clientCertificate.value).toEqual(defaultConfig[ConfigKeys.SSL_CERTIFICATE]);
-      expect(verificationMode.value).toEqual(defaultConfig[ConfigKeys.SSL_VERIFICATION_MODE]);
-      expect(onChange).toBeCalledWith(
-        expect.objectContaining({
-          [ConfigKeys.SSL_CERTIFICATE_AUTHORITIES]: '',
-          [ConfigKeys.SSL_CERTIFICATE]: '',
-          [ConfigKeys.SSL_KEY]: '',
-          [ConfigKeys.SSL_KEY_PASSPHRASE]: '',
-          [ConfigKeys.SSL_VERIFICATION_MODE]: 'full',
-        })
-      );
-    });
-
-    await waitFor(() => {
-      fireEvent.change(ca, { target: { value: 'certificateAuthorities' } });
-      fireEvent.change(clientCertificate, { target: { value: 'clientCertificate' } });
-      fireEvent.change(clientKey, { target: { value: 'clientKey' } });
-      fireEvent.change(clientKeyPassphrase, { target: { value: 'clientKeyPassphrase' } });
-      fireEvent.change(verificationMode, { target: { value: 'none' } });
+      expect(ca.value).toEqual(defaultConfig[ConfigKeys.TLS_CERTIFICATE_AUTHORITIES].value);
+      expect(clientKey.value).toEqual(defaultConfig[ConfigKeys.TLS_KEY].value);
+      expect(clientKeyPassphrase.value).toEqual(defaultConfig[ConfigKeys.TLS_KEY_PASSPHRASE].value);
+      expect(clientCertificate.value).toEqual(defaultConfig[ConfigKeys.TLS_CERTIFICATE].value);
+      expect(verificationMode.value).toEqual(defaultConfig[ConfigKeys.TLS_VERIFICATION_MODE].value);
     });
 
     await waitFor(() => {
       expect(onChange).toBeCalledWith(
         expect.objectContaining({
-          [ConfigKeys.SSL_CERTIFICATE_AUTHORITIES]: 'certificateAuthorities',
-          [ConfigKeys.SSL_CERTIFICATE]: 'clientCertificate',
-          [ConfigKeys.SSL_KEY]: 'clientKey',
-          [ConfigKeys.SSL_KEY_PASSPHRASE]: 'clientKeyPassphrase',
-          [ConfigKeys.SSL_VERIFICATION_MODE]: 'none',
-        })
-      );
-    });
-
-    fireEvent.click(enableSSL);
-
-    await waitFor(() => {
-      expect(queryByLabelText('Certificate authorities')).not.toBeInTheDocument();
-      expect(queryByLabelText('Client key')).not.toBeInTheDocument();
-      expect(queryByLabelText('Client certificate')).not.toBeInTheDocument();
-      expect(queryByLabelText('Client key passphrase')).not.toBeInTheDocument();
-      expect(queryByLabelText('Verification mode')).not.toBeInTheDocument();
-      expect(onChange).toBeCalledWith(
-        expect.objectContaining({
-          [ConfigKeys.SSL_CERTIFICATE_AUTHORITIES]: '',
-          [ConfigKeys.SSL_CERTIFICATE]: '',
-          [ConfigKeys.SSL_KEY]: '',
-          [ConfigKeys.SSL_KEY_PASSPHRASE]: '',
-          [ConfigKeys.SSL_VERIFICATION_MODE]: undefined,
+          [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]: {
+            value: defaultConfig[ConfigKeys.TLS_CERTIFICATE_AUTHORITIES].value,
+            isEnabled: true,
+          },
+          [ConfigKeys.TLS_CERTIFICATE]: {
+            value: defaultConfig[ConfigKeys.TLS_CERTIFICATE].value,
+            isEnabled: true,
+          },
+          [ConfigKeys.TLS_KEY]: {
+            value: defaultConfig[ConfigKeys.TLS_KEY].value,
+            isEnabled: true,
+          },
+          [ConfigKeys.TLS_KEY_PASSPHRASE]: {
+            value: defaultConfig[ConfigKeys.TLS_KEY_PASSPHRASE].value,
+            isEnabled: true,
+          },
+          [ConfigKeys.TLS_VERIFICATION_MODE]: {
+            value: defaultConfig[ConfigKeys.TLS_VERIFICATION_MODE].value,
+            isEnabled: true,
+          },
         })
       );
     });
   });
 
-  it('handles updating each field', async () => {
+  it('handles changing TLS fields', async () => {
+    const { findByLabelText, queryByLabelText } = render(<WrappedComponent />);
+    const enableSSL = queryByLabelText('Enable TLS configuration') as HTMLInputElement;
+    // ensure at least one http advanced option is present
+    fireEvent.click(enableSSL);
+
+    const ca = (await findByLabelText('Certificate authorities')) as HTMLInputElement;
+    const clientKey = (await findByLabelText('Client key')) as HTMLInputElement;
+    const clientKeyPassphrase = (await findByLabelText(
+      'Client key passphrase'
+    )) as HTMLInputElement;
+    const clientCertificate = (await findByLabelText('Client certificate')) as HTMLInputElement;
+    const verificationMode = (await findByLabelText('Verification mode')) as HTMLInputElement;
+
+    await waitFor(() => {
+      fireEvent.change(ca, { target: { value: 'certificateAuthorities' } });
+      expect(ca.value).toEqual(defaultConfig[ConfigKeys.TLS_CERTIFICATE_AUTHORITIES].value);
+    });
+    await waitFor(() => {
+      fireEvent.change(clientCertificate, { target: { value: 'clientCertificate' } });
+      expect(clientCertificate.value).toEqual(defaultConfig[ConfigKeys.TLS_KEY].value);
+    });
+    await waitFor(() => {
+      fireEvent.change(clientKey, { target: { value: 'clientKey' } });
+      expect(clientKey.value).toEqual(defaultConfig[ConfigKeys.TLS_KEY].value);
+    });
+    await waitFor(() => {
+      fireEvent.change(clientKeyPassphrase, { target: { value: 'clientKeyPassphrase' } });
+      expect(clientKeyPassphrase.value).toEqual(defaultConfig[ConfigKeys.TLS_KEY_PASSPHRASE].value);
+    });
+    await waitFor(() => {
+      fireEvent.change(verificationMode, { target: { value: VerificationMode.NONE } });
+      expect(verificationMode.value).toEqual(defaultConfig[ConfigKeys.TLS_VERIFICATION_MODE].value);
+    });
+
+    await waitFor(() => {
+      expect(onChange).toBeCalledWith(
+        expect.objectContaining({
+          [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]: {
+            value: 'certificateAuthorities',
+            isEnabled: true,
+          },
+          [ConfigKeys.TLS_CERTIFICATE]: {
+            value: 'clientCertificate',
+            isEnabled: true,
+          },
+          [ConfigKeys.TLS_KEY]: {
+            value: 'clientKey',
+            isEnabled: true,
+          },
+          [ConfigKeys.TLS_KEY_PASSPHRASE]: {
+            value: 'clientKeyPassphrase',
+            isEnabled: true,
+          },
+          [ConfigKeys.TLS_VERIFICATION_MODE]: {
+            value: VerificationMode.NONE,
+            isEnabled: true,
+          },
+        })
+      );
+    });
+  }, 10000); // runs slow because of multiple useDebounce
+
+  it('handles updating each field (besides TLS)', async () => {
     const { getByLabelText } = render(<WrappedComponent />);
     const url = getByLabelText('URL') as HTMLInputElement;
     const proxyUrl = getByLabelText('Proxy URL') as HTMLInputElement;

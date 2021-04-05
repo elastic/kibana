@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { VerificationMode } from './certs_field';
-
 export enum DataStream {
   HTTP = 'http',
   TCP = 'tcp',
@@ -46,6 +44,20 @@ export enum ScheduleUnit {
   SECONDS = 's',
 }
 
+export enum VerificationMode {
+  CERTIFICATE = 'certificate',
+  FULL = 'full',
+  NONE = 'none',
+  STRICT = 'strict',
+}
+
+export enum TLSVersion {
+  ONE_ZERO = 'TLSv1.0',
+  ONE_ONE = 'TLSv1.1',
+  ONE_TWO = 'TLSv1.2',
+  ONE_THREE = 'TLSv1.3',
+}
+
 // values must match keys in the integration package
 export enum ConfigKeys {
   HOSTS = 'hosts',
@@ -67,11 +79,12 @@ export enum ConfigKeys {
   REQUEST_SEND_CHECK = 'check.send',
   SCHEDULE = 'schedule',
   APM_SERVICE_NAME = 'service.name',
-  SSL_CERTIFICATE_AUTHORITIES = 'ssl.certificate_authorities',
-  SSL_CERTIFICATE = 'ssl.certificate',
-  SSL_KEY = 'ssl.key',
-  SSL_KEY_PASSPHRASE = 'ssl.key_passphrase',
-  SSL_VERIFICATION_MODE = 'ssl.verification_mode',
+  TLS_CERTIFICATE_AUTHORITIES = 'ssl.certificate_authorities',
+  TLS_CERTIFICATE = 'ssl.certificate',
+  TLS_KEY = 'ssl.key',
+  TLS_KEY_PASSPHRASE = 'ssl.key_passphrase',
+  TLS_VERIFICATION_MODE = 'ssl.verification_mode',
+  TLS_VERSION = 'ssl.supported_protocols',
   TAGS = 'tags',
   TIMEOUT = 'timeout',
   URLS = 'urls',
@@ -84,15 +97,37 @@ export interface ISimpleFields {
   [ConfigKeys.MONITOR_TYPE]: DataStream;
   [ConfigKeys.SCHEDULE]: { number: string; unit: ScheduleUnit };
   [ConfigKeys.APM_SERVICE_NAME]: string;
-  [ConfigKeys.SSL_CERTIFICATE_AUTHORITIES]: string;
-  [ConfigKeys.SSL_CERTIFICATE]: string;
-  [ConfigKeys.SSL_KEY]: string;
-  [ConfigKeys.SSL_KEY_PASSPHRASE]: string;
-  [ConfigKeys.SSL_VERIFICATION_MODE]?: VerificationMode;
   [ConfigKeys.TIMEOUT]: number;
   [ConfigKeys.URLS]: string;
   [ConfigKeys.TAGS]: string[];
   [ConfigKeys.WAIT]: number;
+}
+
+export interface ITLSFields {
+  [ConfigKeys.TLS_CERTIFICATE_AUTHORITIES]: {
+    value: string;
+    isEnabled: boolean;
+  };
+  [ConfigKeys.TLS_CERTIFICATE]: {
+    value: string;
+    isEnabled: boolean;
+  };
+  [ConfigKeys.TLS_KEY]: {
+    value: string;
+    isEnabled: boolean;
+  };
+  [ConfigKeys.TLS_KEY_PASSPHRASE]: {
+    value: string;
+    isEnabled: boolean;
+  };
+  [ConfigKeys.TLS_VERIFICATION_MODE]: {
+    value: VerificationMode;
+    isEnabled: boolean;
+  };
+  [ConfigKeys.TLS_VERSION]: {
+    value: TLSVersion[];
+    isEnabled: boolean;
+  };
 }
 
 export interface IHTTPAdvancedFields {
@@ -115,7 +150,7 @@ export interface ITCPAdvancedFields {
   [ConfigKeys.REQUEST_SEND_CHECK]: string;
 }
 
-export type ICustomFields = ISimpleFields & IHTTPAdvancedFields & ITCPAdvancedFields;
+export type ICustomFields = ISimpleFields & ITLSFields & IHTTPAdvancedFields & ITCPAdvancedFields;
 
 export type Config = {
   [ConfigKeys.NAME]: string;
