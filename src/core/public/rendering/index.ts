@@ -7,3 +7,4 @@
  */
 
 export { RenderingService } from './rendering_service';
+export { APP_WRAPPER_CLASS } from './app_containers';

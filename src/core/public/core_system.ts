@@ -176,6 +176,7 @@ export class CoreSystem {
 
       const coreUiTargetDomElement = document.createElement('div');
       coreUiTargetDomElement.id = 'kibana-body';
+      coreUiTargetDomElement.dataset.testSubj = 'kibanaChrome';
       const notificationsTargetDomElement = document.createElement('div');
       const overlayTargetDomElement = document.createElement('div');
 
