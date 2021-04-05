@@ -1,5 +1,5 @@
 [[tutorial-secure-access-to-kibana]]
-== Tutorial: Securing access to {kib}
+== Securing access to {kib}
 
 
 {kib} is home to an ever-growing suite of powerful features, which help you get the most out of your data. Your data is important, and should be protected. {kib} allows you to secure access to your data, and control how users are able to interact with your data.
