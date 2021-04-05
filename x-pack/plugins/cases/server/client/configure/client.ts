@@ -47,5 +47,5 @@ export const createConfigurationSubClient: CasesSubClientImplementation<Configur
       }),
   };
 
-  return configureSubClient;
+  return Object.freeze(configureSubClient);
 };

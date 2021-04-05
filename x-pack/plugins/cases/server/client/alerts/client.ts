@@ -54,5 +54,5 @@ export const createAlertsSubClient: CasesSubClientImplementation<AlertSubClient>
       }),
   };
 
-  return alertsSubClient;
+  return Object.freeze(alertsSubClient);
 };

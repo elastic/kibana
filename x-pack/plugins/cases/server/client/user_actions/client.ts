@@ -32,5 +32,5 @@ export const createUserActionsSubClient: CasesSubClientImplementation<UserAction
       }),
   };
 
-  return attachmentSubClient;
+  return Object.freeze(attachmentSubClient);
 };

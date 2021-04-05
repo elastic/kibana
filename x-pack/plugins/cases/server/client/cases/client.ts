@@ -46,6 +46,7 @@ export const createCasesSubClient: CasesSubClientImplementation<CasesSubClient> 
   getClientsFactories
 ) => {
   const {
+    attachmentService,
     caseConfigureService,
     caseService,
     user,
@@ -87,6 +88,7 @@ export const createCasesSubClient: CasesSubClientImplementation<CasesSubClient> 
     push: (params: CasePush) =>
       push({
         ...params,
+        attachmentService,
         savedObjectsClient,
         caseService,
         userActionService,
@@ -108,5 +110,5 @@ export const createCasesSubClient: CasesSubClientImplementation<CasesSubClient> 
       }),
   };
 
-  return casesSubClient;
+  return Object.freeze(casesSubClient);
 };
