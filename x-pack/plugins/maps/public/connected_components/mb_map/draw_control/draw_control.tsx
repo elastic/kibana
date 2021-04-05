@@ -6,19 +6,22 @@
  */
 
 import _ from 'lodash';
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 // @ts-expect-error
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 // @ts-expect-error
 import DrawRectangle from 'mapbox-gl-draw-rectangle-mode';
-import { Map as MbMap } from 'mapbox-gl';
-import { Feature } from 'geojson';
-import { DRAW_TYPE } from '../../../../common/constants';
-import { DrawCircle } from './draw_circle';
-import { DrawTooltip } from './draw_tooltip';
+import {Map as MbMap} from 'mapbox-gl';
+import {Feature} from 'geojson';
+import {DRAW_TYPE} from '../../../../common/constants';
+import {DrawCircle} from './draw_circle';
+import {DrawTooltip} from './draw_tooltip';
 
 const DRAW_RECTANGLE = 'draw_rectangle';
 const DRAW_CIRCLE = 'draw_circle';
+const DRAW_POLYGON = 'draw_polygon';
+const DRAW_LINE = 'draw_line_string';
+const DRAW_POINT = 'draw_point';
 
 const mbDrawModes = MapboxDraw.modes;
 mbDrawModes[DRAW_RECTANGLE] = DrawRectangle;
@@ -94,6 +97,12 @@ export class DrawControl extends Component<Props, {}> {
       this._mbDrawControl.changeMode(DRAW_RECTANGLE);
     } else if (drawMode !== DRAW_CIRCLE && this.props.drawType === DRAW_TYPE.DISTANCE) {
       this._mbDrawControl.changeMode(DRAW_CIRCLE);
+    } else if (drawMode !== DRAW_LINE && this.props.drawType === DRAW_TYPE.LINE) {
+      this._mbDrawControl.changeMode(DRAW_LINE);
+    } else if (drawMode !== DRAW_POLYGON && this.props.drawType === DRAW_TYPE.POLYGON) {
+      this._mbDrawControl.changeMode(DRAW_POLYGON);
+    } else if (drawMode !== DRAW_POINT && this.props.drawType === DRAW_TYPE.POINT) {
+      this._mbDrawControl.changeMode(DRAW_POINT);
     } else if (
       drawMode !== this._mbDrawControl.modes.DRAW_POLYGON &&
       this.props.drawType === DRAW_TYPE.POLYGON

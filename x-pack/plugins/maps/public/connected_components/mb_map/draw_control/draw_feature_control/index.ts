@@ -11,6 +11,7 @@ import { connect } from 'react-redux';
 import { DrawFeatureControl } from './draw_feature_control';
 import { updateDrawFeatureState } from '../../../../actions';
 import { MapStoreState } from '../../../../reducers/store';
+import { DRAW_TYPE } from '../../../../../common';
 
 function mapStateToProps(state: MapStoreState) {
   return {
@@ -20,6 +21,9 @@ function mapStateToProps(state: MapStoreState) {
 
 function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
+    initiateDraw: (drawFeatureState: DRAW_TYPE) => {
+      dispatch(updateDrawFeatureState(drawFeatureState));
+    },
     disableDrawState() {
       dispatch(updateDrawFeatureState(null));
     },
