@@ -35,7 +35,7 @@ export class AuthorizationAuditLogger {
      * `Unauthorized to create case with "securitySolution" as the owner`
      * `Unauthorized to find cases of any owner`.
      */
-    return `${result} to ${operation.verbs.present} ${owner} ${operation.docType} ${ownerMsg}`;
+    return `${result} to ${operation.verbs.present} ${operation.docType} ${ownerMsg}`;
   }
 
   private logSuccessEvent({
@@ -48,7 +48,7 @@ export class AuthorizationAuditLogger {
     username?: string;
   }) {
     this.auditLogger?.log({
-      message,
+      message: `${username ?? 'unknown user'} ${message}`,
       event: {
         action: operation.action,
         category: EventCategory.DATABASE,
@@ -78,7 +78,7 @@ export class AuthorizationAuditLogger {
       operation,
     });
     this.auditLogger?.log({
-      message,
+      message: `${username ?? 'unknown user'} ${message}`,
       event: {
         action: operation.action,
         category: EventCategory.DATABASE,
