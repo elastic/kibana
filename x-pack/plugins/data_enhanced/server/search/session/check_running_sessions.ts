@@ -10,6 +10,7 @@ import {
   Logger,
   SavedObjectsClientContract,
   SavedObjectsFindResult,
+  SavedObjectsUpdateResponse,
 } from 'kibana/server';
 import moment from 'moment';
 import { EMPTY, from } from 'rxjs';
@@ -169,12 +170,20 @@ export async function checkRunningSessions(
 
               if (!session.attributes.persisted) {
                 if (isSessionStale(session, config, logger)) {
-                  deleted = true;
                   // delete saved object to free up memory
                   // TODO: there's a potential rare edge case of deleting an object and then receiving a new trackId for that same session!
                   // Maybe we want to change state to deleted and cleanup later?
                   logger.debug(`Deleting stale session | ${session.id}`);
-                  await savedObjectsClient.delete(SEARCH_SESSION_TYPE, session.id);
+                  try {
+                    await savedObjectsClient.delete(SEARCH_SESSION_TYPE, session.id, {
+                      namespace: session.namespaces?.[0],
+                    });
+                    deleted = true;
+                  } catch (e) {
+                    logger.error(
+                      `Error while deleting stale search session ${session.id}: ${e.message}`
+                    );
+                  }
 
                   // Send a delete request for each async search to ES
                   Object.keys(session.attributes.idMapping).map(async (searchKey: string) => {
@@ -183,8 +192,8 @@ export async function checkRunningSessions(
                       try {
                         await client.asyncSearch.delete({ id: searchInfo.id });
                       } catch (e) {
-                        logger.debug(
-                          `Error ignored while deleting async_search ${searchInfo.id}: ${e.message}`
+                        logger.error(
+                          `Error while deleting async_search ${searchInfo.id}: ${e.message}`
                         );
                       }
                     }
@@ -202,9 +211,31 @@ export async function checkRunningSessions(
           if (updatedSessions.length) {
             // If there's an error, we'll try again in the next iteration, so there's no need to check the output.
             const updatedResponse = await savedObjectsClient.bulkUpdate<SearchSessionSavedObjectAttributes>(
-              updatedSessions
+              updatedSessions.map((session) => ({
+                ...session,
+                namespace: session.namespaces?.[0],
+              }))
             );
-            logger.debug(`Updated ${updatedResponse.saved_objects.length} search sessions`);
+
+            const success: Array<
+              SavedObjectsUpdateResponse<SearchSessionSavedObjectAttributes>
+            > = [];
+            const fail: Array<SavedObjectsUpdateResponse<SearchSessionSavedObjectAttributes>> = [];
+
+            updatedResponse.saved_objects.forEach((savedObjectResponse) => {
+              if ('error' in savedObjectResponse) {
+                fail.push(savedObjectResponse);
+                logger.error(
+                  `Error while updating search session ${savedObjectResponse?.id}: ${savedObjectResponse.error?.message}`
+                );
+              } else {
+                success.push(savedObjectResponse);
+              }
+            });
+
+            logger.debug(
+              `Updating search sessions: success: ${success.length}, fail: ${fail.length}`
+            );
           }
         })
       )
