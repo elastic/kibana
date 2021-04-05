@@ -1563,47 +1563,6 @@ export class EndpointDocGenerator extends BaseDataGenerator {
     };
   }
 
-  private randomN(n: number): number {
-    return Math.floor(this.random() * n);
-  }
-
-  private *randomNGenerator(max: number, count: number) {
-    let iCount = count;
-    while (iCount > 0) {
-      yield this.randomN(max);
-      iCount = iCount - 1;
-    }
-  }
-
-  private randomArray<T>(lengthLimit: number, generator: () => T): T[] {
-    const rand = this.randomN(lengthLimit) + 1;
-    return [...Array(rand).keys()].map(generator);
-  }
-
-  private randomMac(): string {
-    return [...this.randomNGenerator(255, 6)].map((x) => x.toString(16)).join('-');
-  }
-
-  public randomIP(): string {
-    return [10, ...this.randomNGenerator(255, 3)].map((x) => x.toString()).join('.');
-  }
-
-  private randomVersion(): string {
-    return [6, ...this.randomNGenerator(10, 2)].map((x) => x.toString()).join('.');
-  }
-
-  private randomChoice<T>(choices: T[]): T {
-    return choices[this.randomN(choices.length)];
-  }
-
-  private randomString(length: number): string {
-    return [...this.randomNGenerator(36, length)].map((x) => x.toString(36)).join('');
-  }
-
-  private randomHostname(): string {
-    return `Host-${this.randomString(10)}`;
-  }
-
   private seededUUIDv4(): string {
     return uuid.v4({ random: [...this.randomNGenerator(255, 16)] });
   }
