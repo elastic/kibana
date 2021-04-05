@@ -141,14 +141,14 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, valida
             !!validate[ConfigKeys.REQUEST_HEADERS_CHECK]?.(fields[ConfigKeys.REQUEST_HEADERS_CHECK])
           }
           error={
-            !!validate[ConfigKeys.REQUEST_HEADERS_CHECK]?.(fields[ConfigKeys.REQUEST_HEADERS_CHECK])
-              ? [
-                  <FormattedMessage
-                    id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.requestHeadersField.error"
-                    defaultMessage="Header key must be a valid HTTP token."
-                  />,
-                ]
-              : undefined
+            !!validate[ConfigKeys.REQUEST_HEADERS_CHECK]?.(
+              fields[ConfigKeys.REQUEST_HEADERS_CHECK]
+            ) ? (
+              <FormattedMessage
+                id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.requestHeadersField.error"
+                defaultMessage="Header key must be a valid HTTP token."
+              />
+            ) : undefined
           }
           helpText={
             <FormattedMessage
@@ -293,15 +293,24 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, valida
         <EuiFormRow
           label={
             <FormattedMessage
-              id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseChecks.responseStatusEquals"
+              id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseChecks.responseStatusCheck.label"
               defaultMessage="Check response status equals"
             />
           }
           labelAppend={<OptionalLabel />}
+          isInvalid={
+            !!validate[ConfigKeys.RESPONSE_STATUS_CHECK]?.(fields[ConfigKeys.RESPONSE_STATUS_CHECK])
+          }
+          error={
+            <FormattedMessage
+              id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseChecks.responseStatusCheck.error"
+              defaultMessage="Status code must contain digits only."
+            />
+          }
           helpText={
             <ReactMarkdown
               source={i18n.translate(
-                'xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseStatusCheck.helpText',
+                'xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseChecks.responseStatusCheck.helpText',
                 {
                   defaultMessage:
                     'A list of expected status codes. 4xx and 5xx codes are considered down by default. Other codes are considered `up`.',

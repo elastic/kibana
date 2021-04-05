@@ -19,6 +19,8 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
 const defaultConfig = {
   [ConfigKeys.RESPONSE_RECEIVE_CHECK]: [],
   [ConfigKeys.REQUEST_SEND_CHECK]: '',
+  [ConfigKeys.PROXY_URL]: '',
+  [ConfigKeys.PROXY_USE_LOCAL_RESOLVER]: false,
 };
 
 describe('<TCPAdvancedFields />', () => {
@@ -31,10 +33,13 @@ describe('<TCPAdvancedFields />', () => {
     const { getByText, getByLabelText } = render(<WrappedComponent />);
 
     const requestPayload = getByLabelText('Request payload') as HTMLInputElement;
+    const proxyURL = getByLabelText('Proxy URL') as HTMLInputElement;
     // ComboBox has an issue with associating labels with the field
     const responseContains = getByText('Check response contains');
     expect(requestPayload).toBeInTheDocument();
     expect(requestPayload.value).toEqual(defaultConfig[ConfigKeys.REQUEST_SEND_CHECK]);
+    expect(proxyURL).toBeInTheDocument();
+    expect(proxyURL.value).toEqual(defaultConfig[ConfigKeys.PROXY_URL]);
     expect(responseContains).toBeInTheDocument();
   });
 
@@ -61,5 +66,17 @@ describe('<TCPAdvancedFields />', () => {
         })
       );
     });
+  });
+
+  it('shows resolve hostnames locally field when proxy url is filled for tcp monitors', () => {
+    const { getByLabelText, queryByLabelText } = render(<WrappedComponent />);
+
+    expect(queryByLabelText('Resolve hostnames locally')).not.toBeInTheDocument();
+
+    const proxyUrl = getByLabelText('Proxy URL') as HTMLInputElement;
+
+    fireEvent.change(proxyUrl, { target: { value: 'sampleProxyUrl' } });
+
+    expect(getByLabelText('Resolve hostnames locally')).toBeInTheDocument();
   });
 });

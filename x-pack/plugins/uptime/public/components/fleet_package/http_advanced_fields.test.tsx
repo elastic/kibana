@@ -17,6 +17,7 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
 }));
 
 const defaultConfig = {
+  [ConfigKeys.PROXY_URL]: 'test',
   [ConfigKeys.RESPONSE_BODY_CHECK_NEGATIVE]: [],
   [ConfigKeys.RESPONSE_BODY_CHECK_POSITIVE]: [],
   [ConfigKeys.RESPONSE_BODY_INDEX]: ResponseBodyIndexPolicy.ON_ERROR,
@@ -52,14 +53,11 @@ describe('<HTTPAdvancedFields />', () => {
       'Response body index policy'
     ) as HTMLInputElement;
     const indexResponseHeaders = getByLabelText('Index response headers') as HTMLInputElement;
-    // ComboBox has an issue with associating labels with the field
-    const responseStatusEquals = getByText('Check response status equals');
-    // ComboBox has an issue with associating labels with the field
-    const responseBodyContains = getByText('Check response body contains');
-    // ComboBox has an issue with associating labels with the field
-    const responseBodyDoesNotContain = getByText('Check response body does not contain');
-    // ComboBox has an issue with associating labels with the field
+    const proxyUrl = getByLabelText('Proxy URL') as HTMLInputElement;
     const responseHeadersContain = getByText('Check response headers contain');
+    const responseStatusEquals = getByText('Check response status equals');
+    const responseBodyContains = getByText('Check response body contains');
+    const responseBodyDoesNotContain = getByText('Check response body does not contain');
     expect(requestMethod).toBeInTheDocument();
     expect(requestMethod.value).toEqual(defaultConfig[ConfigKeys.REQUEST_METHOD_CHECK]);
     expect(requestHeaders).toBeInTheDocument();
@@ -70,6 +68,8 @@ describe('<HTTPAdvancedFields />', () => {
     expect(indexResponseBodySelect.value).toEqual(defaultConfig[ConfigKeys.RESPONSE_BODY_INDEX]);
     expect(indexResponseHeaders).toBeInTheDocument();
     expect(indexResponseHeaders.checked).toBe(true);
+    expect(proxyUrl).toBeInTheDocument();
+    expect(proxyUrl.value).toEqual(defaultConfig[ConfigKeys.PROXY_URL]);
     expect(responseStatusEquals).toBeInTheDocument();
     expect(responseBodyContains).toBeInTheDocument();
     expect(responseBodyDoesNotContain).toBeInTheDocument();

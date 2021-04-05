@@ -35,6 +35,10 @@ const validateCommon = {
 };
 
 const validateHTTP = {
+  [ConfigKeys.RESPONSE_STATUS_CHECK]: (value: unknown) => {
+    const statusCodes = value as ICustomFields[ConfigKeys.RESPONSE_STATUS_CHECK];
+    return statusCodes.length ? statusCodes.some((code) => !`${code}`.match(digitsOnly)) : false;
+  },
   [ConfigKeys.RESPONSE_HEADERS_CHECK]: (value: unknown) => {
     const headers = value as ICustomFields[ConfigKeys.RESPONSE_HEADERS_CHECK];
     return validateHeaders<ICustomFields[ConfigKeys.RESPONSE_HEADERS_CHECK]>(headers);

@@ -72,5 +72,5 @@ export const ComboBox = ({ onChange, selectedOptions }: Props) => {
 
 const isValid = (value: string) => {
   // Ensure that the tag is more than whitespace
-  return value.match(/\S/) !== null;
+  return value.match(/\S+/) !== null;
 };
