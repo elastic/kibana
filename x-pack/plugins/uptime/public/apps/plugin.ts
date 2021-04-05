@@ -68,18 +68,21 @@ export class UptimePlugin
 
       return UptimeDataHelper(coreStart);
     };
-    plugins.observability.dashboard.register({
-      appName: 'uptime',
-      hasData: async () => {
-        const dataHelper = await getUptimeDataHelper();
-        const status = await dataHelper.indexStatus();
-        return status.docCount > 0;
-      },
-      fetchData: async (params: FetchDataParams) => {
-        const dataHelper = await getUptimeDataHelper();
-        return await dataHelper.overviewData(params);
-      },
-    });
+
+    if (plugins.observability) {
+      plugins.observability.dashboard.register({
+        appName: 'uptime',
+        hasData: async () => {
+          const dataHelper = await getUptimeDataHelper();
+          const status = await dataHelper.indexStatus();
+          return status.docCount > 0;
+        },
+        fetchData: async (params: FetchDataParams) => {
+          const dataHelper = await getUptimeDataHelper();
+          return await dataHelper.overviewData(params);
+        },
+      });
+    }
 
     core.application.register({
       id: PLUGIN.ID,
