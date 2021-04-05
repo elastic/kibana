@@ -12,9 +12,9 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { ReAuthenticate } from './re_authenticate';
+import { Reauthenticate } from './reauthenticate';
 
-describe('ReAuthenticate', () => {
+describe('Reauthenticate', () => {
   // Needed to mock redirect window.location.replace(oauthUrl)
   const mockReplace = jest.fn();
   const mockWindow = {
@@ -44,14 +44,14 @@ describe('ReAuthenticate', () => {
   });
 
   it('renders', () => {
-    const wrapper = shallow(<ReAuthenticate {...props} />);
+    const wrapper = shallow(<Reauthenticate {...props} />);
 
     expect(wrapper.find('form')).toHaveLength(1);
   });
 
   it('handles form submission', () => {
     jest.spyOn(window.location, 'replace').mockImplementationOnce(mockReplace);
-    const wrapper = shallow(<ReAuthenticate {...props} />);
+    const wrapper = shallow(<Reauthenticate {...props} />);
 
     const preventDefault = jest.fn();
     wrapper.find('form').simulate('submit', { preventDefault });
