@@ -19,7 +19,7 @@ import {
 
 import { Index } from '../../index_management/server';
 import { PLUGIN } from '../common/constants';
-import type { SetupDependencies, CcrRequestHandlerContext } from './types';
+import { SetupDependencies, StartDependencies, CcrRequestHandlerContext } from './types';
 import { registerApiRoutes } from './routes';
 import { elasticsearchJsPlugin } from './client/elasticsearch_ccr';
 import { CrossClusterReplicationConfig } from './config';

@@ -7251,7 +7251,6 @@
     "xpack.crossClusterReplication.followerIndexList.table.statusColumnTitle": "ステータス",
     "xpack.crossClusterReplication.homeBreadcrumbTitle": "クラスター横断レプリケーション",
     "xpack.crossClusterReplication.indexMgmtBadge.followerLabel": "フォロワー",
-    "xpack.crossClusterReplication.licenseCheckErrorMessage": "ライセンス確認失敗",
     "xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.cancelButtonText": "キャンセル",
     "xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.confirmButtonText": "複製を中止",
     "xpack.crossClusterReplication.pauseFollowerIndex.confirmModal.multiplePauseDescription": "これらのフォロワーインデックスの複製が一時停止されます：",

@@ -61,37 +61,39 @@ export class License {
   getLicenseErrorMessage(licenseCheckState: LicenseCheckState): string {
     switch (licenseCheckState) {
       case 'invalid':
-        return i18n.translate('xpack.esUi.license.errorUnsupportedMessage', {
+        return i18n.translate('esUi.license.errorUnsupportedMessage', {
           defaultMessage:
             'Your {licenseType} license does not support {pluginName}. Please upgrade your license.',
           values: { licenseType: this.licenseType!, pluginName: this.pluginName },
         });
 
       case 'expired':
-        return i18n.translate('xpack.esUi.license.errorExpiredMessage', {
+        return i18n.translate('esUi.license.errorExpiredMessage', {
           defaultMessage:
             'You cannot use {pluginName} because your {licenseType} license has expired.',
           values: { licenseType: this.licenseType!, pluginName: this.pluginName },
         });
 
       case 'unavailable':
-        return i18n.translate('xpack.esUi.license.errorUnavailableMessage', {
+        return i18n.translate('esUi.license.errorUnavailableMessage', {
           defaultMessage:
             'You cannot use {pluginName} because license information is not available at this time.',
           values: { pluginName: this.pluginName },
         });
     }
 
-    return i18n.translate('xpack.esUi.license.genericErrorMessage', {
+    return i18n.translate('esUi.license.genericErrorMessage', {
       defaultMessage: 'You cannot use {pluginName} because the license check failed.',
       values: { pluginName: this.pluginName },
     });
   }
 
-  guardApiRoute<P, Q, B>(handler: RequestHandler<P, Q, B, RequestHandlerContext>) {
+  guardApiRoute<Context extends RequestHandlerContext, Params, Query, Body>(
+    handler: RequestHandler<Params, Query, Body, Context>
+  ) {
     return (
-      ctx: RequestHandlerContext,
-      request: KibanaRequest<P, Q, B>,
+      ctx: Context,
+      request: KibanaRequest<Params, Query, Body>,
       response: KibanaResponseFactory
     ) => {
       // We'll only surface license errors if users attempt disallowed access to the API.

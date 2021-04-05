@@ -19,20 +19,25 @@ describe('license_pre_routing_factory', () => {
         warn: jest.fn(),
       };
 
+      const licensingMock = {
+        license$: {
+          subscribe: (callback) =>
+            callback({
+              type: currentLicenseType,
+              check: () => ({ state: licenseState }),
+              getFeature: () => ({}),
+            }),
+        },
+        refresh: jest.fn(),
+        createLicensePoller: jest.fn(),
+        featureUsage: {},
+      };
+
       license.setup({ pluginName, logger });
       license.start({
         pluginId: 'id',
         minimumLicenseType: 'basic',
-        licensing: {
-          license$: {
-            subscribe: (callback) =>
-              callback({
-                type: currentLicenseType,
-                check: () => ({ state: licenseState }),
-                getFeature: () => ({}),
-              }),
-          },
-        },
+        licensing: licensingMock,
       });
 
       const route = jest.fn();
