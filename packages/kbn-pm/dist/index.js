@@ -209,7 +209,7 @@ async function run(argv) {
     },
     default: {
       cache: true,
-      'force-install': true,
+      'force-install': false,
       offline: false,
       validate: true
     },
@@ -8910,8 +8910,11 @@ const BootstrapCommand = {
     const nonBazelProjectsOnly = await Object(_utils_projects__WEBPACK_IMPORTED_MODULE_4__["getNonBazelProjectsOnly"])(projects);
     const batchedNonBazelProjects = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_4__["topologicallyBatchProjects"])(nonBazelProjectsOnly, projectGraph);
     const kibanaProjectPath = ((_projects$get = projects.get('kibana')) === null || _projects$get === void 0 ? void 0 : _projects$get.path) || '';
-    const runOffline = (options === null || options === void 0 ? void 0 : options.offline) === true;
-    const forceInstall = !!options && options['force-install'] === true; // Ensure we have a `node_modules/.yarn-integrity` file as we depend on it
+    const runOffline = (options === null || options === void 0 ? void 0 : options.offline) === true; // Force install is set in case a flag is passed or
+    // if the `.yarn-integrity` file is not found which
+    // will be indicated by the return of yarnIntegrityFileExists.
+
+    const forceInstall = !!options && options['force-install'] === true || !(await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["yarnIntegrityFileExists"])(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(kibanaProjectPath, 'node_modules'))); // Ensure we have a `node_modules/.yarn-integrity` file as we depend on it
     // for bazel to know it has to re-install the node_modules after a reset or a clean
 
     await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["ensureYarnIntegrityFileExists"])(Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(kibanaProjectPath, 'node_modules')); // Install bazel machinery tools if needed
@@ -8925,9 +8928,6 @@ const BootstrapCommand = {
     // That way non bazel projects could depend on bazel projects but not the other way around
     // That is only intended during the migration process while non Bazel projects are not removed at all.
     //
-    // Until we have our first package build within Bazel we will always need to directly call the yarn rule
-    // otherwise yarn install won't trigger as we don't have any npm dependency within Bazel
-    // TODO: Change CLI default in order to not force install as soon as we have our first Bazel package being built
 
     if (forceInstall) {
       await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_9__["runBazel"])(['run', '@nodejs//:yarn'], runOffline);
@@ -9105,6 +9105,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isDirectory", function() { return isDirectory; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isFile", function() { return isFile; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createSymlink", function() { return createSymlink; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "tryRealpath", function() { return tryRealpath; });
 /* harmony import */ var cmd_shim__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(132);
 /* harmony import */ var cmd_shim__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(cmd_shim__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var del__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(143);
@@ -9137,6 +9138,7 @@ const symlink = Object(util__WEBPACK_IMPORTED_MODULE_5__["promisify"])(fs__WEBPA
 const chmod = Object(util__WEBPACK_IMPORTED_MODULE_5__["promisify"])(fs__WEBPACK_IMPORTED_MODULE_2___default.a.chmod);
 const cmdShim = Object(util__WEBPACK_IMPORTED_MODULE_5__["promisify"])(cmd_shim__WEBPACK_IMPORTED_MODULE_0___default.a);
 const mkdir = Object(util__WEBPACK_IMPORTED_MODULE_5__["promisify"])(fs__WEBPACK_IMPORTED_MODULE_2___default.a.mkdir);
+const realpathNative = Object(util__WEBPACK_IMPORTED_MODULE_5__["promisify"])(fs__WEBPACK_IMPORTED_MODULE_2___default.a.realpath.native);
 const mkdirp = async path => await mkdir(path, {
   recursive: true
 });
@@ -9218,6 +9220,20 @@ async function forceCreate(src, dest, type) {
   }
 
   await symlink(src, dest, type);
+}
+
+async function tryRealpath(path) {
+  let calculatedPath = path;
+
+  try {
+    calculatedPath = await realpathNative(path);
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      throw error;
+    }
+  }
+
+  return calculatedPath;
 }
 
 /***/ }),
@@ -22981,11 +22997,11 @@ class Project {
 
   ensureValidProjectDependency(project) {
     const relativePathToProject = normalizePath(path__WEBPACK_IMPORTED_MODULE_1___default.a.relative(this.path, project.path));
-    const relativePathToProjectIfBazelPkg = normalizePath(path__WEBPACK_IMPORTED_MODULE_1___default.a.relative(this.path, `bazel/bin/packages/${path__WEBPACK_IMPORTED_MODULE_1___default.a.basename(project.path)}`));
+    const relativePathToProjectIfBazelPkg = normalizePath(path__WEBPACK_IMPORTED_MODULE_1___default.a.relative(this.path, `${__dirname}/../../../bazel-bin/packages/${path__WEBPACK_IMPORTED_MODULE_1___default.a.basename(project.path)}/npm_module`));
     const versionInPackageJson = this.allDependencies[project.name];
     const expectedVersionInPackageJson = `link:${relativePathToProject}`;
     const expectedVersionInPackageJsonIfBazelPkg = `link:${relativePathToProjectIfBazelPkg}`; // TODO: after introduce bazel to build all the packages and completely remove the support for kbn packages
-    //  do not allow child projects to hold dependencies
+    //  do not allow child projects to hold dependencies, unless they are meant to be published externally
 
     if (versionInPackageJson === expectedVersionInPackageJson || versionInPackageJson === expectedVersionInPackageJsonIfBazelPkg) {
       return;
@@ -23143,7 +23159,7 @@ const createProductionPackageJson = pkgJson => _objectSpread(_objectSpread({}, p
   dependencies: transformDependencies(pkgJson.dependencies)
 });
 const isLinkDependency = depVersion => depVersion.startsWith('link:');
-const isBazelPackageDependency = depVersion => depVersion.startsWith('link:bazel/bin/');
+const isBazelPackageDependency = depVersion => depVersion.startsWith('link:bazel-bin/');
 /**
  * Replaces `link:` dependencies with `file:` dependencies. When installing
  * dependencies, these `file:` dependencies will be copied into `node_modules`
@@ -23153,7 +23169,7 @@ const isBazelPackageDependency = depVersion => depVersion.startsWith('link:bazel
  * will then _copy_ the `file:` dependencies into `node_modules` instead of
  * symlinking like we do in development.
  *
- * Additionally it also taken care of replacing `link:bazel/bin/` with
+ * Additionally it also taken care of replacing `link:bazel-bin/` with
  * `file:` so we can also support the copy of the Bazel packages dist already into
  * build/packages to be copied into the node_modules
  */
@@ -23170,7 +23186,7 @@ function transformDependencies(dependencies = {}) {
     }
 
     if (isBazelPackageDependency(depVersion)) {
-      newDeps[name] = depVersion.replace('link:bazel/bin/', 'file:');
+      newDeps[name] = depVersion.replace('link:bazel-bin/', 'file:').replace('/npm_module', '');
       continue;
     }
 
@@ -48065,8 +48081,10 @@ function addProjectToTree(tree, pathParts, project) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _ensure_yarn_integrity_exists__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(373);
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "ensureYarnIntegrityFileExists", function() { return _ensure_yarn_integrity_exists__WEBPACK_IMPORTED_MODULE_0__["ensureYarnIntegrityFileExists"]; });
+/* harmony import */ var _yarn_integrity__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(373);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "yarnIntegrityFileExists", function() { return _yarn_integrity__WEBPACK_IMPORTED_MODULE_0__["yarnIntegrityFileExists"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "ensureYarnIntegrityFileExists", function() { return _yarn_integrity__WEBPACK_IMPORTED_MODULE_0__["ensureYarnIntegrityFileExists"]; });
 
 /* harmony import */ var _get_cache_folders__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(374);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "getBazelDiskCacheFolder", function() { return _get_cache_folders__WEBPACK_IMPORTED_MODULE_1__["getBazelDiskCacheFolder"]; });
@@ -48099,6 +48117,7 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "yarnIntegrityFileExists", function() { return yarnIntegrityFileExists; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ensureYarnIntegrityFileExists", function() { return ensureYarnIntegrityFileExists; });
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(4);
 /* harmony import */ var path__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_0__);
@@ -48112,9 +48131,27 @@ __webpack_require__.r(__webpack_exports__);
  */
 
 
+async function yarnIntegrityFileExists(nodeModulesPath) {
+  try {
+    const nodeModulesRealPath = await Object(_fs__WEBPACK_IMPORTED_MODULE_1__["tryRealpath"])(nodeModulesPath);
+    const yarnIntegrityFilePath = Object(path__WEBPACK_IMPORTED_MODULE_0__["join"])(nodeModulesRealPath, '.yarn-integrity'); // check if the file already exists
+
+    if (await Object(_fs__WEBPACK_IMPORTED_MODULE_1__["isFile"])(yarnIntegrityFilePath)) {
+      return true;
+    }
+  } catch {// no-op
+  }
+
+  return false;
+}
 async function ensureYarnIntegrityFileExists(nodeModulesPath) {
   try {
-    await Object(_fs__WEBPACK_IMPORTED_MODULE_1__["writeFile"])(Object(path__WEBPACK_IMPORTED_MODULE_0__["join"])(nodeModulesPath, '.yarn-integrity'), '', {
+    const nodeModulesRealPath = await Object(_fs__WEBPACK_IMPORTED_MODULE_1__["tryRealpath"])(nodeModulesPath);
+    const yarnIntegrityFilePath = Object(path__WEBPACK_IMPORTED_MODULE_0__["join"])(nodeModulesRealPath, '.yarn-integrity'); // ensure node_modules folder is created
+
+    await Object(_fs__WEBPACK_IMPORTED_MODULE_1__["mkdirp"])(nodeModulesRealPath); // write a blank file in case it doesn't exists
+
+    await Object(_fs__WEBPACK_IMPORTED_MODULE_1__["writeFile"])(yarnIntegrityFilePath, '', {
       flag: 'wx'
     });
   } catch {// no-op
@@ -63656,7 +63693,7 @@ async function buildBazelProductionProjects({
   const projectNames = [...projects.values()].map(project => project.name);
   _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].info(`Preparing Bazel projects production build for [${projectNames.join(', ')}]`);
   await Object(_utils_bazel__WEBPACK_IMPORTED_MODULE_4__["runBazel"])(['build', '//packages:build']);
-  _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].info(`All Bazel projects production builds for [${projectNames.join(', ')}] are complete}]`);
+  _utils_log__WEBPACK_IMPORTED_MODULE_6__["log"].info(`All Bazel projects production builds for [${projectNames.join(', ')}] are complete`);
 
   for (const project of projects.values()) {
     await copyToBuild(project, kibanaRoot, buildRoot);
@@ -63680,7 +63717,7 @@ async function copyToBuild(project, kibanaRoot, buildRoot) {
   const relativeProjectPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["relative"])(kibanaRoot, project.path);
   const buildProjectPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["resolve"])(buildRoot, relativeProjectPath);
   await cpy__WEBPACK_IMPORTED_MODULE_0___default()(['**/*'], buildProjectPath, {
-    cwd: Object(path__WEBPACK_IMPORTED_MODULE_2__["join"])(kibanaRoot, 'bazel', 'bin', 'packages', Object(path__WEBPACK_IMPORTED_MODULE_2__["basename"])(buildProjectPath), 'npm_module'),
+    cwd: Object(path__WEBPACK_IMPORTED_MODULE_2__["join"])(kibanaRoot, 'bazel-bin', 'packages', Object(path__WEBPACK_IMPORTED_MODULE_2__["basename"])(buildProjectPath), 'npm_module'),
     dot: true,
     onlyFiles: true,
     parents: true
@@ -63702,12 +63739,12 @@ async function applyCorrectPermissions(project, kibanaRoot, buildRoot) {
   const buildProjectPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["resolve"])(buildRoot, relativeProjectPath);
   const allPluginPaths = await globby__WEBPACK_IMPORTED_MODULE_1___default()([`**/*`], {
     onlyFiles: false,
-    cwd: Object(path__WEBPACK_IMPORTED_MODULE_2__["join"])(kibanaRoot, 'bazel', 'bin', 'packages', Object(path__WEBPACK_IMPORTED_MODULE_2__["basename"])(buildProjectPath), 'npm_module'),
+    cwd: buildProjectPath,
     dot: true
   });
 
   for (const pluginPath of allPluginPaths) {
-    const resolvedPluginPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["resolve"])(buildRoot, pluginPath);
+    const resolvedPluginPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["resolve"])(buildProjectPath, pluginPath);
 
     if (await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_5__["isFile"])(resolvedPluginPath)) {
       await Object(_utils_fs__WEBPACK_IMPORTED_MODULE_5__["chmod"])(resolvedPluginPath, 0o644);

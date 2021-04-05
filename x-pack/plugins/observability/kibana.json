@@ -3,7 +3,7 @@
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "observability"],
-  "optionalPlugins": ["licensing", "home", "usageCollection"],
+  "optionalPlugins": ["licensing", "home", "usageCollection","lens"],
   "requiredPlugins": ["data"],
   "ui": true,
   "server": true,

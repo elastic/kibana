@@ -86,7 +86,7 @@ export const Library: React.FC = () => {
     <>
       <SetPageChrome trail={['Library']} />
       <EuiPageHeader pageTitle="Library" />
-      <EuiPageContent>
+      <EuiPageContent hasBorder>
         <EuiPageContentBody>
           <EuiTitle size="m">
             <h2>Result</h2>

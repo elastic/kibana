@@ -27,7 +27,7 @@ import { registerRouteForBundle } from './bundles_route';
  */
 export function registerBundleRoutes({
   router,
-  serverBasePath, // serverBasePath
+  serverBasePath,
   uiPlugins,
   packageInfo,
 }: {
@@ -57,10 +57,10 @@ export function registerBundleRoutes({
     isDist,
   });
 
-  [...uiPlugins.internal.entries()].forEach(([id, { publicTargetDir }]) => {
+  [...uiPlugins.internal.entries()].forEach(([id, { publicTargetDir, version }]) => {
     registerRouteForBundle(router, {
-      publicPath: `${serverBasePath}/${buildNum}/bundles/plugin/${id}/`,
-      routePath: `/${buildNum}/bundles/plugin/${id}/`,
+      publicPath: `${serverBasePath}/${buildNum}/bundles/plugin/${id}/${version}/`,
+      routePath: `/${buildNum}/bundles/plugin/${id}/${version}/`,
       bundlesPath: publicTargetDir,
       fileHashCache,
       isDist,

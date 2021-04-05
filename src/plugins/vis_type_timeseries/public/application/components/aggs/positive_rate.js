@@ -65,9 +65,9 @@ export const PositiveRateAgg = (props) => {
   const handleSelectChange = createSelectHandler(handleChange);
 
   const htmlId = htmlIdGenerator();
-  const indexPattern =
-    (props.series.override_index_pattern && props.series.series_index_pattern) ||
-    props.panel.index_pattern;
+  const indexPattern = props.series.override_index_pattern
+    ? props.series.series_index_pattern
+    : props.panel.index_pattern;
 
   const selectedUnitOptions = UNIT_OPTIONS.filter((o) => o.value === model.unit);
 
