@@ -16,19 +16,22 @@ import { createAlertingServiceProviderMock } from '../shared_services/providers/
 
 const createMlMockClient = () => elasticsearchServiceMock.createLegacyClusterClient();
 
+const createSetupContract = () =>
+  (({
+    jobServiceProvider: createJobServiceProviderMock(),
+    anomalyDetectorsProvider: createAnomalyDetectorsProviderMock(),
+    mlSystemProvider: createMockMlSystemProvider(),
+    modulesProvider: createModulesProviderMock(),
+    resultsServiceProvider: createResultsServiceProviderMock(),
+    alertingServiceProvider: createAlertingServiceProviderMock(),
+    mlClient: createMlMockClient(),
+  } as unknown) as jest.Mocked<MlPluginSetup>);
+
+const createStartContract = () => jest.fn();
+
 export const mlServerPluginMock = {
-  create: () => ({
-    setup: ({
-      jobServiceProvider: createJobServiceProviderMock(),
-      anomalyDetectorsProvider: createAnomalyDetectorsProviderMock(),
-      mlSystemProvider: createMockMlSystemProvider(),
-      modulesProvider: createModulesProviderMock(),
-      resultsServiceProvider: createResultsServiceProviderMock(),
-      alertingServiceProvider: createAlertingServiceProviderMock(),
-      mlClient: createMlMockClient(),
-    } as unknown) as jest.Mocked<MlPluginSetup>,
-    start: jest.fn(),
-  }),
+  createSetupContract,
+  createStartContract,
 };
 
 const mockValidateRuleType = jest.fn().mockResolvedValue({ valid: true, message: undefined });
