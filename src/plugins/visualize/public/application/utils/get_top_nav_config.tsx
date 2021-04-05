@@ -55,6 +55,8 @@ interface TopNavConfigParams {
   embeddableId?: string;
 }
 
+const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
+
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
   if (!anonymousUserCapabilities.visualize) return false;
 
@@ -448,9 +450,6 @@ export const getTopNavConfig = (
                   />
                 );
               } else {
-                const SavedObjectSaveModalDashboard = withSuspense(
-                  LazySavedObjectSaveModalDashboard
-                );
                 saveModal = (
                   <SavedObjectSaveModalDashboard
                     documentInfo={{

@@ -33,6 +33,8 @@ import {
   withSuspense,
 } from '../../../../../../src/plugins/presentation_util/public';
 
+const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
+
 export function getTopNavConfig({
   savedMap,
   isOpenSettingsDisabled,
@@ -208,7 +210,6 @@ export function getTopNavConfig({
             />
           );
         } else {
-          const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
           saveModal = (
             <SavedObjectSaveModalDashboard
               {...saveModalProps}

@@ -30,6 +30,8 @@ export type TagEnhancedSavedObjectSaveModalDashboardProps = Omit<
   onSave: (props: DashboardSaveProps) => void;
 };
 
+const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
+
 export const TagEnhancedSavedObjectSaveModalDashboard: FC<TagEnhancedSavedObjectSaveModalDashboardProps> = ({
   initialTags,
   onSave,
@@ -61,8 +63,6 @@ export const TagEnhancedSavedObjectSaveModalDashboard: FC<TagEnhancedSavedObject
     },
     [onSave, selectedTags]
   );
-
-  const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
   return (
     <SavedObjectSaveModalDashboard

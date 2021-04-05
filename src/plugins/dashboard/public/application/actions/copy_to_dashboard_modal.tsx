@@ -37,6 +37,8 @@ interface CopyToDashboardModalProps {
   closeModal: () => void;
 }
 
+const DashboardPicker = withSuspense(LazyDashboardPicker);
+
 export function CopyToDashboardModal({
   PresentationUtilContext,
   stateTransfer,
@@ -70,7 +72,6 @@ export function CopyToDashboardModal({
 
   const titleId = 'copyToDashboardTitle';
   const descriptionId = 'copyToDashboardDescription';
-  const DashboardPicker = withSuspense(LazyDashboardPicker);
 
   return (
     <EuiFocusTrap clickOutsideDisables={true}>
