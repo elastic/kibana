@@ -5,8 +5,17 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, Component } from 'react';
-import { EuiCallOut, EuiFieldText, EuiFormRow, EuiPanel, EuiSpacer } from '@elastic/eui';
+import React, { ChangeEvent, Component, Fragment } from 'react';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiEmptyPrompt,
+  EuiFieldText,
+  EuiFormRow,
+  EuiLoadingSpinner,
+  EuiPanel,
+  EuiSpacer,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   getExistingIndexNames,
@@ -89,6 +98,24 @@ export class NewVectorLayerEditor extends Component<Props, State> {
     return (
       <EuiPanel>
         <>
+          <EuiEmptyPrompt
+            title={
+              <h4>
+                {i18n.translate('xpack.layers.newVectorLayerWizard.drawVectorShapes', {
+                  defaultMessage: 'Draw vector shapes',
+                })}
+              </h4>
+            }
+            body={
+              <Fragment>
+                <p>
+                  {i18n.translate('xpack.layers.newVectorLayerWizard.vectorEditorDescription', {
+                    defaultMessage: `Using the editor on the left side of the map, draw and edit the points and shapes to be indexed and added to the map.`,
+                  })}
+                </p>
+              </Fragment>
+            }
+          />
           <EuiFormRow
             label={i18n.translate(
               'xpack.layers.newVectorLayerWizard.indexSettings.enterIndexNameLabel',
@@ -142,7 +169,7 @@ export class NewVectorLayerEditor extends Component<Props, State> {
                   {
                     defaultMessage:
                       'Cannot include \\\\, /, *, ?, ", <, >, |, \
-                    " " (space character), , (comma), #',
+                  " " (space character), , (comma), #',
                   }
                 )}
               </li>
@@ -168,8 +195,8 @@ export class NewVectorLayerEditor extends Component<Props, State> {
                   {
                     defaultMessage:
                       'Cannot be longer than 255 bytes (note it is bytes, \
-                    so multi-byte characters will count towards the 255 \
-                    limit faster)',
+                  so multi-byte characters will count towards the 255 \
+                  limit faster)',
                   }
                 )}
               </li>

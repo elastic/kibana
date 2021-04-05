@@ -20,6 +20,7 @@ export interface Props {
   geoFields: GeoFieldWithIndex[];
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;
+  editModeActive: boolean;
 }
 
 export function ToolbarOverlay(props: Props) {
@@ -41,17 +42,11 @@ export function ToolbarOverlay(props: Props) {
   }
 
   function renderFeatureEditControl() {
-    const { geoFields, getFilterActions, getActionContext } = props;
-
-    return (
+    return props.editModeActive ? (
       <EuiFlexItem>
-        <FeatureEditControl
-          geoFields={geoFields}
-          getFilterActions={getFilterActions}
-          getActionContext={getActionContext}
-        />
+        <FeatureEditControl />
       </EuiFlexItem>
-    );
+    ) : null;
   }
 
   return (
