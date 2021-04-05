@@ -16,7 +16,6 @@
     "x-pack/mocks.ts",
     "x-pack/typings/**/*",
     "x-pack/tasks/**/*",
-    "x-pack/plugins/cases/**/*",
     "x-pack/plugins/lists/**/*",
     "x-pack/plugins/security_solution/**/*",
 
@@ -102,6 +101,7 @@
     { "path": "./src/plugins/advanced_settings/tsconfig.json" },
     { "path": "./src/plugins/apm_oss/tsconfig.json" },
     { "path": "./src/plugins/bfetch/tsconfig.json" },
+    { "path": "./src/plugins/cases/tsconfig.json" },
     { "path": "./src/plugins/charts/tsconfig.json" },
     { "path": "./src/plugins/console/tsconfig.json" },
     { "path": "./src/plugins/dashboard/tsconfig.json" },
