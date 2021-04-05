@@ -33,7 +33,7 @@ export class LegacyAppender implements DisposableAppender {
 
   private readonly loggingServer: LegacyLoggingServer;
 
-  constructor(legacyLoggingConfig: Record<string, any>) {
+  constructor(legacyLoggingConfig: any) {
     this.loggingServer = new LegacyLoggingServer(legacyLoggingConfig);
   }
 
