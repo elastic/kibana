@@ -13,7 +13,7 @@ SRCS = SOURCE_FILES
 
 filegroup(
   name = "srcs",
-  srcs = SOURCE_FILES,
+  srcs = SRCS,
 )
 
 NPM_MODULE_EXTRA_FILES = [
