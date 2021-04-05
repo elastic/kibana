@@ -19,7 +19,30 @@ import { EngineDetails } from '../../engine/types';
 import { MetaEnginesTableNameColumnContent } from './meta_engines_table_name_column_content';
 
 describe('MetaEnginesTableNameColumnContent', () => {
-  it('includes the name of the engine', () => {});
+  it('includes the name of the engine', () => {
+    const wrapper = mountWithIntl(
+      <MetaEnginesTableNameColumnContent
+        showRow={jest.fn()}
+        hideRow={jest.fn()}
+        name={'test-engine'}
+        item={
+          {
+            name: 'test-engine',
+            created_at: 'Fri, 1 Jan 1970 12:00:00 +0000',
+            language: 'English',
+            isMeta: true,
+            document_count: 99999,
+            field_count: 10,
+            includedEngines: [] as EngineDetails[],
+          } as EngineDetails
+        }
+        isExpanded={false}
+        sendEngineTableLinkClickTelemetry={jest.fn()}
+      />
+    );
+
+    expect(wrapper.text()).toContain('test-engine');
+  });
 
   describe('toggle button', () => {
     it('displays expanded row when the row is currently hidden', () => {
