@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { get } from 'lodash';
 import { getIndexPatterns } from './plugin_services';
 import { TimelionFunctionArgs } from '../../common/types';
-import { TimelionExpressionFunction, TimelionExpressionArgument } from '../../common/parser';
+import { TimelionExpressionArgument } from '../../common/parser';
+import { getIndexPatternTitleFromArgs } from '../../common/lib';
 import {
   IndexPatternField,
   indexPatterns as indexPatternsUtils,
@@ -21,17 +21,14 @@ const isRuntimeField = (field: IndexPatternField) => Boolean(field.runtimeField)
 export function getArgValueSuggestions() {
   const indexPatterns = getIndexPatterns();
 
-  async function getIndexPattern(functionArgs: TimelionExpressionFunction[]) {
-    const indexPatternArg = functionArgs.find(({ name }) => name === 'index');
-    if (!indexPatternArg) {
-      // index argument not provided
-      return;
-    }
-    const indexPatternTitle = get(indexPatternArg, 'value.text');
+  async function getIndexPattern(functionArgs: TimelionExpressionArgument[]) {
+    const indexPatternTitle = getIndexPatternTitleFromArgs(functionArgs);
 
-    return (await indexPatterns.find(indexPatternTitle)).find(
-      (index) => index.title === indexPatternTitle
-    );
+    return indexPatternTitle
+      ? (await indexPatterns.find(indexPatternTitle)).find(
+          (index) => index.title === indexPatternTitle
+        )
+      : undefined;
   }
 
   function containsFieldName(partial: string, field: { name: string }) {
@@ -53,7 +50,7 @@ export function getArgValueSuggestions() {
           name: title,
         }));
       },
-      async metric(partial: string, functionArgs: TimelionExpressionFunction[]) {
+      async metric(partial: string, functionArgs: TimelionExpressionArgument[]) {
         if (!partial || !partial.includes(':')) {
           return [
             { name: 'avg:' },
@@ -83,7 +80,7 @@ export function getArgValueSuggestions() {
           )
           .map((field) => ({ name: `${valueSplit[0]}:${field.name}`, help: field.type }));
       },
-      async split(partial: string, functionArgs: TimelionExpressionFunction[]) {
+      async split(partial: string, functionArgs: TimelionExpressionArgument[]) {
         const indexPattern = await getIndexPattern(functionArgs);
         if (!indexPattern) {
           return [];
@@ -107,7 +104,7 @@ export function getArgValueSuggestions() {
           )
           .map((field) => ({ name: field.name, help: field.type }));
       },
-      async timefield(partial: string, functionArgs: TimelionExpressionFunction[]) {
+      async timefield(partial: string, functionArgs: TimelionExpressionArgument[]) {
         const indexPattern = await getIndexPattern(functionArgs);
         if (!indexPattern) {
           return [];

@@ -16,6 +16,7 @@ import { toExpressionAst } from './to_ast';
 import { getIndexPatterns } from './helpers/plugin_services';
 
 import { parseTimelionExpressionAsync } from '../common/parser_async';
+import { getIndexPatternTitleFromArgs } from '../common/lib';
 
 import { VIS_EVENT_TO_TRIGGER, VisParams } from '../../visualizations/public';
 
@@ -52,13 +53,11 @@ export function getTimelionVisDefinition(dependencies: TimelionVisDependencies) 
     },
     getUsedIndexPattern: async (params: VisParams) => {
       try {
-        const args = (await parseTimelionExpressionAsync(params.expression))?.args ?? [];
-        const indexArg = args.find(
-          ({ type, name, function: fn }) => type === 'namedArg' && fn === 'es' && name === 'index'
-        );
+        const args = (await parseTimelionExpressionAsync(params.expression))?.args;
+        const indexPatternTitle = getIndexPatternTitleFromArgs(args);
 
-        if (indexArg?.value.text) {
-          return getIndexPatterns().find(indexArg.value.text);
+        if (indexPatternTitle) {
+          return getIndexPatterns().find(indexPatternTitle);
         }
       } catch {
         // timelion expression is invalid

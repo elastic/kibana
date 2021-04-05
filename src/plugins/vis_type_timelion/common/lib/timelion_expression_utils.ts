@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-export { calculateInterval } from './calculate_interval';
-export { toMS } from './to_milliseconds';
-export { getIndexPatternTitleFromArgs } from './timelion_expression_utils';
+import { TimelionExpressionArgument } from '../parser';
 
-export const DEFAULT_TIME_FORMAT = 'MMMM Do YYYY, HH:mm:ss.SSS';
+export const getIndexPatternTitleFromArgs = (args: TimelionExpressionArgument[] = []) =>
+  args.find(
+    ({ type, name, function: fn }) => type === 'namedArg' && fn === 'es' && name === 'index'
+  )?.value.text;

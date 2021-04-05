@@ -11,7 +11,9 @@ import { KibanaContext, TimeRange, Filter, esQuery, Query } from '../../../data/
 import { TimelionVisDependencies } from '../plugin';
 import { getTimezone } from './get_timezone';
 import { TimelionVisParams } from '../timelion_vis_fn';
-import { getDataSearch } from '../helpers/plugin_services';
+import { getDataSearch, getIndexPatterns } from './plugin_services';
+import { parseTimelionExpressionAsync } from '../../common/parser_async';
+import { getIndexPatternTitleFromArgs } from '../../common/lib';
 
 interface Stats {
   cacheCount: number;
@@ -95,12 +97,23 @@ export function getTimelionRequestHandler({
 
     try {
       const searchSessionOptions = dataSearch.session.getSearchOptions(searchSessionId);
+
+      const args = (await parseTimelionExpressionAsync(expression))?.args;
+      const indexPatternTitle = getIndexPatternTitleFromArgs(args);
+
+      let indexPattern;
+      if (indexPatternTitle) {
+        indexPattern = (await getIndexPatterns().find(indexPatternTitle)).find(
+          (index) => index.title === indexPatternTitle
+        );
+      }
+
       return await http.post('/api/timelion/run', {
         body: JSON.stringify({
           sheet: [expression],
           extended: {
             es: {
-              filter: esQuery.buildEsQuery(undefined, query, filters, esQueryConfigs),
+              filter: esQuery.buildEsQuery(indexPattern, query, filters, esQueryConfigs),
             },
           },
           time: {

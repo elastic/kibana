@@ -27,10 +27,7 @@ export default function buildRequest(config, tlConfig, scriptedFields, timeout) 
   bool.must.push(timeFilter);
 
   // Use the kibana filter bar filters
-  if (
-    config.kibana &&
-    !tlConfig.settings[UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX]
-  ) {
+  if (config.kibana) {
     bool.filter = _.get(tlConfig, 'request.body.extended.es.filter');
   }
 
