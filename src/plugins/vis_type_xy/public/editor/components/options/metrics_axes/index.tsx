@@ -314,9 +314,12 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<VisParams>) {
         (valueAxis) => valueAxis.id === series.valueAxis
       );
       if (valueAxisToMetric) {
-        series.mode =
-          valueAxisToMetric.scale.mode === AxisMode.Percentage ? ChartMode.Stacked : series.mode;
-        series.disabledMode = valueAxisToMetric.scale.mode === AxisMode.Percentage;
+        if (valueAxisToMetric.scale.mode === AxisMode.Percentage) {
+          series.mode = ChartMode.Stacked;
+          series.disabledMode = true;
+        } else if (series.disabledMode) {
+          series.disabledMode = false;
+        }
       }
 
       return series;
