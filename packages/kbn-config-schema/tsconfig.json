@@ -2,9 +2,8 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "declaration": true,
-    "declarationDir": "target/types",
     "declarationMap": true,
-    "outDir": "target/out",
+    "outDir": "target",
     "rootDir": "src",
     "sourceMap": true,
     "sourceRoot": "../../../../../packages/kbn-config-schema/src",
