@@ -20,10 +20,12 @@ export const getStatusColor = (status: number) => {
   return color;
 };
 
-export const safeJsonParseAndStringify = (json: string) => {
+export const attemptToFormatPossibleJson = (possibleJson: string) => {
   try {
-    return JSON.stringify(JSON.parse(json), null, 2);
+    // it is JSON, we can format it
+    return JSON.stringify(JSON.parse(possibleJson), null, 2);
   } catch {
-    return json;
+   // it's not JSON, likely a string message, we return it rather than format it
+    return possibleJson;
   }
 };
