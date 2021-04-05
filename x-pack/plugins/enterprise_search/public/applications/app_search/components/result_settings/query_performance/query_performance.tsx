@@ -100,6 +100,8 @@ export const QueryPerformance: React.FC = () => {
       className="response-feedback"
       data-test-subj="serverResultFieldsPerformance"
       tabIndex={-1}
+      role="region"
+      aria-live="polite"
       {...QueryPerformanceBadgeProps[queryPerformanceRating]}
     >
       {QueryPerformanceBadgeContents[queryPerformanceRating]}
