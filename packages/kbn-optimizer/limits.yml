@@ -49,7 +49,7 @@ pageLoadAssetSize:
   lists: 202261
   logstash: 53548
   management: 46112
-  maps: 183610
+  maps: 80000
   mapsLegacy: 87859
   mapsLegacyLicensing: 20214
   ml: 82187
@@ -108,3 +108,4 @@ pageLoadAssetSize:
   fileUpload: 25664
   banners: 17946
   mapsEms: 26072
+  timelines: 28613
