@@ -133,7 +133,7 @@ export const getAreaVisTypeDefinition = (
         title: i18n.translate('visTypeXy.area.metricsTitle', {
           defaultMessage: 'Y-axis',
         }),
-        aggFilter: ['!geo_centroid', '!geo_bounds', '!filtered_metric'],
+        aggFilter: ['!geo_centroid', '!geo_bounds', '!filtered_metric', '!single_percentile'],
         min: 1,
         defaults: [{ schema: 'metric', type: 'count' }],
       },
