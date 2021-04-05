@@ -47,6 +47,8 @@ import {
   UPDATE_MAP_SETTING,
   UPDATE_DRAW_FEATURE_STATE,
   UPDATE_EDIT_MODE,
+  ADD_FEATURES_TO_INDEX_QUEUE,
+  SET_VECTOR_LAYER_INDEX_NAME,
 } from '../../actions';
 
 import { getDefaultMapSettings } from './default_map_settings';
@@ -77,9 +79,11 @@ export const DEFAULT_MAP_STATE: MapState = {
     filters: [],
     refreshConfig: undefined,
     refreshTimerLastTriggeredAt: undefined,
+    vectorLayerIndexName: '',
     drawState: undefined,
     drawFeatureState: undefined,
     editModeActive: undefined,
+    featuresToIndexQueue: [],
   },
   selectedLayerId: null,
   layerList: [],
@@ -112,6 +116,22 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: any) {
         mapState: {
           ...state.mapState,
           editModeActive: action.isActive,
+        },
+      };
+    case ADD_FEATURES_TO_INDEX_QUEUE:
+      return {
+        ...state,
+        mapState: {
+          ...state.mapState,
+          featuresToIndexQueue: [...state.mapState.featuresToIndexQueue, ...action.features],
+        },
+      };
+    case SET_VECTOR_LAYER_INDEX_NAME:
+      return {
+        ...state,
+        mapState: {
+          ...state.mapState,
+          vectorLayerIndexName: action.indexName,
         },
       };
     case REMOVE_TRACKED_LAYER_STATE:

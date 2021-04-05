@@ -7,12 +7,10 @@
 
 import React, { ChangeEvent, Component, Fragment } from 'react';
 import {
-  EuiButton,
   EuiCallOut,
   EuiEmptyPrompt,
   EuiFieldText,
   EuiFormRow,
-  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
@@ -27,6 +25,7 @@ import {
 interface Props {
   setEditModeActive: () => void;
   setEditModeInActive: () => void;
+  setIndexName: (indexName: string) => void;
 }
 
 interface State {
@@ -86,6 +85,7 @@ export class NewVectorLayerEditor extends Component<Props, State> {
       });
     } else {
       this.setState({ indexError: '' });
+      this.props.setIndexName(indexName);
     }
   };
 

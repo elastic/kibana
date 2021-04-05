@@ -10,16 +10,19 @@ import { AnyAction } from 'redux';
 import { connect } from 'react-redux';
 import { MapStoreState } from '../../../reducers/store';
 import { NewVectorLayerEditor } from './wizard';
-import { updateEditMode } from '../../../actions';
+import { setVectorLayerIndexName, updateEditMode } from '../../../actions';
 
 function mapStateToProps(state: MapStoreState) {
-  return {};
+  return {
+    indexName: state.map.mapState.vectorLayerIndexName,
+  };
 }
 
 function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
     setEditModeActive: () => dispatch(updateEditMode(true)),
     setEditModeInActive: () => dispatch(updateEditMode(false)),
+    setIndexName: (indexName: string) => dispatch(setVectorLayerIndexName(indexName)),
   };
 }
 

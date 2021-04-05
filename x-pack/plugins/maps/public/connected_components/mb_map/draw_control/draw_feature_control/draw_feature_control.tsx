@@ -7,14 +7,15 @@
 
 import React, { Component } from 'react';
 import { Map as MbMap } from 'mapbox-gl';
-import { i18n } from '@kbn/i18n';
 import { Feature } from 'geojson';
+import { i18n } from '@kbn/i18n';
 import { getToasts } from '../../../../kibana_services';
 import { DrawControl } from '../draw_control';
 import { DRAW_TYPE } from '../../../../../common';
 
 export interface Props {
   disableDrawState: () => void;
+  addFeaturesToIndexQueue: (features: Feature[]) => void;
   drawType: DRAW_TYPE;
   mbMap: MbMap;
 }
@@ -23,6 +24,7 @@ export class DrawFeatureControl extends Component<Props, {}> {
   _onDraw = async (e: { features: Feature[] }) => {
     try {
       console.log(e);
+      this.props.addFeaturesToIndexQueue(e.features);
     } catch (error) {
       getToasts().addWarning(
         i18n.translate('xpack.maps.drawFeatureControl.unableToCreatFilter', {

@@ -6,6 +6,7 @@
  */
 
 import _ from 'lodash';
+import { Feature } from 'geojson';
 import { AnyAction, Dispatch } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import turfBboxPolygon from '@turf/bbox-polygon';
@@ -46,6 +47,8 @@ import {
   UPDATE_DRAW_FEATURE_STATE,
   UPDATE_EDIT_MODE,
   UPDATE_MAP_SETTING,
+  ADD_FEATURES_TO_INDEX_QUEUE,
+  SET_VECTOR_LAYER_INDEX_NAME,
 } from './map_action_constants';
 import { autoFitToBounds, syncDataForAllLayers } from './data_request_actions';
 import { addLayer, addLayerWithoutDataSync } from './layer_actions';
@@ -342,5 +345,19 @@ export function updateEditMode(isActive: boolean) {
   return {
     type: UPDATE_EDIT_MODE,
     isActive,
+  };
+}
+
+export function addFeaturesToIndexQueue(features: Feature[]) {
+  return {
+    type: ADD_FEATURES_TO_INDEX_QUEUE,
+    features,
+  };
+}
+
+export function setVectorLayerIndexName(indexName: string) {
+  return {
+    type: SET_VECTOR_LAYER_INDEX_NAME,
+    indexName,
   };
 }

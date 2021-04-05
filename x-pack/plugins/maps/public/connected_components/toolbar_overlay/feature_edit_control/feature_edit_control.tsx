@@ -64,7 +64,7 @@ export function FeatureEditControl(props: Props) {
           <EuiButtonIcon
             className="mapToolbarOverlay__button"
             onClick={() => props.initiateDraw(DRAW_TYPE.POINT)}
-            iconType="visMapCoordinate"
+            iconType="dot"
             aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureEdit.drawPointLabel', {
               defaultMessage: 'Draw point',
             })}
