@@ -34,7 +34,7 @@ export const EmptyState: React.FC = () => {
     <>
       <SetPageChrome />
       <EnginesOverviewHeader />
-      <EuiPageContent className="emptyState">
+      <EuiPageContent hasBorder className="emptyState">
         {canManageEngines ? (
           <EuiEmptyPrompt
             data-test-subj="AdminEmptyEnginesPrompt"
