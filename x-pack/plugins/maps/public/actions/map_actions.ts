@@ -44,6 +44,7 @@ import {
   TRIGGER_REFRESH_TIMER,
   UPDATE_DRAW_STATE,
   UPDATE_DRAW_FEATURE_STATE,
+  UPDATE_EDIT_MODE,
   UPDATE_MAP_SETTING,
 } from './map_action_constants';
 import { autoFitToBounds, syncDataForAllLayers } from './data_request_actions';
@@ -334,5 +335,12 @@ export function updateDrawFeatureState(drawFeatureState: DRAW_TYPE | null) {
       type: UPDATE_DRAW_FEATURE_STATE,
       drawFeatureState,
     });
+  };
+}
+
+export function updateEditMode(isActive: boolean) {
+  return {
+    type: UPDATE_EDIT_MODE,
+    isActive,
   };
 }

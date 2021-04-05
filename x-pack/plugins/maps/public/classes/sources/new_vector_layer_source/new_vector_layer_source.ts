@@ -56,7 +56,7 @@ export class NewVectorLayerSource extends AbstractVectorSource {
   }
 
   constructor(descriptor: Partial<NewVectorLayerSourceDescriptor>, inspectorAdapters?: Adapters) {
-    const normalizedDescriptor = GeoJsonFileSource.createDescriptor(descriptor);
+    const normalizedDescriptor = NewVectorLayerSource.createDescriptor(descriptor);
     super(normalizedDescriptor, inspectorAdapters);
   }
 
@@ -78,7 +78,7 @@ export class NewVectorLayerSource extends AbstractVectorSource {
         )} `
       );
     }
-    return new InlineField<GeoJsonFileSource>({
+    return new InlineField<NewVectorLayerSource>({
       fieldName: descriptor.name,
       source: this,
       origin: FIELD_ORIGIN.SOURCE,
@@ -89,7 +89,7 @@ export class NewVectorLayerSource extends AbstractVectorSource {
   async getFields(): Promise<IField[]> {
     const fields = this._getFields();
     return fields.map((field: InlineFieldDescriptor) => {
-      return new InlineField<GeoJsonFileSource>({
+      return new InlineField<NewVectorLayerSource>({
         fieldName: field.name,
         source: this,
         origin: FIELD_ORIGIN.SOURCE,
@@ -106,7 +106,8 @@ export class NewVectorLayerSource extends AbstractVectorSource {
     boundsFilters: BoundsFilters,
     registerCancelCallback: (callback: () => void) => void
   ): Promise<MapExtent | null> {
-    const featureCollection = (this._descriptor as NewVectorLayerSourceDescriptor).__featureCollection;
+    const featureCollection = (this._descriptor as NewVectorLayerSourceDescriptor)
+      .__featureCollection;
     return getFeatureCollectionBounds(featureCollection, false);
   }
 

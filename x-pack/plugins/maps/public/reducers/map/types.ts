@@ -37,6 +37,7 @@ export type MapContext = {
   refreshTimerLastTriggeredAt?: string;
   drawState?: DrawState;
   drawFeatureState?: DRAW_TYPE;
+  editModeActive?: boolean;
   searchSessionId?: string;
   searchSessionMapBuffer?: MapExtent;
 };

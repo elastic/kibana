@@ -46,6 +46,7 @@ import {
   TRACK_MAP_SETTINGS,
   UPDATE_MAP_SETTING,
   UPDATE_DRAW_FEATURE_STATE,
+  UPDATE_EDIT_MODE,
 } from '../../actions';
 
 import { getDefaultMapSettings } from './default_map_settings';
@@ -78,6 +79,7 @@ export const DEFAULT_MAP_STATE: MapState = {
     refreshTimerLastTriggeredAt: undefined,
     drawState: undefined,
     drawFeatureState: undefined,
+    editModeActive: undefined,
   },
   selectedLayerId: null,
   layerList: [],
@@ -102,6 +104,14 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: any) {
         mapState: {
           ...state.mapState,
           drawFeatureState: action.drawFeatureState,
+        },
+      };
+    case UPDATE_EDIT_MODE:
+      return {
+        ...state,
+        mapState: {
+          ...state.mapState,
+          editModeActive: action.isActive,
         },
       };
     case REMOVE_TRACKED_LAYER_STATE:
