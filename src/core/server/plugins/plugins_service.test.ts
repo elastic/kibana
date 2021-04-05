@@ -562,12 +562,12 @@ describe('PluginsService', () => {
         plugin$: from([
           createPlugin('plugin-1', {
             path: 'path-1',
-            version: 'some-version',
+            version: 'version-1',
             configPath: 'plugin1',
           }),
           createPlugin('plugin-2', {
             path: 'path-2',
-            version: 'some-version',
+            version: 'version-2',
             configPath: 'plugin2',
           }),
         ]),
@@ -577,7 +577,7 @@ describe('PluginsService', () => {
     });
 
     describe('uiPlugins.internal', () => {
-      it('includes disabled plugins', async () => {
+      it('contains internal properties for plugins', async () => {
         config$.next({ plugins: { initialize: true }, plugin1: { enabled: false } });
         const { uiPlugins } = await pluginsService.discover({ environment: environmentSetup });
         expect(uiPlugins.internal).toMatchInlineSnapshot(`
@@ -586,14 +586,22 @@ describe('PluginsService', () => {
               "publicAssetsDir": <absolute path>/path-1/public/assets,
               "publicTargetDir": <absolute path>/path-1/target/public,
               "requiredBundles": Array [],
+              "version": "version-1",
             },
             "plugin-2" => Object {
               "publicAssetsDir": <absolute path>/path-2/public/assets,
               "publicTargetDir": <absolute path>/path-2/target/public,
               "requiredBundles": Array [],
+              "version": "version-2",
             },
           }
         `);
+      });
+
+      it('includes disabled plugins', async () => {
+        config$.next({ plugins: { initialize: true }, plugin1: { enabled: false } });
+        const { uiPlugins } = await pluginsService.discover({ environment: environmentSetup });
+        expect([...uiPlugins.internal.keys()].sort()).toEqual(['plugin-1', 'plugin-2']);
       });
     });
 
