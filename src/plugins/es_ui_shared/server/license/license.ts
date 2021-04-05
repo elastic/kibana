@@ -17,6 +17,7 @@ import {
 
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import type {
+  ILicense,
   LicenseType,
   LicenseCheckState,
 } from '../../../../../x-pack/plugins/licensing/common/types';
@@ -24,6 +25,7 @@ import type { LicensingPluginStart } from '../../../../../x-pack/plugins/licensi
 /* eslint-enable @kbn/eslint/no-restricted-paths */
 
 type LicenseLogger = Pick<Logger, 'warn'>;
+type LicenseDependency = Pick<LicensingPluginStart, 'license$'>;
 
 interface SetupSettings {
   pluginName: string;
@@ -33,7 +35,7 @@ interface SetupSettings {
 interface StartSettings {
   pluginId: string;
   minimumLicenseType: LicenseType;
-  licensing: LicensingPluginStart;
+  licensing: LicenseDependency;
 }
 
 export class License {
@@ -50,7 +52,7 @@ export class License {
   }
 
   start({ pluginId, minimumLicenseType, licensing }: StartSettings) {
-    licensing.license$.subscribe((license) => {
+    licensing.license$.subscribe((license: ILicense) => {
       this.licenseType = license.type;
       this.licenseCheckState = license.check(pluginId, minimumLicenseType!).state;
 

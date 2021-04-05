@@ -19,7 +19,7 @@ describe('license_pre_routing_factory', () => {
     const pluginName = 'testPlugin';
     const currentLicenseType = 'currentLicenseType';
 
-    const testRoute = ({ licenseState }) => {
+    const testRoute = ({ licenseState }: { licenseState: LicenseCheckState }) => {
       const license = new License();
       const logger = {
         warn: jest.fn(),
@@ -34,9 +34,6 @@ describe('license_pre_routing_factory', () => {
               getFeature: () => ({}),
             }),
         },
-        refresh: jest.fn(),
-        createLicensePoller: jest.fn(),
-        featureUsage: {},
       };
 
       license.setup({ pluginName, logger });
