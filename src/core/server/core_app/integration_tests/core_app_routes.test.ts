@@ -43,8 +43,9 @@ describe('Core app routes', () => {
       await kbnTestServer.request.get(root, '/some-path').expect(404);
     });
 
-    it('does not redirect if the path starts with the basePath', async () => {
-      await kbnTestServer.request.get(root, '/base-path/not-found/').expect(404);
+    it('does not add the basePath if the path already contains it', async () => {
+      const response = await kbnTestServer.request.get(root, '/base-path/foo/').expect(302);
+      expect(response.get('location')).toEqual('/base-path/foo');
     });
   });
 

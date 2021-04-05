@@ -9,15 +9,6 @@
 import { ConfigPath } from '../config';
 import { ObjectToConfigAdapter } from '../object_to_config_adapter';
 
-// TODO: fix once core schemas are moved to this package
-type LoggingConfigType = any;
-
-/**
- * @internal
- * @deprecated
- */
-export type LegacyVars = Record<string, any>;
-
 /**
  * Represents logging config supported by the legacy platform.
  */
@@ -30,7 +21,7 @@ export interface LegacyLoggingConfig {
   events?: Record<string, string>;
 }
 
-type MixedLoggingConfig = LegacyLoggingConfig & Partial<LoggingConfigType>;
+type MixedLoggingConfig = LegacyLoggingConfig & Record<string, any>;
 
 /**
  * Represents adapter between config provided by legacy platform and `Config`
