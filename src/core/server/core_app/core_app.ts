@@ -51,7 +51,6 @@ export class CoreApp {
       });
     });
 
-    // remove trailing slash catch-all
     router.get(
       {
         path: '/{path*}',
@@ -65,18 +64,14 @@ export class CoreApp {
       async (context, req, res) => {
         const { query, params } = req;
         const { path } = params;
-        if (!path || !path.endsWith('/')) {
+        const basePath = httpSetup.basePath.get(req);
+
+        if (!path || !path.endsWith('/') || `/${path}`.startsWith(basePath)) {
           return res.notFound();
         }
 
-        const basePath = httpSetup.basePath.get(req);
-        let rewrittenPath = path.slice(0, -1);
-        if (`/${path}`.startsWith(basePath)) {
-          rewrittenPath = rewrittenPath.substring(basePath.length);
-        }
-
         const querystring = query ? stringify(query) : undefined;
-        const url = `${basePath}/${rewrittenPath}${querystring ? `?${querystring}` : ''}`;
+        const url = `${basePath}/${path.slice(0, -1)}${querystring ? `?${querystring}` : ''}`;
 
         return res.redirected({
           headers: {
