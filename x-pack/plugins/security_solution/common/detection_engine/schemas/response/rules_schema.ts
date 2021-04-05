@@ -97,6 +97,7 @@ export const requiredRulesSchema = t.type({
   interval,
   rule_id,
   max_signals,
+  output_index,
   risk_score,
   risk_score_mapping: DefaultRiskScoreMappingArray,
   name,
@@ -160,7 +161,7 @@ export const dependentRulesSchema = t.partial({
  * Instead use dependentRulesSchema and check_type_dependents for how to do those.
  */
 export const partialRulesSchema = t.partial({
-  output_index,
+  // output_index,
   actions,
   building_block_type,
   license,
