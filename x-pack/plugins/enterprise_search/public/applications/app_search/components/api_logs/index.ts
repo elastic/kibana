@@ -6,5 +6,6 @@
  */
 
 export { API_LOGS_TITLE } from './constants';
+export { ApiLogsTable, NewApiEventsPrompt } from './components';
 export { ApiLogs } from './api_logs';
 export { ApiLogsLogic } from './api_logs_logic';

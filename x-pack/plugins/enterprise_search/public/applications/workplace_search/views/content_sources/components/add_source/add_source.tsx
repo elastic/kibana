@@ -27,7 +27,7 @@ import { ConfigurationIntro } from './configuration_intro';
 import { ConfigureCustom } from './configure_custom';
 import { ConfigureOauth } from './configure_oauth';
 import { ConnectInstance } from './connect_instance';
-import { ReAuthenticate } from './re_authenticate';
+import { Reauthenticate } from './reauthenticate';
 import { SaveConfig } from './save_config';
 import { SaveCustom } from './save_custom';
 
@@ -150,8 +150,8 @@ export const AddSource: React.FC<AddSourceProps> = (props) => {
           header={header}
         />
       )}
-      {addSourceCurrentStep === AddSourceSteps.ReAuthenticateStep && (
-        <ReAuthenticate name={name} header={header} />
+      {addSourceCurrentStep === AddSourceSteps.ReauthenticateStep && (
+        <Reauthenticate name={name} header={header} />
       )}
     </>
   );

@@ -19,7 +19,7 @@ export const ErrorConnecting: React.FC = () => {
       <SetPageChrome />
       <SendTelemetry action="error" metric="cannot_connect" />
 
-      <EuiPageContent>
+      <EuiPageContent hasBorder>
         <ErrorStatePrompt />
       </EuiPageContent>
     </>
