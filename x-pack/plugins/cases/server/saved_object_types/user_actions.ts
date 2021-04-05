@@ -43,7 +43,7 @@ export const caseUserActionSavedObjectType: SavedObjectsType = {
       old_value: {
         type: 'text',
       },
-      scope: {
+      owner: {
         type: 'keyword',
       },
     },

@@ -45,7 +45,7 @@ describe('create', () => {
         settings: {
           syncAlerts: true,
         },
-        scope: 'securitySolution',
+        owner: 'securitySolution',
       };
 
       const savedObjectsClient = createMockSavedObjectsRepository({
@@ -121,7 +121,7 @@ describe('create', () => {
                 "connector",
                 "settings",
               ],
-              "new_value": "{\\"type\\":\\"individual\\",\\"description\\":\\"This is a brand new case of a bad meanie defacing data\\",\\"title\\":\\"Super Bad Security Issue\\",\\"tags\\":[\\"defacement\\"],\\"connector\\":{\\"id\\":\\"123\\",\\"name\\":\\"Jira\\",\\"type\\":\\".jira\\",\\"fields\\":{\\"issueType\\":\\"Task\\",\\"priority\\":\\"High\\",\\"parent\\":null}},\\"settings\\":{\\"syncAlerts\\":true},\\"scope\\":\\"securitySolution\\"}",
+              "new_value": "{\\"type\\":\\"individual\\",\\"description\\":\\"This is a brand new case of a bad meanie defacing data\\",\\"title\\":\\"Super Bad Security Issue\\",\\"tags\\":[\\"defacement\\"],\\"connector\\":{\\"id\\":\\"123\\",\\"name\\":\\"Jira\\",\\"type\\":\\".jira\\",\\"fields\\":{\\"issueType\\":\\"Task\\",\\"priority\\":\\"High\\",\\"parent\\":null}},\\"settings\\":{\\"syncAlerts\\":true},\\"owner\\":\\"securitySolution\\"}",
               "old_value": null,
             },
             "references": Array [
@@ -151,7 +151,7 @@ describe('create', () => {
         settings: {
           syncAlerts: true,
         },
-        scope: 'securitySolution',
+        owner: 'securitySolution',
       };
 
       const savedObjectsClient = createMockSavedObjectsRepository({
@@ -216,7 +216,7 @@ describe('create', () => {
         settings: {
           syncAlerts: true,
         },
-        scope: 'securitySolution',
+        owner: 'securitySolution',
       };
 
       const savedObjectsClient = createMockSavedObjectsRepository({
@@ -429,7 +429,7 @@ describe('create', () => {
         settings: {
           syncAlerts: true,
         },
-        scope: 'securitySolution',
+        owner: 'securitySolution',
       };
 
       const savedObjectsClient = createMockSavedObjectsRepository({
@@ -458,7 +458,7 @@ describe('create', () => {
         settings: {
           syncAlerts: true,
         },
-        scope: 'securitySolution',
+        owner: 'securitySolution',
       };
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseSavedObject: mockCases,

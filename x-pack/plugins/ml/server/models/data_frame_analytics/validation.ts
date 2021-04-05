@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { estypes } from '@elastic/elasticsearch';
 import { IScopedClusterClient } from 'kibana/server';
 import { getAnalysisType } from '../../../common/util/analytics_utils';
 import {
@@ -24,7 +25,6 @@ import {
   isClassificationAnalysis,
 } from '../../../common/util/analytics_utils';
 import { extractErrorMessage } from '../../../common/util/errors';
-import { SearchResponse7 } from '../../../common';
 import {
   AnalysisConfig,
   DataFrameAnalyticsConfig,
@@ -41,7 +41,7 @@ interface CardinalityAgg {
   };
 }
 
-type ValidationSearchResult = Omit<SearchResponse7, 'aggregations'> & {
+type ValidationSearchResult = Omit<estypes.SearchResponse, 'aggregations'> & {
   aggregations: MissingAgg | CardinalityAgg;
 };
 
@@ -197,7 +197,7 @@ async function getValidationCheckMessages(
   analyzedFields: string[],
   index: string | string[],
   analysisConfig: AnalysisConfig,
-  query: unknown = defaultQuery
+  query: estypes.QueryContainer = defaultQuery
 ) {
   const analysisType = getAnalysisType(analysisConfig);
   const depVar = getDependentVar(analysisConfig);
@@ -241,9 +241,11 @@ async function getValidationCheckMessages(
       },
     });
 
+    // @ts-expect-error
     const totalDocs = body.hits.total.value;
 
     if (body.aggregations) {
+      // @ts-expect-error
       Object.entries(body.aggregations).forEach(([aggName, { doc_count: docCount, value }]) => {
         const empty = docCount / totalDocs;
 

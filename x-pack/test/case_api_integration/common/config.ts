@@ -56,32 +56,10 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       },
     };
 
-    const allFiles = fs.readdirSync(
-      path.resolve(
-        __dirname,
-        '..',
-        '..',
-        'alerting_api_integration',
-        'common',
-        'fixtures',
-        'plugins'
-      )
-    );
+    // Find all folders in ./fixtures/plugins
+    const allFiles = fs.readdirSync(path.resolve(__dirname, 'fixtures', 'plugins'));
     const plugins = allFiles.filter((file) =>
-      fs
-        .statSync(
-          path.resolve(
-            __dirname,
-            '..',
-            '..',
-            'alerting_api_integration',
-            'common',
-            'fixtures',
-            'plugins',
-            file
-          )
-        )
-        .isDirectory()
+      fs.statSync(path.resolve(__dirname, 'fixtures', 'plugins', file)).isDirectory()
     );
 
     return {
@@ -109,20 +87,22 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...xPackApiIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
           `--xpack.actions.allowedHosts=${JSON.stringify(['localhost', 'some.non.existent.com'])}`,
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
+          '--xpack.cases.enableAuthorization=true',
           '--xpack.eventLog.logEntries=true',
           ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
+          // Actions simulators plugin. Needed for testing push to external services.
+          `--plugin-path=${path.resolve(
+            __dirname,
+            '..',
+            '..',
+            'alerting_api_integration',
+            'common',
+            'fixtures',
+            'plugins'
+          )}`,
           ...plugins.map(
             (pluginDir) =>
-              `--plugin-path=${path.resolve(
-                __dirname,
-                '..',
-                '..',
-                'alerting_api_integration',
-                'common',
-                'fixtures',
-                'plugins',
-                pluginDir
-              )}`
+              `--plugin-path=${path.resolve(__dirname, 'fixtures', 'plugins', pluginDir)}`
           ),
           `--server.xsrf.whitelist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
           ...(ssl

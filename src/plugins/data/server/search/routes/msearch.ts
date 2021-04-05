@@ -12,7 +12,7 @@ import { SearchRouteDependencies } from '../search_service';
 
 import { getCallMsearch } from './call_msearch';
 import { reportServerError } from '../../../../kibana_utils/server';
-import type { DataPluginRouter } from '../../types';
+import type { DataPluginRouter } from '../types';
 /**
  * The msearch route takes in an array of searches, each consisting of header
  * and body json, and reformts them into a single request for the _msearch API.

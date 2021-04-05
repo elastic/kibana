@@ -15,11 +15,12 @@ import { get } from 'lodash';
 
 export function polledDataCheckerFactory({ asCurrentUser }) {
   class PolledDataChecker {
-    constructor(index, timeField, duration, query, indicesOptions) {
+    constructor(index, timeField, duration, query, runtimeMappings, indicesOptions) {
       this.index = index;
       this.timeField = timeField;
       this.duration = duration;
       this.query = query;
+      this.runtimeMappings = runtimeMappings;
       this.indicesOptions = indicesOptions;
 
       this.isPolled = false;
@@ -62,6 +63,7 @@ export function polledDataCheckerFactory({ asCurrentUser }) {
             },
           },
         },
+        ...this.runtimeMappings,
       };
 
       return search;

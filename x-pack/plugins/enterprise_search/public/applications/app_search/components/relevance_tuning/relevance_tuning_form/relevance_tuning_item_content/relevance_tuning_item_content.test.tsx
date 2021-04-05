@@ -24,6 +24,7 @@ describe('RelevanceTuningItemContent', () => {
       {
         factor: 2,
         type: BoostType.Value,
+        value: [''],
       },
     ],
     field: {

@@ -88,8 +88,8 @@ export async function fetchIndexShardSize(
                         sort: [
                           {
                             timestamp: {
-                              order: 'desc',
-                              unmapped_type: 'long',
+                              order: 'desc' as const,
+                              unmapped_type: 'long' as const,
                             },
                           },
                         ],
@@ -116,6 +116,7 @@ export async function fetchIndexShardSize(
 
   const { body: response } = await esClient.search(params);
   const stats: IndexShardSizeStats[] = [];
+  // @ts-expect-error @elastic/elasticsearch Aggregate does not specify buckets
   const { buckets: clusterBuckets = [] } = response.aggregations.clusters;
   const validIndexPatterns = memoizedIndexPatterns(shardIndexPatterns);
 

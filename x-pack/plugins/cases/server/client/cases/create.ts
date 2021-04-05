@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { SavedObjectsClientContract, Logger } from 'src/core/server';
 import { flattenCaseSavedObject, transformNewCase } from '../../routes/api/utils';
@@ -38,6 +39,7 @@ import { createCaseError } from '../../common/error';
 import { Authorization } from '../../authorization/authorization';
 import { Operations } from '../../authorization';
 import { AuditLogger } from '../../../../security/server';
+import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 
 interface CreateCaseArgs {
   caseConfigureService: CaseConfigureServiceSetup;
@@ -47,7 +49,7 @@ interface CreateCaseArgs {
   userActionService: CaseUserActionServiceSetup;
   theCase: CasePostRequest;
   logger: Logger;
-  auth: Authorization;
+  auth: PublicMethodsOf<Authorization>;
   auditLogger?: AuditLogger;
 }
 
@@ -67,15 +69,25 @@ export const create = async ({
 }: CreateCaseArgs): Promise<CaseResponse> => {
   // default to an individual case if the type is not defined.
   const { type = CaseType.individual, ...nonTypeCaseFields } = theCase;
+
+  if (!ENABLE_CASE_CONNECTOR && type === CaseType.collection) {
+    throw Boom.badRequest(
+      'Case type cannot be collection when the case connector feature is disabled'
+    );
+  }
+
   const query = pipe(
     // decode with the defaulted type field
-    excess(CasesClientPostRequestRt).decode({ type, ...nonTypeCaseFields }),
+    excess(CasesClientPostRequestRt).decode({
+      type,
+      ...nonTypeCaseFields,
+    }),
     fold(throwErrors(Boom.badRequest), identity)
   );
 
   try {
     try {
-      await auth.ensureAuthorized(query.scope, Operations.createCase);
+      await auth.ensureAuthorized(query.owner, Operations.createCase);
     } catch (error) {
       // TODO: log error using audit logger
       throw error;

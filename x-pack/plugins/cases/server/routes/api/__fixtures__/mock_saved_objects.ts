@@ -59,6 +59,7 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
       settings: {
         syncAlerts: true,
       },
+      owner: 'securitySolution',
     },
     references: [],
     updated_at: '2019-11-25T21:54:48.952Z',
@@ -98,6 +99,7 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
       settings: {
         syncAlerts: true,
       },
+      owner: 'securitySolution',
     },
     references: [],
     updated_at: '2019-11-25T22:32:00.900Z',
@@ -141,6 +143,7 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
       settings: {
         syncAlerts: true,
       },
+      owner: 'securitySolution',
     },
     references: [],
     updated_at: '2019-11-25T22:32:17.947Z',
@@ -188,6 +191,7 @@ export const mockCases: Array<SavedObject<ESCaseAttributes>> = [
       settings: {
         syncAlerts: true,
       },
+      owner: 'securitySolution',
     },
     references: [],
     updated_at: '2019-11-25T22:32:17.947Z',

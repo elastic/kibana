@@ -11,6 +11,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
 import { SavedObject, SavedObjectsClientContract, Logger } from 'src/core/server';
+import { nodeBuilder } from '../../../../../../src/plugins/data/common';
 import { decodeCommentRequest, isCommentRequestTypeGenAlert } from '../../routes/api/utils';
 
 import {
@@ -38,6 +39,7 @@ import { createCaseError } from '../../common/error';
 import {
   MAX_GENERATED_ALERTS_PER_SUB_CASE,
   CASE_COMMENT_SAVED_OBJECT,
+  ENABLE_CASE_CONNECTOR,
 } from '../../../common/constants';
 
 async function getSubCase({
@@ -62,7 +64,10 @@ async function getSubCase({
       id: mostRecentSubCase.id,
       options: {
         fields: [],
-        filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.generatedAlert}`,
+        filter: nodeBuilder.is(
+          `${CASE_COMMENT_SAVED_OBJECT}.attributes.type`,
+          CommentType.generatedAlert
+        ),
         page: 1,
         perPage: 1,
       },
@@ -226,10 +231,14 @@ async function getCombinedCase({
       client,
       id,
     }),
-    service.getSubCase({
-      client,
-      id,
-    }),
+    ...(ENABLE_CASE_CONNECTOR
+      ? [
+          service.getSubCase({
+            client,
+            id,
+          }),
+        ]
+      : [Promise.reject('case connector feature is disabled')]),
   ]);
 
   if (subCasePromise.status === 'fulfilled') {
@@ -289,6 +298,12 @@ export const addComment = async ({
   );
 
   if (isCommentRequestTypeGenAlert(comment)) {
+    if (!ENABLE_CASE_CONNECTOR) {
+      throw Boom.badRequest(
+        'Attempting to add a generated alert when case connector feature is disabled'
+      );
+    }
+
     return addGeneratedAlerts({
       caseId,
       comment,

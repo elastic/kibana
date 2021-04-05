@@ -20,23 +20,23 @@ describe('#get', () => {
     ${{}}
   `(`operation of ${JSON.stringify('$operation')}`, ({ operation }) => {
     const actions = new CasesActions(version);
-    expect(() => actions.get('scope', operation)).toThrowErrorMatchingSnapshot();
+    expect(() => actions.get('owner', operation)).toThrowErrorMatchingSnapshot();
   });
 
   it.each`
-    scope
+    owner
     ${null}
     ${undefined}
     ${''}
     ${1}
     ${true}
     ${{}}
-  `(`scope of ${JSON.stringify('$scope')}`, ({ scope }) => {
+  `(`owner of ${JSON.stringify('$owner')}`, ({ owner }) => {
     const actions = new CasesActions(version);
-    expect(() => actions.get(scope, 'operation')).toThrowErrorMatchingSnapshot();
+    expect(() => actions.get(owner, 'operation')).toThrowErrorMatchingSnapshot();
   });
 
-  it('returns `cases:${scope}/${operation}`', () => {
+  it('returns `cases:${owner}/${operation}`', () => {
     const alertingActions = new CasesActions(version);
     expect(alertingActions.get('security', 'bar-operation')).toBe(
       'cases:1.0.0-zeta1:security/bar-operation'

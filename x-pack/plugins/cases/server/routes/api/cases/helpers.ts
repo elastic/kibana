@@ -15,11 +15,11 @@ import {
   CaseConnector,
   ESCaseConnector,
   ESCasesConfigureAttributes,
+  ConnectorTypeFields,
   ConnectorTypes,
   CaseStatuses,
   CaseType,
   ESConnectorFields,
-  ConnectorTypeFields,
 } from '../../../../common/api';
 import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../../common/constants';
 import { sortToSnake } from '../utils';
@@ -31,20 +31,18 @@ export const addStatusFilter = ({
   appendFilter,
   type = CASE_SAVED_OBJECT,
 }: {
-  status?: CaseStatuses;
+  status: CaseStatuses;
   appendFilter?: KueryNode;
   type?: string;
 }): KueryNode => {
   const filters: KueryNode[] = [];
-  if (status) {
-    filters.push(nodeBuilder.is(`${type}.attributes.status`, status));
-  }
+  filters.push(nodeBuilder.is(`${type}.attributes.status`, status));
 
   if (appendFilter) {
     filters.push(appendFilter);
   }
 
-  return nodeBuilder.and(filters);
+  return filters.length > 1 ? nodeBuilder.and(filters) : filters[0];
 };
 
 export const buildFilter = ({
@@ -53,12 +51,17 @@ export const buildFilter = ({
   operator,
   type = CASE_SAVED_OBJECT,
 }: {
-  filters: string | string[] | undefined;
+  filters: string | string[];
   field: string;
   operator: 'or' | 'and';
   type?: string;
-}): KueryNode => {
-  const filtersAsArray = Array.isArray(filters) ? filters : filters != null ? [filters] : [];
+}): KueryNode | null => {
+  const filtersAsArray = Array.isArray(filters) ? filters : [filters];
+
+  if (filtersAsArray.length === 0) {
+    return null;
+  }
+
   return nodeBuilder[operator](
     filtersAsArray.map((filter) => nodeBuilder.is(`${type}.attributes.${field}`, filter))
   );
@@ -96,6 +99,7 @@ export const constructQueryOptions = ({
   status,
   sortByField,
   caseType,
+  owner,
   authorizationFilter,
 }: {
   tags?: string | string[];
@@ -103,15 +107,20 @@ export const constructQueryOptions = ({
   status?: CaseStatuses;
   sortByField?: string;
   caseType?: CaseType;
+  owner?: string | string[];
   authorizationFilter?: KueryNode;
 }): { case: SavedObjectFindOptionsKueryNode; subCase?: SavedObjectFindOptionsKueryNode } => {
-  const tagsFilter = buildFilter({ filters: tags, field: 'tags', operator: 'or' });
+  const kueryNodeExists = (filter: KueryNode | null | undefined): filter is KueryNode =>
+    filter != null;
+
+  const tagsFilter = buildFilter({ filters: tags ?? [], field: 'tags', operator: 'or' });
   const reportersFilter = buildFilter({
-    filters: reporters,
+    filters: reporters ?? [],
     field: 'created_by.username',
     operator: 'or',
   });
   const sortField = sortToSnake(sortByField);
+  const ownerFilter = buildFilter({ filters: owner ?? [], field: 'owner', operator: 'or' });
 
   switch (caseType) {
     case CaseType.individual: {
@@ -123,15 +132,23 @@ export const constructQueryOptions = ({
         `${CASE_SAVED_OBJECT}.attributes.type`,
         CaseType.individual
       );
-      const caseFilters = addStatusFilter({
-        status,
-        appendFilter: nodeBuilder.and([tagsFilter, reportersFilter, typeFilter]),
-      });
+
+      const filters: KueryNode[] = [typeFilter, tagsFilter, reportersFilter, ownerFilter].filter(
+        kueryNodeExists
+      );
+
+      const caseFilters =
+        status != null
+          ? addStatusFilter({
+              status,
+              appendFilter: filters.length > 1 ? nodeBuilder.and(filters) : filters[0],
+            })
+          : undefined;
 
       return {
         case: {
           filter:
-            authorizationFilter != null
+            authorizationFilter != null && caseFilters != null
               ? combineFilterWithAuthorizationFilter(caseFilters, authorizationFilter)
               : caseFilters,
           sortField,
@@ -145,8 +162,13 @@ export const constructQueryOptions = ({
         `${CASE_SAVED_OBJECT}.attributes.type`,
         CaseType.collection
       );
-      const caseFilters = nodeBuilder.and([tagsFilter, reportersFilter, typeFilter]);
-      const subCaseFilters = addStatusFilter({ status, type: SUB_CASE_SAVED_OBJECT });
+
+      const filters: KueryNode[] = [typeFilter, tagsFilter, reportersFilter, ownerFilter].filter(
+        kueryNodeExists
+      );
+      const caseFilters = filters.length > 1 ? nodeBuilder.and(filters) : filters[0];
+      const subCaseFilters =
+        status != null ? addStatusFilter({ status, type: SUB_CASE_SAVED_OBJECT }) : undefined;
 
       return {
         case: {
@@ -158,8 +180,8 @@ export const constructQueryOptions = ({
         },
         subCase: {
           filter:
-            authorizationFilter != null
-              ? combineFilterWithAuthorizationFilter(caseFilters, authorizationFilter)
+            authorizationFilter != null && subCaseFilters != null
+              ? combineFilterWithAuthorizationFilter(subCaseFilters, authorizationFilter)
               : subCaseFilters,
           sortField,
         },
@@ -185,10 +207,19 @@ export const constructQueryOptions = ({
         CaseType.collection
       );
 
-      const statusFilter = nodeBuilder.and([addStatusFilter({ status }), typeIndividual]);
+      const statusFilter =
+        status != null
+          ? nodeBuilder.and([addStatusFilter({ status }), typeIndividual])
+          : typeIndividual;
       const statusAndType = nodeBuilder.or([statusFilter, typeParent]);
-      const caseFilters = nodeBuilder.and([statusAndType, tagsFilter, reportersFilter]);
-      const subCaseFilters = addStatusFilter({ status, type: SUB_CASE_SAVED_OBJECT });
+
+      const filters: KueryNode[] = [statusAndType, tagsFilter, reportersFilter, ownerFilter].filter(
+        kueryNodeExists
+      );
+
+      const caseFilters = filters.length > 1 ? nodeBuilder.and(filters) : filters[0];
+      const subCaseFilters =
+        status != null ? addStatusFilter({ status, type: SUB_CASE_SAVED_OBJECT }) : undefined;
 
       return {
         case: {
@@ -200,8 +231,8 @@ export const constructQueryOptions = ({
         },
         subCase: {
           filter:
-            authorizationFilter != null
-              ? combineFilterWithAuthorizationFilter(caseFilters, authorizationFilter)
+            authorizationFilter != null && subCaseFilters != null
+              ? combineFilterWithAuthorizationFilter(subCaseFilters, authorizationFilter)
               : subCaseFilters,
           sortField,
         },

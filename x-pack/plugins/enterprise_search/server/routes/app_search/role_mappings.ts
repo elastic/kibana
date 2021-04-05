@@ -66,10 +66,7 @@ export function registerRoleMappingRoute({
     {
       path: '/api/app_search/role_mappings/{id}',
       validate: {
-        body: schema.object({
-          ...roleMappingBaseSchema,
-          id: schema.string(),
-        }),
+        body: schema.object(roleMappingBaseSchema),
         params: schema.object({
           id: schema.string(),
         }),

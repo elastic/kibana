@@ -47,7 +47,7 @@ export const subCaseSavedObjectType: SavedObjectsType = {
           },
         },
       },
-      scope: {
+      owner: {
         type: 'keyword',
       },
       status: {

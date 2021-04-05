@@ -25,6 +25,7 @@ export const sampleData: CasePostRequest = {
   settings: {
     syncAlerts: true,
   },
+  owner: 'securitySolution',
 };
 
 export const sampleConnectorData = { loading: false, connectors: [] };

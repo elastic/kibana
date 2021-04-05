@@ -22,14 +22,14 @@ export class AuthorizationAuditLogger {
 
   private createMessage({
     result,
-    scope,
+    owner,
     operation,
   }: {
     result: AuthorizationResult;
-    scope?: string;
+    owner?: string;
     operation: OperationDetails;
   }): string {
-    const scopeMsg = scope == null ? 'of any class' : `of class "${scope}"`;
+    const scopeMsg = owner == null ? 'of any class' : `of class "${owner}"`;
     /**
      * This will take the form:
      * `Unauthorized to create case of class "securitySolution"`
@@ -65,16 +65,16 @@ export class AuthorizationAuditLogger {
 
   public failure({
     username,
-    scope,
+    owner,
     operation,
   }: {
     username?: string;
-    scope?: string;
+    owner?: string;
     operation: OperationDetails;
   }): string {
     const message = this.createMessage({
       result: AuthorizationResult.Unauthorized,
-      scope,
+      owner,
       operation,
     });
     this.auditLogger?.log({
@@ -98,15 +98,15 @@ export class AuthorizationAuditLogger {
   public success({
     username,
     operation,
-    scope,
+    owner,
   }: {
     username: string;
-    scope: string;
+    owner: string;
     operation: OperationDetails;
   }): string {
     const message = this.createMessage({
       result: AuthorizationResult.Authorized,
-      scope,
+      owner,
       operation,
     });
     this.logSuccessEvent({ message, operation, username });
@@ -124,7 +124,7 @@ export class AuthorizationAuditLogger {
   }): string {
     const message = `${AuthorizationResult.Authorized} to ${operation.verbs.present} ${
       operation.docType
-    } of scope: ${scopes.join(', ')}`;
+    } of owner: ${scopes.join(', ')}`;
     this.logSuccessEvent({ message, operation, username });
     return message;
   }

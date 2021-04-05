@@ -6,14 +6,14 @@
     "source": {
       "body": "eJyrVkrNKynKTC1WsoqOrQUAJxkFKQ==",
       "created": "2021-03-10T21:51:33.155Z",
-      "compressionAlgorithm": "zlib",
-      "encryptionAlgorithm": "none",
+      "compression_algorithm": "zlib",
+      "encryption_algorithm": "none",
       "identifier": "endpoint-exceptionlist-macos-v1",
-      "encodedSha256": "f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda",
-      "encodedSize": 14,
-      "decodedSha256": "d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658",
-      "decodedSize": 22,
-      "packageName": "endpoint",
+      "encoded_sha256": "f8e6afa1d5662f5b37f83337af774b5785b5b7f1daee08b7b00c2d6813874cda",
+      "encoded_size": 14,
+      "decoded_sha256": "d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658",
+      "decoded_size": 22,
+      "package_name": "endpoint",
       "relative_url": "/api/fleet/artifacts/endpoint-exceptionlist-macos-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658",
       "type": "exceptionlist"
     }
@@ -28,14 +28,14 @@
     "source": {
       "body": "eJzFkL0KwjAUhV+lZA55gG4OXcXJRYqE9LZeiElJbotSsvsIbr6ij2AaakVwUqTr+fkOnIGBIYfgWb4bGJ1bYDnzeGw1MP7m1Qi6iqZUhKbZOKvAe1GjBuGxMeBi3rbgJFkXY2iU7iqoojpR4RSreyV9Enupu1EttPSEimdrsRUs8OHj6C8L99v1ksBPGLnOU4p8QYtlYKHkM21+QFLn4FU3kEZCOU4vcOzKWDqAyybGP54tetSLPluGB+Nu8h4=",
       "created": "2021-03-10T21:51:33.155Z",
-      "compressionAlgorithm": "zlib",
-      "encryptionAlgorithm": "none",
+      "compression_algorithm": "zlib",
+      "encryption_algorithm": "none",
       "identifier": "endpoint-exceptionlist-windows-v1",
-      "encodedSha256": "73015ee5131dabd1b48aa4776d3e766d836f8dd8c9fa8999c9b931f60027f07f",
-      "encodedSize": 191,
-      "decodedSha256": "8d2bcc37e82fad5d06e2c9e4bd96793ea8905ace1d528a57d0d0579ecc8c647e",
-      "decodedSize": 704,
-      "packageName": "endpoint",
+      "encoded_sha256": "73015ee5131dabd1b48aa4776d3e766d836f8dd8c9fa8999c9b931f60027f07f",
+      "encoded_size": 191,
+      "decoded_sha256": "8d2bcc37e82fad5d06e2c9e4bd96793ea8905ace1d528a57d0d0579ecc8c647e",
+      "decoded_size": 704,
+      "package_name": "endpoint",
       "relative_url": "/api/fleet/artifacts/endpoint-exceptionlist-windows-v1/d801aa1fb7ddcc330a5e3173372ea6af4a3d08ec58074478e85aa5603e926658",
       "type": "exceptionlist"
     }

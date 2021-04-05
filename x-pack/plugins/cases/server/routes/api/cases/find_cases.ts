@@ -24,7 +24,7 @@ export function initFindCasesApi({ caseService, router, logger }: RouteDeps) {
           return response.badRequest({ body: 'RouteHandlerContext is not registered for cases' });
         }
         const casesClient = await context.cases.getCasesClient();
-        const options = request.body as CasesFindRequest;
+        const options = request.query as CasesFindRequest;
 
         return response.ok({
           body: await casesClient.find({ ...options }),

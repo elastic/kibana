@@ -14,7 +14,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { esKuery } from 'src/plugins/data/server';
+import { esKuery } from '../../../../../../../../src/plugins/data/server';
 import {
   AssociationType,
   CommentsResponseRt,
@@ -23,7 +23,11 @@ import {
 } from '../../../../../common/api';
 import { RouteDeps } from '../../types';
 import { escapeHatch, transformComments, wrapError } from '../../utils';
-import { CASE_COMMENTS_URL, SAVED_OBJECT_TYPES } from '../../../../../common/constants';
+import {
+  CASE_COMMENTS_URL,
+  SAVED_OBJECT_TYPES,
+  ENABLE_CASE_CONNECTOR,
+} from '../../../../../common/constants';
 import { defaultPage, defaultPerPage } from '../..';
 
 const FindQueryParamsRt = rt.partial({
@@ -52,12 +56,15 @@ export function initFindCaseCommentsApi({ caseService, router, logger }: RouteDe
           fold(throwErrors(Boom.badRequest), identity)
         );
 
+        if (!ENABLE_CASE_CONNECTOR && query.subCaseId !== undefined) {
+          throw Boom.badRequest(
+            'The `subCaseId` is not supported when the case connector feature is disabled'
+          );
+        }
+
         const id = query.subCaseId ?? request.params.case_id;
         const associationType = query.subCaseId ? AssociationType.subCase : AssociationType.case;
         const { filter, ...queryWithoutFilter } = query;
-        // convert the string filter into a kuery type
-        const kueryFilter = filter != null ? esKuery.fromKueryExpression(filter) : undefined;
-
         const args = query
           ? {
               caseService,
@@ -70,8 +77,8 @@ export function initFindCaseCommentsApi({ caseService, router, logger }: RouteDe
                 page: defaultPage,
                 perPage: defaultPerPage,
                 sortField: 'created_at',
+                filter: filter != null ? esKuery.fromKueryExpression(filter) : filter,
                 ...queryWithoutFilter,
-                filter: kueryFilter,
               },
               associationType,
             }

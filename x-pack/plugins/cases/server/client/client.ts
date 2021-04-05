@@ -6,6 +6,7 @@
  */
 
 import { ElasticsearchClient, SavedObjectsClientContract, Logger } from 'src/core/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { AuditLogger } from '../../../security/server';
 import {
   CasesClientConstructorArguments,
@@ -54,7 +55,7 @@ export class CasesClientHandler implements CasesClient {
   private readonly _userActionService: CaseUserActionServiceSetup;
   private readonly _alertsService: AlertServiceContract;
   private readonly logger: Logger;
-  private readonly authorization: Authorization;
+  private readonly authorization: PublicMethodsOf<Authorization>;
   private readonly auditLogger?: AuditLogger;
 
   constructor(clientArgs: CasesClientConstructorArguments) {

@@ -46,7 +46,7 @@ describe('POST cases', () => {
         settings: {
           syncAlerts: true,
         },
-        scope: 'securitySolution',
+        owner: 'securitySolution',
       },
     });
 
@@ -86,7 +86,7 @@ describe('POST cases', () => {
         settings: {
           syncAlerts: true,
         },
-        scope: 'securitySolution',
+        owner: 'securitySolution',
       },
     });
 
@@ -120,7 +120,7 @@ describe('POST cases', () => {
         settings: {
           syncAlerts: true,
         },
-        scope: 'securitySolution',
+        owner: 'securitySolution',
       },
     });
 
@@ -146,7 +146,7 @@ describe('POST cases', () => {
         settings: {
           syncAlerts: true,
         },
-        scope: 'securitySolution',
+        owner: 'securitySolution',
       },
     });
 
@@ -180,7 +180,7 @@ describe('POST cases', () => {
         settings: {
           syncAlerts: true,
         },
-        scope: 'securitySolution',
+        owner: 'securitySolution',
       },
     });
 

@@ -108,10 +108,10 @@ export const caseSavedObjectType: SavedObjectsType = {
           },
         },
       },
-      title: {
+      owner: {
         type: 'keyword',
       },
-      scope: {
+      title: {
         type: 'keyword',
       },
       status: {

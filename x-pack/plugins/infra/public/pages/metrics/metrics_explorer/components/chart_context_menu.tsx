@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import DateMath from '@elastic/datemath';
 import { Capabilities } from 'src/core/public';
-import { InfraSourceConfiguration } from '../../../../../common/http_api/source_api';
+import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import { AlertFlyout } from '../../../../alerting/metric_threshold/components/alert_flyout';
 import { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
 import {
@@ -33,14 +33,14 @@ export interface Props {
   options: MetricsExplorerOptions;
   onFilter?: (query: string) => void;
   series: MetricsExplorerSeries;
-  source?: InfraSourceConfiguration;
+  source?: MetricsSourceConfigurationProperties;
   timeRange: MetricsExplorerTimeOptions;
   uiCapabilities?: Capabilities;
   chartOptions: MetricsExplorerChartOptions;
 }
 
 const fieldToNodeType = (
-  source: InfraSourceConfiguration,
+  source: MetricsSourceConfigurationProperties,
   groupBy: string | string[]
 ): InventoryItemType | undefined => {
   const fields = Array.isArray(groupBy) ? groupBy : [groupBy];

@@ -1,0 +1,25 @@
+
+[[search-session-settings-kb]]
+=== Search sessions settings in {kib}
+++++
+<titleabbrev>Search sessions settings</titleabbrev>
+++++
+
+Configure the search session settings in your `kibana.yml` configuration file.
+
+
+[cols="2*<"]
+|===
+a| `xpack.data_enhanced.`
+`search.sessions.enabled`
+| Set to `true` (default) to enable search sessions.
+
+a| `xpack.data_enhanced.`
+`search.sessions.trackingInterval`
+| The frequency for updating the state of a search session. The default is 10s.
+
+a| `xpack.data_enhanced.`
+`search.sessions.defaultExpiration`
+| How long search session results are stored before they are deleted.
+Extending a search session resets the expiration by the same value. The default is 7d.
+|===

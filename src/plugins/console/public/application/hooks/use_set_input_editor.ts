@@ -9,12 +9,13 @@
 import { useCallback } from 'react';
 import { useEditorActionContext } from '../contexts/editor_context';
 import { instance as registry } from '../contexts/editor_context/editor_registry';
+import { SenseEditor } from '../models';
 
 export const useSetInputEditor = () => {
   const dispatch = useEditorActionContext();
 
   return useCallback(
-    (editor: any) => {
+    (editor: SenseEditor) => {
       dispatch({ type: 'setInputEditor', payload: editor });
       registry.setInputEditor(editor);
     },

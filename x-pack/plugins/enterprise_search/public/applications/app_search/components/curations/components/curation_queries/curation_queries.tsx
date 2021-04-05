@@ -12,6 +12,8 @@ import { useValues, useActions } from 'kea';
 import { EuiButton, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { CONTINUE_BUTTON_LABEL } from '../../../../../shared/constants';
+
 import { Curation } from '../../types';
 
 import { CurationQueriesLogic } from './curation_queries_logic';
@@ -28,9 +30,7 @@ interface Props {
 export const CurationQueries: React.FC<Props> = ({
   queries: initialQueries,
   onSubmit,
-  submitButtonText = i18n.translate('xpack.enterpriseSearch.actions.continue', {
-    defaultMessage: 'Continue',
-  }),
+  submitButtonText = CONTINUE_BUTTON_LABEL,
 }) => {
   const logic = CurationQueriesLogic({ queries: initialQueries });
   const { queries, hasEmptyQueries, hasOnlyOneQuery } = useValues(logic);

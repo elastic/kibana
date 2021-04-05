@@ -22,6 +22,7 @@ import {
   SAVED_OBJECT_TYPES,
   CASE_SAVED_OBJECT,
   SUB_CASE_SAVED_OBJECT,
+  ENABLE_CASE_CONNECTOR,
 } from '../../../../../common/constants';
 import { CommentPatchRequestRt, throwErrors, User } from '../../../../../common/api';
 import { CaseServiceSetup } from '../../../../services';
@@ -86,6 +87,12 @@ export function initPatchCommentApi({ caseService, router, userActionService, lo
     },
     async (context, request, response) => {
       try {
+        if (!ENABLE_CASE_CONNECTOR && request.query?.subCaseId !== undefined) {
+          throw Boom.badRequest(
+            'The `subCaseId` is not supported when the case connector feature is disabled'
+          );
+        }
+
         const client = context.core.savedObjects.getClient({
           includedHiddenTypes: SAVED_OBJECT_TYPES,
         });

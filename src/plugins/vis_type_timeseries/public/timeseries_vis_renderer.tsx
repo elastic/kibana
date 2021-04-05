@@ -9,13 +9,15 @@
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
+import { I18nProvider } from '@kbn/i18n/react';
 import { IUiSettingsClient } from 'kibana/public';
 import type { PersistedState } from '../../visualizations/public';
 import { VisualizationContainer } from '../../visualizations/public';
 import { ExpressionRenderDefinition } from '../../expressions/common/expression_renderers';
 import { TimeseriesRenderValue } from './metrics_fn';
-import { TimeseriesVisData } from '../common/types';
+import { isVisTableData, TimeseriesVisData } from '../common/types';
 import { TimeseriesVisParams } from './types';
+import { getChartsSetup } from './services';
 
 const TimeseriesVisualization = lazy(
   () => import('./application/components/timeseries_visualization')
@@ -23,7 +25,7 @@ const TimeseriesVisualization = lazy(
 
 const checkIfDataExists = (visData: TimeseriesVisData | {}, model: TimeseriesVisParams) => {
   if ('type' in visData) {
-    const data = visData.type === 'table' ? visData.series : visData?.[model.id]?.series;
+    const data = isVisTableData(visData) ? visData.series : visData?.[model.id]?.series;
     return Boolean(data?.length);
   }
 
@@ -39,24 +41,30 @@ export const getTimeseriesVisRenderer: (deps: {
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });
+    const { palettes } = getChartsSetup();
 
     const showNoResult = !checkIfDataExists(config.visData, config.visParams);
+    const palettesService = await palettes.getPalettes();
 
     render(
-      <VisualizationContainer
-        data-test-subj="timeseriesVis"
-        handlers={handlers}
-        showNoResult={showNoResult}
-      >
-        <TimeseriesVisualization
-          // it is mandatory to bind uiSettings because of "this" usage inside "get" method
-          getConfig={uiSettings.get.bind(uiSettings)}
+      <I18nProvider>
+        <VisualizationContainer
+          data-test-subj="timeseriesVis"
           handlers={handlers}
-          model={config.visParams}
-          visData={config.visData as TimeseriesVisData}
-          uiState={handlers.uiState! as PersistedState}
-        />
-      </VisualizationContainer>,
+          showNoResult={showNoResult}
+        >
+          <TimeseriesVisualization
+            // it is mandatory to bind uiSettings because of "this" usage inside "get" method
+            getConfig={uiSettings.get.bind(uiSettings)}
+            handlers={handlers}
+            model={config.visParams}
+            visData={config.visData as TimeseriesVisData}
+            syncColors={config.syncColors}
+            uiState={handlers.uiState! as PersistedState}
+            palettesService={palettesService}
+          />
+        </VisualizationContainer>
+      </I18nProvider>,
       domNode
     );
   },

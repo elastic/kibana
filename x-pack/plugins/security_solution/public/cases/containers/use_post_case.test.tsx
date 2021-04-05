@@ -29,6 +29,7 @@ describe('usePostCase', () => {
     settings: {
       syncAlerts: true,
     },
+    owner: 'securitySolution',
   };
   beforeEach(() => {
     jest.clearAllMocks();
