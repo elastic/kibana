@@ -27,6 +27,14 @@ describe('migrationsStateActionMachine', () => {
     targetMappings: { properties: {} },
     migrationVersionPerType: {},
     indexPrefix: '.my-so-index',
+    migrationsConfig: {
+      batchSize: 1000,
+      pollInterval: 0,
+      scrollDuration: '0s',
+      skip: false,
+      enableV2: true,
+      retryAttempts: 5,
+    },
   });
 
   const next = jest.fn((s: State) => {
@@ -221,6 +229,7 @@ describe('migrationsStateActionMachine', () => {
               "_tag": "None",
             },
             "reason": "the fatal reason",
+            "retryAttempts": 5,
             "retryCount": 0,
             "retryDelay": 0,
             "targetIndexMappings": Object {
@@ -280,6 +289,7 @@ describe('migrationsStateActionMachine', () => {
               "_tag": "None",
             },
             "reason": "the fatal reason",
+            "retryAttempts": 5,
             "retryCount": 0,
             "retryDelay": 0,
             "targetIndexMappings": Object {
@@ -424,6 +434,7 @@ describe('migrationsStateActionMachine', () => {
               "_tag": "None",
             },
             "reason": "the fatal reason",
+            "retryAttempts": 5,
             "retryCount": 0,
             "retryDelay": 0,
             "targetIndexMappings": Object {
@@ -478,6 +489,7 @@ describe('migrationsStateActionMachine', () => {
               "_tag": "None",
             },
             "reason": "the fatal reason",
+            "retryAttempts": 5,
             "retryCount": 0,
             "retryDelay": 0,
             "targetIndexMappings": Object {

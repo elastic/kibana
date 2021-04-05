@@ -24,6 +24,8 @@ export const mockFlashMessageHelpers = {
   setQueuedSuccessMessage: jest.fn(),
   setQueuedErrorMessage: jest.fn(),
   clearFlashMessages: jest.fn(),
+  flashSuccessToast: jest.fn(),
+  flashErrorToast: jest.fn(),
 };
 
 jest.mock('../shared/flash_messages', () => ({

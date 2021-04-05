@@ -22,12 +22,12 @@ interface SourceQueryParams {
   sourceId: string;
 }
 
-interface ReAuthenticateProps {
+interface ReauthenticateProps {
   name: string;
   header: React.ReactNode;
 }
 
-export const ReAuthenticate: React.FC<ReAuthenticateProps> = ({ name, header }) => {
+export const Reauthenticate: React.FC<ReauthenticateProps> = ({ name, header }) => {
   const { search } = useLocation() as Location;
 
   const { sourceId } = (parseQueryParams(search) as unknown) as SourceQueryParams;
@@ -66,7 +66,7 @@ export const ReAuthenticate: React.FC<ReAuthenticateProps> = ({ name, header }) 
                 'xpack.enterpriseSearch.workplaceSearch.contentSource.reAuthenticate.body',
                 {
                   defaultMessage:
-                    'Your {name} credentials are no longer valid. Please re-authenticate with the original credentials to resume content syncing.',
+                    'Your {name} credentials are no longer valid. Please reauthenticate with the original credentials to resume content syncing.',
                   values: { name },
                 }
               )}
@@ -79,7 +79,7 @@ export const ReAuthenticate: React.FC<ReAuthenticateProps> = ({ name, header }) 
             {i18n.translate(
               'xpack.enterpriseSearch.workplaceSearch.contentSource.reAuthenticate.button',
               {
-                defaultMessage: 'Re-authenticate {name}',
+                defaultMessage: 'Reauthenticate {name}',
                 values: { name },
               }
             )}
