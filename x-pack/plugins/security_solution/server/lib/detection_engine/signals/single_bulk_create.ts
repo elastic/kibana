@@ -136,7 +136,6 @@ export const singleBulkCreate = async ({
     )
   );
   logger.debug(buildRuleMessage(`took property says bulk took: ${response.took} milliseconds`));
-
   const createdItems = filteredEvents.hits.hits
     .map((doc, index) => ({
       _id: response.items[index].create?._id ?? '',

@@ -26,15 +26,19 @@ describe('get_export_by_object_ids', () => {
   describe('getExportByObjectIds', () => {
     test('it exports object ids into an expected string with new line characters', async () => {
       const alertsClient = alertsClientMock.create();
-      alertsClient.get.mockResolvedValue(getResult(getQueryRuleParams()));
       alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
       const objects = [{ rule_id: 'rule-1' }];
       const exports = await getExportByObjectIds(alertsClient, objects);
-      expect(exports).toEqual({
-        rulesNdjson: `${JSON.stringify({
+      const exportsObj = {
+        rulesNdjson: JSON.parse(exports.rulesNdjson),
+        exportDetails: JSON.parse(exports.exportDetails),
+      };
+      expect(exportsObj).toEqual({
+        rulesNdjson: {
           author: ['Elastic'],
           actions: [],
+          building_block_type: 'default',
           created_at: '2019-12-13T16:40:33.400Z',
           updated_at: '2019-12-13T16:40:33.400Z',
           created_by: 'elastic',
@@ -51,12 +55,12 @@ describe('get_export_by_object_ids', () => {
           language: 'kuery',
           license: 'Elastic License',
           output_index: '.siem-signals',
-          max_signals: 100,
+          max_signals: 10000,
           risk_score: 50,
           risk_score_mapping: [],
           name: 'Detect Root/Admin Users',
           query: 'user.name: root or user.name: admin',
-          references: ['http://www.example.com', 'https://ww.example.com'],
+          references: ['http://example.com', 'https://example.com'],
           timeline_id: 'some-timeline-id',
           timeline_title: 'some-timeline-title',
           meta: { someMeta: 'someField' },
@@ -71,12 +75,12 @@ describe('get_export_by_object_ids', () => {
           note: '# Investigative notes',
           version: 1,
           exceptions_list: getListArrayMock(),
-        })}\n`,
-        exportDetails: `${JSON.stringify({
+        },
+        exportDetails: {
           exported_count: 1,
           missing_rules: [],
           missing_rules_count: 0,
-        })}\n`,
+        },
       });
     });
 
@@ -108,7 +112,6 @@ describe('get_export_by_object_ids', () => {
   describe('getRulesFromObjects', () => {
     test('it returns transformed rules from objects sent in', async () => {
       const alertsClient = alertsClientMock.create();
-      alertsClient.get.mockResolvedValue(getResult(getQueryRuleParams()));
       alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
       const objects = [{ rule_id: 'rule-1' }];
@@ -120,6 +123,7 @@ describe('get_export_by_object_ids', () => {
           {
             actions: [],
             author: ['Elastic'],
+            building_block_type: 'default',
             created_at: '2019-12-13T16:40:33.400Z',
             updated_at: '2019-12-13T16:40:33.400Z',
             created_by: 'elastic',
@@ -134,14 +138,22 @@ describe('get_export_by_object_ids', () => {
             interval: '5m',
             rule_id: 'rule-1',
             language: 'kuery',
+            last_failure_at: undefined,
+            last_failure_message: undefined,
+            last_success_at: undefined,
+            last_success_message: undefined,
             license: 'Elastic License',
             output_index: '.siem-signals',
-            max_signals: 100,
+            max_signals: 10000,
             risk_score: 50,
             risk_score_mapping: [],
+            rule_name_override: undefined,
+            saved_id: undefined,
+            status: undefined,
+            status_date: undefined,
             name: 'Detect Root/Admin Users',
             query: 'user.name: root or user.name: admin',
-            references: ['http://www.example.com', 'https://ww.example.com'],
+            references: ['http://example.com', 'https://example.com'],
             timeline_id: 'some-timeline-id',
             timeline_title: 'some-timeline-title',
             meta: { someMeta: 'someField' },

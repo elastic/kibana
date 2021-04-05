@@ -39,7 +39,7 @@ const getBaseRuleParams = (): BaseRuleParams => {
     note: '# Investigative notes',
     timelineId: 'some-timeline-id',
     timelineTitle: 'some-timeline-title',
-    timestampOverride: 'event.ingested',
+    timestampOverride: undefined,
     meta: {
       someMeta: 'someField',
     },

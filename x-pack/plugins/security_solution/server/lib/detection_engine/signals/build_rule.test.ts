@@ -115,6 +115,7 @@ describe('buildRuleWithOverrides', () => {
       rule_name_override: 'someKey',
       meta: {
         ruleNameOverridden: true,
+        someMeta: 'someField',
       },
     };
     expect(rule).toEqual(expected);
@@ -142,6 +143,7 @@ describe('buildRuleWithOverrides', () => {
       risk_score_mapping: ruleSO.attributes.params.riskScoreMapping,
       meta: {
         riskScoreOverridden: true,
+        someMeta: 'someField',
       },
     };
     expect(rule).toEqual(expected);
@@ -166,6 +168,7 @@ describe('buildRuleWithOverrides', () => {
       severity_mapping: ruleSO.attributes.params.severityMapping,
       meta: {
         severityOverrideField: 'event.severity',
+        someMeta: 'someField',
       },
     };
     expect(rule).toEqual(expected);

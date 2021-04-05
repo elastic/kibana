@@ -68,7 +68,6 @@ describe('getExportAll', () => {
       severity_mapping: [],
       updated_by: 'elastic',
       tags: [],
-      timestamp_override: 'event.ingested',
       to: 'now',
       type: 'query',
       threat: getThreatMock(),

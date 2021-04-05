@@ -22,6 +22,7 @@ import { ruleStatusSavedObjectType } from '../../rules/saved_object_mappings';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
 import { RuleParams } from '../../schemas/rule_schemas';
+import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 
 export const sampleRuleSO = <T extends RuleParams>(params: T): SavedObject<AlertAttributes<T>> => {
   return {
@@ -61,21 +62,33 @@ export const expectedRule = (): RulesSchema => {
     output_index: '.siem-signals',
     description: 'Detecting root and admin users',
     from: 'now-6m',
+    filters: [
+      {
+        query: {
+          match_phrase: {
+            'host.name': 'some-host',
+          },
+        },
+      },
+    ],
     immutable: false,
     index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
     interval: '5m',
     language: 'kuery',
     license: 'Elastic License',
+    meta: {
+      someMeta: 'someField',
+    },
     name: 'rule-name',
     query: 'user.name: root or user.name: admin',
-    references: ['http://google.com'],
+    references: ['http://example.com', 'https://example.com'],
     severity: 'high',
     severity_mapping: [],
     tags: ['some fake tag 1', 'some fake tag 2'],
-    threat: [],
+    threat: getThreatMock(),
     type: 'query',
     to: 'now',
-    note: '',
+    note: '# Investigative notes',
     enabled: true,
     created_by: 'sample user',
     updated_by: 'sample user',
@@ -83,6 +96,8 @@ export const expectedRule = (): RulesSchema => {
     updated_at: '2020-03-27T22:55:59.577Z',
     created_at: '2020-03-27T22:55:59.577Z',
     throttle: 'no_actions',
+    timeline_id: 'some-timeline-id',
+    timeline_title: 'some-timeline-title',
     exceptions_list: getListArrayMock(),
   };
 };
