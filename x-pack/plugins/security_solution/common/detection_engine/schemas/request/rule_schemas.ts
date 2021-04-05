@@ -68,7 +68,6 @@ import {
   last_failure_message,
   throttle,
 } from '../common/schemas';
-import { OnlyFalseAllowed } from '../types';
 
 const createSchema = <
   Required extends t.Props,
@@ -149,6 +148,7 @@ const baseParams = {
     building_block_type,
     note,
     license,
+    output_index,
     timeline_id,
     timeline_title,
     meta,
@@ -186,49 +186,13 @@ export type CommonResponseParams = t.TypeOf<typeof commonResponseParams>;
 // with some variations for each route
 export const sharedCreateSchema = t.intersection([
   commonCreateParams,
-  t.exact(t.partial({ rule_id, output_index })),
+  t.exact(t.partial({ rule_id })),
 ]);
 export type SharedCreateSchema = t.TypeOf<typeof sharedCreateSchema>;
 
 // Update is almost identical to create so we build off of sharedCreateSchema instead of commonCreateParams
 export const sharedUpdateSchema = t.intersection([sharedCreateSchema, t.exact(t.partial({ id }))]);
 export type SharedUpdateSchema = t.TypeOf<typeof sharedUpdateSchema>;
-
-export const sharedImportSchema = t.intersection([
-  commonCreateParams,
-  t.exact(t.type({ rule_id })),
-  t.exact(
-    t.partial({
-      output_index,
-      id,
-      immutable: OnlyFalseAllowed,
-      created_at,
-      updated_at,
-      created_by,
-      updated_by,
-    })
-  ),
-]);
-export const sharedAddPrepackagedSchema = t.intersection([
-  commonCreateParams,
-  t.exact(t.type({ rule_id })),
-]);
-
-export const sharedResponseSchema = t.intersection([
-  commonResponseParams,
-  t.exact(t.type({ rule_id, id, immutable, updated_at, updated_by, created_at, created_by })),
-  t.exact(
-    t.partial({
-      output_index,
-      status: job_status,
-      status_date,
-      last_success_at,
-      last_success_message,
-      last_failure_at,
-      last_failure_message,
-    })
-  ),
-]);
 
 const eqlRuleParams = {
   required: {
