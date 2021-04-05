@@ -37,6 +37,12 @@ export default function ({ getService }: FtrProviderContext) {
         get destinationIndex(): string {
           return `user-${this.jobId}`;
         },
+        runtimeFields: {
+          uppercase_y: {
+            type: 'keyword',
+            script: 'emit(params._source.y.toUpperCase())',
+          },
+        },
         dependentVariable: 'y',
         trainingPercent: 20,
         modelMemory: '60mb',
@@ -91,6 +97,19 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('selects the job type');
           await ml.dataFrameAnalyticsCreation.assertJobTypeSelectExists();
           await ml.dataFrameAnalyticsCreation.selectJobType(testData.jobType);
+
+          await ml.testExecution.logTestStep('displays the runtime mappings editor switch');
+          await ml.dataFrameAnalyticsCreation.assertRuntimeMappingSwitchExists();
+
+          await ml.testExecution.logTestStep('enables the runtime mappings editor');
+          await ml.dataFrameAnalyticsCreation.toggleRuntimeMappingsEditorSwitch(true);
+          await ml.dataFrameAnalyticsCreation.assertRuntimeMappingsEditorContent(['']);
+
+          await ml.testExecution.logTestStep('sets runtime mappings');
+          await ml.dataFrameAnalyticsCreation.setRuntimeMappingsEditorContent(
+            JSON.stringify(testData.runtimeFields)
+          );
+          await ml.dataFrameAnalyticsCreation.applyRuntimeMappings();
 
           await ml.testExecution.logTestStep('inputs the dependent variable');
           await ml.dataFrameAnalyticsCreation.assertDependentVariableInputExists();
