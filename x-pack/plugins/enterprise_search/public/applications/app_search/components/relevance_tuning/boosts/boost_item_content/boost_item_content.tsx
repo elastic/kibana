@@ -41,9 +41,10 @@ export const BoostItemContent: React.FC<Props> = ({ boost, index, name }) => {
   };
 
   return (
-    <EuiPanel hasShadow={false} className="relevanceTuningAccordionItem">
+    <EuiPanel color="subdued" paddingSize="none" className="relevanceTuningAccordionItem">
+      <EuiSpacer size="m" />
       {getBoostForm()}
-      <EuiSpacer />
+      <EuiSpacer size="m" />
       <EuiFormRow
         label={i18n.translate(
           'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.boosts.impactLabel',

@@ -78,7 +78,6 @@ async function migrateAgents() {
           .getDecryptedAsInternalUser<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, so.id);
 
         await invalidateAPIKeys(
-          soClient,
           [attributes.access_api_key_id, attributes.default_api_key_id].filter(
             (keyId): keyId is string => keyId !== undefined
           )
