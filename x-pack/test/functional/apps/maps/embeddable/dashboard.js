@@ -69,7 +69,9 @@ export default function ({ getPageObjects, getService }) {
       await dashboardPanelActions.openInspectorByTitle('join example');
       await retry.try(async () => {
         const joinExampleRequestNames = await inspector.getRequestNames();
-        expect(joinExampleRequestNames).to.equal('geo_shapes*,meta_for_geo_shapes*.shape_name');
+        expect(joinExampleRequestNames).to.equal(
+          'geo_shapes*,meta_for_geo_shapes*.runtime_shape_name'
+        );
       });
       await inspector.close();
 
@@ -99,7 +101,7 @@ export default function ({ getPageObjects, getService }) {
 
       const joinResponse = await PageObjects.maps.getResponseFromDashboardPanel(
         'join example',
-        'meta_for_geo_shapes*.shape_name'
+        'meta_for_geo_shapes*.runtime_shape_name'
       );
       expect(joinResponse.aggregations.join.buckets.length).to.equal(1);
     });
