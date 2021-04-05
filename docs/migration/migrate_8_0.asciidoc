@@ -321,6 +321,15 @@ All supported operating systems support using systemd service files.  Any system
 Any installations using `.deb` or `.rpm` packages using SysV will need to migrate to systemd.
 
 [float]
+=== TLS v1.0 and v1.1 are disabled by default
+
+*Details:*
+Support can be re-enabled by setting `--tls-min-1.0` in the `node.options` config file that can be found inside `kibana/config` folder or any other configured with the environment variable `KBN_PATH_CONF` (for example in Debian based system would be `/etc/kibana`).
+
+*Impact:*
+Browser and proxy clients communicating over TLS v1.0 and v1.1.
+
+[float]
 === Platform removed from root folder name for `.tar.gz` and `.zip` archives
 
 *Details:*
