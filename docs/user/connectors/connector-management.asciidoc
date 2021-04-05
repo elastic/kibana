@@ -9,6 +9,10 @@ For more information on connectors and the types of actions available see <<acti
 [role="screenshot"]
 image::images/connector-listing.png[Example connector listing in the Rules and Connectors UI]
 
+[float]
+=== Required permissions
+
+Access to connectors is granted based on your privileges to alerting-enabled features. See <<alerting-security, Alerting Security>> for more information.
 
 [float]
 === Connector list
@@ -35,11 +39,7 @@ You can delete a connector even if there are still actions referencing it.
 When this happens the action will fail to execute, and appear as errors in the {kib} logs.
 ============================================================================
 
+[float]
 === Creating a new connector
 
 New connectors can be created by clicking the *Create connector* button, which will guide you to select the type of connector and configure its properties. Refer to <<action-types>> for the types of connectors available and how to configure them. Once you create a connector it will be made available to you anytime you set up an action in the current space.
-
-[float]
-=== Required permissions
-
-Access to connectors is granted based on your privileges to alerting-enabled features. See <<alerting-security, Alerting Security>> for more information.
