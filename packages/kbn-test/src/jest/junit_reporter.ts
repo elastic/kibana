@@ -46,6 +46,13 @@ export default class JestJUnitReporter extends BaseReporter {
    * @return {undefined}
    */
   onRunComplete(contexts: Set<Test['context']>, results: AggregatedResult): void {
+    // eslint-disable-next-line no-console
+    console.log('Jest onRunComplete', [
+      process.env.CI,
+      process.env.DISABLE_JUNIT_REPORTER,
+      results.testResults.length,
+    ]);
+
     if (!process.env.CI || process.env.DISABLE_JUNIT_REPORTER || !results.testResults.length) {
       return;
     }
@@ -58,6 +65,9 @@ export default class JestJUnitReporter extends BaseReporter {
       {},
       { keepNullAttributes: false }
     );
+
+    // eslint-disable-next-line no-console
+    console.log('Jest onRunComplete', [reportName, rootDirectory]);
 
     const msToIso = (ms: number | null | undefined) =>
       ms ? new Date(ms).toISOString().slice(0, -5) : undefined;
@@ -105,6 +115,8 @@ export default class JestJUnitReporter extends BaseReporter {
     });
 
     const reportPath = getUniqueJunitReportPath(rootDirectory, reportName);
+    // eslint-disable-next-line no-console
+    console.log('Jest onRunComplete', reportPath);
     const reportXML = root.end();
     mkdirSync(dirname(reportPath), { recursive: true });
     writeFileSync(reportPath, reportXML, 'utf8');
