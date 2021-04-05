@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -28,6 +28,7 @@ import {
   RuntimeType,
   IndexPattern,
   DataPublicPluginStart,
+  useFormData,
 } from '../../shared_imports';
 import { Field, InternalFieldType, PluginStart } from '../../types';
 
@@ -200,8 +201,10 @@ const FieldEditorComponent = ({
     }
   }, [onChange, isFormValid, isSubmitted, submit]);
 
-  const [nameChanged, setNameChanged] = useState(false);
-  const [typeChanged, setTypeChanged] = useState(false);
+  const [{ name: updatedName, type: updatedType }] = useFormData({ form });
+  const nameHasChanged = Boolean(field?.name) && field?.name !== updatedName;
+  const typeHasChanged =
+    Boolean(field?.type) && field?.type !== (updatedType && updatedType[0].value);
 
   return (
     <Form form={form} className="indexPatternFieldEditor__form">
@@ -221,28 +224,16 @@ const FieldEditorComponent = ({
                 }),
               },
             }}
-            onChange={(val) => {
-              if (field?.name) {
-                setNameChanged(field?.name !== val);
-              }
-            }}
           />
         </EuiFlexItem>
 
         {/* Type */}
         <EuiFlexItem>
-          <TypeField
-            isDisabled={fieldTypeToProcess === 'concrete'}
-            onChange={(val) => {
-              if (field?.type) {
-                setTypeChanged(field?.type !== val);
-              }
-            }}
-          />
+          <TypeField isDisabled={fieldTypeToProcess === 'concrete'} />
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {(nameChanged || typeChanged) && (
+      {(nameHasChanged || typeHasChanged) && (
         <EuiFormErrorText data-test-subj="changeWarning">{changeWarning}</EuiFormErrorText>
       )}
       <EuiSpacer size="xl" />
