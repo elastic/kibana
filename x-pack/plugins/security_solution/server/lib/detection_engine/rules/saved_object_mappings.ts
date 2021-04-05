@@ -72,7 +72,7 @@ export const ruleAssetSavedObjectMappings: SavedObjectsType['mappings'] = {
 
 export const ruleAssetType: SavedObjectsType = {
   name: ruleAssetSavedObjectType,
-  hidden: true,
+  hidden: false,
   namespaceType: 'agnostic',
   mappings: ruleAssetSavedObjectMappings,
 };
