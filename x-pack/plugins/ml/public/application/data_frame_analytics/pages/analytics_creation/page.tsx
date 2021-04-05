@@ -104,6 +104,7 @@ export const Page: FC<Props> = ({ jobId }) => {
       children: (
         <ConfigurationStep
           {...createAnalyticsForm}
+          isClone={jobId !== undefined}
           setCurrentStep={setCurrentStep}
           step={currentStep}
           stepActivated={activatedSteps[ANALYTICS_STEPS.CONFIGURATION]}
