@@ -33,8 +33,10 @@ interface SampleResponseValues {
 
 interface SampleResponseActions {
   queryChanged: (query: string) => { query: string };
-  getSearchResultsSuccess: (response?: SampleSearchResponse) => { response?: SampleSearchResponse };
-  getSearchResultsFailure: (response?: string) => { response?: string };
+  getSearchResultsSuccess: (
+    response: SampleSearchResponse | string
+  ) => { response: SampleSearchResponse | string };
+  getSearchResultsFailure: (response: string) => { response: string };
   getSearchResults: (
     query: string,
     resultFields: ServerFieldResultSettingObject
@@ -54,8 +56,8 @@ export const SampleResponseLogic = kea<MakeLogicType<SampleResponseValues, Sampl
     response: [
       null,
       {
-        getSearchResultsSuccess: (_, { response }) => response || null,
-        getSearchResultsFailure: (_, { response }) => response || null,
+        getSearchResultsSuccess: (_, { response }) => response,
+        getSearchResultsFailure: (_, { response }) => response,
       },
     ],
   },

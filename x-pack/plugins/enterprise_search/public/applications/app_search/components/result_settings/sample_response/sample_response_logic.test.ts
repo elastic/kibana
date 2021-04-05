@@ -63,19 +63,6 @@ describe('SampleResponseLogic', () => {
           response: {},
         });
       });
-
-      it('sets the response to null if no response is passed', () => {
-        mount({
-          response: null,
-        });
-
-        SampleResponseLogic.actions.getSearchResultsSuccess();
-
-        expect(SampleResponseLogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          response: null,
-        });
-      });
     });
 
     describe('getSearchResultsFailure', () => {
@@ -89,19 +76,6 @@ describe('SampleResponseLogic', () => {
         expect(SampleResponseLogic.values).toEqual({
           ...DEFAULT_VALUES,
           response: 'An error occured.',
-        });
-      });
-
-      it('sets the response to null if no response is passed', () => {
-        mount({
-          response: null,
-        });
-
-        SampleResponseLogic.actions.getSearchResultsFailure();
-
-        expect(SampleResponseLogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          response: null,
         });
       });
     });
