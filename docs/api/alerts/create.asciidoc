@@ -11,16 +11,11 @@ Create {kib} alerts.
 
 `POST <kibana host>:<port>/api/alerts/alert`
 
-`POST <kibana host>:<port>/s/<space_id>/api/alerts/alert/<id>`
-
 [[alerts-api-create-path-params]]
 ==== Path parameters
 
 `<id>`::
   (Optional, string) Specifies a UUID v1 or v4 to use instead of a randomly generated ID.
-
-`space_id`::
-  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 [[alerts-api-create-request-body]]
 ==== Request body
