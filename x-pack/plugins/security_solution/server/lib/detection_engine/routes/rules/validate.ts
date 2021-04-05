@@ -14,14 +14,13 @@ import {
   FullResponseSchema,
   fullResponseSchema,
 } from '../../../../../common/detection_engine/schemas/request';
-import { validate } from '../../../../../common/validate';
+import { validateNonExact } from '../../../../../common/validate';
 import { findRulesSchema } from '../../../../../common/detection_engine/schemas/response/find_rules_schema';
 import {
   RulesSchema,
   rulesSchema,
 } from '../../../../../common/detection_engine/schemas/response/rules_schema';
 import { formatErrors } from '../../../../../common/format_errors';
-import { exactCheck } from '../../../../../common/exact_check';
 import { PartialAlert, FindResult } from '../../../../../../alerting/server';
 import {
   isAlertType,
@@ -52,10 +51,9 @@ export const transformValidateFindAlerts = (
     return [null, 'Internal error transforming'];
   } else {
     const decoded = findRulesSchema.decode(transformed);
-    const checked = exactCheck(transformed, decoded);
     const left = (errors: t.Errors): string[] => formatErrors(errors);
     const right = (): string[] => [];
-    const piped = pipe(checked, fold(left, right));
+    const piped = pipe(decoded, fold(left, right));
     if (piped.length === 0) {
       return [transformed, null];
     } else {
@@ -73,7 +71,7 @@ export const transformValidate = (
   if (transformed == null) {
     return [null, 'Internal error transforming'];
   } else {
-    return validate(transformed, rulesSchema);
+    return validateNonExact(transformed, rulesSchema);
   }
 };
 
@@ -86,7 +84,7 @@ export const newTransformValidate = (
   if (transformed == null) {
     return [null, 'Internal error transforming'];
   } else {
-    return validate(transformed, fullResponseSchema);
+    return validateNonExact(transformed, fullResponseSchema);
   }
 };
 
@@ -103,7 +101,7 @@ export const transformValidateBulkError = (
         ruleActions,
         ruleStatus?.saved_objects[0] ?? ruleStatus
       );
-      const [validated, errors] = validate(transformed, rulesSchema);
+      const [validated, errors] = validateNonExact(transformed, rulesSchema);
       if (errors != null || validated == null) {
         return createBulkErrorObject({
           ruleId,
@@ -115,7 +113,7 @@ export const transformValidateBulkError = (
       }
     } else {
       const transformed = transformAlertToRule(alert);
-      const [validated, errors] = validate(transformed, rulesSchema);
+      const [validated, errors] = validateNonExact(transformed, rulesSchema);
       if (errors != null || validated == null) {
         return createBulkErrorObject({
           ruleId,

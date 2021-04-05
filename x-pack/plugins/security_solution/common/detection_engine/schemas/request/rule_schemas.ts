@@ -419,6 +419,7 @@ export const fullPatchSchema = t.intersection([
 
 const responseRequiredFields = {
   id,
+  rule_id,
   immutable,
   updated_at,
   updated_by,

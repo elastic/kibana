@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getThreatMock } from '../../../../common/detection_engine/schemas/types/threat.mock';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMappingMock } from '../signals/threat_mapping/build_threat_mapping_filter.mock';
 import {
@@ -30,17 +31,19 @@ const getBaseRuleParams = (): BaseRuleParams => {
     severityMapping: [],
     license: 'Elastic License',
     outputIndex: '.siem-signals',
-    references: ['http://google.com'],
+    references: ['http://example.com', 'https://example.com'],
     riskScore: 50,
     riskScoreMapping: [],
     ruleNameOverride: undefined,
     maxSignals: 10000,
-    note: '',
-    timelineId: undefined,
-    timelineTitle: undefined,
-    timestampOverride: undefined,
-    meta: undefined,
-    threat: [],
+    note: '# Investigative notes',
+    timelineId: 'some-timeline-id',
+    timelineTitle: 'some-timeline-title',
+    timestampOverride: 'event.ingested',
+    meta: {
+      someMeta: 'someField',
+    },
+    threat: getThreatMock(),
     version: 1,
     exceptionsList: getListArrayMock(),
   };
@@ -90,7 +93,15 @@ export const getQueryRuleParams = (): QueryRuleParams => {
     language: 'kuery',
     query: 'user.name: root or user.name: admin',
     index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-    filters: undefined,
+    filters: [
+      {
+        query: {
+          match_phrase: {
+            'host.name': 'some-host',
+          },
+        },
+      },
+    ],
     savedId: undefined,
   };
 };
