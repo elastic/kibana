@@ -7,7 +7,6 @@
 
 import {
   elasticsearchServiceMock,
-  httpServerMock,
   loggingSystemMock,
   savedObjectsClientMock,
 } from '../../../../../src/core/server/mocks';
