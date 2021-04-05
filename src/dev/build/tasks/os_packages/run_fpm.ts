@@ -75,9 +75,6 @@ export async function runFpm(
     '--conflicts',
     build.isOss() ? 'kibana' : 'kibana-oss',
 
-    '--workdir',
-    '/tmp',
-
     // define install/uninstall scripts
     '--after-install',
     resolve(__dirname, 'package_scripts/post_install.sh'),

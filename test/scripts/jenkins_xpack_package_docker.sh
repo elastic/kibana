@@ -5,6 +5,8 @@ set -e
 source src/dev/ci_setup/setup_env.sh
 
 export TEST_BROWSER_HEADLESS=1
+export TMP=/tmp
+export TMPDIR=/tmp
 
 node scripts/build --all-platforms --debug --no-oss
 
