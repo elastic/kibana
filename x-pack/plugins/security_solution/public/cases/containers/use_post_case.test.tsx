@@ -16,7 +16,6 @@ jest.mock('./api');
 describe('usePostCase', () => {
   const abortCtrl = new AbortController();
   const samplePost = {
-    scope: 'securitySolution',
     description: 'description',
     tags: ['tags'],
     title: 'title',

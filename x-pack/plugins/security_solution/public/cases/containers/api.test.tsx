@@ -383,8 +383,6 @@ describe('Case Configuration API', () => {
       fetchMock.mockResolvedValue(basicCaseSnake);
     });
     const data = {
-      // TODO: remove this
-      scope: 'securitySolution',
       description: 'description',
       tags: ['tag'],
       title: 'title',
@@ -397,6 +395,7 @@ describe('Case Configuration API', () => {
       settings: {
         syncAlerts: true,
       },
+      // TODO: remove this
       owner: 'securitySolution',
     };
 

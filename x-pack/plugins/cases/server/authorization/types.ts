@@ -6,6 +6,7 @@
  */
 
 import { KibanaRequest } from 'kibana/server';
+import { KueryNode } from 'src/plugins/data/common';
 import { EventType } from '../../../security/server';
 import { Space } from '../../../spaces/server';
 
@@ -44,4 +45,13 @@ export interface OperationDetails {
   verbs: Verbs;
   docType: string;
   savedObjectType: string;
+}
+
+/**
+ * Defines the helper methods and necessary information for authorizing the find API's request.
+ */
+export interface AuthorizationFilter {
+  filter?: KueryNode;
+  ensureSavedObjectIsAuthorized: (owner: string) => void;
+  logSuccessfulAuthorization: () => void;
 }

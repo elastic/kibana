@@ -38,8 +38,9 @@ import {
 import { createCaseError } from '../../common/error';
 import { Authorization } from '../../authorization/authorization';
 import { Operations } from '../../authorization';
-import { AuditLogger } from '../../../../security/server';
+import { AuditLogger, EventOutcome } from '../../../../security/server';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
+import { createAuditMsg } from '../../common';
 
 interface CreateCaseArgs {
   caseConfigureService: CaseConfigureServiceSetup;
@@ -89,9 +90,14 @@ export const create = async ({
     try {
       await auth.ensureAuthorized(query.owner, Operations.createCase);
     } catch (error) {
-      // TODO: log error using audit logger
+      auditLogger?.log(createAuditMsg({ operation: Operations.createCase, error }));
       throw error;
     }
+
+    // log that we're attempting to create a case
+    auditLogger?.log(
+      createAuditMsg({ operation: Operations.createCase, outcome: EventOutcome.UNKNOWN })
+    );
 
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const { username, full_name, email } = user;
@@ -110,6 +116,15 @@ export const create = async ({
         connector: transformCaseConnectorToEsConnector(query.connector ?? caseConfigureConnector),
       }),
     });
+
+    // log that we successfully created a case
+    auditLogger?.log(
+      createAuditMsg({
+        operation: Operations.createCase,
+        outcome: EventOutcome.SUCCESS,
+        savedObjectID: newCase.id,
+      })
+    );
 
     await userActionService.postUserActions({
       client: savedObjectsClient,

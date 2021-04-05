@@ -101,7 +101,7 @@ export const countAlertsForID = ({
 };
 
 /**
- * Creates an AuditEvent to be used for an audit logger describing a request.
+ * Creates an AuditEvent describing the state of a request.
  */
 export function createAuditMsg({
   operation,
@@ -110,11 +110,14 @@ export function createAuditMsg({
   savedObjectID,
 }: {
   operation: OperationDetails;
-  savedObjectID: string;
+  savedObjectID?: string;
   outcome?: EventOutcome;
   error?: Error;
 }): AuditEvent {
-  const doc = `${operation.savedObjectType} [id=${savedObjectID}]`;
+  const doc =
+    savedObjectID != null
+      ? `${operation.savedObjectType} [id=${savedObjectID}]`
+      : `a ${operation.docType}`;
   const message = error
     ? `Failed attempt to ${operation.verbs.present} ${doc}`
     : outcome === EventOutcome.UNKNOWN
@@ -130,10 +133,9 @@ export function createAuditMsg({
       outcome: outcome ?? (error ? EventOutcome.FAILURE : EventOutcome.SUCCESS),
     },
     kibana: {
-      saved_object: {
-        type: operation.savedObjectType,
-        id: savedObjectID,
-      },
+      ...(savedObjectID != null && {
+        saved_object: { type: operation.savedObjectType, id: savedObjectID },
+      }),
     },
     ...(error != null && {
       error: {

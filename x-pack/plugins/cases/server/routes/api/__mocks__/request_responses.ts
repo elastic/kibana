@@ -15,7 +15,6 @@ import {
 import { FindActionResult } from '../../../../../actions/server/types';
 
 export const newCase: CasePostRequest = {
-  scope: 'securitySolution',
   title: 'My new case',
   description: 'A description',
   tags: ['new', 'case'],

@@ -58,7 +58,6 @@ describe('Utils', () => {
 
       expect(res).toMatchInlineSnapshot(`
         Object {
-          "class": "securitySolution",
           "closed_at": null,
           "closed_by": null,
           "connector": Object {
@@ -88,6 +87,7 @@ describe('Utils', () => {
           },
           "description": "A description",
           "external_service": null,
+          "owner": "securitySolution",
           "settings": Object {
             "syncAlerts": true,
           },
@@ -115,7 +115,6 @@ describe('Utils', () => {
 
       expect(res).toMatchInlineSnapshot(`
         Object {
-          "class": "securitySolution",
           "closed_at": null,
           "closed_by": null,
           "connector": Object {
@@ -145,6 +144,7 @@ describe('Utils', () => {
           },
           "description": "A description",
           "external_service": null,
+          "owner": "securitySolution",
           "settings": Object {
             "syncAlerts": true,
           },
@@ -175,7 +175,6 @@ describe('Utils', () => {
 
       expect(res).toMatchInlineSnapshot(`
         Object {
-          "class": "securitySolution",
           "closed_at": null,
           "closed_by": null,
           "connector": Object {
@@ -205,6 +204,7 @@ describe('Utils', () => {
           },
           "description": "A description",
           "external_service": null,
+          "owner": "securitySolution",
           "settings": Object {
             "syncAlerts": true,
           },
@@ -382,7 +382,6 @@ describe('Utils', () => {
         Object {
           "cases": Array [
             Object {
-              "class": "securitySolution",
               "closed_at": null,
               "closed_by": null,
               "comments": Array [],
@@ -401,6 +400,7 @@ describe('Utils', () => {
               "description": "This is a brand new case of a bad meanie defacing data",
               "external_service": null,
               "id": "mock-id-1",
+              "owner": "securitySolution",
               "settings": Object {
                 "syncAlerts": true,
               },
@@ -423,7 +423,6 @@ describe('Utils', () => {
               "version": "WzAsMV0=",
             },
             Object {
-              "class": "securitySolution",
               "closed_at": null,
               "closed_by": null,
               "comments": Array [],
@@ -442,6 +441,7 @@ describe('Utils', () => {
               "description": "Oh no, a bad meanie destroying data!",
               "external_service": null,
               "id": "mock-id-2",
+              "owner": "securitySolution",
               "settings": Object {
                 "syncAlerts": true,
               },
@@ -464,7 +464,6 @@ describe('Utils', () => {
               "version": "WzQsMV0=",
             },
             Object {
-              "class": "securitySolution",
               "closed_at": null,
               "closed_by": null,
               "comments": Array [],
@@ -487,6 +486,7 @@ describe('Utils', () => {
               "description": "Oh no, a bad meanie going LOLBins all over the place!",
               "external_service": null,
               "id": "mock-id-3",
+              "owner": "securitySolution",
               "settings": Object {
                 "syncAlerts": true,
               },
@@ -509,7 +509,6 @@ describe('Utils', () => {
               "version": "WzUsMV0=",
             },
             Object {
-              "class": "securitySolution",
               "closed_at": "2019-11-25T22:32:17.947Z",
               "closed_by": Object {
                 "email": "testemail@elastic.co",
@@ -536,6 +535,7 @@ describe('Utils', () => {
               "description": "Oh no, a bad meanie going LOLBins all over the place!",
               "external_service": null,
               "id": "mock-id-4",
+              "owner": "securitySolution",
               "settings": Object {
                 "syncAlerts": true,
               },
@@ -579,7 +579,6 @@ describe('Utils', () => {
 
       expect(res).toMatchInlineSnapshot(`
         Object {
-          "class": "securitySolution",
           "closed_at": null,
           "closed_by": null,
           "comments": Array [],
@@ -602,6 +601,7 @@ describe('Utils', () => {
           "description": "Oh no, a bad meanie going LOLBins all over the place!",
           "external_service": null,
           "id": "mock-id-3",
+          "owner": "securitySolution",
           "settings": Object {
             "syncAlerts": true,
           },
@@ -636,7 +636,6 @@ describe('Utils', () => {
 
       expect(res).toMatchInlineSnapshot(`
         Object {
-          "class": "securitySolution",
           "closed_at": null,
           "closed_by": null,
           "comments": Array [],
@@ -659,6 +658,7 @@ describe('Utils', () => {
           "description": "Oh no, a bad meanie going LOLBins all over the place!",
           "external_service": null,
           "id": "mock-id-3",
+          "owner": "securitySolution",
           "settings": Object {
             "syncAlerts": true,
           },
@@ -694,7 +694,6 @@ describe('Utils', () => {
 
       expect(res).toMatchInlineSnapshot(`
         Object {
-          "class": "securitySolution",
           "closed_at": null,
           "closed_by": null,
           "comments": Array [
@@ -739,6 +738,7 @@ describe('Utils', () => {
           "description": "Oh no, a bad meanie going LOLBins all over the place!",
           "external_service": null,
           "id": "mock-id-3",
+          "owner": "securitySolution",
           "settings": Object {
             "syncAlerts": true,
           },

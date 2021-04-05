@@ -7,10 +7,9 @@
 
 import { KibanaRequest } from 'kibana/server';
 import Boom from '@hapi/boom';
-import { KueryNode } from '../../../../../src/plugins/data/server';
 import { SecurityPluginStart } from '../../../security/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
-import { GetSpaceFn } from './types';
+import { AuthorizationFilter, GetSpaceFn } from './types';
 import { getOwnersFilter } from './utils';
 import { AuthorizationAuditLogger, OperationDetails, Operations } from '.';
 
@@ -115,13 +114,7 @@ export class Authorization {
     // else security is disabled so let the operation proceed
   }
 
-  public async getFindAuthorizationFilter(
-    savedObjectType: string
-  ): Promise<{
-    filter?: KueryNode;
-    ensureSavedObjectIsAuthorized: (owner: string) => void;
-    logSuccessfulAuthorization: () => void;
-  }> {
+  public async getFindAuthorizationFilter(savedObjectType: string): Promise<AuthorizationFilter> {
     const { securityAuth } = this;
     const operation = Operations.findCases;
     if (securityAuth && this.shouldCheckAuthorization()) {

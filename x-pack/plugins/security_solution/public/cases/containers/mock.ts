@@ -75,7 +75,7 @@ export const alertComment: Comment = {
 
 export const basicCase: Case = {
   type: CaseType.individual,
-  scope: 'securitySolution',
+  owner: 'securitySolution',
   closedAt: null,
   closedBy: null,
   id: basicCaseId,
@@ -106,7 +106,7 @@ export const basicCase: Case = {
 
 export const collectionCase: Case = {
   type: CaseType.collection,
-  scope: 'securitySolution',
+  owner: 'securitySolution',
   closedAt: null,
   closedBy: null,
   id: 'collection-id',

@@ -959,7 +959,6 @@ describe('case connector', () => {
           comments: [],
           totalComment: 0,
           totalAlerts: 0,
-          scope: 'securitySolution',
           closed_at: null,
           closed_by: null,
           connector: { id: 'none', name: 'none', type: ConnectorTypes.none, fields: null },
@@ -1040,7 +1039,6 @@ describe('case connector', () => {
       it('executes correctly', async () => {
         const updateReturn: CasesResponse = [
           {
-            scope: 'securitySolution',
             closed_at: '2019-11-25T21:54:48.952Z',
             closed_by: {
               email: 'd00d@awesome.com',
@@ -1131,7 +1129,6 @@ describe('case connector', () => {
           totalComment: 0,
           totalAlerts: 0,
           version: 'WzksMV0=',
-          scope: 'securitySolution',
           closed_at: null,
           closed_by: null,
           connector: { id: 'none', name: 'none', type: ConnectorTypes.none, fields: null },

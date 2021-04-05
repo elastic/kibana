@@ -79,7 +79,7 @@ describe('create', () => {
           "description": "This is a brand new case of a bad meanie defacing data",
           "external_service": null,
           "id": "mock-it",
-          "scope": "securitySolution",
+          "owner": "securitySolution",
           "settings": Object {
             "syncAlerts": true,
           },
@@ -180,7 +180,7 @@ describe('create', () => {
           "description": "This is a brand new case of a bad meanie defacing data",
           "external_service": null,
           "id": "mock-it",
-          "scope": "securitySolution",
+          "owner": "securitySolution",
           "settings": Object {
             "syncAlerts": true,
           },
@@ -248,7 +248,7 @@ describe('create', () => {
           "description": "This is a brand new case of a bad meanie defacing data",
           "external_service": null,
           "id": "mock-it",
-          "scope": "securitySolution",
+          "owner": "securitySolution",
           "settings": Object {
             "syncAlerts": true,
           },

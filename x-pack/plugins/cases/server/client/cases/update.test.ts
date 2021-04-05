@@ -46,7 +46,6 @@ describe('update', () => {
       expect(res).toMatchInlineSnapshot(`
         Array [
           Object {
-            "class": "securitySolution",
             "closed_at": "2019-11-25T21:54:48.952Z",
             "closed_by": Object {
               "email": "d00d@awesome.com",
@@ -69,6 +68,7 @@ describe('update', () => {
             "description": "This is a brand new case of a bad meanie defacing data",
             "external_service": null,
             "id": "mock-id-1",
+            "owner": "securitySolution",
             "settings": Object {
               "syncAlerts": true,
             },
@@ -147,7 +147,6 @@ describe('update', () => {
       expect(res).toMatchInlineSnapshot(`
         Array [
           Object {
-            "class": "securitySolution",
             "closed_at": null,
             "closed_by": null,
             "comments": Array [],
@@ -166,6 +165,7 @@ describe('update', () => {
             "description": "This is a brand new case of a bad meanie defacing data",
             "external_service": null,
             "id": "mock-id-1",
+            "owner": "securitySolution",
             "settings": Object {
               "syncAlerts": true,
             },
@@ -212,7 +212,6 @@ describe('update', () => {
       expect(res).toMatchInlineSnapshot(`
         Array [
           Object {
-            "class": "securitySolution",
             "closed_at": null,
             "closed_by": null,
             "comments": Array [],
@@ -235,6 +234,7 @@ describe('update', () => {
             "description": "Oh no, a bad meanie going LOLBins all over the place!",
             "external_service": null,
             "id": "mock-id-4",
+            "owner": "securitySolution",
             "settings": Object {
               "syncAlerts": true,
             },
@@ -353,7 +353,6 @@ describe('update', () => {
       expect(res).toMatchInlineSnapshot(`
         Array [
           Object {
-            "class": "securitySolution",
             "closed_at": null,
             "closed_by": null,
             "comments": Array [],
@@ -376,6 +375,7 @@ describe('update', () => {
             "description": "Oh no, a bad meanie going LOLBins all over the place!",
             "external_service": null,
             "id": "mock-id-3",
+            "owner": "securitySolution",
             "settings": Object {
               "syncAlerts": true,
             },
