@@ -22,7 +22,6 @@ interface Props {
 
 interface State {
   indexName: string;
-  indexValid: boolean;
   indexError: string;
   indexNames: string[];
 }
@@ -30,7 +29,6 @@ interface State {
 export class NewVectorLayerEditor extends Component<Props, State> {
   state = {
     indexName: '',
-    indexValid: false,
     indexError: '',
     indexNames: [],
   };
@@ -59,21 +57,26 @@ export class NewVectorLayerEditor extends Component<Props, State> {
   };
 
   _onIndexNameChange = (indexName: string) => {
-    let error: string | undefined;
     if (this.state.indexNames.includes(indexName)) {
-      error = i18n.translate(
-        'xpack.layers.newVectorLayerWizard.indexSettings.indexNameAlreadyExistsErrorMessage',
-        {
-          defaultMessage: 'Index name already exists.',
-        }
-      );
+      this.setState({
+        indexError: i18n.translate(
+          'xpack.layers.newVectorLayerWizard.indexSettings.indexNameAlreadyExistsErrorMessage',
+          {
+            defaultMessage: 'Index name already exists.',
+          }
+        ),
+      });
     } else if (!checkIndexPatternValid(indexName)) {
-      error = i18n.translate(
-        'xpack.layers.newVectorLayerWizard.indexSettings.indexNameContainsIllegalCharactersErrorMessage',
-        {
-          defaultMessage: 'Index name contains illegal characters.',
-        }
-      );
+      this.setState({
+        indexError: i18n.translate(
+          'xpack.layers.newVectorLayerWizard.indexSettings.indexNameContainsIllegalCharactersErrorMessage',
+          {
+            defaultMessage: 'Index name contains illegal characters.',
+          }
+        ),
+      });
+    } else {
+      this.setState({ indexError: '' });
     }
   };
 
@@ -93,14 +96,14 @@ export class NewVectorLayerEditor extends Component<Props, State> {
                 defaultMessage: 'Index name',
               }
             )}
-            isInvalid={this.state.indexValid}
-            error={this.state.indexValid ? [this.state.indexError] : []}
+            isInvalid={!!this.state.indexError}
+            error={!!this.state.indexError ? [this.state.indexError] : []}
           >
             <EuiFieldText
               data-test-subj="fileUploadIndexNameInput"
               value={this.state.indexName}
               onChange={this._onIndexNameChangeEvent}
-              isInvalid={this.state.indexValid}
+              isInvalid={!!this.state.indexError}
               aria-label={i18n.translate('xpack.layers.newVectorLayerWizard.indexNameReqField', {
                 defaultMessage: 'Index name, required field',
               })}
