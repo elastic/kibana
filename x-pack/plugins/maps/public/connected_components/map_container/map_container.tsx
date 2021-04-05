@@ -16,6 +16,7 @@ import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 import { MBMap } from '../mb_map';
 // @ts-expect-error
 import { WidgetOverlay } from '../widget_overlay';
+import { Timeslider } from '../timeslider';
 import { ToolbarOverlay } from '../toolbar_overlay';
 // @ts-expect-error
 import { LayerPanel } from '../layer_panel';
@@ -264,6 +265,7 @@ export class MapContainer extends Component<Props, State> {
             />
           )}
           <WidgetOverlay />
+          <Timeslider />
         </EuiFlexItem>
 
         <EuiFlexItem

@@ -12,6 +12,7 @@ import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 import { SetViewControl } from './set_view_control';
 import { ToolsControl } from './tools_control';
 import { FitToData } from './fit_to_data';
+import { TimesliderToggleButton } from './timeslider_toggle_button';
 import { GeoFieldWithIndex } from '../../components/geo_field_with_index';
 
 export interface Props {
@@ -56,6 +57,10 @@ export function ToolbarOverlay(props: Props) {
       </EuiFlexItem>
 
       {renderToolsControl()}
+
+      <EuiFlexItem>
+        <TimesliderToggleButton />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }
