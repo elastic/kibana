@@ -39,12 +39,12 @@ export const SampleResponse: React.FC = () => {
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
           <EuiTitle size="s">
-            <h3>
+            <h2>
               {i18n.translate(
                 'xpack.enterpriseSearch.appSearch.engine.resultSettings.sampleResponseTitle',
                 { defaultMessage: 'Sample response' }
               )}
-            </h3>
+            </h2>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
