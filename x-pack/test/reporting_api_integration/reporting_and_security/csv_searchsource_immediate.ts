@@ -31,7 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
     },
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/95594
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/96000
   describe.skip('CSV Generation from SearchSource', () => {
     before(async () => {
       await kibanaServer.uiSettings.update({

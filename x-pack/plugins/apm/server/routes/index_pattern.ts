@@ -21,10 +21,13 @@ export const staticIndexPatternRoute = createRoute((core) => ({
       getInternalSavedObjectsClient(core),
     ]);
 
+    const spaceId = context.plugins.spaces?.spacesService.getSpaceId(request);
+
     const didCreateIndexPattern = await createStaticIndexPattern(
       setup,
       context,
-      savedObjectsClient
+      savedObjectsClient,
+      spaceId
     );
 
     return { created: didCreateIndexPattern };
