@@ -12,7 +12,7 @@ import { statSync } from 'fs';
 import { resolve } from 'path';
 import url from 'url';
 
-import { getConfigPath, fromRoot, IS_KIBANA_DISTRIBUTABLE } from '@kbn/utils';
+import { getConfigPath, fromRoot, isKibanaDistributable } from '@kbn/utils';
 import { readKeystore } from '../keystore/read_keystore';
 
 function canRequire(path) {
@@ -184,7 +184,7 @@ export default function (program) {
     .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector)
     .option('--optimize', 'Deprecated, running the optimizer is no longer required');
 
-  if (!IS_KIBANA_DISTRIBUTABLE) {
+  if (!isKibanaDistributable()) {
     command
       .option('--oss', 'Start Kibana without X-Pack')
       .option(

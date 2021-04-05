@@ -15,5 +15,6 @@ export const kibanaPackageJson = {
   ...require(resolve(REPO_ROOT, 'package.json')),
 };
 
-export const IS_KIBANA_DISTRIBUTABLE =
-  kibanaPackageJson.build && kibanaPackageJson.build.distributable === true;
+export const isKibanaDistributable = () => {
+  return kibanaPackageJson.build && kibanaPackageJson.build.distributable === true;
+};
