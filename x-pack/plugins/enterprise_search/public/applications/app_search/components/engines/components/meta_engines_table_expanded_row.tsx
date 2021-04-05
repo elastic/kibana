@@ -55,7 +55,7 @@ export const MetaEnginesTableExpandedRow: React.FC<MetaEnginesTableExpandedRowPr
           ...FIELD_COUNT_COLUMN,
           render: (_, engineDetails) => (
             <>
-              {conflictingEngines.has(name) ? (
+              {conflictingEngines.has(engineDetails.name) ? (
                 <EuiHealth color="warning">{engineDetails.field_count}</EuiHealth>
               ) : (
                 engineDetails.field_count

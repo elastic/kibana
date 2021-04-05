@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { mountWithIntl } from '../../../../__mocks__';
+
 import React from 'react';
 
 import { shallow } from 'enzyme';
@@ -17,18 +19,26 @@ import { MetaEnginesTableExpandedRow } from './meta_engines_table_expanded_row';
 
 const SOURCE_ENGINES = [
   {
-    name: 'test-engine',
+    name: 'source-engine-1',
     created_at: 'Fri, 1 Jan 1970 12:00:00 +0000',
     language: 'English',
     isMeta: true,
     document_count: 99999,
     field_count: 10,
-  } as EngineDetails,
-];
+  },
+  {
+    name: 'source-engine-2',
+    created_at: 'Fri, 1 Jan 1970 12:00:00 +0000',
+    language: 'English',
+    isMeta: true,
+    document_count: 55555,
+    field_count: 7,
+  },
+] as EngineDetails[];
 
 describe('MetaEnginesTableExpandedRow', () => {
-  describe('contains relevant source engine information', () => {
-    const wrapper = shallow(
+  it('contains relevant source engine information', () => {
+    const wrapper = mountWithIntl(
       <MetaEnginesTableExpandedRow sourceEngines={SOURCE_ENGINES} conflictingEngines={new Set()} />
     );
     const table = wrapper.find(EuiBasicTable);
@@ -36,16 +46,24 @@ describe('MetaEnginesTableExpandedRow', () => {
     expect(table).toHaveLength(1);
 
     const tableContent = table.text();
-    expect(tableContent).toContain('test-engine');
+    expect(tableContent).toContain('source-engine-1');
     expect(tableContent).toContain('99,999');
     expect(tableContent).toContain('10');
+
+    expect(tableContent).toContain('source-engine-2');
+    expect(tableContent).toContain('55,555');
+    expect(tableContent).toContain('7');
   });
 
-  describe('indicates when a meta-engine has conflicts', () => {
+  it('indicates when a meta-engine has conflicts', () => {
     const wrapper = shallow(
-      <MetaEnginesTableExpandedRow sourceEngines={SOURCE_ENGINES} conflictingEngines={new Set()} />
+      <MetaEnginesTableExpandedRow
+        sourceEngines={SOURCE_ENGINES}
+        conflictingEngines={new Set(['source-engine-1', 'source-engine-2'])}
+      />
     );
 
-    expect(wrapper.find(EuiHealth)).toHaveLength(1);
+    const table = wrapper.find(EuiBasicTable);
+    expect(table.dive().find(EuiHealth)).toHaveLength(2);
   });
 });

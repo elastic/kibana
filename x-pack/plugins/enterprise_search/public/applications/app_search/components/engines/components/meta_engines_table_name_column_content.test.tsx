@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { mountWithIntl } from '../../../../__mocks__';
+
 import React from 'react';
 
 import { shallow } from 'enzyme';
@@ -79,7 +81,7 @@ describe('MetaEnginesTableNameColumnContent', () => {
 
   describe('engine count', () => {
     it('is included and labelled', () => {
-      const wrapper = shallow(
+      const wrapper = mountWithIntl(
         <MetaEnginesTableNameColumnContent
           showRow={jest.fn()}
           hideRow={jest.fn()}
@@ -92,6 +94,7 @@ describe('MetaEnginesTableNameColumnContent', () => {
               isMeta: true,
               document_count: 99999,
               field_count: 10,
+              engine_count: 2,
               includedEngines: [
                 { name: 'source-engine-1' },
                 { name: 'source-engine-2' },
@@ -107,7 +110,7 @@ describe('MetaEnginesTableNameColumnContent', () => {
       expect(wrapperContent).toContain('2 Engines');
     });
     it('defaults to 0', () => {
-      const wrapper = shallow(
+      const wrapper = mountWithIntl(
         <MetaEnginesTableNameColumnContent
           showRow={jest.fn()}
           hideRow={jest.fn()}
@@ -133,7 +136,7 @@ describe('MetaEnginesTableNameColumnContent', () => {
     });
 
     it('label loses pluralization with only 1 source engine', () => {
-      const wrapper = shallow(
+      const wrapper = mountWithIntl(
         <MetaEnginesTableNameColumnContent
           showRow={jest.fn()}
           hideRow={jest.fn()}
@@ -146,6 +149,7 @@ describe('MetaEnginesTableNameColumnContent', () => {
               isMeta: true,
               document_count: 99999,
               field_count: 10,
+              engine_count: 1,
               includedEngines: [{ name: 'source-engine-1' }] as EngineDetails[],
             } as EngineDetails
           }

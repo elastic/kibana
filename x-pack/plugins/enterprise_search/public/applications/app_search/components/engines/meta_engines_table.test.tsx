@@ -59,13 +59,19 @@ describe('MetaEnginesTable', () => {
     onDeleteEngine,
   };
 
+  const DEFAULT_VALUES = {
+    myRole: {
+      canManageMetaEngines: false,
+    },
+    expandedSourceEngines: {},
+    conflictingEnginesSets: {},
+    hideRow: jest.fn(),
+    fetchOrDisplayRow: jest.fn(),
+  };
+
   const resetMocks = () => {
     jest.clearAllMocks();
-    setMockValues({
-      myRole: {
-        canManageMetaEngines: false,
-      },
-    });
+    setMockValues(DEFAULT_VALUES);
   };
 
   describe('basic table', () => {
@@ -81,7 +87,7 @@ describe('MetaEnginesTable', () => {
     it('renders', () => {
       expect(table).toHaveLength(1);
       expect(table.prop('pagination').totalItemCount).toEqual(50);
-      expect(table).toContain(MetaEnginesTableNameColumnContent);
+      expect(table.find(MetaEnginesTableNameColumnContent)).toHaveLength(1);
 
       const tableContent = table.text();
       expect(tableContent).toContain('Jan 1, 1970');
@@ -145,8 +151,9 @@ describe('MetaEnginesTable', () => {
       beforeEach(() => {
         resetMocks();
         setMockValues({
+          ...DEFAULT_VALUES,
           myRole: {
-            canManageEngines: true,
+            canManageMetaEngines: true,
           },
         });
 
@@ -159,7 +166,7 @@ describe('MetaEnginesTable', () => {
       it('renders a manage action', () => {
         jest.spyOn(TelemetryLogic.actions, 'sendAppSearchTelemetry');
         jest.spyOn(KibanaLogic.values, 'navigateToUrl');
-        actions.at(0).simulate('click');
+        actions.at(1).simulate('click');
 
         expect(TelemetryLogic.actions.sendAppSearchTelemetry).toHaveBeenCalled();
         expect(KibanaLogic.values.navigateToUrl).toHaveBeenCalledWith('/engines/test-engine');
@@ -168,7 +175,7 @@ describe('MetaEnginesTable', () => {
       describe('delete action', () => {
         it('shows the user a confirm message when the action is clicked', () => {
           jest.spyOn(global, 'confirm' as any).mockReturnValueOnce(true);
-          actions.at(1).simulate('click');
+          actions.at(2).simulate('click');
           expect(global.confirm).toHaveBeenCalled();
         });
 
@@ -176,7 +183,7 @@ describe('MetaEnginesTable', () => {
           jest.spyOn(global, 'confirm' as any).mockReturnValueOnce(true);
           jest.spyOn(EnginesLogic.actions, 'deleteEngine');
 
-          actions.at(1).simulate('click');
+          actions.at(2).simulate('click');
 
           expect(onDeleteEngine).toHaveBeenCalled();
         });
@@ -185,7 +192,7 @@ describe('MetaEnginesTable', () => {
           jest.spyOn(global, 'confirm' as any).mockReturnValueOnce(false);
           jest.spyOn(EnginesLogic.actions, 'deleteEngine');
 
-          actions.at(1).simulate('click');
+          actions.at(2).simulate('click');
 
           expect(onDeleteEngine).toHaveBeenCalledTimes(0);
         });
@@ -200,21 +207,19 @@ describe('MetaEnginesTable', () => {
       });
 
       it('is hidden by default', () => {
-        setMockValues({
-          expandedRows: {},
-        });
         const wrapper = shallow(<MetaEnginesTable {...props} />);
-
-        expect(wrapper.find(MetaEnginesTableExpandedRow)).toHaveLength(0);
+        const table = wrapper.find(EuiBasicTable);
+        expect(table.dive().find(MetaEnginesTableExpandedRow)).toHaveLength(0);
       });
 
       it('is visible when the row has been expanded', () => {
         setMockValues({
-          expandedRows: { 'source-engine-1': true },
+          ...DEFAULT_VALUES,
+          expandedSourceEngines: { 'test-engine': true },
         });
         const wrapper = shallow(<MetaEnginesTable {...props} />);
-
-        expect(wrapper.find(MetaEnginesTableExpandedRow)).toHaveLength(1);
+        const table = wrapper.find(EuiBasicTable);
+        expect(table.dive().find(MetaEnginesTableExpandedRow)).toHaveLength(1);
       });
     });
   });

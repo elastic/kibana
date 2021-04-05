@@ -10,28 +10,39 @@ import { EngineDetails } from '../engine/types';
 
 import { getConflictingEnginesSet } from './utils';
 
-describe('getConflictingEnginesSet', () => {
-  const META_ENGINE_DETAILS = {
-    name: 'test-engine-1',
-    includedEngines: [
-      {
-        name: 'source-engine-1',
-      },
-      {
-        name: 'source-engine-2',
-      },
-    ] as EngineDetails[],
-    schemaConflicts: {
-      'conflicting-field-1': {
-        text: ['source-engine-1'],
-        number: ['source-engine-2'],
-        geolocation: [],
-        date: [],
-      },
-    } as SchemaConflicts,
-  } as EngineDetails;
+const DEFAULT_META_ENGINE_DETAILS = {
+  name: 'test-engine-1',
+  includedEngines: [
+    {
+      name: 'source-engine-1',
+    },
+    {
+      name: 'source-engine-2',
+    },
+    {
+      name: 'source-engine-3',
+    },
+  ] as EngineDetails[],
+  schemaConflicts: {
+    'conflicting-field-1': {
+      text: ['source-engine-1'],
+      number: ['source-engine-2'],
+      geolocation: [],
+      date: [],
+    },
+    'conflicting-field-2': {
+      text: [],
+      number: [],
+      geolocation: ['source-engine-2'],
+      date: ['source-engine-3'],
+    },
+  } as SchemaConflicts,
+} as EngineDetails;
 
-  expect(getConflictingEnginesSet(META_ENGINE_DETAILS)).toEqual(
-    new Set<string>(['source-engine-1', 'source-engine-2'])
-  );
+describe('getConflictingEnginesSet', () => {
+  it('generates a set of engine names with any field conflicts for the meta-engine', () => {
+    expect(getConflictingEnginesSet(DEFAULT_META_ENGINE_DETAILS)).toEqual(
+      new Set<string>(['source-engine-1', 'source-engine-2', 'source-engine-3'])
+    );
+  });
 });

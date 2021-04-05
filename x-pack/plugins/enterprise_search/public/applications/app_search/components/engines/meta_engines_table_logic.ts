@@ -48,6 +48,7 @@ export interface ConflictingEnginesSets {
 export const MetaEnginesTableLogic = kea<
   MakeLogicType<MetaEnginesTableValues, MetaEnginesTableActions, MetaEnginesTableProps>
 >({
+  path: ['enterprise_search', 'app_search', 'meta_engines_table_logic'],
   actions: () => ({
     addSourceEngines: (sourceEngines: object) => sourceEngines,
     displayRow: (itemId: string) => itemId,
