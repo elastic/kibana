@@ -73,24 +73,10 @@ export class RacAuthorization {
     isAuthEnabled: boolean;
   }): Promise<RacAuthorization> {
     let owners: Set<string>;
-    // console.error(
-    //   `************\nFEATURES: ${JSON.stringify(
-    //     features.getKibanaFeatures(),
-    //     null,
-    //     2
-    //   )}\n************`
-    // );
 
     try {
       // Gather all disabled features from user Space
-      const disabledFeatures = new Set((await getSpace(request))?.disabledFeatures ?? []);
-      console.error(
-        `***********\nDISABLED FEATURES ${JSON.stringify(
-          Array.from(disabledFeatures),
-          null,
-          2
-        )}\n**********`
-      );
+      // const disabledFeatures = new Set((await getSpace(request))?.disabledFeatures ?? []);
 
       // Filter through all user Kibana features to find corresponding enabled
       // Rac feature owners like 'security-solution' or 'observability'
@@ -100,11 +86,12 @@ export class RacAuthorization {
           // get all the rac 'owners' that aren't disabled
           // .filter(({ id }) => !disabledFeatures.has(id))
           .flatMap((feature) => {
-            console.error('RAC FEATURES:', feature.id);
             return feature.rac ?? [];
           })
       );
+      console.error('---------> BEFORE OWNERS', owners);
     } catch (error) {
+      console.error('---------> THERE WAS AN ERROR', error);
       owners = new Set<string>();
     }
     console.error('---------> OWNERS', JSON.stringify(Array.from(owners)));
@@ -208,18 +195,17 @@ export class RacAuthorization {
     // }
   }
 
-  public getFindAuthorizationFilter(): {
-    filter?: KueryNode;
-    ensureAlertTypeIsAuthorized: (alertTypeId: string, consumer: string) => void;
-    logSuccessfulAuthorization: () => void;
-  } {
-    // if (this.authorization && this.shouldCheckAuthorization()) {
-    //   // create set of all possible auth spaceId/owner pairs user has
-    //   return {
-    //     filter: ('' as unknown) as KueryNode, // auth filter here
-    //     ensureAlertTypeIsAuthorized: () => {},
-    //     logSuccessfulAuthorization: () => {},
-    //   };
-    // }
-  }
+  // public getFindAuthorizationFilter(): {
+  //   filter?: KueryNode;
+  //   ensureAlertTypeIsAuthorized: (alertTypeId: string, consumer: string) => void;
+  //   logSuccessfulAuthorization: () => void;
+  // } {
+  // if (this.authorization && this.shouldCheckAuthorization()) {
+  //   // create set of all possible auth spaceId/owner pairs user has
+  //   return {
+  //     filter: ('' as unknown) as KueryNode, // auth filter here
+  //     ensureAlertTypeIsAuthorized: () => {},
+  //     logSuccessfulAuthorization: () => {},
+  //   };
+  // }
 }

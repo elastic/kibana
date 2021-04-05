@@ -263,6 +263,7 @@ export class RacClient {
   }: {
     id: string;
   }): Promise<SanitizedAlert<Params>> {
+    return Promise.resolve({ id: 'hello world!!!' });
     // const result = await this.unsecuredSavedObjectsClient.get<RawAlert>('alert', id);
     // try {
     //   await this.authorization.ensureAuthorized(

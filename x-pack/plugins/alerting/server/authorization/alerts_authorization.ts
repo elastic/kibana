@@ -111,13 +111,6 @@ export class AlertsAuthorization {
         // active space at all, which means that their list of features should be empty
         return new Set();
       });
-    console.error(
-      `*********\nALERTING THIS.FEATUREIDS: ${JSON.stringify(
-        Array.from(this.featuresIds),
-        null,
-        2
-      )}\n*********`
-    );
 
     this.allPossibleConsumers = this.featuresIds.then((featuresIds) =>
       featuresIds.size

@@ -14,6 +14,7 @@ export { createLifecycleRuleTypeFactory } from './rule_registry/rule_type_helper
 export { FieldMapOf } from './types';
 export { ScopedRuleRegistryClient } from './rule_registry/create_scoped_rule_registry_client/types';
 export { RacRequestHandlerContext } from './types';
+export { RacRequestHandlerContext, RacApiRequestHandlerContext } from './types';
 
 export const config = {
   schema: schema.object({
