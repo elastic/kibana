@@ -6,5 +6,6 @@
  */
 
 import { FixturePlugin } from './plugin';
+import { PluginInitializerContext } from '../../../../../../../../src/core/server';
 
-export const plugin = () => new FixturePlugin();
+export const plugin = (initContext: PluginInitializerContext) => new FixturePlugin(initContext);
