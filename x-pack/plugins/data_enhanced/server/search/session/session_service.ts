@@ -39,6 +39,7 @@ import { createRequestHash } from './utils';
 import { ConfigSchema } from '../../../config';
 import { registerSearchSessionsTask, scheduleSearchSessionsTasks } from './monitoring_task';
 import { SearchSessionsConfig, SearchStatus } from './types';
+import { DataEnhancedStartDependencies } from '../../type';
 
 export interface SearchSessionDependencies {
   savedObjectsClient: SavedObjectsClientContract;
@@ -79,7 +80,7 @@ export class SearchSessionService
     this.sessionConfig = this.config.search.sessions;
   }
 
-  public setup(core: CoreSetup, deps: SetupDependencies) {
+  public setup(core: CoreSetup<DataEnhancedStartDependencies>, deps: SetupDependencies) {
     registerSearchSessionsTask(core, {
       config: this.config,
       taskManager: deps.taskManager,
