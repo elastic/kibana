@@ -93,7 +93,7 @@ export class RuleRegistryPlugin implements Plugin<RuleRegistryPluginSetupContrac
     // handler is called when '/path' resource is requested with `GET` method
     router.get({ path: '/rac-myfakepath', validate: false }, async (context, req, res) => {
       const racClient = await context.ruleRegistry?.getRacClient();
-      console.error(`WHATS IN THE RAC CLIENT`, racClient);
+      // console.error(`WHATS IN THE RAC CLIENT`, racClient);
       racClient?.get({ id: 'hello world' });
       return res.ok();
     });
@@ -116,6 +116,7 @@ export class RuleRegistryPlugin implements Plugin<RuleRegistryPluginSetupContrac
       },
       features: plugins.features,
       kibanaVersion: this.kibanaVersion,
+      esClient: core.elasticsearch.client.asInternalUser,
     });
 
     const getRacClientWithRequest = (request: KibanaRequest) => {

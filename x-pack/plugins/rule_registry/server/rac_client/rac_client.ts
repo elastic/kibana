@@ -12,42 +12,29 @@ import {
   SavedObject,
   PluginInitializerContext,
   SavedObjectsUtils,
+  ElasticsearchClient,
 } from '../../../../../src/core/server';
 import { esKuery } from '../../../../../src/plugins/data/server';
-import {
-  Alert,
-  PartialAlert,
-  RawAlert,
-  AlertTypeRegistry,
-  AlertAction,
-  IntervalSchedule,
-  SanitizedAlert,
-  AlertTaskState,
-  AlertInstanceSummary,
-  AlertExecutionStatusValues,
-  AlertNotifyWhenType,
-  AlertTypeParams,
-} from '../types';
-import {
-  validateAlertTypeParams,
-  alertExecutionStatusFromRaw,
-  getAlertNotifyWhenType,
-} from '../lib';
 import {
   GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
 } from '../../../security/server';
 
 // TODO: implement the authorization class
-import { AlertsAuthorization, WriteOperations, ReadOperations } from '../authorization';
+import {
+  RacAuthorization,
+  WriteOperations,
+  ReadOperations,
+} from '../authorization/rac_authorization';
 import { AuditLogger, EventOutcome } from '../../../security/server';
-import { alertAuditEvent, AlertAuditAction } from './audit_events';
+// TODO: later
+// import { alertAuditEvent, AlertAuditAction } from './audit_events';
 import { nodeBuilder } from '../../../../../src/plugins/data/common';
 
-export interface RegistryAlertTypeWithAuth extends RegistryAlertType {
-  authorizedConsumers: string[];
-}
-type NormalizedAlertAction = Omit<AlertAction, 'actionTypeId'>;
+// export interface RegistryAlertTypeWithAuth extends RegistryAlertType {
+//   authorizedConsumers: string[];
+// }
+// type NormalizedAlertAction = Omit<AlertAction, 'actionTypeId'>;
 export type CreateAPIKeyResult =
   | { apiKeysEnabled: false }
   | { apiKeysEnabled: true; result: SecurityPluginGrantAPIKeyResult };
@@ -57,10 +44,11 @@ export type InvalidateAPIKeyResult =
 
 export interface ConstructorOptions {
   logger: Logger;
-  authorization: AlertsAuthorization;
+  authorization: RacAuthorization;
   spaceId?: string;
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   auditLogger?: AuditLogger;
+  esClient: ElasticsearchClient;
 }
 
 export interface FindOptions extends IndexType {
@@ -136,20 +124,28 @@ export interface GetAlertInstanceSummaryParams {
 export class RacClient {
   private readonly logger: Logger;
   private readonly spaceId?: string;
-  private readonly authorization: AlertsAuthorization;
-  private readonly alertTypeRegistry: AlertTypeRegistry;
+  private readonly authorization: RacAuthorization;
   private readonly kibanaVersion!: PluginInitializerContext['env']['packageInfo']['version'];
   private readonly auditLogger?: AuditLogger;
+  private readonly esClient: ElasticsearchClient;
 
-  constructor({ authorization, logger, spaceId, kibanaVersion, auditLogger }: ConstructorOptions) {
+  constructor({
+    authorization,
+    logger,
+    spaceId,
+    kibanaVersion,
+    auditLogger,
+    esClient,
+  }: ConstructorOptions) {
     this.logger = logger;
     this.spaceId = spaceId;
     this.authorization = authorization;
     this.kibanaVersion = kibanaVersion;
     this.auditLogger = auditLogger;
+    this.esClient = esClient;
   }
 
-  public async create<Params extends AlertTypeParams = never>({
+  public async create<Params>({
     data,
     options,
   }: CreateOptions<Params>): Promise<SanitizedAlert<Params>> {
@@ -258,12 +254,46 @@ export class RacClient {
     // return this.getAlertFromRaw<Params>(createdAlert.id, createdAlert.attributes, references);
   }
 
-  public async get<Params extends AlertTypeParams = never>({
-    id,
-  }: {
-    id: string;
-  }): Promise<SanitizedAlert<Params>> {
-    return Promise.resolve({ id: 'hello world!!!' });
+  public async get<Params>({ id }: { id: string }): Promise<unknown> {
+    console.error('\n\n\n\n\nHELLO WORLD!!!!\n\n\n\n\n');
+    // TODO: type alert for the get method
+    const thing = await this.esClient.ping();
+    console.error('PING RESULT', JSON.stringify(thing, null, 2));
+    const result = await this.esClient.search({
+      index: 'myfakeindex-1',
+      body: { query: { match_all: {} } },
+    });
+    console.error(`************\nRESULT ${JSON.stringify(result, null, 2)}\n************`);
+    // .get<RawAlert>('alert', id);
+    try {
+      await this.authorization.ensureAuthorized(
+        // TODO: add spaceid here.. I think
+        // result.body._source?.owner,
+        'securitySolution',
+        ReadOperations.Get
+      );
+    } catch (error) {
+      // this.auditLogger?.log(
+      //   alertAuditEvent({
+      //     action: AlertAuditAction.GET,
+      //     savedObject: { type: 'alert', id },
+      //     error,
+      //   })
+      // );
+      throw error;
+    }
+    // this.auditLogger?.log(
+    //   alertAuditEvent({
+    //     action: AlertAuditAction.GET,
+    //     savedObject: { type: 'alert', id },
+    //   })
+    // );
+    // TODO: strip out owner field maybe?
+    // this.getAlertFromRaw<Params>(result.id, result.attributes, result.references);
+
+    return result;
+
+    // return Promise.resolve({ id: 'hello world!!!' });
     // const result = await this.unsecuredSavedObjectsClient.get<RawAlert>('alert', id);
     // try {
     //   await this.authorization.ensureAuthorized(
