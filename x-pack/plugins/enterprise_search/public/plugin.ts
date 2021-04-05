@@ -113,11 +113,11 @@ export class EnterpriseSearchPlugin implements Plugin {
         const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
         const { chrome, http } = kibanaDeps.core;
         chrome.docTitle.change(WORKPLACE_SEARCH_PLUGIN.NAME);
+        await this.getInitialData(http);
 
         // The Workplace Search Personal dashboard needs the chrome hidden. We hide it globally
         // here first to prevent a flash of chrome on the Personal dashboard and unhide it for admin routes.
         chrome.setIsVisible(false);
-        await this.getInitialData(http);
         const pluginData = this.getPluginData();
 
         const { renderApp } = await import('./applications');
