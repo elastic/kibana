@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { MapsLegacyLicensing } from './plugin';
-
-export function plugin() {
-  return new MapsLegacyLicensing();
+export enum URL_KEYS {
+  METRIC_TYPE = 'mt',
+  REPORT_TYPE = 'rt',
+  SERIES_TYPE = 'st',
+  BREAK_DOWN = 'bd',
+  FILTERS = 'ft',
+  REPORT_DEFINITIONS = 'rdf',
 }
