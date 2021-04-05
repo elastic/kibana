@@ -74,6 +74,7 @@ Description:: The details about the incident.
 Parent:: The ID or key of the parent issue. Only for `Subtask` issue types.
 Additional comments:: Additional information for the client, such as how to troubleshoot the issue.
 
+[float]
 [[configuring-jira]]
 === Configure Jira
 
