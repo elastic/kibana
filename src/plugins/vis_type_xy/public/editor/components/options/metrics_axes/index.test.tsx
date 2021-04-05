@@ -14,7 +14,7 @@ import { Position } from '@elastic/charts';
 import { IAggConfig, IAggType } from 'src/plugins/data/public';
 
 import { ChartType } from '../../../../../common';
-import { VisParams, SeriesParam, ValueAxis } from '../../../../types';
+import { VisParams, SeriesParam, ValueAxis, AxisMode, ChartMode } from '../../../../types';
 import MetricsAxisOptions from './index';
 import { ValidationVisOptionsProps } from '../../common';
 import { ValueAxesPanel } from './value_axes_panel';
@@ -128,6 +128,15 @@ describe('MetricsAxisOptions component', () => {
       const updatedSeries = [{ ...chart, data: { id: agg.id, label: agg.makeLabel() } }];
       expect(setValue).toHaveBeenCalledWith(SERIES_PARAMS, updatedSeries);
     });
+
+    it('should set "stacked" mode for metric if the referenced axis is "percentage"', () => {
+      defaultProps.stateParams.valueAxes[0].scale.mode = AxisMode.Percentage;
+      defaultProps.stateParams.seriesParams[0].mode = ChartMode.Normal;
+      mount(<MetricsAxisOptions {...defaultProps} />);
+
+      const updatedSeries = [{ ...chart, disabledMode: true, mode: ChartMode.Stacked }];
+      expect(setValue).toHaveBeenCalledWith(SERIES_PARAMS, updatedSeries);
+    });
   });
 
   describe('updateAxisTitle', () => {
@@ -146,6 +155,7 @@ describe('MetricsAxisOptions component', () => {
     });
 
     it('should set the custom title to match the value axis label when only one agg exists for that axis', () => {
+      defaultProps.stateParams.valueAxes[0].scale.mode = AxisMode.Normal;
       const component = mount(<MetricsAxisOptions {...defaultProps} />);
       const agg = {
         id: aggCount.id,

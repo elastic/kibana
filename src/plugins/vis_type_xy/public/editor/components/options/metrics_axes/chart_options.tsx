@@ -104,6 +104,7 @@ function ChartOptions({
             })}
             options={collections.chartModes}
             paramName="mode"
+            disabled={chart.disabledMode}
             value={chart.mode}
             setValue={setChart}
           />

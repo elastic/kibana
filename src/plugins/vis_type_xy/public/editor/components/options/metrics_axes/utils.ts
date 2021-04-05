@@ -23,6 +23,7 @@ export const makeSerie = (
   const defaultSerie = {
     show: true,
     mode: ChartMode.Normal,
+    disabledMode: false,
     type: ChartType.Line,
     drawLinesBetweenPoints: true,
     showCircles: true,

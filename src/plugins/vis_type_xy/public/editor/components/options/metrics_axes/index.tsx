@@ -13,7 +13,14 @@ import { EuiSpacer } from '@elastic/eui';
 
 import { IAggConfig } from '../../../../../../data/public';
 
-import { VisParams, ValueAxis, SeriesParam, CategoryAxis } from '../../../../types';
+import {
+  VisParams,
+  ValueAxis,
+  SeriesParam,
+  CategoryAxis,
+  ChartMode,
+  AxisMode,
+} from '../../../../types';
 import { ValidationVisOptionsProps } from '../../common';
 import { SeriesPanel } from './series_panel';
 import { CategoryAxisPanel } from './category_axis_panel';
@@ -283,10 +290,11 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<VisParams>) {
     const updatedSeries = metrics.map((agg) => {
       const params = stateParams.seriesParams.find((param) => param.data.id === agg.id);
       const label = agg.makeLabel();
+      let series: SeriesParam;
 
       // update labels for existing params or create new one
       if (params) {
-        return {
+        series = {
           ...params,
           data: {
             ...params.data,
@@ -294,19 +302,36 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<VisParams>) {
           },
         };
       } else {
-        const series = makeSerie(
+        series = makeSerie(
           agg.id,
           label,
           firstValueAxesId,
           stateParams.seriesParams[stateParams.seriesParams.length - 1]
         );
-        return series;
       }
+
+      const valueAxisToMetric = stateParams.valueAxes.find(
+        (valueAxis) => valueAxis.id === series.valueAxis
+      );
+      if (valueAxisToMetric) {
+        series.mode =
+          valueAxisToMetric.scale.mode === AxisMode.Percentage ? ChartMode.Stacked : series.mode;
+        series.disabledMode = valueAxisToMetric.scale.mode === AxisMode.Percentage;
+      }
+
+      return series;
     });
 
     setValue('seriesParams', updatedSeries);
     updateAxisTitle(updatedSeries);
-  }, [metrics, firstValueAxesId, setValue, stateParams.seriesParams, updateAxisTitle]);
+  }, [
+    metrics,
+    firstValueAxesId,
+    setValue,
+    stateParams.seriesParams,
+    stateParams.valueAxes,
+    updateAxisTitle,
+  ]);
 
   return isTabSelected ? (
     <>
