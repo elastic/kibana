@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { DraggableProvidedDragHandleProps } from 'react-beautiful-dnd';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
@@ -126,6 +127,20 @@ describe('Result', () => {
     it('will render custom actions seamlessly next to the document detail link', () => {
       const wrapper = shallow(<Result {...props} actions={actions} shouldLinkToDetailPage />);
       expect(wrapper.find('.appSearchResult__actionButton')).toHaveLength(3);
+    });
+  });
+
+  describe('dragging', () => {
+    // In the real world, the drag library sets data attributes, role, tabIndex, etc.
+    const mockDragHandleProps = ({
+      someMockProp: true,
+    } as unknown) as DraggableProvidedDragHandleProps;
+
+    it('will render a drag handle with the passed props', () => {
+      const wrapper = shallow(<Result {...props} dragHandleProps={mockDragHandleProps} />);
+
+      expect(wrapper.find('.appSearchResult__dragHandle')).toHaveLength(1);
+      expect(wrapper.find('.appSearchResult__dragHandle').prop('someMockProp')).toEqual(true);
     });
   });
 

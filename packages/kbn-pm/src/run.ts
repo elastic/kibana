@@ -69,20 +69,28 @@ export async function runCommand(command: ICommand, config: Omit<ICommandConfig,
     if (command.reportTiming) {
       // if we don't have a kbn object then things are too broken to report on
       if (kbn) {
-        const reporter = CiStatsReporter.fromEnv(log);
-        await reporter.timings({
-          upstreamBranch: kbn.kibanaProject.json.branch,
-          timings: [
-            {
-              group: command.reportTiming.group,
-              id: command.reportTiming.id,
-              ms: Date.now() - runStartTime,
-              meta: {
-                success: false,
+        try {
+          const reporter = CiStatsReporter.fromEnv(log);
+          await reporter.timings({
+            upstreamBranch: kbn.kibanaProject.json.branch,
+            // prevent loading @kbn/utils by passing null
+            kibanaUuid: kbn.getUuid() || null,
+            timings: [
+              {
+                group: command.reportTiming.group,
+                id: command.reportTiming.id,
+                ms: Date.now() - runStartTime,
+                meta: {
+                  success: false,
+                },
               },
-            },
-          ],
-        });
+            ],
+          });
+        } catch (e) {
+          // prevent hiding bootstrap errors
+          log.error('failed to report timings:');
+          log.error(e);
+        }
       }
     }
 

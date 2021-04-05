@@ -44,7 +44,15 @@ interface Props {
   /**
    * Validation to be applied to every text item
    */
-  textValidation?: ValidationFunc<any, string, string>;
+  textValidations?: Array<ValidationFunc<any, string, string>>;
+  /**
+   * Serializer to be applied to every text item
+   */
+  textSerializer?: <O = string>(v: string) => O;
+  /**
+   * Deserializer to be applied to every text item
+   */
+  textDeserializer?: (v: unknown) => string;
 }
 
 const i18nTexts = {
@@ -63,7 +71,9 @@ function DragAndDropTextListComponent({
   onAdd,
   onRemove,
   addLabel,
-  textValidation,
+  textValidations,
+  textDeserializer,
+  textSerializer,
 }: Props): JSX.Element {
   const [droppableId] = useState(() => uuid.v4());
   const [firstItemId] = useState(() => uuid.v4());
@@ -133,9 +143,11 @@ function DragAndDropTextListComponent({
                             <UseField<string>
                               path={item.path}
                               config={{
-                                validations: textValidation
-                                  ? [{ validator: textValidation }]
+                                validations: textValidations
+                                  ? textValidations.map((validator) => ({ validator }))
                                   : undefined,
+                                deserializer: textDeserializer,
+                                serializer: textSerializer,
                               }}
                               readDefaultValueOnForm={!item.isNew}
                             >

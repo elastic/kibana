@@ -122,7 +122,7 @@ export function CustomFields({
                     <ElasticDocsLink
                       target="_blank"
                       section="/kibana"
-                      path="/advanced-queries.html"
+                      path="/correlations.html"
                     >
                       {i18n.translate(
                         'xpack.apm.correlations.customize.fieldHelpTextDocsLink',

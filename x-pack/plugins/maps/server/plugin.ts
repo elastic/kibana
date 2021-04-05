@@ -168,11 +168,12 @@ export class MapsPlugin implements Plugin {
     });
 
     initRoutes(
-      core.http.createRouter(),
+      core,
       () => lastLicenseId,
       emsSettings,
       this.kibanaVersion,
-      this._logger
+      this._logger,
+      currentConfig.enableDrawingFeature
     );
 
     this._initHomeData(home, core.http.basePath.prepend, emsSettings);

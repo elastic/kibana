@@ -79,6 +79,7 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
             _id,
             _index: 'test',
             _source: {
+              'source.ip': '127.0.0.1',
               '@timestamp': '2020-04-20T21:27:45+0000',
               threshold_result: {
                 from: new Date('2020-12-17T16:27:00.000Z'),
@@ -256,6 +257,8 @@ describe('transformThresholdNormalizedResultsToEcs', () => {
             _index: 'test',
             _source: {
               '@timestamp': '2020-04-20T21:27:45+0000',
+              'host.name': 'garden-gnomes',
+              'source.ip': '127.0.0.1',
               threshold_result: {
                 from: new Date('2020-12-17T16:28:00.000Z'), // from threshold signal history
                 terms: [

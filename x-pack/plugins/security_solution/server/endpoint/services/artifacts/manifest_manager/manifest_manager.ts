@@ -32,7 +32,7 @@ import {
   InternalArtifactCompleteSchema,
   internalArtifactCompleteSchema,
 } from '../../../schemas/artifacts';
-import { ArtifactClient } from '../artifact_client';
+import { EndpointArtifactClientInterface } from '../artifact_client';
 import { ManifestClient } from '../manifest_client';
 
 interface ArtifactsBuildResult {
@@ -76,7 +76,7 @@ const iterateAllListItems = async <T>(
 
 export interface ManifestManagerContext {
   savedObjectsClient: SavedObjectsClientContract;
-  artifactClient: ArtifactClient;
+  artifactClient: EndpointArtifactClientInterface;
   exceptionListClient: ExceptionListClient;
   packagePolicyService: PackagePolicyServiceInterface;
   logger: Logger;
@@ -92,7 +92,7 @@ const manifestsEqual = (manifest1: ManifestSchema, manifest2: ManifestSchema) =>
   isEqual(new Set(getArtifactIds(manifest1)), new Set(getArtifactIds(manifest2)));
 
 export class ManifestManager {
-  protected artifactClient: ArtifactClient;
+  protected artifactClient: EndpointArtifactClientInterface;
   protected exceptionListClient: ExceptionListClient;
   protected packagePolicyService: PackagePolicyServiceInterface;
   protected savedObjectsClient: SavedObjectsClientContract;
@@ -100,7 +100,10 @@ export class ManifestManager {
   protected cache: LRU<string, Buffer>;
   protected schemaVersion: ManifestSchemaVersion;
 
-  constructor(context: ManifestManagerContext) {
+  constructor(
+    context: ManifestManagerContext,
+    private readonly isFleetServerEnabled: boolean = false
+  ) {
     this.artifactClient = context.artifactClient;
     this.exceptionListClient = context.exceptionListClient;
     this.packagePolicyService = context.packagePolicyService;
@@ -277,17 +280,23 @@ export class ManifestManager {
         throw new Error('No version returned for manifest.');
       }
 
-      const manifest = new Manifest({
-        schemaVersion: this.schemaVersion,
-        semanticVersion: manifestSo.attributes.semanticVersion,
-        soVersion: manifestSo.version,
-      });
+      const manifest = new Manifest(
+        {
+          schemaVersion: this.schemaVersion,
+          semanticVersion: manifestSo.attributes.semanticVersion,
+          soVersion: manifestSo.version,
+        },
+        this.isFleetServerEnabled
+      );
 
       for (const entry of manifestSo.attributes.artifacts) {
-        manifest.addEntry(
-          (await this.artifactClient.getArtifact(entry.artifactId)).attributes,
-          entry.policyId
-        );
+        const artifact = await this.artifactClient.getArtifact(entry.artifactId);
+
+        if (!artifact) {
+          throw new Error(`artifact id [${entry.artifactId}] not found!`);
+        }
+
+        manifest.addEntry(artifact, entry.policyId);
       }
 
       return manifest;
@@ -300,24 +309,40 @@ export class ManifestManager {
   }
 
   /**
+   * creates a new default Manifest
+   */
+  public static createDefaultManifest(
+    schemaVersion?: ManifestSchemaVersion,
+    isFleetServerEnabled?: boolean
+  ): Manifest {
+    return Manifest.getDefault(schemaVersion, isFleetServerEnabled);
+  }
+
+  /**
    * Builds a new manifest based on the current user exception list.
    *
    * @param baselineManifest A baseline manifest to use for initializing pre-existing artifacts.
    * @returns {Promise<Manifest>} A new Manifest object reprenting the current exception list.
    */
   public async buildNewManifest(
-    baselineManifest: Manifest = Manifest.getDefault(this.schemaVersion)
+    baselineManifest: Manifest = ManifestManager.createDefaultManifest(
+      this.schemaVersion,
+      this.isFleetServerEnabled
+    )
   ): Promise<Manifest> {
     const results = await Promise.all([
       this.buildExceptionListArtifacts(),
       this.buildTrustedAppsArtifacts(),
     ]);
 
-    const manifest = new Manifest({
-      schemaVersion: this.schemaVersion,
-      semanticVersion: baselineManifest.getSemanticVersion(),
-      soVersion: baselineManifest.getSavedObjectVersion(),
-    });
+    const manifest = new Manifest(
+      {
+        schemaVersion: this.schemaVersion,
+        semanticVersion: baselineManifest.getSemanticVersion(),
+        soVersion: baselineManifest.getSavedObjectVersion(),
+      },
+      this.isFleetServerEnabled
+    );
 
     for (const result of results) {
       await iterateArtifactsBuildResult(result, async (artifact, policyId) => {
@@ -440,7 +465,7 @@ export class ManifestManager {
     });
   }
 
-  public getArtifactsClient(): ArtifactClient {
+  public getArtifactsClient(): EndpointArtifactClientInterface {
     return this.artifactClient;
   }
 }

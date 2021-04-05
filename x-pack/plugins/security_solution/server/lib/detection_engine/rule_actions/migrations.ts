@@ -8,8 +8,18 @@
 import {
   SavedObjectUnsanitizedDoc,
   SavedObjectSanitizedDoc,
+  SavedObjectAttributes,
 } from '../../../../../../../src/core/server';
 import { IRuleActionsAttributesSavedObjectAttributes, RuleAlertAction } from './types';
+
+function isEmptyObject(obj: {}) {
+  for (const attr in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, attr)) {
+      return false;
+    }
+  }
+  return true;
+}
 
 export const ruleActionsSavedObjectMigration = {
   '7.11.2': (
@@ -17,108 +27,133 @@ export const ruleActionsSavedObjectMigration = {
   ): SavedObjectSanitizedDoc<IRuleActionsAttributesSavedObjectAttributes> => {
     const { actions } = doc.attributes;
     const newActions = actions.reduce((acc, action) => {
-      if (action.params.subAction !== 'pushToService') {
-        return [...acc, action];
-      }
-
-      if (action.action_type_id === '.servicenow') {
-        const { title, comments, comment, description, severity, urgency, impact } = action.params
-          .subActionParams as {
-          title: string;
-          description?: string;
-          severity?: string;
-          urgency?: string;
-          impact?: string;
-          comment?: string;
-          comments?: Array<{ commentId: string; comment: string }>;
-        };
-        return [
-          ...acc,
-          {
-            ...action,
-            params: {
-              subAction: 'pushToService',
-              subActionParams: {
-                incident: {
-                  short_description: title,
-                  description,
-                  severity,
-                  urgency,
-                  impact,
+      if (
+        ['.servicenow', '.jira', '.resilient'].includes(action.action_type_id) &&
+        action.params.subAction === 'pushToService'
+      ) {
+        // Future developer, we needed to do that because when we created this migration
+        // we forget to think about user already using 7.11.0 and having an incident attribute build the right way
+        // IMPORTANT -> if you change this code please do the same inside of this file
+        // x-pack/plugins/alerting/server/saved_objects/migrations.ts
+        const subActionParamsIncident =
+          (action.params?.subActionParams as SavedObjectAttributes)?.incident ?? null;
+        if (subActionParamsIncident != null && !isEmptyObject(subActionParamsIncident)) {
+          return [...acc, action];
+        }
+        if (action.action_type_id === '.servicenow') {
+          const {
+            title,
+            comments,
+            comment,
+            description,
+            severity,
+            urgency,
+            impact,
+            short_description: shortDescription,
+          } = action.params.subActionParams as {
+            title: string;
+            description?: string;
+            severity?: string;
+            urgency?: string;
+            impact?: string;
+            comment?: string;
+            comments?: Array<{ commentId: string; comment: string }>;
+            short_description?: string;
+          };
+          return [
+            ...acc,
+            {
+              ...action,
+              params: {
+                subAction: 'pushToService',
+                subActionParams: {
+                  incident: {
+                    short_description: shortDescription ?? title,
+                    description,
+                    severity,
+                    urgency,
+                    impact,
+                  },
+                  comments: [
+                    ...(comments ?? []),
+                    ...(comment != null ? [{ commentId: '1', comment }] : []),
+                  ],
                 },
-                comments: [
-                  ...(comments ?? []),
-                  ...(comment != null ? [{ commentId: '1', comment }] : []),
-                ],
               },
             },
-          },
-        ] as RuleAlertAction[];
-      }
-
-      if (action.action_type_id === '.jira') {
-        const { title, comments, description, issueType, priority, labels, parent } = action.params
-          .subActionParams as {
-          title: string;
-          description: string;
-          issueType: string;
-          priority?: string;
-          labels?: string[];
-          parent?: string;
-          comments?: unknown[];
-        };
-        return [
-          ...acc,
-          {
-            ...action,
-            params: {
-              subAction: 'pushToService',
-              subActionParams: {
-                incident: {
-                  summary: title,
-                  description,
-                  issueType,
-                  priority,
-                  labels,
-                  parent,
+          ] as RuleAlertAction[];
+        } else if (action.action_type_id === '.jira') {
+          const {
+            title,
+            comments,
+            description,
+            issueType,
+            priority,
+            labels,
+            parent,
+            summary,
+          } = action.params.subActionParams as {
+            title: string;
+            description: string;
+            issueType: string;
+            priority?: string;
+            labels?: string[];
+            parent?: string;
+            comments?: unknown[];
+            summary?: string;
+          };
+          return [
+            ...acc,
+            {
+              ...action,
+              params: {
+                subAction: 'pushToService',
+                subActionParams: {
+                  incident: {
+                    summary: summary ?? title,
+                    description,
+                    issueType,
+                    priority,
+                    labels,
+                    parent,
+                  },
+                  comments,
                 },
-                comments,
               },
             },
-          },
-        ] as RuleAlertAction[];
-      }
-
-      if (action.action_type_id === '.resilient') {
-        const { title, comments, description, incidentTypes, severityCode } = action.params
-          .subActionParams as {
-          title: string;
-          description: string;
-          incidentTypes?: number[];
-          severityCode?: number;
-          comments?: unknown[];
-        };
-        return [
-          ...acc,
-          {
-            ...action,
-            params: {
-              subAction: 'pushToService',
-              subActionParams: {
-                incident: {
-                  name: title,
-                  description,
-                  incidentTypes,
-                  severityCode,
+          ] as RuleAlertAction[];
+        } else if (action.action_type_id === '.resilient') {
+          const { title, comments, description, incidentTypes, severityCode, name } = action.params
+            .subActionParams as {
+            title: string;
+            description: string;
+            incidentTypes?: number[];
+            severityCode?: number;
+            comments?: unknown[];
+            name?: string;
+          };
+          return [
+            ...acc,
+            {
+              ...action,
+              params: {
+                subAction: 'pushToService',
+                subActionParams: {
+                  incident: {
+                    name: name ?? title,
+                    description,
+                    incidentTypes,
+                    severityCode,
+                  },
+                  comments,
                 },
-                comments,
               },
             },
-          },
-        ] as RuleAlertAction[];
+          ] as RuleAlertAction[];
+        }
       }
 
-      return acc;
+      return [...acc, action];
     }, [] as RuleAlertAction[]);
 
     return {

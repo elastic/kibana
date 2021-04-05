@@ -96,6 +96,7 @@ export const SearchBar: React.FunctionComponent<Props> = ({
       onSubmit={(newQuery) => {
         onChange(newQuery.query as string, true);
       }}
+      submitOnBlur
     />
   );
 };

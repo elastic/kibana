@@ -13,6 +13,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTitle,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
@@ -24,8 +25,10 @@ import { useFetcher } from '../../../../hooks/use_fetcher';
 import { createAgentConfigurationHref } from '../../../shared/Links/apm/agentConfigurationLinks';
 import { AgentConfigurationList } from './List';
 
+const INITIAL_DATA = { configurations: [] };
+
 export function AgentConfigurations() {
-  const { refetch, data = [], status } = useFetcher(
+  const { refetch, data = INITIAL_DATA, status } = useFetcher(
     (callApmApi) =>
       callApmApi({ endpoint: 'GET /api/apm/settings/agent-configuration' }),
     [],
@@ -35,22 +38,28 @@ export function AgentConfigurations() {
   useTrackPageview({ app: 'apm', path: 'agent_configuration' });
   useTrackPageview({ app: 'apm', path: 'agent_configuration', delay: 15000 });
 
-  const hasConfigurations = !isEmpty(data);
+  const hasConfigurations = !isEmpty(data.configurations);
 
   return (
     <>
       <EuiTitle size="l">
         <h1>
           {i18n.translate('xpack.apm.agentConfig.titleText', {
-            defaultMessage: 'Agent remote configuration',
+            defaultMessage: 'Agent central configuration',
           })}
         </h1>
       </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiText color="subdued">
+        {i18n.translate('xpack.apm.settings.agentConfig.descriptionText', {
+          defaultMessage: `Fine-tune your agent configuration from within the APM app. Changes are automatically propagated to your APM agents, so there’s no need to redeploy.`,
+        })}
+      </EuiText>
       <EuiSpacer size="l" />
       <EuiPanel>
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiTitle>
+            <EuiTitle size="s">
               <h2>
                 {i18n.translate(
                   'xpack.apm.agentConfig.configurationsPanelTitle',
@@ -65,7 +74,11 @@ export function AgentConfigurations() {
 
         <EuiSpacer size="m" />
 
-        <AgentConfigurationList status={status} data={data} refetch={refetch} />
+        <AgentConfigurationList
+          status={status}
+          configurations={data.configurations}
+          refetch={refetch}
+        />
       </EuiPanel>
     </>
   );

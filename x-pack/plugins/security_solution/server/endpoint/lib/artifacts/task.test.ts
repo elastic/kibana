@@ -16,7 +16,6 @@ import { ManifestManager } from '../../services/artifacts/manifest_manager';
 import { buildManifestManagerMock } from '../../services/artifacts/manifest_manager/manifest_manager.mock';
 import { InternalArtifactCompleteSchema } from '../../schemas/artifacts';
 import { getMockArtifacts } from './mocks';
-import { Manifest } from './manifest';
 
 describe('task', () => {
   const MOCK_TASK_INSTANCE = {
@@ -83,10 +82,11 @@ describe('task', () => {
       const mockContext = createMockEndpointAppContext();
       const mockTaskManager = taskManagerMock.createSetup();
 
-      new ManifestTask({
+      const manifestTaskInstance = new ManifestTask({
         endpointAppContext: mockContext,
         taskManager: mockTaskManager,
       });
+      manifestTaskInstance.start({ taskManager: taskManagerMock.createStart() });
 
       mockContext.service.getManifestManager = jest.fn().mockReturnValue(manifestManager);
 
@@ -129,7 +129,7 @@ describe('task', () => {
 
     test('Should stop the process when no building new manifest throws error', async () => {
       const manifestManager = buildManifestManagerMock();
-      const lastManifest = Manifest.getDefault();
+      const lastManifest = ManifestManager.createDefaultManifest();
 
       manifestManager.getLastComputedManifest = jest.fn().mockReturnValue(lastManifest);
       manifestManager.buildNewManifest = jest.fn().mockRejectedValue(new Error());
@@ -147,11 +147,11 @@ describe('task', () => {
     test('Should not bump version and commit manifest when no diff in the manifest', async () => {
       const manifestManager = buildManifestManagerMock();
 
-      const lastManifest = Manifest.getDefault();
+      const lastManifest = ManifestManager.createDefaultManifest();
       lastManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
       lastManifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS);
 
-      const newManifest = Manifest.getDefault();
+      const newManifest = ManifestManager.createDefaultManifest();
       newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
       newManifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS);
 
@@ -176,9 +176,9 @@ describe('task', () => {
     test('Should stop the process when there are errors pushing new artifacts', async () => {
       const manifestManager = buildManifestManagerMock();
 
-      const lastManifest = Manifest.getDefault();
+      const lastManifest = ManifestManager.createDefaultManifest();
 
-      const newManifest = Manifest.getDefault();
+      const newManifest = ManifestManager.createDefaultManifest();
       newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
       newManifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS);
 
@@ -204,9 +204,9 @@ describe('task', () => {
     test('Should stop the process when there are errors committing manifest', async () => {
       const manifestManager = buildManifestManagerMock();
 
-      const lastManifest = Manifest.getDefault();
+      const lastManifest = ManifestManager.createDefaultManifest();
 
-      const newManifest = Manifest.getDefault();
+      const newManifest = ManifestManager.createDefaultManifest();
       newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
       newManifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS);
 
@@ -233,9 +233,9 @@ describe('task', () => {
     test('Should stop the process when there are errors dispatching manifest', async () => {
       const manifestManager = buildManifestManagerMock();
 
-      const lastManifest = Manifest.getDefault();
+      const lastManifest = ManifestManager.createDefaultManifest();
 
-      const newManifest = Manifest.getDefault();
+      const newManifest = ManifestManager.createDefaultManifest();
       newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
       newManifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS);
 
@@ -263,11 +263,11 @@ describe('task', () => {
     test('Should succeed the process and delete old artifacts', async () => {
       const manifestManager = buildManifestManagerMock();
 
-      const lastManifest = Manifest.getDefault();
+      const lastManifest = ManifestManager.createDefaultManifest();
       lastManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
       lastManifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS);
 
-      const newManifest = Manifest.getDefault();
+      const newManifest = ManifestManager.createDefaultManifest();
       newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
       newManifest.addEntry(ARTIFACT_TRUSTED_APPS_MACOS);
 
@@ -293,11 +293,11 @@ describe('task', () => {
     test('Should succeed the process but not add or delete artifacts when there are only transitions', async () => {
       const manifestManager = buildManifestManagerMock();
 
-      const lastManifest = Manifest.getDefault();
+      const lastManifest = ManifestManager.createDefaultManifest();
       lastManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS);
       lastManifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_1);
 
-      const newManifest = Manifest.getDefault();
+      const newManifest = ManifestManager.createDefaultManifest();
       newManifest.addEntry(ARTIFACT_EXCEPTIONS_MACOS, TEST_POLICY_ID_1);
       newManifest.addEntry(ARTIFACT_EXCEPTIONS_WINDOWS, TEST_POLICY_ID_2);
 

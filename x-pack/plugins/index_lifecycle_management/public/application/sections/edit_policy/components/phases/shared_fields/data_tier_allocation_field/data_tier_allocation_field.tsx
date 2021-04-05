@@ -25,7 +25,6 @@ import {
   DefaultAllocationNotice,
   DefaultAllocationWarning,
   NoNodeAttributesWarning,
-  MissingCloudTierCallout,
   CloudDataTierCallout,
   LoadingError,
 } from './components';
@@ -59,38 +58,20 @@ export const DataTierAllocationField: FunctionComponent<Props> = ({ phase, descr
 
   const { nodesByRoles, nodesByAttributes, isUsingDeprecatedDataRoleConfig } = data!;
 
-  const hasDataNodeRoles = Object.keys(nodesByRoles).some((nodeRole) =>
-    // match any of the "data_" roles, including data_content.
-    nodeRole.trim().startsWith('data_')
-  );
   const hasNodeAttrs = Boolean(Object.keys(nodesByAttributes ?? {}).length);
   const isCloudEnabled = cloud?.isCloudEnabled ?? false;
-  const cloudDeploymentUrl = cloud?.cloudDeploymentUrl;
+  const cloudDeploymentUrl = cloud?.deploymentUrl;
 
   const renderNotice = () => {
     switch (allocationType) {
       case 'node_roles':
         /**
-         * We'll drive Cloud users to add a cold or frozen tier to their deployment if there are no nodes with that role.
+         * On cloud most users should be using autoscaling which will provision tiers as they are needed. We do not surface any
+         * of the notices below.
          */
-        if (
-          isCloudEnabled &&
-          !isUsingDeprecatedDataRoleConfig &&
-          (phase === 'cold' || phase === 'frozen')
-        ) {
-          const hasNoNodesWithNodeRole = !nodesByRoles[`data_${phase}` as const]?.length;
-
-          if (hasDataNodeRoles && hasNoNodesWithNodeRole) {
-            // Tell cloud users they can deploy nodes on cloud.
-            return (
-              <>
-                <EuiSpacer size="s" />
-                <MissingCloudTierCallout phase={phase} linkToCloudDeployment={cloudDeploymentUrl} />
-              </>
-            );
-          }
+        if (isCloudEnabled) {
+          return null;
         }
-
         /**
          * Node role allocation moves data in a phase to a corresponding tier of the same name. To prevent policy execution from getting
          * stuck ILM allocation will fall back to a previous tier if possible. We show the WARNING below to inform a user when even

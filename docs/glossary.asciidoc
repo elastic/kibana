@@ -2,7 +2,7 @@
 [[glossary]]
 = Glossary
 
-<<a_glos>> | <<b_glos>> | <<c_glos>> | <<d_glos>> | <<e_glos>> | <<f_glos>> | <<g_glos>> | H | I | J | <<k_glos>> | <<l_glos>> | <<m_glos>> | N | O | <<p_glos>> | <<q_glos>> | R | <<s_glos>> | <<t_glos>> | <<u_glos>> | V | <<w_glos>> | X | Y | Z
+<<a_glos>> | <<b_glos>> | <<c_glos>> | <<d_glos>> | <<e_glos>> | <<f_glos>> | <<g_glos>> | H | I | J | <<k_glos>> | <<l_glos>> | <<m_glos>> | N | O | <<p_glos>> | <<q_glos>> | <<r_glos>> | <<s_glos>> | <<t_glos>> | <<u_glos>> | V | <<w_glos>> | X | Y | Z
 
 [float]
 [[a_glos]]
@@ -13,10 +13,9 @@
 +
 --
 // tag::action-def[]
-The alert-specific response that occurs when an alert fires.
-An alert can have multiple actions.
-See
-{kibana-ref}/action-types.html[Action and connector types].
+The rule-specific response that occurs when an alerting <<glossary-rule,rule>>
+fires. A rule can have multiple actions. See
+{kibana-ref}/action-types.html[Connectors and actions].
 // end::action-def[]
 --
 
@@ -27,20 +26,6 @@ by setting the date format, default index, and other attributes.
 Part of {kib} Stack Management.
 See {kibana-ref}/advanced-options.html[Advanced Settings].
 // end::advanced-settings-def[]
-
-[[glossary-alert]] alert ::
-// tag::alert-def[]
-A set of <<glossary-condition,conditions>>, schedules, and <<glossary-action,actions>>
-that enable notifications.
-See <<glossary-alerts-and-actions,Alerts and Actions>>.
-// end::alert-def[]
-
-[[glossary-alerts-and-actions]] Alerts and Actions ::
-// tag::alerts-and-actions-def[]
-A comprehensive view of all your alerts. Enables you to access and
-manage alerts for all {kib} apps from one place.
-See {kibana-ref}/alerting-getting-started.html[Alerts and Actions].
-// end::alerts-and-actions-def[]
 
 [[glossary-annotation]] annotation ::
 // tag::annotation-def[]
@@ -113,13 +98,14 @@ The cluster location is the weighted centroid for all documents in the grid cell
 
 [[glossary-condition]] condition ::
 // tag::condition-def[]
-Specifies the circumstances that must be met to trigger an alert.
+Specifies the circumstances that must be met to trigger an alerting
+<<glossary-rule,rule>>.
 // end::condition-def[]
 
 [[glossary-connector]] connector ::
 // tag::connector-def[]
 A configuration that enables integration with an external system (the destination for an action).
-See {kibana-ref}/action-types.html[Action and connector types].
+See {kibana-ref}/action-types.html[Connectors and actions].
 // end::connector-def[]
 
 [[glossary-console]] Console ::
@@ -334,6 +320,24 @@ query element or visualization, such as a chart, table, or list.
 A tool that enables you to inspect and analyze search queries to diagnose and debug poorly performing queries.
 See {kibana-ref}/xpack-profiler.html[Query Profiler].
 // end::query-profiler-def[]
+
+[float]
+[[r_glos]]
+== R
+
+[[glossary-rule]] rule ::
+// tag::rule-def[]
+A set of <<glossary-condition,conditions>>, schedules, and <<glossary-action,actions>>
+that enable notifications.
+See <<glossary-rules-and-connectors,Rules and Connectors>>.
+// end::rule-def[]
+
+[[glossary-rules-and-connectors]] Rules and Connectors ::
+// tag::rules-and-connectors-def[]
+A comprehensive view of all your alerting rules. Enables you to access and
+manage rules for all {kib} apps from one place.
+See {kibana-ref}/alerting-getting-started.html[Rules and Connectors].
+// end::rules-and-connectors-def[]
 
 [float]
 [[s_glos]]

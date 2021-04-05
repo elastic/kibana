@@ -34,3 +34,5 @@ export const TRAINING_DOCS_LOWER = 200;
 export const INCLUDED_FIELDS_THRESHOLD = 100;
 export const MINIMUM_NUM_FIELD_FOR_CHECK = 25;
 export const FRACTION_EMPTY_LIMIT = 0.3;
+export const NUM_CATEGORIES_THRESHOLD = 10;
+export const ALL_CATEGORIES = -1;

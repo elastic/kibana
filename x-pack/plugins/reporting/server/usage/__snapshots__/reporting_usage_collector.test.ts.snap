@@ -13,6 +13,10 @@ Object {
     "available": true,
     "total": 0,
   },
+  "csv_searchsource": Object {
+    "available": true,
+    "total": 0,
+  },
   "enabled": true,
   "last7Days": Object {
     "PNG": Object {
@@ -21,6 +25,10 @@ Object {
     },
     "_all": 0,
     "csv": Object {
+      "available": true,
+      "total": 0,
+    },
+    "csv_searchsource": Object {
       "available": true,
       "total": 0,
     },
@@ -75,6 +83,10 @@ Object {
     "available": true,
     "total": 0,
   },
+  "csv_searchsource": Object {
+    "available": true,
+    "total": 0,
+  },
   "enabled": true,
   "last7Days": Object {
     "PNG": Object {
@@ -83,6 +95,10 @@ Object {
     },
     "_all": 1,
     "csv": Object {
+      "available": true,
+      "total": 0,
+    },
+    "csv_searchsource": Object {
       "available": true,
       "total": 0,
     },
@@ -166,6 +182,10 @@ Object {
     "available": true,
     "total": 1,
   },
+  "csv_searchsource": Object {
+    "available": true,
+    "total": 0,
+  },
   "enabled": true,
   "last7Days": Object {
     "PNG": Object {
@@ -176,6 +196,10 @@ Object {
     "csv": Object {
       "available": true,
       "total": 1,
+    },
+    "csv_searchsource": Object {
+      "available": true,
+      "total": 0,
     },
     "printable_pdf": Object {
       "app": Object {

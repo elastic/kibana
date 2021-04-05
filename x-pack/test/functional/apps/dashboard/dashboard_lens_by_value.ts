@@ -83,7 +83,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-        operation: 'avg',
+        operation: 'average',
         field: 'bytes',
       });
       await PageObjects.lens.notLinkedToOriginatingApp();

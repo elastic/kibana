@@ -16,6 +16,11 @@ import type { TransformId, TransformPivotConfig } from '../types/transform';
 
 import { transformStateSchema, runtimeMappingsSchema } from './common';
 
+// GET transform nodes
+export interface GetTransformNodesResponseSchema {
+  count: number;
+}
+
 // GET transforms
 export const getTransformsRequestSchema = schema.arrayOf(
   schema.object({
@@ -40,6 +45,7 @@ export const destSchema = schema.object({
 export const pivotSchema = schema.object({
   group_by: schema.any(),
   aggregations: schema.any(),
+  max_page_search_size: schema.maybe(schema.number()),
 });
 
 export const latestFunctionSchema = schema.object({

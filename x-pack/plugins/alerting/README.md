@@ -116,9 +116,8 @@ This is the primary function for an alert type. Whenever the alert needs to exec
 
 |Property|Description|
 |---|---|
-|services.callCluster(path, opts)|Use this to do Elasticsearch queries on the cluster Kibana connects to. This function is the same as any other `callCluster` in Kibana but in the context of the user who created the alert when security is enabled.|
+|services.scopedClusterClient|This is an instance of the Elasticsearch client. Use this to do Elasticsearch queries in the context of the user who created the alert when security is enabled.|
 |services.savedObjectsClient|This is an instance of the saved objects client. This provides the ability to do CRUD on any saved objects within the same space the alert lives in.<br><br>The scope of the saved objects client is tied to the user who created the alert (only when security isenabled).|
-|services.getLegacyScopedClusterClient|This function returns an instance of the LegacyScopedClusterClient scoped to the user who created the alert when security is enabled.|
 |services.alertInstanceFactory(id)|This [alert instance factory](#alert-instance-factory) creates instances of alerts and must be used in order to execute actions. The id you give to the alert instance factory is a unique identifier to the alert instance.|
 |services.log(tags, [data], [timestamp])|Use this to create server logs. (This is the same function as server.log)|
 |startedAt|The date and time the alert type started execution.|
@@ -454,20 +453,20 @@ The only case in which this handler will not be used to evaluate the navigation 
 
 You can use the `registerNavigation` api to specify as many AlertType specific handlers as you like, but you can only use it once per AlertType as we wouldn't know which handler to use if you specified two for the same AlertType. For the same reason, you can only use `registerDefaultNavigation` once per plugin, as it covers all cases for your specific plugin.
 
-## Experimental RESTful API
+## Internal HTTP APIs
 
-Using of the alert type requires you to create an alert that will contain parameters and actions for a given alert type. API description for CRUD operations is a part of the [user documentation](https://www.elastic.co/guide/en/kibana/master/alerts-api-update.html).
-API listed below is experimental and could be changed or removed in the future.
+Using of the rule type requires you to create a rule that will contain parameters and actions for a given rule type. API description for CRUD operations is a part of the [user documentation](https://www.elastic.co/guide/en/kibana/master/alerting-apis.html).
+API listed below are internal and should not be consumed by plugin outside the alerting plugins.
 
-### `GET /api/alerts/alert/{id}/state`: Get alert state
+### `GET /internal/alerting/rule/{id}/state`: Get rule state
 
 Params:
 
 |Property|Description|Type|
 |---|---|---|
-|id|The id of the alert whose state you're trying to get.|string|
+|id|The id of the rule whose state you're trying to get.|string|
 
-### `GET /api/alerts/alert/{id}/_instance_summary`: Get alert instance summary
+### `GET /internal/alerting/rule/{id}/_alert_summary`: Get rule alert summary
 
 Similar to the `GET state` call, but collects additional information from
 the event log.
@@ -476,7 +475,7 @@ Params:
 
 |Property|Description|Type|
 |---|---|---|
-|id|The id of the alert whose instance summary you're trying to get.|string|
+|id|The id of the rule whose alert summary you're trying to get.|string|
 
 Query:
 
@@ -484,11 +483,11 @@ Query:
 |---|---|---|
 |dateStart|The date to start looking for alert events in the event log. Either an ISO date string, or a duration string indicating time since now.|string|
 
-### `POST /api/alerts/alert/{id}/_update_api_key`: Update alert API key
+### `POST /internal/alerting/rule/{id}/_update_api_key`: Update rule API key
 
 |Property|Description|Type|
 |---|---|---|
-|id|The id of the alert you're trying to update the API key for. System will use user in request context to generate an API key for.|string|
+|id|The id of the rule you're trying to update the API key for. System will use user in request context to generate an API key for.|string|
 
 ## Alert instance factory
 

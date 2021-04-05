@@ -7,7 +7,7 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function spaceSelectorFunctonalTests({
+export default function spaceSelectorFunctionalTests({
   getService,
   getPageObjects,
 }: FtrProviderContext) {
@@ -22,8 +22,7 @@ export default function spaceSelectorFunctonalTests({
     'spaceSelector',
   ]);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/51942
-  describe.skip('Spaces', function () {
+  describe('Spaces', function () {
     this.tags('includeFirefox');
     describe('Space Selector', () => {
       before(async () => {

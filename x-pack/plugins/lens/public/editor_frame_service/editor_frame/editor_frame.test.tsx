@@ -14,9 +14,16 @@ import { ReactWrapper } from 'enzyme';
 jest.mock('react-virtualized-auto-sizer', () => {
   return function (props: {
     children: (dimensions: { width: number; height: number }) => React.ReactNode;
+    disableHeight?: boolean;
   }) {
-    const { children, ...otherProps } = props;
-    return <div {...otherProps}>{children({ width: 100, height: 100 })}</div>;
+    const { children, disableHeight, ...otherProps } = props;
+    return (
+      // js-dom may complain that a non-DOM attributes are used when appending props
+      // Handle the disableHeight case using native DOM styling
+      <div {...otherProps} style={disableHeight ? { height: 0 } : {}}>
+        {children({ width: 100, height: 100 })}
+      </div>
+    );
   };
 });
 
@@ -66,7 +73,7 @@ function getDefaultProps() {
     dateRange: { fromDate: '', toDate: '' },
     query: { query: '', language: 'lucene' },
     filters: [],
-    core: coreMock.createSetup(),
+    core: coreMock.createStart(),
     plugins: {
       uiActions: uiActionsPluginMock.createStartContract(),
       data: dataPluginMock.createStartContract(),

@@ -11,7 +11,6 @@ import { useActions, useValues } from 'kea';
 
 import {
   EuiPageHeader,
-  EuiPageHeaderSection,
   EuiTitle,
   EuiPageContentBody,
   EuiPanel,
@@ -55,16 +54,10 @@ export const Credentials: React.FC = () => {
   return (
     <>
       <SetPageChrome trail={[CREDENTIALS_TITLE]} />
-      <EuiPageHeader>
-        <EuiPageHeaderSection>
-          <EuiTitle size="l">
-            <h1>{CREDENTIALS_TITLE}</h1>
-          </EuiTitle>
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
+      <EuiPageHeader pageTitle={CREDENTIALS_TITLE} />
       <EuiPageContentBody>
         {shouldShowCredentialsForm && <CredentialsFlyout />}
-        <EuiPanel className="eui-textCenter">
+        <EuiPanel hasBorder className="eui-textCenter">
           <EuiTitle size="s">
             <h2>
               {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.apiEndpoint', {
@@ -123,7 +116,9 @@ export const Credentials: React.FC = () => {
         </EuiPageContentHeader>
         <EuiSpacer size="m" />
         <FlashMessages />
-        <EuiPanel>{!!dataLoading ? <EuiLoadingContent lines={3} /> : <CredentialsList />}</EuiPanel>
+        <EuiPanel hasBorder>
+          {!!dataLoading ? <EuiLoadingContent lines={3} /> : <CredentialsList />}
+        </EuiPanel>
       </EuiPageContentBody>
     </>
   );

@@ -121,7 +121,7 @@ export interface ConnectorValidationResult<Config, Secrets> {
   secrets?: GenericValidationResult<Secrets>;
 }
 
-interface ActionConnectorProps<Config, Secrets> {
+export interface ActionConnectorProps<Config, Secrets> {
   secrets: Secrets;
   id: string;
   actionTypeId: string;

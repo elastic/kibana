@@ -35,8 +35,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/94367
-  describe.skip('deleting signals migrations', () => {
+  describe('deleting signals migrations', () => {
     let outdatedSignalsIndexName: string;
     let createdMigration: CreateResponse;
     let finalizedMigration: FinalizeResponse;
@@ -129,11 +128,8 @@ export default ({ getService }: FtrProviderContext): void => {
       const deletedMigration = body.migrations[0];
 
       expect(deletedMigration.id).to.eql(createdMigration.migration_id);
-      expect(deletedMigration.error).to.eql({
-        message:
-          'security_exception: action [indices:admin/settings/update] is unauthorized for user [t1_analyst] on indices [], this action is granted by the index privileges [manage,all]',
-        status_code: 403,
-      });
+      expect(deletedMigration.error.message).to.match(/^security_exception/);
+      expect(deletedMigration.error.status_code).to.eql(403);
     });
   });
 };

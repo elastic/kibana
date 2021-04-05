@@ -31,6 +31,7 @@ describe('getUpgradeAssistantStatus', () => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient();
 
   esClient.asCurrentUser.migration.deprecations.mockResolvedValue(
+    // @ts-expect-error not full interface
     asApiResponse(deprecationsResponse)
   );
 
@@ -48,6 +49,7 @@ describe('getUpgradeAssistantStatus', () => {
 
   it('returns readyForUpgrade === false when critical issues found', async () => {
     esClient.asCurrentUser.migration.deprecations.mockResolvedValue(
+      // @ts-expect-error not full interface
       asApiResponse({
         cluster_settings: [{ level: 'critical', message: 'Do count me', url: 'https://...' }],
         node_settings: [],
@@ -64,6 +66,7 @@ describe('getUpgradeAssistantStatus', () => {
 
   it('returns readyForUpgrade === true when no critical issues found', async () => {
     esClient.asCurrentUser.migration.deprecations.mockResolvedValue(
+      // @ts-expect-error not full interface
       asApiResponse({
         cluster_settings: [{ level: 'warning', message: 'Do not count me', url: 'https://...' }],
         node_settings: [],
@@ -80,6 +83,7 @@ describe('getUpgradeAssistantStatus', () => {
 
   it('filters out security realm deprecation on Cloud', async () => {
     esClient.asCurrentUser.migration.deprecations.mockResolvedValue(
+      // @ts-expect-error not full interface
       asApiResponse({
         cluster_settings: [
           {

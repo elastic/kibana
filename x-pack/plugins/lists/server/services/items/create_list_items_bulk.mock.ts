@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { getCallClusterMock } from '../../../common/get_call_cluster.mock';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+
 import { CreateListItemsBulkOptions } from '../items';
 import {
   DATE_NOW,
@@ -20,9 +22,9 @@ import {
 } from '../../../common/constants.mock';
 
 export const getCreateListItemBulkOptionsMock = (): CreateListItemsBulkOptions => ({
-  callCluster: getCallClusterMock(),
   dateNow: DATE_NOW,
   deserializer: undefined,
+  esClient: elasticsearchClientMock.createScopedClusterClient().asCurrentUser,
   listId: LIST_ID,
   listItemIndex: LIST_ITEM_INDEX,
   meta: META,

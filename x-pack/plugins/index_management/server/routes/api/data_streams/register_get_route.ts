@@ -91,7 +91,7 @@ const getDataStreamsStats = (client: ElasticsearchClient, name = '*') => {
 };
 
 const getDataStreamsPrivileges = (client: ElasticsearchClient, names: string[]) => {
-  return client.security.hasPrivileges<PrivilegesFromEs>({
+  return client.security.hasPrivileges({
     body: {
       index: [
         {
@@ -143,6 +143,7 @@ export function registerGetAllRoute({
         dataStreams = enhanceDataStreams({
           dataStreams,
           dataStreamsStats,
+          // @ts-expect-error PrivilegesFromEs incompatible with ApplicationsPrivileges
           dataStreamsPrivileges,
         });
 
@@ -195,6 +196,7 @@ export function registerGetOneRoute({
           const enhancedDataStreams = enhanceDataStreams({
             dataStreams,
             dataStreamsStats,
+            // @ts-expect-error PrivilegesFromEs incompatible with ApplicationsPrivileges
             dataStreamsPrivileges,
           });
           const body = deserializeDataStream(enhancedDataStreams[0]);
