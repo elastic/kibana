@@ -6,7 +6,13 @@
  * Side Public License, v 1.
  */
 
+import type { KibanaRequest, RequestHandlerContext } from 'src/core/server';
+
 import { License } from './license';
+
+/* eslint-disable @kbn/eslint/no-restricted-paths */
+import type { LicenseCheckState } from '../../../../../x-pack/plugins/licensing/common/types';
+/* eslint-enable @kbn/eslint/no-restricted-paths */
 
 describe('license_pre_routing_factory', () => {
   describe('#reportingFeaturePreRoutingFactory', () => {
@@ -21,10 +27,10 @@ describe('license_pre_routing_factory', () => {
 
       const licensingMock = {
         license$: {
-          subscribe: (callback) =>
+          subscribe: (callback: (config: unknown) => {}) =>
             callback({
               type: currentLicenseType,
-              check: () => ({ state: licenseState }),
+              check: (): { state: LicenseCheckState } => ({ state: licenseState }),
               getFeature: () => ({}),
             }),
         },
@@ -43,7 +49,7 @@ describe('license_pre_routing_factory', () => {
       const route = jest.fn();
       const guardedRoute = license.guardApiRoute(route);
       const customError = jest.fn();
-      guardedRoute({}, {}, { customError });
+      guardedRoute({} as RequestHandlerContext, {} as KibanaRequest, { customError });
 
       return {
         errorResponse:

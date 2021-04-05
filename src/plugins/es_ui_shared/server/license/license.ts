@@ -23,9 +23,11 @@ import type {
 import type { LicensingPluginStart } from '../../../../../x-pack/plugins/licensing/server/types';
 /* eslint-enable @kbn/eslint/no-restricted-paths */
 
+type LicenseLogger = Pick<Logger, 'warn'>;
+
 interface SetupSettings {
   pluginName: string;
-  logger: Logger;
+  logger: LicenseLogger;
 }
 
 interface StartSettings {
@@ -36,7 +38,7 @@ interface StartSettings {
 
 export class License {
   private pluginName?: string;
-  private logger?: Logger;
+  private logger?: LicenseLogger;
   private licenseCheckState: LicenseCheckState = 'unavailable';
   private licenseType?: LicenseType;
 
