@@ -91,6 +91,7 @@ beforeEach(() => {
           'plugin-id',
           {
             requiredBundles: [],
+            version: '8.0.0',
             publicTargetDir: 'path/to/target/public',
             publicAssetsDir: '/plugins/name/assets/',
           },
