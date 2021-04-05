@@ -204,6 +204,7 @@ export const mockGlobalState: State = {
     timelineById: {
       test: {
         activeTab: TimelineTabs.query,
+        prevActiveTab: TimelineTabs.notes,
         deletedEventIds: [],
         id: 'test',
         savedObjectId: null,
