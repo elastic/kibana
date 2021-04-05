@@ -1,6 +1,6 @@
 [role="xpack"]
 [[jira-action-type]]
-== Jira connector and action
+=== Jira connector and action
 ++++
 <titleabbrev>Jira</titleabbrev>
 ++++
@@ -9,7 +9,7 @@ The Jira connector uses the https://developer.atlassian.com/cloud/jira/platform/
 
 [float]
 [[jira-connector-configuration]]
-=== Connector configuration
+==== Connector configuration
 
 Jira connectors have the following configuration properties.
 
@@ -21,7 +21,7 @@ API token (or password)::  Jira API authentication token (or password) for HTTP 
 
 [float]
 [[Preconfigured-jira-configuration]]
-=== Preconfigured connector type
+==== Preconfigured connector type
 
 [source,text]
 --
@@ -48,21 +48,21 @@ Secrets defines sensitive information for the connector type.
 
 [float]
 [[define-jira-ui]]
-=== Define connector in Stack Management
+==== Define connector in Stack Management
 
 Define Jira connector properties.
 
 [role="screenshot"]
-image::user/connectors/images/jira-connector.png[Jira connector]
+image::management/connectors/images/jira-connector.png[Jira connector]
 
 Test Jira action parameters.
 
 [role="screenshot"]
-image::user/connectors/images/jira-params-test.png[Jira params test]
+image::management/connectors/images/jira-params-test.png[Jira params test]
 
 [float]
 [[jira-action-configuration]]
-=== Action configuration
+==== Action configuration
 
 Jira actions have the following configuration properties.
 
@@ -76,6 +76,6 @@ Additional comments:: Additional information for the client, such as how to trou
 
 [float]
 [[configuring-jira]]
-=== Configure Jira
+==== Configure Jira
 
 Jira offers free https://www.atlassian.com/software/jira/free[Instances], which you can use to test incidents.

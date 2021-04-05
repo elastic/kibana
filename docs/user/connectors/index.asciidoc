@@ -1,1 +1,0 @@
-include::action-types.asciidoc[]

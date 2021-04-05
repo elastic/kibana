@@ -29,8 +29,6 @@ include::graph/index.asciidoc[]
 
 include::alerting/index.asciidoc[]
 
-include::connectors/index.asciidoc[]
-
 include::{kib-repo-dir}/observability/index.asciidoc[]
 
 include::{kib-repo-dir}/apm/index.asciidoc[]
