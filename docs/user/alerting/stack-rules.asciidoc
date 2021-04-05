@@ -1,6 +1,6 @@
 [role="xpack"]
 [[stack-rules]]
-== Stack Rule types
+== Stack rule types
 
 Kibana provides two types of rules:
 
