@@ -100,7 +100,7 @@ export const TimeSeries = ({
       return;
     }
     const [min, max] = x;
-    onBrush(min, max);
+    onBrush(min, max, series);
   };
 
   const getSeriesColor = useCallback(

@@ -41,7 +41,7 @@ import { MigrationLogger } from '../core/migration_logger';
 export interface KibanaMigratorOptions {
   client: ElasticsearchClient;
   typeRegistry: ISavedObjectTypeRegistry;
-  savedObjectsConfig: SavedObjectsMigrationConfigType;
+  soMigrationsConfig: SavedObjectsMigrationConfigType;
   kibanaConfig: KibanaConfigType;
   kibanaVersion: string;
   logger: Logger;
@@ -72,10 +72,10 @@ export class KibanaMigrator {
   });
   private readonly activeMappings: IndexMapping;
   private migrationsRetryDelay?: number;
-  // TODO migrationsV2: make private once we release migrations v2
-  public kibanaVersion: string;
-  // TODO migrationsV2: make private once we release migrations v2
-  public readonly savedObjectsConfig: SavedObjectsMigrationConfigType;
+  // TODO migrationsV2: make private once we remove migrations v1
+  public readonly kibanaVersion: string;
+  // TODO migrationsV2: make private once we remove migrations v1
+  public readonly soMigrationsConfig: SavedObjectsMigrationConfigType;
 
   /**
    * Creates an instance of KibanaMigrator.
@@ -84,14 +84,14 @@ export class KibanaMigrator {
     client,
     typeRegistry,
     kibanaConfig,
-    savedObjectsConfig,
+    soMigrationsConfig,
     kibanaVersion,
     logger,
     migrationsRetryDelay,
   }: KibanaMigratorOptions) {
     this.client = client;
     this.kibanaConfig = kibanaConfig;
-    this.savedObjectsConfig = savedObjectsConfig;
+    this.soMigrationsConfig = soMigrationsConfig;
     this.typeRegistry = typeRegistry;
     this.serializer = new SavedObjectsSerializer(this.typeRegistry);
     this.mappingProperties = mergeTypes(this.typeRegistry.getAllTypes());
@@ -175,7 +175,7 @@ export class KibanaMigrator {
 
     const migrators = Object.keys(indexMap).map((index) => {
       // TODO migrationsV2: remove old migrations algorithm
-      if (this.savedObjectsConfig.enableV2) {
+      if (this.soMigrationsConfig.enableV2) {
         return {
           migrate: (): Promise<MigrationResult> => {
             return runResilientMigrator({
@@ -193,20 +193,21 @@ export class KibanaMigrator {
                 ),
               migrationVersionPerType: this.documentMigrator.migrationVersion,
               indexPrefix: index,
+              migrationsConfig: this.soMigrationsConfig,
             });
           },
         };
       } else {
         return new IndexMigrator({
-          batchSize: this.savedObjectsConfig.batchSize,
+          batchSize: this.soMigrationsConfig.batchSize,
           client: createMigrationEsClient(this.client, this.log, this.migrationsRetryDelay),
           documentMigrator: this.documentMigrator,
           index,
           kibanaVersion: this.kibanaVersion,
           log: this.log,
           mappingProperties: indexMap[index].typeMappings,
-          pollInterval: this.savedObjectsConfig.pollInterval,
-          scrollDuration: this.savedObjectsConfig.scrollDuration,
+          pollInterval: this.soMigrationsConfig.pollInterval,
+          scrollDuration: this.soMigrationsConfig.scrollDuration,
           serializer: this.serializer,
           // Only necessary for the migrator of the kibana index.
           obsoleteIndexTemplatePattern:
