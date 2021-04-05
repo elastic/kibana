@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+source "$(dirname "${0}")/util.sh"
+
 export CI=true
 
 KIBANA_DIR=$(pwd)
