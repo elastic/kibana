@@ -21,7 +21,7 @@ import ecsMapping from './ecs_mapping.json';
   incremented by 10 in order to add "room" for the aforementioned patch
   release
 */
-export const SIGNALS_TEMPLATE_VERSION = 25;
+export const SIGNALS_TEMPLATE_VERSION = 26;
 export const MIN_EQL_RULE_INDEX_VERSION = 2;
 
 export const getSignalsTemplate = (index: string) => {
@@ -45,6 +45,19 @@ export const getSignalsTemplate = (index: string) => {
       properties: {
         ...ecsMapping.mappings.properties,
         signal: signalsMapping.mappings.properties.signal,
+        threat: {
+          ...ecsMapping.mappings.properties.threat,
+          properties: {
+            ...ecsMapping.mappings.properties.threat.properties,
+            indicator: {
+              ...ecsMapping.mappings.properties.threat.properties.indicator,
+              properties: {
+                ...ecsMapping.mappings.properties.threat.properties.indicator.properties,
+                event: ecsMapping.mappings.properties.event,
+              },
+            },
+          },
+        },
       },
       _meta: {
         version: SIGNALS_TEMPLATE_VERSION,

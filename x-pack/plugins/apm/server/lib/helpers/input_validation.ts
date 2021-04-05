@@ -14,7 +14,7 @@ export const withDefaultValidators = (
   validators: { [key: string]: Schema } = {}
 ) => {
   return Joi.object().keys({
-    _debug: Joi.bool(),
+    _inspect: Joi.bool(),
     start: dateValidation,
     end: dateValidation,
     uiFilters: Joi.string(),

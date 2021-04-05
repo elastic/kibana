@@ -26,10 +26,7 @@ export const serviceNodesRoute = createRoute({
     const { serviceName } = params.path;
     const { kuery } = params.query;
 
-    return getServiceNodes({
-      kuery,
-      setup,
-      serviceName,
-    });
+    const serviceNodes = await getServiceNodes({ kuery, setup, serviceName });
+    return { serviceNodes };
   },
 });

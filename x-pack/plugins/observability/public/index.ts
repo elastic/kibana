@@ -19,6 +19,7 @@ export type {
   ObservabilityPublicPluginsSetup,
   ObservabilityPublicPluginsStart,
 };
+export { enableInspectEsQueries } from '../common/ui_settings_keys';
 
 export const plugin: PluginInitializer<
   ObservabilityPublicSetup,
@@ -54,3 +55,4 @@ export * from './typings';
 export { useChartTheme } from './hooks/use_chart_theme';
 export { useTheme } from './hooks/use_theme';
 export { getApmTraceUrl } from './utils/get_apm_trace_url';
+export { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/utils';

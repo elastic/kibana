@@ -102,6 +102,12 @@ export const i18nTexts = {
           defaultMessage: 'Only numbers above 0 are allowed.',
         }
       ),
+      integerRequired: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.errors.integerRequiredError',
+        {
+          defaultMessage: 'Only integers are allowed.',
+        }
+      ),
       maximumAgeRequiredMessage: i18n.translate(
         'xpack.indexLifecycleMgmt.editPolicy.errors.maximumAgeMissingError',
         {
