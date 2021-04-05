@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiPanel, EuiTitle } from '@elastic/eui';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { ExploratoryViewHeader } from './header/header';
@@ -29,7 +29,7 @@ export function ExploratoryView() {
 
   const { indexPattern } = useIndexPatternContext();
 
-  const LensComponent = lens.EmbeddableComponent;
+  const LensComponent = lens?.EmbeddableComponent;
 
   const { firstSeriesId: seriesId, firstSeries: series } = useUrlStorage();
 
@@ -45,24 +45,36 @@ export function ExploratoryView() {
 
   return (
     <EuiPanel style={{ maxWidth: 1800, minWidth: 1200, margin: '0 auto' }}>
-      <ExploratoryViewHeader lensAttributes={lensAttributes} seriesId={seriesId} />
-      {!indexPattern && (
-        <SpinnerWrap>
-          <EuiLoadingSpinner size="xl" />
-        </SpinnerWrap>
-      )}
-
-      {lensAttributes && seriesId && series?.reportType && series?.time ? (
-        <LensComponent
-          id="exploratoryView"
-          style={{ height: 550 }}
-          timeRange={series?.time}
-          attributes={lensAttributes}
-        />
+      {lens ? (
+        <>
+          <ExploratoryViewHeader lensAttributes={lensAttributes} seriesId={seriesId} />
+          {!indexPattern && (
+            <SpinnerWrap>
+              <EuiLoadingSpinner size="xl" />
+            </SpinnerWrap>
+          )}
+          {lensAttributes && seriesId && series?.reportType && series?.time ? (
+            <LensComponent
+              id="exploratoryView"
+              style={{ height: 550 }}
+              timeRange={series?.time}
+              attributes={lensAttributes}
+            />
+          ) : (
+            <EmptyView />
+          )}
+          <SeriesEditor />
+        </>
       ) : (
-        <EmptyView />
+        <EuiTitle>
+          <h2>
+            {i18n.translate('xpack.observability.overview.exploratoryView.lensDisabled', {
+              defaultMessage:
+                'Lens app is not available, please enable Lens to use exploratory view.',
+            })}
+          </h2>
+        </EuiTitle>
       )}
-      <SeriesEditor />
     </EuiPanel>
   );
 }

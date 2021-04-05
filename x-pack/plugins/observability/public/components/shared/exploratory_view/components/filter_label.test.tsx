@@ -39,7 +39,7 @@ describe('FilterLabel', function () {
     });
   });
 
-  it('should delete filter', async function () {
+  it.skip('should delete filter', async function () {
     const removeFilter = jest.fn();
     render(
       <FilterLabel
@@ -61,7 +61,7 @@ describe('FilterLabel', function () {
     expect(removeFilter).toHaveBeenCalledWith('service.name', 'elastic-co', false);
   });
 
-  it('should invert filter', async function () {
+  it.skip('should invert filter', async function () {
     const removeFilter = jest.fn();
     render(
       <FilterLabel
