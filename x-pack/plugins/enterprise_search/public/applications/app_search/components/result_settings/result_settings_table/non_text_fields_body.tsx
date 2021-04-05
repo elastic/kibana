@@ -9,13 +9,7 @@ import React, { useMemo } from 'react';
 
 import { useValues, useActions } from 'kea';
 
-import {
-  EuiTableBody,
-  EuiTableRow,
-  EuiTableRowCell,
-  EuiCheckbox,
-  EuiTableRowCellCheckbox,
-} from '@elastic/eui';
+import { EuiTableRow, EuiTableRowCell, EuiCheckbox, EuiTableRowCellCheckbox } from '@elastic/eui';
 
 import { ResultSettingsLogic } from '..';
 import { FieldResultSetting } from '../types';
@@ -31,7 +25,7 @@ export const NonTextFieldsBody: React.FC = () => {
   }, [nonTextResultFields]);
 
   return (
-    <EuiTableBody>
+    <>
       {resultSettingsArray.map(([fieldName, fieldSettings]) => (
         <EuiTableRow key={fieldName}>
           <EuiTableRowCell data-test-subj="ResultSettingFieldName">
@@ -50,6 +44,6 @@ export const NonTextFieldsBody: React.FC = () => {
           <EuiTableRowCell colSpan={4} aria-hidden />
         </EuiTableRow>
       ))}
-    </EuiTableBody>
+    </>
   );
 };
