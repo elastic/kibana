@@ -14,6 +14,8 @@ import { EuiPage, EuiPageSideBar, EuiPageBody, EuiCallOut } from '@elastic/eui';
 import { AppLogic } from '../../app_logic';
 import { ViewContentHeader } from '../../components/shared/view_content_header';
 
+import { SourceSubNav } from './components/source_sub_nav';
+
 import {
   PRIVATE_DASHBOARD_READ_ONLY_MODE_WARNING,
   PRIVATE_CAN_CREATE_PAGE_TITLE,
@@ -49,6 +51,7 @@ export const PrivateSourcesLayout: React.FC<LayoutProps> = ({
     <EuiPage className="enterpriseSearchLayout privateSourcesLayout">
       <EuiPageSideBar className="enterpriseSearchLayout__sideBar privateSourcesLayout__sideBar">
         <ViewContentHeader title={PAGE_TITLE} description={PAGE_DESCRIPTION} />
+        <SourceSubNav />
       </EuiPageSideBar>
       <EuiPageBody className="enterpriseSearchLayout__body" restrictWidth={restrictWidth}>
         {readOnlyMode && (
