@@ -224,12 +224,15 @@ export interface DiscoveredPlugin {
  */
 export interface InternalPluginInfo {
   /**
-   * Bundles that must be loaded for this plugoin
+   * Version of the plugin
+   */
+  readonly version: string;
+  /**
+   * Bundles that must be loaded for this plugin
    */
   readonly requiredBundles: readonly string[];
   /**
-   * Path to the target/public directory of the plugin which should be
-   * served
+   * Path to the target/public directory of the plugin which should be served
    */
   readonly publicTargetDir: string;
   /**
@@ -250,7 +253,9 @@ export interface Plugin<
   TPluginsStart extends object = object
 > {
   setup(core: CoreSetup, plugins: TPluginsSetup): TSetup;
+
   start(core: CoreStart, plugins: TPluginsStart): TStart;
+
   stop?(): void;
 }
 
@@ -267,7 +272,9 @@ export interface AsyncPlugin<
   TPluginsStart extends object = object
 > {
   setup(core: CoreSetup, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
+
   start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
+
   stop?(): void;
 }
 
