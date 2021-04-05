@@ -15,7 +15,6 @@ export const getConfig = (
 ): RecursivePartial<PartitionConfig> => {
   const config: RecursivePartial<PartitionConfig> = {
     partitionLayout: PartitionLayout.sunburst,
-    // clockwiseSectors: false,
     fontFamily: chartTheme.barSeriesStyle?.displayValue?.fontFamily,
     outerSizeRatio: 1,
     specialFirstInnermostSector: true,
@@ -36,6 +35,8 @@ export const getConfig = (
     // Force all labels to be linked, then prevent links from showing
     config.linkLabel = { maxCount: 0, maximumSection: Number.POSITIVE_INFINITY };
   }
+
+  // On small multiples we want the labels to only appear inside
   const isSplitChart = Boolean(visParams.dimensions.splitColumn || visParams.dimensions.splitRow);
   if (visParams.labels.position === LabelPositions.INSIDE || isSplitChart) {
     config.linkLabel = { maxCount: 0 };

@@ -16,7 +16,7 @@ import { getDistinctSeries } from './get_distinct_series';
 
 const EMPTY_SLICE = Symbol('empty_slice');
 
-const computeColor = (
+export const computeColor = (
   d: ShapeTreeNode,
   isSplitChart: boolean,
   overwriteColors: { [key: string]: string },
@@ -32,17 +32,18 @@ const computeColor = (
     if (Object.keys(overwriteColors).includes(d.dataName.toString())) {
       return overwriteColors[d.dataName];
     }
+    const index = allSeries.findIndex((name) => name === d.dataName);
     return palettes?.get(visParams.palette.name).getColor(
       [
         {
           name: d.dataName,
-          rankAtDepth: allSeries.findIndex((name) => name === d.dataName),
-          totalSeriesAtDepth: allSeries.length,
+          rankAtDepth: index > -1 ? allSeries.findIndex((name) => name === d.dataName) : 0,
+          totalSeriesAtDepth: allSeries.length || 1,
         },
       ],
       {
         maxDepth: 1,
-        totalSeries: allSeries.length,
+        totalSeries: allSeries.length || 1,
         behindText: false,
         syncColors,
       }
