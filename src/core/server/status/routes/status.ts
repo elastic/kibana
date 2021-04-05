@@ -161,7 +161,7 @@ export const registerStatusRoute = ({ router, config, metrics, status }: Deps) =
       };
 
       const statusCode = overall.level >= ServiceStatusLevels.unavailable ? 503 : 200;
-      return res.custom({ body, statusCode });
+      return res.custom({ body, statusCode, bypassErrorFormat: true });
     }
   );
 };
