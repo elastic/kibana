@@ -7,7 +7,7 @@
 
 import React, { useEffect } from 'react';
 
-import { useActions } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import { EuiPageHeader, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
@@ -15,6 +15,7 @@ import { FlashMessages } from '../../../shared/flash_messages';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 
 import { RESULT_SETTINGS_TITLE } from './constants';
+import { QueryPerformance } from './query_performance';
 import { ResultSettingsTable } from './result_settings_table';
 
 import { ResultSettingsLogic } from '.';
@@ -24,6 +25,7 @@ interface Props {
 }
 
 export const ResultSettings: React.FC<Props> = ({ engineBreadcrumb }) => {
+  const { dataLoading } = useValues(ResultSettingsLogic);
   const { initializeResultSettingsData } = useActions(ResultSettingsLogic);
 
   useEffect(() => {
@@ -40,7 +42,7 @@ export const ResultSettings: React.FC<Props> = ({ engineBreadcrumb }) => {
           <ResultSettingsTable />
         </EuiFlexItem>
         <EuiFlexItem grow={3}>
-          <div>TODO</div>
+          <div>{!dataLoading && <QueryPerformance />}</div>
         </EuiFlexItem>
       </EuiFlexGroup>
     </>
