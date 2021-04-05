@@ -735,6 +735,7 @@ async function migrateIndex({
     mappingProperties,
     batchSize: 10,
     log: getLogMock(),
+    setStatus: () => {},
     pollInterval: 50,
     scrollDuration: '5m',
     serializer: new SavedObjectsSerializer(typeRegistry),

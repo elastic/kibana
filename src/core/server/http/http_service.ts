@@ -120,7 +120,6 @@ export class HttpService
     };
 
     if (notReadySetup) {
-      this.log.warn('haz not ready');
       // We cannot use the real context container since the core services may not yet be ready
       const fakeContext: RequestHandlerContextContainer = deps.context.createContextContainer();
       this.internalSetup.notReadyServer = {
