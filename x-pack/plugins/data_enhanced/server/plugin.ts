@@ -6,7 +6,7 @@
  */
 
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
-import { PluginStart as DataPluginStart, usageProvider } from '../../../../src/plugins/data/server';
+import { usageProvider } from '../../../../src/plugins/data/server';
 import { ENHANCED_ES_SEARCH_STRATEGY, EQL_SEARCH_STRATEGY } from '../common';
 import { registerSessionRoutes } from './routes';
 import { searchSessionSavedObjectType } from './saved_objects';
@@ -35,7 +35,7 @@ export class EnhancedDataServerPlugin
     this.config = this.initializerContext.config.get<ConfigSchema>();
   }
 
-  public setup(core: CoreSetup<DataPluginStart>, deps: SetupDependencies) {
+  public setup(core: CoreSetup<StartDependencies>, deps: SetupDependencies) {
     const usage = deps.usageCollection ? usageProvider(core) : undefined;
 
     core.uiSettings.register(getUiSettings());
