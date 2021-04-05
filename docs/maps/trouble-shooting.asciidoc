@@ -46,8 +46,9 @@ Increase <<settings, `server.maxPayloadBytes`>> for large index patterns.
 [float]
 ==== Tiles are not displayed
 
-* Ensure your tile server has configured https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS[Cross-Origin Resource Sharing (CORS)] so tile requests from your Kibana domain have permission to access your tile server domain.
-* Ensure tiles have the required coordinate system. Vector data must use EPSG:4326 and tiles must use EPSG:3857.
+* Maps uses tile and vector data from Elastic Maps Service by default. See <<maps-connect-to-ems, Connect to Elastic Maps Service>> for more info.
+* If you are using a custom tile service, ensure your tile server has configured https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS[Cross-Origin Resource Sharing (CORS)] so tile requests from your Kibana domain have permission to access your tile server domain.
+* Ensure custom vector and tile services have the required coordinate system. Vector data must use EPSG:4326 and tiles must use EPSG:3857.
 
 [float]
 ==== Coordinate and region map visualizations not available in New Visualization menu
