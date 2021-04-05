@@ -32,6 +32,7 @@ import { statusServiceMock } from '../status/status_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { metricsServiceMock } from '../metrics/metrics_service.mock';
 import { i18nServiceMock } from '../i18n/i18n_service.mock';
+import { deprecationsServiceMock } from '../deprecations/deprecations_service.mock';
 
 const MockKbnServer: jest.Mock<KbnServer> = KbnServer as any;
 
@@ -80,6 +81,7 @@ beforeEach(() => {
       status: statusServiceMock.createInternalSetupContract(),
       logging: loggingServiceMock.createInternalSetupContract(),
       metrics: metricsServiceMock.createInternalSetupContract(),
+      deprecations: deprecationsServiceMock.createInternalSetupContract(),
     },
     plugins: { 'plugin-id': 'plugin-value' },
     uiPlugins: {
@@ -89,6 +91,7 @@ beforeEach(() => {
           'plugin-id',
           {
             requiredBundles: [],
+            version: '8.0.0',
             publicTargetDir: 'path/to/target/public',
             publicAssetsDir: '/plugins/name/assets/',
           },

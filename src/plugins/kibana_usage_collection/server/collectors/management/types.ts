@@ -19,6 +19,7 @@ export interface UsageStats {
   'xpackDashboardMode:roles': string;
   'securitySolution:ipReputationLinks': string;
   'xPack:defaultAdminEmail': string;
+  'banners:textContent': string;
   /**
    * non-sensitive settings
    */
@@ -115,4 +116,7 @@ export interface UsageStats {
   'csv:quoteValues': boolean;
   'dateFormat:dow': string;
   dateFormat: string;
+  'banners:placement': string;
+  'banners:textColor': string;
+  'banners:backgroundColor': string;
 }

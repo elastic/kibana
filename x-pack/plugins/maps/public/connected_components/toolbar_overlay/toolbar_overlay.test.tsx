@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
+import { Filter } from 'src/plugins/data/public';
 
 jest.mock('../../kibana_services', () => {
   return {
@@ -16,15 +17,25 @@ jest.mock('../../kibana_services', () => {
   };
 });
 
-// @ts-ignore
 import { ToolbarOverlay } from './toolbar_overlay';
 
 test('Must render zoom tools', async () => {
-  const component = shallow(<ToolbarOverlay />);
+  const component = shallow(<ToolbarOverlay geoFields={[]} />);
   expect(component).toMatchSnapshot();
 });
 
 test('Must zoom tools and draw filter tools', async () => {
-  const component = shallow(<ToolbarOverlay addFilters={() => {}} geoFields={['coordinates']} />);
+  const geoFieldWithIndex = {
+    geoFieldName: 'myGeoFieldName',
+    geoFieldType: 'geo_point',
+    indexPatternTitle: 'myIndex',
+    indexPatternId: '1',
+  };
+  const component = shallow(
+    <ToolbarOverlay
+      addFilters={async (filters: Filter[], actionId: string) => {}}
+      geoFields={[geoFieldWithIndex]}
+    />
+  );
   expect(component).toMatchSnapshot();
 });
