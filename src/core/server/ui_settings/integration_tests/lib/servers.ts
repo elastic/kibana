@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import supertest from 'supertest';
+import type supertest from 'supertest';
 import { SavedObjectsClientContract, IUiSettingsClient } from 'src/core/server';
 
 import {
