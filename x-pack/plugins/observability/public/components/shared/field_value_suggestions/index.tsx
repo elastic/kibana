@@ -8,16 +8,24 @@
 import React, { useState } from 'react';
 
 import { useDebounce } from 'react-use';
+import { PopoverAnchorPosition } from '@elastic/eui/src/components/popover/popover';
 import { useValuesList } from '../../../hooks/use_values_list';
-import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
+import { IndexPattern } from '../../../../../../../src/plugins/data/common';
 import { FieldValueSelection } from './field_value_selection';
+import { ESFilter } from '../../../../../../../typings/elasticsearch';
 
 export interface FieldValueSuggestionsProps {
   value?: string;
   label: string;
-  indexPattern: IIndexPattern;
+  indexPattern: IndexPattern;
   sourceField: string;
   onChange: (val?: string) => void;
+  filters: ESFilter[];
+  anchorPosition?: PopoverAnchorPosition;
+  time?: { from: string; to: string };
+  forceOpen?: boolean;
+  button?: JSX.Element;
+  width?: number;
 }
 
 export function FieldValueSuggestions({
@@ -25,12 +33,18 @@ export function FieldValueSuggestions({
   label,
   indexPattern,
   value,
+  filters,
+  button,
+  time,
+  width,
+  forceOpen,
+  anchorPosition,
   onChange: onSelectionChange,
 }: FieldValueSuggestionsProps) {
   const [query, setQuery] = useState('');
   const [debouncedValue, setDebouncedValue] = useState('');
 
-  const { values, loading } = useValuesList({ indexPattern, query, sourceField });
+  const { values, loading } = useValuesList({ indexPattern, query, sourceField, filters, time });
 
   useDebounce(
     () => {
@@ -48,6 +62,10 @@ export function FieldValueSuggestions({
       setQuery={setDebouncedValue}
       loading={loading}
       value={value}
+      button={button}
+      forceOpen={forceOpen}
+      anchorPosition={anchorPosition}
+      width={width}
     />
   );
 }
