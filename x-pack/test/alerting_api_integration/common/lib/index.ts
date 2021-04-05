@@ -18,3 +18,4 @@ export { TaskManagerUtils } from './task_manager_utils';
 export * from './test_assertions';
 export { checkAAD } from './check_aad';
 export { getEventLog } from './get_event_log';
+export { retryIfConflicts } from './retry_if_conflicts';
