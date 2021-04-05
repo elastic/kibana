@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlyout, EuiFlyoutBody } from '@elastic/eui';
+import { EuiFlyoutBody } from '@elastic/eui';
 import { HostIsolationContent } from './content';
 
 export const HostIsolationModal = React.memo(() => {

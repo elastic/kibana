@@ -63,7 +63,14 @@ const SelectTitle = styled(EuiTitle)`
 
 export const SelectCaseContent = React.memo(() => {
   const [comment, setComment] = useState('');
-  const options = [{ value: 'isolate_host', text: 'Isolate host' }];
+  const options = [
+    {
+      value: 'isolate_host',
+      text: i18n.translate('xpack.securitySolution.endpoint.hostIsolation.isolateHost', {
+        defaultMessage: 'Isolate host',
+      }),
+    },
+  ];
 
   const [selectValue, setSelectValue] = useState(options[0].value);
 

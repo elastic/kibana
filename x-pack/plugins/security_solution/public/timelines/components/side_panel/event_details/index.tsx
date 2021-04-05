@@ -6,19 +6,11 @@
  */
 
 import { some } from 'lodash/fp';
-import {
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
-  EuiSpacer,
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiFlyoutHeader, EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
-import { FormattedMessage } from '@kbn/i18n/react';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
 import { useTimelineEventsDetails } from '../../../containers/details';
