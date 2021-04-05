@@ -21,7 +21,7 @@ const rewriteAlertingFrameworkHeath: RewriteRequestCase<AlertsHealth> = ({
   ...res,
 });
 
-const rewriteBodyReq: RewriteRequestCase<AlertingFrameworkHealth> = ({
+const rewriteBodyRes: RewriteRequestCase<AlertingFrameworkHealth> = ({
   is_sufficiently_secure: isSufficientlySecure,
   has_permanent_encryption_key: hasPermanentEncryptionKey,
   alerting_framework_heath: alertingFrameworkHeath,
@@ -40,5 +40,5 @@ export async function alertingFrameworkHealth({
 }): Promise<AlertingFrameworkHealth> {
   const res = await http.get(`${BASE_ALERTING_API_PATH}/_health`);
   const alertingFrameworkHeath = rewriteAlertingFrameworkHeath(res.alerting_framework_heath);
-  return { ...rewriteBodyReq(res), alertingFrameworkHeath };
+  return { ...rewriteBodyRes(res), alertingFrameworkHeath };
 }

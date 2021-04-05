@@ -36,7 +36,7 @@ describe('loadAlertState', () => {
     });
 
     expect(await loadAlertState({ http, alertId })).toEqual(resolvedValue);
-    expect(http.get).toHaveBeenCalledWith(`/api/alerting/rule/${alertId}/state`);
+    expect(http.get).toHaveBeenCalledWith(`/internal/alerting/rule/${alertId}/state`);
   });
 
   test('should parse AlertInstances', async () => {
@@ -88,7 +88,7 @@ describe('loadAlertState', () => {
         },
       },
     });
-    expect(http.get).toHaveBeenCalledWith(`/api/alerting/rule/${alertId}/state`);
+    expect(http.get).toHaveBeenCalledWith(`/internal/alerting/rule/${alertId}/state`);
   });
 
   test('should handle empty response from api', async () => {
@@ -96,6 +96,6 @@ describe('loadAlertState', () => {
     http.get.mockResolvedValueOnce('');
 
     expect(await loadAlertState({ http, alertId })).toEqual({});
-    expect(http.get).toHaveBeenCalledWith(`/api/alerting/rule/${alertId}/state`);
+    expect(http.get).toHaveBeenCalledWith(`/internal/alerting/rule/${alertId}/state`);
   });
 });

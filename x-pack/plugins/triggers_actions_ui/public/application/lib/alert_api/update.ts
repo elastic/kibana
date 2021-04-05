@@ -9,20 +9,23 @@ import { pick } from 'lodash';
 import { BASE_ALERTING_API_PATH } from '../../constants';
 import { Alert, AlertUpdates } from '../../../types';
 import { RewriteResponseCase } from '../../../../../actions/common';
+import { transformAlert } from './common_transformations';
 
-const rewriteBodyRequest: RewriteResponseCase<
-  Pick<
-    AlertUpdates,
-    'name' | 'tags' | 'schedule' | 'actions' | 'params' | 'throttle' | 'notifyWhen'
-  >
-> = ({ notifyWhen, actions, ...res }): any => ({
+type AlertUpdatesBody = Pick<
+  AlertUpdates,
+  'name' | 'tags' | 'schedule' | 'actions' | 'params' | 'throttle' | 'notifyWhen'
+>;
+const rewriteBodyRequest: RewriteResponseCase<AlertUpdatesBody> = ({
+  notifyWhen,
+  actions,
+  ...res
+}): any => ({
   ...res,
   notify_when: notifyWhen,
-  actions: actions.map(({ group, id, actionTypeId, params }) => ({
+  actions: actions.map(({ group, id, params }) => ({
     group,
     id,
     params,
-    connector_type_id: actionTypeId,
   })),
 });
 
@@ -38,11 +41,12 @@ export async function updateAlert({
   >;
   id: string;
 }): Promise<Alert> {
-  return await http.put(`${BASE_ALERTING_API_PATH}/rule/${id}`, {
+  const res = await http.put(`${BASE_ALERTING_API_PATH}/rule/${id}`, {
     body: JSON.stringify(
       rewriteBodyRequest(
         pick(alert, ['throttle', 'name', 'tags', 'schedule', 'params', 'actions', 'notifyWhen'])
       )
     ),
   });
+  return transformAlert(res);
 }

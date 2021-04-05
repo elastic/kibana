@@ -5,10 +5,10 @@
  * 2.0.
  */
 import { AlertExecutionStatus } from '../../../../../alerting/common';
-import { RewriteRequestCase } from '../../../../../actions/common';
+import { AsApiContract, RewriteRequestCase } from '../../../../../actions/common';
 import { Alert, AlertAction } from '../../../types';
 
-export const transformAction: RewriteRequestCase<AlertAction> = ({
+const transformAction: RewriteRequestCase<AlertAction> = ({
   group,
   id,
   connector_type_id: actionTypeId,
@@ -20,7 +20,7 @@ export const transformAction: RewriteRequestCase<AlertAction> = ({
   actionTypeId,
 });
 
-export const transformExecutionStatus: RewriteRequestCase<AlertExecutionStatus> = ({
+const transformExecutionStatus: RewriteRequestCase<AlertExecutionStatus> = ({
   last_execution_date: lastExecutionDate,
   ...rest
 }) => ({
@@ -52,8 +52,10 @@ export const transformAlert: RewriteRequestCase<Alert> = ({
   notifyWhen,
   muteAll,
   mutedInstanceIds,
-  executionStatus,
-  actions,
+  executionStatus: executionStatus ? transformExecutionStatus(executionStatus) : undefined,
+  actions: actions
+    ? actions.map((action: AsApiContract<AlertAction>) => transformAction(action))
+    : [],
   scheduledTaskId,
   ...rest,
 });

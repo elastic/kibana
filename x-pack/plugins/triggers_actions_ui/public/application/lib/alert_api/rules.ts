@@ -9,18 +9,10 @@ import { BASE_ALERTING_API_PATH } from '../../constants';
 import { Alert, Pagination, Sorting } from '../../../types';
 import { AsApiContract } from '../../../../../actions/common';
 import { mapFiltersToKql } from './map_filters_to_kql';
-import {
-  transformAction,
-  transformExecutionStatus,
-  transformAlert,
-} from './common_transformations';
+import { transformAlert } from './common_transformations';
 
 const rewriteResponseRes = (results: Array<AsApiContract<Alert>>): Alert[] => {
-  return results.map((item) => {
-    const actions = item.actions.map((action) => transformAction(action as any));
-    const executionStatus = transformExecutionStatus(item.execution_status as any);
-    return transformAlert({ ...item, actions, execution_status: executionStatus });
-  });
+  return results.map((item) => transformAlert(item));
 };
 
 export async function loadAlerts({

@@ -9,7 +9,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { Errors, identity } from 'io-ts';
 import { AlertTaskState } from '../../../types';
-import { BASE_ALERTING_API_PATH } from '../../constants';
+import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 import { alertStateSchema } from '../../../../../alerting/common';
 import { AsApiContract, RewriteRequestCase } from '../../../../../actions/common';
 
@@ -34,7 +34,7 @@ export async function loadAlertState({
   alertId: string;
 }): Promise<AlertTaskState> {
   return await http
-    .get(`${BASE_ALERTING_API_PATH}/rule/${alertId}/state`)
+    .get(`${INTERNAL_BASE_ALERTING_API_PATH}/rule/${alertId}/state`)
     .then((state: AsApiContract<AlertTaskState> | EmptyHttpResponse) =>
       state ? rewriteBodyRes(state) : {}
     )
