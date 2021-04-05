@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-import { MapsLegacyLicensing } from './plugin';
-
-export function plugin() {
-  return new MapsLegacyLicensing();
-}
+export { SampleResponse } from './sample_response';
