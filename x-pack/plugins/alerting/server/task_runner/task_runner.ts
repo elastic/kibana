@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { ApiError } from '@elastic/elasticsearch';
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Dictionary, pickBy, mapValues, without, cloneDeep } from 'lodash';
 import type { Request } from '@hapi/hapi';
@@ -49,6 +51,7 @@ import {
   WithoutReservedActionGroups,
 } from '../../common';
 import { NormalizedAlertType } from '../alert_type_registry';
+import { getEsCause } from './es_error_parser';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 
@@ -62,6 +65,34 @@ interface AlertTaskRunResult {
 interface AlertTaskInstance extends ConcreteTaskInstance {
   state: AlertTaskState;
 }
+
+interface ElasticsearchError extends Error {
+  error?: ApiError;
+}
+
+// interface ElasticsearchError extends Error {
+//   error?: {
+//     meta?: {
+//       body?: {
+//         error?: {
+//           caused_by?: {
+//             type?: string;
+//             reason?: string;
+//           };
+//           failed_shards?: Array<{
+//             reason?: {
+//               script?: string;
+//               caused_by?: {
+//                 type?: string;
+//                 reason?: string;
+//               };
+//             };
+//           }>;
+//         };
+//       };
+//     };
+//   };
+// }
 
 export class TaskRunner<
   Params extends AlertTypeParams,
@@ -530,7 +561,7 @@ export class TaskRunner<
     }
 
     return {
-      state: map<AlertTaskState, Error, AlertTaskState>(
+      state: map<AlertTaskState, ElasticsearchError, AlertTaskState>(
         state,
         (stateUpdates: AlertTaskState) => {
           return {
@@ -538,8 +569,13 @@ export class TaskRunner<
             previousStartedAt: startedAt,
           };
         },
-        (err: Error) => {
-          const message = `Executing Alert "${alertId}" has resulted in Error: ${err.message}`;
+        (err: ElasticsearchError) => {
+          const { body } = err.error as ResponseError;
+          let errorMessage = err.message;
+          if (body && body.error) {
+            errorMessage += `, caused by: "${getEsCause(body.error)}"`;
+          }
+          const message = `Executing Alert "${alertId}" has resulted in Error: ${errorMessage}`;
           if (isAlertSavedObjectNotFoundError(err, alertId)) {
             this.logger.debug(message);
           } else {
