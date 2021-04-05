@@ -35,6 +35,7 @@ import { EsAssetReference, KibanaAssetReference } from '../../../fleet/common/ty
 import { agentPolicyStatuses } from '../../../fleet/common/constants';
 import { firstNonNullValue } from './models/ecs_safety_helpers';
 import { EventOptions } from './types/generator';
+import { BaseDataGenerator } from './data_generators/base_generator';
 
 export type Event = AlertEvent | SafeEndpointEvent;
 /**
@@ -386,9 +387,8 @@ const alertsDefaultDataStream = {
   namespace: 'default',
 };
 
-export class EndpointDocGenerator {
+export class EndpointDocGenerator extends BaseDataGenerator {
   commonInfo: HostInfo;
-  random: seedrandom.prng;
   sequence: number = 0;
   /**
    * The EndpointDocGenerator parameters
@@ -396,12 +396,7 @@ export class EndpointDocGenerator {
    * @param seed either a string to seed the random number generator or a random number generator function
    */
   constructor(seed: string | seedrandom.prng = Math.random().toString()) {
-    if (typeof seed === 'string') {
-      this.random = seedrandom(seed);
-    } else {
-      this.random = seed;
-    }
-
+    super(seed);
     this.commonInfo = this.createHostData();
   }
 
