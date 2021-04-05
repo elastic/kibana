@@ -748,7 +748,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       searchSource.setField('sort', this._buildEsSort());
     }
 
-    const dsl = await searchSource.getSearchRequestBody();
+    const dsl = searchSource.getSearchRequestBody();
     const risonDsl = rison.encode(dsl);
 
     const mvtUrlServicePath = getHttp().basePath.prepend(
