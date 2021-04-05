@@ -27,7 +27,7 @@ import { ToolingLog } from '@kbn/dev-utils';
 // yarn test:jest src/core/public/core_system.test.ts
 // :kibana/src/core/server/saved_objects yarn test:jest
 
-export function runJest(configName = 'jest.config.js') {
+export async function runJest(configName = 'jest.config.js') {
   const argv = buildArgv(process.argv);
 
   const log = new ToolingLog({
@@ -35,45 +35,50 @@ export function runJest(configName = 'jest.config.js') {
     writeTo: process.stdout,
   });
 
-  if (!argv.config) {
-    const cwd = process.env.INIT_CWD || process.cwd();
-    const testFiles = argv._.splice(2).map((p) => resolve(cwd, p));
-    const commonTestFiles = commonBasePath(testFiles);
-    const testFilesProvided = testFiles.length > 0;
+  try {
+    if (!argv.config) {
+      const cwd = process.env.INIT_CWD || process.cwd();
+      const testFiles = argv._.splice(2).map((p) => resolve(cwd, p));
+      const commonTestFiles = commonBasePath(testFiles);
+      const testFilesProvided = testFiles.length > 0;
 
-    log.verbose('cwd:', cwd);
-    log.verbose('testFiles:', testFiles.join(', '));
-    log.verbose('commonTestFiles:', commonTestFiles);
+      log.verbose('cwd:', cwd);
+      log.verbose('testFiles:', testFiles.join(', '));
+      log.verbose('commonTestFiles:', commonTestFiles);
 
-    let configPath;
+      let configPath;
 
-    // sets the working directory to the cwd or the common
-    // base directory of the provided test files
-    let wd = testFilesProvided ? commonTestFiles : cwd;
+      // sets the working directory to the cwd or the common
+      // base directory of the provided test files
+      let wd = testFilesProvided ? commonTestFiles : cwd;
 
-    configPath = resolve(wd, configName);
-
-    while (!existsSync(configPath)) {
-      wd = resolve(wd, '..');
       configPath = resolve(wd, configName);
+
+      while (!existsSync(configPath)) {
+        wd = resolve(wd, '..');
+        configPath = resolve(wd, configName);
+      }
+
+      log.verbose(`no config provided, found ${configPath}`);
+      process.argv.push('--config', configPath);
+
+      if (!testFilesProvided) {
+        log.verbose(`no test files provided, setting to current directory`);
+        process.argv.push(relative(wd, cwd));
+      }
+
+      log.info('yarn jest', process.argv.slice(2).join(' '));
     }
 
-    log.verbose(`no config provided, found ${configPath}`);
-    process.argv.push('--config', configPath);
-
-    if (!testFilesProvided) {
-      log.verbose(`no test files provided, setting to current directory`);
-      process.argv.push(relative(wd, cwd));
+    if (process.env.NODE_ENV == null) {
+      process.env.NODE_ENV = 'test';
     }
 
-    log.info('yarn jest', process.argv.slice(2).join(' '));
+    await run();
+  } catch (ex) {
+    log.error(ex);
+    process.exit(1);
   }
-
-  if (process.env.NODE_ENV == null) {
-    process.env.NODE_ENV = 'test';
-  }
-
-  run();
 }
 
 /**
