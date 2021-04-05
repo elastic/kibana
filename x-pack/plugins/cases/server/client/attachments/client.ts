@@ -6,7 +6,8 @@
  */
 
 import { CaseResponse, CommentRequest as AttachmentsRequest } from '../../../common/api';
-import { CasesSubClientImplementation } from '../types';
+import { CasesClientInternal } from '../client_internal';
+import { CasesClientArgs } from '../types';
 import { addComment } from './add';
 
 export interface AttachmentsAdd {
@@ -18,16 +19,15 @@ export interface AttachmentsSubClient {
   add(args: AttachmentsAdd): Promise<CaseResponse>;
 }
 
-export const createAttachmentsSubClient: CasesSubClientImplementation<AttachmentsSubClient> = (
-  args,
-  getClientsFactories
-) => {
-  const { getCasesInternalClient } = getClientsFactories;
+export const createAttachmentsSubClient = (
+  args: CasesClientArgs,
+  casesClientInternal: CasesClientInternal
+): AttachmentsSubClient => {
   const attachmentSubClient: AttachmentsSubClient = {
     add: ({ caseId, comment }: AttachmentsAdd) =>
       addComment({
         ...args,
-        getCasesInternalClient,
+        casesClientInternal,
         caseId,
         comment,
       }),

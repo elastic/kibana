@@ -16,11 +16,6 @@ import {
   ConnectorMappingsService,
   AttachmentService,
 } from '../services';
-import { AlertSubClient } from './alerts/client';
-import { AttachmentsSubClient } from './attachments/client';
-import { CasesSubClient } from './cases/client';
-import { ConfigureSubClient } from './configure/client';
-import { UserActionsSubClient } from './user_actions/client';
 
 export interface CasesClientArgs {
   readonly scopedClusterClient: ElasticsearchClient;
@@ -35,32 +30,3 @@ export interface CasesClientArgs {
   readonly logger: Logger;
   readonly authorization: Authorization;
 }
-
-/**
- * This represents the interface that other plugins can access.
- */
-
-export interface CasesClient {
-  readonly cases: CasesSubClient;
-  readonly attachments: AttachmentsSubClient;
-  readonly userActions: UserActionsSubClient;
-}
-
-/**
- * This represents the interface that cases uses internally.
- */
-
-export interface CasesClientInternal {
-  readonly alerts: AlertSubClient;
-  readonly configuration: ConfigureSubClient;
-}
-
-export interface GetClientsFactories {
-  readonly getCasesClient: () => CasesClient;
-  readonly getCasesInternalClient: () => CasesClientInternal;
-}
-
-export type CasesSubClientImplementation<T> = (
-  args: CasesClientArgs,
-  getClientsFactories: GetClientsFactories
-) => T;

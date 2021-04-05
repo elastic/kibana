@@ -5,29 +5,40 @@
  * 2.0.
  */
 
-import { CasesClient, CasesClientArgs } from './types';
-import { createCasesSubClient } from './cases/client';
-import { createAttachmentsSubClient } from './attachments/client';
-import { createUserActionsSubClient } from './user_actions/client';
-import { createCasesClientInternal } from './client_internal';
+import { CasesClientArgs } from './types';
+import { CasesSubClient, createCasesSubClient } from './cases/client';
+import { AttachmentsSubClient, createAttachmentsSubClient } from './attachments/client';
+import { UserActionsSubClient, createUserActionsSubClient } from './user_actions/client';
+import { CasesClientInternal, createCasesClientInternal } from './client_internal';
+
+export class CasesClient {
+  private readonly args: CasesClientArgs;
+  private readonly casesClientInternal: CasesClientInternal;
+  private readonly _cases: CasesSubClient;
+  private readonly _attachments: AttachmentsSubClient;
+  private readonly _userActions: UserActionsSubClient;
+
+  constructor(args: CasesClientArgs) {
+    this.args = args;
+    this.casesClientInternal = createCasesClientInternal(args);
+    this._cases = createCasesSubClient(this.args, this, this.casesClientInternal);
+    this._attachments = createAttachmentsSubClient(this.args, this.casesClientInternal);
+    this._userActions = createUserActionsSubClient(this.args);
+  }
+
+  public get cases() {
+    return this._cases;
+  }
+
+  public get attachments() {
+    return this._attachments;
+  }
+
+  public get userActions() {
+    return this._userActions;
+  }
+}
 
 export const createCasesClient = (args: CasesClientArgs): CasesClient => {
-  const casesInternalClient = createCasesClientInternal(args, () => casesClient);
-
-  const casesClient: CasesClient = {
-    cases: createCasesSubClient(args, {
-      getCasesClient: () => casesClient,
-      getCasesInternalClient: () => casesInternalClient,
-    }),
-    attachments: createAttachmentsSubClient(args, {
-      getCasesClient: () => casesClient,
-      getCasesInternalClient: () => casesInternalClient,
-    }),
-    userActions: createUserActionsSubClient(args, {
-      getCasesClient: () => casesClient,
-      getCasesInternalClient: () => casesInternalClient,
-    }),
-  };
-
-  return Object.freeze(casesClient);
+  return new CasesClient(args);
 };

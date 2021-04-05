@@ -18,7 +18,7 @@ interface GetMappingsArgs {
   savedObjectsClient: SavedObjectsClientContract;
   connectorMappingsService: ConnectorMappingsService;
   actionsClient: ActionsClient;
-  getCasesInternalClient: () => CasesClientInternal;
+  casesClientInternal: CasesClientInternal;
   connectorType: string;
   connectorId: string;
   logger: Logger;
@@ -28,13 +28,12 @@ export const getMappings = async ({
   savedObjectsClient,
   connectorMappingsService,
   actionsClient,
-  getCasesInternalClient,
+  casesClientInternal,
   connectorType,
   connectorId,
   logger,
 }: GetMappingsArgs): Promise<ConnectorMappingsAttributes[]> => {
   try {
-    const casesClientInternal = getCasesInternalClient();
     if (connectorType === ConnectorTypes.none) {
       return [];
     }

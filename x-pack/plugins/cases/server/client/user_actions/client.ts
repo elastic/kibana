@@ -6,7 +6,7 @@
  */
 
 import { CaseUserActionsResponse } from '../../../common/api';
-import { CasesSubClientImplementation } from '../types';
+import { CasesClientArgs } from '../types';
 import { get } from './get';
 
 export interface UserActionGet {
@@ -18,9 +18,7 @@ export interface UserActionsSubClient {
   getAll(args: UserActionGet): Promise<CaseUserActionsResponse>;
 }
 
-export const createUserActionsSubClient: CasesSubClientImplementation<UserActionsSubClient> = (
-  args
-) => {
+export const createUserActionsSubClient = (args: CasesClientArgs): UserActionsSubClient => {
   const { savedObjectsClient, userActionService } = args;
 
   const attachmentSubClient: UserActionsSubClient = {

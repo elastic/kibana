@@ -7,10 +7,10 @@
 
 import { CaseStatuses } from '../../../common/api';
 import { AlertInfo } from '../../common';
-import { CasesSubClientImplementation } from '../types';
 import { CasesClientGetAlertsResponse } from './types';
 import { get } from './get';
 import { updateStatus } from './update_status';
+import { CasesClientArgs } from '../types';
 
 /**
  * Defines the fields necessary to update an alert's status.
@@ -34,7 +34,7 @@ export interface AlertSubClient {
   updateStatus(args: AlertUpdateStatus): Promise<void>;
 }
 
-export const createAlertsSubClient: CasesSubClientImplementation<AlertSubClient> = (args) => {
+export const createAlertsSubClient = (args: CasesClientArgs): AlertSubClient => {
   const { alertsService, scopedClusterClient, logger } = args;
 
   const alertsSubClient: AlertSubClient = {

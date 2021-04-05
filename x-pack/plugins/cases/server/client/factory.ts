@@ -24,8 +24,7 @@ import {
   AttachmentService,
 } from '../services';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
-import { CasesClient } from './types';
-import { createCasesClient } from '.';
+import { CasesClient, createCasesClient } from '.';
 
 interface CasesClientFactoryArgs {
   caseConfigureService: CaseConfigureService;

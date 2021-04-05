@@ -7,7 +7,8 @@
 
 import { ActionsClient } from '../../../../actions/server';
 import { ConnectorMappingsAttributes, GetFieldsResponse } from '../../../common/api';
-import { CasesSubClientImplementation } from '../types';
+import { CasesClientInternal } from '../client_internal';
+import { CasesClientArgs } from '../types';
 import { getFields } from './get_fields';
 import { getMappings } from './get_mappings';
 
@@ -28,12 +29,11 @@ export interface ConfigureSubClient {
   getMappings(args: ConfigurationGetMappings): Promise<ConnectorMappingsAttributes[]>;
 }
 
-export const createConfigurationSubClient: CasesSubClientImplementation<ConfigureSubClient> = (
-  args,
-  getClientsFactories
-) => {
+export const createConfigurationSubClient = (
+  args: CasesClientArgs,
+  casesClientInternal: CasesClientInternal
+): ConfigureSubClient => {
   const { savedObjectsClient, connectorMappingsService, logger } = args;
-  const { getCasesInternalClient } = getClientsFactories;
 
   const configureSubClient: ConfigureSubClient = {
     getFields: (fields: ConfigurationGetFields) => getFields(fields),
@@ -42,7 +42,7 @@ export const createConfigurationSubClient: CasesSubClientImplementation<Configur
         ...params,
         savedObjectsClient,
         connectorMappingsService,
-        getCasesInternalClient,
+        casesClientInternal,
         logger,
       }),
   };

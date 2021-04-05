@@ -5,24 +5,30 @@
  * 2.0.
  */
 
-import { CasesClientInternal, CasesClientArgs, GetClientsFactories } from './types';
-import { createAlertsSubClient } from './alerts/client';
-import { createConfigurationSubClient } from './configure/client';
+import { CasesClientArgs } from './types';
+import { AlertSubClient, createAlertsSubClient } from './alerts/client';
+import { ConfigureSubClient, createConfigurationSubClient } from './configure/client';
 
-export const createCasesClientInternal = (
-  args: CasesClientArgs,
-  getCasesClient: GetClientsFactories['getCasesClient']
-): CasesClientInternal => {
-  const casesClientInternal: CasesClientInternal = {
-    alerts: createAlertsSubClient(args, {
-      getCasesClient,
-      getCasesInternalClient: () => casesClientInternal,
-    }),
-    configuration: createConfigurationSubClient(args, {
-      getCasesClient,
-      getCasesInternalClient: () => casesClientInternal,
-    }),
-  };
+export class CasesClientInternal {
+  private readonly args: CasesClientArgs;
+  private readonly _alerts: AlertSubClient;
+  private readonly _configuration: ConfigureSubClient;
 
-  return Object.freeze(casesClientInternal);
+  constructor(args: CasesClientArgs) {
+    this.args = args;
+    this._alerts = createAlertsSubClient(this.args);
+    this._configuration = createConfigurationSubClient(this.args, this);
+  }
+
+  public get alerts() {
+    return this._alerts;
+  }
+
+  public get configuration() {
+    return this._configuration;
+  }
+}
+
+export const createCasesClientInternal = (args: CasesClientArgs): CasesClientInternal => {
+  return new CasesClientInternal(args);
 };

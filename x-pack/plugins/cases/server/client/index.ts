@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export { CasesClient, CasesClientInternal, CasesClientArgs } from './types';
+export { CasesClient } from './client';
+export { CasesClientInternal } from './client_internal';
+export { CasesClientArgs } from './types';
 export { createCasesClient } from './client';
 export { createCasesClientInternal } from './client_internal';

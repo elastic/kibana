@@ -41,8 +41,7 @@ import {
 } from '../../services';
 import { createCaseError } from '../../common/error';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
-import { CasesClient } from '../types';
-import { CasesClientInternal } from '..';
+import { CasesClient, CasesClientInternal } from '..';
 
 /**
  * Returns true if the case should be closed based on the configuration settings and whether the case
@@ -69,8 +68,8 @@ interface PushParams {
   user: User;
   caseId: string;
   connectorId: string;
-  getCasesClient: () => CasesClient;
-  getCasesInternalClient: () => CasesClientInternal;
+  casesClient: CasesClient;
+  casesClientInternal: CasesClientInternal;
   actionsClient: ActionsClient;
   logger: Logger;
 }
@@ -81,8 +80,8 @@ export const push = async ({
   caseService,
   caseConfigureService,
   userActionService,
-  getCasesClient,
-  getCasesInternalClient,
+  casesClient,
+  casesClientInternal,
   actionsClient,
   connectorId,
   caseId,
@@ -96,8 +95,6 @@ export const push = async ({
   let alerts;
   let connectorMappings;
   let externalServiceIncident;
-  const casesClient = getCasesClient();
-  const casesClientInternal = getCasesInternalClient();
 
   try {
     [theCase, connector, userActions] = await Promise.all([

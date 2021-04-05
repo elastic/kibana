@@ -52,10 +52,10 @@ import {
   SUB_CASE_SAVED_OBJECT,
 } from '../../../common/constants';
 import { createAlertUpdateRequest } from '../../common';
-import { CasesClientInternal } from '../types';
 import { createCaseError } from '../../common/error';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import { UpdateAlertRequest } from '../alerts/client';
+import { CasesClientInternal } from '../client_internal';
 
 /**
  * Throws an error if any of the requests attempt to update a collection style cases' status field.
@@ -334,7 +334,7 @@ interface UpdateArgs {
   caseService: CaseService;
   userActionService: CaseUserActionService;
   user: User;
-  getCasesInternalClient: () => CasesClientInternal;
+  casesClientInternal: CasesClientInternal;
   cases: CasesPatchRequest;
   logger: Logger;
 }
@@ -344,7 +344,7 @@ export const update = async ({
   caseService,
   userActionService,
   user,
-  getCasesInternalClient,
+  casesClientInternal,
   cases,
   logger,
 }: UpdateArgs): Promise<CasesResponse> => {
@@ -354,8 +354,6 @@ export const update = async ({
   );
 
   try {
-    const casesClientInternal = getCasesInternalClient();
-
     const myCases = await caseService.getCases({
       client: savedObjectsClient,
       caseIds: query.cases.map((q) => q.id),

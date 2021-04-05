@@ -14,7 +14,9 @@ import {
   CasesFindRequest,
   CasesFindResponse,
 } from '../../../common/api';
-import { CasesSubClientImplementation } from '../types';
+import { CasesClient } from '../client';
+import { CasesClientInternal } from '../client_internal';
+import { CasesClientArgs } from '../types';
 import { create } from './create';
 import { find } from './find';
 import { get } from './get';
@@ -41,10 +43,11 @@ export interface CasesSubClient {
   update(args: CasesPatchRequest): Promise<CasesResponse>;
 }
 
-export const createCasesSubClient: CasesSubClientImplementation<CasesSubClient> = (
-  args,
-  getClientsFactories
-) => {
+export const createCasesSubClient = (
+  args: CasesClientArgs,
+  casesClient: CasesClient,
+  casesClientInternal: CasesClientInternal
+): CasesSubClient => {
   const {
     attachmentService,
     caseConfigureService,
@@ -55,8 +58,6 @@ export const createCasesSubClient: CasesSubClientImplementation<CasesSubClient> 
     logger,
     authorization,
   } = args;
-
-  const { getCasesClient, getCasesInternalClient } = getClientsFactories;
 
   const casesSubClient: CasesSubClient = {
     create: (theCase: CasePostRequest) =>
@@ -93,8 +94,8 @@ export const createCasesSubClient: CasesSubClientImplementation<CasesSubClient> 
         caseService,
         userActionService,
         user,
-        getCasesClient,
-        getCasesInternalClient,
+        casesClient,
+        casesClientInternal,
         caseConfigureService,
         logger,
       }),
@@ -105,7 +106,7 @@ export const createCasesSubClient: CasesSubClientImplementation<CasesSubClient> 
         userActionService,
         user,
         cases,
-        getCasesInternalClient,
+        casesClientInternal,
         logger,
       }),
   };
