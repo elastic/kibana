@@ -78,7 +78,10 @@ function convertLegacyTypeToMetricsetName(type: string) {
     case 'ccr_stats':
       return 'ccr';
     case 'kibana_stats':
+    case 'logstash_stats':
       return 'stats';
+    case 'logstash_state':
+      return 'state';
   }
   return type;
 }

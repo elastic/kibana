@@ -92,6 +92,7 @@ const eventsPerSecondUnitLabel = i18n.translate(
 
 export const metrics = {
   logstash_cluster_events_input_rate: new LogstashEventsRateClusterMetric({
+    debug: true,
     field: 'logstash_stats.events.in',
     label: i18n.translate('xpack.monitoring.metrics.logstash.eventsReceivedRateLabel', {
       defaultMessage: 'Events Received Rate',

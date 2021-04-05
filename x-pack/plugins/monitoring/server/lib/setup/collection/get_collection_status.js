@@ -171,7 +171,7 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid, nod
                     bool: {
                       should: [
                         { term: { type: 'logstash_stats' } },
-                        { term: { 'metricset.name': 'logstash_stats' } },
+                        { term: { 'metricset.name': 'node_stats' } },
                       ],
                     },
                   },
