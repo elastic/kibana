@@ -130,7 +130,7 @@ export const useAddOrUpdateException = ({
           const filter = getQueryFilter(
             '',
             'kuery',
-            [...buildAlertsRuleIdFilter(ruleId), ...buildAlertStatusFilter('open')],
+            [...buildAlertsRuleIdFilter(ruleId, false), ...buildAlertStatusFilter('open')],
             bulkCloseIndex,
             prepareExceptionItemsForBulkClose(exceptionItemsToAddOrUpdate),
             false

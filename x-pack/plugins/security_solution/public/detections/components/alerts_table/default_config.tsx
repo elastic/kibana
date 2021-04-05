@@ -51,7 +51,11 @@ export const buildAlertsRuleIdFilter = (
   };
   const filter = showThreatMatchesOnly
     ? {
-        meta: sharedMeta,
+        meta: {
+          ...sharedMeta,
+          type: 'phrases',
+          key: 'signal.rule.threat_mapping',
+        },
         query: {
           bool: {
             must: [matchPhraseQuery, { exists: { field: 'signal.rule.threat_mapping' } }],
@@ -83,6 +87,7 @@ export const buildShowBuildingBlockFilter = (showBuildingBlockAlerts: boolean): 
             disabled: false,
             type: 'exists',
             key: 'signal.rule.building_block_type',
+            value: 'exists',
           },
           // @ts-expect-error TODO: Rework parent typings to support ExistsFilter[]
           exists: { field: 'signal.rule.building_block_type' },
@@ -96,11 +101,13 @@ export const buildThreatMatchFilter = (showThreatMatchesOnly: boolean): Filter[]
         {
           meta: {
             alias: null,
-            negate: true,
             disabled: false,
+            key: 'signal.rule.threat_mapping',
+            type: 'exists',
+            value: 'exists',
           },
           // @ts-expect-error TODO: Rework parent typings to support BoolFilter[]
-          bool: { must_not: [{ exists: { field: 'signal.rule.threat_mapping' } }] },
+          exists: { field: 'signal.rule.threat_mapping' },
         },
       ]
     : [];

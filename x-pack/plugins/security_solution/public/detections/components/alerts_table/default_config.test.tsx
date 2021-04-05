@@ -42,6 +42,8 @@ describe('alerts default_config', () => {
           alias: null,
           negate: false,
           disabled: false,
+          key: 'signal.rule.threat_mapping',
+          type: 'phrases',
         },
         query: {
           bool: {
