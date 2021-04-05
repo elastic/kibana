@@ -839,7 +839,7 @@ export interface SearchResponse {
 interface SearchForOutdatedDocumentsOptions {
   batchSize: number;
   targetIndex: string;
-  outdatedDocumentsQuery: estypes.QueryContainer;
+  outdatedDocumentsQuery?: estypes.QueryContainer;
 }
 
 /**

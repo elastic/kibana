@@ -337,7 +337,6 @@ describe('migration actions', () => {
   // Reindex doesn't return any errors on it's own, so we have to test
   // together with waitForReindexTask
   describe('reindex & waitForReindexTask', () => {
-    expect.assertions(2);
     it('resolves right when reindex succeeds without reindex script', async () => {
       const res = (await reindex(
         client,
@@ -357,7 +356,7 @@ describe('migration actions', () => {
       const results = ((await searchForOutdatedDocuments(client, {
         batchSize: 1000,
         targetIndex: 'reindex_target',
-        outdatedDocumentsQuery: {},
+        outdatedDocumentsQuery: undefined,
       })()) as Either.Right<SearchResponse>).right.outdatedDocuments;
       expect(results.map((doc) => doc._source.title)).toMatchInlineSnapshot(`
         Array [
@@ -387,7 +386,7 @@ describe('migration actions', () => {
       const results = ((await searchForOutdatedDocuments(client, {
         batchSize: 1000,
         targetIndex: 'reindex_target_2',
-        outdatedDocumentsQuery: {},
+        outdatedDocumentsQuery: undefined,
       })()) as Either.Right<SearchResponse>).right.outdatedDocuments;
       expect(results.map((doc) => doc._source.title)).toMatchInlineSnapshot(`
         Array [
@@ -436,7 +435,7 @@ describe('migration actions', () => {
       const results = ((await searchForOutdatedDocuments(client, {
         batchSize: 1000,
         targetIndex: 'reindex_target_3',
-        outdatedDocumentsQuery: {},
+        outdatedDocumentsQuery: undefined,
       })()) as Either.Right<SearchResponse>).right.outdatedDocuments;
       expect(results.map((doc) => doc._source.title)).toMatchInlineSnapshot(`
         Array [
@@ -455,7 +454,7 @@ describe('migration actions', () => {
       const sourceDocs = ((await searchForOutdatedDocuments(client, {
         batchSize: 1000,
         targetIndex: 'existing_index_with_docs',
-        outdatedDocumentsQuery: {},
+        outdatedDocumentsQuery: undefined,
       })()) as Either.Right<SearchResponse>).right.outdatedDocuments
         .slice(0, 2)
         .map(({ _id, _source }) => ({
@@ -484,7 +483,7 @@ describe('migration actions', () => {
       const results = ((await searchForOutdatedDocuments(client, {
         batchSize: 1000,
         targetIndex: 'reindex_target_4',
-        outdatedDocumentsQuery: {},
+        outdatedDocumentsQuery: undefined,
       })()) as Either.Right<SearchResponse>).right.outdatedDocuments;
       expect(results.map((doc) => doc._source.title)).toMatchInlineSnapshot(`
         Array [
@@ -713,7 +712,7 @@ describe('migration actions', () => {
       const resultsWithoutQuery = ((await searchForOutdatedDocuments(client, {
         batchSize: 1000,
         targetIndex: 'existing_index_with_docs',
-        outdatedDocumentsQuery: {},
+        outdatedDocumentsQuery: undefined,
       })()) as Either.Right<SearchResponse>).right.outdatedDocuments;
       expect(resultsWithoutQuery.length).toBe(4);
     });
@@ -1061,7 +1060,7 @@ describe('migration actions', () => {
       const existingDocs = ((await searchForOutdatedDocuments(client, {
         batchSize: 1000,
         targetIndex: 'existing_index_with_docs',
-        outdatedDocumentsQuery: {},
+        outdatedDocumentsQuery: undefined,
       })()) as Either.Right<SearchResponse>).right.outdatedDocuments;
 
       const task = bulkOverwriteTransformedDocuments(client, 'existing_index_with_docs', [
