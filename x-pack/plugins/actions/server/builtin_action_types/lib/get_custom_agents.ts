@@ -6,7 +6,7 @@
  */
 
 import { Agent as HttpAgent } from 'http';
-import { Agent as HttpsAgent } from 'https';
+import { Agent as HttpsAgent, AgentOptions } from 'https';
 import HttpProxyAgent from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { Logger } from '../../../../../../src/core/server';
@@ -22,13 +22,35 @@ export function getCustomAgents(
   logger: Logger,
   url: string
 ): GetCustomAgentsResponse {
-  const proxySettings = configurationUtilities.getProxySettings();
   const defaultAgents = {
     httpAgent: undefined,
     httpsAgent: new HttpsAgent({
       rejectUnauthorized: configurationUtilities.isRejectUnauthorizedCertificatesEnabled(),
     }),
   };
+
+  const proxySettings = configurationUtilities.getProxySettings();
+  const customHostSettings = configurationUtilities.getCustomHostSettings(url);
+  if (!proxySettings && !customHostSettings) {
+    return defaultAgents;
+  }
+
+  // update the defaultAgents.httpsAgent if configured
+  const tlsSettings = customHostSettings?.tls;
+  let agentOptions: AgentOptions | undefined;
+  if (tlsSettings) {
+    logger.debug(`Creating customized connection settings for: ${url}`);
+    agentOptions = defaultAgents.httpsAgent.options;
+
+    if (tlsSettings.certificateAuthoritiesData) {
+      agentOptions.ca = tlsSettings.certificateAuthoritiesData;
+    }
+
+    // see: src/core/server/elasticsearch/legacy/elasticsearch_client_config.ts
+    if (tlsSettings.rejectUnauthorized !== undefined) {
+      agentOptions.rejectUnauthorized = tlsSettings.rejectUnauthorized;
+    }
+  }
 
   if (!proxySettings) {
     return defaultAgents;
@@ -75,6 +97,13 @@ export function getCustomAgents(
     rejectUnauthorized: proxySettings.proxyRejectUnauthorizedCertificates,
   }) as unknown) as HttpsAgent;
   // vsCode wasn't convinced HttpsProxyAgent is an https.Agent, so we convinced it
+
+  if (agentOptions) {
+    httpsAgent.options = {
+      ...httpsAgent.options,
+      ...agentOptions,
+    };
+  }
 
   return { httpAgent, httpsAgent };
 }

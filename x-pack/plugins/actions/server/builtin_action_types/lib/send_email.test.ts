@@ -15,6 +15,7 @@ import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import nodemailer from 'nodemailer';
 import { ProxySettings } from '../../types';
 import { actionsConfigMock } from '../../actions_config.mock';
+import { CustomHostSettings } from '../../config';
 
 const createTransportMock = nodemailer.createTransport as jest.Mock;
 const sendMailMockResult = { result: 'does not matter' };
@@ -356,15 +357,150 @@ describe('send_email module', () => {
       ]
     `);
   });
+
+  test('it handles custom host settings from config', async () => {
+    const sendEmailOptions = getSendEmailOptionsNoAuth(
+      {
+        transport: {
+          host: 'example.com',
+          port: 1025,
+        },
+      },
+      undefined,
+      {
+        url: 'smtp://example.com:1025',
+        tls: {
+          certificateAuthoritiesData: 'ca cert data goes here',
+        },
+        smtp: {
+          ignoreTLS: false,
+          requireTLS: true,
+        },
+      }
+    );
+
+    const result = await sendEmail(mockLogger, sendEmailOptions);
+    expect(result).toBe(sendMailMockResult);
+
+    // note in the object below, the rejectUnauthenticated got set to false,
+    // given the implementation allowing that for no auth and !secure.
+    expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "host": "example.com",
+          "port": 1025,
+          "requireTLS": true,
+          "secure": false,
+          "tls": Object {
+            "ca": "ca cert data goes here",
+            "rejectUnauthorized": false,
+          },
+        },
+      ]
+    `);
+  });
+
+  test('it allows custom host settings to override calculated values', async () => {
+    const sendEmailOptions = getSendEmailOptionsNoAuth(
+      {
+        transport: {
+          host: 'example.com',
+          port: 1025,
+        },
+      },
+      undefined,
+      {
+        url: 'smtp://example.com:1025',
+        tls: {
+          certificateAuthoritiesData: 'ca cert data goes here',
+          rejectUnauthorized: true,
+        },
+        smtp: {
+          ignoreTLS: true,
+          requireTLS: false,
+        },
+      }
+    );
+
+    const result = await sendEmail(mockLogger, sendEmailOptions);
+    expect(result).toBe(sendMailMockResult);
+
+    // in this case, rejectUnauthorized is true, as the custom host settings
+    // overrode the calculated value of false
+    expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "host": "example.com",
+          "ignoreTLS": true,
+          "port": 1025,
+          "secure": false,
+          "tls": Object {
+            "ca": "ca cert data goes here",
+            "rejectUnauthorized": true,
+          },
+        },
+      ]
+    `);
+  });
+
+  test('it handles custom host settings with a proxy', async () => {
+    const sendEmailOptions = getSendEmailOptionsNoAuth(
+      {
+        transport: {
+          host: 'example.com',
+          port: 1025,
+        },
+      },
+      {
+        proxyUrl: 'https://proxy.com',
+        proxyRejectUnauthorizedCertificates: false,
+        proxyBypassHosts: undefined,
+        proxyOnlyHosts: undefined,
+      },
+      {
+        url: 'smtp://example.com:1025',
+        tls: {
+          certificateAuthoritiesData: 'ca cert data goes here',
+          rejectUnauthorized: true,
+        },
+        smtp: {
+          requireTLS: true,
+        },
+      }
+    );
+
+    const result = await sendEmail(mockLogger, sendEmailOptions);
+    expect(result).toBe(sendMailMockResult);
+    expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "headers": undefined,
+          "host": "example.com",
+          "port": 1025,
+          "proxy": "https://proxy.com",
+          "requireTLS": true,
+          "secure": false,
+          "tls": Object {
+            "ca": "ca cert data goes here",
+            "rejectUnauthorized": true,
+          },
+        },
+      ]
+    `);
+  });
 });
 
 function getSendEmailOptions(
   { content = {}, routing = {}, transport = {} } = {},
-  proxySettings?: ProxySettings
+  proxySettings?: ProxySettings,
+  customHostSettings?: CustomHostSettings
 ) {
   const configurationUtilities = actionsConfigMock.create();
   if (proxySettings) {
     configurationUtilities.getProxySettings.mockReturnValue(proxySettings);
+  }
+  if (customHostSettings) {
+    configurationUtilities.getCustomHostSettings.mockReturnValue(customHostSettings);
   }
   return {
     content: {
@@ -392,11 +528,15 @@ function getSendEmailOptions(
 
 function getSendEmailOptionsNoAuth(
   { content = {}, routing = {}, transport = {} } = {},
-  proxySettings?: ProxySettings
+  proxySettings?: ProxySettings,
+  customHostSettings?: CustomHostSettings
 ) {
   const configurationUtilities = actionsConfigMock.create();
   if (proxySettings) {
     configurationUtilities.getProxySettings.mockReturnValue(proxySettings);
+  }
+  if (customHostSettings) {
+    configurationUtilities.getCustomHostSettings.mockReturnValue(customHostSettings);
   }
   return {
     content: {

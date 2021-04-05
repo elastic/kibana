@@ -48,6 +48,67 @@ You can configure the following settings in the `kibana.yml` file.
   +
   Note that hosts associated with built-in actions, such as Slack and PagerDuty, are not automatically added to allowed hosts. If you are not using the default `[*]` setting, you must ensure that the corresponding endpoints are added to the allowed hosts as well.
 
+| `xpack.actions.customHostSettings` {ess-icon} 
+  | A list of custom host settings to override existing global settings. It
+  defaults to an empty list. In the example below, a custom host setting for a
+  mail server is configured to not bypass certificate validation, provide
+  server certificate data from both a file and inline, and require TLS for the
+  connection.
+
+|===
+
+[source,yaml]
+--
+xpack.actions.customHostSettings:
+  - url: smtp://mail.example.com
+    tls: 
+      rejectUnauthorized: false
+      certificateAuthoritiesFiles: [ 'one.crt' ]
+      certificateAuthoritiesData: |
+          -----BEGIN CERTIFICATE-----
+          ... multiple lines of certificate data here ...
+          -----END CERTIFICATE-----
+    smtp:
+      requireTLS: true
+--
+
+[cols="2*<"]
+|===
+
+| `xpack.actions.customHostSettings[n].url` {ess-icon}
+  | A URL associated with this custom host setting.  Should be in form
+  `protocol://hostname:port`, where `protocol` is `https` or `smtp`.  If the
+  port is not provided, 443 will be used for `https` and 25 will be used for
+  `smtp`.  The `smtp` URLs will be used for the Email actions which use this
+  server, and the `https` URLs will be used for actions which use `https` to
+  connect to services.
+
+  Note that no other URL values should be part of this URL, including paths,
+  query strings, and authentication information.  When an http or smtp request
+  is being made as part of executing an action, only the protocol, hostname and
+  port of the URL for that request are used to look up these configuration
+  values.
+
+| `xpack.actions.customHostSettings[n].smtp.ignoreTLS` {ess-icon}
+  | A boolean value indicatting that TLS must not be used for this connection.
+
+| `xpack.actions.customHostSettings[n].smtp.requireTLS` {ess-icon}
+  | A boolean value indicatting that TLS must be used for this connection.
+
+| `xpack.actions.customHostSettings[n].tls.rejectUnauthorized` {ess-icon}
+  | A boolean value indicating whether to bypass to certificate validation
+  and overrides the general `xpack.actions.rejectUnauthorized` configuration,
+  just for requests made for this hostname/port.
+
+| `xpack.actions.customHostSettings[n].tls.certificateAuthoritiesFiles` {ess-icon}
+  | A file name or list of file names of PEM-encoded certificate files which
+  should be used to validate the server.
+
+| `xpack.actions.customHostSettings[n].tls.certificateAuthoritiesData` {ess-icon}
+  | The contents of a PEM-encoded certificate file, or multiple files appended
+  into a single string.  This configuration can be used for environments where
+  the files themselves cannot be made available.  
+
 | `xpack.actions.enabledActionTypes` {ess-icon}
   | A list of action types that are enabled. It defaults to `[*]`, enabling all types. The names for built-in {kib} action types are prefixed with a `.` and include: `.server-log`, `.slack`, `.email`, `.index`, `.pagerduty`, and `.webhook`. An empty list `[]` will disable all action types. +
   +

@@ -16,6 +16,7 @@ const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 const targetHost = 'elastic.co';
 const targetUrl = `https://${targetHost}/foo/bar/baz`;
+const targetUrlCanonical = `https://${targetHost}:443`;
 const nonMatchingUrl = `https://${targetHost}m/foo/bar/baz`;
 
 describe('getCustomAgents', () => {
@@ -105,5 +106,40 @@ describe('getCustomAgents', () => {
     );
     expect(httpAgent instanceof HttpProxyAgent).toBeFalsy();
     expect(httpsAgent instanceof HttpsProxyAgent).toBeFalsy();
+  });
+
+  test('handles custom host settings', () => {
+    configurationUtilities.getCustomHostSettings.mockReturnValue({
+      url: targetUrlCanonical,
+      tls: {
+        rejectUnauthorized: false,
+        certificateAuthoritiesData: 'ca data here',
+      },
+    });
+    const { httpsAgent } = getCustomAgents(configurationUtilities, logger, targetUrl);
+    expect(httpsAgent?.options.ca).toBe('ca data here');
+    expect(httpsAgent?.options.rejectUnauthorized).toBe(false);
+  });
+
+  test('handles custom host settings with proxy', () => {
+    configurationUtilities.getProxySettings.mockReturnValue({
+      proxyUrl: 'https://someproxyhost',
+      proxyRejectUnauthorizedCertificates: false,
+      proxyBypassHosts: undefined,
+      proxyOnlyHosts: undefined,
+    });
+    configurationUtilities.getCustomHostSettings.mockReturnValue({
+      url: targetUrlCanonical,
+      tls: {
+        rejectUnauthorized: false,
+        certificateAuthoritiesData: 'ca data here',
+      },
+    });
+    const { httpAgent, httpsAgent } = getCustomAgents(configurationUtilities, logger, targetUrl);
+    expect(httpAgent instanceof HttpProxyAgent).toBeTruthy();
+    expect(httpsAgent instanceof HttpsProxyAgent).toBeTruthy();
+
+    expect(httpsAgent?.options.ca).toBe('ca data here');
+    expect(httpsAgent?.options.rejectUnauthorized).toBe(false);
   });
 });
