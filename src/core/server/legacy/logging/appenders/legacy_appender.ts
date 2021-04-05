@@ -10,11 +10,9 @@ import { schema } from '@kbn/config-schema';
 import { LegacyLoggingServer } from '@kbn/legacy-logging';
 import { DisposableAppender, LogRecord } from '@kbn/logging';
 
-type LegacyVars = Record<string, any>;
-
 export interface LegacyAppenderConfig {
   type: 'legacy-appender';
-  legacyLoggingConfig?: any;
+  legacyLoggingConfig?: Record<string, any>;
 }
 
 /**
@@ -24,7 +22,7 @@ export interface LegacyAppenderConfig {
 export class LegacyAppender implements DisposableAppender {
   public static configSchema = schema.object({
     type: schema.literal('legacy-appender'),
-    legacyLoggingConfig: schema.any(),
+    legacyLoggingConfig: schema.recordOf(schema.string(), schema.any()),
   });
 
   /**
@@ -35,7 +33,7 @@ export class LegacyAppender implements DisposableAppender {
 
   private readonly loggingServer: LegacyLoggingServer;
 
-  constructor(legacyLoggingConfig: Readonly<LegacyVars>) {
+  constructor(legacyLoggingConfig: Record<string, any>) {
     this.loggingServer = new LegacyLoggingServer(legacyLoggingConfig);
   }
 

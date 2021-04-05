@@ -64,11 +64,12 @@ export class CoreApp {
       async (context, req, res) => {
         const { query, params } = req;
         const { path } = params;
-        if (!path || !path.endsWith('/')) {
+        const basePath = httpSetup.basePath.get(req);
+
+        if (!path || !path.endsWith('/') || `/${path}`.startsWith(basePath)) {
           return res.notFound();
         }
 
-        const basePath = httpSetup.basePath.get(req);
         const querystring = query ? stringify(query) : undefined;
         const url = `${basePath}/${path.slice(0, -1)}${querystring ? `?${querystring}` : ''}`;
 

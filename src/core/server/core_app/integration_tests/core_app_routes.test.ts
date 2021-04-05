@@ -42,5 +42,16 @@ describe('Core app routes', () => {
     it('does not redirect if the path does not end with `/`', async () => {
       await kbnTestServer.request.get(root, '/some-path').expect(404);
     });
+
+    it('does not redirect if the path starts with the basePath', async () => {
+      await kbnTestServer.request.get(root, '/base-path/not-found/').expect(404);
+    });
+  });
+
+  describe('`/` route', () => {
+    it('prevails on the `/{path*}` route', async () => {
+      const response = await kbnTestServer.request.get(root, '/').expect(302);
+      expect(response.get('location')).toEqual('/base-path/app/home');
+    });
   });
 });
