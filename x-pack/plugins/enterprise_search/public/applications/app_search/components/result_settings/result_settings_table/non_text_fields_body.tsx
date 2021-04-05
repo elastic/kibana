@@ -10,6 +10,7 @@ import React, { useMemo } from 'react';
 import { useValues, useActions } from 'kea';
 
 import { EuiTableRow, EuiTableRowCell, EuiCheckbox, EuiTableRowCellCheckbox } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { ResultSettingsLogic } from '..';
 import { FieldResultSetting } from '../types';
@@ -33,6 +34,10 @@ export const NonTextFieldsBody: React.FC = () => {
           </EuiTableRowCell>
           <EuiTableRowCellCheckbox>
             <EuiCheckbox
+              aria-label={i18n.translate(
+                'xpack.enterpriseSearch.appSearch.engine.resultSettings.table.rawAriaLabel',
+                { defaultMessage: 'Toggle raw field' }
+              )}
               data-test-subj="ResultSettingRawCheckBox"
               id={`${fieldName}-raw}`}
               checked={!!fieldSettings.raw}
