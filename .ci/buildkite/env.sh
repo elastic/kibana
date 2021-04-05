@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-source "$(dirname "${0}")/util.sh"
+source .ci/buildkite/env.sh
 
 export CI=true
 
