@@ -86,7 +86,7 @@ export async function deleteEnrollmentApiKey(
 ) {
   const enrollmentApiKey = await getEnrollmentAPIKey(esClient, id);
 
-  await invalidateAPIKeys(soClient, [enrollmentApiKey.api_key_id]);
+  await invalidateAPIKeys([enrollmentApiKey.api_key_id]);
 
   await esClient.update({
     index: ENROLLMENT_API_KEYS_INDEX,
