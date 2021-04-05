@@ -20,6 +20,7 @@ import {
   getWaitingForMapReadyLayerListRaw,
   getQuery,
   getTimeFilters,
+  getTimeslice,
   getLayerList,
   getSearchSessionId,
   getSearchSessionMapBuffer,
@@ -54,6 +55,7 @@ import {
   MapCenterAndZoom,
   MapExtent,
   MapRefreshConfig,
+  Timeslice,
 } from '../../common/descriptor_types';
 import { INITIAL_LOCATION } from '../../common/constants';
 import { scaleBounds } from '../../common/elasticsearch_util';
@@ -227,6 +229,7 @@ function generateQueryTimestamp() {
 export function setQuery({
   query,
   timeFilters,
+  timeslice,
   filters = [],
   forceRefresh = false,
   searchSessionId,
@@ -235,6 +238,7 @@ export function setQuery({
   filters?: Filter[];
   query?: Query;
   timeFilters?: TimeRange;
+  timeslice?: Timeslice;
   forceRefresh?: boolean;
   searchSessionId?: string;
   searchSessionMapBuffer?: MapExtent;
@@ -251,6 +255,7 @@ export function setQuery({
 
     const nextQueryContext = {
       timeFilters: timeFilters ? timeFilters : getTimeFilters(getState()),
+      timeslice: timeslice ? timeslice : getTimeslice(getState()),
       query: {
         ...(query ? query : getQuery(getState())),
         // ensure query changes to trigger re-fetch when "Refresh" clicked
@@ -263,6 +268,7 @@ export function setQuery({
 
     const prevQueryContext = {
       timeFilters: getTimeFilters(getState()),
+      timeslice: getTimeslice(getState()),
       query: getQuery(getState()),
       filters: getFilters(getState()),
       searchSessionId: getSearchSessionId(getState()),

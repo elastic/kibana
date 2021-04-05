@@ -5,17 +5,20 @@
  * 2.0.
  */
 
+import _ from 'lodash';
 import React, { ChangeEvent, Component } from 'react';
 import { EuiDualRange, EuiRangeTick } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getTicks } from './get_ticks';
 import { calcAutoIntervalNear, TimeRange } from '../../../../../../src/plugins/data/common';
 import { getTimeFilter } from '../../kibana_services';
+import { Timeslice } from '../../../common/descriptor_types';
 
 const NUM_TICKS = 6;
 const MAX_TICKS = 8;
 
 export interface Props {
+  setTimeslice: (timeslice: Timeslice) => void;
   isTimesliderOpen: boolean;
   timeRange: TimeRange;
 }
@@ -37,6 +40,8 @@ export function Timeslider(props: props) {
 }
 
 class KeyedTimeslider extends Component<Props, State> {
+  private _isMounted: boolean = false;
+
   constructor(props: Props) {
     super(props);
     const timeRangeBounds = getTimeFilter().calculateBounds(props.timeRange);
@@ -61,9 +66,24 @@ class KeyedTimeslider extends Component<Props, State> {
     };
   }
 
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
+  componentDidMount() {
+    this._isMounted = true;
+  }
+
   _onChange = (value: number[]) => {
     this.setState({ timeslice: value });
+    this._propagateChange(value);
   };
+
+  _propagateChange = _.debounce((value: number[]) => {
+    if (this._isMounted) {
+      this.props.setTimeslice({ from: value[0], to: value[1] });
+    }
+  }, 300);
 
   render() {
     return (

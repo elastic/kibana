@@ -9,9 +9,11 @@ import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { Timeslider } from './timeslider';
+import { setQuery } from '../../actions';
 import { getTimeFilters } from '../../selectors/map_selectors';
 import { getIsTimesliderOpen } from '../../selectors/ui_selectors';
 import { MapStoreState } from '../../reducers/store';
+import { Timeslice } from '../../../common/descriptor_types';
 
 function mapStateToProps(state: MapStoreState) {
   return {
@@ -21,7 +23,16 @@ function mapStateToProps(state: MapStoreState) {
 }
 
 function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
-  return {};
+  return {
+    setTimeslice: (timeslice: Timeslice) => {
+      dispatch(
+        setQuery({
+          forceRefresh: false,
+          timeslice,
+        })
+      );
+    },
+  };
 }
 
 const connected = connect(mapStateToProps, mapDispatchToProps)(Timeslider);
