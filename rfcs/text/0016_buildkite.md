@@ -102,7 +102,7 @@ This table provides an overview of the conclusions made throughout the rest of t
 | Advanced Pipeline logic              | Yes     | Yes       | Partial        | Partial  | No       |
 | Cloud-friendly pricing model         | Yes     | Yes       | Yes            | No       | No       |
 | Public access                        | Yes     | Yes       | Yes            | Partial  | Yes      |
-| Secrets handling                     | Yes     | No        | Yes            | Partial  | Partial  |
+| Secrets handling                     | Yes     | Partial   | Yes            | Partial  | Partial  |
 | Support or Documentation             | No      | Yes       | Yes            | Partial  | Yes      |
 | Scheduled Builds                     | Yes     | Yes       | Yes            | Yes      | Yes      |
 | Container support                    | Partial | Yes       | Yes            | Yes      | Partial  |
@@ -399,11 +399,11 @@ There are not fine-grained settings for this, and all information in the build i
 
 [Managing Pipeline Secrets](https://buildkite.com/docs/pipelines/secrets)
 
-Buildkite doesn't really have a concept of secrets. This is primarily because agents run on customers' infrastructure, so secrets can stay completely in the customer's environment. They provide recommendations for accessing secrets in pipelines in secure ways.
+Because agents run on customers' infrastructure, secrets can stay completely in the customer's environment. For this reason, Buildkite doesn't provide a real mechanism for storing secrets, and instead provide recommendations for accessing secrets in pipelines in secure ways.
 
 There are two recommended methods for handling secrets: using a third-party secrets service like Vault or GCP's Secret Manager, or baking them into agent images and only letting certain jobs access them. Since Elastic already uses Vault, we could utilize Vault the same way we do in Jenkins today.
 
-However, since Buildkite doesn't really have a concept of secrets, it's up to us to ensure secrets are not leaked to the console. Note that this is similar to our pipelines today: secrets we pull out of Vault at runtime are not automatically masked in the console.
+Also, a new experimental feature, [redacted environment variables](https://buildkite.com/docs/pipelines/managing-log-output#redacted-environment-variables) can automatically redact the values of environment variables that match some configurable suffixes if they are accidentally written to the console. This would only redact environment variables that were set prior to execution of a build step, e.g. during the `environment` or `pre-command` hooks, and not variables that were created during execution, e.g. by accessing Vault in the middle of a build step.
 
 #### Support or Documentation
 
