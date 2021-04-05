@@ -163,7 +163,12 @@ describe('actions', () => {
 
   describe('searchForOutdatedDocuments', () => {
     it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
-      const task = Actions.searchForOutdatedDocuments(client, 'new_index', { properties: {} });
+      const task = Actions.searchForOutdatedDocuments(client, {
+        batchSize: 1000,
+        targetIndex: 'new_index',
+        outdatedDocumentsQuery: {},
+      });
+
       try {
         await task();
       } catch (e) {
