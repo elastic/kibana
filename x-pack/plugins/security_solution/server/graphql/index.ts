@@ -9,7 +9,6 @@ import { rootSchema } from '../../common/graphql/root';
 import { sharedSchema } from '../../common/graphql/shared';
 
 import { ecsSchema } from './ecs';
-import { hostsSchema } from './hosts';
 import { dateSchema } from './scalar_date';
 import { noteSchema } from './note';
 import { pinnedEventSchema } from './pinned_event';
@@ -27,7 +26,6 @@ export const schemas = [
   toNumberSchema,
   toDateSchema,
   toBooleanSchema,
-  hostsSchema,
   noteSchema,
   pinnedEventSchema,
   rootSchema,

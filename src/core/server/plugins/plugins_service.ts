@@ -222,6 +222,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
           if (plugin.includesUiPlugin) {
             this.uiPluginInternalInfo.set(plugin.name, {
               requiredBundles: plugin.requiredBundles,
+              version: plugin.manifest.version,
               publicTargetDir: Path.resolve(plugin.path, 'target/public'),
               publicAssetsDir: Path.resolve(plugin.path, 'public/assets'),
             });
