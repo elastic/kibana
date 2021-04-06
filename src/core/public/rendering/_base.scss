@@ -11,6 +11,16 @@
   min-height: 100%;
 }
 
+#app-fixed-viewport {
+  pointer-events: none;
+  visibility: hidden;
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
 .app-wrapper {
   display: flex;
   flex-flow: column nowrap;
@@ -34,6 +44,10 @@
 // adapted from euiHeaderAffordForFixed as we need to handle the top banner
 @mixin kbnAffordForHeader($headerHeight) {
   padding-top: $headerHeight;
+
+  #app-fixed-viewport {
+    top: $headerHeight;
+  }
 
   .euiFlyout,
   .euiCollapsibleNav {

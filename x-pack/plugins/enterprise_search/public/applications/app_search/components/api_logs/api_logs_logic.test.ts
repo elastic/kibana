@@ -6,6 +6,7 @@
  */
 
 import { LogicMounter, mockHttpValues, mockFlashMessageHelpers } from '../../../__mocks__';
+import { mockApiLog } from './__mocks__/api_log.mock';
 import '../../__mocks__/engine_logic.mock';
 
 import { nextTick } from '@kbn/test/jest';
@@ -29,17 +30,7 @@ describe('ApiLogsLogic', () => {
   };
 
   const MOCK_API_RESPONSE = {
-    results: [
-      {
-        timestamp: '1970-01-01T12:00:00.000Z',
-        http_method: 'POST',
-        status: 200,
-        user_agent: 'some browser agent string',
-        full_request_path: '/api/as/v1/engines/national-parks-demo/search.json',
-        request_body: '{"someMockRequest":"hello"}',
-        response_body: '{"someMockResponse":"world"}',
-      },
-    ],
+    results: [mockApiLog, mockApiLog],
     meta: {
       page: {
         current: 1,
