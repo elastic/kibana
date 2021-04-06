@@ -23,6 +23,7 @@ export const rumFieldFormats: FieldFormat[] = [
         inputFormat: 'microseconds',
         outputFormat: 'asSeconds',
         showSuffix: true,
+        outputPrecision: 1,
       },
     },
   },
