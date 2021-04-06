@@ -8,33 +8,32 @@
 import React, { useCallback, useEffect, useReducer } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
-
 import { HttpStart } from 'kibana/public';
-import { AutocompleteStart } from 'src/plugins/data/public';
-import { isEqlRule, isThresholdRule } from '../../../../../common/detection_engine/utils';
-import { addIdToItem } from '../../../../../common';
-import { Type } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/common';
+
+import { addIdToItem } from '../../../../common/shared_imports';
+import { AutocompleteStart, IIndexPattern } from '../../../../../../../src/plugins/data/public';
 import {
-  BuilderExceptionListItemComponent,
-  ExceptionListItemSchema,
-  NamespaceType,
-  exceptionListItemSchema,
-  OperatorTypeEnum,
-  OperatorEnum,
   CreateExceptionListItemSchema,
+  ExceptionListItemSchema,
   ExceptionListType,
+  NamespaceType,
+  OperatorEnum,
+  OperatorTypeEnum,
   entriesNested,
-} from '../../../../../public/shared_imports';
-import { AndOrBadge } from '../../and_or_badge';
+  exceptionListItemSchema,
+} from '../../../../common';
+import { AndOrBadge } from '../and_or_badge';
+
+import { CreateExceptionListItemBuilderSchema, ExceptionsBuilderExceptionItem } from './types';
+import { BuilderExceptionListItemComponent } from './exception_item_renderer';
 import { BuilderLogicButtons } from './logic_buttons';
-import { getNewExceptionItem, filterExceptionItems } from '../helpers';
-import { ExceptionsBuilderExceptionItem, CreateExceptionListItemBuilderSchema } from '../types';
 import { State, exceptionsBuilderReducer } from './reducer';
 import {
   containsValueListEntry,
+  filterExceptionItems,
   getDefaultEmptyEntry,
   getDefaultNestedEmptyEntry,
+  getNewExceptionItem,
 } from './helpers';
 
 const MyInvisibleAndBadge = styled(EuiFlexItem)`
@@ -52,77 +51,82 @@ const MyButtonsContainer = styled(EuiFlexItem)`
 `;
 
 const initialState: State = {
+  addNested: false,
+  andLogicIncluded: false,
   disableAnd: false,
   disableNested: false,
   disableOr: false,
-  andLogicIncluded: false,
-  addNested: false,
+  errorExists: 0,
   exceptions: [],
   exceptionsToDelete: [],
-  errorExists: 0,
 };
 
-interface OnChangeProps {
+export interface OnChangeProps {
+  errorExists: boolean;
   exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
   exceptionsToDelete: ExceptionListItemSchema[];
-  errorExists: boolean;
 }
 
-interface ExceptionBuilderProps {
-  httpService: HttpStart;
+export interface ExceptionBuilderProps {
+  allowLargeValueLists: boolean;
   autocompleteService: AutocompleteStart;
   exceptionListItems: ExceptionsBuilderExceptionItem[];
-  listType: ExceptionListType;
-  listId: string;
-  listNamespaceType: NamespaceType;
-  ruleName: string;
+  httpService: HttpStart;
   indexPatterns: IIndexPattern;
-  isOrDisabled: boolean;
   isAndDisabled: boolean;
   isNestedDisabled: boolean;
+  isOrDisabled: boolean;
+  listId: string;
+  listNamespaceType: NamespaceType;
+  listType: ExceptionListType;
+  listTypeSpecificIndexPatternFilter?: (
+    pattern: IIndexPattern,
+    type: ExceptionListType
+  ) => IIndexPattern;
   onChange: (arg: OnChangeProps) => void;
-  ruleType?: Type;
+  ruleName: string;
 }
 
 export const ExceptionBuilderComponent = ({
-  httpService,
+  allowLargeValueLists,
   autocompleteService,
   exceptionListItems,
-  listType,
-  listId,
-  listNamespaceType,
-  ruleName,
+  httpService,
   indexPatterns,
-  isOrDisabled,
   isAndDisabled,
   isNestedDisabled,
+  isOrDisabled,
+  listId,
+  listNamespaceType,
+  listType,
+  listTypeSpecificIndexPatternFilter,
   onChange,
-  ruleType,
-}: ExceptionBuilderProps) => {
+  ruleName,
+}: ExceptionBuilderProps): JSX.Element => {
   const [
     {
-      exceptions,
-      exceptionsToDelete,
+      addNested,
       andLogicIncluded,
       disableAnd,
       disableNested,
       disableOr,
-      addNested,
       errorExists,
+      exceptions,
+      exceptionsToDelete,
     },
     dispatch,
   ] = useReducer(exceptionsBuilderReducer(), {
     ...initialState,
     disableAnd: isAndDisabled,
-    disableOr: isOrDisabled,
     disableNested: isNestedDisabled,
+    disableOr: isOrDisabled,
   });
 
   const setErrorsExist = useCallback(
     (hasErrors: boolean): void => {
       dispatch({
-        type: 'setErrorsExist',
         errorExists: hasErrors,
+        type: 'setErrorsExist',
       });
     },
     [dispatch]
@@ -131,8 +135,8 @@ export const ExceptionBuilderComponent = ({
   const setUpdateExceptions = useCallback(
     (items: ExceptionsBuilderExceptionItem[]): void => {
       dispatch({
-        type: 'setExceptions',
         exceptions: items,
+        type: 'setExceptions',
       });
     },
     [dispatch]
@@ -141,9 +145,9 @@ export const ExceptionBuilderComponent = ({
   const setDefaultExceptions = useCallback(
     (item: ExceptionsBuilderExceptionItem): void => {
       dispatch({
-        type: 'setDefault',
         initialState,
         lastException: item,
+        type: 'setDefault',
       });
     },
     [dispatch]
@@ -152,8 +156,8 @@ export const ExceptionBuilderComponent = ({
   const setUpdateExceptionsToDelete = useCallback(
     (items: ExceptionListItemSchema[]): void => {
       dispatch({
-        type: 'setExceptionsToDelete',
         exceptions: items,
+        type: 'setExceptionsToDelete',
       });
     },
     [dispatch]
@@ -162,8 +166,8 @@ export const ExceptionBuilderComponent = ({
   const setUpdateAndDisabled = useCallback(
     (shouldDisable: boolean): void => {
       dispatch({
-        type: 'setDisableAnd',
         shouldDisable,
+        type: 'setDisableAnd',
       });
     },
     [dispatch]
@@ -172,8 +176,8 @@ export const ExceptionBuilderComponent = ({
   const setUpdateOrDisabled = useCallback(
     (shouldDisable: boolean): void => {
       dispatch({
-        type: 'setDisableOr',
         shouldDisable,
+        type: 'setDisableOr',
       });
     },
     [dispatch]
@@ -182,8 +186,9 @@ export const ExceptionBuilderComponent = ({
   const setUpdateAddNested = useCallback(
     (shouldAddNested: boolean): void => {
       dispatch({
-        type: 'setAddNested',
         addNested: shouldAddNested,
+
+        type: 'setAddNested',
       });
     },
     [dispatch]
@@ -295,8 +300,8 @@ export const ExceptionBuilderComponent = ({
               ...lastEntry.entries,
               addIdToItem({
                 field: '',
-                type: OperatorTypeEnum.MATCH,
                 operator: OperatorEnum.INCLUDED,
+                type: OperatorTypeEnum.MATCH,
                 value: '',
               }),
             ],
@@ -331,9 +336,9 @@ export const ExceptionBuilderComponent = ({
   // Bubble up changes to parent
   useEffect(() => {
     onChange({
+      errorExists: errorExists > 0,
       exceptionItems: filterExceptionItems(exceptions),
       exceptionsToDelete,
-      errorExists: errorExists > 0,
     });
   }, [onChange, exceptionsToDelete, exceptions, errorExists]);
 
@@ -381,18 +386,19 @@ export const ExceptionBuilderComponent = ({
               ))}
             <EuiFlexItem grow={false}>
               <BuilderExceptionListItemComponent
-                allowLargeValueLists={!isEqlRule(ruleType) && !isThresholdRule(ruleType)}
-                httpService={httpService}
-                autocompleteService={autocompleteService}
-                key={getExceptionListItemId(exceptionListItem, index)}
-                exceptionItem={exceptionListItem}
-                indexPattern={indexPatterns}
-                listType={listType}
-                exceptionItemIndex={index}
+                allowLargeValueLists={allowLargeValueLists}
                 andLogicIncluded={andLogicIncluded}
+                autocompleteService={autocompleteService}
+                exceptionItem={exceptionListItem}
+                exceptionItemIndex={index}
+                httpService={httpService}
+                indexPattern={indexPatterns}
                 isOnlyItem={exceptions.length === 1}
-                onDeleteExceptionItem={handleDeleteExceptionItem}
+                key={getExceptionListItemId(exceptionListItem, index)}
+                listType={listType}
+                listTypeSpecificIndexPatternFilter={listTypeSpecificIndexPatternFilter}
                 onChangeExceptionItem={handleExceptionItemChange}
+                onDeleteExceptionItem={handleDeleteExceptionItem}
                 onlyShowListOperators={containsValueListEntry(exceptions)}
                 setErrorsExist={setErrorsExist}
               />
