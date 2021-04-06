@@ -14,7 +14,7 @@ import { Position } from '@elastic/charts';
 import { IAggConfig, IAggType } from 'src/plugins/data/public';
 
 import { ChartType } from '../../../../../common';
-import { VisParams, SeriesParam, ValueAxis, AxisMode, ChartMode } from '../../../../types';
+import { VisParams, SeriesParam, ValueAxis } from '../../../../types';
 import MetricsAxisOptions from './index';
 import { ValidationVisOptionsProps } from '../../common';
 import { ValueAxesPanel } from './value_axes_panel';
@@ -146,7 +146,6 @@ describe('MetricsAxisOptions component', () => {
     });
 
     it('should set the custom title to match the value axis label when only one agg exists for that axis', () => {
-      defaultProps.stateParams.valueAxes[0].scale.mode = AxisMode.Normal;
       const component = mount(<MetricsAxisOptions {...defaultProps} />);
       const agg = {
         id: aggCount.id,
