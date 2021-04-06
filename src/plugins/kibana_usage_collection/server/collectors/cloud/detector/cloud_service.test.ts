@@ -10,6 +10,7 @@ import { CloudService, Response } from './cloud_service';
 import { CloudServiceResponse } from './cloud_response';
 
 describe('CloudService', () => {
+  // @ts-expect-error Creating an instance of an abstract class for testing
   const service = new CloudService('xyz');
 
   describe('getName', () => {
@@ -46,11 +47,8 @@ describe('CloudService', () => {
 
   describe('_stringToJson', () => {
     it('only handles strings', () => {
-      // @ts-expect-error
       expect(() => service._stringToJson({})).toThrow();
-      // @ts-expect-error
       expect(() => service._stringToJson(123)).toThrow();
-      // @ts-expect-error
       expect(() => service._stringToJson(true)).toThrow();
     });
 
@@ -92,7 +90,6 @@ describe('CloudService', () => {
 
     it('throws error upon failure to parse body as object', async () => {
       expect(async () => {
-        // @ts-expect-error missing body
         await service._parseResponse();
       }).rejects.toMatchInlineSnapshot(`undefined`);
       expect(async () => {

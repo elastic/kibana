@@ -8,9 +8,11 @@
 
 import fs from 'fs';
 import type { Request, RequestOptions } from './cloud_service';
-import { AWS, AWSCloudService, AWSResponse } from './aws';
+import { AWSCloudService, AWSResponse } from './aws';
 
 type Callback = (err: unknown, res: unknown) => void;
+
+const AWS = new AWSCloudService();
 
 describe('AWS', () => {
   const expectedFilenames = ['/sys/hypervisor/uuid', '/sys/devices/virtual/dmi/id/product_uuid'];

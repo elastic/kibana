@@ -17,17 +17,15 @@ const SERVICE_ENDPOINT = 'http://169.254.169.254/computeMetadata/v1/instance';
 
 /**
  * Checks and loads the service metadata for an Google Cloud Platform VM if it is available.
+ *
+ * @internal
  */
-class GCPCloudService extends CloudService {
+export class GCPCloudService extends CloudService {
   constructor(options: CloudServiceOptions = {}) {
     super('gcp', options);
   }
 
-  _checkIfService(request?: Request) {
-    if (!request) {
-      return Promise.reject(new Error('not implemented'));
-    }
-
+  _checkIfService(request: Request) {
     // we need to call GCP individually for each field we want metadata for
     const fields = ['id', 'machine-type', 'zone'];
 
@@ -69,8 +67,7 @@ class GCPCloudService extends CloudService {
    */
   _extractBody(response: Response, body?: Response['body']) {
     if (
-      response &&
-      response.statusCode === 200 &&
+      response?.statusCode === 200 &&
       response.headers &&
       response.headers['metadata-flavor'] === 'Google'
     ) {
@@ -128,8 +125,3 @@ class GCPCloudService extends CloudService {
     return undefined;
   }
 }
-
-/**
- * Singleton instance of GCPCloudService.
- */
-export const GCP = new GCPCloudService();

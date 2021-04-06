@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-export const cloudDetailsMock = jest.fn();
-export const detectCloudServiceMock = jest.fn();
+import { cloudDetectorMock } from './detector/cloud_detector.mock';
+
+const mock = cloudDetectorMock.create();
+
+export const cloudDetailsMock = mock.getCloudDetails;
+export const detectCloudServiceMock = mock.detectCloudService;
 
 jest.doMock('./detector', () => ({
-  CloudDetector: jest.fn().mockImplementation(() => ({
-    detectCloudService: detectCloudServiceMock,
-    getCloudDetails: cloudDetailsMock,
-  })),
+  CloudDetector: jest.fn().mockImplementation(() => mock),
 }));

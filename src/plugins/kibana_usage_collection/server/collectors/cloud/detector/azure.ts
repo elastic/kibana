@@ -21,17 +21,15 @@ interface AzureResponse {
 
 /**
  * Checks and loads the service metadata for an Azure VM if it is available.
+ *
+ * @internal
  */
-class AzureCloudService extends CloudService {
+export class AzureCloudService extends CloudService {
   constructor(options = {}) {
     super('azure', options);
   }
 
-  _checkIfService(request?: Request) {
-    if (!request) {
-      return Promise.reject(new Error('not implemented'));
-    }
-
+  async _checkIfService(request: Request) {
     const req = {
       method: 'GET',
       uri: SERVICE_ENDPOINT,
@@ -42,16 +40,14 @@ class AzureCloudService extends CloudService {
       json: true,
     };
 
-    return (
-      promisify(request)(req)
-        // Note: there is no fallback option for Azure
-        .then((response) => {
-          if (!response || response.statusCode === 404) {
-            throw new Error('Azure request failed');
-          }
-          return this._parseResponse(response.body, (body) => this._parseBody(body));
-        })
-    );
+    const response = await promisify(request)(req);
+
+    // Note: there is no fallback option for Azure
+    if (!response || response.statusCode === 404) {
+      throw new Error('Azure request failed');
+    }
+
+    return this._parseResponse(response.body, (body) => this._parseBody(body));
   }
 
   /**
@@ -81,10 +77,10 @@ class AzureCloudService extends CloudService {
    * }
    */
   _parseBody(body: AzureResponse): CloudServiceResponse | null {
-    const compute = get(body, 'compute') as Record<string, string>;
-    const id: string = get(compute, 'vmId');
-    const vmType: string = get(compute, 'vmSize');
-    const region: string = get(compute, 'location');
+    const compute: Record<string, string> | undefined = get(body, 'compute');
+    const id = get<Record<string, string>, string>(compute, 'vmId');
+    const vmType = get<Record<string, string>, string>(compute, 'vmSize');
+    const region = get<Record<string, string>, string>(compute, 'location');
 
     // remove keys that we already have; explicitly undefined so we don't send it when empty
     const metadata = compute ? omit(compute, ['vmId', 'vmSize', 'location']) : undefined;
@@ -103,8 +99,3 @@ class AzureCloudService extends CloudService {
     return null;
   }
 }
-
-/**
- * Singleton instance of AzureCloudService.
- */
-export const AZURE = new AzureCloudService();

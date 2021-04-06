@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { AWS } from './aws';
-import { AZURE } from './azure';
-import { GCP } from './gcp';
+const create = () => {
+  const mock = {
+    detectCloudService: jest.fn(),
+    getCloudDetails: jest.fn(),
+  };
 
-/**
- * An iteratable that can be used to loop across all known cloud services to detect them.
- */
-export const CLOUD_SERVICES: [typeof AWS, typeof GCP, typeof AZURE] = [AWS, GCP, AZURE];
+  return mock;
+};
+
+export const cloudDetectorMock = { create };

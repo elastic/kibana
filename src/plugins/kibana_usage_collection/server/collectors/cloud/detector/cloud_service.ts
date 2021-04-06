@@ -32,7 +32,7 @@ export interface CloudServiceOptions {
  * CloudService provides a mechanism for cloud services to be checked for
  * metadata that may help to determine the best defaults and priorities.
  */
-export class CloudService {
+export abstract class CloudService {
   private readonly _request: Request;
   protected readonly _name: string;
 
@@ -56,11 +56,15 @@ export class CloudService {
    * Using whatever mechanism is required by the current Cloud Service,
    * determine if Kibana is running in it and return relevant metadata.
    */
-  checkIfService() {
-    return this._checkIfService(this._request).catch(() => this._createUnconfirmedResponse());
+  async checkIfService() {
+    try {
+      return await this._checkIfService(this._request);
+    } catch (e) {
+      return this._createUnconfirmedResponse();
+    }
   }
 
-  _checkIfService(request?: Request): Promise<CloudServiceResponse> {
+  _checkIfService(request: Request): Promise<CloudServiceResponse> {
     // should always be overridden by a subclass
     return Promise.reject(new Error('not implemented'));
   }

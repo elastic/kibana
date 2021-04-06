@@ -8,7 +8,12 @@
 
 import type { CloudService } from './cloud_service';
 import type { CloudServiceResponseJson } from './cloud_response';
-import { CLOUD_SERVICES } from './cloud_services';
+
+import { AWSCloudService } from './aws';
+import { AzureCloudService } from './azure';
+import { GCPCloudService } from './gcp';
+
+const SUPPORTED_SERVICES = [AWSCloudService, AzureCloudService, GCPCloudService];
 
 interface CloudDetectorOptions {
   cloudServices?: CloudService[];
@@ -21,23 +26,22 @@ interface CloudDetectorOptions {
  * @internal
  */
 export class CloudDetector {
-  private readonly _cloudServices: CloudService[];
-  private _cloudDetails?: CloudServiceResponseJson;
+  private readonly cloudServices: CloudService[];
+  private cloudDetails?: CloudServiceResponseJson;
 
   constructor(options: CloudDetectorOptions = {}) {
-    const { cloudServices = CLOUD_SERVICES } = options;
-
-    this._cloudServices = cloudServices;
+    this.cloudServices =
+      options.cloudServices ?? SUPPORTED_SERVICES.map((Service) => new Service());
     // Explicitly undefined. If the value is never updated, then
     // the property will be dropped when the data is serialized.
-    this._cloudDetails = undefined;
+    this.cloudDetails = undefined;
   }
 
   /**
    * Get any cloud details that we have detected.
    */
   getCloudDetails() {
-    return this._cloudDetails;
+    return this.cloudDetails;
   }
 
   /**
@@ -48,7 +52,7 @@ export class CloudDetector {
    * determine it.
    */
   async detectCloudService() {
-    this._cloudDetails = await this._getCloudService(this._cloudServices);
+    this.cloudDetails = await this._getCloudService(this.cloudServices);
   }
 
   /**

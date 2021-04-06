@@ -7,9 +7,11 @@
  */
 
 import type { Request, RequestOptions } from './cloud_service';
-import { GCP } from './gcp';
+import { GCPCloudService } from './gcp';
 
 type Callback = (err: unknown, res: unknown) => void;
+
+const GCP = new GCPCloudService();
 
 describe('GCP', () => {
   it('is named "gcp"', () => {

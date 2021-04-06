@@ -7,9 +7,11 @@
  */
 
 import type { Request, RequestOptions } from './cloud_service';
-import { AZURE } from './azure';
+import { AzureCloudService } from './azure';
 
 type Callback = (err: unknown, res: unknown) => void;
+
+const AZURE = new AzureCloudService();
 
 describe('Azure', () => {
   it('is named "azure"', () => {

@@ -37,7 +37,7 @@ export interface AWSResponse {
 /**
  * Checks and loads the service metadata for an Amazon Web Service VM if it is available.
  *
- * This is only exported for testing purposes.
+ * @internal
  */
 export class AWSCloudService extends CloudService {
   private readonly _isWindows: boolean;
@@ -53,23 +53,16 @@ export class AWSCloudService extends CloudService {
     this._isWindows = _isWindows;
   }
 
-  _checkIfService(request?: Request) {
-    if (!request) {
-      return Promise.reject(new Error('not implemented'));
-    }
-
+  async _checkIfService(request: Request) {
     const req: RequestOptions = {
       method: 'GET',
       uri: SERVICE_ENDPOINT,
       json: true,
     };
 
-    return (
-      promisify(request)(req)
-        .then((response) => this._parseResponse(response.body, (body) => this._parseBody(body)))
-        // fall back to file detection
-        .catch(() => this._tryToDetectUuid())
-    );
+    return promisify(request)(req)
+      .then((response) => this._parseResponse(response.body, (body) => this._parseBody(body)))
+      .catch(() => this._tryToDetectUuid());
   }
 
   /**
@@ -94,10 +87,10 @@ export class AWSCloudService extends CloudService {
    * }
    */
   _parseBody(body: AWSResponse): CloudServiceResponse | null {
-    const id = get(body, 'instanceId') as string | undefined;
-    const vmType = get(body, 'instanceType') as string | undefined;
-    const region = get(body, 'region') as string | undefined;
-    const zone = get(body, 'availabilityZone') as string | undefined;
+    const id: string | undefined = get(body, 'instanceId');
+    const vmType: string | undefined = get(body, 'instanceType');
+    const region: string | undefined = get(body, 'region');
+    const zone: string | undefined = get(body, 'availabilityZone');
     const metadata = omit(body, [
       // remove keys we already have
       'instanceId',
@@ -151,8 +144,3 @@ export class AWSCloudService extends CloudService {
     return Promise.resolve(this._createUnconfirmedResponse());
   }
 }
-
-/**
- * Singleton instance of AWSCloudService.
- */
-export const AWS = new AWSCloudService();
