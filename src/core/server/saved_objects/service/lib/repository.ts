@@ -66,7 +66,7 @@ import {
 import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../object_types';
 import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { validateConvertFilterToKueryNode } from './filter_utils';
-import { validateAndConvertAggregations } from './aggs_utils';
+import { validateAndConvertAggregations } from './aggregations';
 import {
   ALL_NAMESPACES_STRING,
   FIND_DEFAULT_PAGE,

@@ -6,20 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { IndexMapping } from '../../mappings';
-import { SavedObjectsErrorHelpers } from './errors';
-import { hasFilterKeyError } from './filter_utils';
-import { savedObjectsAggs, validateSavedObjectsTypeAggs } from './aggregations';
+import * as rt from 'io-ts';
+import { pipe } from 'fp-ts/pipeable';
+import { fold } from 'fp-ts/Either';
+import { identity } from 'fp-ts/function';
+import { throwErrors } from './errors';
+import { IndexMapping } from '../../../mappings';
+import { SavedObjectsErrorHelpers } from '../errors';
+import { hasFilterKeyError } from '../filter_utils';
+import { aggsTypes } from './aggs_types';
 
 export const validateAndConvertAggregations = (
   allowedTypes: string[],
   aggs: Record<string, unknown>,
   indexMapping: IndexMapping
 ) => {
-  return validateAggFieldValue(allowedTypes, aggs, indexMapping);
+  return recurseNestedValidation(allowedTypes, aggs, indexMapping);
 };
 
-const validateAggFieldValue = (
+const recurseNestedValidation = (
   allowedTypes: string[],
   aggs: any,
   indexMapping: IndexMapping,
@@ -32,10 +37,10 @@ const validateAggFieldValue = (
         'script attribute is not supported in saved objects aggregation'
       );
     }
-    if (typeof aggs[key] === 'object' && aggType === undefined && savedObjectsAggs[key]) {
+    if (typeof aggs[key] === 'object' && aggType === undefined && aggsTypes[key]) {
       return {
         ...acc,
-        [key]: validateAggFieldValue(allowedTypes, aggs[key], indexMapping, key, key),
+        [key]: recurseNestedValidation(allowedTypes, aggs[key], indexMapping, key, key),
       };
     } else if (
       typeof aggs[key] === 'object' &&
@@ -43,21 +48,21 @@ const validateAggFieldValue = (
     ) {
       return {
         ...acc,
-        [key]: validateAggFieldValue(allowedTypes, aggs[key], indexMapping, key, undefined),
+        [key]: recurseNestedValidation(allowedTypes, aggs[key], indexMapping, key, undefined),
       };
     } else if (
       key !== 'field' &&
       aggType &&
-      savedObjectsAggs[aggType] !== undefined &&
-      savedObjectsAggs[aggType][key] !== undefined
+      aggsTypes[aggType] !== undefined &&
+      aggsTypes[aggType][key] !== undefined
     ) {
-      validateSavedObjectsTypeAggs(savedObjectsAggs[aggType][key], aggs[key]);
+      validateFieldValue(aggsTypes[aggType][key], aggs[key]);
       return {
         ...acc,
         [key]: aggs[key],
       };
     } else {
-      if (aggType === undefined || savedObjectsAggs[aggType] === undefined) {
+      if (aggType === undefined || aggsTypes[aggType] === undefined) {
         throw SavedObjectsErrorHelpers.createBadRequestError(
           `This aggregation ${lastKey} is not valid or we did not defined it yet`
         );
@@ -70,8 +75,8 @@ const validateAggFieldValue = (
       if (error != null) {
         if (
           aggType !== undefined &&
-          savedObjectsAggs[aggType] !== undefined &&
-          savedObjectsAggs[aggType][key] === undefined
+          aggsTypes[aggType] !== undefined &&
+          aggsTypes[aggType][key] === undefined
         ) {
           throw SavedObjectsErrorHelpers.createBadRequestError(
             `${key} attribute is not supported in ${aggType} saved objects aggregation`
@@ -87,4 +92,11 @@ const validateAggFieldValue = (
       };
     }
   }, {});
+};
+
+const validateFieldValue = (rtType: rt.Any, aggObject: unknown) => {
+  pipe(
+    rtType.decode(aggObject),
+    fold(throwErrors(SavedObjectsErrorHelpers.createBadRequestError), identity)
+  );
 };

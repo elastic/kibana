@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { validateAndConvertAggregations } from './aggs_utils';
+import { validateAndConvertAggregations } from './validation';
 
 const mockMappings = {
   properties: {

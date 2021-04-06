@@ -6,23 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
-import * as rt from 'io-ts';
-
-import { SavedObjectsErrorHelpers } from '../errors';
-import { bucketAggsType, metricsAggsType } from './aggs_types';
-import { throwErrors } from './errors';
-
-export const savedObjectsAggs = {
-  ...metricsAggsType,
-  ...bucketAggsType,
-};
-
-export const validateSavedObjectsTypeAggs = (rtType: rt.Any, aggObject: unknown) => {
-  pipe(
-    rtType.decode(aggObject),
-    fold(throwErrors(SavedObjectsErrorHelpers.createBadRequestError), identity)
-  );
-};
+export { validateAndConvertAggregations } from './validation';

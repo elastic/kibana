@@ -6,5 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { bucketAggsType } from './bucket_aggs';
-export { metricsAggsType } from './metrics_aggs';
+import { bucketAggsType } from './bucket_aggs';
+import { metricsAggsType } from './metrics_aggs';
+
+export const aggsTypes = {
+  ...metricsAggsType,
+  ...bucketAggsType,
+};
