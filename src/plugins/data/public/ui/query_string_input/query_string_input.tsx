@@ -108,6 +108,10 @@ const KEY_CODES = {
 // Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
 export default class QueryStringInputUI extends Component<Props, State> {
+  static defaultProps = {
+    storageKey: KIBANA_USER_QUERY_LANGUAGE_KEY,
+  };
+
   public state: State = {
     isSuggestionsVisible: false,
     index: null,
@@ -137,12 +141,6 @@ export default class QueryStringInputUI extends Component<Props, State> {
    * @private
    */
   private isFocusWithin = false;
-
-  getDefaultProps() {
-    return {
-      storageKey: KIBANA_USER_QUERY_LANGUAGE_KEY,
-    };
-  }
 
   private getQueryString = () => {
     return toUser(this.props.query.query);
