@@ -17,6 +17,4 @@ if (typeof window.Event === 'object') {
 }
 
 require('whatwg-fetch');
-require('abortcontroller-polyfill/dist/polyfill-patch-fetch');
-require('./vendor/childnode_remove_polyfill');
 require('symbol-observable');
