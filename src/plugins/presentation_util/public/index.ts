@@ -21,6 +21,7 @@ export {
 } from './components';
 
 export { SaveModalDashboardProps } from './components/types';
+export { PresentationUtilPluginSetup, PresentationUtilPluginStart } from './types';
 
 export function plugin() {
   return new PresentationUtilPlugin();
