@@ -27,9 +27,9 @@ export interface Props {
 }
 
 interface State {
-  interval: number;
   max: number;
   min: number;
+  range: number;
   timeslice: number[];
   timesliceText: string;
   ticks: EuiRangeTick[];
@@ -67,9 +67,9 @@ class KeyedTimeslider extends Component<Props, State> {
     const timeslice = [min, max];
 
     this.state = {
-      interval,
       max,
       min,
+      range: interval,
       ticks: getTicks(min, max, interval),
       timeslice,
       timesliceText: prettyPrintTimeslice(timeslice),
@@ -88,38 +88,36 @@ class KeyedTimeslider extends Component<Props, State> {
     return this.state.timeslice[0] === this.state.min && this.state.timeslice[1] === this.state.max;
   }
 
+  _onDualControlChange = (value: number[]) => {
+    this.setState({ range: value[1] - value[0] }, () => {
+      this._onChange(value);
+    });
+  };
+
   _onChange = (value: number[]) => {
-    this.setState({ timeslice: value, timesliceText: prettyPrintTimeslice(value) });
+    this.setState({
+      timeslice: value,
+      timesliceText: prettyPrintTimeslice(value),
+    });
     this._propagateChange(value);
   };
 
   _onNext = () => {
-    if (this._doesTimesliceCoverTimerange() || this.state.timeslice[1] === this.state.max) {
-      if (this.state.ticks.length >= 1) {
-        this._onChange([this.state.min, this.state.ticks[0].value]);
-      }
-      return;
-    }
-
-    const from = this.state.timeslice[1];
-    const untrimmedTo = from + this.state.interval;
-    const to = untrimmedTo <= this.state.max ? untrimmedTo : this.state.max;
-    this._onChange([from, to]);
+    const from =
+      this._doesTimesliceCoverTimerange() || this.state.timeslice[1] === this.state.max
+        ? this.state.ticks[0].value
+        : this.state.timeslice[1];
+    const to = from + this.state.range;
+    this._onChange([from, to <= this.state.max ? to : this.state.max]);
   };
 
   _onPrevious = () => {
-    if (this._doesTimesliceCoverTimerange() || this.state.timeslice[0] === this.state.min) {
-      if (this.state.ticks.length) {
-        const lastTickIndex = this.state.ticks.length - 1;
-        this._onChange([this.state.ticks[lastTickIndex].value, this.state.max]);
-      }
-      return;
-    }
-
-    const to = this.state.timeslice[0];
-    const untrimmedFrom = to - this.state.interval;
-    const from = untrimmedFrom < this.state.min ? this.state.min : untrimmedFrom;
-    this._onChange([from, to]);
+    const to =
+      this._doesTimesliceCoverTimerange() || this.state.timeslice[0] === this.state.min
+        ? this.state.ticks[this.state.ticks.length - 1].value
+        : this.state.timeslice[0];
+    const from = to - this.state.range;
+    this._onChange([from < this.state.min ? this.state.min : from, to]);
   };
 
   _propagateChange = _.debounce((value: number[]) => {
@@ -166,7 +164,7 @@ class KeyedTimeslider extends Component<Props, State> {
           <EuiDualRange
             fullWidth={true}
             value={this.state.timeslice}
-            onChange={this._onChange}
+            onChange={this._onDualControlChange}
             showTicks={true}
             min={this.state.min}
             max={this.state.max}
