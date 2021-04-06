@@ -7,11 +7,9 @@
 
 import uuid from 'uuid';
 import moment from 'moment';
-import { find } from 'lodash/fp';
 import { schema } from '@kbn/config-schema';
 
 import { IRouter } from '../../../../../../src/core/server';
-import { packSavedObjectType, savedQuerySavedObjectType } from '../../../common/types';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
 import { parseAgentSelection, AgentSelection } from '../../lib/parse_agent_groups';
@@ -33,7 +31,7 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
       const action = {
         action_id: uuid.v4(),
         '@timestamp': moment().toISOString(),
-        expiration: moment().add(2, 'days').toISOString(),
+        expiration: moment().add(1, 'days').toISOString(),
         type: 'INPUT_ACTION',
         input_type: 'osquery',
         agents: selectedAgents,

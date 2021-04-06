@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { isEmpty, map } from 'lodash';
 import { produce } from 'immer';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFilePicker,
   EuiSpacer,
   EuiCard,
   EuiIcon,

@@ -17,7 +17,6 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
-  EuiLink,
 } from '@elastic/eui';
 import React from 'react';
 

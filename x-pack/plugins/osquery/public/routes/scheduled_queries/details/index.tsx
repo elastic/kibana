@@ -72,7 +72,7 @@ const ScheduledQueryDetailsPageComponent = () => {
 
   const RightColumn = useMemo(
     () => (
-      <EuiButton fill {...editQueryLinkProps} iconType="plusInCircle">
+      <EuiButton fill {...editQueryLinkProps} iconType="pencil">
         <FormattedMessage
           id="xpack.osquery.scheduledQueryDetailsPage.editQueryButtonLabel"
           defaultMessage="Edit query"

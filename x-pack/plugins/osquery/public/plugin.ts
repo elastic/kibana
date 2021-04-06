@@ -28,8 +28,6 @@ import { OSQUERY_INTEGRATION_NAME, PLUGIN_NAME } from '../common';
 import {
   LazyOsqueryManagedPolicyCreateImportExtension,
   LazyOsqueryManagedPolicyEditExtension,
-  LazyOsqueryManagedEmptyCreatePolicyExtension,
-  LazyOsqueryManagedEmptyEditPolicyExtension,
   LazyOsqueryManagedCustomButtonExtension,
 } from './fleet_integration';
 
@@ -116,17 +114,13 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       registerExtension({
         package: OSQUERY_INTEGRATION_NAME,
         view: 'package-policy-create',
-        component: config.scheduledQueries
-          ? LazyOsqueryManagedPolicyCreateImportExtension
-          : LazyOsqueryManagedEmptyCreatePolicyExtension,
+        component: LazyOsqueryManagedPolicyCreateImportExtension,
       });
 
       registerExtension({
         package: OSQUERY_INTEGRATION_NAME,
         view: 'package-policy-edit',
-        component: config.scheduledQueries
-          ? LazyOsqueryManagedPolicyEditExtension
-          : LazyOsqueryManagedEmptyEditPolicyExtension,
+        component: LazyOsqueryManagedPolicyEditExtension,
       });
 
       registerExtension({

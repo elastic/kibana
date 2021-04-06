@@ -43,7 +43,9 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   isLive,
 }) => {
   const getUrlForApp = useKibana().services.application.getUrlForApp;
+  // @ts-expect-error update types
   const [pageIndex, setPageIndex] = useState(0);
+  // @ts-expect-error update types
   const [pageSize, setPageSize] = useState(50);
   const {
     // @ts-expect-error update types
