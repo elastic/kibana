@@ -17,6 +17,8 @@ import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chro
 import { RESULT_SETTINGS_TITLE } from './constants';
 import { ResultSettingsTable } from './result_settings_table';
 
+import { SampleResponse } from './sample_response';
+
 import { ResultSettingsLogic } from '.';
 
 interface Props {
@@ -40,7 +42,7 @@ export const ResultSettings: React.FC<Props> = ({ engineBreadcrumb }) => {
           <ResultSettingsTable />
         </EuiFlexItem>
         <EuiFlexItem grow={3}>
-          <div>TODO</div>
+          <SampleResponse />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>
