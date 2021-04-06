@@ -67,3 +67,10 @@
   top: $euiSizeXS;
   right: $euiSizeXS;
 }
+
+.mapTimeslider__timeWindow {
+  display: flex;
+  flex: 1;
+  margin-right: $euiSizeS;
+  font-size: $euiFontSizeS;
+}

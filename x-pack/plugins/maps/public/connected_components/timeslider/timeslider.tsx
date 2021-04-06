@@ -7,9 +7,9 @@
 
 import _ from 'lodash';
 import React, { ChangeEvent, Component } from 'react';
-import { EuiButtonIcon, EuiDualRange, EuiRangeTick } from '@elastic/eui';
+import { EuiButtonIcon, EuiDualRange, EuiRangeTick, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getTicks } from './get_ticks';
+import { epochToKbnDateFormat, getTicks } from './time_utils';
 import { calcAutoIntervalNear, TimeRange } from '../../../../../../src/plugins/data/common';
 import { getTimeFilter } from '../../kibana_services';
 import { Timeslice } from '../../../common/descriptor_types';
@@ -29,7 +29,12 @@ interface State {
   max: number;
   min: number;
   timeslice: number[];
+  timesliceText: string;
   ticks: EuiRangeTick[];
+}
+
+function prettyPrintTimeslice(timeslice: number[]) {
+  return `${epochToKbnDateFormat(timeslice[0])} - ${epochToKbnDateFormat(timeslice[1])}`;
 }
 
 // Why Timeslider and KeyedTimeslider?
@@ -57,13 +62,15 @@ class KeyedTimeslider extends Component<Props, State> {
     }
     const min = timeRangeBounds.min.valueOf();
     const max = timeRangeBounds.max.valueOf();
+    const timeslice = [min, max];
 
     this.state = {
       interval,
       max,
       min,
       ticks: getTicks(min, max, interval),
-      timeslice: [min, max],
+      timeslice,
+      timesliceText: prettyPrintTimeslice(timeslice),
     };
   }
 
@@ -76,7 +83,7 @@ class KeyedTimeslider extends Component<Props, State> {
   }
 
   _onChange = (value: number[]) => {
-    this.setState({ timeslice: value });
+    this.setState({ timeslice: value, timesliceText: prettyPrintTimeslice(value) });
     this._propagateChange(value);
   };
 
@@ -97,6 +104,10 @@ class KeyedTimeslider extends Component<Props, State> {
             className="mapTimeslider__close"
             aria-label="Close timeslider"
           />
+        </div>
+
+        <div className="mapTimeslider__timeWindow">
+          <EuiText size="s">{this.state.timesliceText}</EuiText>
         </div>
 
         <div className="mapTimeslider__row">
