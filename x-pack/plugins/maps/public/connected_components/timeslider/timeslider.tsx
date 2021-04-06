@@ -13,6 +13,8 @@ import { epochToKbnDateFormat, getTicks } from './time_utils';
 import { calcAutoIntervalNear, TimeRange } from '../../../../../../src/plugins/data/common';
 import { getTimeFilter } from '../../kibana_services';
 import { Timeslice } from '../../../common/descriptor_types';
+import { NextTimesliceIcon } from './next_timeslice_icon';
+import { PreviousTimesliceIcon } from './previous_timeslice_icon';
 
 const NUM_TICKS = 6;
 const MAX_TICKS = 8;
@@ -82,9 +84,42 @@ class KeyedTimeslider extends Component<Props, State> {
     this._isMounted = true;
   }
 
+  _doesTimesliceCoverTimerange() {
+    return this.state.timeslice[0] === this.state.min && this.state.timeslice[1] === this.state.max;
+  }
+
   _onChange = (value: number[]) => {
     this.setState({ timeslice: value, timesliceText: prettyPrintTimeslice(value) });
     this._propagateChange(value);
+  };
+
+  _onNext = () => {
+    if (this._doesTimesliceCoverTimerange() || this.state.timeslice[1] === this.state.max) {
+      if (this.state.ticks.length >= 1) {
+        this._onChange([this.state.min, this.state.ticks[0].value]);
+      }
+      return;
+    }
+
+    const from = this.state.timeslice[1];
+    const untrimmedTo = from + this.state.interval;
+    const to = untrimmedTo <= this.state.max ? untrimmedTo : this.state.max;
+    this._onChange([from, to]);
+  };
+
+  _onPrevious = () => {
+    if (this._doesTimesliceCoverTimerange() || this.state.timeslice[0] === this.state.min) {
+      if (this.state.ticks.length) {
+        const lastTickIndex = this.state.ticks.length - 1;
+        this._onChange([this.state.ticks[lastTickIndex].value, this.state.max]);
+      }
+      return;
+    }
+
+    const to = this.state.timeslice[0];
+    const untrimmedFrom = to - this.state.interval;
+    const from = untrimmedFrom < this.state.min ? this.state.min : untrimmedFrom;
+    this._onChange([from, to]);
   };
 
   _propagateChange = _.debounce((value: number[]) => {
@@ -96,7 +131,7 @@ class KeyedTimeslider extends Component<Props, State> {
   render() {
     return (
       <div className="mapTimeslider">
-        <div className="kbnMapsTimeslider__row">
+        <div className="mapTimeslider__row">
           <EuiButtonIcon
             onClick={this.props.closeTimeslider}
             iconType="cross"
@@ -104,10 +139,27 @@ class KeyedTimeslider extends Component<Props, State> {
             className="mapTimeslider__close"
             aria-label="Close timeslider"
           />
-        </div>
 
-        <div className="mapTimeslider__timeWindow">
-          <EuiText size="s">{this.state.timesliceText}</EuiText>
+          <div className="mapTimeslider__timeWindow">
+            <EuiText size="s">{this.state.timesliceText}</EuiText>
+          </div>
+
+          <div className="mapTimeslider__innerPanel">
+            <div className="mapTimeslider__controls">
+              <EuiButtonIcon
+                onClick={this._onPrevious}
+                iconType={PreviousTimesliceIcon}
+                color="text"
+                aria-label="Previous time window"
+              />
+              <EuiButtonIcon
+                onClick={this._onNext}
+                iconType={NextTimesliceIcon}
+                color="text"
+                aria-label="Next time window"
+              />
+            </div>
+          </div>
         </div>
 
         <div className="mapTimeslider__row">

@@ -74,3 +74,16 @@
   margin-right: $euiSizeS;
   font-size: $euiFontSizeS;
 }
+
+.mapTimeslider__controls {
+  margin-left: $euiSizeS;
+}
+
+.mapTimeslider__innerPanel {
+  display: inline-flex;
+  // background: $euiColorLightestShade;
+  border-radius: $euiBorderRadiusSmall;
+  padding: $euiSizeXS;
+  display: inline-flex;
+  align-items: center;
+}
