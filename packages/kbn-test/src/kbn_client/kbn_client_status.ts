@@ -45,6 +45,8 @@ export class KbnClientStatus {
       method: 'GET',
       path: 'api/status',
       retries: 30,
+      // Status endpoint returns 503 if any services are in an unavailable state
+      ignoreErrors: [503],
     });
     return data;
   }
