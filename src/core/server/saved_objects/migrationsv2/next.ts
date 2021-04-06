@@ -37,6 +37,11 @@ import type {
 import * as Actions from './actions';
 import { ElasticsearchClient } from '../../elasticsearch';
 import { SavedObjectsRawDoc } from '..';
+import {
+  LogCaptureTransformRawDocsErrors,
+  LogCorruptSavedObjectsErrors,
+} from '../migrations/kibana/kibana_migrator';
+import { MigrationLogger } from '../migrations/core/migration_logger';
 
 export type TransformRawDocs = (rawDocs: SavedObjectsRawDoc[]) => Promise<SavedObjectsRawDoc[]>;
 type ActionMap = ReturnType<typeof nextActionMap>;
@@ -51,7 +56,11 @@ export type ResponseType<ControlState extends AllActionStates> = UnwrapPromise<
   ReturnType<ReturnType<ActionMap[ControlState]>>
 >;
 
-export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: TransformRawDocs) => {
+export const nextActionMap = (
+  client: ElasticsearchClient,
+  transformRawDocs: TransformRawDocs,
+  captureTransformRawDocsErrors: LogCaptureTransformRawDocsErrors
+) => {
   return {
     INIT: (state: InitState) =>
       Actions.fetchIndices(client, [state.currentAlias, state.versionAlias]),
@@ -93,9 +102,12 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
         TaskEither.tryCatch(
           () => transformRawDocs(state.outdatedDocuments),
           (e) => {
+            captureTransformRawDocsErrors(state.errors, e);
+            // TINA: we don't want to throw here, these errors are never caught
             throw e;
           }
         ),
+        // if we decide to return the CorruptSavedObjectsErrors, the return signature of `transformRawDocs` will change
         TaskEither.chain((docs) =>
           Actions.bulkOverwriteTransformedDocuments(client, state.targetIndex, docs)
         )
@@ -124,8 +136,12 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
   };
 };
 
-export const next = (client: ElasticsearchClient, transformRawDocs: TransformRawDocs) => {
-  const map = nextActionMap(client, transformRawDocs);
+export const next = (
+  client: ElasticsearchClient,
+  transformRawDocs: TransformRawDocs,
+  captureTransformRawDocsErrors: LogCorruptSavedObjectsErrors
+) => {
+  const map = nextActionMap(client, transformRawDocs, captureTransformRawDocsErrors);
   return (state: State) => {
     const delay = <F extends (...args: any) => any>(fn: F): (() => ReturnType<F>) => {
       return () => {

@@ -53,7 +53,7 @@ const logActionResponse = (
 ) => {
   logger.debug(logMessagePrefix + `${state.controlState} RESPONSE`, res as LogMeta);
 };
-
+// naming here is misleading, dumpExecutionLog "dumps" the log messages, it doesn't delete them.
 const dumpExecutionLog = (logger: Logger, logMessagePrefix: string, executionLog: ExecutionLog) => {
   logger.error(logMessagePrefix + 'migration failed, dumping execution log:');
   executionLog.forEach((log) => {

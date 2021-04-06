@@ -34,7 +34,6 @@ export class CorruptSavedObjectError extends Error {
     Object.setPrototypeOf(this, CorruptSavedObjectError.prototype);
   }
 }
-
 /**
  * Applies the specified migration function to every saved object document in the list
  * of raw docs. Any raw docs that are not valid saved objects will simply be passed through.
@@ -70,7 +69,49 @@ export async function migrateRawDocs(
   }
   return processedDocs;
 }
-
+export interface MigrateRawDocsNonThrowing {
+  processedDocs: SavedObjectsRawDoc[];
+  corruptSavedObjectErrors?: CorruptSavedObjectError[];
+}
+/** approach options:
+ * 1. use a collection of processed docs and errors that we generate
+ * 2. log the errors -> we have the logger but aren't using it
+ * 3. return the transformed docs and throw away the corruptSavedObjectsErrors
+ */
+export async function migrateRawDocsNonThrowing(
+  serializer: SavedObjectsSerializer,
+  migrateDoc: MigrateAndConvertFn,
+  rawDocs: SavedObjectsRawDoc[],
+  log: SavedObjectsMigrationLogger
+): Promise<SavedObjectsRawDoc[]> {
+  const migrateDocWithoutBlocking = transformNonBlocking(migrateDoc);
+  const processedDocs = [];
+  const corruptSavedObjectErrors = [];
+  for (const raw of rawDocs) {
+    const options = { namespaceTreatment: 'lax' as const };
+    if (serializer.isRawSavedObject(raw, options)) {
+      const savedObject = serializer.rawToSavedObject(raw, options);
+      savedObject.migrationVersion = savedObject.migrationVersion || {};
+      processedDocs.push(
+        ...(await migrateDocWithoutBlocking(savedObject)).map((attrs) =>
+          serializer.savedObjectToRaw({
+            references: [],
+            ...attrs,
+          })
+        )
+      );
+    } else {
+      corruptSavedObjectErrors.push(new CorruptSavedObjectError(raw._id));
+    }
+  }
+  if (corruptSavedObjectErrors.length > 0) {
+    corruptSavedObjectErrors.forEach((error) => {
+      log.error(error.message, error);
+    });
+  }
+  // a promise only returns one thing. We want to return both things
+  return processedDocs;
+}
 /**
  * Migration transform functions are potentially CPU heavy e.g. doing decryption/encryption
  * or (de)/serializing large JSON payloads.

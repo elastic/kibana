@@ -57,7 +57,7 @@ describe('migrateRawDocs', () => {
     expect(transform).toHaveBeenNthCalledWith(1, obj1);
     expect(transform).toHaveBeenNthCalledWith(2, obj2);
   });
-
+  // we don't want to throw
   test('throws when encountering a corrupt saved object document', async () => {
     const logger = createSavedObjectsMigrationLoggerMock();
     const transform = jest.fn<any, any>((doc: any) => [
