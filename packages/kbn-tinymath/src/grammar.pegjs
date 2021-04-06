@@ -110,13 +110,10 @@ Argument_List "arguments"
     return [first].concat(rest);
   }
 
-StringChar
-  = [0-9A-Za-z._@\[\]-]
-
 String
-  = [\"] value:([^"]*) [\"] { return value.join(''); }
-  / [\'] value:([^']*) [\'] { return value.join(''); }
-  / value:(ValidChar)+ { return value.join(''); }
+  = '"' chars:("\\\"" { return "\""; } / [^"])* '"' { return chars.join(''); }
+  / "'" chars:("\\\'" { return "\'"; } / [^'])* "'" { return chars.join(''); }
+  / chars:(ValidChar)+ { return chars.join(''); }
 
 Argument
  = name:[a-zA-Z_]+ _ '=' _ value:(Number / String) _ {

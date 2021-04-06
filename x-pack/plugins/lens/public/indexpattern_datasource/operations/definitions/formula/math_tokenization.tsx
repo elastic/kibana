@@ -25,25 +25,42 @@ export const languageConfiguration: monaco.languages.LanguageConfiguration = {
   ],
 };
 
-export const lexerRules: monaco.languages.IMonarchLanguage = {
+export const lexerRules = {
   defaultToken: 'invalid',
   tokenPostfix: '',
   ignoreCase: true,
   brackets: [{ open: '(', close: ')', token: 'delimiter.parenthesis' }],
+  escapes: /\\(?:[\\"'])/,
   tokenizer: {
     root: [
       [/\s+/, 'whitespace'],
       [/[a-zA-Z0-9][a-zA-Z0-9_\-\.]*/, 'keyword'],
       [/[,=]/, 'delimiter'],
       [/-?(\d*\.)?\d+([eE][+\-]?\d+)?/, 'number'],
-      [/".+?"/, 'string'],
-      [/'.+?'/, 'string'],
+      // strings double quoted
+      [/"([^"\\]|\\.)*$/, 'string.invalid'], // string without termination
+      [/"/, 'string', '@string_dq'],
+      // strings single quoted
+      [/'([^'\\]|\\.)*$/, 'string.invalid'], // string without termination
+      [/'/, 'string', '@string_sq'],
       [/\+|\-|\*|\//, 'keyword.operator'],
       [/[\(]/, 'delimiter'],
       [/[\)]/, 'delimiter'],
     ],
+    string_dq: [
+      [/[^\\"]+/, 'string'],
+      [/@escapes/, 'string.escape'],
+      [/\\./, 'string.escape.invalid'],
+      [/"/, 'string', '@pop'],
+    ],
+    string_sq: [
+      [/[^\\']+/, 'string'],
+      [/@escapes/, 'string.escape'],
+      [/\\./, 'string.escape.invalid'],
+      [/'/, 'string', '@pop'],
+    ],
   },
-};
+} as monaco.languages.IMonarchLanguage;
 
 monaco.languages.setMonarchTokensProvider(LANGUAGE_ID, lexerRules);
 monaco.languages.setLanguageConfiguration(LANGUAGE_ID, languageConfiguration);

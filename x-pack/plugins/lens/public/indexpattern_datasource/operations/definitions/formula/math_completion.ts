@@ -376,6 +376,11 @@ export function getSuggestion(
       label = `${label}=`;
       detail = '';
       break;
+    case SUGGESTION_TYPE.KQL:
+      if (label.includes(`'`)) {
+        insertText = label.replaceAll(`'`, "\\'");
+      }
+      break;
   }
 
   return {
