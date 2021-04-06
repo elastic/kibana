@@ -27,6 +27,7 @@ export interface EventsActionGroupData {
 }
 
 export type Fields = Record<string, unknown[] | Fields[]>;
+export type ParsedFields = Record<string, string[] | ParsedFields[]>;
 
 export interface EventHit extends SearchHit {
   sort: string[];

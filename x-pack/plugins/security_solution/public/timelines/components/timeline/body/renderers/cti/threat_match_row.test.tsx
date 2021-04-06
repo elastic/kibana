@@ -5,32 +5,73 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
+import { shallow } from 'enzyme';
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 
-import { getMockTheme } from '../../../../../../common/lib/kibana/kibana_react.mock';
-import { getDetectionAlertFieldsMock } from '../../../../../../common/mock';
-import { ThreatMatchRow } from './threat_match_row';
+import { getDetectionAlertFieldsMock, TestProviders } from '../../../../../../common/mock';
+import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
+import { ThreatMatchRowView } from './threat_match_row';
 
-describe('threatMatchRow', () => {
+describe('threatMatchRowView', () => {
+  const mount = useMountAppended();
   let threatMatchFields: ReturnType<typeof getDetectionAlertFieldsMock>;
-  let mockTheme: ReturnType<typeof getMockTheme>;
 
   beforeEach(() => {
-    mockTheme = getMockTheme({ eui: { paddingSizes: {} } });
     threatMatchFields = getDetectionAlertFieldsMock([
       { field: 'threat.indicator.matched.type', value: ['url'] },
     ]);
   });
 
-  it('renders an indicator match alert', () => {
-    const wrapper = mount(
-      <ThemeProvider theme={mockTheme}>
-        <ThreatMatchRow fields={threatMatchFields} />
-      </ThemeProvider>
+  it('renders an indicator match row', () => {
+    const wrapper = shallow(
+      <ThreatMatchRowView
+        indicatorDataset="dataset"
+        indicatorProvider="provider"
+        indicatorReference="http://example.com"
+        indicatorType="domain"
+        sourceField="host.name"
+        sourceValue="http://elastic.co"
+      />
     );
 
     expect(wrapper.find('[data-test-subj="threat-match-row"]').exists()).toEqual(true);
+  });
+
+  it('matches the registered snapshot', () => {
+    const wrapper = shallow(
+      <ThreatMatchRowView
+        indicatorDataset="dataset"
+        indicatorProvider="provider"
+        indicatorReference="http://example.com"
+        indicatorType="domain"
+        sourceField="host.name"
+        sourceValue="http://elastic.co"
+      />
+    );
+
+    expect(wrapper).toMatchSnapshot();
+  });
+
+  it('renders draggable fields', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <ThreatMatchRowView
+          indicatorDataset="dataset"
+          indicatorProvider="provider"
+          indicatorReference="http://example.com"
+          indicatorType="domain"
+          sourceField="host.name"
+          sourceValue="http://elastic.co"
+        />
+      </TestProviders>
+    );
+
+    const sourceValueDraggable = wrapper.find('[data-test-subj="threat-match-row-source-value"]');
+    expect(sourceValueDraggable.props()).toEqual(
+      expect.objectContaining({
+        field: 'host.name',
+        value: 'http://elastic.co',
+      })
+    );
   });
 });

@@ -1,0 +1,91 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`threatMatchRowView matches the registered snapshot 1`] = `
+<Fragment>
+  <EuiFlexGroup
+    alignItems="flexStart"
+    direction="row"
+    gutterSize="none"
+    justifyContent="center"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <DraggableBadge
+        contextId="hmm"
+        data-test-subj="threat-match-row-indicator-type"
+        eventId="mm"
+        field="threat.indicator.matched.type"
+        value="domain"
+      />
+    </EuiFlexItem>
+    indicator matched on
+    <EuiFlexItem
+      grow={false}
+    >
+      <DraggableBadge
+        contextId="hmm"
+        data-test-subj="threat-match-row-source-field"
+        eventId="mm"
+        field="threat.indicator.matched.field"
+        value="host.name"
+      />
+    </EuiFlexItem>
+    , whose value was
+    <EuiFlexItem
+      grow={false}
+    >
+      <DraggableBadge
+        contextId="hmm"
+        data-test-subj="threat-match-row-source-value"
+        eventId="mm"
+        field="host.name"
+        value="http://elastic.co"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    alignItems="flexStart"
+    data-test-subj="threat-match-row"
+    direction="row"
+    gutterSize="none"
+    justifyContent="center"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <DraggableBadge
+        contextId="hmm"
+        data-test-subj="threat-match-row-indicator-dataset"
+        eventId="mm"
+        field="threat.indicator.event.dataset"
+        value="dataset"
+      />
+    </EuiFlexItem>
+    via
+    <EuiFlexItem
+      grow={false}
+    >
+      <DraggableBadge
+        contextId="hmm"
+        data-test-subj="threat-match-row-indicator-provider"
+        eventId="mm"
+        field="threat.indicator.provider"
+        value="provider"
+      />
+    </EuiFlexItem>
+    :
+    <EuiFlexItem
+      grow={false}
+    >
+      <DraggableBadge
+        contextId="hmm"
+        data-test-subj="threat-match-row-indicator-reference"
+        eventId="mm"
+        field="threat.indicator.event.reference"
+        value="http://example.com"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</Fragment>
+`;
