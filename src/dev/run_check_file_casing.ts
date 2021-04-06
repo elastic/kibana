@@ -11,12 +11,13 @@ import globby from 'globby';
 import { REPO_ROOT } from '@kbn/utils';
 import { run } from '@kbn/dev-utils';
 import { File } from './file';
+// @ts-expect-error precommit hooks aren't migrated to TypeScript yet.
 import { checkFileCasing } from './precommit_hook/check_file_casing';
 
 run(async ({ log }) => {
   const paths = await globby('**/*', {
     cwd: REPO_ROOT,
-    nodir: true,
+    onlyFiles: true,
     gitignore: true,
     ignore: [
       // the gitignore: true option makes sure that we don't
