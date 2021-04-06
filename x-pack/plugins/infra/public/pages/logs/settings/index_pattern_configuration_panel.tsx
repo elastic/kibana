@@ -7,25 +7,30 @@
 
 import { EuiDescribedFormGroup, EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useCallback } from 'react';
-import { FormElementProps, getFormRowProps } from './form_elements';
+import React, { useCallback, useMemo } from 'react';
+import { FormElement } from './form_elements';
+import { getFormRowProps } from './form_field_props';
 import { IndexPatternSelector } from './index_pattern_selector';
 import { LogIndexPatternReference } from './types';
+import { FormValidationError } from './validation_errors';
 
 export const IndexPatternConfigurationPanel: React.FC<{
   isLoading: boolean;
   isReadOnly: boolean;
-  indexPatternFormElementProps: FormElementProps<LogIndexPatternReference | undefined>;
-}> = ({ isLoading, isReadOnly, indexPatternFormElementProps }) => {
+  indexPatternFormElement: FormElement<LogIndexPatternReference | undefined, FormValidationError>;
+}> = ({ isLoading, isReadOnly, indexPatternFormElement }) => {
   const changeIndexPatternId = useCallback(
     (indexPattern: string | undefined) => {
       if (indexPattern != null) {
-        indexPatternFormElementProps.onChange?.({ type: 'index-pattern', indexPattern });
+        indexPatternFormElement.updateValue(() => ({
+          type: 'index-pattern',
+          indexPattern,
+        }));
       } else {
-        indexPatternFormElementProps.onChange?.(undefined);
+        indexPatternFormElement.updateValue(() => undefined);
       }
     },
-    [indexPatternFormElementProps]
+    [indexPatternFormElement]
   );
 
   return (
@@ -68,12 +73,15 @@ export const IndexPatternConfigurationPanel: React.FC<{
               defaultMessage="Log index pattern"
             />
           }
-          {...(isLoading ? {} : getFormRowProps(indexPatternFormElementProps))}
+          {...useMemo(() => (isLoading ? {} : getFormRowProps(indexPatternFormElement)), [
+            isLoading,
+            indexPatternFormElement,
+          ])}
         >
           <IndexPatternSelector
-            isLoading={isLoading}
+            isLoading={isLoading || indexPatternFormElement.validity.validity === 'pending'}
             isReadOnly={isReadOnly}
-            indexPatternId={indexPatternFormElementProps.value?.indexPattern}
+            indexPatternId={indexPatternFormElement.value?.indexPattern}
             onChangeIndexPatternId={changeIndexPatternId}
           />
         </EuiFormRow>

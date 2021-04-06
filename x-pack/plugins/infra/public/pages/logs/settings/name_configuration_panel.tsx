@@ -14,14 +14,16 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
-import { FormElementProps, getFormRowProps, getStringInputFieldProps } from './form_elements';
+import React, { useMemo } from 'react';
+import { FormElement } from './form_elements';
+import { getFormRowProps, getStringInputFieldProps } from './form_field_props';
+import { FormValidationError } from './validation_errors';
 
-export const NameConfigurationPanel: React.FC<{
+export const NameConfigurationPanel = React.memo<{
   isLoading: boolean;
   isReadOnly: boolean;
-  nameFormElementProps: FormElementProps<string>;
-}> = ({ isLoading, isReadOnly, nameFormElementProps }) => (
+  nameFormElement: FormElement<string, FormValidationError>;
+}>(({ isLoading, isReadOnly, nameFormElement }) => (
   <EuiForm>
     <EuiTitle size="s" data-test-subj="sourceConfigurationNameSectionTitle">
       <h3>
@@ -50,7 +52,7 @@ export const NameConfigurationPanel: React.FC<{
         label={
           <FormattedMessage id="xpack.infra.sourceConfiguration.nameLabel" defaultMessage="Name" />
         }
-        {...getFormRowProps(nameFormElementProps)}
+        {...useMemo(() => getFormRowProps(nameFormElement), [nameFormElement])}
       >
         <EuiFieldText
           data-test-subj="nameInput"
@@ -58,9 +60,10 @@ export const NameConfigurationPanel: React.FC<{
           disabled={isLoading}
           readOnly={isReadOnly}
           isLoading={isLoading}
-          {...getStringInputFieldProps(nameFormElementProps)}
+          name="name"
+          {...useMemo(() => getStringInputFieldProps(nameFormElement), [nameFormElement])}
         />
       </EuiFormRow>
     </EuiDescribedFormGroup>
   </EuiForm>
-);
+));

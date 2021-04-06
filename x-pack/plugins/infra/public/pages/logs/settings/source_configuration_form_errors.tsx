@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
@@ -47,9 +47,43 @@ export const LogSourceConfigurationFormError: React.FC<{ error: FormValidationEr
         defaultMessage="The column list must not be empty."
       />
     );
+  } else if (error.type === 'child') {
+    return (
+      <FormattedMessage
+        id="xpack.infra.logSourceConfiguration.childFormElementErrorMessage"
+        defaultMessage="At least one form field is in an invalid state."
+      />
+    );
+  } else if (error.type === 'missing_message_field') {
+    return (
+      <FormattedMessage
+        id="xpack.infra.logSourceConfiguration.missingMessageFieldErrorMessage"
+        defaultMessage="The index pattern must contain a {messageField} field."
+        values={{
+          messageField: <EuiCode>message</EuiCode>,
+        }}
+      />
+    );
+  } else if (error.type === 'invalid_message_field_type') {
+    return (
+      <FormattedMessage
+        id="xpack.infra.logSourceConfiguration.invalidMessageFieldTypeErrorMessage"
+        defaultMessage="The {messageField} field must be a text field."
+        values={{
+          messageField: <EuiCode>message</EuiCode>,
+        }}
+      />
+    );
+  } else if (error.type === 'rollup_index_pattern') {
+    return (
+      <FormattedMessage
+        id="xpack.infra.logSourceConfiguration.rollupIndexPatternErrorMessage"
+        defaultMessage="The index pattern must not be a rollup index pattern."
+      />
+    );
+  } else {
+    return null;
   }
-
-  return null;
 };
 
 const logSourceConfigurationFormErrorsCalloutTitle = i18n.translate(

@@ -5,114 +5,88 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
-import { ResolvedLogSourceConfiguration } from '../../../../common/log_sources';
-import { useLogIndicesConfigurationFormState } from './indices_configuration_form_state';
-import { useLogColumnsConfigurationFormState } from './log_columns_configuration_form_state';
+import { useMemo } from 'react';
+import { LogSourceConfigurationProperties } from '../../../containers/logs/log_source';
+import { useCompositeFormElement } from './form_elements';
+import { useFieldsFormElement, useLogIndicesFormElement } from './indices_configuration_form_state';
+import { useLogColumnsFormElement } from './log_columns_configuration_form_state';
+import { useNameFormElement } from './name_configuration_form_state';
 
 export const useLogSourceConfigurationFormState = (
-  configuration?: ResolvedLogSourceConfiguration
+  configuration?: LogSourceConfigurationProperties
 ) => {
-  const indicesConfigurationFormState = useLogIndicesConfigurationFormState({
-    initialFormState: useMemo(
+  const nameFormElement = useNameFormElement(configuration?.name ?? '');
+
+  const logIndicesFormElement = useLogIndicesFormElement(
+    useMemo(
       () =>
-        configuration
-          ? {
-              name: configuration.name,
-              description: configuration.description,
-              logIndices: {
-                type: 'index_name',
-                indexName: configuration.indices,
-              },
-              tiebreakerField: configuration.tiebreakerField,
-              timestampField: configuration.timestampField,
-            }
-          : undefined,
+        configuration?.logIndices ?? {
+          type: 'index_name',
+          indexName: '',
+        },
       [configuration]
-    ),
-  });
+    )
+  );
 
-  const logColumnsConfigurationFormState = useLogColumnsConfigurationFormState({
-    initialFormState: useMemo(
-      () =>
-        configuration
-          ? {
-              logColumns: configuration.columns,
-            }
-          : undefined,
+  const {
+    fieldsFormElement,
+    tiebreakerFieldFormElement,
+    timestampFieldFormElement,
+  } = useFieldsFormElement(
+    useMemo(
+      () => ({
+        tiebreakerField: configuration?.fields?.tiebreaker ?? '_doc',
+        timestampField: configuration?.fields?.timestamp ?? '@timestamp',
+      }),
       [configuration]
-    ),
-  });
-
-  const errors = useMemo(
-    () => [...indicesConfigurationFormState.errors, ...logColumnsConfigurationFormState.errors],
-    [indicesConfigurationFormState.errors, logColumnsConfigurationFormState.errors]
+    )
   );
 
-  const resetForm = useCallback(() => {
-    indicesConfigurationFormState.resetForm();
-    logColumnsConfigurationFormState.resetForm();
-  }, [indicesConfigurationFormState, logColumnsConfigurationFormState]);
-
-  const isFormDirty = useMemo(
-    () => indicesConfigurationFormState.isFormDirty || logColumnsConfigurationFormState.isFormDirty,
-    [indicesConfigurationFormState.isFormDirty, logColumnsConfigurationFormState.isFormDirty]
+  const logColumnsFormElement = useLogColumnsFormElement(
+    useMemo(() => configuration?.logColumns ?? [], [configuration])
   );
 
-  const isFormValid = useMemo(
-    () => indicesConfigurationFormState.isFormValid && logColumnsConfigurationFormState.isFormValid,
-    [indicesConfigurationFormState.isFormValid, logColumnsConfigurationFormState.isFormValid]
+  const sourceConfigurationFormElement = useCompositeFormElement(
+    useMemo(
+      () => ({
+        childFormElements: {
+          name: nameFormElement,
+          logIndices: logIndicesFormElement,
+          fields: fieldsFormElement,
+          logColumns: logColumnsFormElement,
+        },
+        validate: async () => [],
+      }),
+      [nameFormElement, logIndicesFormElement, fieldsFormElement, logColumnsFormElement]
+    )
   );
 
+  // TODO: use sourceConfigurationFormElement.value directly once the
+  // logIndices property exists
   const formState = useMemo(
     () => ({
-      name: indicesConfigurationFormState.formState.name,
-      description: indicesConfigurationFormState.formState.description,
-      // TODO: store as logIndices when the source config supports it
+      name: sourceConfigurationFormElement.value.name,
+      description: '',
       logAlias:
-        indicesConfigurationFormState.formState.logIndices?.type === 'index-name'
-          ? indicesConfigurationFormState.formState.logIndices.indexName
+        sourceConfigurationFormElement.value.logIndices?.type === 'index-name'
+          ? sourceConfigurationFormElement.value.logIndices.indexName
           : '',
       fields: {
-        tiebreaker: indicesConfigurationFormState.formState.tiebreakerField,
-        timestamp: indicesConfigurationFormState.formState.timestampField,
+        tiebreaker: sourceConfigurationFormElement.value.fields.tiebreaker,
+        timestamp: sourceConfigurationFormElement.value.fields.timestamp,
       },
-      logColumns: logColumnsConfigurationFormState.formState.logColumns,
+      logColumns: sourceConfigurationFormElement.value.logColumns,
     }),
-    [indicesConfigurationFormState.formState, logColumnsConfigurationFormState.formState]
-  );
-
-  const formStateChanges = useMemo(
-    () => ({
-      name: indicesConfigurationFormState.formStateChanges.name,
-      description: indicesConfigurationFormState.formStateChanges.description,
-      // TODO: store as logIndices when the source config supports it
-      logAlias:
-        indicesConfigurationFormState.formStateChanges.logIndices?.type === 'index-name'
-          ? indicesConfigurationFormState.formStateChanges.logIndices.indexName
-          : undefined,
-      fields: {
-        tiebreaker: indicesConfigurationFormState.formStateChanges.tiebreakerField,
-        timestamp: indicesConfigurationFormState.formStateChanges.timestampField,
-      },
-      logColumns: logColumnsConfigurationFormState.formStateChanges.logColumns,
-    }),
-    [
-      indicesConfigurationFormState.formStateChanges,
-      logColumnsConfigurationFormState.formStateChanges,
-    ]
+    [sourceConfigurationFormElement.value]
   );
 
   return {
-    addLogColumn: logColumnsConfigurationFormState.addLogColumn,
-    moveLogColumn: logColumnsConfigurationFormState.moveLogColumn,
-    errors,
     formState,
-    formStateChanges,
-    isFormDirty,
-    isFormValid,
-    indicesConfigurationProps: indicesConfigurationFormState.fieldProps,
-    logColumnConfigurationProps: logColumnsConfigurationFormState.logColumnConfigurationProps,
-    resetForm,
+    logIndicesFormElement,
+    logColumnsFormElement,
+    nameFormElement,
+    sourceConfigurationFormElement,
+    tiebreakerFieldFormElement,
+    timestampFieldFormElement,
   };
 };

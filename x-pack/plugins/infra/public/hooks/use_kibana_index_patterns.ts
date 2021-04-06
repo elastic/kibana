@@ -9,23 +9,29 @@ import { useState } from 'react';
 import { useTrackedPromise } from '../utils/use_tracked_promise';
 import { useKibanaContextForPlugin } from './use_kibana';
 
-interface IndexPatternDescriptor {
-  id: string;
-  title: string;
-}
-
-export const useKibanaIndexPatternTitles = () => {
+export const useKibanaIndexPatternService = () => {
   const {
     services: {
       data: { indexPatterns },
     },
   } = useKibanaContextForPlugin();
 
+  return indexPatterns;
+};
+
+interface IndexPatternDescriptor {
+  id: string;
+  title: string;
+}
+
+export const useKibanaIndexPatternTitles = () => {
+  const indexPatterns = useKibanaIndexPatternService();
+
   const [indexPatternTitles, setIndexPatternTitles] = useState<IndexPatternDescriptor[]>([]);
 
   const [indexPatternTitlesRequest, fetchIndexPatternTitles] = useTrackedPromise(
     {
-      createPromise: () => indexPatterns.getIdsWithTitle(),
+      createPromise: () => indexPatterns.getIdsWithTitle(true),
       onResolve: setIndexPatternTitles,
     },
     [indexPatterns]

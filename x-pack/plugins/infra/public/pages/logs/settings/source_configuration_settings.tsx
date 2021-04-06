@@ -47,21 +47,19 @@ export const LogsSettingsPage = () => {
   );
 
   const {
-    addLogColumn,
-    moveLogColumn,
-    indicesConfigurationProps,
-    logColumnConfigurationProps,
-    errors,
-    resetForm,
-    isFormDirty,
-    isFormValid,
-    formStateChanges,
-  } = useLogSourceConfigurationFormState(resolvedSourceConfiguration);
+    sourceConfigurationFormElement,
+    formState,
+    logIndicesFormElement,
+    logColumnsFormElement,
+    nameFormElement,
+    tiebreakerFieldFormElement,
+    timestampFieldFormElement,
+  } = useLogSourceConfigurationFormState(source?.configuration);
 
   const persistUpdates = useCallback(async () => {
-    await updateSourceConfiguration(formStateChanges);
-    resetForm();
-  }, [updateSourceConfiguration, resetForm, formStateChanges]);
+    await updateSourceConfiguration(formState);
+    sourceConfigurationFormElement.resetValue();
+  }, [updateSourceConfiguration, sourceConfigurationFormElement, formState]);
 
   const isWriteable = useMemo(() => shouldAllowEdit && source && source.origin !== 'internal', [
     shouldAllowEdit,
@@ -80,12 +78,14 @@ export const LogsSettingsPage = () => {
       <EuiPage style={{ flex: '1 0 0%' }}>
         <EuiPageBody data-test-subj="sourceConfigurationContent" restrictWidth>
           <EuiPageContentBody>
-            <Prompt prompt={isFormDirty ? unsavedFormPromptMessage : undefined} />
+            <Prompt
+              prompt={sourceConfigurationFormElement.isDirty ? unsavedFormPromptMessage : undefined}
+            />
             <EuiPanel paddingSize="l">
               <NameConfigurationPanel
                 isLoading={isLoading}
                 isReadOnly={!isWriteable}
-                nameFormElementProps={indicesConfigurationProps.name}
+                nameFormElement={nameFormElement}
               />
             </EuiPanel>
             <EuiSpacer />
@@ -93,25 +93,25 @@ export const LogsSettingsPage = () => {
               <IndicesConfigurationPanel
                 isLoading={isLoading}
                 isReadOnly={!isWriteable}
-                indicesFormElementProps={indicesConfigurationProps.logIndices}
-                tiebreakerFieldFormElementProps={indicesConfigurationProps.tiebreakerField}
-                timestampFieldFormElementProps={indicesConfigurationProps.timestampField}
+                indicesFormElement={logIndicesFormElement}
+                tiebreakerFieldFormElement={tiebreakerFieldFormElement}
+                timestampFieldFormElement={timestampFieldFormElement}
               />
             </EuiPanel>
             <EuiSpacer />
             <EuiPanel paddingSize="l">
               <LogColumnsConfigurationPanel
-                addLogColumn={addLogColumn}
-                moveLogColumn={moveLogColumn}
                 availableFields={availableFields}
                 isLoading={isLoading}
-                logColumnConfiguration={logColumnConfigurationProps}
+                logColumnsFormElement={logColumnsFormElement}
               />
             </EuiPanel>
             <EuiSpacer />
-            {errors.length > 0 ? (
+            {sourceConfigurationFormElement.validity.validity === 'invalid' ? (
               <>
-                <LogSourceConfigurationFormErrors errors={errors} />
+                <LogSourceConfigurationFormErrors
+                  errors={sourceConfigurationFormElement.validity.reasons}
+                />
                 <EuiSpacer />
               </>
             ) : null}
@@ -134,9 +134,9 @@ export const LogsSettingsPage = () => {
                             data-test-subj="discardSettingsButton"
                             color="danger"
                             iconType="cross"
-                            isDisabled={isLoading || !isFormDirty}
+                            isDisabled={isLoading || !sourceConfigurationFormElement.isDirty}
                             onClick={() => {
-                              resetForm();
+                              sourceConfigurationFormElement.resetValue();
                             }}
                           >
                             <FormattedMessage
@@ -149,7 +149,10 @@ export const LogsSettingsPage = () => {
                           <EuiButton
                             data-test-subj="applySettingsButton"
                             color="primary"
-                            isDisabled={!isFormDirty || !isFormValid}
+                            isDisabled={
+                              !sourceConfigurationFormElement.isDirty ||
+                              sourceConfigurationFormElement.validity.validity !== 'valid'
+                            }
                             fill
                             onClick={persistUpdates}
                           >

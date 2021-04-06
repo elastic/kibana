@@ -7,69 +7,66 @@
 
 import React, { useCallback } from 'react';
 import { FieldsConfigurationPanel } from './fields_configuration_panel';
-import { FormElementProps, isFormElementPropsForType } from './form_elements';
+import { FormElement, isFormElementForType } from './form_elements';
 import { IndexNamesConfigurationPanel } from './index_names_configuration_panel';
 import { IndexPatternConfigurationPanel } from './index_pattern_configuration_panel';
 import { LogIndexNameReference, LogIndexPatternReference, LogIndexReference } from './types';
+import { FormValidationError } from './validation_errors';
 
-export const IndicesConfigurationPanel: React.FC<{
+export const IndicesConfigurationPanel = React.memo<{
   isLoading: boolean;
   isReadOnly: boolean;
-  indicesFormElementProps: FormElementProps<LogIndexReference | undefined>;
-  tiebreakerFieldFormElementProps: FormElementProps<string>;
-  timestampFieldFormElementProps: FormElementProps<string>;
-}> = ({
-  isLoading,
-  isReadOnly,
-  indicesFormElementProps,
-  tiebreakerFieldFormElementProps,
-  timestampFieldFormElementProps,
-}) => {
-  const switchToIndexPatternReference = useCallback(() => {
-    indicesFormElementProps.onChange?.(undefined);
-  }, [indicesFormElementProps]);
+  indicesFormElement: FormElement<LogIndexReference | undefined, FormValidationError>;
+  tiebreakerFieldFormElement: FormElement<string, FormValidationError>;
+  timestampFieldFormElement: FormElement<string, FormValidationError>;
+}>(
+  ({
+    isLoading,
+    isReadOnly,
+    indicesFormElement,
+    tiebreakerFieldFormElement,
+    timestampFieldFormElement,
+  }) => {
+    const switchToIndexPatternReference = useCallback(() => {
+      indicesFormElement.updateValue(() => undefined);
+    }, [indicesFormElement]);
 
-  if (
-    isUndefinedFormElementProps(indicesFormElementProps) ||
-    isIndexPatternFormElementProps(indicesFormElementProps)
-  ) {
-    return (
-      <IndexPatternConfigurationPanel
-        isLoading={isLoading}
-        isReadOnly={isReadOnly}
-        indexPatternFormElementProps={indicesFormElementProps}
-      />
-    );
-  } else if (isIndexNamesFormElementProps(indicesFormElementProps)) {
-    return (
-      <>
-        <IndexNamesConfigurationPanel
+    if (isIndexPatternFormElement(indicesFormElement)) {
+      return (
+        <IndexPatternConfigurationPanel
           isLoading={isLoading}
           isReadOnly={isReadOnly}
-          indexNamesFormElementProps={indicesFormElementProps}
-          onSwitchToIndexPatternReference={switchToIndexPatternReference}
+          indexPatternFormElement={indicesFormElement}
         />
-        <FieldsConfigurationPanel
-          isLoading={isLoading}
-          isReadOnly={isReadOnly}
-          tiebreakerFieldFormElementProps={tiebreakerFieldFormElementProps}
-          timestampFieldFormElementProps={timestampFieldFormElementProps}
-        />
-      </>
-    );
-  } else {
-    return null;
+      );
+    } else if (isIndexNamesFormElement(indicesFormElement)) {
+      return (
+        <>
+          <IndexNamesConfigurationPanel
+            isLoading={isLoading}
+            isReadOnly={isReadOnly}
+            indexNamesFormElement={indicesFormElement}
+            onSwitchToIndexPatternReference={switchToIndexPatternReference}
+          />
+          <FieldsConfigurationPanel
+            isLoading={isLoading}
+            isReadOnly={isReadOnly}
+            tiebreakerFieldFormElement={tiebreakerFieldFormElement}
+            timestampFieldFormElement={timestampFieldFormElement}
+          />
+        </>
+      );
+    } else {
+      return null;
+    }
   }
-};
-
-const isUndefinedFormElementProps = isFormElementPropsForType(
-  (value): value is undefined => value == null
 );
 
-const isIndexPatternFormElementProps = isFormElementPropsForType(
-  (value): value is LogIndexPatternReference => value?.type === 'index-pattern'
+const isIndexPatternFormElement = isFormElementForType(
+  (value): value is LogIndexPatternReference | undefined =>
+    value == null || value?.type === 'index-pattern'
 );
 
-const isIndexNamesFormElementProps = isFormElementPropsForType(
+const isIndexNamesFormElement = isFormElementForType(
   (value): value is LogIndexNameReference => value?.type === 'index-name'
 );

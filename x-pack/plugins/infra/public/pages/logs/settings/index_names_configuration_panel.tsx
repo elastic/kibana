@@ -18,15 +18,17 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { FormElementProps, getFormRowProps, getInputFieldProps } from './form_elements';
+import { FormElement } from './form_elements';
+import { getFormRowProps, getInputFieldProps } from './form_field_props';
 import { LogIndexNameReference } from './types';
+import { FormValidationError } from './validation_errors';
 
 export const IndexNamesConfigurationPanel: React.FC<{
   isLoading: boolean;
   isReadOnly: boolean;
-  indexNamesFormElementProps: FormElementProps<LogIndexNameReference>;
+  indexNamesFormElement: FormElement<LogIndexNameReference, FormValidationError>;
   onSwitchToIndexPatternReference: () => void;
-}> = ({ isLoading, isReadOnly, indexNamesFormElementProps, onSwitchToIndexPatternReference }) => {
+}> = ({ isLoading, isReadOnly, indexNamesFormElement, onSwitchToIndexPatternReference }) => {
   return (
     <>
       <EuiTitle size="s">
@@ -85,7 +87,7 @@ export const IndexNamesConfigurationPanel: React.FC<{
               defaultMessage="Log indices"
             />
           }
-          {...getFormRowProps(indexNamesFormElementProps)}
+          {...getFormRowProps(indexNamesFormElement)}
         >
           <EuiFieldText
             data-test-subj="logIndicesInput"
@@ -93,7 +95,7 @@ export const IndexNamesConfigurationPanel: React.FC<{
             disabled={isLoading}
             isLoading={isLoading}
             readOnly={isReadOnly}
-            {...getIndexNamesInputFieldProps(indexNamesFormElementProps)}
+            {...getIndexNamesInputFieldProps(indexNamesFormElement)}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>

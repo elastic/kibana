@@ -17,24 +17,26 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
-import { FormElementProps, getFormRowProps, getStringInputFieldProps } from './form_elements';
+import React, { useMemo } from 'react';
+import { FormElement } from './form_elements';
+import { getFormRowProps, getStringInputFieldProps } from './form_field_props';
+import { FormValidationError } from './validation_errors';
 
 interface FieldsConfigurationPanelProps {
   isLoading: boolean;
   isReadOnly: boolean;
-  tiebreakerFieldFormElementProps: FormElementProps<string>;
-  timestampFieldFormElementProps: FormElementProps<string>;
+  tiebreakerFieldFormElement: FormElement<string, FormValidationError>;
+  timestampFieldFormElement: FormElement<string, FormValidationError>;
 }
 
 export const FieldsConfigurationPanel = ({
   isLoading,
   isReadOnly,
-  tiebreakerFieldFormElementProps,
-  timestampFieldFormElementProps,
+  tiebreakerFieldFormElement,
+  timestampFieldFormElement,
 }: FieldsConfigurationPanelProps) => {
-  const isTimestampValueDefault = timestampFieldFormElementProps.value === '@timestamp';
-  const isTiebreakerValueDefault = tiebreakerFieldFormElementProps.value === '_doc';
+  const isTimestampValueDefault = timestampFieldFormElement.value === '@timestamp';
+  const isTiebreakerValueDefault = tiebreakerFieldFormElement.value === '_doc';
 
   return (
     <>
@@ -116,14 +118,18 @@ export const FieldsConfigurationPanel = ({
               defaultMessage="Timestamp"
             />
           }
-          {...getFormRowProps(timestampFieldFormElementProps)}
+          {...useMemo(() => getFormRowProps(timestampFieldFormElement), [
+            timestampFieldFormElement,
+          ])}
         >
           <EuiFieldText
             fullWidth
             disabled={isLoading || isTimestampValueDefault}
             readOnly={isReadOnly}
             isLoading={isLoading}
-            {...getStringInputFieldProps(timestampFieldFormElementProps)}
+            {...useMemo(() => getStringInputFieldProps(timestampFieldFormElement), [
+              timestampFieldFormElement,
+            ])}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
@@ -160,14 +166,18 @@ export const FieldsConfigurationPanel = ({
               defaultMessage="Tiebreaker"
             />
           }
-          {...getFormRowProps(tiebreakerFieldFormElementProps)}
+          {...useMemo(() => getFormRowProps(tiebreakerFieldFormElement), [
+            tiebreakerFieldFormElement,
+          ])}
         >
           <EuiFieldText
             fullWidth
             disabled={isLoading || isTiebreakerValueDefault}
             readOnly={isReadOnly}
             isLoading={isLoading}
-            {...getStringInputFieldProps(tiebreakerFieldFormElementProps)}
+            {...useMemo(() => getStringInputFieldProps(tiebreakerFieldFormElement), [
+              tiebreakerFieldFormElement,
+            ])}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>

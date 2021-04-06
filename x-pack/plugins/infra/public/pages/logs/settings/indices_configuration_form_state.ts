@@ -5,146 +5,86 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
-import { FormElementProps } from './form_elements';
-import { LogIndexNameReference, LogIndexPatternReference, LogIndexReference } from './types';
-import { FormValidationError, validateStringNotEmpty } from './validation_errors';
+import { useMemo } from 'react';
+import { useKibanaIndexPatternService } from '../../../hooks/use_kibana_index_patterns';
+import { useCompositeFormElement, useFormElement } from './form_elements';
+import { LogIndexNameReference, LogIndexPatternReference } from './types';
+import {
+  FormValidationError,
+  validateIndexPattern,
+  validateStringNotEmpty,
+} from './validation_errors';
 
-export interface LogIndicesConfigurationFormState {
-  name: string;
-  description: string;
-  logIndices: LogIndexReference | undefined;
+export type LogIndicesFormState = LogIndexNameReference | LogIndexPatternReference | undefined;
+
+export const useLogIndicesFormElement = (initialValue: LogIndicesFormState) => {
+  const indexPatternService = useKibanaIndexPatternService();
+
+  const logIndicesFormElement = useFormElement<LogIndicesFormState, FormValidationError>({
+    initialValue,
+    validate: useMemo(
+      () => async (logIndices) => {
+        if (logIndices == null) {
+          return validateStringNotEmpty('log index pattern', '');
+        } else if (logIndices.type === 'index-name') {
+          return validateStringNotEmpty('log indices', logIndices.indexName);
+        } else {
+          const emptyStringErrors = validateStringNotEmpty(
+            'log index pattern',
+            logIndices.indexPattern
+          );
+
+          if (emptyStringErrors.length > 0) {
+            return emptyStringErrors;
+          }
+
+          return validateIndexPattern(await indexPatternService.get(logIndices.indexPattern));
+        }
+      },
+      [indexPatternService]
+    ),
+  });
+
+  return logIndicesFormElement;
+};
+
+export interface FieldsFormState {
   tiebreakerField: string;
   timestampField: string;
 }
 
-type FormStateChanges = Partial<LogIndicesConfigurationFormState>;
+export const useFieldsFormElement = (initialValues: FieldsFormState) => {
+  const tiebreakerFieldFormElement = useFormElement<string, FormValidationError>({
+    initialValue: initialValues.tiebreakerField,
+    validate: useMemo(
+      () => async (tiebreakerField) => validateStringNotEmpty('tiebreaker', tiebreakerField),
+      []
+    ),
+  });
 
-export const useLogIndicesConfigurationFormState = ({
-  initialFormState = defaultFormState,
-}: {
-  initialFormState?: LogIndicesConfigurationFormState;
-}) => {
-  const [formStateChanges, setFormStateChanges] = useState<FormStateChanges>({});
+  const timestampFieldFormElement = useFormElement<string, FormValidationError>({
+    initialValue: initialValues.timestampField,
+    validate: useMemo(
+      () => async (timestampField) => validateStringNotEmpty('timestamp', timestampField),
+      []
+    ),
+  });
 
-  const resetForm = useCallback(() => setFormStateChanges({}), []);
-
-  const formState = useMemo(
-    () => ({
-      ...initialFormState,
-      ...formStateChanges,
-    }),
-    [initialFormState, formStateChanges]
+  const fieldsFormElement = useCompositeFormElement(
+    useMemo(
+      () => ({
+        childFormElements: {
+          tiebreaker: tiebreakerFieldFormElement,
+          timestamp: timestampFieldFormElement,
+        },
+      }),
+      [tiebreakerFieldFormElement, timestampFieldFormElement]
+    )
   );
-
-  const nameFormElementProps: FormElementProps<string> = useMemo(
-    () => ({
-      errors: validateStringNotEmpty('name', formState.name),
-      name: 'name',
-      onChange: (name) => setFormStateChanges((changes) => ({ ...changes, name })),
-      value: formState.name,
-    }),
-    [formState.name]
-  );
-
-  const logIndicesFormElementProps: FormElementProps<
-    LogIndexNameReference | LogIndexPatternReference | undefined
-  > = useMemo(() => {
-    const onChange = (logIndices: LogIndexReference | undefined) =>
-      setFormStateChanges((changes) => ({ ...changes, logIndices }));
-
-    if (formState.logIndices == null) {
-      return {
-        errors: validateStringNotEmpty('log index pattern', ''),
-        name: 'indexPatternReference',
-        onChange,
-        value: undefined,
-      };
-    } else if (formState.logIndices.type === 'index-name') {
-      return {
-        errors: validateStringNotEmpty('log indices', formState.logIndices.indexName),
-        name: 'indexNameReference',
-        onChange,
-        value: formState.logIndices,
-      };
-    } else {
-      return {
-        errors: validateStringNotEmpty('log index pattern', formState.logIndices.indexPattern),
-        name: 'indexPatternReference',
-        onChange,
-        value: formState.logIndices,
-      };
-    }
-  }, [formState.logIndices]);
-
-  const tiebreakerFieldFormElementProps: FormElementProps<string> = useMemo(
-    () => ({
-      errors: validateStringNotEmpty('tiebreaker', formState.tiebreakerField),
-      name: `tiebreakerField`,
-      onChange: (tiebreakerField) =>
-        setFormStateChanges((changes) => ({ ...changes, tiebreakerField })),
-      value: formState.tiebreakerField,
-    }),
-    [formState.tiebreakerField]
-  );
-
-  const timestampFieldFormElementProps: FormElementProps<string> = useMemo(
-    () => ({
-      errors: validateStringNotEmpty('timestamp', formState.timestampField),
-      name: `timestampField`,
-      onChange: (timestampField) =>
-        setFormStateChanges((changes) => ({ ...changes, timestampField })),
-      value: formState.timestampField,
-    }),
-    [formState.timestampField]
-  );
-
-  const fieldProps = useMemo(
-    () => ({
-      name: nameFormElementProps,
-      logIndices: logIndicesFormElementProps,
-      tiebreakerField: tiebreakerFieldFormElementProps,
-      timestampField: timestampFieldFormElementProps,
-    }),
-    [
-      nameFormElementProps,
-      logIndicesFormElementProps,
-      tiebreakerFieldFormElementProps,
-      timestampFieldFormElementProps,
-    ]
-  );
-
-  const errors = useMemo(
-    () =>
-      Object.values(fieldProps).reduce<FormValidationError[]>(
-        (accumulatedErrors, formElementProps) => [...accumulatedErrors, ...formElementProps.errors],
-        []
-      ),
-    [fieldProps]
-  );
-
-  const isFormValid = useMemo(() => errors.length <= 0, [errors]);
-
-  const isFormDirty = useMemo(() => Object.keys(formStateChanges).length > 0, [formStateChanges]);
 
   return {
-    errors,
-    fieldProps,
-    formState,
-    formStateChanges,
-    isFormDirty,
-    isFormValid,
-    resetForm,
+    fieldsFormElement,
+    tiebreakerFieldFormElement,
+    timestampFieldFormElement,
   };
-};
-
-const defaultFormState: LogIndicesConfigurationFormState = {
-  name: '',
-  description: '',
-  logIndices: {
-    type: 'index-name',
-    indexName: '',
-  },
-  tiebreakerField: '',
-  timestampField: '',
 };

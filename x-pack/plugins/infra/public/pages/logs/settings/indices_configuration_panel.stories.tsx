@@ -15,8 +15,10 @@ import {
   MockIndexPatternsKibanaContextProvider,
 } from '../../../hooks/use_kibana_index_patterns.mock';
 import {
-  LogIndicesConfigurationFormState,
-  useLogIndicesConfigurationFormState,
+  FieldsFormState,
+  LogIndicesFormState,
+  useFieldsFormElement,
+  useLogIndicesFormElement,
 } from './indices_configuration_form_state';
 import { IndicesConfigurationPanel } from './indices_configuration_panel';
 
@@ -59,49 +61,66 @@ type IndicesConfigurationPanelProps = PropsOf<typeof IndicesConfigurationPanel>;
 type IndicesConfigurationPanelStoryArgs = Pick<
   IndicesConfigurationPanelProps,
   'isLoading' | 'isReadOnly'
-> &
-  LogIndicesConfigurationFormState & {
-    availableIndexPatterns: MockIndexPattern[];
-  };
+> & {
+  availableIndexPatterns: MockIndexPattern[];
+  logIndices: LogIndicesFormState;
+  fields: FieldsFormState;
+};
 
 const IndicesConfigurationPanelTemplate: Story<IndicesConfigurationPanelStoryArgs> = ({
   isLoading,
   isReadOnly,
-  availableIndexPatterns,
-  ...initialFormState
+  logIndices,
+  fields,
 }) => {
-  const indicesConfigurationFormState = useLogIndicesConfigurationFormState({
-    initialFormState,
-  });
+  const logIndicesFormElement = useLogIndicesFormElement(logIndices);
+  const { tiebreakerFieldFormElement, timestampFieldFormElement } = useFieldsFormElement(fields);
 
   return (
     <>
       <IndicesConfigurationPanel
         isLoading={isLoading}
         isReadOnly={isReadOnly}
-        indicesFormElementProps={indicesConfigurationFormState.fieldProps.logIndices}
-        tiebreakerFieldFormElementProps={indicesConfigurationFormState.fieldProps.tiebreakerField}
-        timestampFieldFormElementProps={indicesConfigurationFormState.fieldProps.timestampField}
+        indicesFormElement={logIndicesFormElement}
+        tiebreakerFieldFormElement={tiebreakerFieldFormElement}
+        timestampFieldFormElement={timestampFieldFormElement}
       />
       <EuiCodeBlock language="json">
-        // form state{'\n'}
-        {JSON.stringify(indicesConfigurationFormState.formState, null, 2)}
+        // field states{'\n'}
+        {JSON.stringify(
+          {
+            logIndices: {
+              value: logIndicesFormElement.value,
+              validity: logIndicesFormElement.validity,
+            },
+            tiebreakerField: {
+              value: tiebreakerFieldFormElement.value,
+              validity: tiebreakerFieldFormElement.validity,
+            },
+            timestampField: {
+              value: timestampFieldFormElement.value,
+              validity: timestampFieldFormElement.validity,
+            },
+          },
+          null,
+          2
+        )}
       </EuiCodeBlock>
     </>
   );
 };
 
 const defaultArgs = {
-  description: '',
   isLoading: false,
   isReadOnly: false,
   logIndices: {
     type: 'index-name' as const,
     indexName: 'logs-*',
   },
-  name: 'My log source configuration',
-  tiebreakerField: '_doc',
-  timestampField: '@timestamp',
+  fields: {
+    tiebreakerField: '_doc',
+    timestampField: '@timestamp',
+  },
   availableIndexPatterns: [
     {
       id: 'INDEX_PATTERN_A',
