@@ -55,74 +55,81 @@ const REFRESH_INTERVAL_MS = 30000;
 
 const RowActions = React.memo<{
   agent: Agent;
+  agentPolicy?: AgentPolicy;
   refresh: () => void;
   onReassignClick: () => void;
   onUnenrollClick: () => void;
   onUpgradeClick: () => void;
-}>(({ agent, refresh, onReassignClick, onUnenrollClick, onUpgradeClick }) => {
+}>(({ agent, agentPolicy, refresh, onReassignClick, onUnenrollClick, onUpgradeClick }) => {
   const { getHref } = useLink();
   const hasWriteCapabilites = useCapabilities().write;
 
   const isUnenrolling = agent.status === 'unenrolling';
   const kibanaVersion = useKibanaVersion();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuItems = [
+    <EuiContextMenuItem
+      icon="inspect"
+      href={getHref('fleet_agent_details', { agentId: agent.id })}
+      key="viewAgent"
+    >
+      <FormattedMessage id="xpack.fleet.agentList.viewActionText" defaultMessage="View agent" />
+    </EuiContextMenuItem>,
+  ];
+
+  if (agentPolicy?.is_managed === false) {
+    menuItems.push(
+      <EuiContextMenuItem
+        icon="pencil"
+        onClick={() => {
+          onReassignClick();
+        }}
+        disabled={!agent.active}
+        key="reassignPolicy"
+      >
+        <FormattedMessage
+          id="xpack.fleet.agentList.reassignActionText"
+          defaultMessage="Assign to new policy"
+        />
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem
+        disabled={!hasWriteCapabilites || !agent.active}
+        icon="trash"
+        onClick={() => {
+          onUnenrollClick();
+        }}
+      >
+        {isUnenrolling ? (
+          <FormattedMessage
+            id="xpack.fleet.agentList.forceUnenrollOneButton"
+            defaultMessage="Force unenroll"
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.fleet.agentList.unenrollOneButton"
+            defaultMessage="Unenroll agent"
+          />
+        )}
+      </EuiContextMenuItem>,
+      <EuiContextMenuItem
+        icon="refresh"
+        disabled={!isAgentUpgradeable(agent, kibanaVersion)}
+        onClick={() => {
+          onUpgradeClick();
+        }}
+      >
+        <FormattedMessage
+          id="xpack.fleet.agentList.upgradeOneButton"
+          defaultMessage="Upgrade agent"
+        />
+      </EuiContextMenuItem>
+    );
+  }
   return (
     <ContextMenuActions
       isOpen={isMenuOpen}
       onChange={(isOpen) => setIsMenuOpen(isOpen)}
-      items={[
-        <EuiContextMenuItem
-          icon="inspect"
-          href={getHref('fleet_agent_details', { agentId: agent.id })}
-          key="viewAgent"
-        >
-          <FormattedMessage id="xpack.fleet.agentList.viewActionText" defaultMessage="View agent" />
-        </EuiContextMenuItem>,
-        <EuiContextMenuItem
-          icon="pencil"
-          onClick={() => {
-            onReassignClick();
-          }}
-          disabled={!agent.active}
-          key="reassignPolicy"
-        >
-          <FormattedMessage
-            id="xpack.fleet.agentList.reassignActionText"
-            defaultMessage="Assign to new policy"
-          />
-        </EuiContextMenuItem>,
-        <EuiContextMenuItem
-          disabled={!hasWriteCapabilites || !agent.active}
-          icon="trash"
-          onClick={() => {
-            onUnenrollClick();
-          }}
-        >
-          {isUnenrolling ? (
-            <FormattedMessage
-              id="xpack.fleet.agentList.forceUnenrollOneButton"
-              defaultMessage="Force unenroll"
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.fleet.agentList.unenrollOneButton"
-              defaultMessage="Unenroll agent"
-            />
-          )}
-        </EuiContextMenuItem>,
-        <EuiContextMenuItem
-          icon="refresh"
-          disabled={!isAgentUpgradeable(agent, kibanaVersion)}
-          onClick={() => {
-            onUpgradeClick();
-          }}
-        >
-          <FormattedMessage
-            id="xpack.fleet.agentList.upgradeOneButton"
-            defaultMessage="Upgrade agent"
-          />
-        </EuiContextMenuItem>,
-      ]}
+      items={menuItems}
     />
   );
 });
@@ -453,9 +460,14 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       actions: [
         {
           render: (agent: Agent) => {
+            const agentPolicy =
+              typeof agent.policy_id === 'string'
+                ? agentPoliciesIndexedById[agent.policy_id]
+                : undefined;
             return (
               <RowActions
                 agent={agent}
+                agentPolicy={agentPolicy}
                 refresh={() => fetchData()}
                 onReassignClick={() => setAgentToReassign(agent)}
                 onUnenrollClick={() => setAgentToUnenroll(agent)}
