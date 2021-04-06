@@ -35,6 +35,7 @@ import { SavedObjectsRawDoc } from '..';
 import { AliasAction, RetryableEsClientError } from './actions';
 import { createInitialState, model } from './model';
 import { ResponseType } from './next';
+import { SavedObjectsMigrationConfigType } from '../saved_objects_config';
 
 describe('migrations v2 model', () => {
   const baseState: BaseState = {
@@ -44,6 +45,7 @@ describe('migrations v2 model', () => {
     logs: [],
     retryCount: 0,
     retryDelay: 0,
+    retryAttempts: 15,
     indexPrefix: '.kibana',
     outdatedDocumentsQuery: {},
     targetIndexMappings: {
@@ -160,15 +162,15 @@ describe('migrations v2 model', () => {
       expect(newState.retryDelay).toEqual(0);
     });
 
-    test('terminates to FATAL after 10 retries', () => {
+    test('terminates to FATAL after retryAttempts retries', () => {
       const newState = model(
-        { ...state, ...{ retryCount: 10, retryDelay: 64000 } },
+        { ...state, ...{ retryCount: 15, retryDelay: 64000 } },
         Either.left(retryableError)
       ) as FatalState;
 
       expect(newState.controlState).toEqual('FATAL');
       expect(newState.reason).toMatchInlineSnapshot(
-        `"Unable to complete the INIT step after 10 attempts, terminating."`
+        `"Unable to complete the INIT step after 15 attempts, terminating."`
       );
     });
   });
@@ -610,6 +612,7 @@ describe('migrations v2 model', () => {
       test('LEGACY_SET_WRITE_BLOCK -> LEGACY_CREATE_REINDEX_TARGET if action fails with index_not_found_exception', () => {
         const res: ResponseType<'LEGACY_SET_WRITE_BLOCK'> = Either.left({
           type: 'index_not_found_exception',
+          index: 'legacy_index_name',
         });
         const newState = model(legacySetWriteBlockState, res);
         expect(newState.controlState).toEqual('LEGACY_CREATE_REINDEX_TARGET');
@@ -706,6 +709,16 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('LEGACY_DELETE');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
+      });
+      test('LEGACY_REINDEX_WAIT_FOR_TASK -> LEGACY_REINDEX_WAIT_FOR_TASK if action fails with wait_for_task_completion_timeout', () => {
+        const res: ResponseType<'LEGACY_REINDEX_WAIT_FOR_TASK'> = Either.left({
+          message: '[timeout_exception] Timeout waiting for ...',
+          type: 'wait_for_task_completion_timeout',
+        });
+        const newState = model(legacyReindexWaitForTaskState, res);
+        expect(newState.controlState).toEqual('LEGACY_REINDEX_WAIT_FOR_TASK');
+        expect(newState.retryCount).toEqual(1);
+        expect(newState.retryDelay).toEqual(2000);
       });
     });
     describe('LEGACY_DELETE', () => {
@@ -845,6 +858,16 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('SET_TEMP_WRITE_BLOCK');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
+      });
+      test('REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK -> REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK when response is left wait_for_task_completion_timeout', () => {
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK'> = Either.left({
+          message: '[timeout_exception] Timeout waiting for ...',
+          type: 'wait_for_task_completion_timeout',
+        });
+        const newState = model(state, res);
+        expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_WAIT_FOR_TASK');
+        expect(newState.retryCount).toEqual(1);
+        expect(newState.retryDelay).toEqual(2000);
       });
     });
     describe('SET_TEMP_WRITE_BLOCK', () => {
@@ -1025,6 +1048,19 @@ describe('migrations v2 model', () => {
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
+      test('UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK when response is left wait_for_task_completion_timeout', () => {
+        const res: ResponseType<'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK'> = Either.left({
+          message: '[timeout_exception] Timeout waiting for ...',
+          type: 'wait_for_task_completion_timeout',
+        });
+        const newState = model(
+          updateTargetMappingsWaitForTaskState,
+          res
+        ) as UpdateTargetMappingsWaitForTaskState;
+        expect(newState.controlState).toEqual('UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK');
+        expect(newState.retryCount).toEqual(1);
+        expect(newState.retryDelay).toEqual(2000);
+      });
     });
     describe('CREATE_NEW_TARGET', () => {
       const aliasActions = Option.some([Symbol('alias action')] as unknown) as Option.Some<
@@ -1144,6 +1180,9 @@ describe('migrations v2 model', () => {
     });
   });
   describe('createInitialState', () => {
+    const migrationsConfig = ({
+      retryAttempts: 15,
+    } as unknown) as SavedObjectsMigrationConfigType;
     it('creates the initial state for the model based on the passed in paramaters', () => {
       expect(
         createInitialState({
@@ -1154,6 +1193,7 @@ describe('migrations v2 model', () => {
           },
           migrationVersionPerType: {},
           indexPrefix: '.kibana_task_manager',
+          migrationsConfig,
         })
       ).toMatchInlineSnapshot(`
         Object {
@@ -1171,6 +1211,7 @@ describe('migrations v2 model', () => {
           "preMigrationScript": Object {
             "_tag": "None",
           },
+          "retryAttempts": 15,
           "retryCount": 0,
           "retryDelay": 0,
           "targetIndexMappings": Object {
@@ -1214,6 +1255,7 @@ describe('migrations v2 model', () => {
         preMigrationScript,
         migrationVersionPerType: {},
         indexPrefix: '.kibana_task_manager',
+        migrationsConfig,
       });
 
       expect(Option.isSome(initialState.preMigrationScript)).toEqual(true);
@@ -1233,6 +1275,7 @@ describe('migrations v2 model', () => {
             preMigrationScript: undefined,
             migrationVersionPerType: {},
             indexPrefix: '.kibana_task_manager',
+            migrationsConfig,
           }).preMigrationScript
         )
       ).toEqual(true);
@@ -1248,6 +1291,7 @@ describe('migrations v2 model', () => {
           preMigrationScript: "ctx._id = ctx._source.type + ':' + ctx._id",
           migrationVersionPerType: { my_dashboard: '7.10.1', my_viz: '8.0.0' },
           indexPrefix: '.kibana_task_manager',
+          migrationsConfig,
         }).outdatedDocumentsQuery
       ).toMatchInlineSnapshot(`
         Object {

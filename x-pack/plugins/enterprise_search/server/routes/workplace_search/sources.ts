@@ -22,9 +22,9 @@ const schemaValuesSchema = schema.recordOf(
 );
 
 const pageSchema = schema.object({
-  current: schema.number(),
-  size: schema.number(),
-  total_pages: schema.number(),
+  current: schema.nullable(schema.number()),
+  size: schema.nullable(schema.number()),
+  total_pages: schema.nullable(schema.number()),
   total_results: schema.number(),
 });
 
