@@ -109,6 +109,7 @@ const normalizeTrustedAppsPageLocation = (
       ...(!isDefaultOrMissing(location.view_type, 'grid') ? { view_type: location.view_type } : {}),
       ...(!isDefaultOrMissing(location.show, undefined) ? { show: location.show } : {}),
       ...(!isDefaultOrMissing(location.id, undefined) ? { id: location.id } : {}),
+      ...(!isDefaultOrMissing(location.filter, '') ? { filter: location.filter } : ''),
     };
   } else {
     return {};
@@ -141,9 +142,14 @@ const extractPageSize = (query: querystring.ParsedUrlQuery): number => {
   return MANAGEMENT_PAGE_SIZE_OPTIONS.includes(pageSize) ? pageSize : MANAGEMENT_DEFAULT_PAGE_SIZE;
 };
 
+const extractFilter = (query: querystring.ParsedUrlQuery): string => {
+  return extractFirstParamValue(query, 'filter') || '';
+};
+
 export const extractListPaginationParams = (query: querystring.ParsedUrlQuery) => ({
   page_index: extractPageIndex(query),
   page_size: extractPageSize(query),
+  filter: extractFilter(query),
 });
 
 export const extractTrustedAppsListPageLocation = (

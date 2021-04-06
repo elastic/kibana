@@ -5,24 +5,39 @@
  * 2.0.
  */
 
+import { setMockActions } from '../../../../__mocks__';
+import '../../../../__mocks__/shallow_useeffect.mock';
 import '../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
+import { ApiLogsTable } from '../../api_logs';
+
 import { RecentApiLogs } from './recent_api_logs';
 
 describe('RecentApiLogs', () => {
+  const actions = {
+    fetchApiLogs: jest.fn(),
+    pollForApiLogs: jest.fn(),
+  };
+
   let wrapper: ShallowWrapper;
 
   beforeAll(() => {
     jest.clearAllMocks();
+    setMockActions(actions);
     wrapper = shallow(<RecentApiLogs />);
   });
 
   it('renders the recent API logs table', () => {
     expect(wrapper.prop('title')).toEqual(<h2>Recent API events</h2>);
-    // TODO: expect(wrapper.find(ApiLogsTable)).toHaveLength(1)
+    expect(wrapper.find(ApiLogsTable)).toHaveLength(1);
+  });
+
+  it('calls fetchApiLogs on page load and starts pollForApiLogs', () => {
+    expect(actions.fetchApiLogs).toHaveBeenCalledTimes(1);
+    expect(actions.pollForApiLogs).toHaveBeenCalledTimes(1);
   });
 });

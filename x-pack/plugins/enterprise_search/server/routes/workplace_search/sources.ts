@@ -22,9 +22,9 @@ const schemaValuesSchema = schema.recordOf(
 );
 
 const pageSchema = schema.object({
-  current: schema.number(),
-  size: schema.number(),
-  total_pages: schema.number(),
+  current: schema.nullable(schema.number()),
+  size: schema.nullable(schema.number()),
+  total_pages: schema.nullable(schema.number()),
   total_results: schema.number(),
 });
 
@@ -401,6 +401,25 @@ export function registerAccountSourceReindexJobStatusRoute({
   );
 }
 
+export function registerAccountSourceDownloadDiagnosticsRoute({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.get(
+    {
+      path: '/api/workplace_search/account/sources/{sourceId}/download_diagnostics',
+      validate: {
+        params: schema.object({
+          sourceId: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/sources/:sourceId/download_diagnostics',
+    })
+  );
+}
+
 // Org routes
 export function registerOrgSourcesRoute({
   router,
@@ -750,6 +769,25 @@ export function registerOrgSourceReindexJobStatusRoute({
   );
 }
 
+export function registerOrgSourceDownloadDiagnosticsRoute({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.get(
+    {
+      path: '/api/workplace_search/org/sources/{sourceId}/download_diagnostics',
+      validate: {
+        params: schema.object({
+          sourceId: schema.string(),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/sources/:sourceId/download_diagnostics',
+    })
+  );
+}
+
 export function registerOrgSourceOauthConfigurationsRoute({
   router,
   enterpriseSearchRequestHandler,
@@ -900,6 +938,7 @@ export const registerSourcesRoutes = (dependencies: RouteDependencies) => {
   registerAccountSourceSchemasRoute(dependencies);
   registerAccountSourceReindexJobRoute(dependencies);
   registerAccountSourceReindexJobStatusRoute(dependencies);
+  registerAccountSourceDownloadDiagnosticsRoute(dependencies);
   registerOrgSourcesRoute(dependencies);
   registerOrgSourcesStatusRoute(dependencies);
   registerOrgSourceRoute(dependencies);
@@ -915,6 +954,7 @@ export const registerSourcesRoutes = (dependencies: RouteDependencies) => {
   registerOrgSourceSchemasRoute(dependencies);
   registerOrgSourceReindexJobRoute(dependencies);
   registerOrgSourceReindexJobStatusRoute(dependencies);
+  registerOrgSourceDownloadDiagnosticsRoute(dependencies);
   registerOrgSourceOauthConfigurationsRoute(dependencies);
   registerOrgSourceOauthConfigurationRoute(dependencies);
   registerOauthConnectorParamsRoute(dependencies);
