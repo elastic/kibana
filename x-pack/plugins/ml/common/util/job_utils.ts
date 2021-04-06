@@ -191,8 +191,7 @@ export function isModelPlotChartableForDetector(job: Job, detectorIndex: number)
 // Returns a reason to indicate why the job configuration is not supported
 // if the result is undefined, that means the single metric job should be viewable
 export function getSingleMetricViewerJobErrorMessage(job: CombinedJob): string | undefined {
-  // if job has runtime mappings with no model plot
-
+  // if job has at least one composite source that is not terms or date_histogram
   const aggs = getDatafeedAggregations(job.datafeed_config);
   if (aggs !== undefined) {
     const aggBucketsName = getFirstKey(aggs);
@@ -200,9 +199,12 @@ export function getSingleMetricViewerJobErrorMessage(job: CombinedJob): string |
       // if fieldName is a aggregated field under nested terms using bucket_script
 
       if (!hasValidComposite(aggs[aggBucketsName])) {
-        return i18n.translate('xpack.ml.timeSeriesJob.jobWithRunTimeMessage', {
-          defaultMessage: 'the datafeed contains unsupported composite sources',
-        });
+        return i18n.translate(
+          'xpack.ml.timeSeriesJob.jobWithUnsupportedCompositeAggregationMessage',
+          {
+            defaultMessage: 'the datafeed contains unsupported composite sources',
+          }
+        );
       }
     }
   }
