@@ -21,6 +21,7 @@ import type { CoreStart } from 'src/core/public';
 import {
   Form,
   useForm,
+  useFormData,
   FormHook,
   UseField,
   TextField,
@@ -184,6 +185,9 @@ const FieldEditorComponent = ({
     serializer: formSerializer,
   });
   const { submit, isValid: isFormValid, isSubmitted } = form;
+  const { clear: clearSyntaxError } = syntaxError;
+
+  const [{ type }] = useFormData<FieldFormInternal>({ form });
 
   const nameFieldConfig = getNameFieldConfig(namesNotAllowed, field);
   const i18nTexts = geti18nTexts();
@@ -193,6 +197,12 @@ const FieldEditorComponent = ({
       onChange({ isValid: isFormValid, isSubmitted, submit });
     }
   }, [onChange, isFormValid, isSubmitted, submit]);
+
+  useEffect(() => {
+    // Whenever the field "type" changes we clear any possible painless syntax
+    // error as they might not be relevant anymore.
+    clearSyntaxError();
+  }, [type, clearSyntaxError]);
 
   return (
     <Form form={form} className="indexPatternFieldEditor__form">
