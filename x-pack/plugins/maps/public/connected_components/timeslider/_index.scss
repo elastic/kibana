@@ -49,3 +49,21 @@
     }
   }
 }
+
+.mapTimeslider__row {
+  display: flex;
+
+  & + & {
+    margin-top: $euiSizeS;
+  }
+
+  > * {
+    align-items: center;
+  }
+}
+
+.mapTimeslider__close {
+  position: absolute;
+  top: $euiSizeXS;
+  right: $euiSizeXS;
+}

@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import React, { ChangeEvent, Component } from 'react';
-import { EuiDualRange, EuiRangeTick } from '@elastic/eui';
+import { EuiButtonIcon, EuiDualRange, EuiRangeTick } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getTicks } from './get_ticks';
 import { calcAutoIntervalNear, TimeRange } from '../../../../../../src/plugins/data/common';
@@ -18,6 +18,7 @@ const NUM_TICKS = 6;
 const MAX_TICKS = 8;
 
 export interface Props {
+  closeTimeslider: () => void;
   setTimeslice: (timeslice: Timeslice) => void;
   isTimesliderOpen: boolean;
   timeRange: TimeRange;
@@ -88,6 +89,16 @@ class KeyedTimeslider extends Component<Props, State> {
   render() {
     return (
       <div className="mapTimeslider">
+        <div className="kbnMapsTimeslider__row">
+          <EuiButtonIcon
+            onClick={this.props.closeTimeslider}
+            iconType="cross"
+            color="subdued"
+            className="mapTimeslider__close"
+            aria-label="Close timeslider"
+          />
+        </div>
+
         <div className="mapTimeslider__row">
           <EuiDualRange
             fullWidth={true}

@@ -9,7 +9,7 @@ import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { Timeslider } from './timeslider';
-import { setQuery } from '../../actions';
+import { closeTimeslider, setQuery } from '../../actions';
 import { getTimeFilters } from '../../selectors/map_selectors';
 import { getIsTimesliderOpen } from '../../selectors/ui_selectors';
 import { MapStoreState } from '../../reducers/store';
@@ -24,6 +24,9 @@ function mapStateToProps(state: MapStoreState) {
 
 function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) {
   return {
+    closeTimeslider: () => {
+      dispatch(closeTimeslider());
+    },
     setTimeslice: (timeslice: Timeslice) => {
       dispatch(
         setQuery({
