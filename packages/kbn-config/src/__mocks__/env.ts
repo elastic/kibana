@@ -30,6 +30,5 @@ export function getEnvOptions(options: DeepPartial<EnvOptions> = {}): EnvOptions
       runExamples: false,
       ...(options.cliArgs || {}),
     },
-    isDevCliParent: options.isDevCliParent !== undefined ? options.isDevCliParent : false,
   };
 }

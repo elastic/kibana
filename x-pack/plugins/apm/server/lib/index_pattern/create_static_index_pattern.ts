@@ -20,7 +20,8 @@ import { getApmIndexPatternTitle } from './get_apm_index_pattern_title';
 export async function createStaticIndexPattern(
   setup: Setup,
   context: APMRequestHandlerContext,
-  savedObjectsClient: InternalSavedObjectsClient
+  savedObjectsClient: InternalSavedObjectsClient,
+  spaceId: string | undefined
 ): Promise<boolean> {
   return withApmSpan('create_static_index_pattern', async () => {
     const { config } = context;
@@ -46,7 +47,11 @@ export async function createStaticIndexPattern(
             ...apmIndexPattern.attributes,
             title: apmIndexPatternTitle,
           },
-          { id: APM_STATIC_INDEX_PATTERN_ID, overwrite: false }
+          {
+            id: APM_STATIC_INDEX_PATTERN_ID,
+            overwrite: false,
+            namespace: spaceId,
+          }
         )
       );
       return true;

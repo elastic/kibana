@@ -17,14 +17,20 @@ describe('[Snapshot and Restore API Routes] Restore', () => {
     index: { size: {}, files: {} },
   };
 
-  const router = new RouterMock('snapshotRestore.client');
+  const router = new RouterMock();
 
   beforeAll(() => {
     registerRestoreRoutes({
-      router: router as any,
       ...routeDependencies,
+      router,
     });
   });
+
+  /**
+   * ES APIs used by these endpoints
+   */
+  const indicesRecoveryFn = router.getMockApiFn('indices.recovery');
+  const restoreSnapshotFn = router.getMockApiFn('snapshot.restore');
 
   describe('Restore snapshot', () => {
     const mockRequest: RequestMock = {
@@ -39,7 +45,7 @@ describe('[Snapshot and Restore API Routes] Restore', () => {
 
     it('should return successful response from ES', async () => {
       const mockEsResponse = { acknowledged: true };
-      router.callAsCurrentUserResponses = [mockEsResponse];
+      restoreSnapshotFn.mockResolvedValue({ body: mockEsResponse });
 
       await expect(router.runRequest(mockRequest)).resolves.toEqual({
         body: mockEsResponse,
@@ -47,7 +53,7 @@ describe('[Snapshot and Restore API Routes] Restore', () => {
     });
 
     it('should throw if ES error', async () => {
-      router.callAsCurrentUserResponses = [jest.fn().mockRejectedValueOnce(new Error())];
+      restoreSnapshotFn.mockRejectedValue(new Error());
       await expect(router.runRequest(mockRequest)).rejects.toThrowError();
     });
   });
@@ -76,7 +82,7 @@ describe('[Snapshot and Restore API Routes] Restore', () => {
         },
       };
 
-      router.callAsCurrentUserResponses = [mockEsResponse];
+      indicesRecoveryFn.mockResolvedValue({ body: mockEsResponse });
 
       const expectedResponse = [
         {
@@ -100,7 +106,7 @@ describe('[Snapshot and Restore API Routes] Restore', () => {
 
     it('should return empty array if no repositories returned from ES', async () => {
       const mockEsResponse = {};
-      router.callAsCurrentUserResponses = [mockEsResponse];
+      indicesRecoveryFn.mockResolvedValue({ body: mockEsResponse });
       const expectedResponse: any[] = [];
 
       await expect(router.runRequest(mockRequest)).resolves.toEqual({
@@ -109,7 +115,7 @@ describe('[Snapshot and Restore API Routes] Restore', () => {
     });
 
     it('should throw if ES error', async () => {
-      router.callAsCurrentUserResponses = [jest.fn().mockRejectedValueOnce(new Error())];
+      indicesRecoveryFn.mockRejectedValue(new Error());
       await expect(router.runRequest(mockRequest)).rejects.toThrowError();
     });
   });

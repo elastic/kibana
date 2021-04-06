@@ -17,6 +17,8 @@ import { EuiCallOut } from '@elastic/eui';
 
 import { ViewContentHeader } from '../../components/shared/view_content_header';
 
+import { SourceSubNav } from './components/source_sub_nav';
+
 import {
   PRIVATE_CAN_CREATE_PAGE_TITLE,
   PRIVATE_VIEW_ONLY_PAGE_TITLE,
@@ -40,6 +42,7 @@ describe('PrivateSourcesLayout', () => {
     const wrapper = shallow(<PrivateSourcesLayout>{children}</PrivateSourcesLayout>);
 
     expect(wrapper.find('[data-test-subj="TestChildren"]')).toHaveLength(1);
+    expect(wrapper.find(SourceSubNav)).toHaveLength(1);
   });
 
   it('uses correct title and description when private sources are enabled', () => {
