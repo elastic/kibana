@@ -6,8 +6,7 @@
  */
 
 import { remove, uniq } from 'lodash';
-import { nodeBuilder } from '../../../../../src/plugins/data/common';
-import { KueryNode } from '../../../../../src/plugins/data/server';
+import { nodeBuilder, KueryNode } from '../../../../../src/plugins/data/common';
 
 export const getOwnersFilter = (savedObjectType: string, owners: string[]): KueryNode => {
   return nodeBuilder.or(

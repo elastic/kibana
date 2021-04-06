@@ -9,8 +9,7 @@ import { get, isPlainObject } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 
 import { SavedObjectsFindResponse } from 'kibana/server';
-import { nodeBuilder } from '../../../../../../../src/plugins/data/common';
-import { KueryNode } from '../../../../../../../src/plugins/data/server';
+import { nodeBuilder, KueryNode } from '../../../../../../../src/plugins/data/common';
 import {
   CaseConnector,
   ESCaseConnector,

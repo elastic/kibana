@@ -15,8 +15,7 @@ import {
   SavedObjectsFindResult,
 } from 'kibana/server';
 
-import { nodeBuilder } from '../../../../../../src/plugins/data/common';
-import { KueryNode } from '../../../../../../src/plugins/data/server';
+import { nodeBuilder, KueryNode } from '../../../../../../src/plugins/data/common';
 
 import { SecurityPluginSetup } from '../../../../security/server';
 import {
