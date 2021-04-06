@@ -101,7 +101,7 @@ export interface ElasticsearchNodeStats {
 export interface ElasticsearchIndexStats {
   index?: string;
   shards: {
-    total: number;
+    primaries: number;
   };
   primaries?: {
     docs?: {

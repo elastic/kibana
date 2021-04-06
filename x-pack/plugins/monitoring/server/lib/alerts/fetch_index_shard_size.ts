@@ -89,8 +89,8 @@ export async function fetchIndexShardSize(
                         _source: {
                           includes: [
                             '_index',
-                            'index_stats.shards.total',
-                            'index_stats.total.store.size_in_bytes',
+                            'index_stats.shards.primaries',
+                            'index_stats.primaries.store.size_in_bytes',
                             'source_node.name',
                             'source_node.uuid',
                           ],
@@ -137,13 +137,17 @@ export async function fetchIndexShardSize(
         _source: { source_node: sourceNode, index_stats: indexStats },
       } = topHit;
 
-      const { total: totalShards } = indexStats?.shards;
-      const { size_in_bytes: shardSizeBytes = 0 } = indexStats?.total?.store!;
-      if (!shardSizeBytes) {
+      if (!indexStats || !indexStats.primaries) {
+        continue;
+      }
+
+      const { primaries: totalPrimaryShards } = indexStats.shards;
+      const { size_in_bytes: primaryShardSizeBytes = 0 } = indexStats.primaries.store!;
+      if (!primaryShardSizeBytes) {
         continue;
       }
       const { name: nodeName, uuid: nodeId } = sourceNode;
-      const avgShardSize = shardSizeBytes ? shardSizeBytes / totalShards : 0;
+      const avgShardSize = primaryShardSizeBytes ? primaryShardSizeBytes / totalPrimaryShards : 0;
       const shardSize = +(avgShardSize / gbMultiplier).toFixed(2);
       if (shardSize < thresholdGB) {
         continue;
