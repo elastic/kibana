@@ -120,10 +120,10 @@ const createHighlightQuery = (
 export const logEntryHitRT = rt.intersection([
   commonHitFieldsRT,
   rt.type({
-    fields: rt.record(rt.string, jsonArrayRT),
     sort: rt.tuple([rt.number, rt.number]),
   }),
   rt.partial({
+    fields: rt.record(rt.string, jsonArrayRT),
     highlight: rt.record(rt.string, rt.array(rt.string)),
   }),
 ]);

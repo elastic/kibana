@@ -257,6 +257,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
         >
           <EuiFieldText
             name="username"
+            data-test-subj={'userFormUserNameInput'}
             icon="user"
             value={form.values.username}
             isLoading={form.isValidating}
@@ -278,6 +279,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
             >
               <EuiFieldText
                 name="full_name"
+                data-test-subj={'userFormFullNameInput'}
                 value={form.values.full_name}
                 isInvalid={form.touched.full_name && !!form.errors.full_name}
                 onChange={eventHandlers.onChange}
@@ -293,6 +295,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
             >
               <EuiFieldText
                 name="email"
+                data-test-subj={'userFormEmailInput'}
                 value={form.values.email}
                 isInvalid={form.touched.email && !!form.errors.email}
                 onChange={eventHandlers.onChange}
@@ -332,6 +335,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
           >
             <EuiFieldPassword
               name="password"
+              data-test-subj={'passwordInput'}
               type="dual"
               value={form.values.password}
               isInvalid={form.touched.password && !!form.errors.password}
@@ -349,6 +353,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
           >
             <EuiFieldPassword
               name="confirm_password"
+              data-test-subj={'passwordConfirmationInput'}
               type="dual"
               value={form.values.confirm_password}
               isInvalid={form.touched.confirm_password && !!form.errors.confirm_password}

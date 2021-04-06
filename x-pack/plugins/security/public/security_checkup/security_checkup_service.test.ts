@@ -73,7 +73,7 @@ describe('SecurityCheckupService', () => {
         ?.getAttribute('href');
 
       expect(docLink).toMatchInlineSnapshot(
-        `"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/get-started-enable-security.html?blade=kibanasecuritymessage"`
+        `"https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/configuring-stack-security.html?blade=kibanasecuritymessage"`
       );
     });
   });

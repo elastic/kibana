@@ -6,16 +6,16 @@
  */
 
 import { getFilterClause } from '../helper';
-import { HistogramResult, HistogramQueryResult } from '../../../common/runtime_types';
+import { HistogramResult } from '../../../common/runtime_types';
 import { QUERY } from '../../../common/constants';
 import { getHistogramInterval } from '../helper/get_histogram_interval';
 import { UMElasticsearchQueryFn } from '../adapters/framework';
 
 export interface GetPingHistogramParams {
   /** @member dateRangeStart timestamp bounds */
-  from: string;
+  dateStart: string;
   /** @member dateRangeEnd timestamp bounds */
-  to: string;
+  dateEnd: string;
   /** @member filters user-defined filters */
   filters?: string;
   /** @member monitorId optional limit to monitorId */
@@ -27,7 +27,7 @@ export interface GetPingHistogramParams {
 export const getPingHistogram: UMElasticsearchQueryFn<
   GetPingHistogramParams,
   HistogramResult
-> = async ({ uptimeEsClient, from, to, filters, monitorId, bucketSize }) => {
+> = async ({ uptimeEsClient, dateStart, dateEnd, filters, monitorId, bucketSize }) => {
   const boolFilters = filters ? JSON.parse(filters) : null;
   const additionalFilters = [];
   if (monitorId) {
@@ -36,14 +36,21 @@ export const getPingHistogram: UMElasticsearchQueryFn<
   if (boolFilters) {
     additionalFilters.push(boolFilters);
   }
-  const filter = getFilterClause(from, to, additionalFilters);
+  const filter = getFilterClause(dateStart, dateEnd, additionalFilters);
 
-  const minInterval = getHistogramInterval(from, to, QUERY.DEFAULT_BUCKET_COUNT);
+  const minInterval = getHistogramInterval(dateStart, dateEnd, QUERY.DEFAULT_BUCKET_COUNT);
 
   const params = {
     query: {
       bool: {
-        filter,
+        filter: [
+          ...filter,
+          {
+            exists: {
+              field: 'summary',
+            },
+          },
+        ],
       },
     },
     size: 0,
@@ -56,17 +63,13 @@ export const getPingHistogram: UMElasticsearchQueryFn<
         },
         aggs: {
           down: {
-            filter: {
-              term: {
-                'monitor.status': 'down',
-              },
+            sum: {
+              field: 'summary.down',
             },
           },
           up: {
-            filter: {
-              term: {
-                'monitor.status': 'up',
-              },
+            sum: {
+              field: 'summary.up',
             },
           },
         },
@@ -75,11 +78,11 @@ export const getPingHistogram: UMElasticsearchQueryFn<
   };
 
   const { body: result } = await uptimeEsClient.search({ body: params });
-  const buckets: HistogramQueryResult[] = result?.aggregations?.timeseries?.buckets ?? [];
+  const buckets = result?.aggregations?.timeseries?.buckets ?? [];
   const histogram = buckets.map((bucket) => {
     const x: number = bucket.key;
-    const downCount: number = bucket.down.doc_count;
-    const upCount: number = bucket.up.doc_count;
+    const downCount = bucket.down.value || 0;
+    const upCount = bucket.up.value || 0;
     return {
       x,
       downCount,

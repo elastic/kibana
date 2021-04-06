@@ -203,13 +203,13 @@ const getLogEntryFromHit = (
         } else if ('messageColumn' in column) {
           return {
             columnId: column.messageColumn.id,
-            message: messageFormattingRules.format(hit.fields, hit.highlight || {}),
+            message: messageFormattingRules.format(hit.fields ?? {}, hit.highlight || {}),
           };
         } else {
           return {
             columnId: column.fieldColumn.id,
             field: column.fieldColumn.field,
-            value: hit.fields[column.fieldColumn.field] ?? [],
+            value: hit.fields?.[column.fieldColumn.field] ?? [],
             highlights: hit.highlight?.[column.fieldColumn.field] ?? [],
           };
         }
@@ -233,9 +233,9 @@ const pickRequestCursor = (
 
 const getContextFromHit = (hit: LogEntryHit): LogEntryContext => {
   // Get all context fields, then test for the presence and type of the ones that go together
-  const containerId = hit.fields['container.id']?.[0];
-  const hostName = hit.fields['host.name']?.[0];
-  const logFilePath = hit.fields['log.file.path']?.[0];
+  const containerId = hit.fields?.['container.id']?.[0];
+  const hostName = hit.fields?.['host.name']?.[0];
+  const logFilePath = hit.fields?.['log.file.path']?.[0];
 
   if (typeof containerId === 'string') {
     return { 'container.id': containerId };
