@@ -211,7 +211,7 @@ describe('<FieldEditor />', () => {
       expect(form.getErrorsMessages()).toEqual([]);
     });
 
-    test('should clear the syntax error whenever the field type changes', async () => {
+    test('should clear the painless syntax error whenever the field type changes', async () => {
       const field: Field = {
         name: 'myRuntimeField',
         type: 'keyword',
@@ -232,6 +232,8 @@ describe('<FieldEditor />', () => {
         return (
           <>
             <FieldEditor {...defaultProps} field={field} syntaxError={syntaxError} />
+
+            {/* Button to forward dummy syntax error */}
             <button onClick={() => setError(dummyError)} data-test-subj="setPainlessErrorButton">
               Set painless error
             </button>

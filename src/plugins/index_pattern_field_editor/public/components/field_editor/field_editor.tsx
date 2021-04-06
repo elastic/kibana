@@ -200,7 +200,7 @@ const FieldEditorComponent = ({
 
   useEffect(() => {
     // Whenever the field "type" changes we clear any possible painless syntax
-    // error as they might not be relevant anymore.
+    // error as it is possibly stale.
     clearSyntaxError();
   }, [type, clearSyntaxError]);
 
