@@ -6,8 +6,7 @@
  */
 
 import { transformRequestToMetricsAPIRequest } from './transform_request_to_metrics_api_request';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { ESSearchClient } from '../../../lib/metrics/types';
 import { InfraSource } from '../../../lib/sources';
 import { SnapshotRequest } from '../../../../common/http_api';
 
@@ -25,7 +24,7 @@ describe('transformRequestToMetricsAPIRequest', () => {
   test('returns a MetricsApiRequest given parameters', async () => {
     const compositeSize = 3000;
     const result = await transformRequestToMetricsAPIRequest({
-      client: elasticsearchClientMock,
+      client: {} as ESSearchClient,
       source,
       snapshotRequest,
       compositeSize,
@@ -101,10 +100,10 @@ const metricsApiRequest = {
       id: '__metadata__',
       aggregations: {
         __metadata__: {
-          top_hits: {
+          top_metrics: {
+            metrics: [{ field: 'kubernetes.pod.name' }, { field: 'kubernetes.pod.ip' }],
             size: 1,
-            _source: ['kubernetes.pod.name', 'kubernetes.pod.ip'],
-            sort: [{ '@timestamp': 'desc' }],
+            sort: { '@timestamp': 'desc' },
           },
         },
       },
