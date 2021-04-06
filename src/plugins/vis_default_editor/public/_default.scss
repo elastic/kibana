@@ -91,7 +91,9 @@
   }
 
   .visEditor__visualization__wrapper {
-    // force the visualization to take 100% width.
+    // force the visualization to take 100% width and height.
     width: 100% !important;
+    height: 100% !important;
+    flex: 1 1 100%;
   }
 }
