@@ -142,6 +142,12 @@ describe('buildBulkBody', () => {
           threshold: {
             field: ['host.id'],
             value: 5,
+            cardinality: [
+              {
+                field: 'source.ip',
+                value: 11,
+              },
+            ],
           },
         },
         threshold_result: {

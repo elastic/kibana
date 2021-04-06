@@ -61,6 +61,12 @@ export const getThresholdRuleParams = (): ThresholdRuleParams => {
     threshold: {
       field: ['host.id'],
       value: 5,
+      cardinality: [
+        {
+          field: 'source.ip',
+          value: 11,
+        },
+      ],
     },
   };
 };
