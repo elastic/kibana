@@ -52,19 +52,19 @@ export default function ({ getService }: FtrProviderContext) {
           ],
           scatterplotMatrixColorsWizard: [
             // markers
-            { key: '#52B398', value: 25 },
+            { color: '#52B398', percentage: 15 },
             // grey boilerplate
-            { key: '#6A717D', value: 30 },
+            { color: '#6A717D', percentage: 33 },
           ],
           scatterplotMatrixColorStatsResults: [
             // red markers
-            { key: '#D98071', value: 1 },
+            { color: '#D98071', percentage: 1 },
             // tick/grid/axis, grey markers
-            { key: '#6A717D', value: 30 },
-            { key: '#D3DAE6', value: 8 },
-            { key: '#98A1B3', value: 25 },
+            { color: '#6A717D', percentage: 33 },
+            { color: '#D3DAE6', percentage: 8 },
+            { color: '#98A1B3', percentage: 12 },
             // anti-aliasing
-            { key: '#F5F7FA', value: 27 },
+            { color: '#F5F7FA', percentage: 30 },
           ],
           row: {
             type: 'outlier_detection',
@@ -125,6 +125,16 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('displays the include fields selection');
           await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
+
+          await ml.testExecution.logTestStep(
+            'sets the sample size to 10000 for the scatterplot matrix'
+          );
+          await ml.dataFrameAnalyticsCreation.setScatterplotMatrixSampleSizeSelectValue('10000');
+
+          await ml.testExecution.logTestStep(
+            'sets the randomize query switch to true for the scatterplot matrix'
+          );
+          await ml.dataFrameAnalyticsCreation.setScatterplotMatrixRandomizeQueryCheckState(true);
 
           await ml.testExecution.logTestStep('displays the scatterplot matrix');
           await ml.dataFrameAnalyticsCreation.assertScatterplotMatrix(
@@ -255,9 +265,23 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
           await ml.dataFrameAnalyticsResults.assertFeatureInfluenceCellNotEmpty();
+
+          await ml.testExecution.logTestStep(
+            'sets the sample size to 10000 for the scatterplot matrix'
+          );
+          await ml.dataFrameAnalyticsResults.setScatterplotMatrixSampleSizeSelectValue('10000');
+
+          await ml.testExecution.logTestStep(
+            'sets the randomize query switch to true for the scatterplot matrix'
+          );
+          await ml.dataFrameAnalyticsResults.setScatterplotMatrixRandomizeQueryCheckState(true);
+
+          await ml.testExecution.logTestStep('displays the scatterplot matrix');
           await ml.dataFrameAnalyticsResults.assertScatterplotMatrix(
             testData.expected.scatterplotMatrixColorStatsResults
           );
+
+          await ml.commonUI.resetAntiAliasing();
         });
 
         it('displays the analytics job in the map view', async () => {
