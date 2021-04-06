@@ -23,7 +23,7 @@ import { systemRowRenderers } from './system/generic_row_renderer';
 // Suricata and Zeek which is why Suricata and Zeek are above it. The
 // plainRowRenderer always returns true to everything which is why it always
 // should be last.
-export const rowRenderers: RowRenderer[] = [
+export const defaultRowRenderers: RowRenderer[] = [
   ...auditdRowRenderers,
   ...systemRowRenderers,
   suricataRowRenderer,
