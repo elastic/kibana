@@ -15,4 +15,7 @@ module.exports = {
   webpackFinal: (config) => {
     return webpackConfig({ config });
   },
+  // config: (entry = []) => {
+  //   return [...entry, ]
+  // }
 };

@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { addons } from '@storybook/addons';
+import { addons, types } from '@storybook/addons';
 import { create } from '@storybook/theming';
+import { ThemeSwitcher } from './theme_switcher';
 
 // This configures the "Manager", or main outer view of Storybook. It is an
 // addon that's loaded by the `managerEntries` part of the preset in ../preset.js.
@@ -21,4 +22,14 @@ addons.setConfig({
   isFullscreen: false,
   panelPosition: 'bottom',
   isToolshown: true,
+});
+
+addons.register('kibana/eui-theme-switcher', () => {
+  console.log('add?');
+  addons.add('kibana/eui-theme-switcher', {
+    title: 'EUI Theme Switcher',
+    type: types.TOOL,
+    match: ({ viewMode }) => !!(viewMode && viewMode.match(/^(story|docs)$/)),
+    render: ThemeSwitcher,
+  });
 });
