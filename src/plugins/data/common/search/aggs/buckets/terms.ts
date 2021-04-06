@@ -8,7 +8,6 @@
 
 import { noop } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { RequestAdapter } from 'src/plugins/inspector/common';
 
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
