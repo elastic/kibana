@@ -7,7 +7,19 @@
 
 .mapToolbarOverlay__button,
 .mapToolbarOverlay__buttonGroup {
+  position: relative;
   transition: transform $euiAnimSpeedNormal ease-in-out, background $euiAnimSpeedNormal ease-in-out;
+
+  @include kbnThemeStyle($theme: 'v7') {
+    // Overrides the .euiPanel default border
+    // sass-lint:disable-block no-important
+    border: none !important;
+
+    // Overrides the .euiPanel--hasShadow
+    &.euiPanel.euiPanel--hasShadow {
+      @include euiBottomShadowLarge;
+    }
+  }
 
   &:hover {
     transform: translateY(-1px);
@@ -23,4 +35,28 @@
 .mapToolbarOverlay__buttonGroup {
   display: flex;
   flex-direction: column;
+
+  .euiButtonIcon {
+    border-radius: 0;
+
+    @include kbnThemeStyle($theme: 'v7') {
+      &:first-child {
+        border-radius: $euiBorderRadius $euiBorderRadius 0 0;
+      }
+
+      &:last-child {
+        border-radius: 0 0 $euiBorderRadius $euiBorderRadius;
+      }
+    }
+
+    @include kbnThemeStyle($theme: 'v8') {
+      &:first-child {
+        border-radius: ($euiBorderRadius * (2 / 3)) ($euiBorderRadius * (2 / 3)) 0 0;
+      }
+
+      &:last-child {
+        border-radius: 0 0 ($euiBorderRadius * (2 / 3)) ($euiBorderRadius * (2 / 3));
+      }
+    }
+  }
 }

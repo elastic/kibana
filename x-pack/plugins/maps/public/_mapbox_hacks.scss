@@ -10,8 +10,16 @@
 
   .mapboxgl-ctrl-group:not(:empty) {
     @include euiBottomShadowLarge;
+
+    @include kbnThemeStyle($theme: 'v7') {
+      border-radius: $euiBorderRadius;
+    }
+
+    @include kbnThemeStyle($theme: 'v8') {
+      border-radius: $euiBorderRadius * (2 / 3);
+    }
+
     background-color: $euiColorEmptyShade;
-    border-radius: $euiBorderRadius;
     transition: transform $euiAnimSpeedNormal ease-in-out, background $euiAnimSpeedNormal ease-in-out;
 
     &:hover {
@@ -21,9 +29,36 @@
     > button {
       @include size($euiSizeXL);
 
+      @include kbnThemeStyle($theme: 'v7') {
+        &:first-child {
+          border-radius: $euiBorderRadius $euiBorderRadius 0 0;
+        }
+
+        &:last-child {
+          border-radius: 0 0 $euiBorderRadius $euiBorderRadius;
+        }
+      }
+
+      @include kbnThemeStyle($theme: 'v8') {
+        &:first-child {
+          border-radius: ($euiBorderRadius * (2 / 3)) ($euiBorderRadius * (2 / 3)) 0 0;
+        }
+
+        &:last-child {
+          border-radius: 0 0 ($euiBorderRadius * (2 / 3)) ($euiBorderRadius * (2 / 3));
+        }
+      }
+
       + button {
         border: none;
       }
+    }
+  }
+
+  .mapboxgl-ctrl button:not(:disabled) {
+    &:hover,
+    &:focus {
+      background-color: transparentize($euiColorDarkShade, .9);
     }
   }
 }
