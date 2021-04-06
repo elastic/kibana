@@ -121,7 +121,7 @@ export interface SavedObjectsFindOptions {
    * @alpha
    * @example
    * aggs = { latest_version: { max: { field: 'dashboard.attributes.version' } } };
-   * SavedObjects.find({type: 'dashboard', aggs: '%7B%22latest_version%22%3A%7B%22max%22%3A%7B%22field%22%3A%22dashboard.attributes.version%22%7D%7D%7D'})
+   * SavedObjects.find({ type: 'dashboard', aggs })
    */
   aggs?: Record<string, unknown>;
   namespaces?: string[];
