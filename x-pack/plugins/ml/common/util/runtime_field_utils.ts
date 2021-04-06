@@ -9,19 +9,18 @@ import { isPopulatedObject } from './object_utils';
 import { RUNTIME_FIELD_TYPES } from '../../../../../src/plugins/data/common';
 import type { RuntimeField, RuntimeMappings } from '../types/fields';
 
+type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
+
 export function isRuntimeField(arg: unknown): arg is RuntimeField {
   return (
-    isPopulatedObject(arg) &&
-    ((Object.keys(arg).length === 1 && arg.hasOwnProperty('type')) ||
-      (Object.keys(arg).length === 2 &&
-        arg.hasOwnProperty('type') &&
-        arg.hasOwnProperty('script') &&
+    ((isPopulatedObject(arg, ['type']) && Object.keys(arg).length === 1) ||
+      (isPopulatedObject(arg, ['type', 'script']) &&
+        Object.keys(arg).length === 2 &&
         (typeof arg.script === 'string' ||
-          (isPopulatedObject(arg.script) &&
+          (isPopulatedObject(arg.script, ['source']) &&
             Object.keys(arg.script).length === 1 &&
-            arg.script.hasOwnProperty('source') &&
             typeof arg.script.source === 'string')))) &&
-    RUNTIME_FIELD_TYPES.includes(arg.type)
+    RUNTIME_FIELD_TYPES.includes(arg.type as RuntimeType)
   );
 }
 
