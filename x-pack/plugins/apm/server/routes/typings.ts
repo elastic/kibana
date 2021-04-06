@@ -28,6 +28,10 @@ interface InspectQueryParam {
   query: { _inspect: boolean };
 }
 
+interface IncludeFrozenQueryParam {
+  query: { includeFrozen?: boolean };
+}
+
 export type InspectResponse = Array<{
   response: any;
   duration: number;
@@ -90,7 +94,7 @@ export interface ApmPluginRequestHandlerContext extends RequestHandlerContext {
 export type APMRequestHandlerContext<
   TRouteParams = {}
 > = ApmPluginRequestHandlerContext & {
-  params: TRouteParams & InspectQueryParam;
+  params: TRouteParams & InspectQueryParam & IncludeFrozenQueryParam;
   config: APMConfig;
   logger: Logger;
   plugins: {

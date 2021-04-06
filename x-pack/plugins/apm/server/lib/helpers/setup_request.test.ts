@@ -52,6 +52,7 @@ function getMockRequest() {
     params: {
       query: {
         _inspect: false,
+        includeFrozen: false,
       },
     },
     core: {
@@ -266,7 +267,7 @@ describe('with includeFrozen=true', () => {
     const { mockContext, mockRequest } = getMockRequest();
 
     // mock includeFrozen to return true
-    mockContext.core.uiSettings.client.get.mockResolvedValue(true);
+    mockContext.params.query.includeFrozen = true;
 
     const { apmEventClient } = await setupRequest(mockContext, mockRequest);
 

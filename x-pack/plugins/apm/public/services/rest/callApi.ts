@@ -18,10 +18,9 @@ function fetchOptionsWithDebug(
   inspectableEsQueriesEnabled: boolean,
   includeFrozen?: boolean
 ) {
-  const debugEnabled =
-    inspectableEsQueriesEnabled &&
-    startsWith(fetchOptions.pathname, '/api/apm');
+  const isApmEndPoint = startsWith(fetchOptions.pathname, '/api/apm');
 
+  const debugEnabled = inspectableEsQueriesEnabled && isApmEndPoint;
   const { body, ...rest } = fetchOptions;
 
   return {
@@ -30,7 +29,7 @@ function fetchOptionsWithDebug(
     query: {
       ...fetchOptions.query,
       ...(debugEnabled ? { _inspect: true } : {}),
-      ...(includeFrozen ? { includeFrozen: true } : {}),
+      ...(includeFrozen && isApmEndPoint ? { includeFrozen: true } : {}),
     },
   };
 }
