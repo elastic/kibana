@@ -22,7 +22,11 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-import { hasEqlSequenceQuery, isEqlRule } from '../../../../../common/detection_engine/utils';
+import {
+  hasEqlSequenceQuery,
+  isEqlRule,
+  isThresholdRule,
+} from '../../../../../common/detection_engine/utils';
 import { useFetchIndex } from '../../../containers/source';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
@@ -30,12 +34,12 @@ import {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
   ExceptionListType,
-} from '../../../../../public/lists_plugin_deps';
+  ExceptionBuilder,
+} from '../../../../../public/shared_imports';
 import * as i18n from './translations';
 import * as sharedI18n from '../translations';
 import { useKibana } from '../../../lib/kibana';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
-import { ExceptionBuilderComponent } from '../builder';
 import { useAddOrUpdateException } from '../use_add_exception';
 import { AddExceptionComments } from '../add_exception_comments';
 import {
@@ -44,6 +48,7 @@ import {
   entryHasListType,
   entryHasNonEcsType,
   lowercaseHashValues,
+  filterIndexPatterns,
 } from '../helpers';
 import { Loader } from '../../loader';
 import { ErrorInfo, ErrorCallout } from '../error_callout';
@@ -312,13 +317,17 @@ export const EditExceptionModal = memo(function EditExceptionModal({
               )}
               <EuiText>{i18n.EXCEPTION_BUILDER_INFO}</EuiText>
               <EuiSpacer />
-              <ExceptionBuilderComponent
+              <ExceptionBuilder.ExceptionBuilderComponent
+                allowLargeValueLists={
+                  !isEqlRule(maybeRule?.type) && !isThresholdRule(maybeRule?.type)
+                }
                 httpService={http}
                 autocompleteService={data.autocomplete}
                 exceptionListItems={[exceptionItem]}
                 listType={exceptionListType}
                 listId={exceptionItem.list_id}
                 listNamespaceType={exceptionItem.namespace_type}
+                listTypeSpecificIndexPatternFilter={filterIndexPatterns}
                 ruleName={ruleName}
                 isOrDisabled
                 isAndDisabled={false}
@@ -327,7 +336,6 @@ export const EditExceptionModal = memo(function EditExceptionModal({
                 id-aria="edit-exception-modal-builder"
                 onChange={handleBuilderOnChange}
                 indexPatterns={indexPatterns}
-                ruleType={maybeRule?.type}
               />
 
               <EuiSpacer />
