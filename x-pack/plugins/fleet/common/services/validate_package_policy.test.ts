@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { installationStatuses } from '../../../../../../../common/constants';
-import type { PackageInfo, NewPackagePolicy, RegistryPolicyTemplate } from '../../../../types';
+import { installationStatuses } from '../constants';
+import type { PackageInfo, NewPackagePolicy, RegistryPolicyTemplate } from '../types';
 
+import { packageWithPolicyTemplates, packagePolicyForPolicyTemplates } from './fixtures/packages';
 import { validatePackagePolicy, validationHasErrors } from './validate_package_policy';
 
 describe('Fleet - validatePackagePolicy()', () => {
@@ -501,529 +502,98 @@ describe('Fleet - validatePackagePolicy()', () => {
   });
 
   describe('works for packages with integrations (multiple policy templates)', () => {
-    const mockPackage = ({
-      name: 'mock-package',
-      title: 'Mock package',
-      version: '0.0.0',
-      latestVersion: '0.0.0',
-      description: 'description',
-      type: 'integration',
-      categories: [],
-      conditions: { kibana: { version: '' } },
-      format_version: '',
-      download: '',
-      path: '',
-      assets: {
-        kibana: {
-          dashboard: [],
-          visualization: [],
-          search: [],
-          index_pattern: [],
-          map: [],
-          lens: [],
-          ml_module: [],
-        },
-        elasticsearch: {
-          ingest_pipeline: [],
-          component_template: [],
-          index_template: [],
-          transform: [],
-          ilm_policy: [],
-          data_stream_ilm_policy: [],
-        },
-      },
-      status: 'not_installed',
-      release: 'experimental',
-      owner: {
-        github: 'elastic/fleet',
-      },
-      data_streams: [
-        {
-          type: 'logs',
-          dataset: 'aws.cloudtrail',
-          title: 'AWS CloudTrail logs',
-          release: 'beta',
-          ingest_pipeline: 'default',
-          streams: [
-            {
-              input: 's3',
-              vars: [
-                {
-                  name: 'queue_url',
-                  type: 'text',
-                  title: 'Queue URL',
-                  description: 'URL of the AWS SQS queue that messages will be received from.',
-                  multi: false,
-                  required: true,
-                  show_user: true,
-                },
-                {
-                  name: 'fips_enabled',
-                  type: 'bool',
-                  title: 'Enable S3 FIPS',
-                  description:
-                    'Enabling this option changes the service name from `s3` to `s3-fips` for connecting to the correct service endpoint.',
-                  multi: false,
-                  required: false,
-                  show_user: false,
-                  default: false,
-                },
-              ],
-              template_path: 's3.yml.hbs',
-              title: 'AWS CloudTrail logs',
-              description: 'Collect AWS CloudTrail logs using s3 input',
-              enabled: true,
-            },
-            {
-              input: 'httpjson',
-              vars: [
-                {
-                  name: 'interval',
-                  type: 'text',
-                  title: 'Interval to query Splunk Enterprise REST API',
-                  description: 'Go Duration syntax (eg. 10s)',
-                  multi: false,
-                  required: true,
-                  show_user: true,
-                  default: '10s',
-                },
-                {
-                  name: 'search',
-                  type: 'text',
-                  title: 'Splunk search string',
-                  multi: false,
-                  required: true,
-                  show_user: true,
-                  default: 'search sourcetype=aws:cloudtrail',
-                },
-                {
-                  name: 'tags',
-                  type: 'text',
-                  title: 'Tags',
-                  multi: true,
-                  required: false,
-                  show_user: false,
-                  default: ['forwarded'],
-                },
-              ],
-              template_path: 'httpjson.yml.hbs',
-              title: 'AWS CloudTrail logs via Splunk Enterprise REST API',
-              description: 'Collect AWS CloudTrail logs via Splunk Enterprise REST API',
-              enabled: false,
-            },
-          ],
-          package: 'aws',
-          path: 'cloudtrail',
-        },
-        {
-          type: 'logs',
-          dataset: 'aws.cloudwatch_logs',
-          title: 'AWS CloudWatch logs',
-          release: 'beta',
-          ingest_pipeline: 'default',
-          streams: [
-            {
-              input: 's3',
-              vars: [
-                {
-                  name: 'queue_url',
-                  type: 'text',
-                  title: 'Queue URL',
-                  description: 'URL of the AWS SQS queue that messages will be received from.',
-                  multi: false,
-                  required: true,
-                  show_user: true,
-                },
-                {
-                  name: 'fips_enabled',
-                  type: 'bool',
-                  title: 'Enable S3 FIPS',
-                  description:
-                    'Enabling this option changes the service name from `s3` to `s3-fips` for connecting to the correct service endpoint.',
-                  multi: false,
-                  required: false,
-                  show_user: false,
-                  default: false,
-                },
-              ],
-              template_path: 's3.yml.hbs',
-              title: 'AWS CloudWatch logs',
-              description: 'Collect AWS CloudWatch logs using s3 input',
-              enabled: true,
-            },
-          ],
-          package: 'aws',
-          path: 'cloudwatch_logs',
-        },
-        {
-          type: 'metrics',
-          dataset: 'aws.cloudwatch_metrics',
-          title: 'AWS CloudWatch metrics',
-          release: 'beta',
-          streams: [
-            {
-              input: 'aws/metrics',
-              vars: [
-                {
-                  name: 'period',
-                  type: 'text',
-                  title: 'Period',
-                  multi: false,
-                  required: true,
-                  show_user: true,
-                  default: '300s',
-                },
-                {
-                  name: 'regions',
-                  type: 'text',
-                  title: 'Regions',
-                  multi: true,
-                  required: false,
-                  show_user: true,
-                },
-                {
-                  name: 'latency',
-                  type: 'text',
-                  title: 'Latency',
-                  multi: false,
-                  required: false,
-                  show_user: false,
-                },
-                {
-                  name: 'metrics',
-                  type: 'yaml',
-                  title: 'Metrics',
-                  multi: false,
-                  required: true,
-                  show_user: true,
-                  default:
-                    '- namespace: AWS/EC2\n  resource_type: ec2:instance\n  name:\n    - CPUUtilization\n    - DiskWriteOps\n  statistic:\n    - Average\n    - Maximum\n  # dimensions:\n   # - name: InstanceId\n      # value: i-123456\n  # tags:\n    # - key: created-by\n      # value: foo\n',
-                },
-              ],
-              template_path: 'stream.yml.hbs',
-              title: 'AWS CloudWatch metrics',
-              description: 'Collect AWS CloudWatch metrics',
-              enabled: true,
-            },
-          ],
-          package: 'aws',
-          path: 'cloudwatch_metrics',
-        },
-      ],
-      policy_templates: [
-        {
-          name: 'cloudtrail',
-          title: 'AWS Cloudtrail',
-          description: 'Collect logs from AWS Cloudtrail',
-          data_streams: ['cloudtrail'],
-          inputs: [
-            {
-              type: 's3',
-              vars: [
-                {
-                  name: 'visibility_timeout',
-                  type: 'text',
-                  title: 'Visibility Timeout',
-                  description:
-                    'The duration that the received messages are hidden from subsequent retrieve requests after being retrieved by a ReceiveMessage request.  The maximum is 12 hours.',
-                  multi: false,
-                  required: false,
-                  show_user: false,
-                },
-                {
-                  name: 'api_timeout',
-                  type: 'text',
-                  title: 'API Timeout',
-                  description:
-                    'The maximum duration of AWS API can take. The maximum is half of the visibility timeout value.',
-                  multi: false,
-                  required: false,
-                  show_user: false,
-                },
-              ],
-              title: 'Collect logs from Cloudtrail service',
-              description: 'Collecting Cloudtrail logs using S3 input',
-              input_group: 'logs',
-            },
-          ],
-          multiple: true,
-          icons: [
-            {
-              src: '/img/logo_cloudtrail.svg',
-              path: '/package/aws/0.5.2/img/logo_cloudtrail.svg',
-              title: 'AWS Cloudtrail logo',
-              size: '32x32',
-              type: 'image/svg+xml',
-            },
-          ],
-          screenshots: [
-            {
-              src: '/img/filebeat-aws-cloudtrail.png',
-              path: '/package/aws/0.5.2/img/filebeat-aws-cloudtrail.png',
-              title: 'filebeat aws cloudtrail',
-              size: '1702x1063',
-              type: 'image/png',
-            },
-          ],
-        },
-        {
-          name: 'cloudwatch',
-          title: 'AWS CloudWatch',
-          description: 'Collect logs and metrics from CloudWatch',
-          data_streams: ['cloudwatch_logs', 'cloudwatch_metrics'],
-          inputs: [
-            {
-              type: 's3',
-              vars: [
-                {
-                  name: 'visibility_timeout',
-                  type: 'text',
-                  title: 'Visibility Timeout',
-                  description:
-                    'The duration that the received messages are hidden from subsequent retrieve requests after being retrieved by a ReceiveMessage request.  The maximum is 12 hours.',
-                  multi: false,
-                  required: false,
-                  show_user: false,
-                },
-                {
-                  name: 'api_timeout',
-                  type: 'text',
-                  title: 'API Timeout',
-                  description:
-                    'The maximum duration of AWS API can take. The maximum is half of the visibility timeout value.',
-                  multi: false,
-                  required: false,
-                  show_user: false,
-                },
-              ],
-              title: 'Collect logs from CloudWatch',
-              description: 'Collecting logs from CloudWatch using S3 input',
-              input_group: 'logs',
-            },
-            {
-              type: 'aws/metrics',
-              vars: [
-                {
-                  name: 'metrics',
-                  type: 'yaml',
-                  title: 'Metrics',
-                  multi: false,
-                  required: true,
-                  show_user: true,
-                  default:
-                    '- namespace: AWS/EC2\n  resource_type: ec2:instance\n  name:\n    - CPUUtilization\n    - DiskWriteOps\n  statistic:\n    - Average\n    - Maximum\n  # dimensions:\n   # - name: InstanceId\n      # value: i-123456\n  # tags:\n    # - key: created-by\n      # value: foo\n',
-                },
-              ],
-              title: 'Collect metrics from CloudWatch',
-              description: 'Collecting metrics from AWS CloudWatch',
-              input_group: 'metrics',
-            },
-          ],
-          multiple: true,
-          icons: [
-            {
-              src: '/img/logo_cloudwatch.svg',
-              path: '/package/aws/0.5.2/img/logo_cloudwatch.svg',
-              title: 'AWS CloudWatch logo',
-              size: '32x32',
-              type: 'image/svg+xml',
-            },
-          ],
-        },
-      ],
-      vars: [
-        {
-          name: 'shared_credential_file',
-          type: 'text',
-          title: 'Shared Credential File',
-          description: 'Directory of the shared credentials file.',
-          multi: false,
-          required: false,
-          show_user: false,
-        },
-        {
-          name: 'credential_profile_name',
-          type: 'text',
-          title: 'Credential Profile Name',
-          multi: false,
-          required: false,
-          show_user: true,
-        },
-        {
-          name: 'access_key_id',
-          type: 'text',
-          title: 'Access Key ID',
-          multi: false,
-          required: false,
-          show_user: false,
-        },
-        {
-          name: 'secret_access_key',
-          type: 'text',
-          title: 'Secret Access Key',
-          multi: false,
-          required: false,
-          show_user: false,
-        },
-        {
-          name: 'session_token',
-          type: 'text',
-          title: 'Session Token',
-          multi: false,
-          required: false,
-          show_user: false,
-        },
-        {
-          name: 'role_arn',
-          type: 'text',
-          title: 'Role ARN',
-          multi: false,
-          required: false,
-          show_user: false,
-        },
-        {
-          name: 'endpoint',
-          type: 'text',
-          title: 'Endpoint',
-          description: 'URL of the entry point for an AWS web service.',
-          multi: false,
-          required: false,
-          show_user: false,
-          default: 'amazonaws.com',
-        },
-      ],
-    } as unknown) as PackageInfo;
-
-    const validPackagePolicy: NewPackagePolicy = {
-      name: 'mock-package-1',
-      namespace: 'default',
-      package: { name: 'mock-package', title: 'Mock package', version: '0.0.0' },
-      enabled: true,
-      policy_id: 'some-policy-id',
-      output_id: 'some-output-id',
-      inputs: [
-        {
-          type: 's3',
-          enabled: true,
-          streams: [
-            {
-              enabled: true,
-              data_stream: { type: 'logs', dataset: 'aws.cloudtrail' },
-              vars: {
-                queue_url: { type: 'text', value: 'localhost' },
-                fips_enabled: { value: false, type: 'bool' },
-              },
-            },
-          ],
-          integration: 'cloudtrail',
-          vars: { visibility_timeout: { type: 'text' }, api_timeout: { type: 'text' } },
-        },
-        {
-          type: 's3',
-          enabled: true,
-          streams: [
-            {
-              enabled: true,
-              data_stream: { type: 'logs', dataset: 'aws.cloudwatch_logs' },
-              vars: {
-                queue_url: { type: 'text', value: 'localhost' },
-                fips_enabled: { value: false, type: 'bool' },
-              },
-            },
-          ],
-          integration: 'cloudwatch',
-          vars: { visibility_timeout: { type: 'text' }, api_timeout: { type: 'text' } },
-        },
-        {
-          type: 'aws/metrics',
-          enabled: true,
-          streams: [
-            {
-              enabled: true,
-              data_stream: { type: 'metrics', dataset: 'aws.cloudwatch_metrics' },
-              vars: {
-                period: { value: '300s', type: 'text' },
-                regions: { value: [], type: 'text' },
-                latency: { type: 'text' },
-                metrics: {
-                  value:
-                    '- namespace: AWS/EC2\n  resource_type: ec2:instance\n  name:\n    - CPUUtilization\n    - DiskWriteOps\n  statistic:\n    - Average\n    - Maximum\n  # dimensions:\n   # - name: InstanceId\n      # value: i-123456\n  # tags:\n    # - key: created-by\n      # value: foo\n',
-                  type: 'yaml',
-                },
-              },
-            },
-          ],
-          integration: 'cloudwatch',
-          vars: {
-            metrics: {
-              value:
-                '- namespace: AWS/EC2\n  resource_type: ec2:instance\n  name:\n    - CPUUtilization\n    - DiskWriteOps\n  statistic:\n    - Average\n    - Maximum\n  # dimensions:\n   # - name: InstanceId\n      # value: i-123456\n  # tags:\n    # - key: created-by\n      # value: foo\n',
-              type: 'yaml',
-            },
-          },
-        },
-      ],
-      integrations: [
-        { name: 'cloudtrail', enabled: true },
-        { name: 'cloudwatch', enabled: true },
-      ],
-      vars: {
-        shared_credential_file: { type: 'text' },
-        credential_profile_name: { type: 'text' },
-        access_key_id: { type: 'text' },
-        secret_access_key: { type: 'text' },
-        session_token: { type: 'text' },
-        role_arn: { type: 'text' },
-        endpoint: { value: 'amazonaws.com', type: 'text' },
-      },
-    };
-
     const noErrorsValidationResults = {
       name: null,
       description: null,
       namespace: null,
       inputs: {
-        's3-cloudtrail': {
+        logs: {
           streams: {
             'aws.cloudtrail': {
               vars: {
-                queue_url: null,
+                visibility_timeout: null,
+                api_timeout: null,
+                queue_url: ['Queue URL is required'],
                 fips_enabled: null,
               },
             },
-          },
-          vars: {
-            visibility_timeout: null,
-            api_timeout: null,
-          },
-        },
-        's3-cloudwatch': {
-          streams: {
             'aws.cloudwatch_logs': {
               vars: {
-                queue_url: null,
+                visibility_timeout: null,
+                api_timeout: null,
+                queue_url: ['Queue URL is required'],
+                fips_enabled: null,
+              },
+            },
+            'aws.ec2_logs': {
+              vars: {
+                visibility_timeout: null,
+                api_timeout: null,
+                queue_url: ['Queue URL is required'],
+                fips_enabled: null,
+              },
+            },
+            'aws.elb_logs': {
+              vars: {
+                visibility_timeout: null,
+                api_timeout: null,
+                queue_url: ['Queue URL is required'],
+                fips_enabled: null,
+              },
+            },
+            'aws.s3access': {
+              vars: {
+                visibility_timeout: null,
+                api_timeout: null,
+                queue_url: ['Queue URL is required'],
+                fips_enabled: null,
+              },
+            },
+            'aws.vpcflow': {
+              vars: {
+                visibility_timeout: null,
+                api_timeout: null,
+                queue_url: ['Queue URL is required'],
                 fips_enabled: null,
               },
             },
           },
-          vars: {
-            visibility_timeout: null,
-            api_timeout: null,
-          },
         },
-        'aws/metrics-cloudwatch': {
+        metrics: {
           streams: {
-            'aws.cloudwatch_metrics': {
+            'aws.billing': {
               vars: {
                 period: null,
-                regions: null,
                 latency: null,
-                metrics: null,
+                'cost_explorer_config.group_by_dimension_keys': null,
+                'cost_explorer_config.group_by_tag_keys': null,
               },
             },
-          },
-          vars: {
-            metrics: null,
+            'aws.cloudwatch_metrics': {
+              vars: { period: null, regions: null, latency: null, metrics: null },
+            },
+            'aws.dynamodb': {
+              vars: { period: null, regions: null, latency: null, tags_filter: null },
+            },
+            'aws.ebs': { vars: { period: null, regions: null, latency: null, tags_filter: null } },
+            'aws.ec2_metrics': {
+              vars: { period: null, regions: null, latency: null, tags_filter: null },
+            },
+            'aws.elb_metrics': {
+              vars: { period: null, regions: null, latency: null, tags_filter: null },
+            },
+            'aws.lambda': {
+              vars: { period: null, regions: null, latency: null, tags_filter: null },
+            },
+            'aws.natgateway': { vars: { period: null, regions: null, latency: null } },
+            'aws.rds': { vars: { period: null, regions: null, latency: null, tags_filter: null } },
+            'aws.s3_daily_storage': { vars: { period: null, regions: null, latency: null } },
+            'aws.s3_request': { vars: { period: null, regions: null, latency: null } },
+            'aws.sns': { vars: { period: null, regions: null, latency: null, tags_filter: null } },
+            'aws.sqs': { vars: { period: null, regions: null, latency: null } },
+            'aws.transitgateway': { vars: { period: null, regions: null, latency: null } },
+            'aws.usage': { vars: { period: null, regions: null, latency: null } },
+            'aws.vpn': { vars: { period: null, regions: null, latency: null, tags_filter: null } },
           },
         },
       },
@@ -1039,9 +609,9 @@ describe('Fleet - validatePackagePolicy()', () => {
     };
 
     it('returns no errors for valid package policy', () => {
-      expect(validatePackagePolicy(validPackagePolicy, mockPackage)).toEqual(
-        noErrorsValidationResults
-      );
+      expect(
+        validatePackagePolicy(packagePolicyForPolicyTemplates, packageWithPolicyTemplates)
+      ).toEqual(noErrorsValidationResults);
     });
   });
 });

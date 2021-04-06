@@ -7,7 +7,7 @@
 
 import type { PackageInfo } from '../types';
 
-import { packageWithIntegrations } from './fixtures/packages';
+import { packageWithPolicyTemplates } from './fixtures/packages';
 import { packageToPackagePolicy, packageToPackagePolicyInputs } from './package_to_package_policy';
 
 describe('Fleet - packageToPackagePolicy', () => {
@@ -410,7 +410,7 @@ describe('Fleet - packageToPackagePolicy', () => {
     it('returns package policy with multiple policy templates correctly', () => {
       expect(
         packageToPackagePolicy(
-          packageWithIntegrations,
+          packageWithPolicyTemplates,
           'some-policy-id',
           'some-output-id',
           'default'

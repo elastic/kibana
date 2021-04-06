@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { PackageInfo } from '../../../../../types';
+import type { PackageInfo, NewPackagePolicy } from '../../types';
 
-export const packageWithIntegrations: PackageInfo = {
+export const packageWithPolicyTemplates: PackageInfo = {
   name: 'aws',
   title: 'AWS',
   version: '0.5.2',
@@ -1855,4 +1855,257 @@ export const packageWithIntegrations: PackageInfo = {
   latestVersion: '0.5.2',
   removable: true,
   status: 'not_installed',
+};
+
+export const packagePolicyForPolicyTemplates: NewPackagePolicy = {
+  name: 'aws-1',
+  namespace: 'default',
+  package: { name: 'aws', title: 'AWS', version: '0.5.2' },
+  enabled: true,
+  policy_id: 'some-policy-id',
+  output_id: 'some-output-id',
+  inputs: [
+    {
+      type: 'logs',
+      enabled: true,
+      streams: [
+        {
+          enabled: true,
+          data_stream: { type: 'logs', dataset: 'aws.cloudtrail' },
+          vars: {
+            visibility_timeout: { type: 'text' },
+            api_timeout: { type: 'text' },
+            queue_url: { type: 'text' },
+            fips_enabled: { value: false, type: 'bool' },
+          },
+        },
+        {
+          enabled: true,
+          data_stream: { type: 'logs', dataset: 'aws.cloudwatch_logs' },
+          vars: {
+            visibility_timeout: { type: 'text' },
+            api_timeout: { type: 'text' },
+            queue_url: { type: 'text' },
+            fips_enabled: { value: false, type: 'bool' },
+          },
+        },
+        {
+          enabled: true,
+          data_stream: { type: 'logs', dataset: 'aws.ec2_logs' },
+          vars: {
+            visibility_timeout: { type: 'text' },
+            api_timeout: { type: 'text' },
+            queue_url: { type: 'text' },
+            fips_enabled: { value: false, type: 'bool' },
+          },
+        },
+        {
+          enabled: true,
+          data_stream: { type: 'logs', dataset: 'aws.elb_logs' },
+          vars: {
+            visibility_timeout: { type: 'text' },
+            api_timeout: { type: 'text' },
+            queue_url: { type: 'text' },
+            fips_enabled: { value: false, type: 'bool' },
+          },
+        },
+        {
+          enabled: true,
+          data_stream: { type: 'logs', dataset: 'aws.s3access' },
+          vars: {
+            visibility_timeout: { type: 'text' },
+            api_timeout: { type: 'text' },
+            queue_url: { type: 'text' },
+            fips_enabled: { value: false, type: 'bool' },
+          },
+        },
+        {
+          enabled: true,
+          data_stream: { type: 'logs', dataset: 'aws.vpcflow' },
+          vars: {
+            visibility_timeout: { type: 'text' },
+            api_timeout: { type: 'text' },
+            queue_url: { type: 'text' },
+            fips_enabled: { value: false, type: 'bool' },
+          },
+        },
+      ],
+    },
+    {
+      type: 'metrics',
+      enabled: true,
+      streams: [
+        {
+          enabled: true,
+          data_stream: { type: 'metrics', dataset: 'aws.billing' },
+          vars: {
+            period: { value: '12h', type: 'text' },
+            latency: { type: 'text' },
+            'cost_explorer_config.group_by_dimension_keys': {
+              value: ['AZ', 'INSTANCE_TYPE', 'SERVICE'],
+              type: 'text',
+            },
+            'cost_explorer_config.group_by_tag_keys': { value: ['aws:createdBy'], type: 'text' },
+          },
+        },
+        {
+          enabled: true,
+          data_stream: { type: 'metrics', dataset: 'aws.cloudwatch_metrics' },
+          vars: {
+            period: { value: '300s', type: 'text' },
+            regions: { value: [], type: 'text' },
+            latency: { type: 'text' },
+            metrics: {
+              value:
+                '- namespace: AWS/EC2\n  resource_type: ec2:instance\n  name:\n    - CPUUtilization\n    - DiskWriteOps\n  statistic:\n    - Average\n    - Maximum\n  # dimensions:\n   # - name: InstanceId\n      # value: i-123456\n  # tags:\n    # - key: created-by\n      # value: foo\n',
+              type: 'yaml',
+            },
+          },
+        },
+        {
+          enabled: true,
+          data_stream: { type: 'metrics', dataset: 'aws.dynamodb' },
+          vars: {
+            period: { value: '5m', type: 'text' },
+            regions: { value: [], type: 'text' },
+            latency: { type: 'text' },
+            tags_filter: { value: '# - key: "created-by"\n  # value: "foo"\n', type: 'yaml' },
+          },
+        },
+        {
+          enabled: true,
+          data_stream: { type: 'metrics', dataset: 'aws.ebs' },
+          vars: {
+            period: { value: '5m', type: 'text' },
+            regions: { value: [], type: 'text' },
+            latency: { type: 'text' },
+            tags_filter: { value: '# - key: "created-by"\n  # value: "foo"\n', type: 'yaml' },
+          },
+        },
+        {
+          enabled: true,
+          data_stream: { type: 'metrics', dataset: 'aws.ec2_metrics' },
+          vars: {
+            period: { value: '5m', type: 'text' },
+            regions: { value: [], type: 'text' },
+            latency: { type: 'text' },
+            tags_filter: { value: '# - key: "created-by"\n  # value: "foo"\n', type: 'yaml' },
+          },
+        },
+        {
+          enabled: true,
+          data_stream: { type: 'metrics', dataset: 'aws.elb_metrics' },
+          vars: {
+            period: { value: '1m', type: 'text' },
+            regions: { value: [], type: 'text' },
+            latency: { type: 'text' },
+            tags_filter: { value: '# - key: "created-by"\n  # value: "foo"\n', type: 'yaml' },
+          },
+        },
+        {
+          enabled: true,
+          data_stream: { type: 'metrics', dataset: 'aws.lambda' },
+          vars: {
+            period: { value: '5m', type: 'text' },
+            regions: { value: [], type: 'text' },
+            latency: { type: 'text' },
+            tags_filter: { value: '# - key: "created-by"\n  # value: "foo"\n', type: 'yaml' },
+          },
+        },
+        {
+          enabled: true,
+          data_stream: { type: 'metrics', dataset: 'aws.natgateway' },
+          vars: {
+            period: { value: '1m', type: 'text' },
+            regions: { value: [], type: 'text' },
+            latency: { type: 'text' },
+          },
+        },
+        {
+          enabled: true,
+          data_stream: { type: 'metrics', dataset: 'aws.rds' },
+          vars: {
+            period: { value: '1m', type: 'text' },
+            regions: { value: [], type: 'text' },
+            latency: { type: 'text' },
+            tags_filter: { value: '# - key: "created-by"\n  # value: "foo"\n', type: 'yaml' },
+          },
+        },
+        {
+          enabled: true,
+          data_stream: { type: 'metrics', dataset: 'aws.s3_daily_storage' },
+          vars: {
+            period: { value: '24h', type: 'text' },
+            regions: { value: [], type: 'text' },
+            latency: { type: 'text' },
+          },
+        },
+        {
+          enabled: true,
+          data_stream: { type: 'metrics', dataset: 'aws.s3_request' },
+          vars: {
+            period: { value: '1m', type: 'text' },
+            regions: { value: [], type: 'text' },
+            latency: { type: 'text' },
+          },
+        },
+        {
+          enabled: true,
+          data_stream: { type: 'metrics', dataset: 'aws.sns' },
+          vars: {
+            period: { value: '5m', type: 'text' },
+            regions: { value: [], type: 'text' },
+            latency: { type: 'text' },
+            tags_filter: { value: '# - key: "created-by"\n  # value: "foo"\n', type: 'yaml' },
+          },
+        },
+        {
+          enabled: true,
+          data_stream: { type: 'metrics', dataset: 'aws.sqs' },
+          vars: {
+            period: { value: '5m', type: 'text' },
+            regions: { value: [], type: 'text' },
+            latency: { type: 'text' },
+          },
+        },
+        {
+          enabled: true,
+          data_stream: { type: 'metrics', dataset: 'aws.transitgateway' },
+          vars: {
+            period: { value: '1m', type: 'text' },
+            regions: { value: [], type: 'text' },
+            latency: { type: 'text' },
+          },
+        },
+        {
+          enabled: true,
+          data_stream: { type: 'metrics', dataset: 'aws.usage' },
+          vars: {
+            period: { value: '1m', type: 'text' },
+            regions: { value: [], type: 'text' },
+            latency: { type: 'text' },
+          },
+        },
+        {
+          enabled: true,
+          data_stream: { type: 'metrics', dataset: 'aws.vpn' },
+          vars: {
+            period: { value: '1m', type: 'text' },
+            regions: { value: [], type: 'text' },
+            latency: { type: 'text' },
+            tags_filter: { value: '# - key: "created-by"\n  # value: "foo"\n', type: 'yaml' },
+          },
+        },
+      ],
+    },
+  ],
+  vars: {
+    shared_credential_file: { type: 'text' },
+    credential_profile_name: { type: 'text' },
+    access_key_id: { type: 'text' },
+    secret_access_key: { type: 'text' },
+    session_token: { type: 'text' },
+    role_arn: { type: 'text' },
+    endpoint: { value: 'amazonaws.com', type: 'text' },
+  },
 };

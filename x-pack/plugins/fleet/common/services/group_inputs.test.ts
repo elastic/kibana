@@ -5,10 +5,10 @@
  * 2.0.
  */
 import { groupInputs } from './group_inputs';
-import { packageWithIntegrations } from './fixtures/packages';
+import { packageWithPolicyTemplates } from './fixtures/packages';
 
 describe('groupInputs()', () => {
   it('should group inputs for a package with multiple policy templates and input groups correctly', () => {
-    expect(groupInputs(packageWithIntegrations)).toMatchSnapshot();
+    expect(groupInputs(packageWithPolicyTemplates)).toMatchSnapshot();
   });
 });
