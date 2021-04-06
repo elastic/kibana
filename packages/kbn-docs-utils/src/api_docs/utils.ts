@@ -109,7 +109,9 @@ export function getPluginApiDocId(
 }
 
 export function getApiSectionId(link: AnchorLink) {
-  const id = `def-${link.scope}.${link.apiName}`.replace(' ', '-');
+  // Clean up the name. Things like destructured function parameters can have really long names with brackets and commas.
+  const cleanName = link.apiName.replace(/[^A-Za-z_.$0-9]+/g, '');
+  const id = `def-${link.scope}.${cleanName}`;
   return id;
 }
 
