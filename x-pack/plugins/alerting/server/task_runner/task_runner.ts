@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { ApiError } from '@elastic/elasticsearch';
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Dictionary, pickBy, mapValues, without, cloneDeep } from 'lodash';
 import type { Request } from '@hapi/hapi';
@@ -22,6 +20,7 @@ import {
   executionStatusFromError,
   alertExecutionStatusToRaw,
   ErrorWithReason,
+  ElasticsearchError,
 } from '../lib';
 import {
   RawAlert,
@@ -51,7 +50,7 @@ import {
   WithoutReservedActionGroups,
 } from '../../common';
 import { NormalizedAlertType } from '../alert_type_registry';
-import { getEsCause } from './es_error_parser';
+import { getEsErrorMessage } from './es_error_parser';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 
@@ -65,34 +64,6 @@ interface AlertTaskRunResult {
 interface AlertTaskInstance extends ConcreteTaskInstance {
   state: AlertTaskState;
 }
-
-interface ElasticsearchError extends Error {
-  error?: ApiError;
-}
-
-// interface ElasticsearchError extends Error {
-//   error?: {
-//     meta?: {
-//       body?: {
-//         error?: {
-//           caused_by?: {
-//             type?: string;
-//             reason?: string;
-//           };
-//           failed_shards?: Array<{
-//             reason?: {
-//               script?: string;
-//               caused_by?: {
-//                 type?: string;
-//                 reason?: string;
-//               };
-//             };
-//           }>;
-//         };
-//       };
-//     };
-//   };
-// }
 
 export class TaskRunner<
   Params extends AlertTypeParams,
@@ -511,7 +482,7 @@ export class TaskRunner<
     const executionStatus: AlertExecutionStatus = map(
       state,
       (alertTaskState: AlertTaskState) => executionStatusFromState(alertTaskState),
-      (err: Error) => executionStatusFromError(err)
+      (err: ElasticsearchError) => executionStatusFromError(err)
     );
 
     // set the executionStatus date to same as event, if it's set
@@ -570,14 +541,9 @@ export class TaskRunner<
           };
         },
         (err: ElasticsearchError) => {
-          let errorMessage = err.message;
-          if (err.error) {
-            const { body } = err.error as ResponseError;
-            if (body && body.error) {
-              errorMessage += `, caused by: "${getEsCause(body.error)}"`;
-            }
-          }
-          const message = `Executing Alert "${alertId}" has resulted in Error: ${errorMessage}`;
+          const message = `Executing Alert "${alertId}" has resulted in Error: ${getEsErrorMessage(
+            err
+          )}`;
           if (isAlertSavedObjectNotFoundError(err, alertId)) {
             this.logger.debug(message);
           } else {

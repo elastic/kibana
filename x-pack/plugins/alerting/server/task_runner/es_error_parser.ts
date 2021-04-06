@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { ElasticsearchError } from '../lib';
+
 interface ErrorObject {
   caused_by?: {
     reason?: string;
@@ -40,4 +43,15 @@ export const getEsCause = (obj: ErrorObject = {}, causes: string[] = []): string
   }
 
   return updated.filter(Boolean);
+};
+
+export const getEsErrorMessage = (error: Error) => {
+  let message = error.message;
+  if ((error as ElasticsearchError).error) {
+    const { body } = (error as ElasticsearchError).error as ResponseError;
+    if (body && body.error) {
+      message += `, caused by: "${getEsCause(body.error)}"`;
+    }
+  }
+  return message;
 };
