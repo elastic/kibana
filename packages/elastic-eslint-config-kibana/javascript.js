@@ -12,7 +12,7 @@ module.exports = {
 
       plugins: [
         'mocha',
-        'babel',
+        '@babel',
         'import',
         'no-unsanitized',
         'prefer-object-spread',
@@ -36,6 +36,7 @@ module.exports = {
       parserOptions: {
         sourceType: 'module',
         ecmaVersion: 2018,
+        requireConfigFile: false,
       },
 
       rules: {

@@ -14,6 +14,7 @@ const ruleTester = new RuleTester({
   parser: require.resolve('@babel/eslint-parser'),
   parserOptions: {
     ecmaVersion: 2018,
+    requireConfigFile: false,
   },
 });
 

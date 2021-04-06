@@ -38,7 +38,7 @@ module.exports = {
           assert(!!licenses, '"licenses" option is required');
 
           return licenses.map((license, i) => {
-            const parsed = babelEslint.parse(license);
+            const parsed = babelEslint.parse(license, { requireConfigFile: false });
 
             assert(
               !parsed.body.length,

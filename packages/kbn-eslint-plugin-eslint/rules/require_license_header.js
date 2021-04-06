@@ -38,7 +38,7 @@ module.exports = {
 
           assert(!!license, '"license" option is required');
 
-          const parsed = babelEslint.parse(license);
+          const parsed = babelEslint.parse(license, { requireConfigFile: false });
           assert(!parsed.body.length, '"license" option must only include a single comment');
           assert(
             parsed.comments.length === 1,
