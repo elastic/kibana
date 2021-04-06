@@ -29,7 +29,7 @@ import {
   ConnectorMappingsService,
   AlertService,
 } from './services';
-import { CasesClient, CasesClientInternal, createCasesClientInternal } from './client';
+import { CasesClient } from './client';
 import { registerConnectors } from './connectors';
 import type { CasesRequestHandlerContext } from './types';
 import { CasesClientFactory } from './client/factory';

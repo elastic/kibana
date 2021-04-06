@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { cloneDeep } from 'lodash';
 import {
   KibanaRequest,
   Logger,
@@ -21,7 +22,6 @@ import { SecurityPluginSetup } from '../../../../security/server';
 import {
   ESCaseAttributes,
   CommentAttributes,
-  SavedObjectFindOptions,
   User,
   SubCaseAttributes,
   AssociationType,
@@ -327,7 +327,7 @@ export class CaseService {
     if (ENABLE_CASE_CONNECTOR && subCaseOptions) {
       subCasesTotal = await this.findSubCaseStatusStats({
         soClient,
-        options: subCaseOptions,
+        options: cloneDeep(subCaseOptions),
         ids: caseIds,
       });
     }
@@ -668,7 +668,7 @@ export class CaseService {
       this.log.debug(`Attempting to find cases`);
       return await soClient.find<ESCaseAttributes>({
         sortField: defaultSortField,
-        ...options,
+        ...cloneDeep(options),
         type: CASE_SAVED_OBJECT,
       });
     } catch (error) {
@@ -688,7 +688,7 @@ export class CaseService {
       if (options?.page !== undefined || options?.perPage !== undefined) {
         return soClient.find<SubCaseAttributes>({
           sortField: defaultSortField,
-          ...options,
+          ...cloneDeep(options),
           type: SUB_CASE_SAVED_OBJECT,
         });
       }
@@ -698,14 +698,14 @@ export class CaseService {
         page: 1,
         perPage: 1,
         sortField: defaultSortField,
-        ...options,
+        ...cloneDeep(options),
         type: SUB_CASE_SAVED_OBJECT,
       });
       return soClient.find<SubCaseAttributes>({
         page: 1,
         perPage: stats.total,
         sortField: defaultSortField,
-        ...options,
+        ...cloneDeep(options),
         type: SUB_CASE_SAVED_OBJECT,
       });
     } catch (error) {
@@ -775,7 +775,7 @@ export class CaseService {
         return soClient.find<CommentAttributes>({
           type: CASE_COMMENT_SAVED_OBJECT,
           sortField: defaultSortField,
-          ...options,
+          ...cloneDeep(options),
         });
       }
       // get the total number of comments that are in ES then we'll grab them all in one go
@@ -786,7 +786,7 @@ export class CaseService {
         perPage: 1,
         sortField: defaultSortField,
         // spread the options after so the caller can override the default behavior if they want
-        ...options,
+        ...cloneDeep(options),
       });
 
       return soClient.find<CommentAttributes>({
@@ -794,7 +794,7 @@ export class CaseService {
         page: 1,
         perPage: stats.total,
         sortField: defaultSortField,
-        ...options,
+        ...cloneDeep(options),
       });
     } catch (error) {
       this.log.error(`Error on GET all comments for ${JSON.stringify(id)}: ${error}`);
