@@ -10,7 +10,7 @@ import moment from 'moment';
 import * as reactRouterDom from 'react-router-dom';
 import { Ping } from '../../../common/runtime_types';
 import { MonitorPageTitle } from './monitor_title';
-import { renderWithRouter } from '../../lib/helper/enzyme_helpers';
+import { renderWithRouter } from '../../lib';
 import { mockReduxHooks } from '../../lib/helper/test_helpers';
 
 jest.mock('react-router-dom', () => {
