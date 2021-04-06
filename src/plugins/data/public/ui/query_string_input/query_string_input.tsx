@@ -408,16 +408,13 @@ export default class QueryStringInputUI extends Component<Props, State> {
       selectionStart: start + (cursorIndex ? cursorIndex : text.length),
       selectionEnd: start + (cursorIndex ? cursorIndex : text.length),
     });
+    const isTypeRecentSearch = type === QuerySuggestionTypes.RecentSearch;
 
-    if (type === QuerySuggestionTypes.RecentSearch) {
-      this.setState({ isSuggestionsVisible: false, index: null });
-      this.onSubmit({ query: newQueryString, language: this.props.query.language });
-    }
+    const isAutoSubmitAndValid =
+      his.props.autoSubmit &&
+      (type === QuerySuggestionTypes.Value || [':*', ': *'].includes(value.trim()));
 
-    if (
-      this.props.autoSubmit &&
-      (type === QuerySuggestionTypes.Value || [':*', ': *'].includes(value.trim()))
-    ) {
+    if (isTypeRecentSearch || isAutoSubmitAndValid) {
       this.setState({ isSuggestionsVisible: false, index: null });
       this.onSubmit({ query: newQueryString, language: this.props.query.language });
     }
@@ -512,9 +509,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
     });
 
     const storageKey = this.props.storageKey;
-    if (storageKey) {
-      this.services.storage.set(storageKey, language);
-    }
+    this.services.storage.set(storageKey!, language);
 
     const newQuery = { query: '', language };
     this.onChange(newQuery);
