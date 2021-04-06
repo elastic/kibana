@@ -70,4 +70,31 @@ describe('PagerDutyParamsFields renders', () => {
       wrapper.find('[data-test-subj="eventActionSelect"]').first().prop('value')
     ).toStrictEqual(undefined);
   });
+
+  test('only eventActionSelect is available as a payload params for PagerDuty Resolve event', () => {
+    const actionParams = {
+      eventAction: EventActionOptions.RESOLVE,
+      dedupKey: 'test',
+    };
+
+    const wrapper = mountWithIntl(
+      <PagerDutyParamsFields
+        actionParams={actionParams}
+        errors={{ summary: [], timestamp: [], dedupKey: [] }}
+        editAction={() => {}}
+        index={0}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="dedupKeyInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="dedupKeyInput"]').first().prop('value')).toStrictEqual(
+      'resolve'
+    );
+    expect(wrapper.find('[data-test-subj="eventActionSelect"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="dedupKeyInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="timestampInput"]').length > 0).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="componentInput"]').length > 0).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="groupInput"]').length > 0).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="sourceInput"]').length > 0).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="summaryInput"]').length > 0).toBeFalsy();
+  });
 });
