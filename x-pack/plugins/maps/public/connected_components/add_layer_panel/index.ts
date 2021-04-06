@@ -25,6 +25,7 @@ function mapStateToProps(state: MapStoreState) {
   return {
     hasPreviewLayers: hasPreviewLayers(state),
     isLoadingPreviewLayers: isLoadingPreviewLayers(state),
+    isDrawingLayer: state.map.mapState.editModeActive,
   };
 }
 

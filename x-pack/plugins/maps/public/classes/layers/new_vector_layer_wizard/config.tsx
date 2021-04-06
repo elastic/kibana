@@ -19,7 +19,7 @@ export const newVectorLayerWizardConfig: LayerWizard = {
   icon: DocumentsLayerIcon,
   prerequisiteSteps: [],
   renderWizard: (renderWizardArguments: RenderWizardArguments) => {
-    return <NewVectorLayerEditor />;
+    return <NewVectorLayerEditor {...renderWizardArguments} />;
   },
   title: i18n.translate('xpack.maps.newVectorLayerWizard.title', {
     defaultMessage: 'Draw new vector layer',

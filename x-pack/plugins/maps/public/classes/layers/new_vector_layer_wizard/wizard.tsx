@@ -21,8 +21,11 @@ import {
   checkIndexPatternValid,
   // @ts-expect-error
 } from './utils/indexing_service';
+import { RenderWizardArguments } from '../layer_wizard_registry';
 
-interface Props {
+interface NewVectorLayerProps extends RenderWizardArguments {
+  indexName: string;
+  featuresAreQueued: boolean;
   setEditModeActive: () => void;
   setEditModeInActive: () => void;
   setIndexName: (indexName: string) => void;
@@ -34,7 +37,7 @@ interface State {
   indexNames: string[];
 }
 
-export class NewVectorLayerEditor extends Component<Props, State> {
+export class NewVectorLayerEditor extends Component<NewVectorLayerProps, State> {
   state = {
     indexName: '',
     indexError: '',
@@ -47,6 +50,15 @@ export class NewVectorLayerEditor extends Component<Props, State> {
     this.props.setEditModeActive();
     this._isMounted = true;
     this._loadIndexNames();
+  }
+
+  componentDidUpdate() {
+    const { indexName, featuresAreQueued, enableNextBtn, disableNextBtn } = this.props;
+    if (indexName && featuresAreQueued) {
+      enableNextBtn();
+    } else {
+      disableNextBtn();
+    }
   }
 
   componentWillUnmount() {
@@ -74,6 +86,7 @@ export class NewVectorLayerEditor extends Component<Props, State> {
           }
         ),
       });
+      this.props.setIndexName('');
     } else if (!checkIndexPatternValid(indexName)) {
       this.setState({
         indexError: i18n.translate(
@@ -83,6 +96,7 @@ export class NewVectorLayerEditor extends Component<Props, State> {
           }
         ),
       });
+      this.props.setIndexName('');
     } else {
       this.setState({ indexError: '' });
       this.props.setIndexName(indexName);

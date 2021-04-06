@@ -15,6 +15,7 @@ import { setVectorLayerIndexName, updateEditMode } from '../../../actions';
 function mapStateToProps(state: MapStoreState) {
   return {
     indexName: state.map.mapState.vectorLayerIndexName,
+    featuresAreQueued: !!state.map.mapState.featuresToIndexQueue.length,
   };
 }
 

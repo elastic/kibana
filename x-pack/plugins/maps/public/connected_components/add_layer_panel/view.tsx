@@ -33,6 +33,7 @@ export interface Props {
   hasPreviewLayers: boolean;
   isLoadingPreviewLayers: boolean;
   promotePreviewLayers: () => void;
+  isDrawingLayer: boolean;
 }
 
 interface State {
@@ -127,7 +128,7 @@ export class AddLayerPanel extends Component<Props, State> {
 
     let isDisabled = !this.state.isNextStepBtnEnabled;
     let isLoading = this.state.isStepLoading;
-    if (this.state.currentStep.id === ADD_LAYER_STEP_ID) {
+    if (this.state.currentStep.id === ADD_LAYER_STEP_ID && !this.props.isDrawingLayer) {
       isDisabled = !this.props.hasPreviewLayers;
       isLoading = this.props.isLoadingPreviewLayers;
     } else {
