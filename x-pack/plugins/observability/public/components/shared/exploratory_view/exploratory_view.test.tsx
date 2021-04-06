@@ -56,10 +56,10 @@ describe('ExploratoryView', () => {
 
     await waitFor(() => {
       screen.getByText(/open in lens/i);
+    });
+
+    await waitFor(() => {
       screen.getByText(/select a data type to start building a series\./i);
-      screen.getByRole('table', { name: /this table contains 1 rows\./i });
-      const button = screen.getByRole('button', { name: /add/i });
-      within(button).getByText(/add/i);
     });
 
     await fireEvent.click(screen.getByText(/cancel/i));
