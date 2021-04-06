@@ -16,6 +16,7 @@ describe('Epic Timeline', () => {
     test('should return a TimelineInput instead of TimelineModel ', () => {
       const timelineModel: TimelineModel = {
         activeTab: TimelineTabs.query,
+        prevActiveTab: TimelineTabs.notes,
         columns: [
           {
             columnHeaderType: 'not-filtered',

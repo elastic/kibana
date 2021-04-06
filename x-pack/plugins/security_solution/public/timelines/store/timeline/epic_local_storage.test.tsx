@@ -29,11 +29,12 @@ import {
   updateItemsPerPage,
   updateSort,
 } from './actions';
-
+import { DefaultCellRenderer } from '../../components/timeline/cell_rendering/default_cell_renderer';
 import {
   QueryTabContentComponent,
   Props as QueryTabContentComponentProps,
 } from '../../components/timeline/query_tab_content';
+import { defaultRowRenderers } from '../../components/timeline/body/renderers';
 import { mockDataProviders } from '../../components/timeline/data_providers/mock/mock_data_providers';
 import { Sort } from '../../components/timeline/body/sort';
 
@@ -77,6 +78,8 @@ describe('epicLocalStorage', () => {
       kqlMode: 'search' as QueryTabContentComponentProps['kqlMode'],
       kqlQueryExpression: '',
       onEventClosed: jest.fn(),
+      renderCellValue: DefaultCellRenderer,
+      rowRenderers: defaultRowRenderers,
       showCallOutUnauthorizedMsg: false,
       showExpandedDetails: false,
       start: startDate,

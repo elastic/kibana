@@ -246,6 +246,7 @@ describe('helpers', () => {
       const newTimeline = defaultTimelineToTimelineModel(timeline, false);
       expect(newTimeline).toEqual({
         activeTab: TimelineTabs.query,
+        prevActiveTab: TimelineTabs.query,
         columns: [
           {
             columnHeaderType: 'not-filtered',
@@ -356,6 +357,7 @@ describe('helpers', () => {
       const newTimeline = defaultTimelineToTimelineModel(timeline, false, TimelineType.template);
       expect(newTimeline).toEqual({
         activeTab: TimelineTabs.query,
+        prevActiveTab: TimelineTabs.query,
         columns: [
           {
             columnHeaderType: 'not-filtered',
@@ -466,6 +468,7 @@ describe('helpers', () => {
       const newTimeline = defaultTimelineToTimelineModel(timeline, false, TimelineType.default);
       expect(newTimeline).toEqual({
         activeTab: TimelineTabs.query,
+        prevActiveTab: TimelineTabs.query,
         columns: [
           {
             columnHeaderType: 'not-filtered',
@@ -574,6 +577,7 @@ describe('helpers', () => {
       const newTimeline = defaultTimelineToTimelineModel(timeline, false);
       expect(newTimeline).toEqual({
         activeTab: TimelineTabs.query,
+        prevActiveTab: TimelineTabs.query,
         columns: [
           {
             columnHeaderType: 'not-filtered',
@@ -682,6 +686,7 @@ describe('helpers', () => {
       const newTimeline = defaultTimelineToTimelineModel(timeline, false);
       expect(newTimeline).toEqual({
         activeTab: TimelineTabs.query,
+        prevActiveTab: TimelineTabs.query,
         savedObjectId: 'savedObject-1',
         columns: [
           {
@@ -858,6 +863,7 @@ describe('helpers', () => {
       const newTimeline = defaultTimelineToTimelineModel(timeline, false);
       expect(newTimeline).toEqual({
         activeTab: TimelineTabs.query,
+        prevActiveTab: TimelineTabs.query,
         savedObjectId: 'savedObject-1',
         columns: [
           {
@@ -1006,6 +1012,7 @@ describe('helpers', () => {
       const newTimeline = defaultTimelineToTimelineModel(timeline, false, TimelineType.template);
       expect(newTimeline).toEqual({
         activeTab: TimelineTabs.query,
+        prevActiveTab: TimelineTabs.query,
         columns: [
           {
             columnHeaderType: 'not-filtered',
@@ -1116,6 +1123,7 @@ describe('helpers', () => {
       const newTimeline = defaultTimelineToTimelineModel(timeline, false, TimelineType.default);
       expect(newTimeline).toEqual({
         activeTab: TimelineTabs.query,
+        prevActiveTab: TimelineTabs.query,
         columns: [
           {
             columnHeaderType: 'not-filtered',

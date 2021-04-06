@@ -2063,6 +2063,7 @@ export const mockTimelineResults: OpenTimelineResult[] = [
 
 export const mockTimelineModel: TimelineModel = {
   activeTab: TimelineTabs.query,
+  prevActiveTab: TimelineTabs.notes,
   columns: [
     {
       columnHeaderType: 'not-filtered',
@@ -2210,6 +2211,7 @@ export const defaultTimelineProps: CreateTimelineProps = {
   from: '2018-11-05T18:58:25.937Z',
   timeline: {
     activeTab: TimelineTabs.query,
+    prevActiveTab: TimelineTabs.query,
     columns: [
       { columnHeaderType: 'not-filtered', id: '@timestamp', type: 'number', width: 190 },
       { columnHeaderType: 'not-filtered', id: 'message', width: 180 },
