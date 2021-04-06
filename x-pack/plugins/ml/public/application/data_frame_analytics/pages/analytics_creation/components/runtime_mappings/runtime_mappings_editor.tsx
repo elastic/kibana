@@ -10,6 +10,7 @@ import React, { memo, FC } from 'react';
 import { EuiCodeEditor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isRuntimeMappings } from '../../../../../../../common/util/runtime_field_utils';
+import { XJsonModeType } from './runtime_mappings';
 
 interface Props {
   convertToJson: (data: string) => string;
@@ -17,7 +18,7 @@ interface Props {
   setIsRuntimeMappingsEditorApplyButtonEnabled: React.Dispatch<React.SetStateAction<boolean>>;
   advancedEditorRuntimeMappingsLastApplied: string | undefined;
   advancedRuntimeMappingsConfig: string;
-  xJsonMode: any;
+  xJsonMode: XJsonModeType;
 }
 
 export const RuntimeMappingsEditor: FC<Props> = memo(
