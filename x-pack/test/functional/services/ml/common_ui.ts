@@ -10,17 +10,12 @@ import { ProvidedType } from '@kbn/test/types/ftr';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+import type { CanvasElementColorStats } from '../canvas_element';
+
 interface SetValueOptions {
   clearWithKeyboard?: boolean;
   typeCharByChar?: boolean;
 }
-
-// key: color hex code, e.g. #FF3344
-// value: the expected percentage of the color to be present in the canvas element
-export type CanvasElementColorStats = Array<{
-  key: string;
-  value: number;
-}>;
 
 export type MlCommonUI = ProvidedType<typeof MachineLearningCommonUIProvider>;
 

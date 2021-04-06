@@ -10,6 +10,15 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+import type { CanvasElementColorStats } from '../canvas_element';
+
+export type HistogramCharts = Array<{
+  chartAvailable: boolean;
+  id: string;
+  legend?: string;
+  colorStats?: CanvasElementColorStats;
+}>;
+
 export function TransformWizardProvider({ getService }: FtrProviderContext) {
   const aceEditor = getService('aceEditor');
   const canvasElement = getService('canvasElement');
@@ -197,14 +206,7 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
       );
     },
 
-    async assertIndexPreviewHistogramCharts(
-      expectedHistogramCharts: Array<{
-        chartAvailable: boolean;
-        id: string;
-        legend: string;
-        colorStats?: any[];
-      }>
-    ) {
+    async assertIndexPreviewHistogramCharts(expectedHistogramCharts: HistogramCharts) {
       // For each chart, get the content of each header cell and assert
       // the legend text and column id and if the chart should be present or not.
       await retry.tryForTime(5000, async () => {
@@ -216,11 +218,11 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
 
             if (expected.colorStats !== undefined) {
               const sortedExpectedColorStats = [...expected.colorStats].sort((a, b) =>
-                a.key.localeCompare(b.key)
+                a.color.localeCompare(b.color)
               );
 
               const actualColorStats = await canvasElement.getColorStats(
-                `[data-test-subj="mlDataGridChart-${id}-histogram"] .echCanvasRenderer`,
+                `[data-test-subj="mlDataGridChart-${expected.id}-histogram"] .echCanvasRenderer`,
                 sortedExpectedColorStats
               );
 
