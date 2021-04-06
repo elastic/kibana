@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SavedObjectNotFound } from '../../../../../../../../src/plugins/kibana_utils/public';
 import {
   DataPublicPluginStart,
   IndexPattern,
@@ -29,7 +30,7 @@ function getFieldFormatsForApp(app: DataType) {
 
 export type DataType = 'synthetics' | 'apm' | 'logs' | 'metrics' | 'rum';
 
-const indexPatternList: Record<DataType, string> = {
+export const indexPatternList: Record<DataType, string> = {
   synthetics: 'synthetics_static_index_pattern_id',
   apm: 'apm_static_index_pattern_id',
   rum: 'rum_static_index_pattern_id',
@@ -45,7 +46,7 @@ const appToPatternMap: Record<DataType, string> = {
   metrics: 'metrics-*,metricbeat-*',
 };
 
-function isParamsSame(param1: IFieldFormat['_params'], param2: FieldFormatParams) {
+export function isParamsSame(param1: IFieldFormat['_params'], param2: FieldFormatParams) {
   return (
     param1?.inputFormat === param2?.inputFormat &&
     param1?.outputFormat === param2?.outputFormat &&
@@ -116,11 +117,13 @@ export class ObservabilityIndexPatterns {
     try {
       const indexPattern = await this.data?.indexPatterns.get(indexPatternList[app]);
 
+      // this is intentional a non blocking call, so no await clause
       this.validateFieldFormats(app, indexPattern);
       return indexPattern;
-    } catch (e) {
-      // FIXME, catch specific error
-      return await this.createIndexPattern(app || 'apm');
+    } catch (e: unknown) {
+      if (e instanceof SavedObjectNotFound) {
+        return await this.createIndexPattern(app || 'apm');
+      }
     }
   }
 }
