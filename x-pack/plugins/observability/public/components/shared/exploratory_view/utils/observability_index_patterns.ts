@@ -12,6 +12,7 @@ import {
   IndexPatternSpec,
 } from '../../../../../../../../src/plugins/data/public';
 import { rumFieldFormats } from '../configurations/rum/field_formats';
+import { syntheticsFieldFormats } from '../configurations/synthetics/field_formats';
 import { FieldFormat, FieldFormatParams } from '../types';
 
 const appFieldFormats: Record<DataType, FieldFormat[] | null> = {
@@ -19,7 +20,7 @@ const appFieldFormats: Record<DataType, FieldFormat[] | null> = {
   apm: null,
   logs: null,
   metrics: null,
-  synthetics: null,
+  synthetics: syntheticsFieldFormats,
 };
 
 function getFieldFormatsForApp(app: DataType) {
@@ -37,7 +38,7 @@ const indexPatternList: Record<DataType, string> = {
 };
 
 const appToPatternMap: Record<DataType, string> = {
-  synthetics: 'heartbeat-*',
+  synthetics: '(synthetics-data-view)*,heartbeat-*,synthetics-*',
   apm: 'apm-*',
   rum: '(rum-data-view)*,apm-*',
   logs: 'logs-*,filebeat-*',
@@ -46,7 +47,9 @@ const appToPatternMap: Record<DataType, string> = {
 
 function isParamsSame(param1: IFieldFormat['_params'], param2: FieldFormatParams) {
   return (
-    param1?.inputFormat === param2?.inputFormat && param1?.outputFormat === param2?.outputFormat
+    param1?.inputFormat === param2?.inputFormat &&
+    param1?.outputFormat === param2?.outputFormat &&
+    param2?.outputPrecision === param1?.outputPrecision
   );
 }
 
@@ -73,7 +76,7 @@ export class ObservabilityIndexPatterns {
       title: pattern,
       id: indexPatternList[app],
       timeFieldName: '@timestamp',
-      fieldFormats: this.getFieldFormats(),
+      fieldFormats: this.getFieldFormats(app),
     });
   }
   // we want to make sure field formats remain same
@@ -95,10 +98,10 @@ export class ObservabilityIndexPatterns {
     }
   }
 
-  getFieldFormats() {
+  getFieldFormats(app: DataType) {
     const fieldFormatMap: IndexPatternSpec['fieldFormats'] = {};
 
-    rumFieldFormats.forEach(({ field, format }) => {
+    (appFieldFormats?.[app] ?? []).forEach(({ field, format }) => {
       fieldFormatMap[field] = format;
     });
 

@@ -95,6 +95,7 @@ type OutputFormat = 'asSeconds' | 'asMilliseconds' | 'humanize';
 export interface FieldFormatParams {
   inputFormat: InputFormat;
   outputFormat: OutputFormat;
+  outputPrecision?: number;
 }
 
 export interface FieldFormat {

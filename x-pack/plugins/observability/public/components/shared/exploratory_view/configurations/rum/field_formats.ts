@@ -12,7 +12,7 @@ import {
   LCP_FIELD,
   TBT_FIELD,
   TRANSACTION_DURATION,
-} from '../data/elasticsearch_fieldnames';
+} from '../constants/elasticsearch_fieldnames';
 
 export const rumFieldFormats: FieldFormat[] = [
   {

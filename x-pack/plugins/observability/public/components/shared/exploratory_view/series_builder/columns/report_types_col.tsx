@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { ReportViewTypeId, SeriesUrl } from '../../types';
-import { NEW_SERIES_KEY, useUrlStorage } from '../../hooks/use_url_strorage';
+import { NEW_SERIES_KEY, useUrlStorage } from '../../hooks/use_url_storage';
 
 interface Props {
   reportTypes: Array<{ id: ReportViewTypeId; label: string }>;

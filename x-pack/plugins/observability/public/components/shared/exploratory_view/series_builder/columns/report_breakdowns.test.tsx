@@ -10,7 +10,7 @@ import { fireEvent, screen } from '@testing-library/react';
 import { render } from '../../../../../utils/test_helper';
 import { getDefaultConfigs } from '../../configurations/default_configs';
 import { mockIndexPattern, mockUrlStorage } from '../../rtl_helpers';
-import { NEW_SERIES_KEY } from '../../hooks/use_url_strorage';
+import { NEW_SERIES_KEY } from '../../hooks/use_url_storage';
 import { ReportBreakdowns } from './report_breakdowns';
 import { USER_AGENT_OS } from '../../configurations/data/elasticsearch_fieldnames';
 

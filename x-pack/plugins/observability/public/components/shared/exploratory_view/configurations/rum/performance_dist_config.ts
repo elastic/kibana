@@ -24,7 +24,7 @@ import {
   USER_AGENT_NAME,
   USER_AGENT_OS,
   USER_AGENT_VERSION,
-} from '../data/elasticsearch_fieldnames';
+} from '../constants/elasticsearch_fieldnames';
 
 export function getPerformanceDistLensConfig({ seriesId, indexPattern }: ConfigProps): DataSeries {
   return {

@@ -10,7 +10,7 @@ import { screen, waitFor } from '@testing-library/react';
 import { mockIndexPattern, mockUrlStorage, render } from '../rtl_helpers';
 import { SelectedFilters } from './selected_filters';
 import { getDefaultConfigs } from '../configurations/default_configs';
-import { NEW_SERIES_KEY } from '../hooks/use_url_strorage';
+import { NEW_SERIES_KEY } from '../hooks/use_url_storage';
 import { USER_AGENT_NAME } from '../configurations/data/elasticsearch_fieldnames';
 
 describe('SelectedFilters', function () {
