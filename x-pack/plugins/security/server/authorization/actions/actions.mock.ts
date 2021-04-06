@@ -9,6 +9,7 @@ import type { Actions } from './actions';
 import { AlertingActions } from './alerting';
 import { ApiActions } from './api';
 import { AppActions } from './app';
+import { RacActions } from './rac';
 import { SavedObjectActions } from './saved_object';
 import { SpaceActions } from './space';
 import { UIActions } from './ui';
@@ -19,6 +20,7 @@ jest.mock('./saved_object');
 jest.mock('./space');
 jest.mock('./ui');
 jest.mock('./alerting');
+jest.mock('./rac');
 
 const create = (versionNumber: string) => {
   const t = ({
@@ -30,6 +32,7 @@ const create = (versionNumber: string) => {
     space: new SpaceActions(versionNumber),
     ui: new UIActions(versionNumber),
     version: `version:${versionNumber}`,
+    rac: new RacActions(versionNumber),
   } as unknown) as jest.Mocked<Actions>;
   return t;
 };
