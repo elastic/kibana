@@ -31,8 +31,9 @@ export function StandardAgg(props) {
   const handleSelectChange = createSelectHandler(handleChange);
 
   const restrictFields = getSupportedFieldsByMetricType(model.type);
-  const indexPattern =
-    (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
+  const indexPattern = series.override_index_pattern
+    ? series.series_index_pattern
+    : panel.index_pattern;
   const htmlId = htmlIdGenerator();
 
   return (
