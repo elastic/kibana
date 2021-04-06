@@ -19,7 +19,7 @@ interface Props {
 
 export const ScheduleField = ({ number, onChange, unit }: Props) => {
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup gutterSize="s">
       <EuiFlexItem>
         <EuiFieldNumber
           aria-label={i18n.translate(
