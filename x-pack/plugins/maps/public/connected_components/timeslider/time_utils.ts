@@ -25,16 +25,12 @@ function getScaledDateFormat(interval: number): string {
     return 'MMM D';
   }
 
-  if (interval >= moment.duration(12, 'h')) {
-    return 'MMM D HH';
-  }
-
-  if (interval >= moment.duration(3, 'h')) {
-    return 'D HH';
+  if (interval >= moment.duration(6, 'h')) {
+    return 'MMM D HH:mm';
   }
 
   if (interval >= moment.duration(1, 'h')) {
-    return 'HH';
+    return 'HH:mm';
   }
 
   if (interval >= moment.duration(1, 'm')) {

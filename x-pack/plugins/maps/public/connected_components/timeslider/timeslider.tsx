@@ -17,7 +17,7 @@ import { NextTimesliceIcon } from './next_timeslice_icon';
 import { PreviousTimesliceIcon } from './previous_timeslice_icon';
 
 const NUM_TICKS = 6;
-const MAX_TICKS = 8;
+const MAX_TICKS = 7;
 
 export interface Props {
   closeTimeslider: () => void;
