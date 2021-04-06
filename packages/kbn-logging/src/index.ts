@@ -12,3 +12,4 @@ export { Logger, LogMeta } from './logger';
 export { LoggerFactory } from './logger_factory';
 export { Layout } from './layout';
 export { Appender, DisposableAppender } from './appenders';
+export { Ecs, EcsEventCategory, EcsEventKind, EcsEventOutcome, EcsEventType } from './ecs';

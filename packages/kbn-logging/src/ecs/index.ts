@@ -7,7 +7,6 @@
  */
 
 import { EcsBase } from './base';
-import { EcsField } from './ecs';
 
 import { EcsAgent } from './agent';
 import { EcsAutonomousSystem } from './autonomous_system';
@@ -42,8 +41,23 @@ import { EcsUser } from './user';
 import { EcsUserAgent } from './user_agent';
 import { EcsVulnerability } from './vulnerability';
 
+export { EcsEventCategory, EcsEventKind, EcsEventOutcome, EcsEventType } from './event';
+
+interface EcsField {
+  /**
+   * These typings were written as of ECS 1.9.0.
+   * Don't change this value without checking the rest
+   * of the types to conform to that ECS version.
+   *
+   * https://www.elastic.co/guide/en/ecs/1.9/index.html
+   */
+  version: '1.9.0';
+}
+
 /**
- * @internal
+ * Represents the full ECS schema.
+ *
+ * @public
  */
 export type Ecs = EcsBase &
   EcsTracing & {

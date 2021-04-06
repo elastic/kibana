@@ -11,7 +11,7 @@
  */
 export interface EcsEvent {
   action?: string;
-  category?: Category[];
+  category?: EcsEventCategory[];
   code?: string;
   created?: string;
   dataset?: string;
@@ -20,10 +20,10 @@ export interface EcsEvent {
   hash?: string;
   id?: string;
   ingested?: string;
-  kind?: Kind;
+  kind?: EcsEventKind;
   module?: string;
   original?: string;
-  outcome?: Outcome;
+  outcome?: EcsEventOutcome;
   provider?: string;
   reason?: string;
   reference?: string;
@@ -33,11 +33,14 @@ export interface EcsEvent {
   severity?: number;
   start?: string;
   timezone?: string;
-  type?: Type[];
+  type?: EcsEventType[];
   url?: string;
 }
 
-type Category =
+/**
+ * @public
+ */
+export type EcsEventCategory =
   | 'authentication'
   | 'configuration'
   | 'database'
@@ -54,11 +57,20 @@ type Category =
   | 'session'
   | 'web';
 
-type Kind = 'alert' | 'event' | 'metric' | 'state' | 'pipeline_error' | 'signal';
+/**
+ * @public
+ */
+export type EcsEventKind = 'alert' | 'event' | 'metric' | 'state' | 'pipeline_error' | 'signal';
 
-type Outcome = 'failure' | 'success' | 'unknown';
+/**
+ * @public
+ */
+export type EcsEventOutcome = 'failure' | 'success' | 'unknown';
 
-type Type =
+/**
+ * @public
+ */
+export type EcsEventType =
   | 'access'
   | 'admin'
   | 'allowed'
