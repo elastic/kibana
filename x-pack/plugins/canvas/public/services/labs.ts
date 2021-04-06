@@ -6,24 +6,24 @@
  */
 
 import {
-  experimentIDs,
-  Experiment,
-  ExperimentID,
+  projectIDs,
+  Project,
+  ProjectID,
 } from '../../../../../src/plugins/presentation_util/public';
 
 import { CanvasServiceFactory } from '.';
 
-export interface CanvasExperimentsService {
-  getExperiment: (id: ExperimentID) => Experiment;
-  getExperiments: () => Record<ExperimentID, Experiment>;
+export interface CanvasLabsService {
+  getProject: (id: ProjectID) => Project;
+  getProjects: () => Record<ProjectID, Project>;
 }
 
-export const experimentsServiceFactory: CanvasServiceFactory<CanvasExperimentsService> = async (
+export const labsServiceFactory: CanvasServiceFactory<CanvasLabsService> = async (
   _coreSetup,
   _coreStart,
   _setupPlugins,
   startPlugins
 ) => ({
-  experimentIDs,
-  ...startPlugins.presentationUtil.experimentsService,
+  projectIDs,
+  ...startPlugins.presentationUtil.labsService,
 });

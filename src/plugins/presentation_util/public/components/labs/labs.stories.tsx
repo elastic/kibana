@@ -9,23 +9,24 @@
 import React from 'react';
 import { action } from '@storybook/addon-actions';
 
-import { ExperimentsButton } from './experiments_button';
-import { ExperimentsFlyout } from './experiments_flyout';
+import { LabsBeakerButton } from './labs_beaker_button';
+import { LabsFlyout } from './labs_flyout';
 
 export default {
-  title: 'Experiments/Flyout',
-  description: 'A set of components used for providing Experiment controls in another.',
+  title: 'Labs/Flyout',
+  description:
+    'A set of components used for providing Labs controls and projects in another solution.',
   argTypes: {},
 };
 
 export function BeakerButton() {
-  return <ExperimentsButton />;
+  return <LabsBeakerButton />;
 }
 
 export function Flyout() {
-  return <ExperimentsFlyout onClose={action('onClose')} />;
+  return <LabsFlyout onClose={action('onClose')} />;
 }
 
 export function EmptyFlyout() {
-  return <ExperimentsFlyout onClose={action('onClose')} solutions={[]} />;
+  return <LabsFlyout onClose={action('onClose')} solutions={[]} />;
 }

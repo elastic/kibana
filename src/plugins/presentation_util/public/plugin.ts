@@ -38,7 +38,7 @@ export class PresentationUtilPlugin
     pluginServices.setRegistry(registry.start({ coreStart, startPlugins }));
     return {
       ContextProvider: pluginServices.getContextProvider(),
-      experimentsService: pluginServices.getServices().experiments,
+      labsService: pluginServices.getServices().labs,
     };
   }
 

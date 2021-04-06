@@ -20,32 +20,26 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 
-import {
-  ExperimentSolution,
-  ExperimentStatus,
-  ExperimentID,
-  Experiment,
-  ExperimentEnvironment,
-} from '../../../common';
+import { SolutionName, ProjectStatus, ProjectID, Project, EnvironmentName } from '../../../common';
 import { pluginServices } from '../../services';
-import { ExperimentsStrings } from '../../i18n';
+import { LabsStrings } from '../../i18n';
 
-import { ExperimentsList } from './experiments_list';
+import { ProjectList } from './project_list';
 
-const { Flyout: strings } = ExperimentsStrings.Components;
+const { Flyout: strings } = LabsStrings.Components;
 
 export interface Props {
   onClose: () => void;
-  solutions?: ExperimentSolution[];
+  solutions?: SolutionName[];
   onEnabledCountChange?: (overrideCount: number) => void;
 }
 
 const hasStatusChanged = (
-  original: Record<ExperimentID, Experiment>,
-  current: Record<ExperimentID, Experiment>
+  original: Record<ProjectID, Project>,
+  current: Record<ProjectID, Project>
 ): boolean => {
-  for (const id of Object.keys(original) as ExperimentID[]) {
-    for (const key of Object.keys(original[id].status) as Array<keyof ExperimentStatus>) {
+  for (const id of Object.keys(original) as ProjectID[]) {
+    for (const key of Object.keys(original[id].status) as Array<keyof ProjectStatus>) {
       if (original[id].status[key] !== current[id].status[key]) {
         return true;
       }
@@ -54,31 +48,31 @@ const hasStatusChanged = (
   return false;
 };
 
-export const getOverridenCount = (experiments: Record<ExperimentID, Experiment>) =>
-  Object.values(experiments).filter((experiment) => experiment.status.isOverride).length;
+export const getOverridenCount = (projects: Record<ProjectID, Project>) =>
+  Object.values(projects).filter((project) => project.status.isOverride).length;
 
-export const ExperimentsFlyout = (props: Props) => {
+export const LabsFlyout = (props: Props) => {
   const { solutions, onEnabledCountChange = () => {}, onClose } = props;
-  const { experiments: experimentsService } = pluginServices.getHooks();
-  const { getExperiments, setExperimentStatus, reset } = experimentsService.useService();
+  const { labs: labsService } = pluginServices.getHooks();
+  const { getProjects, setProjectStatus, reset } = labsService.useService();
 
-  const [experiments, setExperiments] = useState(getExperiments());
-  const [overrideCount, setOverrideCount] = useState(getOverridenCount(experiments));
-  const initialStatus = useRef(getExperiments());
+  const [projects, setProjects] = useState(getProjects());
+  const [overrideCount, setOverrideCount] = useState(getOverridenCount(projects));
+  const initialStatus = useRef(getProjects());
 
-  const isChanged = hasStatusChanged(initialStatus.current, experiments);
+  const isChanged = hasStatusChanged(initialStatus.current, projects);
 
   useEffect(() => {
-    setOverrideCount(getOverridenCount(experiments));
-  }, [experiments]);
+    setOverrideCount(getOverridenCount(projects));
+  }, [projects]);
 
   useEffect(() => {
     onEnabledCountChange(overrideCount);
   }, [onEnabledCountChange, overrideCount]);
 
-  const onStatusChange = (id: ExperimentID, env: ExperimentEnvironment, enabled: boolean) => {
-    setExperimentStatus(id, env, enabled);
-    setExperiments(getExperiments());
+  const onStatusChange = (id: ProjectID, env: EnvironmentName, enabled: boolean) => {
+    setProjectStatus(id, env, enabled);
+    setProjects(getProjects());
   };
 
   let footer: ReactNode = null;
@@ -87,7 +81,7 @@ export const ExperimentsFlyout = (props: Props) => {
     <EuiButtonEmpty
       onClick={() => {
         reset();
-        setExperiments(getExperiments());
+        setProjects(getProjects());
       }}
       isDisabled={!overrideCount}
     >
@@ -132,7 +126,7 @@ export const ExperimentsFlyout = (props: Props) => {
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <ExperimentsList {...{ experiments, solutions, onStatusChange }} />
+        <ProjectList {...{ projects, solutions, onStatusChange }} />
       </EuiFlyoutBody>
       {footer}
     </EuiFlyout>
@@ -141,4 +135,4 @@ export const ExperimentsFlyout = (props: Props) => {
 
 // required for dynamic import using React.lazy()
 // eslint-disable-next-line import/no-default-export
-export default ExperimentsList;
+export default LabsFlyout;

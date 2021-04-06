@@ -1,4 +1,4 @@
-.experimentListItem {
+.projectListItem {
   position: relative;
   background: $euiColorEmptyShade;
   padding: $euiSizeL;
@@ -19,7 +19,7 @@
   }
 }
 
-.experimentListItem + .experimentListItem:after {
+.projectListItem + .projectListItem:after {
   position: absolute;
   top: 0;
   right: 0;
@@ -29,9 +29,15 @@
   content: '';
 }
 
-.euiFlyout .experimentListItem {
+.euiFlyout .projectListItem {
+  padding: $euiSizeL $euiSizeXS;
+
   &:first-child {
     padding-top: 0;
+  }
+
+  &--isOverridden:before {
+    left: -12px;
   }
 
   &--isOverridden:first-child:before {

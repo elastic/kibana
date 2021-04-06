@@ -7,26 +7,19 @@
  */
 
 import { PresentationUtilPlugin } from './plugin';
-import { pluginServices } from './services';
 
 export { PresentationUtilPluginSetup, PresentationUtilPluginStart } from './types';
-export { experimentIDs, ExperimentID, Experiment } from '../common/experiments';
+export { SaveModalDashboardProps } from './components/types';
+export { projectIDs, ProjectID, Project } from '../common/labs';
 
 export {
-  LazyExperimentsButton,
-  LazyExperimentsFlyout,
+  LazyLabsBeakerButton,
+  LazyLabsFlyout,
   LazyDashboardPicker,
   LazySavedObjectSaveModalDashboard,
   withSuspense,
 } from './components';
 
-export { SaveModalDashboardProps } from './components/types';
-export { PresentationUtilPluginSetup, PresentationUtilPluginStart } from './types';
-
 export function plugin() {
   return new PresentationUtilPlugin();
 }
-
-export const useExperimentsService = () => {
-  const {} = pluginServices.getHooks().experiments.useService();
-};

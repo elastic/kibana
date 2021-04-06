@@ -16,19 +16,19 @@ import {
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 
-import { ExperimentEnvironment } from '../../../common/experiments';
-import { ExperimentsStrings } from '../../i18n';
+import { EnvironmentName } from '../../../common/labs';
+import { LabsStrings } from '../../i18n';
 
-const { Switch: strings } = ExperimentsStrings.Components;
+const { Switch: strings } = LabsStrings.Components;
 
-const switchText: { [env in ExperimentEnvironment]: { name: string; help: string } } = {
+const switchText: { [env in EnvironmentName]: { name: string; help: string } } = {
   kibana: strings.getKibanaSwitchText(),
   browser: strings.getBrowserSwitchText(),
   session: strings.getSessionSwitchText(),
 };
 
 export interface Props {
-  env: ExperimentEnvironment;
+  env: EnvironmentName;
   isChecked: boolean;
   onChange: (checked: boolean) => void;
   name: string;

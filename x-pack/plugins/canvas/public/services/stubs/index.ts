@@ -10,7 +10,7 @@ import { embeddablesService } from './embeddables';
 import { expressionsService } from './expressions';
 import { navLinkService } from './nav_link';
 import { notifyService } from './notify';
-import { experimentsService } from './experiments';
+import { labsService } from './labs';
 import { platformService } from './platform';
 
 export const stubs: CanvasServices = {
@@ -19,7 +19,7 @@ export const stubs: CanvasServices = {
   navLink: navLinkService,
   notify: notifyService,
   platform: platformService,
-  experiments: experimentsService,
+  labs: labsService,
 };
 
 export const startServices = async (providedServices: Partial<CanvasServices> = {}) => {

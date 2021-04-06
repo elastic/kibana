@@ -8,7 +8,7 @@
 
 import { capabilitiesServiceFactory } from './capabilities';
 import { dashboardsServiceFactory } from './dashboards';
-import { experimentsServiceFactory } from './experiments';
+import { labsServiceFactory } from './labs';
 import { PluginServiceProviders, PluginServiceProvider, PluginServiceRegistry } from '../create';
 import { PresentationUtilServices } from '..';
 
@@ -18,7 +18,7 @@ export { capabilitiesServiceFactory } from './capabilities';
 export const providers: PluginServiceProviders<PresentationUtilServices> = {
   dashboards: new PluginServiceProvider(dashboardsServiceFactory),
   capabilities: new PluginServiceProvider(capabilitiesServiceFactory),
-  experiments: new PluginServiceProvider(experimentsServiceFactory),
+  labs: new PluginServiceProvider(labsServiceFactory),
 };
 
 export const registry = new PluginServiceRegistry<PresentationUtilServices>(providers);

@@ -432,11 +432,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'presentation:unifiedToolbar': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'canvas:timeToPresent': {
+  'labs:presentation:unifiedToolbar': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },

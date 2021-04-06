@@ -18,46 +18,41 @@ import {
 } from '@elastic/eui';
 import classnames from 'classnames';
 
-import {
-  ExperimentID,
-  ExperimentEnvironment,
-  Experiment,
-  environmentNames,
-} from '../../../common/experiments';
+import { ProjectID, EnvironmentName, Project, environmentNames } from '../../../common/labs';
 import { EnvironmentSwitch } from './environment_switch';
 
-import { ExperimentsStrings } from '../../i18n';
-const { ListItem: strings } = ExperimentsStrings.Components;
+import { LabsStrings } from '../../i18n';
+const { ListItem: strings } = LabsStrings.Components;
 
-import './experiment_list_item.scss';
+import './project_list_item.scss';
 
 export interface Props {
-  experiment: Experiment;
-  onStatusChange: (id: ExperimentID, env: ExperimentEnvironment, enabled: boolean) => void;
+  project: Project;
+  onStatusChange: (id: ProjectID, env: EnvironmentName, enabled: boolean) => void;
 }
 
-export const ExperimentListItem = ({ experiment, onStatusChange }: Props) => {
-  const { id, status, isActive, name, description, solutions } = experiment;
+export const ProjectListItem = ({ project, onStatusChange }: Props) => {
+  const { id, status, isActive, name, description, solutions } = project;
   const { isEnabled, isOverride } = status;
 
   return (
     <EuiFlexItem
       className={classnames({
-        experimentListItem: true,
-        'experimentListItem--isOverridden': isOverride,
-        'experimentListItem--isOverriddenEnabled': isOverride && isEnabled,
+        projectListItem: true,
+        'projectListItem--isOverridden': isOverride,
+        'projectListItem--isOverriddenEnabled': isOverride && isEnabled,
       })}
     >
       <EuiFlexGroup gutterSize="m" responsive={false}>
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiTitle className="experimentListItem__title" size="s">
+              <EuiTitle className="projectListItem__title" size="s">
                 <h2>{name}</h2>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <div className="experimentListItem__solutions">
+              <div className="projectListItem__solutions">
                 {solutions.map((solution) => (
                   <EuiBadge key={solution}>{solution}</EuiBadge>
                 ))}

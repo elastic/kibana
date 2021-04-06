@@ -8,7 +8,7 @@
 
 import { capabilitiesServiceFactory } from './capabilities';
 import { dashboardsServiceFactory } from './dashboards';
-import { experimentsServiceFactory } from './experiments';
+import { labsServiceFactory } from './labs';
 import {
   PluginServiceProviders,
   KibanaPluginServiceParams,
@@ -20,14 +20,14 @@ import { PresentationUtilServices } from '..';
 
 export { capabilitiesServiceFactory } from './capabilities';
 export { dashboardsServiceFactory } from './dashboards';
-export { experimentsServiceFactory } from './experiments';
+export { labsServiceFactory } from './labs';
 
 export const providers: PluginServiceProviders<
   PresentationUtilServices,
   KibanaPluginServiceParams<PresentationUtilPluginStartDeps>
 > = {
   capabilities: new PluginServiceProvider(capabilitiesServiceFactory),
-  experiments: new PluginServiceProvider(experimentsServiceFactory),
+  labs: new PluginServiceProvider(labsServiceFactory),
   dashboards: new PluginServiceProvider(dashboardsServiceFactory),
 };
 

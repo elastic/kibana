@@ -10,19 +10,19 @@ import React, { useState } from 'react';
 import { EuiButton, EuiIcon, EuiNotificationBadge, EuiButtonProps } from '@elastic/eui';
 
 import { pluginServices } from '../../services';
-import { ExperimentsFlyout, Props as FlyoutProps } from './experiments_flyout';
+import { LabsFlyout, Props as FlyoutProps } from './labs_flyout';
 
 export type Props = EuiButtonProps & Pick<FlyoutProps, 'solutions'>;
 
-export const ExperimentsButton = ({ solutions, ...props }: Props) => {
-  const { experiments: experimentsService } = pluginServices.getHooks();
-  const { getExperiments } = experimentsService.useService();
+export const LabsBeakerButton = ({ solutions, ...props }: Props) => {
+  const { labs: labsService } = pluginServices.getHooks();
+  const { getProjects } = labsService.useService();
   const [isOpen, setIsOpen] = useState(false);
 
-  const experiments = getExperiments();
+  const projects = getProjects();
 
   const [overrideCount, onEnabledCountChange] = useState(
-    Object.values(experiments).filter((experiment) => experiment.status.isOverride).length
+    Object.values(projects).filter((project) => project.status.isOverride).length
   );
 
   const onButtonClick = () => setIsOpen((open) => !open);
@@ -38,11 +38,11 @@ export const ExperimentsButton = ({ solutions, ...props }: Props) => {
           </EuiNotificationBadge>
         ) : null}
       </EuiButton>
-      {isOpen ? <ExperimentsFlyout {...{ onClose, solutions, onEnabledCountChange }} /> : null}
+      {isOpen ? <LabsFlyout {...{ onClose, solutions, onEnabledCountChange }} /> : null}
     </>
   );
 };
 
 // required for dynamic import using React.lazy()
 // eslint-disable-next-line import/no-default-export
-export default ExperimentsButton;
+export default LabsBeakerButton;

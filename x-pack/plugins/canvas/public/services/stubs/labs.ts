@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { CanvasExperimentsService } from '../experiments';
+import { CanvasLabsService } from '../labs';
 
 const noop = (..._args: any[]): any => {};
 
-export const experimentsService: CanvasExperimentsService = {
-  getExperiment: noop,
-  getExperiments: noop,
+export const labsService: CanvasLabsService = {
+  getProject: noop,
+  getProjects: noop,
 };

@@ -8,14 +8,14 @@
 
 import { schema } from '@kbn/config-schema';
 import { UiSettingsParams } from '../../../../src/core/types';
-import { experiments, experimentIDs, ExperimentID } from '../common';
+import { projects, projectIDs, ProjectID } from '../common';
 
-export const SETTING_CATEGORY = 'Experiments';
+export const SETTING_CATEGORY = 'Presentation Labs';
 
-const experimentSettings: Record<ExperimentID, UiSettingsParams<boolean>> = experimentIDs.reduce(
+const labsProjectSettings: Record<ProjectID, UiSettingsParams<boolean>> = projectIDs.reduce(
   (acc, id) => {
-    const experiment = experiments[id];
-    const { name, description, isActive: value } = experiment;
+    const project = projects[id];
+    const { name, description, isActive: value } = project;
     acc[id] = {
       name,
       value,
@@ -28,7 +28,7 @@ const experimentSettings: Record<ExperimentID, UiSettingsParams<boolean>> = expe
     return acc;
   },
   {} as {
-    [id in ExperimentID]: UiSettingsParams<boolean>;
+    [id in ProjectID]: UiSettingsParams<boolean>;
   }
 );
 
@@ -36,5 +36,5 @@ const experimentSettings: Record<ExperimentID, UiSettingsParams<boolean>> = expe
  * uiSettings definitions for Presentation Util.
  */
 export const getUISettings = (): Record<string, UiSettingsParams<boolean>> => ({
-  ...experimentSettings,
+  ...labsProjectSettings,
 });

@@ -118,6 +118,5 @@ export interface UsageStats {
   'banners:placement': string;
   'banners:textColor': string;
   'banners:backgroundColor': string;
-  'presentation:unifiedToolbar': boolean;
-  'canvas:timeToPresent': boolean;
+  'labs:presentation:unifiedToolbar': boolean;
 }

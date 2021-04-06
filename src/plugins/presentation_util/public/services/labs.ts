@@ -8,32 +8,32 @@
 
 import { IUiSettingsClient } from 'kibana/public';
 import {
-  ExperimentEnvironment,
-  experimentIDs,
-  Experiment,
-  ExperimentConfig,
-  ExperimentID,
+  EnvironmentName,
+  projectIDs,
+  Project,
+  ProjectConfig,
+  ProjectID,
   EnvironmentStatus,
   environmentNames,
-  isExperimentEnabledByStatus,
+  isProjectEnabledByStatus,
 } from '../../common';
 
-export interface PresentationExperimentsService {
-  getExperimentIDs: () => typeof experimentIDs;
-  getExperiment: (id: ExperimentID) => Experiment;
-  getExperiments: () => Record<ExperimentID, Experiment>;
-  setExperimentStatus: (id: ExperimentID, env: ExperimentEnvironment, status: boolean) => void;
+export interface PresentationLabsService {
+  getProjectIDs: () => typeof projectIDs;
+  getProject: (id: ProjectID) => Project;
+  getProjects: () => Record<ProjectID, Project>;
+  setProjectStatus: (id: ProjectID, env: EnvironmentName, status: boolean) => void;
   reset: () => void;
 }
 
 export const isEnabledByStorageValue = (
-  experiment: ExperimentConfig,
-  environment: ExperimentEnvironment,
+  project: ProjectConfig,
+  environment: EnvironmentName,
   value: string | boolean | null
 ): boolean => {
-  const defaultValue = experiment.isActive;
+  const defaultValue = project.isActive;
 
-  if (!experiment.environments.includes(environment)) {
+  if (!project.environments.includes(environment)) {
     return defaultValue;
   }
 
@@ -52,14 +52,11 @@ export const isEnabledByStorageValue = (
   return defaultValue;
 };
 
-export const setStorageStatus = (storage: Storage, id: ExperimentID, enabled: boolean) =>
+export const setStorageStatus = (storage: Storage, id: ProjectID, enabled: boolean) =>
   storage.setItem(id, enabled ? 'enabled' : 'disabled');
 
-export const applyExperimentStatus = (
-  experiment: ExperimentConfig,
-  status: EnvironmentStatus
-): Experiment => {
-  const { isActive, environments } = experiment;
+export const applyProjectStatus = (project: ProjectConfig, status: EnvironmentStatus): Project => {
+  const { isActive, environments } = project;
 
   environmentNames.forEach((name) => {
     if (!environments.includes(name)) {
@@ -67,11 +64,11 @@ export const applyExperimentStatus = (
     }
   });
 
-  const isEnabled = isExperimentEnabledByStatus(isActive, status);
+  const isEnabled = isProjectEnabledByStatus(isActive, status);
   const isOverride = isEnabled !== isActive;
 
   return {
-    ...experiment,
+    ...project,
     status: {
       ...status,
       defaultValue: isActive,
@@ -81,8 +78,5 @@ export const applyExperimentStatus = (
   };
 };
 
-export const setUISettingsStatus = (
-  client: IUiSettingsClient,
-  id: ExperimentID,
-  enabled: boolean
-) => client.set(id, enabled);
+export const setUISettingsStatus = (client: IUiSettingsClient, id: ProjectID, enabled: boolean) =>
+  client.set(id, enabled);

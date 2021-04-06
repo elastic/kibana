@@ -10,59 +10,48 @@ import React from 'react';
 import { action } from '@storybook/addon-actions';
 import { mapValues } from 'lodash';
 
-import {
-  EnvironmentStatus,
-  ExperimentConfig,
-  ExperimentID,
-  ExperimentStatus,
-} from '../../../common';
-import { applyExperimentStatus } from '../../services/experiments';
-import { ExperimentListItem, Props } from './experiment_list_item';
+import { EnvironmentStatus, ProjectConfig, ProjectID, ProjectStatus } from '../../../common';
+import { applyProjectStatus } from '../../services/labs';
+import { ProjectListItem, Props } from './project_list_item';
 
-import { experiments as experimentConfigs } from '../../../common';
-import { ExperimentsList } from './experiments_list';
+import { projects as projectConfigs } from '../../../common';
+import { ProjectList } from './project_list';
 
 export default {
-  title: 'Experiments/List',
-  description: 'A set of controls for displaying and manipulating experiments.',
+  title: 'Labs/ProjectList',
+  description: 'A set of controls for displaying and manipulating projects.',
 };
 
-const experiments = mapValues(experimentConfigs, (experiment) =>
-  applyExperimentStatus(experiment, { kibana: false, session: false, browser: false })
+const projects = mapValues(projectConfigs, (project) =>
+  applyProjectStatus(project, { kibana: false, session: false, browser: false })
 );
 
 export function List() {
-  return <ExperimentsList {...{ experiments }} onStatusChange={action('onStatusChange')} />;
+  return <ProjectList {...{ projects }} onStatusChange={action('onStatusChange')} />;
 }
 
 export function EmptyList() {
-  return (
-    <ExperimentsList
-      {...{ experiments }}
-      solutions={[]}
-      onStatusChange={action('onStatusChange')}
-    />
-  );
+  return <ProjectList {...{ projects }} solutions={[]} onStatusChange={action('onStatusChange')} />;
 }
 
 export const ListItem = (
   props: Pick<
-    Props['experiment'],
+    Props['project'],
     'description' | 'isActive' | 'name' | 'solutions' | 'environments'
   > &
-    Omit<ExperimentStatus, 'defaultValue'>
+    Omit<ProjectStatus, 'defaultValue'>
 ) => {
   const { kibana, browser, session, ...rest } = props;
   const status: EnvironmentStatus = { kibana, browser, session };
-  const experimentConfig: ExperimentConfig = {
+  const projectConfig: ProjectConfig = {
     ...rest,
-    id: 'storybook:component' as ExperimentID,
+    id: 'storybook:component' as ProjectID,
   };
 
   return (
     <div style={{ maxWidth: 800 }}>
-      <ExperimentListItem
-        experiment={applyExperimentStatus(experimentConfig, status)}
+      <ProjectListItem
+        project={applyProjectStatus(projectConfig, status)}
         onStatusChange={(_id, env, enabled) => ({ ...status, [env]: enabled })}
       />
     </div>
@@ -71,8 +60,8 @@ export const ListItem = (
 
 ListItem.args = {
   isActive: false,
-  name: 'Demo Experiment',
-  description: 'This is a demo experiment, and this is the description of the demo experiment.',
+  name: 'Demo Project',
+  description: 'This is a demo project, and this is the description of the demo project.',
   kibana: false,
   browser: false,
   session: false,

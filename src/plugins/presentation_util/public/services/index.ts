@@ -9,11 +9,11 @@
 import { PluginServices } from './create';
 import { PresentationCapabilitiesService } from './capabilities';
 import { PresentationDashboardsService } from './dashboards';
-import { PresentationExperimentsService } from './experiments';
+import { PresentationLabsService } from './labs';
 export interface PresentationUtilServices {
   dashboards: PresentationDashboardsService;
   capabilities: PresentationCapabilitiesService;
-  experiments: PresentationExperimentsService;
+  labs: PresentationLabsService;
 }
 
 export const pluginServices = new PluginServices<PresentationUtilServices>();
