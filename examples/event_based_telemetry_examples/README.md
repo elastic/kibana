@@ -40,10 +40,16 @@ During the demo, you might want to see all the `telemetry.events` log messages (
 ```yaml
 telemetry:
   logging:
+    appenders:
+      telemetry-file:
+        type: rolling-file
+        fileName: /var/log/kibana-telemetry.log
+        layout:
+          type: pattern
     loggers:
       - name: events
         level: debug
-        appenders: [console]
+        appenders: [telemetry-file]
 ```
 
 Also, you may want to test what happens when the leaky bucket is too small that it can only contain 1 event per request.
