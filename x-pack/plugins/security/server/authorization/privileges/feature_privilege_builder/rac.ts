@@ -26,20 +26,15 @@ export class FeaturePrivilegeRacBuilder extends BaseFeaturePrivilegeBuilder {
      *
      * @param operations all CRUD operations to check privileges for
      * @param owners plugin or feature registered with RAC whose rule generate alerts
-     * @param spacesId spaceId corresponding to the rule generating the alert
      */
-    const getAlertingPrivilege = (
-      operations: string[],
-      owners: readonly string[],
-      spacesId: string
-    ) =>
+    const getAlertingPrivilege = (operations: string[], owners: readonly string[]) =>
       owners.flatMap((owner) =>
-        operations.map((operation) => this.actions.alerting.get(spacesId, owner, operation))
+        operations.map((operation) => this.actions.rac.get(owner, operation))
       );
 
     return uniq([
-      ...getAlertingPrivilege(allOperations, privilegeDefinition.rac?.all ?? [], spaceId),
-      ...getAlertingPrivilege(readOperations, privilegeDefinition.rac?.read ?? [], spaceId),
+      ...getAlertingPrivilege(allOperations, privilegeDefinition.rac?.all ?? []),
+      ...getAlertingPrivilege(readOperations, privilegeDefinition.rac?.read ?? []),
     ]);
   }
 }

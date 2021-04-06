@@ -18,6 +18,7 @@ import { PluginStartContract as FeaturesPluginStart } from '../../../features/se
 import { RacAuthorization } from '../authorization/rac_authorization';
 // import { AlertsAuthorizationAuditLogger } from './authorization/audit_logger';
 import { Space } from '../../../spaces/server';
+import { RacAuthorizationAuditLogger } from '../authorization/audit_logger';
 
 export interface RacClientFactoryOpts {
   logger: Logger;
@@ -57,7 +58,7 @@ export class RacClientFactory {
     this.esClient = options.esClient;
   }
 
-  public async create(request: KibanaRequest): RacClient {
+  public async create(request: KibanaRequest): Promise<RacClient> {
     const { features, securityPluginSetup, securityPluginStart } = this;
     const spaceId = this.getSpaceId(request);
 
@@ -67,6 +68,7 @@ export class RacClientFactory {
       getSpace: this.getSpace,
       features: features!,
       isAuthEnabled: true,
+      auditLogger: new RacAuthorizationAuditLogger(securityPluginSetup?.audit.asScoped(request)),
     });
     return new RacClient({
       spaceId,

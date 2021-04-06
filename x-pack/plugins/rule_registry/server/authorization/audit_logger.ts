@@ -49,7 +49,7 @@ export class RacAuthorizationAuditLogger {
       message,
       event: {
         action: 'rac_authorization_failure',
-        category: EventCategory.AUTHENTICATION,
+        category: EventCategory.DATABASE,
         type,
         outcome: EventOutcome.FAILURE,
       },
@@ -78,7 +78,7 @@ export class RacAuthorizationAuditLogger {
       message,
       event: {
         action: 'rac_authorization_failure',
-        category: EventCategory.AUTHENTICATION,
+        category: EventCategory.DATABASE,
         type,
         outcome: EventOutcome.FAILURE,
       },
@@ -105,7 +105,7 @@ export class RacAuthorizationAuditLogger {
       message,
       event: {
         action: 'rac_authorization_success',
-        category: EventCategory.AUTHENTICATION,
+        category: EventCategory.DATABASE,
         type,
         outcome: EventOutcome.SUCCESS,
       },
