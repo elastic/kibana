@@ -411,7 +411,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
     const isTypeRecentSearch = type === QuerySuggestionTypes.RecentSearch;
 
     const isAutoSubmitAndValid =
-      his.props.autoSubmit &&
+      this.props.autoSubmit &&
       (type === QuerySuggestionTypes.Value || [':*', ': *'].includes(value.trim()));
 
     if (isTypeRecentSearch || isAutoSubmitAndValid) {
