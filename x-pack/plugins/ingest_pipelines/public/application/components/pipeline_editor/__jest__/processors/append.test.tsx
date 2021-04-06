@@ -6,15 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { setup, SetupResult, getProcessorValue } from './processor.helpers';
-
-// Default parameter values automatically added to the URI parts processor when saved
-const defaultAppendParameters = {
-  if: undefined,
-  tag: undefined,
-  ignore_failure: undefined,
-  description: undefined,
-};
+import { setup, SetupResult, getProcessorValue, commonFormFields } from './processor.helpers';
 
 const APPEND_TYPE = 'append';
 
@@ -60,7 +52,7 @@ describe('Processor: Append', () => {
     // Click submit button with only the type defined
     await saveNewProcessor();
 
-    // Expect form error as "field" is required parameter
+    // Expect form error as "field" and "value" are required parameters
     expect(form.getErrorsMessages()).toEqual([
       'A field value is required.',
       'A value is required.',
@@ -72,6 +64,7 @@ describe('Processor: Append', () => {
       actions: { addProcessor, saveNewProcessor, addProcessorType },
       form,
       find,
+      component,
     } = testBed;
 
     // Open flyout to add new processor
@@ -81,7 +74,10 @@ describe('Processor: Append', () => {
     // Add "field" value (required)
     form.setInputValue('fieldNameField.input', 'field_1');
 
-    find('valueFieldAppend.input').simulate('change', [{ label: 'Some_Value' }]);
+    await act(async () => {
+      find('appendValueField.input').simulate('change', [{ label: 'Some_Value' }]);
+      component.update();
+    });
 
     // Save the field
     await saveNewProcessor();
@@ -90,7 +86,7 @@ describe('Processor: Append', () => {
     expect(processors[0].append).toEqual({
       field: 'field_1',
       value: ['Some_Value'],
-      ...defaultAppendParameters,
+      ...commonFormFields,
     });
   });
 
@@ -99,6 +95,7 @@ describe('Processor: Append', () => {
       actions: { addProcessor, addProcessorType, saveNewProcessor },
       form,
       find,
+      component,
     } = testBed;
 
     // Open flyout to add new processor
@@ -109,7 +106,10 @@ describe('Processor: Append', () => {
     form.setInputValue('fieldNameField.input', 'field_1');
 
     // Set optional parameteres
-    find('valueFieldAppend.input').simulate('change', [{ label: 'Some_Value' }]);
+    await act(async () => {
+      find('appendValueField.input').simulate('change', [{ label: 'Some_Value' }]);
+      component.update();
+    });
 
     form.toggleEuiSwitch('ignoreFailureSwitch.input');
     // Save the field with new changes
@@ -117,12 +117,12 @@ describe('Processor: Append', () => {
 
     const processors = getProcessorValue(onUpdate, APPEND_TYPE);
     expect(processors[0].append).toEqual({
-      description: undefined,
       field: 'field_1',
       ignore_failure: true,
+      value: ['Some_Value'],
       if: undefined,
       tag: undefined,
-      value: ['Some_Value'],
+      description: undefined,
     });
   });
 });

@@ -53,7 +53,7 @@ export const Append: FunctionComponent = () => {
       />
 
       <UseField
-        data-test-subj="valueFieldAppend"
+        data-test-subj="appendValueField"
         config={fieldsConfig.value}
         component={ComboBoxField}
         path="fields.value"

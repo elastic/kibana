@@ -6,14 +6,12 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { setup, SetupResult, getProcessorValue } from './processor.helpers';
+import { setup, SetupResult, getProcessorValue, commonFormFields } from './processor.helpers';
 
 // Default parameter values automatically added to the URI parts processor when saved
 const defaultUriPartsParameters = {
   keep_original: undefined,
   remove_if_successful: undefined,
-  ignore_failure: undefined,
-  description: undefined,
 };
 
 const URI_PARTS_TYPE = 'uri_parts';
@@ -83,6 +81,7 @@ describe('Processor: URI parts', () => {
     expect(processors[0].uri_parts).toEqual({
       field: 'field_1',
       ...defaultUriPartsParameters,
+      ...commonFormFields,
     });
   });
 
@@ -109,12 +108,11 @@ describe('Processor: URI parts', () => {
 
     const processors = getProcessorValue(onUpdate, URI_PARTS_TYPE);
     expect(processors[0].uri_parts).toEqual({
-      description: undefined,
       field: 'field_1',
-      ignore_failure: undefined,
       keep_original: false,
       remove_if_successful: true,
       target_field: 'target_field',
+      ...commonFormFields,
     });
   });
 });
