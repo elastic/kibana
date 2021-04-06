@@ -157,10 +157,19 @@ export const CertsField: React.FunctionComponent<{
       {fields[ConfigKeys.TLS_VERIFICATION_MODE].value === VerificationMode.NONE && (
         <>
           <EuiSpacer size="s" />
-          <EuiCallOut title="Proceed with caution!" color="warning" iconType="help" size="s">
+          <EuiCallOut
+            title={
+              <FormattedMessage
+                id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.verificationMode.warning.title"
+                defaultMessage="Disabling TLS"
+              />
+            }
+            color="warning"
+            size="s"
+          >
             <p>
               <FormattedMessage
-                id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.verificationMode.warning"
+                id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.verificationMode.warning.description"
                 defaultMessage="This mode disables many of the security benefits of SSL/TLS and should only be used
                   after cautious consideration."
               />
@@ -206,7 +215,7 @@ export const CertsField: React.FunctionComponent<{
         helpText={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.certificateAuthorities.helpText"
-            defaultMessage="Optional custom certificate authorities."
+            defaultMessage="Custom certificate authorities."
           />
         }
         labelAppend={<OptionalLabel />}
@@ -238,7 +247,7 @@ export const CertsField: React.FunctionComponent<{
         helpText={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.certificate.helpText"
-            defaultMessage="Optional certificate for SSL client authentication."
+            defaultMessage="Certificate for SSL client authentication."
           />
         }
         labelAppend={<OptionalLabel />}
@@ -270,7 +279,7 @@ export const CertsField: React.FunctionComponent<{
         helpText={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.certificateKey.helpText"
-            defaultMessage="Optional certificate key for SSL client authentication."
+            defaultMessage="Certificate key for SSL client authentication."
           />
         }
         labelAppend={<OptionalLabel />}
@@ -302,7 +311,7 @@ export const CertsField: React.FunctionComponent<{
         helpText={
           <FormattedMessage
             id="xpack.uptime.createPackagePolicy.stepConfigure.certsField.certificateKeyPassphrase.helpText"
-            defaultMessage="Optional certificate key passphrase for SSL client authentication."
+            defaultMessage="Certificate key passphrase for SSL client authentication."
           />
         }
         labelAppend={<OptionalLabel />}

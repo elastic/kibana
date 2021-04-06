@@ -91,7 +91,7 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, valida
           helpText={
             <FormattedMessage
               id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.username.helpText"
-              defaultMessage="Optional username for authenticating with the server."
+              defaultMessage="Username for authenticating with the server."
             />
           }
         >
@@ -116,7 +116,7 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, valida
           helpText={
             <FormattedMessage
               id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.password.helpText"
-              defaultMessage="Optional password for authenticating with the server."
+              defaultMessage="Password for authenticating with the server."
             />
           }
         >
@@ -142,7 +142,7 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, valida
           helpText={
             <FormattedMessage
               id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.proxyUrl.http.helpText"
-              defaultMessage="An optional HTTP proxy URL."
+              defaultMessage="HTTP proxy URL."
             />
           }
         >
@@ -189,6 +189,7 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, valida
               defaultMessage="Request headers"
             />
           }
+          labelAppend={<OptionalLabel />}
           isInvalid={
             !!validate[ConfigKeys.REQUEST_HEADERS_CHECK]?.(fields[ConfigKeys.REQUEST_HEADERS_CHECK])
           }
@@ -233,10 +234,11 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, valida
               defaultMessage="Request body"
             />
           }
+          labelAppend={<OptionalLabel />}
           helpText={
             <FormattedMessage
               id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.requestBody.helpText"
-              defaultMessage="Optional request body content."
+              defaultMessage="Request body content."
             />
           }
           fullWidth
@@ -389,6 +391,7 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, valida
               defaultMessage="Check response headers contain"
             />
           }
+          labelAppend={<OptionalLabel />}
           isInvalid={
             !!validate[ConfigKeys.RESPONSE_HEADERS_CHECK]?.(
               fields[ConfigKeys.RESPONSE_HEADERS_CHECK]

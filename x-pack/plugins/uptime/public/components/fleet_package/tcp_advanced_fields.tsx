@@ -121,7 +121,7 @@ export const TCPAdvancedFields = memo<Props>(({ defaultValues, onChange }) => {
           helpText={
             <FormattedMessage
               id="xpack.uptime.createPackagePolicy.stepConfigure.tcpAdvacnedSettings.requestConfiguration.requestPayload.helpText"
-              defaultMessage="An optional payload string to send to the remote host."
+              defaultMessage="A payload string to send to the remote host."
             />
           }
         >

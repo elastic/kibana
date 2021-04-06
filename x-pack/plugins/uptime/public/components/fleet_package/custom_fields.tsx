@@ -255,7 +255,7 @@ export const CustomFields = memo<Props>(
                   helpText={
                     <FormattedMessage
                       id="xpack.uptime.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.APMServiceName.helpText"
-                      defaultMessage="Optional APM service name for this monitor. Corresponds to the service.name ECS field. Set this when monitoring an app that is also using APM to enable integrations between Uptime and APM data in Kibana."
+                      defaultMessage="APM service name for this monitor. Corresponds to the service.name ECS field. Set this when monitoring an app that is also using APM to enable integrations between Uptime and APM data in Kibana."
                     />
                   }
                 >

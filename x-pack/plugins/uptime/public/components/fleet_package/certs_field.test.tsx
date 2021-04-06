@@ -156,7 +156,7 @@ describe('<CertsField />', () => {
       target: { value: VerificationMode.NONE },
     });
 
-    expect(getByText('Proceed with caution!')).toBeInTheDocument();
+    expect(getByText('Disabling TLS')).toBeInTheDocument();
   });
 
   it('does not show fields when isEnabled is false', async () => {
