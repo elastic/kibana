@@ -389,7 +389,7 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
                     'xpack.ml.dataframe.analytics.classificationExploration.evaluateSectionOverallAccuracyTooltip',
                     {
                       defaultMessage:
-                        'This is the ratio of number of correct class predictions to the total number predictions.',
+                        'The ratio of the number of correct class predictions to the total number of predictions.',
                     }
                   )}
                 />
