@@ -22,9 +22,9 @@ import { MlServerLimits } from '../types/ml_server_info';
 import { JobValidationMessage, JobValidationMessageId } from '../constants/messages';
 import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '../constants/aggregation_types';
 import { MLCATEGORY } from '../constants/field_types';
-import { getFirstKey, getAggregations, getDatafeedAggregations } from './datafeed_utils';
+import { getAggregations, getDatafeedAggregations } from './datafeed_utils';
 import { findAggField } from './validation_utils';
-import { isPopulatedObject } from './object_utils';
+import { getFirstKeyInObject, isPopulatedObject } from './object_utils';
 import { isDefined } from '../types/guards';
 
 export interface ValidationResults {
@@ -81,7 +81,7 @@ export function hasValidComposite(buckets: { [key: string]: any }) {
     const sources = buckets.composite.sources as Array<Record<string, object>>;
     return sources
       .map((source) => {
-        const sourceName = getFirstKey(source);
+        const sourceName = getFirstKeyInObject(source);
         if (sourceName !== undefined && isPopulatedObject(source[sourceName])) {
           const sourceTypes = Object.keys(source[sourceName]);
           return (
@@ -137,7 +137,7 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
       // We cannot plot the source data for some specific aggregation configurations
       const aggs = getDatafeedAggregations(job.datafeed_config);
       if (aggs !== undefined) {
-        const aggBucketsName = getFirstKey(aggs);
+        const aggBucketsName = getFirstKeyInObject(aggs);
         if (aggBucketsName !== undefined) {
           // if fieldName is a aggregated field under nested terms using bucket_script
           const aggregations = getAggregations<{ [key: string]: any }>(aggs[aggBucketsName]) ?? {};
@@ -194,7 +194,7 @@ export function getSingleMetricViewerJobErrorMessage(job: CombinedJob): string |
   // if job has at least one composite source that is not terms or date_histogram
   const aggs = getDatafeedAggregations(job.datafeed_config);
   if (aggs !== undefined) {
-    const aggBucketsName = getFirstKey(aggs);
+    const aggBucketsName = getFirstKeyInObject(aggs);
     if (aggBucketsName !== undefined) {
       // if fieldName is a aggregated field under nested terms using bucket_script
 

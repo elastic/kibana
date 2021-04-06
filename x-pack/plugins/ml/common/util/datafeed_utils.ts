@@ -6,7 +6,6 @@
  */
 
 import { Aggregation, Datafeed } from '../types/anomaly_detection_jobs';
-import { isPopulatedObject } from './object_utils';
 
 export function getAggregations<T>(obj: any): T | undefined {
   if (obj?.aggregations !== undefined) return obj.aggregations;
@@ -18,11 +17,4 @@ export const getDatafeedAggregations = (
   datafeedConfig: Partial<Datafeed> | undefined
 ): Aggregation | undefined => {
   return getAggregations<Aggregation>(datafeedConfig);
-};
-
-export const getFirstKey = (arg: unknown): string | undefined => {
-  if (isPopulatedObject(arg)) {
-    const keys = Object.keys(arg);
-    return keys.length > 0 ? keys[0] : undefined;
-  }
 };
