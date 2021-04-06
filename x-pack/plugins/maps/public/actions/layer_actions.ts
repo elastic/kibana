@@ -50,7 +50,10 @@ import { notifyLicensedFeatureUsage } from '../licensed_features';
 import { IESAggField } from '../classes/fields/agg';
 import { IField } from '../classes/fields/field';
 // @ts-ignore
-import { createNewIndexAndPattern, addFeatureToIndex } from '../classes/layers/new_vector_layer_wizard/utils/indexing_service';
+import {
+  createNewIndexAndPattern,
+  addFeatureToIndex,
+} from '../classes/layers/new_vector_layer_wizard/utils/indexing_service';
 
 export function trackCurrentLayerState(layerId: string) {
   return {
@@ -553,26 +556,7 @@ export function setAreTilesLoaded(layerId: string, areTilesLoaded: boolean) {
 }
 
 export function indexDrawnLayers() {
-  return async (
-    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
-    getState: () => MapStoreState
-  ) => {
-    const state = getState();
-    const features = state.map.mapState.featuresToIndexQueue;
-    const indexName = state.map.mapState.vectorLayerIndexName;
-    await createNewIndexAndPattern(indexName);
-    Promise.all(
-      features.map(async (feature) => {
-        const geometry = {
-          coordinates: feature.geometry.coordinates,
-          type: feature.geometry.type.toLowerCase(),
-        };
-        await addFeatureToIndex(indexName, geometry);
-      })
-    );
-
-    dispatch({
-      type: INDEX_DRAWN_LAYERS,
-    });
+  return {
+    type: INDEX_DRAWN_LAYERS,
   };
 }

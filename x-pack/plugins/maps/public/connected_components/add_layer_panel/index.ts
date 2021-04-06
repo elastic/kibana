@@ -16,7 +16,6 @@ import {
   removePreviewLayers,
   setFirstPreviewLayerToSelectedLayer,
   updateFlyout,
-  indexDrawnLayers,
 } from '../../actions';
 import { MapStoreState } from '../../reducers/store';
 import { LayerDescriptor } from '../../../common/descriptor_types';
@@ -26,7 +25,6 @@ function mapStateToProps(state: MapStoreState) {
   return {
     hasPreviewLayers: hasPreviewLayers(state),
     isLoadingPreviewLayers: isLoadingPreviewLayers(state),
-    isDrawingLayer: state.map.mapState.editModeActive,
   };
 }
 
@@ -44,7 +42,6 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
       dispatch(updateFlyout(FLYOUT_STATE.NONE));
       dispatch(removePreviewLayers());
     },
-    indexDrawnLayers: () => dispatch(indexDrawnLayers()),
   };
 }
 

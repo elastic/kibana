@@ -10,6 +10,7 @@ import React from 'react';
 import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
 import { NewVectorLayerEditor } from './index';
 import { DocumentsLayerIcon } from '../../layers/icons/documents_layer_icon';
+import { CREATE_DRAWN_FEATURES_INDEX_STEP_ID, ADD_DRAWN_FEATURES_TO_INDEX_STEP_ID } from './wizard';
 
 export const newVectorLayerWizardConfig: LayerWizard = {
   categories: [],
@@ -17,7 +18,20 @@ export const newVectorLayerWizardConfig: LayerWizard = {
     defaultMessage: 'Draw points & shapes and save in Elasticsearch',
   }),
   icon: DocumentsLayerIcon,
-  prerequisiteSteps: [],
+  prerequisiteSteps: [
+    {
+      id: CREATE_DRAWN_FEATURES_INDEX_STEP_ID,
+      label: i18n.translate('xpack.maps.newVectorLayerWizard.indexFeatures', {
+        defaultMessage: 'Index features',
+      }),
+    },
+    {
+      id: ADD_DRAWN_FEATURES_TO_INDEX_STEP_ID,
+      label: i18n.translate('xpack.maps.newVectorLayerWizard.indexingFeatures', {
+        defaultMessage: 'Indexing features',
+      }),
+    },
+  ],
   renderWizard: (renderWizardArguments: RenderWizardArguments) => {
     return <NewVectorLayerEditor {...renderWizardArguments} />;
   },

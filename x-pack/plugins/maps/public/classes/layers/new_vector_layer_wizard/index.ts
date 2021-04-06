@@ -10,12 +10,21 @@ import { AnyAction } from 'redux';
 import { connect } from 'react-redux';
 import { MapStoreState } from '../../../reducers/store';
 import { NewVectorLayerEditor } from './wizard';
-import { setVectorLayerIndexName, updateEditMode } from '../../../actions';
+import {
+  addLayer,
+  indexDrawnLayers,
+  setSelectedLayer,
+  setVectorLayerIndexName,
+  updateEditMode,
+  updateFlyout,
+} from '../../../actions';
+import { FLYOUT_STATE } from '../../../reducers/ui';
+import { LayerDescriptor } from '../../../../common/descriptor_types';
 
 function mapStateToProps(state: MapStoreState) {
   return {
     indexName: state.map.mapState.vectorLayerIndexName,
-    featuresAreQueued: !!state.map.mapState.featuresToIndexQueue.length,
+    featuresQueued: state.map.mapState.featuresToIndexQueue,
   };
 }
 
@@ -24,6 +33,14 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
     setEditModeActive: () => dispatch(updateEditMode(true)),
     setEditModeInActive: () => dispatch(updateEditMode(false)),
     setIndexName: (indexName: string) => dispatch(setVectorLayerIndexName(indexName)),
+    indexDrawnLayers: () => {
+      dispatch(indexDrawnLayers());
+    },
+    addNewLayer: async (layerDescriptor: LayerDescriptor) => {
+      dispatch(addLayer(layerDescriptor));
+      await dispatch(setSelectedLayer(layerDescriptor.id));
+      dispatch(updateFlyout(FLYOUT_STATE.LAYER_PANEL));
+    },
   };
 }
 
