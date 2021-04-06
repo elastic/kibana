@@ -22,7 +22,7 @@ import {
   SearchExamplesPluginSetupDeps,
   SearchExamplesPluginStartDeps,
 } from './types';
-import { mySearchStrategyProvider } from './my_strategy';
+import { fibonacciStrategyProvider, mySearchStrategyProvider } from './my_strategy';
 import { registerRoutes } from './routes';
 
 export class SearchExamplesPlugin
@@ -48,7 +48,9 @@ export class SearchExamplesPlugin
 
     core.getStartServices().then(([_, depsStart]) => {
       const myStrategy = mySearchStrategyProvider(depsStart.data);
+      const fibonacciStrategy = fibonacciStrategyProvider();
       deps.data.search.registerSearchStrategy('myStrategy', myStrategy);
+      deps.data.search.registerSearchStrategy('fibonacciStrategy', fibonacciStrategy);
       registerRoutes(router);
     });
 

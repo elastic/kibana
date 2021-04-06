@@ -27,6 +27,8 @@ import {
   EuiCode,
   EuiComboBox,
   EuiFormLabel,
+  EuiFieldNumber,
+  EuiProgress,
 } from '@elastic/eui';
 
 import { CoreStart } from '../../../../src/core/public';
@@ -42,6 +44,7 @@ import {
 
 import {
   DataPublicPluginStart,
+  IKibanaSearchResponse,
   IndexPattern,
   IndexPatternField,
   isCompleteResponse,
@@ -83,7 +86,10 @@ export const SearchExamplesApp = ({
 }: SearchExamplesAppDeps) => {
   const { IndexPatternSelect } = data.ui;
   const [getCool, setGetCool] = useState<boolean>(false);
+  const [fibonacciN, setFibonacciN] = useState<number>(10);
   const [timeTook, setTimeTook] = useState<number | undefined>();
+  const [total, setTotal] = useState<number>(100);
+  const [loaded, setLoaded] = useState<number>(0);
   const [indexPattern, setIndexPattern] = useState<IndexPattern | null>();
   const [fields, setFields] = useState<IndexPatternField[]>();
   const [selectedFields, setSelectedFields] = useState<IndexPatternField[]>([]);
@@ -91,7 +97,14 @@ export const SearchExamplesApp = ({
     IndexPatternField | null | undefined
   >();
   const [request, setRequest] = useState<Record<string, any>>({});
-  const [response, setResponse] = useState<Record<string, any>>({});
+  const [rawResponse, setRawResponse] = useState<Record<string, any>>({});
+
+  function setResponse(response: IKibanaSearchResponse) {
+    setRawResponse(response.rawResponse);
+    setLoaded(response.loaded!);
+    setTotal(response.total!);
+    setTimeTook(response.rawResponse.took);
+  }
 
   // Fetch the default index pattern using the `data.indexPatterns` service, as the component is mounted.
   useEffect(() => {
@@ -142,8 +155,7 @@ export const SearchExamplesApp = ({
       .subscribe({
         next: (res) => {
           if (isCompleteResponse(res)) {
-            setResponse(res.rawResponse);
-            setTimeTook(res.rawResponse.took);
+            setResponse(res);
             const avgResult: number | undefined = res.rawResponse.aggregations
               ? // @ts-expect-error @elastic/elasticsearch no way to declare a type for aggregation in the search response
                 res.rawResponse.aggregations[1].value
@@ -206,7 +218,7 @@ export const SearchExamplesApp = ({
 
       setRequest(await searchSource.getSearchRequestBody());
       const res = await searchSource.fetch();
-      setResponse(res);
+      setRawResponse(res);
 
       const message = <EuiText>Searched {res.hits.total} documents.</EuiText>;
       notifications.toasts.addSuccess({
@@ -214,7 +226,7 @@ export const SearchExamplesApp = ({
         text: mountReactNode(message),
       });
     } catch (e) {
-      setResponse(e.body);
+      setRawResponse(e.body);
       notifications.toasts.addWarning(`An error has occurred: ${e.message}`);
     }
   };
@@ -225,6 +237,40 @@ export const SearchExamplesApp = ({
 
   const onMyStrategyClickHandler = () => {
     doAsyncSearch('myStrategy');
+  };
+
+  const onPartialResultsClickHandler = () => {
+    const req = {
+      params: {
+        n: fibonacciN,
+      },
+    };
+
+    // Submit the search request using the `data.search` service.
+    setRequest(req.params);
+    const searchSubscription$ = data.search
+      .search(req, {
+        strategy: 'fibonacciStrategy',
+      })
+      .subscribe({
+        next: (res) => {
+          setResponse(res);
+          if (isCompleteResponse(res)) {
+            notifications.toasts.addSuccess({
+              title: 'Query result',
+              text: 'Query finished',
+            });
+            searchSubscription$.unsubscribe();
+          } else if (isErrorResponse(res)) {
+            // TODO: Make response error status clearer
+            notifications.toasts.addWarning('An error has occurred');
+            searchSubscription$.unsubscribe();
+          }
+        },
+        error: () => {
+          notifications.toasts.addDanger('Failed to run search');
+        },
+      });
   };
 
   const onServerClickHandler = async () => {
@@ -390,6 +436,28 @@ export const SearchExamplesApp = ({
                   />
                 </EuiButtonEmpty>
               </EuiText>
+              <EuiSpacer />
+              <EuiTitle size="s">
+                <h3>Handling partial results</h3>
+              </EuiTitle>
+              <EuiText>
+                Search requests provide partial results when the response is not yet complete. These
+                can be handled to update a chart (using <EuiCode>response.rawResponse</EuiCode> or
+                simply a progress bar (using <EuiCode>response.loaded</EuiCode>&amp;
+                <EuiCode>response.total</EuiCode>. Below is an example showing a custom search
+                strategy that emits partial Fibonacci sequences up to the length provided, updates
+                the response with each partial result, and updates a progress bar.
+                <EuiSpacer />
+                <EuiFieldNumber
+                  id="Fibonacci"
+                  placeholder="Number of Fibonacci numbers to generate"
+                  value={fibonacciN}
+                  onChange={(event) => setFibonacciN(parseInt(event.target.value, 10))}
+                />
+                <EuiButtonEmpty size="xs" onClick={onPartialResultsClickHandler} iconType="play">
+                  Request Fibonacci sequence
+                </EuiButtonEmpty>
+              </EuiText>
             </EuiFlexItem>
             <EuiFlexItem style={{ width: '30%' }}>
               <EuiTitle size="xs">
@@ -417,6 +485,7 @@ export const SearchExamplesApp = ({
                   values={{ time: timeTook ?? 'Unknown' }}
                 />
               </EuiText>
+              <EuiProgress value={loaded} max={total} size="xs" />
               <EuiCodeBlock
                 language="json"
                 fontSize="s"
@@ -424,7 +493,7 @@ export const SearchExamplesApp = ({
                 overflowHeight={450}
                 isCopyable
               >
-                {JSON.stringify(response, null, 2)}
+                {JSON.stringify(rawResponse, null, 2)}
               </EuiCodeBlock>
             </EuiFlexItem>
           </EuiFlexGrid>
