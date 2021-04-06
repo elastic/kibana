@@ -95,6 +95,20 @@ describe('formula', () => {
     let indexPattern: IndexPattern;
 
     beforeEach(() => {
+      layer = {
+        indexPatternId: '1',
+        columnOrder: ['col1'],
+        columns: {
+          col1: {
+            label: 'Average',
+            dataType: 'number',
+            operationType: 'average',
+            isBucketed: false,
+            scale: 'ratio',
+            sourceField: 'bytes',
+          },
+        },
+      };
       indexPattern = createMockedIndexPattern();
     });
 
@@ -132,7 +146,7 @@ describe('formula', () => {
         operationType: 'formula',
         isBucketed: false,
         scale: 'ratio',
-        params: { isFormulaBroken: false, formula: 'terms(category)' },
+        params: { isFormulaBroken: false, formula: 'average(bytes)' },
         references: [],
       });
     });
@@ -143,7 +157,6 @@ describe('formula', () => {
           previousColumn: {
             ...layer.columns.col1,
             params: {
-              ...layer.columns.col1.params,
               format: {
                 id: 'number',
                 params: {
@@ -163,7 +176,7 @@ describe('formula', () => {
         scale: 'ratio',
         params: {
           isFormulaBroken: false,
-          formula: 'terms(category)',
+          formula: 'average(bytes)',
           format: {
             id: 'number',
             params: {
@@ -175,7 +188,7 @@ describe('formula', () => {
       });
     });
 
-    it('should move over previous operation parameter if set', () => {
+    it('should move over previous operation parameter if set - only numeric', () => {
       expect(
         formulaOperation.buildColumn(
           {
@@ -229,6 +242,56 @@ describe('formula', () => {
           isFormulaBroken: false,
           formula: 'moving_average(average(bytes), window=3)',
         },
+        references: [],
+      });
+    });
+
+    it('should not move previous column configuration if not numeric', () => {
+      expect(
+        formulaOperation.buildColumn(
+          {
+            previousColumn: {
+              label: 'Top value of category',
+              dataType: 'string',
+              isBucketed: true,
+              operationType: 'terms',
+              params: {
+                orderBy: { type: 'alphabetical' },
+                size: 3,
+                orderDirection: 'asc',
+              },
+              sourceField: 'category',
+            },
+            layer: {
+              indexPatternId: '1',
+              columnOrder: [],
+              columns: {
+                col1: {
+                  label: 'Top value of category',
+                  dataType: 'string',
+                  isBucketed: true,
+                  operationType: 'terms',
+                  params: {
+                    orderBy: { type: 'alphabetical' },
+                    size: 3,
+                    orderDirection: 'asc',
+                  },
+                  sourceField: 'category',
+                },
+              },
+            },
+            indexPattern,
+          },
+          {},
+          operationDefinitionMap
+        )
+      ).toEqual({
+        label: 'Formula',
+        dataType: 'number',
+        operationType: 'formula',
+        isBucketed: false,
+        scale: 'ratio',
+        params: {},
         references: [],
       });
     });
