@@ -69,15 +69,14 @@ export const SyntheticsPolicyEditExtension = memo<PackagePolicyEditExtensionComp
                   value !== null && value !== undefined
                     ? JSON.parse(value)
                     : fallbackConfig[key].value;
-                let type;
-                Object.keys(headers || []).map((headerKey) => {
+                let type = fallbackConfig[key].type;
+                Object.keys(headers || []).some((headerKey) => {
                   if (
                     headerKey === 'Content-Type' &&
                     contentTypesToMode[headers[headerKey] as ContentType]
                   ) {
                     type = contentTypesToMode[headers[headerKey] as ContentType];
-                  } else {
-                    type = fallbackConfig[key].type;
+                    return true;
                   }
                 });
                 acc[key] = {
