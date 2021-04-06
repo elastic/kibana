@@ -98,10 +98,13 @@ export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
           defaultMessage: 'Chart type',
         })}
         name="chartType"
-        className="eui-displayInlineBlock"
+        className="eui-displayInlineBlock lnsLayerChartSwitch"
         options={visualizationTypes
           .filter((t) => isHorizontalSeries(t.id as SeriesType) === horizontalOnly)
           .map((t) => ({
+            className: `lnsLayerChartSwitch__item ${
+              layer.seriesType === t.id ? 'lnsLayerChartSwitch__item-isSelected' : ''
+            }`,
             id: t.id,
             label: t.label,
             iconType: t.icon || 'empty',
