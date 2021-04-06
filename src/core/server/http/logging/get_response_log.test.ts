@@ -81,6 +81,7 @@ describe('getEcsResponseLog', () => {
         },
       });
       const result = getEcsResponseLog(req, logger);
+      // @ts-expect-error ECS custom field
       expect(result.http.response.responseTime).toBe(1000);
     });
 
@@ -92,6 +93,7 @@ describe('getEcsResponseLog', () => {
         },
       });
       const result = getEcsResponseLog(req, logger);
+      // @ts-expect-error ECS custom field
       expect(result.http.response.responseTime).toBe(500);
     });
 
@@ -99,6 +101,7 @@ describe('getEcsResponseLog', () => {
       const req = createMockHapiRequest();
       const result = getEcsResponseLog(req, logger);
       expect(result.message).toMatchInlineSnapshot(`"GET /path 200 - 1.2KB"`);
+      // @ts-expect-error ECS custom field
       expect(result.http.response.responseTime).toBeUndefined();
     });
   });
@@ -112,7 +115,7 @@ describe('getEcsResponseLog', () => {
         },
       });
       const result = getEcsResponseLog(req, logger);
-      expect(result.url.query).toMatchInlineSnapshot(`"a=hello&b=world"`);
+      expect(result.url!.query).toMatchInlineSnapshot(`"a=hello&b=world"`);
       expect(result.message).toMatchInlineSnapshot(`"GET /path?a=hello&b=world 200 - 1.2KB"`);
     });
 
@@ -121,7 +124,7 @@ describe('getEcsResponseLog', () => {
         query: { a: '¡hola!' },
       });
       const result = getEcsResponseLog(req, logger);
-      expect(result.url.query).toMatchInlineSnapshot(`"a=%C2%A1hola!"`);
+      expect(result.url!.query).toMatchInlineSnapshot(`"a=%C2%A1hola!"`);
       expect(result.message).toMatchInlineSnapshot(`"GET /path?a=%C2%A1hola! 200 - 1.2KB"`);
     });
   });
@@ -145,7 +148,7 @@ describe('getEcsResponseLog', () => {
       response: Boom.badRequest(),
     });
     const result = getEcsResponseLog(req, logger);
-    expect(result.http.response.status_code).toBe(400);
+    expect(result.http!.response!.status_code).toBe(400);
   });
 
   describe('filters sensitive headers', () => {
@@ -155,6 +158,7 @@ describe('getEcsResponseLog', () => {
         response: { headers: { 'content-length': 123, 'set-cookie': 'c' } },
       });
       const result = getEcsResponseLog(req, logger);
+      // @ts-expect-error ECS custom field
       expect(result.http.request.headers).toMatchInlineSnapshot(`
         Object {
           "authorization": "[REDACTED]",
@@ -162,6 +166,7 @@ describe('getEcsResponseLog', () => {
           "user-agent": "hi",
         }
       `);
+      // @ts-expect-error ECS custom field
       expect(result.http.response.headers).toMatchInlineSnapshot(`
         Object {
           "content-length": 123,
@@ -196,8 +201,11 @@ describe('getEcsResponseLog', () => {
         }
       `);
 
+      // @ts-expect-error ECS custom field
       responseLog.http.request.headers.a = 'testA';
+      // @ts-expect-error ECS custom field
       responseLog.http.request.headers.b[1] = 'testB';
+      // @ts-expect-error ECS custom field
       responseLog.http.request.headers.c = 'testC';
       expect(reqHeaders).toMatchInlineSnapshot(`
         Object {
@@ -244,12 +252,6 @@ describe('getEcsResponseLog', () => {
   });
 
   describe('ecs', () => {
-    test('specifies correct ECS version', () => {
-      const req = createMockHapiRequest();
-      const result = getEcsResponseLog(req, logger);
-      expect(result.ecs.version).toBe('1.7.0');
-    });
-
     test('provides an ECS-compatible response', () => {
       const req = createMockHapiRequest();
       const result = getEcsResponseLog(req, logger);
@@ -257,9 +259,6 @@ describe('getEcsResponseLog', () => {
         Object {
           "client": Object {
             "ip": undefined,
-          },
-          "ecs": Object {
-            "version": "1.7.0",
           },
           "http": Object {
             "request": Object {

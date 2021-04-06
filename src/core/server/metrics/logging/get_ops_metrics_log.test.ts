@@ -80,25 +80,19 @@ describe('getEcsOpsMetricsLog', () => {
     expect(logMeta.message).toMatchInlineSnapshot(`""`);
   });
 
-  it('specifies correct ECS version', () => {
-    const logMeta = getEcsOpsMetricsLog(createBaseOpsMetrics());
-    expect(logMeta.ecs.version).toBe('1.7.0');
-  });
-
   it('provides an ECS-compatible response', () => {
     const logMeta = getEcsOpsMetricsLog(createBaseOpsMetrics());
     expect(logMeta).toMatchInlineSnapshot(`
       Object {
-        "ecs": Object {
-          "version": "1.7.0",
-        },
         "event": Object {
           "category": Array [
             "process",
             "host",
           ],
           "kind": "metric",
-          "type": "info",
+          "type": Array [
+            "info",
+          ],
         },
         "host": Object {
           "os": Object {
@@ -127,6 +121,6 @@ describe('getEcsOpsMetricsLog', () => {
     const logMeta = getEcsOpsMetricsLog(createBaseOpsMetrics());
     expect(logMeta.event!.kind).toBe('metric');
     expect(logMeta.event!.category).toEqual(expect.arrayContaining(['process', 'host']));
-    expect(logMeta.event!.type).toBe('info');
+    expect(logMeta.event!.type).toEqual(expect.arrayContaining(['info']));
   });
 });

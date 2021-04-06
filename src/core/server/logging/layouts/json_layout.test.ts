@@ -94,6 +94,7 @@ test('`format()` correctly formats record with meta-data', () => {
       })
     )
   ).toStrictEqual({
+    ecs: { version: '1.9.0' },
     '@timestamp': '2012-02-01T09:30:22.011-05:00',
     log: {
       level: 'DEBUG',
@@ -135,6 +136,7 @@ test('`format()` correctly formats error record with meta-data', () => {
       })
     )
   ).toStrictEqual({
+    ecs: { version: '1.9.0' },
     '@timestamp': '2012-02-01T09:30:22.011-05:00',
     log: {
       level: 'DEBUG',
@@ -172,6 +174,7 @@ test('format() meta can override @timestamp', () => {
       })
     )
   ).toStrictEqual({
+    ecs: { version: '1.9.0' },
     '@timestamp': '2099-05-01T09:30:22.011-05:00',
     message: 'foo',
     log: {
@@ -202,6 +205,7 @@ test('format() meta can merge override logs', () => {
       })
     )
   ).toStrictEqual({
+    ecs: { version: '1.9.0' },
     '@timestamp': '2012-02-01T09:30:22.011-05:00',
     message: 'foo',
     log: {
@@ -233,11 +237,72 @@ test('format() meta can override log level objects', () => {
       })
     )
   ).toStrictEqual({
+    ecs: { version: '1.9.0' },
     '@timestamp': '2012-02-01T09:30:22.011-05:00',
     message: 'foo',
     log: {
       level: 'FATAL',
       logger: '123',
+    },
+    process: {
+      pid: 3,
+    },
+  });
+});
+
+test('format() meta can not override message', () => {
+  const layout = new JsonLayout();
+  expect(
+    JSON.parse(
+      layout.format({
+        message: 'foo',
+        timestamp,
+        level: LogLevel.Debug,
+        context: 'bar',
+        pid: 3,
+        meta: {
+          message: 'baz',
+        },
+      })
+    )
+  ).toStrictEqual({
+    ecs: { version: '1.9.0' },
+    '@timestamp': '2012-02-01T09:30:22.011-05:00',
+    message: 'foo',
+    kibana: { message: 'baz' },
+    log: {
+      level: 'DEBUG',
+      logger: 'bar',
+    },
+    process: {
+      pid: 3,
+    },
+  });
+});
+
+test('format() meta can not override ecs version', () => {
+  const layout = new JsonLayout();
+  expect(
+    JSON.parse(
+      layout.format({
+        message: 'foo',
+        timestamp,
+        level: LogLevel.Debug,
+        context: 'bar',
+        pid: 3,
+        meta: {
+          message: 'baz',
+        },
+      })
+    )
+  ).toStrictEqual({
+    ecs: { version: '1.9.0' },
+    '@timestamp': '2012-02-01T09:30:22.011-05:00',
+    message: 'foo',
+    kibana: { message: 'baz' },
+    log: {
+      level: 'DEBUG',
+      logger: 'bar',
     },
     process: {
       pid: 3,

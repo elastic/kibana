@@ -7,9 +7,11 @@
  */
 
 import moment from 'moment-timezone';
+import { get, has, unset } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
 import { merge } from '@kbn/std';
 import { schema } from '@kbn/config-schema';
-import { LogRecord, Layout } from '@kbn/logging';
+import { Ecs, LogMeta, LogRecord, Layout } from '@kbn/logging';
 
 const { literal, object } = schema;
 
@@ -41,8 +43,25 @@ export class JsonLayout implements Layout {
     };
   }
 
+  private static mergeLogMeta(log: Ecs, meta: LogMeta): Ecs {
+    // Paths which cannot be overridden via `meta`.
+    const RESERVED_PATHS = ['ecs', 'message'];
+
+    for (const path of RESERVED_PATHS) {
+      if (has(meta, path)) {
+        // To prevent losing useful data, we "quarantine" conflicting keys
+        // under a `kibana` property rather than deleting them entirely.
+        set(log, `kibana.${path}`, get(meta, path));
+        unset(meta, path);
+      }
+    }
+
+    return merge(log, meta);
+  }
+
   public format(record: LogRecord): string {
-    const log = {
+    const log: Ecs = {
+      ecs: { version: '1.9.0' },
       '@timestamp': moment(record.timestamp).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
       message: record.message,
       error: JsonLayout.errorToSerializableObject(record.error),
@@ -54,7 +73,7 @@ export class JsonLayout implements Layout {
         pid: record.pid,
       },
     };
-    const output = record.meta ? merge(log, record.meta) : log;
+    const output = record.meta ? JsonLayout.mergeLogMeta(log, record.meta) : log;
     return JSON.stringify(output);
   }
 }
