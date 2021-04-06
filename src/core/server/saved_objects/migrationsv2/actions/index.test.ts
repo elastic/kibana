@@ -191,8 +191,8 @@ describe('actions', () => {
 
       await task();
 
-      expect(client.search).toHaveBeenCalledTimes(1);
-      expect(client.search).toHaveBeenCalledWith(
+      expect(esClient.search).toHaveBeenCalledTimes(1);
+      expect(esClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
           index: targetIndex,
           size: batchSize,
