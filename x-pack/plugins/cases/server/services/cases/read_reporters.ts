@@ -26,18 +26,18 @@ export const convertToReporters = (caseObjects: Array<SavedObject<CaseAttributes
   }, []);
 
 export const readReporters = async ({
-  client,
+  soClient,
 }: {
-  client: SavedObjectsClientContract;
+  soClient: SavedObjectsClientContract;
   perPage?: number;
 }): Promise<User[]> => {
-  const firstReporters = await client.find({
+  const firstReporters = await soClient.find({
     type: CASE_SAVED_OBJECT,
     fields: ['created_by'],
     page: 1,
     perPage: 1,
   });
-  const reporters = await client.find<CaseAttributes>({
+  const reporters = await soClient.find<CaseAttributes>({
     type: CASE_SAVED_OBJECT,
     fields: ['created_by'],
     page: 1,

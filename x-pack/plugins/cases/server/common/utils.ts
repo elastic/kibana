@@ -15,7 +15,7 @@ import {
   User,
 } from '../../common/api';
 import { OperationDetails } from '../authorization';
-import { UpdateAlertRequest } from '../client/types';
+import { UpdateAlertRequest } from '../client/alerts/client';
 import { getAlertInfoFromComments } from '../routes/api/utils';
 
 /**

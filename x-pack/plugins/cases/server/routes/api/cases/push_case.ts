@@ -44,7 +44,7 @@ export function initPushCaseApi({ router, logger }: RouteDeps) {
         );
 
         return response.ok({
-          body: await casesClient.push({
+          body: await casesClient.cases.push({
             actionsClient,
             caseId: params.case_id,
             connectorId: params.connector_id,

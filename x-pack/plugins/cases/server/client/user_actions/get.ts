@@ -12,11 +12,11 @@ import {
   CASE_COMMENT_SAVED_OBJECT,
 } from '../../../common/constants';
 import { CaseUserActionsResponseRt, CaseUserActionsResponse } from '../../../common/api';
-import { CaseUserActionServiceSetup } from '../../services';
+import { CaseUserActionService } from '../../services';
 
 interface GetParams {
   savedObjectsClient: SavedObjectsClientContract;
-  userActionService: CaseUserActionServiceSetup;
+  userActionService: CaseUserActionService;
   caseId: string;
   subCaseId?: string;
 }
@@ -27,8 +27,8 @@ export const get = async ({
   caseId,
   subCaseId,
 }: GetParams): Promise<CaseUserActionsResponse> => {
-  const userActions = await userActionService.getUserActions({
-    client: savedObjectsClient,
+  const userActions = await userActionService.getAll({
+    soClient: savedObjectsClient,
     caseId,
     subCaseId,
   });

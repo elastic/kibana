@@ -35,11 +35,7 @@ import {
   transformCaseConnectorToEsConnector,
 } from '../../routes/api/cases/helpers';
 
-import {
-  CaseConfigureServiceSetup,
-  CaseServiceSetup,
-  CaseUserActionServiceSetup,
-} from '../../services';
+import { CaseConfigureService, CaseService, CaseUserActionService } from '../../services';
 import { createCaseError } from '../../common/error';
 import { Authorization } from '../../authorization/authorization';
 import { Operations } from '../../authorization';
@@ -48,11 +44,11 @@ import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import { createAuditMsg } from '../../common';
 
 interface CreateCaseArgs {
-  caseConfigureService: CaseConfigureServiceSetup;
-  caseService: CaseServiceSetup;
+  caseConfigureService: CaseConfigureService;
+  caseService: CaseService;
   user: User;
   savedObjectsClient: SavedObjectsClientContract;
-  userActionService: CaseUserActionServiceSetup;
+  userActionService: CaseUserActionService;
   theCase: CasePostRequest;
   logger: Logger;
   auth: PublicMethodsOf<Authorization>;
@@ -112,11 +108,11 @@ export const create = async ({
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const { username, full_name, email } = user;
     const createdDate = new Date().toISOString();
-    const myCaseConfigure = await caseConfigureService.find({ client: savedObjectsClient });
+    const myCaseConfigure = await caseConfigureService.find({ soClient: savedObjectsClient });
     const caseConfigureConnector = getConnectorFromConfiguration(myCaseConfigure);
 
     const newCase = await caseService.postNewCase({
-      client: savedObjectsClient,
+      soClient: savedObjectsClient,
       attributes: transformNewCase({
         createdDate,
         newCase: query,
@@ -128,8 +124,8 @@ export const create = async ({
       id: savedObjectID,
     });
 
-    await userActionService.postUserActions({
-      client: savedObjectsClient,
+    await userActionService.bulkCreate({
+      soClient: savedObjectsClient,
       actions: [
         buildCaseUserActionItem({
           action: 'create',

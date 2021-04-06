@@ -31,7 +31,7 @@ export function initGetAllCaseUserActionsApi({ router, logger }: RouteDeps) {
         const caseId = request.params.case_id;
 
         return response.ok({
-          body: await casesClient.getUserActions({ caseId }),
+          body: await casesClient.userActions.getAll({ caseId }),
         });
       } catch (error) {
         logger.error(
@@ -65,7 +65,7 @@ export function initGetAllSubCaseUserActionsApi({ router, logger }: RouteDeps) {
         const subCaseId = request.params.sub_case_id;
 
         return response.ok({
-          body: await casesClient.getUserActions({ caseId, subCaseId }),
+          body: await casesClient.userActions.getAll({ caseId, subCaseId }),
         });
       } catch (error) {
         logger.error(

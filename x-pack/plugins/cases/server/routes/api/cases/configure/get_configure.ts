@@ -21,11 +21,11 @@ export function initGetCaseConfigure({ caseConfigureService, router, logger }: R
     async (context, request, response) => {
       try {
         let error = null;
-        const client = context.core.savedObjects.getClient({
+        const soClient = context.core.savedObjects.getClient({
           includedHiddenTypes: SAVED_OBJECT_TYPES,
         });
 
-        const myCaseConfigure = await caseConfigureService.find({ client });
+        const myCaseConfigure = await caseConfigureService.find({ soClient });
 
         const { connector, ...caseConfigureWithoutConnector } = myCaseConfigure.saved_objects[0]
           ?.attributes ?? { connector: null };
@@ -40,7 +40,7 @@ export function initGetCaseConfigure({ caseConfigureService, router, logger }: R
             throw Boom.notFound('Action client not found');
           }
           try {
-            mappings = await casesClient.getMappings({
+            mappings = await casesClient.casesClientInternal.configuration.getMappings({
               actionsClient,
               connectorId: connector.id,
               connectorType: connector.type,

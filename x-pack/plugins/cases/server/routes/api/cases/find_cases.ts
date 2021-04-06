@@ -27,7 +27,7 @@ export function initFindCasesApi({ caseService, router, logger }: RouteDeps) {
         const options = request.query as CasesFindRequest;
 
         return response.ok({
-          body: await casesClient.find({ ...options }),
+          body: await casesClient.cases.find({ ...options }),
         });
       } catch (error) {
         logger.error(`Failed to find cases in route: ${error}`);

@@ -16,7 +16,7 @@ import {
   AlertServiceContract,
   CaseConfigureService,
   CaseService,
-  CaseUserActionServiceSetup,
+  CaseUserActionService,
   ConnectorMappingsService,
 } from '../services';
 import { CasesClient } from './types';
@@ -51,7 +51,7 @@ export const createCasesClientWithMockSavedObjectsClient = async ({
 }): Promise<{
   client: CasesClient;
   services: {
-    userActionService: jest.Mocked<CaseUserActionServiceSetup>;
+    userActionService: jest.Mocked<CaseUserActionService>;
     alertsService: jest.Mocked<AlertServiceContract>;
   };
   esClient: DeeplyMockedKeys<ElasticsearchClient>;

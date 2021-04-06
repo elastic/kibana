@@ -43,24 +43,28 @@ export function initPostCaseConfigure({
         if (!context.cases) {
           throw Boom.badRequest('RouteHandlerContext is not registered for cases');
         }
+
         const casesClient = await context.cases.getCasesClient();
         const actionsClient = context.actions?.getActionsClient();
+
         if (actionsClient == null) {
           throw Boom.notFound('Action client not found');
         }
-        const client = context.core.savedObjects.getClient({
+
+        const soClient = context.core.savedObjects.getClient({
           includedHiddenTypes: SAVED_OBJECT_TYPES,
         });
+
         const query = pipe(
           CasesConfigureRequestRt.decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
         );
 
-        const myCaseConfigure = await caseConfigureService.find({ client });
+        const myCaseConfigure = await caseConfigureService.find({ soClient });
         if (myCaseConfigure.saved_objects.length > 0) {
           await Promise.all(
             myCaseConfigure.saved_objects.map((cc) =>
-              caseConfigureService.delete({ client, caseConfigureId: cc.id })
+              caseConfigureService.delete({ soClient, caseConfigureId: cc.id })
             )
           );
         }
@@ -70,7 +74,7 @@ export function initPostCaseConfigure({
         const creationDate = new Date().toISOString();
         let mappings: ConnectorMappingsAttributes[] = [];
         try {
-          mappings = await casesClient.getMappings({
+          mappings = await casesClient.casesClientInternal.configuration.getMappings({
             actionsClient,
             connectorId: query.connector.id,
             connectorType: query.connector.type,
@@ -81,7 +85,7 @@ export function initPostCaseConfigure({
             : `Error connecting to ${query.connector.name} instance`;
         }
         const post = await caseConfigureService.post({
-          client,
+          soClient,
           attributes: {
             ...query,
             connector: transformCaseConnectorToEsConnector(query.connector),

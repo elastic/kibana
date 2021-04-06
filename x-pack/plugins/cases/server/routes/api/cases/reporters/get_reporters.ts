@@ -18,11 +18,11 @@ export function initGetReportersApi({ caseService, router, logger }: RouteDeps) 
     },
     async (context, request, response) => {
       try {
-        const client = context.core.savedObjects.getClient({
+        const soClient = context.core.savedObjects.getClient({
           includedHiddenTypes: SAVED_OBJECT_TYPES,
         });
         const reporters = await caseService.getReporters({
-          client,
+          soClient,
         });
         return response.ok({ body: UsersRt.encode(reporters) });
       } catch (error) {

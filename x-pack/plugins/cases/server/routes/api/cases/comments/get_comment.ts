@@ -12,7 +12,7 @@ import { RouteDeps } from '../../types';
 import { flattenCommentSavedObject, wrapError } from '../../utils';
 import { CASE_COMMENT_DETAILS_URL, SAVED_OBJECT_TYPES } from '../../../../../common/constants';
 
-export function initGetCommentApi({ caseService, router, logger }: RouteDeps) {
+export function initGetCommentApi({ attachmentService, router, logger }: RouteDeps) {
   router.get(
     {
       path: CASE_COMMENT_DETAILS_URL,
@@ -25,13 +25,13 @@ export function initGetCommentApi({ caseService, router, logger }: RouteDeps) {
     },
     async (context, request, response) => {
       try {
-        const client = context.core.savedObjects.getClient({
+        const soClient = context.core.savedObjects.getClient({
           includedHiddenTypes: SAVED_OBJECT_TYPES,
         });
 
-        const comment = await caseService.getComment({
-          client,
-          commentId: request.params.comment_id,
+        const comment = await attachmentService.get({
+          soClient,
+          attachmentId: request.params.comment_id,
         });
         return response.ok({
           body: CommentResponseRt.encode(flattenCommentSavedObject(comment)),

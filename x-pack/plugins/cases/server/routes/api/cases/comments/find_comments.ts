@@ -48,7 +48,7 @@ export function initFindCaseCommentsApi({ caseService, router, logger }: RouteDe
     },
     async (context, request, response) => {
       try {
-        const client = context.core.savedObjects.getClient({
+        const soClient = context.core.savedObjects.getClient({
           includedHiddenTypes: SAVED_OBJECT_TYPES,
         });
         const query = pipe(
@@ -68,7 +68,7 @@ export function initFindCaseCommentsApi({ caseService, router, logger }: RouteDe
         const args = query
           ? {
               caseService,
-              client,
+              soClient,
               id,
               options: {
                 // We need this because the default behavior of getAllCaseComments is to return all the comments
@@ -84,7 +84,7 @@ export function initFindCaseCommentsApi({ caseService, router, logger }: RouteDe
             }
           : {
               caseService,
-              client,
+              soClient,
               id,
               options: {
                 page: defaultPage,

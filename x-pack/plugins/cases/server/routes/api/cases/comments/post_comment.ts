@@ -45,7 +45,7 @@ export function initPostCommentApi({ router, logger }: RouteDeps) {
         const comment = request.body as CommentRequest;
 
         return response.ok({
-          body: await casesClient.addComment({ caseId, comment }),
+          body: await casesClient.attachments.add({ caseId, comment }),
         });
       } catch (error) {
         logger.error(

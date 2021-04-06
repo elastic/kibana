@@ -34,13 +34,14 @@ import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 
 import { createIncident, getCommentContextFromAttributes } from './utils';
 import {
-  CaseConfigureServiceSetup,
-  CaseServiceSetup,
-  CaseUserActionServiceSetup,
+  CaseConfigureService,
+  CaseService,
+  CaseUserActionService,
+  AttachmentService,
 } from '../../services';
-import { CasesClientHandler } from '../client';
 import { createCaseError } from '../../common/error';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
+import { CasesClient, CasesClientInternal } from '..';
 
 /**
  * Returns true if the case should be closed based on the configuration settings and whether the case
@@ -60,23 +61,27 @@ function shouldCloseByPush(
 
 interface PushParams {
   savedObjectsClient: SavedObjectsClientContract;
-  caseService: CaseServiceSetup;
-  caseConfigureService: CaseConfigureServiceSetup;
-  userActionService: CaseUserActionServiceSetup;
+  caseService: CaseService;
+  caseConfigureService: CaseConfigureService;
+  userActionService: CaseUserActionService;
+  attachmentService: AttachmentService;
   user: User;
   caseId: string;
   connectorId: string;
-  casesClient: CasesClientHandler;
+  casesClient: CasesClient;
+  casesClientInternal: CasesClientInternal;
   actionsClient: ActionsClient;
   logger: Logger;
 }
 
 export const push = async ({
   savedObjectsClient,
+  attachmentService,
   caseService,
   caseConfigureService,
   userActionService,
   casesClient,
+  casesClientInternal,
   actionsClient,
   connectorId,
   caseId,
@@ -93,13 +98,13 @@ export const push = async ({
 
   try {
     [theCase, connector, userActions] = await Promise.all([
-      casesClient.get({
+      casesClient.cases.get({
         id: caseId,
         includeComments: true,
         includeSubCaseComments: ENABLE_CASE_CONNECTOR,
       }),
       actionsClient.get({ id: connectorId }),
-      casesClient.getUserActions({ caseId }),
+      casesClient.userActions.getAll({ caseId }),
     ]);
   } catch (e) {
     const message = `Error getting case and/or connector and/or user actions: ${e.message}`;
@@ -116,7 +121,7 @@ export const push = async ({
   const alertsInfo = getAlertInfoFromComments(theCase?.comments);
 
   try {
-    alerts = await casesClient.getAlerts({
+    alerts = await casesClientInternal.alerts.get({
       alertsInfo,
     });
   } catch (e) {
@@ -128,7 +133,7 @@ export const push = async ({
   }
 
   try {
-    connectorMappings = await casesClient.getMappings({
+    connectorMappings = await casesClientInternal.configuration.getMappings({
       actionsClient,
       connectorId: connector.id,
       connectorType: connector.actionTypeId,
@@ -176,12 +181,12 @@ export const push = async ({
   try {
     [myCase, myCaseConfigure, comments] = await Promise.all([
       caseService.getCase({
-        client: savedObjectsClient,
+        soClient: savedObjectsClient,
         id: caseId,
       }),
-      caseConfigureService.find({ client: savedObjectsClient }),
+      caseConfigureService.find({ soClient: savedObjectsClient }),
       caseService.getAllCaseComments({
-        client: savedObjectsClient,
+        soClient: savedObjectsClient,
         id: caseId,
         options: {
           fields: [],
@@ -219,7 +224,7 @@ export const push = async ({
   try {
     [updatedCase, updatedComments] = await Promise.all([
       caseService.patchCase({
-        client: savedObjectsClient,
+        soClient: savedObjectsClient,
         caseId,
         updatedAttributes: {
           ...(shouldMarkAsClosed
@@ -236,12 +241,12 @@ export const push = async ({
         version: myCase.version,
       }),
 
-      caseService.patchComments({
-        client: savedObjectsClient,
+      attachmentService.bulkUpdate({
+        soClient: savedObjectsClient,
         comments: comments.saved_objects
           .filter((comment) => comment.attributes.pushed_at == null)
           .map((comment) => ({
-            commentId: comment.id,
+            attachmentId: comment.id,
             updatedAttributes: {
               pushed_at: pushedDate,
               pushed_by: { username, full_name, email },
@@ -250,8 +255,8 @@ export const push = async ({
           })),
       }),
 
-      userActionService.postUserActions({
-        client: savedObjectsClient,
+      userActionService.bulkCreate({
+        soClient: savedObjectsClient,
         actions: [
           ...(shouldMarkAsClosed
             ? [

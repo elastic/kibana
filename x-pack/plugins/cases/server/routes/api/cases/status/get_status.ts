@@ -20,7 +20,7 @@ export function initGetCasesStatusApi({ caseService, router, logger }: RouteDeps
     },
     async (context, request, response) => {
       try {
-        const client = context.core.savedObjects.getClient({
+        const soClient = context.core.savedObjects.getClient({
           includedHiddenTypes: SAVED_OBJECT_TYPES,
         });
 
@@ -28,7 +28,7 @@ export function initGetCasesStatusApi({ caseService, router, logger }: RouteDeps
           ...caseStatuses.map((status) => {
             const statusQuery = constructQueryOptions({ status });
             return caseService.findCaseStatusStats({
-              client,
+              soClient,
               caseOptions: statusQuery.case,
               subCaseOptions: statusQuery.subCase,
             });

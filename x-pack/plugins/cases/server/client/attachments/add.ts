@@ -32,9 +32,9 @@ import {
   buildCommentUserActionItem,
 } from '../../services/user_actions/helpers';
 
-import { CaseServiceSetup, CaseUserActionServiceSetup } from '../../services';
+import { AttachmentService, CaseService, CaseUserActionService } from '../../services';
 import { CommentableCase, createAlertUpdateRequest } from '../../common';
-import { CasesClientHandler } from '..';
+import { CasesClientArgs, CasesClientInternal } from '..';
 import { createCaseError } from '../../common/error';
 import {
   MAX_GENERATED_ALERTS_PER_SUB_CASE,
@@ -50,17 +50,17 @@ async function getSubCase({
   userActionService,
   user,
 }: {
-  caseService: CaseServiceSetup;
+  caseService: CaseService;
   savedObjectsClient: SavedObjectsClientContract;
   caseId: string;
   createdAt: string;
-  userActionService: CaseUserActionServiceSetup;
+  userActionService: CaseUserActionService;
   user: User;
 }): Promise<SavedObject<SubCaseAttributes>> {
   const mostRecentSubCase = await caseService.getMostRecentSubCase(savedObjectsClient, caseId);
   if (mostRecentSubCase && mostRecentSubCase.attributes.status !== CaseStatuses.closed) {
     const subCaseAlertsAttachement = await caseService.getAllSubCaseComments({
-      client: savedObjectsClient,
+      soClient: savedObjectsClient,
       id: mostRecentSubCase.id,
       options: {
         fields: [],
@@ -79,13 +79,13 @@ async function getSubCase({
   }
 
   const newSubCase = await caseService.createSubCase({
-    client: savedObjectsClient,
+    soClient: savedObjectsClient,
     createdAt,
     caseId,
     createdBy: user,
   });
-  await userActionService.postUserActions({
-    client: savedObjectsClient,
+  await userActionService.bulkCreate({
+    soClient: savedObjectsClient,
     actions: [
       buildCaseUserActionItem({
         action: 'create',
@@ -102,20 +102,22 @@ async function getSubCase({
 }
 
 interface AddCommentFromRuleArgs {
-  casesClient: CasesClientHandler;
+  casesClientInternal: CasesClientInternal;
   caseId: string;
   comment: CommentRequestAlertType;
   savedObjectsClient: SavedObjectsClientContract;
-  caseService: CaseServiceSetup;
-  userActionService: CaseUserActionServiceSetup;
+  attachmentService: AttachmentService;
+  caseService: CaseService;
+  userActionService: CaseUserActionService;
   logger: Logger;
 }
 
 const addGeneratedAlerts = async ({
   savedObjectsClient,
+  attachmentService,
   caseService,
   userActionService,
-  casesClient,
+  casesClientInternal,
   caseId,
   comment,
   logger,
@@ -136,7 +138,7 @@ const addGeneratedAlerts = async ({
     const createdDate = new Date().toISOString();
 
     const caseInfo = await caseService.getCase({
-      client: savedObjectsClient,
+      soClient: savedObjectsClient,
       id: caseId,
     });
 
@@ -167,7 +169,8 @@ const addGeneratedAlerts = async ({
       collection: caseInfo,
       subCase,
       soClient: savedObjectsClient,
-      service: caseService,
+      caseService,
+      attachmentService,
     });
 
     const {
@@ -184,13 +187,13 @@ const addGeneratedAlerts = async ({
         comment: query,
         status: subCase.attributes.status,
       });
-      await casesClient.updateAlertsStatus({
+      await casesClientInternal.alerts.updateStatus({
         alerts: alertsToUpdate,
       });
     }
 
-    await userActionService.postUserActions({
-      client: savedObjectsClient,
+    await userActionService.bulkCreate({
+      soClient: savedObjectsClient,
       actions: [
         buildCommentUserActionItem({
           action: 'create',
@@ -216,25 +219,27 @@ const addGeneratedAlerts = async ({
 };
 
 async function getCombinedCase({
-  service,
-  client,
+  caseService,
+  attachmentService,
+  soClient,
   id,
   logger,
 }: {
-  service: CaseServiceSetup;
-  client: SavedObjectsClientContract;
+  caseService: CaseService;
+  attachmentService: AttachmentService;
+  soClient: SavedObjectsClientContract;
   id: string;
   logger: Logger;
 }): Promise<CommentableCase> {
   const [casePromise, subCasePromise] = await Promise.allSettled([
-    service.getCase({
-      client,
+    caseService.getCase({
+      soClient,
       id,
     }),
     ...(ENABLE_CASE_CONNECTOR
       ? [
-          service.getSubCase({
-            client,
+          caseService.getSubCase({
+            soClient,
             id,
           }),
         ]
@@ -243,16 +248,17 @@ async function getCombinedCase({
 
   if (subCasePromise.status === 'fulfilled') {
     if (subCasePromise.value.references.length > 0) {
-      const caseValue = await service.getCase({
-        client,
+      const caseValue = await caseService.getCase({
+        soClient,
         id: subCasePromise.value.references[0].id,
       });
       return new CommentableCase({
         logger,
         collection: caseValue,
         subCase: subCasePromise.value,
-        service,
-        soClient: client,
+        caseService,
+        attachmentService,
+        soClient,
       });
     } else {
       throw Boom.badRequest('Sub case found without reference to collection');
@@ -265,37 +271,38 @@ async function getCombinedCase({
     return new CommentableCase({
       logger,
       collection: casePromise.value,
-      service,
-      soClient: client,
+      caseService,
+      attachmentService,
+      soClient,
     });
   }
 }
 
 interface AddCommentArgs {
-  casesClient: CasesClientHandler;
   caseId: string;
   comment: CommentRequest;
-  savedObjectsClient: SavedObjectsClientContract;
-  caseService: CaseServiceSetup;
-  userActionService: CaseUserActionServiceSetup;
-  user: User;
-  logger: Logger;
+  casesClientInternal: CasesClientInternal;
 }
 
 export const addComment = async ({
-  savedObjectsClient,
-  caseService,
-  userActionService,
-  casesClient,
   caseId,
   comment,
-  user,
-  logger,
-}: AddCommentArgs): Promise<CaseResponse> => {
+  casesClientInternal,
+  ...rest
+}: AddCommentArgs & CasesClientArgs): Promise<CaseResponse> => {
   const query = pipe(
     CommentRequestRt.decode(comment),
     fold(throwErrors(Boom.badRequest), identity)
   );
+
+  const {
+    savedObjectsClient,
+    caseService,
+    userActionService,
+    attachmentService,
+    user,
+    logger,
+  } = rest;
 
   if (isCommentRequestTypeGenAlert(comment)) {
     if (!ENABLE_CASE_CONNECTOR) {
@@ -307,10 +314,11 @@ export const addComment = async ({
     return addGeneratedAlerts({
       caseId,
       comment,
-      casesClient,
+      casesClientInternal,
       savedObjectsClient,
       userActionService,
       caseService,
+      attachmentService,
       logger,
     });
   }
@@ -320,8 +328,9 @@ export const addComment = async ({
     const createdDate = new Date().toISOString();
 
     const combinedCase = await getCombinedCase({
-      service: caseService,
-      client: savedObjectsClient,
+      caseService,
+      attachmentService,
+      soClient: savedObjectsClient,
       id: caseId,
       logger,
     });
@@ -346,13 +355,13 @@ export const addComment = async ({
         status: updatedCase.status,
       });
 
-      await casesClient.updateAlertsStatus({
+      await casesClientInternal.alerts.updateStatus({
         alerts: alertsToUpdate,
       });
     }
 
-    await userActionService.postUserActions({
-      client: savedObjectsClient,
+    await userActionService.bulkCreate({
+      soClient: savedObjectsClient,
       actions: [
         buildCommentUserActionItem({
           action: 'create',
