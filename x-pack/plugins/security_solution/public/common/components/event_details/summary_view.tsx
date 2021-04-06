@@ -48,6 +48,7 @@ interface SummaryRow {
     fieldType?: string;
     linkValue?: string;
     isDraggingDisabled?: boolean;
+    isRoleSeparator?: boolean;
   };
 }
 type Summary = SummaryRow[];
@@ -95,17 +96,38 @@ const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
   }
 `;
 
+const Separator = styled.div`
+  width: 120%;
+  height: 2px;
+  margin: 12px 0;
+  background: #eee;
+`;
+
 const StyledEuiDescriptionList = styled(EuiDescriptionList)`
   padding: 24px 4px 4px;
 `;
 
-const getTitle = (title: SummaryRow['title']) => (
-  <EuiTitle size="xxs">
-    <h5>{title}</h5>
-  </EuiTitle>
-);
+const getTitle = (title: SummaryRow['title']) =>
+  title ? (
+    <EuiTitle size="xxs">
+      <h5>{title}</h5>
+    </EuiTitle>
+  ) : (
+    <Separator role={'separator'} />
+  );
 
 getTitle.displayName = 'getTitle';
+
+const getSeparatorRow = (contextId: string, eventId: string, fieldName: string): SummaryRow => ({
+  title: '',
+  description: {
+    contextId,
+    eventId,
+    fieldName,
+    values: [''],
+    isRoleSeparator: true,
+  },
+});
 
 const getDescription = ({
   contextId,
@@ -115,6 +137,7 @@ const getDescription = ({
   fieldType = '',
   linkValue,
   isDraggingDisabled,
+  isRoleSeparator,
 }: SummaryRow['description']) =>
   values.map((value) => (
     <FormattedFieldValue
@@ -126,6 +149,7 @@ const getDescription = ({
       value={value}
       linkValue={linkValue}
       isDraggingDisabled={isDraggingDisabled}
+      isRoleSeparator={isRoleSeparator}
     />
   ));
 
@@ -149,21 +173,23 @@ const getSummary = ({
     return data.reduce<Summary>((acc, { category, field, originalValue }) => {
       if (isDisplayingThreatDetails && field === 'threat.indicator' && originalValue) {
         const isOriginalValueArray = Array.isArray(originalValue);
-        const isArrayIndexVisible = isOriginalValueArray && originalValue.length > 1;
-        const threatData = isArrayIndexVisible
+        const isArrayIndexPresentInFieldName = isOriginalValueArray && originalValue.length > 1;
+        const threatData = isArrayIndexPresentInFieldName
           ? originalValue.map((threatDataItem: string) => JSON.parse(threatDataItem))
           : isOriginalValueArray
           ? JSON.parse(originalValue[0])
           : JSON.parse(originalValue);
 
-        return getDataFromSourceHits(threatData).map((threatInfoItem) => {
+        const items: SummaryRow[] = [];
+        let originalValueArrayIndex = 0;
+        getDataFromSourceHits(threatData).forEach((threatInfoItem) => {
           const fieldName = `threat.indicator.${
-            isArrayIndexVisible
+            isArrayIndexPresentInFieldName
               ? threatInfoItem.field.split('.').slice(1).join('.')
               : threatInfoItem.field
           }`;
-          return {
-            title: threatInfoItem.field,
+          items.push({
+            title: fieldName.substring('threat.indicator.'.length),
             description: {
               contextId,
               eventId,
@@ -171,8 +197,16 @@ const getSummary = ({
               values: threatInfoItem.originalValue,
               isDraggingDisabled: true,
             },
-          };
+          });
+          if (
+            isArrayIndexPresentInFieldName &&
+            +threatInfoItem.field.split('.')[0] !== originalValueArrayIndex
+          ) {
+            items.push(getSeparatorRow(contextId, eventId, fieldName));
+            originalValueArrayIndex++;
+          }
         });
+        return items;
       } else if (
         isDisplayingThreatSummary &&
         field.startsWith('threat.indicator.') &&

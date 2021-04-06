@@ -53,6 +53,7 @@ const FormattedFieldValueComponent: React.FC<{
   value: string | number | undefined | null;
   linkValue?: string | null | undefined;
   isDraggingDisabled?: boolean;
+  isRoleSeparator?: boolean;
 }> = ({
   contextId,
   eventId,
@@ -64,6 +65,7 @@ const FormattedFieldValueComponent: React.FC<{
   value,
   linkValue,
   isDraggingDisabled = false,
+  isRoleSeparator,
 }) => {
   if (isObjectArray) {
     return <>{value}</>;
@@ -125,13 +127,14 @@ const FormattedFieldValueComponent: React.FC<{
     [RULE_REFERENCE_FIELD_NAME, REFERENCE_URL_FIELD_NAME, EVENT_URL_FIELD_NAME].includes(fieldName)
   ) {
     return renderUrl({ contextId, eventId, fieldName, linkValue, truncate, value });
-  } else if (columnNamesNotDraggable.includes(fieldName) || isDraggingDisabled) {
+  } else if (columnNamesNotDraggable.includes(fieldName) || isDraggingDisabled || isRoleSeparator) {
     return (
       <NotDraggable
         fieldName={fieldName}
         isDraggingDisabled={isDraggingDisabled}
         truncate={truncate}
         value={value}
+        isRoleSeparator={isRoleSeparator}
       />
     );
   } else {

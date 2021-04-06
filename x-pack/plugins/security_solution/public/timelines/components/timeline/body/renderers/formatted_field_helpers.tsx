@@ -29,6 +29,13 @@ const EventModuleFlexItem = styled(EuiFlexItem)`
   width: 100%;
 `;
 
+const Separator = styled.div`
+  height: 2px;
+  margin: 12px 0;
+  width: 90%;
+  background: linear-gradient(90deg, rgba(238, 238, 238, 1) 70%, rgba(238, 238, 238, 0) 100%);
+`;
+
 interface RenderRuleNameProps {
   contextId: string;
   eventId: string;
@@ -43,6 +50,7 @@ interface NotDraggableProps {
   isDraggingDisabled: boolean;
   fieldName: string;
   value: string | number | null | undefined;
+  isRoleSeparator?: boolean;
 }
 
 export const NotDraggable: React.FC<NotDraggableProps> = ({
@@ -50,29 +58,34 @@ export const NotDraggable: React.FC<NotDraggableProps> = ({
   isDraggingDisabled,
   fieldName,
   value,
+  isRoleSeparator,
 }) => {
-  return (truncate || isDraggingDisabled) && !isEmpty(value) ? (
-    <TruncatableText data-test-subj="truncatable-message">
-      <EuiToolTip
-        data-test-subj="message-tool-tip"
-        content={
-          <EuiFlexGroup direction="column" gutterSize="none">
-            <EuiFlexItem grow={false}>
-              <span>{fieldName}</span>
-            </EuiFlexItem>
-            {!isDraggingDisabled && (
+  return (truncate || isDraggingDisabled) && !isEmpty(value) && !isRoleSeparator ? (
+    <>
+      <TruncatableText data-test-subj="truncatable-message">
+        <EuiToolTip
+          data-test-subj="message-tool-tip"
+          content={
+            <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem grow={false}>
-                <span>{value}</span>
+                <span>{fieldName}</span>
               </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        }
-      >
-        <>{value}</>
-      </EuiToolTip>
-    </TruncatableText>
+              {!isDraggingDisabled && (
+                <EuiFlexItem grow={false}>
+                  <span>{value}</span>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          }
+        >
+          <div>{value}</div>
+        </EuiToolTip>
+      </TruncatableText>
+    </>
+  ) : isRoleSeparator ? (
+    <Separator role={'separator'} />
   ) : (
-    <>{value}</>
+    <div>{value}</div>
   );
 };
 
