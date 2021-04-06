@@ -26,6 +26,11 @@ describe('create', () => {
     const spyOnDate = jest.spyOn(global, 'Date') as jest.SpyInstance<{}, []>;
     spyOnDate.mockImplementation(() => ({
       toISOString: jest.fn().mockReturnValue('2019-11-25T21:54:48.952Z'),
+      // when we create a case we generate an ID that is used for the saved object. Internally the ID generation code
+      // calls Date.getTime so we need it to return something even though the inject saved object client is going to
+      // override it with a different ID anyway
+      // Otherwise we'll get an error when the function is called
+      getTime: jest.fn().mockReturnValue(1),
     }));
   });
 

@@ -11,7 +11,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import { SavedObjectsClientContract, Logger } from 'src/core/server';
+import { SavedObjectsClientContract, Logger, SavedObjectsUtils } from 'src/core/server';
 import { flattenCaseSavedObject, transformNewCase } from '../../routes/api/utils';
 
 import {
@@ -87,16 +87,21 @@ export const create = async ({
   );
 
   try {
+    const savedObjectID = SavedObjectsUtils.generateId();
     try {
       await auth.ensureAuthorized(query.owner, Operations.createCase);
     } catch (error) {
-      auditLogger?.log(createAuditMsg({ operation: Operations.createCase, error }));
+      auditLogger?.log(createAuditMsg({ operation: Operations.createCase, error, savedObjectID }));
       throw error;
     }
 
     // log that we're attempting to create a case
     auditLogger?.log(
-      createAuditMsg({ operation: Operations.createCase, outcome: EventOutcome.UNKNOWN })
+      createAuditMsg({
+        operation: Operations.createCase,
+        outcome: EventOutcome.UNKNOWN,
+        savedObjectID,
+      })
     );
 
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -115,16 +120,8 @@ export const create = async ({
         email,
         connector: transformCaseConnectorToEsConnector(query.connector ?? caseConfigureConnector),
       }),
+      id: savedObjectID,
     });
-
-    // log that we successfully created a case
-    auditLogger?.log(
-      createAuditMsg({
-        operation: Operations.createCase,
-        outcome: EventOutcome.SUCCESS,
-        savedObjectID: newCase.id,
-      })
-    );
 
     await userActionService.postUserActions({
       client: savedObjectsClient,
