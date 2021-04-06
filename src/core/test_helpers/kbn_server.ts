@@ -29,11 +29,10 @@ import { resolve } from 'path';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
 
-import { CoreStart } from 'src/core/server';
+import { InternalCoreSetup, InternalCoreStart } from '../server/internal_types';
 import { LegacyAPICaller } from '../server/elasticsearch';
 import { CliArgs, Env } from '../server/config';
 import { Root } from '../server/root';
-import KbnServer from '../../legacy/server/kbn_server';
 
 export type HttpMethod = 'delete' | 'get' | 'head' | 'post' | 'put';
 
@@ -125,14 +124,6 @@ export function createRootWithCorePlugins(settings = {}, cliArgs: Partial<CliArg
   );
 }
 
-/**
- * Returns `kbnServer` instance used in the "legacy" Kibana.
- * @param root
- */
-export function getKbnServer(root: Root): KbnServer {
-  return (root as any).server.legacy.kbnServer;
-}
-
 export const request: Record<
   HttpMethod,
   (root: Root, path: string) => ReturnType<typeof getSupertest>
@@ -164,8 +155,8 @@ export interface TestElasticsearchUtils {
 
 export interface TestKibanaUtils {
   root: Root;
-  coreStart: CoreStart;
-  kbnServer: KbnServer;
+  coreSetup: InternalCoreSetup;
+  coreStart: InternalCoreStart;
   stop: () => Promise<void>;
 }
 
@@ -283,14 +274,12 @@ export function createTestServers({
     startKibana: async () => {
       const root = createRootWithCorePlugins(kbnSettings);
 
-      await root.setup();
+      const coreSetup = await root.setup();
       const coreStart = await root.start();
-
-      const kbnServer = getKbnServer(root);
 
       return {
         root,
-        kbnServer,
+        coreSetup,
         coreStart,
         stop: async () => await root.shutdown(),
       };
