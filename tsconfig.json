@@ -19,7 +19,7 @@
     "x-pack/plugins/cases/**/*",
     "x-pack/plugins/lists/**/*",
     "x-pack/plugins/security_solution/**/*",
-    "x-pack/plugins/metrics_summary/**/*",
+    "x-pack/plugins/metrics_entities/**/*",
 
     // tests
     "src/**/*.test.ts",
