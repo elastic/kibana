@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 
+import { CellValueElementProps } from '../../cell_rendering';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 import { Ecs } from '../../../../../../common/ecs';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
@@ -21,7 +22,6 @@ import {
   getPinOnClick,
   InvestigateInResolverAction,
 } from '../helpers';
-import { ColumnRenderer } from '../renderers/column_renderer';
 import { AlertContextMenu } from '../../../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
 import { InvestigateInTimelineAction } from '../../../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
 import { AddEventNoteAction } from '../actions/add_note_icon_item';
@@ -38,7 +38,6 @@ interface Props {
   actionsColumnWidth: number;
   ariaRowindex: number;
   columnHeaders: ColumnHeaderOptions[];
-  columnRenderers: ColumnRenderer[];
   data: TimelineNonEcsData[];
   ecsData: Ecs;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
@@ -51,6 +50,7 @@ interface Props {
   onRowSelected: OnRowSelected;
   onUnPinEvent: OnUnPinEvent;
   refetch: inputsModel.Refetch;
+  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   onRuleChange?: () => void;
   hasRowRenderers: boolean;
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
@@ -69,7 +69,6 @@ export const EventColumnView = React.memo<Props>(
     actionsColumnWidth,
     ariaRowindex,
     columnHeaders,
-    columnRenderers,
     data,
     ecsData,
     eventIdToNoteIds,
@@ -84,6 +83,7 @@ export const EventColumnView = React.memo<Props>(
     refetch,
     hasRowRenderers,
     onRuleChange,
+    renderCellValue,
     selectedEventIds,
     showCheckboxes,
     showNotes,
@@ -227,11 +227,11 @@ export const EventColumnView = React.memo<Props>(
           _id={id}
           ariaRowindex={ariaRowindex}
           columnHeaders={columnHeaders}
-          columnRenderers={columnRenderers}
           data={data}
           ecsData={ecsData}
           hasRowRenderers={hasRowRenderers}
           notesCount={notesCount}
+          renderCellValue={renderCellValue}
           tabType={tabType}
           timelineId={timelineId}
         />
