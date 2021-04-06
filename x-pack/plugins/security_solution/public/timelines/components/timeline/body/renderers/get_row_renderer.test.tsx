@@ -6,13 +6,14 @@
  */
 
 import { shallow } from 'enzyme';
+import { cloneDeep } from 'lodash';
 import React from 'react';
 
 import { removeExternalLinkText } from '../../../../../../common/test_utils';
 import '../../../../../common/mock/match_media';
 import { mockBrowserFields } from '../../../../../common/containers/source/mock';
+import { Ecs } from '../../../../../../common/ecs';
 import { mockTimelineData } from '../../../../../common/mock';
-import { TimelineItem } from '../../../../../../common/search_strategy';
 import { TestProviders } from '../../../../../common/mock/test_providers';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
 
@@ -31,26 +32,26 @@ jest.mock('@elastic/eui', () => {
 jest.mock('../../../../../common/components/link_to');
 
 describe('get_column_renderer', () => {
-  let nonSuricata: TimelineItem;
-  let suricata: TimelineItem;
-  let zeek: TimelineItem;
-  let system: TimelineItem;
-  let auditd: TimelineItem;
+  let nonSuricata: Ecs;
+  let suricata: Ecs;
+  let zeek: Ecs;
+  let system: Ecs;
+  let auditd: Ecs;
   const mount = useMountAppended();
 
   beforeEach(() => {
-    nonSuricata = mockTimelineData[0];
-    suricata = mockTimelineData[2];
-    zeek = mockTimelineData[13];
-    system = mockTimelineData[28];
-    auditd = mockTimelineData[19];
+    nonSuricata = cloneDeep(mockTimelineData[0].ecs);
+    suricata = cloneDeep(mockTimelineData[2].ecs);
+    zeek = cloneDeep(mockTimelineData[13].ecs);
+    system = cloneDeep(mockTimelineData[28].ecs);
+    auditd = cloneDeep(mockTimelineData[19].ecs);
   });
 
   test('renders correctly against snapshot', () => {
-    const rowRenderer = getRowRenderer(defaultRowRenderers, nonSuricata.ecs, nonSuricata.data);
+    const rowRenderer = getRowRenderer(nonSuricata, defaultRowRenderers);
     const row = rowRenderer?.renderRow({
       browserFields: mockBrowserFields,
-      data: nonSuricata.ecs,
+      data: nonSuricata,
       timelineId: 'test',
     });
 
@@ -59,10 +60,10 @@ describe('get_column_renderer', () => {
   });
 
   test('should render plain row data when it is a non suricata row', () => {
-    const rowRenderer = getRowRenderer(defaultRowRenderers, nonSuricata.ecs, nonSuricata.data);
+    const rowRenderer = getRowRenderer(nonSuricata, defaultRowRenderers);
     const row = rowRenderer?.renderRow({
       browserFields: mockBrowserFields,
-      data: nonSuricata.ecs,
+      data: nonSuricata,
       timelineId: 'test',
     });
     const wrapper = mount(
@@ -74,10 +75,10 @@ describe('get_column_renderer', () => {
   });
 
   test('should render a suricata row data when it is a suricata row', () => {
-    const rowRenderer = getRowRenderer(defaultRowRenderers, suricata.ecs, suricata.data);
+    const rowRenderer = getRowRenderer(suricata, defaultRowRenderers);
     const row = rowRenderer?.renderRow({
       browserFields: mockBrowserFields,
-      data: suricata.ecs,
+      data: suricata,
       timelineId: 'test',
     });
     const wrapper = mount(
@@ -91,11 +92,11 @@ describe('get_column_renderer', () => {
   });
 
   test('should render a suricata row data if event.category is network_traffic', () => {
-    suricata.ecs.event = { ...suricata.ecs.event, ...{ category: ['network_traffic'] } };
-    const rowRenderer = getRowRenderer(defaultRowRenderers, suricata.ecs, suricata.data);
+    suricata.event = { ...suricata.event, ...{ category: ['network_traffic'] } };
+    const rowRenderer = getRowRenderer(suricata, defaultRowRenderers);
     const row = rowRenderer?.renderRow({
       browserFields: mockBrowserFields,
-      data: suricata.ecs,
+      data: suricata,
       timelineId: 'test',
     });
     const wrapper = mount(
@@ -109,11 +110,11 @@ describe('get_column_renderer', () => {
   });
 
   test('should render a zeek row data if event.category is network_traffic', () => {
-    zeek.ecs.event = { ...zeek.ecs.event, ...{ category: ['network_traffic'] } };
-    const rowRenderer = getRowRenderer(defaultRowRenderers, zeek.ecs, zeek.data);
+    zeek.event = { ...zeek.event, ...{ category: ['network_traffic'] } };
+    const rowRenderer = getRowRenderer(zeek, defaultRowRenderers);
     const row = rowRenderer?.renderRow({
       browserFields: mockBrowserFields,
-      data: zeek.ecs,
+      data: zeek,
       timelineId: 'test',
     });
     const wrapper = mount(
@@ -127,11 +128,11 @@ describe('get_column_renderer', () => {
   });
 
   test('should render a system row data if event.category is network_traffic', () => {
-    system.ecs.event = { ...system.ecs.event, ...{ category: ['network_traffic'] } };
-    const rowRenderer = getRowRenderer(defaultRowRenderers, system.ecs, system.data);
+    system.event = { ...system.event, ...{ category: ['network_traffic'] } };
+    const rowRenderer = getRowRenderer(system, defaultRowRenderers);
     const row = rowRenderer?.renderRow({
       browserFields: mockBrowserFields,
-      data: system.ecs,
+      data: system,
       timelineId: 'test',
     });
     const wrapper = mount(
@@ -145,11 +146,11 @@ describe('get_column_renderer', () => {
   });
 
   test('should render a auditd row data if event.category is network_traffic', () => {
-    auditd.ecs.event = { ...auditd.ecs.event, ...{ category: ['network_traffic'] } };
-    const rowRenderer = getRowRenderer(defaultRowRenderers, auditd.ecs, auditd.data);
+    auditd.event = { ...auditd.event, ...{ category: ['network_traffic'] } };
+    const rowRenderer = getRowRenderer(auditd, defaultRowRenderers);
     const row = rowRenderer?.renderRow({
       browserFields: mockBrowserFields,
-      data: auditd.ecs,
+      data: auditd,
       timelineId: 'test',
     });
     const wrapper = mount(

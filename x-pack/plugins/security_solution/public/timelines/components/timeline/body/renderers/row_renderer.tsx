@@ -11,7 +11,6 @@ import { BrowserFields } from '../../../../../common/containers/source';
 import type { RowRendererId } from '../../../../../../common/types/timeline';
 import { Ecs } from '../../../../../../common/ecs';
 import { EventsTrSupplement } from '../../styles';
-import { TimelineNonEcsData } from '../../../../../../common/search_strategy';
 
 interface RowRendererContainerProps {
   children: React.ReactNode;
@@ -26,16 +25,14 @@ RowRendererContainer.displayName = 'RowRendererContainer';
 
 export interface RowRenderer {
   id: RowRendererId;
-  isInstance: (data: Ecs, flattenedData?: TimelineNonEcsData[]) => boolean;
+  isInstance: (data: Ecs) => boolean;
   renderRow: ({
     browserFields,
     data,
-    flattenedData,
     timelineId,
   }: {
     browserFields: BrowserFields;
     data: Ecs;
-    flattenedData?: TimelineNonEcsData[];
     timelineId: string;
   }) => React.ReactNode;
 }

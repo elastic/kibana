@@ -6,12 +6,7 @@
  */
 
 import { Ecs } from '../../../../../../common/ecs';
-import { TimelineNonEcsData } from '../../../../../../common/search_strategy';
 import { RowRenderer } from './row_renderer';
 
-export const getRowRenderer = (
-  rowRenderers: RowRenderer[],
-  ecs: Ecs,
-  data: TimelineNonEcsData[]
-): RowRenderer | null =>
-  rowRenderers.find((rowRenderer) => rowRenderer.isInstance(ecs, data)) ?? null;
+export const getRowRenderer = (ecs: Ecs, rowRenderers: RowRenderer[]): RowRenderer | null =>
+  rowRenderers.find((rowRenderer) => rowRenderer.isInstance(ecs)) ?? null;

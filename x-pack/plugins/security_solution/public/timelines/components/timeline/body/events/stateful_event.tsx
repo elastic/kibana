@@ -148,10 +148,10 @@ const StatefulEventComponent: React.FC<Props> = ({
     [notesById, noteIds]
   );
 
-  const hasRowRenderers: boolean = useMemo(
-    () => getRowRenderer(rowRenderers, event.ecs, event.data) != null,
-    [event.ecs, event.data, rowRenderers]
-  );
+  const hasRowRenderers: boolean = useMemo(() => getRowRenderer(event.ecs, rowRenderers) != null, [
+    event.ecs,
+    rowRenderers,
+  ]);
 
   const onToggleShowNotes = useCallback(() => {
     const eventId = event._id;
