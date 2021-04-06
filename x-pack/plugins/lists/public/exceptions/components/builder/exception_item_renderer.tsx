@@ -47,6 +47,10 @@ interface BuilderExceptionListItemProps {
   andLogicIncluded: boolean;
   isOnlyItem: boolean;
   listType: ExceptionListType;
+  listTypeSpecificIndexPatternFilter?: (
+    pattern: IIndexPattern,
+    type: ExceptionListType
+  ) => IIndexPattern;
   onDeleteExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
   onChangeExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
   setErrorsExist: (arg: boolean) => void;
@@ -64,6 +68,7 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
     indexPattern,
     isOnlyItem,
     listType,
+    listTypeSpecificIndexPatternFilter,
     andLogicIncluded,
     onDeleteExceptionItem,
     onChangeExceptionItem,
@@ -142,25 +147,26 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
                       <MyOverflowContainer grow={1}>
                         <BuilderEntryItem
                           allowLargeValueLists={allowLargeValueLists}
-                          httpService={httpService}
                           autocompleteService={autocompleteService}
                           entry={item}
+                          httpService={httpService}
                           indexPattern={indexPattern}
                           listType={listType}
+                          listTypeSpecificIndexPatternFilter={listTypeSpecificIndexPatternFilter}
+                          onChange={handleEntryChange}
+                          onlyShowListOperators={onlyShowListOperators}
+                          setErrorsExist={setErrorsExist}
                           osTypes={osTypes}
                           showLabel={
                             exceptionItemIndex === 0 && index === 0 && item.nested !== 'child'
                           }
-                          onChange={handleEntryChange}
-                          setErrorsExist={setErrorsExist}
-                          onlyShowListOperators={onlyShowListOperators}
                         />
                       </MyOverflowContainer>
                       <BuilderEntryDeleteButtonComponent
                         entries={exceptionItem.entries}
-                        isOnlyItem={isOnlyItem}
                         entryIndex={item.entryIndex}
                         exceptionItemIndex={exceptionItemIndex}
+                        isOnlyItem={isOnlyItem}
                         nestedParentIndex={item.parent != null ? item.parent.parentIndex : null}
                         onDelete={handleDeleteEntry}
                       />
