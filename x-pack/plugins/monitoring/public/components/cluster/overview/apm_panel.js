@@ -30,15 +30,78 @@ import { SetupModeTooltip } from '../../setup_mode/tooltip';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
 import { SetupModeFeature } from '../../../../common/enums';
+import { checkAgentTypeMetric } from '../../../lib/apm_agent';
+
+const getServerTitle = (isFleetTypeMetric, total) => {
+  const apmsTotal = <span data-test-subj="apmsTotal">{total}</span>;
+  const linkLabel = {};
+  if (isFleetTypeMetric) {
+    linkLabel.link = (
+      <FormattedMessage
+        id="xpack.monitoring.cluster.overview.apmPanel.agentServersTotalLinkLabel"
+        defaultMessage="APM & Fleet Servers: {apmsTotal}"
+        values={{ apmsTotal }}
+      />
+    );
+    linkLabel.aria = i18n.translate(
+      'xpack.monitoring.cluster.overview.apmPanel.instancesAndFleetsTotalLinkAriaLabel',
+      {
+        defaultMessage: 'APM and Fleet server instances: {apmsTotal}',
+        values: { apmsTotal },
+      }
+    );
+  }
+  linkLabel.link = (
+    <FormattedMessage
+      id="xpack.monitoring.cluster.overview.apmPanel.serversTotalLinkLabel"
+      defaultMessage="APM servers: {apmsTotal}"
+      values={{ apmsTotal }}
+    />
+  );
+  linkLabel.aria = i18n.translate(
+    'xpack.monitoring.cluster.overview.apmPanel.instancesTotalLinkAriaLabel',
+    {
+      defaultMessage: 'APM server instances: {apmsTotal}',
+      values: { apmsTotal },
+    }
+  );
+
+  return linkLabel;
+};
+
+const getOverviewTitle = (isFleetTypeMetric) => {
+  if (isFleetTypeMetric) {
+    return i18n.translate('xpack.monitoring.cluster.overview.apmPanel.overviewFleetLinkLabel', {
+      defaultMessage: 'APM & Fleet server overview',
+    });
+  }
+  return i18n.translate('xpack.monitoring.cluster.overview.apmPanel.overviewLinkLabel', {
+    defaultMessage: 'APM server overview',
+  });
+};
+
+const getHeadingTitle = (isFleetTypeMetric) => {
+  if (isFleetTypeMetric) {
+    return i18n.translate('xpack.monitoring.cluster.overview.apmPanel.apmFleetTitle', {
+      defaultMessage: 'APM & Fleet server',
+    });
+  }
+  return i18n.translate('xpack.monitoring.cluster.overview.apmPanel.apmTitle', {
+    defaultMessage: 'APM server',
+  });
+};
 
 export function ApmPanel(props) {
-  const { setupMode } = props;
+  const { setupMode, versions } = props;
   const apmsTotal = get(props, 'apms.total') || 0;
   // Do not show if we are not in setup mode
   if (apmsTotal === 0 && !setupMode.enabled) {
     return null;
   }
 
+  const isFleetTypeMetric = checkAgentTypeMetric(versions);
+  const { link, aria } = getServerTitle(isFleetTypeMetric, apmsTotal);
+  const overviewTitle = getOverviewTitle(isFleetTypeMetric);
   const goToInstances = () => getSafeForExternalLink('#/apm/instances');
   const setupModeData = get(setupMode.data, 'apm');
   const setupModeMetricbeatMigrationTooltip = isSetupModeFeatureEnabled(
@@ -52,13 +115,7 @@ export function ApmPanel(props) {
   ) : null;
 
   return (
-    <ClusterItemContainer
-      {...props}
-      url="apm"
-      title={i18n.translate('xpack.monitoring.cluster.overview.apmPanel.apmTitle', {
-        defaultMessage: 'APM server',
-      })}
-    >
+    <ClusterItemContainer {...props} url="apm" title={getHeadingTitle(isFleetTypeMetric)}>
       <EuiFlexGrid columns={4}>
         <EuiFlexItem>
           <EuiPanel paddingSize="m">
@@ -68,18 +125,10 @@ export function ApmPanel(props) {
                   setupModeEnabled={setupMode.enabled}
                   setupModeData={setupModeData}
                   href={getSafeForExternalLink('#/apm')}
-                  aria-label={i18n.translate(
-                    'xpack.monitoring.cluster.overview.apmPanel.overviewLinkAriaLabel',
-                    {
-                      defaultMessage: 'APM server overview',
-                    }
-                  )}
+                  aria-label={overviewTitle}
                   data-test-subj="apmOverview"
                 >
-                  <FormattedMessage
-                    id="xpack.monitoring.cluster.overview.apmPanel.overviewLinkLabel"
-                    defaultMessage="APM server overview"
-                  />
+                  {overviewTitle}
                 </DisabledIfNoDataAndInSetupModeLink>
               </h3>
             </EuiTitle>
@@ -121,22 +170,8 @@ export function ApmPanel(props) {
               <EuiFlexItem grow={false}>
                 <EuiTitle size="s">
                   <h3>
-                    <EuiLink
-                      href={goToInstances()}
-                      aria-label={i18n.translate(
-                        'xpack.monitoring.cluster.overview.apmPanel.instancesTotalLinkAriaLabel',
-                        {
-                          defaultMessage: 'APM server instances: {apmsTotal}',
-                          values: { apmsTotal },
-                        }
-                      )}
-                      data-test-subj="apmListing"
-                    >
-                      <FormattedMessage
-                        id="xpack.monitoring.cluster.overview.apmPanel.serversTotalLinkLabel"
-                        defaultMessage="APM servers: {apmsTotal}"
-                        values={{ apmsTotal }}
-                      />
+                    <EuiLink href={goToInstances()} aria-label={aria} data-test-subj="apmListing">
+                      {link}
                     </EuiLink>
                   </h3>
                 </EuiTitle>

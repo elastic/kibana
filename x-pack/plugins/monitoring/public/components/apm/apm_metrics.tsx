@@ -24,12 +24,18 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { MonitoringTimeseriesContainer } from '../chart';
 // @ts-ignore could not find declaration file
 import { Status } from './instance/status';
+import { checkAgentTypeMetric } from '../../lib/apm_agent';
 
+interface TitleType {
+  title?: string;
+  heading?: unknown;
+}
 interface Props {
-  stats: unknown;
+  stats: { versions: string[]; [key: string]: unknown };
   metrics: { [key: string]: unknown };
   seriesToShow: unknown[];
   title: string;
+  summary?: { version: string };
 }
 
 const createCharts = (series: unknown[], props: Partial<Props>) => {
@@ -42,19 +48,39 @@ const createCharts = (series: unknown[], props: Partial<Props>) => {
   });
 };
 
+const getHeading = (isFleetTypeMetric: boolean) => {
+  const titles: TitleType = {};
+  if (isFleetTypeMetric) {
+    titles.title = i18n.translate('xpack.monitoring.apm.metrics.topCharts.agentTitle', {
+      defaultMessage: 'APM & Fleet Server - Resource Usage',
+    });
+    titles.heading = (
+      <FormattedMessage
+        id="xpack.monitoring.apm.metrics.agentHeading"
+        defaultMessage="APM & Fleet Server"
+      />
+    );
+  }
+  titles.title = i18n.translate('xpack.monitoring.apm.metrics.topCharts.title', {
+    defaultMessage: 'APM Server - Resource Usage',
+  });
+  titles.heading = (
+    <FormattedMessage id="xpack.monitoring.apm.metrics.heading" defaultMessage="APM server" />
+  );
+  return titles;
+};
+
 export const ApmMetrics = ({ stats, metrics, seriesToShow, title, ...props }: Props) => {
   const topSeries = [metrics.apm_cpu, metrics.apm_memory, metrics.apm_os_load];
+  const versions = props.summary?.version ? [props.summary?.version] : stats.versions;
+  const isFleetTypeMetric = checkAgentTypeMetric(versions);
+  const titles = getHeading(isFleetTypeMetric);
 
   return (
     <EuiPage>
       <EuiPageBody>
         <EuiScreenReaderOnly>
-          <h1>
-            <FormattedMessage
-              id="xpack.monitoring.apm.metrics.heading"
-              defaultMessage="APM server"
-            />
-          </h1>
+          <h1>{titles.heading as FormattedMessage}</h1>
         </EuiScreenReaderOnly>
         <EuiPanel>
           <Status stats={stats} />
@@ -62,11 +88,7 @@ export const ApmMetrics = ({ stats, metrics, seriesToShow, title, ...props }: Pr
         <EuiSpacer size="m" />
         <EuiPanel>
           <EuiTitle>
-            <h3>
-              {i18n.translate('xpack.monitoring.apm.metrics.topCharts.nonAgentTitle', {
-                defaultMessage: 'APM Server - Resource Usage',
-              })}
-            </h3>
+            <h3>{titles.title}</h3>
           </EuiTitle>
           <EuiSpacer size="m" />
           <EuiFlexGroup wrap>{createCharts(topSeries, props)}</EuiFlexGroup>
