@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { shallowWithRouter } from '../lib/helper/enzyme_helpers';
+import { shallowWithRouter } from '../lib';
 import { NotFoundPage } from './not_found';
 
 describe('NotFoundPage', () => {
