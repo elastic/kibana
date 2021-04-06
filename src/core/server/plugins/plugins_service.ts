@@ -7,7 +7,7 @@
  */
 
 import Path from 'path';
-import { Observable, EMPTY } from 'rxjs';
+import { Observable } from 'rxjs';
 import { filter, first, map, mergeMap, tap, toArray } from 'rxjs/operators';
 import { pick } from '@kbn/std';
 
@@ -75,11 +75,9 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
   private readonly config$: Observable<PluginsConfig>;
   private readonly pluginConfigDescriptors = new Map<PluginName, PluginConfigDescriptor>();
   private readonly uiPluginInternalInfo = new Map<PluginName, InternalPluginInfo>();
-  private readonly discoveryDisabled: boolean;
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('plugins-service');
-    this.discoveryDisabled = coreContext.env.isDevCliParent;
     this.pluginsSystem = new PluginsSystem(coreContext);
     this.configService = coreContext.configService;
     this.config$ = coreContext.configService
@@ -90,14 +88,9 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
   public async discover({ environment }: PluginsServiceDiscoverDeps) {
     const config = await this.config$.pipe(first()).toPromise();
 
-    const { error$, plugin$ } = this.discoveryDisabled
-      ? {
-          error$: EMPTY,
-          plugin$: EMPTY,
-        }
-      : discover(config, this.coreContext, {
-          uuid: environment.instanceUuid,
-        });
+    const { error$, plugin$ } = discover(config, this.coreContext, {
+      uuid: environment.instanceUuid,
+    });
 
     await this.handleDiscoveryErrors(error$);
     await this.handleDiscoveredPlugins(plugin$);
@@ -122,8 +115,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     const config = await this.config$.pipe(first()).toPromise();
 
     let contracts = new Map<PluginName, unknown>();
-    const initialize = config.initialize && !this.coreContext.env.isDevCliParent;
-    if (initialize) {
+    if (config.initialize) {
       contracts = await this.pluginsSystem.setupPlugins(deps);
       this.registerPluginStaticDirs(deps);
     } else {
@@ -131,7 +123,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     }
 
     return {
-      initialized: initialize,
+      initialized: config.initialize,
       contracts,
     };
   }
@@ -230,6 +222,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
           if (plugin.includesUiPlugin) {
             this.uiPluginInternalInfo.set(plugin.name, {
               requiredBundles: plugin.requiredBundles,
+              version: plugin.manifest.version,
               publicTargetDir: Path.resolve(plugin.path, 'target/public'),
               publicAssetsDir: Path.resolve(plugin.path, 'public/assets'),
             });
