@@ -92,7 +92,7 @@ export class RacAuthorization {
     const isAvailableOwner = this.featureOwners.has(owner);
 
     if (authorization != null && this.shouldCheckAuthorization()) {
-      const requiredPrivileges = [authorization.actions.rac.get('default', owner, operation)];
+      const requiredPrivileges = [authorization.actions.rac.get(owner, operation)];
       const checkPrivileges = authorization.checkPrivilegesDynamicallyWithRequest(this.request);
       const { hasAllRequested, username, privileges } = await checkPrivileges({
         kibana: requiredPrivileges,

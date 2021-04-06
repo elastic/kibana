@@ -46,8 +46,8 @@ describe(`rac`, () => {
 
         expect(alertsFeaturePrivilege.getActions(privilege)).toMatchInlineSnapshot(`
           Array [
-            "alerting:1.0.0-zeta1:default/observability/get",
-            "alerting:1.0.0-zeta1:default/observability/find",
+            "rac:1.0.0-zeta1:observability/get",
+            "rac:1.0.0-zeta1:observability/find",
           ]
         `);
       });
@@ -70,9 +70,9 @@ describe(`rac`, () => {
 
         expect(alertsFeaturePrivilege.getActions(privilege)).toMatchInlineSnapshot(`
           Array [
-            "alerting:1.0.0-zeta1:default/security/get",
-            "alerting:1.0.0-zeta1:default/security/find",
-            "alerting:1.0.0-zeta1:default/security/update",
+            "rac:1.0.0-zeta1:security/get",
+            "rac:1.0.0-zeta1:security/find",
+            "rac:1.0.0-zeta1:security/update",
           ]
         `);
       });
@@ -96,11 +96,11 @@ describe(`rac`, () => {
 
         expect(alertsFeaturePrivilege.getActions(privilege)).toMatchInlineSnapshot(`
           Array [
-            "alerting:1.0.0-zeta1:default/security/get",
-            "alerting:1.0.0-zeta1:default/security/find",
-            "alerting:1.0.0-zeta1:default/security/update",
-            "alerting:1.0.0-zeta1:default/obs/get",
-            "alerting:1.0.0-zeta1:default/obs/find",
+            "rac:1.0.0-zeta1:security/get",
+            "rac:1.0.0-zeta1:security/find",
+            "rac:1.0.0-zeta1:security/update",
+            "rac:1.0.0-zeta1:obs/get",
+            "rac:1.0.0-zeta1:obs/find",
           ]
         `);
       });
@@ -124,16 +124,16 @@ describe(`rac`, () => {
 
         expect(alertsFeaturePrivilege.getActions(privilege)).toMatchInlineSnapshot(`
           Array [
-            "alerting:1.0.0-zeta1:default/security/get",
-            "alerting:1.0.0-zeta1:default/security/find",
-            "alerting:1.0.0-zeta1:default/security/update",
-            "alerting:1.0.0-zeta1:default/other-security/get",
-            "alerting:1.0.0-zeta1:default/other-security/find",
-            "alerting:1.0.0-zeta1:default/other-security/update",
-            "alerting:1.0.0-zeta1:default/obs/get",
-            "alerting:1.0.0-zeta1:default/obs/find",
-            "alerting:1.0.0-zeta1:default/other-obs/get",
-            "alerting:1.0.0-zeta1:default/other-obs/find",
+            "rac:1.0.0-zeta1:security/get",
+            "rac:1.0.0-zeta1:security/find",
+            "rac:1.0.0-zeta1:security/update",
+            "rac:1.0.0-zeta1:other-security/get",
+            "rac:1.0.0-zeta1:other-security/find",
+            "rac:1.0.0-zeta1:other-security/update",
+            "rac:1.0.0-zeta1:obs/get",
+            "rac:1.0.0-zeta1:obs/find",
+            "rac:1.0.0-zeta1:other-obs/get",
+            "rac:1.0.0-zeta1:other-obs/find",
           ]
         `);
       });

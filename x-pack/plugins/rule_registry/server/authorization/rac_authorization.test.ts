@@ -14,7 +14,7 @@ import {
 } from '../../../features/server';
 import { featuresPluginMock } from '../../../features/server/mocks';
 import { RacAuthorization, WriteOperations, ReadOperations } from './rac_authorization';
-import { RacAuthorizationAuditLogger } from './audit_logger';
+import { alertsAuthorizationAuditLoggerMock } from './audit_logger.mock';
 import uuid from 'uuid';
 
 jest.mock('./audit_logger');
@@ -22,12 +22,11 @@ jest.mock('./audit_logger');
 const features: jest.Mocked<FeaturesStartContract> = featuresPluginMock.createStart();
 const request = {} as KibanaRequest;
 
-const auditLogger = new RacAuthorizationAuditLogger();
+const auditLogger = alertsAuthorizationAuditLoggerMock.create();
 
 const getSpace = jest.fn();
 
-const mockAuthorizationAction = (spaceId: string, app: string, operation: string) =>
-  `${spaceId}/${app}/${operation}`;
+const mockAuthorizationAction = (owner: string, operation: string) => `${owner}/${operation}`;
 function mockSecurity() {
   const security = securityMock.createSetup();
   const authorization = security.authz;
@@ -204,9 +203,7 @@ describe('RacAuthorization', () => {
 
       await expect(
         racAuthorization.ensureAuthorized('securitySolution', WriteOperations.Update)
-      ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"[rac_authorization] - authorization client required"`
-      );
+      ).resolves.toBeUndefined();
     });
 
     test('is a no-op when the security license is disabled', async () => {
@@ -249,13 +246,9 @@ describe('RacAuthorization', () => {
 
       await racAuthorization.ensureAuthorized('securitySolution', WriteOperations.Update);
 
-      expect(authorization.actions.rac.get).toHaveBeenCalledWith(
-        'default',
-        'securitySolution',
-        'update'
-      );
+      expect(authorization.actions.rac.get).toHaveBeenCalledWith('securitySolution', 'update');
       expect(checkPrivileges).toHaveBeenCalledWith({
-        kibana: [mockAuthorizationAction('default', 'securitySolution', 'update')],
+        kibana: [mockAuthorizationAction('securitySolution', 'update')],
       });
 
       expect(auditLogger.racAuthorizationSuccess).toHaveBeenCalledTimes(1);
@@ -295,13 +288,9 @@ describe('RacAuthorization', () => {
 
       await racAuthorization.ensureAuthorized('securitySolution', ReadOperations.Find);
 
-      expect(authorization.actions.rac.get).toHaveBeenCalledWith(
-        'default',
-        'securitySolution',
-        'find'
-      );
+      expect(authorization.actions.rac.get).toHaveBeenCalledWith('securitySolution', 'find');
       expect(checkPrivileges).toHaveBeenCalledWith({
-        kibana: [mockAuthorizationAction('default', 'securitySolution', 'find')],
+        kibana: [mockAuthorizationAction('securitySolution', 'find')],
       });
 
       expect(auditLogger.racAuthorizationSuccess).toHaveBeenCalledTimes(1);
@@ -339,11 +328,11 @@ describe('RacAuthorization', () => {
         privileges: {
           kibana: [
             {
-              privilege: mockAuthorizationAction('spaceId', 'securitySolution', 'update'),
+              privilege: mockAuthorizationAction('securitySolution', 'update'),
               authorized: false,
             },
             {
-              privilege: mockAuthorizationAction('spaceId', 'observability', 'update'),
+              privilege: mockAuthorizationAction('observability', 'update'),
               authorized: true,
             },
           ],
