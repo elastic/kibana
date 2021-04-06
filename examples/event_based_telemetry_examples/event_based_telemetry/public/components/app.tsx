@@ -102,7 +102,7 @@ export const EventBasedTelemetryApp = ({
                     <EuiButton type="primary" size="s" onClick={() => onClickHandler(false)}>
                       <FormattedMessage
                         id="eventBasedTelemetry.buttonText"
-                        defaultMessage="Push user-agent events"
+                        defaultMessage="Push 100x user-agent events"
                       />
                     </EuiButton>
                     <EuiButton
