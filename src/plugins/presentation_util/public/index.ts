@@ -8,14 +8,12 @@
 
 import { PresentationUtilPlugin } from './plugin';
 
-export {
-  SavedObjectSaveModalDashboard,
-  SaveModalDashboardProps,
-} from './components/saved_object_save_modal_dashboard';
+export { LazyDashboardPicker, LazySavedObjectSaveModalDashboard, withSuspense } from './components';
 
-export { DashboardPicker } from './components/dashboard_picker';
+export { SaveModalDashboardProps } from './components/types';
 
 export function plugin() {
   return new PresentationUtilPlugin();
 }
+
 export { PresentationUtilPluginSetup, PresentationUtilPluginStart } from './types';
