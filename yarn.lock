@@ -2680,6 +2680,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/io-ts-utils@link:packages/kbn-io-ts-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/legacy-logging@link:packages/kbn-legacy-logging":
   version "0.0.0"
   uid ""
@@ -2709,6 +2713,10 @@
   uid ""
 
 "@kbn/server-http-tools@link:packages/kbn-server-http-tools":
+  version "0.0.0"
+  uid ""
+
+"@kbn/server-route-repository@link:packages/kbn-server-route-repository":
   version "0.0.0"
   uid ""
 
