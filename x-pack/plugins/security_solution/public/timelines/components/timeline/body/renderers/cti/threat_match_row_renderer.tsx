@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
-
 import { RowRendererId } from '../../../../../../../common/types/timeline';
 import { RowRenderer } from '../row_renderer';
-import { isThreatMatchField } from './helpers';
+import { hasThreatMatchValue } from './helpers';
 import { ThreatMatchRows } from './threat_match_rows';
 
 export const threatMatchRowRenderer: RowRenderer = {
   id: RowRendererId.threat_match,
-  isInstance: (_, fields) =>
-    fields?.some((field) => isThreatMatchField(field) && !isEmpty(field.value)) ?? false,
+  isInstance: hasThreatMatchValue,
   renderRow: ThreatMatchRows,
 };

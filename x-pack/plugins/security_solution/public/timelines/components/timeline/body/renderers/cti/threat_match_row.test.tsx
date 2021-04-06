@@ -8,19 +8,12 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { getDetectionAlertFieldsMock, TestProviders } from '../../../../../../common/mock';
+import { TestProviders } from '../../../../../../common/mock';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 import { ThreatMatchRowView } from './threat_match_row';
 
 describe('threatMatchRowView', () => {
   const mount = useMountAppended();
-  let threatMatchFields: ReturnType<typeof getDetectionAlertFieldsMock>;
-
-  beforeEach(() => {
-    threatMatchFields = getDetectionAlertFieldsMock([
-      { field: 'threat.indicator.matched.type', value: ['url'] },
-    ]);
-  });
 
   it('renders an indicator match row', () => {
     const wrapper = shallow(

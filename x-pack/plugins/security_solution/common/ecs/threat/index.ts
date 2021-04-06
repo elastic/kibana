@@ -5,5 +5,17 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ThreatEcs {}
+interface ThreatMatchEcs {
+  atomic?: string[];
+  field?: string[];
+  type?: string[];
+}
+
+export interface ThreatIndicatorEcs {
+  matched?: ThreatMatchEcs;
+  type?: string[];
+}
+
+export interface ThreatEcs {
+  indicator: ThreatIndicatorEcs[];
+}

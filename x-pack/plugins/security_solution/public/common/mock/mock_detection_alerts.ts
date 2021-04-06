@@ -79,6 +79,30 @@ export const getDetectionAlertMock = (overrides: Partial<Ecs> = {}): Ecs => ({
   ...overrides,
 });
 
+export const getThreatMatchDetectionAlert = (overrides: Partial<Ecs> = {}): Ecs => ({
+  ...mockEcsDataWithAlert,
+  signal: {
+    ...mockEcsDataWithAlert.signal,
+    rule: {
+      ...mockEcsDataWithAlert.rule,
+      name: ['mock threat_match rule'],
+      type: ['threat_match'],
+    },
+  },
+  threat: {
+    indicator: [
+      {
+        matched: {
+          atomic: ['matched.atomic'],
+          field: ['matched.atomic'],
+          type: ['matched.domain'],
+        },
+      },
+    ],
+  },
+  ...overrides,
+});
+
 export const getDetectionAlertFieldsMock = (
   fields: TimelineNonEcsData[] = []
 ): TimelineNonEcsData[] => [

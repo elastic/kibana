@@ -5,7 +5,24 @@ exports[`threatMatchRowRenderer #renderRow renders correctly against snapshot 1`
   <RowRendererContainer
     data-test-subj="threat-match-row-renderer"
   >
-    <span />
+    <ThreatMatchRowContainer
+      fields={
+        Object {
+          "matched": Object {
+            "atomic": Array [
+              "matched.atomic",
+            ],
+            "field": Array [
+              "matched.atomic",
+            ],
+            "type": Array [
+              "matched.domain",
+            ],
+          },
+        }
+      }
+      key="0"
+    />
   </RowRendererContainer>
 </span>
 `;

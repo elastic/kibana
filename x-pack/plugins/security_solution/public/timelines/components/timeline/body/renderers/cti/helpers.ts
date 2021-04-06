@@ -5,11 +5,19 @@
  * 2.0.
  */
 
-import { TimelineNonEcsData } from '../../../../../../../common/search_strategy';
-import { requiredFields, threatMatchFields } from './fields';
+import { get, isEmpty } from 'lodash';
 
-export const isThreatMatchField = (field: TimelineNonEcsData): boolean =>
-  threatMatchFields.includes(field.field);
+import { INDICATOR_DESTINATION_PATH } from '../../../../../../../common/constants';
+import { Ecs } from '../../../../../../../common/ecs';
+import { ThreatIndicatorEcs } from '../../../../../../../common/ecs/threat';
+import { threatMatchSubFields } from './constants';
 
-export const isRequiredField = (field: TimelineNonEcsData): boolean =>
-  requiredFields.includes(field.field);
+export const getIndicatorEcs = (data: Ecs): ThreatIndicatorEcs[] =>
+  get(data, INDICATOR_DESTINATION_PATH) ?? [];
+
+export const hasThreatMatchValue = (data: Ecs): boolean =>
+  getIndicatorEcs(data).some((indicator) =>
+    threatMatchSubFields.some(
+      (threatMatchSubField) => !isEmpty(get(indicator, threatMatchSubField))
+    )
+  );

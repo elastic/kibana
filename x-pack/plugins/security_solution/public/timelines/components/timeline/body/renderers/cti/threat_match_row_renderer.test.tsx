@@ -8,46 +8,46 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { Ecs } from '../../../../../../../common/ecs';
-import { getDetectionAlertFieldsMock } from '../../../../../../common/mock';
+import { getThreatMatchDetectionAlert } from '../../../../../../common/mock';
 
 import { threatMatchRowRenderer } from './threat_match_row_renderer';
 
 describe('threatMatchRowRenderer', () => {
-  let threatMatchFields: ReturnType<typeof getDetectionAlertFieldsMock>;
-  let ecs: Ecs;
+  let threatMatchData: ReturnType<typeof getThreatMatchDetectionAlert>;
 
   beforeEach(() => {
-    ecs = {
-      _id: 'abcd',
-      timestamp: '2018-11-12T19:03:25.936Z',
-    };
-    threatMatchFields = getDetectionAlertFieldsMock([
-      { field: 'threat.indicator.matched.type', value: ['url'] },
-    ]);
+    threatMatchData = getThreatMatchDetectionAlert();
   });
 
   describe('#isInstance', () => {
     it('is false for an empty event', () => {
-      expect(threatMatchRowRenderer.isInstance(ecs, [])).toBe(false);
+      const emptyEvent = {
+        _id: 'my_id',
+        '@timestamp': ['2020-11-17T14:48:08.922Z'],
+      };
+      expect(threatMatchRowRenderer.isInstance(emptyEvent)).toBe(false);
     });
 
     it('is false for an alert with indicator data but no match', () => {
-      const indicatorTypeFields = getDetectionAlertFieldsMock([
-        { field: 'threat.indicator.type', value: ['url'] },
-      ]);
-      expect(threatMatchRowRenderer.isInstance(ecs, indicatorTypeFields)).toBe(false);
+      const indicatorTypeData = getThreatMatchDetectionAlert({
+        threat: {
+          indicator: [{ type: ['url'] }],
+        },
+      });
+      expect(threatMatchRowRenderer.isInstance(indicatorTypeData)).toBe(false);
     });
 
     it('is false for an alert with threat match fields but no data', () => {
-      const emptyThreatMatchFields = getDetectionAlertFieldsMock([
-        { field: 'threat.indicator.matched.type', value: [] },
-      ]);
-      expect(threatMatchRowRenderer.isInstance(ecs, emptyThreatMatchFields)).toBe(false);
+      const emptyThreatMatchData = getThreatMatchDetectionAlert({
+        threat: {
+          indicator: [{ matched: { type: [] } }],
+        },
+      });
+      expect(threatMatchRowRenderer.isInstance(emptyThreatMatchData)).toBe(false);
     });
 
     it('is true for an alert event with present indicator match fields', () => {
-      expect(threatMatchRowRenderer.isInstance(ecs, threatMatchFields)).toBe(true);
+      expect(threatMatchRowRenderer.isInstance(threatMatchData)).toBe(true);
     });
   });
 
@@ -55,8 +55,7 @@ describe('threatMatchRowRenderer', () => {
     it('renders correctly against snapshot', () => {
       const children = threatMatchRowRenderer.renderRow({
         browserFields: {},
-        data: ecs,
-        flattenedData: threatMatchFields,
+        data: threatMatchData,
         timelineId: 'test',
       });
       const wrapper = shallow(<span>{children}</span>);

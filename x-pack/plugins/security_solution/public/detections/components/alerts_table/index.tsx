@@ -47,7 +47,7 @@ import {
 } from '../../../common/components/toasters';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
-import { requiredFields as requiredThreatMatchFields } from '../../../timelines/components/timeline/body/renderers/cti/fields';
+import { requiredFields as requiredThreatMatchFields } from '../../../timelines/components/timeline/body/renderers/cti/constants';
 import { buildTimeRangeFilter } from './helpers';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
