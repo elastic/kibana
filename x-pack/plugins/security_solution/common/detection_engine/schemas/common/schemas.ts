@@ -506,7 +506,7 @@ export type ThresholdOrUndefined = t.TypeOf<typeof thresholdOrUndefined>;
 export const thresholdNormalized = t.intersection([
   thresholdFieldNormalized,
   t.exact(
-    t.type({
+    t.partial({
       cardinality: t.array(thresholdCardinalityField),
     })
   ),

@@ -97,9 +97,8 @@ export const typeSpecificSnakeToCamel = (params: CreateTypeSpecific): TypeSpecif
         filters: params.filters,
         savedId: params.saved_id,
         threshold: {
+          ...params.threshold,
           field: normalizeThresholdField(params.threshold.field),
-          value: params.threshold.value,
-          cardinality: params.threshold.cardinality != null ? params.threshold.cardinality : [],
         },
       };
     }

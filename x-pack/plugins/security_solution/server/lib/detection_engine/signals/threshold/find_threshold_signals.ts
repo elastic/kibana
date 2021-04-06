@@ -68,7 +68,7 @@ export const findThresholdSignals = async ({
         size: 1,
       },
     },
-    ...(threshold.cardinality.length
+    ...(threshold.cardinality?.length
       ? {
           cardinality_count: {
             cardinality: {

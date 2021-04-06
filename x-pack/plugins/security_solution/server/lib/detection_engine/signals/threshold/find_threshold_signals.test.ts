@@ -42,7 +42,6 @@ describe('findThresholdSignals', () => {
       threshold: {
         field: [],
         value: 100,
-        cardinality: [],
       },
       buildRuleMessage,
       timestampOverride: undefined,
@@ -95,7 +94,6 @@ describe('findThresholdSignals', () => {
       threshold: {
         field: ['host.name'],
         value: 100,
-        cardinality: [],
       },
       buildRuleMessage,
       timestampOverride: undefined,
