@@ -234,7 +234,7 @@ export function validateKibanaFeature(feature: KibanaFeatureConfig) {
     all.forEach((privilegeOwner) => unseenRacTypes.delete(privilegeOwner));
     read.forEach((privilegeOwner) => unseenRacTypes.delete(privilegeOwner));
 
-    const unknownRacEntries = difference([...all, ...read], alerting);
+    const unknownRacEntries = difference([...all, ...read], rac);
     if (unknownRacEntries.length > 0) {
       throw new Error(
         `Feature privilege ${

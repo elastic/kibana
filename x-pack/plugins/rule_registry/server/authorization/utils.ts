@@ -6,8 +6,42 @@
  */
 
 import { remove, uniq } from 'lodash';
+
+import { KibanaRequest } from 'src/core/server';
+
 import { nodeBuilder } from '../../../../../src/plugins/data/common';
-import { KueryNode, esQuery } from '../../../../../src/plugins/data/server';
+import { KueryNode } from '../../../../../src/plugins/data/server';
+import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
+import { GetSpaceFn } from './rac_authorization';
+
+export const getEnabledKibanaSpaceFeatures = async ({
+  getSpace,
+  request,
+  features,
+}: {
+  request: KibanaRequest;
+  getSpace: GetSpaceFn;
+  features: FeaturesPluginStart;
+}): Promise<Set<string>> => {
+  try {
+    const disabledUserSpaceFeatures = new Set((await getSpace(request))?.disabledFeatures ?? []);
+
+    // Filter through all user Kibana features to find corresponding enabled
+    // RAC feature owners like 'security-solution' or 'observability'
+    const owners = await new Set(
+      features
+        .getKibanaFeatures()
+        // get all the rac 'owners' that aren't disabled
+        .filter(({ id }) => !disabledUserSpaceFeatures.has(id))
+        .flatMap((feature) => {
+          return feature.rac ?? [];
+        })
+    );
+    return owners;
+  } catch (error) {
+    return new Set<string>();
+  }
+};
 
 export const getOwnersFilter = (owners: string[]): KueryNode => {
   // const kqlQuery: Query = {

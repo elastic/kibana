@@ -5,14 +5,14 @@
  * 2.0.
  */
 import Boom from '@hapi/boom';
-import { has, map, mapValues } from 'lodash';
 
 import { KibanaRequest } from 'src/core/server';
-import { SecurityPluginStart } from '../../../security/server';
+import { EventType, SecurityPluginStart } from '../../../security/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
 import { Space } from '../../../spaces/server';
 import { KueryNode } from '../../../../../src/plugins/data/server';
-import { getOwnersFilter } from './utils';
+import { RacAuthorizationAuditLogger } from './audit_logger';
+import { getEnabledKibanaSpaceFeatures } from './utils';
 
 export type GetSpaceFn = (request: KibanaRequest) => Promise<Space | undefined>;
 
@@ -22,7 +22,6 @@ export enum ReadOperations {
 }
 
 export enum WriteOperations {
-  Create = 'create',
   Update = 'update',
 }
 
@@ -32,34 +31,34 @@ interface HasPrivileges {
 }
 export interface ConstructorOptions {
   request: KibanaRequest;
-  owners: FeaturesPluginStart;
-  getSpace: (request: KibanaRequest) => Promise<Space | undefined>;
-  // auditLogger: AlertsAuthorizationAuditLogger;
   authorization?: SecurityPluginStart['authz'];
+  owners: Set<string>;
+  isAuthEnabled: boolean;
+  auditLogger: RacAuthorizationAuditLogger;
+}
+
+export interface CreateOptions {
+  request: KibanaRequest;
+  authorization?: SecurityPluginStart['authz'];
+  isAuthEnabled: boolean;
+  auditLogger: RacAuthorizationAuditLogger;
+  getSpace: GetSpaceFn;
+  features: FeaturesPluginStart;
 }
 
 export class RacAuthorization {
   private readonly request: KibanaRequest;
   private readonly authorization?: SecurityPluginStart['authz'];
-  // private readonly auditLogger: AlertsAuthorizationAuditLogger;
+  private readonly auditLogger: RacAuthorizationAuditLogger;
   private readonly featureOwners: Set<string>;
   private readonly isAuthEnabled: boolean;
 
-  private constructor({
-    request,
-    authorization,
-    owners,
-    isAuthEnabled,
-  }: {
-    request: KibanaRequest;
-    authorization?: SecurityPluginStart['authz'];
-    owners: Set<string>;
-    isAuthEnabled: boolean;
-  }) {
+  constructor({ request, authorization, owners, isAuthEnabled, auditLogger }: ConstructorOptions) {
     this.request = request;
     this.authorization = authorization;
     this.featureOwners = owners;
     this.isAuthEnabled = isAuthEnabled;
+    this.auditLogger = auditLogger;
   }
 
   static async create({
@@ -68,61 +67,37 @@ export class RacAuthorization {
     getSpace,
     features,
     isAuthEnabled,
-  }: {
-    request: KibanaRequest;
-    authorization?: SecurityPluginStart['authz'];
-    getSpace: GetSpaceFn;
-    features: FeaturesPluginStart;
-    isAuthEnabled: boolean;
-  }): Promise<RacAuthorization> {
-    let owners: Set<string>;
+    auditLogger,
+  }: CreateOptions): Promise<RacAuthorization> {
+    const owners = await getEnabledKibanaSpaceFeatures({
+      getSpace,
+      request,
+      features,
+    });
 
-    try {
-      // Gather all disabled features from user Space
-      // const disabledFeatures = new Set((await getSpace(request))?.disabledFeatures ?? []);
-
-      // Filter through all user Kibana features to find corresponding enabled
-      // Rac feature owners like 'security-solution' or 'observability'
-      owners = await new Set(
-        features
-          .getKibanaFeatures()
-          // get all the rac 'owners' that aren't disabled
-          // .filter(({ id }) => !disabledFeatures.has(id))
-          .flatMap((feature) => {
-            return feature.rac ?? [];
-          })
-      );
-      console.error('---------> BEFORE OWNERS', owners);
-    } catch (error) {
-      console.error('---------> THERE WAS AN ERROR', error);
-      owners = new Set<string>();
-    }
-    console.error('---------> OWNERS', JSON.stringify(Array.from(owners)));
-    return new RacAuthorization({ request, authorization, owners, isAuthEnabled });
+    return new RacAuthorization({ request, authorization, owners, isAuthEnabled, auditLogger });
   }
 
+  /**
+   * Determines whether the security license is disabled
+   */
   private shouldCheckAuthorization(): boolean {
     return this.authorization?.mode?.useRbacForRequest(this.request) ?? false;
   }
 
   public async ensureAuthorized(owner: string, operation: ReadOperations | WriteOperations) {
     const { authorization } = this;
-    const isAvailableConsumer = has(await this.featureOwners, owner);
-    if (authorization && this.shouldCheckAuthorization()) {
-      const requiredPrivilegesByScope = {
-        owner: authorization.actions.rac.get('default', owner, operation),
-      };
-      // We special case the Alerts Management `consumer` as we don't want to have to
-      // manually authorize each alert type in the management UI
+
+    // Does the owner the client sent up match with the KibanaFeatures structure
+    const isAvailableOwner = this.featureOwners.has(owner);
+
+    if (authorization != null && this.shouldCheckAuthorization()) {
+      const requiredPrivileges = [authorization.actions.rac.get('default', owner, operation)];
       const checkPrivileges = authorization.checkPrivilegesDynamicallyWithRequest(this.request);
       const { hasAllRequested, username, privileges } = await checkPrivileges({
-        kibana: [
-          // check for access at owner level
-          requiredPrivilegesByScope.owner,
-        ],
+        kibana: requiredPrivileges,
       });
-      if (!isAvailableConsumer) {
-        // TODO: implement this and send to audit logger later
+      if (!isAvailableOwner) {
         /**
          * Under most circumstances this would have been caught by `checkPrivileges` as
          * a user can't have Privileges to an unknown consumer, but super users
@@ -130,53 +105,51 @@ export class RacAuthorization {
          * as Privileged.
          * This check will ensure we don't accidentally let these through
          */
-        // throw Boom.forbidden(
-        //   this.auditLogger.alertsAuthorizationFailure(
-        //     username,
-        //     alertTypeId,
-        //     ScopeType.Consumer,
-        //     consumer,
-        //     operation
-        //   )
-        // );
-        console.error('UNKNOWN CONSUMER');
-        throw Error('UNKNOWN CONSUMER');
+        throw Boom.forbidden(
+          this.auditLogger.racAuthorizationFailure({
+            owner,
+            username,
+            operation,
+            type: EventType.ACCESS,
+          })
+        );
       }
       if (hasAllRequested) {
-        // TODO: implement when we add audit logger
-        // this.auditLogger.alertsAuthorizationSuccess(
-        //   username,
-        //   alertTypeId,
-        //   ScopeType.Consumer,
-        //   consumer,
-        //   operation
-        // );
-        console.error('GREAT SUCCESS');
+        this.auditLogger.racAuthorizationSuccess({
+          owner,
+          username,
+          operation,
+          type: EventType.ACCESS,
+        });
       } else {
-        console.error('DOES NOT HAVE ALL REQUESTED');
-        // throw Boom.forbidden(
-        //   this.auditLogger.alertsAuthorizationFailure(
-        //     username,
-        //     alertTypeId,
-        //     unauthorizedScopeType,
-        //     unauthorizedScope,
-        //     operation
-        //   )
-        // );
-        throw Error('DOES NOT HAVE ALL REQUESTED');
+        const authorizedPrivileges = privileges.kibana.reduce<string[]>((acc, privilege) => {
+          if (privilege.authorized) {
+            return [...acc, privilege.privilege];
+          }
+          return acc;
+        }, []);
+        const unauthorizedPrivilages = requiredPrivileges.filter(
+          (privilege) => !authorizedPrivileges.includes(privilege)
+        );
+
+        throw Boom.forbidden(
+          this.auditLogger.racAuthorizationFailure({
+            owner: unauthorizedPrivilages.join(','),
+            username,
+            operation,
+            type: EventType.ACCESS,
+          })
+        );
       }
-    } else if (!isAvailableConsumer) {
-      // throw Boom.forbidden(
-      //   this.auditLogger.alertsAuthorizationFailure(
-      //     '',
-      //     alertTypeId,
-      //     ScopeType.Consumer,
-      //     consumer,
-      //     operation
-      //   )
-      // );
-      console.error('UNAVAILABLE OWNER');
-      throw Error('UNAVAILABLE OWNER');
+    } else if (!isAvailableOwner) {
+      throw Boom.forbidden(
+        this.auditLogger.racAuthorizationFailure({
+          owner,
+          username: '',
+          operation,
+          type: EventType.ACCESS,
+        })
+      );
     }
   }
 

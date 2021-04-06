@@ -78,13 +78,6 @@ export class AlertsAuthorization {
     this.authorization = authorization;
     this.alertTypeRegistry = alertTypeRegistry;
     this.auditLogger = auditLogger;
-    // console.error(
-    //   `*********\nALERTING FEATURES: ${JSON.stringify(
-    //     features.getKibanaFeatures(),
-    //     null,
-    //     2
-    //   )}\n*********`
-    // );
 
     this.featuresIds = getSpace(request)
       .then((maybeSpace) => new Set(maybeSpace?.disabledFeatures ?? []))
@@ -100,10 +93,7 @@ export class AlertsAuthorization {
                   // ignore features which don't grant privileges to alerting
                   (alerting?.length ?? 0 > 0)
               )
-              .map((feature) => {
-                // console.error('INSIDE FEATURE ID:', feature.id);
-                return feature.id;
-              })
+              .map((feature) => feature.id)
           )
       )
       .catch(() => {
