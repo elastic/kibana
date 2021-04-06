@@ -79,6 +79,7 @@ MetricVisualization.propTypes = {
   additionalLabel: PropTypes.string,
   model: PropTypes.object,
   onBrush: PropTypes.func,
+  onFilterClick: PropTypes.func,
   onChange: PropTypes.func,
   visData: PropTypes.object,
   getConfig: PropTypes.func,

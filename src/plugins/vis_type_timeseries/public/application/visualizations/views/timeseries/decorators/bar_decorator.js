@@ -55,6 +55,7 @@ export function BarSeriesDecorator({
     enableHistogramMode,
     sortIndex,
     tickFormat,
+    // splitSeriesAccessors: [2],
     ...barSeriesStyle,
   };
 

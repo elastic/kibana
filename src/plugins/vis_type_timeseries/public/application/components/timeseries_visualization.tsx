@@ -12,11 +12,12 @@ import React, { useCallback, useEffect } from 'react';
 
 import { get } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-
+import { XYChartSeriesIdentifier, GeometryValue } from '@elastic/charts';
 import { IUiSettingsClient } from 'src/core/public';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { PersistedState } from 'src/plugins/visualizations/public';
 import { PaletteRegistry } from 'src/plugins/charts/public';
+import { ValueClickContext } from 'src/plugins/embeddable/public';
 
 // @ts-expect-error
 import { ErrorComponent } from './error';
@@ -80,6 +81,53 @@ function TimeseriesVisualization({
     [handlers, model]
   );
 
+  const handleFilterClick = useCallback(
+    async (series: PanelData[], points: Array<[GeometryValue, XYChartSeriesIdentifier]>) => {
+      const data: ValueClickContext['data']['data'] = [];
+      const indexPatternValue = model.index_pattern || '';
+      const { indexPatterns } = getDataStart();
+      const { indexPattern } = await fetchIndexPattern(indexPatternValue, indexPatterns);
+
+      const tables = indexPattern
+        ? await convertSeriesToDataTable(model, series, indexPattern)
+        : null;
+
+      // should find the table by the click event
+      const table = tables?.[model.series[0].id];
+
+      points.forEach((point) => {
+        const [geometry] = point;
+        // console.dir(point);
+        const index = table?.rows.findIndex((row) => {
+          return geometry.x === row[X_ACCESSOR_INDEX] && geometry.y === row[X_ACCESSOR_INDEX + 1];
+        });
+        if (!index) return;
+
+        const newData = table?.columns.map(({ id }) => ({
+          table,
+          column: parseInt(id, 10),
+          row: index,
+          value: table.rows?.[index]?.[id] ?? null,
+        }));
+        if (newData?.length) {
+          data.push(...newData);
+        }
+      });
+
+      const event = {
+        name: 'filterBucket',
+        data: {
+          data,
+          negate: false,
+          timeFieldName: indexPattern?.timeFieldName,
+        },
+      };
+
+      handlers.event(event);
+    },
+    [handlers, model]
+  );
+
   const handleUiState = useCallback(
     (field: string, value: { column: string; order: string }) => {
       uiState.set(field, value);
@@ -133,6 +181,7 @@ function TimeseriesVisualization({
             visData={visData}
             uiState={uiState}
             onBrush={onBrush}
+            onFilterClick={handleFilterClick}
             onUiState={handleUiState}
             syncColors={syncColors}
             palettesService={palettesService}

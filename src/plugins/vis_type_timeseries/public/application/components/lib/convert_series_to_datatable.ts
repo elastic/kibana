@@ -44,10 +44,19 @@ export const addMetaToColumns = (
         field: column.name,
         index: indexPattern.title,
         source: 'esaggs',
+        params: {
+          id: column.isSplit ? 'terms' : type,
+          params: {
+            id: type,
+          },
+        },
         sourceParams: {
           enabled: true,
           indexPatternId: indexPattern?.id,
           type: type === 'date' ? 'date_histogram' : column.isSplit ? 'terms' : metricsType,
+          params: {
+            field: column.name,
+          },
         },
       },
     };
