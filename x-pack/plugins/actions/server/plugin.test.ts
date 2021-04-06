@@ -21,6 +21,7 @@ import {
   ActionsPluginsStart,
   PluginSetupContract,
 } from './plugin';
+import moment from 'moment';
 
 describe('Actions Plugin', () => {
   describe('setup()', () => {
@@ -37,6 +38,8 @@ describe('Actions Plugin', () => {
         preconfigured: {},
         proxyRejectUnauthorizedCertificates: true,
         rejectUnauthorized: true,
+        maxResponseContentLength: 1000000,
+        responseTimeout: moment.duration(60000),
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -197,6 +200,8 @@ describe('Actions Plugin', () => {
         },
         proxyRejectUnauthorizedCertificates: true,
         rejectUnauthorized: true,
+        maxResponseContentLength: 1000000,
+        responseTimeout: moment.duration(60000),
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();

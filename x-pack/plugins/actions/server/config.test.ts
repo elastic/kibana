@@ -23,7 +23,7 @@ describe('config validation', () => {
         "preconfigured": Object {},
         "proxyRejectUnauthorizedCertificates": true,
         "rejectUnauthorized": true,
-        "responseTimeout": "60s",
+        "responseTimeout": "PT1M",
       }
     `);
   });
@@ -64,7 +64,7 @@ describe('config validation', () => {
         },
         "proxyRejectUnauthorizedCertificates": false,
         "rejectUnauthorized": false,
-        "responseTimeout": "60s",
+        "responseTimeout": "PT1M",
       }
     `);
   });

@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import moment from 'moment';
 
 import { ActionTypeRegistry, ActionTypeRegistryOpts } from './action_type_registry';
 import { ActionsClient } from './actions_client';
@@ -406,6 +407,8 @@ describe('create()', () => {
       preconfigured: {},
       proxyRejectUnauthorizedCertificates: true,
       rejectUnauthorized: true,
+      maxResponseContentLength: 100000,
+      responseTimeout: moment.duration('60s'),
     });
 
     const localActionTypeRegistryParams = {

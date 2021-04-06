@@ -14,7 +14,6 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { ActionsConfig } from './config';
 import { ActionTypeDisabledError } from './lib';
 import { ProxySettings, ResponseSettings } from './types';
-import { parseDuration } from './lib/parse_duration';
 
 export enum AllowedHosts {
   Any = '*',
@@ -103,7 +102,7 @@ function getProxySettingsFromConfig(config: ActionsConfig): undefined | ProxySet
 function getResponseSettingsFromConfig(config: ActionsConfig): ResponseSettings {
   return {
     maxResponseContentLength: config.maxResponseContentLength,
-    responseTimeout: parseDuration(config.responseTimeout),
+    responseTimeout: config.responseTimeout.asMilliseconds(),
   };
 }
 

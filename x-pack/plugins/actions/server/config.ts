@@ -7,7 +7,6 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { AllowedHosts, EnabledActionTypes } from './actions_config';
-import { validateDurationSchema } from './lib/parse_duration';
 
 const preconfiguredActionSchema = schema.object({
   name: schema.string({ minLength: 1 }),
@@ -39,7 +38,7 @@ export const configSchema = schema.object({
   proxyRejectUnauthorizedCertificates: schema.boolean({ defaultValue: true }),
   rejectUnauthorized: schema.boolean({ defaultValue: true }),
   maxResponseContentLength: schema.number({ defaultValue: 1000000 }), // 1MB
-  responseTimeout: schema.string({ validate: validateDurationSchema, defaultValue: '60s' }),
+  responseTimeout: schema.duration({ defaultValue: '60s' }),
 });
 
 export type ActionsConfig = TypeOf<typeof configSchema>;
