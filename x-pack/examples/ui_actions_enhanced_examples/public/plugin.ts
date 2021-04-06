@@ -88,7 +88,7 @@ export class UiActionsEnhancedExamplesPlugin
           toMountPoint(
             h(pluginsStart.uiActionsEnhanced.DrilldownManager, {
               onClose: () => handle.close(),
-              tab: 'create',
+              initialRoute: '/create',
               dynamicActionManager: self.managerWithoutEmbeddableSingleButton,
               triggers: [SAMPLE_APP2_CLICK_TRIGGER],
               placeContext: {},
@@ -113,7 +113,7 @@ export class UiActionsEnhancedExamplesPlugin
           toMountPoint(
             h(pluginsStart.uiActionsEnhanced.DrilldownManager, {
               onClose: () => handle.close(),
-              tab: 'manage',
+              initialRoute: '/manage',
               dynamicActionManager: self.managerWithoutEmbeddableSingleButton,
               triggers: [SAMPLE_APP2_CLICK_TRIGGER],
               placeContext: { sampleApp2ClickContext },

@@ -13,7 +13,6 @@ import { sampleApp2ClickContext, SAMPLE_APP2_CLICK_TRIGGER } from '../../trigger
 export const DrilldownsWithoutEmbeddableSingleButtonExample: React.FC = () => {
   const { plugins, managerWithoutEmbeddableSingleButton } = useUiActions();
   const [showManager, setShowManager] = React.useState(false);
-  const viewRef = React.useRef<'create' | 'manage'>('create');
 
   return (
     <>
@@ -51,7 +50,7 @@ export const DrilldownsWithoutEmbeddableSingleButtonExample: React.FC = () => {
       {showManager && (
         <EuiFlyout onClose={() => setShowManager(false)} aria-labelledby="Drilldown Manager">
           <plugins.uiActionsEnhanced.DrilldownManager
-            tab={viewRef.current}
+            initialRoute={'/create'}
             dynamicActionManager={managerWithoutEmbeddableSingleButton}
             triggers={[SAMPLE_APP2_CLICK_TRIGGER]}
             onClose={() => setShowManager(false)}
