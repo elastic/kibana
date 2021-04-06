@@ -1600,6 +1600,10 @@ export class EndpointDocGenerator extends BaseDataGenerator {
   private randomProcessName(): string {
     return this.randomChoice(fakeProcessNames);
   }
+
+  public randomIP(): string {
+    return super.randomIP();
+  }
 }
 
 const fakeProcessNames = [
