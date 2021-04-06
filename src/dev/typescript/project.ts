@@ -7,7 +7,7 @@
  */
 
 import { basename, dirname, relative, resolve } from 'path';
-import { memoize } from 'lodash';
+
 import { IMinimatch, Minimatch } from 'minimatch';
 import { REPO_ROOT } from '@kbn/utils';
 
@@ -26,10 +26,6 @@ function testMatchers(matchers: IMinimatch[], path: string) {
   return matchers.some((matcher) => matcher.match(path));
 }
 
-const parentProjectFactory = memoize(function (parentConfigPath: string) {
-  return new Project(parentConfigPath);
-});
-
 export class Project {
   public directory: string;
   public name: string;
@@ -38,7 +34,6 @@ export class Project {
 
   private readonly include: IMinimatch[];
   private readonly exclude: IMinimatch[];
-  private readonly parent?: Project;
 
   constructor(
     public tsConfigPath: string,
@@ -46,16 +41,15 @@ export class Project {
   ) {
     this.config = parseTsConfig(tsConfigPath);
 
-    const { files, include, exclude = [], extends: extendsPath } = this.config as {
+    const { files, include, exclude = [] } = this.config as {
       files?: string[];
       include?: string[];
       exclude?: string[];
-      extends?: string;
     };
 
     if (files || !include) {
       throw new Error(
-        `[${tsConfigPath}]: tsconfig.json files in the Kibana repo must use "include" keys and not "files"`
+        'tsconfig.json files in the Kibana repo must use "include" keys and not "files"'
       );
     }
 
@@ -64,30 +58,9 @@ export class Project {
     this.name = options.name || relative(REPO_ROOT, this.directory) || basename(this.directory);
     this.include = makeMatchers(this.directory, include);
     this.exclude = makeMatchers(this.directory, exclude);
-
-    if (extendsPath !== undefined) {
-      const parentConfigPath = resolve(this.directory, extendsPath);
-      this.parent = parentProjectFactory(parentConfigPath);
-    }
   }
 
-  public isAbsolutePathSelected(path: string): boolean {
-    return this.isExcluded(path) ? false : this.isIncluded(path);
-  }
-
-  public isExcluded(path: string): boolean {
-    if (testMatchers(this.exclude, path)) return true;
-    if (this.parent) {
-      return this.parent.isExcluded(path);
-    }
-    return false;
-  }
-
-  public isIncluded(path: string): boolean {
-    if (testMatchers(this.include, path)) return true;
-    if (this.parent) {
-      return this.parent.isIncluded(path);
-    }
-    return false;
+  public isAbsolutePathSelected(path: string) {
+    return testMatchers(this.exclude, path) ? false : testMatchers(this.include, path);
   }
 }

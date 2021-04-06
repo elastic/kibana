@@ -107,7 +107,6 @@
 /x-pack/plugins/dashboard_enhanced/ @elastic/kibana-presentation
 /x-pack/test/functional/apps/canvas/  @elastic/kibana-presentation
 #CC# /src/plugins/kibana_react/public/code_editor/ @elastic/kibana-presentation
-#CC# /x-pack/legacy/plugins/canvas/ @elastic/kibana-presentation
 #CC# /x-pack/plugins/dashboard_mode @elastic/kibana-presentation
 
 
@@ -146,7 +145,6 @@
 /x-pack/test/visual_regression/tests/maps/index.js @elastic/kibana-gis
 #CC# /src/plugins/maps_legacy/ @elastic/kibana-gis
 #CC# /x-pack/plugins/file_upload @elastic/kibana-gis
-#CC# /x-pack/plugins/maps_legacy_licensing @elastic/kibana-gis
 /src/plugins/tile_map/ @elastic/kibana-gis
 /src/plugins/region_map/ @elastic/kibana-gis
 
@@ -165,7 +163,6 @@
 /packages/kbn-utils/ @elastic/kibana-operations
 /packages/kbn-cli-dev-mode/ @elastic/kibana-operations
 /src/cli/keystore/ @elastic/kibana-operations
-/src/legacy/server/warnings/ @elastic/kibana-operations
 /.ci/es-snapshots/ @elastic/kibana-operations
 /.github/workflows/ @elastic/kibana-operations
 /vars/ @elastic/kibana-operations
@@ -202,9 +199,6 @@
 /packages/kbn-legacy-logging/ @elastic/kibana-core
 /packages/kbn-crypto/ @elastic/kibana-core
 /packages/kbn-http-tools/ @elastic/kibana-core
-/src/legacy/server/config/ @elastic/kibana-core
-/src/legacy/server/http/ @elastic/kibana-core
-/src/legacy/server/logging/ @elastic/kibana-core
 /src/plugins/status_page/ @elastic/kibana-core
 /src/plugins/saved_objects_management/ @elastic/kibana-core
 /src/dev/run_check_published_api_changes.ts @elastic/kibana-core
@@ -214,9 +208,6 @@
 /src/plugins/kibana_overview/ @elastic/kibana-core
 /x-pack/plugins/global_search_bar/ @elastic/kibana-core
 #CC# /src/core/server/csp/ @elastic/kibana-core
-#CC# /src/legacy/server/config/ @elastic/kibana-core
-#CC# /src/legacy/server/http/ @elastic/kibana-core
-#CC# /src/legacy/ui/public/documentation_links @elastic/kibana-core
 #CC# /src/plugins/legacy_export/ @elastic/kibana-core
 #CC# /src/plugins/xpack_legacy/ @elastic/kibana-core
 #CC# /src/plugins/saved_objects/ @elastic/kibana-core
