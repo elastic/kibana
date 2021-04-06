@@ -21,10 +21,10 @@ export const useAllAgents = ({ osqueryPolicies, osqueryPoliciesLoading }: UseAll
     ['agents', osqueryPolicies],
     async () => {
       return await http.get('/api/fleet/agents', {
-        // query: {
-        //   kuery: osqueryPolicies.map((p) => `policy_id:${p}`).join(' or '),
-        //   perPage: 9000,
-        // },
+        query: {
+          kuery: osqueryPolicies.map((p) => `policy_id:${p}`).join(' or '),
+          perPage: 9000,
+        },
       });
     },
     {

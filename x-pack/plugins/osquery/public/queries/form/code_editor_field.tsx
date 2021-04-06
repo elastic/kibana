@@ -29,8 +29,6 @@ OsquerySchemaLink.displayName = 'OsquerySchemaLink';
 const CodeEditorFieldComponent: React.FC<CodeEditorFieldProps> = ({ field }) => {
   const { value, label, labelAppend, helpText, setValue } = field;
 
-  console.error('labelAppend', labelAppend);
-
   return (
     <EuiFormRow
       label={label}

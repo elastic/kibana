@@ -34,7 +34,7 @@ interface PolicyIdComboBoxFieldProps {
   field: FieldHook<string[]>;
 }
 
-export const PolicyIdComboBoxField = ({ field }: PolicyIdComboBoxFieldProps) => {
+const PolicyIdComboBoxFieldComponent: React.FC<PolicyIdComboBoxFieldProps> = ({ field }) => {
   const { value } = field;
 
   const { data: agentPolicies = [] } = useAgentPolicies();
@@ -81,22 +81,31 @@ export const PolicyIdComboBoxField = ({ field }: PolicyIdComboBoxFieldProps) => 
     [agentPoliciesById]
   );
 
+  const selectedOptions = useMemo(() => {
+    if (!value?.length || !value[0].length) return [];
+
+    return value.map((policyId) => ({
+      label: agentPoliciesById[policyId]?.name ?? policyId,
+    }));
+  }, [agentPoliciesById, value]);
+
   return (
     <ComboBoxField
       field={field as FieldHook}
       fullWidth={true}
       // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
       euiFieldProps={{
+        onCreateOption: null,
         singleSelection: { asPlainText: true },
         noSuggestions: false,
         isClearable: false,
         options: agentPolicyOptions,
         'data-test-subj': 'searchableSnapshotCombobox',
-        selectedOptions: value.map((policyId) => ({
-          label: agentPoliciesById[policyId]?.name ?? policyId,
-        })),
+        selectedOptions,
         renderOption,
       }}
     />
   );
 };
+
+export const PolicyIdComboBoxField = React.memo(PolicyIdComboBoxFieldComponent);

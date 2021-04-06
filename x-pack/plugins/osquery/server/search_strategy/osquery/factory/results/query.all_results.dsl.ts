@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { OSQUERY_INTEGRATION_NAME } from '../../../../../common';
 import { ISearchRequestParams } from '../../../../../../../../src/plugins/data/common';
 import { ResultsRequestOptions } from '../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../common/utils/build_query';
@@ -36,7 +37,7 @@ export const buildResultsQuery = ({
 
   const dslQuery = {
     allowNoIndices: true,
-    index: 'logs-osquery_manager.result*',
+    index: `logs-${OSQUERY_INTEGRATION_NAME}.result*`,
     ignoreUnavailable: true,
     body: {
       aggs: {

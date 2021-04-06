@@ -8,6 +8,7 @@
 import { useQuery } from 'react-query';
 import { useKibana } from '../common/lib/kibana';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../fleet/common';
+import { OSQUERY_INTEGRATION_NAME } from '../../common';
 
 export const useOsqueryPolicies = () => {
   const { http } = useKibana().services;
@@ -17,7 +18,7 @@ export const useOsqueryPolicies = () => {
     async () => {
       return await http.get('/api/fleet/package_policies', {
         query: {
-          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:osquery_manager`,
+          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
         },
       });
     },

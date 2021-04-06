@@ -32,7 +32,7 @@ const NewScheduledQueryPageComponent = () => {
             <h1>
               <FormattedMessage
                 id="xpack.osquery.newScheduledQuery.pageTitle"
-                defaultMessage="New Scheduled query"
+                defaultMessage="New scheduled query"
               />
             </h1>
           </EuiText>

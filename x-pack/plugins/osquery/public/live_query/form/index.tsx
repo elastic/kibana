@@ -70,10 +70,20 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   const { submit } = form;
 
   const actionId = useMemo(() => data?.actions[0].action_id, [data?.actions]);
-
+  const agentIds = useMemo(() => data?.actions[0].agents, [data?.actions]);
   const [{ agentSelection, query }] = useFormData({ form, watch: ['agentSelection', 'query'] });
 
-  const agentSelected = useMemo(() => true ?? !!agentSelection?.length, [agentSelection?.agents]);
+  const agentSelected = useMemo(
+    () =>
+      agentSelection &&
+      !!(
+        agentSelection.allAgentsSelected ||
+        agentSelection.agents.length ||
+        agentSelection.platformsSelected.length ||
+        agentSelection.policiesSelected.length
+      ),
+    [agentSelection]
+  );
 
   const queryValueProvided = useMemo(() => !!query?.query?.length, [query]);
 
@@ -138,12 +148,12 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           defaultMessage: 'Check results',
         }),
         children: actionId ? (
-          <ResultTabs actionId={actionId} agentIds={agentSelection?.agents} isLive={true} />
+          <ResultTabs actionId={actionId} agentIds={agentIds} isLive={true} />
         ) : null,
         status: resultsStatus,
       },
     ],
-    [actionId, agentSelected, agentSelection, queryStatus, resultsStatus, submit, submitQueryStatus]
+    [actionId, agentIds, agentSelected, queryStatus, resultsStatus, submit, submitQueryStatus]
   );
 
   return (

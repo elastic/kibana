@@ -22,8 +22,9 @@ import React from 'react';
 import { useMutation } from 'react-query';
 import { produce } from 'immer';
 
+import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { Form, useForm, getUseField, Field, FIELD_TYPES } from '../../shared_imports';
-import { useKibana } from '../../common/lib/kibana';
+import { useKibana, useRouterNavigate } from '../../common/lib/kibana';
 import { PolicyIdComboBoxField } from './policy_id_combobox_field';
 import { QueriesField } from './queries_field';
 
@@ -43,6 +44,10 @@ const ScheduledQueryFormComponent: React.FC<ScheduledQueryFormProps> = ({
   editMode = false,
 }) => {
   const { http } = useKibana().services;
+
+  const cancelButtonProps = useRouterNavigate(
+    `scheduled_queries/${editMode ? defaultValue?.id : ''}`
+  );
 
   const {
     // data,
@@ -108,7 +113,7 @@ const ScheduledQueryFormComponent: React.FC<ScheduledQueryFormProps> = ({
       // console.error('deserializer', payload);
       return {
         ...payload,
-        policy_id: [payload.policy_id],
+        policy_id: payload.policy_id.length ? [payload.policy_id] : [],
         namespace: [payload.namespace],
       };
     },
@@ -127,11 +132,11 @@ const ScheduledQueryFormComponent: React.FC<ScheduledQueryFormProps> = ({
         name: '',
         description: '',
         enabled: true,
-        policy_id: [''],
+        policy_id: [],
         namespace: 'default',
         output_id: '',
         package: {
-          name: 'osquery_manager',
+          name: OSQUERY_INTEGRATION_NAME,
           title: 'Osquery Manager',
           version: '0.1.0',
         },
@@ -199,10 +204,10 @@ const ScheduledQueryFormComponent: React.FC<ScheduledQueryFormProps> = ({
       <EuiBottomBar>
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s">
+            <EuiFlexGroup gutterSize="m">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty color="ghost" size="s">
-                  Close
+                <EuiButtonEmpty color="ghost" {...cancelButtonProps}>
+                  {'Cancel'}
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -214,7 +219,7 @@ const ScheduledQueryFormComponent: React.FC<ScheduledQueryFormProps> = ({
                   iconType="save"
                   onClick={submit}
                 >
-                  Save query
+                  {'Save query'}
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>

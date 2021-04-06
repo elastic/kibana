@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiText, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiButton,
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
@@ -18,6 +25,7 @@ import { ScheduledQueryQueriesTable } from '../../../fleet_integration/component
 const ScheduledQueryDetailsPageComponent = () => {
   const { scheduledQueryId } = useParams<{ scheduledQueryId: string }>();
   const scheduledQueriesListProps = useRouterNavigate('scheduled_queries');
+  const editQueryLinkProps = useRouterNavigate(`scheduled_queries/${scheduledQueryId}/edit`);
 
   const { data } = useScheduledQuery({ scheduledQueryId });
 
@@ -62,8 +70,20 @@ const ScheduledQueryDetailsPageComponent = () => {
     [scheduledQueriesListProps]
   );
 
+  const RightColumn = useMemo(
+    () => (
+      <EuiButton fill {...editQueryLinkProps} iconType="plusInCircle">
+        <FormattedMessage
+          id="xpack.osquery.scheduledQueryDetailsPage.editQueryButtonLabel"
+          defaultMessage="Edit query"
+        />
+      </EuiButton>
+    ),
+    [editQueryLinkProps]
+  );
+
   return (
-    <WithHeaderLayout leftColumn={LeftColumn}>
+    <WithHeaderLayout leftColumn={LeftColumn} rightColumn={RightColumn} rightColumnGrow={false}>
       {/* <EuiCodeBlock language="sql" fontSize="m" paddingSize="m">
         {data?.actionDetails._source?.data?.query}
       </EuiCodeBlock> */}

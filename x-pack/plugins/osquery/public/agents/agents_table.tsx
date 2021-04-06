@@ -6,7 +6,13 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiComboBox, EuiComboBoxOptionOption, EuiHealth, EuiHighlight } from '@elastic/eui';
+import {
+  EuiComboBox,
+  EuiSpacer,
+  EuiComboBoxOptionOption,
+  EuiHealth,
+  EuiHighlight,
+} from '@elastic/eui';
 
 import { useAllAgents } from './use_all_agents';
 import { useAgentGroups } from './use_agent_groups';
@@ -23,7 +29,6 @@ import {
   ALL_AGENTS_LABEL,
   AGENT_PLATFORMS_LABEL,
   AGENT_POLICY_LABEL,
-  SELECT_AGENT_LABEL,
   AGENT_SELECTION_LABEL,
   generateSelectedAgentsMessage,
 } from './translations';
@@ -208,9 +213,6 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ onChange }) => {
   }, []);
   return (
     <div>
-      <h2>{SELECT_AGENT_LABEL}</h2>
-      {numAgentsSelected > 0 ? <span>{generateSelectedAgentsMessage(numAgentsSelected)}</span> : ''}
-      &nbsp;
       <EuiComboBox
         placeholder="Select or create options"
         isLoading={loading}
@@ -220,6 +222,8 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ onChange }) => {
         onChange={onSelection}
         renderOption={renderOption}
       />
+      <EuiSpacer size="xs" />
+      {numAgentsSelected > 0 ? <span>{generateSelectedAgentsMessage(numAgentsSelected)}</span> : ''}
     </div>
   );
 };

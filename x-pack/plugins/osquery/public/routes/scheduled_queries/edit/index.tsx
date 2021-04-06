@@ -23,20 +23,18 @@ import { useScheduledQuery } from '../../../scheduled_queries/use_scheduled_quer
 
 const EditScheduledQueryPageComponent = () => {
   const { scheduledQueryId } = useParams<{ scheduledQueryId: string }>();
-  const scheduledQueryListProps = useRouterNavigate('scheduled_queries');
+  const queryDetailsLinkProps = useRouterNavigate(`scheduled_queries/${scheduledQueryId}`);
 
   const { data } = useScheduledQuery({ scheduledQueryId });
-
-  console.error('data', data);
 
   const LeftColumn = useMemo(
     () => (
       <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="m">
         <EuiFlexItem>
-          <EuiButtonEmpty iconType="arrowLeft" {...scheduledQueryListProps} flush="left" size="xs">
+          <EuiButtonEmpty iconType="arrowLeft" {...queryDetailsLinkProps} flush="left" size="xs">
             <FormattedMessage
               id="xpack.osquery.editScheduledQuery.viewScheduledQueriesListTitle"
-              defaultMessage="View all live queries"
+              defaultMessage="View query details"
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
@@ -62,7 +60,7 @@ const EditScheduledQueryPageComponent = () => {
         </EuiFlexItem> */}
       </EuiFlexGroup>
     ),
-    [scheduledQueryListProps]
+    [queryDetailsLinkProps]
   );
 
   return (

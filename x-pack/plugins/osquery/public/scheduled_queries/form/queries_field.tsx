@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSpacer } from '@elastic/eui';
 import { produce } from 'immer';
 import React, { useCallback, useState } from 'react';
 
+import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { FieldHook } from '../../shared_imports';
 import { ScheduledQueryQueriesTable } from '../../fleet_integration/components/scheduled_queries_table';
 import { AddQueryFlyout } from './add_query_flyout';
@@ -88,9 +89,9 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field }) => {
       setValue(
         produce((draft) => {
           draft[0].streams.push({
-            data_stream: { type: 'logs', dataset: 'osquery_manager.result' },
+            data_stream: { type: 'logs', dataset: `${OSQUERY_INTEGRATION_NAME}.result` },
             enabled: true,
-            id: 'osquery-osquery_manager.result-900083be-ef20-4b25-9896-e0485cf7e88b',
+            id: `osquery-${OSQUERY_INTEGRATION_NAME}.result-900083be-ef20-4b25-9896-e0485cf7e88b`,
             vars: {
               id: { type: 'text', value: newQuery.id },
               interval: {
@@ -114,9 +115,9 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field }) => {
         produce((draft) => {
           forEach(newQueries, (newQuery, newQueryId) => {
             draft[0].streams.push({
-              data_stream: { type: 'logs', dataset: 'osquery_manager.result' },
+              data_stream: { type: 'logs', dataset: `${OSQUERY_INTEGRATION_NAME}.result` },
               enabled: true,
-              id: 'osquery-osquery_manager.result-900083be-ef20-4b25-9896-e0485cf7e88b',
+              id: `osquery-${OSQUERY_INTEGRATION_NAME}.result-900083be-ef20-4b25-9896-e0485cf7e88b`,
               vars: {
                 id: { type: 'text', value: newQueryId },
                 interval: {
@@ -145,14 +146,19 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field }) => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
-      <ScheduledQueryQueriesTable
-        // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-        data={{ inputs: field.value }}
+      {
         // @ts-expect-error update types
-        onEditClick={handleEditClick}
-        // @ts-expect-error update types
-        onDeleteClick={handleDeleteClick}
-      />
+        field.value?.streams?.length && (
+          <ScheduledQueryQueriesTable
+            // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+            data={{ inputs: field.value }}
+            // @ts-expect-error update types
+            onEditClick={handleEditClick}
+            // @ts-expect-error update types
+            onDeleteClick={handleDeleteClick}
+          />
+        )
+      }
       <EuiSpacer />
       {
         // @ts-expect-error update types

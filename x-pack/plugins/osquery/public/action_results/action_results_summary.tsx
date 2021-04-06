@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,7 +5,10 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import {
+  EuiLink,
   EuiFlexGroup,
   EuiFlexItem,
   EuiCard,
@@ -21,6 +23,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useActionResults } from './use_action_results';
 import { useAllResults } from '../results/use_all_results';
 import { Direction } from '../../common/search_strategy';
+import { useKibana } from '../common/lib/kibana';
 
 interface ActionResultsSummaryProps {
   actionId: string;
@@ -39,6 +42,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   agentIds,
   isLive,
 }) => {
+  const getUrlForApp = useKibana().services.application.getUrlForApp;
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(50);
   const {
@@ -97,16 +101,23 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     [agentIds, aggregations.failed, aggregations.successful, notRespondedCount]
   );
 
+  const renderAgentIdColumn = useCallback(
+    (agentId) => (
+      <EuiLink
+        className="eui-textTruncate"
+        href={getUrlForApp('fleet', { path: `#/fleet/agents/${agentId}` })}
+        target="_blank"
+      >
+        {agentId}
+      </EuiLink>
+    ),
+    [getUrlForApp]
+  );
+
   const renderRowsColumn = useCallback(
     (_, item) => {
       if (!logsResults) return '-';
       const agentId = item.fields.agent_id[0];
-
-      // console.error(
-      //   'agentId',
-      //   agentId,
-      //   logsResults?.rawResponse?.aggregations?.count_by_agent_id?.buckets
-      // );
 
       return (
         // @ts-expect-error update types
@@ -128,7 +139,6 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
         // @ts-expect-error update types
         // eslint-disable-next-line react/display-name
         render: (value, item) => {
-          // console.error('item', item);
           if (!value) return 'pending';
           if (item.fields['error.keyword']) return 'error';
           return <>{'success'}</>;
@@ -137,6 +147,8 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
       {
         field: 'fields.agent_id[0]',
         name: 'Agent ID',
+        truncateText: true,
+        render: renderAgentIdColumn,
       },
       {
         field: 'fields.rows[0]',
@@ -149,7 +161,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
         render: renderErrorMessage,
       },
     ],
-    [renderRowsColumn]
+    [renderAgentIdColumn, renderRowsColumn]
   );
 
   const pagination = useMemo(

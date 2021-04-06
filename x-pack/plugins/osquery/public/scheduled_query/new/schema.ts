@@ -13,12 +13,12 @@ export const defaultValue = {
   description: '',
   namespace: 'default',
   enabled: true,
-  policy_id: '1e2bb670-686c-11eb-84b4-81282a213fcf',
+  policy_id: '',
   output_id: '',
   package: {
     name: OSQUERY_INTEGRATION_NAME,
-    title: 'OSquery Elastic Managed',
-    version: '0.1.2',
+    title: 'Osquery Manager',
+    version: '0.1.0',
   },
   inputs: [
     {
