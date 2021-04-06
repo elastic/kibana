@@ -37,7 +37,7 @@ export function initGetCaseApi({ router, logger }: RouteDeps) {
         const id = request.params.case_id;
 
         return response.ok({
-          body: await casesClient.get({
+          body: await casesClient.cases.get({
             id,
             includeComments: request.query.includeComments,
             includeSubCaseComments: request.query.includeSubCaseComments,

@@ -14,7 +14,7 @@ describe('updateAlertsStatus', () => {
     const savedObjectsClient = createMockSavedObjectsRepository();
 
     const casesClient = await createCasesClientWithMockSavedObjectsClient({ savedObjectsClient });
-    await casesClient.client.updateAlertsStatus({
+    await casesClient.client.updateStatus({
       alerts: [{ id: 'alert-id-1', index: '.siem-signals', status: CaseStatuses.closed }],
     });
 

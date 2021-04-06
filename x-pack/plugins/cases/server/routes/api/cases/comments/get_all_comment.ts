@@ -37,7 +37,7 @@ export function initGetAllCommentsApi({ caseService, router, logger }: RouteDeps
     },
     async (context, request, response) => {
       try {
-        const client = context.core.savedObjects.getClient({
+        const soClient = context.core.savedObjects.getClient({
           includedHiddenTypes: SAVED_OBJECT_TYPES,
         });
         let comments: SavedObjectsFindResponse<CommentAttributes>;
@@ -54,7 +54,7 @@ export function initGetAllCommentsApi({ caseService, router, logger }: RouteDeps
 
         if (request.query?.subCaseId) {
           comments = await caseService.getAllSubCaseComments({
-            client,
+            soClient,
             id: request.query.subCaseId,
             options: {
               sortField: defaultSortField,
@@ -62,7 +62,7 @@ export function initGetAllCommentsApi({ caseService, router, logger }: RouteDeps
           });
         } else {
           comments = await caseService.getAllCaseComments({
-            client,
+            soClient,
             id: request.params.case_id,
             includeSubCaseComments: request.query?.includeSubCaseComments,
             options: {

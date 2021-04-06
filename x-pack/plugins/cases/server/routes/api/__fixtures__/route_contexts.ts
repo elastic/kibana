@@ -51,7 +51,7 @@ export const createRouteContext = async (client: any, badAuth = false) => {
   savedObjectsService.getScopedClient.mockReturnValue(client);
 
   const contextMock = xpackMocks.createRequestHandlerContext();
-  // The tests check the calls on the saved object client, so we need to make sure it is the same one returned by
+  // The tests check the calls on the saved object soClient, so we need to make sure it is the same one returned by
   // getScopedClient and .client
   contextMock.core.savedObjects.getClient = jest.fn(() => client);
   contextMock.core.savedObjects.client = client;

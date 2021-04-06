@@ -40,7 +40,7 @@ export function initPatchCaseConfigure({
     async (context, request, response) => {
       try {
         let error = null;
-        const client = context.core.savedObjects.getClient({
+        const soClient = context.core.savedObjects.getClient({
           includedHiddenTypes: SAVED_OBJECT_TYPES,
         });
         const query = pipe(
@@ -48,7 +48,7 @@ export function initPatchCaseConfigure({
           fold(throwErrors(Boom.badRequest), identity)
         );
 
-        const myCaseConfigure = await caseConfigureService.find({ client });
+        const myCaseConfigure = await caseConfigureService.find({ soClient });
         const { version, connector, ...queryWithoutVersion } = query;
         if (myCaseConfigure.saved_objects.length === 0) {
           throw Boom.conflict(
@@ -78,7 +78,7 @@ export function initPatchCaseConfigure({
             throw Boom.notFound('Action client have not been found');
           }
           try {
-            mappings = await casesClient.getMappings({
+            mappings = await casesClient.casesClientInternal.configuration.getMappings({
               actionsClient,
               connectorId: connector.id,
               connectorType: connector.type,
@@ -90,7 +90,7 @@ export function initPatchCaseConfigure({
           }
         }
         const patch = await caseConfigureService.patch({
-          client,
+          soClient,
           caseConfigureId: myCaseConfigure.saved_objects[0].id,
           updatedAttributes: {
             ...queryWithoutVersion,

@@ -10,15 +10,15 @@ import { ActionsClient } from '../../../../actions/server';
 import { ConnectorMappingsAttributes, ConnectorTypes } from '../../../common/api';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server/saved_objects';
-import { ConnectorMappingsServiceSetup } from '../../services';
-import { CasesClientHandler } from '..';
+import { ConnectorMappingsService } from '../../services';
+import { CasesClientInternal } from '..';
 import { createCaseError } from '../../common/error';
 
 interface GetMappingsArgs {
   savedObjectsClient: SavedObjectsClientContract;
-  connectorMappingsService: ConnectorMappingsServiceSetup;
+  connectorMappingsService: ConnectorMappingsService;
   actionsClient: ActionsClient;
-  casesClient: CasesClientHandler;
+  casesClientInternal: CasesClientInternal;
   connectorType: string;
   connectorId: string;
   logger: Logger;
@@ -28,7 +28,7 @@ export const getMappings = async ({
   savedObjectsClient,
   connectorMappingsService,
   actionsClient,
-  casesClient,
+  casesClientInternal,
   connectorType,
   connectorId,
   logger,
@@ -38,7 +38,7 @@ export const getMappings = async ({
       return [];
     }
     const myConnectorMappings = await connectorMappingsService.find({
-      client: savedObjectsClient,
+      soClient: savedObjectsClient,
       options: {
         hasReference: {
           type: ACTION_SAVED_OBJECT_TYPE,
@@ -49,13 +49,13 @@ export const getMappings = async ({
     let theMapping;
     // Create connector mappings if there are none
     if (myConnectorMappings.total === 0) {
-      const res = await casesClient.getFields({
+      const res = await casesClientInternal.configuration.getFields({
         actionsClient,
         connectorId,
         connectorType,
       });
       theMapping = await connectorMappingsService.post({
-        client: savedObjectsClient,
+        soClient: savedObjectsClient,
         attributes: {
           mappings: res.defaultMappings,
         },

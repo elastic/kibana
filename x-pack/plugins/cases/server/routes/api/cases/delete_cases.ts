@@ -12,22 +12,24 @@ import { buildCaseUserActionItem } from '../../../services/user_actions/helpers'
 import { RouteDeps } from '../types';
 import { wrapError } from '../utils';
 import { CASES_URL, SAVED_OBJECT_TYPES, ENABLE_CASE_CONNECTOR } from '../../../../common/constants';
-import { CaseServiceSetup } from '../../../services';
+import { CaseService, AttachmentService } from '../../../services';
 
 async function deleteSubCases({
+  attachmentService,
   caseService,
-  client,
+  soClient,
   caseIds,
 }: {
-  caseService: CaseServiceSetup;
-  client: SavedObjectsClientContract;
+  attachmentService: AttachmentService;
+  caseService: CaseService;
+  soClient: SavedObjectsClientContract;
   caseIds: string[];
 }) {
-  const subCasesForCaseIds = await caseService.findSubCasesByCaseId({ client, ids: caseIds });
+  const subCasesForCaseIds = await caseService.findSubCasesByCaseId({ soClient, ids: caseIds });
 
   const subCaseIDs = subCasesForCaseIds.saved_objects.map((subCase) => subCase.id);
   const commentsForSubCases = await caseService.getAllSubCaseComments({
-    client,
+    soClient,
     id: subCaseIDs,
   });
 
@@ -35,18 +37,24 @@ async function deleteSubCases({
   // per case ID
   await Promise.all(
     commentsForSubCases.saved_objects.map((commentSO) =>
-      caseService.deleteComment({ client, commentId: commentSO.id })
+      attachmentService.delete({ soClient, attachmentId: commentSO.id })
     )
   );
 
   await Promise.all(
     subCasesForCaseIds.saved_objects.map((subCaseSO) =>
-      caseService.deleteSubCase(client, subCaseSO.id)
+      caseService.deleteSubCase(soClient, subCaseSO.id)
     )
   );
 }
 
-export function initDeleteCasesApi({ caseService, router, userActionService, logger }: RouteDeps) {
+export function initDeleteCasesApi({
+  attachmentService,
+  caseService,
+  router,
+  userActionService,
+  logger,
+}: RouteDeps) {
   router.delete(
     {
       path: CASES_URL,
@@ -58,13 +66,13 @@ export function initDeleteCasesApi({ caseService, router, userActionService, log
     },
     async (context, request, response) => {
       try {
-        const client = context.core.savedObjects.getClient({
+        const soClient = context.core.savedObjects.getClient({
           includedHiddenTypes: SAVED_OBJECT_TYPES,
         });
         await Promise.all(
           request.query.ids.map((id) =>
             caseService.deleteCase({
-              client,
+              soClient,
               id,
             })
           )
@@ -72,7 +80,7 @@ export function initDeleteCasesApi({ caseService, router, userActionService, log
         const comments = await Promise.all(
           request.query.ids.map((id) =>
             caseService.getAllCaseComments({
-              client,
+              soClient,
               id,
             })
           )
@@ -83,9 +91,9 @@ export function initDeleteCasesApi({ caseService, router, userActionService, log
             comments.map((c) =>
               Promise.all(
                 c.saved_objects.map(({ id }) =>
-                  caseService.deleteComment({
-                    client,
-                    commentId: id,
+                  attachmentService.delete({
+                    soClient,
+                    attachmentId: id,
                   })
                 )
               )
@@ -94,15 +102,20 @@ export function initDeleteCasesApi({ caseService, router, userActionService, log
         }
 
         if (ENABLE_CASE_CONNECTOR) {
-          await deleteSubCases({ caseService, client, caseIds: request.query.ids });
+          await deleteSubCases({
+            attachmentService,
+            caseService,
+            soClient,
+            caseIds: request.query.ids,
+          });
         }
 
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const { username, full_name, email } = await caseService.getUser({ request });
         const deleteDate = new Date().toISOString();
 
-        await userActionService.postUserActions({
-          client,
+        await userActionService.bulkCreate({
+          soClient,
           actions: request.query.ids.map((id) =>
             buildCaseUserActionItem({
               action: 'create',

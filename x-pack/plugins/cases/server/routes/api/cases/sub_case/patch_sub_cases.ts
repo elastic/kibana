@@ -19,7 +19,7 @@ import {
 
 import { nodeBuilder } from '../../../../../../../../src/plugins/data/common';
 import { CasesClient } from '../../../../client';
-import { CaseServiceSetup, CaseUserActionServiceSetup } from '../../../../services';
+import { CaseService, CaseUserActionService } from '../../../../services';
 import {
   CaseStatuses,
   SubCasesPatchRequest,
@@ -51,13 +51,13 @@ import {
 import { getCaseToUpdate } from '../helpers';
 import { buildSubCaseUserActions } from '../../../../services/user_actions/helpers';
 import { createAlertUpdateRequest } from '../../../../common';
-import { UpdateAlertRequest } from '../../../../client/types';
 import { createCaseError } from '../../../../common/error';
+import { UpdateAlertRequest } from '../../../../client/alerts/client';
 
 interface UpdateArgs {
-  client: SavedObjectsClientContract;
-  caseService: CaseServiceSetup;
-  userActionService: CaseUserActionServiceSetup;
+  soClient: SavedObjectsClientContract;
+  caseService: CaseService;
+  userActionService: CaseUserActionService;
   request: KibanaRequest;
   casesClient: CasesClient;
   subCases: SubCasesPatchRequest;
@@ -132,19 +132,19 @@ function getParentIDs({
 
 async function getParentCases({
   caseService,
-  client,
+  soClient,
   subCaseIDs,
   subCasesMap,
 }: {
-  caseService: CaseServiceSetup;
-  client: SavedObjectsClientContract;
+  caseService: CaseService;
+  soClient: SavedObjectsClientContract;
   subCaseIDs: string[];
   subCasesMap: Map<string, SavedObject<SubCaseAttributes>>;
 }): Promise<Map<string, SavedObject<ESCaseAttributes>>> {
   const parentIDInfo = getParentIDs({ subCaseIDs, subCasesMap });
 
   const parentCases = await caseService.getCases({
-    client,
+    soClient,
     caseIds: parentIDInfo.ids,
   });
 
@@ -199,15 +199,15 @@ function getID(comment: SavedObject<CommentAttributes>): string | undefined {
 async function getAlertComments({
   subCasesToSync,
   caseService,
-  client,
+  soClient,
 }: {
   subCasesToSync: SubCasePatchRequest[];
-  caseService: CaseServiceSetup;
-  client: SavedObjectsClientContract;
+  caseService: CaseService;
+  soClient: SavedObjectsClientContract;
 }): Promise<SavedObjectsFindResponse<CommentAttributes>> {
   const ids = subCasesToSync.map((subCase) => subCase.id);
   return caseService.getAllSubCaseComments({
-    client,
+    soClient,
     id: ids,
     options: {
       filter: nodeBuilder.or([
@@ -222,17 +222,17 @@ async function getAlertComments({
  * Updates the status of alerts for the specified sub cases.
  */
 async function updateAlerts({
-  subCasesToSync,
   caseService,
-  client,
+  soClient,
   casesClient,
   logger,
+  subCasesToSync,
 }: {
-  subCasesToSync: SubCasePatchRequest[];
-  caseService: CaseServiceSetup;
-  client: SavedObjectsClientContract;
+  caseService: CaseService;
+  soClient: SavedObjectsClientContract;
   casesClient: CasesClient;
   logger: Logger;
+  subCasesToSync: SubCasePatchRequest[];
 }) {
   try {
     const subCasesToSyncMap = subCasesToSync.reduce((acc, subCase) => {
@@ -240,7 +240,7 @@ async function updateAlerts({
       return acc;
     }, new Map<string, SubCasePatchRequest>());
     // get all the alerts for all sub cases that need to be synced
-    const totalAlerts = await getAlertComments({ caseService, client, subCasesToSync });
+    const totalAlerts = await getAlertComments({ caseService, soClient, subCasesToSync });
     // create a map of the status (open, closed, etc) to alert info that needs to be updated
     const alertsToUpdate = totalAlerts.saved_objects.reduce(
       (acc: UpdateAlertRequest[], alertComment) => {
@@ -258,7 +258,7 @@ async function updateAlerts({
       []
     );
 
-    await casesClient.updateAlertsStatus({ alerts: alertsToUpdate });
+    await casesClient.casesClientInternal.alerts.updateStatus({ alerts: alertsToUpdate });
   } catch (error) {
     throw createCaseError({
       message: `Failed to update alert status while updating sub cases: ${JSON.stringify(
@@ -271,7 +271,7 @@ async function updateAlerts({
 }
 
 async function update({
-  client,
+  soClient,
   caseService,
   userActionService,
   request,
@@ -286,7 +286,7 @@ async function update({
 
   try {
     const bulkSubCases = await caseService.getSubCases({
-      client,
+      soClient,
       ids: query.subCases.map((q) => q.id),
     });
 
@@ -304,7 +304,7 @@ async function update({
     }
 
     const subIDToParentCase = await getParentCases({
-      client,
+      soClient,
       caseService,
       subCaseIDs: nonEmptySubCaseRequests.map((subCase) => subCase.id),
       subCasesMap,
@@ -314,7 +314,7 @@ async function update({
     const { username, full_name, email } = await caseService.getUser({ request });
     const updatedAt = new Date().toISOString();
     const updatedCases = await caseService.patchSubCases({
-      client,
+      soClient,
       subCases: nonEmptySubCaseRequests.map((thisCase) => {
         const { id: subCaseId, version, ...updateSubCaseAttributes } = thisCase;
         let closedInfo: { closed_at: string | null; closed_by: User | null } = {
@@ -366,7 +366,7 @@ async function update({
 
     await updateAlerts({
       caseService,
-      client,
+      soClient,
       casesClient,
       subCasesToSync: subCasesToSyncAlertsFor,
       logger,
@@ -393,8 +393,8 @@ async function update({
       []
     );
 
-    await userActionService.postUserActions({
-      client,
+    await userActionService.bulkCreate({
+      soClient,
       actions: buildSubCaseUserActions({
         originalSubCases: bulkSubCases.saved_objects,
         updatedSubCases: updatedCases.saved_objects,
@@ -440,7 +440,7 @@ export function initPatchSubCasesApi({
             request,
             subCases,
             casesClient,
-            client: context.core.savedObjects.client,
+            soClient: context.core.savedObjects.client,
             caseService,
             userActionService,
             logger,

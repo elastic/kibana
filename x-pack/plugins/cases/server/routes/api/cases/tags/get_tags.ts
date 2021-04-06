@@ -17,11 +17,11 @@ export function initGetTagsApi({ caseService, router }: RouteDeps) {
     },
     async (context, request, response) => {
       try {
-        const client = context.core.savedObjects.getClient({
+        const soClient = context.core.savedObjects.getClient({
           includedHiddenTypes: SAVED_OBJECT_TYPES,
         });
         const tags = await caseService.getTags({
-          client,
+          soClient,
         });
         return response.ok({ body: tags });
       } catch (error) {

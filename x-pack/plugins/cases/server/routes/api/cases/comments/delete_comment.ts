@@ -20,6 +20,7 @@ import {
 } from '../../../../../common/constants';
 
 export function initDeleteCommentApi({
+  attachmentService,
   caseService,
   router,
   userActionService,
@@ -48,16 +49,16 @@ export function initDeleteCommentApi({
           );
         }
 
-        const client = context.core.savedObjects.getClient({
+        const soClient = context.core.savedObjects.getClient({
           includedHiddenTypes: SAVED_OBJECT_TYPES,
         });
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const { username, full_name, email } = caseService.getUser({ request });
         const deleteDate = new Date().toISOString();
 
-        const myComment = await caseService.getComment({
-          client,
-          commentId: request.params.comment_id,
+        const myComment = await attachmentService.get({
+          soClient,
+          attachmentId: request.params.comment_id,
         });
 
         if (myComment == null) {
@@ -74,13 +75,13 @@ export function initDeleteCommentApi({
           );
         }
 
-        await caseService.deleteComment({
-          client,
-          commentId: request.params.comment_id,
+        await attachmentService.delete({
+          soClient,
+          attachmentId: request.params.comment_id,
         });
 
-        await userActionService.postUserActions({
-          client,
+        await userActionService.bulkCreate({
+          soClient,
           actions: [
             buildCommentUserActionItem({
               action: 'delete',

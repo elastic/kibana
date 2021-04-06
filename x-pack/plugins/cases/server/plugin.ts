@@ -24,13 +24,9 @@ import {
 } from './saved_object_types';
 import {
   CaseConfigureService,
-  CaseConfigureServiceSetup,
   CaseService,
-  CaseServiceSetup,
   CaseUserActionService,
-  CaseUserActionServiceSetup,
   ConnectorMappingsService,
-  ConnectorMappingsServiceSetup,
   AlertService,
 } from './services';
 import { CasesClient } from './client';
@@ -39,6 +35,7 @@ import type { CasesRequestHandlerContext } from './types';
 import { CasesClientFactory } from './client/factory';
 import { SpacesPluginStart } from '../../spaces/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
+import { AttachmentService } from './services/attachments';
 
 function createConfig(context: PluginInitializerContext) {
   return context.config.get<ConfigType>();
@@ -57,17 +54,18 @@ export interface PluginsStart {
 
 export class CasePlugin {
   private readonly log: Logger;
-  private caseConfigureService?: CaseConfigureServiceSetup;
-  private caseService?: CaseServiceSetup;
-  private connectorMappingsService?: ConnectorMappingsServiceSetup;
-  private userActionService?: CaseUserActionServiceSetup;
+  private caseConfigureService?: CaseConfigureService;
+  private caseService?: CaseService;
+  private connectorMappingsService?: ConnectorMappingsService;
+  private userActionService?: CaseUserActionService;
   private alertsService?: AlertService;
+  private attachmentService?: AttachmentService;
   private clientFactory: CasesClientFactory;
   private securityPluginSetup?: SecurityPluginSetup;
   private config?: ConfigType;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
-    this.log = this.initializerContext.logger.get();
+    this.log = this.initializerContext.logger.get('plugins', 'cases');
     this.clientFactory = new CasesClientFactory(this.log);
   }
 
@@ -98,10 +96,11 @@ export class CasePlugin {
       this.log,
       plugins.security != null ? plugins.security.authc : undefined
     );
-    this.caseConfigureService = await new CaseConfigureService(this.log).setup();
-    this.connectorMappingsService = await new ConnectorMappingsService(this.log).setup();
-    this.userActionService = await new CaseUserActionService(this.log).setup();
+    this.caseConfigureService = new CaseConfigureService(this.log);
+    this.connectorMappingsService = new ConnectorMappingsService(this.log);
+    this.userActionService = new CaseUserActionService(this.log);
     this.alertsService = new AlertService();
+    this.attachmentService = new AttachmentService(this.log);
 
     core.http.registerRouteHandlerContext<CasesRequestHandlerContext, 'cases'>(
       APP_ID,
@@ -117,6 +116,7 @@ export class CasePlugin {
       caseConfigureService: this.caseConfigureService,
       connectorMappingsService: this.connectorMappingsService,
       userActionService: this.userActionService,
+      attachmentService: this.attachmentService,
       router,
     });
 
@@ -139,6 +139,7 @@ export class CasePlugin {
       caseService: this.caseService!,
       connectorMappingsService: this.connectorMappingsService!,
       userActionService: this.userActionService!,
+      attachmentService: this.attachmentService!,
       securityPluginSetup: this.securityPluginSetup,
       securityPluginStart: plugins.security,
       getSpace: async (request: KibanaRequest) => {

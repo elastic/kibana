@@ -35,7 +35,7 @@ import {
   transformNewComment,
 } from '../../routes/api/utils';
 import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../common/constants';
-import { CaseServiceSetup } from '../../services';
+import { AttachmentService, CaseService } from '../../services';
 import { createCaseError } from '../error';
 import { countAlertsForID } from '../index';
 
@@ -53,7 +53,8 @@ interface CommentableCaseParams {
   collection: SavedObject<ESCaseAttributes>;
   subCase?: SavedObject<SubCaseAttributes>;
   soClient: SavedObjectsClientContract;
-  service: CaseServiceSetup;
+  caseService: CaseService;
+  attachmentService: AttachmentService;
   logger: Logger;
 }
 
@@ -65,14 +66,23 @@ export class CommentableCase {
   private readonly collection: SavedObject<ESCaseAttributes>;
   private readonly subCase?: SavedObject<SubCaseAttributes>;
   private readonly soClient: SavedObjectsClientContract;
-  private readonly service: CaseServiceSetup;
+  private readonly caseService: CaseService;
+  private readonly attachmentService: AttachmentService;
   private readonly logger: Logger;
 
-  constructor({ collection, subCase, soClient, service, logger }: CommentableCaseParams) {
+  constructor({
+    collection,
+    subCase,
+    soClient,
+    caseService,
+    attachmentService,
+    logger,
+  }: CommentableCaseParams) {
     this.collection = collection;
     this.subCase = subCase;
     this.soClient = soClient;
-    this.service = service;
+    this.caseService = caseService;
+    this.attachmentService = attachmentService;
     this.logger = logger;
   }
 
@@ -129,8 +139,8 @@ export class CommentableCase {
       let updatedSubCaseAttributes: SavedObject<SubCaseAttributes> | undefined;
 
       if (this.subCase) {
-        const updatedSubCase = await this.service.patchSubCase({
-          client: this.soClient,
+        const updatedSubCase = await this.caseService.patchSubCase({
+          soClient: this.soClient,
           subCaseId: this.subCase.id,
           updatedAttributes: {
             updated_at: date,
@@ -151,8 +161,8 @@ export class CommentableCase {
         };
       }
 
-      const updatedCase = await this.service.patchCase({
-        client: this.soClient,
+      const updatedCase = await this.caseService.patchCase({
+        soClient: this.soClient,
         caseId: this.collection.id,
         updatedAttributes: {
           updated_at: date,
@@ -173,7 +183,8 @@ export class CommentableCase {
         },
         subCase: updatedSubCaseAttributes,
         soClient: this.soClient,
-        service: this.service,
+        caseService: this.caseService,
+        attachmentService: this.attachmentService,
         logger: this.logger,
       });
     } catch (error) {
@@ -201,9 +212,9 @@ export class CommentableCase {
       const { id, version, ...queryRestAttributes } = updateRequest;
 
       const [comment, commentableCase] = await Promise.all([
-        this.service.patchComment({
-          client: this.soClient,
-          commentId: id,
+        this.attachmentService.update({
+          soClient: this.soClient,
+          attachmentId: id,
           updatedAttributes: {
             ...queryRestAttributes,
             updated_at: updatedAt,
@@ -250,8 +261,8 @@ export class CommentableCase {
       }
 
       const [comment, commentableCase] = await Promise.all([
-        this.service.postNewComment({
-          client: this.soClient,
+        this.attachmentService.create({
+          soClient: this.soClient,
           attributes: transformNewComment({
             associationType: this.subCase ? AssociationType.subCase : AssociationType.case,
             createdDate,
@@ -287,8 +298,8 @@ export class CommentableCase {
 
   public async encode(): Promise<CaseResponse> {
     try {
-      const collectionCommentStats = await this.service.getAllCaseComments({
-        client: this.soClient,
+      const collectionCommentStats = await this.caseService.getAllCaseComments({
+        soClient: this.soClient,
         id: this.collection.id,
         options: {
           fields: [],
@@ -297,8 +308,8 @@ export class CommentableCase {
         },
       });
 
-      const collectionComments = await this.service.getAllCaseComments({
-        client: this.soClient,
+      const collectionComments = await this.caseService.getAllCaseComments({
+        soClient: this.soClient,
         id: this.collection.id,
         options: {
           fields: [],
@@ -317,8 +328,8 @@ export class CommentableCase {
       };
 
       if (this.subCase) {
-        const subCaseComments = await this.service.getAllSubCaseComments({
-          client: this.soClient,
+        const subCaseComments = await this.caseService.getAllSubCaseComments({
+          soClient: this.soClient,
           id: this.subCase.id,
         });
         const totalAlerts =

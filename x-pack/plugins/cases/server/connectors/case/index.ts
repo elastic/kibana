@@ -76,7 +76,7 @@ async function executor(
 
   if (subAction === 'create') {
     try {
-      data = await casesClient.create({
+      data = await casesClient.cases.create({
         ...(subActionParams as CasePostRequest),
       });
     } catch (error) {
@@ -98,7 +98,7 @@ async function executor(
     );
 
     try {
-      data = await casesClient.update({ cases: [updateParamsWithoutNullValues] });
+      data = await casesClient.cases.update({ cases: [updateParamsWithoutNullValues] });
     } catch (error) {
       throw createCaseError({
         message: `Failed to update case using connector id: ${updateParamsWithoutNullValues?.id} version: ${updateParamsWithoutNullValues?.version}: ${error}`,
@@ -112,7 +112,7 @@ async function executor(
     const { caseId, comment } = subActionParams as ExecutorSubActionAddCommentParams;
     try {
       const formattedComment = transformConnectorComment(comment, logger);
-      data = await casesClient.addComment({ caseId, comment: formattedComment });
+      data = await casesClient.attachments.add({ caseId, comment: formattedComment });
     } catch (error) {
       throw createCaseError({
         message: `Failed to create comment using connector case id: ${caseId}: ${error}`,
