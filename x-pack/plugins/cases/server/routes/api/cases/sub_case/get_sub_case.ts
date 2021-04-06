@@ -29,13 +29,13 @@ export function initGetSubCaseApi({ caseService, router, logger }: RouteDeps) {
     },
     async (context, request, response) => {
       try {
-        const client = context.core.savedObjects.getClient({
+        const soClient = context.core.savedObjects.getClient({
           includedHiddenTypes: SAVED_OBJECT_TYPES,
         });
         const includeComments = request.query.includeComments;
 
         const subCase = await caseService.getSubCase({
-          client,
+          soClient,
           id: request.params.sub_case_id,
         });
 
@@ -50,7 +50,7 @@ export function initGetSubCaseApi({ caseService, router, logger }: RouteDeps) {
         }
 
         const theComments = await caseService.getAllSubCaseComments({
-          client,
+          soClient,
           id: request.params.sub_case_id,
           options: {
             sortField: 'created_at',

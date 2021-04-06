@@ -29,27 +29,27 @@ export const convertTagsToSet = (tagObjects: Array<SavedObject<CaseAttributes>>)
 // then this should be replaced with a an aggregation call.
 // Ref: https://www.elastic.co/guide/en/kibana/master/saved-objects-api.html
 export const readTags = async ({
-  client,
+  soClient,
 }: {
-  client: SavedObjectsClientContract;
+  soClient: SavedObjectsClientContract;
   perPage?: number;
 }): Promise<string[]> => {
-  const tags = await readRawTags({ client });
+  const tags = await readRawTags({ soClient });
   return tags;
 };
 
 export const readRawTags = async ({
-  client,
+  soClient,
 }: {
-  client: SavedObjectsClientContract;
+  soClient: SavedObjectsClientContract;
 }): Promise<string[]> => {
-  const firstTags = await client.find({
+  const firstTags = await soClient.find({
     type: CASE_SAVED_OBJECT,
     fields: ['tags'],
     page: 1,
     perPage: 1,
   });
-  const tags = await client.find<CaseAttributes>({
+  const tags = await soClient.find<CaseAttributes>({
     type: CASE_SAVED_OBJECT,
     fields: ['tags'],
     page: 1,

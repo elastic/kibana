@@ -49,7 +49,7 @@ export function initDeleteCommentApi({
           );
         }
 
-        const client = context.core.savedObjects.getClient({
+        const soClient = context.core.savedObjects.getClient({
           includedHiddenTypes: SAVED_OBJECT_TYPES,
         });
         // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -57,7 +57,7 @@ export function initDeleteCommentApi({
         const deleteDate = new Date().toISOString();
 
         const myComment = await attachmentService.get({
-          client,
+          soClient,
           attachmentId: request.params.comment_id,
         });
 
@@ -76,12 +76,12 @@ export function initDeleteCommentApi({
         }
 
         await attachmentService.delete({
-          client,
+          soClient,
           attachmentId: request.params.comment_id,
         });
 
         await userActionService.bulkCreate({
-          client,
+          soClient,
           actions: [
             buildCommentUserActionItem({
               action: 'delete',

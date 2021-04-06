@@ -140,7 +140,7 @@ export class CommentableCase {
 
       if (this.subCase) {
         const updatedSubCase = await this.caseService.patchSubCase({
-          client: this.soClient,
+          soClient: this.soClient,
           subCaseId: this.subCase.id,
           updatedAttributes: {
             updated_at: date,
@@ -162,7 +162,7 @@ export class CommentableCase {
       }
 
       const updatedCase = await this.caseService.patchCase({
-        client: this.soClient,
+        soClient: this.soClient,
         caseId: this.collection.id,
         updatedAttributes: {
           updated_at: date,
@@ -213,7 +213,7 @@ export class CommentableCase {
 
       const [comment, commentableCase] = await Promise.all([
         this.attachmentService.update({
-          client: this.soClient,
+          soClient: this.soClient,
           attachmentId: id,
           updatedAttributes: {
             ...queryRestAttributes,
@@ -262,7 +262,7 @@ export class CommentableCase {
 
       const [comment, commentableCase] = await Promise.all([
         this.attachmentService.create({
-          client: this.soClient,
+          soClient: this.soClient,
           attributes: transformNewComment({
             associationType: this.subCase ? AssociationType.subCase : AssociationType.case,
             createdDate,
@@ -299,7 +299,7 @@ export class CommentableCase {
   public async encode(): Promise<CaseResponse> {
     try {
       const collectionCommentStats = await this.caseService.getAllCaseComments({
-        client: this.soClient,
+        soClient: this.soClient,
         id: this.collection.id,
         options: {
           fields: [],
@@ -309,7 +309,7 @@ export class CommentableCase {
       });
 
       const collectionComments = await this.caseService.getAllCaseComments({
-        client: this.soClient,
+        soClient: this.soClient,
         id: this.collection.id,
         options: {
           fields: [],
@@ -329,7 +329,7 @@ export class CommentableCase {
 
       if (this.subCase) {
         const subCaseComments = await this.caseService.getAllSubCaseComments({
-          client: this.soClient,
+          soClient: this.soClient,
           id: this.subCase.id,
         });
         const totalAlerts =

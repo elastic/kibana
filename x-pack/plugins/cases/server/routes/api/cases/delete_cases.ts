@@ -17,19 +17,19 @@ import { CaseService, AttachmentService } from '../../../services';
 async function deleteSubCases({
   attachmentService,
   caseService,
-  client,
+  soClient,
   caseIds,
 }: {
   attachmentService: AttachmentService;
   caseService: CaseService;
-  client: SavedObjectsClientContract;
+  soClient: SavedObjectsClientContract;
   caseIds: string[];
 }) {
-  const subCasesForCaseIds = await caseService.findSubCasesByCaseId({ client, ids: caseIds });
+  const subCasesForCaseIds = await caseService.findSubCasesByCaseId({ soClient, ids: caseIds });
 
   const subCaseIDs = subCasesForCaseIds.saved_objects.map((subCase) => subCase.id);
   const commentsForSubCases = await caseService.getAllSubCaseComments({
-    client,
+    soClient,
     id: subCaseIDs,
   });
 
@@ -37,13 +37,13 @@ async function deleteSubCases({
   // per case ID
   await Promise.all(
     commentsForSubCases.saved_objects.map((commentSO) =>
-      attachmentService.delete({ client, attachmentId: commentSO.id })
+      attachmentService.delete({ soClient, attachmentId: commentSO.id })
     )
   );
 
   await Promise.all(
     subCasesForCaseIds.saved_objects.map((subCaseSO) =>
-      caseService.deleteSubCase(client, subCaseSO.id)
+      caseService.deleteSubCase(soClient, subCaseSO.id)
     )
   );
 }
@@ -66,13 +66,13 @@ export function initDeleteCasesApi({
     },
     async (context, request, response) => {
       try {
-        const client = context.core.savedObjects.getClient({
+        const soClient = context.core.savedObjects.getClient({
           includedHiddenTypes: SAVED_OBJECT_TYPES,
         });
         await Promise.all(
           request.query.ids.map((id) =>
             caseService.deleteCase({
-              client,
+              soClient,
               id,
             })
           )
@@ -80,7 +80,7 @@ export function initDeleteCasesApi({
         const comments = await Promise.all(
           request.query.ids.map((id) =>
             caseService.getAllCaseComments({
-              client,
+              soClient,
               id,
             })
           )
@@ -92,7 +92,7 @@ export function initDeleteCasesApi({
               Promise.all(
                 c.saved_objects.map(({ id }) =>
                   attachmentService.delete({
-                    client,
+                    soClient,
                     attachmentId: id,
                   })
                 )
@@ -105,7 +105,7 @@ export function initDeleteCasesApi({
           await deleteSubCases({
             attachmentService,
             caseService,
-            client,
+            soClient,
             caseIds: request.query.ids,
           });
         }
@@ -115,7 +115,7 @@ export function initDeleteCasesApi({
         const deleteDate = new Date().toISOString();
 
         await userActionService.bulkCreate({
-          client,
+          soClient,
           actions: request.query.ids.map((id) =>
             buildCaseUserActionItem({
               action: 'create',

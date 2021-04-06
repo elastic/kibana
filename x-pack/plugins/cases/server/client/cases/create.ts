@@ -89,11 +89,11 @@ export const create = async ({
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const { username, full_name, email } = user;
     const createdDate = new Date().toISOString();
-    const myCaseConfigure = await caseConfigureService.find({ client: savedObjectsClient });
+    const myCaseConfigure = await caseConfigureService.find({ soClient: savedObjectsClient });
     const caseConfigureConnector = getConnectorFromConfiguration(myCaseConfigure);
 
     const newCase = await caseService.postNewCase({
-      client: savedObjectsClient,
+      soClient: savedObjectsClient,
       attributes: transformNewCase({
         createdDate,
         newCase: query,
@@ -105,7 +105,7 @@ export const create = async ({
     });
 
     await userActionService.bulkCreate({
-      client: savedObjectsClient,
+      soClient: savedObjectsClient,
       actions: [
         buildCaseUserActionItem({
           action: 'create',

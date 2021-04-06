@@ -71,22 +71,22 @@ interface GetSubCasesArgs extends ClientArgs {
 }
 
 interface FindCommentsArgs {
-  client: SavedObjectsClientContract;
+  soClient: SavedObjectsClientContract;
   id: string | string[];
-  options?: SavedObjectFindOptions;
+  options?: SavedObjectFindOptionsKueryNode;
 }
 
 interface FindCaseCommentsArgs {
-  client: SavedObjectsClientContract;
+  soClient: SavedObjectsClientContract;
   id: string | string[];
-  options?: SavedObjectFindOptions;
+  options?: SavedObjectFindOptionsKueryNode;
   includeSubCaseComments?: boolean;
 }
 
 interface FindSubCaseCommentsArgs {
-  client: SavedObjectsClientContract;
+  soClient: SavedObjectsClientContract;
   id: string | string[];
-  options?: SavedObjectFindOptions;
+  options?: SavedObjectFindOptionsKueryNode;
 }
 
 interface FindCasesArgs extends ClientArgs {
@@ -98,7 +98,7 @@ interface FindSubCasesByIDArgs extends FindCasesArgs {
 }
 
 interface FindSubCasesStatusStats {
-  client: SavedObjectsClientContract;
+  soClient: SavedObjectsClientContract;
   options: SavedObjectFindOptionsKueryNode;
   ids: string[];
 }
@@ -125,15 +125,15 @@ interface PatchCasesArgs extends ClientArgs {
 }
 
 interface PatchSubCase {
-  client: SavedObjectsClientContract;
+  soClient: SavedObjectsClientContract;
   subCaseId: string;
   updatedAttributes: Partial<SubCaseAttributes>;
   version?: string;
 }
 
 interface PatchSubCases {
-  client: SavedObjectsClientContract;
-  subCases: Array<Omit<PatchSubCase, 'client'>>;
+  soClient: SavedObjectsClientContract;
+  subCases: Array<Omit<PatchSubCase, 'soClient'>>;
 }
 
 interface GetUserArgs {
@@ -153,10 +153,10 @@ interface CaseCommentStats {
 }
 
 interface FindCommentsByAssociationArgs {
-  client: SavedObjectsClientContract;
+  soClient: SavedObjectsClientContract;
   id: string | string[];
   associationType: AssociationType;
-  options?: SavedObjectFindOptions;
+  options?: SavedObjectFindOptionsKueryNode;
 }
 
 interface Collection {
@@ -183,22 +183,22 @@ export class CaseService {
    * Returns a map of all cases combined with their sub cases if they are collections.
    */
   public async findCasesGroupedByID({
-    client,
+    soClient,
     caseOptions,
     subCaseOptions,
   }: {
-    client: SavedObjectsClientContract;
+    soClient: SavedObjectsClientContract;
     caseOptions: FindCaseOptions;
     subCaseOptions?: SavedObjectFindOptionsKueryNode;
   }): Promise<CasesMapWithPageInfo> {
     const cases = await this.findCases({
-      client,
+      soClient,
       options: caseOptions,
     });
 
     const subCasesResp = ENABLE_CASE_CONNECTOR
       ? await this.findSubCasesGroupByCase({
-          client,
+          soClient,
           options: subCaseOptions,
           ids: cases.saved_objects
             .filter((caseInfo) => caseInfo.attributes.type === CaseType.collection)
@@ -239,7 +239,7 @@ export class CaseService {
      * in another request (the one below this comment).
      */
     const totalCommentsForCases = await this.getCaseCommentStats({
-      client,
+      soClient,
       ids: Array.from(casesMap.keys()),
       associationType: AssociationType.case,
     });
@@ -270,16 +270,16 @@ export class CaseService {
    * This also counts sub cases. Parent cases are excluded from the statistics.
    */
   public async findCaseStatusStats({
-    client,
+    soClient,
     caseOptions,
     subCaseOptions,
   }: {
-    client: SavedObjectsClientContract;
+    soClient: SavedObjectsClientContract;
     caseOptions: SavedObjectFindOptionsKueryNode;
     subCaseOptions?: SavedObjectFindOptionsKueryNode;
   }): Promise<number> {
     const casesStats = await this.findCases({
-      client,
+      soClient,
       options: {
         ...caseOptions,
         fields: [],
@@ -309,7 +309,7 @@ export class CaseService {
      * don't have the same title and tags, we'd need to account for that as well.
      */
     const cases = await this.findCases({
-      client,
+      soClient,
       options: {
         ...caseOptions,
         fields: [caseTypeField],
@@ -326,7 +326,7 @@ export class CaseService {
 
     if (ENABLE_CASE_CONNECTOR && subCaseOptions) {
       subCasesTotal = await this.findSubCaseStatusStats({
-        client,
+        soClient,
         options: subCaseOptions,
         ids: caseIds,
       });
@@ -343,20 +343,20 @@ export class CaseService {
    * Retrieves the comments attached to a case or sub case.
    */
   public async getCommentsByAssociation({
-    client,
+    soClient,
     id,
     associationType,
     options,
   }: FindCommentsByAssociationArgs): Promise<SavedObjectsFindResponse<CommentAttributes>> {
     if (associationType === AssociationType.subCase) {
       return this.getAllSubCaseComments({
-        client,
+        soClient,
         id,
         options,
       });
     } else {
       return this.getAllCaseComments({
-        client,
+        soClient,
         id,
         options,
       });
@@ -367,11 +367,11 @@ export class CaseService {
    * Returns the number of total comments and alerts for a case (or sub case)
    */
   public async getCaseCommentStats({
-    client,
+    soClient,
     ids,
     associationType,
   }: {
-    client: SavedObjectsClientContract;
+    soClient: SavedObjectsClientContract;
     ids: string[];
     associationType: AssociationType;
   }): Promise<CaseCommentStats> {
@@ -388,7 +388,7 @@ export class CaseService {
     const allComments = await Promise.all(
       ids.map((id) =>
         this.getCommentsByAssociation({
-          client,
+          soClient,
           associationType,
           id,
           options: { page: 1, perPage: 1 },
@@ -397,11 +397,17 @@ export class CaseService {
     );
 
     const alerts = await this.getCommentsByAssociation({
-      client,
+      soClient,
       associationType,
       id: ids,
       options: {
-        filter: `(${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.alert} OR ${CASE_COMMENT_SAVED_OBJECT}.attributes.type: ${CommentType.generatedAlert})`,
+        filter: nodeBuilder.or([
+          nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`, CommentType.alert),
+          nodeBuilder.is(
+            `${CASE_COMMENT_SAVED_OBJECT}.attributes.type`,
+            CommentType.generatedAlert
+          ),
+        ]),
       },
     });
 
@@ -427,11 +433,11 @@ export class CaseService {
    * Returns all the sub cases for a set of case IDs. Comment statistics are also returned.
    */
   public async findSubCasesGroupByCase({
-    client,
+    soClient,
     options,
     ids,
   }: {
-    client: SavedObjectsClientContract;
+    soClient: SavedObjectsClientContract;
     options?: SavedObjectFindOptionsKueryNode;
     ids: string[];
   }): Promise<SubCasesMapWithPageInfo> {
@@ -455,7 +461,7 @@ export class CaseService {
     }
 
     const subCases = await this.findSubCases({
-      client,
+      soClient,
       options: {
         ...options,
         hasReference: ids.map((id) => {
@@ -468,7 +474,7 @@ export class CaseService {
     });
 
     const subCaseComments = await this.getCaseCommentStats({
-      client,
+      soClient,
       ids: subCases.saved_objects.map((subCase) => subCase.id),
       associationType: AssociationType.subCase,
     });
@@ -507,7 +513,7 @@ export class CaseService {
    * Calculates the number of sub cases for a given set of options for a set of case IDs.
    */
   public async findSubCaseStatusStats({
-    client,
+    soClient,
     options,
     ids,
   }: FindSubCasesStatusStats): Promise<number> {
@@ -516,7 +522,7 @@ export class CaseService {
     }
 
     const subCases = await this.findSubCases({
-      client,
+      soClient,
       options: {
         ...options,
         page: 1,
@@ -535,14 +541,14 @@ export class CaseService {
   }
 
   public async createSubCase({
-    client,
+    soClient,
     createdAt,
     caseId,
     createdBy,
   }: CreateSubCaseArgs): Promise<SavedObject<SubCaseAttributes>> {
     try {
       this.log.debug(`Attempting to POST a new sub case`);
-      return client.create<SubCaseAttributes>(
+      return soClient.create<SubCaseAttributes>(
         SUB_CASE_SAVED_OBJECT,
         transformNewSubCase({ createdAt, createdBy }),
         {
@@ -561,10 +567,10 @@ export class CaseService {
     }
   }
 
-  public async getMostRecentSubCase(client: SavedObjectsClientContract, caseId: string) {
+  public async getMostRecentSubCase(soClient: SavedObjectsClientContract, caseId: string) {
     try {
       this.log.debug(`Attempting to find most recent sub case for caseID: ${caseId}`);
-      const subCases = await client.find<SubCaseAttributes>({
+      const subCases = await soClient.find<SubCaseAttributes>({
         perPage: 1,
         sortField: 'created_at',
         sortOrder: 'desc',
@@ -582,20 +588,20 @@ export class CaseService {
     }
   }
 
-  public async deleteSubCase(client: SavedObjectsClientContract, id: string) {
+  public async deleteSubCase(soClient: SavedObjectsClientContract, id: string) {
     try {
       this.log.debug(`Attempting to DELETE sub case ${id}`);
-      return await client.delete(SUB_CASE_SAVED_OBJECT, id);
+      return await soClient.delete(SUB_CASE_SAVED_OBJECT, id);
     } catch (error) {
       this.log.error(`Error on DELETE sub case ${id}: ${error}`);
       throw error;
     }
   }
 
-  public async deleteCase({ client, id: caseId }: GetCaseArgs) {
+  public async deleteCase({ soClient, id: caseId }: GetCaseArgs) {
     try {
       this.log.debug(`Attempting to DELETE case ${caseId}`);
-      return await client.delete(CASE_SAVED_OBJECT, caseId);
+      return await soClient.delete(CASE_SAVED_OBJECT, caseId);
     } catch (error) {
       this.log.error(`Error on DELETE case ${caseId}: ${error}`);
       throw error;
@@ -603,21 +609,21 @@ export class CaseService {
   }
 
   public async getCase({
-    client,
+    soClient,
     id: caseId,
   }: GetCaseArgs): Promise<SavedObject<ESCaseAttributes>> {
     try {
       this.log.debug(`Attempting to GET case ${caseId}`);
-      return await client.get<ESCaseAttributes>(CASE_SAVED_OBJECT, caseId);
+      return await soClient.get<ESCaseAttributes>(CASE_SAVED_OBJECT, caseId);
     } catch (error) {
       this.log.error(`Error on GET case ${caseId}: ${error}`);
       throw error;
     }
   }
-  public async getSubCase({ client, id }: GetCaseArgs): Promise<SavedObject<SubCaseAttributes>> {
+  public async getSubCase({ soClient, id }: GetCaseArgs): Promise<SavedObject<SubCaseAttributes>> {
     try {
       this.log.debug(`Attempting to GET sub case ${id}`);
-      return await client.get<SubCaseAttributes>(SUB_CASE_SAVED_OBJECT, id);
+      return await soClient.get<SubCaseAttributes>(SUB_CASE_SAVED_OBJECT, id);
     } catch (error) {
       this.log.error(`Error on GET sub case ${id}: ${error}`);
       throw error;
@@ -625,12 +631,12 @@ export class CaseService {
   }
 
   public async getSubCases({
-    client,
+    soClient,
     ids,
   }: GetSubCasesArgs): Promise<SavedObjectsBulkResponse<SubCaseAttributes>> {
     try {
       this.log.debug(`Attempting to GET sub cases ${ids.join(', ')}`);
-      return await client.bulkGet<SubCaseAttributes>(
+      return await soClient.bulkGet<SubCaseAttributes>(
         ids.map((id) => ({ type: SUB_CASE_SAVED_OBJECT, id }))
       );
     } catch (error) {
@@ -640,12 +646,12 @@ export class CaseService {
   }
 
   public async getCases({
-    client,
+    soClient,
     caseIds,
   }: GetCasesArgs): Promise<SavedObjectsBulkResponse<ESCaseAttributes>> {
     try {
       this.log.debug(`Attempting to GET cases ${caseIds.join(', ')}`);
-      return await client.bulkGet<ESCaseAttributes>(
+      return await soClient.bulkGet<ESCaseAttributes>(
         caseIds.map((caseId) => ({ type: CASE_SAVED_OBJECT, id: caseId }))
       );
     } catch (error) {
@@ -655,12 +661,12 @@ export class CaseService {
   }
 
   public async findCases({
-    client,
+    soClient,
     options,
   }: FindCasesArgs): Promise<SavedObjectsFindResponse<ESCaseAttributes>> {
     try {
       this.log.debug(`Attempting to find cases`);
-      return await client.find<ESCaseAttributes>({
+      return await soClient.find<ESCaseAttributes>({
         sortField: defaultSortField,
         ...options,
         type: CASE_SAVED_OBJECT,
@@ -672,7 +678,7 @@ export class CaseService {
   }
 
   public async findSubCases({
-    client,
+    soClient,
     options,
   }: FindCasesArgs): Promise<SavedObjectsFindResponse<SubCaseAttributes>> {
     try {
@@ -680,14 +686,14 @@ export class CaseService {
       // if the page or perPage options are set then respect those instead of trying to
       // grab all sub cases
       if (options?.page !== undefined || options?.perPage !== undefined) {
-        return client.find<SubCaseAttributes>({
+        return soClient.find<SubCaseAttributes>({
           sortField: defaultSortField,
           ...options,
           type: SUB_CASE_SAVED_OBJECT,
         });
       }
 
-      const stats = await client.find<SubCaseAttributes>({
+      const stats = await soClient.find<SubCaseAttributes>({
         fields: [],
         page: 1,
         perPage: 1,
@@ -695,7 +701,7 @@ export class CaseService {
         ...options,
         type: SUB_CASE_SAVED_OBJECT,
       });
-      return client.find<SubCaseAttributes>({
+      return soClient.find<SubCaseAttributes>({
         page: 1,
         perPage: stats.total,
         sortField: defaultSortField,
@@ -715,7 +721,7 @@ export class CaseService {
    * @param id the saved object ID of the parent collection to find sub cases for.
    */
   public async findSubCasesByCaseId({
-    client,
+    soClient,
     ids,
     options,
   }: FindSubCasesByIDArgs): Promise<SavedObjectsFindResponse<SubCaseAttributes>> {
@@ -731,7 +737,7 @@ export class CaseService {
     try {
       this.log.debug(`Attempting to GET sub cases for case collection id ${ids.join(', ')}`);
       return this.findSubCases({
-        client,
+        soClient,
         options: {
           ...options,
           hasReference: ids.map((id) => ({
@@ -759,21 +765,21 @@ export class CaseService {
   }
 
   private async getAllComments({
-    client,
+    soClient,
     id,
     options,
   }: FindCommentsArgs): Promise<SavedObjectsFindResponse<CommentAttributes>> {
     try {
       this.log.debug(`Attempting to GET all comments for id ${JSON.stringify(id)}`);
       if (options?.page !== undefined || options?.perPage !== undefined) {
-        return client.find<CommentAttributes>({
+        return soClient.find<CommentAttributes>({
           type: CASE_COMMENT_SAVED_OBJECT,
           sortField: defaultSortField,
           ...options,
         });
       }
       // get the total number of comments that are in ES then we'll grab them all in one go
-      const stats = await client.find<CommentAttributes>({
+      const stats = await soClient.find<CommentAttributes>({
         type: CASE_COMMENT_SAVED_OBJECT,
         fields: [],
         page: 1,
@@ -783,7 +789,7 @@ export class CaseService {
         ...options,
       });
 
-      return client.find<CommentAttributes>({
+      return soClient.find<CommentAttributes>({
         type: CASE_COMMENT_SAVED_OBJECT,
         page: 1,
         perPage: stats.total,
@@ -804,7 +810,7 @@ export class CaseService {
    *  sub case comments are excluded. If the `filter` field is included in the options, it will override this behavior
    */
   public async getAllCaseComments({
-    client,
+    soClient,
     id,
     options,
     includeSubCaseComments = false,
@@ -823,18 +829,20 @@ export class CaseService {
       let filter: KueryNode | undefined;
       if (!includeSubCaseComments) {
         // if other filters were passed in then combine them to filter out sub case comments
-        filter = nodeBuilder.and([
-          options?.filter,
-          nodeBuilder.is(
-            `${CASE_COMMENT_SAVED_OBJECT}.attributes.associationType`,
-            AssociationType.case
-          ),
-        ]);
+        const associationTypeFilter = nodeBuilder.is(
+          `${CASE_COMMENT_SAVED_OBJECT}.attributes.associationType`,
+          AssociationType.case
+        );
+
+        filter =
+          options?.filter != null
+            ? nodeBuilder.and([options.filter, associationTypeFilter])
+            : associationTypeFilter;
       }
 
       this.log.debug(`Attempting to GET all comments for case caseID ${JSON.stringify(id)}`);
       return this.getAllComments({
-        client,
+        soClient,
         id,
         options: {
           hasReferenceOperator: 'OR',
@@ -850,7 +858,7 @@ export class CaseService {
   }
 
   public async getAllSubCaseComments({
-    client,
+    soClient,
     id,
     options,
   }: FindSubCaseCommentsArgs): Promise<SavedObjectsFindResponse<CommentAttributes>> {
@@ -867,7 +875,7 @@ export class CaseService {
 
       this.log.debug(`Attempting to GET all comments for sub case caseID ${JSON.stringify(id)}`);
       return this.getAllComments({
-        client,
+        soClient,
         id,
         options: {
           hasReferenceOperator: 'OR',
@@ -881,19 +889,19 @@ export class CaseService {
     }
   }
 
-  public async getReporters({ client }: ClientArgs) {
+  public async getReporters({ soClient }: ClientArgs) {
     try {
       this.log.debug(`Attempting to GET all reporters`);
-      return await readReporters({ client });
+      return await readReporters({ soClient });
     } catch (error) {
       this.log.error(`Error on GET all reporters: ${error}`);
       throw error;
     }
   }
-  public async getTags({ client }: ClientArgs) {
+  public async getTags({ soClient }: ClientArgs) {
     try {
       this.log.debug(`Attempting to GET all cases`);
-      return await readTags({ client });
+      return await readTags({ soClient });
     } catch (error) {
       this.log.error(`Error on GET cases: ${error}`);
       throw error;
@@ -925,10 +933,10 @@ export class CaseService {
     }
   }
 
-  public async postNewCase({ client, attributes }: PostCaseArgs) {
+  public async postNewCase({ soClient, attributes }: PostCaseArgs) {
     try {
       this.log.debug(`Attempting to POST a new case`);
-      return await client.create<ESCaseAttributes>(CASE_SAVED_OBJECT, {
+      return await soClient.create<ESCaseAttributes>(CASE_SAVED_OBJECT, {
         ...attributes,
       });
     } catch (error) {
@@ -937,10 +945,10 @@ export class CaseService {
     }
   }
 
-  public async patchCase({ client, caseId, updatedAttributes, version }: PatchCaseArgs) {
+  public async patchCase({ soClient, caseId, updatedAttributes, version }: PatchCaseArgs) {
     try {
       this.log.debug(`Attempting to UPDATE case ${caseId}`);
-      return await client.update<ESCaseAttributes>(
+      return await soClient.update<ESCaseAttributes>(
         CASE_SAVED_OBJECT,
         caseId,
         { ...updatedAttributes },
@@ -952,10 +960,10 @@ export class CaseService {
     }
   }
 
-  public async patchCases({ client, cases }: PatchCasesArgs) {
+  public async patchCases({ soClient, cases }: PatchCasesArgs) {
     try {
       this.log.debug(`Attempting to UPDATE case ${cases.map((c) => c.caseId).join(', ')}`);
-      return await client.bulkUpdate<ESCaseAttributes>(
+      return await soClient.bulkUpdate<ESCaseAttributes>(
         cases.map((c) => ({
           type: CASE_SAVED_OBJECT,
           id: c.caseId,
@@ -969,10 +977,10 @@ export class CaseService {
     }
   }
 
-  public async patchSubCase({ client, subCaseId, updatedAttributes, version }: PatchSubCase) {
+  public async patchSubCase({ soClient, subCaseId, updatedAttributes, version }: PatchSubCase) {
     try {
       this.log.debug(`Attempting to UPDATE sub case ${subCaseId}`);
-      return await client.update<SubCaseAttributes>(
+      return await soClient.update<SubCaseAttributes>(
         SUB_CASE_SAVED_OBJECT,
         subCaseId,
         { ...updatedAttributes },
@@ -984,12 +992,12 @@ export class CaseService {
     }
   }
 
-  public async patchSubCases({ client, subCases }: PatchSubCases) {
+  public async patchSubCases({ soClient, subCases }: PatchSubCases) {
     try {
       this.log.debug(
         `Attempting to UPDATE sub case ${subCases.map((c) => c.subCaseId).join(', ')}`
       );
-      return await client.bulkUpdate<SubCaseAttributes>(
+      return await soClient.bulkUpdate<SubCaseAttributes>(
         subCases.map((c) => ({
           type: SUB_CASE_SAVED_OBJECT,
           id: c.subCaseId,

@@ -71,7 +71,7 @@ export const find = async ({
 
     const caseQueries = constructQueryOptions({ ...queryArgs, authorizationFilter });
     const cases = await caseService.findCasesGroupedByID({
-      client: savedObjectsClient,
+      soClient: savedObjectsClient,
       caseOptions: {
         ...queryParams,
         ...caseQueries.case,
@@ -97,7 +97,7 @@ export const find = async ({
       ...caseStatuses.map((status) => {
         const statusQuery = constructQueryOptions({ ...queryArgs, status, authorizationFilter });
         return caseService.findCaseStatusStats({
-          client: savedObjectsClient,
+          soClient: savedObjectsClient,
           caseOptions: statusQuery.case,
           subCaseOptions: statusQuery.subCase,
         });

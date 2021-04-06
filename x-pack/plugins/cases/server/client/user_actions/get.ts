@@ -28,7 +28,7 @@ export const get = async ({
   subCaseId,
 }: GetParams): Promise<CaseUserActionsResponse> => {
   const userActions = await userActionService.getAll({
-    client: savedObjectsClient,
+    soClient: savedObjectsClient,
     caseId,
     subCaseId,
   });

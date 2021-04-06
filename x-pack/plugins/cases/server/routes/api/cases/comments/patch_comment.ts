@@ -30,7 +30,7 @@ import { CaseService, AttachmentService } from '../../../../services';
 interface CombinedCaseParams {
   attachmentService: AttachmentService;
   caseService: CaseService;
-  client: SavedObjectsClientContract;
+  soClient: SavedObjectsClientContract;
   caseID: string;
   logger: Logger;
   subCaseId?: string;
@@ -39,7 +39,7 @@ interface CombinedCaseParams {
 async function getCommentableCase({
   attachmentService,
   caseService,
-  client,
+  soClient,
   caseID,
   subCaseId,
   logger,
@@ -47,11 +47,11 @@ async function getCommentableCase({
   if (subCaseId) {
     const [caseInfo, subCase] = await Promise.all([
       caseService.getCase({
-        client,
+        soClient,
         id: caseID,
       }),
       caseService.getSubCase({
-        client,
+        soClient,
         id: subCaseId,
       }),
     ]);
@@ -60,19 +60,19 @@ async function getCommentableCase({
       caseService,
       collection: caseInfo,
       subCase,
-      soClient: client,
+      soClient,
       logger,
     });
   } else {
     const caseInfo = await caseService.getCase({
-      client,
+      soClient,
       id: caseID,
     });
     return new CommentableCase({
       attachmentService,
       caseService,
       collection: caseInfo,
-      soClient: client,
+      soClient,
       logger,
     });
   }
@@ -108,7 +108,7 @@ export function initPatchCommentApi({
           );
         }
 
-        const client = context.core.savedObjects.getClient({
+        const soClient = context.core.savedObjects.getClient({
           includedHiddenTypes: SAVED_OBJECT_TYPES,
         });
         const query = pipe(
@@ -122,14 +122,14 @@ export function initPatchCommentApi({
         const commentableCase = await getCommentableCase({
           attachmentService,
           caseService,
-          client,
+          soClient,
           caseID: request.params.case_id,
           subCaseId: request.query?.subCaseId,
           logger,
         });
 
         const myComment = await attachmentService.get({
-          client,
+          soClient,
           attachmentId: queryCommentId,
         });
 
@@ -175,7 +175,7 @@ export function initPatchCommentApi({
         });
 
         await userActionService.bulkCreate({
-          client,
+          soClient,
           actions: [
             buildCommentUserActionItem({
               action: 'update',

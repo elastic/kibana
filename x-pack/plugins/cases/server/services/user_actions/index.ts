@@ -32,11 +32,11 @@ interface PostCaseUserActionArgs extends ClientArgs {
 export class CaseUserActionService {
   constructor(private readonly log: Logger) {}
 
-  public async getAll({ client, caseId, subCaseId }: GetCaseUserActionArgs) {
+  public async getAll({ soClient, caseId, subCaseId }: GetCaseUserActionArgs) {
     try {
       const id = subCaseId ?? caseId;
       const type = subCaseId ? SUB_CASE_SAVED_OBJECT : CASE_SAVED_OBJECT;
-      const caseUserActionInfo = await client.find<CaseUserActionAttributes>({
+      const caseUserActionInfo = await soClient.find<CaseUserActionAttributes>({
         type: CASE_USER_ACTION_SAVED_OBJECT,
         fields: [],
         hasReference: { type, id },
@@ -44,7 +44,7 @@ export class CaseUserActionService {
         perPage: 1,
       });
 
-      return await client.find<CaseUserActionAttributes>({
+      return await soClient.find<CaseUserActionAttributes>({
         type: CASE_USER_ACTION_SAVED_OBJECT,
         hasReference: { type, id },
         page: 1,
@@ -58,10 +58,10 @@ export class CaseUserActionService {
     }
   }
 
-  public async bulkCreate({ client, actions }: PostCaseUserActionArgs) {
+  public async bulkCreate({ soClient, actions }: PostCaseUserActionArgs) {
     try {
       this.log.debug(`Attempting to POST a new case user action`);
-      return await client.bulkCreate<CaseUserActionAttributes>(
+      return await soClient.bulkCreate<CaseUserActionAttributes>(
         actions.map((action) => ({ type: CASE_USER_ACTION_SAVED_OBJECT, ...action }))
       );
     } catch (error) {

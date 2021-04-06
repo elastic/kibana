@@ -37,7 +37,7 @@ export function initFindSubCasesApi({ caseService, router, logger }: RouteDeps) 
     },
     async (context, request, response) => {
       try {
-        const client = context.core.savedObjects.getClient({
+        const soClient = context.core.savedObjects.getClient({
           includedHiddenTypes: SAVED_OBJECT_TYPES,
         });
         const queryParams = pipe(
@@ -52,7 +52,7 @@ export function initFindSubCasesApi({ caseService, router, logger }: RouteDeps) 
         });
 
         const subCases = await caseService.findSubCasesGroupByCase({
-          client,
+          soClient,
           ids,
           options: {
             sortField: 'created_at',
@@ -70,7 +70,7 @@ export function initFindSubCasesApi({ caseService, router, logger }: RouteDeps) 
               sortByField: queryParams.sortField,
             });
             return caseService.findSubCaseStatusStats({
-              client,
+              soClient,
               options: statusQueryOptions ?? {},
               ids,
             });

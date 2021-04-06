@@ -38,7 +38,7 @@ export const getMappings = async ({
       return [];
     }
     const myConnectorMappings = await connectorMappingsService.find({
-      client: savedObjectsClient,
+      soClient: savedObjectsClient,
       options: {
         hasReference: {
           type: ACTION_SAVED_OBJECT_TYPE,
@@ -55,7 +55,7 @@ export const getMappings = async ({
         connectorType,
       });
       theMapping = await connectorMappingsService.post({
-        client: savedObjectsClient,
+        soClient: savedObjectsClient,
         attributes: {
           mappings: res.defaultMappings,
         },

@@ -46,7 +46,7 @@ export function initDeleteAllCommentsApi({
           );
         }
 
-        const client = context.core.savedObjects.getClient({
+        const soClient = context.core.savedObjects.getClient({
           includedHiddenTypes: SAVED_OBJECT_TYPES,
         });
         // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -56,7 +56,7 @@ export function initDeleteAllCommentsApi({
         const subCaseId = request.query?.subCaseId;
         const id = subCaseId ?? request.params.case_id;
         const comments = await caseService.getCommentsByAssociation({
-          client,
+          soClient,
           id,
           associationType: subCaseId ? AssociationType.subCase : AssociationType.case,
         });
@@ -64,14 +64,14 @@ export function initDeleteAllCommentsApi({
         await Promise.all(
           comments.saved_objects.map((comment) =>
             attachmentService.delete({
-              client,
+              soClient,
               attachmentId: comment.id,
             })
           )
         );
 
         await userActionService.bulkCreate({
-          client,
+          soClient,
           actions: comments.saved_objects.map((comment) =>
             buildCommentUserActionItem({
               action: 'delete',

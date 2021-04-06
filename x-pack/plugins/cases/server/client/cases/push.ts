@@ -181,12 +181,12 @@ export const push = async ({
   try {
     [myCase, myCaseConfigure, comments] = await Promise.all([
       caseService.getCase({
-        client: savedObjectsClient,
+        soClient: savedObjectsClient,
         id: caseId,
       }),
-      caseConfigureService.find({ client: savedObjectsClient }),
+      caseConfigureService.find({ soClient: savedObjectsClient }),
       caseService.getAllCaseComments({
-        client: savedObjectsClient,
+        soClient: savedObjectsClient,
         id: caseId,
         options: {
           fields: [],
@@ -224,7 +224,7 @@ export const push = async ({
   try {
     [updatedCase, updatedComments] = await Promise.all([
       caseService.patchCase({
-        client: savedObjectsClient,
+        soClient: savedObjectsClient,
         caseId,
         updatedAttributes: {
           ...(shouldMarkAsClosed
@@ -242,7 +242,7 @@ export const push = async ({
       }),
 
       attachmentService.bulkUpdate({
-        client: savedObjectsClient,
+        soClient: savedObjectsClient,
         comments: comments.saved_objects
           .filter((comment) => comment.attributes.pushed_at == null)
           .map((comment) => ({
@@ -256,7 +256,7 @@ export const push = async ({
       }),
 
       userActionService.bulkCreate({
-        client: savedObjectsClient,
+        soClient: savedObjectsClient,
         actions: [
           ...(shouldMarkAsClosed
             ? [

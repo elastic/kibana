@@ -34,13 +34,13 @@ export function initDeleteSubCasesApi({
     },
     async (context, request, response) => {
       try {
-        const client = context.core.savedObjects.getClient({
+        const soClient = context.core.savedObjects.getClient({
           includedHiddenTypes: SAVED_OBJECT_TYPES,
         });
 
         const [comments, subCases] = await Promise.all([
-          caseService.getAllSubCaseComments({ client, id: request.query.ids }),
-          caseService.getSubCases({ client, ids: request.query.ids }),
+          caseService.getAllSubCaseComments({ soClient, id: request.query.ids }),
+          caseService.getSubCases({ soClient, ids: request.query.ids }),
         ]);
 
         const subCaseErrors = subCases.saved_objects.filter(
@@ -63,18 +63,18 @@ export function initDeleteSubCasesApi({
 
         await Promise.all(
           comments.saved_objects.map((comment) =>
-            attachmentService.delete({ client, attachmentId: comment.id })
+            attachmentService.delete({ soClient, attachmentId: comment.id })
           )
         );
 
-        await Promise.all(request.query.ids.map((id) => caseService.deleteSubCase(client, id)));
+        await Promise.all(request.query.ids.map((id) => caseService.deleteSubCase(soClient, id)));
 
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const { username, full_name, email } = await caseService.getUser({ request });
         const deleteDate = new Date().toISOString();
 
         await userActionService.bulkCreate({
-          client,
+          soClient,
           actions: request.query.ids.map((id) =>
             buildCaseUserActionItem({
               action: 'delete',

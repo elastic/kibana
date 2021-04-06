@@ -123,15 +123,15 @@ function throwIfUpdateType(requests: ESCasePatchRequest[]) {
 async function throwIfInvalidUpdateOfTypeWithAlerts({
   requests,
   caseService,
-  client,
+  soClient,
 }: {
   requests: ESCasePatchRequest[];
   caseService: CaseService;
-  client: SavedObjectsClientContract;
+  soClient: SavedObjectsClientContract;
 }) {
   const getAlertsForID = async (caseToUpdate: ESCasePatchRequest) => {
     const alerts = await caseService.getAllCaseComments({
-      client,
+      soClient,
       id: caseToUpdate.id,
       options: {
         fields: [],
@@ -185,17 +185,17 @@ function getID(
 async function getAlertComments({
   casesToSync,
   caseService,
-  client,
+  soClient,
 }: {
   casesToSync: ESCasePatchRequest[];
   caseService: CaseService;
-  client: SavedObjectsClientContract;
+  soClient: SavedObjectsClientContract;
 }): Promise<SavedObjectsFindResponse<CommentAttributes>> {
   const idsOfCasesToSync = casesToSync.map((casePatchReq) => casePatchReq.id);
 
   // getAllCaseComments will by default get all the comments, unless page or perPage fields are set
   return caseService.getAllCaseComments({
-    client,
+    soClient,
     id: idsOfCasesToSync,
     includeSubCaseComments: true,
     options: {
@@ -214,11 +214,11 @@ async function getAlertComments({
 async function getSubCasesToStatus({
   totalAlerts,
   caseService,
-  client,
+  soClient,
 }: {
   totalAlerts: SavedObjectsFindResponse<CommentAttributes>;
   caseService: CaseService;
-  client: SavedObjectsClientContract;
+  soClient: SavedObjectsClientContract;
 }): Promise<Map<string, CaseStatuses>> {
   const subCasesToRetrieve = totalAlerts.saved_objects.reduce((acc, alertComment) => {
     if (
@@ -235,7 +235,7 @@ async function getSubCasesToStatus({
 
   const subCases = await caseService.getSubCases({
     ids: Array.from(subCasesToRetrieve.values()),
-    client,
+    soClient,
   });
 
   return subCases.saved_objects.reduce((acc, subCase) => {
@@ -281,14 +281,14 @@ async function updateAlerts({
   casesWithStatusChangedAndSynced,
   casesMap,
   caseService,
-  client,
+  soClient,
   casesClientInternal,
 }: {
   casesWithSyncSettingChangedToOn: ESCasePatchRequest[];
   casesWithStatusChangedAndSynced: ESCasePatchRequest[];
   casesMap: Map<string, SavedObject<ESCaseAttributes>>;
   caseService: CaseService;
-  client: SavedObjectsClientContract;
+  soClient: SavedObjectsClientContract;
   casesClientInternal: CasesClientInternal;
 }) {
   /**
@@ -313,11 +313,11 @@ async function updateAlerts({
   const totalAlerts = await getAlertComments({
     casesToSync,
     caseService,
-    client,
+    soClient,
   });
 
   // get a map of sub case id to the sub case status
-  const subCasesToStatus = await getSubCasesToStatus({ totalAlerts, client, caseService });
+  const subCasesToStatus = await getSubCasesToStatus({ totalAlerts, soClient, caseService });
 
   // create an array of requests that indicate the id, index, and status to update an alert
   const alertsToUpdate = totalAlerts.saved_objects.reduce(
@@ -366,7 +366,7 @@ export const update = async ({
 
   try {
     const myCases = await caseService.getCases({
-      client: savedObjectsClient,
+      soClient: savedObjectsClient,
       caseIds: query.cases.map((q) => q.id),
     });
 
@@ -433,14 +433,14 @@ export const update = async ({
     await throwIfInvalidUpdateOfTypeWithAlerts({
       requests: updateFilterCases,
       caseService,
-      client: savedObjectsClient,
+      soClient: savedObjectsClient,
     });
 
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const { username, full_name, email } = user;
     const updatedDt = new Date().toISOString();
     const updatedCases = await caseService.patchCases({
-      client: savedObjectsClient,
+      soClient: savedObjectsClient,
       cases: updateFilterCases.map((thisCase) => {
         const { id: caseId, version, ...updateCaseAttributes } = thisCase;
         let closedInfo = {};
@@ -501,7 +501,7 @@ export const update = async ({
       casesWithStatusChangedAndSynced,
       casesWithSyncSettingChangedToOn,
       caseService,
-      client: savedObjectsClient,
+      soClient: savedObjectsClient,
       casesClientInternal,
       casesMap,
     });
@@ -524,7 +524,7 @@ export const update = async ({
       });
 
     await userActionService.bulkCreate({
-      client: savedObjectsClient,
+      soClient: savedObjectsClient,
       actions: buildCaseUserActions({
         originalCases: myCases.saved_objects,
         updatedCases: updatedCases.saved_objects,

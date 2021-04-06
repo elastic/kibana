@@ -11,7 +11,7 @@ import { ConnectorMappings, SavedObjectFindOptions } from '../../../common/api';
 import { CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT } from '../../../common/constants';
 
 interface ClientArgs {
-  client: SavedObjectsClientContract;
+  soClient: SavedObjectsClientContract;
 }
 interface FindConnectorMappingsArgs extends ClientArgs {
   options?: SavedObjectFindOptions;
@@ -25,10 +25,10 @@ interface PostConnectorMappingsArgs extends ClientArgs {
 export class ConnectorMappingsService {
   constructor(private readonly log: Logger) {}
 
-  public async find({ client, options }: FindConnectorMappingsArgs) {
+  public async find({ soClient, options }: FindConnectorMappingsArgs) {
     try {
       this.log.debug(`Attempting to find all connector mappings`);
-      return await client.find<ConnectorMappings>({
+      return await soClient.find<ConnectorMappings>({
         ...options,
         type: CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,
       });
@@ -38,10 +38,10 @@ export class ConnectorMappingsService {
     }
   }
 
-  public async post({ client, attributes, references }: PostConnectorMappingsArgs) {
+  public async post({ soClient, attributes, references }: PostConnectorMappingsArgs) {
     try {
       this.log.debug(`Attempting to POST a new connector mappings`);
-      return await client.create<ConnectorMappings>(
+      return await soClient.create<ConnectorMappings>(
         CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,
         attributes,
         {

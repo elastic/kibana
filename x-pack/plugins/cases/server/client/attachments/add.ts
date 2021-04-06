@@ -60,7 +60,7 @@ async function getSubCase({
   const mostRecentSubCase = await caseService.getMostRecentSubCase(savedObjectsClient, caseId);
   if (mostRecentSubCase && mostRecentSubCase.attributes.status !== CaseStatuses.closed) {
     const subCaseAlertsAttachement = await caseService.getAllSubCaseComments({
-      client: savedObjectsClient,
+      soClient: savedObjectsClient,
       id: mostRecentSubCase.id,
       options: {
         fields: [],
@@ -79,13 +79,13 @@ async function getSubCase({
   }
 
   const newSubCase = await caseService.createSubCase({
-    client: savedObjectsClient,
+    soClient: savedObjectsClient,
     createdAt,
     caseId,
     createdBy: user,
   });
   await userActionService.bulkCreate({
-    client: savedObjectsClient,
+    soClient: savedObjectsClient,
     actions: [
       buildCaseUserActionItem({
         action: 'create',
@@ -138,7 +138,7 @@ const addGeneratedAlerts = async ({
     const createdDate = new Date().toISOString();
 
     const caseInfo = await caseService.getCase({
-      client: savedObjectsClient,
+      soClient: savedObjectsClient,
       id: caseId,
     });
 
@@ -193,7 +193,7 @@ const addGeneratedAlerts = async ({
     }
 
     await userActionService.bulkCreate({
-      client: savedObjectsClient,
+      soClient: savedObjectsClient,
       actions: [
         buildCommentUserActionItem({
           action: 'create',
@@ -221,25 +221,25 @@ const addGeneratedAlerts = async ({
 async function getCombinedCase({
   caseService,
   attachmentService,
-  client,
+  soClient,
   id,
   logger,
 }: {
   caseService: CaseService;
   attachmentService: AttachmentService;
-  client: SavedObjectsClientContract;
+  soClient: SavedObjectsClientContract;
   id: string;
   logger: Logger;
 }): Promise<CommentableCase> {
   const [casePromise, subCasePromise] = await Promise.allSettled([
     caseService.getCase({
-      client,
+      soClient,
       id,
     }),
     ...(ENABLE_CASE_CONNECTOR
       ? [
           caseService.getSubCase({
-            client,
+            soClient,
             id,
           }),
         ]
@@ -249,7 +249,7 @@ async function getCombinedCase({
   if (subCasePromise.status === 'fulfilled') {
     if (subCasePromise.value.references.length > 0) {
       const caseValue = await caseService.getCase({
-        client,
+        soClient,
         id: subCasePromise.value.references[0].id,
       });
       return new CommentableCase({
@@ -258,7 +258,7 @@ async function getCombinedCase({
         subCase: subCasePromise.value,
         caseService,
         attachmentService,
-        soClient: client,
+        soClient,
       });
     } else {
       throw Boom.badRequest('Sub case found without reference to collection');
@@ -273,7 +273,7 @@ async function getCombinedCase({
       collection: casePromise.value,
       caseService,
       attachmentService,
-      soClient: client,
+      soClient,
     });
   }
 }
@@ -330,7 +330,7 @@ export const addComment = async ({
     const combinedCase = await getCombinedCase({
       caseService,
       attachmentService,
-      client: savedObjectsClient,
+      soClient: savedObjectsClient,
       id: caseId,
       logger,
     });
@@ -361,7 +361,7 @@ export const addComment = async ({
     }
 
     await userActionService.bulkCreate({
-      client: savedObjectsClient,
+      soClient: savedObjectsClient,
       actions: [
         buildCommentUserActionItem({
           action: 'create',

@@ -40,17 +40,17 @@ export const get = async ({
     if (ENABLE_CASE_CONNECTOR) {
       const [caseInfo, subCasesForCaseId] = await Promise.all([
         caseService.getCase({
-          client: savedObjectsClient,
+          soClient: savedObjectsClient,
           id,
         }),
-        caseService.findSubCasesByCaseId({ client: savedObjectsClient, ids: [id] }),
+        caseService.findSubCasesByCaseId({ soClient: savedObjectsClient, ids: [id] }),
       ]);
 
       theCase = caseInfo;
       subCaseIds = subCasesForCaseId.saved_objects.map((so) => so.id);
     } else {
       theCase = await caseService.getCase({
-        client: savedObjectsClient,
+        soClient: savedObjectsClient,
         id,
       });
     }
@@ -64,7 +64,7 @@ export const get = async ({
       );
     }
     const theComments = await caseService.getAllCaseComments({
-      client: savedObjectsClient,
+      soClient: savedObjectsClient,
       id,
       options: {
         sortField: 'created_at',

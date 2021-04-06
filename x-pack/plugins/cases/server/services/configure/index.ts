@@ -11,7 +11,7 @@ import { ESCasesConfigureAttributes, SavedObjectFindOptions } from '../../../com
 import { CASE_CONFIGURE_SAVED_OBJECT } from '../../../common/constants';
 
 interface ClientArgs {
-  client: SavedObjectsClientContract;
+  soClient: SavedObjectsClientContract;
 }
 
 interface GetCaseConfigureArgs extends ClientArgs {
@@ -33,20 +33,20 @@ interface PatchCaseConfigureArgs extends ClientArgs {
 export class CaseConfigureService {
   constructor(private readonly log: Logger) {}
 
-  public async delete({ client, caseConfigureId }: GetCaseConfigureArgs) {
+  public async delete({ soClient, caseConfigureId }: GetCaseConfigureArgs) {
     try {
       this.log.debug(`Attempting to DELETE case configure ${caseConfigureId}`);
-      return await client.delete(CASE_CONFIGURE_SAVED_OBJECT, caseConfigureId);
+      return await soClient.delete(CASE_CONFIGURE_SAVED_OBJECT, caseConfigureId);
     } catch (error) {
       this.log.debug(`Error on DELETE case configure ${caseConfigureId}: ${error}`);
       throw error;
     }
   }
 
-  public async get({ client, caseConfigureId }: GetCaseConfigureArgs) {
+  public async get({ soClient, caseConfigureId }: GetCaseConfigureArgs) {
     try {
       this.log.debug(`Attempting to GET case configuration ${caseConfigureId}`);
-      return await client.get<ESCasesConfigureAttributes>(
+      return await soClient.get<ESCasesConfigureAttributes>(
         CASE_CONFIGURE_SAVED_OBJECT,
         caseConfigureId
       );
@@ -56,10 +56,10 @@ export class CaseConfigureService {
     }
   }
 
-  public async find({ client, options }: FindCaseConfigureArgs) {
+  public async find({ soClient, options }: FindCaseConfigureArgs) {
     try {
       this.log.debug(`Attempting to find all case configuration`);
-      return await client.find<ESCasesConfigureAttributes>({
+      return await soClient.find<ESCasesConfigureAttributes>({
         ...options,
         type: CASE_CONFIGURE_SAVED_OBJECT,
       });
@@ -69,10 +69,10 @@ export class CaseConfigureService {
     }
   }
 
-  public async post({ client, attributes }: PostCaseConfigureArgs) {
+  public async post({ soClient, attributes }: PostCaseConfigureArgs) {
     try {
       this.log.debug(`Attempting to POST a new case configuration`);
-      return await client.create<ESCasesConfigureAttributes>(CASE_CONFIGURE_SAVED_OBJECT, {
+      return await soClient.create<ESCasesConfigureAttributes>(CASE_CONFIGURE_SAVED_OBJECT, {
         ...attributes,
       });
     } catch (error) {
@@ -81,10 +81,10 @@ export class CaseConfigureService {
     }
   }
 
-  public async patch({ client, caseConfigureId, updatedAttributes }: PatchCaseConfigureArgs) {
+  public async patch({ soClient, caseConfigureId, updatedAttributes }: PatchCaseConfigureArgs) {
     try {
       this.log.debug(`Attempting to UPDATE case configuration ${caseConfigureId}`);
-      return await client.update<ESCasesConfigureAttributes>(
+      return await soClient.update<ESCasesConfigureAttributes>(
         CASE_CONFIGURE_SAVED_OBJECT,
         caseConfigureId,
         {
