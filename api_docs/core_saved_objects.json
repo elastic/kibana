@@ -491,7 +491,7 @@
                 }
               },
               {
-                "id": "def-public.SavedObjectsClient.update.{-version, migrationVersion, references }",
+                "id": "def-public.SavedObjectsClient.update.versionmigrationVersionreferences",
                 "type": "Object",
                 "label": "{ version, migrationVersion, references }",
                 "isRequired": true,
@@ -767,7 +767,7 @@
                 }
               },
               {
-                "id": "def-public.SimpleSavedObject.Unnamed.{\n-     id,\n      type,\n      version,\n      attributes,\n      error,\n      references,\n      migrationVersion,\n      coreMigrationVersion,\n    }",
+                "id": "def-public.SimpleSavedObject.Unnamed.idtypeversionattributeserrorreferencesmigrationVersioncoreMigrationVersion",
                 "type": "Object",
                 "label": "{\n      id,\n      type,\n      version,\n      attributes,\n      error,\n      references,\n      migrationVersion,\n      coreMigrationVersion,\n    }",
                 "isRequired": true,
@@ -4352,7 +4352,7 @@
         "children": [
           {
             "tags": [],
-            "id": "def-server.SavedObjectsExporter.#savedObjectsClient",
+            "id": "def-server.SavedObjectsExporter.savedObjectsClient",
             "type": "Object",
             "label": "#savedObjectsClient",
             "description": [],
@@ -4374,7 +4374,7 @@
           },
           {
             "tags": [],
-            "id": "def-server.SavedObjectsExporter.#exportTransforms",
+            "id": "def-server.SavedObjectsExporter.exportTransforms",
             "type": "Object",
             "label": "#exportTransforms",
             "description": [],
@@ -4396,7 +4396,7 @@
           },
           {
             "tags": [],
-            "id": "def-server.SavedObjectsExporter.#exportSizeLimit",
+            "id": "def-server.SavedObjectsExporter.exportSizeLimit",
             "type": "number",
             "label": "#exportSizeLimit",
             "description": [],
@@ -4407,7 +4407,7 @@
           },
           {
             "tags": [],
-            "id": "def-server.SavedObjectsExporter.#log",
+            "id": "def-server.SavedObjectsExporter.log",
             "type": "Object",
             "label": "#log",
             "description": [],
@@ -4429,7 +4429,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsExporter.Unnamed.{\n-   savedObjectsClient,\n    typeRegistry,\n    exportSizeLimit,\n    logger,\n  }.{\n    savedObjectsClient,\n    typeRegistry,\n    exportSizeLimit,\n    logger,\n  }",
+                "id": "def-server.SavedObjectsExporter.Unnamed.savedObjectsClienttypeRegistryexportSizeLimitlogger.savedObjectsClienttypeRegistryexportSizeLimitlogger",
                 "type": "Object",
                 "label": "{\n    savedObjectsClient,\n    typeRegistry,\n    exportSizeLimit,\n    logger,\n  }",
                 "tags": [],
@@ -4437,7 +4437,7 @@
                 "children": [
                   {
                     "tags": [],
-                    "id": "def-server.SavedObjectsExporter.Unnamed.{\n-   savedObjectsClient,\n    typeRegistry,\n    exportSizeLimit,\n    logger,\n  }.{\n    savedObjectsClient,\n    typeRegistry,\n    exportSizeLimit,\n    logger,\n  }.savedObjectsClient",
+                    "id": "def-server.SavedObjectsExporter.Unnamed.savedObjectsClienttypeRegistryexportSizeLimitlogger.savedObjectsClienttypeRegistryexportSizeLimitlogger.savedObjectsClient",
                     "type": "Object",
                     "label": "savedObjectsClient",
                     "description": [],
@@ -4459,7 +4459,7 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-server.SavedObjectsExporter.Unnamed.{\n-   savedObjectsClient,\n    typeRegistry,\n    exportSizeLimit,\n    logger,\n  }.{\n    savedObjectsClient,\n    typeRegistry,\n    exportSizeLimit,\n    logger,\n  }.typeRegistry",
+                    "id": "def-server.SavedObjectsExporter.Unnamed.savedObjectsClienttypeRegistryexportSizeLimitlogger.savedObjectsClienttypeRegistryexportSizeLimitlogger.typeRegistry",
                     "type": "Object",
                     "label": "typeRegistry",
                     "description": [],
@@ -4481,7 +4481,7 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-server.SavedObjectsExporter.Unnamed.{\n-   savedObjectsClient,\n    typeRegistry,\n    exportSizeLimit,\n    logger,\n  }.{\n    savedObjectsClient,\n    typeRegistry,\n    exportSizeLimit,\n    logger,\n  }.exportSizeLimit",
+                    "id": "def-server.SavedObjectsExporter.Unnamed.savedObjectsClienttypeRegistryexportSizeLimitlogger.savedObjectsClienttypeRegistryexportSizeLimitlogger.exportSizeLimit",
                     "type": "number",
                     "label": "exportSizeLimit",
                     "description": [],
@@ -4492,7 +4492,7 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-server.SavedObjectsExporter.Unnamed.{\n-   savedObjectsClient,\n    typeRegistry,\n    exportSizeLimit,\n    logger,\n  }.{\n    savedObjectsClient,\n    typeRegistry,\n    exportSizeLimit,\n    logger,\n  }.logger",
+                    "id": "def-server.SavedObjectsExporter.Unnamed.savedObjectsClienttypeRegistryexportSizeLimitlogger.savedObjectsClienttypeRegistryexportSizeLimitlogger.logger",
                     "type": "Object",
                     "label": "logger",
                     "description": [],
@@ -4911,7 +4911,7 @@
         "children": [
           {
             "tags": [],
-            "id": "def-server.SavedObjectsImporter.#savedObjectsClient",
+            "id": "def-server.SavedObjectsImporter.savedObjectsClient",
             "type": "Object",
             "label": "#savedObjectsClient",
             "description": [],
@@ -4933,7 +4933,7 @@
           },
           {
             "tags": [],
-            "id": "def-server.SavedObjectsImporter.#typeRegistry",
+            "id": "def-server.SavedObjectsImporter.typeRegistry",
             "type": "Object",
             "label": "#typeRegistry",
             "description": [],
@@ -4955,7 +4955,7 @@
           },
           {
             "tags": [],
-            "id": "def-server.SavedObjectsImporter.#importSizeLimit",
+            "id": "def-server.SavedObjectsImporter.importSizeLimit",
             "type": "number",
             "label": "#importSizeLimit",
             "description": [],
@@ -4966,7 +4966,7 @@
           },
           {
             "tags": [],
-            "id": "def-server.SavedObjectsImporter.#importHooks",
+            "id": "def-server.SavedObjectsImporter.importHooks",
             "type": "Object",
             "label": "#importHooks",
             "description": [],
@@ -4996,7 +4996,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.SavedObjectsImporter.Unnamed.{\n-   savedObjectsClient,\n    typeRegistry,\n    importSizeLimit,\n  }.{\n    savedObjectsClient,\n    typeRegistry,\n    importSizeLimit,\n  }",
+                "id": "def-server.SavedObjectsImporter.Unnamed.savedObjectsClienttypeRegistryimportSizeLimit.savedObjectsClienttypeRegistryimportSizeLimit",
                 "type": "Object",
                 "label": "{\n    savedObjectsClient,\n    typeRegistry,\n    importSizeLimit,\n  }",
                 "tags": [],
@@ -5004,7 +5004,7 @@
                 "children": [
                   {
                     "tags": [],
-                    "id": "def-server.SavedObjectsImporter.Unnamed.{\n-   savedObjectsClient,\n    typeRegistry,\n    importSizeLimit,\n  }.{\n    savedObjectsClient,\n    typeRegistry,\n    importSizeLimit,\n  }.savedObjectsClient",
+                    "id": "def-server.SavedObjectsImporter.Unnamed.savedObjectsClienttypeRegistryimportSizeLimit.savedObjectsClienttypeRegistryimportSizeLimit.savedObjectsClient",
                     "type": "Object",
                     "label": "savedObjectsClient",
                     "description": [],
@@ -5026,7 +5026,7 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-server.SavedObjectsImporter.Unnamed.{\n-   savedObjectsClient,\n    typeRegistry,\n    importSizeLimit,\n  }.{\n    savedObjectsClient,\n    typeRegistry,\n    importSizeLimit,\n  }.typeRegistry",
+                    "id": "def-server.SavedObjectsImporter.Unnamed.savedObjectsClienttypeRegistryimportSizeLimit.savedObjectsClienttypeRegistryimportSizeLimit.typeRegistry",
                     "type": "Object",
                     "label": "typeRegistry",
                     "description": [],
@@ -5048,7 +5048,7 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-server.SavedObjectsImporter.Unnamed.{\n-   savedObjectsClient,\n    typeRegistry,\n    importSizeLimit,\n  }.{\n    savedObjectsClient,\n    typeRegistry,\n    importSizeLimit,\n  }.importSizeLimit",
+                    "id": "def-server.SavedObjectsImporter.Unnamed.savedObjectsClienttypeRegistryimportSizeLimit.savedObjectsClienttypeRegistryimportSizeLimit.importSizeLimit",
                     "type": "number",
                     "label": "importSizeLimit",
                     "description": [],
@@ -5099,7 +5099,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsImporter.import.{\n-   readStream,\n    createNewCopies,\n    namespace,\n    overwrite,\n  }",
+                "id": "def-server.SavedObjectsImporter.import.readStreamcreateNewCopiesnamespaceoverwrite",
                 "type": "Object",
                 "label": "{\n    readStream,\n    createNewCopies,\n    namespace,\n    overwrite,\n  }",
                 "isRequired": true,
@@ -5156,7 +5156,7 @@
             ],
             "children": [
               {
-                "id": "def-server.SavedObjectsImporter.resolveImportErrors.{\n-   readStream,\n    createNewCopies,\n    namespace,\n    retries,\n  }",
+                "id": "def-server.SavedObjectsImporter.resolveImportErrors.readStreamcreateNewCopiesnamespaceretries",
                 "type": "Object",
                 "label": "{\n    readStream,\n    createNewCopies,\n    namespace,\n    retries,\n  }",
                 "isRequired": true,
@@ -6783,7 +6783,7 @@
                 }
               },
               {
-                "id": "def-server.SavedObjectsRepository.openPointInTimeForType.{-keepAlive = '5m', preference }",
+                "id": "def-server.SavedObjectsRepository.openPointInTimeForType.keepAlive5mpreference",
                 "type": "Object",
                 "label": "{ keepAlive = '5m', preference }",
                 "isRequired": true,
@@ -7435,7 +7435,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.SavedObjectsUtils.createEmptyFindResponse.{\n-   page = FIND_DEFAULT_PAGE,\n    perPage = FIND_DEFAULT_PER_PAGE,\n  }",
+                "id": "def-server.SavedObjectsUtils.createEmptyFindResponse.pageFIND_DEFAULT_PAGEperPageFIND_DEFAULT_PER_PAGE",
                 "type": "Object",
                 "label": "{\n    page = FIND_DEFAULT_PAGE,\n    perPage = FIND_DEFAULT_PER_PAGE,\n  }",
                 "isRequired": true,

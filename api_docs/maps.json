@@ -420,7 +420,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.MapEmbeddable._dispatchSetQuery.{-forceRefresh }.{ forceRefresh }",
+                "id": "def-public.MapEmbeddable._dispatchSetQuery.forceRefresh.forceRefresh",
                 "type": "Object",
                 "label": "{ forceRefresh }",
                 "tags": [],
@@ -428,7 +428,7 @@
                 "children": [
                   {
                     "tags": [],
-                    "id": "def-public.MapEmbeddable._dispatchSetQuery.{-forceRefresh }.{ forceRefresh }.forceRefresh",
+                    "id": "def-public.MapEmbeddable._dispatchSetQuery.forceRefresh.forceRefresh.forceRefresh",
                     "type": "boolean",
                     "label": "forceRefresh",
                     "description": [],
@@ -1002,7 +1002,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.RenderTooltipContentParams.loadFeatureProperties.{-layerId, featureId }",
+                "id": "def-public.RenderTooltipContentParams.loadFeatureProperties.layerIdfeatureId",
                 "type": "Object",
                 "label": "{ layerId, featureId }",
                 "isRequired": true,
@@ -1054,7 +1054,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.RenderTooltipContentParams.loadFeatureGeometry.{-layerId, featureId }",
+                "id": "def-public.RenderTooltipContentParams.loadFeatureGeometry.layerIdfeatureId",
                 "type": "Object",
                 "label": "{ layerId, featureId }",
                 "isRequired": true,
@@ -1140,7 +1140,7 @@
           "description": [],
           "source": {
             "path": "x-pack/plugins/maps/public/api/start_api.ts",
-            "lineNumber": 14
+            "lineNumber": 15
           },
           "signature": [
             "{ createSecurityLayerDescriptors: (indexPatternId: string, indexPatternTitle: string) => Promise<",
@@ -1212,7 +1212,7 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/maps/public/api/start_api.ts",
-                "lineNumber": 24
+                "lineNumber": 25
               }
             }
           ],
@@ -1220,7 +1220,7 @@
           "returnComment": [],
           "source": {
             "path": "x-pack/plugins/maps/public/api/start_api.ts",
-            "lineNumber": 24
+            "lineNumber": 25
           }
         },
         {
@@ -1257,7 +1257,7 @@
               "description": [],
               "source": {
                 "path": "x-pack/plugins/maps/public/api/start_api.ts",
-                "lineNumber": 25
+                "lineNumber": 26
               }
             }
           ],
@@ -1265,13 +1265,66 @@
           "returnComment": [],
           "source": {
             "path": "x-pack/plugins/maps/public/api/start_api.ts",
-            "lineNumber": 25
+            "lineNumber": 26
+          }
+        },
+        {
+          "id": "def-public.MapsStartApi.suggestEMSTermJoinConfig",
+          "type": "Function",
+          "label": "suggestEMSTermJoinConfig",
+          "signature": [
+            "(config: ",
+            {
+              "pluginId": "maps",
+              "scope": "public",
+              "docId": "kibMapsPluginApi",
+              "section": "def-public.SampleValuesConfig",
+              "text": "SampleValuesConfig"
+            },
+            ") => Promise<",
+            {
+              "pluginId": "maps",
+              "scope": "public",
+              "docId": "kibMapsPluginApi",
+              "section": "def-public.EMSTermJoinConfig",
+              "text": "EMSTermJoinConfig"
+            },
+            " | null>"
+          ],
+          "description": [],
+          "children": [
+            {
+              "id": "def-public.MapsStartApi.suggestEMSTermJoinConfig.config",
+              "type": "Object",
+              "label": "config",
+              "isRequired": true,
+              "signature": [
+                {
+                  "pluginId": "maps",
+                  "scope": "public",
+                  "docId": "kibMapsPluginApi",
+                  "section": "def-public.SampleValuesConfig",
+                  "text": "SampleValuesConfig"
+                }
+              ],
+              "description": [],
+              "source": {
+                "path": "x-pack/plugins/maps/public/api/start_api.ts",
+                "lineNumber": 27
+              }
+            }
+          ],
+          "tags": [],
+          "returnComment": [],
+          "source": {
+            "path": "x-pack/plugins/maps/public/api/start_api.ts",
+            "lineNumber": 27
           }
         }
       ],
       "source": {
         "path": "x-pack/plugins/maps/public/api/start_api.ts",
-        "lineNumber": 13
+        "lineNumber": 14
       },
       "lifecycle": "start",
       "initialIsOpen": true
@@ -2263,6 +2316,51 @@
         },
         "signature": [
           "\"vector/tile\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.emsRegionLayerId",
+        "type": "string",
+        "label": "emsRegionLayerId",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/maps/common/constants.ts",
+          "lineNumber": 305
+        },
+        "signature": [
+          "\"administrative_regions_lvl2\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.emsUsaZipLayerId",
+        "type": "string",
+        "label": "emsUsaZipLayerId",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/maps/common/constants.ts",
+          "lineNumber": 306
+        },
+        "signature": [
+          "\"usa_zip_codes\""
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "tags": [],
+        "id": "def-common.emsWorldLayerId",
+        "type": "string",
+        "label": "emsWorldLayerId",
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/maps/common/constants.ts",
+          "lineNumber": 304
+        },
+        "signature": [
+          "\"world_countries\""
         ],
         "initialIsOpen": false
       },

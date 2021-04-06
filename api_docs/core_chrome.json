@@ -255,10 +255,10 @@
           "DisambiguateSet",
           "<",
           "PropsForAnchor",
-          "<CommonEuiButtonEmptyProps, {}>, ",
-          "PropsForButton",
-          "<CommonEuiButtonEmptyProps, {}>> & CommonEuiButtonEmptyProps & { onClick?: ((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void) | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement>) | (",
-          "DisambiguateSet"
+          "<",
+          "CommonEuiButtonEmptyProps",
+          ", {}>, ",
+          "PropsForButton"
         ],
         "description": [],
         "tags": [
@@ -333,10 +333,10 @@
           "DisambiguateSet",
           "<",
           "PropsForAnchor",
-          "<CommonEuiButtonEmptyProps, {}>, ",
-          "PropsForButton",
-          "<CommonEuiButtonEmptyProps, {}>> & CommonEuiButtonEmptyProps & { onClick?: ((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void) | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement>) | (",
-          "DisambiguateSet"
+          "<",
+          "CommonEuiButtonEmptyProps",
+          ", {}>, ",
+          "PropsForButton"
         ],
         "description": [],
         "tags": [
@@ -395,10 +395,10 @@
           "DisambiguateSet",
           "<",
           "PropsForAnchor",
-          "<CommonEuiButtonEmptyProps, {}>, ",
-          "PropsForButton",
-          "<CommonEuiButtonEmptyProps, {}>> & CommonEuiButtonEmptyProps & { onClick?: ((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void) | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement>) | (",
-          "DisambiguateSet"
+          "<",
+          "CommonEuiButtonEmptyProps",
+          ", {}>, ",
+          "PropsForButton"
         ],
         "description": [],
         "tags": [
@@ -457,10 +457,10 @@
           "DisambiguateSet",
           "<",
           "PropsForAnchor",
-          "<CommonEuiButtonEmptyProps, {}>, ",
-          "PropsForButton",
-          "<CommonEuiButtonEmptyProps, {}>> & CommonEuiButtonEmptyProps & { onClick?: ((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void) | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement>) | (",
-          "DisambiguateSet"
+          "<",
+          "CommonEuiButtonEmptyProps",
+          ", {}>, ",
+          "PropsForButton"
         ],
         "description": [],
         "tags": [

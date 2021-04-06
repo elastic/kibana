@@ -685,7 +685,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.connectToQueryState.{\n-   timefilter: { timefilter },\n    filterManager,\n    queryString,\n    state$,\n  }",
+            "id": "def-public.connectToQueryState.timefiltertimefilterfilterManagerqueryStringstate$",
             "type": "Object",
             "label": "{\n    timefilter: { timefilter },\n    filterManager,\n    queryString,\n    state$,\n  }",
             "isRequired": true,
@@ -1934,7 +1934,7 @@
             }
           },
           {
-            "id": "def-common.getAbsoluteTimeRange.{-forceNow }.{ forceNow }",
+            "id": "def-common.getAbsoluteTimeRange.forceNow.forceNow",
             "type": "Object",
             "label": "{ forceNow }",
             "tags": [],
@@ -1942,7 +1942,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-common.getAbsoluteTimeRange.{-forceNow }.{ forceNow }.forceNow",
+                "id": "def-common.getAbsoluteTimeRange.forceNow.forceNow.forceNow",
                 "type": "Object",
                 "label": "forceNow",
                 "description": [],

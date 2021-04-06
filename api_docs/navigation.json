@@ -167,7 +167,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.NavigationPublicPlugin.start.{-i18n }",
+                "id": "def-public.NavigationPublicPlugin.start.i18n",
                 "type": "Object",
                 "label": "{ i18n }",
                 "isRequired": true,
@@ -187,7 +187,7 @@
                 }
               },
               {
-                "id": "def-public.NavigationPublicPlugin.start.{-data }",
+                "id": "def-public.NavigationPublicPlugin.start.data",
                 "type": "Object",
                 "label": "{ data }",
                 "isRequired": true,

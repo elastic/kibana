@@ -1462,7 +1462,7 @@
             }
           },
           {
-            "id": "def-server.searchUsageObserver.{-isRestore }",
+            "id": "def-server.searchUsageObserver.isRestore",
             "type": "Object",
             "label": "{ isRestore }",
             "isRequired": true,
@@ -3695,7 +3695,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-common.AggConfigs.clone.{-enabledOnly = true }",
+                "id": "def-common.AggConfigs.clone.enabledOnlytrue",
                 "type": "Object",
                 "label": "{ enabledOnly = true }",
                 "isRequired": true,
@@ -3759,7 +3759,7 @@
                 }
               },
               {
-                "id": "def-common.AggConfigs.createAggConfig.{-addToAggConfigs = true }",
+                "id": "def-common.AggConfigs.createAggConfig.addToAggConfigstrue",
                 "type": "Object",
                 "label": "{ addToAggConfigs = true }",
                 "isRequired": true,
@@ -4514,7 +4514,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-common.AggsCommonService.setup.{-registerFunction }",
+                "id": "def-common.AggsCommonService.setup.registerFunction",
                 "type": "Object",
                 "label": "{ registerFunction }",
                 "isRequired": true,
@@ -4566,7 +4566,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-common.AggsCommonService.start.{\n-   getConfig,\n    getIndexPattern,\n    isDefaultTimezone,\n  }",
+                "id": "def-common.AggsCommonService.start.getConfiggetIndexPatternisDefaultTimezone",
                 "type": "Object",
                 "label": "{\n    getConfig,\n    getIndexPattern,\n    isDefaultTimezone,\n  }",
                 "isRequired": true,
@@ -5867,11 +5867,11 @@
               },
               {
                 "id": "def-common.InvalidEsCalendarIntervalError.Unnamed.unit",
-                "type": "Any",
+                "type": "CompoundType",
                 "label": "unit",
                 "isRequired": true,
                 "signature": [
-                  "any"
+                  "Unit"
                 ],
                 "description": [],
                 "source": {
@@ -8233,7 +8233,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-common.convertDateRangeToString.{-from, to }",
+            "id": "def-common.convertDateRangeToString.fromto",
             "type": "Object",
             "label": "{ from, to }",
             "isRequired": true,
@@ -9064,7 +9064,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-common.getDateHistogramBucketAgg.{\n- calculateBounds,\n  isDefaultTimezone,\n  getConfig,\n}",
+            "id": "def-common.getDateHistogramBucketAgg.calculateBoundsisDefaultTimezonegetConfig",
             "type": "Object",
             "label": "{\n  calculateBounds,\n  isDefaultTimezone,\n  getConfig,\n}",
             "isRequired": true,
@@ -9182,7 +9182,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-common.getDateRangeBucketAgg.{\n- isDefaultTimezone,\n  getConfig,\n}",
+            "id": "def-common.getDateRangeBucketAgg.isDefaultTimezonegetConfig",
             "type": "Object",
             "label": "{\n  isDefaultTimezone,\n  getConfig,\n}",
             "isRequired": true,
@@ -9277,7 +9277,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-common.getEsdslFn.{\n- getStartDependencies,\n}.{\n  getStartDependencies,\n}",
+            "id": "def-common.getEsdslFn.getStartDependencies.getStartDependencies",
             "type": "Object",
             "label": "{\n  getStartDependencies,\n}",
             "tags": [],
@@ -9285,7 +9285,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-common.getEsdslFn.{\n- getStartDependencies,\n}.{\n  getStartDependencies,\n}.getStartDependencies",
+                "id": "def-common.getEsdslFn.getStartDependencies.getStartDependencies.getStartDependencies",
                 "type": "Function",
                 "label": "getStartDependencies",
                 "description": [],
@@ -9339,7 +9339,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-common.getFilterBucketAgg.{-getConfig }.{ getConfig }",
+            "id": "def-common.getFilterBucketAgg.getConfig.getConfig",
             "type": "Object",
             "label": "{ getConfig }",
             "tags": [],
@@ -9347,7 +9347,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-common.getFilterBucketAgg.{-getConfig }.{ getConfig }.getConfig",
+                "id": "def-common.getFilterBucketAgg.getConfig.getConfig.getConfig",
                 "type": "Function",
                 "label": "getConfig",
                 "description": [],
@@ -9433,7 +9433,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-common.getFiltersBucketAgg.{-getConfig }",
+            "id": "def-common.getFiltersBucketAgg.getConfig",
             "type": "Object",
             "label": "{ getConfig }",
             "isRequired": true,
@@ -9619,7 +9619,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-common.getHistogramBucketAgg.{\n- getConfig,\n  getFieldFormatsStart,\n}",
+            "id": "def-common.getHistogramBucketAgg.getConfiggetFieldFormatsStart",
             "type": "Object",
             "label": "{\n  getConfig,\n  getFieldFormatsStart,\n}",
             "isRequired": true,
@@ -9959,7 +9959,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-common.getPercentileRanksMetricAgg.{\n- getFieldFormatsStart,\n}",
+            "id": "def-common.getPercentileRanksMetricAgg.getFieldFormatsStart",
             "type": "Object",
             "label": "{\n  getFieldFormatsStart,\n}",
             "isRequired": true,
@@ -10088,7 +10088,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-common.getRangeBucketAgg.{-getFieldFormatsStart }",
+            "id": "def-common.getRangeBucketAgg.getFieldFormatsStart",
             "type": "Object",
             "label": "{ getFieldFormatsStart }",
             "isRequired": true,
@@ -10632,7 +10632,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-common.handleRequest.{\n- abortSignal,\n  aggs,\n  filters,\n  indexPattern,\n  inspectorAdapters,\n  metricsAtAllLevels,\n  partialRows,\n  query,\n  searchSessionId,\n  searchSourceService,\n  timeFields,\n  timeRange,\n  getNow,\n}",
+            "id": "def-common.handleRequest.abortSignalaggsfiltersindexPatterninspectorAdaptersmetricsAtAllLevelspartialRowsquerysearchSessionIdsearchSourceServicetimeFieldstimeRangegetNow",
             "type": "Object",
             "label": "{\n  abortSignal,\n  aggs,\n  filters,\n  indexPattern,\n  inspectorAdapters,\n  metricsAtAllLevels,\n  partialRows,\n  query,\n  searchSessionId,\n  searchSourceService,\n  timeFields,\n  timeRange,\n  getNow,\n}",
             "isRequired": true,
@@ -11327,7 +11327,9 @@
         "type": "Function",
         "label": "parseEsInterval",
         "signature": [
-          "(interval: string) => { value: number; unit: any; type: \"calendar\" | \"fixed\"; }"
+          "(interval: string) => { value: number; unit: ",
+          "Unit",
+          "; type: \"calendar\" | \"fixed\"; }"
         ],
         "description": [
           "\nExtracts interval properties from an ES interval string. Disallows unrecognized interval formats\nand fractional values. Converts some intervals from \"calendar\" to \"fixed\" when the number of\nunits is larger than 1, and throws an error for others.\n\nConversion rules:\n\n| Interval | Single unit type | Multiple units type |\n| -------- | ---------------- | ------------------- |\n| ms       | fixed            | fixed               |\n| s        | fixed            | fixed               |\n| m        | calendar         | fixed               |\n| h        | calendar         | fixed               |\n| d        | calendar         | fixed               |\n| w        | calendar         | N/A - disallowed    |\n| M        | calendar         | N/A - disallowed    |\n| y        | calendar         | N/A - disallowed    |\n"
@@ -11536,7 +11538,9 @@
           }
         ],
         "signature": [
-          "(interval: string) => { value: number; unit: any; } | null"
+          "(interval: string) => { value: number; unit: ",
+          "Unit",
+          "; } | null"
         ],
         "description": [],
         "label": "splitStringInterval",
@@ -11981,7 +11985,7 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          ") => { from: any; to: any; } | undefined"
+          ") => { from: Date; to: Date; } | undefined"
         ],
         "description": [],
         "children": [
@@ -20341,7 +20345,7 @@
           "lineNumber": 18
         },
         "signature": [
-          "{ value: number; unit: any; type: \"calendar\" | \"fixed\"; }"
+          "{ value: number; unit: Unit; type: \"calendar\" | \"fixed\"; }"
         ],
         "initialIsOpen": false
       },
@@ -20426,7 +20430,7 @@
         "children": [
           {
             "tags": [],
-            "id": "def-common.AggGroupLabels.[AggGroupNames.Buckets]",
+            "id": "def-common.AggGroupLabels.AggGroupNames.Buckets",
             "type": "string",
             "label": "[AggGroupNames.Buckets]",
             "description": [],
@@ -20437,7 +20441,7 @@
           },
           {
             "tags": [],
-            "id": "def-common.AggGroupLabels.[AggGroupNames.Metrics]",
+            "id": "def-common.AggGroupLabels.AggGroupNames.Metrics",
             "type": "string",
             "label": "[AggGroupNames.Metrics]",
             "description": [],
@@ -20448,7 +20452,7 @@
           },
           {
             "tags": [],
-            "id": "def-common.AggGroupLabels.[AggGroupNames.None]",
+            "id": "def-common.AggGroupLabels.AggGroupNames.None",
             "type": "string",
             "label": "[AggGroupNames.None]",
             "description": [],
@@ -21243,7 +21247,7 @@
                 }
               },
               {
-                "id": "def-common.kibana.fn.{-getSearchContext }",
+                "id": "def-common.kibana.fn.getSearchContext",
                 "type": "Object",
                 "label": "{ getSearchContext }",
                 "isRequired": true,

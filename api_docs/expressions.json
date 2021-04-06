@@ -2730,7 +2730,7 @@
                 }
               },
               {
-                "id": "def-public.ExpressionRenderHandler.Unnamed.{\n-     onRenderError,\n      renderMode,\n      syncColors,\n      hasCompatibleActions = async () => false,\n    }",
+                "id": "def-public.ExpressionRenderHandler.Unnamed.onRenderErrorrenderModesyncColorshasCompatibleActionsasyncfalse",
                 "type": "Object",
                 "label": "{\n      onRenderError,\n      renderMode,\n      syncColors,\n      hasCompatibleActions = async () => false,\n    }",
                 "isRequired": true,
@@ -3458,7 +3458,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.ExpressionsService.Unnamed.{\n-   executor = Executor.createWithDefaults(),\n    renderers = new ExpressionRendererRegistry(),\n  }",
+                "id": "def-public.ExpressionsService.Unnamed.executorExecutor.createWithDefaultsrenderersnewExpressionRendererRegistry",
                 "type": "Object",
                 "label": "{\n    executor = Executor.createWithDefaults(),\n    renderers = new ExpressionRendererRegistry(),\n  }",
                 "isRequired": true,
@@ -5813,7 +5813,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.ReactExpressionRenderer.{\n- className,\n  dataAttrs,\n  padding,\n  renderError,\n  expression,\n  onEvent,\n  onData$,\n  reload$,\n  debounce,\n  ...expressionLoaderOptions\n}",
+            "id": "def-public.ReactExpressionRenderer.classNamedataAttrspaddingrenderErrorexpressiononEventonData$reload$debounce...expressionLoaderOptions",
             "type": "Object",
             "label": "{\n  className,\n  dataAttrs,\n  padding,\n  renderError,\n  expression,\n  onEvent,\n  onData$,\n  reload$,\n  debounce,\n  ...expressionLoaderOptions\n}",
             "isRequired": true,
@@ -19736,7 +19736,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-common.ExpressionsService.Unnamed.{\n-   executor = Executor.createWithDefaults(),\n    renderers = new ExpressionRendererRegistry(),\n  }",
+                "id": "def-common.ExpressionsService.Unnamed.executorExecutor.createWithDefaultsrenderersnewExpressionRendererRegistry",
                 "type": "Object",
                 "label": "{\n    executor = Executor.createWithDefaults(),\n    renderers = new ExpressionRendererRegistry(),\n  }",
                 "isRequired": true,
@@ -22142,6 +22142,41 @@
         "initialIsOpen": false
       },
       {
+        "id": "def-common.createMockContext",
+        "type": "Function",
+        "children": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ", ",
+          "SerializableState",
+          ">"
+        ],
+        "description": [],
+        "label": "createMockContext",
+        "source": {
+          "path": "src/plugins/expressions/common/util/test_utils.ts",
+          "lineNumber": 11
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
         "id": "def-common.format",
         "type": "Function",
         "label": "format",
@@ -22688,7 +22723,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-common.unboxExpressionValue.{\n- type,\n  ...value\n}",
+            "id": "def-common.unboxExpressionValue.type...value",
             "type": "CompoundType",
             "label": "{\n  type,\n  ...value\n}",
             "isRequired": true,
@@ -28456,7 +28491,7 @@
                 }
               },
               {
-                "id": "def-common.cumulativeSum.fn.{-by, inputColumnId, outputColumnId, outputColumnName }",
+                "id": "def-common.cumulativeSum.fn.byinputColumnIdoutputColumnIdoutputColumnName",
                 "type": "Object",
                 "label": "{ by, inputColumnId, outputColumnId, outputColumnName }",
                 "isRequired": true,
@@ -29273,7 +29308,7 @@
                 }
               },
               {
-                "id": "def-common.derivative.fn.{-by, inputColumnId, outputColumnId, outputColumnName }",
+                "id": "def-common.derivative.fn.byinputColumnIdoutputColumnIdoutputColumnName",
                 "type": "Object",
                 "label": "{ by, inputColumnId, outputColumnId, outputColumnName }",
                 "isRequired": true,
@@ -31646,7 +31681,7 @@
                 }
               },
               {
-                "id": "def-common.movingAverage.fn.{-by, inputColumnId, outputColumnId, outputColumnName, window }",
+                "id": "def-common.movingAverage.fn.byinputColumnIdoutputColumnIdoutputColumnNamewindow",
                 "type": "Object",
                 "label": "{ by, inputColumnId, outputColumnId, outputColumnName, window }",
                 "isRequired": true,
@@ -31724,7 +31759,7 @@
             "tags": [],
             "children": [
               {
-                "id": "def-common.nullType.from.'*'",
+                "id": "def-common.nullType.from.",
                 "type": "Function",
                 "children": [],
                 "signature": [
@@ -31859,11 +31894,11 @@
                 "returnComment": []
               },
               {
-                "id": "def-common.num.from.'*'",
+                "id": "def-common.num.from.",
                 "type": "Function",
                 "children": [
                   {
-                    "id": "def-common.num.from.'*'.value",
+                    "id": "def-common.num.from..value",
                     "type": "Any",
                     "label": "value",
                     "isRequired": true,
@@ -31907,7 +31942,7 @@
                 "type": "Function",
                 "children": [
                   {
-                    "id": "def-common.num.to.render.{-value }",
+                    "id": "def-common.num.to.render.value",
                     "type": "CompoundType",
                     "label": "{ value }",
                     "isRequired": true,
@@ -31961,7 +31996,7 @@
                 "type": "Function",
                 "children": [
                   {
-                    "id": "def-common.num.to.datatable.{-value }",
+                    "id": "def-common.num.to.datatable.value",
                     "type": "CompoundType",
                     "label": "{ value }",
                     "isRequired": true,
@@ -32558,7 +32593,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-common.pureSelectors.getContext.{-context }",
+                "id": "def-common.pureSelectors.getContext.context",
                 "type": "Object",
                 "label": "{ context }",
                 "isRequired": true,
@@ -32979,11 +33014,11 @@
             "tags": [],
             "children": [
               {
-                "id": "def-common.render.from.'*'",
+                "id": "def-common.render.from.",
                 "type": "Function",
                 "children": [
                   {
-                    "id": "def-common.render.from.'*'.v",
+                    "id": "def-common.render.from..v",
                     "type": "Uncategorized",
                     "label": "v",
                     "isRequired": true,

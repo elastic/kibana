@@ -105,7 +105,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.UrlForwardingPlugin.start.{-application, http: { basePath }, uiSettings }",
+                "id": "def-public.UrlForwardingPlugin.start.applicationhttpbasePathuiSettings",
                 "type": "Object",
                 "label": "{ application, http: { basePath }, uiSettings }",
                 "isRequired": true,
@@ -125,7 +125,7 @@
                 }
               },
               {
-                "id": "def-public.UrlForwardingPlugin.start.{-kibanaLegacy }.{ kibanaLegacy }",
+                "id": "def-public.UrlForwardingPlugin.start.kibanaLegacy.kibanaLegacy",
                 "type": "Object",
                 "label": "{ kibanaLegacy }",
                 "tags": [],
@@ -133,7 +133,7 @@
                 "children": [
                   {
                     "tags": [],
-                    "id": "def-public.UrlForwardingPlugin.start.{-kibanaLegacy }.{ kibanaLegacy }.kibanaLegacy",
+                    "id": "def-public.UrlForwardingPlugin.start.kibanaLegacy.kibanaLegacy.kibanaLegacy",
                     "type": "Object",
                     "label": "kibanaLegacy",
                     "description": [],

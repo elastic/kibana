@@ -150,7 +150,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.UiActionsService.Unnamed.{\n-   triggers = new Map(),\n    actions = new Map(),\n    triggerToActions = new Map(),\n  }",
+                "id": "def-public.UiActionsService.Unnamed.triggersnewMapactionsnewMaptriggerToActionsnewMap",
                 "type": "Object",
                 "label": "{\n    triggers = new Map(),\n    actions = new Map(),\n    triggerToActions = new Map(),\n  }",
                 "isRequired": true,
@@ -792,7 +792,7 @@
         ],
         "children": [
           {
-            "id": "def-public.buildContextMenuForActions.{\n- actions,\n  title = defaultTitle,\n  closeMenu = () => {},\n}",
+            "id": "def-public.buildContextMenuForActions.actionstitledefaultTitlecloseMenu",
             "type": "Object",
             "label": "{\n  actions,\n  title = defaultTitle,\n  closeMenu = () => {},\n}",
             "isRequired": true,

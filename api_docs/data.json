@@ -1374,7 +1374,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.AggConfigs.clone.{-enabledOnly = true }",
+                "id": "def-public.AggConfigs.clone.enabledOnlytrue",
                 "type": "Object",
                 "label": "{ enabledOnly = true }",
                 "isRequired": true,
@@ -1438,7 +1438,7 @@
                 }
               },
               {
-                "id": "def-public.AggConfigs.createAggConfig.{-addToAggConfigs = true }",
+                "id": "def-public.AggConfigs.createAggConfig.addToAggConfigstrue",
                 "type": "Object",
                 "label": "{ addToAggConfigs = true }",
                 "isRequired": true,
@@ -2325,7 +2325,7 @@
                 }
               },
               {
-                "id": "def-public.DataPublicPlugin.setup.{-bfetch, expressions, uiActions, usageCollection, inspector }",
+                "id": "def-public.DataPublicPlugin.setup.bfetchexpressionsuiActionsusageCollectioninspector",
                 "type": "Object",
                 "label": "{ bfetch, expressions, uiActions, usageCollection, inspector }",
                 "isRequired": true,
@@ -2405,7 +2405,7 @@
                 }
               },
               {
-                "id": "def-public.DataPublicPlugin.start.{-uiActions }",
+                "id": "def-public.DataPublicPlugin.start.uiActions",
                 "type": "Object",
                 "label": "{ uiActions }",
                 "isRequired": true,
@@ -3411,7 +3411,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.IndexPattern.Unnamed.{\n-   spec = {},\n    fieldFormats,\n    shortDotsEnable = false,\n    metaFields = [],\n  }",
+                "id": "def-public.IndexPattern.Unnamed.specfieldFormatsshortDotsEnablefalsemetaFields",
                 "type": "Object",
                 "label": "{\n    spec = {},\n    fieldFormats,\n    shortDotsEnable = false,\n    metaFields = [],\n  }",
                 "isRequired": true,
@@ -4838,7 +4838,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.IndexPatternField.toSpec.{\n-   getFormatterForField,\n  }.{\n    getFormatterForField,\n  }",
+                "id": "def-public.IndexPatternField.toSpec.getFormatterForField.getFormatterForField",
                 "type": "Object",
                 "label": "{\n    getFormatterForField,\n  }",
                 "tags": [],
@@ -4846,7 +4846,7 @@
                 "children": [
                   {
                     "tags": [],
-                    "id": "def-public.IndexPatternField.toSpec.{\n-   getFormatterForField,\n  }.{\n    getFormatterForField,\n  }.getFormatterForField",
+                    "id": "def-public.IndexPatternField.toSpec.getFormatterForField.getFormatterForField.getFormatterForField",
                     "type": "Function",
                     "label": "getFormatterForField",
                     "description": [],
@@ -4948,7 +4948,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.IndexPatternsService.Unnamed.{\n-   uiSettings,\n    savedObjectsClient,\n    apiClient,\n    fieldFormats,\n    onNotification,\n    onError,\n    onRedirectNoIndexPattern = () => {},\n  }",
+                "id": "def-public.IndexPatternsService.Unnamed.uiSettingssavedObjectsClientapiClientfieldFormatsonNotificationonErroronRedirectNoIndexPattern",
                 "type": "Object",
                 "label": "{\n    uiSettings,\n    savedObjectsClient,\n    apiClient,\n    fieldFormats,\n    onNotification,\n    onError,\n    onRedirectNoIndexPattern = () => {},\n  }",
                 "isRequired": true,
@@ -12266,7 +12266,7 @@
           "lineNumber": 18
         },
         "signature": [
-          "{ value: number; unit: any; type: \"calendar\" | \"fixed\"; }"
+          "{ value: number; unit: Unit; type: \"calendar\" | \"fixed\"; }"
         ],
         "initialIsOpen": false
       },
@@ -12369,7 +12369,7 @@
         "children": [
           {
             "tags": [],
-            "id": "def-public.AggGroupLabels.[AggGroupNames.Buckets]",
+            "id": "def-public.AggGroupLabels.AggGroupNames.Buckets",
             "type": "string",
             "label": "[AggGroupNames.Buckets]",
             "description": [],
@@ -12380,7 +12380,7 @@
           },
           {
             "tags": [],
-            "id": "def-public.AggGroupLabels.[AggGroupNames.Metrics]",
+            "id": "def-public.AggGroupLabels.AggGroupNames.Metrics",
             "type": "string",
             "label": "[AggGroupNames.Metrics]",
             "description": [],
@@ -12391,7 +12391,7 @@
           },
           {
             "tags": [],
-            "id": "def-public.AggGroupLabels.[AggGroupNames.None]",
+            "id": "def-public.AggGroupLabels.AggGroupNames.None",
             "type": "string",
             "label": "[AggGroupNames.None]",
             "description": [],
@@ -15398,7 +15398,7 @@
                 }
               },
               {
-                "id": "def-server.DataServerPlugin.setup.{-bfetch, expressions, usageCollection }",
+                "id": "def-server.DataServerPlugin.setup.bfetchexpressionsusageCollection",
                 "type": "Object",
                 "label": "{ bfetch, expressions, usageCollection }",
                 "isRequired": true,
@@ -15801,7 +15801,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.IndexPattern.Unnamed.{\n-   spec = {},\n    fieldFormats,\n    shortDotsEnable = false,\n    metaFields = [],\n  }",
+                "id": "def-server.IndexPattern.Unnamed.specfieldFormatsshortDotsEnablefalsemetaFields",
                 "type": "Object",
                 "label": "{\n    spec = {},\n    fieldFormats,\n    shortDotsEnable = false,\n    metaFields = [],\n  }",
                 "isRequired": true,
@@ -16750,7 +16750,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.IndexPatternsService.Unnamed.{\n-   uiSettings,\n    savedObjectsClient,\n    apiClient,\n    fieldFormats,\n    onNotification,\n    onError,\n    onRedirectNoIndexPattern = () => {},\n  }",
+                "id": "def-server.IndexPatternsService.Unnamed.uiSettingssavedObjectsClientapiClientfieldFormatsonNotificationonErroronRedirectNoIndexPattern",
                 "type": "Object",
                 "label": "{\n    uiSettings,\n    savedObjectsClient,\n    apiClient,\n    fieldFormats,\n    onNotification,\n    onError,\n    onRedirectNoIndexPattern = () => {},\n  }",
                 "isRequired": true,
@@ -17839,7 +17839,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.IndexPatternsService.Unnamed.{\n-   uiSettings,\n    savedObjectsClient,\n    apiClient,\n    fieldFormats,\n    onNotification,\n    onError,\n    onRedirectNoIndexPattern = () => {},\n  }",
+                "id": "def-server.IndexPatternsService.Unnamed.uiSettingssavedObjectsClientapiClientfieldFormatsonNotificationonErroronRedirectNoIndexPattern",
                 "type": "Object",
                 "label": "{\n    uiSettings,\n    savedObjectsClient,\n    apiClient,\n    fieldFormats,\n    onNotification,\n    onError,\n    onRedirectNoIndexPattern = () => {},\n  }",
                 "isRequired": true,
@@ -21165,7 +21165,7 @@
           "lineNumber": 18
         },
         "signature": [
-          "{ value: number; unit: any; type: \"calendar\" | \"fixed\"; }"
+          "{ value: number; unit: Unit; type: \"calendar\" | \"fixed\"; }"
         ],
         "initialIsOpen": false
       },
@@ -21208,7 +21208,7 @@
         "children": [
           {
             "tags": [],
-            "id": "def-server.AggGroupLabels.[AggGroupNames.Buckets]",
+            "id": "def-server.AggGroupLabels.AggGroupNames.Buckets",
             "type": "string",
             "label": "[AggGroupNames.Buckets]",
             "description": [],
@@ -21219,7 +21219,7 @@
           },
           {
             "tags": [],
-            "id": "def-server.AggGroupLabels.[AggGroupNames.Metrics]",
+            "id": "def-server.AggGroupLabels.AggGroupNames.Metrics",
             "type": "string",
             "label": "[AggGroupNames.Metrics]",
             "description": [],
@@ -21230,7 +21230,7 @@
           },
           {
             "tags": [],
-            "id": "def-server.AggGroupLabels.[AggGroupNames.None]",
+            "id": "def-server.AggGroupLabels.AggGroupNames.None",
             "type": "string",
             "label": "[AggGroupNames.None]",
             "description": [],
@@ -24263,7 +24263,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-common.datatableToCSV.{-columns, rows }",
+            "id": "def-common.datatableToCSV.columnsrows",
             "type": "Object",
             "label": "{ columns, rows }",
             "isRequired": true,
@@ -24283,7 +24283,7 @@
             }
           },
           {
-            "id": "def-common.datatableToCSV.{-csvSeparator, quoteValues, formatFactory, raw }",
+            "id": "def-common.datatableToCSV.csvSeparatorquoteValuesformatFactoryraw",
             "type": "Object",
             "label": "{ csvSeparator, quoteValues, formatFactory, raw }",
             "isRequired": true,

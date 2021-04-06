@@ -1479,7 +1479,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.createKbnUrlStateStorage.{\n-   useHash = false,\n    history,\n    onGetError,\n    onSetError,\n  }.{\n    useHash = false,\n    history,\n    onGetError,\n    onSetError,\n  }",
+            "id": "def-public.createKbnUrlStateStorage.useHashfalsehistoryonGetErroronSetError.useHashfalsehistoryonGetErroronSetError",
             "type": "Object",
             "label": "{\n    useHash = false,\n    history,\n    onGetError,\n    onSetError,\n  }",
             "tags": [],
@@ -1487,7 +1487,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-public.createKbnUrlStateStorage.{\n-   useHash = false,\n    history,\n    onGetError,\n    onSetError,\n  }.{\n    useHash = false,\n    history,\n    onGetError,\n    onSetError,\n  }.useHash",
+                "id": "def-public.createKbnUrlStateStorage.useHashfalsehistoryonGetErroronSetError.useHashfalsehistoryonGetErroronSetError.useHash",
                 "type": "boolean",
                 "label": "useHash",
                 "description": [],
@@ -1498,7 +1498,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.createKbnUrlStateStorage.{\n-   useHash = false,\n    history,\n    onGetError,\n    onSetError,\n  }.{\n    useHash = false,\n    history,\n    onGetError,\n    onSetError,\n  }.history",
+                "id": "def-public.createKbnUrlStateStorage.useHashfalsehistoryonGetErroronSetError.useHashfalsehistoryonGetErroronSetError.history",
                 "type": "Object",
                 "label": "history",
                 "description": [],
@@ -1513,7 +1513,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.createKbnUrlStateStorage.{\n-   useHash = false,\n    history,\n    onGetError,\n    onSetError,\n  }.{\n    useHash = false,\n    history,\n    onGetError,\n    onSetError,\n  }.onGetError",
+                "id": "def-public.createKbnUrlStateStorage.useHashfalsehistoryonGetErroronSetError.useHashfalsehistoryonGetErroronSetError.onGetError",
                 "type": "Function",
                 "label": "onGetError",
                 "description": [],
@@ -1527,7 +1527,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.createKbnUrlStateStorage.{\n-   useHash = false,\n    history,\n    onGetError,\n    onSetError,\n  }.{\n    useHash = false,\n    history,\n    onGetError,\n    onSetError,\n  }.onSetError",
+                "id": "def-public.createKbnUrlStateStorage.useHashfalsehistoryonGetErroronSetError.useHashfalsehistoryonGetErroronSetError.onSetError",
                 "type": "Function",
                 "label": "onSetError",
                 "description": [],
@@ -1607,7 +1607,7 @@
         ],
         "children": [
           {
-            "id": "def-public.createKbnUrlTracker.{\n- baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.{\n  baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}",
+            "id": "def-public.createKbnUrlTracker.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink",
             "type": "Object",
             "label": "{\n  baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}",
             "tags": [],
@@ -1615,7 +1615,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-public.createKbnUrlTracker.{\n- baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.{\n  baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.baseUrl",
+                "id": "def-public.createKbnUrlTracker.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.baseUrl",
                 "type": "string",
                 "label": "baseUrl",
                 "description": [
@@ -1628,7 +1628,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.createKbnUrlTracker.{\n- baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.{\n  baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.defaultSubUrl",
+                "id": "def-public.createKbnUrlTracker.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.defaultSubUrl",
                 "type": "string",
                 "label": "defaultSubUrl",
                 "description": [
@@ -1641,7 +1641,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.createKbnUrlTracker.{\n- baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.{\n  baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.stateParams",
+                "id": "def-public.createKbnUrlTracker.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.stateParams",
                 "type": "Array",
                 "label": "stateParams",
                 "description": [
@@ -1659,7 +1659,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.createKbnUrlTracker.{\n- baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.{\n  baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.storageKey",
+                "id": "def-public.createKbnUrlTracker.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.storageKey",
                 "type": "string",
                 "label": "storageKey",
                 "description": [
@@ -1672,7 +1672,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.createKbnUrlTracker.{\n- baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.{\n  baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.navLinkUpdater$",
+                "id": "def-public.createKbnUrlTracker.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.navLinkUpdater$",
                 "type": "Object",
                 "label": "navLinkUpdater$",
                 "description": [
@@ -1697,7 +1697,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.createKbnUrlTracker.{\n- baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.{\n  baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.toastNotifications",
+                "id": "def-public.createKbnUrlTracker.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.toastNotifications",
                 "type": "Object",
                 "label": "toastNotifications",
                 "description": [
@@ -1721,7 +1721,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.createKbnUrlTracker.{\n- baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.{\n  baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.history",
+                "id": "def-public.createKbnUrlTracker.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.history",
                 "type": "Object",
                 "label": "history",
                 "description": [
@@ -1738,7 +1738,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.createKbnUrlTracker.{\n- baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.{\n  baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.getHistory",
+                "id": "def-public.createKbnUrlTracker.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.getHistory",
                 "type": "Function",
                 "label": "getHistory",
                 "description": [
@@ -1756,7 +1756,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.createKbnUrlTracker.{\n- baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.{\n  baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.storage",
+                "id": "def-public.createKbnUrlTracker.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.storage",
                 "type": "Object",
                 "label": "storage",
                 "description": [
@@ -1772,7 +1772,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.createKbnUrlTracker.{\n- baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.{\n  baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.shouldTrackUrlUpdate",
+                "id": "def-public.createKbnUrlTracker.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.shouldTrackUrlUpdate",
                 "type": "Function",
                 "label": "shouldTrackUrlUpdate",
                 "description": [
@@ -1788,7 +1788,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.createKbnUrlTracker.{\n- baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.{\n  baseUrl,\n  defaultSubUrl,\n  storageKey,\n  stateParams,\n  navLinkUpdater$,\n  toastNotifications,\n  history,\n  getHistory,\n  storage,\n  shouldTrackUrlUpdate = () => {\n    return true;\n  },\n  onBeforeNavLinkSaved = (newNavLink) => newNavLink,\n}.onBeforeNavLinkSaved",
+                "id": "def-public.createKbnUrlTracker.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.baseUrldefaultSubUrlstorageKeystateParamsnavLinkUpdater$toastNotificationshistorygetHistorystorageshouldTrackUrlUpdatereturntrueonBeforeNavLinkSavednewNavLinknewNavLink.onBeforeNavLinkSaved",
                 "type": "Function",
                 "label": "onBeforeNavLinkSaved",
                 "description": [
@@ -2659,7 +2659,7 @@
             }
           },
           {
-            "id": "def-public.getStateFromKbnUrl.{-getFromHashQuery = true }.{ getFromHashQuery = true }",
+            "id": "def-public.getStateFromKbnUrl.getFromHashQuerytrue.getFromHashQuerytrue",
             "type": "Object",
             "label": "{ getFromHashQuery = true }",
             "tags": [],
@@ -2667,7 +2667,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-public.getStateFromKbnUrl.{-getFromHashQuery = true }.{ getFromHashQuery = true }.getFromHashQuery",
+                "id": "def-public.getStateFromKbnUrl.getFromHashQuerytrue.getFromHashQuerytrue.getFromHashQuery",
                 "type": "boolean",
                 "label": "getFromHashQuery",
                 "description": [],
@@ -2731,7 +2731,7 @@
             }
           },
           {
-            "id": "def-public.getStatesFromKbnUrl.{-getFromHashQuery = true }.{ getFromHashQuery = true }",
+            "id": "def-public.getStatesFromKbnUrl.getFromHashQuerytrue.getFromHashQuerytrue",
             "type": "Object",
             "label": "{ getFromHashQuery = true }",
             "tags": [],
@@ -2739,7 +2739,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-public.getStatesFromKbnUrl.{-getFromHashQuery = true }.{ getFromHashQuery = true }.getFromHashQuery",
+                "id": "def-public.getStatesFromKbnUrl.getFromHashQuerytrue.getFromHashQuerytrue.getFromHashQuery",
                 "type": "boolean",
                 "label": "getFromHashQuery",
                 "description": [],
@@ -2936,7 +2936,7 @@
         ],
         "children": [
           {
-            "id": "def-public.redirectWhenMissing.{\n- history,\n  navigateToApp,\n  basePath,\n  mapping,\n  toastNotifications,\n  onBeforeRedirect,\n}.{\n  history,\n  navigateToApp,\n  basePath,\n  mapping,\n  toastNotifications,\n  onBeforeRedirect,\n}",
+            "id": "def-public.redirectWhenMissing.historynavigateToAppbasePathmappingtoastNotificationsonBeforeRedirect.historynavigateToAppbasePathmappingtoastNotificationsonBeforeRedirect",
             "type": "Object",
             "label": "{\n  history,\n  navigateToApp,\n  basePath,\n  mapping,\n  toastNotifications,\n  onBeforeRedirect,\n}",
             "tags": [],
@@ -2944,7 +2944,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-public.redirectWhenMissing.{\n- history,\n  navigateToApp,\n  basePath,\n  mapping,\n  toastNotifications,\n  onBeforeRedirect,\n}.{\n  history,\n  navigateToApp,\n  basePath,\n  mapping,\n  toastNotifications,\n  onBeforeRedirect,\n}.history",
+                "id": "def-public.redirectWhenMissing.historynavigateToAppbasePathmappingtoastNotificationsonBeforeRedirect.historynavigateToAppbasePathmappingtoastNotificationsonBeforeRedirect.history",
                 "type": "Object",
                 "label": "history",
                 "description": [],
@@ -2959,7 +2959,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.redirectWhenMissing.{\n- history,\n  navigateToApp,\n  basePath,\n  mapping,\n  toastNotifications,\n  onBeforeRedirect,\n}.{\n  history,\n  navigateToApp,\n  basePath,\n  mapping,\n  toastNotifications,\n  onBeforeRedirect,\n}.navigateToApp",
+                "id": "def-public.redirectWhenMissing.historynavigateToAppbasePathmappingtoastNotificationsonBeforeRedirect.historynavigateToAppbasePathmappingtoastNotificationsonBeforeRedirect.navigateToApp",
                 "type": "Function",
                 "label": "navigateToApp",
                 "description": [],
@@ -2981,7 +2981,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.redirectWhenMissing.{\n- history,\n  navigateToApp,\n  basePath,\n  mapping,\n  toastNotifications,\n  onBeforeRedirect,\n}.{\n  history,\n  navigateToApp,\n  basePath,\n  mapping,\n  toastNotifications,\n  onBeforeRedirect,\n}.basePath",
+                "id": "def-public.redirectWhenMissing.historynavigateToAppbasePathmappingtoastNotificationsonBeforeRedirect.historynavigateToAppbasePathmappingtoastNotificationsonBeforeRedirect.basePath",
                 "type": "Object",
                 "label": "basePath",
                 "description": [],
@@ -3001,7 +3001,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.redirectWhenMissing.{\n- history,\n  navigateToApp,\n  basePath,\n  mapping,\n  toastNotifications,\n  onBeforeRedirect,\n}.{\n  history,\n  navigateToApp,\n  basePath,\n  mapping,\n  toastNotifications,\n  onBeforeRedirect,\n}.mapping",
+                "id": "def-public.redirectWhenMissing.historynavigateToAppbasePathmappingtoastNotificationsonBeforeRedirect.historynavigateToAppbasePathmappingtoastNotificationsonBeforeRedirect.mapping",
                 "type": "CompoundType",
                 "label": "mapping",
                 "description": [
@@ -3017,7 +3017,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.redirectWhenMissing.{\n- history,\n  navigateToApp,\n  basePath,\n  mapping,\n  toastNotifications,\n  onBeforeRedirect,\n}.{\n  history,\n  navigateToApp,\n  basePath,\n  mapping,\n  toastNotifications,\n  onBeforeRedirect,\n}.toastNotifications",
+                "id": "def-public.redirectWhenMissing.historynavigateToAppbasePathmappingtoastNotificationsonBeforeRedirect.historynavigateToAppbasePathmappingtoastNotificationsonBeforeRedirect.toastNotifications",
                 "type": "Object",
                 "label": "toastNotifications",
                 "description": [
@@ -3041,7 +3041,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.redirectWhenMissing.{\n- history,\n  navigateToApp,\n  basePath,\n  mapping,\n  toastNotifications,\n  onBeforeRedirect,\n}.{\n  history,\n  navigateToApp,\n  basePath,\n  mapping,\n  toastNotifications,\n  onBeforeRedirect,\n}.onBeforeRedirect",
+                "id": "def-public.redirectWhenMissing.historynavigateToAppbasePathmappingtoastNotificationsonBeforeRedirect.historynavigateToAppbasePathmappingtoastNotificationsonBeforeRedirect.onBeforeRedirect",
                 "type": "Function",
                 "label": "onBeforeRedirect",
                 "description": [
@@ -3321,7 +3321,7 @@
             }
           },
           {
-            "id": "def-public.setStateToKbnUrl.{-useHash = false, storeInHashQuery = true }.{ useHash = false, storeInHashQuery = true }",
+            "id": "def-public.setStateToKbnUrl.useHashfalsestoreInHashQuerytrue.useHashfalsestoreInHashQuerytrue",
             "type": "Object",
             "label": "{ useHash = false, storeInHashQuery = true }",
             "tags": [],
@@ -3329,7 +3329,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-public.setStateToKbnUrl.{-useHash = false, storeInHashQuery = true }.{ useHash = false, storeInHashQuery = true }.useHash",
+                "id": "def-public.setStateToKbnUrl.useHashfalsestoreInHashQuerytrue.useHashfalsestoreInHashQuerytrue.useHash",
                 "type": "boolean",
                 "label": "useHash",
                 "description": [],
@@ -3340,7 +3340,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.setStateToKbnUrl.{-useHash = false, storeInHashQuery = true }.{ useHash = false, storeInHashQuery = true }.storeInHashQuery",
+                "id": "def-public.setStateToKbnUrl.useHashfalsestoreInHashQuerytrue.useHashfalsestoreInHashQuerytrue.storeInHashQuery",
                 "type": "CompoundType",
                 "label": "storeInHashQuery",
                 "description": [],
@@ -3413,7 +3413,7 @@
         ],
         "children": [
           {
-            "id": "def-public.syncState.{\n- storageKey,\n  stateStorage,\n  stateContainer,\n}",
+            "id": "def-public.syncState.storageKeystateStoragestateContainer",
             "type": "Object",
             "label": "{\n  storageKey,\n  stateStorage,\n  stateContainer,\n}",
             "isRequired": true,

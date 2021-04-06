@@ -135,7 +135,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.KibanaLegacyPlugin.start.{-application, http: { basePath }, uiSettings }",
+                "id": "def-public.KibanaLegacyPlugin.start.applicationhttpbasePathuiSettings",
                 "type": "Object",
                 "label": "{ application, http: { basePath }, uiSettings }",
                 "isRequired": true,

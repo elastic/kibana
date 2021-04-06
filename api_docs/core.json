@@ -1591,7 +1591,7 @@
             "description": [],
             "source": {
               "path": "src/core/public/doc_links/doc_links_service.ts",
-              "lineNumber": 307
+              "lineNumber": 348
             }
           },
           {
@@ -1602,7 +1602,7 @@
             "description": [],
             "source": {
               "path": "src/core/public/doc_links/doc_links_service.ts",
-              "lineNumber": 308
+              "lineNumber": 349
             }
           },
           {
@@ -1613,16 +1613,16 @@
             "description": [],
             "source": {
               "path": "src/core/public/doc_links/doc_links_service.ts",
-              "lineNumber": 309
+              "lineNumber": 350
             },
             "signature": [
-              "{ readonly dashboard: { readonly guide: string; readonly drilldowns: string; readonly drilldownsTriggerPicker: string; readonly urlDrilldownTemplateSyntax: string; readonly urlDrilldownVariables: string; }; readonly discover: Record<string, string>; readonly filebeat: { readonly base: string; readonly installation: string; readonly configuration: string; readonly elasticsearchOutput: string; readonly elasticsearchModule: string; readonly startup: string; readonly exportedFields: string; }; readonly auditbeat: { readonly base: string; }; readonly metricbeat: { readonly base: string; readonly configure: string; readonly httpEndpoint: string; readonly install: string; readonly start: string; }; readonly enterpriseSearch: { readonly base: string; readonly appSearchBase: string; readonly workplaceSearchBase: string; }; readonly heartbeat: { readonly base: string; }; readonly logstash: { readonly base: string; }; readonly functionbeat: { readonly base: string; }; readonly winlogbeat: { readonly base: string; }; readonly aggs: { readonly composite: string; readonly composite_missing_bucket: string; readonly date_histogram: string; readonly date_range: string; readonly date_format_pattern: string; readonly filter: string; readonly filters: string; readonly geohash_grid: string; readonly histogram: string; readonly ip_range: string; readonly range: string; readonly significant_terms: string; readonly terms: string; readonly avg: string; readonly avg_bucket: string; readonly max_bucket: string; readonly min_bucket: string; readonly sum_bucket: string; readonly cardinality: string; readonly count: string; readonly cumulative_sum: string; readonly derivative: string; readonly geo_bounds: string; readonly geo_centroid: string; readonly max: string; readonly median: string; readonly min: string; readonly moving_avg: string; readonly percentile_ranks: string; readonly serial_diff: string; readonly std_dev: string; readonly sum: string; readonly top_hits: string; }; readonly runtimeFields: { readonly mapping: string; }; readonly scriptedFields: { readonly scriptFields: string; readonly scriptAggs: string; readonly painless: string; readonly painlessApi: string; readonly painlessLangSpec: string; readonly painlessSyntax: string; readonly painlessWalkthrough: string; readonly luceneExpressions: string; }; readonly indexPatterns: { readonly introduction: string; readonly fieldFormattersNumber: string; readonly fieldFormattersString: string; }; readonly addData: string; readonly kibana: string; readonly elasticsearch: Record<string, string>; readonly siem: { readonly guide: string; readonly gettingStarted: string; }; readonly query: { readonly eql: string; readonly luceneQuerySyntax: string; readonly queryDsl: string; readonly kueryQuerySyntax: string; }; readonly date: { readonly dateMath: string; readonly dateMathIndexNames: string; }; readonly management: Record<string, string>; readonly ml: Record<string, string>; readonly transforms: Record<string, string>; readonly visualize: Record<string, string>; readonly apis: Readonly<{ createIndex: string; createSnapshotLifecyclePolicy: string; createRoleMapping: string; createRoleMappingTemplates: string; createApiKey: string; createPipeline: string; createTransformRequest: string; cronExpressions: string; executeWatchActionModes: string; indexExists: string; openIndex: string; putComponentTemplate: string; painlessExecute: string; painlessExecuteAPIContexts: string; putComponentTemplateMetadata: string; putSnapshotLifecyclePolicy: string; putWatch: string; updateTransform: string; }>; readonly observability: Record<string, string>; readonly alerting: Record<string, string>; readonly maps: Record<string, string>; readonly monitoring: Record<string, string>; readonly security: Readonly<{ apiKeyServiceSettings: string; clusterPrivileges: string; elasticsearchSettings: string; elasticsearchEnableSecurity: string; indicesPrivileges: string; kibanaTLS: string; kibanaPrivileges: string; mappingRoles: string; mappingRolesFieldRules: string; runAsPrivilege: string; }>; readonly watcher: Record<string, string>; readonly ccs: Record<string, string>; readonly plugins: Record<string, string>; readonly snapshotRestore: Record<string, string>; readonly ingest: Record<string, string>; }"
+              "{ readonly dashboard: { readonly guide: string; readonly drilldowns: string; readonly drilldownsTriggerPicker: string; readonly urlDrilldownTemplateSyntax: string; readonly urlDrilldownVariables: string; }; readonly discover: Record<string, string>; readonly filebeat: { readonly base: string; readonly installation: string; readonly configuration: string; readonly elasticsearchOutput: string; readonly elasticsearchModule: string; readonly startup: string; readonly exportedFields: string; }; readonly auditbeat: { readonly base: string; }; readonly metricbeat: { readonly base: string; readonly configure: string; readonly httpEndpoint: string; readonly install: string; readonly start: string; }; readonly enterpriseSearch: { readonly base: string; readonly appSearchBase: string; readonly workplaceSearchBase: string; }; readonly heartbeat: { readonly base: string; }; readonly logstash: { readonly base: string; }; readonly functionbeat: { readonly base: string; }; readonly winlogbeat: { readonly base: string; }; readonly aggs: { readonly composite: string; readonly composite_missing_bucket: string; readonly date_histogram: string; readonly date_range: string; readonly date_format_pattern: string; readonly filter: string; readonly filters: string; readonly geohash_grid: string; readonly histogram: string; readonly ip_range: string; readonly range: string; readonly significant_terms: string; readonly terms: string; readonly avg: string; readonly avg_bucket: string; readonly max_bucket: string; readonly min_bucket: string; readonly sum_bucket: string; readonly cardinality: string; readonly count: string; readonly cumulative_sum: string; readonly derivative: string; readonly geo_bounds: string; readonly geo_centroid: string; readonly max: string; readonly median: string; readonly min: string; readonly moving_avg: string; readonly percentile_ranks: string; readonly serial_diff: string; readonly std_dev: string; readonly sum: string; readonly top_hits: string; }; readonly runtimeFields: { readonly mapping: string; }; readonly scriptedFields: { readonly scriptFields: string; readonly scriptAggs: string; readonly painless: string; readonly painlessApi: string; readonly painlessLangSpec: string; readonly painlessSyntax: string; readonly painlessWalkthrough: string; readonly luceneExpressions: string; }; readonly indexPatterns: { readonly introduction: string; readonly fieldFormattersNumber: string; readonly fieldFormattersString: string; }; readonly addData: string; readonly kibana: string; readonly elasticsearch: Record<string, string>; readonly siem: { readonly guide: string; readonly gettingStarted: string; }; readonly query: { readonly eql: string; readonly luceneQuerySyntax: string; readonly queryDsl: string; readonly kueryQuerySyntax: string; }; readonly date: { readonly dateMath: string; readonly dateMathIndexNames: string; }; readonly management: Record<string, string>; readonly ml: Record<string, string>; readonly transforms: Record<string, string>; readonly visualize: Record<string, string>; readonly apis: Readonly<{ createIndex: string; createSnapshotLifecyclePolicy: string; createRoleMapping: string; createRoleMappingTemplates: string; createApiKey: string; createPipeline: string; createTransformRequest: string; cronExpressions: string; executeWatchActionModes: string; indexExists: string; openIndex: string; putComponentTemplate: string; painlessExecute: string; painlessExecuteAPIContexts: string; putComponentTemplateMetadata: string; putSnapshotLifecyclePolicy: string; putWatch: string; simulatePipeline: string; updateTransform: string; }>; readonly observability: Record<string, string>; readonly alerting: Record<string, string>; readonly maps: Record<string, string>; readonly monitoring: Record<string, string>; readonly security: Readonly<{ apiKeyServiceSettings: string; clusterPrivileges: string; elasticsearchSettings: string; elasticsearchEnableSecurity: string; indicesPrivileges: string; kibanaTLS: string; kibanaPrivileges: string; mappingRoles: string; mappingRolesFieldRules: string; runAsPrivilege: string; }>; readonly watcher: Record<string, string>; readonly ccs: Record<string, string>; readonly plugins: Record<string, string>; readonly snapshotRestore: Record<string, string>; readonly ingest: Record<string, string>; }"
             ]
           }
         ],
         "source": {
           "path": "src/core/public/doc_links/doc_links_service.ts",
-          "lineNumber": 306
+          "lineNumber": 347
         },
         "initialIsOpen": false
       },
@@ -2575,7 +2575,7 @@
           },
           {
             "tags": [],
-            "id": "def-public.OverlayFlyoutOpenOptions.'data-test-subj'",
+            "id": "def-public.OverlayFlyoutOpenOptions.datatestsubj",
             "type": "string",
             "label": "'data-test-subj'",
             "description": [],
@@ -2807,7 +2807,7 @@
           },
           {
             "tags": [],
-            "id": "def-public.OverlayModalConfirmOptions.'data-test-subj'",
+            "id": "def-public.OverlayModalConfirmOptions.datatestsubj",
             "type": "string",
             "label": "'data-test-subj'",
             "description": [],
@@ -2909,7 +2909,7 @@
           },
           {
             "tags": [],
-            "id": "def-public.OverlayModalOpenOptions.'data-test-subj'",
+            "id": "def-public.OverlayModalOpenOptions.datatestsubj",
             "type": "string",
             "label": "'data-test-subj'",
             "description": [],
@@ -7552,7 +7552,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 269
+                  "lineNumber": 274
                 }
               },
               {
@@ -7566,7 +7566,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 269
+                  "lineNumber": 274
                 }
               }
             ],
@@ -7574,7 +7574,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 269
+              "lineNumber": 274
             }
           },
           {
@@ -7611,7 +7611,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 270
+                  "lineNumber": 276
                 }
               },
               {
@@ -7625,7 +7625,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 270
+                  "lineNumber": 276
                 }
               }
             ],
@@ -7633,7 +7633,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 270
+              "lineNumber": 276
             }
           },
           {
@@ -7649,13 +7649,13 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 271
+              "lineNumber": 278
             }
           }
         ],
         "source": {
           "path": "src/core/server/plugins/types.ts",
-          "lineNumber": 263
+          "lineNumber": 268
         },
         "initialIsOpen": false
       },
@@ -7975,7 +7975,9 @@
             "type": "Function",
             "label": "rename",
             "signature": [
-              "(oldKey: string, newKey: string) => ",
+              "(oldKey: string, newKey: string, details?: Partial<",
+              "DeprecatedConfigDetails",
+              "> | undefined) => ",
               "ConfigDeprecation"
             ],
             "description": [
@@ -7993,7 +7995,7 @@
                 "description": [],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 63
+                  "lineNumber": 80
                 }
               },
               {
@@ -8007,7 +8009,23 @@
                 "description": [],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 63
+                  "lineNumber": 80
+                }
+              },
+              {
+                "id": "def-server.ConfigDeprecationFactory.rename.details",
+                "type": "Object",
+                "label": "details",
+                "isRequired": false,
+                "signature": [
+                  "Partial<",
+                  "DeprecatedConfigDetails",
+                  "> | undefined"
+                ],
+                "description": [],
+                "source": {
+                  "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
+                  "lineNumber": 80
                 }
               }
             ],
@@ -8015,7 +8033,7 @@
             "returnComment": [],
             "source": {
               "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-              "lineNumber": 63
+              "lineNumber": 80
             }
           },
           {
@@ -8023,7 +8041,9 @@
             "type": "Function",
             "label": "renameFromRoot",
             "signature": [
-              "(oldKey: string, newKey: string, silent?: boolean | undefined) => ",
+              "(oldKey: string, newKey: string, details?: Partial<",
+              "DeprecatedConfigDetails",
+              "> | undefined) => ",
               "ConfigDeprecation"
             ],
             "description": [
@@ -8041,7 +8061,7 @@
                 "description": [],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 79
+                  "lineNumber": 96
                 }
               },
               {
@@ -8055,21 +8075,23 @@
                 "description": [],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 79
+                  "lineNumber": 96
                 }
               },
               {
-                "id": "def-server.ConfigDeprecationFactory.renameFromRoot.silent",
-                "type": "CompoundType",
-                "label": "silent",
+                "id": "def-server.ConfigDeprecationFactory.renameFromRoot.details",
+                "type": "Object",
+                "label": "details",
                 "isRequired": false,
                 "signature": [
-                  "boolean | undefined"
+                  "Partial<",
+                  "DeprecatedConfigDetails",
+                  "> | undefined"
                 ],
                 "description": [],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 79
+                  "lineNumber": 96
                 }
               }
             ],
@@ -8077,7 +8099,7 @@
             "returnComment": [],
             "source": {
               "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-              "lineNumber": 79
+              "lineNumber": 96
             }
           },
           {
@@ -8085,7 +8107,9 @@
             "type": "Function",
             "label": "unused",
             "signature": [
-              "(unusedKey: string) => ",
+              "(unusedKey: string, details?: Partial<",
+              "DeprecatedConfigDetails",
+              "> | undefined) => ",
               "ConfigDeprecation"
             ],
             "description": [
@@ -8103,7 +8127,23 @@
                 "description": [],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 92
+                  "lineNumber": 109
+                }
+              },
+              {
+                "id": "def-server.ConfigDeprecationFactory.unused.details",
+                "type": "Object",
+                "label": "details",
+                "isRequired": false,
+                "signature": [
+                  "Partial<",
+                  "DeprecatedConfigDetails",
+                  "> | undefined"
+                ],
+                "description": [],
+                "source": {
+                  "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
+                  "lineNumber": 109
                 }
               }
             ],
@@ -8111,7 +8151,7 @@
             "returnComment": [],
             "source": {
               "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-              "lineNumber": 92
+              "lineNumber": 109
             }
           },
           {
@@ -8119,7 +8159,9 @@
             "type": "Function",
             "label": "unusedFromRoot",
             "signature": [
-              "(unusedKey: string) => ",
+              "(unusedKey: string, details?: Partial<",
+              "DeprecatedConfigDetails",
+              "> | undefined) => ",
               "ConfigDeprecation"
             ],
             "description": [
@@ -8137,7 +8179,23 @@
                 "description": [],
                 "source": {
                   "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-                  "lineNumber": 108
+                  "lineNumber": 125
+                }
+              },
+              {
+                "id": "def-server.ConfigDeprecationFactory.unusedFromRoot.details",
+                "type": "Object",
+                "label": "details",
+                "isRequired": false,
+                "signature": [
+                  "Partial<",
+                  "DeprecatedConfigDetails",
+                  "> | undefined"
+                ],
+                "description": [],
+                "source": {
+                  "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
+                  "lineNumber": 125
                 }
               }
             ],
@@ -8145,13 +8203,13 @@
             "returnComment": [],
             "source": {
               "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-              "lineNumber": 108
+              "lineNumber": 125
             }
           }
         ],
         "source": {
           "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-          "lineNumber": 50
+          "lineNumber": 67
         },
         "initialIsOpen": false
       },
@@ -8229,7 +8287,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 468
+              "lineNumber": 466
             },
             "signature": [
               {
@@ -8251,7 +8309,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 470
+              "lineNumber": 468
             },
             "signature": [
               {
@@ -8273,7 +8331,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 472
+              "lineNumber": 470
             },
             "signature": [
               {
@@ -8295,7 +8353,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 474
+              "lineNumber": 472
             },
             "signature": [
               {
@@ -8326,7 +8384,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 479
+              "lineNumber": 477
             },
             "signature": [
               {
@@ -8348,7 +8406,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 481
+              "lineNumber": 479
             },
             "signature": [
               {
@@ -8370,7 +8428,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 483
+              "lineNumber": 481
             },
             "signature": [
               {
@@ -8392,7 +8450,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 485
+              "lineNumber": 483
             },
             "signature": [
               {
@@ -8414,7 +8472,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 487
+              "lineNumber": 485
             },
             "signature": [
               {
@@ -8436,7 +8494,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 489
+              "lineNumber": 487
             },
             "signature": [
               {
@@ -8458,7 +8516,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 491
+              "lineNumber": 489
             },
             "signature": [
               {
@@ -8480,7 +8538,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 493
+              "lineNumber": 491
             },
             "signature": [
               {
@@ -8496,7 +8554,7 @@
         ],
         "source": {
           "path": "src/core/server/index.ts",
-          "lineNumber": 466
+          "lineNumber": 464
         },
         "initialIsOpen": false
       },
@@ -8521,7 +8579,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 516
+              "lineNumber": 514
             },
             "signature": [
               {
@@ -8543,7 +8601,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 518
+              "lineNumber": 516
             },
             "signature": [
               {
@@ -8565,7 +8623,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 520
+              "lineNumber": 518
             },
             "signature": [
               {
@@ -8587,7 +8645,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 522
+              "lineNumber": 520
             },
             "signature": [
               {
@@ -8609,7 +8667,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 524
+              "lineNumber": 522
             },
             "signature": [
               {
@@ -8631,7 +8689,7 @@
             ],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 526
+              "lineNumber": 524
             },
             "signature": [
               {
@@ -8646,7 +8704,7 @@
         ],
         "source": {
           "path": "src/core/server/index.ts",
-          "lineNumber": 514
+          "lineNumber": 512
         },
         "initialIsOpen": false
       },
@@ -12807,7 +12865,7 @@
         "children": [
           {
             "tags": [],
-            "id": "def-server.LegacyElasticsearchError.[code]",
+            "id": "def-server.LegacyElasticsearchError.code",
             "type": "string",
             "label": "[code]",
             "description": [],
@@ -12823,116 +12881,6 @@
         "source": {
           "path": "src/core/server/elasticsearch/legacy/errors.ts",
           "lineNumber": 22
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.LegacyServiceSetupDeps",
-        "type": "Interface",
-        "label": "LegacyServiceSetupDeps",
-        "description": [],
-        "tags": [
-          "public",
-          "deprecated"
-        ],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-server.LegacyServiceSetupDeps.core",
-            "type": "CompoundType",
-            "label": "core",
-            "description": [],
-            "source": {
-              "path": "src/core/server/legacy/types.ts",
-              "lineNumber": 43
-            },
-            "signature": [
-              "LegacyCoreSetup"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.LegacyServiceSetupDeps.plugins",
-            "type": "Object",
-            "label": "plugins",
-            "description": [],
-            "source": {
-              "path": "src/core/server/legacy/types.ts",
-              "lineNumber": 44
-            },
-            "signature": [
-              "Record<string, unknown>"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.LegacyServiceSetupDeps.uiPlugins",
-            "type": "Object",
-            "label": "uiPlugins",
-            "description": [],
-            "source": {
-              "path": "src/core/server/legacy/types.ts",
-              "lineNumber": 45
-            },
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.UiPlugins",
-                "text": "UiPlugins"
-              }
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/core/server/legacy/types.ts",
-          "lineNumber": 42
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-server.LegacyServiceStartDeps",
-        "type": "Interface",
-        "label": "LegacyServiceStartDeps",
-        "description": [],
-        "tags": [
-          "public",
-          "deprecated"
-        ],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-server.LegacyServiceStartDeps.core",
-            "type": "CompoundType",
-            "label": "core",
-            "description": [],
-            "source": {
-              "path": "src/core/server/legacy/types.ts",
-              "lineNumber": 53
-            },
-            "signature": [
-              "LegacyCoreStart"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-server.LegacyServiceStartDeps.plugins",
-            "type": "Object",
-            "label": "plugins",
-            "description": [],
-            "source": {
-              "path": "src/core/server/legacy/types.ts",
-              "lineNumber": 54
-            },
-            "signature": [
-              "Record<string, unknown>"
-            ]
-          }
-        ],
-        "source": {
-          "path": "src/core/server/legacy/types.ts",
-          "lineNumber": 52
         },
         "initialIsOpen": false
       },
@@ -13332,7 +13280,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/logging/logging_config.ts",
-              "lineNumber": 111
+              "lineNumber": 113
             },
             "signature": [
               "Record<string, ",
@@ -13362,7 +13310,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/logging/logging_config.ts",
-              "lineNumber": 112
+              "lineNumber": 114
             },
             "signature": [
               "Readonly<{} & { name: string; level: ",
@@ -13373,7 +13321,7 @@
         ],
         "source": {
           "path": "src/core/server/logging/logging_config.ts",
-          "lineNumber": 109
+          "lineNumber": 111
         },
         "initialIsOpen": false
       },
@@ -14219,7 +14167,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 252
+                  "lineNumber": 255
                 }
               },
               {
@@ -14233,7 +14181,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 252
+                  "lineNumber": 255
                 }
               }
             ],
@@ -14241,7 +14189,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 252
+              "lineNumber": 255
             }
           },
           {
@@ -14278,7 +14226,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 253
+                  "lineNumber": 257
                 }
               },
               {
@@ -14292,7 +14240,7 @@
                 "description": [],
                 "source": {
                   "path": "src/core/server/plugins/types.ts",
-                  "lineNumber": 253
+                  "lineNumber": 257
                 }
               }
             ],
@@ -14300,7 +14248,7 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 253
+              "lineNumber": 257
             }
           },
           {
@@ -14316,13 +14264,13 @@
             "returnComment": [],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 254
+              "lineNumber": 259
             }
           }
         ],
         "source": {
           "path": "src/core/server/plugins/types.ts",
-          "lineNumber": 246
+          "lineNumber": 249
         },
         "initialIsOpen": false
       },
@@ -14439,7 +14387,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 298
+              "lineNumber": 305
             },
             "signature": [
               "symbol"
@@ -14453,7 +14401,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 299
+              "lineNumber": 306
             },
             "signature": [
               "{ mode: ",
@@ -14473,7 +14421,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 322
+              "lineNumber": 329
             },
             "signature": [
               "LoggerFactory"
@@ -14489,7 +14437,7 @@
             ],
             "source": {
               "path": "src/core/server/plugins/types.ts",
-              "lineNumber": 326
+              "lineNumber": 333
             },
             "signature": [
               "{ legacy: { globalConfig$: ",
@@ -14507,7 +14455,7 @@
         ],
         "source": {
           "path": "src/core/server/plugins/types.ts",
-          "lineNumber": 297
+          "lineNumber": 304
         },
         "initialIsOpen": false
       },
@@ -14755,7 +14703,7 @@
             "description": [],
             "source": {
               "path": "src/core/server/index.ts",
-              "lineNumber": 434
+              "lineNumber": 432
             },
             "signature": [
               "{ savedObjects: { client: Pick<",
@@ -14803,7 +14751,7 @@
         ],
         "source": {
           "path": "src/core/server/index.ts",
-          "lineNumber": 433
+          "lineNumber": 431
         },
         "initialIsOpen": false
       },
@@ -16278,6 +16226,27 @@
     "enums": [],
     "misc": [
       {
+        "id": "def-server.AddConfigDeprecation",
+        "type": "Type",
+        "label": "AddConfigDeprecation",
+        "tags": [
+          "public"
+        ],
+        "description": [
+          "\nConfig deprecation hook used when invoking a {@link ConfigDeprecation}\n"
+        ],
+        "source": {
+          "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
+          "lineNumber": 6
+        },
+        "signature": [
+          "(details: ",
+          "DeprecatedConfigDetails",
+          ") => void"
+        ],
+        "initialIsOpen": false
+      },
+      {
         "id": "def-server.AppenderConfigType",
         "type": "Type",
         "label": "AppenderConfigType",
@@ -16368,11 +16337,11 @@
         ],
         "source": {
           "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-          "lineNumber": 16
+          "lineNumber": 33
         },
         "signature": [
-          "(config: Record<string, any>, fromPath: string, logger: ",
-          "ConfigDeprecationLogger",
+          "(config: Record<string, any>, fromPath: string, addDeprecation: ",
+          "AddConfigDeprecation",
           ") => Record<string, any>"
         ],
         "initialIsOpen": false
@@ -16389,7 +16358,7 @@
         ],
         "source": {
           "path": "node_modules/@kbn/config/target/deprecation/types.d.ts",
-          "lineNumber": 33
+          "lineNumber": 50
         },
         "signature": [
           "(factory: ",
@@ -16761,7 +16730,7 @@
         "description": [],
         "source": {
           "path": "src/core/server/logging/logging_config.ts",
-          "lineNumber": 59
+          "lineNumber": 60
         },
         "signature": [
           "{ readonly name: string; readonly level: ",
@@ -16856,7 +16825,7 @@
         ],
         "source": {
           "path": "src/core/server/plugins/types.ts",
-          "lineNumber": 404
+          "lineNumber": 411
         },
         "signature": [
           "(core: ",
@@ -17055,7 +17024,7 @@
         "description": [],
         "source": {
           "path": "src/core/server/plugins/types.ts",
-          "lineNumber": 285
+          "lineNumber": 292
         },
         "signature": [
           "{ readonly kibana: Readonly<{ readonly index: string; readonly autocompleteTerminateAfter: Readonly<{ clone: () => ",
@@ -17083,7 +17052,7 @@
         ],
         "source": {
           "path": "src/core/server/index.ts",
-          "lineNumber": 504
+          "lineNumber": 502
         },
         "signature": [
           "() => Promise<[",

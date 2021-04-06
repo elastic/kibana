@@ -1131,7 +1131,7 @@
                 }
               },
               {
-                "id": "def-public.AdvancedUiActionsPublicPlugin.setup.{-embeddable, uiActions, licensing }",
+                "id": "def-public.AdvancedUiActionsPublicPlugin.setup.embeddableuiActionslicensing",
                 "type": "Object",
                 "label": "{ embeddable, uiActions, licensing }",
                 "isRequired": true,
@@ -1205,7 +1205,7 @@
                 }
               },
               {
-                "id": "def-public.AdvancedUiActionsPublicPlugin.start.{-uiActions, licensing }",
+                "id": "def-public.AdvancedUiActionsPublicPlugin.start.uiActionslicensing",
                 "type": "Object",
                 "label": "{ uiActions, licensing }",
                 "isRequired": true,
@@ -1491,7 +1491,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-public.DynamicActionManager.killAction.{-eventId, triggers }",
+                "id": "def-public.DynamicActionManager.killAction.eventIdtriggers",
                 "type": "Object",
                 "label": "{ eventId, triggers }",
                 "isRequired": true,
@@ -2074,7 +2074,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.ActionWizard.{\n- currentActionFactory,\n  actionFactories,\n  onActionFactoryChange,\n  onConfigChange,\n  config,\n  context,\n  onSelectedTriggersChange,\n  getTriggerInfo,\n  triggers,\n  triggerPickerDocsLink,\n}",
+            "id": "def-public.ActionWizard.currentActionFactoryactionFactoriesonActionFactoryChangeonConfigChangeconfigcontextonSelectedTriggersChangegetTriggerInfotriggerstriggerPickerDocsLink",
             "type": "CompoundType",
             "label": "{\n  currentActionFactory,\n  actionFactories,\n  onActionFactoryChange,\n  onConfigChange,\n  config,\n  context,\n  onSelectedTriggersChange,\n  getTriggerInfo,\n  triggers,\n  triggerPickerDocsLink,\n}",
             "isRequired": true,
@@ -2204,7 +2204,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.globalScopeProvider.{\n- core,\n}",
+            "id": "def-public.globalScopeProvider.core",
             "type": "Object",
             "label": "{\n  core,\n}",
             "isRequired": true,
@@ -3503,7 +3503,7 @@
                 }
               },
               {
-                "id": "def-server.AdvancedUiActionsServerPlugin.setup.{-embeddable }",
+                "id": "def-server.AdvancedUiActionsServerPlugin.setup.embeddable",
                 "type": "Object",
                 "label": "{ embeddable }",
                 "isRequired": true,

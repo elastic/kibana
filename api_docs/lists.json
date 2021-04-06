@@ -289,7 +289,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.addEndpointExceptionListWithValidation.{\n- http,\n  signal,\n}",
+            "id": "def-public.addEndpointExceptionListWithValidation.httpsignal",
             "type": "Object",
             "label": "{\n  http,\n  signal,\n}",
             "isRequired": true,
@@ -329,7 +329,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.addExceptionListItemWithValidation.{\n- http,\n  listItem,\n  signal,\n}",
+            "id": "def-public.addExceptionListItemWithValidation.httplistItemsignal",
             "type": "Object",
             "label": "{\n  http,\n  listItem,\n  signal,\n}",
             "isRequired": true,
@@ -369,7 +369,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.addExceptionListWithValidation.{\n- http,\n  list,\n  signal,\n}",
+            "id": "def-public.addExceptionListWithValidation.httplistsignal",
             "type": "Object",
             "label": "{\n  http,\n  list,\n  signal,\n}",
             "isRequired": true,
@@ -405,98 +405,11 @@
         "initialIsOpen": false
       },
       {
-        "tags": [],
-        "id": "def-public.BuilderAndBadgeComponent",
-        "type": "Function",
-        "label": "BuilderAndBadgeComponent",
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/lists/public/exceptions/components/builder/and_badge.tsx",
-          "lineNumber": 27
-        },
-        "signature": [
-          "React.NamedExoticComponent<BuilderAndBadgeProps>"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-public.BuilderEntryDeleteButtonComponent",
-        "type": "Function",
-        "label": "BuilderEntryDeleteButtonComponent",
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/lists/public/exceptions/components/builder/entry_delete_button.tsx",
-          "lineNumber": 27
-        },
-        "signature": [
-          "React.NamedExoticComponent<BuilderEntryDeleteButtonProps>"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-public.BuilderEntryItem",
-        "type": "Function",
-        "children": [
-          {
-            "id": "def-public.BuilderEntryItem.{\n- allowLargeValueLists = false,\n  autocompleteService,\n  entry,\n  httpService,\n  indexPattern,\n  listType,\n  listTypeSpecificFilter,\n  onChange,\n  onlyShowListOperators = false,\n  setErrorsExist,\n  showLabel,\n}",
-            "type": "CompoundType",
-            "label": "{\n  allowLargeValueLists = false,\n  autocompleteService,\n  entry,\n  httpService,\n  indexPattern,\n  listType,\n  listTypeSpecificFilter,\n  onChange,\n  onlyShowListOperators = false,\n  setErrorsExist,\n  showLabel,\n}",
-            "isRequired": true,
-            "signature": [
-              "React.PropsWithChildren<",
-              {
-                "pluginId": "lists",
-                "scope": "public",
-                "docId": "kibListsPluginApi",
-                "section": "def-public.EntryItemProps",
-                "text": "EntryItemProps"
-              },
-              ">"
-            ],
-            "description": [],
-            "source": {
-              "path": "x-pack/plugins/lists/public/exceptions/components/builder/entry_renderer.tsx",
-              "lineNumber": 56
-            }
-          }
-        ],
-        "signature": [
-          "{ ({ allowLargeValueLists, autocompleteService, entry, httpService, indexPattern, listType, listTypeSpecificFilter, onChange, onlyShowListOperators, setErrorsExist, showLabel, }: React.PropsWithChildren<",
-          "EntryItemProps",
-          ">): JSX.Element; displayName: string | undefined; }"
-        ],
-        "description": [],
-        "label": "BuilderEntryItem",
-        "source": {
-          "path": "x-pack/plugins/lists/public/exceptions/components/builder/entry_renderer.tsx",
-          "lineNumber": 56
-        },
-        "tags": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "tags": [],
-        "id": "def-public.BuilderExceptionListItemComponent",
-        "type": "Function",
-        "label": "BuilderExceptionListItemComponent",
-        "description": [],
-        "source": {
-          "path": "x-pack/plugins/lists/public/exceptions/components/builder/exception_item_renderer.tsx",
-          "lineNumber": 54
-        },
-        "signature": [
-          "React.NamedExoticComponent<BuilderExceptionListItemProps>"
-        ],
-        "initialIsOpen": false
-      },
-      {
         "id": "def-public.exportListWithValidation",
         "type": "Function",
         "children": [
           {
-            "id": "def-public.exportListWithValidation.{\n- http,\n  listId,\n  signal,\n}",
+            "id": "def-public.exportListWithValidation.httplistIdsignal",
             "type": "Object",
             "label": "{\n  http,\n  listId,\n  signal,\n}",
             "isRequired": true,
@@ -536,7 +449,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.fetchExceptionListByIdWithValidation.{\n- http,\n  id,\n  namespaceType,\n  signal,\n}",
+            "id": "def-public.fetchExceptionListByIdWithValidation.httpidnamespaceTypesignal",
             "type": "Object",
             "label": "{\n  http,\n  id,\n  namespaceType,\n  signal,\n}",
             "isRequired": true,
@@ -576,7 +489,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.updateExceptionListItemWithValidation.{\n- http,\n  listItem,\n  signal,\n}",
+            "id": "def-public.updateExceptionListItemWithValidation.httplistItemsignal",
             "type": "Object",
             "label": "{\n  http,\n  listItem,\n  signal,\n}",
             "isRequired": true,
@@ -724,7 +637,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.useCursor.{-pageIndex, pageSize }",
+            "id": "def-public.useCursor.pageIndexpageSize",
             "type": "Object",
             "label": "{ pageIndex, pageSize }",
             "isRequired": true,
@@ -787,7 +700,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.useExceptionListItems.{\n- http,\n  lists,\n  pagination = {\n    page: 1,\n    perPage: 20,\n    total: 0,\n  },\n  filterOptions,\n  showDetectionsListsOnly,\n  showEndpointListsOnly,\n  matchFilters,\n  onError,\n  onSuccess,\n}",
+            "id": "def-public.useExceptionListItems.httplistspaginationpage1perPage20total0filterOptionsshowDetectionsListsOnlyshowEndpointListsOnlymatchFiltersonErroronSuccess",
             "type": "Object",
             "label": "{\n  http,\n  lists,\n  pagination = {\n    page: 1,\n    perPage: 20,\n    total: 0,\n  },\n  filterOptions,\n  showDetectionsListsOnly,\n  showEndpointListsOnly,\n  matchFilters,\n  onError,\n  onSuccess,\n}",
             "isRequired": true,
@@ -830,7 +743,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.useExceptionLists.{\n- errorMessage,\n  http,\n  pagination = {\n    page: 1,\n    perPage: 20,\n    total: 0,\n  },\n  filterOptions = {},\n  namespaceTypes,\n  notifications,\n  showTrustedApps = false,\n}",
+            "id": "def-public.useExceptionLists.errorMessagehttppaginationpage1perPage20total0filterOptionsnamespaceTypesnotificationsshowTrustedAppsfalse",
             "type": "Object",
             "label": "{\n  errorMessage,\n  http,\n  pagination = {\n    page: 1,\n    perPage: 20,\n    total: 0,\n  },\n  filterOptions = {},\n  namespaceTypes,\n  notifications,\n  showTrustedApps = false,\n}",
             "isRequired": true,
@@ -963,7 +876,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.usePersistExceptionItem.{\n- http,\n  onError,\n}",
+            "id": "def-public.usePersistExceptionItem.httponError",
             "type": "Object",
             "label": "{\n  http,\n  onError,\n}",
             "isRequired": true,
@@ -1006,7 +919,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.usePersistExceptionList.{\n- http,\n  onError,\n}",
+            "id": "def-public.usePersistExceptionList.httponError",
             "type": "Object",
             "label": "{\n  http,\n  onError,\n}",
             "isRequired": true,
@@ -1462,7 +1375,24 @@
     ],
     "enums": [],
     "misc": [],
-    "objects": [],
+    "objects": [
+      {
+        "id": "def-public.ExceptionBuilder",
+        "type": "Object",
+        "label": "ExceptionBuilder",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "x-pack/plugins/lists/public/shared_exports.ts",
+          "lineNumber": 41
+        },
+        "signature": [
+          "typeof ",
+          "x-pack/plugins/lists/public/exceptions/components/builder/index"
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "setup": {
       "id": "def-public.PluginSetup",
       "type": "Interface",
@@ -1511,7 +1441,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.ExceptionListClient.Unnamed.{-user, savedObjectsClient }",
+                "id": "def-server.ExceptionListClient.Unnamed.usersavedObjectsClient",
                 "type": "Object",
                 "label": "{ user, savedObjectsClient }",
                 "isRequired": true,
@@ -1543,7 +1473,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ExceptionListClient.getExceptionList.{\n-   listId,\n    id,\n    namespaceType,\n  }",
+                "id": "def-server.ExceptionListClient.getExceptionList.listIdidnamespaceType",
                 "type": "Object",
                 "label": "{\n    listId,\n    id,\n    namespaceType,\n  }",
                 "isRequired": true,
@@ -1588,7 +1518,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ExceptionListClient.getExceptionListItem.{\n-   itemId,\n    id,\n    namespaceType,\n  }",
+                "id": "def-server.ExceptionListClient.getExceptionListItem.itemIdidnamespaceType",
                 "type": "Object",
                 "label": "{\n    itemId,\n    id,\n    namespaceType,\n  }",
                 "isRequired": true,
@@ -1671,7 +1601,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ExceptionListClient.createEndpointListItem.{\n-   comments,\n    description,\n    entries,\n    itemId,\n    meta,\n    name,\n    osTypes,\n    tags,\n    type,\n  }",
+                "id": "def-server.ExceptionListClient.createEndpointListItem.commentsdescriptionentriesitemIdmetanameosTypestagstype",
                 "type": "Object",
                 "label": "{\n    comments,\n    description,\n    entries,\n    itemId,\n    meta,\n    name,\n    osTypes,\n    tags,\n    type,\n  }",
                 "isRequired": true,
@@ -1718,7 +1648,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ExceptionListClient.updateEndpointListItem.{\n-   _version,\n    comments,\n    description,\n    entries,\n    id,\n    itemId,\n    meta,\n    name,\n    osTypes,\n    tags,\n    type,\n  }",
+                "id": "def-server.ExceptionListClient.updateEndpointListItem._versioncommentsdescriptionentriesiditemIdmetanameosTypestagstype",
                 "type": "Object",
                 "label": "{\n    _version,\n    comments,\n    description,\n    entries,\n    id,\n    itemId,\n    meta,\n    name,\n    osTypes,\n    tags,\n    type,\n  }",
                 "isRequired": true,
@@ -1765,7 +1695,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ExceptionListClient.getEndpointListItem.{\n-   itemId,\n    id,\n  }",
+                "id": "def-server.ExceptionListClient.getEndpointListItem.itemIdid",
                 "type": "Object",
                 "label": "{\n    itemId,\n    id,\n  }",
                 "isRequired": true,
@@ -1812,7 +1742,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ExceptionListClient.createExceptionList.{\n-   description,\n    immutable,\n    listId,\n    meta,\n    name,\n    namespaceType,\n    tags,\n    type,\n    version,\n  }",
+                "id": "def-server.ExceptionListClient.createExceptionList.descriptionimmutablelistIdmetanamenamespaceTypetagstypeversion",
                 "type": "Object",
                 "label": "{\n    description,\n    immutable,\n    listId,\n    meta,\n    name,\n    namespaceType,\n    tags,\n    type,\n    version,\n  }",
                 "isRequired": true,
@@ -1857,7 +1787,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ExceptionListClient.updateExceptionList.{\n-   _version,\n    id,\n    description,\n    listId,\n    meta,\n    name,\n    namespaceType,\n    osTypes,\n    tags,\n    type,\n    version,\n  }",
+                "id": "def-server.ExceptionListClient.updateExceptionList._versioniddescriptionlistIdmetanamenamespaceTypeosTypestagstypeversion",
                 "type": "Object",
                 "label": "{\n    _version,\n    id,\n    description,\n    listId,\n    meta,\n    name,\n    namespaceType,\n    osTypes,\n    tags,\n    type,\n    version,\n  }",
                 "isRequired": true,
@@ -1902,7 +1832,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ExceptionListClient.deleteExceptionList.{\n-   id,\n    listId,\n    namespaceType,\n  }",
+                "id": "def-server.ExceptionListClient.deleteExceptionList.idlistIdnamespaceType",
                 "type": "Object",
                 "label": "{\n    id,\n    listId,\n    namespaceType,\n  }",
                 "isRequired": true,
@@ -1947,7 +1877,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ExceptionListClient.createExceptionListItem.{\n-   comments,\n    description,\n    entries,\n    itemId,\n    listId,\n    meta,\n    name,\n    namespaceType,\n    osTypes,\n    tags,\n    type,\n  }",
+                "id": "def-server.ExceptionListClient.createExceptionListItem.commentsdescriptionentriesitemIdlistIdmetanamenamespaceTypeosTypestagstype",
                 "type": "Object",
                 "label": "{\n    comments,\n    description,\n    entries,\n    itemId,\n    listId,\n    meta,\n    name,\n    namespaceType,\n    osTypes,\n    tags,\n    type,\n  }",
                 "isRequired": true,
@@ -1992,7 +1922,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ExceptionListClient.updateExceptionListItem.{\n-   _version,\n    comments,\n    description,\n    entries,\n    id,\n    itemId,\n    meta,\n    name,\n    namespaceType,\n    osTypes,\n    tags,\n    type,\n  }",
+                "id": "def-server.ExceptionListClient.updateExceptionListItem._versioncommentsdescriptionentriesiditemIdmetanamenamespaceTypeosTypestagstype",
                 "type": "Object",
                 "label": "{\n    _version,\n    comments,\n    description,\n    entries,\n    id,\n    itemId,\n    meta,\n    name,\n    namespaceType,\n    osTypes,\n    tags,\n    type,\n  }",
                 "isRequired": true,
@@ -2037,7 +1967,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ExceptionListClient.deleteExceptionListItem.{\n-   id,\n    itemId,\n    namespaceType,\n  }",
+                "id": "def-server.ExceptionListClient.deleteExceptionListItem.iditemIdnamespaceType",
                 "type": "Object",
                 "label": "{\n    id,\n    itemId,\n    namespaceType,\n  }",
                 "isRequired": true,
@@ -2082,7 +2012,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ExceptionListClient.deleteExceptionListItemById.{\n-   id,\n    namespaceType,\n  }",
+                "id": "def-server.ExceptionListClient.deleteExceptionListItemById.idnamespaceType",
                 "type": "Object",
                 "label": "{\n    id,\n    namespaceType,\n  }",
                 "isRequired": true,
@@ -2127,7 +2057,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ExceptionListClient.deleteEndpointListItem.{\n-   id,\n    itemId,\n  }",
+                "id": "def-server.ExceptionListClient.deleteEndpointListItem.iditemId",
                 "type": "Object",
                 "label": "{\n    id,\n    itemId,\n  }",
                 "isRequired": true,
@@ -2174,7 +2104,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ExceptionListClient.findExceptionListItem.{\n-   listId,\n    filter,\n    perPage,\n    page,\n    sortField,\n    sortOrder,\n    namespaceType,\n  }",
+                "id": "def-server.ExceptionListClient.findExceptionListItem.listIdfilterperPagepagesortFieldsortOrdernamespaceType",
                 "type": "Object",
                 "label": "{\n    listId,\n    filter,\n    perPage,\n    page,\n    sortField,\n    sortOrder,\n    namespaceType,\n  }",
                 "isRequired": true,
@@ -2219,7 +2149,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ExceptionListClient.findExceptionListsItem.{\n-   listId,\n    filter,\n    perPage,\n    page,\n    sortField,\n    sortOrder,\n    namespaceType,\n  }",
+                "id": "def-server.ExceptionListClient.findExceptionListsItem.listIdfilterperPagepagesortFieldsortOrdernamespaceType",
                 "type": "Object",
                 "label": "{\n    listId,\n    filter,\n    perPage,\n    page,\n    sortField,\n    sortOrder,\n    namespaceType,\n  }",
                 "isRequired": true,
@@ -2264,7 +2194,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ExceptionListClient.findValueListExceptionListItems.{\n-   perPage,\n    page,\n    sortField,\n    sortOrder,\n    valueListId,\n  }",
+                "id": "def-server.ExceptionListClient.findValueListExceptionListItems.perPagepagesortFieldsortOrdervalueListId",
                 "type": "Object",
                 "label": "{\n    perPage,\n    page,\n    sortField,\n    sortOrder,\n    valueListId,\n  }",
                 "isRequired": true,
@@ -2309,7 +2239,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ExceptionListClient.findExceptionList.{\n-   filter,\n    perPage,\n    page,\n    sortField,\n    sortOrder,\n    namespaceType,\n  }",
+                "id": "def-server.ExceptionListClient.findExceptionList.filterperPagepagesortFieldsortOrdernamespaceType",
                 "type": "Object",
                 "label": "{\n    filter,\n    perPage,\n    page,\n    sortField,\n    sortOrder,\n    namespaceType,\n  }",
                 "isRequired": true,
@@ -2354,7 +2284,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ExceptionListClient.findEndpointListItem.{\n-   filter,\n    perPage,\n    page,\n    sortField,\n    sortOrder,\n  }",
+                "id": "def-server.ExceptionListClient.findEndpointListItem.filterperPagepagesortFieldsortOrder",
                 "type": "Object",
                 "label": "{\n    filter,\n    perPage,\n    page,\n    sortField,\n    sortOrder,\n  }",
                 "isRequired": true,
@@ -2420,7 +2350,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.ListClient.Unnamed.{-spaceId, user, config, esClient }",
+                "id": "def-server.ListClient.Unnamed.spaceIduserconfigesClient",
                 "type": "Object",
                 "label": "{ spaceId, user, config, esClient }",
                 "isRequired": true,
@@ -2484,7 +2414,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ListClient.getList.{-id }",
+                "id": "def-server.ListClient.getList.id",
                 "type": "Object",
                 "label": "{ id }",
                 "isRequired": true,
@@ -2529,7 +2459,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ListClient.createList.{\n-   id,\n    deserializer,\n    immutable,\n    serializer,\n    name,\n    description,\n    type,\n    meta,\n    version,\n  }",
+                "id": "def-server.ListClient.createList.iddeserializerimmutableserializernamedescriptiontypemetaversion",
                 "type": "Object",
                 "label": "{\n    id,\n    deserializer,\n    immutable,\n    serializer,\n    name,\n    description,\n    type,\n    meta,\n    version,\n  }",
                 "isRequired": true,
@@ -2574,7 +2504,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ListClient.createListIfItDoesNotExist.{\n-   id,\n    deserializer,\n    serializer,\n    name,\n    description,\n    immutable,\n    type,\n    meta,\n    version,\n  }",
+                "id": "def-server.ListClient.createListIfItDoesNotExist.iddeserializerserializernamedescriptionimmutabletypemetaversion",
                 "type": "Object",
                 "label": "{\n    id,\n    deserializer,\n    serializer,\n    name,\n    description,\n    immutable,\n    type,\n    meta,\n    version,\n  }",
                 "isRequired": true,
@@ -2939,7 +2869,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ListClient.deleteListItem.{-id }",
+                "id": "def-server.ListClient.deleteListItem.id",
                 "type": "Object",
                 "label": "{ id }",
                 "isRequired": true,
@@ -2984,7 +2914,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ListClient.deleteListItemByValue.{\n-   listId,\n    value,\n    type,\n  }",
+                "id": "def-server.ListClient.deleteListItemByValue.listIdvaluetype",
                 "type": "Object",
                 "label": "{\n    listId,\n    value,\n    type,\n  }",
                 "isRequired": true,
@@ -3029,7 +2959,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ListClient.deleteList.{-id }",
+                "id": "def-server.ListClient.deleteList.id",
                 "type": "Object",
                 "label": "{ id }",
                 "isRequired": true,
@@ -3074,7 +3004,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ListClient.exportListItemsToStream.{\n-   stringToAppend,\n    listId,\n    stream,\n  }",
+                "id": "def-server.ListClient.exportListItemsToStream.stringToAppendlistIdstream",
                 "type": "Object",
                 "label": "{\n    stringToAppend,\n    listId,\n    stream,\n  }",
                 "isRequired": true,
@@ -3119,7 +3049,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ListClient.importListItemsToStream.{\n-   deserializer,\n    serializer,\n    type,\n    listId,\n    stream,\n    meta,\n    version,\n  }",
+                "id": "def-server.ListClient.importListItemsToStream.deserializerserializertypelistIdstreammetaversion",
                 "type": "Object",
                 "label": "{\n    deserializer,\n    serializer,\n    type,\n    listId,\n    stream,\n    meta,\n    version,\n  }",
                 "isRequired": true,
@@ -3164,7 +3094,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ListClient.getListItemByValue.{\n-   listId,\n    value,\n    type,\n  }",
+                "id": "def-server.ListClient.getListItemByValue.listIdvaluetype",
                 "type": "Object",
                 "label": "{\n    listId,\n    value,\n    type,\n  }",
                 "isRequired": true,
@@ -3209,7 +3139,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ListClient.createListItem.{\n-   id,\n    deserializer,\n    serializer,\n    listId,\n    value,\n    type,\n    meta,\n  }",
+                "id": "def-server.ListClient.createListItem.iddeserializerserializerlistIdvaluetypemeta",
                 "type": "Object",
                 "label": "{\n    id,\n    deserializer,\n    serializer,\n    listId,\n    value,\n    type,\n    meta,\n  }",
                 "isRequired": true,
@@ -3254,7 +3184,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ListClient.updateListItem.{\n-   _version,\n    id,\n    value,\n    meta,\n  }",
+                "id": "def-server.ListClient.updateListItem._versionidvaluemeta",
                 "type": "Object",
                 "label": "{\n    _version,\n    id,\n    value,\n    meta,\n  }",
                 "isRequired": true,
@@ -3299,7 +3229,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ListClient.updateList.{\n-   _version,\n    id,\n    name,\n    description,\n    meta,\n    version,\n  }",
+                "id": "def-server.ListClient.updateList._versionidnamedescriptionmetaversion",
                 "type": "Object",
                 "label": "{\n    _version,\n    id,\n    name,\n    description,\n    meta,\n    version,\n  }",
                 "isRequired": true,
@@ -3344,7 +3274,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ListClient.getListItem.{-id }",
+                "id": "def-server.ListClient.getListItem.id",
                 "type": "Object",
                 "label": "{ id }",
                 "isRequired": true,
@@ -3389,7 +3319,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ListClient.getListItemByValues.{\n-   type,\n    listId,\n    value,\n  }",
+                "id": "def-server.ListClient.getListItemByValues.typelistIdvalue",
                 "type": "Object",
                 "label": "{\n    type,\n    listId,\n    value,\n  }",
                 "isRequired": true,
@@ -3434,7 +3364,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ListClient.searchListItemByValues.{\n-   type,\n    listId,\n    value,\n  }",
+                "id": "def-server.ListClient.searchListItemByValues.typelistIdvalue",
                 "type": "Object",
                 "label": "{\n    type,\n    listId,\n    value,\n  }",
                 "isRequired": true,
@@ -3479,7 +3409,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ListClient.findList.{\n-   filter,\n    currentIndexPosition,\n    perPage,\n    page,\n    sortField,\n    sortOrder,\n    searchAfter,\n  }",
+                "id": "def-server.ListClient.findList.filtercurrentIndexPositionperPagepagesortFieldsortOrdersearchAfter",
                 "type": "Object",
                 "label": "{\n    filter,\n    currentIndexPosition,\n    perPage,\n    page,\n    sortField,\n    sortOrder,\n    searchAfter,\n  }",
                 "isRequired": true,
@@ -3524,7 +3454,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-server.ListClient.findListItem.{\n-   listId,\n    filter,\n    currentIndexPosition,\n    perPage,\n    page,\n    sortField,\n    sortOrder,\n    searchAfter,\n  }",
+                "id": "def-server.ListClient.findListItem.listIdfiltercurrentIndexPositionperPagepagesortFieldsortOrdersearchAfter",
                 "type": "Object",
                 "label": "{\n    listId,\n    filter,\n    currentIndexPosition,\n    perPage,\n    page,\n    sortField,\n    sortOrder,\n    searchAfter,\n  }",
                 "isRequired": true,
@@ -4037,7 +3967,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-common.buildExceptionFilter.{\n- lists,\n  excludeExceptions,\n  chunkSize,\n}.{\n  lists,\n  excludeExceptions,\n  chunkSize,\n}",
+            "id": "def-common.buildExceptionFilter.listsexcludeExceptionschunkSize.listsexcludeExceptionschunkSize",
             "type": "Object",
             "label": "{\n  lists,\n  excludeExceptions,\n  chunkSize,\n}",
             "tags": [],
@@ -4045,7 +3975,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-common.buildExceptionFilter.{\n- lists,\n  excludeExceptions,\n  chunkSize,\n}.{\n  lists,\n  excludeExceptions,\n  chunkSize,\n}.lists",
+                "id": "def-common.buildExceptionFilter.listsexcludeExceptionschunkSize.listsexcludeExceptionschunkSize.lists",
                 "type": "Array",
                 "label": "lists",
                 "description": [],
@@ -4059,7 +3989,7 @@
               },
               {
                 "tags": [],
-                "id": "def-common.buildExceptionFilter.{\n- lists,\n  excludeExceptions,\n  chunkSize,\n}.{\n  lists,\n  excludeExceptions,\n  chunkSize,\n}.excludeExceptions",
+                "id": "def-common.buildExceptionFilter.listsexcludeExceptionschunkSize.listsexcludeExceptionschunkSize.excludeExceptions",
                 "type": "boolean",
                 "label": "excludeExceptions",
                 "description": [],
@@ -4070,7 +4000,7 @@
               },
               {
                 "tags": [],
-                "id": "def-common.buildExceptionFilter.{\n- lists,\n  excludeExceptions,\n  chunkSize,\n}.{\n  lists,\n  excludeExceptions,\n  chunkSize,\n}.chunkSize",
+                "id": "def-common.buildExceptionFilter.listsexcludeExceptionschunkSize.listsexcludeExceptionschunkSize.chunkSize",
                 "type": "number",
                 "label": "chunkSize",
                 "description": [],

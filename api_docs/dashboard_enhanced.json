@@ -887,7 +887,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-common.createExtract.{\n- drilldownId,\n}.{\n  drilldownId,\n}",
+            "id": "def-common.createExtract.drilldownId.drilldownId",
             "type": "Object",
             "label": "{\n  drilldownId,\n}",
             "tags": [],
@@ -895,7 +895,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-common.createExtract.{\n- drilldownId,\n}.{\n  drilldownId,\n}.drilldownId",
+                "id": "def-common.createExtract.drilldownId.drilldownId.drilldownId",
                 "type": "string",
                 "label": "drilldownId",
                 "description": [],
@@ -947,7 +947,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-common.createInject.{\n- drilldownId,\n}.{\n  drilldownId,\n}",
+            "id": "def-common.createInject.drilldownId.drilldownId",
             "type": "Object",
             "label": "{\n  drilldownId,\n}",
             "tags": [],
@@ -955,7 +955,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-common.createInject.{\n- drilldownId,\n}.{\n  drilldownId,\n}.drilldownId",
+                "id": "def-common.createInject.drilldownId.drilldownId.drilldownId",
                 "type": "string",
                 "label": "drilldownId",
                 "description": [],

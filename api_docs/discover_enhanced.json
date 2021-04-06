@@ -164,7 +164,7 @@
                 }
               },
               {
-                "id": "def-public.DiscoverEnhancedPlugin.setup.{-uiActions, share }",
+                "id": "def-public.DiscoverEnhancedPlugin.setup.uiActionsshare",
                 "type": "Object",
                 "label": "{ uiActions, share }",
                 "isRequired": true,

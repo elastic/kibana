@@ -744,7 +744,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.loadActionTypes.{-http }.{ http }",
+            "id": "def-public.loadActionTypes.http.http",
             "type": "Object",
             "label": "{ http }",
             "tags": [],
@@ -752,7 +752,7 @@
             "children": [
               {
                 "tags": [],
-                "id": "def-public.loadActionTypes.{-http }.{ http }.http",
+                "id": "def-public.loadActionTypes.http.http.http",
                 "type": "Object",
                 "label": "http",
                 "description": [],
@@ -2516,13 +2516,13 @@
         "tags": [],
         "children": [
           {
-            "id": "def-public.builtInComparators.[COMPARATORS.GREATER_THAN]",
+            "id": "def-public.builtInComparators.COMPARATORS.GREATER_THAN",
             "type": "Object",
             "tags": [],
             "children": [
               {
                 "tags": [],
-                "id": "def-public.builtInComparators.[COMPARATORS.GREATER_THAN].text",
+                "id": "def-public.builtInComparators.COMPARATORS.GREATER_THAN.text",
                 "type": "string",
                 "label": "text",
                 "description": [],
@@ -2533,7 +2533,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.builtInComparators.[COMPARATORS.GREATER_THAN].value",
+                "id": "def-public.builtInComparators.COMPARATORS.GREATER_THAN.value",
                 "type": "Enum",
                 "label": "value",
                 "description": [],
@@ -2553,7 +2553,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.builtInComparators.[COMPARATORS.GREATER_THAN].requiredValues",
+                "id": "def-public.builtInComparators.COMPARATORS.GREATER_THAN.requiredValues",
                 "type": "number",
                 "label": "requiredValues",
                 "description": [],
@@ -2571,13 +2571,13 @@
             }
           },
           {
-            "id": "def-public.builtInComparators.[COMPARATORS.GREATER_THAN_OR_EQUALS]",
+            "id": "def-public.builtInComparators.COMPARATORS.GREATER_THAN_OR_EQUALS",
             "type": "Object",
             "tags": [],
             "children": [
               {
                 "tags": [],
-                "id": "def-public.builtInComparators.[COMPARATORS.GREATER_THAN_OR_EQUALS].text",
+                "id": "def-public.builtInComparators.COMPARATORS.GREATER_THAN_OR_EQUALS.text",
                 "type": "string",
                 "label": "text",
                 "description": [],
@@ -2588,7 +2588,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.builtInComparators.[COMPARATORS.GREATER_THAN_OR_EQUALS].value",
+                "id": "def-public.builtInComparators.COMPARATORS.GREATER_THAN_OR_EQUALS.value",
                 "type": "Enum",
                 "label": "value",
                 "description": [],
@@ -2608,7 +2608,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.builtInComparators.[COMPARATORS.GREATER_THAN_OR_EQUALS].requiredValues",
+                "id": "def-public.builtInComparators.COMPARATORS.GREATER_THAN_OR_EQUALS.requiredValues",
                 "type": "number",
                 "label": "requiredValues",
                 "description": [],
@@ -2626,13 +2626,13 @@
             }
           },
           {
-            "id": "def-public.builtInComparators.[COMPARATORS.LESS_THAN]",
+            "id": "def-public.builtInComparators.COMPARATORS.LESS_THAN",
             "type": "Object",
             "tags": [],
             "children": [
               {
                 "tags": [],
-                "id": "def-public.builtInComparators.[COMPARATORS.LESS_THAN].text",
+                "id": "def-public.builtInComparators.COMPARATORS.LESS_THAN.text",
                 "type": "string",
                 "label": "text",
                 "description": [],
@@ -2643,7 +2643,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.builtInComparators.[COMPARATORS.LESS_THAN].value",
+                "id": "def-public.builtInComparators.COMPARATORS.LESS_THAN.value",
                 "type": "Enum",
                 "label": "value",
                 "description": [],
@@ -2663,7 +2663,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.builtInComparators.[COMPARATORS.LESS_THAN].requiredValues",
+                "id": "def-public.builtInComparators.COMPARATORS.LESS_THAN.requiredValues",
                 "type": "number",
                 "label": "requiredValues",
                 "description": [],
@@ -2681,13 +2681,13 @@
             }
           },
           {
-            "id": "def-public.builtInComparators.[COMPARATORS.LESS_THAN_OR_EQUALS]",
+            "id": "def-public.builtInComparators.COMPARATORS.LESS_THAN_OR_EQUALS",
             "type": "Object",
             "tags": [],
             "children": [
               {
                 "tags": [],
-                "id": "def-public.builtInComparators.[COMPARATORS.LESS_THAN_OR_EQUALS].text",
+                "id": "def-public.builtInComparators.COMPARATORS.LESS_THAN_OR_EQUALS.text",
                 "type": "string",
                 "label": "text",
                 "description": [],
@@ -2698,7 +2698,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.builtInComparators.[COMPARATORS.LESS_THAN_OR_EQUALS].value",
+                "id": "def-public.builtInComparators.COMPARATORS.LESS_THAN_OR_EQUALS.value",
                 "type": "Enum",
                 "label": "value",
                 "description": [],
@@ -2718,7 +2718,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.builtInComparators.[COMPARATORS.LESS_THAN_OR_EQUALS].requiredValues",
+                "id": "def-public.builtInComparators.COMPARATORS.LESS_THAN_OR_EQUALS.requiredValues",
                 "type": "number",
                 "label": "requiredValues",
                 "description": [],
@@ -2736,13 +2736,13 @@
             }
           },
           {
-            "id": "def-public.builtInComparators.[COMPARATORS.BETWEEN]",
+            "id": "def-public.builtInComparators.COMPARATORS.BETWEEN",
             "type": "Object",
             "tags": [],
             "children": [
               {
                 "tags": [],
-                "id": "def-public.builtInComparators.[COMPARATORS.BETWEEN].text",
+                "id": "def-public.builtInComparators.COMPARATORS.BETWEEN.text",
                 "type": "string",
                 "label": "text",
                 "description": [],
@@ -2753,7 +2753,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.builtInComparators.[COMPARATORS.BETWEEN].value",
+                "id": "def-public.builtInComparators.COMPARATORS.BETWEEN.value",
                 "type": "Enum",
                 "label": "value",
                 "description": [],
@@ -2773,7 +2773,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.builtInComparators.[COMPARATORS.BETWEEN].requiredValues",
+                "id": "def-public.builtInComparators.COMPARATORS.BETWEEN.requiredValues",
                 "type": "number",
                 "label": "requiredValues",
                 "description": [],
@@ -3325,7 +3325,7 @@
           "lineNumber": 40
         },
         "signature": [
-          "{ readonly termSize?: number | undefined; readonly termField?: string | undefined; readonly aggField?: string | undefined; readonly index: string | string[]; readonly aggType: string; readonly groupBy: string; readonly timeWindowSize: number; readonly timeWindowUnit: string; readonly timeField: string; }"
+          "{ readonly termSize?: number | undefined; readonly termField?: string | undefined; readonly aggField?: string | undefined; readonly index: string | string[]; readonly groupBy: string; readonly timeWindowSize: number; readonly timeWindowUnit: string; readonly aggType: string; readonly timeField: string; }"
         ],
         "initialIsOpen": false
       },
@@ -3385,7 +3385,7 @@
           "lineNumber": 29
         },
         "signature": [
-          "{ readonly interval?: string | undefined; readonly termSize?: number | undefined; readonly termField?: string | undefined; readonly aggField?: string | undefined; readonly dateStart?: string | undefined; readonly dateEnd?: string | undefined; readonly index: string | string[]; readonly aggType: string; readonly groupBy: string; readonly timeWindowSize: number; readonly timeWindowUnit: string; readonly timeField: string; }"
+          "{ readonly interval?: string | undefined; readonly termSize?: number | undefined; readonly termField?: string | undefined; readonly aggField?: string | undefined; readonly dateStart?: string | undefined; readonly dateEnd?: string | undefined; readonly index: string | string[]; readonly groupBy: string; readonly timeWindowSize: number; readonly timeWindowUnit: string; readonly aggType: string; readonly timeField: string; }"
         ],
         "initialIsOpen": false
       }

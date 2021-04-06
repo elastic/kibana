@@ -1043,7 +1043,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-public.pagePathGetters.integration_details_overview.{-pkgkey }",
+                "id": "def-public.pagePathGetters.integration_details_overview.pkgkey",
                 "type": "Object",
                 "label": "{ pkgkey }",
                 "isRequired": true,
@@ -1088,7 +1088,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-public.pagePathGetters.integration_details_policies.{-pkgkey }",
+                "id": "def-public.pagePathGetters.integration_details_policies.pkgkey",
                 "type": "Object",
                 "label": "{ pkgkey }",
                 "isRequired": true,
@@ -1133,7 +1133,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-public.pagePathGetters.integration_details_settings.{-pkgkey }",
+                "id": "def-public.pagePathGetters.integration_details_settings.pkgkey",
                 "type": "Object",
                 "label": "{ pkgkey }",
                 "isRequired": true,
@@ -1178,7 +1178,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-public.pagePathGetters.integration_details_custom.{-pkgkey }",
+                "id": "def-public.pagePathGetters.integration_details_custom.pkgkey",
                 "type": "Object",
                 "label": "{ pkgkey }",
                 "isRequired": true,
@@ -1223,7 +1223,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-public.pagePathGetters.integration_policy_edit.{-packagePolicyId }",
+                "id": "def-public.pagePathGetters.integration_policy_edit.packagePolicyId",
                 "type": "Object",
                 "label": "{ packagePolicyId }",
                 "isRequired": true,
@@ -1300,7 +1300,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-public.pagePathGetters.policy_details.{-policyId, tabId }",
+                "id": "def-public.pagePathGetters.policy_details.policyIdtabId",
                 "type": "Object",
                 "label": "{ policyId, tabId }",
                 "isRequired": true,
@@ -1345,7 +1345,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-public.pagePathGetters.add_integration_from_policy.{-policyId }",
+                "id": "def-public.pagePathGetters.add_integration_from_policy.policyId",
                 "type": "Object",
                 "label": "{ policyId }",
                 "isRequired": true,
@@ -1390,7 +1390,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-public.pagePathGetters.add_integration_to_policy.{-pkgkey }",
+                "id": "def-public.pagePathGetters.add_integration_to_policy.pkgkey",
                 "type": "Object",
                 "label": "{ pkgkey }",
                 "isRequired": true,
@@ -1435,7 +1435,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-public.pagePathGetters.edit_integration.{-policyId, packagePolicyId }",
+                "id": "def-public.pagePathGetters.edit_integration.policyIdpackagePolicyId",
                 "type": "Object",
                 "label": "{ policyId, packagePolicyId }",
                 "isRequired": true,
@@ -1496,7 +1496,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-public.pagePathGetters.fleet_agent_list.{-kuery }",
+                "id": "def-public.pagePathGetters.fleet_agent_list.kuery",
                 "type": "Object",
                 "label": "{ kuery }",
                 "isRequired": true,
@@ -1541,7 +1541,7 @@
             "type": "Function",
             "children": [
               {
-                "id": "def-public.pagePathGetters.fleet_agent_details.{-agentId, tabId, logQuery }",
+                "id": "def-public.pagePathGetters.fleet_agent_details.agentIdtabIdlogQuery",
                 "type": "Object",
                 "label": "{ agentId, tabId, logQuery }",
                 "isRequired": true,
@@ -1739,7 +1739,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-server.relativeDownloadUrlFromArtifact.{\n- identifier,\n  decodedSha256,\n}",
+            "id": "def-server.relativeDownloadUrlFromArtifact.identifierdecodedSha256",
             "type": "Uncategorized",
             "label": "{\n  identifier,\n  decodedSha256,\n}",
             "isRequired": true,
@@ -6054,7 +6054,7 @@
           },
           {
             "tags": [],
-            "id": "def-common.FleetServerAgentAction.'@timestamp'",
+            "id": "def-common.FleetServerAgentAction.timestamp",
             "type": "string",
             "label": "'@timestamp'",
             "description": [
@@ -6366,7 +6366,7 @@
         "children": [
           {
             "tags": [],
-            "id": "def-common.FleetServerPolicy.'@timestamp'",
+            "id": "def-common.FleetServerPolicy.timestamp",
             "type": "string",
             "label": "'@timestamp'",
             "description": [
@@ -11426,7 +11426,7 @@
         "children": [
           {
             "tags": [],
-            "id": "def-common.RegistryDataStream.[RegistryDataStreamKeys.type]",
+            "id": "def-common.RegistryDataStream.RegistryDataStreamKeys.type",
             "type": "string",
             "label": "[RegistryDataStreamKeys.type]",
             "description": [],
@@ -11437,7 +11437,7 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryDataStream.[RegistryDataStreamKeys.ilm_policy]",
+            "id": "def-common.RegistryDataStream.RegistryDataStreamKeys.ilm_policy",
             "type": "string",
             "label": "[RegistryDataStreamKeys.ilm_policy]",
             "description": [],
@@ -11451,7 +11451,7 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryDataStream.[RegistryDataStreamKeys.hidden]",
+            "id": "def-common.RegistryDataStream.RegistryDataStreamKeys.hidden",
             "type": "CompoundType",
             "label": "[RegistryDataStreamKeys.hidden]",
             "description": [],
@@ -11465,7 +11465,7 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryDataStream.[RegistryDataStreamKeys.dataset]",
+            "id": "def-common.RegistryDataStream.RegistryDataStreamKeys.dataset",
             "type": "string",
             "label": "[RegistryDataStreamKeys.dataset]",
             "description": [],
@@ -11476,7 +11476,7 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryDataStream.[RegistryDataStreamKeys.title]",
+            "id": "def-common.RegistryDataStream.RegistryDataStreamKeys.title",
             "type": "string",
             "label": "[RegistryDataStreamKeys.title]",
             "description": [],
@@ -11487,7 +11487,7 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryDataStream.[RegistryDataStreamKeys.release]",
+            "id": "def-common.RegistryDataStream.RegistryDataStreamKeys.release",
             "type": "string",
             "label": "[RegistryDataStreamKeys.release]",
             "description": [],
@@ -11498,7 +11498,7 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryDataStream.[RegistryDataStreamKeys.streams]",
+            "id": "def-common.RegistryDataStream.RegistryDataStreamKeys.streams",
             "type": "Array",
             "label": "[RegistryDataStreamKeys.streams]",
             "description": [],
@@ -11519,7 +11519,7 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryDataStream.[RegistryDataStreamKeys.package]",
+            "id": "def-common.RegistryDataStream.RegistryDataStreamKeys.package",
             "type": "string",
             "label": "[RegistryDataStreamKeys.package]",
             "description": [],
@@ -11530,7 +11530,7 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryDataStream.[RegistryDataStreamKeys.path]",
+            "id": "def-common.RegistryDataStream.RegistryDataStreamKeys.path",
             "type": "string",
             "label": "[RegistryDataStreamKeys.path]",
             "description": [],
@@ -11541,7 +11541,7 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryDataStream.[RegistryDataStreamKeys.ingest_pipeline]",
+            "id": "def-common.RegistryDataStream.RegistryDataStreamKeys.ingest_pipeline",
             "type": "string",
             "label": "[RegistryDataStreamKeys.ingest_pipeline]",
             "description": [],
@@ -11552,7 +11552,7 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryDataStream.[RegistryDataStreamKeys.elasticsearch]",
+            "id": "def-common.RegistryDataStream.RegistryDataStreamKeys.elasticsearch",
             "type": "Object",
             "label": "[RegistryDataStreamKeys.elasticsearch]",
             "description": [],
@@ -11573,7 +11573,7 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryDataStream.[RegistryDataStreamKeys.dataset_is_prefix]",
+            "id": "def-common.RegistryDataStream.RegistryDataStreamKeys.dataset_is_prefix",
             "type": "CompoundType",
             "label": "[RegistryDataStreamKeys.dataset_is_prefix]",
             "description": [],
@@ -11601,7 +11601,7 @@
         "children": [
           {
             "tags": [],
-            "id": "def-common.RegistryElasticsearch.'index_template.settings'",
+            "id": "def-common.RegistryElasticsearch.index_template.settings",
             "type": "Uncategorized",
             "label": "'index_template.settings'",
             "description": [],
@@ -11615,7 +11615,7 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryElasticsearch.'index_template.mappings'",
+            "id": "def-common.RegistryElasticsearch.index_template.mappings",
             "type": "Uncategorized",
             "label": "'index_template.mappings'",
             "description": [],
@@ -11721,7 +11721,7 @@
         "children": [
           {
             "tags": [],
-            "id": "def-common.RegistryInput.[RegistryInputKeys.type]",
+            "id": "def-common.RegistryInput.RegistryInputKeys.type",
             "type": "string",
             "label": "[RegistryInputKeys.type]",
             "description": [],
@@ -11732,7 +11732,7 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryInput.[RegistryInputKeys.title]",
+            "id": "def-common.RegistryInput.RegistryInputKeys.title",
             "type": "string",
             "label": "[RegistryInputKeys.title]",
             "description": [],
@@ -11743,7 +11743,7 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryInput.[RegistryInputKeys.description]",
+            "id": "def-common.RegistryInput.RegistryInputKeys.description",
             "type": "string",
             "label": "[RegistryInputKeys.description]",
             "description": [],
@@ -11754,7 +11754,7 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryInput.[RegistryInputKeys.template_path]",
+            "id": "def-common.RegistryInput.RegistryInputKeys.template_path",
             "type": "string",
             "label": "[RegistryInputKeys.template_path]",
             "description": [],
@@ -11768,7 +11768,7 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryInput.[RegistryInputKeys.condition]",
+            "id": "def-common.RegistryInput.RegistryInputKeys.condition",
             "type": "string",
             "label": "[RegistryInputKeys.condition]",
             "description": [],
@@ -11782,7 +11782,7 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryInput.[RegistryInputKeys.vars]",
+            "id": "def-common.RegistryInput.RegistryInputKeys.vars",
             "type": "Array",
             "label": "[RegistryInputKeys.vars]",
             "description": [],
@@ -11817,7 +11817,7 @@
         "children": [
           {
             "tags": [],
-            "id": "def-common.RegistryPolicyTemplate.[RegistryPolicyTemplateKeys.name]",
+            "id": "def-common.RegistryPolicyTemplate.RegistryPolicyTemplateKeys.name",
             "type": "string",
             "label": "[RegistryPolicyTemplateKeys.name]",
             "description": [],
@@ -11828,7 +11828,7 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryPolicyTemplate.[RegistryPolicyTemplateKeys.title]",
+            "id": "def-common.RegistryPolicyTemplate.RegistryPolicyTemplateKeys.title",
             "type": "string",
             "label": "[RegistryPolicyTemplateKeys.title]",
             "description": [],
@@ -11839,7 +11839,7 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryPolicyTemplate.[RegistryPolicyTemplateKeys.description]",
+            "id": "def-common.RegistryPolicyTemplate.RegistryPolicyTemplateKeys.description",
             "type": "string",
             "label": "[RegistryPolicyTemplateKeys.description]",
             "description": [],
@@ -11850,7 +11850,7 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryPolicyTemplate.[RegistryPolicyTemplateKeys.inputs]",
+            "id": "def-common.RegistryPolicyTemplate.RegistryPolicyTemplateKeys.inputs",
             "type": "Array",
             "label": "[RegistryPolicyTemplateKeys.inputs]",
             "description": [],
@@ -11871,7 +11871,7 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryPolicyTemplate.[RegistryPolicyTemplateKeys.multiple]",
+            "id": "def-common.RegistryPolicyTemplate.RegistryPolicyTemplateKeys.multiple",
             "type": "CompoundType",
             "label": "[RegistryPolicyTemplateKeys.multiple]",
             "description": [],
@@ -11899,7 +11899,7 @@
         "children": [
           {
             "tags": [],
-            "id": "def-common.RegistryStream.[RegistryStreamKeys.input]",
+            "id": "def-common.RegistryStream.RegistryStreamKeys.input",
             "type": "string",
             "label": "[RegistryStreamKeys.input]",
             "description": [],
@@ -11910,7 +11910,7 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryStream.[RegistryStreamKeys.title]",
+            "id": "def-common.RegistryStream.RegistryStreamKeys.title",
             "type": "string",
             "label": "[RegistryStreamKeys.title]",
             "description": [],
@@ -11921,7 +11921,7 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryStream.[RegistryStreamKeys.description]",
+            "id": "def-common.RegistryStream.RegistryStreamKeys.description",
             "type": "string",
             "label": "[RegistryStreamKeys.description]",
             "description": [],
@@ -11935,7 +11935,7 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryStream.[RegistryStreamKeys.enabled]",
+            "id": "def-common.RegistryStream.RegistryStreamKeys.enabled",
             "type": "CompoundType",
             "label": "[RegistryStreamKeys.enabled]",
             "description": [],
@@ -11949,7 +11949,7 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryStream.[RegistryStreamKeys.vars]",
+            "id": "def-common.RegistryStream.RegistryStreamKeys.vars",
             "type": "Array",
             "label": "[RegistryStreamKeys.vars]",
             "description": [],
@@ -11970,7 +11970,7 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryStream.[RegistryStreamKeys.template_path]",
+            "id": "def-common.RegistryStream.RegistryStreamKeys.template_path",
             "type": "string",
             "label": "[RegistryStreamKeys.template_path]",
             "description": [],
@@ -11995,7 +11995,7 @@
         "children": [
           {
             "tags": [],
-            "id": "def-common.RegistryVarsEntry.[RegistryVarsEntryKeys.name]",
+            "id": "def-common.RegistryVarsEntry.RegistryVarsEntryKeys.name",
             "type": "string",
             "label": "[RegistryVarsEntryKeys.name]",
             "description": [],
@@ -12006,7 +12006,7 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryVarsEntry.[RegistryVarsEntryKeys.title]",
+            "id": "def-common.RegistryVarsEntry.RegistryVarsEntryKeys.title",
             "type": "string",
             "label": "[RegistryVarsEntryKeys.title]",
             "description": [],
@@ -12020,7 +12020,7 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryVarsEntry.[RegistryVarsEntryKeys.description]",
+            "id": "def-common.RegistryVarsEntry.RegistryVarsEntryKeys.description",
             "type": "string",
             "label": "[RegistryVarsEntryKeys.description]",
             "description": [],
@@ -12034,7 +12034,7 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryVarsEntry.[RegistryVarsEntryKeys.type]",
+            "id": "def-common.RegistryVarsEntry.RegistryVarsEntryKeys.type",
             "type": "CompoundType",
             "label": "[RegistryVarsEntryKeys.type]",
             "description": [],
@@ -12054,7 +12054,7 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryVarsEntry.[RegistryVarsEntryKeys.required]",
+            "id": "def-common.RegistryVarsEntry.RegistryVarsEntryKeys.required",
             "type": "CompoundType",
             "label": "[RegistryVarsEntryKeys.required]",
             "description": [],
@@ -12068,7 +12068,7 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryVarsEntry.[RegistryVarsEntryKeys.show_user]",
+            "id": "def-common.RegistryVarsEntry.RegistryVarsEntryKeys.show_user",
             "type": "CompoundType",
             "label": "[RegistryVarsEntryKeys.show_user]",
             "description": [],
@@ -12082,7 +12082,7 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryVarsEntry.[RegistryVarsEntryKeys.multi]",
+            "id": "def-common.RegistryVarsEntry.RegistryVarsEntryKeys.multi",
             "type": "CompoundType",
             "label": "[RegistryVarsEntryKeys.multi]",
             "description": [],
@@ -12096,7 +12096,7 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryVarsEntry.[RegistryVarsEntryKeys.default]",
+            "id": "def-common.RegistryVarsEntry.RegistryVarsEntryKeys.default",
             "type": "CompoundType",
             "label": "[RegistryVarsEntryKeys.default]",
             "description": [],
@@ -12110,7 +12110,7 @@
           },
           {
             "tags": [],
-            "id": "def-common.RegistryVarsEntry.[RegistryVarsEntryKeys.os]",
+            "id": "def-common.RegistryVarsEntry.RegistryVarsEntryKeys.os",
             "type": "Object",
             "label": "[RegistryVarsEntryKeys.os]",
             "description": [],

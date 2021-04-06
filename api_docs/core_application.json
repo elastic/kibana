@@ -431,7 +431,7 @@
                 }
               },
               {
-                "id": "def-public.ScopedHistory.createHref.{-prependBasePath = true }.{ prependBasePath = true }",
+                "id": "def-public.ScopedHistory.createHref.prependBasePathtrue.prependBasePathtrue",
                 "type": "Object",
                 "label": "{ prependBasePath = true }",
                 "tags": [],
@@ -439,7 +439,7 @@
                 "children": [
                   {
                     "tags": [],
-                    "id": "def-public.ScopedHistory.createHref.{-prependBasePath = true }.{ prependBasePath = true }.prependBasePath",
+                    "id": "def-public.ScopedHistory.createHref.prependBasePathtrue.prependBasePathtrue.prependBasePath",
                     "type": "CompoundType",
                     "label": "prependBasePath",
                     "description": [],

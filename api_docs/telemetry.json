@@ -185,7 +185,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.FetcherTask.start.{-savedObjects, elasticsearch }",
+                "id": "def-server.FetcherTask.start.savedObjectselasticsearch",
                 "type": "Object",
                 "label": "{ savedObjects, elasticsearch }",
                 "isRequired": true,
@@ -205,7 +205,7 @@
                 }
               },
               {
-                "id": "def-server.FetcherTask.start.{-telemetryCollectionManager }",
+                "id": "def-server.FetcherTask.start.telemetryCollectionManager",
                 "type": "Object",
                 "label": "{ telemetryCollectionManager }",
                 "isRequired": true,
@@ -316,7 +316,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-server.getClusterUuids.{-esClient }",
+            "id": "def-server.getClusterUuids.esClient",
             "type": "Object",
             "label": "{ esClient }",
             "isRequired": true,

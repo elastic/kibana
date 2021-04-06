@@ -1195,7 +1195,7 @@
               "lineNumber": 426
             },
             "signature": [
-              "\"None\" | \"Linear\" | \"Zero\" | \"Carry\" | \"Lookahead\" | undefined"
+              "\"None\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | undefined"
             ]
           },
           {

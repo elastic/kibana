@@ -244,7 +244,7 @@
                 }
               },
               {
-                "id": "def-server.EnhancedDataServerPlugin.start.{-taskManager }",
+                "id": "def-server.EnhancedDataServerPlugin.start.taskManager",
                 "type": "Object",
                 "label": "{ taskManager }",
                 "isRequired": true,
@@ -368,7 +368,7 @@
             }
           },
           {
-            "id": "def-common.pollSearch.{-pollInterval = 1000, abortSignal }",
+            "id": "def-common.pollSearch.pollInterval1000abortSignal",
             "type": "Object",
             "label": "{ pollInterval = 1000, abortSignal }",
             "isRequired": true,

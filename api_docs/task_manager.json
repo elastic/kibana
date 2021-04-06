@@ -167,7 +167,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-server.TaskManagerPlugin.start.{-savedObjects, elasticsearch }",
+                "id": "def-server.TaskManagerPlugin.start.savedObjectselasticsearch",
                 "type": "Object",
                 "label": "{ savedObjects, elasticsearch }",
                 "isRequired": true,

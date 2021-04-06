@@ -19,7 +19,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 25
+              "lineNumber": 26
             },
             "signature": [
               {
@@ -39,7 +39,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 26
+              "lineNumber": 27
             },
             "signature": [
               {
@@ -55,7 +55,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 24
+          "lineNumber": 25
         },
         "initialIsOpen": false
       },
@@ -145,13 +145,13 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 97
+              "lineNumber": 100
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 96
+          "lineNumber": 99
         },
         "initialIsOpen": false
       },
@@ -281,7 +281,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 30
+              "lineNumber": 31
             }
           },
           {
@@ -292,7 +292,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 31
+              "lineNumber": 32
             }
           },
           {
@@ -303,7 +303,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 32
+              "lineNumber": 33
             }
           },
           {
@@ -314,7 +314,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 33
+              "lineNumber": 34
             }
           },
           {
@@ -325,7 +325,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 34
+              "lineNumber": 35
             },
             "signature": [
               "{ [fieldName: string]: { count: number; cardinality: number; top_hits: { count: number; value: any; }[]; mean_value?: number | undefined; median_value?: number | undefined; max_value?: number | undefined; min_value?: number | undefined; earliest?: string | undefined; latest?: string | undefined; }; }"
@@ -339,7 +339,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 47
+              "lineNumber": 48
             }
           },
           {
@@ -350,7 +350,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 48
+              "lineNumber": 49
             }
           },
           {
@@ -361,7 +361,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 49
+              "lineNumber": 50
             },
             "signature": [
               "{ properties: { [fieldName: string]: { type: ",
@@ -414,7 +414,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 62
+              "lineNumber": 63
             }
           },
           {
@@ -425,7 +425,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 63
+              "lineNumber": 64
             }
           },
           {
@@ -436,7 +436,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 64
+              "lineNumber": 65
             }
           },
           {
@@ -447,7 +447,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 65
+              "lineNumber": 66
             }
           },
           {
@@ -458,7 +458,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 66
+              "lineNumber": 67
             },
             "signature": [
               "string[] | undefined"
@@ -472,7 +472,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 67
+              "lineNumber": 68
             },
             "signature": [
               "string[] | undefined"
@@ -486,7 +486,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 68
+              "lineNumber": 69
             },
             "signature": [
               "string | undefined"
@@ -500,7 +500,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 69
+              "lineNumber": 70
             },
             "signature": [
               "string | undefined"
@@ -514,7 +514,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 70
+              "lineNumber": 71
             },
             "signature": [
               "string | undefined"
@@ -528,7 +528,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 71
+              "lineNumber": 72
             },
             "signature": [
               "string[] | undefined"
@@ -542,7 +542,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 72
+              "lineNumber": 73
             },
             "signature": [
               "string[] | undefined"
@@ -556,7 +556,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 73
+              "lineNumber": 74
             },
             "signature": [
               "string | undefined"
@@ -570,7 +570,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 74
+              "lineNumber": 75
             },
             "signature": [
               "boolean | undefined"
@@ -579,7 +579,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 29
+          "lineNumber": 30
         },
         "initialIsOpen": false
       },
@@ -598,13 +598,13 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 11
+              "lineNumber": 12
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 10
+          "lineNumber": 11
         },
         "initialIsOpen": false
       },
@@ -1008,7 +1008,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 91
+              "lineNumber": 94
             }
           },
           {
@@ -1019,7 +1019,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 92
+              "lineNumber": 95
             }
           },
           {
@@ -1030,7 +1030,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 93
+              "lineNumber": 96
             },
             "signature": [
               {
@@ -1045,7 +1045,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 90
+          "lineNumber": 93
         },
         "initialIsOpen": false
       },
@@ -1064,7 +1064,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 80
+              "lineNumber": 81
             }
           },
           {
@@ -1075,7 +1075,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 81
+              "lineNumber": 82
             }
           },
           {
@@ -1086,7 +1086,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 82
+              "lineNumber": 83
             },
             "signature": [
               "string | undefined"
@@ -1100,7 +1100,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 83
+              "lineNumber": 84
             },
             "signature": [
               "string | undefined"
@@ -1114,7 +1114,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 84
+              "lineNumber": 85
             }
           },
           {
@@ -1125,7 +1125,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 85
+              "lineNumber": 86
             },
             "signature": [
               {
@@ -1141,15 +1141,17 @@
           {
             "tags": [],
             "id": "def-public.ImportResponse.error",
-            "type": "Any",
+            "type": "Object",
             "label": "error",
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 86
+              "lineNumber": 87
             },
             "signature": [
-              "any"
+              "{ error: ",
+              "ErrorCause",
+              "; } | undefined"
             ]
           },
           {
@@ -1160,7 +1162,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 87
+              "lineNumber": 90
             },
             "signature": [
               "boolean | undefined"
@@ -1169,7 +1171,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 79
+          "lineNumber": 80
         },
         "initialIsOpen": false
       },
@@ -1262,7 +1264,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 124
+              "lineNumber": 127
             }
           },
           {
@@ -1273,7 +1275,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 125
+              "lineNumber": 128
             },
             "signature": [
               "any[]"
@@ -1282,7 +1284,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 123
+          "lineNumber": 126
         },
         "initialIsOpen": false
       },
@@ -1301,7 +1303,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 119
+              "lineNumber": 122
             }
           },
           {
@@ -1312,7 +1314,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 120
+              "lineNumber": 123
             },
             "signature": [
               {
@@ -1327,7 +1329,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 118
+          "lineNumber": 121
         },
         "initialIsOpen": false
       },
@@ -1346,7 +1348,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 15
+              "lineNumber": 16
             },
             "signature": [
               "any"
@@ -1355,7 +1357,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 14
+          "lineNumber": 15
         },
         "initialIsOpen": false
       },
@@ -1374,7 +1376,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 110
+              "lineNumber": 113
             },
             "signature": [
               "{ created_by: string; } | undefined"
@@ -1388,7 +1390,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 113
+              "lineNumber": 116
             },
             "signature": [
               "{ [key: string]: any; }"
@@ -1397,7 +1399,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 109
+          "lineNumber": 112
         },
         "initialIsOpen": false
       },
@@ -1416,7 +1418,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 103
+              "lineNumber": 106
             },
             "signature": [
               "string | undefined"
@@ -1430,7 +1432,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 104
+              "lineNumber": 107
             }
           },
           {
@@ -1441,7 +1443,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 105
+              "lineNumber": 108
             },
             "signature": [
               "any[]"
@@ -1455,7 +1457,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 106
+              "lineNumber": 109
             },
             "signature": [
               "any"
@@ -1464,7 +1466,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 102
+          "lineNumber": 105
         },
         "initialIsOpen": false
       }
@@ -1509,7 +1511,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 18
+          "lineNumber": 19
         },
         "signature": [
           "InputOverrides & { column_names: string[]; has_header_row: boolean; should_trim_fields: boolean; }"
@@ -1524,7 +1526,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 100
+          "lineNumber": 103
         },
         "signature": [
           "string | object | ",
@@ -1561,7 +1563,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 77
+          "lineNumber": 78
         },
         "signature": [
           "any[]"
@@ -1671,7 +1673,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 25
+              "lineNumber": 26
             },
             "signature": [
               {
@@ -1691,7 +1693,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 26
+              "lineNumber": 27
             },
             "signature": [
               {
@@ -1707,7 +1709,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 24
+          "lineNumber": 25
         },
         "initialIsOpen": false
       },
@@ -1726,13 +1728,13 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 97
+              "lineNumber": 100
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 96
+          "lineNumber": 99
         },
         "initialIsOpen": false
       },
@@ -1751,7 +1753,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 30
+              "lineNumber": 31
             }
           },
           {
@@ -1762,7 +1764,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 31
+              "lineNumber": 32
             }
           },
           {
@@ -1773,7 +1775,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 32
+              "lineNumber": 33
             }
           },
           {
@@ -1784,7 +1786,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 33
+              "lineNumber": 34
             }
           },
           {
@@ -1795,7 +1797,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 34
+              "lineNumber": 35
             },
             "signature": [
               "{ [fieldName: string]: { count: number; cardinality: number; top_hits: { count: number; value: any; }[]; mean_value?: number | undefined; median_value?: number | undefined; max_value?: number | undefined; min_value?: number | undefined; earliest?: string | undefined; latest?: string | undefined; }; }"
@@ -1809,7 +1811,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 47
+              "lineNumber": 48
             }
           },
           {
@@ -1820,7 +1822,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 48
+              "lineNumber": 49
             }
           },
           {
@@ -1831,7 +1833,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 49
+              "lineNumber": 50
             },
             "signature": [
               "{ properties: { [fieldName: string]: { type: ",
@@ -1884,7 +1886,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 62
+              "lineNumber": 63
             }
           },
           {
@@ -1895,7 +1897,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 63
+              "lineNumber": 64
             }
           },
           {
@@ -1906,7 +1908,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 64
+              "lineNumber": 65
             }
           },
           {
@@ -1917,7 +1919,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 65
+              "lineNumber": 66
             }
           },
           {
@@ -1928,7 +1930,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 66
+              "lineNumber": 67
             },
             "signature": [
               "string[] | undefined"
@@ -1942,7 +1944,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 67
+              "lineNumber": 68
             },
             "signature": [
               "string[] | undefined"
@@ -1956,7 +1958,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 68
+              "lineNumber": 69
             },
             "signature": [
               "string | undefined"
@@ -1970,7 +1972,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 69
+              "lineNumber": 70
             },
             "signature": [
               "string | undefined"
@@ -1984,7 +1986,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 70
+              "lineNumber": 71
             },
             "signature": [
               "string | undefined"
@@ -1998,7 +2000,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 71
+              "lineNumber": 72
             },
             "signature": [
               "string[] | undefined"
@@ -2012,7 +2014,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 72
+              "lineNumber": 73
             },
             "signature": [
               "string[] | undefined"
@@ -2026,7 +2028,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 73
+              "lineNumber": 74
             },
             "signature": [
               "string | undefined"
@@ -2040,7 +2042,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 74
+              "lineNumber": 75
             },
             "signature": [
               "boolean | undefined"
@@ -2049,7 +2051,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 29
+          "lineNumber": 30
         },
         "initialIsOpen": false
       },
@@ -2068,13 +2070,13 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 11
+              "lineNumber": 12
             }
           }
         ],
         "source": {
           "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 10
+          "lineNumber": 11
         },
         "initialIsOpen": false
       },
@@ -2093,7 +2095,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 91
+              "lineNumber": 94
             }
           },
           {
@@ -2104,7 +2106,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 92
+              "lineNumber": 95
             }
           },
           {
@@ -2115,7 +2117,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 93
+              "lineNumber": 96
             },
             "signature": [
               {
@@ -2130,7 +2132,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 90
+          "lineNumber": 93
         },
         "initialIsOpen": false
       },
@@ -2149,7 +2151,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 80
+              "lineNumber": 81
             }
           },
           {
@@ -2160,7 +2162,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 81
+              "lineNumber": 82
             }
           },
           {
@@ -2171,7 +2173,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 82
+              "lineNumber": 83
             },
             "signature": [
               "string | undefined"
@@ -2185,7 +2187,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 83
+              "lineNumber": 84
             },
             "signature": [
               "string | undefined"
@@ -2199,7 +2201,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 84
+              "lineNumber": 85
             }
           },
           {
@@ -2210,7 +2212,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 85
+              "lineNumber": 86
             },
             "signature": [
               {
@@ -2226,15 +2228,17 @@
           {
             "tags": [],
             "id": "def-common.ImportResponse.error",
-            "type": "Any",
+            "type": "Object",
             "label": "error",
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 86
+              "lineNumber": 87
             },
             "signature": [
-              "any"
+              "{ error: ",
+              "ErrorCause",
+              "; } | undefined"
             ]
           },
           {
@@ -2245,7 +2249,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 87
+              "lineNumber": 90
             },
             "signature": [
               "boolean | undefined"
@@ -2254,7 +2258,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 79
+          "lineNumber": 80
         },
         "initialIsOpen": false
       },
@@ -2273,7 +2277,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 124
+              "lineNumber": 127
             }
           },
           {
@@ -2284,7 +2288,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 125
+              "lineNumber": 128
             },
             "signature": [
               "any[]"
@@ -2293,7 +2297,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 123
+          "lineNumber": 126
         },
         "initialIsOpen": false
       },
@@ -2312,7 +2316,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 119
+              "lineNumber": 122
             }
           },
           {
@@ -2323,7 +2327,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 120
+              "lineNumber": 123
             },
             "signature": [
               {
@@ -2338,7 +2342,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 118
+          "lineNumber": 121
         },
         "initialIsOpen": false
       },
@@ -2357,7 +2361,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 15
+              "lineNumber": 16
             },
             "signature": [
               "any"
@@ -2366,7 +2370,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 14
+          "lineNumber": 15
         },
         "initialIsOpen": false
       },
@@ -2385,7 +2389,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 110
+              "lineNumber": 113
             },
             "signature": [
               "{ created_by: string; } | undefined"
@@ -2399,7 +2403,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 113
+              "lineNumber": 116
             },
             "signature": [
               "{ [key: string]: any; }"
@@ -2408,7 +2412,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 109
+          "lineNumber": 112
         },
         "initialIsOpen": false
       },
@@ -2427,7 +2431,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 103
+              "lineNumber": 106
             },
             "signature": [
               "string | undefined"
@@ -2441,7 +2445,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 104
+              "lineNumber": 107
             }
           },
           {
@@ -2452,7 +2456,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 105
+              "lineNumber": 108
             },
             "signature": [
               "any[]"
@@ -2466,7 +2470,7 @@
             "description": [],
             "source": {
               "path": "x-pack/plugins/file_upload/common/types.ts",
-              "lineNumber": 106
+              "lineNumber": 109
             },
             "signature": [
               "any"
@@ -2475,7 +2479,7 @@
         ],
         "source": {
           "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 102
+          "lineNumber": 105
         },
         "initialIsOpen": false
       }
@@ -2520,7 +2524,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 18
+          "lineNumber": 19
         },
         "signature": [
           "InputOverrides & { column_names: string[]; has_header_row: boolean; should_trim_fields: boolean; }"
@@ -2535,7 +2539,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 100
+          "lineNumber": 103
         },
         "signature": [
           "string | object | ",
@@ -2572,7 +2576,7 @@
         "description": [],
         "source": {
           "path": "x-pack/plugins/file_upload/common/types.ts",
-          "lineNumber": 77
+          "lineNumber": 78
         },
         "signature": [
           "any[]"

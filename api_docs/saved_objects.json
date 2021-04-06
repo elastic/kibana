@@ -509,7 +509,7 @@
             ],
             "children": [
               {
-                "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.{\n-   attributes,\n    id,\n    references = [],\n  }.{\n    attributes,\n    id,\n    references = [],\n  }",
+                "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.attributesidreferences.attributesidreferences",
                 "type": "Object",
                 "label": "{\n    attributes,\n    id,\n    references = [],\n  }",
                 "tags": [],
@@ -517,7 +517,7 @@
                 "children": [
                   {
                     "tags": [],
-                    "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.{\n-   attributes,\n    id,\n    references = [],\n  }.{\n    attributes,\n    id,\n    references = [],\n  }.attributes",
+                    "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.attributesidreferences.attributesidreferences.attributes",
                     "type": "Object",
                     "label": "attributes",
                     "description": [],
@@ -531,7 +531,7 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.{\n-   attributes,\n    id,\n    references = [],\n  }.{\n    attributes,\n    id,\n    references = [],\n  }.id",
+                    "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.attributesidreferences.attributesidreferences.id",
                     "type": "string",
                     "label": "id",
                     "description": [],
@@ -542,7 +542,7 @@
                   },
                   {
                     "tags": [],
-                    "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.{\n-   attributes,\n    id,\n    references = [],\n  }.{\n    attributes,\n    id,\n    references = [],\n  }.references",
+                    "id": "def-public.SavedObjectLoader.mapSavedObjectApiHits.attributesidreferences.attributesidreferences.references",
                     "type": "Array",
                     "label": "references",
                     "description": [],

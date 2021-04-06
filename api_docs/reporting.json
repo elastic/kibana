@@ -691,7 +691,7 @@
                 }
               },
               {
-                "id": "def-public.ReportingPublicPlugin.setup.{-home, management, licensing, uiActions, share }",
+                "id": "def-public.ReportingPublicPlugin.setup.homemanagementlicensinguiActionsshare",
                 "type": "Object",
                 "label": "{ home, management, licensing, uiActions, share }",
                 "isRequired": true,

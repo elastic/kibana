@@ -707,7 +707,7 @@
             }
           },
           {
-            "id": "def-public.getVisSchemas.{-timeRange, timefilter }",
+            "id": "def-public.getVisSchemas.timeRangetimefilter",
             "type": "Object",
             "label": "{ timeRange, timefilter }",
             "isRequired": true,
@@ -810,7 +810,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.VisualizationContainer.{\n- 'data-test-subj': dataTestSubj = '',\n  className,\n  children,\n  handlers,\n  showNoResult = false,\n}",
+            "id": "def-public.VisualizationContainer.datatestsubjdataTestSubjclassNamechildrenhandlersshowNoResultfalse",
             "type": "Object",
             "label": "{\n  'data-test-subj': dataTestSubj = '',\n  className,\n  children,\n  handlers,\n  showNoResult = false,\n}",
             "isRequired": true,
@@ -984,7 +984,7 @@
         "children": [
           {
             "tags": [],
-            "id": "def-public.ISchemas.[AggGroupNames.Buckets]",
+            "id": "def-public.ISchemas.AggGroupNames.Buckets",
             "type": "Array",
             "label": "[AggGroupNames.Buckets]",
             "description": [],
@@ -1005,7 +1005,7 @@
           },
           {
             "tags": [],
-            "id": "def-public.ISchemas.[AggGroupNames.Metrics]",
+            "id": "def-public.ISchemas.AggGroupNames.Metrics",
             "type": "Array",
             "label": "[AggGroupNames.Metrics]",
             "description": [],

@@ -90,7 +90,7 @@
                 }
               },
               {
-                "id": "def-public.DevToolsPlugin.setup.{-urlForwarding }.{ urlForwarding }",
+                "id": "def-public.DevToolsPlugin.setup.urlForwarding.urlForwarding",
                 "type": "Object",
                 "label": "{ urlForwarding }",
                 "tags": [],
@@ -98,7 +98,7 @@
                 "children": [
                   {
                     "tags": [],
-                    "id": "def-public.DevToolsPlugin.setup.{-urlForwarding }.{ urlForwarding }.urlForwarding",
+                    "id": "def-public.DevToolsPlugin.setup.urlForwarding.urlForwarding.urlForwarding",
                     "type": "Object",
                     "label": "urlForwarding",
                     "description": [],

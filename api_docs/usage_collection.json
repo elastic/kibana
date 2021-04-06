@@ -272,7 +272,7 @@
                 }
               },
               {
-                "id": "def-server.Collector.Unnamed.{\n-     type,\n      init,\n      fetch,\n      isReady,\n      extendFetchContext = {},\n      ...options\n    }",
+                "id": "def-server.Collector.Unnamed.typeinitfetchisReadyextendFetchContext...options",
                 "type": "CompoundType",
                 "label": "{\n      type,\n      init,\n      fetch,\n      isReady,\n      extendFetchContext = {},\n      ...options\n    }",
                 "isRequired": true,

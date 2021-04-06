@@ -20,7 +20,7 @@
         "description": [],
         "children": [
           {
-            "id": "def-public.createSavedSearchesLoader.{-savedObjectsClient, savedObjects }",
+            "id": "def-public.createSavedSearchesLoader.savedObjectsClientsavedObjects",
             "type": "Object",
             "label": "{ savedObjectsClient, savedObjects }",
             "isRequired": true,

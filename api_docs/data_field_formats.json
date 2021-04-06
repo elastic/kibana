@@ -300,7 +300,7 @@
             "label": "id",
             "description": [],
             "source": {
-              "path": "src/plugins/data/common/field_formats/converters/color.ts",
+              "path": "src/plugins/data/common/field_formats/converters/color.tsx",
               "lineNumber": 20
             },
             "signature": [
@@ -320,7 +320,7 @@
             "label": "title",
             "description": [],
             "source": {
-              "path": "src/plugins/data/common/field_formats/converters/color.ts",
+              "path": "src/plugins/data/common/field_formats/converters/color.tsx",
               "lineNumber": 21
             }
           },
@@ -331,7 +331,7 @@
             "label": "fieldType",
             "description": [],
             "source": {
-              "path": "src/plugins/data/common/field_formats/converters/color.ts",
+              "path": "src/plugins/data/common/field_formats/converters/color.tsx",
               "lineNumber": 24
             },
             "signature": [
@@ -357,7 +357,7 @@
             "tags": [],
             "returnComment": [],
             "source": {
-              "path": "src/plugins/data/common/field_formats/converters/color.ts",
+              "path": "src/plugins/data/common/field_formats/converters/color.tsx",
               "lineNumber": 26
             }
           },
@@ -380,7 +380,7 @@
                 ],
                 "description": [],
                 "source": {
-                  "path": "src/plugins/data/common/field_formats/converters/color.ts",
+                  "path": "src/plugins/data/common/field_formats/converters/color.tsx",
                   "lineNumber": 33
                 }
               }
@@ -388,7 +388,7 @@
             "tags": [],
             "returnComment": [],
             "source": {
-              "path": "src/plugins/data/common/field_formats/converters/color.ts",
+              "path": "src/plugins/data/common/field_formats/converters/color.tsx",
               "lineNumber": 33
             }
           },
@@ -406,7 +406,7 @@
                 ],
                 "description": [],
                 "source": {
-                  "path": "src/plugins/data/common/field_formats/converters/color.ts",
+                  "path": "src/plugins/data/common/field_formats/converters/color.tsx",
                   "lineNumber": 52
                 }
               }
@@ -417,7 +417,7 @@
             "description": [],
             "label": "htmlConvert",
             "source": {
-              "path": "src/plugins/data/common/field_formats/converters/color.ts",
+              "path": "src/plugins/data/common/field_formats/converters/color.tsx",
               "lineNumber": 52
             },
             "tags": [],
@@ -425,7 +425,7 @@
           }
         ],
         "source": {
-          "path": "src/plugins/data/common/field_formats/converters/color.ts",
+          "path": "src/plugins/data/common/field_formats/converters/color.tsx",
           "lineNumber": 19
         },
         "initialIsOpen": false
@@ -2994,8 +2994,8 @@
             "label": "id",
             "description": [],
             "source": {
-              "path": "src/plugins/data/common/field_formats/converters/source.ts",
-              "lineNumber": 45
+              "path": "src/plugins/data/common/field_formats/converters/source.tsx",
+              "lineNumber": 39
             },
             "signature": [
               {
@@ -3014,8 +3014,8 @@
             "label": "title",
             "description": [],
             "source": {
-              "path": "src/plugins/data/common/field_formats/converters/source.ts",
-              "lineNumber": 46
+              "path": "src/plugins/data/common/field_formats/converters/source.tsx",
+              "lineNumber": 40
             }
           },
           {
@@ -3025,8 +3025,8 @@
             "label": "fieldType",
             "description": [],
             "source": {
-              "path": "src/plugins/data/common/field_formats/converters/source.ts",
-              "lineNumber": 47
+              "path": "src/plugins/data/common/field_formats/converters/source.tsx",
+              "lineNumber": 41
             },
             "signature": [
               {
@@ -3052,8 +3052,8 @@
                 ],
                 "description": [],
                 "source": {
-                  "path": "src/plugins/data/common/field_formats/converters/source.ts",
-                  "lineNumber": 49
+                  "path": "src/plugins/data/common/field_formats/converters/source.tsx",
+                  "lineNumber": 43
                 }
               }
             ],
@@ -3063,8 +3063,8 @@
             "description": [],
             "label": "textConvert",
             "source": {
-              "path": "src/plugins/data/common/field_formats/converters/source.ts",
-              "lineNumber": 49
+              "path": "src/plugins/data/common/field_formats/converters/source.tsx",
+              "lineNumber": 43
             },
             "tags": [],
             "returnComment": []
@@ -3083,8 +3083,8 @@
                 ],
                 "description": [],
                 "source": {
-                  "path": "src/plugins/data/common/field_formats/converters/source.ts",
-                  "lineNumber": 51
+                  "path": "src/plugins/data/common/field_formats/converters/source.tsx",
+                  "lineNumber": 45
                 }
               },
               {
@@ -3104,8 +3104,8 @@
                 ],
                 "description": [],
                 "source": {
-                  "path": "src/plugins/data/common/field_formats/converters/source.ts",
-                  "lineNumber": 51
+                  "path": "src/plugins/data/common/field_formats/converters/source.tsx",
+                  "lineNumber": 45
                 }
               }
             ],
@@ -3123,16 +3123,16 @@
             "description": [],
             "label": "htmlConvert",
             "source": {
-              "path": "src/plugins/data/common/field_formats/converters/source.ts",
-              "lineNumber": 51
+              "path": "src/plugins/data/common/field_formats/converters/source.tsx",
+              "lineNumber": 45
             },
             "tags": [],
             "returnComment": []
           }
         ],
         "source": {
-          "path": "src/plugins/data/common/field_formats/converters/source.ts",
-          "lineNumber": 44
+          "path": "src/plugins/data/common/field_formats/converters/source.tsx",
+          "lineNumber": 38
         },
         "initialIsOpen": false
       },

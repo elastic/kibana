@@ -8,7 +8,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.ColorPicker.{\n- onChange,\n  color: selectedColor,\n  label,\n  useLegacyColors = true,\n  colorIsOverwritten = true,\n  onKeyDown,\n}",
+            "id": "def-public.ColorPicker.onChangecolorselectedColorlabeluseLegacyColorstruecolorIsOverwrittentrueonKeyDown",
             "type": "Object",
             "label": "{\n  onChange,\n  color: selectedColor,\n  label,\n  useLegacyColors = true,\n  colorIsOverwritten = true,\n  onKeyDown,\n}",
             "isRequired": true,
@@ -74,7 +74,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.CurrentTime.{-isDarkMode, domainEnd }",
+            "id": "def-public.CurrentTime.isDarkModedomainEnd",
             "type": "CompoundType",
             "label": "{ isDarkMode, domainEnd }",
             "isRequired": true,
@@ -108,7 +108,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.Endzones.{\n- isDarkMode,\n  domainStart,\n  domainEnd,\n  interval,\n  domainMin,\n  domainMax,\n  hideTooltips = true,\n  isFullBin = false,\n}",
+            "id": "def-public.Endzones.isDarkModedomainStartdomainEndintervaldomainMindomainMaxhideTooltipstrueisFullBinfalse",
             "type": "CompoundType",
             "label": "{\n  isDarkMode,\n  domainStart,\n  domainEnd,\n  interval,\n  domainMin,\n  domainMax,\n  hideTooltips = true,\n  isFullBin = false,\n}",
             "isRequired": true,
@@ -1766,13 +1766,13 @@
         "tags": [],
         "children": [
           {
-            "id": "def-public.vislibColorMaps.[ColorSchemas.Blues]",
+            "id": "def-public.vislibColorMaps.ColorSchemas.Blues",
             "type": "Object",
             "tags": [],
             "children": [
               {
                 "tags": [],
-                "id": "def-public.vislibColorMaps.[ColorSchemas.Blues].id",
+                "id": "def-public.vislibColorMaps.ColorSchemas.Blues.id",
                 "type": "string",
                 "label": "id",
                 "description": [],
@@ -1793,7 +1793,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.vislibColorMaps.[ColorSchemas.Blues].label",
+                "id": "def-public.vislibColorMaps.ColorSchemas.Blues.label",
                 "type": "string",
                 "label": "label",
                 "description": [],
@@ -1804,7 +1804,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.vislibColorMaps.[ColorSchemas.Blues].value",
+                "id": "def-public.vislibColorMaps.ColorSchemas.Blues.value",
                 "type": "Array",
                 "label": "value",
                 "description": [],
@@ -1827,13 +1827,13 @@
             }
           },
           {
-            "id": "def-public.vislibColorMaps.[ColorSchemas.Greens]",
+            "id": "def-public.vislibColorMaps.ColorSchemas.Greens",
             "type": "Object",
             "tags": [],
             "children": [
               {
                 "tags": [],
-                "id": "def-public.vislibColorMaps.[ColorSchemas.Greens].id",
+                "id": "def-public.vislibColorMaps.ColorSchemas.Greens.id",
                 "type": "string",
                 "label": "id",
                 "description": [],
@@ -1854,7 +1854,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.vislibColorMaps.[ColorSchemas.Greens].label",
+                "id": "def-public.vislibColorMaps.ColorSchemas.Greens.label",
                 "type": "string",
                 "label": "label",
                 "description": [],
@@ -1865,7 +1865,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.vislibColorMaps.[ColorSchemas.Greens].value",
+                "id": "def-public.vislibColorMaps.ColorSchemas.Greens.value",
                 "type": "Array",
                 "label": "value",
                 "description": [],
@@ -1886,13 +1886,13 @@
             }
           },
           {
-            "id": "def-public.vislibColorMaps.[ColorSchemas.Greys]",
+            "id": "def-public.vislibColorMaps.ColorSchemas.Greys",
             "type": "Object",
             "tags": [],
             "children": [
               {
                 "tags": [],
-                "id": "def-public.vislibColorMaps.[ColorSchemas.Greys].id",
+                "id": "def-public.vislibColorMaps.ColorSchemas.Greys.id",
                 "type": "string",
                 "label": "id",
                 "description": [],
@@ -1913,7 +1913,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.vislibColorMaps.[ColorSchemas.Greys].label",
+                "id": "def-public.vislibColorMaps.ColorSchemas.Greys.label",
                 "type": "string",
                 "label": "label",
                 "description": [],
@@ -1924,7 +1924,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.vislibColorMaps.[ColorSchemas.Greys].value",
+                "id": "def-public.vislibColorMaps.ColorSchemas.Greys.value",
                 "type": "Array",
                 "label": "value",
                 "description": [],
@@ -1945,13 +1945,13 @@
             }
           },
           {
-            "id": "def-public.vislibColorMaps.[ColorSchemas.Reds]",
+            "id": "def-public.vislibColorMaps.ColorSchemas.Reds",
             "type": "Object",
             "tags": [],
             "children": [
               {
                 "tags": [],
-                "id": "def-public.vislibColorMaps.[ColorSchemas.Reds].id",
+                "id": "def-public.vislibColorMaps.ColorSchemas.Reds.id",
                 "type": "string",
                 "label": "id",
                 "description": [],
@@ -1972,7 +1972,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.vislibColorMaps.[ColorSchemas.Reds].label",
+                "id": "def-public.vislibColorMaps.ColorSchemas.Reds.label",
                 "type": "string",
                 "label": "label",
                 "description": [],
@@ -1983,7 +1983,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.vislibColorMaps.[ColorSchemas.Reds].value",
+                "id": "def-public.vislibColorMaps.ColorSchemas.Reds.value",
                 "type": "Array",
                 "label": "value",
                 "description": [],
@@ -2004,13 +2004,13 @@
             }
           },
           {
-            "id": "def-public.vislibColorMaps.[ColorSchemas.YellowToRed]",
+            "id": "def-public.vislibColorMaps.ColorSchemas.YellowToRed",
             "type": "Object",
             "tags": [],
             "children": [
               {
                 "tags": [],
-                "id": "def-public.vislibColorMaps.[ColorSchemas.YellowToRed].id",
+                "id": "def-public.vislibColorMaps.ColorSchemas.YellowToRed.id",
                 "type": "string",
                 "label": "id",
                 "description": [],
@@ -2031,7 +2031,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.vislibColorMaps.[ColorSchemas.YellowToRed].label",
+                "id": "def-public.vislibColorMaps.ColorSchemas.YellowToRed.label",
                 "type": "string",
                 "label": "label",
                 "description": [],
@@ -2042,7 +2042,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.vislibColorMaps.[ColorSchemas.YellowToRed].value",
+                "id": "def-public.vislibColorMaps.ColorSchemas.YellowToRed.value",
                 "type": "Array",
                 "label": "value",
                 "description": [],
@@ -2063,13 +2063,13 @@
             }
           },
           {
-            "id": "def-public.vislibColorMaps.[ColorSchemas.GreenToRed]",
+            "id": "def-public.vislibColorMaps.ColorSchemas.GreenToRed",
             "type": "Object",
             "tags": [],
             "children": [
               {
                 "tags": [],
-                "id": "def-public.vislibColorMaps.[ColorSchemas.GreenToRed].id",
+                "id": "def-public.vislibColorMaps.ColorSchemas.GreenToRed.id",
                 "type": "string",
                 "label": "id",
                 "description": [],
@@ -2090,7 +2090,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.vislibColorMaps.[ColorSchemas.GreenToRed].label",
+                "id": "def-public.vislibColorMaps.ColorSchemas.GreenToRed.label",
                 "type": "string",
                 "label": "label",
                 "description": [],
@@ -2101,7 +2101,7 @@
               },
               {
                 "tags": [],
-                "id": "def-public.vislibColorMaps.[ColorSchemas.GreenToRed].value",
+                "id": "def-public.vislibColorMaps.ColorSchemas.GreenToRed.value",
                 "type": "Array",
                 "label": "value",
                 "description": [],

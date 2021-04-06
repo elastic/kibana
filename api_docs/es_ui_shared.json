@@ -259,7 +259,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.AuthorizationProvider.{-privilegesEndpoint, httpClient, children }",
+            "id": "def-public.AuthorizationProvider.privilegesEndpointhttpClientchildren",
             "type": "Object",
             "label": "{ privilegesEndpoint, httpClient, children }",
             "isRequired": true,
@@ -340,7 +340,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.NotAuthorizedSection.{-title, message }",
+            "id": "def-public.NotAuthorizedSection.titlemessage",
             "type": "Object",
             "label": "{ title, message }",
             "isRequired": true,
@@ -372,7 +372,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.SectionError.{\n- title,\n  error,\n  actions,\n  ...rest\n}",
+            "id": "def-public.SectionError.titleerroractions...rest",
             "type": "CompoundType",
             "label": "{\n  title,\n  error,\n  actions,\n  ...rest\n}",
             "isRequired": true,
@@ -404,7 +404,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.SectionLoading.{-inline, children, ...rest }",
+            "id": "def-public.SectionLoading.inlinechildren...rest",
             "type": "CompoundType",
             "label": "{ inline, children, ...rest }",
             "isRequired": true,
@@ -456,7 +456,7 @@
             }
           },
           {
-            "id": "def-public.sendRequest.{-path, method, body, query, asSystemRequest }",
+            "id": "def-public.sendRequest.pathmethodbodyqueryasSystemRequest",
             "type": "Object",
             "label": "{ path, method, body, query, asSystemRequest }",
             "isRequired": true,
@@ -555,7 +555,7 @@
             }
           },
           {
-            "id": "def-public.useRequest.{-path, method, query, body, pollIntervalMs, initialData, deserializer }",
+            "id": "def-public.useRequest.pathmethodquerybodypollIntervalMsinitialDatadeserializer",
             "type": "Object",
             "label": "{ path, method, query, body, pollIntervalMs, initialData, deserializer }",
             "isRequired": true,
@@ -617,7 +617,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.WithPrivileges.{-privileges: requiredPrivileges, children }",
+            "id": "def-public.WithPrivileges.privilegesrequiredPrivilegeschildren",
             "type": "Object",
             "label": "{ privileges: requiredPrivileges, children }",
             "isRequired": true,
@@ -1302,7 +1302,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-server.handleEsError.{\n- error,\n  response,\n  handleCustomError,\n}",
+            "id": "def-server.handleEsError.errorresponsehandleCustomError",
             "type": "Object",
             "label": "{\n  error,\n  response,\n  handleCustomError,\n}",
             "isRequired": true,

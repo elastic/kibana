@@ -8,7 +8,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.RuntimeFieldEditor.{-defaultValue, onChange, docLinks, ctx }",
+            "id": "def-public.RuntimeFieldEditor.defaultValueonChangedocLinksctx",
             "type": "Object",
             "label": "{ defaultValue, onChange, docLinks, ctx }",
             "isRequired": true,
@@ -54,7 +54,7 @@
         "type": "Function",
         "children": [
           {
-            "id": "def-public.RuntimeFieldEditorFlyoutContent.{\n- onSave,\n  onCancel,\n  docLinks,\n  defaultValue: field,\n  ctx,\n}",
+            "id": "def-public.RuntimeFieldEditorFlyoutContent.onSaveonCanceldocLinksdefaultValuefieldctx",
             "type": "Object",
             "label": "{\n  onSave,\n  onCancel,\n  docLinks,\n  defaultValue: field,\n  ctx,\n}",
             "isRequired": true,

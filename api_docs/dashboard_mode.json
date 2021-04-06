@@ -112,7 +112,7 @@
                 }
               },
               {
-                "id": "def-server.DashboardModeServerPlugin.setup.{-security }",
+                "id": "def-server.DashboardModeServerPlugin.setup.security",
                 "type": "Object",
                 "label": "{ security }",
                 "isRequired": true,

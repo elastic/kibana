@@ -32,7 +32,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/vis_type_timeseries/common/types.ts",
-              "lineNumber": 71
+              "lineNumber": 74
             }
           }
         ],
@@ -46,7 +46,7 @@
         "label": "isVisSeriesData",
         "source": {
           "path": "src/plugins/vis_type_timeseries/common/types.ts",
-          "lineNumber": 71
+          "lineNumber": 74
         },
         "tags": [],
         "returnComment": [],
@@ -73,7 +73,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/vis_type_timeseries/common/types.ts",
-              "lineNumber": 68
+              "lineNumber": 71
             }
           }
         ],
@@ -86,7 +86,7 @@
         "label": "isVisTableData",
         "source": {
           "path": "src/plugins/vis_type_timeseries/common/types.ts",
-          "lineNumber": 68
+          "lineNumber": 71
         },
         "tags": [],
         "returnComment": [],

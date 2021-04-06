@@ -421,7 +421,7 @@
                 }
               },
               {
-                "id": "def-server.IndexPatternsServiceProvider.setup.{-expressions, usageCollection }",
+                "id": "def-server.IndexPatternsServiceProvider.setup.expressionsusageCollection",
                 "type": "Object",
                 "label": "{ expressions, usageCollection }",
                 "isRequired": true,
@@ -517,7 +517,7 @@
                 }
               },
               {
-                "id": "def-server.IndexPatternsServiceProvider.start.{-fieldFormats, logger }",
+                "id": "def-server.IndexPatternsServiceProvider.start.fieldFormatslogger",
                 "type": "Object",
                 "label": "{ fieldFormats, logger }",
                 "isRequired": true,
@@ -1288,7 +1288,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-common.IndexPattern.Unnamed.{\n-   spec = {},\n    fieldFormats,\n    shortDotsEnable = false,\n    metaFields = [],\n  }",
+                "id": "def-common.IndexPattern.Unnamed.specfieldFormatsshortDotsEnablefalsemetaFields",
                 "type": "Object",
                 "label": "{\n    spec = {},\n    fieldFormats,\n    shortDotsEnable = false,\n    metaFields = [],\n  }",
                 "isRequired": true,
@@ -2715,7 +2715,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-common.IndexPatternField.toSpec.{\n-   getFormatterForField,\n  }.{\n    getFormatterForField,\n  }",
+                "id": "def-common.IndexPatternField.toSpec.getFormatterForField.getFormatterForField",
                 "type": "Object",
                 "label": "{\n    getFormatterForField,\n  }",
                 "tags": [],
@@ -2723,7 +2723,7 @@
                 "children": [
                   {
                     "tags": [],
-                    "id": "def-common.IndexPatternField.toSpec.{\n-   getFormatterForField,\n  }.{\n    getFormatterForField,\n  }.getFormatterForField",
+                    "id": "def-common.IndexPatternField.toSpec.getFormatterForField.getFormatterForField.getFormatterForField",
                     "type": "Function",
                     "label": "getFormatterForField",
                     "description": [],
@@ -2825,7 +2825,7 @@
             "description": [],
             "children": [
               {
-                "id": "def-common.IndexPatternsService.Unnamed.{\n-   uiSettings,\n    savedObjectsClient,\n    apiClient,\n    fieldFormats,\n    onNotification,\n    onError,\n    onRedirectNoIndexPattern = () => {},\n  }",
+                "id": "def-common.IndexPatternsService.Unnamed.uiSettingssavedObjectsClientapiClientfieldFormatsonNotificationonErroronRedirectNoIndexPattern",
                 "type": "Object",
                 "label": "{\n    uiSettings,\n    savedObjectsClient,\n    apiClient,\n    fieldFormats,\n    onNotification,\n    onError,\n    onRedirectNoIndexPattern = () => {},\n  }",
                 "isRequired": true,

@@ -4,89 +4,85 @@
     "classes": [],
     "functions": [
       {
-        "id": "def-public.DashboardPicker",
-        "type": "Function",
-        "label": "DashboardPicker",
-        "signature": [
-          "(props: ",
-          "DashboardPickerProps",
-          ") => JSX.Element"
-        ],
-        "description": [],
-        "children": [
-          {
-            "id": "def-public.DashboardPicker.props",
-            "type": "Object",
-            "label": "props",
-            "isRequired": true,
-            "signature": [
-              {
-                "pluginId": "presentationUtil",
-                "scope": "public",
-                "docId": "kibPresentationUtilPluginApi",
-                "section": "def-public.DashboardPickerProps",
-                "text": "DashboardPickerProps"
-              }
-            ],
-            "description": [],
-            "source": {
-              "path": "src/plugins/presentation_util/public/components/dashboard_picker.tsx",
-              "lineNumber": 27
-            }
-          }
-        ],
         "tags": [],
-        "returnComment": [],
+        "id": "def-public.LazyDashboardPicker",
+        "type": "Function",
+        "label": "LazyDashboardPicker",
+        "description": [],
         "source": {
-          "path": "src/plugins/presentation_util/public/components/dashboard_picker.tsx",
-          "lineNumber": 27
+          "path": "src/plugins/presentation_util/public/components/index.tsx",
+          "lineNumber": 28
         },
+        "signature": [
+          "React.LazyExoticComponent<typeof ",
+          "DashboardPicker",
+          ">"
+        ],
         "initialIsOpen": false
       },
       {
-        "id": "def-public.SavedObjectSaveModalDashboard",
+        "tags": [],
+        "id": "def-public.LazySavedObjectSaveModalDashboard",
         "type": "Function",
-        "label": "SavedObjectSaveModalDashboard",
-        "signature": [
-          "(props: ",
-          {
-            "pluginId": "presentationUtil",
-            "scope": "public",
-            "docId": "kibPresentationUtilPluginApi",
-            "section": "def-public.SaveModalDashboardProps",
-            "text": "SaveModalDashboardProps"
-          },
-          ") => JSX.Element"
-        ],
+        "label": "LazySavedObjectSaveModalDashboard",
         "description": [],
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/index.tsx",
+          "lineNumber": 30
+        },
+        "signature": [
+          "React.LazyExoticComponent<typeof ",
+          "default",
+          ">"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "id": "def-public.withSuspense",
+        "type": "Function",
         "children": [
           {
-            "id": "def-public.SavedObjectSaveModalDashboard.props",
-            "type": "Object",
-            "label": "props",
+            "id": "def-public.withSuspense.Component",
+            "type": "CompoundType",
+            "label": "Component",
             "isRequired": true,
             "signature": [
-              {
-                "pluginId": "presentationUtil",
-                "scope": "public",
-                "docId": "kibPresentationUtilPluginApi",
-                "section": "def-public.SaveModalDashboardProps",
-                "text": "SaveModalDashboardProps"
-              }
+              "React.ComponentType<P>"
             ],
             "description": [],
             "source": {
-              "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-              "lineNumber": 38
+              "path": "src/plugins/presentation_util/public/components/index.tsx",
+              "lineNumber": 18
+            }
+          },
+          {
+            "id": "def-public.withSuspense.fallback",
+            "type": "CompoundType",
+            "label": "fallback",
+            "isRequired": false,
+            "signature": [
+              "React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | null"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/presentation_util/public/components/index.tsx",
+              "lineNumber": 19
             }
           }
         ],
+        "signature": [
+          "<P extends {}>(Component: React.ComponentType<P>, fallback?: React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | null) => (props: P) => JSX.Element"
+        ],
+        "description": [
+          "\nA HOC which supplies React.Suspense with a fallback component, and a `EuiErrorBoundary` to contain errors."
+        ],
+        "label": "withSuspense",
+        "source": {
+          "path": "src/plugins/presentation_util/public/components/index.tsx",
+          "lineNumber": 17
+        },
         "tags": [],
         "returnComment": [],
-        "source": {
-          "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-          "lineNumber": 38
-        },
         "initialIsOpen": false
       }
     ],
@@ -105,8 +101,8 @@
             "label": "documentInfo",
             "description": [],
             "source": {
-              "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-              "lineNumber": 30
+              "path": "src/plugins/presentation_util/public/components/types.ts",
+              "lineNumber": 18
             },
             "signature": [
               "SaveModalDocumentInfo"
@@ -119,8 +115,8 @@
             "label": "canSaveByReference",
             "description": [],
             "source": {
-              "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-              "lineNumber": 31
+              "path": "src/plugins/presentation_util/public/components/types.ts",
+              "lineNumber": 19
             }
           },
           {
@@ -130,8 +126,8 @@
             "label": "objectType",
             "description": [],
             "source": {
-              "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-              "lineNumber": 32
+              "path": "src/plugins/presentation_util/public/components/types.ts",
+              "lineNumber": 20
             }
           },
           {
@@ -141,8 +137,8 @@
             "label": "onClose",
             "description": [],
             "source": {
-              "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-              "lineNumber": 33
+              "path": "src/plugins/presentation_util/public/components/types.ts",
+              "lineNumber": 21
             },
             "signature": [
               "() => void"
@@ -155,8 +151,8 @@
             "label": "onSave",
             "description": [],
             "source": {
-              "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-              "lineNumber": 34
+              "path": "src/plugins/presentation_util/public/components/types.ts",
+              "lineNumber": 22
             },
             "signature": [
               "(props: ",
@@ -177,8 +173,8 @@
             "label": "tagOptions",
             "description": [],
             "source": {
-              "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-              "lineNumber": 35
+              "path": "src/plugins/presentation_util/public/components/types.ts",
+              "lineNumber": 23
             },
             "signature": [
               "string | number | boolean | {} | React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | React.ReactNodeArray | React.ReactPortal | ((state: ",
@@ -194,8 +190,8 @@
           }
         ],
         "source": {
-          "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx",
-          "lineNumber": 29
+          "path": "src/plugins/presentation_util/public/components/types.ts",
+          "lineNumber": 17
         },
         "initialIsOpen": false
       }
