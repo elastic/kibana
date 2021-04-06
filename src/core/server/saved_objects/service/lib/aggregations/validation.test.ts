@@ -151,6 +151,52 @@ describe('Aggregation Utils', () => {
       });
     });
 
+    test('Validate a deeply nested aggregations', () => {
+      expect(
+        validateAndConvertAggregations(
+          ['alert'],
+          {
+            first: {
+              cardinality: {
+                field: 'alert.attributes.actions.group',
+                aggs: {
+                  second: {
+                    max: { field: 'alert.attributes.actions.group' },
+                    aggs: {
+                      third: {
+                        min: {
+                          field: 'alert.attributes.actions.actionTypeId',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          mockMappings
+        )
+      ).toEqual({
+        first: {
+          cardinality: {
+            field: 'alert.actions.group',
+            aggs: {
+              second: {
+                max: { field: 'alert.actions.group' },
+                aggs: {
+                  third: {
+                    min: {
+                      field: 'alert.actions.actionTypeId',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+    });
+
     test('Validate an aggregation without the attribute field', () => {
       expect(
         validateAndConvertAggregations(
