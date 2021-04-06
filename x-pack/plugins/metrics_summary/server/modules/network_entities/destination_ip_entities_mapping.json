@@ -1,7 +1,7 @@
 {
   "mappings": {
     "_meta": {
-      "index": "source_ip_entities"
+      "index": "dest_ip_ent"
     },
     "dynamic": "strict",
     "properties": {

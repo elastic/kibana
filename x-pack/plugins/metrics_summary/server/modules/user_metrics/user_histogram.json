@@ -1,6 +1,6 @@
 {
-  "id": "user_histogram",
-  "description": "User metrics",
+  "id": "user_hist",
+  "description": "[event.category authentication metrics] grouped by @timestamp and aggregated on success, failure, and unknown",
   "source": {
     "query": {
       "bool": {

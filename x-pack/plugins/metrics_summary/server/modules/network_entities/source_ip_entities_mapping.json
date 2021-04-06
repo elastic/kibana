@@ -1,7 +1,7 @@
 {
   "mappings": {
     "_meta": {
-      "index": "source_country_iso_code_entities"
+      "index": "src_ip_ent"
     },
     "dynamic": "strict",
     "properties": {
@@ -28,17 +28,6 @@
                     "type": "long"
                   }
                 }
-              },
-              "geo": {
-                "properties": {
-                  "country_iso_code": {
-                    "properties": {
-                      "value_count": {
-                        "type": "long"
-                      }
-                    }
-                  }
-                }
               }
             }
           },
@@ -58,17 +47,6 @@
                 "properties": {
                   "sum": {
                     "type": "long"
-                  }
-                }
-              },
-              "geo": {
-                "properties": {
-                  "country_iso_code": {
-                    "properties": {
-                      "value_count": {
-                        "type": "long"
-                      }
-                    }
                   }
                 }
               }
@@ -91,13 +69,6 @@
         "properties": {
           "ip": {
             "type": "ip"
-          },
-          "geo": {
-            "properties": {
-              "country_iso_code": {
-                "type": "keyword"
-              }
-            }
           }
         }
       },
@@ -105,13 +76,6 @@
         "properties": {
           "ip": {
             "type": "ip"
-          },
-          "geo": {
-            "properties": {
-              "country_iso_code": {
-                "type": "keyword"
-              }
-            }
           }
         }
       }

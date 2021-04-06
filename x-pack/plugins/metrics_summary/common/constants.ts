@@ -19,4 +19,4 @@ export const METRICS_SUMMARY_TRANSFORMS = `${METRICS_SUMMARY_URL}/transforms`;
 /**
  * Global prefix for all the transform jobs
  */
-export const ELASTIC_NAME = 'elastic';
+export const ELASTIC_NAME = 'estc';

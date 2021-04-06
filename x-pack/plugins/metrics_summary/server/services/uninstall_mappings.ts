@@ -9,28 +9,35 @@
 import { ElasticsearchClient } from 'kibana/server';
 
 import { Mappings } from '../modules/types';
+import type { Logger } from '../../../../../src/core/server';
 
 import { computeMappingId } from './utils';
+import { logMappingError } from './utils/log_mapping_error';
+import { logMappingDebug } from './utils/log_mapping_debug';
 
-interface DeleteMappingOptions {
+interface UninstallMappingOptions {
   esClient: ElasticsearchClient;
   mappings: Mappings[];
-  moduleName: string;
   prefix: string;
   suffix: string;
+  logger: Logger;
 }
 
 export const uninstallMappings = async ({
   esClient,
+  logger,
   mappings,
-  moduleName,
   prefix,
   suffix,
-}: DeleteMappingOptions): Promise<void> => {
+}: UninstallMappingOptions): Promise<void> => {
   const indices = mappings.map((mapping) => {
     const { index } = mapping.mappings._meta;
-    const mappingId = computeMappingId({ id: index, moduleName, prefix, suffix });
-    return mappingId;
+    return computeMappingId({ id: index, prefix, suffix });
+  });
+  logMappingDebug({
+    id: JSON.stringify(indices),
+    logger,
+    message: 'deleting indices',
   });
   try {
     await esClient.indices.delete({
@@ -39,6 +46,12 @@ export const uninstallMappings = async ({
       index: indices,
     });
   } catch (error) {
-    // TODO: Logging statement goes here
+    logMappingError({
+      error,
+      id: JSON.stringify(indices),
+      logger,
+      message: 'could not delete index',
+      postBody: undefined,
+    });
   }
 };

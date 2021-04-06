@@ -8,7 +8,7 @@
 import { hostHistogram, hostHistogramMapping } from './host_metrics';
 import { userHistogram, userHistogramMapping } from './user_metrics';
 import { ipHistogram, ipHistogramMapping } from './network_metrics';
-import { hostEntities, hostEntitiesMapping } from './host_summaries';
+import { hostEntities, hostEntitiesMapping } from './host_entities';
 import {
   destinationCountryIsoCodeEntities,
   destinationCountryIsoCodeEntitiesMapping,
@@ -18,20 +18,19 @@ import {
   sourceCountryIsoCodeEntitiesMapping,
   sourceIpEntities,
   sourceIpEntitiesMapping,
-} from './network_summaries';
+} from './network_entities';
 import { Mappings, Transforms } from './types';
-import { userEntities, userEntitiesMapping } from './user_summaries';
+import { userEntities, userEntitiesMapping } from './user_entities';
 
 /**
  * These module names will map 1 to 1 to the REST interface.
  */
 export enum ModuleNames {
-  securitySolutions = 'security_solutions',
   hostMetrics = 'host_metrics',
-  hostSummaries = 'host_summaries',
-  networkSummaries = 'network_summaries',
+  hostSummaryEntities = 'host_entities',
+  networkSummaryEntities = 'network_entities',
   networkMetrics = 'network_metrics',
-  userSummaries = 'user_summaries',
+  userSummaryEntities = 'user_entities',
   userMetrics = 'user_metrics',
 }
 
@@ -40,29 +39,16 @@ export enum ModuleNames {
  * key values.
  */
 export const installableTransforms: Record<ModuleNames, Transforms[]> = {
-  // TODO: Do we want all modules based on security solutions or broken apart?
-  [ModuleNames.securitySolutions]: [
-    hostHistogram,
-    hostEntities,
-    destinationIpEntities,
-    sourceIpEntities,
-    destinationCountryIsoCodeEntities,
-    sourceCountryIsoCodeEntities,
-    userEntities,
-    ipHistogram,
-    userHistogram,
-  ],
-
   [ModuleNames.hostMetrics]: [hostHistogram],
-  [ModuleNames.hostSummaries]: [hostEntities],
-  [ModuleNames.networkSummaries]: [
+  [ModuleNames.hostSummaryEntities]: [hostEntities],
+  [ModuleNames.networkSummaryEntities]: [
     destinationIpEntities,
     sourceIpEntities,
     destinationCountryIsoCodeEntities,
     sourceCountryIsoCodeEntities,
   ],
   [ModuleNames.networkMetrics]: [ipHistogram],
-  [ModuleNames.userSummaries]: [userEntities],
+  [ModuleNames.userSummaryEntities]: [userEntities],
   [ModuleNames.userMetrics]: [userHistogram],
 };
 
@@ -72,28 +58,15 @@ export const installableTransforms: Record<ModuleNames, Transforms[]> = {
  * that will be ok as we will not installs the mapping twice.
  */
 export const installableMappings: Record<ModuleNames, Mappings[]> = {
-  // TODO: Do we want all modules based on security solutions or broken apart?
-  [ModuleNames.securitySolutions]: [
-    hostHistogramMapping,
-    hostEntitiesMapping,
-    sourceIpEntitiesMapping,
-    destinationIpEntitiesMapping,
-    destinationCountryIsoCodeEntitiesMapping,
-    sourceCountryIsoCodeEntitiesMapping,
-    ipHistogramMapping,
-    userEntitiesMapping,
-    userHistogramMapping,
-  ],
-
   [ModuleNames.hostMetrics]: [hostHistogramMapping],
-  [ModuleNames.hostSummaries]: [hostEntitiesMapping],
-  [ModuleNames.networkSummaries]: [
+  [ModuleNames.hostSummaryEntities]: [hostEntitiesMapping],
+  [ModuleNames.networkSummaryEntities]: [
     sourceIpEntitiesMapping,
     destinationIpEntitiesMapping,
     destinationCountryIsoCodeEntitiesMapping,
     sourceCountryIsoCodeEntitiesMapping,
   ],
   [ModuleNames.networkMetrics]: [ipHistogramMapping],
-  [ModuleNames.userSummaries]: [userEntitiesMapping],
+  [ModuleNames.userSummaryEntities]: [userEntitiesMapping],
   [ModuleNames.userMetrics]: [userHistogramMapping],
 };

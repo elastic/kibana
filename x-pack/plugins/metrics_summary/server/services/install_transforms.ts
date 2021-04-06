@@ -9,8 +9,11 @@
 import { ElasticsearchClient } from 'kibana/server';
 
 import { Transforms } from '../modules/types';
+import type { Logger } from '../../../../../src/core/server';
 
 import { computeMappingId, computeTransformId, getTransformExists } from './utils';
+import { logTransformError } from './utils/log_transform_error';
+import { logTransformDebug } from './utils/log_transform_debug';
 
 interface CreateTransformOptions {
   esClient: ElasticsearchClient;
@@ -18,6 +21,7 @@ interface CreateTransformOptions {
   autoStart: boolean;
   indices: string[];
   frequency: string;
+  logger: Logger;
   query: object;
   docsPerSecond: number | null;
   maxPageSearchSize: number;
@@ -27,7 +31,6 @@ interface CreateTransformOptions {
       field: string;
     };
   };
-  moduleName: string;
   prefix: string;
   suffix: string;
 }
@@ -38,8 +41,8 @@ export const installTransforms = async ({
   frequency,
   indices,
   docsPerSecond,
+  logger,
   maxPageSearchSize,
-  moduleName,
   prefix,
   suffix,
   transforms,
@@ -50,7 +53,7 @@ export const installTransforms = async ({
     // If the user doesn't define an explicit mapping in the module then use the default
     // of the transform id as the mapping index.
     const destIndex = transform?.dest?.index ?? transform.id;
-    const computedMappingIndex = computeMappingId({ id: destIndex, moduleName, prefix, suffix });
+    const computedMappingIndex = computeMappingId({ id: destIndex, prefix, suffix });
     const { id, ...transformNoId } = {
       ...transform,
       ...{ source: { ...transform.source, index: indices, query } },
@@ -66,23 +69,52 @@ export const installTransforms = async ({
       sync,
     };
 
-    const computedName = computeTransformId({ id, moduleName, prefix, suffix });
+    const computedName = computeTransformId({ id, prefix, suffix });
     const exists = await getTransformExists(esClient, computedName);
     if (!exists) {
       try {
+        logTransformDebug({
+          id: computedName,
+          logger,
+          message: 'does not exist, creating the transform',
+        });
         await esClient.transform.putTransform({
           body: transformNoId,
           defer_validation: true,
           transform_id: computedName,
         });
+
         if (autoStart) {
+          logTransformDebug({
+            id: computedName,
+            logger,
+            message: 'is being auto started',
+          });
           await esClient.transform.startTransform({
             transform_id: computedName,
           });
+        } else {
+          logTransformDebug({
+            id: computedName,
+            logger,
+            message: 'is not being auto started',
+          });
         }
       } catch (error) {
-        // TODO: Logging statement goes here
+        logTransformError({
+          error,
+          id: computedName,
+          logger,
+          message: 'Could not create and/or start',
+          postBody: transformNoId,
+        });
       }
+    } else {
+      logTransformDebug({
+        id: computedName,
+        logger,
+        message: 'already exists. It will not be recreated',
+      });
     }
   }
 };

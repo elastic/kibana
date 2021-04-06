@@ -1,6 +1,6 @@
 {
-  "id": "ip_histogram",
-  "description": "ip histogram",
+  "id": "ip_hist",
+  "description": "[source.ip metrics] grouped by @timestamp, source.ip, destination.ip and aggregated on tls.version, suricata.eve.tls.version, zeek.ssl.version, dns.question.name, and zeek.dns.query",
   "pivot": {
     "group_by": {
       "@timestamp": {

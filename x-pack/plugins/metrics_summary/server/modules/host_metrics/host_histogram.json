@@ -1,6 +1,6 @@
 {
-  "id": "host_histogram",
-  "description": "Histogram of all the hosts",
+  "id": "host_hist",
+  "description": "[host.name metrics] grouped by @timestamp and aggregated on host.name",
   "pivot": {
     "group_by": {
       "@timestamp": {

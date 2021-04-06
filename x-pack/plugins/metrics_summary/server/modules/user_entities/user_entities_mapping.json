@@ -1,7 +1,7 @@
 {
   "mappings": {
     "_meta": {
-      "index": "user_entities"
+      "index": "user_ent"
     },
     "dynamic": "strict",
     "properties": {

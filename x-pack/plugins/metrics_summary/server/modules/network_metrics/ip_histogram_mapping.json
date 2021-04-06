@@ -1,7 +1,7 @@
 {
   "mappings": {
     "_meta": {
-      "index": "ip_histogram"
+      "index": "ip_hist"
     },
     "dynamic": "strict",
     "properties": {

@@ -1,11 +1,11 @@
 {
-  "id": "dest_country_iso_code_entities",
-  "description": "Unique destination country iso code",
+  "id": "src_ip_ent",
+  "description": "[source.ip entities] grouped by @timestamp and aggregated on destination.ip, source.bytes, destination.bytes, network.community_id, and destination.ip",
   "pivot": {
     "group_by": {
-      "destination.geo.country_iso_code": {
+      "source.ip": {
         "terms": {
-          "field": "destination.geo.country_iso_code"
+          "field": "source.ip"
         }
       },
       "@timestamp": {
@@ -16,9 +16,9 @@
       }
     },
     "aggregations": {
-      "metrics.destination.geo.country_iso_code.value_count": {
+      "metrics.source.ip.value_count": {
         "value_count": {
-          "field": "destination.geo.country_iso_code"
+          "field": "source.ip"
         }
       },
       "metrics.source.bytes.sum": {
@@ -34,11 +34,6 @@
       "metrics.network.community_id.cardinality": {
         "cardinality": {
           "field": "network.community_id"
-        }
-      },
-      "metrics.source.ip.cardinality": {
-        "cardinality": {
-          "field": "source.ip"
         }
       },
       "metrics.destination.ip.cardinality": {

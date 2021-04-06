@@ -109,16 +109,16 @@ export const IP_REPUTATION_LINKS_SETTING_DEFAULT = `[
 /** The default settings for the transforms */
 export const defaultTransformsSetting: TransformConfigSchema = {
   enabled: false,
-  query: [
-    {
-      range: {
-        '@timestamp': {
-          gte: 'now-1d/d',
-          format: 'strict_date_optional_time',
-        },
+  auto_start: true,
+  auto_create: true,
+  query: {
+    range: {
+      '@timestamp': {
+        gte: 'now-1d/d',
+        format: 'strict_date_optional_time',
       },
     },
-  ],
+  },
   retention_policy: {
     time: {
       field: '@timestamp',

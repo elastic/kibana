@@ -1,11 +1,11 @@
 {
-  "id": "source_ip_entities",
-  "description": "Unique source ip",
+  "id": "dest_ip_ent",
+  "description": "[destination.ip entities] grouped by @timestamp and aggregated on destination.ip, source.bytes, destination.bytes, network.community_id, and source.ip",
   "pivot": {
     "group_by": {
-      "source.ip": {
+      "destination.ip": {
         "terms": {
-          "field": "source.ip"
+          "field": "destination.ip"
         }
       },
       "@timestamp": {
@@ -16,9 +16,9 @@
       }
     },
     "aggregations": {
-      "metrics.source.ip.value_count": {
+      "metrics.destination.ip.value_count": {
         "value_count": {
-          "field": "source.ip"
+          "field": "destination.ip"
         }
       },
       "metrics.source.bytes.sum": {
@@ -36,9 +36,9 @@
           "field": "network.community_id"
         }
       },
-      "metrics.destination.ip.cardinality": {
+      "metrics.source.ip.cardinality": {
         "cardinality": {
-          "field": "destination.ip"
+          "field": "source.ip"
         }
       }
     }

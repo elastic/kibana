@@ -8,10 +8,12 @@
 
 import { ElasticsearchClient } from 'kibana/server';
 
+import type { Logger } from '../../../../../src/core/server';
 import { ModuleNames } from '../modules';
 
 export interface ConstructorOptions {
   esClient: ElasticsearchClient;
+  logger: Logger;
 }
 
 export interface PostTransformsOptions {

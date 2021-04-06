@@ -1,11 +1,11 @@
 {
-  "id": "source_country_iso_code_entities",
-  "description": "Unique source country iso code",
+  "id": "dest_iso_ent",
+  "description": "[destination.geo.country_iso_code entities] grouped by @timestamp and aggregated on source.bytes, destination.bytes, network.community_id, destination.ip, and source.ip",
   "pivot": {
     "group_by": {
-      "source.geo.country_iso_code": {
+      "destination.geo.country_iso_code": {
         "terms": {
-          "field": "source.geo.country_iso_code"
+          "field": "destination.geo.country_iso_code"
         }
       },
       "@timestamp": {
@@ -16,9 +16,9 @@
       }
     },
     "aggregations": {
-      "metrics.source.geo.country_iso_code.value_count": {
+      "metrics.destination.geo.country_iso_code.value_count": {
         "value_count": {
-          "field": "source.geo.country_iso_code"
+          "field": "destination.geo.country_iso_code"
         }
       },
       "metrics.source.bytes.sum": {

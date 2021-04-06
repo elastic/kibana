@@ -6,17 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { computeTransformId } from './compute_transform_id';
+import type { Logger } from '../../../../../../src/core/server';
 
-export const computeMappingId = ({
-  prefix,
+export const logTransformDebug = ({
+  logger,
   id,
-  suffix,
+  message,
 }: {
-  prefix: string;
+  logger: Logger;
   id: string;
-  suffix: string;
-}): string => {
-  const computedId = computeTransformId({ id, prefix, suffix });
-  return `.${computedId}`;
+  message: string;
+}): void => {
+  logger.debug(`transform id: "${id}", ${message}`);
 };

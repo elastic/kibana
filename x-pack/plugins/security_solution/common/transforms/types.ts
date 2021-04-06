@@ -11,8 +11,10 @@ import { schema, TypeOf } from '@kbn/config-schema';
  * Kibana configuration schema
  */
 export const transformConfigSchema = schema.object({
+  auto_start: schema.boolean(),
+  auto_create: schema.boolean(),
   enabled: schema.boolean(),
-  query: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+  query: schema.maybe(schema.object({}, { unknowns: 'allow' })),
   retention_policy: schema.maybe(
     schema.object({
       time: schema.object({

@@ -6,17 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { computeTransformId } from './compute_transform_id';
-
-export const computeMappingId = ({
-  prefix,
-  id,
-  suffix,
-}: {
-  prefix: string;
-  id: string;
-  suffix: string;
-}): string => {
-  const computedId = computeTransformId({ id, prefix, suffix });
-  return `.${computedId}`;
-};
+// TODO: Move indent to configuration part or flip to default false
+export const getJSON = (body: unknown, indent: boolean = true): string =>
+  indent ? JSON.stringify(body, null, 2) : JSON.stringify(body);

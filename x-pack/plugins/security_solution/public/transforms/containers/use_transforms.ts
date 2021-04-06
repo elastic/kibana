@@ -118,8 +118,7 @@ export const getSettingsMatch = ({
  * TODO: Once this is moved into the plugin then this should use the
  * ELASTIC_NAME from '../../../common
  */
-const ELASTIC_NAME = 'elastic';
-const MODULE_NAME = 'security_solutions';
+const ELASTIC_NAME = 'estc';
 
 export const createIndicesFromPrefix = ({
   transformIndices,
@@ -128,7 +127,7 @@ export const createIndicesFromPrefix = ({
   transformIndices: string[];
   prefix: string;
 }): string[] => {
-  return transformIndices.map((index) => `.${ELASTIC_NAME}_${prefix}_${MODULE_NAME}_${index}`);
+  return transformIndices.map((index) => `.${ELASTIC_NAME}_${prefix}_${index}`);
 };
 
 export const isFilterQueryCompatible = (filterQuery: ESQuery | string | undefined) => {
@@ -173,7 +172,7 @@ export const getTransformChangesIfTheyExist: GetTransformChangesIfTheyExist = ({
       return {
         indices: createIndicesFromPrefix({
           prefix: settings.prefix,
-          transformIndices: ['host_entities'],
+          transformIndices: ['host_ent'],
         }),
         factoryQueryType: HostsKpiQueries.kpiHostsSummary,
       };
@@ -182,7 +181,7 @@ export const getTransformChangesIfTheyExist: GetTransformChangesIfTheyExist = ({
       return {
         indices: createIndicesFromPrefix({
           prefix: settings.prefix,
-          transformIndices: ['user_entities'],
+          transformIndices: ['user_ent'],
         }),
         factoryQueryType: HostsKpiQueries.kpiAuthenticationsSummary,
       };
@@ -191,7 +190,7 @@ export const getTransformChangesIfTheyExist: GetTransformChangesIfTheyExist = ({
       return {
         indices: createIndicesFromPrefix({
           prefix: settings.prefix,
-          transformIndices: ['source_ip_entities', 'destination_ip_entities'],
+          transformIndices: ['src_ip_ent', 'dest_ip_ent'],
         }),
         factoryQueryType: HostsKpiQueries.kpiUniqueIpsSummary,
       };
@@ -200,7 +199,7 @@ export const getTransformChangesIfTheyExist: GetTransformChangesIfTheyExist = ({
       return {
         indices: createIndicesFromPrefix({
           prefix: settings.prefix,
-          transformIndices: ['host_entities'],
+          transformIndices: ['host_ent'],
         }),
         factoryQueryType: HostsQueries.hostsSummary,
       };
@@ -209,7 +208,7 @@ export const getTransformChangesIfTheyExist: GetTransformChangesIfTheyExist = ({
       return {
         indices: createIndicesFromPrefix({
           prefix: settings.prefix,
-          transformIndices: ['user_entities'],
+          transformIndices: ['user_ent'],
         }),
         factoryQueryType: HostsQueries.authenticationsSummary,
       };
@@ -218,7 +217,7 @@ export const getTransformChangesIfTheyExist: GetTransformChangesIfTheyExist = ({
       return {
         indices: createIndicesFromPrefix({
           prefix: settings.prefix,
-          transformIndices: ['source_country_iso_code_entities', 'dest_country_iso_code_entities'],
+          transformIndices: ['src_iso_ent', 'dest_iso_ent'],
         }),
         factoryQueryType: NetworkQueries.topCountriesSummary,
       };
@@ -227,7 +226,7 @@ export const getTransformChangesIfTheyExist: GetTransformChangesIfTheyExist = ({
       return {
         indices: createIndicesFromPrefix({
           prefix: settings.prefix,
-          transformIndices: ['source_ip_entities', 'destination_ip_entities'],
+          transformIndices: ['src_ip_ent', 'dest_ip_ent'],
         }),
         factoryQueryType: NetworkQueries.topNFlowSummary,
       };
@@ -236,7 +235,7 @@ export const getTransformChangesIfTheyExist: GetTransformChangesIfTheyExist = ({
       return {
         indices: createIndicesFromPrefix({
           prefix: settings.prefix,
-          transformIndices: ['ip_histogram'],
+          transformIndices: ['ip_hist'],
         }),
         factoryQueryType: NetworkKpiQueries.dnsSummary,
       };
@@ -245,7 +244,7 @@ export const getTransformChangesIfTheyExist: GetTransformChangesIfTheyExist = ({
       return {
         indices: createIndicesFromPrefix({
           prefix: settings.prefix,
-          transformIndices: ['ip_histogram'],
+          transformIndices: ['ip_hist'],
         }),
         factoryQueryType: NetworkKpiQueries.networkEventsSummary,
       };
@@ -254,7 +253,7 @@ export const getTransformChangesIfTheyExist: GetTransformChangesIfTheyExist = ({
       return {
         indices: createIndicesFromPrefix({
           prefix: settings.prefix,
-          transformIndices: ['ip_histogram'],
+          transformIndices: ['ip_hist'],
         }),
         factoryQueryType: NetworkKpiQueries.tlsHandshakesSummary,
       };
@@ -263,7 +262,7 @@ export const getTransformChangesIfTheyExist: GetTransformChangesIfTheyExist = ({
       return {
         indices: createIndicesFromPrefix({
           prefix: settings.prefix,
-          transformIndices: ['source_ip_entities', 'destination_ip_entities'],
+          transformIndices: ['src_ip_ent', 'dest_ip_ent'],
         }),
         factoryQueryType: NetworkKpiQueries.uniquePrivateIpsSummary,
       };
@@ -274,7 +273,7 @@ export const getTransformChangesIfTheyExist: GetTransformChangesIfTheyExist = ({
           return {
             indices: createIndicesFromPrefix({
               prefix: settings.prefix,
-              transformIndices: ['user_histogram'],
+              transformIndices: ['user_hist'],
             }),
             factoryQueryType: MatrixHistogramQuerySummary,
             histogramType: MatrixHistogramType.authenticationsSummary,

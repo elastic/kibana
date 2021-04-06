@@ -1,5 +1,5 @@
 {
-  "modules": ["network_metrics", "network_summaries"],
+  "modules": ["network_metrics", "network_entities"],
   "indices": [
     "auditbeat-*",
     "endgame-*",

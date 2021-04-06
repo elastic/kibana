@@ -1,6 +1,6 @@
 {
-  "id": "host_entities",
-  "description": "Unique host names",
+  "id": "host_ent",
+  "description": "[host.name entities] grouped by @timestamp, host.name, os.name, and os.version, and aggregated on host.name",
   "pivot": {
     "group_by": {
       "host.name": {

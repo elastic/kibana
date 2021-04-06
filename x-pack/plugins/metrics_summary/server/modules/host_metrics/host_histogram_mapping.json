@@ -1,7 +1,7 @@
 {
   "mappings": {
     "_meta": {
-      "index": "host_histogram"
+      "index": "host_hist"
     },
     "properties": {
       "metrics": {

@@ -8,8 +8,11 @@
 
 import { ElasticsearchClient } from 'kibana/server';
 
+import type { Logger } from '../../../../../src/core/server';
+
 interface GetTransformsOptions {
   esClient: ElasticsearchClient;
+  logger: Logger;
 }
 
 // TODO: Type the Promise<unknown> to a stronger type

@@ -7,7 +7,7 @@
       }
     }
   },
-  "modules": ["security_solutions"],
+  "modules": ["sec_sol"],
   "indices": ["auditbeat-*"],
   "prefix": "all",
   "auto_start": true,

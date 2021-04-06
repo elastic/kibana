@@ -7,41 +7,43 @@
 
 import { KibanaServices } from '../../common/lib/kibana';
 
-// TODO: Use a more common basic signal or do we keep this duplicated everywhere for now?
-export interface BasicSignals {
+export interface CreateTransforms {
   signal: AbortSignal;
+  // TODO: Stronger types from the metrics_summary project
+  bodies: unknown[];
+}
+
+export interface CreateTransform {
+  signal: AbortSignal;
+  // TODO: Stronger types from the metrics_summary project
+  body: unknown;
 }
 
 /**
  * Creates transforms given a configuration
- * TODO: Take configuration option so we can loop over it and determine what to push for the body (or take the body)
- * TODO: Add the return signature
  * @param signal AbortSignal for cancelling request
+ * @param bodies The bodies for the REST interface that is going to create them one at a time.
  *
+ * TODO: Once there is a _bulk API, then we can do these all at once
  * @throws An error if response is not OK
  */
-export const createTransforms = async ({ signal }: BasicSignals) => {
-  // TODO: Use constants for the url
-  // TODO: Push the body down from the settings configuration
+export const createTransforms = async ({ bodies, signal }: CreateTransforms): Promise<void> => {
+  for (const body of bodies) {
+    await createTransform({ body, signal });
+  }
+};
+
+/**
+ * Creates a single transform given a configuration
+ * @param signal AbortSignal for cancelling request
+ * @param bodies The body for the REST interface that is going to it.
+ * @throws An error if response is not OK
+ */
+export const createTransform = async ({ body, signal }: CreateTransform): Promise<void> => {
+  // TODO: Use constants for the url here or from the metrics package.
   return KibanaServices.get().http.fetch('/api/metrics_summary/transforms', {
     method: 'POST',
-    body: JSON.stringify({
-      query: {
-        range: {
-          '@timestamp': {
-            gte: 'now-1w',
-            format: 'strict_date_optional_time',
-          },
-        },
-      },
-      prefix: 'all',
-      modules: ['security_solutions'],
-      indices: ['auditbeat-*'],
-      auto_start: true,
-      settings: {
-        max_page_search_size: 5000,
-      },
-    }),
+    body: JSON.stringify(body),
     signal,
   });
 };

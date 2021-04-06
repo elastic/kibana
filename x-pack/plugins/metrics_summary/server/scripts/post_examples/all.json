@@ -1,10 +1,10 @@
 {
   "modules": [
     "host_metrics",
-    "host_summaries",
+    "host_entities",
     "network_metrics",
-    "network_summaries",
-    "user_summaries",
+    "network_entities",
+    "user_entities",
     "user_metrics"
   ],
   "indices": [

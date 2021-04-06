@@ -9,12 +9,14 @@
 import { ElasticsearchClient } from 'kibana/server';
 
 import { ModuleNames, installableMappings, installableTransforms } from '../modules';
+import type { Logger } from '../../../../../src/core/server';
 
 import { uninstallMappings } from './uninstall_mappings';
 import { uninstallTransforms } from './uninstall_transforms';
 
 interface DeleteTransformsOptions {
   esClient: ElasticsearchClient;
+  logger: Logger;
   modules: ModuleNames[];
   prefix: string;
   suffix: string;
@@ -22,6 +24,7 @@ interface DeleteTransformsOptions {
 
 export const deleteTransforms = async ({
   esClient,
+  logger,
   modules,
   prefix,
   suffix,
@@ -30,7 +33,7 @@ export const deleteTransforms = async ({
     const mappings = installableMappings[moduleName];
     const transforms = installableTransforms[moduleName];
 
-    await uninstallTransforms({ esClient, moduleName, prefix, suffix, transforms });
-    await uninstallMappings({ esClient, mappings, moduleName, prefix, suffix });
+    await uninstallTransforms({ esClient, logger, prefix, suffix, transforms });
+    await uninstallMappings({ esClient, logger, mappings, prefix, suffix });
   }
 };

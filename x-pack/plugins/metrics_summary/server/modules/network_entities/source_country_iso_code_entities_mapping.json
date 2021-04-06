@@ -1,7 +1,7 @@
 {
   "mappings": {
     "_meta": {
-      "index": "destination_country_iso_code_entities"
+      "index": "src_iso_ent"
     },
     "dynamic": "strict",
     "properties": {

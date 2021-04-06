@@ -35,11 +35,16 @@ export const useCreateTransforms = (): ReturnTransform => {
     const abortCtrl = new AbortController();
 
     const createTheTransforms = async () => {
+      // double check one more time and
+      // not create the transform if the settings are not enabled.
+      if (!transformSettings.enabled || !transformSettings.auto_create) {
+        return;
+      }
       let isFetchingData = false;
+      setLoading(true);
+      const bodies = getTransformBodies(transformSettings);
       try {
-        setLoading(true);
-        await createTransforms({ signal: abortCtrl.signal });
-
+        await createTransforms({ bodies, signal: abortCtrl.signal });
         if (isSubscribed) {
           isFetchingData = true;
         }
@@ -54,6 +59,7 @@ export const useCreateTransforms = (): ReturnTransform => {
         setLoading(false);
       }
     };
+
     if (transformSettings.enabled) {
       setTransforms({ createTransforms: createTheTransforms });
     } else {
@@ -66,4 +72,29 @@ export const useCreateTransforms = (): ReturnTransform => {
   }, [dispatchToaster, transformSettings]);
 
   return { loading, ...transforms };
+};
+
+export const getTransformBodies = (transformSettings: TransformConfigSchema) => {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const { query, auto_start, max_page_search_size, docs_per_second } = transformSettings;
+  return transformSettings.settings.map(({ prefix, indices }) => {
+    return {
+      query,
+      prefix,
+      modules: [
+        'host_metrics',
+        'host_entities',
+        'network_entities',
+        'network_metrics',
+        'user_entities',
+        'user_metrics',
+      ],
+      indices,
+      auto_start,
+      settings: {
+        max_page_search_size,
+        docs_per_second,
+      },
+    };
+  });
 };

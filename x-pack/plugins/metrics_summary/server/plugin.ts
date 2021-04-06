@@ -34,7 +34,6 @@ export class MetricsSummaryPlugin
   }
 
   public setup(core: CoreSetup): MetricsSummaryPluginSetup {
-    this.logger.debug('metrics_summary: Setup');
     const router = core.http.createRouter();
 
     core.http.registerRouteHandlerContext<MetricsSummaryRequestHandlerContext, 'metricsSummary'>(
@@ -52,17 +51,18 @@ export class MetricsSummaryPlugin
       getMetricsSummaryClient: (esClient): MetricsSummaryClient =>
         new MetricsSummaryClient({
           esClient,
+          logger: this.logger,
         }),
     };
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public start(core: CoreStart): void {
-    this.logger.debug('metrics_summary: Started');
+    this.logger.debug('Starting plugin');
   }
 
   public stop(): void {
-    this.logger.debug('metrics_summary: Stopped');
+    this.logger.debug('Stopping plugin');
   }
 
   private createRouteHandlerContext = (): ContextProvider => {
@@ -74,17 +74,13 @@ export class MetricsSummaryPlugin
           },
         },
       } = context;
-      // TODO: Remove this if config is not needed, otherwise add it back here.
-      // if (config == null) {
-      //   throw new TypeError('Configuration is required for this plugin to operate');
-      // } else {
       return {
         getMetricsSummaryClient: (): MetricsSummaryClient =>
           new MetricsSummaryClient({
             esClient,
+            logger: this.logger,
           }),
       };
-      // } // TODO: Remove this if not needed because config is not used, otherwise add it back
     };
   };
 }

@@ -9,28 +9,31 @@
 import { ElasticsearchClient } from 'kibana/server';
 
 import { Mappings } from '../modules/types';
+import type { Logger } from '../../../../../src/core/server';
 
 import { computeMappingId } from './utils';
 import { getIndexExists } from './utils/get_index_exists';
+import { logMappingDebug } from './utils/log_mapping_debug';
+import { logMappingError } from './utils/log_mapping_error';
 
 interface CreateMappingOptions {
   esClient: ElasticsearchClient;
   mappings: Mappings[];
-  moduleName: string;
   prefix: string;
   suffix: string;
+  logger: Logger;
 }
 
 export const installMappings = async ({
   esClient,
   mappings,
-  moduleName,
   prefix,
   suffix,
+  logger,
 }: CreateMappingOptions): Promise<void> => {
   for (const mapping of mappings) {
     const { index } = mapping.mappings._meta;
-    const mappingId = computeMappingId({ id: index, moduleName, prefix, suffix });
+    const mappingId = computeMappingId({ id: index, prefix, suffix });
     const exists = await getIndexExists(esClient, mappingId);
     const computedBody = {
       ...mapping,
@@ -46,13 +49,26 @@ export const installMappings = async ({
     };
     if (!exists) {
       try {
+        logMappingDebug({ id: mappingId, logger, message: 'does not exist, creating the mapping' });
         await esClient.indices.create({
           body: computedBody,
           index: mappingId,
         });
       } catch (error) {
-        // TODO: Logging statement goes here
+        logMappingError({
+          error,
+          id: mappingId,
+          logger,
+          message: 'cannot install mapping',
+          postBody: computedBody,
+        });
       }
+    } else {
+      logMappingDebug({
+        id: mappingId,
+        logger,
+        message: 'mapping already exists. It will not be recreated',
+      });
     }
   }
 };

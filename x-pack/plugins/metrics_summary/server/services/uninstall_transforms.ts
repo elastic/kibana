@@ -9,15 +9,18 @@
 import { ElasticsearchClient } from 'kibana/server';
 
 import { Transforms } from '../modules/types';
+import type { Logger } from '../../../../../src/core/server';
 
 import { computeTransformId, getTransformExists } from './utils';
+import { logTransformError } from './utils/log_transform_error';
+import { logTransformDebug } from './utils/log_transform_debug';
 
 interface UninstallTransformsOptions {
   esClient: ElasticsearchClient;
   transforms: Transforms[];
-  moduleName: string;
   prefix: string;
   suffix: string;
+  logger: Logger;
 }
 
 /**
@@ -25,16 +28,21 @@ interface UninstallTransformsOptions {
  */
 export const uninstallTransforms = async ({
   esClient,
-  moduleName,
+  logger,
   prefix,
   suffix,
   transforms,
 }: UninstallTransformsOptions): Promise<void> => {
   transforms.forEach(async (transform) => {
     const { id } = transform;
-    const computedId = computeTransformId({ id, moduleName, prefix, suffix });
+    const computedId = computeTransformId({ id, prefix, suffix });
     const exists = await getTransformExists(esClient, computedId);
     if (exists) {
+      logTransformDebug({
+        id: computedId,
+        logger,
+        message: 'stopping transform',
+      });
       try {
         await esClient.transform.stopTransform({
           allow_no_match: true,
@@ -44,18 +52,39 @@ export const uninstallTransforms = async ({
           wait_for_completion: true,
         });
       } catch (error) {
-        // This can happen from a timeout, go ahead and try to delete it even if
-        // the stop did not happen correctly
-        // TODO: Logging statement goes here
+        logTransformError({
+          error,
+          id: computedId,
+          logger,
+          message: 'Could not stop transform, still attempting to delete it',
+          postBody: undefined,
+        });
       }
+      logTransformDebug({
+        id: computedId,
+        logger,
+        message: 'deleting transform',
+      });
       try {
         await esClient.transform.deleteTransform({
           force: true,
           transform_id: computedId,
         });
       } catch (error) {
-        // TODO: Logging statement goes here
+        logTransformError({
+          error,
+          id: computedId,
+          logger,
+          message: 'Could not create and/or start',
+          postBody: undefined,
+        });
       }
+    } else {
+      logTransformDebug({
+        id: computedId,
+        logger,
+        message: 'transform does not exist',
+      });
     }
   });
 };

@@ -1,6 +1,6 @@
 {
-  "id": "user_entities",
-  "description": "Unique user names",
+  "id": "user_ent",
+  "description": "[user.name entities] grouped by @timestamp and aggregated on user.name, and event.categories of success, failure, and unknown",
   "pivot": {
     "group_by": {
       "user.name": {

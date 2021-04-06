@@ -9,11 +9,13 @@
 import { ElasticsearchClient } from 'kibana/server';
 
 import { ModuleNames, installableMappings, installableTransforms } from '../modules';
+import type { Logger } from '../../../../../src/core/server';
 
 import { installMappings } from './install_mappings';
 import { installTransforms } from './install_transforms';
 
 interface PostTransformsOptions {
+  logger: Logger;
   esClient: ElasticsearchClient;
   modules: ModuleNames[];
   autoStart: boolean;
@@ -34,6 +36,7 @@ interface PostTransformsOptions {
 
 export const postTransforms = async ({
   autoStart,
+  logger,
   esClient,
   frequency,
   indices,
@@ -49,15 +52,15 @@ export const postTransforms = async ({
     const mappings = installableMappings[moduleName];
     const transforms = installableTransforms[moduleName];
 
-    await installMappings({ esClient, mappings, moduleName, prefix, suffix });
+    await installMappings({ esClient, logger, mappings, prefix, suffix });
     await installTransforms({
       autoStart,
       docsPerSecond,
       esClient,
       frequency,
       indices,
+      logger,
       maxPageSearchSize,
-      moduleName,
       prefix,
       query,
       suffix,
