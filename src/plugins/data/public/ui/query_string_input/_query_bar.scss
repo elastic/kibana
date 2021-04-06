@@ -6,6 +6,7 @@
 // Uses the append style, but no bordering
 .kqlQueryBar__languageSwitcherButton {
   border-right: none !important;
+  border-left: $euiFormInputGroupBorder;
 }
 
 .kbnQueryBar__textareaWrap {
@@ -13,18 +14,30 @@
   display: flex;
   flex: 1 1 100%;
   position: relative;
+
+  @include kbnThemeStyle('v8') {
+    background-color: $euiFormBackgroundColor;
+  }
 }
 
 .kbnQueryBar__textarea {
   z-index: $euiZContentMenu;
   resize: none !important; // When in the group, it will autosize
-  height: $euiFormControlHeight;
+  height: $euiFormControlHeight - 2px;
   // Unlike most inputs within layout control groups, the text area still needs a border
   // for multi-line content. These adjusts help it sit above the control groups
   // shadow to line up correctly.
   padding: $euiSizeS;
-  padding-top: $euiSizeS + 3px;
   box-shadow: 0 0 0 1px $euiFormBorderColor;
+
+  @include kbnThemeStyle('v7') {
+    padding-top: $euiSizeS + 2px;
+  }
+
+  @include kbnThemeStyle('v8') {
+    border-radius: 0;
+    padding-bottom: $euiSizeS + 1px;
+  }
 
   &:not(.kbnQueryBar__textarea--autoHeight):not(:invalid) {
     @include euiYScrollWithShadows;

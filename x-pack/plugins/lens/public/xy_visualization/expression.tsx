@@ -333,7 +333,6 @@ export function XYChart({
   const { legend, layers, fittingFunction, gridlinesVisibilitySettings, valueLabels } = args;
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
-
   const filteredLayers = getFilteredLayers(layers, data);
 
   if (filteredLayers.length === 0) {
@@ -547,6 +546,7 @@ export function XYChart({
         }}
         baseTheme={chartBaseTheme}
         tooltip={{
+          boundary: document.getElementById('app-fixed-viewport') ?? undefined,
           headerFormatter: (d) => safeXAccessorLabelRenderer(d.value),
         }}
         rotation={shouldRotate ? 90 : 0}
