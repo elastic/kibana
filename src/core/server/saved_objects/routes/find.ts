@@ -60,6 +60,20 @@ export const registerFindRoute = (router: IRouter, { coreUsageData }: RouteDepen
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsFind({ request: req }).catch(() => {});
 
+      // manually validation to avoid using JSON.parse twice
+      let aggs;
+      if (query.aggs) {
+        try {
+          aggs = JSON.parse(query.aggs);
+        } catch (e) {
+          return res.badRequest({
+            body: {
+              message: 'invalid aggs value',
+            },
+          });
+        }
+      }
+
       const result = await context.core.savedObjects.client.find({
         perPage: query.per_page,
         page: query.page,
@@ -73,7 +87,7 @@ export const registerFindRoute = (router: IRouter, { coreUsageData }: RouteDepen
         hasReferenceOperator: query.has_reference_operator,
         fields: typeof query.fields === 'string' ? [query.fields] : query.fields,
         filter: query.filter,
-        aggs: query.aggs ? JSON.parse(query.aggs) : undefined,
+        aggs,
         namespaces,
       });
 
