@@ -49,6 +49,7 @@ import {
   UPDATE_EDIT_MODE,
   ADD_FEATURES_TO_INDEX_QUEUE,
   SET_VECTOR_LAYER_INDEX_NAME,
+  INDEX_DRAWN_LAYERS,
 } from '../../actions';
 
 import { getDefaultMapSettings } from './default_map_settings';
@@ -132,6 +133,14 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: any) {
         mapState: {
           ...state.mapState,
           vectorLayerIndexName: action.indexName,
+        },
+      };
+    case INDEX_DRAWN_LAYERS:
+      return {
+        ...state,
+        mapState: {
+          ...state.mapState,
+          featuresToIndexQueue: [],
         },
       };
     case REMOVE_TRACKED_LAYER_STATE:

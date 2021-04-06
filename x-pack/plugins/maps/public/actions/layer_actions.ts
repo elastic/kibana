@@ -37,6 +37,7 @@ import {
   UPDATE_LAYER_PROP,
   UPDATE_LAYER_STYLE,
   UPDATE_SOURCE_PROP,
+  INDEX_DRAWN_LAYERS,
 } from './map_action_constants';
 import { clearDataRequests, syncDataForLayerId, updateStyleMeta } from './data_request_actions';
 import { cleanTooltipStateForLayer } from './tooltip_actions';
@@ -48,6 +49,8 @@ import { IVectorStyle } from '../classes/styles/vector/vector_style';
 import { notifyLicensedFeatureUsage } from '../licensed_features';
 import { IESAggField } from '../classes/fields/agg';
 import { IField } from '../classes/fields/field';
+// @ts-ignore
+import { createNewIndexAndPattern, addFeatureToIndex } from '../classes/layers/new_vector_layer_wizard/utils/indexing_service';
 
 export function trackCurrentLayerState(layerId: string) {
   return {
@@ -546,5 +549,30 @@ export function setAreTilesLoaded(layerId: string, areTilesLoaded: boolean) {
     id: layerId,
     propName: '__areTilesLoaded',
     newValue: areTilesLoaded,
+  };
+}
+
+export function indexDrawnLayers() {
+  return async (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    const state = getState();
+    const features = state.map.mapState.featuresToIndexQueue;
+    const indexName = state.map.mapState.vectorLayerIndexName;
+    await createNewIndexAndPattern(indexName);
+    Promise.all(
+      features.map(async (feature) => {
+        const geometry = {
+          coordinates: feature.geometry.coordinates,
+          type: feature.geometry.type.toLowerCase(),
+        };
+        await addFeatureToIndex(indexName, geometry);
+      })
+    );
+
+    return {
+      type: INDEX_DRAWN_LAYERS,
+    };
   };
 }

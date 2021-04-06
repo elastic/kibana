@@ -16,6 +16,7 @@ import {
   removePreviewLayers,
   setFirstPreviewLayerToSelectedLayer,
   updateFlyout,
+  indexDrawnLayers,
 } from '../../actions';
 import { MapStoreState } from '../../reducers/store';
 import { LayerDescriptor } from '../../../common/descriptor_types';
@@ -43,6 +44,7 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
       dispatch(updateFlyout(FLYOUT_STATE.NONE));
       dispatch(removePreviewLayers());
     },
+    indexDrawnLayers: () => dispatch(indexDrawnLayers()),
   };
 }
 

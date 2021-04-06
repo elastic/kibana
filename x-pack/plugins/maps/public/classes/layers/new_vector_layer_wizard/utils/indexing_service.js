@@ -16,6 +16,37 @@ export const getExistingIndexNames = async () => {
   return indexes ? indexes.map(({ name }) => name) : [];
 };
 
+export const createNewIndexAndPattern = async (indexName) => {
+  return await httpService({
+    url: `/api/maps/docSource`,
+    method: 'POST',
+    data: {
+      index: indexName,
+      // Initially set to static mappings
+      mappings: {
+        properties: {
+          coordinates: {
+            type: 'geo_shape',
+          },
+        },
+      },
+    },
+  });
+};
+
+export const addFeatureToIndex = async (indexName, geometry) => {
+  return await httpService({
+    url: `/api/maps/feature`,
+    method: 'POST',
+    data: {
+      index: indexName,
+      data: {
+        coordinates: geometry,
+      },
+    },
+  });
+};
+
 export const getExistingIndexPatternNames = async () => {
   const indexPatterns = await getSavedObjectsClient()
     .find({

@@ -34,6 +34,7 @@ export interface Props {
   isLoadingPreviewLayers: boolean;
   promotePreviewLayers: () => void;
   isDrawingLayer: boolean;
+  indexDrawnLayers: () => void;
 }
 
 interface State {
@@ -89,7 +90,10 @@ export class AddLayerPanel extends Component<Props, State> {
       return;
     }
 
-    if (this.state.layerSteps.length - 1 === this.state.currentStepIndex) {
+    if (this.props.isDrawingLayer) {
+      // Write to index
+      this.props.indexDrawnLayers();
+    } else if (this.state.layerSteps.length - 1 === this.state.currentStepIndex) {
       // last step
       this.props.promotePreviewLayers();
     } else {
