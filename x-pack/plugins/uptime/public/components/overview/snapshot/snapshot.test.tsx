@@ -7,8 +7,9 @@
 
 import React from 'react';
 import { shallowWithIntl } from '@kbn/test/jest';
-import { Snapshot } from '../../../common/runtime_types';
-import { SnapshotComponent } from './snapshot/snapshot';
+import { SnapshotComponent } from './snapshot';
+import { Snapshot } from '../../../../common/runtime_types/snapshot';
+import * as hook from './use_snap_shot';
 
 describe('Snapshot component', () => {
   const snapshot: Snapshot = {
@@ -18,7 +19,9 @@ describe('Snapshot component', () => {
   };
 
   it('renders without errors', () => {
-    const wrapper = shallowWithIntl(<SnapshotComponent count={snapshot} loading={false} />);
+    jest.spyOn(hook, 'useSnapShotCount').mockReturnValue({ count: snapshot, loading: false });
+
+    const wrapper = shallowWithIntl(<SnapshotComponent />);
     expect(wrapper).toMatchSnapshot();
   });
 });

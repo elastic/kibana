@@ -58,6 +58,10 @@ export interface QueryBarTopRowProps {
   isClearable?: boolean;
   nonKqlMode?: 'lucene' | 'text';
   nonKqlModeHelpText?: string;
+  storageKey?: string;
+  disableLanguageSwitcher?: boolean;
+  isInvalid?: boolean;
+  autoSubmit?: boolean;
 }
 
 // Needed for React.lazy
@@ -179,6 +183,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
           screenTitle={props.screenTitle}
           onChange={onQueryChange}
           onChangeQueryInputFocus={onChangeQueryInputFocus}
+          autoSubmit={props.autoSubmit}
           onSubmit={onInputSubmit}
           persistedLog={persistedLog}
           dataTestSubj={props.dataTestSubj}
@@ -187,6 +192,9 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
           iconType={props.iconType}
           nonKqlMode={props.nonKqlMode}
           nonKqlModeHelpText={props.nonKqlModeHelpText}
+          storageKey={props.storageKey}
+          disableLanguageSwitcher={props.disableLanguageSwitcher}
+          isInvalid={props.isInvalid}
         />
       </EuiFlexItem>
     );
