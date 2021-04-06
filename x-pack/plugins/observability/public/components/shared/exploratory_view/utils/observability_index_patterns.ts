@@ -49,6 +49,7 @@ function isParamsSame(param1: IFieldFormat['_params'], param2: FieldFormatParams
   return (
     param1?.inputFormat === param2?.inputFormat &&
     param1?.outputFormat === param2?.outputFormat &&
+    param1?.showSuffix === param2?.showSuffix &&
     param2?.outputPrecision === param1?.outputPrecision
   );
 }

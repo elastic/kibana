@@ -22,6 +22,7 @@ export const rumFieldFormats: FieldFormat[] = [
       params: {
         inputFormat: 'microseconds',
         outputFormat: 'asSeconds',
+        showSuffix: true,
       },
     },
   },
@@ -32,6 +33,7 @@ export const rumFieldFormats: FieldFormat[] = [
       params: {
         inputFormat: 'milliseconds',
         outputFormat: 'asSeconds',
+        showSuffix: true,
       },
     },
   },
@@ -42,6 +44,7 @@ export const rumFieldFormats: FieldFormat[] = [
       params: {
         inputFormat: 'milliseconds',
         outputFormat: 'asSeconds',
+        showSuffix: true,
       },
     },
   },
@@ -52,6 +55,7 @@ export const rumFieldFormats: FieldFormat[] = [
       params: {
         inputFormat: 'milliseconds',
         outputFormat: 'asSeconds',
+        showSuffix: true,
       },
     },
   },
@@ -62,6 +66,7 @@ export const rumFieldFormats: FieldFormat[] = [
       params: {
         inputFormat: 'milliseconds',
         outputFormat: 'asSeconds',
+        showSuffix: true,
       },
     },
   },
