@@ -116,24 +116,23 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
       dtr.partition_field_name !== MLCATEGORY &&
       dtr.over_field_name !== MLCATEGORY;
 
-    // If the datafeed uses script fields, we can only plot the time series if
-    // model plot is enabled. Without model plot it will be very difficult or impossible
-    // to invert to a reverse search of the underlying metric data.
-    if (
-      isSourceDataChartable === true &&
-      job.datafeed_config?.script_fields !== null &&
-      typeof job.datafeed_config?.script_fields === 'object'
-    ) {
-      // Perform extra check to see if the detector is using a scripted field.
-      const scriptFields = Object.keys(job.datafeed_config.script_fields);
-      isSourceDataChartable =
-        scriptFields.indexOf(dtr.partition_field_name!) === -1 &&
-        scriptFields.indexOf(dtr.by_field_name!) === -1 &&
-        scriptFields.indexOf(dtr.over_field_name!) === -1;
-    }
-
     const hasDatafeed = isPopulatedObject(job.datafeed_config);
-    if (hasDatafeed) {
+
+    if (isSourceDataChartable && hasDatafeed) {
+      // Perform extra check to see if the detector is using a scripted field.
+      if (isPopulatedObject(job.datafeed_config.script_fields)) {
+        // If the datafeed uses script fields, we can only plot the time series if
+        // model plot is enabled. Without model plot it will be very difficult or impossible
+        // to invert to a reverse search of the underlying metric data.
+
+        const scriptFields = Object.keys(job.datafeed_config.script_fields);
+        return (
+          scriptFields.indexOf(dtr.partition_field_name!) === -1 &&
+          scriptFields.indexOf(dtr.by_field_name!) === -1 &&
+          scriptFields.indexOf(dtr.over_field_name!) === -1
+        );
+      }
+
       // We cannot plot the source data for some specific aggregation configurations
       const aggs = getDatafeedAggregations(job.datafeed_config);
       if (aggs !== undefined) {
