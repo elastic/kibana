@@ -13,14 +13,7 @@ import { EuiSpacer } from '@elastic/eui';
 
 import { IAggConfig } from '../../../../../../data/public';
 
-import {
-  VisParams,
-  ValueAxis,
-  SeriesParam,
-  CategoryAxis,
-  ChartMode,
-  AxisMode,
-} from '../../../../types';
+import { VisParams, ValueAxis, SeriesParam, CategoryAxis } from '../../../../types';
 import { ValidationVisOptionsProps } from '../../common';
 import { SeriesPanel } from './series_panel';
 import { CategoryAxisPanel } from './category_axis_panel';
@@ -308,18 +301,6 @@ function MetricsAxisOptions(props: ValidationVisOptionsProps<VisParams>) {
           firstValueAxesId,
           stateParams.seriesParams[stateParams.seriesParams.length - 1]
         );
-      }
-
-      const valueAxisToMetric = stateParams.valueAxes.find(
-        (valueAxis) => valueAxis.id === series.valueAxis
-      );
-      if (valueAxisToMetric) {
-        if (valueAxisToMetric.scale.mode === AxisMode.Percentage) {
-          series.mode = ChartMode.Stacked;
-          series.disabledMode = true;
-        } else if (series.disabledMode) {
-          series.disabledMode = false;
-        }
       }
 
       return series;

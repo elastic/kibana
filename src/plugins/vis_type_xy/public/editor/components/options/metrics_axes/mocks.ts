@@ -68,7 +68,6 @@ const seriesParam: SeriesParam = {
   show: true,
   type: ChartType.Histogram,
   mode: ChartMode.Stacked,
-  disabledMode: false,
   data: {
     label: 'Count',
     id: '1',

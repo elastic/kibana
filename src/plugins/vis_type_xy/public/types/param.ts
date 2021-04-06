@@ -68,7 +68,6 @@ export interface SeriesParam {
   interpolate?: InterpolationMode;
   lineWidth?: number;
   mode: ChartMode;
-  disabledMode: boolean;
   show: boolean;
   showCircles: boolean;
   type: ChartType;

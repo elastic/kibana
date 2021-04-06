@@ -128,15 +128,6 @@ describe('MetricsAxisOptions component', () => {
       const updatedSeries = [{ ...chart, data: { id: agg.id, label: agg.makeLabel() } }];
       expect(setValue).toHaveBeenCalledWith(SERIES_PARAMS, updatedSeries);
     });
-
-    it('should set "stacked" mode for metric if the referenced axis is "percentage"', () => {
-      defaultProps.stateParams.valueAxes[0].scale.mode = AxisMode.Percentage;
-      defaultProps.stateParams.seriesParams[0].mode = ChartMode.Normal;
-      mount(<MetricsAxisOptions {...defaultProps} />);
-
-      const updatedSeries = [{ ...chart, disabledMode: true, mode: ChartMode.Stacked }];
-      expect(setValue).toHaveBeenCalledWith(SERIES_PARAMS, updatedSeries);
-    });
   });
 
   describe('updateAxisTitle', () => {
