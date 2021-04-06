@@ -234,6 +234,7 @@ export function setQuery({
   forceRefresh = false,
   searchSessionId,
   searchSessionMapBuffer,
+  clearTimeslice,
 }: {
   filters?: Filter[];
   query?: Query;
@@ -242,6 +243,7 @@ export function setQuery({
   forceRefresh?: boolean;
   searchSessionId?: string;
   searchSessionMapBuffer?: MapExtent;
+  clearTimeslice?: boolean;
 }) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
@@ -253,11 +255,24 @@ export function setQuery({
         ? prevQuery.queryLastTriggeredAt
         : generateQueryTimestamp();
 
+    const prevTimeFilters = getTimeFilters(getState());
+
+    function getNextTimeslice() {
+      if (
+        clearTimeslice ||
+        (timeFilters !== undefined && !_.isEqual(timeFilters, prevTimeFilters))
+      ) {
+        return undefined;
+      }
+
+      return timeslice ? timeslice : getTimeslice(getState());
+    }
+
     const nextQueryContext = {
-      timeFilters: timeFilters ? timeFilters : getTimeFilters(getState()),
-      timeslice: timeslice ? timeslice : getTimeslice(getState()),
+      timeFilters: timeFilters ? timeFilters : prevTimeFilters,
+      timeslice: getNextTimeslice(),
       query: {
-        ...(query ? query : getQuery(getState())),
+        ...(query ? query : prevQuery),
         // ensure query changes to trigger re-fetch when "Refresh" clicked
         queryLastTriggeredAt: forceRefresh ? generateQueryTimestamp() : prevTriggeredAt,
       },
@@ -267,9 +282,9 @@ export function setQuery({
     };
 
     const prevQueryContext = {
-      timeFilters: getTimeFilters(getState()),
+      timeFilters: prevTimeFilters,
       timeslice: getTimeslice(getState()),
-      query: getQuery(getState()),
+      query: prevQuery,
       filters: getFilters(getState()),
       searchSessionId: getSearchSessionId(getState()),
       searchSessionMapBuffer: getSearchSessionMapBuffer(getState()),

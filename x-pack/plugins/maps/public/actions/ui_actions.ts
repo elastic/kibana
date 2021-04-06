@@ -10,7 +10,7 @@ import { ThunkDispatch } from 'redux-thunk';
 import { MapStoreState } from '../reducers/store';
 import { getFlyoutDisplay } from '../selectors/ui_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
-import { trackMapSettings } from './map_actions';
+import { setQuery, trackMapSettings } from './map_actions';
 import { setSelectedLayer } from './layer_actions';
 
 export const UPDATE_FLYOUT = 'UPDATE_FLYOUT';
@@ -97,8 +97,11 @@ export function openTimeslider() {
 }
 
 export function closeTimeslider() {
-  return {
-    type: SET_IS_TIME_SLIDER_OPEN,
-    isTimesliderOpen: false,
+  return (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
+    dispatch({
+      type: SET_IS_TIME_SLIDER_OPEN,
+      isTimesliderOpen: false,
+    });
+    dispatch(setQuery({ clearTimeslice: true }));
   };
 }
