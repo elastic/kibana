@@ -24,8 +24,7 @@ import {
   USER_AGENT_NAME,
   USER_AGENT_OS,
   USER_AGENT_VERSION,
-  TRANSACTION_TIME_TO_FIRST_BYTE,
-} from '../data/elasticsearch_fieldnames';
+} from '../constants/elasticsearch_fieldnames';
 
 export function getPerformanceDistLensConfig({ seriesId, indexPattern }: ConfigProps): DataSeries {
   return {
@@ -65,7 +64,6 @@ export function getPerformanceDistLensConfig({ seriesId, indexPattern }: ConfigP
         defaultValue: TRANSACTION_DURATION,
         options: [
           { label: 'Page load time', field: TRANSACTION_DURATION },
-          { label: 'Backend time', field: TRANSACTION_TIME_TO_FIRST_BYTE },
           { label: 'First contentful paint', field: FCP_FIELD },
           { label: 'Total blocking time', field: TBT_FIELD },
           // FIXME, review if we need these descriptions
@@ -82,7 +80,7 @@ export function getPerformanceDistLensConfig({ seriesId, indexPattern }: ConfigP
     labels: {
       ...FieldLabels,
       [SERVICE_NAME]: 'Web Application',
-      [TRANSACTION_DURATION]: 'Page load time',
+      [TRANSACTION_DURATION]: 'Page load time (Seconds)',
     },
   };
 }

@@ -12,7 +12,7 @@ import {
   LCP_FIELD,
   TBT_FIELD,
   TRANSACTION_DURATION,
-} from '../data/elasticsearch_fieldnames';
+} from '../constants/elasticsearch_fieldnames';
 
 export const rumFieldFormats: FieldFormat[] = [
   {
@@ -22,6 +22,8 @@ export const rumFieldFormats: FieldFormat[] = [
       params: {
         inputFormat: 'microseconds',
         outputFormat: 'asSeconds',
+        showSuffix: true,
+        outputPrecision: 1,
       },
     },
   },
@@ -32,6 +34,7 @@ export const rumFieldFormats: FieldFormat[] = [
       params: {
         inputFormat: 'milliseconds',
         outputFormat: 'asSeconds',
+        showSuffix: true,
       },
     },
   },
@@ -42,6 +45,7 @@ export const rumFieldFormats: FieldFormat[] = [
       params: {
         inputFormat: 'milliseconds',
         outputFormat: 'asSeconds',
+        showSuffix: true,
       },
     },
   },
@@ -51,7 +55,8 @@ export const rumFieldFormats: FieldFormat[] = [
       id: 'duration',
       params: {
         inputFormat: 'milliseconds',
-        outputFormat: 'asMilliseconds',
+        outputFormat: 'asSeconds',
+        showSuffix: true,
       },
     },
   },
@@ -61,7 +66,8 @@ export const rumFieldFormats: FieldFormat[] = [
       id: 'duration',
       params: {
         inputFormat: 'milliseconds',
-        outputFormat: 'asMilliseconds',
+        outputFormat: 'asSeconds',
+        showSuffix: true,
       },
     },
   },

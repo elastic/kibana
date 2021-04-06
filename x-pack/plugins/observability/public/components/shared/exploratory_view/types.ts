@@ -41,22 +41,14 @@ export interface ReportDefinition {
   required?: boolean;
   custom?: boolean;
   defaultValue?: string;
-  options?: Array<{
-    field: string;
-    label: string;
-    description?: string;
-    columnType?: 'range' | 'operation';
-  }>;
+  options?: Array<{ field: string; label: string; description?: string }>;
 }
 
 export interface DataSeries {
   reportType: ReportViewType;
   id: string;
   xAxisColumn: Partial<LastValueIndexPatternColumn> | Partial<DateHistogramIndexPatternColumn>;
-  yAxisColumn:
-    | Partial<IndexPatternColumn>
-    | Partial<LastValueIndexPatternColumn>
-    | Partial<DateHistogramIndexPatternColumn>;
+  yAxisColumn: Partial<IndexPatternColumn>;
 
   breakdowns: string[];
   defaultSeriesType: SeriesType;
@@ -100,13 +92,17 @@ type FormatType = 'duration' | 'number';
 type InputFormat = 'microseconds' | 'milliseconds' | 'seconds';
 type OutputFormat = 'asSeconds' | 'asMilliseconds' | 'humanize';
 
+export interface FieldFormatParams {
+  inputFormat: InputFormat;
+  outputFormat: OutputFormat;
+  outputPrecision?: number;
+  showSuffix?: boolean;
+}
+
 export interface FieldFormat {
   field: string;
   format: {
     id: FormatType;
-    params: {
-      inputFormat: InputFormat;
-      outputFormat: OutputFormat;
-    };
+    params: FieldFormatParams;
   };
 }

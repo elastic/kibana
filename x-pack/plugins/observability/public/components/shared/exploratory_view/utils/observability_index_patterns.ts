@@ -5,24 +5,32 @@
  * 2.0.
  */
 
+import { SavedObjectNotFound } from '../../../../../../../../src/plugins/kibana_utils/public';
 import {
   DataPublicPluginStart,
   IndexPattern,
+  FieldFormat as IFieldFormat,
   IndexPatternSpec,
 } from '../../../../../../../../src/plugins/data/public';
 import { rumFieldFormats } from '../configurations/rum/field_formats';
+import { syntheticsFieldFormats } from '../configurations/synthetics/field_formats';
+import { FieldFormat, FieldFormatParams } from '../types';
 
-const fieldFormats = {
+const appFieldFormats: Record<DataType, FieldFormat[] | null> = {
   rum: rumFieldFormats,
+  apm: null,
+  logs: null,
+  metrics: null,
+  synthetics: syntheticsFieldFormats,
 };
 
 function getFieldFormatsForApp(app: DataType) {
-  return rumFieldFormats;
+  return appFieldFormats[app];
 }
 
 export type DataType = 'synthetics' | 'apm' | 'logs' | 'metrics' | 'rum';
 
-const indexPatternList: Record<DataType, string> = {
+export const indexPatternList: Record<DataType, string> = {
   synthetics: 'synthetics_static_index_pattern_id',
   apm: 'apm_static_index_pattern_id',
   rum: 'rum_static_index_pattern_id',
@@ -31,12 +39,21 @@ const indexPatternList: Record<DataType, string> = {
 };
 
 const appToPatternMap: Record<DataType, string> = {
-  synthetics: 'heartbeat-*',
+  synthetics: '(synthetics-data-view)*,heartbeat-*,synthetics-*',
   apm: 'apm-*',
   rum: '(rum-data-view)*,apm-*',
   logs: 'logs-*,filebeat-*',
   metrics: 'metrics-*,metricbeat-*',
 };
+
+export function isParamsSame(param1: IFieldFormat['_params'], param2: FieldFormatParams) {
+  return (
+    param1?.inputFormat === param2?.inputFormat &&
+    param1?.outputFormat === param2?.outputFormat &&
+    param1?.showSuffix === param2?.showSuffix &&
+    param2?.outputPrecision === param1?.outputPrecision
+  );
+}
 
 export class ObservabilityIndexPatterns {
   data?: DataPublicPluginStart;
@@ -61,26 +78,32 @@ export class ObservabilityIndexPatterns {
       title: pattern,
       id: indexPatternList[app],
       timeFieldName: '@timestamp',
-      fieldFormats: this.getFieldFormats(),
+      fieldFormats: this.getFieldFormats(app),
     });
   }
   // we want to make sure field formats remain same
   async validateFieldFormats(app: DataType, indexPattern: IndexPattern) {
-    const defaultFieldFormats = getFieldFormatsForApp('rum');
-
-    defaultFieldFormats.forEach(({ field, format }) => {
-      // const fieldFormat = indexPattern.getFormatterForField(indexPattern.getFieldByName(field)!);
-      // const params = fieldFormat.params();
-      indexPattern.setFieldFormat(field, format);
-    });
-    // FIXME only update if it actually changes
-    await this.data?.indexPatterns.updateSavedObject(indexPattern);
+    const defaultFieldFormats = getFieldFormatsForApp(app);
+    if (defaultFieldFormats && defaultFieldFormats.length > 0) {
+      let isParamsDifferent = false;
+      defaultFieldFormats.forEach(({ field, format }) => {
+        const fieldFormat = indexPattern.getFormatterForField(indexPattern.getFieldByName(field)!);
+        const params = fieldFormat.params();
+        if (!isParamsSame(params, format.params)) {
+          indexPattern.setFieldFormat(field, format);
+          isParamsDifferent = true;
+        }
+      });
+      if (isParamsDifferent) {
+        await this.data?.indexPatterns.updateSavedObject(indexPattern);
+      }
+    }
   }
 
-  getFieldFormats() {
+  getFieldFormats(app: DataType) {
     const fieldFormatMap: IndexPatternSpec['fieldFormats'] = {};
 
-    rumFieldFormats.forEach(({ field, format }) => {
+    (appFieldFormats?.[app] ?? []).forEach(({ field, format }) => {
       fieldFormatMap[field] = format;
     });
 
@@ -94,11 +117,13 @@ export class ObservabilityIndexPatterns {
     try {
       const indexPattern = await this.data?.indexPatterns.get(indexPatternList[app]);
 
+      // this is intentional a non blocking call, so no await clause
       this.validateFieldFormats(app, indexPattern);
       return indexPattern;
-    } catch (e) {
-      // FIXME, catch specific error
-      return await this.createIndexPattern(app || 'apm');
+    } catch (e: unknown) {
+      if (e instanceof SavedObjectNotFound) {
+        return await this.createIndexPattern(app || 'apm');
+      }
     }
   }
 }

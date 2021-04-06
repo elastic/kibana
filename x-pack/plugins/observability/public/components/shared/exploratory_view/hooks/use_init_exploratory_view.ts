@@ -8,7 +8,7 @@ import { useFetcher } from '../../../..';
 import { IKbnUrlStateStorage } from '../../../../../../../../src/plugins/kibana_utils/public';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../../../../plugin';
-import { AllShortSeries } from './use_url_strorage';
+import { AllShortSeries } from './use_url_storage';
 import { ReportToDataTypeMap } from '../configurations/constants';
 import { DataType, ObservabilityIndexPatterns } from '../utils/observability_index_patterns';
 
