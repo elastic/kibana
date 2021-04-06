@@ -16,6 +16,7 @@ import { useMountAppended } from '../../../../../common/utils/use_mount_appended
 
 import { FormattedFieldValue } from './formatted_field';
 import { HOST_NAME_FIELD_NAME } from './constants';
+import { removeExternalLinkText } from '../../../../../../common';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -287,4 +288,28 @@ describe('Events', () => {
     );
     expect(wrapper.text()).toEqual(getEmptyValue());
   });
+
+  [
+    'threat.indicator.event.reference',
+    'threat.indicator.event.url',
+    'event.url',
+    'reference.url',
+    'rule.reference',
+  ].forEach((fieldName) =>
+    test(`it renders a link when fieldName is ${fieldName}`, () => {
+      const linkValue = `https://www.${fieldName.split('.').join('')}.com`;
+      const wrapper = mount(
+        <TestProviders>
+          <FormattedFieldValue
+            eventId={mockTimelineData[0].ecs._id}
+            contextId="test"
+            fieldName={fieldName}
+            fieldType="text"
+            value={linkValue}
+          />
+        </TestProviders>
+      );
+      expect(removeExternalLinkText(wrapper.text())).toEqual(linkValue);
+    })
+  );
 });

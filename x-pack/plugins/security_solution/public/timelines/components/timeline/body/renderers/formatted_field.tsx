@@ -30,6 +30,8 @@ import {
   EVENT_URL_FIELD_NAME,
   SIGNAL_STATUS_FIELD_NAME,
   GEO_FIELD_TYPE,
+  THREAT_INDICATOR_EVENT_REFERENCE_FIELD_NAME,
+  THREAT_INDICATOR_EVENT_URL_FIELD_NAME,
 } from './constants';
 import { RenderRuleName, renderEventModule, renderUrl } from './formatted_field_helpers';
 import { RuleStatus } from './rule_status';
@@ -116,7 +118,13 @@ const FormattedFieldValueComponent: React.FC<{
       <RuleStatus contextId={contextId} eventId={eventId} fieldName={fieldName} value={value} />
     );
   } else if (
-    [RULE_REFERENCE_FIELD_NAME, REFERENCE_URL_FIELD_NAME, EVENT_URL_FIELD_NAME].includes(fieldName)
+    [
+      EVENT_URL_FIELD_NAME,
+      REFERENCE_URL_FIELD_NAME,
+      RULE_REFERENCE_FIELD_NAME,
+      THREAT_INDICATOR_EVENT_REFERENCE_FIELD_NAME,
+      THREAT_INDICATOR_EVENT_URL_FIELD_NAME,
+    ].includes(fieldName)
   ) {
     return renderUrl({ contextId, eventId, fieldName, linkValue, truncate, value });
   } else if (columnNamesNotDraggable.includes(fieldName)) {
