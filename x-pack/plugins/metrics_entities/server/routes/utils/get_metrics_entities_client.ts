@@ -7,7 +7,7 @@
  */
 
 import { ErrorWithStatusCode } from '../../error_with_status_code';
-import { MetricsSummaryClient } from '../../services/metrics_summary_client';
+import { MetricsSummaryClient } from '../../services/metrics_entities_client';
 import type { MetricsSummaryRequestHandlerContext } from '../../types';
 
 export const getMetricsSummaryClient = (

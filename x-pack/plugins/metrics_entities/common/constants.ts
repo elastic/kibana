@@ -9,7 +9,7 @@
 /**
  * Base route
  */
-export const METRICS_SUMMARY_URL = '/api/metrics_summary';
+export const METRICS_SUMMARY_URL = '/api/metrics_entities';
 
 /**
  * Transforms route

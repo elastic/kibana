@@ -42,7 +42,7 @@ export const installMappings = async ({
           ...mapping.mappings,
           _meta: {
             ...mapping.mappings._meta,
-            ...{ created_by: 'metrics_summary', index: mappingId, version: { created: '1.0.0' } },
+            ...{ created_by: 'metrics_entities', index: mappingId, version: { created: '1.0.0' } },
           },
         },
       },

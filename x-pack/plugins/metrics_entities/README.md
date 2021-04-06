@@ -1,6 +1,6 @@
-# metrics_summary
+# metrics_entities
 
-Metrics summary where you can create metrics and summary transform jobs.
+Metrics entities where you can create metrics and entities transform jobs.
 
 The transform jobs are on the file system as:
  - modules (The different logical pieces)

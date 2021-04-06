@@ -12,7 +12,7 @@ import { IRouter } from '../../../../../src/core/server';
 import { METRICS_SUMMARY_TRANSFORMS } from '../../common/constants';
 import { ModuleNames } from '../modules';
 
-import { getMetricsSummaryClient } from './utils/get_metrics_summary_client';
+import { getMetricsSummaryClient } from './utils/get_metrics_entities_client';
 
 /**
  * Deletes transforms.

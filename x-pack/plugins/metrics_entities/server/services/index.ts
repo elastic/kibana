@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 export * from './get_transforms';
-export * from './metrics_summary_client';
+export * from './metrics_entities_client';
 export * from './post_transforms';

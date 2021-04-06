@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export const PLUGIN_ID = 'metricsSummary';
-export const PLUGIN_NAME = 'metrics_summary';
+export const PLUGIN_ID = 'metricsEntities';
+export const PLUGIN_NAME = 'metrics_entities';
 
 export * from './constants';

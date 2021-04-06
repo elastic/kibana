@@ -5,4 +5,4 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export * from './get_metrics_summary_client';
+export * from './get_metrics_entities_client';

@@ -9,5 +9,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/metrics_summary'],
+  roots: ['<rootDir>/x-pack/plugins/metrics_entities'],
 };

@@ -9,7 +9,7 @@
 import { IRouter } from '../../../../../src/core/server';
 import { METRICS_SUMMARY_TRANSFORMS } from '../../common/constants';
 
-import { getMetricsSummaryClient } from './utils/get_metrics_summary_client';
+import { getMetricsSummaryClient } from './utils/get_metrics_entities_client';
 
 /**
  * Returns a transform given a parameter of:
@@ -18,7 +18,7 @@ import { getMetricsSummaryClient } from './utils/get_metrics_summary_client';
  *   type - Either metric or entities (default is metrics)
  *   module - The module name of the transforms
  * Example:
- *   GET /api/metrics_summary/transforms?namespace=myNamespace&key=myKey
+ *   GET /api/metrics_entities/transforms?namespace=myNamespace&key=myKey
  * @param router The router to get the collection of transforms
  */
 export const getTransforms = (router: IRouter): void => {

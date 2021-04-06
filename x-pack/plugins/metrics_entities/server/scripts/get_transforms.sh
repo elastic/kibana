@@ -15,4 +15,4 @@ set -e
 # Example: ./get_transforms.sh
 curl -s -k \
  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
- -X GET ${KIBANA_URL}${SPACE_URL}/api/metrics_summary/transforms | jq .
+ -X GET ${KIBANA_URL}${SPACE_URL}/api/metrics_entities/transforms | jq .

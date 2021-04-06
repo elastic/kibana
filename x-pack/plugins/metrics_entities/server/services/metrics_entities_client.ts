@@ -15,7 +15,7 @@ import {
   ConstructorOptions,
   DeleteTransformsOptions,
   PostTransformsOptions,
-} from './metrics_summary_client_types';
+} from './metrics_entities_client_types';
 import { postTransforms } from './post_transforms';
 import { deleteTransforms } from './delete_transforms';
 

@@ -22,7 +22,7 @@ import {
   MetricsSummaryRequestHandlerContext,
 } from './types';
 import { getTransforms, postTransforms } from './routes';
-import { MetricsSummaryClient } from './services/metrics_summary_client';
+import { MetricsSummaryClient } from './services/metrics_entities_client';
 import { deleteTransforms } from './routes/delete_transforms';
 
 export class MetricsSummaryPlugin

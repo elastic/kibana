@@ -8,7 +8,7 @@
 
 import { ElasticsearchClient, IContextProvider, RequestHandlerContext } from 'kibana/server';
 
-import { MetricsSummaryClient } from './services/metrics_summary_client';
+import { MetricsSummaryClient } from './services/metrics_entities_client';
 
 export type GetMetricsSummaryClientType = (esClient: ElasticsearchClient) => MetricsSummaryClient;
 

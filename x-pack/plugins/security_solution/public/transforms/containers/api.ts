@@ -9,13 +9,13 @@ import { KibanaServices } from '../../common/lib/kibana';
 
 export interface CreateTransforms {
   signal: AbortSignal;
-  // TODO: Stronger types from the metrics_summary project
+  // TODO: Stronger types from the metrics_entities project
   bodies: unknown[];
 }
 
 export interface CreateTransform {
   signal: AbortSignal;
-  // TODO: Stronger types from the metrics_summary project
+  // TODO: Stronger types from the metrics_entities project
   body: unknown;
 }
 
@@ -41,7 +41,7 @@ export const createTransforms = async ({ bodies, signal }: CreateTransforms): Pr
  */
 export const createTransform = async ({ body, signal }: CreateTransform): Promise<void> => {
   // TODO: Use constants for the url here or from the metrics package.
-  return KibanaServices.get().http.fetch('/api/metrics_summary/transforms', {
+  return KibanaServices.get().http.fetch('/api/metrics_entities/transforms', {
     method: 'POST',
     body: JSON.stringify(body),
     signal,
