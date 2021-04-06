@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { within } from '@testing-library/react';
 import { fireEvent, screen, waitFor } from '@testing-library/dom';
 import { render, mockUrlStorage, mockCore } from './rtl_helpers';
 import { ExploratoryView } from './exploratory_view';
