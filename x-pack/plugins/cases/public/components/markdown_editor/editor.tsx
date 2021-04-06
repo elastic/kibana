@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useState, useCallback } from 'react';
+import React, { memo, useEffect, useState, useCallback, FunctionComponent } from 'react';
+import { Plugin, PluggableList } from 'unified';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { Options as Remark2RehypeOptions } from 'mdast-util-to-hast';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import rehype2react from 'rehype-react';
 import {
+  EuiLinkAnchorProps,
   EuiMarkdownEditor,
   getDefaultEuiMarkdownParsingPlugins,
   getDefaultEuiMarkdownProcessingPlugins,
@@ -26,8 +32,18 @@ interface MarkdownEditorProps {
 export const { uiPlugins, parsingPlugins, processingPlugins } = {
   uiPlugins: getDefaultEuiMarkdownUiPlugins(),
   parsingPlugins: getDefaultEuiMarkdownParsingPlugins(),
-  processingPlugins: getDefaultEuiMarkdownProcessingPlugins(),
+  processingPlugins: getDefaultEuiMarkdownProcessingPlugins() as [
+    [Plugin, Remark2RehypeOptions],
+    [
+      typeof rehype2react,
+      Parameters<typeof rehype2react>[0] & {
+        components: { a: FunctionComponent<EuiLinkAnchorProps> };
+      }
+    ],
+    ...PluggableList
+  ],
 };
+
 const MarkdownEditorComponent: React.FC<MarkdownEditorProps> = ({
   onChange,
   value,
