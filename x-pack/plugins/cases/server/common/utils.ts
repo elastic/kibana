@@ -132,11 +132,11 @@ export function createAuditMsg({
       type: operation.type,
       outcome: outcome ?? (error ? EventOutcome.FAILURE : EventOutcome.SUCCESS),
     },
-    kibana: {
-      ...(savedObjectID != null && {
+    ...(savedObjectID != null && {
+      kibana: {
         saved_object: { type: operation.savedObjectType, id: savedObjectID },
-      }),
-    },
+      },
+    }),
     ...(error != null && {
       error: {
         code: error.name,

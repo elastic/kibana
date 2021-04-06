@@ -395,7 +395,6 @@ describe('Case Configuration API', () => {
       settings: {
         syncAlerts: true,
       },
-      // TODO: remove this
       owner: 'securitySolution',
     };
 
