@@ -12,18 +12,16 @@ import { UserActionsSubClient, createUserActionsSubClient } from './user_actions
 import { CasesClientInternal, createCasesClientInternal } from './client_internal';
 
 export class CasesClient {
-  private readonly args: CasesClientArgs;
   private readonly casesClientInternal: CasesClientInternal;
   private readonly _cases: CasesSubClient;
   private readonly _attachments: AttachmentsSubClient;
   private readonly _userActions: UserActionsSubClient;
 
   constructor(args: CasesClientArgs) {
-    this.args = args;
     this.casesClientInternal = createCasesClientInternal(args);
-    this._cases = createCasesSubClient(this.args, this, this.casesClientInternal);
-    this._attachments = createAttachmentsSubClient(this.args, this.casesClientInternal);
-    this._userActions = createUserActionsSubClient(this.args);
+    this._cases = createCasesSubClient(args, this, this.casesClientInternal);
+    this._attachments = createAttachmentsSubClient(args, this.casesClientInternal);
+    this._userActions = createUserActionsSubClient(args);
   }
 
   public get cases() {

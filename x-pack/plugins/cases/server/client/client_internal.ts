@@ -10,14 +10,12 @@ import { AlertSubClient, createAlertsSubClient } from './alerts/client';
 import { ConfigureSubClient, createConfigurationSubClient } from './configure/client';
 
 export class CasesClientInternal {
-  private readonly args: CasesClientArgs;
   private readonly _alerts: AlertSubClient;
   private readonly _configuration: ConfigureSubClient;
 
   constructor(args: CasesClientArgs) {
-    this.args = args;
-    this._alerts = createAlertsSubClient(this.args);
-    this._configuration = createConfigurationSubClient(this.args, this);
+    this._alerts = createAlertsSubClient(args);
+    this._configuration = createConfigurationSubClient(args, this);
   }
 
   public get alerts() {
