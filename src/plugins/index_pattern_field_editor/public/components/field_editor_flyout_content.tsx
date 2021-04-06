@@ -66,7 +66,7 @@ const geti18nTexts = (field?: Field) => {
     typeConfirm: i18n.translate(
       'indexPatternFieldEditor.saveRuntimeField.confirmModal.typeConfirm',
       {
-        defaultMessage: 'Enter CHANGE to continue:',
+        defaultMessage: 'Enter CHANGE to continue',
       }
     ),
     titleConfirmChanges: i18n.translate(
