@@ -19,6 +19,8 @@ const defaultActionsConfig: ActionsConfig = {
   preconfigured: {},
   proxyRejectUnauthorizedCertificates: true,
   rejectUnauthorized: true,
+  maxResponseContentLength: 1000000,
+  responseTimeout: '60s',
 };
 
 describe('ensureUriAllowed', () => {
@@ -251,5 +253,31 @@ describe('ensureActionTypeEnabled', () => {
       enabledActionTypes: ['ignore', 'foo'],
     };
     expect(getActionsConfigurationUtilities(config).ensureActionTypeEnabled('foo')).toBeUndefined();
+  });
+});
+
+describe('getResponseSettingsFromConfig', () => {
+  test('throw error when responseTimeout configuration has wrong format', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      enabled: false,
+      allowedHosts: [],
+      responseTimeout: '1w',
+    };
+    expect(() =>
+      getActionsConfigurationUtilities(config).getResponseSettings()
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Invalid duration \\"1w\\". Durations must be of the form {number}x. Example: 5s, 5m, 5h or 5d\\""`
+    );
+  });
+
+  test('returns expected parsed values for default config for responseTimeout and maxResponseContentLength', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+    };
+    expect(getActionsConfigurationUtilities(config).getResponseSettings()).toEqual({
+      responseTimeout: 60000,
+      maxResponseContentLength: 1000000,
+    });
   });
 });

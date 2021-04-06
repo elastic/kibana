@@ -136,3 +136,8 @@ export interface ProxySettings {
   proxyHeaders?: Record<string, string>;
   proxyRejectUnauthorizedCertificates: boolean;
 }
+
+export interface ResponseSettings {
+  maxResponseContentLength: number;
+  responseTimeout: number;
+}
