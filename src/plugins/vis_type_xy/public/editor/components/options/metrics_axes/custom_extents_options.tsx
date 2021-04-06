@@ -9,6 +9,8 @@
 import React, { useCallback, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiIconTip } from '@elastic/eui';
 
 import { NumberInputOption, SwitchOption } from '../../../../../../vis_default_editor/public';
 
@@ -21,6 +23,7 @@ export interface CustomExtentsOptionsProps {
   setMultipleValidity(paramName: string, isValid: boolean): void;
   setValueAxis<T extends keyof ValueAxis>(paramName: T, value: ValueAxis[T]): void;
   setValueAxisScale: SetScale;
+  showLogOptions: boolean;
 }
 
 function CustomExtentsOptions({
@@ -28,6 +31,7 @@ function CustomExtentsOptions({
   setMultipleValidity,
   setValueAxis,
   setValueAxisScale,
+  showLogOptions,
 }: CustomExtentsOptionsProps) {
   const invalidBoundsMarginMessage = i18n.translate(
     'visTypeXy.controls.pointSeries.valueAxes.scaleToDataBounds.minNeededBoundsMargin',
@@ -65,6 +69,26 @@ function CustomExtentsOptions({
     },
     [axisScale, setValueAxis]
   );
+
+  const setAxisLogMinLimit = useCallback(
+    (paramName: 'logMinLimit', value: number | '') => {
+      setValueAxisScale(paramName, value === '' ? 1 : value);
+    },
+    [setValueAxisScale]
+  );
+
+  const setUselogLimit = useCallback(
+    (paramName: 'useLogMinLimit', value: boolean) => {
+      setValueAxisScale(paramName, value);
+    },
+    [setValueAxisScale]
+  );
+
+  useEffect(() => {
+    if (!showLogOptions) {
+      setUselogLimit('useLogMinLimit', false);
+    }
+  }, [setUselogLimit, showLogOptions]);
 
   useEffect(() => {
     setMultipleValidity('boundsMargin', isBoundsMarginValid);
@@ -119,6 +143,37 @@ function CustomExtentsOptions({
           setScale={setValueAxisScale}
           setMultipleValidity={setMultipleValidity}
         />
+      )}
+
+      {showLogOptions && (
+        <>
+          <SwitchOption
+            label={i18n.translate('visTypeXy.controls.pointSeries.valueAxes.setAxisLogMinLimit', {
+              defaultMessage: 'Set log min limit',
+            })}
+            paramName="useLogMinLimit"
+            value={axisScale.useLogMinLimit}
+            setValue={setUselogLimit}
+          />
+
+          {axisScale.useLogMinLimit && (
+            <NumberInputOption
+              label={
+                <>
+                  <FormattedMessage
+                    id="visTypeXy.controls.pointSeries.valueAxes.LogMinLimit"
+                    defaultMessage="Log min limit"
+                  />{' '}
+                  <EuiIconTip content="Absolute value to limit visible data on a log scale." />
+                </>
+              }
+              isInvalid={(axisScale.logMinLimit ?? 1) <= 0}
+              paramName="logMinLimit"
+              value={axisScale.logMinLimit}
+              setValue={setAxisLogMinLimit}
+            />
+          )}
+        </>
       )}
     </>
   );

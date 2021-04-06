@@ -167,21 +167,22 @@ function getAxisDomain<S extends XScaleType | YScaleType>(
     return;
   }
 
-  const { min, max, defaultYExtents, boundsMargin } = scale;
-  const fit = defaultYExtents;
+  const { min, max, defaultYExtents, boundsMargin, useLogMinLimit } = scale;
+  const fit = defaultYExtents || useLogMinLimit;
   const padding = boundsMargin;
+  const logMinLimit = useLogMinLimit ? scale.logMinLimit : undefined;
 
   if (!isNil(min) && !isNil(max)) {
-    return { fit, padding, min, max };
+    return { fit, logMinLimit, padding, min, max };
   }
 
   if (!isNil(min)) {
-    return { fit, padding, min };
+    return { fit, logMinLimit, padding, min };
   }
 
   if (!isNil(max)) {
-    return { fit, padding, max };
+    return { fit, logMinLimit, padding, max };
   }
 
-  return { fit, padding };
+  return { fit, logMinLimit, padding };
 }

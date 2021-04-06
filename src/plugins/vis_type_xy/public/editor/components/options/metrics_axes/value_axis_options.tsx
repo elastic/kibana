@@ -35,6 +35,7 @@ export interface ValueAxisOptionsParams {
   onValueAxisPositionChanged: (index: number, value: ValueAxis['position']) => void;
   setParamByIndex: SetParamByIndex;
   valueAxis: ValueAxis;
+  showLogOptions: boolean;
   setMultipleValidity: (paramName: string, isValid: boolean) => void;
 }
 
@@ -45,6 +46,7 @@ export function ValueAxisOptions({
   onValueAxisPositionChanged,
   setParamByIndex,
   setMultipleValidity,
+  showLogOptions,
 }: ValueAxisOptionsParams) {
   const setValueAxis = useCallback(
     <T extends keyof ValueAxis>(paramName: T, value: ValueAxis[T]) =>
@@ -188,6 +190,7 @@ export function ValueAxisOptions({
           <EuiSpacer size="m" />
           <CustomExtentsOptions
             axisScale={axis.scale}
+            showLogOptions={showLogOptions}
             setMultipleValidity={setMultipleValidity}
             setValueAxisScale={setValueAxisScale}
             setValueAxis={setValueAxis}

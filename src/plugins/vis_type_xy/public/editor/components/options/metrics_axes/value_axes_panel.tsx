@@ -20,9 +20,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { SeriesParam, ValueAxis } from '../../../../types';
+import { ChartMode, ScaleType, SeriesParam, ValueAxis } from '../../../../types';
 import { ValueAxisOptions } from './value_axis_options';
 import { SetParamByIndex } from '.';
+import { ChartType } from '../../../../../common';
 
 export interface ValueAxesPanelProps {
   addValueAxis: () => ValueAxis;
@@ -94,6 +95,22 @@ function ValueAxesPanel(props: ValueAxesPanelProps) {
     },
     [getSeries]
   );
+
+  const shouldShowLogOptions = useCallback(
+    (axis: ValueAxis) => {
+      if (axis.scale.type !== ScaleType.Log) return false;
+
+      const isFirst = valueAxes[0].id === axis.id;
+      const series = seriesParams.filter(
+        (serie) => serie.valueAxis === axis.id || (isFirst && !serie.valueAxis)
+      );
+      return series.some(
+        (serie) => serie.type === ChartType.Line && serie.mode === ChartMode.Normal
+      );
+    },
+    [seriesParams, valueAxes]
+  );
+
   return (
     <EuiPanel paddingSize="s">
       <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="baseline">
@@ -145,6 +162,7 @@ function ValueAxesPanel(props: ValueAxesPanelProps) {
             <ValueAxisOptions
               axis={axis}
               index={index}
+              showLogOptions={shouldShowLogOptions(axis)}
               valueAxis={valueAxes[index]}
               onValueAxisPositionChanged={props.onValueAxisPositionChanged}
               setParamByIndex={props.setParamByIndex}

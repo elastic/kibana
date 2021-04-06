@@ -29,6 +29,8 @@ export interface Scale {
   mode?: AxisMode;
   setYExtents?: boolean;
   type: ScaleType;
+  useLogMinLimit?: boolean;
+  logMinLimit?: number;
 }
 
 export interface CategoryAxis {
