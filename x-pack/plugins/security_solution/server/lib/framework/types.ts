@@ -12,9 +12,10 @@ import { KibanaRequest } from '../../../../../../src/core/server';
 import { AuthenticatedUser } from '../../../../security/common/model';
 import { ESQuery } from '../../../common/typed_json';
 import type { SecuritySolutionRequestHandlerContext } from '../../types';
-import { PaginationInput, SortField, SourceConfiguration } from '../../graphql/types';
+import { SortField, SourceConfiguration } from '../../graphql/types';
 import {
   DocValueFieldsInput,
+  PaginationInput,
   PaginationInputPaginated,
   TimerangeInput,
 } from '../../../common/search_strategy';

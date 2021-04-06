@@ -7,15 +7,7 @@
 
 import { CloudEcs } from '../../../../ecs/cloud';
 import { HostEcs, OsEcs } from '../../../../ecs/host';
-import {
-  Direction,
-  Hit,
-  Hits,
-  Maybe,
-  SearchHit,
-  StringOrNumber,
-  TotalValue,
-} from '../../../common';
+import { Hit, Hits, Maybe, SearchHit, StringOrNumber, TotalValue } from '../../../common';
 
 export enum HostPolicyResponseActionStatus {
   success = 'success',
@@ -27,12 +19,6 @@ export enum HostPolicyResponseActionStatus {
 export enum HostsFields {
   lastSeen = 'lastSeen',
   hostName = 'hostName',
-}
-
-export interface HostsSortField {
-  field: HostsFields;
-
-  direction: Direction;
 }
 
 export interface DocValueFieldsInput {

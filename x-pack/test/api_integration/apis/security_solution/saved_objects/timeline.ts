@@ -6,13 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import ApolloClient from 'apollo-client';
-
+import Supertest from 'supertest';
+import supertestAsPromised from 'supertest-as-promised';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-import { deleteTimelineMutation } from '../../../../../plugins/security_solution/public/timelines/containers/delete/persist.gql_query';
-import { persistTimelineFavoriteMutation } from '../../../../../plugins/security_solution/public/timelines/containers/favorite/persist.gql_query';
-import { persistTimelineMutation } from '../../../../../plugins/security_solution/public/timelines/containers/persist.gql_query';
 import { TimelineResult } from '../../../../../plugins/security_solution/public/graphql/types';
 import { TimelineType } from '../../../../../plugins/security_solution/common/types/timeline';
 
@@ -423,7 +420,10 @@ const omitTypename = (key: string, value: keyof TimelineResult) =>
 const omitTypenameInTimeline = (timeline: TimelineResult) =>
   JSON.parse(JSON.stringify(timeline), omitTypename);
 
-export const createBasicTimeline = async (supertest, titleToSaved: string) =>
+export const createBasicTimeline = async (
+  supertest: Supertest.SuperTest<supertestAsPromised.Test>,
+  titleToSaved: string
+) =>
   await supertest
     .post('/api/timeline')
     .set('kbn-xsrf', 'true')

@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { persistTimelinePinnedEventMutation } from '../../../../../plugins/security_solution/public/timelines/containers/pinned_event/persist.gql_query';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
