@@ -214,7 +214,7 @@ describe('SourceLogic', () => {
         SourceLogic.actions.initializeFederatedSummary(contentSource.id);
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/org/sources/123/federated_summary'
+          '/api/workplace_search/account/sources/123/federated_summary'
         );
         await promise;
         expect(onUpdateSummarySpy).toHaveBeenCalledWith(contentSource.summary);
