@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { act } from 'react-dom/test-utils';
 import { nextTick, pageHelpers, setupEnvironment } from './helpers';
 import { RestoreSnapshotTestBed } from './helpers/restore_snapshot.helpers';
 import * as fixtures from '../../test/fixtures';
@@ -20,6 +21,27 @@ describe('<RestoreSnapshot />', () => {
   afterAll(() => {
     server.restore();
   });
+
+  describe('wizard navigation', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setGetSnapshotResponse(fixtures.getSnapshot());
+
+      await act(async () => {
+        testBed = await setup();
+      });
+
+      testBed.component.update();
+    });
+
+    it('does not allow navigation when the step is invalid', async () => {
+      const { actions } = testBed;
+      actions.goToStep(2);
+      expect(actions.canGoToADifferentStep()).toBe(true);
+      actions.toggleModifyIndexSettings();
+      expect(actions.canGoToADifferentStep()).toBe(false);
+    });
+  });
+
   describe('with data streams', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setGetSnapshotResponse(fixtures.getSnapshot());
