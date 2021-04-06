@@ -14,6 +14,8 @@ import { StatefulTimeline } from '../../timeline';
 import { TimelineId } from '../../../../../common/types/timeline';
 import * as i18n from './translations';
 import { timelineActions } from '../../../store/timeline';
+import { defaultRowRenderers } from '../../timeline/body/renderers';
+import { DefaultCellRenderer } from '../../timeline/cell_rendering/default_cell_renderer';
 import { focusActiveTimelineButton } from '../../timeline/helpers';
 
 interface FlyoutPaneComponentProps {
@@ -46,7 +48,11 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({ timelineId })
         onClose={handleClose}
         size="l"
       >
-        <StatefulTimeline timelineId={timelineId} />
+        <StatefulTimeline
+          renderCellValue={DefaultCellRenderer}
+          rowRenderers={defaultRowRenderers}
+          timelineId={timelineId}
+        />
       </EuiFlyout>
     </EuiFlyoutContainer>
   );

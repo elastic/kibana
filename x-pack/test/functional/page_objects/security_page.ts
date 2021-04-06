@@ -290,6 +290,11 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
+    async clickSaveCreateUser() {
+      await find.clickByButtonText('Create user');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
     async clickSaveEditRole() {
       const saveButton = await retry.try(() => testSubjects.find('roleFormSaveButton'));
       await saveButton.moveMouseTo();
