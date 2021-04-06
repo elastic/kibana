@@ -571,8 +571,8 @@ export function indexDrawnLayers() {
       })
     );
 
-    return {
+    dispatch({
       type: INDEX_DRAWN_LAYERS,
-    };
+    });
   };
 }
