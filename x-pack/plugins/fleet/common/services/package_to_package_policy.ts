@@ -62,7 +62,7 @@ const varsReducer = (
 export const packageToPackagePolicyInputs = (
   packageInfo: PackageInfo
 ): NewPackagePolicy['inputs'] => {
-  const inputsByTypeOrPolicyTemplate: { [key: string]: NewPackagePolicyInput } = {};
+  const inputs: NewPackagePolicy['inputs'] = [];
   const packageDataStreams = packageInfo.data_streams || [];
   const packagePolicyTemplates = packageInfo.policy_templates || [];
   const hasIntegrations = doesPackageHaveIntegrations(packageInfo);
@@ -73,83 +73,51 @@ export const packageToPackagePolicyInputs = (
       data_streams: policyTemplateDataStreams = [],
       name: policyTemplateName,
     }) => {
-      // If policy template is has data streams defined, only look for inputs on those data streams
+      // If policy template has data streams defined, only look for inputs on those data streams
       // Otherwise look in all of the package data streams
       const dataStreamsToSearchForInputs = policyTemplateDataStreams.length
         ? packageDataStreams.filter((dataStream) =>
-            // TODO: is `path` field safe to use?
             policyTemplateDataStreams.includes(dataStream.path)
           )
         : packageDataStreams;
 
-      // For each input on the policy template, look for matching streams
-      policyTemplateInputs.forEach((policyTemplateInput) => {
-        const { type: inputType } = policyTemplateInput;
-        const inputVars = policyTemplateInput.vars?.length
-          ? policyTemplateInput.vars.reduce(varsReducer, {})
-          : {};
-
+      // Map each package package policy input to agent policy package policy input
+      policyTemplateInputs.forEach((packageInput) => {
         // Map each package input stream into package policy input stream
         const streams: NewPackagePolicyInputStream[] = getStreamsForInputType(
-          inputType,
+          packageInput.type,
           dataStreamsToSearchForInputs
         ).map((packageStream) => {
           const stream: NewPackagePolicyInputStream = {
             enabled: packageStream.enabled === false ? false : true,
             data_stream: packageStream.data_stream,
           };
-          const streamVars = packageStream.vars?.length
-            ? packageStream.vars.reduce(varsReducer, {})
-            : {};
-
-          if (hasIntegrations) {
-            if (Object.entries(streamVars).length || Object.entries(inputVars).length) {
-              stream.vars = { ...inputVars, ...streamVars };
-            }
-          } else {
-            if (Object.entries(streamVars).length) {
-              stream.vars = streamVars;
-            }
+          if (packageStream.vars && packageStream.vars.length) {
+            stream.vars = packageStream.vars.reduce(varsReducer, {});
           }
           return stream;
         });
 
-        const inputKey = hasIntegrations ? policyTemplateName : inputType;
         const input: NewPackagePolicyInput = {
-          type: inputKey,
+          type: packageInput.type,
           enabled: streams.length ? !!streams.find((stream) => stream.enabled) : true,
           streams,
         };
 
-        if (!hasIntegrations && Object.entries(inputVars).length) {
-          input.vars = inputVars;
+        if (hasIntegrations) {
+          input.integration = policyTemplateName;
         }
 
-        if (inputsByTypeOrPolicyTemplate[inputKey]) {
-          const existingInput = inputsByTypeOrPolicyTemplate[inputKey];
-          inputsByTypeOrPolicyTemplate[inputKey] = {
-            ...existingInput,
-            enabled: existingInput.enabled || input.enabled,
-            streams: [...existingInput.streams, ...input.streams],
-          };
-          if (
-            !hasIntegrations &&
-            (Object.entries(existingInput.vars || {}).length ||
-              Object.entries(input.vars || {}).length)
-          ) {
-            inputsByTypeOrPolicyTemplate[inputKey].vars = {
-              ...existingInput.vars,
-              ...input.vars,
-            };
-          }
-        } else {
-          inputsByTypeOrPolicyTemplate[inputKey] = input;
+        if (packageInput.vars && packageInput.vars.length) {
+          input.vars = packageInput.vars.reduce(varsReducer, {});
         }
+
+        inputs.push(input);
       });
     }
   );
 
-  return Object.values(inputsByTypeOrPolicyTemplate);
+  return inputs;
 };
 
 /**
@@ -183,7 +151,14 @@ export const packageToPackagePolicy = (
     inputs: packageToPackagePolicyInputs(packageInfo),
   };
 
-  if (packageInfo.vars && packageInfo.vars.length) {
+  if (doesPackageHaveIntegrations(packageInfo)) {
+    packagePolicy.integrations = packageInfo.policy_templates?.map((policyTemplate) => ({
+      name: policyTemplate.name,
+      enabled: true,
+    }));
+  }
+
+  if (packageInfo.vars?.length) {
     packagePolicy.vars = packageInfo.vars.reduce(varsReducer, {});
   }
 

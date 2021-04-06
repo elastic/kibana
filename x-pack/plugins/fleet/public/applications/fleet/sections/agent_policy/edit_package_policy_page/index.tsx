@@ -356,10 +356,8 @@ export const EditPackagePolicyForm = memo<{
           {/* Only show the out-of-box configuration step if a UI extension is NOT registered */}
           {!ExtensionView && (
             <StepConfigurePackagePolicy
-              from={'edit'}
               packageInfo={packageInfo}
               packagePolicy={packagePolicy}
-              packagePolicyId={packagePolicyId}
               updatePackagePolicy={updatePackagePolicy}
               validationResults={validationResults!}
               submitAttempted={formState === 'INVALID'}
@@ -386,7 +384,6 @@ export const EditPackagePolicyForm = memo<{
       packagePolicy,
       updatePackagePolicy,
       validationResults,
-      packagePolicyId,
       formState,
       originalPackagePolicy,
       ExtensionView,

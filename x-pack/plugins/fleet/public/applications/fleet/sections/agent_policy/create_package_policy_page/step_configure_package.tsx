@@ -50,22 +50,12 @@ const findStreamsForInputType = (
 };
 
 export const StepConfigurePackagePolicy: React.FunctionComponent<{
-  from?: CreatePackagePolicyFrom;
   packageInfo: PackageInfo;
   packagePolicy: NewPackagePolicy;
-  packagePolicyId?: string;
   updatePackagePolicy: (fields: Partial<NewPackagePolicy>) => void;
   validationResults: PackagePolicyValidationResults;
   submitAttempted: boolean;
-}> = ({
-  from = 'policy',
-  packageInfo,
-  packagePolicy,
-  packagePolicyId,
-  updatePackagePolicy,
-  validationResults,
-  submitAttempted,
-}) => {
+}> = ({ packageInfo, packagePolicy, updatePackagePolicy, validationResults, submitAttempted }) => {
   // Configure inputs (and their streams)
   // Assume packages only export one config template for now
   const renderConfigureInputs = () =>
@@ -100,7 +90,13 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                       inputs: newInputs,
                     });
                   }}
-                  inputValidationResults={validationResults!.inputs![packagePolicyInput.type]}
+                  inputValidationResults={
+                    validationResults!.inputs![
+                      packagePolicyInput.integration
+                        ? `${packagePolicyInput.type}-${packagePolicyInput.integration}`
+                        : packagePolicyInput.type
+                    ]
+                  }
                   forceShowErrors={submitAttempted}
                 />
                 <EuiHorizontalRule margin="m" />

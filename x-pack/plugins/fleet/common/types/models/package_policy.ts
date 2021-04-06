@@ -35,6 +35,7 @@ export interface PackagePolicyInputStream extends NewPackagePolicyInputStream {
 
 export interface NewPackagePolicyInput {
   type: string;
+  integration?: string;
   enabled: boolean;
   vars?: PackagePolicyConfigRecord;
   config?: PackagePolicyConfigRecord;
@@ -46,6 +47,11 @@ export interface PackagePolicyInput extends Omit<NewPackagePolicyInput, 'streams
   compiled_input?: any;
 }
 
+export interface PackagePolicyIntegrations {
+  name: string;
+  enabled: boolean;
+}
+
 export interface NewPackagePolicy {
   name: string;
   description?: string;
@@ -54,6 +60,7 @@ export interface NewPackagePolicy {
   policy_id: string;
   output_id: string;
   package?: PackagePolicyPackage;
+  integrations?: PackagePolicyIntegrations[];
   inputs: NewPackagePolicyInput[];
   vars?: PackagePolicyConfigRecord;
 }

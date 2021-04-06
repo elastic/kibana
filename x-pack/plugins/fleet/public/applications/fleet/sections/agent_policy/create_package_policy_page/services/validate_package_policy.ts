@@ -7,8 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import { safeLoad } from 'js-yaml';
+import { keyBy } from 'lodash';
 
-import { getFlattenedObject, isValidNamespace } from '../../../../services';
+import {
+  getFlattenedObject,
+  isValidNamespace,
+  doesPackageHaveIntegrations,
+} from '../../../../services';
+
 import type {
   NewPackagePolicy,
   PackagePolicyInput,
@@ -32,12 +38,12 @@ export type PackagePolicyInputValidationResults = PackagePolicyConfigValidationR
   streams?: Record<PackagePolicyInputStream['id'], PackagePolicyConfigValidationResults>;
 };
 
-export interface PackagePolicyValidationResults {
+export type PackagePolicyValidationResults = {
   name: Errors;
   description: Errors;
   namespace: Errors;
   inputs: Record<PackagePolicyInput['type'], PackagePolicyInputValidationResults> | null;
-}
+} & PackagePolicyConfigValidationResults;
 
 /*
  * Returns validation information for a given package policy and package info
@@ -47,6 +53,7 @@ export const validatePackagePolicy = (
   packagePolicy: NewPackagePolicy,
   packageInfo: PackageInfo
 ): PackagePolicyValidationResults => {
+  const hasIntegrations = doesPackageHaveIntegrations(packageInfo);
   const validationResults: PackagePolicyValidationResults = {
     name: null,
     description: null,
@@ -67,6 +74,16 @@ export const validatePackagePolicy = (
     validationResults.namespace = [namespaceValidation.error];
   }
 
+  // Validate package-level vars
+  const packageVarsByName = keyBy(packageInfo.vars || [], 'name');
+  const packageVars = Object.entries(packagePolicy.vars || {});
+  if (packageVars.length) {
+    validationResults.vars = packageVars.reduce((results, [name, configEntry]) => {
+      results[name] = validatePackagePolicyConfig(configEntry, packageVarsByName[name]);
+      return results;
+    }, {} as ValidationEntry);
+  }
+
   if (
     !packageInfo.policy_templates ||
     packageInfo.policy_templates.length === 0 ||
@@ -78,11 +95,14 @@ export const validatePackagePolicy = (
     return validationResults;
   }
 
-  const registryInputsByType: Record<
+  const registryInputsByTypeAndIntegration: Record<
     string,
     RegistryInput
-  > = packageInfo.policy_templates[0].inputs.reduce((inputs, registryInput) => {
-    inputs[registryInput.type] = registryInput;
+  > = packageInfo.policy_templates.reduce((inputs, policyTemplate) => {
+    (policyTemplate.inputs || []).forEach((input) => {
+      inputs[hasIntegrations ? `${input.type}-${policyTemplate.name}` : input.type] = input;
+    });
+
     return inputs;
   }, {} as Record<string, RegistryInput>);
 
@@ -99,18 +119,13 @@ export const validatePackagePolicy = (
       return;
     }
 
+    const inputKey = hasIntegrations ? `${input.type}-${input.integration}` : input.type;
     const inputValidationResults: PackagePolicyInputValidationResults = {
       vars: undefined,
       streams: {},
     };
 
-    const inputVarsByName = (registryInputsByType[input.type].vars || []).reduce(
-      (vars, registryVar) => {
-        vars[registryVar.name] = registryVar;
-        return vars;
-      },
-      {} as Record<string, RegistryVarsEntry>
-    );
+    const inputVarsByName = keyBy(registryInputsByTypeAndIntegration[inputKey].vars || [], 'name');
 
     // Validate input-level config fields
     const inputConfigs = Object.entries(input.vars || {});
@@ -161,7 +176,7 @@ export const validatePackagePolicy = (
     }
 
     if (inputValidationResults.vars || inputValidationResults.streams) {
-      validationResults.inputs![input.type] = inputValidationResults;
+      validationResults.inputs![inputKey] = inputValidationResults;
     }
   });
 
@@ -263,7 +278,7 @@ export const countValidationErrors = (
     | PackagePolicyInputValidationResults
     | PackagePolicyConfigValidationResults
 ): number => {
-  const flattenedValidation = getFlattenedObject(validationResults);
+  const flattenedValidation = getFlattenedObject(validationResults || {});
   const errors = Object.values(flattenedValidation).filter((value) => Boolean(value)) || [];
   return errors.length;
 };
