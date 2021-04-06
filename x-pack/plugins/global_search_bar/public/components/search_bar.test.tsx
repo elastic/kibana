@@ -120,7 +120,8 @@ describe('SearchBar', () => {
         basePathUrl={basePathUrl}
         darkMode={darkMode}
         trackUiMetric={jest.fn()}
-      />
+      />,
+      { attachTo: document.body }
     );
 
     const searchEvent = new KeyboardEvent('keydown', {

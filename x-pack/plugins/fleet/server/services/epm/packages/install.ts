@@ -97,22 +97,54 @@ export async function ensureInstalledDefaultPackages(
   });
 }
 
+export async function isPackageVersionInstalled(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgName: string;
+  pkgVersion?: string;
+}): Promise<Installation | false> {
+  const { savedObjectsClient, pkgName, pkgVersion } = options;
+  const installedPackage = await getInstallation({ savedObjectsClient, pkgName });
+  if (installedPackage && (!pkgVersion || installedPackage.version === pkgVersion)) {
+    return installedPackage;
+  }
+  return false;
+}
+
 export async function ensureInstalledPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   esClient: ElasticsearchClient;
+  pkgVersion?: string;
 }): Promise<Installation> {
-  const { savedObjectsClient, pkgName, esClient } = options;
-  const installedPackage = await getInstallation({ savedObjectsClient, pkgName });
+  const { savedObjectsClient, pkgName, esClient, pkgVersion } = options;
+  const installedPackage = await isPackageVersionInstalled({
+    savedObjectsClient,
+    pkgName,
+    pkgVersion,
+  });
   if (installedPackage) {
     return installedPackage;
   }
   // if the requested packaged was not found to be installed, install
-  await installLatestPackage({
-    savedObjectsClient,
-    pkgName,
-    esClient,
-  });
+  if (pkgVersion) {
+    const pkgkey = Registry.pkgToPkgKey({
+      name: pkgName,
+      version: pkgVersion,
+    });
+    await installPackage({
+      installSource: 'registry',
+      savedObjectsClient,
+      pkgkey,
+      esClient,
+      force: true,
+    });
+  } else {
+    await installLatestPackage({
+      savedObjectsClient,
+      pkgName,
+      esClient,
+    });
+  }
   const installation = await getInstallation({ savedObjectsClient, pkgName });
   if (!installation) throw new Error(`could not get installation ${pkgName}`);
   return installation;

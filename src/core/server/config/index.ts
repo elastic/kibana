@@ -7,6 +7,7 @@
  */
 
 export { coreDeprecationProvider } from './deprecation';
+export { ensureValidConfiguration } from './ensure_valid_configuration';
 
 export {
   ConfigService,
@@ -24,7 +25,7 @@ export type {
   ConfigPath,
   CliArgs,
   ConfigDeprecation,
-  ConfigDeprecationLogger,
+  AddConfigDeprecation,
   ConfigDeprecationProvider,
   ConfigDeprecationFactory,
   EnvironmentMode,
