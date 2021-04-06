@@ -7,13 +7,13 @@
 
 import uuid from 'uuid';
 import { SavedObject } from 'kibana/server';
+import { normalizeThresholdField } from '../../../../common/detection_engine/utils';
 import {
   InternalRuleCreate,
   RuleParams,
   TypeSpecificRuleParams,
   BaseRuleParams,
 } from './rule_schemas';
-import { normalizeThresholdField } from '../../../../common/detection_engine/utils';
 import { assertUnreachable } from '../../../../common/utility_types';
 import {
   CreateRulesSchema,
@@ -97,10 +97,7 @@ export const typeSpecificSnakeToCamel = (params: CreateTypeSpecific): TypeSpecif
         filters: params.filters,
         savedId: params.saved_id,
         threshold: {
-          field:
-            typeof params.threshold.field === 'string'
-              ? [params.threshold.field]
-              : params.threshold.field,
+          field: normalizeThresholdField(params.threshold.field),
           value: params.threshold.value,
           cardinality: params.threshold.cardinality != null ? params.threshold.cardinality : [],
         },
@@ -225,10 +222,7 @@ export const typeSpecificCamelToSnake = (params: TypeSpecificRuleParams): Respon
         query: params.query,
         filters: params.filters,
         saved_id: params.savedId,
-        threshold: {
-          ...params.threshold,
-          field: normalizeThresholdField(params.threshold.field),
-        },
+        threshold: params.threshold,
       };
     }
     case 'machine_learning': {

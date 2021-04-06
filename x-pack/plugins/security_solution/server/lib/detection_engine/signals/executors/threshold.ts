@@ -12,10 +12,7 @@ import {
   AlertInstanceState,
   AlertServices,
 } from '../../../../../../alerting/server';
-import {
-  hasLargeValueItem,
-  normalizeThresholdField,
-} from '../../../../../common/detection_engine/utils';
+import { hasLargeValueItem } from '../../../../../common/detection_engine/utils';
 import { ExceptionListItemSchema } from '../../../../../common/shared_imports';
 import { ThresholdRuleParams } from '../../schemas/rule_schemas';
 import { RefreshTypes } from '../../types';
@@ -80,7 +77,7 @@ export const thresholdExecutor = async ({
       services,
       logger,
       ruleId: ruleParams.ruleId,
-      bucketByFields: normalizeThresholdField(ruleParams.threshold.field),
+      bucketByFields: ruleParams.threshold.field,
       timestampOverride: ruleParams.timestampOverride,
       buildRuleMessage,
     });

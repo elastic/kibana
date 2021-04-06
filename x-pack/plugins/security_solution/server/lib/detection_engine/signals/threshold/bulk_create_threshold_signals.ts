@@ -7,7 +7,6 @@
 
 import { get } from 'lodash/fp';
 import set from 'set-value';
-import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
 import {
   ThresholdNormalized,
   TimestampOverrideOrUndefined,
@@ -242,7 +241,6 @@ export const bulkCreateThresholdSignals = async (
 ): Promise<SingleBulkCreateResponse> => {
   const ruleParams = params.ruleSO.attributes.params;
   const thresholdResults = params.someResult;
-  const threshold = ruleParams.threshold;
   const ecsResults = transformThresholdResultsToEcs(
     thresholdResults,
     params.inputIndexPattern.join(','),
@@ -250,10 +248,7 @@ export const bulkCreateThresholdSignals = async (
     params.from,
     params.filter,
     params.logger,
-    {
-      ...threshold,
-      field: normalizeThresholdField(threshold.field),
-    },
+    ruleParams.threshold,
     ruleParams.ruleId,
     ruleParams.timestampOverride,
     params.thresholdSignalHistory
