@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { ContentType, Mode } from './types';
 
 import { KeyValuePairsField, Pair } from './key_value_field';
@@ -20,18 +21,15 @@ export const HeaderField = ({ contentMode, defaultValue, onChange }: Props) => {
   const defaultValueKeys = Object.keys(defaultValue).filter((key) => key !== 'Content-Type'); // Content-Type is a secret header we hide from the user
   const formattedDefaultValues: Pair[] = [
     ...defaultValueKeys.map<Pair>((key) => {
-      return [key || '', defaultValue[key] || '', true]; // key, value, checked
+      return [key || '', defaultValue[key] || '']; // key, value
     }),
-    ['', '', false], // ensure there is one extra empty field
   ];
-  const [headers, setHeaders] = useState<Pair[]>(
-    defaultValueKeys.length ? formattedDefaultValues : [['', '', false]]
-  );
+  const [headers, setHeaders] = useState<Pair[]>(formattedDefaultValues);
 
   useEffect(() => {
     const formattedHeaders = headers.reduce((acc: Record<string, string>, header) => {
-      const [key, value, checked] = header;
-      if (checked) {
+      const [key, value] = header;
+      if (key) {
         return {
           ...acc,
           [key]: value,
@@ -47,7 +45,18 @@ export const HeaderField = ({ contentMode, defaultValue, onChange }: Props) => {
     }
   }, [contentMode, headers, onChange]);
 
-  return <KeyValuePairsField defaultPairs={headers} onChange={setHeaders} />;
+  return (
+    <KeyValuePairsField
+      addPairControlLabel={
+        <FormattedMessage
+          id="xpack.uptime.createPackagePolicy.stepConfigure.headerField.addHeader.label"
+          defaultMessage="Add header"
+        />
+      }
+      defaultPairs={headers}
+      onChange={setHeaders}
+    />
+  );
 };
 
 export const contentTypes: Record<Mode, ContentType> = {

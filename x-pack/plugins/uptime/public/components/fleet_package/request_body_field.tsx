@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { stringify, parse } from 'query-string';
 
 import styled from 'styled-components';
 
 import { EuiCodeEditor, EuiPanel, EuiTabbedContent } from '@elastic/eui';
+
 import { Mode } from './types';
 
 import { KeyValuePairsField, Pair } from './key_value_field';
@@ -101,8 +102,8 @@ export const RequestBodyField = ({ onChange, type, value }: Props) => {
   const onChangeFormFields = useCallback(
     (pairs: Pair[]) => {
       const formattedPairs = pairs.reduce((acc: Record<string, string>, header) => {
-        const [key, pairValue, checked] = header;
-        if (checked) {
+        const [key, pairValue] = header;
+        if (key) {
           return {
             ...acc,
             [key]: pairValue,
@@ -121,15 +122,11 @@ export const RequestBodyField = ({ onChange, type, value }: Props) => {
   const defaultFormPairs: Pair[] = useMemo(() => {
     const pairs = parse(values[Mode.FORM]);
     const keys = Object.keys(pairs);
-    if (keys.length) {
-      const formattedPairs: Pair[] = keys.map((key: string) => {
-        // key, value, checked;
-        return [key, `${pairs[key]}`, true];
-      });
-      return formattedPairs;
-    } else {
-      return [['', '', false]];
-    }
+    const formattedPairs: Pair[] = keys.map((key: string) => {
+      // key, value, checked;
+      return [key, `${pairs[key]}`];
+    });
+    return formattedPairs;
   }, [values]);
 
   const tabs = [
@@ -175,7 +172,18 @@ export const RequestBodyField = ({ onChange, type, value }: Props) => {
     {
       id: Mode.FORM,
       name: modeLabels[Mode.FORM],
-      content: <KeyValuePairsField defaultPairs={defaultFormPairs} onChange={onChangeFormFields} />,
+      content: (
+        <KeyValuePairsField
+          addPairControlLabel={
+            <FormattedMessage
+              id="xpack.uptime.createPackagePolicy.stepConfigure.requestBody.formField.addFormField.label"
+              defaultMessage="Add form field"
+            />
+          }
+          defaultPairs={defaultFormPairs}
+          onChange={onChangeFormFields}
+        />
+      ),
     },
   ];
 

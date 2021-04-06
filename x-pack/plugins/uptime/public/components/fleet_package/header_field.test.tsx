@@ -29,7 +29,11 @@ describe('<HeaderField />', () => {
   });
 
   it('formats headers and handles onChange', async () => {
-    const { getByTestId } = render(<HeaderField defaultValue={defaultValue} onChange={onChange} />);
+    const { getByTestId, getByText } = render(
+      <HeaderField defaultValue={defaultValue} onChange={onChange} />
+    );
+    const addHeader = getByText('Add header');
+    fireEvent.click(addHeader);
     const key = getByTestId('keyValuePairsKey0') as HTMLInputElement;
     const value = getByTestId('keyValuePairsValue0') as HTMLInputElement;
     const newKey = 'sampleKey';
@@ -44,9 +48,14 @@ describe('<HeaderField />', () => {
     });
   });
 
-  it('handles unchecking headers', async () => {
-    const { getByTestId } = render(<HeaderField defaultValue={defaultValue} onChange={onChange} />);
-    const checkbox = getByTestId('keyValuePairsCheckbox0') as HTMLInputElement;
+  it('handles deleting headers', async () => {
+    const { getByTestId, getByText, getByLabelText } = render(
+      <HeaderField defaultValue={{ sampleKey: 'sampleValue' }} onChange={onChange} />
+    );
+    const addHeader = getByText('Add header');
+
+    fireEvent.click(addHeader);
+
     const key = getByTestId('keyValuePairsKey0') as HTMLInputElement;
     const value = getByTestId('keyValuePairsValue0') as HTMLInputElement;
     const newKey = 'sampleKey';
@@ -60,21 +69,10 @@ describe('<HeaderField />', () => {
       });
     });
 
+    const deleteBtn = getByLabelText('Delete item number 2, sampleKey:sampleValue');
+
     // uncheck
-    fireEvent.click(checkbox);
-
-    await waitFor(() => {
-      expect(onChange).toBeCalledWith({});
-    });
-
-    // check
-    fireEvent.click(checkbox);
-
-    await waitFor(() => {
-      expect(onChange).toBeCalledWith({
-        [newKey]: newValue,
-      });
-    });
+    fireEvent.click(deleteBtn);
   });
 
   it('handles content mode', async () => {

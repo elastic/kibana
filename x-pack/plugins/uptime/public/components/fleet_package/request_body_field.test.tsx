@@ -59,7 +59,7 @@ describe('<RequestBodyField />', () => {
       fireEvent.click(formButton);
     }
     await waitFor(() => {
-      expect(getByText('Key')).toBeInTheDocument();
+      expect(getByText('Add form field')).toBeInTheDocument();
       expect(queryByLabelText('Text code editor')).not.toBeInTheDocument();
     });
   });

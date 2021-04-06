@@ -7,10 +7,12 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
+  EuiButton,
+  EuiButtonIcon,
   EuiFieldText,
-  EuiCheckbox,
-  htmlIdGenerator,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormControlLayoutDelimited,
@@ -22,8 +24,8 @@ import {
 const StyledFieldset = styled(EuiFormFieldset)`
   &&& {
     legend {
-      width: calc(100% - 40px);
-      margin-left: 40px;
+      width: calc(100% - 52px); // right margin + flex item padding
+      margin-right: 40px;
     }
     .euiFlexGroup {
       margin-left: 0;
@@ -41,26 +43,17 @@ const StyledField = styled(EuiFieldText)`
 
 export type Pair = [
   string, // key
-  string, // value
-  boolean // checked, i.e. key is active
+  string // value
 ];
 
 interface Props {
+  addPairControlLabel: string | React.ReactElement;
   defaultPairs: Pair[];
   onChange: (pairs: Pair[]) => void;
 }
 
-export const KeyValuePairsField = ({ defaultPairs, onChange }: Props) => {
+export const KeyValuePairsField = ({ addPairControlLabel, defaultPairs, onChange }: Props) => {
   const [pairs, setPairs] = useState<Pair[]>(defaultPairs);
-  const handleOnCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
-    const checked = event.target.checked;
-    setPairs((prevPairs) => {
-      const newPairs = [...prevPairs];
-      const [key, value] = prevPairs[index];
-      newPairs[index] = [key, value, checked];
-      return newPairs;
-    });
-  };
 
   const handleOnChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>, index: number, isKey: boolean) => {
@@ -68,28 +61,24 @@ export const KeyValuePairsField = ({ defaultPairs, onChange }: Props) => {
 
       setPairs((prevPairs) => {
         const newPairs = [...prevPairs];
-        const [prevKey, prevValue, prevChecked] = prevPairs[index];
-        let checked;
-        // if there previously wasn't a key, and a new key is added
-        if (!prevKey && isKey && targetValue) {
-          checked = true;
-          // if the item we are updating is an existing key
-        } else if (isKey) {
-          checked = targetValue ? true : false;
-          // if the item we are updating is a value
-        } else {
-          checked = prevChecked;
-        }
-        newPairs[index] = isKey
-          ? [targetValue, prevValue, checked]
-          : [prevKey, targetValue, checked];
-        const isLastRow = prevPairs.length - 1 === index;
-
-        // automatically add a new row if the current is the last row and previously did not contain a key
-        if (isLastRow && !prevPairs[index][0]) {
-          newPairs.push(['', '', false]);
-        }
+        const [prevKey, prevValue] = prevPairs[index];
+        newPairs[index] = isKey ? [targetValue, prevValue] : [prevKey, targetValue];
         return newPairs;
+      });
+    },
+    [setPairs]
+  );
+
+  const handleAddPair = useCallback(() => {
+    setPairs((prevPairs) => [['', ''], ...prevPairs]);
+  }, [setPairs]);
+
+  const handleDeletePair = useCallback(
+    (index: number) => {
+      setPairs((prevPairs) => {
+        const newPairs = [...prevPairs];
+        newPairs.splice(index, 1);
+        return [...newPairs];
       });
     },
     [setPairs]
@@ -102,49 +91,89 @@ export const KeyValuePairsField = ({ defaultPairs, onChange }: Props) => {
   return (
     <>
       <EuiSpacer size="s" />
+      <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          <EuiButton iconType="plus" onClick={handleAddPair}>
+            {addPairControlLabel}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
       <StyledFieldset
-        legend={{
-          children: (
-            <EuiFlexGroup responsive={false}>
-              <EuiFlexItem>Key</EuiFlexItem>
-              <EuiFlexItem>Value</EuiFlexItem>
-            </EuiFlexGroup>
-          ),
-        }}
+        legend={
+          !!pairs.length
+            ? {
+                children: (
+                  <EuiFlexGroup responsive={false}>
+                    <EuiFlexItem>
+                      {
+                        <FormattedMessage
+                          id="xpack.uptime.keyValuePairsField.key.label"
+                          defaultMessage="Key"
+                        />
+                      }
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      {
+                        <FormattedMessage
+                          id="xpack.uptime.keyValuePairsField.value.label"
+                          defaultMessage="Value"
+                        />
+                      }
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                ),
+              }
+            : undefined
+        }
       >
         {pairs.map((pair, index) => {
-          const [key, value, checked] = pair;
+          const [key, value] = pair;
           return (
-            <EuiFormControlLayoutDelimited
-              key={index}
-              fullWidth
-              prepend={
-                <EuiFormLabel>
-                  <EuiCheckbox
-                    data-test-subj={`keyValuePairsCheckbox${index}`}
-                    id={htmlIdGenerator()()}
-                    checked={checked}
-                    disabled={!key}
-                    onChange={(event) => handleOnCheckboxChange(event, index)}
+            <>
+              <EuiSpacer size="xs" />
+              <EuiFormControlLayoutDelimited
+                key={index}
+                fullWidth
+                append={
+                  <EuiFormLabel>
+                    <EuiButtonIcon
+                      iconType="trash"
+                      aria-label={i18n.translate(
+                        'xpack.uptime.keyValuePairsField.deleteItem.label',
+                        {
+                          defaultMessage: 'Delete item number {index}, {key}:{value}',
+                          values: { index: index + 1, key, value },
+                        }
+                      )}
+                      onClick={() => handleDeletePair(index)}
+                    />
+                  </EuiFormLabel>
+                }
+                startControl={
+                  <StyledField
+                    aria-label={i18n.translate('xpack.uptime.keyValuePairsField.key.ariaLabel', {
+                      defaultMessage: 'Key',
+                    })}
+                    data-test-subj={`keyValuePairsKey${index}`}
+                    value={key}
+                    onChange={(event) => handleOnChange(event, index, true)}
                   />
-                </EuiFormLabel>
-              }
-              startControl={
-                <StyledField
-                  data-test-subj={`keyValuePairsKey${index}`}
-                  value={key}
-                  onChange={(event) => handleOnChange(event, index, true)}
-                />
-              }
-              endControl={
-                <StyledField
-                  data-test-subj={`keyValuePairsValue${index}`}
-                  value={value}
-                  onChange={(event) => handleOnChange(event, index, false)}
-                />
-              }
-              delimiter=":"
-            />
+                }
+                endControl={
+                  <StyledField
+                    aria-label={i18n.translate('xpack.uptime.keyValuePairsField.value.ariaLabel', {
+                      defaultMessage: 'Value',
+                    })}
+                    data-test-subj={`keyValuePairsValue${index}`}
+                    value={value}
+                    onChange={(event) => handleOnChange(event, index, false)}
+                  />
+                }
+                delimiter=":"
+              />
+              <EuiSpacer size="xs" />
+            </>
           );
         })}
       </StyledFieldset>
