@@ -13,9 +13,9 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { QueryPerformance } from './query_performance';
 import { ResultSettings } from './result_settings';
 import { ResultSettingsTable } from './result_settings_table';
+import { SampleResponse } from './sample_response';
 
 describe('RelevanceTuning', () => {
   const values = {
@@ -35,7 +35,7 @@ describe('RelevanceTuning', () => {
   it('renders', () => {
     const wrapper = shallow(<ResultSettings engineBreadcrumb={['test']} />);
     expect(wrapper.find(ResultSettingsTable).exists()).toBe(true);
-    expect(wrapper.find(QueryPerformance).exists()).toBe(true);
+    expect(wrapper.find(SampleResponse).exists()).toBe(true);
   });
 
   it('initializes result settings data when mounted', () => {
@@ -43,11 +43,12 @@ describe('RelevanceTuning', () => {
     expect(actions.initializeResultSettingsData).toHaveBeenCalled();
   });
 
-  it('does not show a query performance rating when data is still loading', () => {
+  it('renders a loading screen if data has not loaded yet', () => {
     setMockValues({
       dataLoading: true,
     });
     const wrapper = shallow(<ResultSettings engineBreadcrumb={['test']} />);
-    expect(wrapper.find(QueryPerformance).exists()).toBe(false);
+    expect(wrapper.find(ResultSettingsTable).exists()).toBe(false);
+    expect(wrapper.find(SampleResponse).exists()).toBe(false);
   });
 });

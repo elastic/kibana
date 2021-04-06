@@ -14,9 +14,12 @@ import { EuiPageHeader, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FlashMessages } from '../../../shared/flash_messages';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 
+import { Loading } from '../../../shared/loading';
+
 import { RESULT_SETTINGS_TITLE } from './constants';
-import { QueryPerformance } from './query_performance';
 import { ResultSettingsTable } from './result_settings_table';
+
+import { SampleResponse } from './sample_response';
 
 import { ResultSettingsLogic } from '.';
 
@@ -32,6 +35,8 @@ export const ResultSettings: React.FC<Props> = ({ engineBreadcrumb }) => {
     initializeResultSettingsData();
   }, []);
 
+  if (dataLoading) return <Loading />;
+
   return (
     <>
       <SetPageChrome trail={[...engineBreadcrumb, RESULT_SETTINGS_TITLE]} />
@@ -42,7 +47,7 @@ export const ResultSettings: React.FC<Props> = ({ engineBreadcrumb }) => {
           <ResultSettingsTable />
         </EuiFlexItem>
         <EuiFlexItem grow={3}>
-          <div>{!dataLoading && <QueryPerformance />}</div>
+          <SampleResponse />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

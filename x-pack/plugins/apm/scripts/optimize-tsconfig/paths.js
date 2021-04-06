@@ -12,7 +12,7 @@ const tsconfigTpl = path.resolve(__dirname, './tsconfig.json');
 
 const filesToIgnore = [
   path.resolve(kibanaRoot, 'tsconfig.json'),
-  path.resolve(kibanaRoot, 'tsconfig.project.json'),
+  path.resolve(kibanaRoot, 'tsconfig.base.json'),
   path.resolve(kibanaRoot, 'x-pack/plugins/apm', 'tsconfig.json'),
 ];
 
