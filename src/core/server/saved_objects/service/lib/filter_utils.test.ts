@@ -16,7 +16,7 @@ import {
   hasFilterKeyError,
 } from './filter_utils';
 
-export const mockMappings = {
+const mockMappings = {
   properties: {
     updated_at: {
       type: 'date',
@@ -529,7 +529,6 @@ describe('Filter Utils', () => {
         indexMapping: mockMappings,
       });
 
-      // nodes will have errors in the array
       expect(validationObject).toEqual([
         {
           astPath: 'arguments.1.arguments.0',

@@ -7,9 +7,83 @@
  */
 
 import { validateGetSavedObjectsAggs } from './aggs_utils';
-import { mockMappings } from './filter_utils.test';
 
-describe('Filter Utils', () => {
+const mockMappings = {
+  properties: {
+    updated_at: {
+      type: 'date',
+    },
+    foo: {
+      properties: {
+        title: {
+          type: 'text',
+        },
+        description: {
+          type: 'text',
+        },
+        bytes: {
+          type: 'number',
+        },
+      },
+    },
+    bar: {
+      properties: {
+        foo: {
+          type: 'text',
+        },
+        description: {
+          type: 'text',
+        },
+      },
+    },
+    bean: {
+      properties: {
+        canned: {
+          fields: {
+            text: {
+              type: 'text',
+            },
+          },
+          type: 'keyword',
+        },
+      },
+    },
+    alert: {
+      properties: {
+        actions: {
+          type: 'nested',
+          properties: {
+            group: {
+              type: 'keyword',
+            },
+            actionRef: {
+              type: 'keyword',
+            },
+            actionTypeId: {
+              type: 'keyword',
+            },
+            params: {
+              enabled: false,
+              type: 'object',
+            },
+          },
+        },
+        params: {
+          type: 'flattened',
+        },
+      },
+    },
+    hiddenType: {
+      properties: {
+        description: {
+          type: 'text',
+        },
+      },
+    },
+  },
+};
+
+describe('Aggregation Utils', () => {
   describe('#validateGetSavedObjectsAggs', () => {
     test('Validate a simple aggregations', () => {
       expect(
