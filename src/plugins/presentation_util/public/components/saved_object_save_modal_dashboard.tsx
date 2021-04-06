@@ -10,32 +10,15 @@ import React, { useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  OnSaveProps,
-  SaveModalState,
-  SavedObjectSaveModal,
-} from '../../../../plugins/saved_objects/public';
+import { OnSaveProps, SavedObjectSaveModal } from '../../../../plugins/saved_objects/public';
 
-import './saved_object_save_modal_dashboard.scss';
 import { pluginServices } from '../services';
+import { SaveModalDashboardProps } from './types';
 import { SaveModalDashboardSelector } from './saved_object_save_modal_dashboard_selector';
 
-interface SaveModalDocumentInfo {
-  id?: string;
-  title: string;
-  description?: string;
-}
+import './saved_object_save_modal_dashboard.scss';
 
-export interface SaveModalDashboardProps {
-  documentInfo: SaveModalDocumentInfo;
-  canSaveByReference: boolean;
-  objectType: string;
-  onClose: () => void;
-  onSave: (props: OnSaveProps & { dashboardId: string | null; addToLibrary: boolean }) => void;
-  tagOptions?: React.ReactNode | ((state: SaveModalState) => React.ReactNode);
-}
-
-export function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
+function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
   const { documentInfo, tagOptions, objectType, onClose, canSaveByReference } = props;
   const { id: documentId } = documentInfo;
   const initialCopyOnSave = !Boolean(documentId);
@@ -136,3 +119,7 @@ export function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
     />
   );
 }
+
+// required for dynamic import using React.lazy()
+// eslint-disable-next-line import/no-default-export
+export default SavedObjectSaveModalDashboard;
