@@ -13,9 +13,9 @@ import { UMElasticsearchQueryFn } from '../adapters/framework';
 
 export interface GetPingHistogramParams {
   /** @member dateRangeStart timestamp bounds */
-  from: string;
+  dateStart: string;
   /** @member dateRangeEnd timestamp bounds */
-  to: string;
+  dateEnd: string;
   /** @member filters user-defined filters */
   filters?: string;
   /** @member monitorId optional limit to monitorId */
@@ -27,7 +27,7 @@ export interface GetPingHistogramParams {
 export const getPingHistogram: UMElasticsearchQueryFn<
   GetPingHistogramParams,
   HistogramResult
-> = async ({ uptimeEsClient, from, to, filters, monitorId, bucketSize }) => {
+> = async ({ uptimeEsClient, dateStart, dateEnd, filters, monitorId, bucketSize }) => {
   const boolFilters = filters ? JSON.parse(filters) : null;
   const additionalFilters = [];
   if (monitorId) {
@@ -36,9 +36,9 @@ export const getPingHistogram: UMElasticsearchQueryFn<
   if (boolFilters) {
     additionalFilters.push(boolFilters);
   }
-  const filter = getFilterClause(from, to, additionalFilters);
+  const filter = getFilterClause(dateStart, dateEnd, additionalFilters);
 
-  const minInterval = getHistogramInterval(from, to, QUERY.DEFAULT_BUCKET_COUNT);
+  const minInterval = getHistogramInterval(dateStart, dateEnd, QUERY.DEFAULT_BUCKET_COUNT);
 
   const params = {
     query: {
