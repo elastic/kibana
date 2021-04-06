@@ -4,6 +4,7 @@
     "composite": true,
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
+    "declaration": true,
     "declarationMap": true
   },
   "include": [
