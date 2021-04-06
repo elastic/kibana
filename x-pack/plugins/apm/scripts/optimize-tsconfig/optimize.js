@@ -22,7 +22,7 @@ const { kibanaRoot, tsconfigTpl, filesToIgnore } = require('./paths');
 const { unoptimizeTsConfig } = require('./unoptimize');
 
 async function prepareBaseTsConfig() {
-  const baseConfigFilename = path.resolve(kibanaRoot, 'tsconfig.project.json');
+  const baseConfigFilename = path.resolve(kibanaRoot, 'tsconfig.base.json');
   const config = json5.parse(await readFile(baseConfigFilename, 'utf-8'));
 
   await writeFile(
