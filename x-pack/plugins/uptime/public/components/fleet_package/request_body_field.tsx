@@ -20,12 +20,16 @@ import { KeyValuePairsField, Pair } from './key_value_field';
 import 'brace/theme/github';
 import 'brace/mode/xml';
 import 'brace/mode/json';
-import 'brace/snippets/javascript';
 import 'brace/ext/language_tools';
 
 const CodeEditorContainer = styled(EuiPanel)`
   padding: 0;
 `;
+
+enum ResponseBodyType {
+  CODE = 'code',
+  FORM = 'form',
+}
 
 const CodeEditor = ({
   ariaLabel,
@@ -71,21 +75,14 @@ interface Props {
 
 // TO DO: Look into whether or not code editor reports errors, in order to prevent form submission on an error
 export const RequestBodyField = ({ onChange, type, value }: Props) => {
-  const modeKeys = Object.values(Mode) as Mode[];
-  const defaultValues = modeKeys.reduce((acc: Record<string, string>, modeKey: Mode) => {
-    if (type === modeKey) {
-      acc[modeKey] = value;
-    } else {
-      acc[modeKey] = '';
-    }
-    return acc;
-  }, {});
-  const [values, setValues] = useState<Record<Mode, string>>(defaultValues);
-
+  const [values, setValues] = useState<Record<ResponseBodyType, string>>({
+    [ResponseBodyType.FORM]: type === Mode.FORM ? value : '',
+    [ResponseBodyType.CODE]: type !== Mode.FORM ? value : '',
+  });
   useEffect(() => {
     onChange({
       type,
-      value: values[type],
+      value: type === Mode.FORM ? values[ResponseBodyType.FORM] : values[ResponseBodyType.CODE],
     });
   }, [onChange, type, values]);
 
@@ -93,7 +90,8 @@ export const RequestBodyField = ({ onChange, type, value }: Props) => {
     (currentMode: Mode) => {
       onChange({
         type: currentMode,
-        value: values[currentMode],
+        value:
+          currentMode === Mode.FORM ? values[ResponseBodyType.FORM] : values[ResponseBodyType.CODE],
       });
     },
     [onChange, values]
@@ -135,11 +133,18 @@ export const RequestBodyField = ({ onChange, type, value }: Props) => {
       name: modeLabels[Mode.TEXT],
       content: (
         <CodeEditor
-          ariaLabel={`${modeLabels[Mode.TEXT]} code editor`}
+          ariaLabel={i18n.translate(
+            'xpack.uptime.createPackagePolicy.stepConfigure.requestBody.codeEditor.text.ariaLabel',
+            {
+              defaultMessage: 'Text code editor',
+            }
+          )}
           id={Mode.TEXT}
           mode={Mode.TEXT}
-          onChange={(code) => setValues((prevValues) => ({ ...prevValues, [Mode.TEXT]: code }))}
-          value={values[Mode.TEXT]}
+          onChange={(code) =>
+            setValues((prevValues) => ({ ...prevValues, [ResponseBodyType.CODE]: code }))
+          }
+          value={values[ResponseBodyType.CODE]}
         />
       ),
     },
@@ -148,11 +153,18 @@ export const RequestBodyField = ({ onChange, type, value }: Props) => {
       name: modeLabels[Mode.JSON],
       content: (
         <CodeEditor
-          ariaLabel={`${modeLabels[Mode.JSON]} code editor`}
+          ariaLabel={i18n.translate(
+            'xpack.uptime.createPackagePolicy.stepConfigure.requestBody.codeEditor.json.ariaLabel',
+            {
+              defaultMessage: 'JSON code editor',
+            }
+          )}
           id={Mode.JSON}
           mode={Mode.JSON}
-          onChange={(code) => setValues((prevValues) => ({ ...prevValues, [Mode.JSON]: code }))}
-          value={values[Mode.JSON]}
+          onChange={(code) =>
+            setValues((prevValues) => ({ ...prevValues, [ResponseBodyType.CODE]: code }))
+          }
+          value={values[ResponseBodyType.CODE]}
         />
       ),
     },
@@ -161,11 +173,18 @@ export const RequestBodyField = ({ onChange, type, value }: Props) => {
       name: modeLabels[Mode.XML],
       content: (
         <CodeEditor
-          ariaLabel={`${modeLabels[Mode.XML]} code editor`}
+          ariaLabel={i18n.translate(
+            'xpack.uptime.createPackagePolicy.stepConfigure.requestBody.codeEditor.xml.ariaLabel',
+            {
+              defaultMessage: 'XML code editor',
+            }
+          )}
           id={Mode.XML}
           mode={Mode.XML}
-          onChange={(code) => setValues((prevValues) => ({ ...prevValues, [Mode.XML]: code }))}
-          value={values[Mode.XML]}
+          onChange={(code) =>
+            setValues((prevValues) => ({ ...prevValues, [ResponseBodyType.CODE]: code }))
+          }
+          value={values[ResponseBodyType.CODE]}
         />
       ),
     },
@@ -201,27 +220,24 @@ export const RequestBodyField = ({ onChange, type, value }: Props) => {
 
 const modeLabels = {
   [Mode.FORM]: i18n.translate(
-    'xpack.uptime.createPackagePolicy.stepConfigure.responseBodyType.form',
+    'xpack.uptime.createPackagePolicy.stepConfigure.requestBodyType.form',
     {
       defaultMessage: 'Form',
     }
   ),
   [Mode.TEXT]: i18n.translate(
-    'xpack.uptime.createPackagePolicy.stepConfigure.responseBodyType.text',
+    'xpack.uptime.createPackagePolicy.stepConfigure.requestBodyType.text',
     {
       defaultMessage: 'Text',
     }
   ),
   [Mode.JSON]: i18n.translate(
-    'xpack.uptime.createPackagePolicy.stepConfigure.responseBodyType.JSON',
+    'xpack.uptime.createPackagePolicy.stepConfigure.requestBodyType.JSON',
     {
       defaultMessage: 'JSON',
     }
   ),
-  [Mode.XML]: i18n.translate(
-    'xpack.uptime.createPackagePolicy.stepConfigure.responseBodyType.XML',
-    {
-      defaultMessage: 'XML',
-    }
-  ),
+  [Mode.XML]: i18n.translate('xpack.uptime.createPackagePolicy.stepConfigure.requestBodyType.XML', {
+    defaultMessage: 'XML',
+  }),
 };

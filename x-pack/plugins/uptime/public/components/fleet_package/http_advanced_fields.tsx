@@ -412,7 +412,7 @@ export const HTTPAdvancedFields = memo<Props>(({ defaultValues, onChange, valida
           helpText={
             <FormattedMessage
               id="xpack.uptime.createPackagePolicy.stepConfigure.httpAdvancedOptions.responseHeadersField.helpText"
-              defaultMessage="The required response headers."
+              defaultMessage="A list of expected response headers."
             />
           }
         >

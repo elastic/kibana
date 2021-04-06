@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -19,6 +19,7 @@ import {
   EuiFormLabel,
   EuiFormFieldset,
   EuiSpacer,
+  htmlIdGenerator,
 } from '@elastic/eui';
 
 const StyledFieldset = styled(EuiFormFieldset)`
@@ -54,6 +55,7 @@ interface Props {
 
 export const KeyValuePairsField = ({ addPairControlLabel, defaultPairs, onChange }: Props) => {
   const [pairs, setPairs] = useState<Pair[]>(defaultPairs);
+  const htmlId = htmlIdGenerator();
 
   const handleOnChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>, index: number, isKey: boolean) => {
@@ -130,10 +132,9 @@ export const KeyValuePairsField = ({ addPairControlLabel, defaultPairs, onChange
         {pairs.map((pair, index) => {
           const [key, value] = pair;
           return (
-            <>
+            <Fragment key={htmlId()}>
               <EuiSpacer size="xs" />
               <EuiFormControlLayoutDelimited
-                key={index}
                 fullWidth
                 append={
                   <EuiFormLabel>
@@ -173,7 +174,7 @@ export const KeyValuePairsField = ({ addPairControlLabel, defaultPairs, onChange
                 delimiter=":"
               />
               <EuiSpacer size="xs" />
-            </>
+            </Fragment>
           );
         })}
       </StyledFieldset>
