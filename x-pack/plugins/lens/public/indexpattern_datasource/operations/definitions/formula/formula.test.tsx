@@ -188,6 +188,34 @@ describe('formula', () => {
       });
     });
 
+    it('it should move over kql arguments if set', () => {
+      expect(
+        formulaOperation.buildColumn({
+          previousColumn: {
+            ...layer.columns.col1,
+            filter: {
+              language: 'kuery',
+              // Need to test with multiple replaces due to string replace
+              query: `category.keyword: "Men's Clothing" or category.keyword: "Men's Shoes"`,
+            },
+          } as IndexPatternColumn,
+          layer,
+          indexPattern,
+        })
+      ).toEqual({
+        label: 'Formula',
+        dataType: 'number',
+        operationType: 'formula',
+        isBucketed: false,
+        scale: 'ratio',
+        params: {
+          isFormulaBroken: false,
+          formula: `terms(category, kql='category.keyword: "Men\\'s Clothing" or category.keyword: "Men\\'s Shoes"')`,
+        },
+        references: [],
+      });
+    });
+
     it('should move over previous operation parameter if set - only numeric', () => {
       expect(
         formulaOperation.buildColumn(

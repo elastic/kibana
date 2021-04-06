@@ -45,7 +45,6 @@ import {
   getSafeFieldName,
   groupArgsByType,
   hasMathNode,
-  isSupportedFieldType,
   tinymathFunctions,
 } from './util';
 import { useDebounceWithOptions } from '../helpers';
@@ -178,6 +177,12 @@ export const formulaOperation: OperationDefinition<
         previousFormula +=
           ', ' + formulaNamedArgs.map(({ name, value }) => `${name}=${value}`).join(', ');
       }
+      if (previousColumn.filter) {
+        previousFormula +=
+          ', ' +
+          (previousColumn.filter.language === 'kuery' ? 'kql=' : 'lucene=') +
+          `'${previousColumn.filter.query.replace(/'/g, `\\'`)}'`; // replace all
+      }
       if (previousFormula) {
         // close the formula at the end
         previousFormula += ')';
@@ -228,6 +233,9 @@ function FormulaEditor({
   );
   const overflowDiv1 = React.useRef<HTMLElement>();
   const overflowDiv2 = React.useRef<HTMLElement>();
+  const updateAfterTyping = React.useRef<monaco.IDisposable>();
+  const editor1 = React.useRef<monaco.editor.IStandaloneCodeEditor>();
+  const editor2 = React.useRef<monaco.editor.IStandaloneCodeEditor>();
 
   // The Monaco editor needs to have the overflowDiv in the first render. Using an effect
   // requires a second render to work, so we are using an if statement to guarantee it happens
@@ -249,10 +257,16 @@ function FormulaEditor({
   // Clean up the monaco editor and DOM on unmount
   useEffect(() => {
     const model = editorModel.current;
+    const disposable1 = updateAfterTyping.current;
+    const editor1ref = editor1.current;
+    const editor2ref = editor2.current;
     return () => {
       model.dispose();
       overflowDiv1.current?.parentNode?.removeChild(overflowDiv1.current);
       overflowDiv2.current?.parentNode?.removeChild(overflowDiv2.current);
+      disposable1?.dispose();
+      editor1ref?.dispose();
+      editor2ref?.dispose();
     };
   }, []);
 
@@ -484,6 +498,71 @@ function FormulaEditor({
     [operationDefinitionMap]
   );
 
+  const onTypeHandler = useCallback(
+    (e: monaco.editor.IModelContentChangedEvent, editor: monaco.editor.IStandaloneCodeEditor) => {
+      if (e.isFlush || e.isRedoing || e.isUndoing) {
+        return;
+      }
+      // I think the changes are always length 1 when triggered by a user, but if we
+      // add more automation it can create change lists.
+      if (e.changes.length === 1 && e.changes[0].text === '=') {
+        const currentPosition = e.changes[0].range;
+        if (currentPosition) {
+          // Timeout is required because otherwise the cursor position is not updated.
+          setTimeout(() => {
+            editor.executeEdits(
+              'LENS',
+              [
+                {
+                  range: {
+                    ...currentPosition,
+                    // Insert after the current char
+                    startColumn: currentPosition.startColumn + 1,
+                    endColumn: currentPosition.startColumn + 1,
+                  },
+                  text: `''`,
+                },
+              ],
+              [
+                // After inserting, move the cursor in between the single quotes
+                new monaco.Selection(
+                  currentPosition.startLineNumber,
+                  currentPosition.startColumn + 2,
+                  currentPosition.startLineNumber,
+                  currentPosition.startColumn + 2
+                ),
+              ]
+            );
+          }, 0);
+        }
+      }
+    },
+    []
+  );
+
+  const registerOnTypeHandler = useCallback(
+    (editor: monaco.editor.IStandaloneCodeEditor) => {
+      // Toggle between two different callbacks when the editors change
+      if (updateAfterTyping.current) {
+        updateAfterTyping.current.dispose();
+      }
+      updateAfterTyping.current = editor.onDidChangeModelContent((e) => {
+        onTypeHandler(e, editor);
+      });
+    },
+    [onTypeHandler]
+  );
+
+  useEffect(() => {
+    if (updateAfterTyping.current) {
+      if (isOpen) {
+        if (editor2.current) registerOnTypeHandler(editor2.current);
+      } else {
+        if (editor1.current) registerOnTypeHandler(editor1.current);
+      }
+    }
+  }, [isOpen, registerOnTypeHandler]);
+
   const codeEditorOptions: CodeEditorProps = {
     languageId: LANGUAGE_ID,
     value: text ?? '',
@@ -603,6 +682,10 @@ Use the symbols +, -, /, and * to perform basic math.
           overflowWidgetsDomNode: overflowDiv1.current,
           model: editorModel.current,
         }}
+        editorDidMount={(editor) => {
+          editor1.current = editor;
+          registerOnTypeHandler(editor);
+        }}
       />
       <EuiSpacer />
       <EuiFlexGroup>
@@ -658,6 +741,10 @@ Use the symbols +, -, /, and * to perform basic math.
                     overflowWidgetsDomNode: overflowDiv2.current,
                     model: editorModel?.current,
                   }}
+                  editorDidMount={(editor) => {
+                    editor2.current = editor;
+                    registerOnTypeHandler(editor);
+                  }}
                 />
               </div>
             </EuiFlexItem>
@@ -673,20 +760,6 @@ Use the symbols +, -, /, and * to perform basic math.
               </div>
             </EuiFlexItem>
           </EuiFlexGroup>
-          {/* <EuiModalFooter>
-            <EuiButton
-              color="text"
-              onClick={() => {
-                setIsOpen(false);
-                setText(currentColumn.params.formula);
-              }}
-              iconType="cross"
-            >
-              {i18n.translate('xpack.lens.indexPattern.formulaCancelLabel', {
-                defaultMessage: 'Cancel',
-              })}
-            </EuiButton>
-          </EuiModalFooter> */}
         </EuiModal>
       ) : null}
     </div>

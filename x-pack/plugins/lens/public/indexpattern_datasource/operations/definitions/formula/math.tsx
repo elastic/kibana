@@ -94,6 +94,9 @@ function astToString(ast: TinymathAST | string): string | number {
     return ast.value;
   }
   if (ast.type === 'namedArgument') {
+    if (ast.name === 'kql' || ast.name === 'lucene') {
+      return `${ast.name}='${ast.value}'`;
+    }
     return `${ast.name}=${ast.value}`;
   }
   return `${ast.name}(${ast.args.map(astToString).join(',')})`;
