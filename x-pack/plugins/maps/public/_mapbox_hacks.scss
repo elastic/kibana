@@ -12,6 +12,11 @@
     @include euiBottomShadowLarge;
     background-color: $euiColorEmptyShade;
     border-radius: $euiBorderRadius;
+    transition: transform $euiAnimSpeedNormal ease-in-out, background $euiAnimSpeedNormal ease-in-out;
+
+    &:hover {
+      transform: translateY(-1px);
+    }
 
     > button {
       @include size($euiSizeXL);

@@ -1,0 +1,26 @@
+.mapToolbarOverlay {
+  position: absolute;
+  top: ($euiSizeM + $euiSizeS) + ($euiSizeXL * 2); // Position and height of mapbox controls plus margin
+  left: $euiSizeM;
+  z-index: 2; // Sit on top of mapbox controls shadow
+}
+
+.mapToolbarOverlay__button,
+.mapToolbarOverlay__buttonGroup {
+  transition: transform $euiAnimSpeedNormal ease-in-out, background $euiAnimSpeedNormal ease-in-out;
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+
+  // Removes the hover effect from the .euiButtonIcon because it would create a 1px bottom gap
+  // So we put this hover effect into the panel that wraps the button or buttons
+  .euiButtonIcon:hover {
+    transform: translateY(0);
+  }
+}
+
+.mapToolbarOverlay__buttonGroup {
+  display: flex;
+  flex-direction: column;
+}
