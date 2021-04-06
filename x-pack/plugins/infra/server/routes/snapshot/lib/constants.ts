@@ -6,4 +6,3 @@
  */
 
 export const META_KEY = '__metadata__';
-export const DEFAULT_COMPOSITE_SIZE = 2000;

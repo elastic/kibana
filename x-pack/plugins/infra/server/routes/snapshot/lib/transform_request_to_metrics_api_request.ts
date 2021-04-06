@@ -12,15 +12,22 @@ import { InfraSource } from '../../../lib/sources';
 import { createTimeRangeWithInterval } from './create_timerange_with_interval';
 import { parseFilterQuery } from '../../../utils/serialized_query';
 import { transformSnapshotMetricsToMetricsAPIMetrics } from './transform_snapshot_metrics_to_metrics_api_metrics';
-import { META_KEY, DEFAULT_COMPOSITE_SIZE } from './constants';
+import { META_KEY } from './constants';
 import { SourceOverrides } from './get_nodes';
 
-export const transformRequestToMetricsAPIRequest = async (
-  client: ESSearchClient,
-  source: InfraSource,
-  snapshotRequest: SnapshotRequest,
-  sourceOverrides?: SourceOverrides
-): Promise<MetricsAPIRequest> => {
+export const transformRequestToMetricsAPIRequest = async ({
+  client,
+  source,
+  snapshotRequest,
+  compositeSize,
+  sourceOverrides,
+}: {
+  client: ESSearchClient;
+  source: InfraSource;
+  snapshotRequest: SnapshotRequest;
+  compositeSize: number;
+  sourceOverrides?: SourceOverrides;
+}): Promise<MetricsAPIRequest> => {
   const timeRangeWithIntervalApplied = await createTimeRangeWithInterval(client, {
     ...snapshotRequest,
     filterQuery: parseFilterQuery(snapshotRequest.filterQuery),
@@ -38,7 +45,7 @@ export const transformRequestToMetricsAPIRequest = async (
     metrics: transformSnapshotMetricsToMetricsAPIMetrics(snapshotRequest),
     limit: snapshotRequest.overrideCompositeSize
       ? snapshotRequest.overrideCompositeSize
-      : DEFAULT_COMPOSITE_SIZE,
+      : compositeSize,
     alignDataToEnd: true,
   };
 

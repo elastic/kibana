@@ -135,8 +135,7 @@ describe('the InfraSources lib', () => {
 const createMockStaticConfiguration = (sources: any) => ({
   enabled: true,
   query: {
-    partitionSize: 1,
-    partitionFactor: 1,
+    compositeSize: 2000,
   },
   sources,
 });

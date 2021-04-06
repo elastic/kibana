@@ -40,7 +40,7 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
         requestContext.core.savedObjects.client,
         snapshotRequest.sourceId
       );
-
+      const compositeSize = libs.configuration.query.compositeSize;
       const logQueryFields = await libs.getLogQueryFields(
         snapshotRequest.sourceId,
         requestContext.core.savedObjects.client
@@ -49,7 +49,13 @@ export const initSnapshotRoute = (libs: InfraBackendLibs) => {
       UsageCollector.countNode(snapshotRequest.nodeType);
       const client = createSearchClient(requestContext, framework);
 
-      const snapshotResponse = await getNodes(client, snapshotRequest, source, logQueryFields);
+      const snapshotResponse = await getNodes(
+        client,
+        snapshotRequest,
+        source,
+        logQueryFields,
+        compositeSize
+      );
 
       return response.ok({
         body: SnapshotNodeResponseRT.encode(snapshotResponse),
