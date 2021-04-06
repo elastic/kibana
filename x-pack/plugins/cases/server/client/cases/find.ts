@@ -11,6 +11,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   CasesFindResponse,
   CasesFindRequest,
@@ -18,6 +19,7 @@ import {
   throwErrors,
   caseStatuses,
   CasesFindResponseRt,
+  excess,
 } from '../../../common/api';
 
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
@@ -32,7 +34,7 @@ interface FindParams {
   savedObjectsClient: SavedObjectsClientContract;
   caseService: CaseService;
   logger: Logger;
-  auth: Authorization;
+  auth: PublicMethodsOf<Authorization>;
   options: CasesFindRequest;
 }
 
@@ -48,7 +50,7 @@ export const find = async ({
 }: FindParams): Promise<CasesFindResponse> => {
   try {
     const queryParams = pipe(
-      CasesFindRequestRt.decode(options),
+      excess(CasesFindRequestRt).decode(options),
       fold(throwErrors(Boom.badRequest), identity)
     );
 
@@ -64,6 +66,7 @@ export const find = async ({
       sortByField: queryParams.sortField,
       status: queryParams.status,
       caseType: queryParams.type,
+      owner: queryParams.owner,
     };
 
     const caseQueries = constructQueryOptions({ ...queryArgs, authorizationFilter });
@@ -72,6 +75,12 @@ export const find = async ({
       caseOptions: {
         ...queryParams,
         ...caseQueries.case,
+        searchFields:
+          queryParams.searchFields != null
+            ? Array.isArray(queryParams.searchFields)
+              ? queryParams.searchFields
+              : [queryParams.searchFields]
+            : queryParams.searchFields,
         fields: queryParams.fields
           ? includeFieldsRequiredForAuthentication(queryParams.fields)
           : queryParams.fields,

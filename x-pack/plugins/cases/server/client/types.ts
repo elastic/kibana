@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { ElasticsearchClient, SavedObjectsClientContract, Logger } from 'kibana/server';
 import { User } from '../../common/api';
 import { Authorization } from '../authorization/authorization';
@@ -28,5 +29,5 @@ export interface CasesClientArgs {
   readonly alertsService: AlertServiceContract;
   readonly attachmentService: AttachmentService;
   readonly logger: Logger;
-  readonly authorization: Authorization;
+  readonly authorization: PublicMethodsOf<Authorization>;
 }

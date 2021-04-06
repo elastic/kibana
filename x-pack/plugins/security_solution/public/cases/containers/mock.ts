@@ -254,6 +254,7 @@ export const basicCaseSnake: CaseResponse = {
   external_service: null,
   updated_at: basicUpdatedAt,
   updated_by: elasticUserSnake,
+  owner: 'securitySolution',
 } as CaseResponse;
 
 export const casesStatusSnake: CasesStatusResponse = {

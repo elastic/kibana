@@ -59,13 +59,13 @@ export function Header({ color, datePicker = null, restrictWidth }: Props) {
       </HeaderMenuPortal>
       <Wrapper restrictWidth={restrictWidth}>
         <EuiSpacer size="l" />
-        <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem>
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
                 <EuiIcon type="logoObservability" size="xxl" data-test-subj="observability-logo" />
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
                 <EuiTitle>
                   <h1>
                     {i18n.translate('xpack.observability.home.title', {

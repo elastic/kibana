@@ -23,11 +23,13 @@ import {
   CaseStatuses,
   SubCasesResponse,
   CasesResponse,
+  CasesFindResponse,
 } from '../../../../plugins/cases/common/api';
-import { postCollectionReq, postCommentGenAlertReq } from './mock';
+import { getPostCaseRequest, postCollectionReq, postCommentGenAlertReq } from './mock';
 import { getSubCasesUrl } from '../../../../plugins/cases/common/api/helpers';
 import { ContextTypeGeneratedAlertType } from '../../../../plugins/cases/server/connectors';
 import { SignalHit } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
+import { User } from './authentication/types';
 
 function toArray<T>(input: T | T[]): T[] {
   if (Array.isArray(input)) {
@@ -406,4 +408,63 @@ export const deleteConfiguration = async (es: KibanaClient): Promise<void> => {
     refresh: true,
     body: {},
   });
+};
+
+export const getSpaceUrlPrefix = (spaceId: string) => {
+  return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
+};
+
+export const createCaseAsUser = async ({
+  supertestWithoutAuth,
+  user,
+  space,
+  owner,
+  expectedHttpCode = 200,
+}: {
+  supertestWithoutAuth: st.SuperTest<supertestAsPromised.Test>;
+  user: User;
+  space: string;
+  owner?: string;
+  expectedHttpCode?: number;
+}): Promise<CaseResponse> => {
+  const { body: theCase } = await supertestWithoutAuth
+    .post(`${getSpaceUrlPrefix(space)}${CASES_URL}`)
+    .auth(user.username, user.password)
+    .set('kbn-xsrf', 'true')
+    .send(getPostCaseRequest({ owner }))
+    .expect(expectedHttpCode);
+
+  return theCase;
+};
+
+export const findCasesAsUser = async ({
+  supertestWithoutAuth,
+  user,
+  space,
+  expectedHttpCode = 200,
+  appendToUrl = '',
+}: {
+  supertestWithoutAuth: st.SuperTest<supertestAsPromised.Test>;
+  user: User;
+  space: string;
+  expectedHttpCode?: number;
+  appendToUrl?: string;
+}): Promise<CasesFindResponse> => {
+  const { body: res } = await supertestWithoutAuth
+    .get(`${getSpaceUrlPrefix(space)}${CASES_URL}/_find?sortOrder=asc&${appendToUrl}`)
+    .auth(user.username, user.password)
+    .set('kbn-xsrf', 'true')
+    .send()
+    .expect(expectedHttpCode);
+
+  return res;
+};
+
+export const ensureSavedObjectIsAuthorized = (
+  cases: CaseResponse[],
+  numberOfExpectedCases: number,
+  owners: string[]
+) => {
+  expect(cases.length).to.eql(numberOfExpectedCases);
+  cases.forEach((theCase) => expect(owners.includes(theCase.owner)).to.be(true));
 };

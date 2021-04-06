@@ -44,7 +44,16 @@ export const postCaseReq: CasePostRequest = {
   settings: {
     syncAlerts: true,
   },
+  owner: 'securitySolutionFixture',
 };
+
+/**
+ * Return a request for creating a case.
+ */
+export const getPostCaseRequest = (req?: Partial<CasePostRequest>): CasePostRequest => ({
+  ...postCaseReq,
+  ...req,
+});
 
 /**
  * The fields for creating a collection style case.

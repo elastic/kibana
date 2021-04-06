@@ -8,7 +8,7 @@
 import { SavedObjectsFindResponse } from 'kibana/server';
 import { AssociationType, CommentAttributes, CommentRequest, CommentType } from '../../common/api';
 import { transformNewComment } from '../routes/api/utils';
-import { combineFilters, countAlerts, countAlertsForID, groupTotalAlertsByID } from './utils';
+import { countAlerts, countAlertsForID, groupTotalAlertsByID } from './utils';
 
 interface CommentReference {
   ids: string[];
@@ -47,36 +47,6 @@ function createCommentFindResponse(
 }
 
 describe('common utils', () => {
-  describe('combineFilters', () => {
-    it("creates a filter string with two values and'd together", () => {
-      expect(combineFilters(['a', 'b'], 'AND')).toBe('(a AND b)');
-    });
-
-    it('creates a filter string with three values or together', () => {
-      expect(combineFilters(['a', 'b', 'c'], 'OR')).toBe('(a OR b OR c)');
-    });
-
-    it('ignores empty strings', () => {
-      expect(combineFilters(['', 'a', '', 'b'], 'AND')).toBe('(a AND b)');
-    });
-
-    it('returns an empty string if all filters are empty strings', () => {
-      expect(combineFilters(['', ''], 'OR')).toBe('');
-    });
-
-    it('returns an empty string if the filters are undefined', () => {
-      expect(combineFilters(undefined, 'OR')).toBe('');
-    });
-
-    it('returns a value without parenthesis when only a single filter is provided', () => {
-      expect(combineFilters(['a'], 'OR')).toBe('a');
-    });
-
-    it('returns a string without parenthesis when only a single non empty filter is provided', () => {
-      expect(combineFilters(['', ''], 'AND')).toBe('');
-    });
-  });
-
   describe('countAlerts', () => {
     it('returns 0 when no alerts are found', () => {
       expect(
