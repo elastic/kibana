@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiBadge, EuiBadgeProps } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { ResultSettingsLogic } from '../result_settings_logic';
@@ -20,29 +20,6 @@ enum QueryPerformanceRating {
   Standard = 'Standard',
   Delayed = 'Delayed',
 }
-
-type QueryPerformanceBadgePropsCollection = {
-  [x in QueryPerformanceRating]: EuiBadgeProps;
-};
-
-type QueryPerformanceBadgeContentCollection = {
-  [x in QueryPerformanceRating]: string;
-};
-
-const QueryPerformanceBadgeProps: QueryPerformanceBadgePropsCollection = {
-  [QueryPerformanceRating.Optimal]: {
-    color: '#59deb4',
-  },
-  [QueryPerformanceRating.Good]: {
-    color: '#40bfff',
-  },
-  [QueryPerformanceRating.Standard]: {
-    color: '#fed566',
-  },
-  [QueryPerformanceRating.Delayed]: {
-    color: '#ff9173',
-  },
-};
 
 const QUERY_PERFORMANCE_LABEL = (performanceValue: string) =>
   i18n.translate('xpack.enterpriseSearch.appSearch.engine.resultSettings.queryPerformanceLabel', {
@@ -72,14 +49,21 @@ const QUERY_PERFORMANCE_DELAYED = i18n.translate(
   { defaultMessage: 'delayed' }
 );
 
-const QueryPerformanceBadgeContents: QueryPerformanceBadgeContentCollection = {
+const badgeText: Record<QueryPerformanceRating, string> = {
   [QueryPerformanceRating.Optimal]: QUERY_PERFORMANCE_LABEL(QUERY_PERFORMANCE_OPTIMAL),
   [QueryPerformanceRating.Good]: QUERY_PERFORMANCE_LABEL(QUERY_PERFORMANCE_GOOD),
   [QueryPerformanceRating.Standard]: QUERY_PERFORMANCE_LABEL(QUERY_PERFORMANCE_STANDARD),
   [QueryPerformanceRating.Delayed]: QUERY_PERFORMANCE_LABEL(QUERY_PERFORMANCE_DELAYED),
 };
 
-const getQueryPerformanceRatingForScore = (score: number) => {
+const badgeColors: Record<QueryPerformanceRating, string> = {
+  [QueryPerformanceRating.Optimal]: '#59deb4',
+  [QueryPerformanceRating.Good]: '#40bfff',
+  [QueryPerformanceRating.Standard]: '#fed566',
+  [QueryPerformanceRating.Delayed]: '#ff9173',
+};
+
+const getPerformanceRating = (score: number) => {
   switch (true) {
     case score < 6:
       return QueryPerformanceRating.Optimal;
@@ -94,17 +78,10 @@ const getQueryPerformanceRatingForScore = (score: number) => {
 
 export const QueryPerformance: React.FC = () => {
   const { queryPerformanceScore } = useValues(ResultSettingsLogic);
-  const queryPerformanceRating = getQueryPerformanceRatingForScore(queryPerformanceScore);
+  const performanceRating = getPerformanceRating(queryPerformanceScore);
   return (
-    <EuiBadge
-      className="response-feedback"
-      data-test-subj="serverResultFieldsPerformance"
-      tabIndex={-1}
-      role="region"
-      aria-live="polite"
-      {...QueryPerformanceBadgeProps[queryPerformanceRating]}
-    >
-      {QueryPerformanceBadgeContents[queryPerformanceRating]}
+    <EuiBadge role="region" aria-live="polite" color={badgeColors[performanceRating]}>
+      {badgeText[performanceRating]}
     </EuiBadge>
   );
 };
