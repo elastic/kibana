@@ -6,7 +6,7 @@ recommended for the development of all Kibana plugins.
 - [General](#general)
 - [HTML](#html)
 - [API endpoints](#api-endpoints)
-- [TypeScript/JavaScript](#typeScript/javaScript)
+- [TypeScript/JavaScript](#typescriptjavascript)
 - [SASS files](#sass-files)
 - [React](#react)
 
