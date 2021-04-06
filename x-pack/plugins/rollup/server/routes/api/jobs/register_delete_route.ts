@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { errors } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { addBasePath } from '../../../services';
 import { RouteDependencies } from '../../../types';
@@ -35,11 +35,16 @@ export const registerDeleteRoute = ({
         // There is an issue opened on ES to handle the following error correctly
         // https://github.com/elastic/elasticsearch/issues/42908
         // Until then we'll modify the response here.
-        if (err.response && err.response.includes('Job must be [STOPPED] before deletion')) {
-          err.status = 400;
-          err.statusCode = 400;
-          err.displayName = 'Bad request';
-          err.message = JSON.parse(err.response).task_failures[0].reason.reason;
+        if (
+          err?.meta &&
+          err.body?.task_failures[0]?.reason?.reason?.includes(
+            'Job must be [STOPPED] before deletion'
+          )
+        ) {
+          err.meta.status = 400;
+          err.meta.statusCode = 400;
+          err.meta.displayName = 'Bad request';
+          err.message = err.body.task_failures[0].reason.reason;
         }
         return handleEsError({ error: err, response });
       }
