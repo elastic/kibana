@@ -195,10 +195,6 @@ export function createSearchBar({ core, storage, data, usageCollection }: Statef
           customSubmitButton={props.customSubmitButton}
           isClearable={props.isClearable}
           placeholder={props.placeholder}
-          autoSubmit={props.autoSubmit}
-          storageKey={props.storageKey}
-          disableLanguageSwitcher={props.disableLanguageSwitcher}
-          isInvalid={props.isInvalid}
           {...overrideDefaultBehaviors(props)}
         />
       </KibanaContextProvider>
