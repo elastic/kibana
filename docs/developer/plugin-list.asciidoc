@@ -452,10 +452,6 @@ using the CURL scripts in the scripts folder.
 |Visualize geo data from Elasticsearch or 3rd party geo-services.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/maps_legacy_licensing/README.md[mapsLegacyLicensing]
-|This plugin provides access to the detailed tile map services from Elastic.
-
-
 |{kib-repo}blob/{branch}/x-pack/plugins/ml/readme.md[ml]
 |This plugin provides access to the machine learning features provided by
 Elastic.
@@ -535,6 +531,10 @@ Documentation: https://www.elastic.co/guide/en/kibana/master/task-manager-produc
 
 |{kib-repo}blob/{branch}/x-pack/plugins/telemetry_collection_xpack/README.md[telemetryCollectionXpack]
 |Gathers all usage collection, retrieving them from both: OSS and X-Pack plugins.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/timelines/README.md[timelines]
+|Timelines is a plugin that provides a grid component with accompanying server side apis to help users identify events of interest and perform root cause analysis within Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/transform/readme.md[transform]

@@ -414,12 +414,13 @@ const mockOptions = ({ enableV2 }: { enableV2: boolean } = { enableV2: false }) 
       enabled: true,
       index: '.my-index',
     } as KibanaMigratorOptions['kibanaConfig'],
-    savedObjectsConfig: {
+    soMigrationsConfig: {
       batchSize: 20,
       pollInterval: 20000,
       scrollDuration: '10m',
       skip: false,
       enableV2,
+      retryAttempts: 20,
     },
     client: elasticsearchClientMock.createElasticsearchClient(),
   };

@@ -51,8 +51,9 @@ export const FilterRatioAgg = (props) => {
     (query) => handleChange({ denominator: query }),
     [handleChange]
   );
-  const indexPattern =
-    (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
+  const indexPattern = series.override_index_pattern
+    ? series.series_index_pattern
+    : panel.index_pattern;
 
   const defaults = {
     numerator: getDataStart().query.queryString.getDefaultQuery(),
