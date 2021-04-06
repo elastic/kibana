@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { ExceptionsBuilderExceptionItem } from '../types';
-import { ExceptionListItemSchema, OperatorTypeEnum } from '../../../../../public/lists_plugin_deps';
+import { ExceptionListItemSchema, OperatorTypeEnum } from '../../../../common';
+
+import { ExceptionsBuilderExceptionItem } from './types';
 import { getDefaultEmptyEntry } from './helpers';
 
 export type ViewerModalName = 'addModal' | 'editModal' | null;
@@ -58,7 +59,7 @@ export const exceptionsBuilderReducer = () => (state: State, action: Action): St
     case 'setExceptions': {
       const isAndLogicIncluded =
         action.exceptions.filter(({ entries }) => entries.length > 1).length > 0;
-      const lastExceptionItem = action.exceptions.slice(-1)[0];
+      const [lastExceptionItem] = action.exceptions.slice(-1);
       const isAddNested =
         lastExceptionItem != null
           ? lastExceptionItem.entries.slice(-1).filter(({ type }) => type === 'nested').length > 0
@@ -73,12 +74,12 @@ export const exceptionsBuilderReducer = () => (state: State, action: Action): St
 
       return {
         ...state,
-        andLogicIncluded: isAndLogicIncluded,
-        exceptions: action.exceptions,
         addNested: isAddNested,
+        andLogicIncluded: isAndLogicIncluded,
         disableAnd: isAndDisabled,
-        disableOr: isOrDisabled,
         disableNested: containsValueList,
+        disableOr: isOrDisabled,
+        exceptions: action.exceptions,
       };
     }
     case 'setDefault': {
