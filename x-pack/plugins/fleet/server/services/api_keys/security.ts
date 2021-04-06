@@ -56,30 +56,14 @@ export async function createAPIKey(
   }
 }
 
-export async function invalidateAPIKeys(soClient: SavedObjectsClientContract, ids: string[]) {
-  const adminUser = await outputService.getAdminUser(soClient);
-  if (!adminUser) {
-    throw new Error('No admin user configured');
-  }
-  const request = KibanaRequest.from(({
-    path: '/',
-    route: { settings: {} },
-    url: { href: '/' },
-    raw: { req: { url: '/' } },
-    headers: {
-      authorization: `Basic ${Buffer.from(`${adminUser.username}:${adminUser.password}`).toString(
-        'base64'
-      )}`,
-    },
-  } as unknown) as Request);
-
+export async function invalidateAPIKeys(ids: string[]) {
   const security = appContextService.getSecurity();
   if (!security) {
     throw new Error('Missing security plugin');
   }
 
   try {
-    const res = await security.authc.apiKeys.invalidate(request, {
+    const res = await security.authc.apiKeys.invalidateAsInternalUser({
       ids,
     });
 
