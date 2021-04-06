@@ -245,13 +245,6 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       await testSubjects.existOrFail('mlDataFrameAnalyticsAdvancedRuntimeMappingsEditor');
     },
 
-    // async enableRuntimeMappingsEditor() {
-    //   await retry.tryForTime(5000, async () => {
-    //     await testSubjects.clickWhenNotDisabled('mlDataFrameAnalyticsRuntimeMappingsEditorSwitch');
-    //     await this.assertRuntimeMappingEditorExists();
-    //   });
-    // },
-
     async assertRuntimeMappingsEditorSwitchCheckState(expectedCheckState: boolean) {
       const actualCheckState = await this.getRuntimeMappingsEditorSwitchCheckedState();
       expect(actualCheckState).to.eql(

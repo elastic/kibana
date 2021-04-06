@@ -103,6 +103,9 @@ export default function ({ getService }: FtrProviderContext) {
             JSON.stringify(testData.runtimeFields)
           );
           await ml.dataFrameAnalyticsCreation.applyRuntimeMappings();
+          await ml.dataFrameAnalyticsCreation.assertRuntimeMappingsEditorContent([
+            '{"uppercase_stab":{"type":"keyword","script":"emit(params._source.stabf.toUpperCase())"}}',
+          ]);
 
           await ml.testExecution.logTestStep('inputs the dependent variable');
           await ml.dataFrameAnalyticsCreation.assertDependentVariableInputExists();
