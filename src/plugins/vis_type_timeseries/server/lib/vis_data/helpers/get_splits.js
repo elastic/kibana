@@ -45,6 +45,7 @@ export async function getSplits(resp, panel, series, meta, extractFields) {
         const bucket = _.get(resp, `aggregations.${series.id}.buckets.${filter.id}`);
         bucket.id = `${series.id}:${filter.id}`;
         bucket.key = filter.id;
+        bucket.splitByLabel = splitByLabel;
         bucket.color = filter.color;
         bucket.label = filter.label || filter.filter.query || '*';
         bucket.meta = meta;
