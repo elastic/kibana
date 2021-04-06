@@ -5,6 +5,7 @@ kibanaPipeline(timeoutMinutes: 300) {
   slackNotifications.onFailure(disabled: true) {
     githubPr.withDefaultPrComments {
       ciStats.trackBuild {
+        def packageTypes = ['deb', 'docker', 'rpm']
         workers.ci(ramDisk: false, name: "package-${packageType}", size: 's') {
           withEnv(["GIT_COMMIT=${buildState.get('checkoutInfo').commit}"]) {
             withGcpServiceAccount.fromVaultSecret('secret/kibana-issues/dev/ci-artifacts-key', 'value') {
@@ -12,7 +13,6 @@ kibanaPipeline(timeoutMinutes: 300) {
             }
           }
         }
-        def packageTypes = ['deb', 'docker', 'rpm']
         def workers = [:]
         packageTypes.each { type ->
           workers["package-${type}"] = {
