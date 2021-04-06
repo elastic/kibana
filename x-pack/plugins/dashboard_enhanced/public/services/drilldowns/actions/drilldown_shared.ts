@@ -49,12 +49,16 @@ export const createDrilldownTemplatesFromSiblings = (
 ): DrilldownTemplate[] => {
   const templates: DrilldownTemplate[] = [];
   const embeddableId = embeddable.id;
+
   const container = embeddable.getRoot();
 
   if (!container) return templates;
   if (!isEmbeddableContainer(container)) return templates;
 
-  for (const child of Object.values(container.children)) {
+  const childrenIds = (container as EmbeddableContainer).getChildIds();
+
+  for (const childId of childrenIds) {
+    const child = (container as EmbeddableContainer).getChild(childId);
     if (child.id === embeddableId) continue;
     if (!isEnhancedEmbeddable(child)) continue;
     const events = child.enhancements.dynamicActions.state.get().events;

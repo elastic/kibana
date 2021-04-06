@@ -18,7 +18,6 @@ import {
   defaultEmbeddableFactoryProvider,
   EmbeddableContext,
   PANEL_NOTIFICATION_TRIGGER,
-  ViewMode,
 } from '../../../../src/plugins/embeddable/public';
 import { EnhancedEmbeddable } from './types';
 import {
