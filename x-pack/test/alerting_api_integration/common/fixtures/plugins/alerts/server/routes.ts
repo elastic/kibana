@@ -21,7 +21,7 @@ import {
   TaskInstance,
 } from '../../../../../../../plugins/task_manager/server';
 import { FixtureStartDeps } from './plugin';
-import { retryIfConflicts } from '../../../../lib';
+import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 
 export function defineRoutes(core: CoreSetup<FixtureStartDeps>, { logger }: { logger: Logger }) {
   const router = core.http.createRouter();
