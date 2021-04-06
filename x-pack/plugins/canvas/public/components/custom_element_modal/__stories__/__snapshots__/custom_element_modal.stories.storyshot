@@ -545,14 +545,7 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
                   >
                     
                   </span>
-                  <div
-                    className="euiText euiText--small euiCard__description"
-                    id="generated-idDescription"
-                  >
-                    <p>
-                      
-                    </p>
-                  </div>
+                  
                 </div>
                 <div
                   className="euiCard__footer"
@@ -855,14 +848,7 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
                   >
                     My Chart
                   </span>
-                  <div
-                    className="euiText euiText--small euiCard__description"
-                    id="generated-idDescription"
-                  >
-                    <p>
-                      
-                    </p>
-                  </div>
+                  
                 </div>
                 <div
                   className="euiCard__footer"
@@ -1163,14 +1149,7 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
                   >
                     
                   </span>
-                  <div
-                    className="euiText euiText--small euiCard__description"
-                    id="generated-idDescription"
-                  >
-                    <p>
-                      
-                    </p>
-                  </div>
+                  
                 </div>
                 <div
                   className="euiCard__footer"
