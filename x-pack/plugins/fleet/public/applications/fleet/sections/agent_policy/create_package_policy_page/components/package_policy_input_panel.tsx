@@ -21,8 +21,10 @@ import {
 
 import type {
   NewPackagePolicyInput,
+  NewPackagePolicyInputStream,
   PackagePolicyInputStream,
   RegistryInput,
+  RegistryInputKeys,
   RegistryStream,
 } from '../../../../types';
 import type { PackagePolicyInputValidationResults } from '../services';
@@ -39,7 +41,7 @@ const ShortenedHorizontalRule = styled(EuiHorizontalRule)`
 `;
 
 const shouldShowStreamsByDefault = (
-  packageInput: RegistryInput,
+  packageInput: Pick<RegistryInput, RegistryInputKeys.vars>,
   packageInputStreams: Array<RegistryStream & { data_stream: { dataset: string } }>,
   packagePolicyInput: NewPackagePolicyInput
 ): boolean => {
@@ -62,8 +64,14 @@ const shouldShowStreamsByDefault = (
 };
 
 export const PackagePolicyInputPanel: React.FunctionComponent<{
-  packageInput: RegistryInput;
-  packageInputStreams: Array<RegistryStream & { data_stream: { dataset: string } }>;
+  packageInput: Pick<
+    RegistryInput,
+    | RegistryInputKeys.type
+    | RegistryInputKeys.title
+    | RegistryInputKeys.description
+    | RegistryInputKeys.vars
+  >;
+  packageInputStreams: Array<RegistryStream & Pick<NewPackagePolicyInputStream, 'data_stream'>>;
   packagePolicyInput: NewPackagePolicyInput;
   updatePackagePolicyInput: (updatedInput: Partial<NewPackagePolicyInput>) => void;
   inputValidationResults: PackagePolicyInputValidationResults;

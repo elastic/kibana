@@ -30,6 +30,7 @@ export {
   doesPackageHaveIntegrations,
   getStreamsForInputType,
   findDataStreamsByNames,
+  groupInputs,
   PackagePolicyValidationResults,
   PackagePolicyConfigValidationResults,
   PackagePolicyInputValidationResults,

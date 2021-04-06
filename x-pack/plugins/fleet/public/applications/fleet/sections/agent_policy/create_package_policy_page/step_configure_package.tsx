@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React from 'react';
+import React, { useMemo, memo } from 'react';
+import { keyBy } from 'lodash';
 import {
   EuiHorizontalRule,
   EuiFlexGroup,
@@ -15,38 +15,12 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import type {
-  PackageInfo,
-  RegistryStream,
-  NewPackagePolicy,
-  NewPackagePolicyInput,
-} from '../../../types';
+import type { PackageInfo, NewPackagePolicy, NewPackagePolicyInput } from '../../../types';
 import { Loading } from '../../../components';
+import { groupInputs } from '../../../services';
 
 import type { PackagePolicyValidationResults } from './services';
 import { PackagePolicyInputPanel } from './components';
-
-const findStreamsForInputType = (
-  inputType: string,
-  packageInfo: PackageInfo
-): Array<RegistryStream & { data_stream: { dataset: string } }> => {
-  const streams: Array<RegistryStream & { data_stream: { dataset: string } }> = [];
-
-  (packageInfo.data_streams || []).forEach((dataStream) => {
-    (dataStream.streams || []).forEach((stream) => {
-      if (stream.input === inputType) {
-        streams.push({
-          ...stream,
-          data_stream: {
-            dataset: dataStream.dataset,
-          },
-        });
-      }
-    });
-  });
-
-  return streams;
-};
 
 export const StepConfigurePackagePolicy: React.FunctionComponent<{
   packageInfo: PackageInfo;
@@ -54,31 +28,48 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   updatePackagePolicy: (fields: Partial<NewPackagePolicy>) => void;
   validationResults: PackagePolicyValidationResults;
   submitAttempted: boolean;
-}> = ({ packageInfo, packagePolicy, updatePackagePolicy, validationResults, submitAttempted }) => {
-  // Configure inputs (and their streams)
-  // Assume packages only export one config template for now
-  const renderConfigureInputs = () =>
-    packageInfo.policy_templates &&
-    packageInfo.policy_templates[0] &&
-    packageInfo.policy_templates[0].inputs &&
-    packageInfo.policy_templates[0].inputs.length ? (
+}> = memo(
+  ({ packageInfo, packagePolicy, updatePackagePolicy, validationResults, submitAttempted }) => {
+    const groupedPackageInputs = useMemo(() => groupInputs(packageInfo), [packageInfo]);
+    const policyInputsByType = useMemo(() => keyBy(packagePolicy.inputs, 'type'), [
+      packagePolicy.inputs,
+    ]);
+
+    if (groupedPackageInputs.length === 0) {
+      return (
+        <EuiEmptyPrompt
+          iconType="checkInCircleFilled"
+          iconColor="secondary"
+          body={
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="xpack.fleet.createPackagePolicy.stepConfigure.noPolicyOptionsMessage"
+                  defaultMessage="Nothing to configure"
+                />
+              </p>
+            </EuiText>
+          }
+        />
+      );
+    }
+
+    return validationResults ? (
       <>
         <EuiHorizontalRule margin="m" />
         <EuiFlexGroup direction="column" gutterSize="none">
-          {packageInfo.policy_templates[0].inputs.map((packageInput) => {
-            const packagePolicyInput = packagePolicy.inputs.find(
-              (input) => input.type === packageInput.type
-            );
-            const packageInputStreams = findStreamsForInputType(packageInput.type, packageInfo);
+          {groupedPackageInputs.map((packageInput) => {
+            const inputType = packageInput.name;
+            const packagePolicyInput = policyInputsByType[inputType];
             return packagePolicyInput ? (
-              <EuiFlexItem key={packageInput.type}>
+              <EuiFlexItem key={packageInput.name}>
                 <PackagePolicyInputPanel
-                  packageInput={packageInput}
-                  packageInputStreams={packageInputStreams}
+                  packageInput={{ type: inputType, ...packageInput }}
+                  packageInputStreams={packageInput.streams || []}
                   packagePolicyInput={packagePolicyInput}
                   updatePackagePolicyInput={(updatedInput: Partial<NewPackagePolicyInput>) => {
                     const indexOfUpdatedInput = packagePolicy.inputs.findIndex(
-                      (input) => input.type === packageInput.type
+                      (input) => input.type === packageInput.name
                     );
                     const newInputs = [...packagePolicy.inputs];
                     newInputs[indexOfUpdatedInput] = {
@@ -89,13 +80,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                       inputs: newInputs,
                     });
                   }}
-                  inputValidationResults={
-                    validationResults!.inputs![
-                      packagePolicyInput.integration
-                        ? `${packagePolicyInput.type}-${packagePolicyInput.integration}`
-                        : packagePolicyInput.type
-                    ]
-                  }
+                  inputValidationResults={validationResults!.inputs![packagePolicyInput.type]}
                   forceShowErrors={submitAttempted}
                 />
                 <EuiHorizontalRule margin="m" />
@@ -105,21 +90,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
         </EuiFlexGroup>
       </>
     ) : (
-      <EuiEmptyPrompt
-        iconType="checkInCircleFilled"
-        iconColor="secondary"
-        body={
-          <EuiText>
-            <p>
-              <FormattedMessage
-                id="xpack.fleet.createPackagePolicy.stepConfigure.noPolicyOptionsMessage"
-                defaultMessage="Nothing to configure"
-              />
-            </p>
-          </EuiText>
-        }
-      />
+      <Loading />
     );
-
-  return validationResults ? renderConfigureInputs() : <Loading />;
-};
+  }
+);
