@@ -9,9 +9,8 @@ import { EuiHorizontalRule, EuiText } from '@elastic/eui';
 import React, { useCallback, useMemo, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { TimelineType } from '../../../../common/types/timeline';
+import { SortFieldTimeline, TimelineType } from '../../../../common/types/timeline';
 import { useGetAllTimeline } from '../../../timelines/containers/all';
-import { SortFieldTimeline, Direction } from '../../../graphql/types';
 import {
   queryTimelineById,
   dispatchUpdateTimeline,
@@ -29,6 +28,7 @@ import { SecurityPageName } from '../../../app/types';
 import { APP_ID } from '../../../../common/constants';
 import { useFormatUrl } from '../../../common/components/link_to';
 import { LinkAnchor } from '../../../common/components/links';
+import { Direction } from '../../../../common/search_strategy';
 
 interface Props {
   filterBy: FilterMode;

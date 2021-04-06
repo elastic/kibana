@@ -19,7 +19,7 @@ import { buildFrameworkRequest } from '../../utils/common';
 import { persistPinnedEventSchema } from '../../schemas/pinned_events';
 import { persistPinnedEventOnTimeline } from '../../saved_object/pinned_events';
 
-export const persistPinnedEventsRoute = (
+export const persistPinnedEventRoute = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
   security: SetupPlugins['security']

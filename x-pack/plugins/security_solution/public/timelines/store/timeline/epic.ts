@@ -35,14 +35,13 @@ import {
   Filter,
   MatchAllFilter,
 } from '../../../../../../.../../../src/plugins/data/public';
-import { TimelineStatus, TimelineErrorResponse } from '../../../../common/types/timeline';
-import { inputsModel } from '../../../common/store/inputs';
 import {
+  TimelineStatus,
+  TimelineErrorResponse,
   TimelineType,
-  TimelineInput,
-  ResponseTimeline,
-  TimelineResult,
-} from '../../../graphql/types';
+} from '../../../../common/types/timeline';
+import { inputsModel } from '../../../common/store/inputs';
+import { TimelineInput, ResponseTimeline, TimelineResult } from '../../../graphql/types';
 import { addError } from '../../../common/store/app/actions';
 
 import { persistTimeline } from '../../containers/api';

@@ -9,15 +9,8 @@ import React, { useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { assertUnreachable } from '../../../../common/utility_types';
-import {
-  Direction,
-  HostFields,
-  HostItem,
-  HostsEdges,
-  HostsFields,
-  HostsSortField,
-  OsFields,
-} from '../../../graphql/types';
+import { HostsSortField } from '../../../../common/search_strategy/security_solution/hosts';
+import { HostFields, HostItem, HostsEdges, HostsFields, OsFields } from '../../../graphql/types';
 import {
   Columns,
   Criteria,
@@ -29,6 +22,7 @@ import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { hostsActions, hostsModel, hostsSelectors } from '../../store';
 import { getHostsColumns } from './columns';
 import * as i18n from './translations';
+import { Direction } from '../../../../common/search_strategy';
 
 const tableType = hostsModel.HostsTableType.hosts;
 

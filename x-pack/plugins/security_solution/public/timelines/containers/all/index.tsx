@@ -12,12 +12,7 @@ import { useDispatch } from 'react-redux';
 
 import { OpenTimelineResult } from '../../components/open_timeline/types';
 import { errorToToaster, useStateToaster } from '../../../common/components/toasters';
-import {
-  GetAllTimeline,
-  PageInfoTimeline,
-  SortTimeline,
-  TimelineResult,
-} from '../../../graphql/types';
+import { GetAllTimeline, SortTimeline, TimelineResult } from '../../../graphql/types';
 import { inputsActions } from '../../../common/store/inputs';
 
 import * as i18n from '../../pages/translations';
@@ -25,6 +20,7 @@ import {
   TimelineType,
   TimelineTypeLiteralWithNull,
   TimelineStatusLiteralWithNull,
+  PageInfoTimeline,
 } from '../../../../common/types/timeline';
 import { getAllTimelines } from '../api';
 

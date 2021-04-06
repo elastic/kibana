@@ -8,7 +8,9 @@
 import { isEmpty } from 'lodash/fp';
 
 import { assertUnreachable } from '../../../common/utility_types';
-import { Direction, HostsFields, HostsSortField } from '../../graphql/types';
+import { HostsSortField } from '../../../common/search_strategy/security_solution/hosts';
+
+import { Direction, HostsFields } from '../../graphql/types';
 import { createQueryFilterClauses } from '../../utils/build_query';
 
 import { HostsRequestOptions } from '.';

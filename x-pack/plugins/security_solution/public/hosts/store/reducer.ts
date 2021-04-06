@@ -7,7 +7,7 @@
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
-import { Direction, HostsFields } from '../../graphql/types';
+import { HostsFields } from '../../graphql/types';
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../common/store/constants';
 
 import {
@@ -22,6 +22,7 @@ import {
   setHostDetailsQueriesActivePageToZero,
 } from './helpers';
 import { HostsModel, HostsTableType } from './model';
+import { Direction } from '../../../common/search_strategy';
 
 export type HostsState = HostsModel;
 

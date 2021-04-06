@@ -14,12 +14,11 @@ import {
   Maybe,
   OsEcsFields,
   SourceConfiguration,
-  TimerangeInput,
-  DocValueFieldsInput,
 } from '../../graphql/types';
 import { FrameworkRequest, RequestOptionsPaginated } from '../framework';
 import { Hit, Hits, SearchHit } from '../types';
 import { TotalValue } from '../../../common/detection_engine/types';
+import { DocValueFieldsInput, TimerangeInput } from '../../../common/search_strategy';
 
 export interface HostsAdapter {
   getHosts(req: FrameworkRequest, options: HostsRequestOptions): Promise<HostsData>;

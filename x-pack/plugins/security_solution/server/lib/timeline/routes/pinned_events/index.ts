@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { persistPinnedEventsRoute } from './persist_pinned_event_on_timeline';
+export { persistPinnedEventRoute } from './persist_pinned_event';

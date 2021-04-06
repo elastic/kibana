@@ -8,10 +8,9 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { SortFieldTimeline, Direction } from '../../../graphql/types';
 import { sourcererSelectors } from '../../../common/store';
 import { useShallowEqualSelector, useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { TimelineId } from '../../../../common/types/timeline';
+import { SortFieldTimeline, TimelineId } from '../../../../common/types/timeline';
 import { TimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import {
@@ -46,6 +45,7 @@ import { DEFAULT_SORT_FIELD, DEFAULT_SORT_DIRECTION } from './constants';
 import { useTimelineTypes } from './use_timeline_types';
 import { useTimelineStatus } from './use_timeline_status';
 import { deleteTimelinesByIds } from '../../containers/api';
+import { Direction } from '../../../../common/search_strategy';
 
 interface OwnProps<TCache = object> {
   /** Displays open timeline in modal */

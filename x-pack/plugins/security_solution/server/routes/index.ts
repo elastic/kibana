@@ -48,7 +48,7 @@ import { cleanDraftTimelinesRoute } from '../lib/timeline/routes/draft_timelines
 
 import { persistNoteRoute } from '../lib/timeline/routes/notes';
 
-import { persistPinnedEventsRoute } from '../lib/timeline/routes/pinned_events';
+import { persistPinnedEventRoute } from '../lib/timeline/routes/pinned_events';
 
 import { SetupPlugins } from '../plugin';
 import { ConfigType } from '../config';
@@ -94,7 +94,7 @@ export const initRoutes = (
   installPrepackedTimelinesRoute(router, config, security);
 
   persistNoteRoute(router, config, security);
-  persistPinnedEventsRoute(router, config, security);
+  persistPinnedEventRoute(router, config, security);
 
   findRulesStatusesRoute(router);
 

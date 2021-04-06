@@ -28,8 +28,9 @@ import {
   responseFavoriteTimeline,
   GetTimelinesArgs,
   SingleTimelineResponseType,
+  TimelineType,
 } from '../../../common/types/timeline';
-import { TimelineInput, TimelineType } from '../../graphql/types';
+import { TimelineInput } from '../../graphql/types';
 import {
   TIMELINE_URL,
   TIMELINE_DRAFT_URL,

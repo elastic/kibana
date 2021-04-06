@@ -36,11 +36,11 @@ import {
 } from '../../components/timeline/query_tab_content';
 import { mockDataProviders } from '../../components/timeline/data_providers/mock/mock_data_providers';
 import { Sort } from '../../components/timeline/body/sort';
-import { Direction } from '../../../graphql/types';
 
 import { addTimelineInStorage } from '../../containers/local_storage';
 import { isPageTimeline } from './epic_local_storage';
 import { TimelineId, TimelineStatus, TimelineTabs } from '../../../../common/types/timeline';
+import { Direction } from '../../../../common/search_strategy';
 
 jest.mock('../../containers/local_storage');
 

@@ -565,3 +565,9 @@ export const allTimelinesResponse = runtimeTypes.intersection([
 ]);
 
 export type AllTimelinesResponse = runtimeTypes.TypeOf<typeof allTimelinesResponse>;
+
+export interface PageInfoTimeline {
+  pageIndex: number;
+
+  pageSize: number;
+}

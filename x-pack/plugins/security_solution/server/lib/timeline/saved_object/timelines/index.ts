@@ -19,10 +19,10 @@ import {
   TimelineStatusLiteralWithNull,
   AllTimelinesResponse,
   ResponseTimelines,
+  PageInfoTimeline,
 } from '../../../../../common/types/timeline';
 import {
   ResponseTimeline,
-  PageInfoTimeline,
   SortTimeline,
   ResponseFavoriteTimeline,
   TimelineResult,

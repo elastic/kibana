@@ -9,7 +9,6 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
-import { Direction } from '../../../../graphql/types';
 import { defaultHeaders, mockTimelineData } from '../../../../common/mock';
 import '../../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock/test_providers';
@@ -22,6 +21,7 @@ import { useTimelineEventsDetails } from '../../../containers/details/index';
 import { useSourcererScope } from '../../../../common/containers/sourcerer';
 import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
 import { PinnedTabContentComponent, Props as PinnedTabContentComponentProps } from '.';
+import { Direction } from '../../../../../common/search_strategy';
 
 jest.mock('../../../containers/index', () => ({
   useTimelineEvents: jest.fn(),
