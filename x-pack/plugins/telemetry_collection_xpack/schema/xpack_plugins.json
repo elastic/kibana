@@ -1837,17 +1837,35 @@
         },
         "agents": {
           "properties": {
-            "total": {
-              "type": "long"
+            "total_enrolled": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled agents, in any state"
+              }
             },
-            "online": {
-              "type": "long"
+            "healthy": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled agents in a healthy state"
+              }
             },
-            "error": {
-              "type": "long"
+            "unhealthy": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled agents in an unhealthy state"
+              }
             },
             "offline": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "The total number of enrolled agents currently offline"
+              }
+            },
+            "total_all_statuses": {
+              "type": "long",
+              "_meta": {
+                "description": "The total number of agents in any state, both enrolled and inactive"
+              }
             }
           }
         },
@@ -1978,6 +1996,42 @@
             "xy_layer_added": {
               "type": "long"
             },
+            "open_field_editor_edit": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user opened the editor flyout to edit a field from within Lens."
+              }
+            },
+            "open_field_editor_add": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user opened the editor flyout to add a field from within Lens."
+              }
+            },
+            "save_field_edit": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user edited a field from within Lens."
+              }
+            },
+            "save_field_add": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user added a field from within Lens."
+              }
+            },
+            "open_field_delete_modal": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user opened the field delete modal from within Lens."
+              }
+            },
+            "delete_field": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user deleted a field from within Lens."
+              }
+            },
             "indexpattern_dimension_operation_terms": {
               "type": "long",
               "_meta": {
@@ -2034,70 +2088,50 @@
             },
             "indexpattern_dimension_operation_range": {
               "type": "long",
-              "_meta": { "description": "Number of times the range function was selected" }
+              "_meta": {
+                "description": "Number of times the range function was selected"
+              }
             },
             "indexpattern_dimension_operation_median": {
               "type": "long",
-              "_meta": { "description": "Number of times the median function was selected" }
+              "_meta": {
+                "description": "Number of times the median function was selected"
+              }
             },
             "indexpattern_dimension_operation_percentile": {
               "type": "long",
-              "_meta": { "description": "Number of times the percentile function was selected" }
+              "_meta": {
+                "description": "Number of times the percentile function was selected"
+              }
             },
             "indexpattern_dimension_operation_last_value": {
               "type": "long",
-              "_meta": { "description": "Number of times the last value function was selected" }
+              "_meta": {
+                "description": "Number of times the last value function was selected"
+              }
             },
             "indexpattern_dimension_operation_cumulative_sum": {
               "type": "long",
-              "_meta": { "description": "Number of times the cumulative sum function was selected" }
+              "_meta": {
+                "description": "Number of times the cumulative sum function was selected"
+              }
             },
             "indexpattern_dimension_operation_counter_rate": {
               "type": "long",
-              "_meta": { "description": "Number of times the counter rate function was selected" }
+              "_meta": {
+                "description": "Number of times the counter rate function was selected"
+              }
             },
             "indexpattern_dimension_operation_derivative": {
               "type": "long",
-              "_meta": { "description": "Number of times the derivative function was selected" }
+              "_meta": {
+                "description": "Number of times the derivative function was selected"
+              }
             },
             "indexpattern_dimension_operation_moving_average": {
               "type": "long",
-              "_meta": { "description": "Number of times the moving average function was selected" }
-            },
-            "open_field_editor_edit": {
-              "type": "long",
               "_meta": {
-                "description": "Number of times the user opened the editor flyout to edit a field from within Lens."
-              }
-            },
-            "open_field_editor_add": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the user opened the editor flyout to add a field from within Lens."
-              }
-            },
-            "save_field_edit": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the user edited a field from within Lens."
-              }
-            },
-            "save_field_add": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the user added a field from within Lens."
-              }
-            },
-            "open_field_delete_modal": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the user opened the field delete modal from within Lens."
-              }
-            },
-            "delete_field": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the user deleted a field from within Lens."
+                "description": "Number of times the moving average function was selected"
               }
             }
           }
@@ -2185,6 +2219,42 @@
             "xy_layer_added": {
               "type": "long"
             },
+            "open_field_editor_edit": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user opened the editor flyout to edit a field from within Lens."
+              }
+            },
+            "open_field_editor_add": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user opened the editor flyout to add a field from within Lens."
+              }
+            },
+            "save_field_edit": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user edited a field from within Lens."
+              }
+            },
+            "save_field_add": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user added a field from within Lens."
+              }
+            },
+            "open_field_delete_modal": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user opened the field delete modal from within Lens."
+              }
+            },
+            "delete_field": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of times the user deleted a field from within Lens."
+              }
+            },
             "indexpattern_dimension_operation_terms": {
               "type": "long",
               "_meta": {
@@ -2241,70 +2311,50 @@
             },
             "indexpattern_dimension_operation_range": {
               "type": "long",
-              "_meta": { "description": "Number of times the range function was selected" }
+              "_meta": {
+                "description": "Number of times the range function was selected"
+              }
             },
             "indexpattern_dimension_operation_median": {
               "type": "long",
-              "_meta": { "description": "Number of times the median function was selected" }
+              "_meta": {
+                "description": "Number of times the median function was selected"
+              }
             },
             "indexpattern_dimension_operation_percentile": {
               "type": "long",
-              "_meta": { "description": "Number of times the percentile function was selected" }
+              "_meta": {
+                "description": "Number of times the percentile function was selected"
+              }
             },
             "indexpattern_dimension_operation_last_value": {
               "type": "long",
-              "_meta": { "description": "Number of times the last value function was selected" }
+              "_meta": {
+                "description": "Number of times the last value function was selected"
+              }
             },
             "indexpattern_dimension_operation_cumulative_sum": {
               "type": "long",
-              "_meta": { "description": "Number of times the cumulative sum function was selected" }
+              "_meta": {
+                "description": "Number of times the cumulative sum function was selected"
+              }
             },
             "indexpattern_dimension_operation_counter_rate": {
               "type": "long",
-              "_meta": { "description": "Number of times the counter rate function was selected" }
+              "_meta": {
+                "description": "Number of times the counter rate function was selected"
+              }
             },
             "indexpattern_dimension_operation_derivative": {
               "type": "long",
-              "_meta": { "description": "Number of times the derivative function was selected" }
+              "_meta": {
+                "description": "Number of times the derivative function was selected"
+              }
             },
             "indexpattern_dimension_operation_moving_average": {
               "type": "long",
-              "_meta": { "description": "Number of times the moving average function was selected" }
-            },
-            "open_field_editor_edit": {
-              "type": "long",
               "_meta": {
-                "description": "Number of times the user opened the editor flyout to edit a field from within Lens."
-              }
-            },
-            "open_field_editor_add": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the user opened the editor flyout to add a field from within Lens."
-              }
-            },
-            "save_field_edit": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the user edited a field from within Lens."
-              }
-            },
-            "save_field_add": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the user added a field from within Lens."
-              }
-            },
-            "open_field_delete_modal": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the user opened the field delete modal from within Lens."
-              }
-            },
-            "delete_field": {
-              "type": "long",
-              "_meta": {
-                "description": "Number of times the user deleted a field from within Lens."
+                "description": "Number of times the moving average function was selected"
               }
             }
           }

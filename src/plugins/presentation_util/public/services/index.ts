@@ -23,6 +23,7 @@ export interface PresentationDashboardsService {
 export interface PresentationCapabilitiesService {
   canAccessDashboards: () => boolean;
   canCreateNewDashboards: () => boolean;
+  canSaveVisualizations: () => boolean;
 }
 
 export interface PresentationUtilServices {

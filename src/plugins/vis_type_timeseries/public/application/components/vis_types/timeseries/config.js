@@ -327,10 +327,9 @@ export const TimeseriesConfig = injectI18n(function (props) {
 
   const disableSeparateYaxis = model.separate_axis ? false : true;
 
-  const seriesIndexPattern =
-    props.model.override_index_pattern && props.model.series_index_pattern
-      ? props.model.series_index_pattern
-      : props.indexPatternForQuery;
+  const seriesIndexPattern = props.model.override_index_pattern
+    ? props.model.series_index_pattern
+    : props.indexPatternForQuery;
 
   const initialPalette = {
     ...model.palette,
