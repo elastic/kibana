@@ -7,7 +7,7 @@
 
 import React, { FunctionComponent, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiIcon, EuiLink, EuiPopover, EuiText } from '@elastic/eui';
+import { EuiLink, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
 import { useAppContext } from '../../../../app_context';
 
 export const CloudUrlHelp: FunctionComponent = () => {
@@ -33,51 +33,32 @@ export const CloudUrlHelp: FunctionComponent = () => {
       closePopover={() => setIsOpen(false)}
       anchorPosition="upCenter"
     >
-      <EuiText>
-        <h6>
-          <FormattedMessage
-            id="xpack.remoteClusters.remoteClusterForm.cloudUrlHelp.popoverTitle"
-            defaultMessage="How to find your Elasticsearch endpoint URL"
-          />
-        </h6>
-        <ol>
-          <li>
-            <FormattedMessage
-              id="xpack.remoteClusters.remoteClusterForm.cloudUrlHelp.stepOneText"
-              defaultMessage="Open the {deploymentsLink}"
-              values={{
-                deploymentsLink: (
-                  <EuiLink external={true} href={`${cloudBaseUrl}/deployments`} target="_blank">
-                    <FormattedMessage
-                      id="xpack.remoteClusters.remoteClusterForm.cloudUrlHelpModal.deploymentsLink"
-                      defaultMessage="deployments page."
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          </li>
-          <li>
-            <FormattedMessage
-              id="xpack.remoteClusters.remoteClusterForm.cloudUrlHelp.stepTwoText"
-              defaultMessage="Select the remote deployment."
-            />
-          </li>
-          <li>
-            <FormattedMessage
-              id="xpack.remoteClusters.remoteClusterForm.cloudUrlHelp.stepThreeText"
-              defaultMessage="Under Applications, copy the {elasticsearch} endpoint URL."
-              values={{
-                elasticsearch: (
-                  <>
-                    <EuiIcon className="eui-alignBaseline" type="logoElasticsearch" />
-                    <strong> Elasticsearch</strong>
-                  </>
-                ),
-              }}
-            />
-          </li>
-        </ol>
+      <EuiPopoverTitle>
+        <FormattedMessage
+          id="xpack.remoteClusters.remoteClusterForm.cloudUrlHelp.popoverTitle"
+          defaultMessage="How to find your Elasticsearch endpoint URL"
+        />
+      </EuiPopoverTitle>
+      <EuiText size="s" style={{ maxWidth: 500 }}>
+        <FormattedMessage
+          id="xpack.remoteClusters.remoteClusterForm.cloudUrlHelp.stepOneText"
+          defaultMessage="Open the {deploymentsLink}, select the remote deployment and copy the {elasticsearch} endpoint URL."
+          values={{
+            deploymentsLink: (
+              <EuiLink external={true} href={`${cloudBaseUrl}/deployments`} target="_blank">
+                <FormattedMessage
+                  id="xpack.remoteClusters.remoteClusterForm.cloudUrlHelpModal.deploymentsLink"
+                  defaultMessage="deployments page"
+                />
+              </EuiLink>
+            ),
+            elasticsearch: (
+              <>
+                <strong> Elasticsearch</strong>
+              </>
+            ),
+          }}
+        />
       </EuiText>
     </EuiPopover>
   );
