@@ -78,7 +78,7 @@ export function initPatchCaseConfigure({
             throw Boom.notFound('Action client have not been found');
           }
           try {
-            mappings = await casesClient.getMappings({
+            mappings = await casesClient.casesClientInternal.configuration.getMappings({
               actionsClient,
               connectorId: connector.id,
               connectorType: connector.type,

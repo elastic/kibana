@@ -40,7 +40,7 @@ export function initGetCaseConfigure({ caseConfigureService, router, logger }: R
             throw Boom.notFound('Action client not found');
           }
           try {
-            mappings = await casesClient.getMappings({
+            mappings = await casesClient.casesClientInternal.configuration.getMappings({
               actionsClient,
               connectorId: connector.id,
               connectorType: connector.type,

@@ -12,15 +12,15 @@ import { UserActionsSubClient, createUserActionsSubClient } from './user_actions
 import { CasesClientInternal, createCasesClientInternal } from './client_internal';
 
 export class CasesClient {
-  private readonly casesClientInternal: CasesClientInternal;
+  private readonly _casesClientInternal: CasesClientInternal;
   private readonly _cases: CasesSubClient;
   private readonly _attachments: AttachmentsSubClient;
   private readonly _userActions: UserActionsSubClient;
 
   constructor(args: CasesClientArgs) {
-    this.casesClientInternal = createCasesClientInternal(args);
-    this._cases = createCasesSubClient(args, this, this.casesClientInternal);
-    this._attachments = createAttachmentsSubClient(args, this.casesClientInternal);
+    this._casesClientInternal = createCasesClientInternal(args);
+    this._cases = createCasesSubClient(args, this, this._casesClientInternal);
+    this._attachments = createAttachmentsSubClient(args, this._casesClientInternal);
     this._userActions = createUserActionsSubClient(args);
   }
 
@@ -34,6 +34,11 @@ export class CasesClient {
 
   public get userActions() {
     return this._userActions;
+  }
+
+  // TODO: Remove it when all routes will be moved to the cases client.
+  public get casesClientInternal() {
+    return this._casesClientInternal;
   }
 }
 

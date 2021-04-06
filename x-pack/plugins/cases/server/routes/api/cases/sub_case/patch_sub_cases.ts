@@ -258,7 +258,7 @@ async function updateAlerts({
       []
     );
 
-    await casesClient.updateAlertsStatus({ alerts: alertsToUpdate });
+    await casesClient.casesClientInternal.alerts.updateStatus({ alerts: alertsToUpdate });
   } catch (error) {
     throw createCaseError({
       message: `Failed to update alert status while updating sub cases: ${JSON.stringify(

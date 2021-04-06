@@ -74,7 +74,7 @@ export function initPostCaseConfigure({
         const creationDate = new Date().toISOString();
         let mappings: ConnectorMappingsAttributes[] = [];
         try {
-          mappings = await casesClient.getMappings({
+          mappings = await casesClient.casesClientInternal.configuration.getMappings({
             actionsClient,
             connectorId: query.connector.id,
             connectorType: query.connector.type,
