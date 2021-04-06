@@ -9,7 +9,6 @@ import { IResolvers, makeExecutableSchema } from 'graphql-tools';
 
 import { schemas } from './graphql';
 import { createScalarToStringArrayValueResolvers } from './graphql/ecs';
-import { createHostsResolvers } from './graphql/hosts';
 import { createNoteResolvers } from './graphql/note';
 import { createPinnedEventResolvers } from './graphql/pinned_event';
 import { createScalarDateResolvers } from './graphql/scalar_date';
@@ -25,7 +24,6 @@ import { AppBackendLibs } from './lib/types';
 export const initServer = (libs: AppBackendLibs) => {
   const schema = makeExecutableSchema({
     resolvers: [
-      createHostsResolvers(libs) as IResolvers,
       createNoteResolvers(libs) as IResolvers,
       createPinnedEventResolvers(libs) as IResolvers,
       createSourcesResolvers(libs) as IResolvers,
