@@ -570,10 +570,12 @@ export class TaskRunner<
           };
         },
         (err: ElasticsearchError) => {
-          const { body } = err.error as ResponseError;
           let errorMessage = err.message;
-          if (body && body.error) {
-            errorMessage += `, caused by: "${getEsCause(body.error)}"`;
+          if (err.error) {
+            const { body } = err.error as ResponseError;
+            if (body && body.error) {
+              errorMessage += `, caused by: "${getEsCause(body.error)}"`;
+            }
           }
           const message = `Executing Alert "${alertId}" has resulted in Error: ${errorMessage}`;
           if (isAlertSavedObjectNotFoundError(err, alertId)) {
