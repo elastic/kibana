@@ -32,7 +32,7 @@ export interface HostItem {
   cloud?: Maybe<CloudEcs>;
   endpoint?: Maybe<EndpointFields>;
   host?: Maybe<HostEcs>;
-  lastSeen?: Maybe<string>;
+  lastSeen?: Maybe<string[]>;
 }
 
 export interface HostValue {
