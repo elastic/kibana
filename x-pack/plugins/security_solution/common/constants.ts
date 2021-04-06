@@ -134,6 +134,8 @@ export const DETECTION_ENGINE_INDEX_URL = `${DETECTION_ENGINE_URL}/index`;
 export const DETECTION_ENGINE_TAGS_URL = `${DETECTION_ENGINE_URL}/tags`;
 export const DETECTION_ENGINE_RULES_STATUS_URL = `${DETECTION_ENGINE_RULES_URL}/_find_statuses`;
 export const DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL = `${DETECTION_ENGINE_RULES_URL}/prepackaged/_status`;
+// may need to organize somewhere else
+export const DANPANSAPI = `something`;
 
 export const TIMELINE_URL = '/api/timeline';
 export const TIMELINE_DRAFT_URL = `${TIMELINE_URL}/_draft`;

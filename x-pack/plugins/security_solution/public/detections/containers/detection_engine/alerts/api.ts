@@ -11,6 +11,7 @@ import {
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
   DETECTION_ENGINE_INDEX_URL,
   DETECTION_ENGINE_PRIVILEGES_URL,
+  DANPANSAPI,
 } from '../../../../../common/constants';
 import { KibanaServices } from '../../../../common/lib/kibana';
 import {
@@ -100,4 +101,19 @@ export const createSignalIndex = async ({ signal }: BasicSignals): Promise<Alert
   KibanaServices.get().http.fetch<AlertsIndex>(DETECTION_ENGINE_INDEX_URL, {
     method: 'POST',
     signal,
+  });
+
+/**
+ * Get an API!
+ *
+ * @param hostId
+ *
+ * @throws An error if response is not OK
+ */
+export const someAPICall = async (hostId: string): Promise<SomeType> =>
+  KibanaServices.get().http.fetch<SomeType>(DANPANSAPI, {
+    method: 'POST',
+    body: JSON.stringify({
+      hostId,
+    }),
   });
