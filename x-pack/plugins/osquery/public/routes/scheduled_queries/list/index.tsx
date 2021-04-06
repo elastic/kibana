@@ -9,12 +9,12 @@ import { EuiButton, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useMemo } from 'react';
 
-// import { useRouterNavigate } from '../../../common/lib/kibana';
+import { useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
 import { ScheduledQueriesTable } from '../../../scheduled_queries/scheduled_queries_table';
 
 const ScheduledQueriesPageComponent = () => {
-  // const newQueryLinkProps = useRouterNavigate('live_query/new');
+  const newQueryLinkProps = useRouterNavigate('scheduled_queries/new');
 
   const LeftColumn = useMemo(
     () => (
@@ -23,7 +23,7 @@ const ScheduledQueriesPageComponent = () => {
           <EuiText>
             <h1>
               <FormattedMessage
-                id="xpack.osquery.liveQueryList.pageTitle"
+                id="xpack.osquery.scheduledQueryList.pageTitle"
                 defaultMessage="Scheduled queries"
               />
             </h1>
@@ -44,23 +44,20 @@ const ScheduledQueriesPageComponent = () => {
     []
   );
 
-  // const RightColumn = useMemo(
-  //   () => (
-  //     <EuiButton fill {...newQueryLinkProps} iconType="plusInCircle">
-  //       <FormattedMessage
-  //         id="xpack.osquery.liveQueryList.newScheduledQueryButtonLabel"
-  //         defaultMessage="New live query"
-  //       />
-  //     </EuiButton>
-  //   ),
-  //   [newQueryLinkProps]
-  // );
+  const RightColumn = useMemo(
+    () => (
+      <EuiButton fill {...newQueryLinkProps} iconType="plusInCircle">
+        <FormattedMessage
+          id="xpack.osquery.liveQueryList.newScheduledQueryButtonLabel"
+          defaultMessage="New live query"
+        />
+      </EuiButton>
+    ),
+    [newQueryLinkProps]
+  );
 
   return (
-    <WithHeaderLayout
-      leftColumn={LeftColumn}
-      // rightColumn={RightColumn} rightColumnGrow={false}
-    >
+    <WithHeaderLayout leftColumn={LeftColumn} rightColumn={RightColumn} rightColumnGrow={false}>
       <ScheduledQueriesTable />
     </WithHeaderLayout>
   );

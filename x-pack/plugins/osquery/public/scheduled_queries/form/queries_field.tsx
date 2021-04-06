@@ -5,16 +5,10 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
-import { findIndex, forEach, pullAt, mapKeys } from 'lodash';
-
-import { FormattedMessage } from '@kbn/i18n/react';
+import { findIndex, forEach, pullAt } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSpacer } from '@elastic/eui';
-
 import { produce } from 'immer';
-import React, { useCallback, useState, useEffect, useRef, useMemo } from 'react';
-import styled from 'styled-components';
+import React, { useCallback, useState } from 'react';
 
 import { FieldHook } from '../../shared_imports';
 import { ScheduledQueryQueriesTable } from '../../fleet_integration/components/scheduled_queries_table';
@@ -22,15 +16,11 @@ import { AddQueryFlyout } from './add_query_flyout';
 import { EditQueryFlyout } from './edit_query_flyout';
 import { OsqueryPackUploader } from './pack_uploader';
 
-interface PropsRepositoryCombobox {
+interface QueriesFieldProps {
   field: FieldHook;
-  isLoading: boolean;
-  repos: string[];
-  noSuggestions: boolean;
-  globalRepository: string;
 }
 
-export const QueriesField = ({ field }: PropsRepositoryCombobox) => {
+const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ field }) => {
   const [showAddQueryFlyout, setShowAddQueryFlyout] = useState(false);
   const [showEditQueryFlyout, setShowEditQueryFlyout] = useState<number | null>(null);
 
@@ -38,12 +28,11 @@ export const QueriesField = ({ field }: PropsRepositoryCombobox) => {
   const handleHideAddFlyout = useCallback(() => setShowAddQueryFlyout(false), []);
   const handleHideEditFlyout = useCallback(() => setShowEditQueryFlyout(null), []);
 
-  const { setValue, value } = field;
-
-  console.error('field', field);
+  const { setValue } = field;
 
   const handleDeleteClick = useCallback(
     (stream) => {
+      // @ts-expect-error update types
       const streamIndex = findIndex(field.value[0].streams, [
         'vars.id.value',
         stream.vars.id.value,
@@ -64,6 +53,7 @@ export const QueriesField = ({ field }: PropsRepositoryCombobox) => {
 
   const handleEditClick = useCallback(
     (stream) => {
+      // @ts-expect-error update types
       const streamIndex = findIndex(field.value[0].streams, [
         'vars.id.value',
         stream.vars.id.value,
@@ -156,17 +146,25 @@ export const QueriesField = ({ field }: PropsRepositoryCombobox) => {
       </EuiFlexGroup>
       <EuiSpacer />
       <ScheduledQueryQueriesTable
+        // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
         data={{ inputs: field.value }}
+        // @ts-expect-error update types
         onEditClick={handleEditClick}
+        // @ts-expect-error update types
         onDeleteClick={handleDeleteClick}
       />
       <EuiSpacer />
-      <OsqueryPackUploader onChange={handlePackUpload} />
+      {
+        // @ts-expect-error update types
+        <OsqueryPackUploader onChange={handlePackUpload} />
+      }
       {showAddQueryFlyout && (
+        // @ts-expect-error update types
         <AddQueryFlyout onSave={handleAddQuery} onClose={handleHideAddFlyout} />
       )}
       {showEditQueryFlyout != null && showEditQueryFlyout >= 0 && (
         <EditQueryFlyout
+          // @ts-expect-error update types
           defaultValue={field.value[0].streams[showEditQueryFlyout]}
           onSave={handleEditQuery}
           onClose={handleHideEditFlyout}
@@ -175,3 +173,5 @@ export const QueriesField = ({ field }: PropsRepositoryCombobox) => {
     </>
   );
 };
+
+export const QueriesField = React.memo(QueriesFieldComponent);

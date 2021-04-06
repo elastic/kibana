@@ -29,6 +29,7 @@ export const useScheduledQueries = () => {
       keepPreviousData: true,
       select: produce((draft) => {
         draft.items = draft.items.filter(
+          // @ts-expect-error update types
           (item) =>
             !(
               !item.inputs[0].streams.length ||

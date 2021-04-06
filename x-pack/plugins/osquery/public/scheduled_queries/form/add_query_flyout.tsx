@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/jsx-no-bind */
-
-/* eslint-disable react-perf/jsx-no-new-function-as-prop */
-
-import { produce } from 'immer';
 import {
   EuiFlyout,
   EuiTitle,
@@ -28,25 +23,22 @@ import React from 'react';
 
 import { CodeEditorField } from '../../queries/form/code_editor_field';
 
-import {
-  UseField,
-  Form,
-  useForm,
-  getUseField,
-  Field,
-  FIELD_TYPES,
-  useFormData,
-} from '../../shared_imports';
+import { Form, useForm, FormData, getUseField, Field, FIELD_TYPES } from '../../shared_imports';
 
 const FORM_ID = 'addQueryFlyoutForm';
 
 const CommonUseField = getUseField({ component: Field });
 
-export const AddQueryFlyout = ({ onSave, onClose }) => {
+interface AddQueryFlyoutProps {
+  onSave: (payload: FormData) => Promise<void>;
+  onClose: () => void;
+}
+
+const AddQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({ onSave, onClose }) => {
   const { form } = useForm({
     id: FORM_ID,
+    // @ts-expect-error update types
     onSubmit: (payload, isValid) => {
-      console.error('aaa', payload);
       if (isValid) {
         onSave(payload);
         onClose();
@@ -113,3 +105,5 @@ export const AddQueryFlyout = ({ onSave, onClose }) => {
     </EuiPortal>
   );
 };
+
+export const AddQueryFlyout = React.memo(AddQueryFlyoutComponent);

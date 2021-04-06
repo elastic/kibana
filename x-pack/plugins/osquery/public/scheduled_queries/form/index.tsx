@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react-perf/jsx-no-new-object-as-prop, react/display-name */
-
 import { merge } from 'lodash/fp';
 import {
   EuiFlexGroup,
@@ -20,21 +18,11 @@ import {
   EuiBottomBar,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useMutation } from 'react-query';
-import deepmerge from 'deepmerge';
 import { produce } from 'immer';
-import styled from 'styled-components';
 
-import {
-  UseField,
-  Form,
-  useForm,
-  getUseField,
-  Field,
-  FIELD_TYPES,
-  useFormData,
-} from '../../shared_imports';
+import { Form, useForm, getUseField, Field, FIELD_TYPES } from '../../shared_imports';
 import { useKibana } from '../../common/lib/kibana';
 import { PolicyIdComboBoxField } from './policy_id_combobox_field';
 import { QueriesField } from './queries_field';
@@ -45,28 +33,36 @@ const FORM_ID = 'scheduledQueryForm';
 
 const CommonUseField = getUseField({ component: Field });
 
-const ScheduledQueryFormComponent = ({ defaultValue, editMode = false }) => {
+interface ScheduledQueryFormProps {
+  defaultValue?: Record<string, unknown>;
+  editMode?: boolean;
+}
+
+const ScheduledQueryFormComponent: React.FC<ScheduledQueryFormProps> = ({
+  defaultValue,
+  editMode = false,
+}) => {
   const { http } = useKibana().services;
 
   const {
-    data,
+    // data,
     isLoading,
     mutateAsync,
-    isError,
-    isSuccess,
+    // isError,
+    // isSuccess,
     // error
   } = useMutation(
     (payload: Record<string, unknown>) =>
       editMode
-        ? http.put(`/api/fleet/package_policies/${defaultValue.id}`, {
+        ? http.put(`/api/fleet/package_policies/${defaultValue?.id}`, {
             body: JSON.stringify(payload),
           })
         : http.post('/api/fleet/package_policies', {
             body: JSON.stringify(payload),
-          }),
-    {
-      onSuccess: () => {},
-    }
+          })
+    // {
+    //   onSuccess: () => {},
+    // }
   );
 
   const { form } = useForm({
@@ -94,8 +90,9 @@ const ScheduledQueryFormComponent = ({ defaultValue, editMode = false }) => {
       },
     },
     onSubmit: (payload) => {
-      console.error('payload', payload);
+      // console.error('payload', payload);
       const formData = produce(payload, (draft) => {
+        // @ts-expect-error update types
         draft.inputs[0].streams.forEach((stream) => {
           delete stream.compiled_stream;
         });
@@ -106,8 +103,9 @@ const ScheduledQueryFormComponent = ({ defaultValue, editMode = false }) => {
     options: {
       stripEmptyFields: false,
     },
+    // @ts-expect-error update types
     deserializer: (payload) => {
-      console.error('deserializer', payload);
+      // console.error('deserializer', payload);
       return {
         ...payload,
         policy_id: [payload.policy_id],
@@ -115,10 +113,12 @@ const ScheduledQueryFormComponent = ({ defaultValue, editMode = false }) => {
       };
     },
     serializer: (payload) => {
-      console.error('serializer', payload);
+      // console.error('serializer', payload);
       return {
         ...payload,
+        // @ts-expect-error update types
         policy_id: payload.policy_id[0],
+        // @ts-expect-error update types
         namespace: payload.namespace[0],
       };
     },
@@ -133,7 +133,7 @@ const ScheduledQueryFormComponent = ({ defaultValue, editMode = false }) => {
         package: {
           name: 'osquery_manager',
           title: 'Osquery Manager',
-          version: '0.1.4',
+          version: '0.1.0',
         },
         inputs: [
           {

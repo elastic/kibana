@@ -11,6 +11,7 @@ import { EuiButton, EuiButtonEmpty, EuiSpacer, EuiHorizontalRule } from '@elasti
 import uuid from 'uuid';
 import React, { useMemo } from 'react';
 
+import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import {
   UseField,
   useForm,

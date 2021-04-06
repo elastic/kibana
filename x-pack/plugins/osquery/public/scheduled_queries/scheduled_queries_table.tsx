@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+/* eslint-disable react/display-name */
+
 import { find, uniq, map } from 'lodash/fp';
 import { EuiInMemoryTable, EuiLink } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useQueries } from 'react-query';
 
 import { agentPolicyRouteService } from '../../../fleet/common';
@@ -20,6 +22,7 @@ const ScheduledQueryNameComponent = ({ id, name }: { id: string; name: string })
 
 const ScheduledQueryName = React.memo(ScheduledQueryNameComponent);
 
+// @ts-expect-error update types
 const renderName = (_, item) => <ScheduledQueryName id={item.id} name={item.name} />;
 
 const ScheduledQueriesTableComponent = () => {
@@ -51,7 +54,10 @@ const ScheduledQueriesTableComponent = () => {
 
       return (
         <EuiLink href={getUrlForApp('fleet', { path: `#/policies/${policyId}` })} target="_blank">
-          {policyDetails?.data?.item?.name ?? policyId}
+          {
+            // @ts-expect-error update types
+            policyDetails?.data?.item?.name ?? policyId
+          }
         </EuiLink>
       );
     },
@@ -75,15 +81,15 @@ const ScheduledQueriesTableComponent = () => {
       {
         field: 'inputs[0].streams',
         name: '# queries',
+        // @ts-expect-error update types
         render: (streams) => <>{streams.length}</>,
       },
       {
         field: 'enabled',
         name: 'Active',
         sortable: true,
-        render: (enabled, item) => {
-          return <>{item.enabled ? 'True' : 'False'}</>;
-        },
+        // @ts-expect-error update types
+        render: (enabled, item) => <>{item.enabled ? 'True' : 'False'}</>,
       },
     ],
     [renderAgentPolicy]
@@ -101,6 +107,7 @@ const ScheduledQueriesTableComponent = () => {
 
   return (
     <EuiInMemoryTable
+      // eslint-disable-next-line react-perf/jsx-no-new-array-as-prop
       items={data?.items ?? []}
       columns={columns}
       pagination={true}

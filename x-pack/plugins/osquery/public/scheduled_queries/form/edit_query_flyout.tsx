@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/jsx-no-bind */
-
-/* eslint-disable react-perf/jsx-no-new-function-as-prop */
-
-import { produce } from 'immer';
 import {
   EuiFlyout,
   EuiTitle,
@@ -25,39 +20,44 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 
-import { OSQUERY_INTEGRATION_NAME } from '../../../common';
-import { AddPackQueryForm } from '../../packs/common/add_pack_query';
 import { CodeEditorField } from '../../queries/form/code_editor_field';
 
-import {
-  UseField,
-  Form,
-  useForm,
-  getUseField,
-  Field,
-  FIELD_TYPES,
-  useFormData,
-} from '../../shared_imports';
+import { Form, useForm, getUseField, Field, FIELD_TYPES } from '../../shared_imports';
 
 const FORM_ID = 'addQueryFlyoutForm';
 
 const CommonUseField = getUseField({ component: Field });
 
-export const EditQueryFlyout = ({ defaultValue, onSave, onClose }) => {
+interface EditQueryFlyoutProps {
+  defaultValue: Record<string, unknown>;
+  onSave: (payload: FormData) => void;
+  onClose: () => void;
+}
+
+export const EditQueryFlyout: React.FC<EditQueryFlyoutProps> = ({
+  defaultValue,
+  onSave,
+  onClose,
+}) => {
   const { form } = useForm({
     id: FORM_ID,
+    // @ts-expect-error update types
     onSubmit: (payload, isValid) => {
-      console.error('aaa', payload);
       if (isValid) {
+        // @ts-expect-error update types
         onSave(payload);
         onClose();
       }
+      return;
     },
     defaultValue,
     deserializer: (payload) => {
       return {
+        // @ts-expect-error update types
         id: payload.vars.id.value,
+        // @ts-expect-error update types
         query: payload.vars.query.value,
+        // @ts-expect-error update types
         interval: payload.vars.interval.value,
       };
     },

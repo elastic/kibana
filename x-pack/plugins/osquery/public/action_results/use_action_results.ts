@@ -57,8 +57,6 @@ export const useActionResults = ({
 }: UseActionResults) => {
   const { data } = useKibana().services;
 
-  console.error('aaa', agentIds);
-
   return useQuery(
     ['actionResults', { actionId }],
     async () => {
@@ -89,10 +87,10 @@ export const useActionResults = ({
 
       const cachedData = queryClient.getQueryData(['actionResults', { actionId }]);
 
-      console.error('cachedData', cachedData);
-
+      // @ts-expect-error update types
       const previousEdges = cachedData?.edges.length
-        ? cachedData?.edges
+        ? // @ts-expect-error update types
+          cachedData?.edges
         : agentIds?.map((agentId) => ({ fields: { agent_id: [agentId] } })) ?? [];
 
       return {
@@ -114,6 +112,7 @@ export const useActionResults = ({
         aggregations: {
           totalResponded: 0,
           successful: 0,
+          // @ts-expect-error update types
           pending: agentIds?.length ?? 0,
           failed: 0,
         },

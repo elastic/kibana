@@ -5,17 +5,8 @@
  * 2.0.
  */
 
-import { isEmpty, map } from 'lodash';
-import { produce } from 'immer';
-import {
-  EuiFlexGroup,
-  EuiLink,
-  EuiFormRow,
-  EuiFlexItem,
-  EuiFilePicker,
-  EuiSpacer,
-} from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import { EuiLink, EuiFormRow, EuiFilePicker, EuiSpacer } from '@elastic/eui';
+import React, { useCallback } from 'react';
 
 const ExamplePackLink = React.memo(() => (
   <EuiLink href="https://github.com/osquery/osquery/tree/master/packs" target="_blank">
@@ -29,18 +20,15 @@ ExamplePackLink.displayName = 'ExamplePackLink';
  * Exports Osquery-specific package policy instructions
  * for use in the Fleet app create / edit package policy
  */
+// @ts-expect-error update types
 export const OsqueryPackUploader = React.memo(({ onChange }) => {
-  const [files, setFiles] = useState({});
-
   // @ts-expect-error update types
   let fileReader;
 
-  // @ts-expect-error update types
-  const handleFileRead = (e) => {
+  const handleFileRead = () => {
     // @ts-expect-error update types
     const content = fileReader.result;
 
-    // @ts-expect-error update types
     let queriesJSON;
 
     try {
@@ -66,7 +54,6 @@ export const OsqueryPackUploader = React.memo(({ onChange }) => {
   const handleInputChange = useCallback(
     (inputFiles) => {
       handleFileChosen(inputFiles[0]);
-      setFiles(inputFiles);
     },
     [handleFileChosen]
   );

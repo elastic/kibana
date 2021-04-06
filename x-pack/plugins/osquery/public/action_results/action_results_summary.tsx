@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -101,14 +102,16 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
       if (!logsResults) return '-';
       const agentId = item.fields.agent_id[0];
 
-      console.error(
-        'agentId',
-        agentId,
-        logsResults?.rawResponse?.aggregations?.count_by_agent_id?.buckets
-      );
+      // console.error(
+      //   'agentId',
+      //   agentId,
+      //   logsResults?.rawResponse?.aggregations?.count_by_agent_id?.buckets
+      // );
 
       return (
+        // @ts-expect-error update types
         logsResults?.rawResponse?.aggregations?.count_by_agent_id?.buckets?.find(
+          // @ts-expect-error update types
           (bucket) => bucket.key === agentId
         )?.doc_count ?? '-'
       );
@@ -122,9 +125,10 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
         field: 'fields.completed_at[0]',
         name: 'Status',
         sortable: true,
+        // @ts-expect-error update types
         // eslint-disable-next-line react/display-name
         render: (value, item) => {
-          console.error('item', item);
+          // console.error('item', item);
           if (!value) return 'pending';
           if (item.fields['error.keyword']) return 'error';
           return <>{'success'}</>;
@@ -158,12 +162,12 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     [totalCount, pageIndex, pageSize]
   );
 
-  const onTableChange = useCallback(({ page = {} }) => {
-    const { index, size } = page;
+  // const onTableChange = useCallback(({ page = {} }) => {
+  //   const { index, size } = page;
 
-    setPageIndex(index);
-    setPageSize(size);
-  }, []);
+  //   setPageIndex(index);
+  //   setPageSize(size);
+  // }, []);
 
   return (
     <>

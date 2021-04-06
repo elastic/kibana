@@ -7,6 +7,7 @@
 
 import uuid from 'uuid';
 import moment from 'moment';
+import { find } from 'lodash/fp';
 import { schema } from '@kbn/config-schema';
 
 import { IRouter } from '../../../../../../src/core/server';

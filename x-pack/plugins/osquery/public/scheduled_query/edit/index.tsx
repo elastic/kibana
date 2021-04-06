@@ -34,7 +34,6 @@ const EditScheduledQueryPageComponent = () => {
     return (
       <EditScheduledQueryForm
         data={data}
-        // @ts-expect-error update types
         agentPolicies={agentPolicies?.items}
         // @ts-expect-error update types
         handleSubmit={updateScheduledQueryMutation.mutate}

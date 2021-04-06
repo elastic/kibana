@@ -27,7 +27,8 @@ export const ScheduledQueryQueriesTable: React.FC<ScheduledQueryQueriesTableProp
     (item) => (
       <EuiButtonIcon
         color="danger"
-        // eslint-disable-next-line react/jsx-no-bind
+        // @ts-expect-error update types
+        // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
         onClick={() => onDeleteClick(item)}
         iconType="trash"
         aria-label={`Delete ${item.vars.id.value}`}
@@ -40,7 +41,8 @@ export const ScheduledQueryQueriesTable: React.FC<ScheduledQueryQueriesTableProp
     (item) => (
       <EuiButtonIcon
         color="primary"
-        // eslint-disable-next-line react/jsx-no-bind
+        // @ts-expect-error update types
+        // eslint-disable-next-line react/jsx-no-bind, react-perf/jsx-no-new-function-as-prop
         onClick={() => onEditClick(item)}
         iconType="pencil"
         aria-label={`Edit ${item.vars.id.value}`}
@@ -92,6 +94,7 @@ export const ScheduledQueryQueriesTable: React.FC<ScheduledQueryQueriesTableProp
 
   return (
     <EuiInMemoryTable
+      // @ts-expect-error update types
       items={data.inputs[0].streams}
       itemId="vars.id.value"
       isExpandable={true}

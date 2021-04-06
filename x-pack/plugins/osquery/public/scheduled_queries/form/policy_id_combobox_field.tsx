@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name, @typescript-eslint/no-non-null-assertion */
+/* eslint-disable  @typescript-eslint/no-non-null-assertion */
 
 import { mapKeys } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -30,28 +30,20 @@ const AgentPolicyDescriptionColumn = styled(EuiFlexItem)`
   overflow: hidden;
 `;
 
-interface PropsRepositoryCombobox {
+interface PolicyIdComboBoxFieldProps {
   field: FieldHook<string[]>;
-  isLoading: boolean;
-  repos: string[];
-  noSuggestions: boolean;
-  globalRepository: string;
 }
 
-export const PolicyIdComboBoxField = ({
-  field,
-  isLoading,
-  repos,
-  noSuggestions,
-}: PropsRepositoryCombobox) => {
+export const PolicyIdComboBoxField = ({ field }: PolicyIdComboBoxFieldProps) => {
+  const { value } = field;
+
   const { data: agentPolicies = [] } = useAgentPolicies();
 
   const agentPoliciesById = mapKeys(agentPolicies, 'id');
 
-  const { setValue, value } = field;
-
   const agentPolicyOptions = useMemo(
     () =>
+      // @ts-expect-error update types
       agentPolicies.map((agentPolicy) => ({
         key: agentPolicy.id,
         label: agentPolicy.id,
@@ -75,7 +67,7 @@ export const PolicyIdComboBoxField = ({
         <EuiFlexItem grow={2} className="eui-textRight">
           <EuiTextColor color="subdued">
             <FormattedMessage
-              id="xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyAgentsCountText"
+              id="xpack.osquery.createScheduledQuery.agentPolicyAgentsCountText"
               defaultMessage="{count, plural, one {# agent} other {# agents}} enrolled"
               // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
               values={{
