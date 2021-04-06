@@ -1,5 +1,5 @@
 {
-  "id": "host_hist",
+  "id": "host_met",
   "description": "[host.name metrics] grouped by @timestamp and aggregated on host.name",
   "pivot": {
     "group_by": {

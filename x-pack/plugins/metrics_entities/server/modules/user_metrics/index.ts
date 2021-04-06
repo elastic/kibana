@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import userHistogram from './user_histogram.json';
-import userHistogramMapping from './user_histogram_mapping.json';
+import userMetrics from './user_metrics.json';
+import userMetricsMapping from './user_metrics_mapping.json';
 
-export { userHistogram, userHistogramMapping };
+export { userMetrics, userMetricsMapping };

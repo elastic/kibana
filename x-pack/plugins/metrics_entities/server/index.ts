@@ -8,13 +8,13 @@
 
 import { PluginInitializerContext } from '../../../../src/core/server';
 
-import { MetricsSummaryPlugin } from './plugin';
+import { MetricsEntitiesPlugin } from './plugin';
 
 //  This exports static code and TypeScript types,
 //  as well as, Kibana Platform `plugin()` initializer.
 
-export const plugin = (initializerContext: PluginInitializerContext): MetricsSummaryPlugin => {
-  return new MetricsSummaryPlugin(initializerContext);
+export const plugin = (initializerContext: PluginInitializerContext): MetricsEntitiesPlugin => {
+  return new MetricsEntitiesPlugin(initializerContext);
 };
 
-export { MetricsSummaryPluginSetup, MetricsSummaryPluginStart } from './types';
+export { MetricsEntitiesPluginSetup, MetricsEntitiesPluginStart } from './types';

@@ -17,27 +17,27 @@ import {
 import {
   ContextProvider,
   ContextProviderReturn,
-  MetricsSummaryPluginSetup,
-  MetricsSummaryPluginStart,
-  MetricsSummaryRequestHandlerContext,
+  MetricsEntitiesPluginSetup,
+  MetricsEntitiesPluginStart,
+  MetricsEntitiesRequestHandlerContext,
 } from './types';
 import { getTransforms, postTransforms } from './routes';
-import { MetricsSummaryClient } from './services/metrics_entities_client';
+import { MetricsEntitiesClient } from './services/metrics_entities_client';
 import { deleteTransforms } from './routes/delete_transforms';
 
-export class MetricsSummaryPlugin
-  implements Plugin<MetricsSummaryPluginSetup, MetricsSummaryPluginStart> {
+export class MetricsEntitiesPlugin
+  implements Plugin<MetricsEntitiesPluginSetup, MetricsEntitiesPluginStart> {
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup): MetricsSummaryPluginSetup {
+  public setup(core: CoreSetup): MetricsEntitiesPluginSetup {
     const router = core.http.createRouter();
 
-    core.http.registerRouteHandlerContext<MetricsSummaryRequestHandlerContext, 'metricsSummary'>(
-      'metricsSummary',
+    core.http.registerRouteHandlerContext<MetricsEntitiesRequestHandlerContext, 'metricsEntities'>(
+      'metricsEntities',
       this.createRouteHandlerContext()
     );
 
@@ -48,8 +48,8 @@ export class MetricsSummaryPlugin
     deleteTransforms(router);
 
     return {
-      getMetricsSummaryClient: (esClient): MetricsSummaryClient =>
-        new MetricsSummaryClient({
+      getMetricsEntitiesClient: (esClient): MetricsEntitiesClient =>
+        new MetricsEntitiesClient({
           esClient,
           logger: this.logger,
         }),
@@ -75,8 +75,8 @@ export class MetricsSummaryPlugin
         },
       } = context;
       return {
-        getMetricsSummaryClient: (): MetricsSummaryClient =>
-          new MetricsSummaryClient({
+        getMetricsEntitiesClient: (): MetricsEntitiesClient =>
+          new MetricsEntitiesClient({
             esClient,
             logger: this.logger,
           }),

@@ -19,7 +19,7 @@ import {
 import { postTransforms } from './post_transforms';
 import { deleteTransforms } from './delete_transforms';
 
-export class MetricsSummaryClient {
+export class MetricsEntitiesClient {
   private readonly esClient: ElasticsearchClient;
   private readonly logger: Logger;
   constructor({ esClient, logger }: ConstructorOptions) {

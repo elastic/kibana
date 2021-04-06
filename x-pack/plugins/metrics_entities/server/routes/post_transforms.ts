@@ -9,10 +9,10 @@
 import { schema } from '@kbn/config-schema';
 
 import { IRouter } from '../../../../../src/core/server';
-import { METRICS_SUMMARY_TRANSFORMS } from '../../common/constants';
+import { METRICS_ENTITIES_TRANSFORMS } from '../../common/constants';
 import { ModuleNames } from '../modules';
 
-import { getMetricsSummaryClient } from './utils/get_metrics_entities_client';
+import { getMetricsEntitiesClient } from './utils/get_metrics_entities_client';
 
 /**
  * Creates transforms.
@@ -21,7 +21,7 @@ import { getMetricsSummaryClient } from './utils/get_metrics_entities_client';
 export const postTransforms = (router: IRouter): void => {
   router.post(
     {
-      path: METRICS_SUMMARY_TRANSFORMS,
+      path: METRICS_ENTITIES_TRANSFORMS,
       // TODO: Add the namespace and the key and the type
       validate: {
         // TODO: Add the validation instead of allowing handler to have access to raw non-validated in runtime
@@ -74,7 +74,7 @@ export const postTransforms = (router: IRouter): void => {
           };
         };
       };
-      const metrics = getMetricsSummaryClient(context);
+      const metrics = getMetricsEntitiesClient(context);
       await metrics.postTransforms({
         autoStart,
         docsPerSecond,

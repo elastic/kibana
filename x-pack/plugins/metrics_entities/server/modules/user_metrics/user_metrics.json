@@ -1,5 +1,5 @@
 {
-  "id": "user_hist",
+  "id": "user_met",
   "description": "[event.category authentication metrics] grouped by @timestamp and aggregated on success, failure, and unknown",
   "source": {
     "query": {

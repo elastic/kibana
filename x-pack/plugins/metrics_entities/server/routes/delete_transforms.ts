@@ -9,10 +9,10 @@
 import { schema } from '@kbn/config-schema';
 
 import { IRouter } from '../../../../../src/core/server';
-import { METRICS_SUMMARY_TRANSFORMS } from '../../common/constants';
+import { METRICS_ENTITIES_TRANSFORMS } from '../../common/constants';
 import { ModuleNames } from '../modules';
 
-import { getMetricsSummaryClient } from './utils/get_metrics_entities_client';
+import { getMetricsEntitiesClient } from './utils/get_metrics_entities_client';
 
 /**
  * Deletes transforms.
@@ -23,7 +23,7 @@ import { getMetricsSummaryClient } from './utils/get_metrics_entities_client';
 export const deleteTransforms = (router: IRouter): void => {
   router.post(
     {
-      path: `${METRICS_SUMMARY_TRANSFORMS}/_delete`,
+      path: `${METRICS_ENTITIES_TRANSFORMS}/_delete`,
       // TODO: Add the namespace
       validate: {
         // TODO: Add the validation instead of allowing handler to have access to raw non-validated in runtime
@@ -41,7 +41,7 @@ export const deleteTransforms = (router: IRouter): void => {
         prefix: string;
         suffix: string;
       };
-      const metrics = getMetricsSummaryClient(context);
+      const metrics = getMetricsEntitiesClient(context);
       await metrics.deleteTransforms({ modules, prefix, suffix });
 
       return response.custom({

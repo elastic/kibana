@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { hostHistogram, hostHistogramMapping } from './host_metrics';
-import { userHistogram, userHistogramMapping } from './user_metrics';
-import { ipHistogram, ipHistogramMapping } from './network_metrics';
+import { hostMetrics, hostMetricsMapping } from './host_metrics';
+import { userMetrics, userMetricsMapping } from './user_metrics';
+import { ipMetrics, ipMetricsMapping } from './network_metrics';
 import { hostEntities, hostEntitiesMapping } from './host_entities';
 import {
   destinationCountryIsoCodeEntities,
@@ -26,12 +26,12 @@ import { userEntities, userEntitiesMapping } from './user_entities';
  * These module names will map 1 to 1 to the REST interface.
  */
 export enum ModuleNames {
-  hostMetrics = 'host_metrics',
+  hostSummaryMetrics = 'host_metrics',
   hostSummaryEntities = 'host_entities',
   networkSummaryEntities = 'network_entities',
-  networkMetrics = 'network_metrics',
+  networkSummaryMetrics = 'network_metrics',
   userSummaryEntities = 'user_entities',
-  userMetrics = 'user_metrics',
+  userSummaryMetrics = 'user_metrics',
 }
 
 /**
@@ -39,7 +39,7 @@ export enum ModuleNames {
  * key values.
  */
 export const installableTransforms: Record<ModuleNames, Transforms[]> = {
-  [ModuleNames.hostMetrics]: [hostHistogram],
+  [ModuleNames.hostSummaryMetrics]: [hostMetrics],
   [ModuleNames.hostSummaryEntities]: [hostEntities],
   [ModuleNames.networkSummaryEntities]: [
     destinationIpEntities,
@@ -47,9 +47,9 @@ export const installableTransforms: Record<ModuleNames, Transforms[]> = {
     destinationCountryIsoCodeEntities,
     sourceCountryIsoCodeEntities,
   ],
-  [ModuleNames.networkMetrics]: [ipHistogram],
+  [ModuleNames.networkSummaryMetrics]: [ipMetrics],
   [ModuleNames.userSummaryEntities]: [userEntities],
-  [ModuleNames.userMetrics]: [userHistogram],
+  [ModuleNames.userSummaryMetrics]: [userMetrics],
 };
 
 /**
@@ -58,7 +58,7 @@ export const installableTransforms: Record<ModuleNames, Transforms[]> = {
  * that will be ok as we will not installs the mapping twice.
  */
 export const installableMappings: Record<ModuleNames, Mappings[]> = {
-  [ModuleNames.hostMetrics]: [hostHistogramMapping],
+  [ModuleNames.hostSummaryMetrics]: [hostMetricsMapping],
   [ModuleNames.hostSummaryEntities]: [hostEntitiesMapping],
   [ModuleNames.networkSummaryEntities]: [
     sourceIpEntitiesMapping,
@@ -66,7 +66,7 @@ export const installableMappings: Record<ModuleNames, Mappings[]> = {
     destinationCountryIsoCodeEntitiesMapping,
     sourceCountryIsoCodeEntitiesMapping,
   ],
-  [ModuleNames.networkMetrics]: [ipHistogramMapping],
+  [ModuleNames.networkSummaryMetrics]: [ipMetricsMapping],
   [ModuleNames.userSummaryEntities]: [userEntitiesMapping],
-  [ModuleNames.userMetrics]: [userHistogramMapping],
+  [ModuleNames.userSummaryMetrics]: [userMetricsMapping],
 };

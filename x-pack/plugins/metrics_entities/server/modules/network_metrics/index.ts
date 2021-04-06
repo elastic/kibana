@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import ipHistogram from './ip_histogram.json';
-import ipHistogramMapping from './ip_histogram_mapping.json';
+import ipMetrics from './ip_metrics.json';
+import ipMetricsMapping from './ip_metrics_mapping.json';
 
-export { ipHistogram, ipHistogramMapping };
+export { ipMetrics, ipMetricsMapping };

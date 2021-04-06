@@ -7,16 +7,16 @@
  */
 
 import { ErrorWithStatusCode } from '../../error_with_status_code';
-import { MetricsSummaryClient } from '../../services/metrics_entities_client';
-import type { MetricsSummaryRequestHandlerContext } from '../../types';
+import { MetricsEntitiesClient } from '../../services/metrics_entities_client';
+import type { MetricsEntitiesRequestHandlerContext } from '../../types';
 
-export const getMetricsSummaryClient = (
-  context: MetricsSummaryRequestHandlerContext
-): MetricsSummaryClient => {
-  const metricsSummary = context.metricsSummary?.getMetricsSummaryClient();
-  if (metricsSummary == null) {
-    throw new ErrorWithStatusCode('Metrics Summary is not found as a plugin', 404);
+export const getMetricsEntitiesClient = (
+  context: MetricsEntitiesRequestHandlerContext
+): MetricsEntitiesClient => {
+  const metricsEntities = context.metricsEntities?.getMetricsEntitiesClient();
+  if (metricsEntities == null) {
+    throw new ErrorWithStatusCode('Metrics Entities is not found as a plugin', 404);
   } else {
-    return metricsSummary;
+    return metricsEntities;
   }
 };

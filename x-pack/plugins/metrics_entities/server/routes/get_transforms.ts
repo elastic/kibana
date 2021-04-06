@@ -7,9 +7,9 @@
  */
 
 import { IRouter } from '../../../../../src/core/server';
-import { METRICS_SUMMARY_TRANSFORMS } from '../../common/constants';
+import { METRICS_ENTITIES_TRANSFORMS } from '../../common/constants';
 
-import { getMetricsSummaryClient } from './utils/get_metrics_entities_client';
+import { getMetricsEntitiesClient } from './utils/get_metrics_entities_client';
 
 /**
  * Returns a transform given a parameter of:
@@ -24,13 +24,13 @@ import { getMetricsSummaryClient } from './utils/get_metrics_entities_client';
 export const getTransforms = (router: IRouter): void => {
   router.get(
     {
-      path: METRICS_SUMMARY_TRANSFORMS,
+      path: METRICS_ENTITIES_TRANSFORMS,
       // TODO: Add the validation instead of false
       // TODO: Add the namespace and the key and the type
       validate: false,
     },
     async (context, _, response) => {
-      const metrics = getMetricsSummaryClient(context);
+      const metrics = getMetricsEntitiesClient(context);
       const summaries = await metrics.getTransforms();
       return response.ok({
         body: {

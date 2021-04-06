@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import hostHistogram from './host_histogram.json';
-import hostHistogramMapping from './host_histogram_mapping.json';
+import hostMetrics from './host_metrics.json';
+import hostMetricsMapping from './host_metrics_mapping.json';
 
-export { hostHistogram, hostHistogramMapping };
+export { hostMetrics, hostMetricsMapping };

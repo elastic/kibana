@@ -9,12 +9,12 @@
 /**
  * Base route
  */
-export const METRICS_SUMMARY_URL = '/api/metrics_entities';
+export const METRICS_ENTITIES_URL = '/api/metrics_entities';
 
 /**
  * Transforms route
  */
-export const METRICS_SUMMARY_TRANSFORMS = `${METRICS_SUMMARY_URL}/transforms`;
+export const METRICS_ENTITIES_TRANSFORMS = `${METRICS_ENTITIES_URL}/transforms`;
 
 /**
  * Global prefix for all the transform jobs

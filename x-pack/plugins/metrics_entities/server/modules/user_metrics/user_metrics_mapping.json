@@ -1,7 +1,7 @@
 {
   "mappings": {
     "_meta": {
-      "index": "user_hist"
+      "index": "user_met"
     },
     "dynamic": "strict",
     "properties": {

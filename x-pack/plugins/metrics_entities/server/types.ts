@@ -8,30 +8,30 @@
 
 import { ElasticsearchClient, IContextProvider, RequestHandlerContext } from 'kibana/server';
 
-import { MetricsSummaryClient } from './services/metrics_entities_client';
+import { MetricsEntitiesClient } from './services/metrics_entities_client';
 
-export type GetMetricsSummaryClientType = (esClient: ElasticsearchClient) => MetricsSummaryClient;
+export type GetMetricsEntitiesClientType = (esClient: ElasticsearchClient) => MetricsEntitiesClient;
 
-export interface MetricsSummaryPluginSetup {
-  getMetricsSummaryClient: GetMetricsSummaryClientType;
+export interface MetricsEntitiesPluginSetup {
+  getMetricsEntitiesClient: GetMetricsEntitiesClientType;
 }
 
-export type MetricsSummaryPluginStart = void;
+export type MetricsEntitiesPluginStart = void;
 
 export type ContextProvider = IContextProvider<
-  MetricsSummaryRequestHandlerContext,
-  'metricsSummary'
+  MetricsEntitiesRequestHandlerContext,
+  'metricsEntities'
 >;
 
-export interface MetricsSummaryApiRequestHandlerContext {
-  getMetricsSummaryClient: () => MetricsSummaryClient;
+export interface MetricsEntitiesApiRequestHandlerContext {
+  getMetricsEntitiesClient: () => MetricsEntitiesClient;
 }
 
-export interface MetricsSummaryRequestHandlerContext extends RequestHandlerContext {
-  metricsSummary?: MetricsSummaryApiRequestHandlerContext;
+export interface MetricsEntitiesRequestHandlerContext extends RequestHandlerContext {
+  metricsEntities?: MetricsEntitiesApiRequestHandlerContext;
 }
 
 /**
  * @internal
  */
-export type ContextProviderReturn = Promise<MetricsSummaryApiRequestHandlerContext>;
+export type ContextProviderReturn = Promise<MetricsEntitiesApiRequestHandlerContext>;
