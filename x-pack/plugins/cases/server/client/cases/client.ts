@@ -57,6 +57,7 @@ export const createCasesSubClient = (
     userActionService,
     logger,
     authorization,
+    auditLogger,
   } = args;
 
   const casesSubClient: CasesSubClient = {
@@ -70,6 +71,7 @@ export const createCasesSubClient = (
         theCase,
         logger,
         auth: authorization,
+        auditLogger,
       }),
     find: (options: CasesFindRequest) =>
       find({
@@ -78,6 +80,7 @@ export const createCasesSubClient = (
         logger,
         auth: authorization,
         options,
+        auditLogger,
       }),
     get: (params: CaseGet) =>
       get({

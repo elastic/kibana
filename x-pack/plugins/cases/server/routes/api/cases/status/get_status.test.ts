@@ -16,6 +16,7 @@ import {
 } from '../../__fixtures__';
 import { initGetCasesStatusApi } from './get_status';
 import { CASE_STATUS_URL } from '../../../../../common/constants';
+import { esKuery } from 'src/plugins/data/server';
 import { CaseType } from '../../../../../common/api';
 
 describe('GET status', () => {
@@ -47,17 +48,23 @@ describe('GET status', () => {
     const response = await routeHandler(context, request, kibanaResponseFactory);
     expect(context.core.savedObjects.client.find).toHaveBeenNthCalledWith(1, {
       ...findArgs,
-      filter: `((cases.attributes.status: open AND cases.attributes.type: individual) OR cases.attributes.type: ${CaseType.collection})`,
+      filter: esKuery.fromKueryExpression(
+        `((cases.attributes.status: open AND cases.attributes.type: individual) OR cases.attributes.type: ${CaseType.collection})`
+      ),
     });
 
     expect(context.core.savedObjects.client.find).toHaveBeenNthCalledWith(2, {
       ...findArgs,
-      filter: `((cases.attributes.status: in-progress AND cases.attributes.type: individual) OR cases.attributes.type: ${CaseType.collection})`,
+      filter: esKuery.fromKueryExpression(
+        `((cases.attributes.status: in-progress AND cases.attributes.type: individual) OR cases.attributes.type: ${CaseType.collection})`
+      ),
     });
 
     expect(context.core.savedObjects.client.find).toHaveBeenNthCalledWith(3, {
       ...findArgs,
-      filter: `((cases.attributes.status: closed AND cases.attributes.type: individual) OR cases.attributes.type: ${CaseType.collection})`,
+      filter: esKuery.fromKueryExpression(
+        `((cases.attributes.status: closed AND cases.attributes.type: individual) OR cases.attributes.type: ${CaseType.collection})`
+      ),
     });
 
     expect(response.payload).toEqual({

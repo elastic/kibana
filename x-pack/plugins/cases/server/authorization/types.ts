@@ -6,20 +6,52 @@
  */
 
 import { KibanaRequest } from 'kibana/server';
+import { KueryNode } from 'src/plugins/data/common';
+import { EventType } from '../../../security/server';
 import { Space } from '../../../spaces/server';
+
+/**
+ * The tenses for describing the action performed by a API route
+ */
+export interface Verbs {
+  present: string;
+  progressive: string;
+  past: string;
+}
 
 export type GetSpaceFn = (request: KibanaRequest) => Promise<Space | undefined>;
 
 // TODO: we need to have an operation per entity route so I think we need to create a bunch like
 //  getCase, getComment, getSubCase etc for each, need to think of a clever way of creating them for all the routes easily?
 export enum ReadOperations {
-  Get = 'get',
-  Find = 'find',
+  GetCase = 'getCase',
+  FindCases = 'findCases',
 }
 
 // TODO: comments
 export enum WriteOperations {
-  Create = 'create',
-  Delete = 'delete',
-  Update = 'update',
+  CreateCase = 'createCase',
+  DeleteCase = 'deleteCase',
+  UpdateCase = 'updateCase',
+}
+
+/**
+ * Defines the structure for a case API route.
+ */
+export interface OperationDetails {
+  type: EventType;
+  name: ReadOperations | WriteOperations;
+  action: string;
+  verbs: Verbs;
+  docType: string;
+  savedObjectType: string;
+}
+
+/**
+ * Defines the helper methods and necessary information for authorizing the find API's request.
+ */
+export interface AuthorizationFilter {
+  filter?: KueryNode;
+  ensureSavedObjectIsAuthorized: (owner: string) => void;
+  logSuccessfulAuthorization: () => void;
 }

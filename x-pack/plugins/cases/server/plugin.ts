@@ -62,7 +62,6 @@ export class CasePlugin {
   private attachmentService?: AttachmentService;
   private clientFactory: CasesClientFactory;
   private securityPluginSetup?: SecurityPluginSetup;
-  private config?: ConfigType;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.log = this.initializerContext.logger.get('plugins', 'cases');
@@ -76,8 +75,6 @@ export class CasePlugin {
       return;
     }
 
-    // save instance variables for the client factor initialization call
-    this.config = config;
     this.securityPluginSetup = plugins.security;
 
     core.savedObjects.registerType(caseCommentSavedObjectType);
@@ -146,8 +143,6 @@ export class CasePlugin {
         return plugins.spaces?.spacesService.getActiveSpace(request);
       },
       featuresPluginStart: plugins.features,
-      // we'll be removing this eventually but let's just default it to false if it wasn't specified explicitly in the config file
-      isAuthEnabled: this.config?.enableAuthorization ?? false,
     });
 
     const getCasesClientWithRequestAndContext = async (

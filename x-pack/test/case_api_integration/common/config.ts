@@ -87,7 +87,6 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...xPackApiIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
           `--xpack.actions.allowedHosts=${JSON.stringify(['localhost', 'some.non.existent.com'])}`,
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
-          '--xpack.cases.enableAuthorization=true',
           '--xpack.eventLog.logEntries=true',
           ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
           // Actions simulators plugin. Needed for testing push to external services.

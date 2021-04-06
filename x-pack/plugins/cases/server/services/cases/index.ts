@@ -105,6 +105,7 @@ interface FindSubCasesStatusStats {
 
 interface PostCaseArgs extends ClientArgs {
   attributes: ESCaseAttributes;
+  id: string;
 }
 
 interface CreateSubCaseArgs extends ClientArgs {
@@ -933,12 +934,10 @@ export class CaseService {
     }
   }
 
-  public async postNewCase({ soClient, attributes }: PostCaseArgs) {
+  public async postNewCase({ soClient, attributes, id }: PostCaseArgs) {
     try {
       this.log.debug(`Attempting to POST a new case`);
-      return await soClient.create<ESCaseAttributes>(CASE_SAVED_OBJECT, {
-        ...attributes,
-      });
+      return await soClient.create<ESCaseAttributes>(CASE_SAVED_OBJECT, attributes, { id });
     } catch (error) {
       this.log.error(`Error on POST a new case: ${error}`);
       throw error;

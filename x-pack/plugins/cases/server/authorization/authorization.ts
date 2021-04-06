@@ -7,11 +7,11 @@
 
 import { KibanaRequest } from 'kibana/server';
 import Boom from '@hapi/boom';
-import { KueryNode } from '../../../../../src/plugins/data/server';
 import { SecurityPluginStart } from '../../../security/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
-import { GetSpaceFn, ReadOperations, WriteOperations } from './types';
+import { AuthorizationFilter, GetSpaceFn } from './types';
 import { getOwnersFilter } from './utils';
+import { AuthorizationAuditLogger, OperationDetails, Operations } from '.';
 
 /**
  * This class handles ensuring that the user making a request has the correct permissions
@@ -21,25 +21,23 @@ export class Authorization {
   private readonly request: KibanaRequest;
   private readonly securityAuth: SecurityPluginStart['authz'] | undefined;
   private readonly featureCaseOwners: Set<string>;
-  private readonly isAuthEnabled: boolean;
-  // TODO: create this
-  // private readonly auditLogger: AuthorizationAuditLogger;
+  private readonly auditLogger: AuthorizationAuditLogger;
 
   private constructor({
     request,
     securityAuth,
     caseOwners,
-    isAuthEnabled,
+    auditLogger,
   }: {
     request: KibanaRequest;
     securityAuth?: SecurityPluginStart['authz'];
     caseOwners: Set<string>;
-    isAuthEnabled: boolean;
+    auditLogger: AuthorizationAuditLogger;
   }) {
     this.request = request;
     this.securityAuth = securityAuth;
     this.featureCaseOwners = caseOwners;
-    this.isAuthEnabled = isAuthEnabled;
+    this.auditLogger = auditLogger;
   }
 
   /**
@@ -50,13 +48,13 @@ export class Authorization {
     securityAuth,
     getSpace,
     features,
-    isAuthEnabled,
+    auditLogger,
   }: {
     request: KibanaRequest;
     securityAuth?: SecurityPluginStart['authz'];
     getSpace: GetSpaceFn;
     features: FeaturesPluginStart;
-    isAuthEnabled: boolean;
+    auditLogger: AuthorizationAuditLogger;
   }): Promise<Authorization> {
     // Since we need to do async operations, this static method handles that before creating the Auth class
     let caseOwners: Set<string>;
@@ -74,34 +72,26 @@ export class Authorization {
       caseOwners = new Set<string>();
     }
 
-    return new Authorization({ request, securityAuth, caseOwners, isAuthEnabled });
+    return new Authorization({ request, securityAuth, caseOwners, auditLogger });
   }
 
   private shouldCheckAuthorization(): boolean {
     return this.securityAuth?.mode?.useRbacForRequest(this.request) ?? false;
   }
 
-  public async ensureAuthorized(owner: string, operation: ReadOperations | WriteOperations) {
-    // TODO: remove
-    if (!this.isAuthEnabled) {
-      return;
-    }
-
+  public async ensureAuthorized(owner: string, operation: OperationDetails) {
     const { securityAuth } = this;
     const isOwnerAvailable = this.featureCaseOwners.has(owner);
 
-    // TODO: throw if the request is not authorized
     if (securityAuth && this.shouldCheckAuthorization()) {
-      // TODO: implement ensure logic
-      const requiredPrivileges: string[] = [securityAuth.actions.cases.get(owner, operation)];
+      const requiredPrivileges: string[] = [securityAuth.actions.cases.get(owner, operation.name)];
 
       const checkPrivileges = securityAuth.checkPrivilegesDynamicallyWithRequest(this.request);
-      const { hasAllRequested, username, privileges } = await checkPrivileges({
+      const { hasAllRequested, username } = await checkPrivileges({
         kibana: requiredPrivileges,
       });
 
       if (!isOwnerAvailable) {
-        // TODO: throw if any of the owner are not available
         /**
          * Under most circumstances this would have been caught by `checkPrivileges` as
          * a user can't have Privileges to an unknown owner, but super users
@@ -109,67 +99,54 @@ export class Authorization {
          * as Privileged.
          * This check will ensure we don't accidentally let these through
          */
-        // TODO: audit log using `username`
-        throw Boom.forbidden('User does not have permissions for this owner');
+        throw Boom.forbidden(this.auditLogger.failure({ username, owner, operation }));
       }
 
       if (hasAllRequested) {
-        // TODO: user authorized. log success
+        this.auditLogger.success({ username, operation, owner });
       } else {
-        const authorizedPrivileges = privileges.kibana.reduce<string[]>((acc, privilege) => {
-          if (privilege.authorized) {
-            return [...acc, privilege.privilege];
-          }
-          return acc;
-        }, []);
-
-        const unauthorizedPrivilages = requiredPrivileges.filter(
-          (privilege) => !authorizedPrivileges.includes(privilege)
-        );
-
-        // TODO: audit log
-        // TODO: User unauthorized. throw an error. authorizedPrivileges & unauthorizedPrivilages are needed for logging.
-        throw Boom.forbidden('Not authorized for this owner');
+        throw Boom.forbidden(this.auditLogger.failure({ owner, operation, username }));
       }
     } else if (!isOwnerAvailable) {
-      // TODO: throw an error
-      throw Boom.forbidden('Security is disabled but no owner was found');
+      throw Boom.forbidden(this.auditLogger.failure({ owner, operation }));
     }
 
     // else security is disabled so let the operation proceed
   }
 
-  public async getFindAuthorizationFilter(
-    savedObjectType: string
-  ): Promise<{
-    filter?: KueryNode;
-    ensureSavedObjectIsAuthorized: (owner: string) => void;
-  }> {
+  public async getFindAuthorizationFilter(savedObjectType: string): Promise<AuthorizationFilter> {
     const { securityAuth } = this;
+    const operation = Operations.findCases;
     if (securityAuth && this.shouldCheckAuthorization()) {
-      const { authorizedOwners } = await this.getAuthorizedOwners([ReadOperations.Find]);
+      const { username, authorizedOwners } = await this.getAuthorizedOwners([operation]);
 
       if (!authorizedOwners.length) {
-        // TODO: Better error message, log error
-        throw Boom.forbidden('Not authorized for this owner');
+        throw Boom.forbidden(this.auditLogger.failure({ username, operation }));
       }
 
       return {
         filter: getOwnersFilter(savedObjectType, authorizedOwners),
         ensureSavedObjectIsAuthorized: (owner: string) => {
           if (!authorizedOwners.includes(owner)) {
-            // TODO: log error
-            throw Boom.forbidden('Not authorized for this owner');
+            throw Boom.forbidden(this.auditLogger.failure({ username, operation, owner }));
+          }
+        },
+        logSuccessfulAuthorization: () => {
+          if (authorizedOwners.length) {
+            this.auditLogger.bulkSuccess({ username, owners: authorizedOwners, operation });
           }
         },
       };
     }
 
-    return { ensureSavedObjectIsAuthorized: (owner: string) => {} };
+    return {
+      ensureSavedObjectIsAuthorized: (owner: string) => {},
+      logSuccessfulAuthorization: () => {},
+    };
   }
 
   private async getAuthorizedOwners(
-    operations: Array<ReadOperations | WriteOperations>
+    operations: OperationDetails[]
   ): Promise<{
     username?: string;
     hasAllRequested: boolean;
@@ -182,7 +159,7 @@ export class Authorization {
 
       for (const owner of featureCaseOwners) {
         for (const operation of operations) {
-          requiredPrivileges.set(securityAuth.actions.cases.get(owner, operation), [owner]);
+          requiredPrivileges.set(securityAuth.actions.cases.get(owner, operation.name), [owner]);
         }
       }
 

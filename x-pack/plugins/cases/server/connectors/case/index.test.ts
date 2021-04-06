@@ -61,7 +61,6 @@ describe('case connector', () => {
       userActionService,
       featuresPluginStart: featuresPluginMock.createStart(),
       getSpace: async (req: KibanaRequest) => undefined,
-      isAuthEnabled: true,
       securityPluginSetup: securityMock.createSetup(),
       securityPluginStart: securityMock.createStart(),
     });
@@ -1130,7 +1129,6 @@ describe('case connector', () => {
           totalComment: 0,
           totalAlerts: 0,
           version: 'WzksMV0=',
-
           closed_at: null,
           closed_by: null,
           connector: { id: 'none', name: 'none', type: ConnectorTypes.none, fields: null },

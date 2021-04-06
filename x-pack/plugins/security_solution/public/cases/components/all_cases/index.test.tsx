@@ -769,6 +769,7 @@ describe('AllCases', () => {
           },
         },
         id: '1',
+        owner: 'securitySolution',
         status: 'open',
         subCaseIds: [],
         tags: ['coke', 'pepsi'],

@@ -56,6 +56,7 @@ export interface CaseExternalService {
 
 interface BasicCase {
   id: string;
+  owner: string;
   closedAt: string | null;
   closedBy: ElasticUser | null;
   comments: Comment[];

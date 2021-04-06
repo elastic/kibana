@@ -164,12 +164,13 @@ describe('PATCH configuration', () => {
       cases: {
         ...context.cases,
         getCasesClient: async () => {
-          return {
+          return ({
             ...(await context?.cases?.getCasesClient()),
             getMappings: () => {
               throw new Error();
             },
-          } as CasesClient;
+            // This avoids ts errors with overriding getMappings
+          } as unknown) as CasesClient;
         },
       },
     };

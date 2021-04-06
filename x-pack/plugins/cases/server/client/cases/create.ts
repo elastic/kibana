@@ -9,9 +9,14 @@ import Boom from '@hapi/boom';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
-
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { SavedObjectsClientContract, Logger } from 'src/core/server';
+
+import {
+  SavedObjectsClientContract,
+  Logger,
+  SavedObjectsUtils,
+} from '../../../../../../src/core/server';
+
 import { flattenCaseSavedObject, transformNewCase } from '../../routes/api/utils';
 
 import {
@@ -33,8 +38,10 @@ import {
 import { CaseConfigureService, CaseService, CaseUserActionService } from '../../services';
 import { createCaseError } from '../../common/error';
 import { Authorization } from '../../authorization/authorization';
-import { WriteOperations } from '../../authorization/types';
+import { Operations } from '../../authorization';
+import { AuditLogger, EventOutcome } from '../../../../security/server';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
+import { createAuditMsg } from '../../common';
 
 interface CreateCaseArgs {
   caseConfigureService: CaseConfigureService;
@@ -45,6 +52,7 @@ interface CreateCaseArgs {
   theCase: CasePostRequest;
   logger: Logger;
   auth: PublicMethodsOf<Authorization>;
+  auditLogger?: AuditLogger;
 }
 
 /**
@@ -59,6 +67,7 @@ export const create = async ({
   theCase,
   logger,
   auth,
+  auditLogger,
 }: CreateCaseArgs): Promise<CaseResponse> => {
   // default to an individual case if the type is not defined.
   const { type = CaseType.individual, ...nonTypeCaseFields } = theCase;
@@ -79,12 +88,22 @@ export const create = async ({
   );
 
   try {
+    const savedObjectID = SavedObjectsUtils.generateId();
     try {
-      await auth.ensureAuthorized(query.owner, WriteOperations.Create);
+      await auth.ensureAuthorized(query.owner, Operations.createCase);
     } catch (error) {
-      // TODO: log error using audit logger
+      auditLogger?.log(createAuditMsg({ operation: Operations.createCase, error, savedObjectID }));
       throw error;
     }
+
+    // log that we're attempting to create a case
+    auditLogger?.log(
+      createAuditMsg({
+        operation: Operations.createCase,
+        outcome: EventOutcome.UNKNOWN,
+        savedObjectID,
+      })
+    );
 
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const { username, full_name, email } = user;
@@ -102,6 +121,7 @@ export const create = async ({
         email,
         connector: transformCaseConnectorToEsConnector(query.connector ?? caseConfigureConnector),
       }),
+      id: savedObjectID,
     });
 
     await userActionService.bulkCreate({

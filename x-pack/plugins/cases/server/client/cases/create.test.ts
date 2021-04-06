@@ -26,6 +26,11 @@ describe('create', () => {
     const spyOnDate = jest.spyOn(global, 'Date') as jest.SpyInstance<{}, []>;
     spyOnDate.mockImplementation(() => ({
       toISOString: jest.fn().mockReturnValue('2019-11-25T21:54:48.952Z'),
+      // when we create a case we generate an ID that is used for the saved object. Internally the ID generation code
+      // calls Date.getTime so we need it to return something even though the inject saved object client is going to
+      // override it with a different ID anyway
+      // Otherwise we'll get an error when the function is called
+      getTime: jest.fn().mockReturnValue(1),
     }));
   });
 
@@ -45,7 +50,7 @@ describe('create', () => {
         settings: {
           syncAlerts: true,
         },
-        owner: 'awesome',
+        owner: 'securitySolution',
       };
 
       const savedObjectsClient = createMockSavedObjectsRepository({
@@ -57,7 +62,6 @@ describe('create', () => {
 
       expect(res).toMatchInlineSnapshot(`
         Object {
-          "owner": "awesome",
           "closed_at": null,
           "closed_by": null,
           "comments": Array [],
@@ -80,6 +84,7 @@ describe('create', () => {
           "description": "This is a brand new case of a bad meanie defacing data",
           "external_service": null,
           "id": "mock-it",
+          "owner": "securitySolution",
           "settings": Object {
             "syncAlerts": true,
           },
@@ -121,7 +126,7 @@ describe('create', () => {
                 "connector",
                 "settings",
               ],
-              "new_value": "{\\"type\\":\\"individual\\",\\"description\\":\\"This is a brand new case of a bad meanie defacing data\\",\\"title\\":\\"Super Bad Security Issue\\",\\"tags\\":[\\"defacement\\"],\\"connector\\":{\\"id\\":\\"123\\",\\"name\\":\\"Jira\\",\\"type\\":\\".jira\\",\\"fields\\":{\\"issueType\\":\\"Task\\",\\"priority\\":\\"High\\",\\"parent\\":null}},\\"settings\\":{\\"syncAlerts\\":true},\\"owner\\":\\"awesome\\"}",
+              "new_value": "{\\"type\\":\\"individual\\",\\"description\\":\\"This is a brand new case of a bad meanie defacing data\\",\\"title\\":\\"Super Bad Security Issue\\",\\"tags\\":[\\"defacement\\"],\\"connector\\":{\\"id\\":\\"123\\",\\"name\\":\\"Jira\\",\\"type\\":\\".jira\\",\\"fields\\":{\\"issueType\\":\\"Task\\",\\"priority\\":\\"High\\",\\"parent\\":null}},\\"settings\\":{\\"syncAlerts\\":true},\\"owner\\":\\"securitySolution\\"}",
               "old_value": null,
             },
             "references": Array [
@@ -151,7 +156,7 @@ describe('create', () => {
         settings: {
           syncAlerts: true,
         },
-        owner: 'awesome',
+        owner: 'securitySolution',
       };
 
       const savedObjectsClient = createMockSavedObjectsRepository({
@@ -162,7 +167,6 @@ describe('create', () => {
 
       expect(res).toMatchInlineSnapshot(`
         Object {
-          "owner": "awesome",
           "closed_at": null,
           "closed_by": null,
           "comments": Array [],
@@ -181,6 +185,7 @@ describe('create', () => {
           "description": "This is a brand new case of a bad meanie defacing data",
           "external_service": null,
           "id": "mock-it",
+          "owner": "securitySolution",
           "settings": Object {
             "syncAlerts": true,
           },
@@ -216,7 +221,7 @@ describe('create', () => {
         settings: {
           syncAlerts: true,
         },
-        owner: 'awesome',
+        owner: 'securitySolution',
       };
 
       const savedObjectsClient = createMockSavedObjectsRepository({
@@ -230,7 +235,6 @@ describe('create', () => {
 
       expect(res).toMatchInlineSnapshot(`
         Object {
-          "owner": "awesome",
           "closed_at": null,
           "closed_by": null,
           "comments": Array [],
@@ -249,6 +253,7 @@ describe('create', () => {
           "description": "This is a brand new case of a bad meanie defacing data",
           "external_service": null,
           "id": "mock-it",
+          "owner": "securitySolution",
           "settings": Object {
             "syncAlerts": true,
           },
@@ -429,7 +434,7 @@ describe('create', () => {
         settings: {
           syncAlerts: true,
         },
-        owner: 'awesome',
+        owner: 'securitySolution',
       };
 
       const savedObjectsClient = createMockSavedObjectsRepository({
@@ -458,7 +463,7 @@ describe('create', () => {
         settings: {
           syncAlerts: true,
         },
-        owner: 'awesome',
+        owner: 'securitySolution',
       };
       const savedObjectsClient = createMockSavedObjectsRepository({
         caseSavedObject: mockCases,

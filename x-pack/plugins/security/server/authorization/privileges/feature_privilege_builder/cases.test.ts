@@ -70,8 +70,8 @@ describe(`cases`, () => {
 
         expect(casesFeaturePrivilege.getActions(privilege, feature)).toMatchInlineSnapshot(`
           Array [
-            "cases:1.0.0-zeta1:observability/get",
-            "cases:1.0.0-zeta1:observability/find",
+            "cases:1.0.0-zeta1:observability/getCase",
+            "cases:1.0.0-zeta1:observability/findCases",
           ]
         `);
       });
@@ -105,11 +105,11 @@ describe(`cases`, () => {
 
         expect(casesFeaturePrivilege.getActions(privilege, feature)).toMatchInlineSnapshot(`
           Array [
-            "cases:1.0.0-zeta1:security/get",
-            "cases:1.0.0-zeta1:security/find",
-            "cases:1.0.0-zeta1:security/create",
-            "cases:1.0.0-zeta1:security/delete",
-            "cases:1.0.0-zeta1:security/update",
+            "cases:1.0.0-zeta1:security/getCase",
+            "cases:1.0.0-zeta1:security/findCases",
+            "cases:1.0.0-zeta1:security/createCase",
+            "cases:1.0.0-zeta1:security/deleteCase",
+            "cases:1.0.0-zeta1:security/updateCase",
           ]
         `);
       });
@@ -144,13 +144,13 @@ describe(`cases`, () => {
 
         expect(casesFeaturePrivilege.getActions(privilege, feature)).toMatchInlineSnapshot(`
           Array [
-            "cases:1.0.0-zeta1:security/get",
-            "cases:1.0.0-zeta1:security/find",
-            "cases:1.0.0-zeta1:security/create",
-            "cases:1.0.0-zeta1:security/delete",
-            "cases:1.0.0-zeta1:security/update",
-            "cases:1.0.0-zeta1:obs/get",
-            "cases:1.0.0-zeta1:obs/find",
+            "cases:1.0.0-zeta1:security/getCase",
+            "cases:1.0.0-zeta1:security/findCases",
+            "cases:1.0.0-zeta1:security/createCase",
+            "cases:1.0.0-zeta1:security/deleteCase",
+            "cases:1.0.0-zeta1:security/updateCase",
+            "cases:1.0.0-zeta1:obs/getCase",
+            "cases:1.0.0-zeta1:obs/findCases",
           ]
         `);
       });
@@ -185,20 +185,20 @@ describe(`cases`, () => {
 
         expect(casesFeaturePrivilege.getActions(privilege, feature)).toMatchInlineSnapshot(`
           Array [
-            "cases:1.0.0-zeta1:security/get",
-            "cases:1.0.0-zeta1:security/find",
-            "cases:1.0.0-zeta1:security/create",
-            "cases:1.0.0-zeta1:security/delete",
-            "cases:1.0.0-zeta1:security/update",
-            "cases:1.0.0-zeta1:other-security/get",
-            "cases:1.0.0-zeta1:other-security/find",
-            "cases:1.0.0-zeta1:other-security/create",
-            "cases:1.0.0-zeta1:other-security/delete",
-            "cases:1.0.0-zeta1:other-security/update",
-            "cases:1.0.0-zeta1:obs/get",
-            "cases:1.0.0-zeta1:obs/find",
-            "cases:1.0.0-zeta1:other-obs/get",
-            "cases:1.0.0-zeta1:other-obs/find",
+            "cases:1.0.0-zeta1:security/getCase",
+            "cases:1.0.0-zeta1:security/findCases",
+            "cases:1.0.0-zeta1:security/createCase",
+            "cases:1.0.0-zeta1:security/deleteCase",
+            "cases:1.0.0-zeta1:security/updateCase",
+            "cases:1.0.0-zeta1:other-security/getCase",
+            "cases:1.0.0-zeta1:other-security/findCases",
+            "cases:1.0.0-zeta1:other-security/createCase",
+            "cases:1.0.0-zeta1:other-security/deleteCase",
+            "cases:1.0.0-zeta1:other-security/updateCase",
+            "cases:1.0.0-zeta1:obs/getCase",
+            "cases:1.0.0-zeta1:obs/findCases",
+            "cases:1.0.0-zeta1:other-obs/getCase",
+            "cases:1.0.0-zeta1:other-obs/findCases",
           ]
         `);
       });

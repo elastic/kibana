@@ -29,6 +29,9 @@ import { constructQueryOptions } from '../../routes/api/cases/helpers';
 import { transformCases } from '../../routes/api/utils';
 import { Authorization } from '../../authorization/authorization';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
+import { AuthorizationFilter, Operations } from '../../authorization';
+import { AuditLogger } from '../../../../security/server';
+import { createAuditMsg } from '../../common';
 
 interface FindParams {
   savedObjectsClient: SavedObjectsClientContract;
@@ -36,6 +39,7 @@ interface FindParams {
   logger: Logger;
   auth: PublicMethodsOf<Authorization>;
   options: CasesFindRequest;
+  auditLogger?: AuditLogger;
 }
 
 /**
@@ -46,6 +50,7 @@ export const find = async ({
   caseService,
   logger,
   auth,
+  auditLogger,
   options,
 }: FindParams): Promise<CasesFindResponse> => {
   try {
@@ -54,11 +59,19 @@ export const find = async ({
       fold(throwErrors(Boom.badRequest), identity)
     );
 
-    // TODO: Maybe surround it with try/catch
+    let authFindHelpers: AuthorizationFilter;
+    try {
+      authFindHelpers = await auth.getFindAuthorizationFilter(CASE_SAVED_OBJECT);
+    } catch (error) {
+      auditLogger?.log(createAuditMsg({ operation: Operations.findCases, error }));
+      throw error;
+    }
+
     const {
       filter: authorizationFilter,
       ensureSavedObjectIsAuthorized,
-    } = await auth.getFindAuthorizationFilter(CASE_SAVED_OBJECT);
+      logSuccessfulAuthorization,
+    } = authFindHelpers;
 
     const queryArgs = {
       tags: queryParams.tags,
@@ -89,7 +102,18 @@ export const find = async ({
     });
 
     for (const theCase of cases.casesMap.values()) {
-      ensureSavedObjectIsAuthorized(theCase.owner);
+      try {
+        ensureSavedObjectIsAuthorized(theCase.owner);
+        // log each of the found cases
+        auditLogger?.log(
+          createAuditMsg({ operation: Operations.findCases, savedObjectID: theCase.id })
+        );
+      } catch (error) {
+        auditLogger?.log(
+          createAuditMsg({ operation: Operations.findCases, error, savedObjectID: theCase.id })
+        );
+        throw error;
+      }
     }
 
     // TODO: Make sure we do not leak information when authorization is on
@@ -103,6 +127,8 @@ export const find = async ({
         });
       }),
     ]);
+
+    logSuccessfulAuthorization();
 
     return CasesFindResponseRt.encode(
       transformCases({

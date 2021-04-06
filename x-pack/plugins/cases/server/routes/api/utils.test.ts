@@ -87,6 +87,7 @@ describe('Utils', () => {
           },
           "description": "A description",
           "external_service": null,
+          "owner": "securitySolution",
           "settings": Object {
             "syncAlerts": true,
           },
@@ -143,6 +144,7 @@ describe('Utils', () => {
           },
           "description": "A description",
           "external_service": null,
+          "owner": "securitySolution",
           "settings": Object {
             "syncAlerts": true,
           },
@@ -202,6 +204,7 @@ describe('Utils', () => {
           },
           "description": "A description",
           "external_service": null,
+          "owner": "securitySolution",
           "settings": Object {
             "syncAlerts": true,
           },
@@ -397,6 +400,7 @@ describe('Utils', () => {
               "description": "This is a brand new case of a bad meanie defacing data",
               "external_service": null,
               "id": "mock-id-1",
+              "owner": "securitySolution",
               "settings": Object {
                 "syncAlerts": true,
               },
@@ -437,6 +441,7 @@ describe('Utils', () => {
               "description": "Oh no, a bad meanie destroying data!",
               "external_service": null,
               "id": "mock-id-2",
+              "owner": "securitySolution",
               "settings": Object {
                 "syncAlerts": true,
               },
@@ -481,6 +486,7 @@ describe('Utils', () => {
               "description": "Oh no, a bad meanie going LOLBins all over the place!",
               "external_service": null,
               "id": "mock-id-3",
+              "owner": "securitySolution",
               "settings": Object {
                 "syncAlerts": true,
               },
@@ -529,6 +535,7 @@ describe('Utils', () => {
               "description": "Oh no, a bad meanie going LOLBins all over the place!",
               "external_service": null,
               "id": "mock-id-4",
+              "owner": "securitySolution",
               "settings": Object {
                 "syncAlerts": true,
               },
@@ -594,6 +601,7 @@ describe('Utils', () => {
           "description": "Oh no, a bad meanie going LOLBins all over the place!",
           "external_service": null,
           "id": "mock-id-3",
+          "owner": "securitySolution",
           "settings": Object {
             "syncAlerts": true,
           },
@@ -650,6 +658,7 @@ describe('Utils', () => {
           "description": "Oh no, a bad meanie going LOLBins all over the place!",
           "external_service": null,
           "id": "mock-id-3",
+          "owner": "securitySolution",
           "settings": Object {
             "syncAlerts": true,
           },
@@ -729,6 +738,7 @@ describe('Utils', () => {
           "description": "Oh no, a bad meanie going LOLBins all over the place!",
           "external_service": null,
           "id": "mock-id-3",
+          "owner": "securitySolution",
           "settings": Object {
             "syncAlerts": true,
           },

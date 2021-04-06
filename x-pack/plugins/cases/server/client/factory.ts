@@ -24,6 +24,7 @@ import {
   AttachmentService,
 } from '../services';
 import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
+import { AuthorizationAuditLogger } from '../authorization';
 import { CasesClient, createCasesClient } from '.';
 
 interface CasesClientFactoryArgs {
@@ -37,7 +38,6 @@ interface CasesClientFactoryArgs {
   securityPluginStart?: SecurityPluginStart;
   getSpace: GetSpaceFn;
   featuresPluginStart: FeaturesPluginStart;
-  isAuthEnabled: boolean;
 }
 
 /**
@@ -85,12 +85,14 @@ export class CasesClientFactory {
       );
     }
 
+    const auditLogger = this.options.securityPluginSetup?.audit.asScoped(request);
+
     const auth = await Authorization.create({
       request,
       securityAuth: this.options.securityPluginStart?.authz,
       getSpace: this.options.getSpace,
       features: this.options.featuresPluginStart,
-      isAuthEnabled: this.options.isAuthEnabled,
+      auditLogger: new AuthorizationAuditLogger(auditLogger),
     });
 
     const user = this.options.caseService.getUser({ request });
@@ -109,6 +111,7 @@ export class CasesClientFactory {
       attachmentService: this.options.attachmentService,
       logger: this.logger,
       authorization: auth,
+      auditLogger,
     });
   }
 }
