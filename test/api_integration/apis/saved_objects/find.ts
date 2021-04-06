@@ -293,6 +293,74 @@ export default function ({ getService }: FtrProviderContext) {
             }));
       });
 
+      describe('with a aggs', () => {
+        it('should return 200 with a valid response', async () =>
+          await supertest
+            .get(
+              `/api/saved_objects/_find?type=visualization&per_page=0&aggs=${encodeURIComponent(
+                JSON.stringify({
+                  type_count: { max: { field: 'visualization.attributes.version' } },
+                })
+              )}`
+            )
+            .expect(200)
+            .then((resp) => {
+              expect(resp.body).to.eql({
+                aggregations: {
+                  type_count: {
+                    value: 1,
+                  },
+                },
+                page: 1,
+                per_page: 0,
+                saved_objects: [],
+                total: 1,
+              });
+            }));
+
+        it('wrong type should return 400 with Bad Request', async () =>
+          await supertest
+            .get(
+              `/api/saved_objects/_find?type=visualization&per_page=0&aggs=${encodeURIComponent(
+                JSON.stringify({
+                  type_count: { max: { field: 'dashboard.attributes.version' } },
+                })
+              )}`
+            )
+            .expect(400)
+            .then((resp) => {
+              expect(resp.body).to.eql({
+                error: 'Bad Request',
+                message: 'This type dashboard is not allowed: Bad Request',
+                statusCode: 400,
+              });
+            }));
+
+        it('adding a wrong attributes should return 400 with Bad Request', async () =>
+          await supertest
+            .get(
+              `/api/saved_objects/_find?type=visualization&per_page=0&aggs=${encodeURIComponent(
+                JSON.stringify({
+                  type_count: {
+                    max: {
+                      field: 'visualization.attributes.version',
+                      script: 'Oh yes I am going to a script',
+                    },
+                  },
+                })
+              )}`
+            )
+            .expect(400)
+            .then((resp) => {
+              expect(resp.body).to.eql({
+                error: 'Bad Request',
+                message:
+                  'script attribute is not supported in saved objects aggregation: Bad Request',
+                statusCode: 400,
+              });
+            }));
+      });
+
       describe('`has_reference` and `has_reference_operator` parameters', () => {
         before(() => esArchiver.load('saved_objects/references'));
         after(() => esArchiver.unload('saved_objects/references'));
