@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { renderWithRouter, shallowWithRouter } from '../../lib/helper/enzyme_helpers';
+import { renderWithRouter, shallowWithRouter } from '../../lib';
 import { FingerprintCol } from './fingerprint_col';
 import moment from 'moment';
 
