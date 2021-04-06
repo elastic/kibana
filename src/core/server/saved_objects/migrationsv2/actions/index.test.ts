@@ -177,6 +177,29 @@ describe('actions', () => {
 
       expect(catchRetryableEsClientErrors).toHaveBeenCalledWith(retryableError);
     });
+
+    it('configures request according to given parameters', async () => {
+      const esClient = elasticsearchClientMock.createInternalClient();
+      const query = {};
+      const targetIndex = 'new_index';
+      const batchSize = 1000;
+      const task = Actions.searchForOutdatedDocuments(esClient, {
+        batchSize,
+        targetIndex,
+        outdatedDocumentsQuery: query,
+      });
+
+      await task();
+
+      expect(client.search).toHaveBeenCalledTimes(1);
+      expect(client.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: targetIndex,
+          size: batchSize,
+          body: expect.objectContaining({ query }),
+        })
+      );
+    });
   });
 
   describe('bulkOverwriteTransformedDocuments', () => {
