@@ -6,20 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { getUnusedConfigKeys } from './get_unused_config_keys';
-import { ConfigService } from '../../config';
-import { CriticalError } from '../../errors';
-import { LegacyServiceSetupConfig } from '../types';
+import { ConfigService } from '@kbn/config';
+import { CriticalError } from '../errors';
 
-export async function ensureValidConfiguration(
-  configService: ConfigService,
-  { legacyConfig, settings }: LegacyServiceSetupConfig
-) {
-  const unusedConfigKeys = await getUnusedConfigKeys({
-    coreHandledConfigPaths: await configService.getUsedPaths(),
-    settings,
-    legacyConfig,
-  });
+export async function ensureValidConfiguration(configService: ConfigService) {
+  await configService.validate();
+
+  const unusedConfigKeys = await configService.getUnusedPaths();
 
   if (unusedConfigKeys.length > 0) {
     const message = `Unknown configuration key(s): ${unusedConfigKeys
