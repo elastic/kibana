@@ -15,7 +15,7 @@ export interface Stat {
 
 export interface Coordinates {
   x: number;
-  y?: number;
+  y?: number | null;
 }
 
 export interface Series {
