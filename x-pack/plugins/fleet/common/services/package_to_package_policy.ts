@@ -16,7 +16,7 @@ import type {
   PackagePolicyConfigRecordEntry,
 } from '../types';
 
-import { doesPackageHaveIntegrations, groupInputs } from './';
+import { groupInputs } from './';
 
 export const findDataStreamsByNames = (
   names: string[] = [],
@@ -112,16 +112,25 @@ export const packageToPackagePolicyInputs = (
  * @param outputId
  * @param packagePolicyName
  */
-export const packageToPackagePolicy = (
-  packageInfo: PackageInfo,
-  agentPolicyId: string,
-  outputId: string,
-  namespace: string = '',
-  packagePolicyName?: string,
-  description?: string
-): NewPackagePolicy => {
+export const packageToPackagePolicy = (options: {
+  name?: string;
+  description?: string;
+  namespace?: string;
+  packageInfo: PackageInfo;
+  agentPolicyId: string;
+  outputId: string;
+}): NewPackagePolicy => {
+  const {
+    name,
+    packageInfo,
+    agentPolicyId,
+    outputId,
+    namespace = 'default',
+    description,
+  } = options;
+
   const packagePolicy: NewPackagePolicy = {
-    name: packagePolicyName || `${packageInfo.name}-1`,
+    name: name || `${packageInfo.name}-1`,
     namespace,
     description,
     package: {

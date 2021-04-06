@@ -802,14 +802,14 @@ export async function addPackageToAgentPolicy(
     pkgVersion: packageToInstall.version,
   });
 
-  const basePackagePolicy = packageToPackagePolicy(
+  const basePackagePolicy = packageToPackagePolicy({
+    name: packagePolicyName,
+    description: packagePolicyDescription,
+    namespace: agentPolicy.namespace ?? 'default',
     packageInfo,
-    agentPolicy.id,
-    defaultOutput.id,
-    agentPolicy.namespace ?? 'default',
-    packagePolicyName,
-    packagePolicyDescription
-  );
+    agentPolicyId: agentPolicy.id,
+    outputId: defaultOutput.id,
+  });
 
   const newPackagePolicy = transformPackagePolicy
     ? transformPackagePolicy(basePackagePolicy)

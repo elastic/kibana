@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useState, useMemo } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFormRow,
   EuiFieldText,
   EuiButtonEmpty,
-  EuiSpacer,
   EuiText,
   EuiComboBox,
   EuiDescribedFormGroup,
@@ -74,19 +73,18 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
         .sort((a, b) => a - b);
 
       updatePackagePolicy(
-        packageToPackagePolicy(
-          packageInfo,
-          agentPolicy.id,
-          packagePolicy.output_id,
-          packagePolicy.namespace,
-          // FIXME: Improve package policies name uniqueness - https://github.com/elastic/kibana/issues/72948
-          `${packageInfo.name}-${
+        packageToPackagePolicy({
+          name: `${packageInfo.name}-${
             pkgPoliciesWithMatchingNames.length
               ? pkgPoliciesWithMatchingNames[pkgPoliciesWithMatchingNames.length - 1] + 1
               : 1
           }`,
-          packagePolicy.description
-        )
+          description: packagePolicy.description,
+          namespace: packagePolicy.namespace,
+          packageInfo,
+          agentPolicyId: agentPolicy.id,
+          outputId: packagePolicy.output_id,
+        })
       );
     }
 

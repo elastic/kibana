@@ -416,7 +416,7 @@ class PackagePolicyService {
   ): Promise<NewPackagePolicy | undefined> {
     const pkgInstall = await getInstallation({ savedObjectsClient: soClient, pkgName });
     if (pkgInstall) {
-      const [pkgInfo, defaultOutputId] = await Promise.all([
+      const [packageInfo, defaultOutputId] = await Promise.all([
         getPackageInfo({
           savedObjectsClient: soClient,
           pkgName: pkgInstall.name,
@@ -424,11 +424,15 @@ class PackagePolicyService {
         }),
         outputService.getDefaultOutputId(soClient),
       ]);
-      if (pkgInfo) {
+      if (packageInfo) {
         if (!defaultOutputId) {
           throw new Error('Default output is not set');
         }
-        return packageToPackagePolicy(pkgInfo, '', defaultOutputId);
+        return packageToPackagePolicy({
+          packageInfo,
+          agentPolicyId: '',
+          outputId: defaultOutputId,
+        });
       }
     }
   }

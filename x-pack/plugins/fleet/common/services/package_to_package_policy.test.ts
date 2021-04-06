@@ -325,9 +325,11 @@ describe('Fleet - packageToPackagePolicy', () => {
 
   describe('packageToPackagePolicy', () => {
     it('returns package policy with default name', () => {
-      expect(packageToPackagePolicy(mockPackage, '1', '2')).toEqual({
+      expect(
+        packageToPackagePolicy({ packageInfo: mockPackage, agentPolicyId: '1', outputId: '2' })
+      ).toEqual({
         policy_id: '1',
-        namespace: '',
+        namespace: 'default',
         enabled: true,
         inputs: [],
         name: 'mock-package-1',
@@ -341,7 +343,14 @@ describe('Fleet - packageToPackagePolicy', () => {
     });
 
     it('returns package policy with custom name', () => {
-      expect(packageToPackagePolicy(mockPackage, '1', '2', 'default', 'pkgPolicy-1')).toEqual({
+      expect(
+        packageToPackagePolicy({
+          name: 'pkgPolicy-1',
+          packageInfo: mockPackage,
+          agentPolicyId: '1',
+          outputId: '2',
+        })
+      ).toEqual({
         policy_id: '1',
         namespace: 'default',
         enabled: true,
@@ -358,14 +367,14 @@ describe('Fleet - packageToPackagePolicy', () => {
 
     it('returns package policy with namespace and description', () => {
       expect(
-        packageToPackagePolicy(
-          mockPackage,
-          '1',
-          '2',
-          'mock-namespace',
-          'pkgPolicy-1',
-          'Test description'
-        )
+        packageToPackagePolicy({
+          name: 'pkgPolicy-1',
+          namespace: 'mock-namespace',
+          description: 'Test description',
+          packageInfo: mockPackage,
+          agentPolicyId: '1',
+          outputId: '2',
+        })
       ).toEqual({
         policy_id: '1',
         enabled: true,
@@ -383,14 +392,19 @@ describe('Fleet - packageToPackagePolicy', () => {
     });
 
     it('returns package policy with inputs and package-level vars', () => {
-      const mockPackageWithPolicyTemplates = ({
+      const mockPackageWithPackageVars = ({
         ...mockPackage,
         policy_templates: [{ inputs: [{ type: 'foo' }] }],
         vars: [{ default: 'foo-var-value', name: 'var-name', type: 'text' }],
       } as unknown) as PackageInfo;
 
       expect(
-        packageToPackagePolicy(mockPackageWithPolicyTemplates, '1', '2', 'default', 'pkgPolicy-1')
+        packageToPackagePolicy({
+          name: 'pkgPolicy-1',
+          packageInfo: mockPackageWithPackageVars,
+          agentPolicyId: '1',
+          outputId: '2',
+        })
       ).toEqual({
         policy_id: '1',
         namespace: 'default',
@@ -409,12 +423,12 @@ describe('Fleet - packageToPackagePolicy', () => {
 
     it('returns package policy with multiple policy templates correctly', () => {
       expect(
-        packageToPackagePolicy(
-          packageWithPolicyTemplates,
-          'some-policy-id',
-          'some-output-id',
-          'default'
-        )
+        packageToPackagePolicy({
+          name: 'aws-1',
+          packageInfo: packageWithPolicyTemplates,
+          agentPolicyId: 'some-policy-id',
+          outputId: 'some-output-id',
+        })
       ).toMatchSnapshot();
     });
   });
