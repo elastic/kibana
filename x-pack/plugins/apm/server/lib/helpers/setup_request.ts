@@ -9,13 +9,9 @@ import { Logger } from 'kibana/server';
 import { isActivePlatinumLicense } from '../../../common/license_check';
 import { APMConfig } from '../..';
 import { KibanaRequest } from '../../../../../../src/core/server';
-import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
 import { UIFilters } from '../../../typings/ui_filters';
 import { APMRequestHandlerContext } from '../../routes/typings';
-import {
-  ApmIndicesConfig,
-  getApmIndices,
-} from '../settings/apm_indices/get_apm_indices';
+import { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
 import {
   APMEventClient,
   createApmEventClient,
@@ -25,6 +21,7 @@ import {
   createInternalESClient,
 } from './create_es_client/create_internal_es_client';
 import { withApmSpan } from '../../utils/with_apm_span';
+import { apmIndicesSettings } from '../settings/apm_indices';
 
 // Explicitly type Setup to prevent TS initialization errors
 // https://github.com/microsoft/TypeScript/issues/34933
@@ -47,6 +44,7 @@ interface SetupRequestParams {
   query?: {
     _inspect?: boolean;
 
+    includeFrozen?: boolean;
     /**
      * Timestamp in ms since epoch
      */
@@ -72,15 +70,12 @@ export async function setupRequest<TParams extends SetupRequestParams>(
     const { config, logger } = context;
     const { query } = context.params;
 
-    const [indices, includeFrozen] = await Promise.all([
-      getApmIndices({
-        savedObjectsClient: context.core.savedObjects.client,
-        config,
-      }),
-      withApmSpan('get_ui_settings', () =>
-        context.core.uiSettings.client.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN)
-      ),
-    ]);
+    const indices = await apmIndicesSettings.getIndices({
+      savedObjectsClient: context.core.savedObjects.client,
+      config,
+    });
+
+    const includeFrozen = !!query.includeFrozen;
 
     const uiFilters = decodeUiFilters(logger, query.uiFilters);
 

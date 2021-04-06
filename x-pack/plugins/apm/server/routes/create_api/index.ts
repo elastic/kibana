@@ -24,7 +24,12 @@ import type { ApmPluginRequestHandlerContext } from '../typings';
 
 const inspectRt = t.exact(
   t.partial({
-    query: t.exact(t.partial({ _inspect: jsonRt.pipe(t.boolean) })),
+    query: t.exact(
+      t.partial({
+        _inspect: jsonRt.pipe(t.boolean),
+        includeFrozen: jsonRt.pipe(t.boolean),
+      })
+    ),
   })
 );
 

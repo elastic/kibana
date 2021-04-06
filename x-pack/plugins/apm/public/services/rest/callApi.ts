@@ -11,10 +11,12 @@ import LRU from 'lru-cache';
 import hash from 'object-hash';
 import { enableInspectEsQueries } from '../../../../observability/public';
 import { FetchOptions } from '../../../common/fetch_options';
+import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
 
 function fetchOptionsWithDebug(
   fetchOptions: FetchOptions,
-  inspectableEsQueriesEnabled: boolean
+  inspectableEsQueriesEnabled: boolean,
+  includeFrozen?: boolean
 ) {
   const debugEnabled =
     inspectableEsQueriesEnabled &&
@@ -28,6 +30,7 @@ function fetchOptionsWithDebug(
     query: {
       ...fetchOptions.query,
       ...(debugEnabled ? { _inspect: true } : {}),
+      ...(includeFrozen ? { includeFrozen: true } : {}),
     },
   };
 }
@@ -47,6 +50,8 @@ export async function callApi<T = void>(
   const inspectableEsQueriesEnabled: boolean = uiSettings.get(
     enableInspectEsQueries
   );
+  const includeFrozen = uiSettings.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
+
   const cacheKey = getCacheKey(fetchOptions);
   const cacheResponse = cache.get(cacheKey);
   if (cacheResponse) {
@@ -55,7 +60,8 @@ export async function callApi<T = void>(
 
   const { pathname, method = 'get', ...options } = fetchOptionsWithDebug(
     fetchOptions,
-    inspectableEsQueriesEnabled
+    inspectableEsQueriesEnabled,
+    includeFrozen
   );
 
   const lowercaseMethod = method.toLowerCase() as
