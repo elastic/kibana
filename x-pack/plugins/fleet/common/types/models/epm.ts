@@ -283,7 +283,7 @@ export interface RegistryDataStream {
   [RegistryDataStreamKeys.streams]?: RegistryStream[];
   [RegistryDataStreamKeys.package]: string;
   [RegistryDataStreamKeys.path]: string;
-  [RegistryDataStreamKeys.ingest_pipeline]: string;
+  [RegistryDataStreamKeys.ingest_pipeline]?: string;
   [RegistryDataStreamKeys.elasticsearch]?: RegistryElasticsearch;
   [RegistryDataStreamKeys.dataset_is_prefix]?: boolean;
 }
@@ -317,7 +317,7 @@ export interface RegistryVarsEntry {
   [RegistryVarsEntryKeys.required]?: boolean;
   [RegistryVarsEntryKeys.show_user]?: boolean;
   [RegistryVarsEntryKeys.multi]?: boolean;
-  [RegistryVarsEntryKeys.default]?: string | string[];
+  [RegistryVarsEntryKeys.default]?: string | string[] | boolean;
   [RegistryVarsEntryKeys.os]?: {
     [key: string]: {
       default: string | string[];

@@ -30,4 +30,6 @@ export {
   LicenseService,
   isAgentUpgradeable,
   doesPackageHaveIntegrations,
+  getStreamsForInputType,
+  findDataStreamsByNames,
 } from '../../../../common';

@@ -25,7 +25,6 @@ import { Loading } from '../../../components';
 
 import type { PackagePolicyValidationResults } from './services';
 import { PackagePolicyInputPanel } from './components';
-import type { CreatePackagePolicyFrom } from './types';
 
 const findStreamsForInputType = (
   inputType: string,

@@ -16,3 +16,4 @@ export {
   validationHasErrors,
   countValidationErrors,
 } from './validate_package_policy';
+export { groupInputs } from './group_inputs';
