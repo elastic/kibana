@@ -468,7 +468,7 @@ export type ThreatsOrUndefined = t.TypeOf<typeof threatsOrUndefined>;
 
 export const thresholdField = t.exact(
   t.type({
-    field: t.union([t.string, t.array(t.string)]), // Covers pre- and post-7.12
+    field: t.array(t.string),
     value: PositiveIntegerGreaterThanZero,
   })
 );
@@ -494,7 +494,7 @@ export const threshold = t.intersection([
   thresholdField,
   t.exact(
     t.partial({
-      cardinality: t.union([t.array(thresholdCardinalityField), t.null]),
+      cardinality: t.array(thresholdCardinalityField),
     })
   ),
 ]);

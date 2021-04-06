@@ -30,6 +30,9 @@ export const isAnyActionSupportIncidents = (doc: SavedObjectUnsanitizedDoc<RawAl
     SUPPORT_INCIDENTS_ACTION_TYPES.includes(action.actionTypeId)
   );
 
+export const isSecuritySolutionRule = (doc: SavedObjectUnsanitizedDoc<RawAlert>): boolean =>
+  doc.attributes.alertTypeId === 'siem.signals';
+
 export function getMigrations(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ): SavedObjectMigrationMap {
@@ -59,10 +62,16 @@ export function getMigrations(
     pipeMigrations(restructureConnectorsThatSupportIncident)
   );
 
+  const migrationSecurityRules713 = encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
+    (doc): doc is SavedObjectUnsanitizedDoc<RawAlert> => isSecuritySolutionRule(doc),
+    pipeMigrations(removeNullsFromSecurityRules)
+  );
+
   return {
     '7.10.0': executeMigrationWithErrorHandling(migrationWhenRBACWasIntroduced, '7.10.0'),
     '7.11.0': executeMigrationWithErrorHandling(migrationAlertUpdatedAtAndNotifyWhen, '7.11.0'),
     '7.11.2': executeMigrationWithErrorHandling(migrationActions7112, '7.11.2'),
+    '7.13.0': executeMigrationWithErrorHandling(migrationSecurityRules713, '7.13.0'),
   };
 }
 
@@ -329,6 +338,64 @@ function restructureConnectorsThatSupportIncident(
     attributes: {
       ...doc.attributes,
       actions: newActions,
+    },
+  };
+}
+
+function removeNullsFromSecurityRules(
+  doc: SavedObjectUnsanitizedDoc<RawAlert>
+): SavedObjectUnsanitizedDoc<RawAlert> {
+  const {
+    attributes: { params },
+  } = doc;
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      params: {
+        ...params,
+        buildingBlockType: params.buildingBlockType != null ? params.buildingBlockType : undefined,
+        note: params.note != null ? params.note : undefined,
+        index: params.index != null ? params.index : undefined,
+        language: params.language != null ? params.language : undefined,
+        license: params.license != null ? params.license : undefined,
+        outputIndex: params.outputIndex != null ? params.outputIndex : undefined,
+        savedId: params.savedId != null ? params.savedId : undefined,
+        timelineId: params.timelineId != null ? params.timelineId : undefined,
+        timelineTitle: params.timelineTitle != null ? params.timelineTitle : undefined,
+        meta: params.meta != null ? params.meta : undefined,
+        query: params.query != null ? params.query : undefined,
+        filters: params.filters != null ? params.filters : undefined,
+        riskScoreMapping: params.riskScoreMapping != null ? params.riskScoreMapping : [],
+        ruleNameOverride: params.ruleNameOverride != null ? params.ruleNameOverride : undefined,
+        severityMapping: params.severityMapping != null ? params.severityMapping : [],
+        threat: params.threat != null ? params.threat : [],
+        threshold:
+          params.threshold != null &&
+          typeof params.threshold === 'object' &&
+          !Array.isArray(params.threshold)
+            ? {
+                field: Array.isArray(params.threshold.field)
+                  ? params.threshold.field
+                  : params.threshold.field === ''
+                  ? []
+                  : [params.threshold.field],
+                value: params.threshold.value,
+                cardinality:
+                  params.threshold.cardinality != null ? params.threshold.cardinality : [],
+              }
+            : undefined,
+        timestampOverride: params.timestampOverride != null ? params.timestampOverride : undefined,
+        exceptionsList:
+          params.exceptionsList != null
+            ? params.exceptionsList
+            : params.exceptions_list != null
+            ? params.exceptions_list
+            : params.lists != null
+            ? params.lists
+            : [],
+        threatFilters: params.threatFilters != null ? params.threatFilters : undefined,
+      },
     },
   };
 }
