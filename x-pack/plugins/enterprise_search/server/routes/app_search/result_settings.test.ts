@@ -88,4 +88,48 @@ describe('result settings routes', () => {
       });
     });
   });
+
+  describe('POST /api/app_search/engines/{name}/sample_response_search', () => {
+    const mockRouter = new MockRouter({
+      method: 'post',
+      path: '/api/app_search/engines/{engineName}/sample_response_search',
+    });
+
+    beforeEach(() => {
+      registerResultSettingsRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request to enterprise search', () => {
+      mockRouter.callRoute({
+        params: { engineName: 'some-engine' },
+        body: {
+          query: 'test',
+          result_fields: resultFields,
+        },
+      });
+
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/as/engines/:engineName/sample_response_search',
+      });
+    });
+
+    describe('validates', () => {
+      it('correctly', () => {
+        const request = {
+          body: {
+            query: 'test',
+            result_fields: resultFields,
+          },
+        };
+        mockRouter.shouldValidate(request);
+      });
+      it('missing required fields', () => {
+        const request = { body: {} };
+        mockRouter.shouldThrow(request);
+      });
+    });
+  });
 });

@@ -117,10 +117,6 @@ export const ApiLogsLogic = kea<MakeLogicType<ApiLogsValues, ApiLogsActions>>({
         // while polls are stored in-state until the user manually triggers the 'Refresh' action
         if (isPoll) {
           actions.onPollInterval(response);
-          flashErrorToast(POLLING_ERROR_TITLE, {
-            text: POLLING_ERROR_TEXT,
-            toastLifeTimeMs: POLLING_DURATION * 0.75,
-          });
         } else {
           actions.updateView(response);
         }
