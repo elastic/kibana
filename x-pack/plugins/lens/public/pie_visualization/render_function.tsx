@@ -251,6 +251,7 @@ export function PieComponent(
 
     onClickValue(desanitizeFilterContext(context));
   };
+
   return (
     <VisualizationContainer
       reportTitle={props.args.title}
@@ -260,6 +261,7 @@ export function PieComponent(
     >
       <Chart>
         <Settings
+          tooltip={{ boundary: document.getElementById('app-fixed-viewport') ?? undefined }}
           debugState={window._echDebugStateFlag ?? false}
           // Legend is hidden in many scenarios
           // - Tiny preview

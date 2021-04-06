@@ -7,10 +7,6 @@
 
 import React from 'react';
 
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import _kebabCase from 'lodash/kebabCase';
-
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -72,7 +68,7 @@ export const SourceRow: React.FC<SourceRowProps> = ({
   const fixLink = (
     <EuiLinkTo
       to={getSourcesPath(
-        `${ADD_SOURCE_PATH}/${_kebabCase(serviceType)}/re-authenticate?sourceId=${id}`,
+        `${ADD_SOURCE_PATH}/${serviceType}/reauthenticate?sourceId=${id}`,
         isOrganization
       )}
     >
