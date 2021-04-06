@@ -296,14 +296,14 @@ export const DataGrid: FC<Props> = memo(
           <div data-test-subj={`${dataTestSubj} ccsWarning`}>
             <EuiCallOut
               title={i18n.translate('xpack.ml.dataGrid.CcsWarningCalloutTitle', {
-                defaultMessage: 'Cross Cluster Search returned no fields data.',
+                defaultMessage: 'Cross-cluster search returned no fields data.',
               })}
               color="warning"
             >
               <p>
                 {i18n.translate('xpack.ml.dataGrid.CcsWarningCalloutBody', {
                   defaultMessage:
-                    'There was an issue retrieving data for the index pattern. Source preview in combination with Cross Cluster Search is only supported for versions 7.10 and above. You may still configure and create the transform.',
+                    'There was an issue retrieving data for the index pattern. Source preview in combination with cross-cluster search is only supported for versions 7.10 and above. You may still configure and create the transform.',
                 })}
               </p>
             </EuiCallOut>
