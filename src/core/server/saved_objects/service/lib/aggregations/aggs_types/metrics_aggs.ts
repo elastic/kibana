@@ -7,8 +7,7 @@
  */
 
 import * as rt from 'io-ts';
-
-import { fieldBasic, FieldBasicRT } from '../helpers';
+import { fieldBasic, FieldBasicRT } from './base';
 
 /*
  * Types for Metrics Aggregations

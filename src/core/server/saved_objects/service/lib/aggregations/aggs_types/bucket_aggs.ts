@@ -7,8 +7,7 @@
  */
 
 import * as rt from 'io-ts';
-
-import { fieldBasic } from '../helpers';
+import { fieldBasic } from './base';
 
 export const bucketAggsType: Record<string, Record<string, rt.Any>> = {
   filter: {

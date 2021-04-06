@@ -7,10 +7,9 @@
  */
 
 import { IndexMapping } from '../../mappings';
-
 import { SavedObjectsErrorHelpers } from './errors';
 import { hasFilterKeyError } from './filter_utils';
-import { savedObjectsAggs, validateSavedObjectsTypeAggs } from './saved_objects_aggs_types';
+import { savedObjectsAggs, validateSavedObjectsTypeAggs } from './aggregations';
 
 export const validateGetSavedObjectsAggs = (
   allowedTypes: string[],

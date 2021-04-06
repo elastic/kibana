@@ -11,9 +11,6 @@ import { failure } from 'io-ts/lib/PathReporter';
 
 type ErrorFactory = (message: string) => Error;
 
-export const fieldBasic = { field: rt.string };
-export const FieldBasicRT = rt.type({ field: rt.string });
-
 export const throwErrors = (createError: ErrorFactory) => (errors: rt.Errors) => {
   throw createError(failure(errors).join('\n'));
 };
