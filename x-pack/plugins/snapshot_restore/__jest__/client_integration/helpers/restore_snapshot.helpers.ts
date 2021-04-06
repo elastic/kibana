@@ -25,6 +25,7 @@ const initTestBed = registerTestBed<RestoreSnapshotFormTestSubject>(
 
 const setupActions = (testBed: TestBed<RestoreSnapshotFormTestSubject>) => {
   const { find, component, form } = testBed;
+
   return {
     findDataStreamCallout() {
       return find('dataStreamWarningCallOut');
@@ -35,6 +36,28 @@ const setupActions = (testBed: TestBed<RestoreSnapshotFormTestSubject>) => {
         form.toggleEuiSwitch('includeGlobalStateSwitch');
       });
 
+      component.update();
+    },
+
+    toggleIncludeAliases() {
+      act(() => {
+        form.toggleEuiSwitch('includeAliasesSwitch');
+      });
+
+      component.update();
+    },
+
+    goToStep(step: number) {
+      while (--step > 0) {
+        find('nextButton').simulate('click');
+      }
+      component.update();
+    },
+
+    async clickRestore() {
+      await act(async () => {
+        find('restoreButton').simulate('click');
+      });
       component.update();
     },
   };
@@ -58,5 +81,8 @@ export const setup = async (): Promise<RestoreSnapshotTestBed> => {
 export type RestoreSnapshotFormTestSubject =
   | 'snapshotRestoreStepLogistics'
   | 'includeGlobalStateSwitch'
+  | 'includeAliasesSwitch'
+  | 'nextButton'
+  | 'restoreButton'
   | 'systemIndicesInfoCallOut'
   | 'dataStreamWarningCallOut';

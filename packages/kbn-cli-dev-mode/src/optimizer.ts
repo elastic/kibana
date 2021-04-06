@@ -25,6 +25,7 @@ export interface Options {
   repoRoot: string;
   quiet: boolean;
   silent: boolean;
+  verbose: boolean;
   watch: boolean;
   cache: boolean;
   dist: boolean;
@@ -80,6 +81,7 @@ export class Optimizer {
 
     const { flags: levelFlags } = parseLogLevel(
       pickLevelFromFlags({
+        verbose: options.verbose,
         quiet: options.quiet,
         silent: options.silent,
       })
@@ -105,14 +107,26 @@ export class Optimizer {
       },
     ]);
 
-    this.run$ = runOptimizer(config).pipe(
-      logOptimizerState(log, config),
-      tap(({ state }) => {
-        this.phase$.next(state.phase);
-        this.ready$.next(state.phase === 'success' || state.phase === 'issue');
-      }),
-      ignoreElements()
-    );
+    this.run$ = new Rx.Observable<void>((subscriber) => {
+      subscriber.add(
+        runOptimizer(config)
+          .pipe(
+            logOptimizerState(log, config),
+            tap(({ state }) => {
+              this.phase$.next(state.phase);
+              this.ready$.next(state.phase === 'success' || state.phase === 'issue');
+            }),
+            ignoreElements()
+          )
+          .subscribe(subscriber)
+      );
+
+      // complete state subjects when run$ completes
+      subscriber.add(() => {
+        this.phase$.complete();
+        this.ready$.complete();
+      });
+    });
   }
 
   getPhase$() {
