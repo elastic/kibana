@@ -22,11 +22,7 @@ import { MlServerLimits } from '../types/ml_server_info';
 import { JobValidationMessage, JobValidationMessageId } from '../constants/messages';
 import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '../constants/aggregation_types';
 import { MLCATEGORY } from '../constants/field_types';
-import {
-  getAggregationBucketsName,
-  getAggregations,
-  getDatafeedAggregations,
-} from './datafeed_utils';
+import { getFirstKey, getAggregations, getDatafeedAggregations } from './datafeed_utils';
 import { findAggField } from './validation_utils';
 import { isPopulatedObject } from './object_utils';
 import { isDefined } from '../types/guards';
@@ -52,14 +48,6 @@ export function calculateDatafeedFrequencyDefaultSeconds(bucketSpanSeconds: numb
   return freq;
 }
 
-export function hasRuntimeMappings(job: CombinedJob): boolean {
-  const hasDatafeed = isPopulatedObject(job.datafeed_config);
-  if (hasDatafeed) {
-    return isPopulatedObject(job.datafeed_config.runtime_mappings);
-  }
-  return false;
-}
-
 export function isTimeSeriesViewJob(job: CombinedJob): boolean {
   return getSingleMetricViewerJobErrorMessage(job) === undefined;
 }
@@ -83,6 +71,29 @@ export function isMappableJob(job: CombinedJob, detectorIndex: number): boolean 
     isMappable = functionName === ML_JOB_AGGREGATION.LAT_LONG;
   }
   return isMappable;
+}
+
+export function hasValidComposite(buckets: { [key: string]: any }) {
+  if (
+    isPopulatedObject(buckets, ['composite']) &&
+    isPopulatedObject(buckets.composite, ['sources'])
+  ) {
+    const sources = buckets.composite.sources as Array<Record<string, object>>;
+    return sources
+      .map((source) => {
+        const sourceName = getFirstKey(source);
+        if (sourceName !== undefined && isPopulatedObject(source[sourceName])) {
+          const sourceTypes = Object.keys(source[sourceName]);
+          return (
+            sourceTypes.length === 1 &&
+            (sourceTypes[0] === 'date_histogram' || sourceTypes[0] === 'terms')
+          );
+        }
+        return false;
+      })
+      .every((isValidCompositeSource: boolean) => isValidCompositeSource === true);
+  }
+  return true;
 }
 
 // Returns a flag to indicate whether the source data can be plotted in a time
@@ -126,7 +137,7 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
       // We cannot plot the source data for some specific aggregation configurations
       const aggs = getDatafeedAggregations(job.datafeed_config);
       if (aggs !== undefined) {
-        const aggBucketsName = getAggregationBucketsName(aggs);
+        const aggBucketsName = getFirstKey(aggs);
         if (aggBucketsName !== undefined) {
           // if fieldName is a aggregated field under nested terms using bucket_script
           const aggregations = getAggregations<{ [key: string]: any }>(aggs[aggBucketsName]) ?? {};
@@ -134,13 +145,13 @@ export function isSourceDataChartableForDetector(job: CombinedJob, detectorIndex
           if (foundField?.bucket_script !== undefined) {
             return false;
           }
+
+          // composite sources should be terms and date_histogram only for now
+          return hasValidComposite(aggregations);
         }
       }
 
-      // We also cannot plot the source data if they datafeed uses any field defined by runtime_mappings
-      if (hasRuntimeMappings(job)) {
-        return false;
-      }
+      return true;
     }
   }
 
@@ -181,10 +192,19 @@ export function isModelPlotChartableForDetector(job: Job, detectorIndex: number)
 // if the result is undefined, that means the single metric job should be viewable
 export function getSingleMetricViewerJobErrorMessage(job: CombinedJob): string | undefined {
   // if job has runtime mappings with no model plot
-  if (hasRuntimeMappings(job) && !job.model_plot_config?.enabled) {
-    return i18n.translate('xpack.ml.timeSeriesJob.jobWithRunTimeMessage', {
-      defaultMessage: 'the datafeed contains runtime fields and model plot is disabled',
-    });
+
+  const aggs = getDatafeedAggregations(job.datafeed_config);
+  if (aggs !== undefined) {
+    const aggBucketsName = getFirstKey(aggs);
+    if (aggBucketsName !== undefined) {
+      // if fieldName is a aggregated field under nested terms using bucket_script
+
+      if (!hasValidComposite(aggs[aggBucketsName])) {
+        return i18n.translate('xpack.ml.timeSeriesJob.jobWithRunTimeMessage', {
+          defaultMessage: 'the datafeed contains unsupported composite sources',
+        });
+      }
+    }
   }
   // only allow jobs with at least one detector whose function corresponds to
   // an ES aggregation which can be viewed in the single metric view and which
