@@ -166,7 +166,7 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
         <EuiSpacer />
         <EuiFlexGroup alignItems="stretch">
           <EuiFlexItem>
-            <EuiPanel paddingSize="l">
+            <EuiPanel hasBorder paddingSize="l">
               <EuiTitle size="s">
                 <h3>{ROLE_TITLE}</h3>
               </EuiTitle>
@@ -175,7 +175,6 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
                 <h4>{FULL_ENGINE_ACCESS_TITLE}</h4>
               </EuiTitle>
               <EuiSpacer />
-              export{' '}
               {STANDARD_ROLE_TYPES.map(({ type, description }) => (
                 <RoleSelector
                   key={type}
@@ -190,7 +189,7 @@ export const RoleMapping: React.FC<RoleMappingProps> = ({ isNew }) => {
           </EuiFlexItem>
           {hasAdvancedRoles && (
             <EuiFlexItem>
-              <EuiPanel paddingSize="l">
+              <EuiPanel hasBorder paddingSize="l">
                 <EuiTitle size="s">
                   <h3>{ENGINE_ACCESS_TITLE}</h3>
                 </EuiTitle>

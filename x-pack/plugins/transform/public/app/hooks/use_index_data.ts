@@ -7,7 +7,8 @@
 
 import { useEffect, useMemo } from 'react';
 
-import { EuiDataGridColumn } from '@elastic/eui';
+import type { estypes } from '@elastic/elasticsearch';
+import type { EuiDataGridColumn } from '@elastic/eui';
 
 import {
   isEsSearchResponse,
@@ -133,10 +134,14 @@ export const useIndexData = (
       return;
     }
 
-    const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields));
+    const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
 
-    setRowCount(resp.hits.total.value);
-    setRowCountRelation(resp.hits.total.relation);
+    setRowCount(typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total.value);
+    setRowCountRelation(
+      typeof resp.hits.total === 'number'
+        ? ('eq' as estypes.TotalHitsRelation)
+        : resp.hits.total.relation
+    );
     setTableItems(docs);
     setStatus(INDEX_STATUS.LOADED);
   };

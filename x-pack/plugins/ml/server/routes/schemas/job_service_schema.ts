@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { anomalyDetectionJobSchema } from './anomaly_detectors_schema';
 import { datafeedConfigSchema, indicesOptionsSchema } from './datafeeds_schema';
+import { runtimeMappingsSchema } from './runtime_mappings_schema';
 
 export const categorizationFieldExamplesSchema = {
   indexPatternTitle: schema.string(),
@@ -18,7 +19,7 @@ export const categorizationFieldExamplesSchema = {
   start: schema.number(),
   end: schema.number(),
   analyzer: schema.any(),
-  runtimeMappings: schema.maybe(schema.any()),
+  runtimeMappings: runtimeMappingsSchema,
   indicesOptions: indicesOptionsSchema,
 };
 
@@ -32,7 +33,7 @@ export const chartSchema = {
   aggFieldNamePairs: schema.arrayOf(schema.any()),
   splitFieldName: schema.maybe(schema.nullable(schema.string())),
   splitFieldValue: schema.maybe(schema.nullable(schema.string())),
-  runtimeMappings: schema.maybe(schema.any()),
+  runtimeMappings: runtimeMappingsSchema,
   indicesOptions: indicesOptionsSchema,
 };
 

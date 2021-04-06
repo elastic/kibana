@@ -8,15 +8,20 @@
 
 import apm from 'elastic-apm-node';
 import { config as pathConfig } from '@kbn/utils';
-import { mapToObject } from '@kbn/std';
-import { ConfigService, Env, RawConfigurationProvider, coreDeprecationProvider } from './config';
+import {
+  ConfigService,
+  Env,
+  RawConfigurationProvider,
+  coreDeprecationProvider,
+  ensureValidConfiguration,
+} from './config';
 import { CoreApp } from './core_app';
 import { I18nService } from './i18n';
 import { ElasticsearchService } from './elasticsearch';
 import { HttpService } from './http';
 import { HttpResourcesService } from './http_resources';
 import { RenderingService } from './rendering';
-import { LegacyService, ensureValidConfiguration } from './legacy';
+import { LegacyService } from './legacy';
 import { Logger, LoggerFactory, LoggingService, ILoggingSystem } from './logging';
 import { UiSettingsService } from './ui_settings';
 import { PluginsService, config as pluginsConfig } from './plugins';
@@ -41,6 +46,7 @@ import { ContextService } from './context';
 import { RequestHandlerContext } from '.';
 import { InternalCoreSetup, InternalCoreStart, ServiceConfigDescriptor } from './internal_types';
 import { CoreUsageDataService } from './core_usage_data';
+import { DeprecationsService } from './deprecations';
 import { CoreRouteHandlerContext } from './core_route_handler_context';
 import { config as externalUrlConfig } from './external_url';
 
@@ -67,6 +73,7 @@ export class Server {
   private readonly coreApp: CoreApp;
   private readonly coreUsageData: CoreUsageDataService;
   private readonly i18n: I18nService;
+  private readonly deprecations: DeprecationsService;
 
   private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
   private resolveSavedObjectsStartPromise?: (value: SavedObjectsServiceStart) => void;
@@ -102,6 +109,7 @@ export class Server {
     this.logging = new LoggingService(core);
     this.coreUsageData = new CoreUsageDataService(core);
     this.i18n = new I18nService(core);
+    this.deprecations = new DeprecationsService(core);
 
     this.savedObjectsStartPromise = new Promise((resolve) => {
       this.resolveSavedObjectsStartPromise = resolve;
@@ -118,22 +126,13 @@ export class Server {
     const { pluginTree, pluginPaths, uiPlugins } = await this.plugins.discover({
       environment: environmentSetup,
     });
-    const legacyConfigSetup = await this.legacy.setupLegacyConfig();
 
     // Immediately terminate in case of invalid configuration
     // This needs to be done after plugin discovery
-    await this.configService.validate();
-    await ensureValidConfiguration(this.configService, legacyConfigSetup);
+    await ensureValidConfiguration(this.configService);
 
     const contextServiceSetup = this.context.setup({
-      // We inject a fake "legacy plugin" with dependencies on every plugin so that legacy plugins:
-      // 1) Can access context from any KP plugin
-      // 2) Can register context providers that will only be available to other legacy plugins and will not leak into
-      //    New Platform plugins.
-      pluginDependencies: new Map([
-        ...pluginTree.asOpaqueIds,
-        [this.legacy.legacyId, [...pluginTree.asOpaqueIds.keys()]],
-      ]),
+      pluginDependencies: new Map([...pluginTree.asOpaqueIds]),
     });
 
     const httpSetup = await this.http.setup({
@@ -192,6 +191,12 @@ export class Server {
       loggingSystem: this.loggingSystem,
     });
 
+    const deprecationsSetup = this.deprecations.setup({
+      http: httpSetup,
+      elasticsearch: elasticsearchServiceSetup,
+      coreUsageData: coreUsageDataSetup,
+    });
+
     const coreSetup: InternalCoreSetup = {
       capabilities: capabilitiesSetup,
       context: contextServiceSetup,
@@ -206,15 +211,14 @@ export class Server {
       httpResources: httpResourcesSetup,
       logging: loggingSetup,
       metrics: metricsSetup,
+      deprecations: deprecationsSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
     this.#pluginsInitialized = pluginsSetup.initialized;
 
     await this.legacy.setup({
-      core: { ...coreSetup, plugins: pluginsSetup, rendering: renderingSetup },
-      plugins: mapToObject(pluginsSetup.contracts),
-      uiPlugins,
+      http: httpSetup,
     });
 
     this.registerCoreContext(coreSetup);
@@ -256,15 +260,7 @@ export class Server {
       coreUsageData: coreUsageDataStart,
     };
 
-    const pluginsStart = await this.plugins.start(this.coreStart);
-
-    await this.legacy.start({
-      core: {
-        ...this.coreStart,
-        plugins: pluginsStart,
-      },
-      plugins: mapToObject(pluginsStart.contracts),
-    });
+    await this.plugins.start(this.coreStart);
 
     await this.http.start();
 
@@ -285,6 +281,7 @@ export class Server {
     await this.metrics.stop();
     await this.status.stop();
     await this.logging.stop();
+    this.deprecations.stop();
   }
 
   private registerCoreContext(coreSetup: InternalCoreSetup) {
