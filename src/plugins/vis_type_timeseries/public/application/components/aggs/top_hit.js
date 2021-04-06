@@ -100,8 +100,9 @@ const TopHitAggUi = (props) => {
     order: 'desc',
   };
   const model = { ...defaults, ...props.model };
-  const indexPattern =
-    (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
+  const indexPattern = series.override_index_pattern
+    ? series.series_index_pattern
+    : panel.index_pattern;
 
   const aggWithOptionsRestrictFields = [
     PANEL_TYPES.TABLE,
