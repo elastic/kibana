@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AggregationRequest } from '../types';
-
+import { Direction } from '../../../../../../common/search_strategy/common';
+import { AggregationRequest } from '../../../../../../common/search_strategy/security_solution/hosts';
 import { buildFieldsTermAggregation } from './helpers';
 
 describe('#buildFieldsTermAggregation', () => {
@@ -25,7 +25,7 @@ describe('#buildFieldsTermAggregation', () => {
           field: 'host.architecture',
           size: 10,
           order: {
-            timestamp: 'desc',
+            timestamp: Direction.desc,
           },
         },
         aggs: {
@@ -41,7 +41,7 @@ describe('#buildFieldsTermAggregation', () => {
           field: 'host.id',
           size: 10,
           order: {
-            timestamp: 'desc',
+            timestamp: Direction.desc,
           },
         },
         aggs: {
@@ -60,7 +60,7 @@ describe('#buildFieldsTermAggregation', () => {
           },
           size: 10,
           order: {
-            timestamp: 'desc',
+            timestamp: Direction.desc,
           },
         },
         aggs: {
@@ -76,7 +76,7 @@ describe('#buildFieldsTermAggregation', () => {
           field: 'host.name',
           size: 10,
           order: {
-            timestamp: 'desc',
+            timestamp: Direction.desc,
           },
         },
         aggs: {
@@ -92,7 +92,7 @@ describe('#buildFieldsTermAggregation', () => {
           field: 'host.os.family',
           size: 10,
           order: {
-            timestamp: 'desc',
+            timestamp: Direction.desc,
           },
         },
         aggs: {
@@ -108,7 +108,7 @@ describe('#buildFieldsTermAggregation', () => {
           field: 'host.os.name',
           size: 10,
           order: {
-            timestamp: 'desc',
+            timestamp: Direction.desc,
           },
         },
         aggs: {

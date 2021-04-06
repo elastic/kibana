@@ -6,7 +6,6 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
-
 import { HostsSortField } from '../../../common/search_strategy/security_solution/hosts';
 
 import { HostsTableType, HostsType } from './model';

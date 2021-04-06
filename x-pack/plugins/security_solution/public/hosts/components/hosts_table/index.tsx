@@ -9,8 +9,6 @@ import React, { useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { assertUnreachable } from '../../../../common/utility_types';
-import { HostsSortField } from '../../../../common/search_strategy/security_solution/hosts';
-import { HostFields, HostItem, HostsEdges, HostsFields, OsFields } from '../../../graphql/types';
 import {
   Columns,
   Criteria,
@@ -22,7 +20,14 @@ import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { hostsActions, hostsModel, hostsSelectors } from '../../store';
 import { getHostsColumns } from './columns';
 import * as i18n from './translations';
+import {
+  HostsEdges,
+  HostItem,
+  HostsSortField,
+  HostsFields,
+} from '../../../../common/search_strategy/security_solution/hosts';
 import { Direction } from '../../../../common/search_strategy';
+import { HostEcs, OsEcs } from '../../../../common/ecs/host';
 
 const tableType = hostsModel.HostsTableType.hosts;
 
@@ -39,10 +44,10 @@ interface HostsTableProps {
 }
 
 export type HostsTableColumns = [
-  Columns<HostFields['name']>,
+  Columns<HostEcs['name']>,
   Columns<HostItem['lastSeen']>,
-  Columns<OsFields['name']>,
-  Columns<OsFields['version']>
+  Columns<OsEcs['name']>,
+  Columns<OsEcs['version']>
 ];
 
 const rowItems: ItemsPerRow[] = [
@@ -76,7 +81,6 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
   const { activePage, direction, limit, sortField } = useDeepEqualSelector((state) =>
     getHostsSelector(state, type)
   );
-
   const updateLimitPagination = useCallback(
     (newLimit) =>
       dispatch(
@@ -172,6 +176,5 @@ const getNodeField = (field: HostsFields): string => {
   }
   assertUnreachable(field);
 };
-export const HostsTable = React.memo(HostsTableComponent);
 
-HostsTable.displayName = 'HostsTable';
+export const HostsTable = React.memo(HostsTableComponent);
