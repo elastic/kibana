@@ -16,6 +16,7 @@ import { FileUploadComponentProps } from '../lazy_load_bundle';
 import { ImportResults } from '../importer';
 import { GeoJsonImporter } from '../importer/geojson_importer';
 import { Settings } from '../../common';
+import { hasImportPermission } from '../api';
 
 enum PHASE {
   CONFIGURE = 'CONFIGURE',
@@ -31,6 +32,7 @@ function getWritingToIndexMsg(progress: number) {
 }
 
 interface State {
+  failedPermissionCheck: boolean;
   geoFieldType: ES_FIELD_TYPES.GEO_POINT | ES_FIELD_TYPES.GEO_SHAPE;
   importStatus: string;
   importResults?: ImportResults;
@@ -45,6 +47,7 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
   private _isMounted = false;
 
   state: State = {
+    failedPermissionCheck: false,
     geoFieldType: ES_FIELD_TYPES.GEO_SHAPE,
     importStatus: '',
     indexName: '',
@@ -71,6 +74,26 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
 
   _import = async () => {
     if (!this._geojsonImporter) {
+      return;
+    }
+
+    //
+    // check permissions
+    //
+    const canImport = await hasImportPermission({
+      checkCreateIndexPattern: true,
+      checkHasManagePipeline: false,
+      indexName: this.state.indexName,
+    });
+    if (!this._isMounted) {
+      return;
+    }
+    if (!canImport) {
+      this.setState({
+        phase: PHASE.COMPLETE,
+        failedPermissionCheck: true,
+      });
+      this.props.onIndexingError();
       return;
     }
 
@@ -111,6 +134,7 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
     if (initializeImportResp.index === undefined || initializeImportResp.id === undefined) {
       this.setState({
         phase: PHASE.COMPLETE,
+        importResults: initializeImportResp,
       });
       this.props.onIndexingError();
       return;
@@ -255,6 +279,8 @@ export class JsonUploadAndParse extends Component<FileUploadComponentProps, Stat
         <ImportCompleteView
           importResults={this.state.importResults}
           indexPatternResp={this.state.indexPatternResp}
+          indexName={this.state.indexName}
+          failedPermissionCheck={this.state.failedPermissionCheck}
         />
       );
     }

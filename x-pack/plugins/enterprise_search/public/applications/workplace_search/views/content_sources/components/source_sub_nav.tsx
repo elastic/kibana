@@ -33,7 +33,7 @@ export const SourceSubNav: React.FC = () => {
   const isCustom = serviceType === CUSTOM_SERVICE_TYPE;
 
   return (
-    <>
+    <div className="sourcesSubNav">
       <SideNavLink to={getContentSourcePath(SOURCE_DETAILS_PATH, id, isOrganization)}>
         {NAV.OVERVIEW}
       </SideNavLink>
@@ -53,6 +53,6 @@ export const SourceSubNav: React.FC = () => {
       <SideNavLink to={getContentSourcePath(SOURCE_SETTINGS_PATH, id, isOrganization)}>
         {NAV.SETTINGS}
       </SideNavLink>
-    </>
+    </div>
   );
 };

@@ -162,6 +162,7 @@ export const RestoreSnapshotForm: React.FunctionComponent<Props> = ({
                 iconType="check"
                 onClick={() => executeRestore()}
                 isLoading={isSaving}
+                data-test-subj="restoreButton"
               >
                 {isSaving ? (
                   <FormattedMessage
