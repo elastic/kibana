@@ -11,15 +11,15 @@ import { SavedObjectsErrorHelpers } from './errors';
 import { hasFilterKeyError } from './filter_utils';
 import { savedObjectsAggs, validateSavedObjectsTypeAggs } from './aggregations';
 
-export const validateGetSavedObjectsAggs = (
+export const validateAndConvertAggregations = (
   allowedTypes: string[],
   aggs: Record<string, unknown>,
   indexMapping: IndexMapping
 ) => {
-  return validateGetAggFieldValue(allowedTypes, aggs, indexMapping);
+  return validateAggFieldValue(allowedTypes, aggs, indexMapping);
 };
 
-const validateGetAggFieldValue = (
+const validateAggFieldValue = (
   allowedTypes: string[],
   aggs: any,
   indexMapping: IndexMapping,
@@ -35,7 +35,7 @@ const validateGetAggFieldValue = (
     if (typeof aggs[key] === 'object' && aggType === undefined && savedObjectsAggs[key]) {
       return {
         ...acc,
-        [key]: validateGetAggFieldValue(allowedTypes, aggs[key], indexMapping, key, key),
+        [key]: validateAggFieldValue(allowedTypes, aggs[key], indexMapping, key, key),
       };
     } else if (
       typeof aggs[key] === 'object' &&
@@ -43,7 +43,7 @@ const validateGetAggFieldValue = (
     ) {
       return {
         ...acc,
-        [key]: validateGetAggFieldValue(allowedTypes, aggs[key], indexMapping, key, undefined),
+        [key]: validateAggFieldValue(allowedTypes, aggs[key], indexMapping, key, undefined),
       };
     } else if (
       key !== 'field' &&

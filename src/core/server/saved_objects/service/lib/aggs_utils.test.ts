@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { validateGetSavedObjectsAggs } from './aggs_utils';
+import { validateAndConvertAggregations } from './aggs_utils';
 
 const mockMappings = {
   properties: {
@@ -87,7 +87,7 @@ describe('Aggregation Utils', () => {
   describe('#validateGetSavedObjectsAggs', () => {
     test('Validate a simple aggregations', () => {
       expect(
-        validateGetSavedObjectsAggs(
+        validateAndConvertAggregations(
           ['foo'],
           { aggName: { max: { field: 'foo.attributes.bytes' } } },
           mockMappings
@@ -103,7 +103,7 @@ describe('Aggregation Utils', () => {
 
     test('Validate a nested field in simple aggregations', () => {
       expect(
-        validateGetSavedObjectsAggs(
+        validateAndConvertAggregations(
           ['alert'],
           { aggName: { cardinality: { field: 'alert.attributes.actions.group' } } },
           mockMappings
@@ -119,7 +119,7 @@ describe('Aggregation Utils', () => {
 
     test('Validate a nested aggregations', () => {
       expect(
-        validateGetSavedObjectsAggs(
+        validateAndConvertAggregations(
           ['alert'],
           {
             aggName: {
@@ -153,7 +153,7 @@ describe('Aggregation Utils', () => {
 
     test('Validate an aggregation without the attribute field', () => {
       expect(
-        validateGetSavedObjectsAggs(
+        validateAndConvertAggregations(
           ['alert'],
           { aggName: { terms: { 'alert.attributes.actions.group': ['myFriend', 'snoopy'] } } },
           mockMappings
@@ -169,7 +169,7 @@ describe('Aggregation Utils', () => {
 
     test('Validate a filter term aggregations', () => {
       expect(
-        validateGetSavedObjectsAggs(
+        validateAndConvertAggregations(
           ['foo'],
           { aggName: { filter: { term: { 'foo.attributes.bytes': 10 } } } },
           mockMappings
@@ -185,7 +185,7 @@ describe('Aggregation Utils', () => {
 
     test('Throw an error when types is not allowed', () => {
       expect(() => {
-        validateGetSavedObjectsAggs(
+        validateAndConvertAggregations(
           ['alert'],
           {
             aggName: {
@@ -199,7 +199,7 @@ describe('Aggregation Utils', () => {
 
     test('Throw an error when add an invalid attributes ', () => {
       expect(() => {
-        validateGetSavedObjectsAggs(
+        validateAndConvertAggregations(
           ['foo'],
           {
             aggName: {
@@ -215,7 +215,7 @@ describe('Aggregation Utils', () => {
 
     test('Throw an error when an attributes is not defined correctly', () => {
       expect(() =>
-        validateGetSavedObjectsAggs(
+        validateAndConvertAggregations(
           ['alert'],
           {
             aggName: {
@@ -229,7 +229,7 @@ describe('Aggregation Utils', () => {
 
     test('Throw an error when aggregation is not defined in SavedObjectsAggs', () => {
       expect(() => {
-        validateGetSavedObjectsAggs(
+        validateAndConvertAggregations(
           ['foo'],
           {
             aggName: {
@@ -245,7 +245,7 @@ describe('Aggregation Utils', () => {
 
     test('Throw an error when children aggregation is not defined in SavedObjectsAggs', () => {
       expect(() => {
-        validateGetSavedObjectsAggs(
+        validateAndConvertAggregations(
           ['foo'],
           {
             aggName: {
@@ -268,7 +268,7 @@ describe('Aggregation Utils', () => {
 
     test('Throw an error when you add the script attribute who are not defined in SavedObjectsAggs', () => {
       expect(() => {
-        validateGetSavedObjectsAggs(
+        validateAndConvertAggregations(
           ['alert'],
           {
             aggName: {
@@ -285,7 +285,7 @@ describe('Aggregation Utils', () => {
 
     test('Throw an error when you add the script attribute in a nested aggregations who are not defined in SavedObjectsAggs', () => {
       expect(() => {
-        validateGetSavedObjectsAggs(
+        validateAndConvertAggregations(
           ['alert'],
           {
             aggName: {
