@@ -1621,7 +1621,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/search/types.ts",
-              "lineNumber": 88
+              "lineNumber": 90
             },
             "signature": [
               "(sessionId: string, attributes: Partial<unknown>) => Promise<",
@@ -1643,7 +1643,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/search/types.ts",
-              "lineNumber": 89
+              "lineNumber": 91
             },
             "signature": [
               "(sessionId: string) => Promise<",
@@ -1665,7 +1665,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/search/types.ts",
-              "lineNumber": 90
+              "lineNumber": 92
             },
             "signature": [
               "(options: Pick<",
@@ -1695,7 +1695,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/search/types.ts",
-              "lineNumber": 91
+              "lineNumber": 93
             },
             "signature": [
               "(sessionId: string, attributes: Partial<unknown>) => Promise<",
@@ -1717,7 +1717,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/search/types.ts",
-              "lineNumber": 92
+              "lineNumber": 94
             },
             "signature": [
               "(sessionId: string) => Promise<{}>"
@@ -1731,7 +1731,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/search/types.ts",
-              "lineNumber": 93
+              "lineNumber": 95
             },
             "signature": [
               "(sessionId: string) => Promise<{}>"
@@ -1745,7 +1745,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/search/types.ts",
-              "lineNumber": 94
+              "lineNumber": 96
             },
             "signature": [
               "(sessionId: string, expires: Date) => Promise<",
@@ -1762,7 +1762,7 @@
         ],
         "source": {
           "path": "src/plugins/data/server/search/types.ts",
-          "lineNumber": 87
+          "lineNumber": 89
         },
         "initialIsOpen": false
       },
@@ -1843,7 +1843,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/search/types.ts",
-              "lineNumber": 41
+              "lineNumber": 43
             },
             "signature": [
               {
@@ -1865,7 +1865,7 @@
             ],
             "source": {
               "path": "src/plugins/data/server/search/types.ts",
-              "lineNumber": 46
+              "lineNumber": 48
             },
             "signature": [
               "<SearchStrategyRequest extends ",
@@ -1920,7 +1920,7 @@
             ],
             "source": {
               "path": "src/plugins/data/server/search/types.ts",
-              "lineNumber": 57
+              "lineNumber": 59
             },
             "signature": [
               {
@@ -1936,7 +1936,7 @@
         ],
         "source": {
           "path": "src/plugins/data/server/search/types.ts",
-          "lineNumber": 40
+          "lineNumber": 42
         },
         "initialIsOpen": false
       },
@@ -1965,7 +1965,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/search/types.ts",
-              "lineNumber": 101
+              "lineNumber": 103
             },
             "signature": [
               {
@@ -1987,7 +1987,7 @@
             ],
             "source": {
               "path": "src/plugins/data/server/search/types.ts",
-              "lineNumber": 107
+              "lineNumber": 109
             },
             "signature": [
               "(name?: string | undefined) => ",
@@ -2009,7 +2009,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/search/types.ts",
-              "lineNumber": 110
+              "lineNumber": 112
             },
             "signature": [
               "(request: ",
@@ -2038,7 +2038,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/search/types.ts",
-              "lineNumber": 111
+              "lineNumber": 113
             },
             "signature": [
               "{ asScoped: (request: ",
@@ -2063,7 +2063,7 @@
         ],
         "source": {
           "path": "src/plugins/data/server/search/types.ts",
-          "lineNumber": 97
+          "lineNumber": 99
         },
         "initialIsOpen": false
       },
@@ -2094,7 +2094,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/search/types.ts",
-              "lineNumber": 73
+              "lineNumber": 75
             },
             "signature": [
               "(request: SearchStrategyRequest, options: ",
@@ -2126,7 +2126,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/search/types.ts",
-              "lineNumber": 78
+              "lineNumber": 80
             },
             "signature": [
               "((id: string, options: ",
@@ -2156,7 +2156,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/search/types.ts",
-              "lineNumber": 79
+              "lineNumber": 81
             },
             "signature": [
               "((id: string, keepAlive: string, options: ",
@@ -2181,7 +2181,7 @@
         ],
         "source": {
           "path": "src/plugins/data/server/search/types.ts",
-          "lineNumber": 69
+          "lineNumber": 71
         },
         "initialIsOpen": false
       },
@@ -2200,7 +2200,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/search/types.ts",
-              "lineNumber": 34
+              "lineNumber": 36
             },
             "signature": [
               "Pick<",
@@ -2211,7 +2211,7 @@
                 "section": "def-server.SavedObjectsClient",
                 "text": "SavedObjectsClient"
               },
-              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\">"
+              ", \"get\" | \"delete\" | \"create\" | \"find\" | \"update\" | \"bulkCreate\" | \"bulkGet\" | \"bulkUpdate\" | \"errors\" | \"checkConflicts\" | \"resolve\" | \"addToNamespaces\" | \"deleteFromNamespaces\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
             ]
           },
           {
@@ -2222,7 +2222,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/search/types.ts",
-              "lineNumber": 35
+              "lineNumber": 37
             },
             "signature": [
               {
@@ -2242,7 +2242,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/search/types.ts",
-              "lineNumber": 36
+              "lineNumber": 38
             },
             "signature": [
               {
@@ -2262,7 +2262,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/server/search/types.ts",
-              "lineNumber": 37
+              "lineNumber": 39
             },
             "signature": [
               {
@@ -2278,7 +2278,7 @@
         ],
         "source": {
           "path": "src/plugins/data/server/search/types.ts",
-          "lineNumber": 33
+          "lineNumber": 35
         },
         "initialIsOpen": false
       },
@@ -2344,7 +2344,23 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "id": "def-server.SearchRequestHandlerContext",
+        "type": "Type",
+        "label": "SearchRequestHandlerContext",
+        "tags": [],
+        "description": [],
+        "source": {
+          "path": "src/plugins/data/server/search/types.ts",
+          "lineNumber": 118
+        },
+        "signature": [
+          "IScopedSearchClient"
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   },
   "common": {
@@ -9456,6 +9472,70 @@
         "initialIsOpen": false
       },
       {
+        "id": "def-common.getKibanaContextFn",
+        "type": "Function",
+        "children": [
+          {
+            "type": "Function",
+            "label": "getStartDependencies",
+            "isRequired": true,
+            "signature": [
+              "(getKibanaRequest: (() => ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any>) | undefined) => Promise<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.KibanaContextStartDependencies",
+                "text": "KibanaContextStartDependencies"
+              },
+              ">"
+            ],
+            "description": [],
+            "source": {
+              "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
+              "lineNumber": 52
+            }
+          }
+        ],
+        "signature": [
+          "(getStartDependencies: (getKibanaRequest: (() => ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.KibanaRequest",
+            "text": "KibanaRequest"
+          },
+          "<unknown, unknown, unknown, any>) | undefined) => Promise<",
+          "KibanaContextStartDependencies",
+          ">) => ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.ExpressionFunctionKibanaContext",
+            "text": "ExpressionFunctionKibanaContext"
+          }
+        ],
+        "description": [],
+        "label": "getKibanaContextFn",
+        "source": {
+          "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
+          "lineNumber": 51
+        },
+        "tags": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
         "id": "def-common.getMaxMetricAgg",
         "type": "Function",
         "children": [],
@@ -10015,8 +10095,7 @@
             "docId": "kibDataSearchPluginApi",
             "section": "def-common.ISearchRequestParams",
             "text": "ISearchRequestParams"
-          },
-          "<Record<string, any>>"
+          }
         ],
         "description": [],
         "children": [
@@ -15167,7 +15246,7 @@
             ],
             "source": {
               "path": "src/plugins/data/common/search/search_source/fetch/types.ts",
-              "lineNumber": 33
+              "lineNumber": 36
             },
             "signature": [
               {
@@ -15477,7 +15556,7 @@
             "section": "def-common.ISearchRequestParams",
             "text": "ISearchRequestParams"
           },
-          "<Record<string, any>>>"
+          ">"
         ],
         "description": [],
         "tags": [],
@@ -15490,7 +15569,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/es_search/types.ts",
-              "lineNumber": 20
+              "lineNumber": 19
             },
             "signature": [
               "string | undefined"
@@ -15499,7 +15578,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/es_search/types.ts",
-          "lineNumber": 19
+          "lineNumber": 18
         },
         "initialIsOpen": false
       },
@@ -16090,7 +16169,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/legacy/types.ts",
-              "lineNumber": 36
+              "lineNumber": 35
             },
             "signature": [
               "(params: { body: ",
@@ -16120,7 +16199,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/legacy/types.ts",
-              "lineNumber": 40
+              "lineNumber": 39
             },
             "signature": [
               "BehaviorSubject",
@@ -16130,7 +16209,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/search_source/legacy/types.ts",
-          "lineNumber": 35
+          "lineNumber": 34
         },
         "initialIsOpen": false
       },
@@ -16224,7 +16303,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/legacy/types.ts",
-              "lineNumber": 26
+              "lineNumber": 25
             },
             "signature": [
               "MsearchRequest[]"
@@ -16233,7 +16312,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/search_source/legacy/types.ts",
-          "lineNumber": 25
+          "lineNumber": 24
         },
         "initialIsOpen": false
       },
@@ -16252,21 +16331,19 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/legacy/types.ts",
-              "lineNumber": 31
+              "lineNumber": 30
             },
             "signature": [
               "ApiResponse",
               "<{ responses: ",
               "SearchResponse",
-              "<any>[]; }, ",
-              "Context",
-              ">"
+              "<any>[]; }, unknown>"
             ]
           }
         ],
         "source": {
           "path": "src/plugins/data/common/search/search_source/legacy/types.ts",
-          "lineNumber": 30
+          "lineNumber": 29
         },
         "initialIsOpen": false
       },
@@ -16613,7 +16690,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/fetch/types.ts",
-              "lineNumber": 37
+              "lineNumber": 40
             }
           },
           {
@@ -16624,7 +16701,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/fetch/types.ts",
-              "lineNumber": 38
+              "lineNumber": 41
             }
           },
           {
@@ -16635,7 +16712,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/fetch/types.ts",
-              "lineNumber": 39
+              "lineNumber": 42
             }
           },
           {
@@ -16646,7 +16723,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/fetch/types.ts",
-              "lineNumber": 40
+              "lineNumber": 43
             }
           },
           {
@@ -16657,7 +16734,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/fetch/types.ts",
-              "lineNumber": 41
+              "lineNumber": 44
             }
           },
           {
@@ -16668,13 +16745,13 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/fetch/types.ts",
-              "lineNumber": 42
+              "lineNumber": 45
             }
           }
         ],
         "source": {
           "path": "src/plugins/data/common/search/search_source/fetch/types.ts",
-          "lineNumber": 36
+          "lineNumber": 39
         },
         "initialIsOpen": false
       },
@@ -17568,7 +17645,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/legacy/types.ts",
-              "lineNumber": 49
+              "lineNumber": 48
             }
           },
           {
@@ -17579,7 +17656,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/legacy/types.ts",
-              "lineNumber": 50
+              "lineNumber": 49
             },
             "signature": [
               "(params: ",
@@ -17604,7 +17681,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/search_source/legacy/types.ts",
-          "lineNumber": 48
+          "lineNumber": 47
         },
         "initialIsOpen": false
       },
@@ -17633,7 +17710,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/legacy/types.ts",
-              "lineNumber": 54
+              "lineNumber": 53
             },
             "signature": [
               "Promise<",
@@ -17649,7 +17726,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/legacy/types.ts",
-              "lineNumber": 55
+              "lineNumber": 54
             },
             "signature": [
               "() => void"
@@ -17658,7 +17735,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/search_source/legacy/types.ts",
-          "lineNumber": 53
+          "lineNumber": 52
         },
         "initialIsOpen": false
       },
@@ -17694,7 +17771,7 @@
             "description": [],
             "source": {
               "path": "src/plugins/data/common/search/search_source/legacy/types.ts",
-              "lineNumber": 44
+              "lineNumber": 43
             },
             "signature": [
               "Record<string, any>[]"
@@ -17703,7 +17780,7 @@
         ],
         "source": {
           "path": "src/plugins/data/common/search/search_source/legacy/types.ts",
-          "lineNumber": 43
+          "lineNumber": 42
         },
         "initialIsOpen": false
       },
@@ -18653,7 +18730,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/es_search/types.ts",
-          "lineNumber": 13
+          "lineNumber": 12
         },
         "signature": [
           "\"es\""
@@ -18877,7 +18954,7 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-          "lineNumber": 26
+          "lineNumber": 34
         },
         "signature": [
           "ExpressionFunctionDefinition<\"kibana_context\", ",
@@ -19315,10 +19392,10 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/es_search/types.ts",
-          "lineNumber": 23
+          "lineNumber": 22
         },
         "signature": [
-          "IKibanaSearchResponse<SearchResponse<Source>>"
+          "IKibanaSearchResponse<estypes.SearchResponse<Source>>"
         ],
         "initialIsOpen": false
       },
@@ -19530,10 +19607,10 @@
         "description": [],
         "source": {
           "path": "src/plugins/data/common/search/es_search/types.ts",
-          "lineNumber": 15
+          "lineNumber": 14
         },
         "signature": [
-          "{ trackTotalHits?: boolean | undefined; } & Search<T>"
+          "{ trackTotalHits?: boolean | undefined; } & estypes.SearchRequest"
         ],
         "initialIsOpen": false
       },
@@ -20646,426 +20723,6 @@
         "source": {
           "path": "src/plugins/data/common/search/expressions/kibana_context_type.ts",
           "lineNumber": 34
-        },
-        "initialIsOpen": false
-      },
-      {
-        "id": "def-common.kibanaContextFunction",
-        "type": "Object",
-        "tags": [],
-        "children": [
-          {
-            "tags": [],
-            "id": "def-common.kibanaContextFunction.name",
-            "type": "string",
-            "label": "name",
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-              "lineNumber": 44
-            },
-            "signature": [
-              "\"kibana_context\""
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.kibanaContextFunction.type",
-            "type": "string",
-            "label": "type",
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-              "lineNumber": 45
-            },
-            "signature": [
-              "\"kibana_context\""
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.kibanaContextFunction.inputTypes",
-            "type": "Array",
-            "label": "inputTypes",
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-              "lineNumber": 46
-            },
-            "signature": [
-              "(\"kibana_context\" | \"null\")[]"
-            ]
-          },
-          {
-            "tags": [],
-            "id": "def-common.kibanaContextFunction.help",
-            "type": "string",
-            "label": "help",
-            "description": [],
-            "source": {
-              "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-              "lineNumber": 47
-            }
-          },
-          {
-            "id": "def-common.kibanaContextFunction.args",
-            "type": "Object",
-            "tags": [],
-            "children": [
-              {
-                "id": "def-common.kibanaContextFunction.args.q",
-                "type": "Object",
-                "tags": [],
-                "children": [
-                  {
-                    "tags": [],
-                    "id": "def-common.kibanaContextFunction.args.q.types",
-                    "type": "Array",
-                    "label": "types",
-                    "description": [],
-                    "source": {
-                      "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-                      "lineNumber": 52
-                    },
-                    "signature": [
-                      "(\"null\" | \"kibana_query\")[]"
-                    ]
-                  },
-                  {
-                    "tags": [],
-                    "id": "def-common.kibanaContextFunction.args.q.aliases",
-                    "type": "Array",
-                    "label": "aliases",
-                    "description": [],
-                    "source": {
-                      "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-                      "lineNumber": 53
-                    },
-                    "signature": [
-                      "string[]"
-                    ]
-                  },
-                  {
-                    "tags": [],
-                    "id": "def-common.kibanaContextFunction.args.q.default",
-                    "type": "Uncategorized",
-                    "label": "default",
-                    "description": [],
-                    "source": {
-                      "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-                      "lineNumber": 54
-                    },
-                    "signature": [
-                      "null"
-                    ]
-                  },
-                  {
-                    "tags": [],
-                    "id": "def-common.kibanaContextFunction.args.q.help",
-                    "type": "string",
-                    "label": "help",
-                    "description": [],
-                    "source": {
-                      "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-                      "lineNumber": 55
-                    }
-                  }
-                ],
-                "description": [],
-                "label": "q",
-                "source": {
-                  "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-                  "lineNumber": 51
-                }
-              },
-              {
-                "id": "def-common.kibanaContextFunction.args.filters",
-                "type": "Object",
-                "tags": [],
-                "children": [
-                  {
-                    "tags": [],
-                    "id": "def-common.kibanaContextFunction.args.filters.types",
-                    "type": "Array",
-                    "label": "types",
-                    "description": [],
-                    "source": {
-                      "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-                      "lineNumber": 60
-                    },
-                    "signature": [
-                      "(\"null\" | \"kibana_filter\")[]"
-                    ]
-                  },
-                  {
-                    "tags": [],
-                    "id": "def-common.kibanaContextFunction.args.filters.multi",
-                    "type": "boolean",
-                    "label": "multi",
-                    "description": [],
-                    "source": {
-                      "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-                      "lineNumber": 61
-                    },
-                    "signature": [
-                      "true"
-                    ]
-                  },
-                  {
-                    "tags": [],
-                    "id": "def-common.kibanaContextFunction.args.filters.help",
-                    "type": "string",
-                    "label": "help",
-                    "description": [],
-                    "source": {
-                      "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-                      "lineNumber": 62
-                    }
-                  }
-                ],
-                "description": [],
-                "label": "filters",
-                "source": {
-                  "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-                  "lineNumber": 59
-                }
-              },
-              {
-                "id": "def-common.kibanaContextFunction.args.timeRange",
-                "type": "Object",
-                "tags": [],
-                "children": [
-                  {
-                    "tags": [],
-                    "id": "def-common.kibanaContextFunction.args.timeRange.types",
-                    "type": "Array",
-                    "label": "types",
-                    "description": [],
-                    "source": {
-                      "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-                      "lineNumber": 67
-                    },
-                    "signature": [
-                      "(\"null\" | \"timerange\")[]"
-                    ]
-                  },
-                  {
-                    "tags": [],
-                    "id": "def-common.kibanaContextFunction.args.timeRange.default",
-                    "type": "Uncategorized",
-                    "label": "default",
-                    "description": [],
-                    "source": {
-                      "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-                      "lineNumber": 68
-                    },
-                    "signature": [
-                      "null"
-                    ]
-                  },
-                  {
-                    "tags": [],
-                    "id": "def-common.kibanaContextFunction.args.timeRange.help",
-                    "type": "string",
-                    "label": "help",
-                    "description": [],
-                    "source": {
-                      "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-                      "lineNumber": 69
-                    }
-                  }
-                ],
-                "description": [],
-                "label": "timeRange",
-                "source": {
-                  "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-                  "lineNumber": 66
-                }
-              },
-              {
-                "id": "def-common.kibanaContextFunction.args.savedSearchId",
-                "type": "Object",
-                "tags": [],
-                "children": [
-                  {
-                    "tags": [],
-                    "id": "def-common.kibanaContextFunction.args.savedSearchId.types",
-                    "type": "Array",
-                    "label": "types",
-                    "description": [],
-                    "source": {
-                      "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-                      "lineNumber": 74
-                    },
-                    "signature": [
-                      "(\"string\" | \"null\")[]"
-                    ]
-                  },
-                  {
-                    "tags": [],
-                    "id": "def-common.kibanaContextFunction.args.savedSearchId.default",
-                    "type": "Uncategorized",
-                    "label": "default",
-                    "description": [],
-                    "source": {
-                      "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-                      "lineNumber": 75
-                    },
-                    "signature": [
-                      "null"
-                    ]
-                  },
-                  {
-                    "tags": [],
-                    "id": "def-common.kibanaContextFunction.args.savedSearchId.help",
-                    "type": "string",
-                    "label": "help",
-                    "description": [],
-                    "source": {
-                      "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-                      "lineNumber": 76
-                    }
-                  }
-                ],
-                "description": [],
-                "label": "savedSearchId",
-                "source": {
-                  "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-                  "lineNumber": 73
-                }
-              }
-            ],
-            "description": [],
-            "label": "args",
-            "source": {
-              "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-              "lineNumber": 50
-            }
-          },
-          {
-            "id": "def-common.kibanaContextFunction.fn",
-            "type": "Function",
-            "label": "fn",
-            "signature": [
-              "(input: Input, args: Arguments, { getSavedObject }: ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExecutionContext",
-                "text": "ExecutionContext"
-              },
-              "<",
-              {
-                "pluginId": "inspector",
-                "scope": "common",
-                "docId": "kibInspectorPluginApi",
-                "section": "def-common.Adapters",
-                "text": "Adapters"
-              },
-              ", ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.ExecutionContextSearch",
-                "text": "ExecutionContextSearch"
-              },
-              ">) => Promise<{ type: \"kibana_context\"; query: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              "[]; filters: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              }
-            ],
-            "description": [],
-            "children": [
-              {
-                "type": "CompoundType",
-                "label": "input",
-                "isRequired": false,
-                "signature": [
-                  "Input"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-                  "lineNumber": 82
-                }
-              },
-              {
-                "type": "Object",
-                "label": "args",
-                "isRequired": true,
-                "signature": [
-                  "Arguments"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-                  "lineNumber": 82
-                }
-              },
-              {
-                "type": "Object",
-                "label": "{ getSavedObject }",
-                "isRequired": true,
-                "signature": [
-                  {
-                    "pluginId": "expressions",
-                    "scope": "common",
-                    "docId": "kibExpressionsPluginApi",
-                    "section": "def-common.ExecutionContext",
-                    "text": "ExecutionContext"
-                  },
-                  "<",
-                  {
-                    "pluginId": "inspector",
-                    "scope": "common",
-                    "docId": "kibInspectorPluginApi",
-                    "section": "def-common.Adapters",
-                    "text": "Adapters"
-                  },
-                  ", ",
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.ExecutionContextSearch",
-                    "text": "ExecutionContextSearch"
-                  },
-                  ">"
-                ],
-                "description": [],
-                "source": {
-                  "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-                  "lineNumber": 82
-                }
-              }
-            ],
-            "tags": [],
-            "returnComment": [],
-            "source": {
-              "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-              "lineNumber": 82
-            }
-          }
-        ],
-        "description": [],
-        "label": "kibanaContextFunction",
-        "source": {
-          "path": "src/plugins/data/common/search/expressions/kibana_context.ts",
-          "lineNumber": 43
         },
         "initialIsOpen": false
       },

@@ -63,8 +63,8 @@ start() {
   chroot --userspec "$user":"$group" "$chroot" sh -c "
 
     cd \"$chdir\"
-    exec \"$program $args\"
-  " >> /var/log/kibana/kibana.log  2>&1 &
+    exec \"$program\" \"$args\"
+  " >> /var/log/kibana/startup.log  2>&1 &
 
   # Generate the pidfile from here. If we instead made the forked process
   # generate it there will be a race condition between the pidfile writing

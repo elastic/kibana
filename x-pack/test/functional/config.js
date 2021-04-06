@@ -86,7 +86,7 @@ export default async function ({ readConfigFile }) {
         '--xpack.maps.enableDrawingFeature=true',
         '--xpack.reporting.queue.pollInterval=3000', // make it explicitly the default
         '--xpack.reporting.csv.maxSizeBytes=2850', // small-ish limit for cutting off a 1999 byte report
-        '--stats.maximumWaitTimeForAllCollectorsInS=0',
+        '--usageCollection.maximumWaitTimeForAllCollectorsInS=1',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
         '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
         '--timelion.ui.enabled=true',
@@ -196,6 +196,9 @@ export default async function ({ readConfigFile }) {
       },
       reporting: {
         pathname: '/app/management/insightsAndAlerting/reporting',
+      },
+      securitySolution: {
+        pathname: '/app/security',
       },
     },
 
