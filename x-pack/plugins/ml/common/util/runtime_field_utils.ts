@@ -4,26 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { estypes } from '@elastic/elasticsearch';
 import { isPopulatedObject } from './object_utils';
-import { RUNTIME_FIELD_TYPES, RuntimeType } from '../../../../../src/plugins/data/common';
+import { RUNTIME_FIELD_TYPES } from '../../../../../src/plugins/data/common';
 import type { RuntimeMappings } from '../types/fields';
+
+type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
 
 export function isRuntimeField(arg: unknown): arg is estypes.RuntimeField {
   return (
-    isPopulatedObject(arg) &&
-    ((Object.keys(arg).length === 1 && arg.hasOwnProperty('type')) ||
-      (Object.keys(arg).length === 2 &&
-        arg.hasOwnProperty('type') &&
-        arg.hasOwnProperty('script') &&
+    ((isPopulatedObject(arg, ['type']) && Object.keys(arg).length === 1) ||
+      (isPopulatedObject(arg, ['type', 'script']) &&
+        Object.keys(arg).length === 2 &&
         (typeof arg.script === 'string' ||
-          (isPopulatedObject(arg.script) &&
+          (isPopulatedObject(arg.script, ['source']) &&
             Object.keys(arg.script).length === 1 &&
-            arg.script.hasOwnProperty('source') &&
             typeof arg.script.source === 'string')))) &&
-    // replace this with estypes.RuntimeType once fixed
-    // https://github.com/elastic/elastic-client-generator/issues/258
     RUNTIME_FIELD_TYPES.includes(arg.type as RuntimeType)
   );
 }
